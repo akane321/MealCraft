@@ -6,7 +6,7 @@ const slug = Array.isArray(route.params.slug) ? route.params.slug[0] : route.par
 const { data: recipe, error, refresh, status } = await useRecipe(slug ?? "");
 
 useHead(() => ({
-  title: recipe.value ? `${recipe.value.title} · Dietary Planner MVP` : "Recipe · Dietary Planner MVP",
+  title: recipe.value ? `${recipe.value.title} · MealCraft` : "Recipe · MealCraft",
 }));
 </script>
 

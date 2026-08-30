@@ -6,7 +6,7 @@ describe("createServiceStatuses", () => {
   it("reports all services as healthy when the backend and database are connected", () => {
     const statuses = createServiceStatuses({
       status: "ok",
-      service: "Dietary Planner MVP",
+      service: "MealCraft",
       database: "connected",
     });
 

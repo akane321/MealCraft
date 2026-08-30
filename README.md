@@ -1,6 +1,6 @@
-# Dietary Planner MVP
+# MealCraft
 
-A constraint-aware weekly dietary planning application developed for
+MealCraft is a constraint-aware weekly dietary planning application developed for
 DSS5105 Data Science Projects in Practice.
 
 ## MVP Goal

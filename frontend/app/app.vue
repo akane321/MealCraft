@@ -2,7 +2,7 @@
   <div class="app-shell">
     <header class="app-header">
       <div class="page-width header-content">
-        <NuxtLink class="brand-name" to="/">Dietary Planner MVP</NuxtLink>
+        <NuxtLink class="brand-name" to="/">MealCraft</NuxtLink>
         <nav class="primary-nav" aria-label="Primary navigation">
           <NuxtLink to="/plan">Plan</NuxtLink>
           <NuxtLink to="/recipes">Recipes</NuxtLink>

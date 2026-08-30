@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { formatNutrition, formatTag } from "~/lib/recipe-format";
 
-useHead({ title: "Recipes · Dietary Planner MVP" });
+useHead({ title: "Recipes · MealCraft" });
 
 const { data, error, refresh, status } = await useRecipes();
 </script>

@@ -11,7 +11,7 @@ def test_health_endpoint_returns_ok() -> None:
     assert response.status_code == 200
     assert response.json() == {
         "status": "ok",
-        "service": "Dietary Planner MVP",
+        "service": "MealCraft",
         "database": "connected",
     }
 
@@ -21,7 +21,7 @@ def test_info_endpoint_returns_application_metadata() -> None:
 
     assert response.status_code == 200
     assert response.json() == {
-        "name": "Dietary Planner MVP",
+        "name": "MealCraft",
         "version": "0.1.0",
         "environment": "development",
     }

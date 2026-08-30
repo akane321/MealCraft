@@ -1,4 +1,4 @@
-name: dietary-planner-mvp
+name: mealcraft
 
 services:
   database:
@@ -11,7 +11,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-15432}:5432"
     volumes:
-      - dietary-planner-postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -64,13 +64,13 @@ services:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:
       - ./frontend:/app
-      - dietary-planner-frontend-node-modules:/app/node_modules
-      - dietary-planner-frontend-nuxt:/app/.nuxt
+      - frontend-node-modules:/app/node_modules
+      - frontend-nuxt:/app/.nuxt
     depends_on:
       backend:
         condition: service_healthy
 
 volumes:
-  dietary-planner-frontend-node-modules:
-  dietary-planner-frontend-nuxt:
-  dietary-planner-postgres-data:
+  frontend-node-modules:
+  frontend-nuxt:
+  postgres-data:

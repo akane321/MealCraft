@@ -12,7 +12,7 @@ import type {
   RecipeRecommendationRequest,
 } from "~/types/recommendation";
 
-useHead({ title: "Plan a meal · Dietary Planner MVP" });
+useHead({ title: "Plan a meal · MealCraft" });
 
 const allergenOptions = ["soy", "gluten", "sesame"];
 const dietaryOptions: { label: string; value: DietaryPreference }[] = [

@@ -1,7 +1,7 @@
 [project]
-name = "dietary-planner-backend"
+name = "mealcraft-backend"
 version = "0.1.0"
-description = "Backend API for the Dietary Planner MVP"
+description = "Backend API for MealCraft"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "alembic==1.19.1",
