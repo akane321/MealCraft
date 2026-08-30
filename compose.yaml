@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-15432}:5432"
     volumes:
       - dietary-planner-postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -38,6 +38,39 @@ services:
     depends_on:
       database:
         condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - uv
+        - run
+        - --no-sync
+        - python
+        - -c
+        - >-
+          import urllib.request;
+          urllib.request.urlopen('http://localhost:8000/api/health', timeout=3)
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    environment:
+      NUXT_API_BASE: http://backend:8000
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8000}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - dietary-planner-frontend-node-modules:/app/node_modules
+      - dietary-planner-frontend-nuxt:/app/.nuxt
+    depends_on:
+      backend:
+        condition: service_healthy
 
 volumes:
+  dietary-planner-frontend-node-modules:
+  dietary-planner-frontend-nuxt:
   dietary-planner-postgres-data:

@@ -41,5 +41,6 @@ docker compose up --build --detach
 ```
 
 - Backend API: <http://localhost:8000>
+- Frontend: <http://localhost:3000>
 - Swagger documentation: <http://localhost:8000/docs>
 - Health check: <http://localhost:8000/api/health>

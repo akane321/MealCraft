@@ -25,9 +25,10 @@ docker compose up --build --detach
 
 Available services:
 
+- Frontend: <http://localhost:3000>
 - Backend API: <http://localhost:8000>
 - Swagger documentation: <http://localhost:8000/docs>
-- PostgreSQL: `localhost:5432`
+- PostgreSQL: `localhost:15432` (container-internal port remains `5432`)
 
 The backend applies all pending Alembic migrations before starting Uvicorn.
 
@@ -44,6 +45,15 @@ docker compose logs --follow backend
 docker compose exec backend uv run --no-sync ruff check .
 docker compose exec backend uv run --no-sync ruff format --check .
 docker compose exec backend uv run --no-sync pytest
+```
+
+## Run Frontend Quality Checks
+
+```bash
+docker compose run --rm frontend pnpm lint
+docker compose run --rm frontend pnpm test
+docker compose run --rm frontend pnpm typecheck
+docker compose run --rm frontend pnpm build
 ```
 
 ## Database Migrations
