@@ -12,6 +12,7 @@ def test_health_endpoint_returns_ok() -> None:
     assert response.json() == {
         "status": "ok",
         "service": "Dietary Planner MVP",
+        "database": "connected",
     }
 
 

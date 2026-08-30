@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     backend_port: int = 8000
     frontend_port: int = 3000
+    database_url: str = "sqlite+pysqlite:///./dietary_planner.db"
     cors_origins: list[str] = ["http://localhost:3000"]
 
     model_config = SettingsConfigDict(

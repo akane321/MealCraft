@@ -30,5 +30,16 @@ visualizes planned-meal nutrition through a dashboard.
 
 ## Current Status
 
-The project is establishing its application skeleton and development
-infrastructure.
+The FastAPI backend, PostgreSQL database, Alembic migrations, and Docker
+Compose development environment are operational.
+
+## Quick Start
+
+```bash
+cp .env.example .env
+docker compose up --build --detach
+```
+
+- Backend API: <http://localhost:8000>
+- Swagger documentation: <http://localhost:8000/docs>
+- Health check: <http://localhost:8000/api/health>
