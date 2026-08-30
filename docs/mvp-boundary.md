@@ -23,6 +23,17 @@
 - Planned-meal check-in
 - Nutrition dashboard
 
+## Current Constraint Semantics
+
+- Allergens, prohibited ingredients, dietary requirements, cooking-time limits,
+  and user-entered numeric ceilings are hard constraints.
+- Low-sodium, low-sugar, lower-calorie, nutrition-target alignment, and pantry
+  usage are soft ranking preferences.
+- A known pantry quantity affects coverage when its unit matches the recipe.
+- An unknown pantry quantity only improves recipe ranking.
+- The default low-sodium preference is deliberately flexible; only a user-entered
+  sodium ceiling removes a recipe.
+
 ## Excluded
 
 - Medical diagnosis or treatment advice

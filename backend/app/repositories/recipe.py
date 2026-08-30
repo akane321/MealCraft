@@ -28,3 +28,15 @@ class RecipeRepository:
             )
         )
         return self.session.scalars(statement).unique().one_or_none()
+
+    def list_for_recommendation(self, *, limit: int = 500) -> list[Recipe]:
+        statement = (
+            select(Recipe)
+            .options(
+                joinedload(Recipe.nutrition),
+                selectinload(Recipe.recipe_ingredients).joinedload(RecipeIngredient.ingredient),
+            )
+            .order_by(Recipe.id)
+            .limit(limit)
+        )
+        return list(self.session.scalars(statement).unique().all())

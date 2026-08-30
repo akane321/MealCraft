@@ -32,7 +32,8 @@ visualizes planned-meal nutrition through a dashboard.
 
 The full-stack development environment is operational. The first business
 vertical slice provides a PostgreSQL recipe catalog, FastAPI list/detail APIs,
-and responsive Nuxt recipe pages.
+and responsive Nuxt recipe pages. The constraint-matching slice adds a
+deterministic recommendation API and an explainable planning form.
 
 ## Quick Start
 
@@ -44,5 +45,6 @@ docker compose up --build --detach
 - Backend API: <http://localhost:8000>
 - Frontend: <http://localhost:3000>
 - Recipe catalog: <http://localhost:3000/recipes>
+- Constraint matching: <http://localhost:3000/plan>
 - Swagger documentation: <http://localhost:8000/docs>
 - Health check: <http://localhost:8000/api/health>

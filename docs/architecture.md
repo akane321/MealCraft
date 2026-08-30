@@ -33,3 +33,19 @@ remaining features:
 4. PostgreSQL stores recipes, per-serving nutrition, normalized ingredients,
    recipe quantities, and ordered cooking steps.
 5. Nuxt consumes the list and detail contracts without direct database access.
+
+## Constraint Recommendation Flow
+
+The constraint parser contract is represented by `RecipeRecommendationRequest`.
+The current form produces that structure directly; an LLM parser can later emit
+the same validated object without changing the deterministic engine.
+
+The recommendation flow is:
+
+1. FastAPI validates normalized constraints.
+2. The repository batch-loads recipes, nutrition, and ingredient relationships.
+3. Hard constraints produce explicit exclusion reasons.
+4. Eligible recipes receive nutrition, pantry, and time scores.
+5. Nuxt renders ranked matches, score components, and exclusions.
+
+The LLM never determines allergen safety or the final constraint result.

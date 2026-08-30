@@ -4,6 +4,7 @@
       <div class="page-width header-content">
         <NuxtLink class="brand-name" to="/">Dietary Planner MVP</NuxtLink>
         <nav class="primary-nav" aria-label="Primary navigation">
+          <NuxtLink to="/plan">Plan</NuxtLink>
           <NuxtLink to="/recipes">Recipes</NuxtLink>
           <NuxtLink to="/">System</NuxtLink>
         </nav>
