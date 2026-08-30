@@ -11,14 +11,7 @@ const healthCheckUrl = computed(() => `${config.public.apiBase}/api/health`);
 </script>
 
 <template>
-  <div class="app-shell">
-    <header class="app-header">
-      <div class="page-width">
-        <p class="brand-name">Dietary Planner MVP</p>
-      </div>
-    </header>
-
-    <main class="page-width main-content">
+  <main class="page-width main-content">
       <section class="intro" aria-labelledby="page-title">
         <h1 id="page-title">Development environment</h1>
         <p>
@@ -66,6 +59,13 @@ const healthCheckUrl = computed(() => `${config.public.apiBase}/api/health`);
           </div>
 
           <nav class="technical-links" aria-label="Technical links">
+            <NuxtLink to="/recipes">
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M5 4h14v16H5z" />
+                <path d="M9 8h6M9 12h6M9 16h4" />
+              </svg>
+              Browse recipe catalog
+            </NuxtLink>
             <a :href="apiDocumentationUrl" target="_blank" rel="noreferrer">
               <svg aria-hidden="true" viewBox="0 0 24 24">
                 <path d="M6 3.5h8l4 4V20.5H6z" />
@@ -84,6 +84,5 @@ const healthCheckUrl = computed(() => `${config.public.apiBase}/api/health`);
           </nav>
         </div>
       </section>
-    </main>
-  </div>
+  </main>
 </template>

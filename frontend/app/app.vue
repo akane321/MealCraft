@@ -1,3 +1,15 @@
 <template>
-  <NuxtPage />
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="page-width header-content">
+        <NuxtLink class="brand-name" to="/">Dietary Planner MVP</NuxtLink>
+        <nav class="primary-nav" aria-label="Primary navigation">
+          <NuxtLink to="/recipes">Recipes</NuxtLink>
+          <NuxtLink to="/">System</NuxtLink>
+        </nav>
+      </div>
+    </header>
+
+    <NuxtPage />
+  </div>
 </template>

@@ -21,3 +21,15 @@ scoring.
 The grocery provider retrieves and normalizes FairPrice product information.
 
 The database stores recipes, plans, products, and meal records.
+
+## Recipe Data Flow
+
+The recipe catalog follows the same modular-monolith boundary intended for the
+remaining features:
+
+1. FastAPI routes validate HTTP input and output.
+2. The recipe service defines pagination and response assembly.
+3. The repository performs eager-loaded SQLAlchemy queries.
+4. PostgreSQL stores recipes, per-serving nutrition, normalized ingredients,
+   recipe quantities, and ordered cooking steps.
+5. Nuxt consumes the list and detail contracts without direct database access.
