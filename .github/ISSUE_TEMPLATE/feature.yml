@@ -1,0 +1,63 @@
+name: Feature or task
+description: 提议一项功能、研究任务或工程改进
+title: "[Task] "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 背景与问题
+      description: 为什么需要这项工作？它服务于哪一段 MVP 用户流程？
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 本任务范围
+      description: 明确本任务会完成什么。
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: 不在本任务范围
+      description: 写出容易被误解为本任务内容、但本次不做的事项。
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收条件
+      description: 使用可验证的条目说明何时算完成。
+      placeholder: |
+        - [ ] API 返回 ...
+        - [ ] 页面能够 ...
+        - [ ] 自动测试覆盖 ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 主要模块
+      options:
+        - Frontend
+        - Backend / API
+        - Planning engine
+        - Recipe / data
+        - FairPrice integration
+        - Database / migration
+        - Docker / CI
+        - Documentation / research
+        - Cross-module
+    validations:
+      required: true
+  - type: input
+    id: dependencies
+    attributes:
+      label: 前置依赖
+      description: 填写相关 Issue 编号；没有则填 None。
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: 设计、研究资料或其他想法
+      description: 可以包含链接、截图、草图、代码片段或实验记录。
