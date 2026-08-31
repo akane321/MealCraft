@@ -79,6 +79,15 @@ class MealPlanEntry(Base):
         CheckConstraint("recommendation_score BETWEEN 0 AND 100", name="meal_plan_entries_score_valid"),
         CheckConstraint("consumed_cost_sgd >= 0", name="meal_plan_entries_consumed_cost_nonnegative"),
         CheckConstraint("purchase_cost_sgd >= 0", name="meal_plan_entries_purchase_cost_nonnegative"),
+        CheckConstraint(
+            "status IN ('planned', 'completed', 'skipped')",
+            name="meal_plan_entries_status_valid",
+        ),
+        CheckConstraint(
+            "(status = 'completed' AND consumed_at IS NOT NULL) "
+            "OR (status IN ('planned', 'skipped') AND consumed_at IS NULL)",
+            name="meal_plan_entries_consumed_at_consistent",
+        ),
         UniqueConstraint("plan_id", "day_index", name="meal_plan_entries_plan_day_key"),
         Index("meal_plan_entries_plan_id_idx", "plan_id"),
         Index("meal_plan_entries_recipe_id_idx", "recipe_id"),
@@ -98,6 +107,8 @@ class MealPlanEntry(Base):
     fat_g: Mapped[Decimal] = mapped_column(Numeric(8, 2))
     sodium_mg: Mapped[Decimal] = mapped_column(Numeric(8, 2))
     sugar_g: Mapped[Decimal] = mapped_column(Numeric(8, 2))
+    status: Mapped[str] = mapped_column(String(20), default="planned", server_default="planned")
+    consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     plan: Mapped[MealPlan] = relationship(back_populates="entries")
     recipe: Mapped[Recipe] = relationship()

@@ -7,7 +7,7 @@ DSS5105 Data Science Projects in Practice.
 
 The system accepts user dietary constraints, generates a seven-day meal plan,
 maps required ingredients to FairPrice products, produces a grocery list, and
-visualizes planned-meal nutrition through a dashboard.
+visualizes planned and completed MealCraft nutrition through a dashboard.
 
 ## Technology Stack
 
@@ -39,7 +39,10 @@ explicit fixture fallback, maps ingredients to package sizes, and enforces the
 per-meal budget using estimated ingredient-use cost. The weekly-planning slice
 persists a seven-day main-meal schedule, avoids consecutive repetition where
 possible, aggregates per-person nutrition, and produces one consolidated,
-package-aware shopping list with a weekly budget result.
+package-aware shopping list with a weekly budget result. The meal-execution
+slice lets users mark each planned dish as planned, completed, or skipped, and
+visualizes completed MealCraft dishes through daily nutrition totals, weekly
+trends, and completion progress.
 
 ## Quick Start
 
@@ -53,6 +56,7 @@ docker compose up --build --detach
 - Recipe catalog: <http://localhost:3000/recipes>
 - Constraint matching: <http://localhost:3000/plan>
 - Seven-day planning: <http://localhost:3000/weekly-plan>
+- Meal check-in dashboard: <http://localhost:3000/dashboard>
 - FairPrice product search: <http://localhost:3000/products>
 - Swagger documentation: <http://localhost:8000/docs>
 - Health check: <http://localhost:8000/api/health>

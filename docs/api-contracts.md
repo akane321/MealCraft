@@ -21,6 +21,8 @@ Available endpoints:
 - POST /api/plans/generate
 - GET /api/plans
 - GET /api/plans/{plan_id}
+- PATCH /api/plans/{plan_id}/entries/{entry_id}
+- GET /api/plans/{plan_id}/dashboard
 
 ## Recipe Catalog
 
@@ -92,3 +94,22 @@ quantities are deducted once after the seven recipe requirements are combined.
 
 `GET /api/plans/{plan_id}` returns the persisted snapshot. `GET /api/plans`
 returns recent plan summaries for later history and dashboard integration.
+
+## Meal Check-in and Nutrition Dashboard
+
+`PATCH /api/plans/{plan_id}/entries/{entry_id}` accepts one status:
+`planned`, `completed`, or `skipped`. A successful response returns the complete
+updated weekly plan. Repeating the current status is idempotent; no additional
+meal record or duplicate nutrition contribution is created.
+
+`GET /api/plans/{plan_id}/dashboard` returns:
+
+- planned-meal and completed-meal nutrition totals
+- per-day planned and completed nutrition values
+- planned, completed, and skipped entry counts
+- weekly completion rate
+- the user-entered nutrition targets stored with the plan
+
+Only completed dishes from the selected MealCraft plan contribute to completed
+nutrition. Plan-external foods are outside the MVP and cannot be entered through
+this contract.

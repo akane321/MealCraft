@@ -28,6 +28,7 @@ Available services:
 - Frontend: <http://localhost:3000>
 - FairPrice product search: <http://localhost:3000/products>
 - Seven-day planner: <http://localhost:3000/weekly-plan>
+- Meal check-in dashboard: <http://localhost:3000/dashboard>
 - Backend API: <http://localhost:8000>
 - Swagger documentation: <http://localhost:8000/docs>
 - PostgreSQL: `localhost:15432` (container-internal port remains `5432`)
@@ -35,7 +36,8 @@ Available services:
 The backend applies all pending Alembic migrations before starting Uvicorn.
 
 Generated weekly plans are persisted in `meal_plans`, `meal_plan_entries`, and
-`meal_plan_grocery_items`. The current migration head is `20260831_0004`.
+`meal_plan_grocery_items`. Meal execution status and completion timestamps are
+stored on `meal_plan_entries`. The current migration head is `20260831_0005`.
 
 ## Product Pricing Modes
 

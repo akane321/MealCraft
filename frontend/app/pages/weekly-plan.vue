@@ -178,7 +178,10 @@ async function submitPlan() {
             <p class="eyebrow">Saved plan #{{ result.id }}</p>
             <h2>{{ formatPlanDate(result.start_date) }} — {{ formatPlanDate(result.end_date) }}</h2>
           </div>
-          <span>{{ result.household_size }} people · {{ result.day_count }} main meals</span>
+          <div class="weekly-result-actions">
+            <span>{{ result.household_size }} people · {{ result.day_count }} main meals</span>
+            <NuxtLink class="secondary-button" :to="{ path: '/dashboard', query: { plan: result.id } }">Open nutrition dashboard</NuxtLink>
+          </div>
         </div>
 
         <div v-for="warning in result.warnings" :key="warning" class="result-warning">{{ warning }}</div>

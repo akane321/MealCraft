@@ -1,10 +1,13 @@
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
 from app.schemas.product import GroceryLineEstimate, PricingMode
 from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
-from app.schemas.recommendation import RecipeRecommendationRequest
+from app.schemas.recommendation import NutritionTargets, RecipeRecommendationRequest
+
+MealPlanEntryStatus = Literal["planned", "completed", "skipped"]
 
 
 class WeeklyMealPlanRequest(RecipeRecommendationRequest):
@@ -14,6 +17,7 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
 
 
 class WeeklyPlanDayResponse(BaseModel):
+    entry_id: int
     day_index: int = Field(ge=1, le=7)
     planned_date: date
     recipe: RecipeListItemResponse
@@ -21,6 +25,12 @@ class WeeklyPlanDayResponse(BaseModel):
     nutrition_per_person: RecipeNutritionResponse
     consumed_cost_sgd: float
     purchase_cost_sgd: float
+    status: MealPlanEntryStatus
+    consumed_at: datetime | None
+
+
+class MealPlanEntryStatusUpdate(BaseModel):
+    status: MealPlanEntryStatus
 
 
 class WeeklyNutritionSummaryResponse(BaseModel):
@@ -70,3 +80,32 @@ class WeeklyMealPlanListItem(BaseModel):
 
 class WeeklyMealPlanCollectionResponse(BaseModel):
     items: list[WeeklyMealPlanListItem]
+
+
+class MealPlanStatusCounts(BaseModel):
+    planned: int
+    completed: int
+    skipped: int
+
+
+class NutritionDashboardDayResponse(BaseModel):
+    entry_id: int
+    day_index: int = Field(ge=1, le=7)
+    planned_date: date
+    recipe: RecipeListItemResponse
+    status: MealPlanEntryStatus
+    consumed_at: datetime | None
+    nutrition_per_person: RecipeNutritionResponse
+
+
+class WeeklyNutritionDashboardResponse(BaseModel):
+    plan_id: int
+    start_date: date
+    end_date: date
+    household_size: int
+    completion_rate: float
+    status_counts: MealPlanStatusCounts
+    nutrition_targets: NutritionTargets
+    planned_nutrition_per_person: WeeklyNutritionSummaryResponse
+    completed_nutrition_per_person: WeeklyNutritionSummaryResponse
+    days: list[NutritionDashboardDayResponse]

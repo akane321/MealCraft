@@ -1,11 +1,11 @@
-from datetime import date
+from datetime import UTC, date, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanGroceryItem
 from app.models.recipe import Recipe
-from app.schemas.meal_plan import WeeklyGroceryEstimateResponse, WeeklyMealPlanRequest
+from app.schemas.meal_plan import MealPlanEntryStatus, WeeklyGroceryEstimateResponse, WeeklyMealPlanRequest
 from app.schemas.recommendation import RecipeRecommendationResponse
 
 
@@ -103,3 +103,25 @@ class MealPlanRepository:
     def list_recent(self, *, limit: int) -> list[MealPlan]:
         statement = select(MealPlan).order_by(MealPlan.created_at.desc(), MealPlan.id.desc()).limit(limit)
         return list(self.session.scalars(statement).all())
+
+    def update_entry_status(
+        self,
+        *,
+        plan_id: int,
+        entry_id: int,
+        status: MealPlanEntryStatus,
+    ) -> MealPlan | None:
+        statement = select(MealPlanEntry).where(
+            MealPlanEntry.id == entry_id,
+            MealPlanEntry.plan_id == plan_id,
+        )
+        entry = self.session.scalars(statement).one_or_none()
+        if entry is None:
+            return None
+
+        if entry.status != status:
+            entry.status = status
+            entry.consumed_at = datetime.now(UTC) if status == "completed" else None
+            self.session.commit()
+
+        return self.get(plan_id)
