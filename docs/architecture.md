@@ -46,6 +46,23 @@ The recommendation flow is:
 2. The repository batch-loads recipes, nutrition, and ingredient relationships.
 3. Hard constraints produce explicit exclusion reasons.
 4. Eligible recipes receive nutrition, pantry, and time scores.
-5. Nuxt renders ranked matches, score components, and exclusions.
+5. The grocery estimator maps scaled ingredient demand to product packages,
+   deducting pantry stock only when a compatible quantity is known.
+6. Complete ingredient-use estimates enforce the optional meal budget.
+7. Nuxt renders rankings, grocery costs, package counts, and exclusions.
 
 The LLM never determines allergen safety or the final constraint result.
+
+## FairPrice Product Flow
+
+1. The product route receives a normalized search query and pricing mode.
+2. Fixture mode reads stable local product records for reproducible development.
+3. Live mode first checks a time-bounded PostgreSQL cache, then parses the
+   current FairPrice catalogue response when refresh is required.
+4. Normalized snapshots are upserted by source, query, and external product ID.
+5. A deterministic matcher ranks compatible products by ingredient tokens,
+   package unit, and name similarity.
+6. The estimator calculates both actual package checkout cost and prorated
+   ingredient-use cost. The latter is used for the per-meal budget constraint.
+7. Any live-provider failure is exposed and falls back to fixtures so the
+   planning flow remains demonstrable.

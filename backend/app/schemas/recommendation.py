@@ -2,6 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from app.schemas.product import GroceryEstimateResponse, PricingMode
 from app.schemas.recipe import RecipeListItemResponse
 
 DietaryPreference = Literal["vegetarian", "vegan", "gluten-free", "dairy-free"]
@@ -48,6 +49,7 @@ class RecipeRecommendationRequest(BaseModel):
     nutrition_targets: NutritionTargets = Field(default_factory=NutritionTargets)
     max_sodium_mg_per_meal: float | None = Field(default=None, ge=100, le=5000)
     available_ingredients: list[AvailableIngredientInput] = Field(default_factory=list, max_length=100)
+    pricing_mode: PricingMode = "fixture"
 
     @field_validator("allergens")
     @classmethod
@@ -71,6 +73,7 @@ class RecipeRecommendationResponse(BaseModel):
     total_score: float
     score_breakdown: RecommendationScoreBreakdown
     reasons: list[str]
+    grocery_estimate: GroceryEstimateResponse | None = None
 
 
 class ExcludedRecipeResponse(BaseModel):

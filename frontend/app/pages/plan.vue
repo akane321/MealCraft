@@ -5,10 +5,12 @@ import {
   parseExcludedIngredients,
   toOptionalNumber,
 } from "~/lib/recommendation-form";
+import { formatQuantity, formatSgd } from "~/lib/product-format";
 import type {
   AvailableIngredientInput,
   DietaryPreference,
   HealthPreference,
+  PricingMode,
   RecipeRecommendationRequest,
 } from "~/types/recommendation";
 
@@ -40,6 +42,7 @@ const form = reactive({
   carbohydrateTarget: null as number | null,
   fatTarget: null as number | null,
   maxSodiumMg: null as number | null,
+  pricingMode: "fixture" as PricingMode,
 });
 
 const pantryItems = ref<AvailableIngredientInput[]>([
@@ -85,6 +88,7 @@ async function submitConstraints() {
     },
     max_sodium_mg_per_meal: toOptionalNumber(form.maxSodiumMg),
     available_ingredients: cleanAvailableIngredients(pantryItems.value),
+    pricing_mode: form.pricingMode,
   };
 
   await recommend(payload);
@@ -133,11 +137,18 @@ async function submitConstraints() {
             </label>
           </div>
           <label>
-            <span>Budget per meal <small>recorded now; scored after FairPrice pricing</small></span>
+            <span>Budget per meal <small>enforced using estimated ingredient-use cost</small></span>
             <div class="input-with-prefix">
               <span>S$</span>
               <input v-model.number="form.budgetPerMealSgd" type="number" min="0.01" step="0.01" placeholder="Optional">
             </div>
+          </label>
+          <label>
+            <span>Product pricing <small>fixture is reproducible; live queries FairPrice and may be slower</small></span>
+            <select v-model="form.pricingMode">
+              <option value="fixture">Fixture · reproducible</option>
+              <option value="live">Live · FairPrice with visible fallback</option>
+            </select>
           </label>
         </fieldset>
 
@@ -262,6 +273,45 @@ async function submitConstraints() {
                   <div><dt>Pantry</dt><dd>{{ item.score_breakdown.pantry ?? "—" }}</dd></div>
                   <div><dt>Time</dt><dd>{{ item.score_breakdown.time }}</dd></div>
                 </dl>
+
+                <section v-if="item.grocery_estimate" class="grocery-estimate">
+                  <div class="grocery-total-row">
+                    <div>
+                      <span>Ingredient-use cost</span>
+                      <strong>{{ formatSgd(item.grocery_estimate.consumed_total_sgd) }}</strong>
+                    </div>
+                    <div>
+                      <span>Checkout total</span>
+                      <strong>{{ formatSgd(item.grocery_estimate.purchase_total_sgd) }}</strong>
+                    </div>
+                    <span
+                      v-if="item.grocery_estimate.within_budget !== null"
+                      class="budget-status"
+                      :class="{ 'over-budget': !item.grocery_estimate.within_budget }"
+                    >
+                      {{ item.grocery_estimate.within_budget ? "Within budget" : "Over budget" }}
+                    </span>
+                  </div>
+
+                  <details class="grocery-details">
+                    <summary>Shopping estimate · {{ item.grocery_estimate.items.length }} ingredients</summary>
+                    <div v-for="line in item.grocery_estimate.items" :key="line.ingredient_name" class="grocery-line">
+                      <div>
+                        <strong>{{ line.ingredient_display_name }}</strong>
+                        <span>
+                          Need {{ formatQuantity(line.remaining_quantity, line.unit) }}
+                          <template v-if="line.pantry_deduction > 0"> · pantry −{{ formatQuantity(line.pantry_deduction, line.unit) }}</template>
+                        </span>
+                      </div>
+                      <div v-if="line.product" class="grocery-product">
+                        <a :href="line.product.product_url" target="_blank" rel="noreferrer">{{ line.product.name }} ↗</a>
+                        <span>{{ line.packages_required }} pack(s) · {{ formatSgd(line.purchase_cost_sgd) }}</span>
+                      </div>
+                      <span v-else-if="line.remaining_quantity === 0" class="pantry-covered">Covered by known pantry quantity</span>
+                      <span v-else class="unmapped-product">No product mapping</span>
+                    </div>
+                  </details>
+                </section>
 
                 <ul class="reason-list">
                   <li v-for="reason in item.reasons" :key="reason">{{ reason }}</li>

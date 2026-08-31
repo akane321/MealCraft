@@ -152,20 +152,65 @@ def test_recommendations_apply_hard_filters_and_return_score_reasons(recipe_clie
     assert payload["excluded"][0]["reasons"] == ["Contains selected allergen: soy."]
 
 
-def test_recommendations_explain_deferred_budget_scoring(recipe_client: TestClient) -> None:
+def test_recommendations_enforce_budget_with_fixture_product_costs(recipe_client: TestClient) -> None:
     response = recipe_client.post(
         "/api/recommendations/recipes",
         json={
             "household_size": 2,
             "max_cooking_time_minutes": 60,
-            "budget_per_meal_sgd": 8,
+            "budget_per_meal_sgd": 4.3,
+            "pricing_mode": "fixture",
         },
     )
 
     assert response.status_code == 200
-    assert response.json()["warnings"] == [
-        "Budget was recorded but is not scored until live FairPrice product pricing is connected."
+    payload = response.json()
+    assert [item["recipe"]["slug"] for item in payload["recommendations"]] == ["tofu-soba"]
+    assert payload["recommendations"][0]["grocery_estimate"]["complete"] is True
+    assert payload["recommendations"][0]["grocery_estimate"]["within_budget"] is True
+    assert payload["excluded"] == [
+        {
+            "id": 1,
+            "slug": "lemon-chicken",
+            "title": "Lemon Chicken",
+            "reasons": ["Estimated ingredient-use cost S$4.60 is above the S$4.30 meal budget."],
+        }
     ]
+    assert payload["warnings"] == [
+        "Stable fixture prices are shown for reproducible planning; select live pricing to query FairPrice."
+    ]
+
+
+def test_known_pantry_quantity_is_deducted_but_unknown_quantity_is_not(recipe_client: TestClient) -> None:
+    response = recipe_client.post(
+        "/api/recommendations/recipes",
+        json={
+            "household_size": 2,
+            "max_cooking_time_minutes": 35,
+            "available_ingredients": [
+                {"normalized_name": "chicken_breast", "quantity": 300, "unit": "g"},
+                {"normalized_name": "lemon", "quantity": None, "unit": None},
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+    estimate = response.json()["recommendations"][0]["grocery_estimate"]
+    chicken, lemon = estimate["items"]
+    assert chicken["pantry_deduction"] == 300
+    assert chicken["packages_required"] == 0
+    assert lemon["pantry_deduction"] == 0
+    assert lemon["packages_required"] == 1
+
+
+def test_product_search_endpoint_returns_stable_fixture_products(recipe_client: TestClient) -> None:
+    response = recipe_client.get("/api/products/search", params={"q": "brown rice", "live": False})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["provider_used"] == "fixture"
+    assert payload["fallback_used"] is False
+    assert payload["items"][0]["external_id"] == "fixture-brown-rice-1kg"
 
 
 def test_recommendation_rejects_known_quantity_without_unit(recipe_client: TestClient) -> None:
