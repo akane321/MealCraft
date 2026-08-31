@@ -33,6 +33,12 @@
 - An unknown pantry quantity only improves recipe ranking.
 - The default low-sodium preference is deliberately flexible; only a user-entered
   sodium ceiling removes a recipe.
+- Product pricing has an explicit reproducible fixture mode and a live FairPrice
+  mode with cache and visible fallback.
+- Budget compares the prorated value of ingredients used by the meal. Package
+  checkout cost and excess quantity remain visible as separate estimates.
+- Known pantry quantities are deducted from purchase demand; unknown quantities
+  affect recipe ranking only and are never silently deducted.
 
 ## Excluded
 

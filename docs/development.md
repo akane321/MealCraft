@@ -26,11 +26,19 @@ docker compose up --build --detach
 Available services:
 
 - Frontend: <http://localhost:3000>
+- FairPrice product search: <http://localhost:3000/products>
 - Backend API: <http://localhost:8000>
 - Swagger documentation: <http://localhost:8000/docs>
 - PostgreSQL: `localhost:15432` (container-internal port remains `5432`)
 
 The backend applies all pending Alembic migrations before starting Uvicorn.
+
+## Product Pricing Modes
+
+The planner defaults to `fixture` pricing for repeatable development and tests.
+Select `live` in the UI to query FairPrice. Live responses are cached in
+PostgreSQL for 15 minutes by default; selecting “Ignore cache” on the product
+page requests a refresh. Configuration is available in `.env.example`.
 
 ## Inspect Service Status and Logs
 
