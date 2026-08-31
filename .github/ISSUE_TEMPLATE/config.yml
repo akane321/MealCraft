@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Team discussion
+    url: https://github.com/akane321/MealCraft/discussions
+    about: 尚未形成明确任务的问题先在 Discussions 中讨论

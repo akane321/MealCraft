@@ -1,0 +1,8 @@
+# Initial ownership for repository governance files.
+# Add two teammates per product area after all six GitHub usernames are known.
+# Code-owner approval is intentionally not required yet, so this file cannot
+# block parallel development.
+
+/.github/ @akane321
+/docs/ @akane321
+/README.md @akane321
