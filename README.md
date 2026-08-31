@@ -36,7 +36,10 @@ and responsive Nuxt recipe pages. The constraint-matching slice adds a
 deterministic recommendation API and an explainable planning form. The product
 slice queries the current FairPrice catalogue with a PostgreSQL cache and an
 explicit fixture fallback, maps ingredients to package sizes, and enforces the
-per-meal budget using estimated ingredient-use cost.
+per-meal budget using estimated ingredient-use cost. The weekly-planning slice
+persists a seven-day main-meal schedule, avoids consecutive repetition where
+possible, aggregates per-person nutrition, and produces one consolidated,
+package-aware shopping list with a weekly budget result.
 
 ## Quick Start
 
@@ -49,6 +52,7 @@ docker compose up --build --detach
 - Frontend: <http://localhost:3000>
 - Recipe catalog: <http://localhost:3000/recipes>
 - Constraint matching: <http://localhost:3000/plan>
+- Seven-day planning: <http://localhost:3000/weekly-plan>
 - FairPrice product search: <http://localhost:3000/products>
 - Swagger documentation: <http://localhost:8000/docs>
 - Health check: <http://localhost:8000/api/health>

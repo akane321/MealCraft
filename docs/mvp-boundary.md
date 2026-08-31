@@ -39,6 +39,12 @@
   checkout cost and excess quantity remain visible as separate estimates.
 - Known pantry quantities are deducted from purchase demand; unknown quantities
   affect recipe ranking only and are never silently deducted.
+- The current weekly MVP plans one main meal per day for seven days. It avoids
+  consecutive repetition whenever at least two eligible recipes exist.
+- Weekly nutrition is reported per person and contains only planned MealCraft
+  recipes; unplanned food is not inferred or recorded.
+- The weekly shopping list combines repeated ingredients before applying pantry
+  deductions and product package rounding.
 
 ## Excluded
 

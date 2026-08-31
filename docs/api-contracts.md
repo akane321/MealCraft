@@ -18,6 +18,9 @@ Available endpoints:
 - GET /api/recipes/{slug}
 - POST /api/recommendations/recipes
 - GET /api/products/search?q={query}&live={boolean}&refresh={boolean}
+- POST /api/plans/generate
+- GET /api/plans
+- GET /api/plans/{plan_id}
 
 ## Recipe Catalog
 
@@ -73,3 +76,19 @@ deduction, surplus quantity, mapping completeness, and budget result.
 `refresh=true` bypasses a fresh cache entry. If a live lookup fails, the API
 returns fixture results with `fallback_used=true` and a warning; the source is
 never silently misrepresented.
+
+## Weekly Meal Plans
+
+`POST /api/plans/generate` extends the recipe-constraint request with:
+
+- `start_date` and a fixed MVP `day_count` of 7
+- an optional `weekly_budget_sgd`
+- the existing optional per-meal budget and fixture/live pricing mode
+
+The response contains seven persisted main-meal entries, per-person weekly
+nutrition totals, an aggregated shopping list, package checkout cost,
+ingredient-use cost, weekly budget status, and explicit warnings. Known pantry
+quantities are deducted once after the seven recipe requirements are combined.
+
+`GET /api/plans/{plan_id}` returns the persisted snapshot. `GET /api/plans`
+returns recent plan summaries for later history and dashboard integration.
