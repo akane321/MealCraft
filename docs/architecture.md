@@ -85,3 +85,18 @@ The LLM never determines allergen safety or the final constraint result.
    snapshots, and consolidated grocery rows.
 8. Nuxt renders the schedule, summary, warnings, and shopping list from the same
    persisted response contract.
+
+## Meal Execution and Dashboard Flow
+
+1. Each persisted meal-plan entry starts in the `planned` state.
+2. The dashboard loads a selected weekly plan and its aggregated nutrition
+   snapshot through separate read contracts.
+3. A check-in updates exactly one entry to `planned`, `completed`, or `skipped`
+   in a short database transaction.
+4. The backend records a completion timestamp only for the `completed` state;
+   repeated updates to the same state do not create duplicate records.
+5. The dashboard service derives completed nutrition from the immutable
+   nutrition snapshots already stored with the plan. It never infers or records
+   food outside MealCraft.
+6. Nuxt refetches the authoritative dashboard after each check-in and displays
+   daily totals, weekly trends, completion progress, and the seven meal states.

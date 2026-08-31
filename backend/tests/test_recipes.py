@@ -298,3 +298,82 @@ def test_weekly_plan_returns_422_when_no_recipe_meets_hard_constraints(recipe_cl
 
     assert response.status_code == 422
     assert response.json() == {"detail": "No recipes satisfy the supplied hard constraints."}
+
+
+def test_meal_checkin_is_idempotent_and_dashboard_counts_completed_meals(recipe_client: TestClient) -> None:
+    generated = recipe_client.post(
+        "/api/plans/generate",
+        json={
+            "start_date": "2026-09-15",
+            "household_size": 2,
+            "max_cooking_time_minutes": 60,
+            "pricing_mode": "fixture",
+            "nutrition_targets": {"calories_kcal": 500, "protein_g": 35},
+        },
+    )
+    assert generated.status_code == 201
+    plan = generated.json()
+    first_day, second_day = plan["days"][:2]
+    assert first_day["status"] == "planned"
+    assert first_day["consumed_at"] is None
+    assert first_day["entry_id"] > 0
+
+    completed = recipe_client.patch(
+        f"/api/plans/{plan['id']}/entries/{first_day['entry_id']}",
+        json={"status": "completed"},
+    )
+    assert completed.status_code == 200
+    completed_day = completed.json()["days"][0]
+    assert completed_day["status"] == "completed"
+    assert completed_day["consumed_at"] is not None
+
+    repeated = recipe_client.patch(
+        f"/api/plans/{plan['id']}/entries/{first_day['entry_id']}",
+        json={"status": "completed"},
+    )
+    assert repeated.status_code == 200
+    assert repeated.json()["days"][0]["consumed_at"] == completed_day["consumed_at"]
+
+    skipped = recipe_client.patch(
+        f"/api/plans/{plan['id']}/entries/{second_day['entry_id']}",
+        json={"status": "skipped"},
+    )
+    assert skipped.status_code == 200
+    assert skipped.json()["days"][1]["consumed_at"] is None
+
+    dashboard = recipe_client.get(f"/api/plans/{plan['id']}/dashboard")
+    assert dashboard.status_code == 200
+    payload = dashboard.json()
+    assert payload["status_counts"] == {"planned": 5, "completed": 1, "skipped": 1}
+    assert payload["completion_rate"] == 14.3
+    assert payload["nutrition_targets"]["calories_kcal"] == 500
+    assert payload["completed_nutrition_per_person"] == first_day["nutrition_per_person"]
+    assert (
+        payload["planned_nutrition_per_person"]["calories_kcal"]
+        > payload["completed_nutrition_per_person"]["calories_kcal"]
+    )
+
+
+def test_meal_checkin_rejects_unknown_entry_and_invalid_status(recipe_client: TestClient) -> None:
+    generated = recipe_client.post(
+        "/api/plans/generate",
+        json={
+            "household_size": 2,
+            "max_cooking_time_minutes": 60,
+            "pricing_mode": "fixture",
+        },
+    )
+    plan_id = generated.json()["id"]
+
+    missing = recipe_client.patch(
+        f"/api/plans/{plan_id}/entries/999999",
+        json={"status": "completed"},
+    )
+    assert missing.status_code == 404
+    assert missing.json() == {"detail": "Meal-plan entry not found"}
+
+    invalid = recipe_client.patch(
+        f"/api/plans/{plan_id}/entries/{generated.json()['days'][0]['entry_id']}",
+        json={"status": "ate-something-else"},
+    )
+    assert invalid.status_code == 422

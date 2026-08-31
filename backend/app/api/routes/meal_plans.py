@@ -11,9 +11,11 @@ from app.repositories.meal_plan import MealPlanRepository
 from app.repositories.product import ProductSnapshotRepository
 from app.repositories.recipe import RecipeRepository
 from app.schemas.meal_plan import (
+    MealPlanEntryStatusUpdate,
     WeeklyMealPlanCollectionResponse,
     WeeklyMealPlanRequest,
     WeeklyMealPlanResponse,
+    WeeklyNutritionDashboardResponse,
 )
 from app.services.meal_plan import WeeklyMealPlanService
 from app.services.product import create_product_search_service
@@ -67,3 +69,31 @@ def get_weekly_plan(plan_id: int, service: MealPlanServiceDependency) -> WeeklyM
     if plan is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Meal plan not found")
     return plan
+
+
+@router.patch("/{plan_id}/entries/{entry_id}", response_model=WeeklyMealPlanResponse)
+def update_meal_status(
+    plan_id: int,
+    entry_id: int,
+    update: MealPlanEntryStatusUpdate,
+    service: MealPlanServiceDependency,
+) -> WeeklyMealPlanResponse:
+    plan = service.update_entry_status(
+        plan_id=plan_id,
+        entry_id=entry_id,
+        status=update.status,
+    )
+    if plan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Meal-plan entry not found")
+    return plan
+
+
+@router.get("/{plan_id}/dashboard", response_model=WeeklyNutritionDashboardResponse)
+def get_nutrition_dashboard(
+    plan_id: int,
+    service: MealPlanServiceDependency,
+) -> WeeklyNutritionDashboardResponse:
+    dashboard = service.dashboard(plan_id)
+    if dashboard is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Meal plan not found")
+    return dashboard

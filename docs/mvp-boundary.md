@@ -43,6 +43,12 @@
   consecutive repetition whenever at least two eligible recipes exist.
 - Weekly nutrition is reported per person and contains only planned MealCraft
   recipes; unplanned food is not inferred or recorded.
+- Each planned dish has one of three execution states: `planned`, `completed`,
+  or `skipped`. Only `completed` dishes contribute to actual nutrition totals
+  and weekly trends.
+- Repeating the same status update is idempotent. A completion timestamp is
+  recorded when a dish first changes to `completed` and cleared when it is
+  changed back to `planned` or `skipped`.
 - The weekly shopping list combines repeated ingredients before applying pantry
   deductions and product package rounding.
 
