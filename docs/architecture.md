@@ -66,3 +66,22 @@ The LLM never determines allergen safety or the final constraint result.
    ingredient-use cost. The latter is used for the per-meal budget constraint.
 7. Any live-provider failure is exposed and falls back to fixtures so the
    planning flow remains demonstrable.
+
+## Weekly Planning Flow
+
+1. The recommendation engine applies hard constraints and scores eligible recipes.
+2. Per-meal product estimates enforce the optional meal budget without repeatedly
+   consuming the same pantry stock.
+3. A deterministic selector fills seven dates, avoids the previous day's recipe,
+   adds a diversity penalty for repeated use, and uses the weekly budget as a
+   feasibility guard when costs are complete.
+4. Ingredient quantities from all selected recipes are converted to base units
+   and aggregated.
+5. Known pantry quantities are deducted once from the weekly total; unknown
+   quantities remain a ranking signal only.
+6. Unique ingredients are mapped to products once, then package counts, checkout
+   cost, ingredient-use value, and excess quantities are recalculated at week level.
+7. One short database transaction persists the plan, seven entries, nutrition
+   snapshots, and consolidated grocery rows.
+8. Nuxt renders the schedule, summary, warnings, and shopping list from the same
+   persisted response contract.

@@ -224,3 +224,77 @@ def test_recommendation_rejects_known_quantity_without_unit(recipe_client: TestC
     )
 
     assert response.status_code == 422
+
+
+def test_weekly_plan_is_persisted_without_consecutive_repeats(recipe_client: TestClient) -> None:
+    response = recipe_client.post(
+        "/api/plans/generate",
+        json={
+            "start_date": "2026-09-01",
+            "household_size": 2,
+            "max_cooking_time_minutes": 60,
+            "weekly_budget_sgd": 40,
+            "pricing_mode": "fixture",
+            "available_ingredients": [
+                {"normalized_name": "chicken_breast", "quantity": 300, "unit": "g"},
+            ],
+        },
+    )
+
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["start_date"] == "2026-09-01"
+    assert payload["end_date"] == "2026-09-07"
+    assert len(payload["days"]) == 7
+    slugs = [day["recipe"]["slug"] for day in payload["days"]]
+    assert all(current != following for current, following in zip(slugs, slugs[1:], strict=False))
+    assert payload["nutrition_summary_per_person"]["calories_kcal"] > 3000
+    assert payload["grocery_estimate"]["complete"] is True
+
+    chicken = next(item for item in payload["grocery_estimate"]["items"] if item["ingredient_name"] == "chicken_breast")
+    assert chicken["required_quantity"] > 300
+    assert chicken["pantry_deduction"] == 300
+
+    stored = recipe_client.get(f"/api/plans/{payload['id']}")
+    assert stored.status_code == 200
+    assert [day["recipe"]["slug"] for day in stored.json()["days"]] == slugs
+    assert stored.json()["grocery_estimate"]["purchase_total_sgd"] == payload["grocery_estimate"]["purchase_total_sgd"]
+
+    collection = recipe_client.get("/api/plans")
+    assert collection.status_code == 200
+    assert collection.json()["items"][0]["id"] == payload["id"]
+
+
+def test_weekly_plan_respects_allergen_filter_and_explains_unavoidable_repeat(
+    recipe_client: TestClient,
+) -> None:
+    response = recipe_client.post(
+        "/api/plans/generate",
+        json={
+            "start_date": "2026-09-08",
+            "household_size": 2,
+            "max_cooking_time_minutes": 60,
+            "allergens": ["soy"],
+            "pricing_mode": "fixture",
+        },
+    )
+
+    assert response.status_code == 201
+    payload = response.json()
+    assert {day["recipe"]["slug"] for day in payload["days"]} == {"lemon-chicken"}
+    assert any("consecutive repetition could not be avoided" in warning for warning in payload["warnings"])
+    assert any("contains 1 recipe" in warning for warning in payload["warnings"])
+
+
+def test_weekly_plan_returns_422_when_no_recipe_meets_hard_constraints(recipe_client: TestClient) -> None:
+    response = recipe_client.post(
+        "/api/plans/generate",
+        json={
+            "household_size": 2,
+            "max_cooking_time_minutes": 20,
+            "pricing_mode": "fixture",
+        },
+    )
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "No recipes satisfy the supplied hard constraints."}

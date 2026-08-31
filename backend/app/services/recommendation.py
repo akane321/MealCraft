@@ -19,7 +19,12 @@ class RecipeRecommendationService:
         self.grocery_estimator = grocery_estimator
         self.engine = engine or RecipeRecommendationEngine()
 
-    def recommend(self, constraints: RecipeRecommendationRequest) -> RecipeRecommendationCollectionResponse:
+    def recommend(
+        self,
+        constraints: RecipeRecommendationRequest,
+        *,
+        deduct_pantry_from_cost: bool = True,
+    ) -> RecipeRecommendationCollectionResponse:
         recipes = self.repository.list_for_recommendation()
         recommendations, excluded = self.engine.recommend(recipes, constraints)
         warnings: list[str] = []
@@ -28,7 +33,10 @@ class RecipeRecommendationService:
 
         for recommendation in recommendations:
             recipe = recipes_by_id[recommendation.recipe.id]
-            estimate = self.grocery_estimator.estimate(recipe, constraints)
+            estimation_constraints = (
+                constraints if deduct_pantry_from_cost else constraints.model_copy(update={"available_ingredients": []})
+            )
+            estimate = self.grocery_estimator.estimate(recipe, estimation_constraints)
             for warning in estimate.warnings:
                 if warning not in warnings:
                     warnings.append(warning)

@@ -97,7 +97,7 @@ class GroceryEstimator:
             ingredient = recipe_item.ingredient
             required = float(recipe_item.quantity) * household_scale if recipe_item.quantity is not None else None
             pantry_item = pantry.get(ingredient.normalized_name)
-            pantry_deduction = self._pantry_deduction(pantry_item, required, recipe_item.unit)
+            pantry_deduction = self.pantry_deduction(pantry_item, required, recipe_item.unit)
             remaining = max(0.0, required - pantry_deduction) if required is not None else None
 
             if remaining == 0:
@@ -155,7 +155,7 @@ class GroceryEstimator:
                 )
                 continue
 
-            line = self._price_line(
+            line = self.price_line(
                 ingredient.normalized_name,
                 ingredient.display_name,
                 required,
@@ -188,7 +188,7 @@ class GroceryEstimator:
         )
 
     @staticmethod
-    def _pantry_deduction(
+    def pantry_deduction(
         pantry_item: AvailableIngredientInput | None,
         required: float | None,
         required_unit: str | None,
@@ -199,7 +199,7 @@ class GroceryEstimator:
         return min(required, converted) if converted is not None else 0.0
 
     @staticmethod
-    def _price_line(
+    def price_line(
         ingredient_name: str,
         ingredient_display_name: str,
         required: float | None,
