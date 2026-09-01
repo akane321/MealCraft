@@ -19,6 +19,8 @@ visualizes planned and completed MealCraft nutrition through a dashboard.
 - Infrastructure: Docker Compose
 - Backend testing: Pytest
 - Frontend testing: Vitest
+- Agent orchestration: LangGraph
+- Optional language parser: OpenAI structured outputs through LangChain
 
 ## Repository Structure
 
@@ -42,7 +44,11 @@ possible, aggregates per-person nutrition, and produces one consolidated,
 package-aware shopping list with a weekly budget result. The meal-execution
 slice lets users mark each planned dish as planned, completed, or skipped, and
 visualizes completed MealCraft dishes through daily nutrition totals, weekly
-trends, and completion progress.
+trends, and completion progress. The planning-assistant slice persists every
+conversation and its structured constraint state, asks targeted clarification
+questions, and invokes the deterministic weekly planner only after confirmation.
+It runs without an API key in reproducible fixture mode; OpenAI parsing is an
+explicit optional configuration.
 
 ## Quick Start
 
@@ -53,6 +59,7 @@ docker compose up --build --detach
 
 - Backend API: <http://localhost:8000>
 - Frontend: <http://localhost:3000>
+- Planning assistant: <http://localhost:3000/assistant>
 - Recipe catalog: <http://localhost:3000/recipes>
 - Constraint matching: <http://localhost:3000/plan>
 - Seven-day planning: <http://localhost:3000/weekly-plan>

@@ -35,3 +35,4 @@ Thumbs.db
 # Local database and application data
 postgres-data/
 local-data/
+*.db

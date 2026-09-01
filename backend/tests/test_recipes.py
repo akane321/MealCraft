@@ -226,6 +226,94 @@ def test_recommendation_rejects_known_quantity_without_unit(recipe_client: TestC
     assert response.status_code == 422
 
 
+def test_agent_clarifies_unknown_pantry_quantity_then_becomes_ready(
+    recipe_client: TestClient,
+) -> None:
+    response = recipe_client.post(
+        "/api/agent/sessions",
+        json={
+            "message": (
+                "Plan for 2 people with S$15 per meal, low sodium and a peanut allergy. I already have chicken breast."
+            )
+        },
+    )
+
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["status"] == "collecting"
+    assert payload["constraints"]["household_size"] == 2
+    assert payload["constraints"]["budget_per_meal_sgd"] == 15
+    assert payload["constraints"]["allergens"] == ["peanut"]
+    assert payload["constraints"]["health_preferences"] == ["low-sodium"]
+    assert payload["constraints"]["available_ingredients"] == [
+        {"normalized_name": "chicken_breast", "quantity": None, "unit": None}
+    ]
+    assert "available_ingredients.chicken_breast.quantity" in payload["missing_fields"]
+    assert payload["can_confirm"] is False
+
+    response = recipe_client.post(
+        f"/api/agent/sessions/{payload['id']}/messages",
+        json={"message": "unknown"},
+    )
+    assert response.status_code == 200
+    ready = response.json()
+    assert ready["status"] == "ready"
+    assert ready["missing_fields"] == []
+    assert ready["can_confirm"] is True
+
+
+def test_agent_confirmation_calls_weekly_planner_and_persists_plan_link(
+    recipe_client: TestClient,
+) -> None:
+    created = recipe_client.post(
+        "/api/agent/sessions",
+        json={"message": "Build a weekly plan for 2 people with a S$20 per meal budget."},
+    ).json()
+    assert created["status"] == "ready"
+
+    response = recipe_client.post(f"/api/agent/sessions/{created['id']}/confirm")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["session"]["status"] == "planned"
+    assert payload["session"]["plan_id"] == payload["plan"]["id"]
+    assert len(payload["plan"]["days"]) == 7
+
+    persisted = recipe_client.get(f"/api/agent/sessions/{created['id']}").json()
+    assert persisted["status"] == "planned"
+    assert persisted["plan_id"] == payload["plan"]["id"]
+    assert persisted["messages"][-1]["content"].endswith(f"plan #{payload['plan']['id']}.")
+
+
+def test_agent_enforces_non_medical_boundary_without_inventing_constraints(
+    recipe_client: TestClient,
+) -> None:
+    response = recipe_client.post(
+        "/api/agent/sessions",
+        json={"message": "Create a diabetes treatment diet for 2 people."},
+    )
+
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["status"] == "ready"
+    assert payload["constraints"]["health_preferences"] == []
+    assert "does not provide disease-specific" in payload["messages"][-1]["content"]
+
+
+def test_agent_keeps_explicit_exclusions_separate_from_allergens(
+    recipe_client: TestClient,
+) -> None:
+    response = recipe_client.post(
+        "/api/agent/sessions",
+        json={"message": "Plan for 2 people with no peanuts and no tofu."},
+    )
+
+    assert response.status_code == 201
+    constraints = response.json()["constraints"]
+    assert constraints["allergens"] == []
+    assert constraints["excluded_ingredients"] == ["firm_tofu", "peanut"]
+
+
 def test_weekly_plan_is_persisted_without_consecutive_repeats(recipe_client: TestClient) -> None:
     response = recipe_client.post(
         "/api/plans/generate",

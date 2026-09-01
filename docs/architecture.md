@@ -36,9 +36,10 @@ remaining features:
 
 ## Constraint Recommendation Flow
 
-The constraint parser contract is represented by `RecipeRecommendationRequest`.
-The current form produces that structure directly; an LLM parser can later emit
-the same validated object without changing the deterministic engine.
+The constraint parser ultimately produces the same validated fields represented
+by `RecipeRecommendationRequest`. The form can produce that structure directly,
+while the assistant reaches it through a persistent multi-turn workflow without
+changing the deterministic engine.
 
 The recommendation flow is:
 
@@ -52,6 +53,31 @@ The recommendation flow is:
 7. Nuxt renders rankings, grocery costs, package counts, and exclusions.
 
 The LLM never determines allergen safety or the final constraint result.
+
+## Persistent Planning Assistant Flow
+
+1. Nuxt creates or resumes an agent session and displays both the conversation
+   and the current structured constraint state.
+2. The repository copies the persisted state and recent messages into a plain
+   snapshot, then closes the read transaction before any external model call.
+3. A LangGraph workflow runs two explicit nodes: constraint extraction, then
+   state merge and clarification assessment.
+4. The default fixture parser provides reproducible bilingual MVP behavior. An
+   optional OpenAI parser uses a Pydantic structured-output schema and never
+   invents absent values.
+5. A short database transaction appends the user and assistant messages and
+   updates constraints, missing fields, questions, and readiness.
+6. Unknown pantry quantities remain explicit. After the user acknowledges an
+   unknown quantity, the ingredient affects recipe ranking but is not deducted
+   from the shopping list.
+7. Disease-specific requests trigger a non-medical boundary message and are not
+   converted into medical planning constraints.
+8. Only a `ready` session can be confirmed. Confirmation calls the existing
+   deterministic weekly-planning service and persists the resulting plan ID on
+   the session.
+
+The database, rather than an in-memory agent checkpoint, is the authoritative
+conversation state. Container restarts therefore do not erase a planning thread.
 
 ## FairPrice Product Flow
 

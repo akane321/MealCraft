@@ -1,5 +1,7 @@
 from functools import lru_cache
+from typing import Literal
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +17,10 @@ class Settings(BaseSettings):
     fairprice_timeout_seconds: float = 12.0
     fairprice_cache_ttl_minutes: int = 15
     product_fixture_path: str = "data/fixtures/fairprice-products.json"
+    agent_parser_provider: Literal["fixture", "openai"] = "fixture"
+    agent_max_history_messages: int = 20
+    openai_api_key: SecretStr | None = None
+    openai_model: str = "gpt-5.4-mini"
 
     model_config = SettingsConfigDict(
         env_file=".env",
