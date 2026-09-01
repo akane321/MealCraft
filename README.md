@@ -27,7 +27,9 @@ completed MealCraft nutrition through a dashboard.
 
 - `backend/`: backend API and business logic
 - `frontend/`: Nuxt frontend application
-- `data/fixtures/`: stable development fixtures
+- `data/ingredients/` and `data/recipes/`: validated reference catalog
+- `data/fixtures/`: stable FairPrice-shaped products
+- `data/evaluation/`: repeatable planning scenarios
 - `docs/`: architecture, MVP boundary, and API contracts
 - `.github/workflows/`: continuous integration
 
@@ -59,6 +61,10 @@ change in English or Chinese inside the existing Assistant conversation, answer
 a focused clarification when needed, inspect recipe, nutrition, Shopping List,
 and price deltas, then confirm or discard the persistent preview. The Agent
 delegates every calculation and mutation to the deterministic replanning engine.
+The data-quality slice expands the validated catalog to 30 recipes and 34
+normalized ingredients, provides complete fixture product mappings, imports the
+catalog idempotently at startup, and gates changes through 20 end-to-end planning
+scenarios with machine-readable and human-readable reports.
 
 ## Quick Start
 
@@ -66,6 +72,9 @@ delegates every calculation and mutation to the deterministic replanning engine.
 cp .env.example .env
 docker compose up --build --detach
 ```
+
+The backend validates and imports the reference catalog after migrations, so a
+fresh environment and an existing environment converge on the same records.
 
 - Backend API: <http://localhost:8000>
 - Frontend: <http://localhost:3000>

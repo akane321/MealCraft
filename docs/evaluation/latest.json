@@ -1,0 +1,373 @@
+{
+  "passed": true,
+  "metrics": {
+    "catalog_recipe_count": 30,
+    "catalog_ingredient_count": 34,
+    "scenario_count": 20,
+    "scenario_expectation_rate": 1.0,
+    "feasible_scenario_success_rate": 1.0,
+    "hard_constraint_violation_count": 0,
+    "determinism_rate": 1.0,
+    "consecutive_repetition_count": 0,
+    "fixture_mapping_count": 34,
+    "used_ingredient_count": 34,
+    "fixture_mapping_coverage": 1.0,
+    "complete_grocery_rate": 1.0
+  },
+  "thresholds": {
+    "catalog_recipe_count": true,
+    "scenario_expectation_rate": true,
+    "feasible_scenario_success_rate": true,
+    "hard_constraint_violation_count": true,
+    "determinism_rate": true,
+    "consecutive_repetition_count": true,
+    "fixture_mapping_coverage": true,
+    "complete_grocery_rate": true
+  },
+  "scenarios": [
+    {
+      "name": "baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "spinach-oat-egg-cakes",
+        "yogurt-oat-bowl",
+        "savoury-vegan-oats",
+        "egg-vegetable-rice",
+        "tuna-cucumber-rice-bowl",
+        "chickpea-quinoa-salad"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "vegetarian",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "spinach-oat-egg-cakes",
+        "yogurt-oat-bowl",
+        "savoury-vegan-oats",
+        "egg-vegetable-rice",
+        "chickpea-quinoa-salad",
+        "mushroom-spinach-pasta"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "vegan",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "savoury-vegan-oats",
+        "chickpea-quinoa-salad",
+        "mushroom-spinach-pasta",
+        "chickpea-tomato-stew",
+        "black-bean-quinoa-skillet",
+        "savoury-vegan-oats",
+        "vegetable-rice-skillet"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "gluten-free",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "egg-vegetable-rice",
+        "tuna-cucumber-rice-bowl",
+        "chickpea-quinoa-salad",
+        "egg-tomato-quinoa",
+        "chickpea-tomato-stew",
+        "black-bean-quinoa-skillet",
+        "tofu-brown-rice-stir-fry"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "dairy-free",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "spinach-oat-egg-cakes",
+        "savoury-vegan-oats",
+        "egg-vegetable-rice",
+        "tuna-cucumber-rice-bowl",
+        "chickpea-quinoa-salad",
+        "mushroom-spinach-pasta",
+        "tuna-spinach-pasta"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "soy-allergy",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "spinach-oat-egg-cakes",
+        "yogurt-oat-bowl",
+        "savoury-vegan-oats",
+        "egg-vegetable-rice",
+        "tuna-cucumber-rice-bowl",
+        "chickpea-quinoa-salad"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "fish-allergy",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "spinach-oat-egg-cakes",
+        "yogurt-oat-bowl",
+        "savoury-vegan-oats",
+        "egg-vegetable-rice",
+        "chickpea-quinoa-salad",
+        "mushroom-spinach-pasta"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "egg-allergy",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "savoury-vegan-oats",
+        "yogurt-oat-bowl",
+        "tuna-cucumber-rice-bowl",
+        "chickpea-quinoa-salad",
+        "mushroom-spinach-pasta",
+        "tuna-spinach-pasta"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "sesame-allergy",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "spinach-oat-egg-cakes",
+        "yogurt-oat-bowl",
+        "savoury-vegan-oats",
+        "egg-vegetable-rice",
+        "tuna-cucumber-rice-bowl",
+        "chickpea-quinoa-salad"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "exclude-chicken",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "spinach-oat-egg-cakes",
+        "yogurt-oat-bowl",
+        "savoury-vegan-oats",
+        "egg-vegetable-rice",
+        "tuna-cucumber-rice-bowl",
+        "chickpea-quinoa-salad"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "sodium-hard-limit",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "spinach-oat-egg-cakes",
+        "yogurt-oat-bowl",
+        "savoury-vegan-oats",
+        "chickpea-quinoa-salad",
+        "mushroom-spinach-pasta",
+        "egg-tomato-quinoa"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "quick-meals",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "spinach-oat-egg-cakes",
+        "yogurt-oat-bowl",
+        "savoury-vegan-oats",
+        "yogurt-oat-bowl",
+        "spinach-oat-egg-cakes",
+        "yogurt-oat-bowl"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "lower-calorie-soft-preference",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "spinach-oat-egg-cakes",
+        "savoury-vegan-oats",
+        "egg-vegetable-rice",
+        "tuna-cucumber-rice-bowl",
+        "chickpea-quinoa-salad",
+        "mushroom-spinach-pasta"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "low-sugar-soft-preference",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "spinach-oat-egg-cakes",
+        "savoury-vegan-oats",
+        "egg-vegetable-rice",
+        "tuna-cucumber-rice-bowl",
+        "chickpea-quinoa-salad",
+        "mushroom-spinach-pasta",
+        "tuna-spinach-pasta"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "nutrition-targets",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "lemon-herb-chicken-rice-bowl",
+        "egg-vegetable-rice",
+        "chicken-quinoa-pepper",
+        "tofu-mushroom-soba",
+        "tofu-brown-rice-stir-fry",
+        "tuna-tomato-pasta",
+        "tuna-cucumber-rice-bowl"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "known-pantry-quantity",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "egg-vegetable-rice",
+        "tuna-cucumber-rice-bowl",
+        "tofu-brown-rice-stir-fry",
+        "chicken-broccoli-rice",
+        "vegetable-rice-skillet",
+        "black-bean-sweet-potato-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "unknown-pantry-quantity",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "chickpea-quinoa-salad",
+        "chickpea-tomato-stew",
+        "tofu-chickpea-bowl",
+        "chickpea-sweet-potato-curry",
+        "spinach-oat-egg-cakes",
+        "savoury-vegan-oats"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "per-meal-budget",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "spinach-oat-egg-cakes",
+        "yogurt-oat-bowl",
+        "savoury-vegan-oats",
+        "egg-vegetable-rice",
+        "tuna-cucumber-rice-bowl",
+        "chickpea-quinoa-salad"
+      ],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": true
+    },
+    {
+      "name": "impossible-five-minute-limit",
+      "expected_feasible": false,
+      "actual_feasible": false,
+      "selected_slugs": [],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": null
+    },
+    {
+      "name": "impossible-vegan-ten-minute-limit",
+      "expected_feasible": false,
+      "actual_feasible": false,
+      "selected_slugs": [],
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 0,
+      "grocery_complete": null
+    }
+  ]
+}
