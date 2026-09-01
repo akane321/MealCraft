@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { activeAgentPhase, formatOptionalNumber, formatPantryQuantity } from "~/lib/agent-format";
+import { eventTypeLabel, formatSigned, groceryDeltaSummary } from "~/lib/replanning";
 
 useHead({ title: "Planning assistant · MealCraft" });
 
@@ -7,7 +8,9 @@ const starterMessage = ref("");
 const replyMessage = ref("");
 const {
   confirm,
+  confirmReplan,
   create,
+  discardReplan,
   errorMessage,
   generatedPlan,
   isLoading,
@@ -107,15 +110,51 @@ onMounted(restoreLatest);
             </article>
           </div>
 
-          <form v-if="session.status !== 'planned'" class="assistant-composer" @submit.prevent="sendReply">
-            <textarea v-model="replyMessage" rows="3" required :placeholder="session.clarification_questions[0] || 'Add or revise a constraint…'" />
+          <form class="assistant-composer" @submit.prevent="sendReply">
+            <textarea v-model="replyMessage" rows="3" required :placeholder="session.clarification_questions[0] || (session.status === 'planned' ? 'Example: Replace day 3 because chicken is unavailable…' : 'Add or revise a constraint…')" />
             <div>
-              <span>{{ session.status === 'ready' ? 'You can still revise a constraint before confirming.' : 'Answer the clarification or add another constraint.' }}</span>
+              <span v-if="session.status === 'planned'">Request one meal change at a time. MealCraft will preview it before saving.</span>
+              <span v-else>{{ session.status === 'ready' ? 'You can still revise a constraint before confirming.' : 'Answer the clarification or add another constraint.' }}</span>
               <button class="assistant-primary" type="submit" :disabled="isLoading || !replyMessage.trim()">
                 {{ isLoading ? "Updating…" : "Send" }}
               </button>
             </div>
           </form>
+
+          <section v-if="session.pending_replan" class="agent-replan-preview replan-preview" aria-label="Replanning preview">
+            <div class="preview-title-row">
+              <div><p class="form-kicker">Preview only</p><h3>{{ eventTypeLabel(session.pending_replan.event_type) }}</h3></div>
+              <span>Revision {{ session.pending_replan.base_revision }}</span>
+            </div>
+            <div class="recipe-change-card">
+              <div><span>Before</span><strong>{{ session.pending_replan.before_entry.recipe_title }}</strong></div>
+              <span class="change-arrow">→</span>
+              <div><span>After</span><strong>{{ session.pending_replan.after_entry.recipe_title }}</strong></div>
+            </div>
+            <dl class="nutrition-delta-grid">
+              <div><dt>Calories</dt><dd>{{ formatSigned(session.pending_replan.nutrition_delta.calories_kcal, ' kcal') }}</dd></div>
+              <div><dt>Protein</dt><dd>{{ formatSigned(session.pending_replan.nutrition_delta.protein_g, ' g') }}</dd></div>
+              <div><dt>Sodium</dt><dd>{{ formatSigned(session.pending_replan.nutrition_delta.sodium_mg, ' mg') }}</dd></div>
+              <div><dt>Shopping total</dt><dd>{{ formatSigned(session.pending_replan.purchase_total_delta_sgd, ' SGD') }}</dd></div>
+            </dl>
+            <div class="shopping-delta">
+              <h4>Shopping List delta</h4>
+              <p v-if="!session.pending_replan.grocery_delta.length">No package-level shopping change.</p>
+              <ul v-else>
+                <li v-for="line in session.pending_replan.grocery_delta" :key="line.ingredient_name">
+                  <span :class="`delta-${line.change}`">{{ line.change }}</span>
+                  <strong>{{ line.ingredient_display_name }}</strong>
+                  <small>{{ groceryDeltaSummary(line) }} · {{ formatSigned(line.purchase_cost_delta_sgd, ' SGD') }}</small>
+                </li>
+              </ul>
+            </div>
+            <div class="preview-actions">
+              <button type="button" class="secondary-button" :disabled="isLoading" @click="discardReplan">Discard preview</button>
+              <button type="button" class="primary-button" :disabled="isLoading" @click="confirmReplan">
+                {{ isLoading ? 'Applying…' : 'Confirm and update plan' }}
+              </button>
+            </div>
+          </section>
         </template>
       </section>
 

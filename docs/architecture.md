@@ -75,9 +75,19 @@ The LLM never determines allergen safety or the final constraint result.
 8. Only a `ready` session can be confirmed. Confirmation calls the existing
    deterministic weekly-planning service and persists the resulting plan ID on
    the session.
+9. After planning, a deterministic bilingual interpreter maps a new user message
+   to one event type, target entry, reason, and optional unavailable ingredient.
+   Missing information is stored as a replanning draft and produces exactly one
+   clarification question.
+10. A complete draft delegates to the existing replanning service. The agent
+    stores only the pending event link; it never selects recipes, calculates
+    deltas, or mutates a meal plan itself.
+11. Confirmation applies the revision-safe event and clears the draft. Discarding
+    clears the draft and link while leaving the active plan unchanged.
 
 The database, rather than an in-memory agent checkpoint, is the authoritative
-conversation state. Container restarts therefore do not erase a planning thread.
+conversation state. Container restarts therefore do not erase a planning thread
+or a pending adjustment preview.
 
 ## FairPrice Product Flow
 

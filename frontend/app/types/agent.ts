@@ -1,4 +1,8 @@
-import type { WeeklyMealPlan } from "~/types/meal-plan";
+import type {
+  MealPlanEventType,
+  MealPlanReplanEvent,
+  WeeklyMealPlan,
+} from "~/types/meal-plan";
 import type {
   AvailableIngredientInput,
   DietaryPreference,
@@ -32,6 +36,13 @@ export interface AgentConstraintState {
   pricing_mode: PricingMode;
 }
 
+export interface AgentReplanDraft {
+  event_type: MealPlanEventType | null;
+  entry_id: number | null;
+  unavailable_ingredient: string | null;
+  reason: string | null;
+}
+
 export interface AgentSession {
   id: number;
   status: AgentSessionStatus;
@@ -41,6 +52,8 @@ export interface AgentSession {
   clarification_questions: string[];
   messages: AgentMessage[];
   plan_id: number | null;
+  replan_draft: AgentReplanDraft;
+  pending_replan: MealPlanReplanEvent | null;
   can_confirm: boolean;
   created_at: string;
   updated_at: string;
@@ -52,5 +65,11 @@ export interface AgentSessionCollection {
 
 export interface AgentConfirmation {
   session: AgentSession;
+  plan: WeeklyMealPlan;
+}
+
+export interface AgentReplanConfirmation {
+  session: AgentSession;
+  event: MealPlanReplanEvent;
   plan: WeeklyMealPlan;
 }

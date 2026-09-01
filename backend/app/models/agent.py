@@ -20,6 +20,7 @@ class AgentSession(Base):
         ),
         Index("agent_sessions_updated_id_idx", "updated_at", "id"),
         Index("agent_sessions_plan_id_idx", "plan_id"),
+        Index("agent_sessions_pending_event_id_idx", "pending_event_id"),
     )
 
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
@@ -29,9 +30,15 @@ class AgentSession(Base):
     missing_fields: Mapped[list[str]] = mapped_column(JSON, default=list)
     clarification_questions: Mapped[list[str]] = mapped_column(JSON, default=list)
     acknowledged_unknown_quantities: Mapped[list[str]] = mapped_column(JSON, default=list)
+    replan_draft: Mapped[dict] = mapped_column(JSON, default=dict)
     plan_id: Mapped[int | None] = mapped_column(
         BIGINT_ID,
         ForeignKey("meal_plans.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    pending_event_id: Mapped[int | None] = mapped_column(
+        BIGINT_ID,
+        ForeignKey("meal_plan_events.id", ondelete="SET NULL"),
         nullable=True,
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
