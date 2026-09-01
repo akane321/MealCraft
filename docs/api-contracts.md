@@ -9,6 +9,8 @@ The system will define the following shared objects:
 - FairPriceProduct
 - MealPlan
 - ShoppingList
+- AgentSession
+- AgentMessage
 
 Available endpoints:
 
@@ -23,6 +25,11 @@ Available endpoints:
 - GET /api/plans/{plan_id}
 - PATCH /api/plans/{plan_id}/entries/{entry_id}
 - GET /api/plans/{plan_id}/dashboard
+- POST /api/agent/sessions
+- GET /api/agent/sessions
+- GET /api/agent/sessions/{session_id}
+- POST /api/agent/sessions/{session_id}/messages
+- POST /api/agent/sessions/{session_id}/confirm
 
 ## Recipe Catalog
 
@@ -113,3 +120,25 @@ meal record or duplicate nutrition contribution is created.
 Only completed dishes from the selected MealCraft plan contribute to completed
 nutrition. Plan-external foods are outside the MVP and cannot be entered through
 this contract.
+
+## Persistent Planning Assistant
+
+`POST /api/agent/sessions` accepts an initial natural-language `message` and
+returns the persisted messages, parser provider, current structured constraints,
+missing fields, clarification questions, readiness, and optional generated plan
+ID. `POST /api/agent/sessions/{session_id}/messages` appends another turn and
+merges only explicitly extracted values into the current state.
+
+The assistant requires household size and resolves any unquantified available
+ingredient before confirmation. A user may answer `unknown`; the quantity then
+remains null, so the ingredient improves recipe ranking but is never deducted.
+
+`POST /api/agent/sessions/{session_id}/confirm` is accepted only when
+`can_confirm=true`. It passes the validated state to the same deterministic
+weekly planner used by `/api/plans/generate`, returns the generated plan, and
+stores its ID on the agent session. `GET` endpoints allow the frontend to resume
+the latest conversation after a reload or container restart.
+
+The default parser is deterministic fixture mode. Optional OpenAI mode uses the
+same Pydantic extraction contract. Neither parser makes medical recommendations,
+decides allergen safety, or bypasses deterministic planning rules.

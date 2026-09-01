@@ -26,6 +26,7 @@ docker compose up --build --detach
 Available services:
 
 - Frontend: <http://localhost:3000>
+- Planning assistant: <http://localhost:3000/assistant>
 - FairPrice product search: <http://localhost:3000/products>
 - Seven-day planner: <http://localhost:3000/weekly-plan>
 - Meal check-in dashboard: <http://localhost:3000/dashboard>
@@ -37,7 +38,29 @@ The backend applies all pending Alembic migrations before starting Uvicorn.
 
 Generated weekly plans are persisted in `meal_plans`, `meal_plan_entries`, and
 `meal_plan_grocery_items`. Meal execution status and completion timestamps are
-stored on `meal_plan_entries`. The current migration head is `20260831_0005`.
+stored on `meal_plan_entries`. Agent conversations, extracted constraints,
+outstanding clarifications, and the generated-plan link are persisted in
+`agent_sessions` and `agent_messages`. The current migration head is
+`20260901_0006`.
+
+## Planning Assistant Parser
+
+The default `.env.example` uses `AGENT_PARSER_PROVIDER=fixture`. This mode is
+deterministic, works offline, and is used in tests. It recognizes the supported
+MVP constraints in common English and Chinese phrasing.
+
+To experiment with model-based structured extraction, set these only in the
+local uncommitted `.env` file:
+
+```bash
+AGENT_PARSER_PROVIDER=openai
+OPENAI_API_KEY=your_local_key
+OPENAI_MODEL=gpt-5.4-mini
+```
+
+The model only extracts explicit fields. The deterministic planner still owns
+all hard filters, scoring, grocery calculations, and persistence. Do not commit
+API keys.
 
 ## Product Pricing Modes
 
