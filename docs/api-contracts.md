@@ -33,6 +33,8 @@ Available endpoints:
 - GET /api/agent/sessions/{session_id}
 - POST /api/agent/sessions/{session_id}/messages
 - POST /api/agent/sessions/{session_id}/confirm
+- POST /api/agent/sessions/{session_id}/replan/confirm
+- POST /api/agent/sessions/{session_id}/replan/discard
 
 ## Recipe Catalog
 
@@ -165,3 +167,15 @@ the latest conversation after a reload or container restart.
 The default parser is deterministic fixture mode. Optional OpenAI mode uses the
 same Pydantic extraction contract. Neither parser makes medical recommendations,
 decides allergen safety, or bypasses deterministic planning rules.
+
+After a session has produced a plan, the messages endpoint switches to the
+replanning loop. It accepts one user-triggered meal event at a time, resolves a
+day or date and an unavailable ingredient when required, and asks one focused
+question when the request is incomplete. A complete request calls the existing
+deterministic replanning service and exposes the persisted preview as
+`pending_replan`; it does not mutate the plan.
+
+`POST /api/agent/sessions/{session_id}/replan/confirm` applies the linked preview
+with the same revision check as the plan API. `discard` clears the session link
+and draft without modifying the plan. The draft and event link survive reloads
+and container restarts.

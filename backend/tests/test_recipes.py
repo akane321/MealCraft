@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -283,6 +284,121 @@ def test_agent_confirmation_calls_weekly_planner_and_persists_plan_link(
     assert persisted["status"] == "planned"
     assert persisted["plan_id"] == payload["plan"]["id"]
     assert persisted["messages"][-1]["content"].endswith(f"plan #{payload['plan']['id']}.")
+
+
+def test_agent_clarifies_replanning_target_then_persists_preview(
+    recipe_client: TestClient,
+) -> None:
+    created = recipe_client.post(
+        "/api/agent/sessions",
+        json={"message": "Build a weekly plan for 2 people with a S$20 per meal budget."},
+    ).json()
+    planned = recipe_client.post(f"/api/agent/sessions/{created['id']}/confirm").json()
+
+    ambiguous = recipe_client.post(
+        f"/api/agent/sessions/{created['id']}/messages",
+        json={"message": "Replace a meal."},
+    )
+    assert ambiguous.status_code == 200
+    assert ambiguous.json()["clarification_questions"] == ["Which day should I adjust?"]
+    assert ambiguous.json()["pending_replan"] is None
+
+    previewed = recipe_client.post(
+        f"/api/agent/sessions/{created['id']}/messages",
+        json={"message": "Day 3."},
+    )
+    assert previewed.status_code == 200
+    payload = previewed.json()
+    assert payload["status"] == "planned"
+    assert payload["pending_replan"]["status"] == "previewed"
+    assert payload["pending_replan"]["plan_id"] == planned["plan"]["id"]
+    assert payload["pending_replan"]["before_entry"]["entry_id"] == planned["plan"]["days"][2]["entry_id"]
+    assert (
+        payload["pending_replan"]["before_entry"]["recipe_slug"]
+        != payload["pending_replan"]["after_entry"]["recipe_slug"]
+    )
+
+    restored = recipe_client.get(f"/api/agent/sessions/{created['id']}").json()
+    assert restored["pending_replan"]["id"] == payload["pending_replan"]["id"]
+
+
+def test_agent_confirms_replanning_and_updates_plan_revision(
+    recipe_client: TestClient,
+) -> None:
+    created = recipe_client.post(
+        "/api/agent/sessions",
+        json={"message": "Build a weekly plan for 2 people with a S$20 per meal budget."},
+    ).json()
+    planned = recipe_client.post(f"/api/agent/sessions/{created['id']}/confirm").json()
+    previewed = recipe_client.post(
+        f"/api/agent/sessions/{created['id']}/messages",
+        json={"message": "Replace day 3 with a different meal."},
+    ).json()
+
+    confirmed = recipe_client.post(f"/api/agent/sessions/{created['id']}/replan/confirm")
+    assert confirmed.status_code == 200
+    payload = confirmed.json()
+    assert payload["event"]["id"] == previewed["pending_replan"]["id"]
+    assert payload["event"]["status"] == "applied"
+    assert payload["plan"]["revision"] == planned["plan"]["revision"] + 1
+    assert payload["session"]["pending_replan"] is None
+    assert payload["session"]["replan_draft"] == {
+        "event_type": None,
+        "entry_id": None,
+        "unavailable_ingredient": None,
+        "reason": None,
+    }
+    assert "Dashboard and Shopping List are updated" in payload["session"]["messages"][-1]["content"]
+
+
+def test_agent_item_unavailable_clarifies_ingredient_and_can_discard_preview(
+    recipe_client: TestClient,
+) -> None:
+    created = recipe_client.post(
+        "/api/agent/sessions",
+        json={"message": "Build a weekly plan for 2 people with a S$20 per meal budget."},
+    ).json()
+    recipe_client.post(f"/api/agent/sessions/{created['id']}/confirm")
+
+    missing = recipe_client.post(
+        f"/api/agent/sessions/{created['id']}/messages",
+        json={"message": "Day 1 has an unavailable ingredient."},
+    ).json()
+    assert missing["clarification_questions"] == ["Which ingredient is unavailable?"]
+
+    previewed = recipe_client.post(
+        f"/api/agent/sessions/{created['id']}/messages",
+        json={"message": "Chicken breast."},
+    ).json()
+    assert previewed["pending_replan"]["event_type"] == "ITEM_UNAVAILABLE"
+    assert previewed["pending_replan"]["unavailable_ingredient"] == "chicken_breast"
+
+    discarded = recipe_client.post(f"/api/agent/sessions/{created['id']}/replan/discard")
+    assert discarded.status_code == 200
+    assert discarded.json()["pending_replan"] is None
+    unchanged = recipe_client.get(f"/api/plans/{previewed['plan_id']}").json()
+    assert unchanged["revision"] == 1
+
+
+def test_agent_understands_bilingual_weekday_replanning_request(
+    recipe_client: TestClient,
+) -> None:
+    created = recipe_client.post(
+        "/api/agent/sessions",
+        json={"message": "为2个人制定每餐20新币的每周计划。"},
+    ).json()
+    planned = recipe_client.post(f"/api/agent/sessions/{created['id']}/confirm").json()["plan"]
+    wednesday = next(day for day in planned["days"] if date.fromisoformat(day["planned_date"]).weekday() == 2)
+
+    response = recipe_client.post(
+        f"/api/agent/sessions/{created['id']}/messages",
+        json={"message": "把周三晚餐换掉。"},
+    )
+
+    assert response.status_code == 200
+    preview = response.json()["pending_replan"]
+    assert preview["event_type"] == "REPLACE_MEAL"
+    assert preview["before_entry"]["entry_id"] == wednesday["entry_id"]
 
 
 def test_agent_enforces_non_medical_boundary_without_inventing_constraints(

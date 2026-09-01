@@ -54,6 +54,11 @@ The dynamic-replanning slice adds revision-safe previews for meal replacement,
 cancellation, locking, and unavailable ingredients. Confirmed changes update
 only the target meal and its derived shopping demand, while an event trail keeps
 the before/after decision auditable.
+The agent-replanning slice closes the interaction loop: users can request one
+change in English or Chinese inside the existing Assistant conversation, answer
+a focused clarification when needed, inspect recipe, nutrition, Shopping List,
+and price deltas, then confirm or discard the persistent preview. The Agent
+delegates every calculation and mutation to the deterministic replanning engine.
 
 ## Quick Start
 

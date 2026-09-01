@@ -3,7 +3,11 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.schemas.meal_plan import WeeklyMealPlanResponse
+from app.schemas.meal_plan import (
+    MealPlanEventType,
+    MealPlanReplanEventResponse,
+    WeeklyMealPlanResponse,
+)
 from app.schemas.product import PricingMode
 from app.schemas.recommendation import (
     AvailableIngredientInput,
@@ -61,6 +65,13 @@ class AgentConstraintState(BaseModel):
     pricing_mode: PricingMode = "fixture"
 
 
+class AgentReplanDraft(BaseModel):
+    event_type: MealPlanEventType | None = None
+    entry_id: int | None = Field(default=None, gt=0)
+    unavailable_ingredient: str | None = None
+    reason: str | None = None
+
+
 class AgentSessionResponse(BaseModel):
     id: int
     status: AgentSessionStatus
@@ -70,6 +81,8 @@ class AgentSessionResponse(BaseModel):
     clarification_questions: list[str]
     messages: list[AgentMessageResponse]
     plan_id: int | None
+    replan_draft: AgentReplanDraft
+    pending_replan: MealPlanReplanEventResponse | None
     can_confirm: bool
     created_at: datetime
     updated_at: datetime
@@ -81,4 +94,10 @@ class AgentSessionCollectionResponse(BaseModel):
 
 class AgentConfirmationResponse(BaseModel):
     session: AgentSessionResponse
+    plan: WeeklyMealPlanResponse
+
+
+class AgentReplanConfirmationResponse(BaseModel):
+    session: AgentSessionResponse
+    event: MealPlanReplanEventResponse
     plan: WeeklyMealPlanResponse

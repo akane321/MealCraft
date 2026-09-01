@@ -155,6 +155,10 @@ class MealPlanReplanningService:
             items=[self._event_response(event) for event in self.repository.list_events(plan_id=plan_id, limit=limit)]
         )
 
+    def get_event(self, *, plan_id: int, event_id: int) -> MealPlanReplanEventResponse | None:
+        event = self.repository.get_event(plan_id=plan_id, event_id=event_id)
+        return self._event_response(event) if event is not None else None
+
     @staticmethod
     def _validate_target(entry: MealPlanEntry, request: MealPlanReplanPreviewRequest) -> None:
         if entry.status == "completed":
