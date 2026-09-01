@@ -707,3 +707,114 @@ def test_item_unavailable_and_cancel_events_update_only_the_target_meal(
         < applied.json()["plan"]["nutrition_summary_per_person"]["calories_kcal"]
     )
     assert result["days"][0]["recipe"]["slug"] == preview.json()["after_entry"]["recipe_slug"]
+
+
+def _household_profile_payload() -> dict:
+    return {
+        "name": "Akane household",
+        "members": [
+            {
+                "name": "Akane",
+                "servings_per_meal": 1,
+                "allergens": [],
+                "excluded_ingredients": ["mushroom"],
+                "dietary_preferences": [],
+            },
+            {
+                "name": "Guest",
+                "servings_per_meal": 1,
+                "allergens": [],
+                "excluded_ingredients": ["yellow onion"],
+                "dietary_preferences": [],
+            },
+        ],
+        "max_cooking_time_minutes": 60,
+        "budget_per_meal_sgd": 20,
+        "weekly_budget_sgd": 60,
+        "health_preferences": ["low-sodium"],
+        "nutrition_targets": {"calories_kcal": 500, "protein_g": 35},
+        "max_sodium_mg_per_meal": None,
+        "available_ingredients": [{"normalized_name": "lemon", "quantity": None, "unit": None}],
+        "pricing_mode": "fixture",
+    }
+
+
+def test_household_profile_is_versioned_and_merges_member_hard_constraints(
+    recipe_client: TestClient,
+) -> None:
+    created = recipe_client.post("/api/household-profiles", json=_household_profile_payload())
+
+    assert created.status_code == 201
+    profile = created.json()
+    assert profile["current_version"] == 1
+    assert profile["current"]["planning_household_size"] == 2
+    assert profile["current"]["excluded_ingredients"] == ["mushroom", "yellow_onion"]
+    assert profile["latest_plan_id"] is None
+
+    duplicate = recipe_client.post("/api/household-profiles", json=_household_profile_payload())
+    assert duplicate.status_code == 409
+
+    update = _household_profile_payload()
+    update["expected_version"] = 1
+    update["members"][1]["servings_per_meal"] = 2
+    update["members"][1]["allergens"] = ["SOY"]
+    updated = recipe_client.put(f"/api/household-profiles/{profile['id']}", json=update)
+
+    assert updated.status_code == 200
+    assert updated.json()["current_version"] == 2
+    assert updated.json()["current"]["planning_household_size"] == 3
+    assert updated.json()["current"]["allergens"] == ["soy"]
+
+    versions = recipe_client.get(f"/api/household-profiles/{profile['id']}/versions")
+    assert versions.status_code == 200
+    assert [item["version"] for item in versions.json()["items"]] == [2, 1]
+
+    stale = recipe_client.put(f"/api/household-profiles/{profile['id']}", json=update)
+    assert stale.status_code == 409
+
+
+def test_household_profile_generates_traceable_plan_and_explains_replanning(
+    recipe_client: TestClient,
+) -> None:
+    profile = recipe_client.post("/api/household-profiles", json=_household_profile_payload()).json()
+    generated = recipe_client.post(
+        f"/api/household-profiles/{profile['id']}/plans",
+        json={
+            "start_date": "2026-11-03",
+            "overrides": {"weekly_budget_sgd": 70},
+        },
+    )
+
+    assert generated.status_code == 201
+    first = generated.json()
+    assert first["profile_version"] == 1
+    assert first["plan"]["household_profile_id"] == profile["id"]
+    assert first["plan"]["household_profile_version"] == 1
+    assert first["plan"]["replaces_plan_id"] is None
+    assert first["plan"]["grocery_estimate"]["weekly_budget_sgd"] == 70
+
+    update = _household_profile_payload()
+    update["expected_version"] = 1
+    update["members"][0]["allergens"] = ["soy"]
+    update["weekly_budget_sgd"] = 80
+    updated = recipe_client.put(f"/api/household-profiles/{profile['id']}", json=update)
+    assert updated.status_code == 200
+
+    replanned = recipe_client.post(
+        f"/api/household-profiles/{profile['id']}/plans/{first['plan']['id']}/replan",
+        json={},
+    )
+    assert replanned.status_code == 201
+    second = replanned.json()
+    assert second["profile_version"] == 2
+    assert second["replaces_plan_id"] == first["plan"]["id"]
+    assert second["plan"]["replaces_plan_id"] == first["plan"]["id"]
+    assert {item["field"] for item in second["constraint_changes"]} >= {
+        "Allergens",
+        "Weekly budget",
+    }
+    assert {day["recipe"]["slug"] for day in second["plan"]["days"]} == {"lemon-chicken"}
+
+    current = recipe_client.get("/api/household-profiles/current")
+    assert current.status_code == 200
+    assert current.json()["latest_plan_id"] == second["plan"]["id"]
