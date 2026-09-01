@@ -32,6 +32,8 @@ completed MealCraft nutrition through a dashboard.
 - `data/evaluation/`: repeatable planning scenarios
 - `docs/`: architecture, MVP boundary, and API contracts
 - `.github/workflows/`: continuous integration
+- `AGENTS.md`: cross-agent work protocol and private shared-memory bootstrap
+- `docs/memory-bootstrap.md`: cross-device setup and daily memory workflow
 
 ## Current Status
 
@@ -86,3 +88,12 @@ fresh environment and an existing environment converge on the same records.
 - FairPrice product search: <http://localhost:3000/products>
 - Swagger documentation: <http://localhost:8000/docs>
 - Health check: <http://localhost:8000/api/health>
+
+## Shared Project Memory
+
+Approved team members use the private `MealCraft-Knowledge` repository as the
+versioned source for project decisions, course requirements, current state,
+risks, and task history. Read [docs/memory-bootstrap.md](docs/memory-bootstrap.md)
+before the first material contribution. The private repository is intentionally
+kept separate from this public source repository and is never required to run
+the application.
