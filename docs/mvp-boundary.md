@@ -9,6 +9,8 @@
 4. The system produces a grocery list with package quantities and prices.
 5. The user marks planned dishes as consumed.
 6. The dashboard displays daily nutrition and weekly trends.
+7. The user may preview and confirm a minimal meal-plan adjustment; the system
+   updates the affected shopping demand and keeps an event history.
 
 ## Included
 
@@ -22,6 +24,8 @@
 - Unknown-quantity ingredient ranking preference
 - Planned-meal check-in
 - Nutrition dashboard
+- User-triggered replacement, cancellation, meal locking, and unavailable-item events
+- Preview-before-confirmation with plan revisions and Shopping List deltas
 
 ## Current Constraint Semantics
 
@@ -51,6 +55,12 @@
   changed back to `planned` or `skipped`.
 - The weekly shopping list combines repeated ingredients before applying pantry
   deductions and product package rounding.
+- Dynamic replanning never changes completed or locked meals. A preview is tied
+  to the current plan revision and is rejected as stale after another confirmed
+  change.
+- The MVP replans one selected meal at a time. The deterministic planner chooses
+  an eligible alternative; the Agent may interpret intent but does not directly
+  mutate a plan.
 
 ## Excluded
 

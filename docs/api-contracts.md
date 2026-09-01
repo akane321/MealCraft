@@ -25,6 +25,9 @@ Available endpoints:
 - GET /api/plans/{plan_id}
 - PATCH /api/plans/{plan_id}/entries/{entry_id}
 - GET /api/plans/{plan_id}/dashboard
+- POST /api/plans/{plan_id}/replan/preview
+- POST /api/plans/{plan_id}/replan/{event_id}/confirm
+- GET /api/plans/{plan_id}/events
 - POST /api/agent/sessions
 - GET /api/agent/sessions
 - GET /api/agent/sessions/{session_id}
@@ -120,6 +123,26 @@ meal record or duplicate nutrition contribution is created.
 Only completed dishes from the selected MealCraft plan contribute to completed
 nutrition. Plan-external foods are outside the MVP and cannot be entered through
 this contract.
+
+## Event-driven Replanning
+
+`POST /api/plans/{plan_id}/replan/preview` accepts an `entry_id`, optional
+`reason`, and one event type: `REPLACE_MEAL`, `CANCEL_MEAL`, `LOCK_MEAL`, or
+`ITEM_UNAVAILABLE`. The unavailable-item event additionally requires a normalized
+`unavailable_ingredient`.
+
+The preview does not modify the active plan. It persists the base revision,
+before/after meal snapshots, nutrition delta, package-level Shopping List delta,
+and checkout-cost delta. Completed and locked entries are rejected.
+
+`POST /api/plans/{plan_id}/replan/{event_id}/confirm` applies a preview only when
+its base revision still matches the active plan. Confirmation updates the target
+entry, recalculates the consolidated grocery rows, increments the plan revision,
+and marks the event as applied. A stale preview returns HTTP 409 instead of
+overwriting a newer decision.
+
+`GET /api/plans/{plan_id}/events` returns the persistent audit trail in reverse
+chronological order.
 
 ## Persistent Planning Assistant
 

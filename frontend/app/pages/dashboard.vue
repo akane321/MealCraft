@@ -7,13 +7,24 @@ import {
   type NutritionMetric,
 } from "~/lib/dashboard";
 import { formatNutrition, formatPlanDate } from "~/lib/meal-plan-format";
-import type { MealPlanEntryStatus } from "~/types/meal-plan";
+import { eventTypeLabel, formatSigned, groceryDeltaSummary, replanEventOptions } from "~/lib/replanning";
+import type {
+  MealPlanEntryStatus,
+  MealPlanEventType,
+  NutritionDashboardDay,
+} from "~/types/meal-plan";
 
 useHead({ title: "Nutrition dashboard · MealCraft" });
 
 const route = useRoute();
 const router = useRouter();
 const selectedMetric = ref<NutritionMetric>("calories_kcal");
+const replanEntry = ref<NutritionDashboardDay | null>(null);
+const replanForm = reactive({
+  eventType: "REPLACE_MEAL" as MealPlanEventType,
+  reason: "",
+  unavailableIngredient: "",
+});
 const {
   dashboard,
   errorMessage,
@@ -24,6 +35,17 @@ const {
   updateStatus,
   updatingEntryId,
 } = useNutritionDashboard();
+const {
+  clearPreview,
+  confirmPreview,
+  createPreview,
+  errorMessage: replanError,
+  events,
+  isConfirming,
+  isPreviewing,
+  loadEvents,
+  preview,
+} = useMealReplanning();
 
 const selectedMetricDefinition = computed(() => {
   const metric = nutritionMetrics.find(item => item.key === selectedMetric.value);
@@ -47,7 +69,47 @@ async function selectPlan(event: Event) {
   const planId = Number((event.target as HTMLSelectElement).value);
   if (!planId) return;
   await loadDashboard(planId);
+  await loadEvents(planId);
+  closeReplan();
   await router.replace({ query: { ...route.query, plan: String(planId) } });
+}
+
+function openReplan(day: NutritionDashboardDay) {
+  replanEntry.value = day;
+  replanForm.eventType = "REPLACE_MEAL";
+  replanForm.reason = "";
+  replanForm.unavailableIngredient = "";
+  clearPreview();
+  nextTick(() => document.querySelector(".replan-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+}
+
+function closeReplan() {
+  replanEntry.value = null;
+  clearPreview();
+}
+
+async function previewChange() {
+  if (!dashboard.value || !replanEntry.value) return;
+  await createPreview(dashboard.value.plan_id, {
+    event_type: replanForm.eventType,
+    entry_id: replanEntry.value.entry_id,
+    reason: replanForm.reason.trim() || null,
+    unavailable_ingredient: replanForm.eventType === "ITEM_UNAVAILABLE"
+      ? replanForm.unavailableIngredient.trim()
+      : null,
+  });
+}
+
+async function applyPreview() {
+  if (!dashboard.value) return;
+  const result = await confirmPreview(dashboard.value.plan_id);
+  if (!result) return;
+  await loadDashboard(dashboard.value.plan_id);
+  replanEntry.value = null;
+}
+
+function resetPreview() {
+  clearPreview();
 }
 
 async function selectStatus(entryId: number, event: Event) {
@@ -61,6 +123,7 @@ function statusLabel(status: MealPlanEntryStatus): string {
 
 onMounted(async () => {
   await loadPlans(queryPlanId());
+  if (dashboard.value) await loadEvents(dashboard.value.plan_id);
   if (dashboard.value && route.query.plan !== String(dashboard.value.plan_id)) {
     await router.replace({ query: { ...route.query, plan: String(dashboard.value.plan_id) } });
   }
@@ -72,7 +135,9 @@ onMounted(async () => {
     <header class="dashboard-heading">
       <div>
         <h1>Nutrition dashboard</h1>
-        <p v-if="dashboard">{{ formatPlanDate(dashboard.start_date) }} — {{ formatPlanDate(dashboard.end_date) }} · per person</p>
+        <p v-if="dashboard">
+          {{ formatPlanDate(dashboard.start_date) }} — {{ formatPlanDate(dashboard.end_date) }} · per person · revision {{ dashboard.revision }}
+        </p>
         <p v-else>Track only the meals planned and completed inside MealCraft.</p>
       </div>
       <label v-if="plans.length" class="dashboard-plan-select">
@@ -171,10 +236,15 @@ onMounted(async () => {
           <div><h2>Planned meals</h2><p>Update execution status without recording food outside this plan.</p></div>
         </div>
         <div class="meal-checkin-table">
-          <div class="meal-checkin-header" aria-hidden="true"><span>Date</span><span>Recipe</span><span>Nutrition summary</span><span>Status</span></div>
+          <div class="meal-checkin-header" aria-hidden="true">
+            <span>Date</span><span>Recipe</span><span>Nutrition summary</span><span>Status</span><span>Plan</span>
+          </div>
           <article v-for="day in dashboard.days" :key="day.entry_id" class="meal-checkin-row">
             <time :datetime="day.planned_date">{{ formatPlanDate(day.planned_date) }}</time>
-            <NuxtLink :to="`/recipes/${day.recipe.slug}`">{{ day.recipe.title }}</NuxtLink>
+            <div class="meal-recipe-cell">
+              <NuxtLink :to="`/recipes/${day.recipe.slug}`">{{ day.recipe.title }}</NuxtLink>
+              <span v-if="day.is_locked" class="locked-badge">Locked</span>
+            </div>
             <p>
               {{ formatNutrition(day.nutrition_per_person.calories_kcal, "kcal") }} ·
               {{ formatNutrition(day.nutrition_per_person.protein_g, "g protein") }} ·
@@ -188,8 +258,112 @@ onMounted(async () => {
                 <option value="skipped">{{ statusLabel("skipped") }}</option>
               </select>
             </label>
+            <button
+              type="button"
+              class="adjust-meal-button"
+              :disabled="day.status === 'completed' || day.is_locked"
+              @click="openReplan(day)"
+            >{{ day.is_locked ? "Protected" : day.status === "completed" ? "Historical" : "Adjust" }}</button>
           </article>
         </div>
+      </section>
+
+      <section v-if="replanEntry" class="replan-workspace" aria-labelledby="replan-title">
+        <div class="replan-heading">
+          <div>
+            <p class="form-kicker">Dynamic replanning</p>
+            <h2 id="replan-title">Adjust {{ replanEntry.recipe.title }}</h2>
+            <p>{{ formatPlanDate(replanEntry.planned_date) }} · only this meal and its shopping demand may change.</p>
+          </div>
+          <button type="button" class="replan-close" aria-label="Close replanning panel" @click="closeReplan">×</button>
+        </div>
+
+        <div v-if="replanError" class="notice-panel error-notice">{{ replanError }}</div>
+        <div class="replan-grid">
+          <form class="replan-form" @submit.prevent="previewChange">
+            <fieldset>
+              <legend>What changed?</legend>
+              <label v-for="option in replanEventOptions" :key="option.value" class="replan-choice">
+                <input v-model="replanForm.eventType" type="radio" :value="option.value" @change="resetPreview">
+                <span><strong>{{ option.label }}</strong><small>{{ option.description }}</small></span>
+              </label>
+            </fieldset>
+            <label v-if="replanForm.eventType === 'ITEM_UNAVAILABLE'">
+              <span>Unavailable ingredient</span>
+              <input
+                v-model="replanForm.unavailableIngredient"
+                required
+                type="text"
+                placeholder="e.g. chicken breast"
+                @input="resetPreview"
+              >
+            </label>
+            <label>
+              <span>Reason <small>optional</small></span>
+              <textarea v-model="replanForm.reason" rows="3" placeholder="Record why this adjustment was requested." @input="resetPreview" />
+            </label>
+            <button type="submit" class="primary-button" :disabled="isPreviewing">
+              {{ isPreviewing ? "Preparing preview…" : "Preview minimal change" }}
+            </button>
+          </form>
+
+          <div class="replan-preview" :class="{ empty: !preview }">
+            <template v-if="preview">
+              <div class="preview-title-row">
+                <div><p class="form-kicker">Preview only</p><h3>Review before applying</h3></div>
+                <span>Based on revision {{ preview.base_revision }}</span>
+              </div>
+              <div class="recipe-change-card">
+                <div><span>Before</span><strong>{{ preview.before_entry.recipe_title }}</strong></div>
+                <span class="change-arrow">→</span>
+                <div><span>After</span><strong>{{ preview.after_entry.recipe_title }}</strong></div>
+              </div>
+              <dl class="nutrition-delta-grid">
+                <div><dt>Calories</dt><dd>{{ formatSigned(preview.nutrition_delta.calories_kcal, " kcal") }}</dd></div>
+                <div><dt>Protein</dt><dd>{{ formatSigned(preview.nutrition_delta.protein_g, " g") }}</dd></div>
+                <div><dt>Sodium</dt><dd>{{ formatSigned(preview.nutrition_delta.sodium_mg, " mg") }}</dd></div>
+                <div><dt>Shopping total</dt><dd>{{ formatSigned(preview.purchase_total_delta_sgd, " SGD") }}</dd></div>
+              </dl>
+              <div class="shopping-delta">
+                <h4>Shopping List delta</h4>
+                <p v-if="!preview.grocery_delta.length">No package-level shopping change.</p>
+                <ul v-else>
+                  <li v-for="line in preview.grocery_delta" :key="line.ingredient_name">
+                    <span :class="`delta-${line.change}`">{{ line.change }}</span>
+                    <strong>{{ line.ingredient_display_name }}</strong>
+                    <small>{{ groceryDeltaSummary(line) }} · {{ formatSigned(line.purchase_cost_delta_sgd, " SGD") }}</small>
+                  </li>
+                </ul>
+              </div>
+              <div class="preview-actions">
+                <button type="button" class="secondary-button" @click="clearPreview">Discard preview</button>
+                <button type="button" class="primary-button" :disabled="isConfirming" @click="applyPreview">
+                  {{ isConfirming ? "Applying…" : "Confirm and update plan" }}
+                </button>
+              </div>
+            </template>
+            <template v-else>
+              <p class="form-kicker">No plan changes yet</p>
+              <h3>Preview first, then confirm</h3>
+              <p>MealCraft keeps completed meals intact, changes the smallest possible scope, and shows shopping impact before saving.</p>
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <section v-if="events.length" class="plan-history-section">
+        <div class="dashboard-section-heading">
+          <div><h2>Plan history</h2><p>Persistent event trail for this weekly plan.</p></div>
+        </div>
+        <ol class="plan-history-list">
+          <li v-for="event in events" :key="event.id">
+            <span :class="event.status">{{ event.status }}</span>
+            <div>
+              <strong>{{ eventTypeLabel(event.event_type) }}</strong>
+              <p>{{ event.before_entry.recipe_title }} → {{ event.after_entry.recipe_title }} · revision {{ event.base_revision }}<template v-if="event.applied_revision"> → {{ event.applied_revision }}</template></p>
+            </div>
+          </li>
+        </ol>
       </section>
     </template>
   </main>

@@ -12,6 +12,10 @@ from app.repositories.product import ProductSnapshotRepository
 from app.repositories.recipe import RecipeRepository
 from app.schemas.meal_plan import (
     MealPlanEntryStatusUpdate,
+    MealPlanReplanConfirmationResponse,
+    MealPlanReplanEventCollectionResponse,
+    MealPlanReplanEventResponse,
+    MealPlanReplanPreviewRequest,
     WeeklyMealPlanCollectionResponse,
     WeeklyMealPlanRequest,
     WeeklyMealPlanResponse,
@@ -20,6 +24,12 @@ from app.schemas.meal_plan import (
 from app.services.meal_plan import WeeklyMealPlanService
 from app.services.product import create_product_search_service
 from app.services.recommendation import RecipeRecommendationService
+from app.services.replanning import (
+    MealPlanReplanConflictError,
+    MealPlanReplanningService,
+    MealPlanReplanNotFoundError,
+    MealPlanReplanValidationError,
+)
 
 router = APIRouter(prefix="/plans", tags=["meal plans"])
 
@@ -44,6 +54,24 @@ def get_meal_plan_service(database: DatabaseDependency) -> WeeklyMealPlanService
 MealPlanServiceDependency = Annotated[WeeklyMealPlanService, Depends(get_meal_plan_service)]
 
 
+def get_replanning_service(database: DatabaseDependency) -> MealPlanReplanningService:
+    recipe_repository = RecipeRepository(database)
+    product_service = create_product_search_service(ProductSnapshotRepository(database))
+    recommendation_service = RecipeRecommendationService(
+        recipe_repository,
+        grocery_estimator=GroceryEstimator(product_service),
+    )
+    return MealPlanReplanningService(
+        repository=MealPlanRepository(database),
+        recipe_repository=recipe_repository,
+        recommendation_service=recommendation_service,
+        grocery_aggregator=WeeklyGroceryAggregator(product_service),
+    )
+
+
+ReplanningServiceDependency = Annotated[MealPlanReplanningService, Depends(get_replanning_service)]
+
+
 @router.post("/generate", response_model=WeeklyMealPlanResponse, status_code=status.HTTP_201_CREATED)
 def generate_weekly_plan(
     constraints: WeeklyMealPlanRequest,
@@ -61,6 +89,53 @@ def list_weekly_plans(
     limit: Annotated[int, Query(ge=1, le=50)] = 20,
 ) -> WeeklyMealPlanCollectionResponse:
     return service.list_recent(limit=limit)
+
+
+@router.post(
+    "/{plan_id}/replan/preview",
+    response_model=MealPlanReplanEventResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def preview_meal_plan_change(
+    plan_id: int,
+    request: MealPlanReplanPreviewRequest,
+    service: ReplanningServiceDependency,
+) -> MealPlanReplanEventResponse:
+    try:
+        return service.preview(plan_id=plan_id, request=request)
+    except MealPlanReplanNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+    except (MealPlanReplanValidationError, WeeklyPlanSelectionError) as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
+
+
+@router.post(
+    "/{plan_id}/replan/{event_id}/confirm",
+    response_model=MealPlanReplanConfirmationResponse,
+)
+def confirm_meal_plan_change(
+    plan_id: int,
+    event_id: int,
+    service: ReplanningServiceDependency,
+) -> MealPlanReplanConfirmationResponse:
+    try:
+        return service.confirm(plan_id=plan_id, event_id=event_id)
+    except MealPlanReplanNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+    except MealPlanReplanConflictError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+
+
+@router.get("/{plan_id}/events", response_model=MealPlanReplanEventCollectionResponse)
+def list_meal_plan_events(
+    plan_id: int,
+    service: ReplanningServiceDependency,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> MealPlanReplanEventCollectionResponse:
+    try:
+        return service.list_events(plan_id=plan_id, limit=limit)
+    except MealPlanReplanNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
 
 
 @router.get("/{plan_id}", response_model=WeeklyMealPlanResponse)
