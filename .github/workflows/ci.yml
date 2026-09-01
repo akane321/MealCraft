@@ -43,6 +43,9 @@ jobs:
       - name: Backend tests
         run: uv run --project backend pytest backend/tests
 
+      - name: MVP data and planning evaluation
+        run: uv run --project backend python -m app.evaluation
+
   frontend:
     name: frontend
     runs-on: ubuntu-latest

@@ -34,7 +34,8 @@ Available services:
 - Swagger documentation: <http://localhost:8000/docs>
 - PostgreSQL: `localhost:15432` (container-internal port remains `5432`)
 
-The backend applies all pending Alembic migrations before starting Uvicorn.
+The backend applies all pending Alembic migrations, validates and idempotently
+imports the reference catalog, and then starts Uvicorn.
 
 Generated weekly plans are persisted in `meal_plans`, `meal_plan_entries`, and
 `meal_plan_grocery_items`. Meal execution status and completion timestamps are
@@ -86,6 +87,25 @@ docker compose exec backend uv run --no-sync ruff check .
 docker compose exec backend uv run --no-sync ruff format --check .
 docker compose exec backend uv run --no-sync pytest
 ```
+
+Validate or import the catalog manually:
+
+```bash
+docker compose exec backend uv run --no-sync python -m app.data.import_catalog --validate-only
+docker compose exec backend uv run --no-sync python -m app.data.import_catalog
+```
+
+Run the reproducible MVP evaluation and refresh both reports:
+
+```bash
+docker compose exec backend uv run --no-sync python -m app.evaluation
+```
+
+The evaluation covers 20 constraint combinations and fails when catalog size,
+scenario feasibility, hard-constraint safety, deterministic selection,
+consecutive-repeat avoidance, product mapping, or grocery completeness falls
+below its gate. Results are written to `docs/evaluation/latest.json` and
+`docs/evaluation/latest.md`.
 
 ## Run Frontend Quality Checks
 

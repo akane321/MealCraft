@@ -15,6 +15,7 @@
 ## Included
 
 - Seven-day meal planning
+- Validated 30-recipe reference catalog with normalized ingredients
 - Allergen and prohibited-ingredient constraints
 - Low-sodium, low-sugar, and similar general health preferences
 - Optional user-provided calorie and macronutrient targets
@@ -26,6 +27,7 @@
 - Nutrition dashboard
 - User-triggered replacement, cancellation, meal locking, and unavailable-item events
 - Preview-before-confirmation with plan revisions and Shopping List deltas
+- Repeatable scenario evaluation with CI quality gates
 
 ## Current Constraint Semantics
 
