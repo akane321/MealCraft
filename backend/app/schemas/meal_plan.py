@@ -60,6 +60,9 @@ class WeeklyGroceryEstimateResponse(BaseModel):
 class WeeklyMealPlanResponse(BaseModel):
     id: int
     revision: int
+    household_profile_id: int | None
+    household_profile_version: int | None
+    replaces_plan_id: int | None
     start_date: date
     end_date: date
     day_count: int
@@ -74,6 +77,9 @@ class WeeklyMealPlanResponse(BaseModel):
 class WeeklyMealPlanListItem(BaseModel):
     id: int
     revision: int
+    household_profile_id: int | None
+    household_profile_version: int | None
+    replaces_plan_id: int | None
     start_date: date
     end_date: date
     household_size: int

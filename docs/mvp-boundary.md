@@ -2,8 +2,8 @@
 
 ## Core User Flow
 
-1. The user enters household size, budget, cooking-time limit, allergens,
-   health preferences, optional nutrition targets, and available ingredients.
+1. The user saves a versioned household profile containing member servings and
+   safety constraints plus shared budget, time, nutrition, and pantry defaults.
 2. The system generates a seven-day meal plan.
 3. Recipe ingredients are mapped to FairPrice products.
 4. The system produces a grocery list with package quantities and prices.
@@ -15,6 +15,7 @@
 ## Included
 
 - Seven-day meal planning
+- Versioned household profile and profile-linked planning
 - Validated 30-recipe reference catalog with normalized ingredients
 - Allergen and prohibited-ingredient constraints
 - Low-sodium, low-sugar, and similar general health preferences
@@ -60,9 +61,16 @@
 - Dynamic replanning never changes completed or locked meals. A preview is tied
   to the current plan revision and is rejected as stale after another confirmed
   change.
-- The MVP replans one selected meal at a time. The deterministic planner chooses
+- Event-driven replanning changes one selected meal at a time. The deterministic planner chooses
   an eligible alternative; the Agent may interpret intent but does not directly
   mutate a plan.
+- Member allergens, prohibited ingredients, and dietary requirements are merged
+  into one shared-plan safety boundary. The MVP does not generate a separate
+  menu for each member.
+- Every profile edit appends an immutable version. Profile-driven plans store the
+  exact version and retain the complete effective-constraint snapshot.
+- Replanning after a profile edit creates a new linked replacement week and
+  reports changed constraint groups; it never rewrites the previous plan.
 
 ## Excluded
 

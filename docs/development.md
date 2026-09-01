@@ -27,6 +27,7 @@ Available services:
 
 - Frontend: <http://localhost:3000>
 - Planning assistant: <http://localhost:3000/assistant>
+- Household profile: <http://localhost:3000/profile>
 - FairPrice product search: <http://localhost:3000/products>
 - Seven-day planner: <http://localhost:3000/weekly-plan>
 - Meal check-in dashboard: <http://localhost:3000/dashboard>
@@ -44,7 +45,10 @@ outstanding clarifications, and the generated-plan link are persisted in
 `agent_sessions` and `agent_messages`. Replanning previews and confirmations are
 stored in `meal_plan_events`; `meal_plans.revision` provides optimistic
 concurrency and `meal_plan_entries.is_locked` protects selected meals. The
-current migration head is `20260901_0008`. Agent replanning drafts and pending
+current migration head is `20260902_0009`. Household profile identity and
+immutable versions are stored in `household_profiles` and
+`household_profile_versions`; linked plans preserve the exact profile version
+and optional replaced-plan ID. Agent replanning drafts and pending
 event links are stored on `agent_sessions`.
 
 ## Planning Assistant Parser

@@ -8,6 +8,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
+    ForeignKeyConstraint,
     Identity,
     Index,
     Integer,
@@ -43,6 +44,18 @@ class MealPlan(Base):
             name="meal_plans_consumed_total_nonnegative",
         ),
         Index("meal_plans_start_created_idx", "start_date", "created_at"),
+        Index("meal_plans_household_profile_idx", "household_profile_id", "household_profile_version"),
+        ForeignKeyConstraint(
+            ["household_profile_id", "household_profile_version"],
+            ["household_profile_versions.profile_id", "household_profile_versions.version"],
+            name="meal_plans_household_profile_version_fkey",
+            ondelete="SET NULL",
+        ),
+        CheckConstraint(
+            "(household_profile_id IS NULL AND household_profile_version IS NULL) "
+            "OR (household_profile_id IS NOT NULL AND household_profile_version IS NOT NULL)",
+            name="meal_plans_household_profile_reference_consistent",
+        ),
     )
 
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
@@ -57,6 +70,13 @@ class MealPlan(Base):
     consumed_total_sgd: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     within_weekly_budget: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     constraints: Mapped[dict] = mapped_column(JSON)
+    household_profile_id: Mapped[int | None] = mapped_column(BIGINT_ID, nullable=True)
+    household_profile_version: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    replaces_plan_id: Mapped[int | None] = mapped_column(
+        BIGINT_ID,
+        ForeignKey("meal_plans.id", ondelete="SET NULL"),
+        nullable=True,
+    )
     warnings: Mapped[list[str]] = mapped_column(JSON, default=list)
     revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -67,6 +67,11 @@ The data-quality slice expands the validated catalog to 30 recipes and 34
 normalized ingredients, provides complete fixture product mappings, imports the
 catalog idempotently at startup, and gates changes through 20 end-to-end planning
 scenarios with machine-readable and human-readable reports.
+The household-profile slice persists member-level servings and safety
+constraints together with shared budget, time, nutrition, pricing, and pantry
+defaults. Every edit creates an immutable version. Plans generated from a
+profile record the exact version and a replacement plan explains which
+constraint groups changed.
 
 ## Quick Start
 
@@ -81,6 +86,7 @@ fresh environment and an existing environment converge on the same records.
 - Backend API: <http://localhost:8000>
 - Frontend: <http://localhost:3000>
 - Planning assistant: <http://localhost:3000/assistant>
+- Household profile: <http://localhost:3000/profile>
 - Recipe catalog: <http://localhost:3000/recipes>
 - Constraint matching: <http://localhost:3000/plan>
 - Seven-day planning: <http://localhost:3000/weekly-plan>

@@ -11,6 +11,8 @@ The system will define the following shared objects:
 - ShoppingList
 - AgentSession
 - AgentMessage
+- HouseholdProfile
+- HouseholdProfileVersion
 
 Available endpoints:
 
@@ -35,6 +37,36 @@ Available endpoints:
 - POST /api/agent/sessions/{session_id}/confirm
 - POST /api/agent/sessions/{session_id}/replan/confirm
 - POST /api/agent/sessions/{session_id}/replan/discard
+- POST /api/household-profiles
+- GET /api/household-profiles/current
+- GET /api/household-profiles/{profile_id}
+- PUT /api/household-profiles/{profile_id}
+- GET /api/household-profiles/{profile_id}/versions
+- POST /api/household-profiles/{profile_id}/plans
+- POST /api/household-profiles/{profile_id}/plans/{plan_id}/replan
+
+## Household Profiles
+
+The MVP maintains one household profile. Each member supplies a name, one to
+three planned servings, allergens, prohibited ingredient IDs, and dietary
+requirements. The backend deterministically sums servings and merges every
+member's safety constraints into the shared-plan hard constraints.
+
+Shared defaults include cooking time, per-meal and weekly budgets, general
+health preferences, user-entered nutrition targets, an optional sodium target,
+available ingredients, and fixture/live pricing mode. Creating a profile writes
+version 1. `PUT` requires `expected_version`; a successful edit appends an
+immutable version, while a stale edit returns HTTP 409.
+
+`POST /api/household-profiles/{profile_id}/plans` compiles a selected profile
+version into the existing `WeeklyMealPlanRequest`. It accepts temporary
+overrides for non-safety planning defaults but never removes member allergens,
+prohibited ingredients, or dietary requirements. The persisted plan records
+the profile ID, profile version, and complete effective-constraint snapshot.
+
+The replan endpoint leaves the original plan unchanged and generates a linked
+replacement from the requested profile version. Its response contains the old
+plan ID and a deterministic, field-level list of changed constraints.
 
 ## Recipe Catalog
 

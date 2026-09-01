@@ -5,6 +5,7 @@
         <NuxtLink class="brand-name" to="/">MealCraft</NuxtLink>
         <nav class="primary-nav" aria-label="Primary navigation">
           <NuxtLink to="/assistant">Assistant</NuxtLink>
+          <NuxtLink to="/profile">Profile</NuxtLink>
           <NuxtLink to="/weekly-plan">Weekly plan</NuxtLink>
           <NuxtLink to="/dashboard">Dashboard</NuxtLink>
           <NuxtLink to="/plan">Plan</NuxtLink>
