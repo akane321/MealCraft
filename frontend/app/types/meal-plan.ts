@@ -24,6 +24,7 @@ export interface WeeklyPlanDay {
   consumed_cost_sgd: number;
   purchase_cost_sgd: number;
   status: MealPlanEntryStatus;
+  is_locked: boolean;
   consumed_at: string | null;
 }
 
@@ -43,6 +44,7 @@ export interface WeeklyGroceryEstimate {
 
 export interface WeeklyMealPlan {
   id: number;
+  revision: number;
   start_date: string;
   end_date: string;
   day_count: number;
@@ -56,6 +58,7 @@ export interface WeeklyMealPlan {
 
 export interface WeeklyMealPlanListItem {
   id: number;
+  revision: number;
   start_date: string;
   end_date: string;
   household_size: number;
@@ -81,12 +84,14 @@ export interface NutritionDashboardDay {
   planned_date: string;
   recipe: RecipeListItem;
   status: MealPlanEntryStatus;
+  is_locked: boolean;
   consumed_at: string | null;
   nutrition_per_person: RecipeNutrition;
 }
 
 export interface WeeklyNutritionDashboard {
   plan_id: number;
+  revision: number;
   start_date: string;
   end_date: string;
   household_size: number;
@@ -96,4 +101,72 @@ export interface WeeklyNutritionDashboard {
   planned_nutrition_per_person: WeeklyNutritionSummary;
   completed_nutrition_per_person: WeeklyNutritionSummary;
   days: NutritionDashboardDay[];
+}
+
+export type MealPlanEventType = "REPLACE_MEAL" | "CANCEL_MEAL" | "LOCK_MEAL" | "ITEM_UNAVAILABLE";
+export type MealPlanEventStatus = "previewed" | "applied";
+
+export interface MealPlanEntrySnapshot {
+  entry_id: number;
+  recipe_id: number;
+  recipe_slug: string;
+  recipe_title: string;
+  status: MealPlanEntryStatus;
+  is_locked: boolean;
+  recommendation_score: number;
+}
+
+export interface MealPlanNutritionDelta {
+  calories_kcal: number;
+  protein_g: number;
+  carbohydrate_g: number;
+  fat_g: number;
+  sodium_mg: number;
+  sugar_g: number;
+}
+
+export interface MealPlanGroceryDeltaLine {
+  ingredient_name: string;
+  ingredient_display_name: string;
+  change: "added" | "removed" | "updated";
+  before_required_quantity: number | null;
+  after_required_quantity: number | null;
+  unit: string | null;
+  before_packages_required: number;
+  after_packages_required: number;
+  purchase_cost_delta_sgd: number;
+}
+
+export interface MealPlanReplanPreviewRequest {
+  event_type: MealPlanEventType;
+  entry_id: number;
+  reason: string | null;
+  unavailable_ingredient: string | null;
+}
+
+export interface MealPlanReplanEvent {
+  id: number;
+  plan_id: number;
+  base_revision: number;
+  applied_revision: number | null;
+  event_type: MealPlanEventType;
+  status: MealPlanEventStatus;
+  reason: string | null;
+  unavailable_ingredient: string | null;
+  before_entry: MealPlanEntrySnapshot;
+  after_entry: MealPlanEntrySnapshot;
+  nutrition_delta: MealPlanNutritionDelta;
+  grocery_delta: MealPlanGroceryDeltaLine[];
+  purchase_total_delta_sgd: number;
+  created_at: string;
+  applied_at: string | null;
+}
+
+export interface MealPlanReplanEventCollection {
+  items: MealPlanReplanEvent[];
+}
+
+export interface MealPlanReplanConfirmation {
+  event: MealPlanReplanEvent;
+  plan: WeeklyMealPlan;
 }

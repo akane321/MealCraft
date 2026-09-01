@@ -40,8 +40,10 @@ Generated weekly plans are persisted in `meal_plans`, `meal_plan_entries`, and
 `meal_plan_grocery_items`. Meal execution status and completion timestamps are
 stored on `meal_plan_entries`. Agent conversations, extracted constraints,
 outstanding clarifications, and the generated-plan link are persisted in
-`agent_sessions` and `agent_messages`. The current migration head is
-`20260901_0006`.
+`agent_sessions` and `agent_messages`. Replanning previews and confirmations are
+stored in `meal_plan_events`; `meal_plans.revision` provides optimistic
+concurrency and `meal_plan_entries.is_locked` protects selected meals. The
+current migration head is `20260901_0007`.
 
 ## Planning Assistant Parser
 

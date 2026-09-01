@@ -58,6 +58,7 @@ class MealPlan(Base):
     within_weekly_budget: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     constraints: Mapped[dict] = mapped_column(JSON)
     warnings: Mapped[list[str]] = mapped_column(JSON, default=list)
+    revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     entries: Mapped[list["MealPlanEntry"]] = relationship(
@@ -69,6 +70,11 @@ class MealPlan(Base):
         back_populates="plan",
         cascade="all, delete-orphan",
         order_by="MealPlanGroceryItem.ingredient_name",
+    )
+    events: Mapped[list["MealPlanEvent"]] = relationship(
+        back_populates="plan",
+        cascade="all, delete-orphan",
+        order_by="MealPlanEvent.id",
     )
 
 
@@ -108,6 +114,7 @@ class MealPlanEntry(Base):
     sodium_mg: Mapped[Decimal] = mapped_column(Numeric(8, 2))
     sugar_g: Mapped[Decimal] = mapped_column(Numeric(8, 2))
     status: Mapped[str] = mapped_column(String(20), default="planned", server_default="planned")
+    is_locked: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     plan: Mapped[MealPlan] = relationship(back_populates="entries")
@@ -159,3 +166,52 @@ class MealPlanGroceryItem(Base):
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     plan: Mapped[MealPlan] = relationship(back_populates="grocery_items")
+
+
+class MealPlanEvent(Base):
+    __tablename__ = "meal_plan_events"
+    __table_args__ = (
+        CheckConstraint(
+            "event_type IN ('REPLACE_MEAL', 'CANCEL_MEAL', 'LOCK_MEAL', 'ITEM_UNAVAILABLE')",
+            name="meal_plan_events_type_valid",
+        ),
+        CheckConstraint(
+            "status IN ('previewed', 'applied')",
+            name="meal_plan_events_status_valid",
+        ),
+        CheckConstraint("base_revision > 0", name="meal_plan_events_base_revision_positive"),
+        CheckConstraint(
+            "applied_revision IS NULL OR applied_revision > base_revision",
+            name="meal_plan_events_applied_revision_valid",
+        ),
+        Index("meal_plan_events_plan_created_idx", "plan_id", "created_at", "id"),
+        Index("meal_plan_events_entry_id_idx", "entry_id"),
+    )
+
+    id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
+    plan_id: Mapped[int] = mapped_column(BIGINT_ID, ForeignKey("meal_plans.id", ondelete="CASCADE"))
+    entry_id: Mapped[int] = mapped_column(BIGINT_ID, ForeignKey("meal_plan_entries.id", ondelete="CASCADE"))
+    proposed_recipe_id: Mapped[int | None] = mapped_column(
+        BIGINT_ID,
+        ForeignKey("recipes.id", ondelete="RESTRICT"),
+        nullable=True,
+    )
+    event_type: Mapped[str] = mapped_column(String(32))
+    status: Mapped[str] = mapped_column(String(20), default="previewed", server_default="previewed")
+    base_revision: Mapped[int] = mapped_column(Integer)
+    applied_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    unavailable_ingredient: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    before_entry: Mapped[dict] = mapped_column(JSON)
+    after_entry: Mapped[dict] = mapped_column(JSON)
+    after_grocery: Mapped[dict] = mapped_column(JSON)
+    after_warnings: Mapped[list[str]] = mapped_column(JSON, default=list)
+    nutrition_delta: Mapped[dict] = mapped_column(JSON)
+    grocery_delta: Mapped[list[dict]] = mapped_column(JSON, default=list)
+    purchase_total_delta_sgd: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    applied_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    plan: Mapped[MealPlan] = relationship(back_populates="events")
+    entry: Mapped[MealPlanEntry] = relationship()
+    proposed_recipe: Mapped[Recipe | None] = relationship()

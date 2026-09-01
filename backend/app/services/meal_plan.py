@@ -88,6 +88,7 @@ class WeeklyMealPlanService:
             items=[
                 WeeklyMealPlanListItem(
                     id=plan.id,
+                    revision=plan.revision,
                     start_date=plan.start_date,
                     end_date=plan.end_date,
                     household_size=plan.household_size,
@@ -130,7 +131,8 @@ class WeeklyMealPlanService:
             nutrition = self._entry_nutrition(entry)
             counts[entry.status] += 1
             for key in planned_totals:
-                planned_totals[key] += getattr(nutrition, key)
+                if entry.status != "skipped":
+                    planned_totals[key] += getattr(nutrition, key)
                 if entry.status == "completed":
                     completed_totals[key] += getattr(nutrition, key)
             days.append(
@@ -140,6 +142,7 @@ class WeeklyMealPlanService:
                     planned_date=entry.planned_date,
                     recipe=RecipeListItemResponse.model_validate(entry.recipe),
                     status=entry.status,
+                    is_locked=entry.is_locked,
                     consumed_at=self._as_utc(entry.consumed_at),
                     nutrition_per_person=nutrition,
                 )
@@ -149,6 +152,7 @@ class WeeklyMealPlanService:
         completed_count = counts["completed"]
         return WeeklyNutritionDashboardResponse(
             plan_id=plan.id,
+            revision=plan.revision,
             start_date=plan.start_date,
             end_date=plan.end_date,
             household_size=plan.household_size,
@@ -173,8 +177,9 @@ class WeeklyMealPlanService:
         }
         for entry in plan.entries:
             nutrition = WeeklyMealPlanService._entry_nutrition(entry)
-            for key in totals:
-                totals[key] += getattr(nutrition, key)
+            if entry.status != "skipped":
+                for key in totals:
+                    totals[key] += getattr(nutrition, key)
             days.append(
                 WeeklyPlanDayResponse(
                     entry_id=entry.id,
@@ -186,6 +191,7 @@ class WeeklyMealPlanService:
                     consumed_cost_sgd=float(entry.consumed_cost_sgd),
                     purchase_cost_sgd=float(entry.purchase_cost_sgd),
                     status=entry.status,
+                    is_locked=entry.is_locked,
                     consumed_at=WeeklyMealPlanService._as_utc(entry.consumed_at),
                 )
             )
@@ -209,6 +215,7 @@ class WeeklyMealPlanService:
         )
         return WeeklyMealPlanResponse(
             id=plan.id,
+            revision=plan.revision,
             start_date=plan.start_date,
             end_date=plan.end_date,
             day_count=plan.day_count,

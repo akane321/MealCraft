@@ -126,3 +126,25 @@ conversation state. Container restarts therefore do not erase a planning thread.
    food outside MealCraft.
 6. Nuxt refetches the authoritative dashboard after each check-in and displays
    daily totals, weekly trends, completion progress, and the seven meal states.
+
+## Event-driven Replanning Flow
+
+1. The user selects one non-completed, non-locked meal and submits a structured
+   event: replacement, cancellation, lock, or unavailable ingredient.
+2. The deterministic recommendation service applies the plan's existing hard
+   constraints and selects an alternative with penalties for extra repetition
+   and disruption to adjacent days.
+3. The backend rebuilds only the prospective recipe set and derives a fresh
+   consolidated grocery estimate. It compares this estimate with the persisted
+   Shopping List to produce package and price deltas.
+4. A `previewed` event stores the base plan revision, before/after meal snapshots,
+   nutrition delta, Shopping List delta, and proposed grocery state. The active
+   plan is unchanged.
+5. Confirmation uses optimistic concurrency: the event applies only if its base
+   revision still equals `meal_plans.revision`. Otherwise the API returns HTTP
+   409 and requires a new preview.
+6. One transaction applies the target change, replaces derived grocery rows,
+   increments the revision, and marks the event `applied`. Completed nutrition
+   remains historical and completed or locked meals are never replaced.
+7. Nuxt reloads the authoritative dashboard and displays the persistent event
+   history so the reason and effect of each revision remain explainable.

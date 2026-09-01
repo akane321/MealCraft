@@ -2072,7 +2072,7 @@ a {
 .meal-checkin-header,
 .meal-checkin-row {
   display: grid;
-  grid-template-columns: 130px minmax(210px, 1fr) minmax(330px, 2fr) 170px;
+  grid-template-columns: 120px minmax(190px, 1fr) minmax(280px, 1.7fr) 150px 100px;
   align-items: center;
   column-gap: 20px;
 }
@@ -2132,6 +2132,357 @@ a {
   color: #9a6d00;
 }
 
+.meal-recipe-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.locked-badge,
+.plan-history-list > li > span,
+.shopping-delta li > span {
+  padding: 4px 6px;
+  border-radius: 99px;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.locked-badge {
+  color: #5b4a11;
+  background: #f4edcf;
+}
+
+.adjust-meal-button {
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid #aeb6bc;
+  border-radius: 3px;
+  color: #176e45;
+  background: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.adjust-meal-button:disabled {
+  color: #8b9196;
+  background: #f4f5f6;
+  cursor: not-allowed;
+}
+
+.replan-workspace,
+.plan-history-section {
+  margin-top: 22px;
+  border: 1px solid var(--border);
+  scroll-margin-top: 24px;
+}
+
+.replan-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+  gap: 20px;
+}
+
+.replan-heading h2,
+.replan-preview h3 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.025em;
+}
+
+.replan-heading > div > p:last-child,
+.replan-preview.empty > p:last-child {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.replan-close {
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.replan-workspace > .notice-panel {
+  margin: 20px 24px 0;
+}
+
+.replan-grid {
+  display: grid;
+  grid-template-columns: minmax(340px, 0.8fr) minmax(0, 1.2fr);
+}
+
+.replan-form,
+.replan-preview {
+  padding: 24px;
+}
+
+.replan-form {
+  display: grid;
+  border-right: 1px solid var(--border);
+  gap: 18px;
+}
+
+.replan-form fieldset {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  gap: 8px;
+}
+
+.replan-form legend,
+.replan-form > label > span {
+  margin-bottom: 8px;
+  color: #34383c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.replan-choice {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  gap: 10px;
+}
+
+.replan-choice:has(input:checked) {
+  border-color: #65a480;
+  background: #f2f8f4;
+}
+
+.replan-choice input {
+  margin-top: 3px;
+  accent-color: #167449;
+}
+
+.replan-choice span,
+.replan-form > label {
+  display: grid;
+}
+
+.replan-choice small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.replan-form input[type="text"],
+.replan-form textarea {
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid #c7cdd2;
+  border-radius: 3px;
+  color: #17191c;
+  background: #ffffff;
+  font: inherit;
+}
+
+.replan-form .primary-button,
+.preview-actions .primary-button {
+  margin-top: 0;
+}
+
+.replan-preview {
+  background: #fbfcfb;
+}
+
+.replan-preview.empty {
+  display: grid;
+  min-height: 420px;
+  align-content: center;
+  justify-items: start;
+}
+
+.preview-title-row,
+.preview-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.preview-title-row > span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.recipe-change-card {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid #c9ddd1;
+  background: #ffffff;
+  gap: 16px;
+}
+
+.recipe-change-card > div {
+  display: grid;
+  gap: 5px;
+}
+
+.recipe-change-card span {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.recipe-change-card .change-arrow {
+  color: #167449;
+  font-size: 22px;
+}
+
+.nutrition-delta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 18px 0;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+}
+
+.nutrition-delta-grid > div {
+  padding: 13px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.nutrition-delta-grid dt {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.nutrition-delta-grid dd {
+  margin: 5px 0 0;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.shopping-delta {
+  border: 1px solid var(--border);
+  background: #ffffff;
+}
+
+.shopping-delta h4,
+.shopping-delta > p {
+  margin: 0;
+  padding: 13px 15px;
+}
+
+.shopping-delta > p {
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.shopping-delta ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shopping-delta li {
+  display: grid;
+  grid-template-columns: 70px minmax(120px, 1fr) minmax(180px, 1.4fr);
+  align-items: center;
+  padding: 11px 15px;
+  border-top: 1px solid var(--border);
+  gap: 10px;
+}
+
+.shopping-delta li strong,
+.shopping-delta li small {
+  font-size: 11px;
+}
+
+.shopping-delta li small {
+  color: var(--muted);
+}
+
+.delta-added {
+  color: #176e45;
+  background: #e8f5ec;
+}
+
+.delta-removed {
+  color: #8b2929;
+  background: #fbecec;
+}
+
+.delta-updated {
+  color: #70400c;
+  background: #fff3da;
+}
+
+.preview-actions {
+  align-items: center;
+  margin-top: 18px;
+}
+
+.preview-actions .primary-button {
+  width: auto;
+  min-height: 40px;
+  padding-inline: 18px;
+}
+
+.plan-history-section > .dashboard-section-heading {
+  padding: 22px 24px 18px;
+}
+
+.plan-history-list {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+  list-style: none;
+}
+
+.plan-history-list li {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  align-items: start;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  gap: 14px;
+}
+
+.plan-history-list li:last-child {
+  border-bottom: 0;
+}
+
+.plan-history-list > li > span.applied {
+  color: #176e45;
+  background: #e8f5ec;
+}
+
+.plan-history-list > li > span.previewed {
+  color: #70400c;
+  background: #fff3da;
+}
+
+.plan-history-list strong {
+  font-size: 13px;
+}
+
+.plan-history-list p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
 .weekly-result-actions {
   align-items: flex-end;
   flex-direction: column;
@@ -2153,7 +2504,7 @@ a {
 
   .meal-checkin-header,
   .meal-checkin-row {
-    grid-template-columns: 110px minmax(180px, 0.9fr) minmax(260px, 1.4fr) 150px;
+    grid-template-columns: 100px minmax(160px, 0.9fr) minmax(230px, 1.4fr) 140px 90px;
   }
 }
 
@@ -2190,7 +2541,7 @@ a {
   }
 
   .meal-checkin-row {
-    grid-template-columns: 110px minmax(0, 1fr) 150px;
+    grid-template-columns: 100px minmax(0, 1fr) 140px 90px;
   }
 
   .meal-checkin-row p {
@@ -2200,6 +2551,20 @@ a {
   .status-select {
     grid-column: 3;
     grid-row: 1 / span 2;
+  }
+
+  .adjust-meal-button {
+    grid-column: 4;
+    grid-row: 1 / span 2;
+  }
+
+  .replan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .replan-form {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
   }
 }
 
@@ -2268,9 +2633,22 @@ a {
   }
 
   .meal-checkin-row p,
-  .status-select {
+  .status-select,
+  .adjust-meal-button {
     grid-column: 1;
     grid-row: auto;
+  }
+
+  .nutrition-delta-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shopping-delta li {
+    grid-template-columns: 70px 1fr;
+  }
+
+  .shopping-delta li small {
+    grid-column: 2;
   }
 }
 

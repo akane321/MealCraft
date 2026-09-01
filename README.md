@@ -6,8 +6,9 @@ DSS5105 Data Science Projects in Practice.
 ## MVP Goal
 
 The system accepts user dietary constraints, generates a seven-day meal plan,
-maps required ingredients to FairPrice products, produces a grocery list, and
-visualizes planned and completed MealCraft nutrition through a dashboard.
+maps required ingredients to FairPrice products, produces a grocery list,
+supports previewed event-driven plan adjustments, and visualizes planned and
+completed MealCraft nutrition through a dashboard.
 
 ## Technology Stack
 
@@ -49,6 +50,10 @@ conversation and its structured constraint state, asks targeted clarification
 questions, and invokes the deterministic weekly planner only after confirmation.
 It runs without an API key in reproducible fixture mode; OpenAI parsing is an
 explicit optional configuration.
+The dynamic-replanning slice adds revision-safe previews for meal replacement,
+cancellation, locking, and unavailable ingredients. Confirmed changes update
+only the target meal and its derived shopping demand, while an event trail keeps
+the before/after decision auditable.
 
 ## Quick Start
 

@@ -34,6 +34,7 @@ function day(status: NutritionDashboardDay["status"], dayIndex: number): Nutriti
       nutrition,
     },
     status,
+    is_locked: false,
     consumed_at: status === "completed" ? "2026-09-01T12:00:00Z" : null,
     nutrition_per_person: nutrition,
   };
