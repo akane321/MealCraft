@@ -1,0 +1,22 @@
+[
+  {"id":"dev-001","name":"baseline","category":"basic","expected_feasible":true,"request":{}},
+  {"id":"dev-002","name":"vegetarian","category":"dietary","expected_feasible":true,"request":{"dietary_preferences":["vegetarian"]}},
+  {"id":"dev-003","name":"vegan","category":"dietary","expected_feasible":true,"request":{"dietary_preferences":["vegan"]}},
+  {"id":"dev-004","name":"gluten-free","category":"dietary","expected_feasible":true,"request":{"dietary_preferences":["gluten-free"]}},
+  {"id":"dev-005","name":"dairy-free","category":"dietary","expected_feasible":true,"request":{"dietary_preferences":["dairy-free"]}},
+  {"id":"dev-006","name":"soy-allergy","category":"allergen","expected_feasible":true,"request":{"allergens":["soy"]}},
+  {"id":"dev-007","name":"fish-allergy","category":"allergen","expected_feasible":true,"request":{"allergens":["fish"]}},
+  {"id":"dev-008","name":"egg-allergy","category":"allergen","expected_feasible":true,"request":{"allergens":["egg"]}},
+  {"id":"dev-009","name":"sesame-allergy","category":"allergen","expected_feasible":true,"request":{"allergens":["sesame"]}},
+  {"id":"dev-010","name":"exclude-chicken","category":"exclusion","expected_feasible":true,"request":{"excluded_ingredients":["chicken_breast"]}},
+  {"id":"dev-011","name":"sodium-hard-limit","category":"nutrition","expected_feasible":true,"request":{"max_sodium_mg_per_meal":500}},
+  {"id":"dev-012","name":"quick-meals","category":"time","expected_feasible":true,"request":{"max_cooking_time_minutes":25}},
+  {"id":"dev-013","name":"lower-calorie-soft-preference","category":"preference","expected_feasible":true,"request":{"health_preferences":["lower-calorie"]}},
+  {"id":"dev-014","name":"low-sugar-soft-preference","category":"preference","expected_feasible":true,"request":{"health_preferences":["low-sugar"]}},
+  {"id":"dev-015","name":"nutrition-targets","category":"nutrition","expected_feasible":true,"request":{"nutrition_targets":{"calories_kcal":520,"protein_g":35,"carbohydrate_g":60,"fat_g":16}}},
+  {"id":"dev-016","name":"known-pantry-quantity","category":"pantry","expected_feasible":true,"request":{"available_ingredients":[{"normalized_name":"brown_rice","quantity":500,"unit":"g"}]}},
+  {"id":"dev-017","name":"unknown-pantry-quantity","category":"pantry","expected_feasible":true,"request":{"available_ingredients":[{"normalized_name":"chickpea"}]}},
+  {"id":"dev-018","name":"per-meal-budget","category":"budget","expected_feasible":true,"request":{"budget_per_meal_sgd":8}},
+  {"id":"dev-019","name":"impossible-five-minute-limit","category":"infeasible","difficulty":"edge","expected_feasible":false,"request":{"max_cooking_time_minutes":5}},
+  {"id":"dev-020","name":"impossible-vegan-ten-minute-limit","category":"infeasible","difficulty":"edge","expected_feasible":false,"request":{"max_cooking_time_minutes":10,"dietary_preferences":["vegan"]}}
+]

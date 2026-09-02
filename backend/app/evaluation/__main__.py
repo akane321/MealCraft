@@ -8,7 +8,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run the repeatable MealCraft MVP quality evaluation.")
     parser.add_argument("--ingredients", type=Path, default=Path("data/ingredients/ingredients.json"))
     parser.add_argument("--recipes", type=Path, default=Path("data/recipes/recipes.json"))
-    parser.add_argument("--scenarios", type=Path, default=Path("data/evaluation/scenarios.json"))
+    parser.add_argument("--scenarios", type=Path, default=Path("data/evaluation/dev/planning-v1.json"))
     parser.add_argument("--fixtures", type=Path, default=Path("data/fixtures/fairprice-products.json"))
     parser.add_argument("--json-report", type=Path, default=Path("docs/evaluation/latest.json"))
     parser.add_argument("--markdown-report", type=Path, default=Path("docs/evaluation/latest.md"))

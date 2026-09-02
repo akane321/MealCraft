@@ -14,7 +14,7 @@ from app.models.recipe import Ingredient, Recipe
 ROOT = Path("/app") if Path("/app/data").exists() else Path(__file__).resolve().parents[2]
 INGREDIENTS = ROOT / "data/ingredients/ingredients.json"
 RECIPES = ROOT / "data/recipes/recipes.json"
-SCENARIOS = ROOT / "data/evaluation/scenarios.json"
+SCENARIOS = ROOT / "data/evaluation/dev/planning-v1.json"
 FIXTURES = ROOT / "data/fixtures/fairprice-products.json"
 
 
