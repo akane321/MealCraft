@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.agent import AgentMessage, AgentSession
-from app.schemas.agent import AgentConstraintState
+from app.schemas.agent import AgentConstraintState, AgentReplanDraft
 
 
 class AgentSessionRepository:
@@ -95,6 +95,44 @@ class AgentSessionRepository:
                 content=f"The seven-day plan is ready and saved as plan #{plan_id}.",
             )
         )
+        self.session.commit()
+        return self.get(session_id)
+
+    def append_replan_exchange(
+        self,
+        session_id: int,
+        *,
+        user_message: str,
+        assistant_message: str,
+        draft: AgentReplanDraft,
+        clarification_questions: list[str],
+        pending_event_id: int | None,
+    ) -> AgentSession | None:
+        agent_session = self.get(session_id)
+        if agent_session is None:
+            return None
+        agent_session.replan_draft = draft.model_dump(mode="json")
+        agent_session.missing_fields = ["replan"] if clarification_questions else []
+        agent_session.clarification_questions = clarification_questions[:1]
+        agent_session.pending_event_id = pending_event_id
+        agent_session.messages.extend(
+            [
+                AgentMessage(role="user", content=user_message),
+                AgentMessage(role="assistant", content=assistant_message),
+            ]
+        )
+        self.session.commit()
+        return self.get(session_id)
+
+    def finish_replan(self, session_id: int, *, assistant_message: str) -> AgentSession | None:
+        agent_session = self.get(session_id)
+        if agent_session is None:
+            return None
+        agent_session.replan_draft = {}
+        agent_session.pending_event_id = None
+        agent_session.missing_fields = []
+        agent_session.clarification_questions = []
+        agent_session.messages.append(AgentMessage(role="assistant", content=assistant_message))
         self.session.commit()
         return self.get(session_id)
 

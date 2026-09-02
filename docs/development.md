@@ -27,6 +27,7 @@ Available services:
 
 - Frontend: <http://localhost:3000>
 - Planning assistant: <http://localhost:3000/assistant>
+- Household profile: <http://localhost:3000/profile>
 - FairPrice product search: <http://localhost:3000/products>
 - Seven-day planner: <http://localhost:3000/weekly-plan>
 - Meal check-in dashboard: <http://localhost:3000/dashboard>
@@ -34,20 +35,27 @@ Available services:
 - Swagger documentation: <http://localhost:8000/docs>
 - PostgreSQL: `localhost:15432` (container-internal port remains `5432`)
 
-The backend applies all pending Alembic migrations before starting Uvicorn.
+The backend applies all pending Alembic migrations, validates and idempotently
+imports the reference catalog, and then starts Uvicorn.
 
 Generated weekly plans are persisted in `meal_plans`, `meal_plan_entries`, and
 `meal_plan_grocery_items`. Meal execution status and completion timestamps are
 stored on `meal_plan_entries`. Agent conversations, extracted constraints,
 outstanding clarifications, and the generated-plan link are persisted in
-`agent_sessions` and `agent_messages`. The current migration head is
-`20260901_0006`.
+`agent_sessions` and `agent_messages`. Replanning previews and confirmations are
+stored in `meal_plan_events`; `meal_plans.revision` provides optimistic
+concurrency and `meal_plan_entries.is_locked` protects selected meals. The
+current migration head is `20260902_0009`. Household profile identity and
+immutable versions are stored in `household_profiles` and
+`household_profile_versions`; linked plans preserve the exact profile version
+and optional replaced-plan ID. Agent replanning drafts and pending
+event links are stored on `agent_sessions`.
 
 ## Planning Assistant Parser
 
 The default `.env.example` uses `AGENT_PARSER_PROVIDER=fixture`. This mode is
 deterministic, works offline, and is used in tests. It recognizes the supported
-MVP constraints in common English and Chinese phrasing.
+current baseline constraints in common English and Chinese phrasing.
 
 To experiment with model-based structured extraction, set these only in the
 local uncommitted `.env` file:
@@ -83,6 +91,25 @@ docker compose exec backend uv run --no-sync ruff check .
 docker compose exec backend uv run --no-sync ruff format --check .
 docker compose exec backend uv run --no-sync pytest
 ```
+
+Validate or import the catalog manually:
+
+```bash
+docker compose exec backend uv run --no-sync python -m app.data.import_catalog --validate-only
+docker compose exec backend uv run --no-sync python -m app.data.import_catalog
+```
+
+Run the reproducible baseline evaluation and refresh both reports:
+
+```bash
+docker compose exec backend uv run --no-sync python -m app.evaluation
+```
+
+The evaluation covers 20 constraint combinations and fails when catalog size,
+scenario feasibility, hard-constraint safety, deterministic selection,
+consecutive-repeat avoidance, product mapping, or grocery completeness falls
+below its gate. Results are written to `docs/evaluation/latest.json` and
+`docs/evaluation/latest.md`.
 
 ## Run Frontend Quality Checks
 

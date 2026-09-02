@@ -1,6 +1,6 @@
 # Architecture
 
-The MVP uses a modular monolith architecture.
+The current product uses a modular monolith architecture.
 
 ## Components
 
@@ -20,7 +20,26 @@ scoring.
 
 The grocery provider retrieves and normalizes FairPrice product information.
 
-The database stores recipes, plans, products, and meal records.
+The database stores versioned household profiles, recipes, plans, products, and
+meal records.
+
+## Household Profile Flow
+
+1. Nuxt creates or edits the currently supported single household profile.
+2. FastAPI validates each member and rejects more than 12 combined planned
+   servings.
+3. The service sums member servings and merges allergens, prohibited
+   ingredients, and dietary requirements into shared hard constraints.
+4. Every edit appends an immutable version and advances `current_version` using
+   optimistic concurrency.
+5. Plan generation converts the selected version into the existing validated
+   weekly-planning request. Only non-safety defaults may be overridden for one
+   week.
+6. The meal plan stores the profile ID, exact profile version, and full effective
+   constraint snapshot.
+7. Replanning after a profile edit creates a replacement plan linked through
+   `replaces_plan_id` and returns a deterministic field-level constraint diff;
+   the previous plan remains auditable.
 
 ## Recipe Data Flow
 
@@ -62,7 +81,7 @@ The LLM never determines allergen safety or the final constraint result.
    snapshot, then closes the read transaction before any external model call.
 3. A LangGraph workflow runs two explicit nodes: constraint extraction, then
    state merge and clarification assessment.
-4. The default fixture parser provides reproducible bilingual MVP behavior. An
+4. The default fixture parser provides reproducible bilingual baseline behavior. An
    optional OpenAI parser uses a Pydantic structured-output schema and never
    invents absent values.
 5. A short database transaction appends the user and assistant messages and
@@ -75,9 +94,19 @@ The LLM never determines allergen safety or the final constraint result.
 8. Only a `ready` session can be confirmed. Confirmation calls the existing
    deterministic weekly-planning service and persists the resulting plan ID on
    the session.
+9. After planning, a deterministic bilingual interpreter maps a new user message
+   to one event type, target entry, reason, and optional unavailable ingredient.
+   Missing information is stored as a replanning draft and produces exactly one
+   clarification question.
+10. A complete draft delegates to the existing replanning service. The agent
+    stores only the pending event link; it never selects recipes, calculates
+    deltas, or mutates a meal plan itself.
+11. Confirmation applies the revision-safe event and clears the draft. Discarding
+    clears the draft and link while leaving the active plan unchanged.
 
 The database, rather than an in-memory agent checkpoint, is the authoritative
-conversation state. Container restarts therefore do not erase a planning thread.
+conversation state. Container restarts therefore do not erase a planning thread
+or a pending adjustment preview.
 
 ## FairPrice Product Flow
 
@@ -126,3 +155,25 @@ conversation state. Container restarts therefore do not erase a planning thread.
    food outside MealCraft.
 6. Nuxt refetches the authoritative dashboard after each check-in and displays
    daily totals, weekly trends, completion progress, and the seven meal states.
+
+## Event-driven Replanning Flow
+
+1. The user selects one non-completed, non-locked meal and submits a structured
+   event: replacement, cancellation, lock, or unavailable ingredient.
+2. The deterministic recommendation service applies the plan's existing hard
+   constraints and selects an alternative with penalties for extra repetition
+   and disruption to adjacent days.
+3. The backend rebuilds only the prospective recipe set and derives a fresh
+   consolidated grocery estimate. It compares this estimate with the persisted
+   Shopping List to produce package and price deltas.
+4. A `previewed` event stores the base plan revision, before/after meal snapshots,
+   nutrition delta, Shopping List delta, and proposed grocery state. The active
+   plan is unchanged.
+5. Confirmation uses optimistic concurrency: the event applies only if its base
+   revision still equals `meal_plans.revision`. Otherwise the API returns HTTP
+   409 and requires a new preview.
+6. One transaction applies the target change, replaces derived grocery rows,
+   increments the revision, and marks the event `applied`. Completed nutrition
+   remains historical and completed or locked meals are never replaced.
+7. Nuxt reloads the authoritative dashboard and displays the persistent event
+   history so the reason and effect of each revision remain explainable.

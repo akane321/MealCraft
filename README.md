@@ -3,11 +3,14 @@
 MealCraft is a constraint-aware weekly dietary planning application developed for
 DSS5105 Data Science Projects in Practice.
 
-## MVP Goal
+## Product Goal and Minimum Baseline
+
+MealCraft targets a polished, evidence-backed final product. The MVP is the minimum acceptance baseline, not a scope or quality ceiling. Once a capability meets the baseline, development continues toward stronger user value, reliability, usability, evaluation evidence, and engineering quality according to priority, risk, and available time.
 
 The system accepts user dietary constraints, generates a seven-day meal plan,
-maps required ingredients to FairPrice products, produces a grocery list, and
-visualizes planned and completed MealCraft nutrition through a dashboard.
+maps required ingredients to FairPrice products, produces a grocery list,
+supports previewed event-driven plan adjustments, and visualizes planned and
+completed MealCraft nutrition through a dashboard.
 
 ## Technology Stack
 
@@ -26,9 +29,13 @@ visualizes planned and completed MealCraft nutrition through a dashboard.
 
 - `backend/`: backend API and business logic
 - `frontend/`: Nuxt frontend application
-- `data/fixtures/`: stable development fixtures
+- `data/ingredients/` and `data/recipes/`: validated reference catalog
+- `data/fixtures/`: stable FairPrice-shaped products
+- `data/evaluation/`: repeatable planning scenarios
 - `docs/`: architecture, MVP boundary, and API contracts
 - `.github/workflows/`: continuous integration
+- `AGENTS.md`: cross-agent work protocol and private shared-memory bootstrap
+- `docs/memory-bootstrap.md`: cross-device setup and daily memory workflow
 
 ## Current Status
 
@@ -49,6 +56,24 @@ conversation and its structured constraint state, asks targeted clarification
 questions, and invokes the deterministic weekly planner only after confirmation.
 It runs without an API key in reproducible fixture mode; OpenAI parsing is an
 explicit optional configuration.
+The dynamic-replanning slice adds revision-safe previews for meal replacement,
+cancellation, locking, and unavailable ingredients. Confirmed changes update
+only the target meal and its derived shopping demand, while an event trail keeps
+the before/after decision auditable.
+The agent-replanning slice closes the interaction loop: users can request one
+change in English or Chinese inside the existing Assistant conversation, answer
+a focused clarification when needed, inspect recipe, nutrition, Shopping List,
+and price deltas, then confirm or discard the persistent preview. The Agent
+delegates every calculation and mutation to the deterministic replanning engine.
+The data-quality slice expands the validated catalog to 30 recipes and 34
+normalized ingredients, provides complete fixture product mappings, imports the
+catalog idempotently at startup, and gates changes through 20 end-to-end planning
+scenarios with machine-readable and human-readable reports.
+The household-profile slice persists member-level servings and safety
+constraints together with shared budget, time, nutrition, pricing, and pantry
+defaults. Every edit creates an immutable version. Plans generated from a
+profile record the exact version and a replacement plan explains which
+constraint groups changed.
 
 ## Quick Start
 
@@ -57,9 +82,13 @@ cp .env.example .env
 docker compose up --build --detach
 ```
 
+The backend validates and imports the reference catalog after migrations, so a
+fresh environment and an existing environment converge on the same records.
+
 - Backend API: <http://localhost:8000>
 - Frontend: <http://localhost:3000>
 - Planning assistant: <http://localhost:3000/assistant>
+- Household profile: <http://localhost:3000/profile>
 - Recipe catalog: <http://localhost:3000/recipes>
 - Constraint matching: <http://localhost:3000/plan>
 - Seven-day planning: <http://localhost:3000/weekly-plan>
@@ -67,3 +96,12 @@ docker compose up --build --detach
 - FairPrice product search: <http://localhost:3000/products>
 - Swagger documentation: <http://localhost:8000/docs>
 - Health check: <http://localhost:8000/api/health>
+
+## Shared Project Memory
+
+Approved team members use the private `MealCraft-Knowledge` repository as the
+versioned source for project decisions, course requirements, current state,
+risks, and task history. Read [docs/memory-bootstrap.md](docs/memory-bootstrap.md)
+before the first material contribution. The private repository is intentionally
+kept separate from this public source repository and is never required to run
+the application.

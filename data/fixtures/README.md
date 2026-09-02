@@ -7,5 +7,12 @@ Fixture files:
 
 - `fairprice-products.json`: stable FairPrice-shaped products used for deterministic development and tests.
 
-Recipe records are currently seeded through the backend database migration
-workflow rather than duplicated as JSON fixtures.
+Reference data is deliberately separated from database migrations:
+
+- `../ingredients/ingredients.json`: normalized ingredient vocabulary and allergens.
+- `../recipes/recipes.json`: complete recipe, nutrition, ingredient, and step records.
+- `../evaluation/scenarios.json`: representative feasible and infeasible user requests.
+
+The startup importer validates cross-file references and performs an idempotent
+upsert. Fixture prices are reproducible test inputs; the application still
+supports an explicit live FairPrice lookup mode.

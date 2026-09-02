@@ -9,7 +9,7 @@ from app.agent.parser import (
     OpenAIConstraintParser,
     RuleBasedConstraintParser,
 )
-from app.api.routes.meal_plans import get_meal_plan_service
+from app.api.routes.meal_plans import get_meal_plan_service, get_replanning_service
 from app.core.config import Settings, get_settings
 from app.db.session import get_db_session
 from app.planning.weekly_planner import WeeklyPlanSelectionError
@@ -17,6 +17,7 @@ from app.repositories.agent import AgentSessionRepository
 from app.schemas.agent import (
     AgentConfirmationResponse,
     AgentMessageInput,
+    AgentReplanConfirmationResponse,
     AgentSessionCollectionResponse,
     AgentSessionResponse,
 )
@@ -24,6 +25,10 @@ from app.services.agent import (
     AgentSessionNotFoundError,
     AgentSessionNotReadyError,
     AgentSessionService,
+)
+from app.services.replanning import (
+    MealPlanReplanConflictError,
+    MealPlanReplanNotFoundError,
 )
 
 router = APIRouter(prefix="/agent/sessions", tags=["planning agent"])
@@ -54,6 +59,7 @@ def get_agent_service(
         repository=AgentSessionRepository(database),
         parser=parser,
         meal_plan_service=get_meal_plan_service(database),
+        replanning_service=get_replanning_service(database),
         max_history_messages=settings.agent_max_history_messages,
     )
 
@@ -112,3 +118,31 @@ def confirm_agent_session(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
     except WeeklyPlanSelectionError as error:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
+
+
+@router.post("/{session_id}/replan/confirm", response_model=AgentReplanConfirmationResponse)
+def confirm_agent_replan(
+    session_id: int,
+    service: AgentServiceDependency,
+) -> AgentReplanConfirmationResponse:
+    try:
+        return service.confirm_replan(session_id)
+    except AgentSessionNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
+    except MealPlanReplanNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+    except (AgentSessionNotReadyError, MealPlanReplanConflictError) as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+
+
+@router.post("/{session_id}/replan/discard", response_model=AgentSessionResponse)
+def discard_agent_replan(
+    session_id: int,
+    service: AgentServiceDependency,
+) -> AgentSessionResponse:
+    try:
+        return service.discard_replan(session_id)
+    except AgentSessionNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
+    except AgentSessionNotReadyError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error

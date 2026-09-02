@@ -1,4 +1,5 @@
 import type { WeeklyMealPlan, WeeklyMealPlanRequest } from "~/types/meal-plan";
+import type { HouseholdProfilePlanRequest, HouseholdProfilePlanResult } from "~/types/household";
 
 export function useWeeklyMealPlan() {
   const config = useRuntimeConfig();
@@ -24,5 +25,24 @@ export function useWeeklyMealPlan() {
     }
   }
 
-  return { errorMessage, generate, isGenerating, result };
+  async function generateFromProfile(profileId: number, payload: HouseholdProfilePlanRequest) {
+    isGenerating.value = true;
+    errorMessage.value = null;
+    try {
+      const response = await $fetch<HouseholdProfilePlanResult>(
+        `${config.public.apiBase}/api/household-profiles/${profileId}/plans`,
+        { method: "POST", body: payload },
+      );
+      result.value = response.plan;
+    }
+    catch (error) {
+      const detail = (error as { data?: { detail?: string } }).data?.detail;
+      errorMessage.value = detail || "The weekly plan could not be generated from the saved profile.";
+    }
+    finally {
+      isGenerating.value = false;
+    }
+  }
+
+  return { errorMessage, generate, generateFromProfile, isGenerating, result };
 }

@@ -1,5 +1,6 @@
 import type {
   AgentConfirmation,
+  AgentReplanConfirmation,
   AgentSession,
   AgentSessionCollection,
 } from "~/types/agent";
@@ -57,6 +58,28 @@ export function useMealCraftAgent() {
     }
   }
 
+  async function confirmReplan() {
+    if (!session.value) return null;
+    const result = await run(() => $fetch<AgentReplanConfirmation>(
+      `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/replan/confirm`,
+      { method: "POST" },
+    ));
+    if (result) {
+      session.value = result.session;
+      generatedPlan.value = result.plan;
+    }
+    return result;
+  }
+
+  async function discardReplan() {
+    if (!session.value) return;
+    const result = await run(() => $fetch<AgentSession>(
+      `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/replan/discard`,
+      { method: "POST" },
+    ));
+    if (result) session.value = result;
+  }
+
   async function restoreLatest() {
     const result = await run(() => $fetch<AgentSessionCollection>(
       `${config.public.apiBase}/api/agent/sessions`,
@@ -73,7 +96,9 @@ export function useMealCraftAgent() {
 
   return {
     confirm,
+    confirmReplan,
     create,
+    discardReplan,
     errorMessage,
     generatedPlan,
     isLoading,

@@ -1,13 +1,15 @@
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.schemas.product import GroceryLineEstimate, PricingMode
 from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
 from app.schemas.recommendation import NutritionTargets, RecipeRecommendationRequest
 
 MealPlanEntryStatus = Literal["planned", "completed", "skipped"]
+MealPlanEventType = Literal["REPLACE_MEAL", "CANCEL_MEAL", "LOCK_MEAL", "ITEM_UNAVAILABLE"]
+MealPlanEventStatus = Literal["previewed", "applied"]
 
 
 class WeeklyMealPlanRequest(RecipeRecommendationRequest):
@@ -26,6 +28,7 @@ class WeeklyPlanDayResponse(BaseModel):
     consumed_cost_sgd: float
     purchase_cost_sgd: float
     status: MealPlanEntryStatus
+    is_locked: bool
     consumed_at: datetime | None
 
 
@@ -56,6 +59,10 @@ class WeeklyGroceryEstimateResponse(BaseModel):
 
 class WeeklyMealPlanResponse(BaseModel):
     id: int
+    revision: int
+    household_profile_id: int | None
+    household_profile_version: int | None
+    replaces_plan_id: int | None
     start_date: date
     end_date: date
     day_count: int
@@ -69,6 +76,10 @@ class WeeklyMealPlanResponse(BaseModel):
 
 class WeeklyMealPlanListItem(BaseModel):
     id: int
+    revision: int
+    household_profile_id: int | None
+    household_profile_version: int | None
+    replaces_plan_id: int | None
     start_date: date
     end_date: date
     household_size: int
@@ -94,12 +105,14 @@ class NutritionDashboardDayResponse(BaseModel):
     planned_date: date
     recipe: RecipeListItemResponse
     status: MealPlanEntryStatus
+    is_locked: bool
     consumed_at: datetime | None
     nutrition_per_person: RecipeNutritionResponse
 
 
 class WeeklyNutritionDashboardResponse(BaseModel):
     plan_id: int
+    revision: int
     start_date: date
     end_date: date
     household_size: int
@@ -109,3 +122,86 @@ class WeeklyNutritionDashboardResponse(BaseModel):
     planned_nutrition_per_person: WeeklyNutritionSummaryResponse
     completed_nutrition_per_person: WeeklyNutritionSummaryResponse
     days: list[NutritionDashboardDayResponse]
+
+
+class MealPlanReplanPreviewRequest(BaseModel):
+    event_type: MealPlanEventType
+    entry_id: int = Field(gt=0)
+    reason: str | None = Field(default=None, max_length=500)
+    unavailable_ingredient: str | None = Field(default=None, max_length=160)
+
+    @field_validator("reason")
+    @classmethod
+    def normalize_reason(cls, value: str | None) -> str | None:
+        return value.strip() if value and value.strip() else None
+
+    @field_validator("unavailable_ingredient")
+    @classmethod
+    def normalize_unavailable_ingredient(cls, value: str | None) -> str | None:
+        return value.strip().lower().replace(" ", "_") if value and value.strip() else None
+
+    @model_validator(mode="after")
+    def require_unavailable_ingredient(self) -> "MealPlanReplanPreviewRequest":
+        if self.event_type == "ITEM_UNAVAILABLE" and self.unavailable_ingredient is None:
+            raise ValueError("unavailable_ingredient is required for ITEM_UNAVAILABLE")
+        if self.event_type != "ITEM_UNAVAILABLE" and self.unavailable_ingredient is not None:
+            raise ValueError("unavailable_ingredient is only valid for ITEM_UNAVAILABLE")
+        return self
+
+
+class MealPlanEntrySnapshot(BaseModel):
+    entry_id: int
+    recipe_id: int
+    recipe_slug: str
+    recipe_title: str
+    status: MealPlanEntryStatus
+    is_locked: bool
+    recommendation_score: float
+
+
+class MealPlanNutritionDelta(BaseModel):
+    calories_kcal: float
+    protein_g: float
+    carbohydrate_g: float
+    fat_g: float
+    sodium_mg: float
+    sugar_g: float
+
+
+class MealPlanGroceryDeltaLine(BaseModel):
+    ingredient_name: str
+    ingredient_display_name: str
+    change: Literal["added", "removed", "updated"]
+    before_required_quantity: float | None
+    after_required_quantity: float | None
+    unit: str | None
+    before_packages_required: int
+    after_packages_required: int
+    purchase_cost_delta_sgd: float
+
+
+class MealPlanReplanEventResponse(BaseModel):
+    id: int
+    plan_id: int
+    base_revision: int
+    applied_revision: int | None
+    event_type: MealPlanEventType
+    status: MealPlanEventStatus
+    reason: str | None
+    unavailable_ingredient: str | None
+    before_entry: MealPlanEntrySnapshot
+    after_entry: MealPlanEntrySnapshot
+    nutrition_delta: MealPlanNutritionDelta
+    grocery_delta: list[MealPlanGroceryDeltaLine]
+    purchase_total_delta_sgd: float
+    created_at: datetime
+    applied_at: datetime | None
+
+
+class MealPlanReplanEventCollectionResponse(BaseModel):
+    items: list[MealPlanReplanEventResponse]
+
+
+class MealPlanReplanConfirmationResponse(BaseModel):
+    event: MealPlanReplanEventResponse
+    plan: WeeklyMealPlanResponse

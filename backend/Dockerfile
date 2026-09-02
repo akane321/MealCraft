@@ -14,7 +14,7 @@ COPY backend/app ./app
 COPY backend/alembic ./alembic
 COPY backend/alembic.ini ./alembic.ini
 COPY backend/tests ./tests
-COPY data/fixtures ./data/fixtures
+COPY data ./data
 
 EXPOSE 8000
 

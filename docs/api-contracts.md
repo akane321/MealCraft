@@ -11,6 +11,8 @@ The system will define the following shared objects:
 - ShoppingList
 - AgentSession
 - AgentMessage
+- HouseholdProfile
+- HouseholdProfileVersion
 
 Available endpoints:
 
@@ -25,11 +27,46 @@ Available endpoints:
 - GET /api/plans/{plan_id}
 - PATCH /api/plans/{plan_id}/entries/{entry_id}
 - GET /api/plans/{plan_id}/dashboard
+- POST /api/plans/{plan_id}/replan/preview
+- POST /api/plans/{plan_id}/replan/{event_id}/confirm
+- GET /api/plans/{plan_id}/events
 - POST /api/agent/sessions
 - GET /api/agent/sessions
 - GET /api/agent/sessions/{session_id}
 - POST /api/agent/sessions/{session_id}/messages
 - POST /api/agent/sessions/{session_id}/confirm
+- POST /api/agent/sessions/{session_id}/replan/confirm
+- POST /api/agent/sessions/{session_id}/replan/discard
+- POST /api/household-profiles
+- GET /api/household-profiles/current
+- GET /api/household-profiles/{profile_id}
+- PUT /api/household-profiles/{profile_id}
+- GET /api/household-profiles/{profile_id}/versions
+- POST /api/household-profiles/{profile_id}/plans
+- POST /api/household-profiles/{profile_id}/plans/{plan_id}/replan
+
+## Household Profiles
+
+The current implementation maintains one household profile. Each member supplies a name, one to
+three planned servings, allergens, prohibited ingredient IDs, and dietary
+requirements. The backend deterministically sums servings and merges every
+member's safety constraints into the shared-plan hard constraints.
+
+Shared defaults include cooking time, per-meal and weekly budgets, general
+health preferences, user-entered nutrition targets, an optional sodium target,
+available ingredients, and fixture/live pricing mode. Creating a profile writes
+version 1. `PUT` requires `expected_version`; a successful edit appends an
+immutable version, while a stale edit returns HTTP 409.
+
+`POST /api/household-profiles/{profile_id}/plans` compiles a selected profile
+version into the existing `WeeklyMealPlanRequest`. It accepts temporary
+overrides for non-safety planning defaults but never removes member allergens,
+prohibited ingredients, or dietary requirements. The persisted plan records
+the profile ID, profile version, and complete effective-constraint snapshot.
+
+The replan endpoint leaves the original plan unchanged and generates a linked
+replacement from the requested profile version. Its response contains the old
+plan ID and a deterministic, field-level list of changed constraints.
 
 ## Recipe Catalog
 
@@ -90,7 +127,7 @@ never silently misrepresented.
 
 `POST /api/plans/generate` extends the recipe-constraint request with:
 
-- `start_date` and a fixed MVP `day_count` of 7
+- `start_date` and a currently fixed `day_count` of 7
 - an optional `weekly_budget_sgd`
 - the existing optional per-meal budget and fixture/live pricing mode
 
@@ -118,8 +155,28 @@ meal record or duplicate nutrition contribution is created.
 - the user-entered nutrition targets stored with the plan
 
 Only completed dishes from the selected MealCraft plan contribute to completed
-nutrition. Plan-external foods are outside the MVP and cannot be entered through
+nutrition. Plan-external foods are outside the current baseline and cannot be entered through
 this contract.
+
+## Event-driven Replanning
+
+`POST /api/plans/{plan_id}/replan/preview` accepts an `entry_id`, optional
+`reason`, and one event type: `REPLACE_MEAL`, `CANCEL_MEAL`, `LOCK_MEAL`, or
+`ITEM_UNAVAILABLE`. The unavailable-item event additionally requires a normalized
+`unavailable_ingredient`.
+
+The preview does not modify the active plan. It persists the base revision,
+before/after meal snapshots, nutrition delta, package-level Shopping List delta,
+and checkout-cost delta. Completed and locked entries are rejected.
+
+`POST /api/plans/{plan_id}/replan/{event_id}/confirm` applies a preview only when
+its base revision still matches the active plan. Confirmation updates the target
+entry, recalculates the consolidated grocery rows, increments the plan revision,
+and marks the event as applied. A stale preview returns HTTP 409 instead of
+overwriting a newer decision.
+
+`GET /api/plans/{plan_id}/events` returns the persistent audit trail in reverse
+chronological order.
 
 ## Persistent Planning Assistant
 
@@ -142,3 +199,15 @@ the latest conversation after a reload or container restart.
 The default parser is deterministic fixture mode. Optional OpenAI mode uses the
 same Pydantic extraction contract. Neither parser makes medical recommendations,
 decides allergen safety, or bypasses deterministic planning rules.
+
+After a session has produced a plan, the messages endpoint switches to the
+replanning loop. It accepts one user-triggered meal event at a time, resolves a
+day or date and an unavailable ingredient when required, and asks one focused
+question when the request is incomplete. A complete request calls the existing
+deterministic replanning service and exposes the persisted preview as
+`pending_replan`; it does not mutate the plan.
+
+`POST /api/agent/sessions/{session_id}/replan/confirm` applies the linked preview
+with the same revision check as the plan API. `discard` clears the session link
+and draft without modifying the plan. The draft and event link survive reloads
+and container restarts.
