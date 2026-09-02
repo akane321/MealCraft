@@ -17,6 +17,9 @@ htmlcov/
 
 # Node and Nuxt
 node_modules/
+.playwright/
+playwright-report/
+test-results/
 .nuxt/
 .output/
 dist/

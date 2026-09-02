@@ -1,0 +1,5701 @@
+{
+  "schema_version": "1.0",
+  "protocol": "docs/evaluation/protocol-v1.md",
+  "developer_gate_passed": true,
+  "api_evaluation": {
+    "provider": "fixture",
+    "live_api_used": false,
+    "status": "reserved; not used"
+  },
+  "comparison": {
+    "expectation_rate_delta": 0.0,
+    "mean_distinct_recipes_delta": 5.1389,
+    "consecutive_repetition_reduction": 216,
+    "failure_case_reduction": 36
+  },
+  "developer_planning": {
+    "schema_version": "2.0",
+    "system": "mealcraft-planner",
+    "dataset": {
+      "path": "data/evaluation/dev/planning-v1.json",
+      "sha256": "ba128503501c09bcdcb1bcc938600dd228800f638af1baddb731595d03f47627",
+      "split": "dev"
+    },
+    "passed": true,
+    "gates_enforced": true,
+    "metrics": {
+      "catalog_recipe_count": 30,
+      "catalog_ingredient_count": 34,
+      "scenario_count": 20,
+      "scenario_expectation_rate": 1.0,
+      "feasible_scenario_success_rate": 1.0,
+      "hard_constraint_violation_count": 0,
+      "determinism_rate": 1.0,
+      "consecutive_repetition_count": 0,
+      "mean_distinct_recipes": 6.2222,
+      "fixture_mapping_count": 34,
+      "used_ingredient_count": 34,
+      "fixture_mapping_coverage": 1.0,
+      "complete_grocery_rate": 1.0,
+      "failure_case_count": 0
+    },
+    "thresholds": {
+      "catalog_recipe_count": true,
+      "scenario_expectation_rate": true,
+      "feasible_scenario_success_rate": true,
+      "hard_constraint_violation_count": true,
+      "determinism_rate": true,
+      "consecutive_repetition_count": true,
+      "fixture_mapping_coverage": true,
+      "complete_grocery_rate": true
+    },
+    "category_metrics": {
+      "allergen": {
+        "scenario_count": 4,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "basic": {
+        "scenario_count": 1,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "budget": {
+        "scenario_count": 1,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "dietary": {
+        "scenario_count": 4,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "exclusion": {
+        "scenario_count": 1,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "infeasible": {
+        "scenario_count": 2,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "nutrition": {
+        "scenario_count": 2,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "pantry": {
+        "scenario_count": 2,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "preference": {
+        "scenario_count": 2,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "time": {
+        "scenario_count": 1,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      }
+    },
+    "failure_cases": [],
+    "scenarios": [
+      {
+        "id": "dev-001",
+        "name": "baseline",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-002",
+        "name": "vegetarian",
+        "category": "dietary",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-003",
+        "name": "vegan",
+        "category": "dietary",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "savoury-vegan-oats",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta",
+          "chickpea-tomato-stew",
+          "black-bean-quinoa-skillet",
+          "savoury-vegan-oats",
+          "vegetable-rice-skillet"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-004",
+        "name": "gluten-free",
+        "category": "dietary",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "chickpea-tomato-stew",
+          "black-bean-quinoa-skillet",
+          "tofu-brown-rice-stir-fry"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-005",
+        "name": "dairy-free",
+        "category": "dietary",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta",
+          "tuna-spinach-pasta"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-006",
+        "name": "soy-allergy",
+        "category": "allergen",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-007",
+        "name": "fish-allergy",
+        "category": "allergen",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-008",
+        "name": "egg-allergy",
+        "category": "allergen",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "yogurt-oat-bowl",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta",
+          "tuna-spinach-pasta"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-009",
+        "name": "sesame-allergy",
+        "category": "allergen",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-010",
+        "name": "exclude-chicken",
+        "category": "exclusion",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-011",
+        "name": "sodium-hard-limit",
+        "category": "nutrition",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta",
+          "egg-tomato-quinoa"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-012",
+        "name": "quick-meals",
+        "category": "time",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 3,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-013",
+        "name": "lower-calorie-soft-preference",
+        "category": "preference",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-014",
+        "name": "low-sugar-soft-preference",
+        "category": "preference",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta",
+          "tuna-spinach-pasta"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-015",
+        "name": "nutrition-targets",
+        "category": "nutrition",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "lemon-herb-chicken-rice-bowl",
+          "egg-vegetable-rice",
+          "chicken-quinoa-pepper",
+          "tofu-mushroom-soba",
+          "tofu-brown-rice-stir-fry",
+          "tuna-tomato-pasta",
+          "tuna-cucumber-rice-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-016",
+        "name": "known-pantry-quantity",
+        "category": "pantry",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "tofu-brown-rice-stir-fry",
+          "chicken-broccoli-rice",
+          "vegetable-rice-skillet",
+          "black-bean-sweet-potato-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-017",
+        "name": "unknown-pantry-quantity",
+        "category": "pantry",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "chickpea-quinoa-salad",
+          "chickpea-tomato-stew",
+          "tofu-chickpea-bowl",
+          "chickpea-sweet-potato-curry",
+          "spinach-oat-egg-cakes",
+          "savoury-vegan-oats"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-018",
+        "name": "per-meal-budget",
+        "category": "budget",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-019",
+        "name": "impossible-five-minute-limit",
+        "category": "infeasible",
+        "difficulty": "edge",
+        "system": "mealcraft-planner",
+        "expected_feasible": false,
+        "actual_feasible": false,
+        "selected_slugs": [],
+        "distinct_recipe_count": 0,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": null,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-020",
+        "name": "impossible-vegan-ten-minute-limit",
+        "category": "infeasible",
+        "difficulty": "edge",
+        "system": "mealcraft-planner",
+        "expected_feasible": false,
+        "actual_feasible": false,
+        "selected_slugs": [],
+        "distinct_recipe_count": 0,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": null,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      }
+    ]
+  },
+  "heldout_greedy_baseline": {
+    "schema_version": "2.0",
+    "system": "greedy-baseline",
+    "dataset": {
+      "path": "data/evaluation/heldout/planning-v1.json",
+      "sha256": "95d13610fbd537c48153d38dec16bd4eb34a27d21336e66c4f67f2b8cc8db037",
+      "split": "heldout"
+    },
+    "passed": null,
+    "gates_enforced": false,
+    "metrics": {
+      "catalog_recipe_count": 30,
+      "catalog_ingredient_count": 34,
+      "scenario_count": 40,
+      "scenario_expectation_rate": 1.0,
+      "feasible_scenario_success_rate": 1.0,
+      "hard_constraint_violation_count": 0,
+      "determinism_rate": 1.0,
+      "consecutive_repetition_count": 216,
+      "mean_distinct_recipes": 1.0,
+      "fixture_mapping_count": 34,
+      "used_ingredient_count": 34,
+      "fixture_mapping_coverage": 1.0,
+      "complete_grocery_rate": 1.0,
+      "failure_case_count": 36
+    },
+    "thresholds": {
+      "catalog_recipe_count": true,
+      "scenario_expectation_rate": true,
+      "feasible_scenario_success_rate": true,
+      "hard_constraint_violation_count": true,
+      "determinism_rate": true,
+      "consecutive_repetition_count": false,
+      "fixture_mapping_coverage": true,
+      "complete_grocery_rate": true
+    },
+    "category_metrics": {
+      "basic": {
+        "scenario_count": 5,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 5
+      },
+      "budget-time": {
+        "scenario_count": 6,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 6
+      },
+      "combined-constraints": {
+        "scenario_count": 8,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 8
+      },
+      "hard-restriction": {
+        "scenario_count": 9,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 9
+      },
+      "infeasible-conflict": {
+        "scenario_count": 4,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "nutrition-preference": {
+        "scenario_count": 5,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 5
+      },
+      "pantry-grocery": {
+        "scenario_count": 3,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 3
+      }
+    },
+    "failure_cases": [
+      {
+        "id": "hold-001",
+        "name": "three-person default week",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-002",
+        "name": "single-person default week",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-003",
+        "name": "large household default week",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-004",
+        "name": "forty-five-minute meals",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-005",
+        "name": "fixture pricing explicit",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-006",
+        "name": "peanut allergy",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-007",
+        "name": "dairy allergy",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-008",
+        "name": "gluten allergy",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-009",
+        "name": "exclude tofu",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-010",
+        "name": "exclude tomato",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-011",
+        "name": "strict sodium seven hundred",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-012",
+        "name": "strict sodium four hundred",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-013",
+        "name": "vegetarian household",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-014",
+        "name": "gluten-free household",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-015",
+        "name": "vegetarian and dairy-free",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-016",
+        "name": "vegan low sodium",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-017",
+        "name": "quick vegetarian",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-018",
+        "name": "soy-free gluten-free",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-019",
+        "name": "dairy-free exclude chicken",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-020",
+        "name": "four people quick and low sodium",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-021",
+        "name": "vegetarian peanut allergy",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-022",
+        "name": "dairy and egg allergy",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-023",
+        "name": "ten dollar meal budget",
+        "category": "budget-time",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-024",
+        "name": "six dollar meal budget",
+        "category": "budget-time",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-025",
+        "name": "seventy dollar weekly budget",
+        "category": "budget-time",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": true,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-026",
+        "name": "forty dollar weekly budget",
+        "category": "budget-time",
+        "difficulty": "edge",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": false,
+        "failure_reasons": [
+          "consecutive_recipe_repetition",
+          "weekly_budget_exceeded"
+        ]
+      },
+      {
+        "id": "hold-027",
+        "name": "quick meal with weekly budget",
+        "category": "budget-time",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": true,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-028",
+        "name": "family per-meal budget",
+        "category": "budget-time",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": true,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-029",
+        "name": "calorie and protein targets",
+        "category": "nutrition-preference",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "ginger-salmon-soba",
+          "ginger-salmon-soba",
+          "ginger-salmon-soba",
+          "ginger-salmon-soba",
+          "ginger-salmon-soba",
+          "ginger-salmon-soba",
+          "ginger-salmon-soba"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-030",
+        "name": "balanced macro targets",
+        "category": "nutrition-preference",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "egg-tomato-quinoa",
+          "egg-tomato-quinoa",
+          "egg-tomato-quinoa",
+          "egg-tomato-quinoa",
+          "egg-tomato-quinoa",
+          "egg-tomato-quinoa",
+          "egg-tomato-quinoa"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-031",
+        "name": "lower calorie preference",
+        "category": "nutrition-preference",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-032",
+        "name": "low sugar and low sodium preferences",
+        "category": "nutrition-preference",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-033",
+        "name": "protein target with sodium ceiling",
+        "category": "nutrition-preference",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chicken-quinoa-pepper",
+          "chicken-quinoa-pepper",
+          "chicken-quinoa-pepper",
+          "chicken-quinoa-pepper",
+          "chicken-quinoa-pepper",
+          "chicken-quinoa-pepper",
+          "chicken-quinoa-pepper"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-034",
+        "name": "known rice pantry",
+        "category": "pantry-grocery",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "egg-vegetable-rice",
+          "egg-vegetable-rice",
+          "egg-vegetable-rice",
+          "egg-vegetable-rice",
+          "egg-vegetable-rice",
+          "egg-vegetable-rice",
+          "egg-vegetable-rice"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-035",
+        "name": "unknown tofu pantry",
+        "category": "pantry-grocery",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-036",
+        "name": "mixed known and unknown pantry",
+        "category": "pantry-grocery",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "hold-001",
+        "name": "three-person default week",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-002",
+        "name": "single-person default week",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-003",
+        "name": "large household default week",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-004",
+        "name": "forty-five-minute meals",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-005",
+        "name": "fixture pricing explicit",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-006",
+        "name": "peanut allergy",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-007",
+        "name": "dairy allergy",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-008",
+        "name": "gluten allergy",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-009",
+        "name": "exclude tofu",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-010",
+        "name": "exclude tomato",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-011",
+        "name": "strict sodium seven hundred",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-012",
+        "name": "strict sodium four hundred",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-013",
+        "name": "vegetarian household",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-014",
+        "name": "gluten-free household",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-015",
+        "name": "vegetarian and dairy-free",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-016",
+        "name": "vegan low sodium",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-017",
+        "name": "quick vegetarian",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-018",
+        "name": "soy-free gluten-free",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-019",
+        "name": "dairy-free exclude chicken",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-020",
+        "name": "four people quick and low sodium",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-021",
+        "name": "vegetarian peanut allergy",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-022",
+        "name": "dairy and egg allergy",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats",
+          "savoury-vegan-oats"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-023",
+        "name": "ten dollar meal budget",
+        "category": "budget-time",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-024",
+        "name": "six dollar meal budget",
+        "category": "budget-time",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-025",
+        "name": "seventy dollar weekly budget",
+        "category": "budget-time",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": true,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-026",
+        "name": "forty dollar weekly budget",
+        "category": "budget-time",
+        "difficulty": "edge",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": false,
+        "failure_reasons": [
+          "consecutive_recipe_repetition",
+          "weekly_budget_exceeded"
+        ]
+      },
+      {
+        "id": "hold-027",
+        "name": "quick meal with weekly budget",
+        "category": "budget-time",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": true,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-028",
+        "name": "family per-meal budget",
+        "category": "budget-time",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": true,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-029",
+        "name": "calorie and protein targets",
+        "category": "nutrition-preference",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "ginger-salmon-soba",
+          "ginger-salmon-soba",
+          "ginger-salmon-soba",
+          "ginger-salmon-soba",
+          "ginger-salmon-soba",
+          "ginger-salmon-soba",
+          "ginger-salmon-soba"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-030",
+        "name": "balanced macro targets",
+        "category": "nutrition-preference",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "egg-tomato-quinoa",
+          "egg-tomato-quinoa",
+          "egg-tomato-quinoa",
+          "egg-tomato-quinoa",
+          "egg-tomato-quinoa",
+          "egg-tomato-quinoa",
+          "egg-tomato-quinoa"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-031",
+        "name": "lower calorie preference",
+        "category": "nutrition-preference",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-032",
+        "name": "low sugar and low sodium preferences",
+        "category": "nutrition-preference",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-033",
+        "name": "protein target with sodium ceiling",
+        "category": "nutrition-preference",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chicken-quinoa-pepper",
+          "chicken-quinoa-pepper",
+          "chicken-quinoa-pepper",
+          "chicken-quinoa-pepper",
+          "chicken-quinoa-pepper",
+          "chicken-quinoa-pepper",
+          "chicken-quinoa-pepper"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-034",
+        "name": "known rice pantry",
+        "category": "pantry-grocery",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "egg-vegetable-rice",
+          "egg-vegetable-rice",
+          "egg-vegetable-rice",
+          "egg-vegetable-rice",
+          "egg-vegetable-rice",
+          "egg-vegetable-rice",
+          "egg-vegetable-rice"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-035",
+        "name": "unknown tofu pantry",
+        "category": "pantry-grocery",
+        "difficulty": "basic",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-036",
+        "name": "mixed known and unknown pantry",
+        "category": "pantry-grocery",
+        "difficulty": "combined",
+        "system": "greedy-baseline",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 1,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 6,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": [
+          "consecutive_recipe_repetition"
+        ]
+      },
+      {
+        "id": "hold-037",
+        "name": "five-minute hard limit",
+        "category": "infeasible-conflict",
+        "difficulty": "edge",
+        "system": "greedy-baseline",
+        "expected_feasible": false,
+        "actual_feasible": false,
+        "selected_slugs": [],
+        "distinct_recipe_count": 0,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": null,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-038",
+        "name": "vegan five-minute hard limit",
+        "category": "infeasible-conflict",
+        "difficulty": "edge",
+        "system": "greedy-baseline",
+        "expected_feasible": false,
+        "actual_feasible": false,
+        "selected_slugs": [],
+        "distinct_recipe_count": 0,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": null,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-039",
+        "name": "vegetarian dairy-free five-minute limit",
+        "category": "infeasible-conflict",
+        "difficulty": "edge",
+        "system": "greedy-baseline",
+        "expected_feasible": false,
+        "actual_feasible": false,
+        "selected_slugs": [],
+        "distinct_recipe_count": 0,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": null,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-040",
+        "name": "all major allergens and five-minute limit",
+        "category": "infeasible-conflict",
+        "difficulty": "edge",
+        "system": "greedy-baseline",
+        "expected_feasible": false,
+        "actual_feasible": false,
+        "selected_slugs": [],
+        "distinct_recipe_count": 0,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": null,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      }
+    ]
+  },
+  "heldout_mealcraft_planner": {
+    "schema_version": "2.0",
+    "system": "mealcraft-planner",
+    "dataset": {
+      "path": "data/evaluation/heldout/planning-v1.json",
+      "sha256": "95d13610fbd537c48153d38dec16bd4eb34a27d21336e66c4f67f2b8cc8db037",
+      "split": "heldout"
+    },
+    "passed": null,
+    "gates_enforced": false,
+    "metrics": {
+      "catalog_recipe_count": 30,
+      "catalog_ingredient_count": 34,
+      "scenario_count": 40,
+      "scenario_expectation_rate": 1.0,
+      "feasible_scenario_success_rate": 1.0,
+      "hard_constraint_violation_count": 0,
+      "determinism_rate": 1.0,
+      "consecutive_repetition_count": 0,
+      "mean_distinct_recipes": 6.1389,
+      "fixture_mapping_count": 34,
+      "used_ingredient_count": 34,
+      "fixture_mapping_coverage": 1.0,
+      "complete_grocery_rate": 1.0,
+      "failure_case_count": 0
+    },
+    "thresholds": {
+      "catalog_recipe_count": true,
+      "scenario_expectation_rate": true,
+      "feasible_scenario_success_rate": true,
+      "hard_constraint_violation_count": true,
+      "determinism_rate": true,
+      "consecutive_repetition_count": true,
+      "fixture_mapping_coverage": true,
+      "complete_grocery_rate": true
+    },
+    "category_metrics": {
+      "basic": {
+        "scenario_count": 5,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "budget-time": {
+        "scenario_count": 6,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "combined-constraints": {
+        "scenario_count": 8,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "hard-restriction": {
+        "scenario_count": 9,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "infeasible-conflict": {
+        "scenario_count": 4,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "nutrition-preference": {
+        "scenario_count": 5,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      },
+      "pantry-grocery": {
+        "scenario_count": 3,
+        "expectation_rate": 1.0,
+        "hard_constraint_violation_count": 0,
+        "failure_case_count": 0
+      }
+    },
+    "failure_cases": [],
+    "scenarios": [
+      {
+        "id": "hold-001",
+        "name": "three-person default week",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-002",
+        "name": "single-person default week",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-003",
+        "name": "large household default week",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-004",
+        "name": "forty-five-minute meals",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "yogurt-oat-bowl",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl"
+        ],
+        "distinct_recipe_count": 5,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-005",
+        "name": "fixture pricing explicit",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-006",
+        "name": "peanut allergy",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-007",
+        "name": "dairy allergy",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta",
+          "tuna-spinach-pasta"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-008",
+        "name": "gluten allergy",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "chickpea-tomato-stew",
+          "black-bean-quinoa-skillet",
+          "tofu-brown-rice-stir-fry"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-009",
+        "name": "exclude tofu",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-010",
+        "name": "exclude tomato",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-011",
+        "name": "strict sodium seven hundred",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-012",
+        "name": "strict sodium four hundred",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "chickpea-quinoa-salad",
+          "yogurt-oat-bowl",
+          "mushroom-spinach-pasta",
+          "yogurt-oat-bowl",
+          "vegetable-rice-skillet",
+          "salmon-sweet-potato-tray"
+        ],
+        "distinct_recipe_count": 5,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-013",
+        "name": "vegetarian household",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-014",
+        "name": "gluten-free household",
+        "category": "hard-restriction",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "chickpea-tomato-stew",
+          "black-bean-quinoa-skillet",
+          "tofu-brown-rice-stir-fry"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-015",
+        "name": "vegetarian and dairy-free",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta",
+          "egg-tomato-quinoa",
+          "chickpea-tomato-stew"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-016",
+        "name": "vegan low sodium",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "savoury-vegan-oats",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta",
+          "chickpea-tomato-stew",
+          "black-bean-quinoa-skillet",
+          "vegetable-rice-skillet",
+          "chickpea-sweet-potato-curry"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-017",
+        "name": "quick vegetarian",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "yogurt-oat-bowl",
+          "egg-vegetable-rice",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 4,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-018",
+        "name": "soy-free gluten-free",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "chickpea-tomato-stew",
+          "black-bean-quinoa-skillet",
+          "chicken-broccoli-rice"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-019",
+        "name": "dairy-free exclude chicken",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta",
+          "tuna-spinach-pasta"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-020",
+        "name": "four people quick and low sodium",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "yogurt-oat-bowl",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl"
+        ],
+        "distinct_recipe_count": 5,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-021",
+        "name": "vegetarian peanut allergy",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-022",
+        "name": "dairy and egg allergy",
+        "category": "combined-constraints",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "savoury-vegan-oats",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta",
+          "tuna-spinach-pasta",
+          "tuna-tomato-pasta",
+          "chickpea-tomato-stew"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-023",
+        "name": "ten dollar meal budget",
+        "category": "budget-time",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-024",
+        "name": "six dollar meal budget",
+        "category": "budget-time",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "egg-vegetable-rice",
+          "chickpea-tomato-stew",
+          "black-bean-quinoa-skillet",
+          "tofu-brown-rice-stir-fry",
+          "spinach-oat-egg-cakes",
+          "tofu-chickpea-bowl"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-025",
+        "name": "seventy dollar weekly budget",
+        "category": "budget-time",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": true,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-026",
+        "name": "forty dollar weekly budget",
+        "category": "budget-time",
+        "difficulty": "edge",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "chickpea-tomato-stew",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 5,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": true,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-027",
+        "name": "quick meal with weekly budget",
+        "category": "budget-time",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "yogurt-oat-bowl",
+          "egg-vegetable-rice",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 4,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": true,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-028",
+        "name": "family per-meal budget",
+        "category": "budget-time",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": true,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-029",
+        "name": "calorie and protein targets",
+        "category": "nutrition-preference",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "ginger-salmon-soba",
+          "salmon-quinoa-bowl",
+          "salmon-sweet-potato-tray",
+          "tuna-spinach-pasta",
+          "tuna-tomato-pasta",
+          "chicken-zucchini-pasta",
+          "chicken-broccoli-rice"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-030",
+        "name": "balanced macro targets",
+        "category": "nutrition-preference",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "egg-tomato-quinoa",
+          "tofu-brown-rice-stir-fry",
+          "tofu-mushroom-soba",
+          "tofu-vegetable-soba",
+          "spinach-oat-egg-cakes",
+          "egg-vegetable-rice",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-031",
+        "name": "lower calorie preference",
+        "category": "nutrition-preference",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "spinach-oat-egg-cakes",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-032",
+        "name": "low sugar and low sodium preferences",
+        "category": "nutrition-preference",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "chickpea-quinoa-salad",
+          "mushroom-spinach-pasta"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-033",
+        "name": "protein target with sodium ceiling",
+        "category": "nutrition-preference",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chicken-quinoa-pepper",
+          "chicken-broccoli-rice",
+          "lemon-herb-chicken-rice-bowl",
+          "chicken-zucchini-pasta",
+          "chicken-quinoa-pepper",
+          "salmon-quinoa-bowl",
+          "chicken-broccoli-rice"
+        ],
+        "distinct_recipe_count": 5,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-034",
+        "name": "known rice pantry",
+        "category": "pantry-grocery",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "egg-vegetable-rice",
+          "tuna-cucumber-rice-bowl",
+          "tofu-brown-rice-stir-fry",
+          "chicken-broccoli-rice",
+          "vegetable-rice-skillet",
+          "black-bean-sweet-potato-bowl",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-035",
+        "name": "unknown tofu pantry",
+        "category": "pantry-grocery",
+        "difficulty": "basic",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "tofu-brown-rice-stir-fry",
+          "tofu-mushroom-soba",
+          "tofu-chickpea-bowl",
+          "tofu-vegetable-soba",
+          "spinach-oat-egg-cakes",
+          "savoury-vegan-oats"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-036",
+        "name": "mixed known and unknown pantry",
+        "category": "pantry-grocery",
+        "difficulty": "combined",
+        "system": "mealcraft-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "yogurt-oat-bowl",
+          "chicken-quinoa-pepper",
+          "lemon-herb-chicken-rice-bowl",
+          "tuna-cucumber-rice-bowl",
+          "tuna-spinach-pasta",
+          "yogurt-oat-bowl",
+          "chickpea-quinoa-salad"
+        ],
+        "distinct_recipe_count": 6,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-037",
+        "name": "five-minute hard limit",
+        "category": "infeasible-conflict",
+        "difficulty": "edge",
+        "system": "mealcraft-planner",
+        "expected_feasible": false,
+        "actual_feasible": false,
+        "selected_slugs": [],
+        "distinct_recipe_count": 0,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": null,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-038",
+        "name": "vegan five-minute hard limit",
+        "category": "infeasible-conflict",
+        "difficulty": "edge",
+        "system": "mealcraft-planner",
+        "expected_feasible": false,
+        "actual_feasible": false,
+        "selected_slugs": [],
+        "distinct_recipe_count": 0,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": null,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-039",
+        "name": "vegetarian dairy-free five-minute limit",
+        "category": "infeasible-conflict",
+        "difficulty": "edge",
+        "system": "mealcraft-planner",
+        "expected_feasible": false,
+        "actual_feasible": false,
+        "selected_slugs": [],
+        "distinct_recipe_count": 0,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": null,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "hold-040",
+        "name": "all major allergens and five-minute limit",
+        "category": "infeasible-conflict",
+        "difficulty": "edge",
+        "system": "mealcraft-planner",
+        "expected_feasible": false,
+        "actual_feasible": false,
+        "selected_slugs": [],
+        "distinct_recipe_count": 0,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": null,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      }
+    ]
+  },
+  "agent_benchmark": {
+    "schema_version": "1.0",
+    "provider": "fixture",
+    "model": null,
+    "live_api_used": false,
+    "dataset": {
+      "path": "data/evaluation/agent/fixture-v1.json",
+      "sha256": "6fd3bd8d01a10f0bd6457988ffa7a215b487507b80a56a58e842eddac9bfacb3"
+    },
+    "metrics": {
+      "case_count": 24,
+      "exact_case_rate": 0.6667,
+      "field_precision": 1.0,
+      "field_recall": 0.8298,
+      "field_f1": 0.907,
+      "hallucinated_field_count": 0,
+      "clarification_accuracy": 0.875,
+      "medical_boundary_accuracy": 1.0,
+      "failure_case_count": 8
+    },
+    "failure_cases": [
+      {
+        "id": "agent-005",
+        "category": "allergen",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 1,
+        "expected_fields": 2,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "household_size"
+        ],
+        "missing_fields_match": false,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "allergens": [
+            "peanut"
+          ]
+        },
+        "actual_missing_fields": [
+          "household_size"
+        ],
+        "failure_reasons": [
+          "extraction_mismatch",
+          "clarification_mismatch"
+        ]
+      },
+      {
+        "id": "agent-014",
+        "category": "allergen-gap",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 1,
+        "expected_fields": 2,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "allergens"
+        ],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": [
+          "extraction_mismatch"
+        ]
+      },
+      {
+        "id": "agent-015",
+        "category": "allergen-gap",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 1,
+        "expected_fields": 2,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "allergens"
+        ],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": [
+          "extraction_mismatch"
+        ]
+      },
+      {
+        "id": "agent-016",
+        "category": "language-gap",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 0,
+        "expected_fields": 1,
+        "predicted_fields": 0,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "household_size"
+        ],
+        "missing_fields_match": false,
+        "medical_boundary_match": true,
+        "actual_extraction": {},
+        "actual_missing_fields": [
+          "household_size"
+        ],
+        "failure_reasons": [
+          "extraction_mismatch",
+          "clarification_mismatch"
+        ]
+      },
+      {
+        "id": "agent-017",
+        "category": "exclusion-gap",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 1,
+        "expected_fields": 2,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "excluded_ingredients"
+        ],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": [
+          "extraction_mismatch"
+        ]
+      },
+      {
+        "id": "agent-018",
+        "category": "time-gap",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 1,
+        "expected_fields": 2,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "max_cooking_time_minutes"
+        ],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": [
+          "extraction_mismatch"
+        ]
+      },
+      {
+        "id": "agent-019",
+        "category": "budget-gap",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 1,
+        "expected_fields": 2,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "budget_per_meal_sgd"
+        ],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": [
+          "extraction_mismatch"
+        ]
+      },
+      {
+        "id": "agent-024",
+        "category": "combined-gap",
+        "language": "mixed",
+        "exact_match": false,
+        "matched_fields": 3,
+        "expected_fields": 4,
+        "predicted_fields": 3,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "household_size"
+        ],
+        "missing_fields_match": false,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "max_cooking_time_minutes": 25,
+          "weekly_budget_sgd": 70.0,
+          "dietary_preferences": [
+            "vegan"
+          ]
+        },
+        "actual_missing_fields": [
+          "household_size"
+        ],
+        "failure_reasons": [
+          "extraction_mismatch",
+          "clarification_mismatch"
+        ]
+      }
+    ],
+    "cases": [
+      {
+        "id": "agent-001",
+        "category": "household",
+        "language": "en",
+        "exact_match": true,
+        "matched_fields": 1,
+        "expected_fields": 1,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-002",
+        "category": "budget",
+        "language": "en",
+        "exact_match": true,
+        "matched_fields": 2,
+        "expected_fields": 2,
+        "predicted_fields": 2,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 3,
+          "budget_per_meal_sgd": 15.0
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-003",
+        "category": "time",
+        "language": "en",
+        "exact_match": true,
+        "matched_fields": 2,
+        "expected_fields": 2,
+        "predicted_fields": 2,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2,
+          "max_cooking_time_minutes": 30
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-004",
+        "category": "preference",
+        "language": "en",
+        "exact_match": true,
+        "matched_fields": 2,
+        "expected_fields": 2,
+        "predicted_fields": 2,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2,
+          "health_preferences": [
+            "low-sodium",
+            "low-sugar"
+          ]
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-005",
+        "category": "allergen",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 1,
+        "expected_fields": 2,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "household_size"
+        ],
+        "missing_fields_match": false,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "allergens": [
+            "peanut"
+          ]
+        },
+        "actual_missing_fields": [
+          "household_size"
+        ],
+        "failure_reasons": [
+          "extraction_mismatch",
+          "clarification_mismatch"
+        ]
+      },
+      {
+        "id": "agent-006",
+        "category": "exclusion",
+        "language": "en",
+        "exact_match": true,
+        "matched_fields": 2,
+        "expected_fields": 2,
+        "predicted_fields": 2,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2,
+          "excluded_ingredients": [
+            "firm_tofu"
+          ]
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-007",
+        "category": "dietary",
+        "language": "en",
+        "exact_match": true,
+        "matched_fields": 2,
+        "expected_fields": 2,
+        "predicted_fields": 2,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 4,
+          "dietary_preferences": [
+            "vegetarian"
+          ]
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-008",
+        "category": "nutrition",
+        "language": "en",
+        "exact_match": true,
+        "matched_fields": 2,
+        "expected_fields": 2,
+        "predicted_fields": 2,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2,
+          "nutrition_targets": {
+            "calories_kcal": 550.0,
+            "protein_g": 35.0
+          }
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-009",
+        "category": "pantry-known",
+        "language": "en",
+        "exact_match": true,
+        "matched_fields": 2,
+        "expected_fields": 2,
+        "predicted_fields": 2,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2,
+          "available_ingredients": [
+            {
+              "normalized_name": "brown_rice",
+              "quantity": 500.0,
+              "unit": "g"
+            }
+          ]
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-010",
+        "category": "pantry-unknown",
+        "language": "en",
+        "exact_match": true,
+        "matched_fields": 2,
+        "expected_fields": 2,
+        "predicted_fields": 2,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2,
+          "available_ingredients": [
+            {
+              "normalized_name": "chicken_breast",
+              "quantity": null,
+              "unit": null
+            }
+          ]
+        },
+        "actual_missing_fields": [
+          "available_ingredients.chicken_breast.quantity"
+        ],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-011",
+        "category": "follow-up",
+        "language": "en",
+        "exact_match": true,
+        "matched_fields": 0,
+        "expected_fields": 0,
+        "predicted_fields": 0,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {},
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-012",
+        "category": "pricing",
+        "language": "en",
+        "exact_match": true,
+        "matched_fields": 2,
+        "expected_fields": 2,
+        "predicted_fields": 2,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2,
+          "pricing_mode": "live"
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-013",
+        "category": "medical-boundary",
+        "language": "en",
+        "exact_match": true,
+        "matched_fields": 2,
+        "expected_fields": 2,
+        "predicted_fields": 2,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2,
+          "medical_request_detected": true
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-014",
+        "category": "allergen-gap",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 1,
+        "expected_fields": 2,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "allergens"
+        ],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": [
+          "extraction_mismatch"
+        ]
+      },
+      {
+        "id": "agent-015",
+        "category": "allergen-gap",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 1,
+        "expected_fields": 2,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "allergens"
+        ],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": [
+          "extraction_mismatch"
+        ]
+      },
+      {
+        "id": "agent-016",
+        "category": "language-gap",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 0,
+        "expected_fields": 1,
+        "predicted_fields": 0,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "household_size"
+        ],
+        "missing_fields_match": false,
+        "medical_boundary_match": true,
+        "actual_extraction": {},
+        "actual_missing_fields": [
+          "household_size"
+        ],
+        "failure_reasons": [
+          "extraction_mismatch",
+          "clarification_mismatch"
+        ]
+      },
+      {
+        "id": "agent-017",
+        "category": "exclusion-gap",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 1,
+        "expected_fields": 2,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "excluded_ingredients"
+        ],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": [
+          "extraction_mismatch"
+        ]
+      },
+      {
+        "id": "agent-018",
+        "category": "time-gap",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 1,
+        "expected_fields": 2,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "max_cooking_time_minutes"
+        ],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": [
+          "extraction_mismatch"
+        ]
+      },
+      {
+        "id": "agent-019",
+        "category": "budget-gap",
+        "language": "en",
+        "exact_match": false,
+        "matched_fields": 1,
+        "expected_fields": 2,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "budget_per_meal_sgd"
+        ],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": [
+          "extraction_mismatch"
+        ]
+      },
+      {
+        "id": "agent-020",
+        "category": "chinese",
+        "language": "zh",
+        "exact_match": true,
+        "matched_fields": 1,
+        "expected_fields": 1,
+        "predicted_fields": 1,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-021",
+        "category": "chinese",
+        "language": "zh",
+        "exact_match": true,
+        "matched_fields": 3,
+        "expected_fields": 3,
+        "predicted_fields": 3,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2,
+          "budget_per_meal_sgd": 15.0,
+          "health_preferences": [
+            "low-sodium"
+          ]
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-022",
+        "category": "chinese",
+        "language": "zh",
+        "exact_match": true,
+        "matched_fields": 3,
+        "expected_fields": 3,
+        "predicted_fields": 3,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2,
+          "allergens": [
+            "peanut"
+          ],
+          "excluded_ingredients": [
+            "firm_tofu"
+          ]
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-023",
+        "category": "chinese",
+        "language": "zh",
+        "exact_match": true,
+        "matched_fields": 2,
+        "expected_fields": 2,
+        "predicted_fields": 2,
+        "hallucinated_fields": [],
+        "mismatched_fields": [],
+        "missing_fields_match": true,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "household_size": 2,
+          "available_ingredients": [
+            {
+              "normalized_name": "brown_rice",
+              "quantity": 500.0,
+              "unit": "g"
+            }
+          ]
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
+      },
+      {
+        "id": "agent-024",
+        "category": "combined-gap",
+        "language": "mixed",
+        "exact_match": false,
+        "matched_fields": 3,
+        "expected_fields": 4,
+        "predicted_fields": 3,
+        "hallucinated_fields": [],
+        "mismatched_fields": [
+          "household_size"
+        ],
+        "missing_fields_match": false,
+        "medical_boundary_match": true,
+        "actual_extraction": {
+          "max_cooking_time_minutes": 25,
+          "weekly_budget_sgd": 70.0,
+          "dietary_preferences": [
+            "vegan"
+          ]
+        },
+        "actual_missing_fields": [
+          "household_size"
+        ],
+        "failure_reasons": [
+          "extraction_mismatch",
+          "clarification_mismatch"
+        ]
+      }
+    ]
+  },
+  "failure_registry": [
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-001",
+      "name": "three-person default week",
+      "category": "basic",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-002",
+      "name": "single-person default week",
+      "category": "basic",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-003",
+      "name": "large household default week",
+      "category": "basic",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-004",
+      "name": "forty-five-minute meals",
+      "category": "basic",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-005",
+      "name": "fixture pricing explicit",
+      "category": "basic",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-006",
+      "name": "peanut allergy",
+      "category": "hard-restriction",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-007",
+      "name": "dairy allergy",
+      "category": "hard-restriction",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-008",
+      "name": "gluten allergy",
+      "category": "hard-restriction",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-009",
+      "name": "exclude tofu",
+      "category": "hard-restriction",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-010",
+      "name": "exclude tomato",
+      "category": "hard-restriction",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-011",
+      "name": "strict sodium seven hundred",
+      "category": "hard-restriction",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-012",
+      "name": "strict sodium four hundred",
+      "category": "hard-restriction",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-013",
+      "name": "vegetarian household",
+      "category": "hard-restriction",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-014",
+      "name": "gluten-free household",
+      "category": "hard-restriction",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-015",
+      "name": "vegetarian and dairy-free",
+      "category": "combined-constraints",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-016",
+      "name": "vegan low sodium",
+      "category": "combined-constraints",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "savoury-vegan-oats",
+        "savoury-vegan-oats",
+        "savoury-vegan-oats",
+        "savoury-vegan-oats",
+        "savoury-vegan-oats",
+        "savoury-vegan-oats",
+        "savoury-vegan-oats"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-017",
+      "name": "quick vegetarian",
+      "category": "combined-constraints",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-018",
+      "name": "soy-free gluten-free",
+      "category": "combined-constraints",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad",
+        "chickpea-quinoa-salad"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-019",
+      "name": "dairy-free exclude chicken",
+      "category": "combined-constraints",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-020",
+      "name": "four people quick and low sodium",
+      "category": "combined-constraints",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-021",
+      "name": "vegetarian peanut allergy",
+      "category": "combined-constraints",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-022",
+      "name": "dairy and egg allergy",
+      "category": "combined-constraints",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "savoury-vegan-oats",
+        "savoury-vegan-oats",
+        "savoury-vegan-oats",
+        "savoury-vegan-oats",
+        "savoury-vegan-oats",
+        "savoury-vegan-oats",
+        "savoury-vegan-oats"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-023",
+      "name": "ten dollar meal budget",
+      "category": "budget-time",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-024",
+      "name": "six dollar meal budget",
+      "category": "budget-time",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-025",
+      "name": "seventy dollar weekly budget",
+      "category": "budget-time",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": true,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-026",
+      "name": "forty dollar weekly budget",
+      "category": "budget-time",
+      "difficulty": "edge",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": false,
+      "failure_reasons": [
+        "consecutive_recipe_repetition",
+        "weekly_budget_exceeded"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-027",
+      "name": "quick meal with weekly budget",
+      "category": "budget-time",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": true,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-028",
+      "name": "family per-meal budget",
+      "category": "budget-time",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": true,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-029",
+      "name": "calorie and protein targets",
+      "category": "nutrition-preference",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "ginger-salmon-soba",
+        "ginger-salmon-soba",
+        "ginger-salmon-soba",
+        "ginger-salmon-soba",
+        "ginger-salmon-soba",
+        "ginger-salmon-soba",
+        "ginger-salmon-soba"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-030",
+      "name": "balanced macro targets",
+      "category": "nutrition-preference",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "egg-tomato-quinoa",
+        "egg-tomato-quinoa",
+        "egg-tomato-quinoa",
+        "egg-tomato-quinoa",
+        "egg-tomato-quinoa",
+        "egg-tomato-quinoa",
+        "egg-tomato-quinoa"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-031",
+      "name": "lower calorie preference",
+      "category": "nutrition-preference",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-032",
+      "name": "low sugar and low sodium preferences",
+      "category": "nutrition-preference",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes",
+        "spinach-oat-egg-cakes"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-033",
+      "name": "protein target with sodium ceiling",
+      "category": "nutrition-preference",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "chicken-quinoa-pepper",
+        "chicken-quinoa-pepper",
+        "chicken-quinoa-pepper",
+        "chicken-quinoa-pepper",
+        "chicken-quinoa-pepper",
+        "chicken-quinoa-pepper",
+        "chicken-quinoa-pepper"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-034",
+      "name": "known rice pantry",
+      "category": "pantry-grocery",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "egg-vegetable-rice",
+        "egg-vegetable-rice",
+        "egg-vegetable-rice",
+        "egg-vegetable-rice",
+        "egg-vegetable-rice",
+        "egg-vegetable-rice",
+        "egg-vegetable-rice"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-035",
+      "name": "unknown tofu pantry",
+      "category": "pantry-grocery",
+      "difficulty": "basic",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "heldout-greedy-baseline",
+      "id": "hold-036",
+      "name": "mixed known and unknown pantry",
+      "category": "pantry-grocery",
+      "difficulty": "combined",
+      "system": "greedy-baseline",
+      "expected_feasible": true,
+      "actual_feasible": true,
+      "selected_slugs": [
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl",
+        "yogurt-oat-bowl"
+      ],
+      "distinct_recipe_count": 1,
+      "hard_constraint_violations": [],
+      "deterministic": true,
+      "consecutive_repetitions": 6,
+      "grocery_complete": true,
+      "within_weekly_budget": null,
+      "failure_reasons": [
+        "consecutive_recipe_repetition"
+      ]
+    },
+    {
+      "source": "agent-benchmark",
+      "id": "agent-005",
+      "category": "allergen",
+      "language": "en",
+      "exact_match": false,
+      "matched_fields": 1,
+      "expected_fields": 2,
+      "predicted_fields": 1,
+      "hallucinated_fields": [],
+      "mismatched_fields": [
+        "household_size"
+      ],
+      "missing_fields_match": false,
+      "medical_boundary_match": true,
+      "actual_extraction": {
+        "allergens": [
+          "peanut"
+        ]
+      },
+      "actual_missing_fields": [
+        "household_size"
+      ],
+      "failure_reasons": [
+        "extraction_mismatch",
+        "clarification_mismatch"
+      ]
+    },
+    {
+      "source": "agent-benchmark",
+      "id": "agent-014",
+      "category": "allergen-gap",
+      "language": "en",
+      "exact_match": false,
+      "matched_fields": 1,
+      "expected_fields": 2,
+      "predicted_fields": 1,
+      "hallucinated_fields": [],
+      "mismatched_fields": [
+        "allergens"
+      ],
+      "missing_fields_match": true,
+      "medical_boundary_match": true,
+      "actual_extraction": {
+        "household_size": 2
+      },
+      "actual_missing_fields": [],
+      "failure_reasons": [
+        "extraction_mismatch"
+      ]
+    },
+    {
+      "source": "agent-benchmark",
+      "id": "agent-015",
+      "category": "allergen-gap",
+      "language": "en",
+      "exact_match": false,
+      "matched_fields": 1,
+      "expected_fields": 2,
+      "predicted_fields": 1,
+      "hallucinated_fields": [],
+      "mismatched_fields": [
+        "allergens"
+      ],
+      "missing_fields_match": true,
+      "medical_boundary_match": true,
+      "actual_extraction": {
+        "household_size": 2
+      },
+      "actual_missing_fields": [],
+      "failure_reasons": [
+        "extraction_mismatch"
+      ]
+    },
+    {
+      "source": "agent-benchmark",
+      "id": "agent-016",
+      "category": "language-gap",
+      "language": "en",
+      "exact_match": false,
+      "matched_fields": 0,
+      "expected_fields": 1,
+      "predicted_fields": 0,
+      "hallucinated_fields": [],
+      "mismatched_fields": [
+        "household_size"
+      ],
+      "missing_fields_match": false,
+      "medical_boundary_match": true,
+      "actual_extraction": {},
+      "actual_missing_fields": [
+        "household_size"
+      ],
+      "failure_reasons": [
+        "extraction_mismatch",
+        "clarification_mismatch"
+      ]
+    },
+    {
+      "source": "agent-benchmark",
+      "id": "agent-017",
+      "category": "exclusion-gap",
+      "language": "en",
+      "exact_match": false,
+      "matched_fields": 1,
+      "expected_fields": 2,
+      "predicted_fields": 1,
+      "hallucinated_fields": [],
+      "mismatched_fields": [
+        "excluded_ingredients"
+      ],
+      "missing_fields_match": true,
+      "medical_boundary_match": true,
+      "actual_extraction": {
+        "household_size": 2
+      },
+      "actual_missing_fields": [],
+      "failure_reasons": [
+        "extraction_mismatch"
+      ]
+    },
+    {
+      "source": "agent-benchmark",
+      "id": "agent-018",
+      "category": "time-gap",
+      "language": "en",
+      "exact_match": false,
+      "matched_fields": 1,
+      "expected_fields": 2,
+      "predicted_fields": 1,
+      "hallucinated_fields": [],
+      "mismatched_fields": [
+        "max_cooking_time_minutes"
+      ],
+      "missing_fields_match": true,
+      "medical_boundary_match": true,
+      "actual_extraction": {
+        "household_size": 2
+      },
+      "actual_missing_fields": [],
+      "failure_reasons": [
+        "extraction_mismatch"
+      ]
+    },
+    {
+      "source": "agent-benchmark",
+      "id": "agent-019",
+      "category": "budget-gap",
+      "language": "en",
+      "exact_match": false,
+      "matched_fields": 1,
+      "expected_fields": 2,
+      "predicted_fields": 1,
+      "hallucinated_fields": [],
+      "mismatched_fields": [
+        "budget_per_meal_sgd"
+      ],
+      "missing_fields_match": true,
+      "medical_boundary_match": true,
+      "actual_extraction": {
+        "household_size": 2
+      },
+      "actual_missing_fields": [],
+      "failure_reasons": [
+        "extraction_mismatch"
+      ]
+    },
+    {
+      "source": "agent-benchmark",
+      "id": "agent-024",
+      "category": "combined-gap",
+      "language": "mixed",
+      "exact_match": false,
+      "matched_fields": 3,
+      "expected_fields": 4,
+      "predicted_fields": 3,
+      "hallucinated_fields": [],
+      "mismatched_fields": [
+        "household_size"
+      ],
+      "missing_fields_match": false,
+      "medical_boundary_match": true,
+      "actual_extraction": {
+        "max_cooking_time_minutes": 25,
+        "weekly_budget_sgd": 70.0,
+        "dietary_preferences": [
+          "vegan"
+        ]
+      },
+      "actual_missing_fields": [
+        "household_size"
+      ],
+      "failure_reasons": [
+        "extraction_mismatch",
+        "clarification_mismatch"
+      ]
+    }
+  ]
+}

@@ -65,10 +65,12 @@ change in English or Chinese inside the existing Assistant conversation, answer
 a focused clarification when needed, inspect recipe, nutrition, Shopping List,
 and price deltas, then confirm or discard the persistent preview. The Agent
 delegates every calculation and mutation to the deterministic replanning engine.
-The data-quality slice expands the validated catalog to 30 recipes and 34
-normalized ingredients, provides complete fixture product mappings, imports the
-catalog idempotently at startup, and gates changes through 20 end-to-end planning
-scenarios with machine-readable and human-readable reports.
+The data-quality and evaluation slice expands the validated catalog to 30
+recipes and 34 normalized ingredients, provides complete fixture product
+mappings, imports the catalog idempotently at startup, and gates changes through
+20 developer scenarios. A separate 40-case held-out set compares a transparent
+greedy baseline with the MealCraft weekly planner, while a 24-case offline Agent
+benchmark records extraction, clarification and medical-boundary behaviour.
 The household-profile slice persists member-level servings and safety
 constraints together with shared budget, time, nutrition, pricing, and pantry
 defaults. Every edit creates an immutable version. Plans generated from a
@@ -96,6 +98,27 @@ fresh environment and an existing environment converge on the same records.
 - FairPrice product search: <http://localhost:3000/products>
 - Swagger documentation: <http://localhost:8000/docs>
 - Health check: <http://localhost:8000/api/health>
+
+## Evaluation
+
+The versioned method and metric definitions are documented in
+[docs/evaluation/protocol-v1.md](docs/evaluation/protocol-v1.md). Run the
+developer quality gate and the complete offline workbench from the repository
+root:
+
+```bash
+uv run --project backend python -m app.evaluation
+uv run --project backend python -m app.evaluation.workbench
+```
+
+The generated comparison and failure registry are written to
+[`docs/evaluation/workbench/latest.md`](docs/evaluation/workbench/latest.md).
+Both commands use fixtures and make no paid API call. The optional OpenAI Agent
+benchmark is reserved behind two explicit command-line switches and a runtime
+environment variable; it is not used by CI or the committed protocol-v1 report.
+
+Frontend state tests run with `pnpm test`; browser acceptance tests run with
+`pnpm test:e2e` after installing the Playwright Chromium browser.
 
 ## Shared Project Memory
 
