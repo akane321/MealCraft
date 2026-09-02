@@ -3,7 +3,9 @@
 MealCraft is a constraint-aware weekly dietary planning application developed for
 DSS5105 Data Science Projects in Practice.
 
-## MVP Goal
+## Product Goal and Minimum Baseline
+
+MealCraft targets a polished, evidence-backed final product. The MVP is the minimum acceptance baseline, not a scope or quality ceiling. Once a capability meets the baseline, development continues toward stronger user value, reliability, usability, evaluation evidence, and engineering quality according to priority, risk, and available time.
 
 The system accepts user dietary constraints, generates a seven-day meal plan,
 maps required ingredients to FairPrice products, produces a grocery list,

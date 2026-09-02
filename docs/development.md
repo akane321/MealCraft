@@ -55,7 +55,7 @@ event links are stored on `agent_sessions`.
 
 The default `.env.example` uses `AGENT_PARSER_PROVIDER=fixture`. This mode is
 deterministic, works offline, and is used in tests. It recognizes the supported
-MVP constraints in common English and Chinese phrasing.
+current baseline constraints in common English and Chinese phrasing.
 
 To experiment with model-based structured extraction, set these only in the
 local uncommitted `.env` file:
@@ -99,7 +99,7 @@ docker compose exec backend uv run --no-sync python -m app.data.import_catalog -
 docker compose exec backend uv run --no-sync python -m app.data.import_catalog
 ```
 
-Run the reproducible MVP evaluation and refresh both reports:
+Run the reproducible baseline evaluation and refresh both reports:
 
 ```bash
 docker compose exec backend uv run --no-sync python -m app.evaluation

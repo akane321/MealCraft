@@ -47,7 +47,7 @@ Available endpoints:
 
 ## Household Profiles
 
-The MVP maintains one household profile. Each member supplies a name, one to
+The current implementation maintains one household profile. Each member supplies a name, one to
 three planned servings, allergens, prohibited ingredient IDs, and dietary
 requirements. The backend deterministically sums servings and merges every
 member's safety constraints into the shared-plan hard constraints.
@@ -127,7 +127,7 @@ never silently misrepresented.
 
 `POST /api/plans/generate` extends the recipe-constraint request with:
 
-- `start_date` and a fixed MVP `day_count` of 7
+- `start_date` and a currently fixed `day_count` of 7
 - an optional `weekly_budget_sgd`
 - the existing optional per-meal budget and fixture/live pricing mode
 
@@ -155,7 +155,7 @@ meal record or duplicate nutrition contribution is created.
 - the user-entered nutrition targets stored with the plan
 
 Only completed dishes from the selected MealCraft plan contribute to completed
-nutrition. Plan-external foods are outside the MVP and cannot be entered through
+nutrition. Plan-external foods are outside the current baseline and cannot be entered through
 this contract.
 
 ## Event-driven Replanning

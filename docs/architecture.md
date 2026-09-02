@@ -1,6 +1,6 @@
 # Architecture
 
-The MVP uses a modular monolith architecture.
+The current product uses a modular monolith architecture.
 
 ## Components
 
@@ -25,7 +25,7 @@ meal records.
 
 ## Household Profile Flow
 
-1. Nuxt creates or edits the single MVP household profile.
+1. Nuxt creates or edits the currently supported single household profile.
 2. FastAPI validates each member and rejects more than 12 combined planned
    servings.
 3. The service sums member servings and merges allergens, prohibited
@@ -81,7 +81,7 @@ The LLM never determines allergen safety or the final constraint result.
    snapshot, then closes the read transaction before any external model call.
 3. A LangGraph workflow runs two explicit nodes: constraint extraction, then
    state merge and clarification assessment.
-4. The default fixture parser provides reproducible bilingual MVP behavior. An
+4. The default fixture parser provides reproducible bilingual baseline behavior. An
    optional OpenAI parser uses a Pydantic structured-output schema and never
    invents absent values.
 5. A short database transaction appends the user and assistant messages and

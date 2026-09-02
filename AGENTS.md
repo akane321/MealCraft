@@ -30,6 +30,8 @@ If the private knowledge repository cannot be accessed, state that the context i
 ## While working
 
 - Current code, tests, remote GitHub state, course source documents, and accepted ADRs are evidence; do not treat a roadmap item as completed behavior.
+- Treat MVP requirements as the minimum acceptance baseline, never as the product goal, scope ceiling, or automatic stopping point. After a module meets its baseline, continue toward final-product quality in user value, completeness, reliability, usability, evaluation evidence, testing, documentation, and demo readiness when time, risk, and dependencies allow.
+- Going beyond the baseline does not authorize unbounded feature growth. Material additions must state user value, success criteria, evaluation evidence, cost, dependencies, and risks, and must preserve the accepted safety, privacy, reproducibility, and deterministic-computation boundaries.
 - Preserve unrelated user changes and use feature branches plus pull requests.
 - Keep numeric constraints, nutrition, cost, package quantity, Shopping List, and evaluation logic deterministic and testable. The Agent may parse intent and explain tool results.
 - Never commit secrets, `.env`, real personal health data, private memory content, or raw restricted course material to this public repository.
@@ -41,4 +43,3 @@ If the private knowledge repository cannot be accessed, state that the context i
 3. Update `CURRENT_STATE.md` only for verified behavior merged to remote `main`; create an ADR for L2/L3 decisions.
 4. Validate and submit knowledge changes through a separate `memory/*` branch and PR.
 5. Do not automatically push, merge, or rewrite Git history unless the user explicitly authorizes it.
-
