@@ -29,6 +29,9 @@ class MealPlanRepository:
         scheduled: list[tuple[date, RecipeRecommendationResponse]],
         grocery: WeeklyGroceryEstimateResponse,
         warnings: list[str],
+        household_profile_id: int | None = None,
+        household_profile_version: int | None = None,
+        replaces_plan_id: int | None = None,
     ) -> MealPlan:
         plan = MealPlan(
             start_date=constraints.start_date,
@@ -43,6 +46,9 @@ class MealPlanRepository:
             within_weekly_budget=grocery.within_weekly_budget,
             constraints=constraints.model_dump(mode="json"),
             warnings=warnings,
+            household_profile_id=household_profile_id,
+            household_profile_version=household_profile_version,
+            replaces_plan_id=replaces_plan_id,
         )
         for day_index, (planned_date, recommendation) in enumerate(scheduled, start=1):
             estimate = recommendation.grocery_estimate

@@ -39,7 +39,14 @@ class WeeklyMealPlanService:
         self.grocery_aggregator = grocery_aggregator
         self.selector = selector or WeeklyPlanSelector()
 
-    def generate(self, constraints: WeeklyMealPlanRequest) -> WeeklyMealPlanResponse:
+    def generate(
+        self,
+        constraints: WeeklyMealPlanRequest,
+        *,
+        household_profile_id: int | None = None,
+        household_profile_version: int | None = None,
+        replaces_plan_id: int | None = None,
+    ) -> WeeklyMealPlanResponse:
         recommendation_result = self.recommendation_service.recommend(
             constraints,
             deduct_pantry_from_cost=False,
@@ -76,6 +83,9 @@ class WeeklyMealPlanService:
             scheduled=scheduled,
             grocery=grocery,
             warnings=self._deduplicate(warnings),
+            household_profile_id=household_profile_id,
+            household_profile_version=household_profile_version,
+            replaces_plan_id=replaces_plan_id,
         )
         return self._to_response(plan)
 
@@ -89,6 +99,9 @@ class WeeklyMealPlanService:
                 WeeklyMealPlanListItem(
                     id=plan.id,
                     revision=plan.revision,
+                    household_profile_id=plan.household_profile_id,
+                    household_profile_version=plan.household_profile_version,
+                    replaces_plan_id=plan.replaces_plan_id,
                     start_date=plan.start_date,
                     end_date=plan.end_date,
                     household_size=plan.household_size,
@@ -216,6 +229,9 @@ class WeeklyMealPlanService:
         return WeeklyMealPlanResponse(
             id=plan.id,
             revision=plan.revision,
+            household_profile_id=plan.household_profile_id,
+            household_profile_version=plan.household_profile_version,
+            replaces_plan_id=plan.replaces_plan_id,
             start_date=plan.start_date,
             end_date=plan.end_date,
             day_count=plan.day_count,

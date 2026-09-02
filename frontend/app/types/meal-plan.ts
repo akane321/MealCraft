@@ -45,6 +45,9 @@ export interface WeeklyGroceryEstimate {
 export interface WeeklyMealPlan {
   id: number;
   revision: number;
+  household_profile_id: number | null;
+  household_profile_version: number | null;
+  replaces_plan_id: number | null;
   start_date: string;
   end_date: string;
   day_count: number;
@@ -59,6 +62,9 @@ export interface WeeklyMealPlan {
 export interface WeeklyMealPlanListItem {
   id: number;
   revision: number;
+  household_profile_id: number | null;
+  household_profile_version: number | null;
+  replaces_plan_id: number | null;
   start_date: string;
   end_date: string;
   household_size: number;

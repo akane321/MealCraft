@@ -48,7 +48,27 @@ const pantryItems = ref<AvailableIngredientInput[]>([
   { normalized_name: "brown_rice", quantity: 200, unit: "g" },
   { normalized_name: "lemon", quantity: null, unit: null },
 ]);
-const { errorMessage, generate, isGenerating, result } = useWeeklyMealPlan();
+const { errorMessage, generate, generateFromProfile, isGenerating, result } = useWeeklyMealPlan();
+const { current: householdProfile, loadCurrent: loadHouseholdProfile } = useHouseholdProfile();
+
+function applyHouseholdProfile() {
+  if (!householdProfile.value) return;
+  const profile = householdProfile.value.current;
+  form.householdSize = profile.planning_household_size;
+  form.maxCookingTimeMinutes = profile.max_cooking_time_minutes;
+  form.budgetPerMealSgd = profile.budget_per_meal_sgd;
+  form.weeklyBudgetSgd = profile.weekly_budget_sgd;
+  form.pricingMode = profile.pricing_mode;
+  form.allergens = [...profile.allergens];
+  form.excludedIngredients = profile.excluded_ingredients.join(", ");
+  form.dietaryPreferences = [...profile.dietary_preferences];
+  form.healthPreferences = [...profile.health_preferences];
+  form.calorieTarget = profile.nutrition_targets.calories_kcal;
+  form.proteinTarget = profile.nutrition_targets.protein_g;
+  pantryItems.value = profile.available_ingredients.length
+    ? profile.available_ingredients.map(item => ({ ...item }))
+    : [{ normalized_name: "", quantity: null, unit: null }];
+}
 
 function addPantryItem() {
   pantryItems.value.push({ normalized_name: "", quantity: null, unit: null });
@@ -80,10 +100,32 @@ async function submitPlan() {
     max_sodium_mg_per_meal: null,
     available_ingredients: cleanAvailableIngredients(pantryItems.value),
   };
-  await generate(payload);
+  if (householdProfile.value) {
+    await generateFromProfile(householdProfile.value.id, {
+      start_date: form.startDate,
+      overrides: {
+        max_cooking_time_minutes: payload.max_cooking_time_minutes,
+        budget_per_meal_sgd: payload.budget_per_meal_sgd,
+        weekly_budget_sgd: payload.weekly_budget_sgd,
+        health_preferences: payload.health_preferences,
+        nutrition_targets: payload.nutrition_targets,
+        max_sodium_mg_per_meal: payload.max_sodium_mg_per_meal,
+        available_ingredients: payload.available_ingredients,
+        pricing_mode: payload.pricing_mode,
+      },
+    });
+  }
+  else {
+    await generate(payload);
+  }
   await nextTick();
   document.getElementById("weekly-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
+onMounted(async () => {
+  await loadHouseholdProfile();
+  applyHouseholdProfile();
+});
 </script>
 
 <template>
@@ -99,11 +141,22 @@ async function submitPlan() {
     </section>
 
     <form class="weekly-form" @submit.prevent="submitPlan">
+      <div v-if="householdProfile" class="profile-source-banner">
+        <div>
+          <strong>{{ householdProfile.name }} · version {{ householdProfile.current_version }}</strong>
+          <span>Member safety constraints are locked to the saved profile. Planning defaults below can be overridden for this week.</span>
+        </div>
+        <NuxtLink class="secondary-button" to="/profile">Edit profile</NuxtLink>
+      </div>
+      <div v-else class="profile-source-banner profile-source-empty">
+        <div><strong>No saved household profile</strong><span>This plan will use only the values entered below.</span></div>
+        <NuxtLink class="secondary-button" to="/profile">Create profile</NuxtLink>
+      </div>
       <div class="weekly-form-section">
         <h2>Schedule and budget</h2>
         <div class="weekly-fields four-columns">
           <label><span>Week starts</span><input v-model="form.startDate" type="date" required></label>
-          <label><span>Household</span><input v-model.number="form.householdSize" type="number" min="1" max="12" required></label>
+          <label><span>Household</span><input v-model.number="form.householdSize" type="number" min="1" max="12" :disabled="!!householdProfile" required></label>
           <label><span>Time per meal</span><input v-model.number="form.maxCookingTimeMinutes" type="number" min="5" max="240" required></label>
           <label>
             <span>Pricing source</span>
@@ -125,13 +178,13 @@ async function submitPlan() {
           <div>
             <p>Allergens</p>
             <label v-for="allergen in allergenOptions" :key="allergen" class="inline-choice">
-              <input v-model="form.allergens" type="checkbox" :value="allergen"><span>{{ allergen }}</span>
+              <input v-model="form.allergens" type="checkbox" :value="allergen" :disabled="!!householdProfile"><span>{{ allergen }}</span>
             </label>
           </div>
           <div>
             <p>Dietary requirements</p>
             <label v-for="option in dietaryOptions" :key="option.value" class="inline-choice">
-              <input v-model="form.dietaryPreferences" type="checkbox" :value="option.value"><span>{{ option.label }}</span>
+              <input v-model="form.dietaryPreferences" type="checkbox" :value="option.value" :disabled="!!householdProfile"><span>{{ option.label }}</span>
             </label>
           </div>
           <div>
@@ -143,7 +196,7 @@ async function submitPlan() {
         </div>
         <label class="wide-field">
           <span>Excluded ingredient IDs <small>comma-separated</small></span>
-          <input v-model="form.excludedIngredients" type="text" placeholder="mushroom, yellow_onion">
+          <input v-model="form.excludedIngredients" type="text" :disabled="!!householdProfile" placeholder="mushroom, yellow_onion">
         </label>
       </div>
 
@@ -177,6 +230,7 @@ async function submitPlan() {
           <div>
             <p class="eyebrow">Saved plan #{{ result.id }}</p>
             <h2>{{ formatPlanDate(result.start_date) }} — {{ formatPlanDate(result.end_date) }}</h2>
+            <p v-if="result.household_profile_id" class="profile-result-source">Profile #{{ result.household_profile_id }} · version {{ result.household_profile_version }}</p>
           </div>
           <div class="weekly-result-actions">
             <span>{{ result.household_size }} people · {{ result.day_count }} main meals</span>

@@ -1,6 +1,6 @@
 # Architecture
 
-The MVP uses a modular monolith architecture.
+The current product uses a modular monolith architecture.
 
 ## Components
 
@@ -20,7 +20,26 @@ scoring.
 
 The grocery provider retrieves and normalizes FairPrice product information.
 
-The database stores recipes, plans, products, and meal records.
+The database stores versioned household profiles, recipes, plans, products, and
+meal records.
+
+## Household Profile Flow
+
+1. Nuxt creates or edits the currently supported single household profile.
+2. FastAPI validates each member and rejects more than 12 combined planned
+   servings.
+3. The service sums member servings and merges allergens, prohibited
+   ingredients, and dietary requirements into shared hard constraints.
+4. Every edit appends an immutable version and advances `current_version` using
+   optimistic concurrency.
+5. Plan generation converts the selected version into the existing validated
+   weekly-planning request. Only non-safety defaults may be overridden for one
+   week.
+6. The meal plan stores the profile ID, exact profile version, and full effective
+   constraint snapshot.
+7. Replanning after a profile edit creates a replacement plan linked through
+   `replaces_plan_id` and returns a deterministic field-level constraint diff;
+   the previous plan remains auditable.
 
 ## Recipe Data Flow
 
@@ -62,7 +81,7 @@ The LLM never determines allergen safety or the final constraint result.
    snapshot, then closes the read transaction before any external model call.
 3. A LangGraph workflow runs two explicit nodes: constraint extraction, then
    state merge and clarification assessment.
-4. The default fixture parser provides reproducible bilingual MVP behavior. An
+4. The default fixture parser provides reproducible bilingual baseline behavior. An
    optional OpenAI parser uses a Pydantic structured-output schema and never
    invents absent values.
 5. A short database transaction appends the user and assistant messages and
