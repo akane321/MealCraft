@@ -1,10 +1,10 @@
 # MealCraft Current Status
 
-> Last verified public snapshot: 2026-09-03
+> Last verified public snapshot: 2026-09-05
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `9a94fed` - `feat: add offline evaluation workbench (#14)`
+> Verified remote `main`: `78b16db` - `chore: focus frontend on desktop web (#17)`
 
 ## How to Read This Document
 
@@ -85,6 +85,7 @@ improved.
 | Dynamic replanning | Partial | Add broader event semantics, temporary versus persistent preference handling, disruption metrics, and Shopping List consistency stress tests |
 | Evaluation scale | Partial | Expand toward 150-200 verified requests, 150-250 recipes, 80-120 planning scenarios, and complete grocery coverage for benchmark demand; preserve frozen splits and digests |
 | Multiple baselines | Partial | Add structured-planner and carefully controlled LLM-only comparisons where cost and safety allow |
+| Capability-centred Evaluation v2 | Target | Implement the accepted strong Rule-only, context-matched LLM-only, Plain LLM and Human Manual Planning design; v1 remains the only current report |
 | User-facing quality | Partial | Deepen loading, empty, error, degraded, accessibility, desktop layout, and end-to-end coverage |
 | Operations and maintainability | Target beyond the original proposal | Add health, data-quality, mapping, trace, and evaluation diagnostics where they reduce maintenance and demo risk |
 

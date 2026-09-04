@@ -179,7 +179,9 @@ docker compose exec backend uv run --no-sync python -m app.evaluation.workbench
 Neither command makes a paid API call by default. Read the
 [Evaluation Protocol](docs/evaluation/protocol-v1.md) and the
 [latest workbench report](docs/evaluation/workbench/latest.md) before quoting
-results.
+results. The accepted next-stage design is the
+[Capability-centred Comparative Evaluation v2](docs/design/comparative-evaluation-v2.md),
+which is not yet an implemented or reported result.
 
 ## Documentation
 
@@ -193,12 +195,14 @@ for users, contributors, maintainers, and coding agents.
   design gaps, and current priorities
 - [Architecture](docs/architecture.md) - components, ownership boundaries, data
   flow, and runtime behaviour
+- [Design Contracts](docs/design/README.md) - detailed module outputs,
+  dependencies, hand-offs, readiness gates, and Evaluation v2 design
 - [API Contracts](docs/api-contracts.md) - current HTTP and schema contracts
 - [Development](docs/development.md) - setup, run, debug, test, and recovery
 - [MVP Boundary](docs/mvp-boundary.md) - minimum baseline and exact current
   semantics
-- [Evaluation](docs/evaluation/protocol-v1.md) - datasets, metrics, baselines,
-  limitations, and execution
+- [Evaluation v1](docs/evaluation/protocol-v1.md) - currently executable
+  datasets, metrics, limitations, and commands
 - [Contributing](CONTRIBUTING.md) - Issue, branch, validation, review, and merge
   workflow
 - [Agent Instructions](AGENTS.md) - mandatory context and safety rules for coding

@@ -247,6 +247,29 @@ User event
 | Dashboard actuals | Persisted plan-entry status | Completed entries and coverage |
 | Evaluation result | Evaluation workbench | Code revision, dataset path/digest, method, metrics, failures |
 
+## Design-time Module Contracts
+
+Runtime architecture is complemented by the [Design Contracts](design/README.md).
+They identify the producer, consumer, versioned artifact, missing-data policy
+and evaluation-readiness gate for recipe data, FairPrice grounding, planning,
+Agent orchestration, frontend evidence and Evaluation v2.
+
+The core dependency chain is:
+
+```text
+recipe/ingredient facts ----+----> candidate retrieval ----> planner
+                            |                                |
+FairPrice observations ----> ingredient-product mapping ----+----> Shopping List
+                                                             |
+user request ----> Agent state/clarification ----------------+
+                                                             |
+all frozen inputs and traces --------------------------------+----> Evaluation
+```
+
+Consumers may develop against versioned fixtures, but a fixture assumption does
+not become a production fact. A downstream claim is enabled only after the
+upstream schema, provenance, unknown semantics and validation evidence exist.
+
 ## Final-Design Extensions
 
 The architecture should evolve toward the product baseline without mislabelling

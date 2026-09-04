@@ -1,8 +1,14 @@
 # MealCraft Evaluation Protocol v1
 
+> **Implemented diagnostic protocol.** This document and its reports describe
+> the currently executable offline workbench. The accepted next research design
+> is [Capability-centred Comparative Evaluation v2](../design/comparative-evaluation-v2.md),
+> which adds strong Rule-only, context-matched LLM-only, general-purpose LLM and
+> Human Manual Planning baselines. V2 is a target, not a reported result.
+
 ## 1. Purpose and research questions
 
-The evaluation asks four concrete questions:
+This diagnostic protocol asks four concrete questions:
 
 1. Does the planner respect explicit hard constraints?
 2. Does weekly selection improve diversity over a transparent greedy baseline?
