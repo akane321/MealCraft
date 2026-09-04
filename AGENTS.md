@@ -11,8 +11,11 @@ Before reasoning about a material change, read:
 3. `docs/architecture.md` for current component and calculation boundaries;
 4. `docs/api-contracts.md` and the relevant code/tests for exact behaviour;
 5. `docs/mvp-boundary.md` when minimum product semantics are involved;
-6. `docs/evaluation/protocol-v1.md` when changing data, planning, Agent,
-   grocery, nutrition, frontend evidence, or metrics.
+6. `docs/design/README.md` and the relevant module contract when changing a
+   producer/consumer boundary or accepted target;
+7. `docs/evaluation/protocol-v1.md` for currently executable evidence and
+   `docs/design/comparative-evaluation-v2.md` for accepted next-stage evaluation
+   semantics.
 
 The initial proposal defines a minimum final-product ambition. Its maintained
 public interpretation is `docs/project-guide.md`; do not require every agent to
@@ -77,6 +80,9 @@ If the private knowledge repository cannot be accessed, state that the context i
 - Current code, tests, remote GitHub state, course source documents, and accepted ADRs are evidence; do not treat a roadmap item as completed behavior.
 - Treat MVP requirements as the minimum acceptance baseline, never as the product goal, scope ceiling, or automatic stopping point. After a module meets its baseline, continue toward final-product quality in user value, completeness, reliability, usability, evaluation evidence, testing, documentation, and demo readiness when time, risk, and dependencies allow.
 - Going beyond the baseline does not authorize unbounded feature growth. Material additions must state user value, success criteria, evaluation evidence, cost, dependencies, and risks, and must preserve the accepted safety, privacy, reproducibility, and deterministic-computation boundaries.
+- Do not add a metric, filter, score, or claim until its upstream field has a
+  canonical definition, versioned fixture, missing-value semantics, provenance
+  where required, and a documented consumer. Use `docs/design/README.md`.
 - Preserve unrelated user changes and use feature branches plus pull requests.
 - Keep numeric constraints, nutrition, cost, package quantity, Shopping List, and evaluation logic deterministic and testable. The Agent may parse intent and explain tool results.
 - Never commit secrets, `.env`, real personal health data, private memory content, or raw restricted course material to this public repository.

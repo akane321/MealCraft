@@ -23,7 +23,9 @@ already implemented.
    migrations, and troubleshooting.
 4. Read [Architecture](architecture.md) and [API Contracts](api-contracts.md)
    before changing a boundary between modules.
-5. Read the relevant evaluation protocol before changing planning, Agent,
+5. Use the [Design Contracts](design/README.md) to identify producer, consumer,
+   fixture and readiness dependencies across modules.
+6. Read the relevant evaluation protocol before changing planning, Agent,
    grocery, nutrition, or evaluation semantics.
 
 ### I am a coding agent
@@ -36,9 +38,11 @@ already implemented.
 
 ### I want to understand the evidence
 
-1. Read the [Evaluation Protocol](evaluation/protocol-v1.md).
+1. Read the implemented [Evaluation Protocol v1](evaluation/protocol-v1.md).
 2. Inspect the [latest workbench report](evaluation/workbench/latest.md).
-3. Use the [frontend state matrix](evaluation/frontend-state-matrix.md) for the
+3. Read the accepted [Comparative Evaluation v2 design](design/comparative-evaluation-v2.md)
+   to understand the stronger planned baselines and capability claims.
+4. Use the [frontend state matrix](evaluation/frontend-state-matrix.md) for the
    current browser and state coverage boundary.
 
 ## Canonical Documents
@@ -53,7 +57,9 @@ already implemented.
 | How do I run and debug it? | [Development](development.md) |
 | How do I operate the product? | [User Guide](user-guide.md) |
 | How do I contribute safely? | [CONTRIBUTING.md](../CONTRIBUTING.md) |
-| How is performance evaluated? | [Evaluation Protocol](evaluation/protocol-v1.md) |
+| What must each module produce for other modules? | [Design Contracts](design/README.md) |
+| What evaluation is executable now? | [Evaluation Protocol v1](evaluation/protocol-v1.md) |
+| What comparative capability evaluation are we building? | [Comparative Evaluation v2](design/comparative-evaluation-v2.md) |
 
 ## Documentation Update Rules
 
@@ -62,6 +68,8 @@ already implemented.
 - Update `mvp-boundary.md` when minimum acceptance semantics change.
 - Update `architecture.md` and `api-contracts.md` with code that changes system
   boundaries or contracts.
+- Update the relevant `design/` contract when a producer field, downstream
+  dependency, baseline, readiness gate or accepted target changes.
 - Version evaluation datasets and protocols instead of silently changing
   previously reported conditions.
 - Do not copy private project memory, credentials, personal data, or restricted

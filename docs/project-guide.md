@@ -276,12 +276,21 @@ The proposal-scale evaluation ambition is:
 | Planning scenarios with feasibility labels | 80-120 |
 | Grocery snapshot | Complete mapping coverage for benchmark ingredient demand |
 
-The final evaluation should include a transparent greedy/rule baseline, a
-structured planner that bypasses language parsing, an LLM-only comparison under
-controlled cost and safety conditions, and the complete MealCraft pipeline. All
-methods must use comparable requests, recipes, pantry states, product snapshots,
-and planning horizons. Development, validation, and final held-out evidence must
-remain separated.
+The final evaluation should treat engineering checks as supporting validity and
+make comparative Agent capability the main research question. It should include
+a weak greedy lower bound, a credible Rule-only Planner, a context-matched
+LLM-only baseline, a supplementary Plain General-purpose LLM condition, Human
+Manual Planning on a representative subset, and the complete MealCraft
+pipeline. All controlled comparisons must use comparable requests, recipe
+candidate pools, pantry states, FairPrice snapshots, planning horizons and
+output schemas. Development, validation, and final held-out evidence must remain
+separated. See [Comparative Evaluation v2](design/comparative-evaluation-v2.md).
+
+The primary planned endpoint is strict end-to-end task success: every applicable
+requirement for interpretation/clarification, feasibility, hard constraints,
+nutrition semantics, pantry use, product packages, cost and Shopping List
+consistency must pass. Average preference or diversity cannot compensate for a
+hard-constraint failure.
 
 Implementation technologies may change without reducing this ambition. Nuxt may
 replace Next.js, direct PostgreSQL may replace Supabase, and different retrieval
@@ -323,7 +332,8 @@ they affect:
 
 These are responsibility boundaries, not permanent personal branches or named
 assignments. Integration occurs through reviewed contracts, fixtures, tests, and
-short-lived task branches.
+short-lived task branches. The [module design contracts](design/README.md) make
+each producer/consumer dependency and evaluation-readiness gate explicit.
 
 ## Success Definition
 

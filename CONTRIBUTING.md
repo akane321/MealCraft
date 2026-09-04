@@ -36,6 +36,12 @@ be explicit:
 These domains are not permanent personal branches. Coordinate through schemas,
 fixtures, API contracts, and reviewable task branches.
 
+Before work that changes what another domain must provide, read the
+[Design Contracts](docs/design/README.md). Name the producer, consumer, field or
+artifact, missing/degraded semantics, and the smallest shared fixture. This lets
+contributors implement against a stable contract without waiting for another
+module's full production implementation.
+
 ## 3. Start with an Issue
 
 Create or claim an Issue before substantial work. Record:
@@ -160,6 +166,13 @@ before requesting review.
   conditions; version material changes.
 - Baselines and MealCraft must receive the same applicable input, candidate
   pool, pantry state, product snapshot, and planning horizon.
+- Distinguish engineering verification from component, end-to-end comparative,
+  human-utility, and robustness evidence.
+- Keep the greedy-repeat case as a weak lower bound; primary v2 comparison must
+  include a credible Rule-only Planner and a context-matched LLM-only condition.
+- A context-matched LLM-only baseline receives the same facts, never MealCraft's
+  parsed constraints, eligibility labels, scores, chosen products, package
+  counts, feasibility labels or gold answers.
 - State every metric's numerator, denominator, sample size, and limitation.
 - Keep baseline, Agent, planner, grocery, frontend, and product failures
   distinguishable.
@@ -181,6 +194,8 @@ Update documentation in the same pull request when behaviour changes:
 - setup, command, or troubleshooting -> `docs/development.md`;
 - user operation -> `docs/user-guide.md`;
 - dataset, metric, or experimental procedure -> `docs/evaluation/`;
+- accepted module target, producer/consumer dependency, or evaluation-readiness
+  gate -> the relevant document under `docs/design/`;
 - coding-agent safety or workflow -> `AGENTS.md`.
 
 Do not duplicate the same changing fact across multiple files without a clear
