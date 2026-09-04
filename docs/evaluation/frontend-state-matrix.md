@@ -26,5 +26,6 @@ whether to confirm it.
 3. Required loading, success and error feedback is visible and readable.
 4. A plan displays exactly seven meal cards and a consolidated shopping list.
 5. The assistant never presents disease-specific advice as a planning output.
-6. Desktop and narrow mobile layouts keep primary actions accessible.
+6. The supported 1280×720 desktop viewport keeps primary actions accessible
+   without horizontal task-level scrolling.
 7. No new uncaught console error is introduced by the tested flow.

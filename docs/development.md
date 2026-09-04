@@ -147,7 +147,7 @@ docker compose run --rm frontend pnpm typecheck
 docker compose run --rm frontend pnpm build
 ```
 
-Run browser acceptance tests when a user journey or responsive state changes:
+Run browser acceptance tests when a desktop user journey or visible state changes:
 
 ```bash
 cd frontend
@@ -156,8 +156,9 @@ pnpm test:e2e
 ```
 
 A successful typecheck or build does not prove that the rendered interface is
-usable. Inspect the affected desktop and mobile pages and check browser console
-errors for visible product changes.
+usable. Inspect affected pages at the supported minimum 1280×720 desktop
+viewport and check browser console errors for visible product changes. Mobile
+and tablet layouts are outside the current product and evaluation scope.
 
 ## Database Migrations
 

@@ -11,7 +11,7 @@
 - [ ] 后端 Ruff 与 Pytest 通过，或本 PR 不涉及后端
 - [ ] 前端 ESLint、Vitest、typecheck 与 build 通过，或本 PR 不涉及前端
 - [ ] Docker Compose 配置检查通过
-- [ ] 已完成相关页面的桌面端与移动端人工检查，或本 PR 不涉及页面
+- [ ] 已在最低 1280×720 桌面视口检查相关页面，或本 PR 不涉及页面
 - [ ] 已更新相关 API、架构或使用文档
 - [ ] 未提交密码、Token、个人数据或本地 .env
 
