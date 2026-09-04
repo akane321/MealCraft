@@ -197,6 +197,8 @@ for users, contributors, maintainers, and coding agents.
   flow, and runtime behaviour
 - [Design Contracts](docs/design/README.md) - detailed module outputs,
   dependencies, hand-offs, readiness gates, and Evaluation v2 design
+- [Data Engineering Handoff](docs/data/README.md) - recipe and ingredient
+  sources, cleaning layers, review policy, release gates, and teammate hand-off
 - [API Contracts](docs/api-contracts.md) - current HTTP and schema contracts
 - [Development](docs/development.md) - setup, run, debug, test, and recovery
 - [MVP Boundary](docs/mvp-boundary.md) - minimum baseline and exact current

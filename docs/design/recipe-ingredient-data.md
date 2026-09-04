@@ -7,6 +7,11 @@ grounding, explanation and evaluation can share. Its goal is not to maximize
 the number of fields. Its goal is to provide trustworthy, typed facts that have
 an identified consumer.
 
+For the operational pipeline, source policy, release artifacts, two-person
+workflow and acceptance gates, use the
+[Data Engineering Handoff](../data/README.md). This document remains the short
+canonical contract between modules.
+
 ## Verified baseline
 
 The current catalog contains 30 recipes and 34 normalized ingredients. A recipe
@@ -72,6 +77,12 @@ Raw records must remain distinguishable from normalized facts. Automatic
 normalization should produce an unresolved state instead of silently guessing a
 canonical ingredient or conversion.
 
+The raw, staging, candidate, review, curated and immutable release layers must
+remain distinguishable. Restricted raw datasets stay outside the public
+repository and are referenced by a source manifest and checksum. A candidate
+match score is a review-prioritization signal, not evidence that the match is
+correct.
+
 ## Minimum hand-off contracts
 
 The planner can consume a recipe only when identity, servings, time, dietary
@@ -110,6 +121,8 @@ must not be presented as whole-catalog coverage.
 5. Sources and transformations are traceable.
 6. Evaluation claims are enabled only for fields whose coverage meets a
    predeclared threshold.
+7. The release manifest records source versions, code revision, schema version,
+   output hashes, metric denominators and known gaps.
 
 ## Open design questions
 

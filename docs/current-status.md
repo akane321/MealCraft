@@ -4,7 +4,7 @@
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `78b16db` - `chore: focus frontend on desktop web (#17)`
+> Verified remote `main`: `8245468` - `docs: define capability evaluation and module contracts (#18)`
 
 ## How to Read This Document
 
