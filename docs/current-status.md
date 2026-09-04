@@ -28,7 +28,7 @@
 | Shopping List | Aggregated demand, known-quantity deduction, package rounding, price and budget results | Unknown pantry quantities are never deducted |
 | Check-in and Dashboard | Planned/completed/skipped states, daily totals, weekly trends, completion coverage | Counts completed MealCraft dishes only |
 | Replanning | Preview, confirm/discard, plan revision, event history, local meal changes, price and Shopping List deltas | Broader preference and stress-event semantics remain partial |
-| Evaluation | Developer, held-out, and Agent fixtures; greedy baseline; failure registry; state tests; desktop/mobile browser tests | Evidence uses curated fixtures and does not establish clinical or population validity |
+| Evaluation | Developer, held-out, and Agent fixtures; greedy baseline; failure registry; state tests; desktop browser tests at 1280×720 | Evidence uses curated fixtures and does not establish clinical or population validity |
 
 ## Recorded Evaluation Snapshot
 
@@ -85,7 +85,7 @@ improved.
 | Dynamic replanning | Partial | Add broader event semantics, temporary versus persistent preference handling, disruption metrics, and Shopping List consistency stress tests |
 | Evaluation scale | Partial | Expand toward 150-200 verified requests, 150-250 recipes, 80-120 planning scenarios, and complete grocery coverage for benchmark demand; preserve frozen splits and digests |
 | Multiple baselines | Partial | Add structured-planner and carefully controlled LLM-only comparisons where cost and safety allow |
-| User-facing quality | Partial | Broaden loading, empty, error, degraded, accessibility, responsive, and end-to-end coverage |
+| User-facing quality | Partial | Deepen loading, empty, error, degraded, accessibility, desktop layout, and end-to-end coverage |
 | Operations and maintainability | Target beyond the original proposal | Add health, data-quality, mapping, trace, and evaluation diagnostics where they reduce maintenance and demo risk |
 
 ## Current Priorities

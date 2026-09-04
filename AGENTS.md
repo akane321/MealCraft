@@ -113,8 +113,8 @@ docker compose run --rm frontend pnpm build
 ```
 
 Run `python -m app.evaluation.workbench` for evaluation-affecting changes and
-Playwright for affected user journeys. Do not claim visual or responsive quality
-from a successful build alone.
+Playwright for affected desktop user journeys. Do not claim visual quality from
+a successful build alone. Mobile and tablet product design are out of scope.
 
 Update the canonical document identified in `docs/README.md` when behaviour,
 contracts, setup, final direction, or evaluation semantics change.

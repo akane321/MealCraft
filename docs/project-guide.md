@@ -293,6 +293,9 @@ same responsibility and evidence.
 The following are not primary objectives unless a later accepted decision gives
 them clear value, evidence, and delivery capacity:
 
+- mobile and tablet layouts, touch-specific interaction patterns, and
+  mobile-device browser acceptance; the supported product and demonstration
+  surface is desktop web at a minimum viewport of 1280×720;
 - OCR, food-image recognition, and barcode scanning;
 - ordering, payment, and multi-store route optimization;
 - social or community functions;
