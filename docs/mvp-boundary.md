@@ -6,6 +6,10 @@ reason to stop improving a completed module. Capabilities beyond this baseline
 must be prioritized by user value, evaluation benefit, implementation cost,
 dependencies, and risk, then integrated with tests, documentation, and evidence.
 
+Read [Project Guide](project-guide.md) for the final product ambition and
+[Current Status](current-status.md) for the last verified implementation and
+remaining design gaps.
+
 ## Core User Flow
 
 1. The user saves a versioned household profile containing member servings and
