@@ -2,6 +2,51 @@
 
 This public repository contains source code. The private sibling repository `MealCraft-Knowledge` is the shared project-memory authority for accepted decisions, course requirements, current state, risks, and task history.
 
+## Required public reading order
+
+Before reasoning about a material change, read:
+
+1. `docs/project-guide.md` for the accepted final product direction;
+2. `docs/current-status.md` for the last documented verified snapshot;
+3. `docs/architecture.md` for current component and calculation boundaries;
+4. `docs/api-contracts.md` and the relevant code/tests for exact behaviour;
+5. `docs/mvp-boundary.md` when minimum product semantics are involved;
+6. `docs/evaluation/protocol-v1.md` when changing data, planning, Agent,
+   grocery, nutrition, frontend evidence, or metrics.
+
+The initial proposal defines a minimum final-product ambition. Its maintained
+public interpretation is `docs/project-guide.md`; do not require every agent to
+infer the current target from an old PDF. The current MVP is not the final scope.
+
+## Evidence hierarchy
+
+When sources disagree, use this order unless the current user instruction or a
+course authority explicitly overrides it:
+
+1. current code, migrations, generated OpenAPI, and passing tests;
+2. accepted, non-superseded decisions in the private knowledge repository;
+3. `docs/api-contracts.md` and `docs/architecture.md`;
+4. `docs/current-status.md`;
+5. `docs/project-guide.md`, roadmap, Issues, and proposals.
+
+A design target, Issue, branch, or roadmap entry is not implemented behaviour.
+
+## Public code map
+
+```text
+backend/app/api/          HTTP routes and request/response boundaries
+backend/app/services/     deterministic workflows and domain services
+backend/app/repositories/ persistence adapters
+backend/app/evaluation/   repeatable datasets, metrics and reports
+frontend/app/pages/       user-facing routes
+frontend/app/components/  reusable product interface
+data/recipes/             validated recipe catalog
+data/ingredients/         normalized ingredient catalog
+data/fixtures/            deterministic grocery fixtures
+data/evaluation/          versioned evaluation inputs
+docs/                     maintained product and engineering documentation
+```
+
 ## Before material changes
 
 Classify the task:
@@ -35,6 +80,44 @@ If the private knowledge repository cannot be accessed, state that the context i
 - Preserve unrelated user changes and use feature branches plus pull requests.
 - Keep numeric constraints, nutrition, cost, package quantity, Shopping List, and evaluation logic deterministic and testable. The Agent may parse intent and explain tool results.
 - Never commit secrets, `.env`, real personal health data, private memory content, or raw restricted course material to this public repository.
+
+## Protected product invariants
+
+- Allergens, prohibited ingredients, diet compatibility, explicit numeric
+  limits, nutrition arithmetic, cost, packages, pantry deduction, Shopping List
+  derivation, Dashboard aggregation, and evaluation metrics remain deterministic
+  and testable.
+- Unknown pantry quantity may affect ranking but must not be deducted.
+- Dashboard actuals include completed MealCraft dishes only.
+- Broad lower-sodium or lower-sugar preferences are not medical prescriptions or
+  silent hard filters.
+- Live FairPrice data must remain distinguishable from cache and fixture data.
+- An external recipe or model response is untrusted until parsed, normalized,
+  validated, and linked to provenance.
+- The Shopping List is derived after the final plan is validated; it is not a
+  free-form Agent output.
+
+## Verification routing
+
+Use checks proportional to the changed surface:
+
+```bash
+docker compose config --quiet
+docker compose exec backend uv run --no-sync ruff check .
+docker compose exec backend uv run --no-sync ruff format --check .
+docker compose exec backend uv run --no-sync pytest
+docker compose run --rm frontend pnpm lint
+docker compose run --rm frontend pnpm test
+docker compose run --rm frontend pnpm typecheck
+docker compose run --rm frontend pnpm build
+```
+
+Run `python -m app.evaluation.workbench` for evaluation-affecting changes and
+Playwright for affected user journeys. Do not claim visual or responsive quality
+from a successful build alone.
+
+Update the canonical document identified in `docs/README.md` when behaviour,
+contracts, setup, final direction, or evaluation semantics change.
 
 ## After material changes
 

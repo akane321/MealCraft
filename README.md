@@ -1,130 +1,217 @@
 # MealCraft
 
-MealCraft is a constraint-aware weekly dietary planning application developed for
-DSS5105 Data Science Projects in Practice.
+MealCraft is an explainable, constraint-aware weekly meal-planning system that
+turns household requirements and real grocery information into a validated meal
+plan and an actionable Shopping List.
 
-## Product Goal and Minimum Baseline
+It is developed for **DSS5105 Data Science Projects in Practice**. The project
+targets a polished, evidence-backed final product: the current MVP is a minimum
+acceptance baseline, not the scope or quality ceiling.
 
-MealCraft targets a polished, evidence-backed final product. The MVP is the minimum acceptance baseline, not a scope or quality ceiling. Once a capability meets the baseline, development continues toward stronger user value, reliability, usability, evaluation evidence, and engineering quality according to priority, risk, and available time.
+## Product Vision
 
-The system accepts user dietary constraints, generates a seven-day meal plan,
-maps required ingredients to FairPrice products, produces a grocery list,
-supports previewed event-driven plan adjustments, and visualizes planned and
-completed MealCraft nutrition through a dashboard.
+MealCraft addresses a planning problem that ordinary recipe search and one-shot
+LLM generation do not solve reliably. A useful weekly plan must coordinate
+dietary restrictions, allergens, budget, cooking time, serving size, optional
+nutrition targets, existing ingredients, real product packages, and changing
+user decisions without losing numerical consistency.
+
+The intended product journey is:
+
+```text
+Household profile and natural-language request
+                    |
+          Agent parsing and clarification
+                    |
+       Grounded recipe candidate retrieval
+                    |
+   Deterministic planning, calculation and validation
+                    |
+     FairPrice products, packages and observed prices
+                    |
+       Validated weekly plan and Shopping List
+                    |
+          Check-in, Dashboard and replanning
+```
+
+The LLM may interpret intent, request clarification, select tools, and explain
+results. It does **not** own allergen decisions, constraint validation, nutrition
+arithmetic, package quantities, cost calculation, or Shopping List derivation.
+Those operations remain deterministic and testable.
+
+## Current Verified Capabilities
+
+| Capability | Current implementation |
+| --- | --- |
+| Household profile | One shared household profile with member servings, safety constraints, shared defaults, and immutable versions |
+| Planning assistant | Persistent English/Chinese conversations, structured constraint state, targeted clarification, confirmation, and tool delegation |
+| Weekly planning | Persisted seven-day main-meal plans with hard filtering, soft ranking, diversity control, and per-person nutrition |
+| Grocery grounding | FairPrice product lookup with normalized packages, PostgreSQL cache, and reproducible fixtures |
+| Shopping List | Consolidated ingredient demand, known-quantity pantry deduction, package rounding, and budget results |
+| Plan execution | `planned`, `completed`, and `skipped` check-in states |
+| Nutrition Dashboard | Daily totals, weekly trends, and completion coverage for completed MealCraft dishes only |
+| Replanning | Revision-safe preview, confirmation or discard, local meal changes, Shopping List deltas, and event history |
+| Evaluation | Versioned developer, held-out, and Agent fixtures; greedy baseline; failure registry; frontend state and browser tests |
+
+This table reports capabilities verified on remote `main`, not every final
+design target. Read [Current Status](docs/current-status.md) for the evidence
+boundary, known limitations, and next gaps.
+
+## Product Boundaries
+
+- Allergens, prohibited ingredients, incompatible diet types, and explicit
+  user-entered limits are validated as constraints.
+- Lower-sodium, lower-sugar, lower-calorie, nutrition alignment, variety, and
+  pantry use are general planning preferences unless the user supplies an
+  explicit numeric ceiling.
+- Calorie and macronutrient targets are used only when entered by the user.
+  MealCraft does not calculate BMR/TDEE or prescribe weight-loss or muscle-gain
+  targets.
+- Dashboard totals include completed MealCraft dishes only. Off-plan food is not
+  inferred or recorded.
+- A known pantry quantity may reduce purchase demand. An unknown quantity may
+  influence recipe ranking but is never silently deducted.
+- MealCraft does not provide clinical nutrition, diagnosis, disease treatment,
+  or medically tailored diet planning.
+- Complete inventory management, waste prediction, multi-store price
+  comparison, ordering, and payment are not part of the verified baseline.
+
+See [MVP Boundary](docs/mvp-boundary.md) for precise current semantics and
+[Project Guide](docs/project-guide.md) for the final product direction.
 
 ## Technology Stack
 
-- Backend: Python 3.12, FastAPI, Pydantic, SQLAlchemy
+- Backend: Python 3.12, FastAPI, Pydantic, SQLAlchemy, Alembic
 - Frontend: Nuxt 4, Vue 3, TypeScript
 - Database: PostgreSQL
-- Python package management: uv
-- Frontend package management: pnpm
+- Agent orchestration: LangGraph-style state and tool orchestration
+- Optional language parser: OpenAI structured output through LangChain
+- Package management: uv and pnpm
 - Infrastructure: Docker Compose
-- Backend testing: Pytest
-- Frontend testing: Vitest
-- Agent orchestration: LangGraph
-- Optional language parser: OpenAI structured outputs through LangChain
+- Quality: Ruff, Pytest, ESLint, Vitest, Playwright, GitHub Actions
 
-## Repository Structure
+The initial proposal mentioned alternative frameworks such as Next.js and
+Supabase. Nuxt, FastAPI, and PostgreSQL are intentional implementation choices
+that preserve the same product responsibilities.
 
-- `backend/`: backend API and business logic
-- `frontend/`: Nuxt frontend application
-- `data/ingredients/` and `data/recipes/`: validated reference catalog
-- `data/fixtures/`: stable FairPrice-shaped products
-- `data/evaluation/`: repeatable planning scenarios
-- `docs/`: architecture, MVP boundary, and API contracts
-- `.github/workflows/`: continuous integration
-- `AGENTS.md`: cross-agent work protocol and private shared-memory bootstrap
-- `docs/memory-bootstrap.md`: cross-device setup and daily memory workflow
+## Repository Map
 
-## Current Status
-
-The full-stack development environment is operational. The first business
-vertical slice provides a PostgreSQL recipe catalog, FastAPI list/detail APIs,
-and responsive Nuxt recipe pages. The constraint-matching slice adds a
-deterministic recommendation API and an explainable planning form. The product
-slice queries the current FairPrice catalogue with a PostgreSQL cache and an
-explicit fixture fallback, maps ingredients to package sizes, and enforces the
-per-meal budget using estimated ingredient-use cost. The weekly-planning slice
-persists a seven-day main-meal schedule, avoids consecutive repetition where
-possible, aggregates per-person nutrition, and produces one consolidated,
-package-aware shopping list with a weekly budget result. The meal-execution
-slice lets users mark each planned dish as planned, completed, or skipped, and
-visualizes completed MealCraft dishes through daily nutrition totals, weekly
-trends, and completion progress. The planning-assistant slice persists every
-conversation and its structured constraint state, asks targeted clarification
-questions, and invokes the deterministic weekly planner only after confirmation.
-It runs without an API key in reproducible fixture mode; OpenAI parsing is an
-explicit optional configuration.
-The dynamic-replanning slice adds revision-safe previews for meal replacement,
-cancellation, locking, and unavailable ingredients. Confirmed changes update
-only the target meal and its derived shopping demand, while an event trail keeps
-the before/after decision auditable.
-The agent-replanning slice closes the interaction loop: users can request one
-change in English or Chinese inside the existing Assistant conversation, answer
-a focused clarification when needed, inspect recipe, nutrition, Shopping List,
-and price deltas, then confirm or discard the persistent preview. The Agent
-delegates every calculation and mutation to the deterministic replanning engine.
-The data-quality and evaluation slice expands the validated catalog to 30
-recipes and 34 normalized ingredients, provides complete fixture product
-mappings, imports the catalog idempotently at startup, and gates changes through
-20 developer scenarios. A separate 40-case held-out set compares a transparent
-greedy baseline with the MealCraft weekly planner, while a 24-case offline Agent
-benchmark records extraction, clarification and medical-boundary behaviour.
-The household-profile slice persists member-level servings and safety
-constraints together with shared budget, time, nutrition, pricing, and pantry
-defaults. Every edit creates an immutable version. Plans generated from a
-profile record the exact version and a replacement plan explains which
-constraint groups changed.
+```text
+backend/app/api/          HTTP routes and request boundaries
+backend/app/services/     deterministic application and domain services
+backend/app/repositories/ persistence adapters
+backend/app/evaluation/   repeatable evaluation workbench
+frontend/app/pages/       user-facing product routes
+frontend/app/components/  reusable interface components
+data/recipes/             versioned recipe catalog
+data/ingredients/         normalized ingredient catalog
+data/fixtures/            reproducible grocery fixtures
+data/evaluation/          versioned evaluation inputs
+docs/                     product, architecture, operation and evaluation docs
+.github/                   CI, issue, PR and ownership configuration
+```
 
 ## Quick Start
+
+Prerequisites: Git, Docker Desktop with WSL 2, and Docker Compose. Clone the
+repository, then run from the repository root:
 
 ```bash
 cp .env.example .env
 docker compose up --build --detach
+docker compose ps
 ```
 
-The backend validates and imports the reference catalog after migrations, so a
-fresh environment and an existing environment converge on the same records.
+PowerShell users can create the local environment file with:
 
-- Backend API: <http://localhost:8000>
-- Frontend: <http://localhost:3000>
+```powershell
+Copy-Item .env.example .env
+```
+
+The backend applies pending migrations, validates and imports the reference
+catalog idempotently, and starts the API. The local `.env` file must never be
+committed.
+
+### Local entry points
+
+- Product home: <http://localhost:3000>
 - Planning assistant: <http://localhost:3000/assistant>
 - Household profile: <http://localhost:3000/profile>
 - Recipe catalog: <http://localhost:3000/recipes>
 - Constraint matching: <http://localhost:3000/plan>
 - Seven-day planning: <http://localhost:3000/weekly-plan>
-- Meal check-in dashboard: <http://localhost:3000/dashboard>
+- Meal check-in Dashboard: <http://localhost:3000/dashboard>
 - FairPrice product search: <http://localhost:3000/products>
-- Swagger documentation: <http://localhost:8000/docs>
+- Backend API: <http://localhost:8000>
+- Swagger: <http://localhost:8000/docs>
 - Health check: <http://localhost:8000/api/health>
 
-## Evaluation
+Follow the [User Guide](docs/user-guide.md) for the product workflow and the
+[Development Guide](docs/development.md) for setup, testing, debugging, pricing
+modes, migrations, and troubleshooting.
 
-The versioned method and metric definitions are documented in
-[docs/evaluation/protocol-v1.md](docs/evaluation/protocol-v1.md). Run the
-developer quality gate and the complete offline workbench from the repository
-root:
+## Evaluation Snapshot
+
+The committed offline-first workbench currently contains 20 developer planning
+scenarios, 40 held-out planning scenarios (36 feasible and 4 infeasible), and 24
+Agent fixtures. On the recorded held-out run, the transparent greedy baseline
+and MealCraft used the same eligible recipe pool:
+
+| Metric | Greedy baseline | MealCraft |
+| --- | ---: | ---: |
+| Adjacent repetitions | 216 | 0 |
+| Mean distinct recipes per plan | 1.0 | 6.1389 |
+| Feasible-case failures | 36 | 0 |
+
+The recorded MealCraft run had zero hard-constraint violations. The offline
+Agent fixture result was field F1 `0.907` and exact-case rate `16/24`; eight
+failures remain visible for regression work. These results describe curated,
+versioned fixtures, not clinical outcomes, representative Singapore households,
+or the reliability of the live FairPrice website.
+
+Run the deterministic developer gate and full offline workbench:
 
 ```bash
-uv run --project backend python -m app.evaluation
-uv run --project backend python -m app.evaluation.workbench
+docker compose exec backend uv run --no-sync python -m app.evaluation
+docker compose exec backend uv run --no-sync python -m app.evaluation.workbench
 ```
 
-The generated comparison and failure registry are written to
-[`docs/evaluation/workbench/latest.md`](docs/evaluation/workbench/latest.md).
-Both commands use fixtures and make no paid API call. The optional OpenAI Agent
-benchmark is reserved behind two explicit command-line switches and a runtime
-environment variable; it is not used by CI or the committed protocol-v1 report.
+Neither command makes a paid API call by default. Read the
+[Evaluation Protocol](docs/evaluation/protocol-v1.md) and the
+[latest workbench report](docs/evaluation/workbench/latest.md) before quoting
+results.
 
-Frontend state tests run with `pnpm test`; browser acceptance tests run with
-`pnpm test:e2e` after installing the Playwright Chromium browser.
+## Documentation
 
-## Shared Project Memory
+Start with [Documentation Home](docs/README.md), which provides reading paths
+for users, contributors, maintainers, and coding agents.
 
-Approved team members use the private `MealCraft-Knowledge` repository as the
-versioned source for project decisions, course requirements, current state,
-risks, and task history. Read [docs/memory-bootstrap.md](docs/memory-bootstrap.md)
-before the first material contribution. The private repository is intentionally
-kept separate from this public source repository and is never required to run
-the application.
+- [Project Guide](docs/project-guide.md) - product purpose, principles, final
+  design, functional model, and success definition
+- [User Guide](docs/user-guide.md) - how to operate the current application
+- [Current Status](docs/current-status.md) - verified implementation, remaining
+  design gaps, and current priorities
+- [Architecture](docs/architecture.md) - components, ownership boundaries, data
+  flow, and runtime behaviour
+- [API Contracts](docs/api-contracts.md) - current HTTP and schema contracts
+- [Development](docs/development.md) - setup, run, debug, test, and recovery
+- [MVP Boundary](docs/mvp-boundary.md) - minimum baseline and exact current
+  semantics
+- [Evaluation](docs/evaluation/protocol-v1.md) - datasets, metrics, baselines,
+  limitations, and execution
+- [Contributing](CONTRIBUTING.md) - Issue, branch, validation, review, and merge
+  workflow
+- [Agent Instructions](AGENTS.md) - mandatory context and safety rules for coding
+  agents
+
+## Contributing and Shared Context
+
+Use short-lived task branches, pull requests, automated checks, and teammate
+review. Begin with [CONTRIBUTING.md](CONTRIBUTING.md); do not commit directly to
+`main`.
+
+Approved contributors may also use the private sibling repository
+`MealCraft-Knowledge` for accepted decisions, course requirements, risks, and
+task history. The private repository is never required to run MealCraft and its
+contents must not be copied into this public repository. See
+[Memory Bootstrap](docs/memory-bootstrap.md).

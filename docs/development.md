@@ -1,5 +1,10 @@
 # Development
 
+This guide explains how to obtain, run, inspect, test, and recover the current
+MealCraft development environment. New contributors should first read the
+[Project Guide](project-guide.md), [Current Status](current-status.md), and
+[Contributing Guide](../CONTRIBUTING.md).
+
 ## Prerequisites
 
 - Git
@@ -11,8 +16,26 @@
 
 ## Initial Setup
 
+Clone the repository into a normal development directory. Do not download a ZIP
+if the clone will be used for team contribution:
+
+```bash
+git clone https://github.com/akane321/MealCraft.git
+cd MealCraft
+git switch main
+git pull --ff-only origin main
+```
+
+Create the local environment file:
+
 ```bash
 cp .env.example .env
+```
+
+PowerShell:
+
+```powershell
+Copy-Item .env.example .env
 ```
 
 The `.env` file is local-only and must not be committed.
@@ -103,13 +126,17 @@ Run the reproducible baseline evaluation and refresh both reports:
 
 ```bash
 docker compose exec backend uv run --no-sync python -m app.evaluation
+docker compose exec backend uv run --no-sync python -m app.evaluation.workbench
 ```
 
 The evaluation covers 20 constraint combinations and fails when catalog size,
 scenario feasibility, hard-constraint safety, deterministic selection,
 consecutive-repeat avoidance, product mapping, or grocery completeness falls
 below its gate. Results are written to `docs/evaluation/latest.json` and
-`docs/evaluation/latest.md`.
+`docs/evaluation/latest.md`. The workbench additionally runs the held-out
+planner comparison and offline Agent fixture benchmark and writes
+`docs/evaluation/workbench/latest.json` and `latest.md`. Both commands are
+fixture-only by default and do not make a paid API call.
 
 ## Run Frontend Quality Checks
 
@@ -119,6 +146,18 @@ docker compose run --rm frontend pnpm test
 docker compose run --rm frontend pnpm typecheck
 docker compose run --rm frontend pnpm build
 ```
+
+Run browser acceptance tests when a user journey or responsive state changes:
+
+```bash
+cd frontend
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+A successful typecheck or build does not prove that the rendered interface is
+usable. Inspect the affected desktop and mobile pages and check browser console
+errors for visible product changes.
 
 ## Database Migrations
 
@@ -133,6 +172,73 @@ Apply pending migrations:
 ```bash
 docker compose exec backend uv run --no-sync alembic upgrade head
 ```
+
+## Debugging and Inspection
+
+### Follow logs
+
+```bash
+docker compose logs --follow backend
+docker compose logs --follow frontend
+docker compose logs --follow db
+```
+
+### Inspect API contracts
+
+Open <http://localhost:8000/docs>. The generated OpenAPI view is the fastest
+way to inspect current request and response models. Compare material changes
+with [API Contracts](api-contracts.md).
+
+### Inspect persisted state
+
+Use repository/service tests or a PostgreSQL client connected to
+`localhost:15432`. Do not manually edit production-like data to make a test
+pass; add an explicit seed, fixture, migration, or reproducible setup.
+
+### Work in a Dev Container
+
+Open the repository folder in VS Code after Docker Desktop and WSL 2 are ready.
+Use **Dev Containers: Reopen in Container** when the repository configuration is
+detected. If the command is absent, confirm that the Dev Containers extension is
+installed and that the repository root, not a parent directory, is open.
+
+## Common Problems
+
+### A service is unhealthy or a page cannot reach the API
+
+```bash
+docker compose ps
+docker compose logs --tail 200 backend
+```
+
+Verify <http://localhost:8000/api/health>, then inspect the backend log before
+changing application code.
+
+### A local port is already in use
+
+Check which application owns ports `3000`, `8000`, or `15432`, stop the stale
+process or container, and restart Compose. Do not silently change committed
+ports for one machine.
+
+### Migrations and local database state disagree
+
+```bash
+docker compose exec backend uv run --no-sync alembic current
+docker compose exec backend uv run --no-sync alembic upgrade head
+```
+
+Preserve the database volume unless discarding local data is intentional. Never
+use `docker compose down --volumes` as a routine troubleshooting step.
+
+### FairPrice live lookup is unavailable
+
+Use fixture mode to continue deterministic development. Record and expose the
+degraded state; do not label cache or fixture data as a successful fresh lookup.
+
+### The optional model parser is unavailable
+
+Return to `AGENT_PARSER_PROVIDER=fixture`. A missing key or provider response
+must not prevent deterministic development, CI, or evaluation.
 
 ## Stop the Development Services
 
