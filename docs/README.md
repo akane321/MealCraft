@@ -28,7 +28,10 @@ already implemented.
 6. For recipe or ingredient work, follow the
    [Data Engineering Handoff](data/README.md) before changing source, schema,
    normalization, review or release behaviour.
-7. Read the relevant evaluation protocol before changing planning, Agent,
+7. For FairPrice, YouTube, or RAG work, follow the
+   [External Retrieval and RAG Handoff](design/external-retrieval-rag.md) before
+   changing providers, evidence, ranking, caching, or fallback semantics.
+8. Read the relevant evaluation protocol before changing planning, Agent,
    grocery, nutrition, or evaluation semantics.
 
 ### I am a coding agent
@@ -62,6 +65,7 @@ already implemented.
 | How do I contribute safely? | [CONTRIBUTING.md](../CONTRIBUTING.md) |
 | What must each module produce for other modules? | [Design Contracts](design/README.md) |
 | How is recipe and ingredient data sourced, cleaned, reviewed and released? | [Data Engineering Handoff](data/README.md) |
+| How are FairPrice, YouTube and external evidence retrieved and handed off? | [External Retrieval and RAG Handoff](design/external-retrieval-rag.md) |
 | What evaluation is executable now? | [Evaluation Protocol v1](evaluation/protocol-v1.md) |
 | What comparative capability evaluation are we building? | [Comparative Evaluation v2](design/comparative-evaluation-v2.md) |
 

@@ -6,7 +6,9 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db_session
 from app.repositories.recipe import RecipeRepository
 from app.schemas.recipe import RecipeCollectionResponse, RecipeDetailResponse
+from app.schemas.retrieval import TutorialRecommendationResponse
 from app.services.recipe import RecipeService
+from app.services.tutorial import TutorialRecommendationService, create_tutorial_service
 
 router = APIRouter(prefix="/recipes", tags=["recipes"])
 
@@ -18,6 +20,13 @@ def get_recipe_service(database: DatabaseDependency) -> RecipeService:
 
 
 RecipeServiceDependency = Annotated[RecipeService, Depends(get_recipe_service)]
+
+
+def get_tutorial_service(database: DatabaseDependency) -> TutorialRecommendationService:
+    return create_tutorial_service(RecipeRepository(database))
+
+
+TutorialServiceDependency = Annotated[TutorialRecommendationService, Depends(get_tutorial_service)]
 
 
 @router.get("", response_model=RecipeCollectionResponse)
@@ -41,3 +50,19 @@ def get_recipe(
             detail="Recipe not found",
         )
     return recipe
+
+
+@router.get("/{slug}/tutorial", response_model=TutorialRecommendationResponse)
+def get_recipe_tutorial(
+    service: TutorialServiceDependency,
+    slug: Annotated[str, Path(min_length=1, max_length=160)],
+    live: bool = False,
+    language: Annotated[str, Query(min_length=2, max_length=20)] = "en",
+) -> TutorialRecommendationResponse:
+    recommendation = service.recommend(slug, live=live, language=language)
+    if recommendation is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recipe not found",
+        )
+    return recommendation

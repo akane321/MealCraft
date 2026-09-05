@@ -3,6 +3,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.schemas.retrieval import RetrievalTrace
+
 ProductSource = Literal["fairprice", "fixture"]
 PricingMode = Literal["fixture", "live"]
 
@@ -29,6 +31,7 @@ class ProductSearchResponse(BaseModel):
     cached: bool
     warning: str | None
     items: list[ProductResponse]
+    retrieval: RetrievalTrace
 
 
 class GroceryLineEstimate(BaseModel):

@@ -127,6 +127,29 @@ def test_get_recipe_returns_not_found(recipe_client: TestClient) -> None:
     assert response.json() == {"detail": "Recipe not found"}
 
 
+def test_get_recipe_tutorial_returns_one_ranked_video(recipe_client: TestClient) -> None:
+    response = recipe_client.get("/api/recipes/lemon-chicken/tutorial")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["recipe_slug"] == "lemon-chicken"
+    assert payload["selected_video"]["video_id"] == "fixture-lemon-chicken-best"
+    assert "candidates" not in payload
+    assert payload["retrieval"]["provider_used"] == "fixture"
+    assert payload["retrieval"]["selected_external_id"] == "fixture-lemon-chicken-best"
+
+
+def test_get_recipe_tutorial_live_scaffold_degrades_visibly(recipe_client: TestClient) -> None:
+    response = recipe_client.get("/api/recipes/lemon-chicken/tutorial", params={"live": True})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["selected_video"] is not None
+    assert payload["retrieval"]["status"] == "degraded"
+    assert payload["retrieval"]["provider_used"] == "fixture"
+    assert "not configured" in payload["warning"]
+
+
 def test_recommendations_apply_hard_filters_and_return_score_reasons(recipe_client: TestClient) -> None:
     response = recipe_client.post(
         "/api/recommendations/recipes",

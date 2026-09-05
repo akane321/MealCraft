@@ -37,9 +37,9 @@ Shopping List correctness.
 +------+      +-------------v--------------+      +----------------+
 | User | <--> | MealCraft Web Application  | <--> | FairPrice Web  |
 +------+      | Nuxt + FastAPI + Services  |      +----------------+
-              +-------------+--------------+
-                            |
-                     +------v-------+
+              +-------------+--------------+      +----------------+
+                            |              <----> | YouTube API    |
+                     +------v-------+              +----------------+
                      | PostgreSQL   |
                      +--------------+
 ```
@@ -55,6 +55,7 @@ must keep the core flow runnable without an API key or live retailer response.
 | Backend | Python 3.12, FastAPI, Pydantic | HTTP contracts, orchestration, deterministic services, external adapters, and evaluation entry points |
 | Database | PostgreSQL | Profiles and versions, recipes, ingredients, products/cache, plans, entries, grocery items, events, check-ins, and Agent sessions |
 | External provider | FairPrice public catalogue | Current product, package, and observed-price information |
+| Optional tutorial provider | YouTube Data API | Bounded tutorial candidates after recipe selection; only one deterministic Top-1 reaches the user |
 | Optional model provider | OpenAI through structured parsing | Explicit field extraction when locally enabled; never the calculator or validator |
 
 Docker Compose provides the local integration boundary. The backend applies
@@ -208,6 +209,26 @@ Normalized ingredient query
 The response must preserve source mode and freshness so fallback data is not
 presented as current live data.
 
+FairPrice live retrieval is demand-driven: it begins only after a validated
+plan or Shopping List identifies remaining canonical ingredient demand. It must
+not become a broad background catalog crawl.
+
+### Recipe tutorial lookup
+
+```text
+Selected canonical recipe
+ -> deterministic query builder
+ -> bounded YouTube candidates or fixture
+ -> eligibility filter and scored ranking
+ -> one Top-1 tutorial plus retrieval trace
+ -> Recipe Side Panel
+```
+
+Candidate evidence and score components remain internal for evaluation. Video
+content is execution support and cannot overwrite MealCraft ingredients,
+quantities, allergens, nutrition, or written steps. Provider failure returns a
+typed degraded or unavailable state rather than an invented recommendation.
+
 ### Check-in and Dashboard
 
 ```text
@@ -243,6 +264,7 @@ User event
 | Parsed request | Agent session state | User message, parser mode, validated structured output |
 | Plan | Deterministic planning service | Effective constraints, selected recipes, revision, replacement link |
 | Product and price | Grocery provider/cache/fixture | Provider, source mode, package, observed price, timestamp |
+| Tutorial candidate and selection | Tutorial provider plus deterministic ranker | Query, provider mode, candidate count, ranking policy, selected video ID, timestamp, warnings |
 | Shopping List | Shopping engine | Derivable from final plan, pantry state, and product packages |
 | Dashboard actuals | Persisted plan-entry status | Completed entries and coverage |
 | Evaluation result | Evaluation workbench | Code revision, dataset path/digest, method, metrics, failures |
@@ -253,6 +275,10 @@ Runtime architecture is complemented by the [Design Contracts](design/README.md)
 They identify the producer, consumer, versioned artifact, missing-data policy
 and evaluation-readiness gate for recipe data, FairPrice grounding, planning,
 Agent orchestration, frontend evidence and Evaluation v2.
+
+The detailed provider, evidence-packet, Top-1, degradation and teammate
+contracts are defined in
+[External Retrieval and RAG](design/external-retrieval-rag.md).
 
 The core dependency chain is:
 
