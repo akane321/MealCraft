@@ -102,6 +102,7 @@ backend/app/services/     deterministic application and domain services
 backend/app/repositories/ persistence adapters
 backend/app/evaluation/   repeatable evaluation workbench
 backend/app/planning/     deterministic planning, shopping and validation algorithms
+backend/app/auth/         session-token and authorization foundations
 frontend/app/pages/       user-facing product routes
 frontend/app/components/  reusable interface components
 data/recipes/             versioned recipe catalog
@@ -206,6 +207,9 @@ for users, contributors, maintainers, and coding agents.
 - [Algorithm Engineering Handoff](docs/design/algorithm-engineering-handoff.md) -
   final-scope multi-meal mathematical model, deterministic validation,
   Beam Search proposal, product-repair loop, work packages, and completion gates
+- [Backend Platform Engineering Handoff](docs/design/backend-platform-engineering.md) -
+  accounts, revocable sessions, household data isolation, durable jobs,
+  operations traces, internal Console design, security gates, and work packages
 - [API Contracts](docs/api-contracts.md) - current HTTP and schema contracts
 - [Development](docs/development.md) - setup, run, debug, test, and recovery
 - [MVP Boundary](docs/mvp-boundary.md) - minimum baseline and exact current

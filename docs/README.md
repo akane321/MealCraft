@@ -35,6 +35,9 @@ already implemented.
    grocery, nutrition, or evaluation semantics.
 9. For planning, validation, package optimization or algorithm work, use the
    [Algorithm Engineering Handoff](design/algorithm-engineering-handoff.md).
+10. For user accounts, authentication, household data isolation, background
+    jobs or Operations Console work, use the
+    [Backend Platform Engineering Handoff](design/backend-platform-engineering.md).
 
 ### I am a coding agent
 
@@ -69,6 +72,7 @@ already implemented.
 | How is recipe and ingredient data sourced, cleaned, reviewed and released? | [Data Engineering Handoff](data/README.md) |
 | How are FairPrice, YouTube and external evidence retrieved and handed off? | [External Retrieval and RAG Handoff](design/external-retrieval-rag.md) |
 | How should the final-scope planner and validator be completed? | [Algorithm Engineering Handoff](design/algorithm-engineering-handoff.md) |
+| How should accounts, tenancy, operations and the internal Console be completed? | [Backend Platform Engineering Handoff](design/backend-platform-engineering.md) |
 | What evaluation is executable now? | [Evaluation Protocol v1](evaluation/protocol-v1.md) |
 | What comparative capability evaluation are we building? | [Comparative Evaluation v2](design/comparative-evaluation-v2.md) |
 

@@ -10,6 +10,9 @@ Fixture files:
   packet with explicit multi-meal slots, nutrition bands, pantry states,
   product packages and a purchase budget. It is a scaffold fixture, not a
   representative evaluation dataset.
+- `backend-platform/identity-scope.json`: synthetic account, household and
+  expected-access cases for authorization and cross-tenant testing. It contains
+  no usable password, token or personal information.
 
 Reference data is deliberately separated from database migrations:
 

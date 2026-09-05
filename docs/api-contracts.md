@@ -1,5 +1,13 @@
 # API Contracts
 
+> Backend platform boundary: account and tenancy models introduced by the
+> backend-platform scaffold do not yet expose registration/login endpoints and
+> do not secure the current anonymous routes. Target auth, household membership
+> and `/api/ops` contracts are documented in
+> [Backend Platform Engineering Handoff](design/backend-platform-engineering.md)
+> and require a complete route-plus-ownership migration before they become
+> current API behaviour.
+
 The system will define the following shared objects:
 
 - UserConstraints

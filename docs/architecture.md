@@ -95,6 +95,11 @@ depend on frontend presentation. Repositories should not decide product policy.
   version.
 - Creates a replacement plan rather than rewriting history after profile change.
 
+The accepted final backend adds `User`, `AuthSession`, `Household` and
+`HouseholdMembership` as identity and tenancy concepts. These additive models
+are currently a scaffold: existing routes are not authenticated or
+household-scoped until the complete ownership migration is implemented.
+
 ### Agent
 
 - Persists conversations and structured constraint state.
@@ -312,7 +317,8 @@ upstream schema, provenance, unknown semantics and validation evidence exist.
 The architecture should evolve toward the product baseline without mislabelling
 targets as current behaviour:
 
-- authentication and user separation appropriate to deployment;
+- authentication, revocable device sessions, household membership and complete
+  private-resource isolation appropriate to deployment;
 - a larger high-dimensional recipe and nutrition catalog;
 - validated external recipe ingestion;
 - semantic retrieval followed by metadata filtering;
@@ -322,6 +328,10 @@ targets as current behaviour:
 - broader dynamic-event semantics and disruption metrics;
 - operations views for health, data quality, product mapping, plan trace, Agent
   trace, and evaluation runs.
+
+The implementation boundary, staged migration, security invariants, durable-job
+design and Console work packages are defined in the
+[Backend Platform Engineering Handoff](design/backend-platform-engineering.md).
 
 Each extension must define contracts, failure behaviour, tests, evaluation
 evidence, and a fallback strategy before it is treated as complete.
