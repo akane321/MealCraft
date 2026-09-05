@@ -116,7 +116,7 @@ credible implementation a competent developer could build without an Agent.
 - strict feasible/infeasible classification accuracy;
 - episode-level hard-constraint violation rate;
 - violation count per planned meal and per applicable constraint;
-- seven-day completion rate for feasible cases;
+- required-slot completion rate for feasible cases;
 - nutrition absolute deviation and rate within predeclared tolerance;
 - weekly-budget compliance and cost regret against the best known valid plan;
 - adjacent repetition and distinct-recipe count;

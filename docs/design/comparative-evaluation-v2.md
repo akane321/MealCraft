@@ -310,7 +310,7 @@ are valid. It should define:
 - replanning invariants and expected changed/unaffected items.
 
 The common output schema should preserve status, clarifying question or plan,
-seven day selections, servings, constraint claims, Shopping List lines, package
+all explicit slot selections, servings, constraint claims, Shopping List lines, package
 counts, costs, warnings, relaxation options and explanation evidence references.
 Unparseable output counts as an end-to-end failure and is also reported as a
 schema failure.
@@ -328,7 +328,7 @@ strict success rate = number of episodes passing every applicable required check
 For a labelled feasible episode, success requires:
 
 1. correct interpretation or completion of required clarification;
-2. a complete seven-day plan;
+2. a complete assignment for every required slot in the frozen packet;
 3. zero applicable hard-constraint violations;
 4. nutrition claims calculated under the frozen semantics;
 5. Shopping List ingredients consistent with the final plan;
@@ -375,7 +375,7 @@ score.
 
 ### Plan quality
 
-- seven-day completion rate over labelled feasible episodes;
+- required-slot completion rate over labelled feasible episodes;
 - adjacent repetition count and mean distinct recipes per completed week;
 - nutrition mean absolute deviation and within-tolerance rate, separately by
   nutrient and only where the source field is complete;
