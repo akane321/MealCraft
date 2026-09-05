@@ -20,6 +20,7 @@ Available endpoints:
 - GET /api/info
 - GET /api/recipes?limit=20&after_id={recipe_id}
 - GET /api/recipes/{slug}
+- GET /api/recipes/{slug}/tutorial?live={boolean}&language={language}
 - POST /api/recommendations/recipes
 - GET /api/products/search?q={query}&live={boolean}&refresh={boolean}
 - POST /api/plans/generate
@@ -83,6 +84,13 @@ A recipe detail contains:
 
 Nutrition values are descriptive planning data. They are not medical advice.
 
+`GET /api/recipes/{slug}/tutorial` constructs a deterministic query from the
+canonical recipe and returns at most one selected tutorial. `live=false` uses
+the reproducible fixture provider. The current `live=true` adapter is an
+explicit extension point and degrades to fixtures with a warning; it is not a
+claim that live YouTube search is complete. Candidate lists and raw provider
+payloads are intentionally absent from this user-facing contract.
+
 ## Recipe Recommendations
 
 `POST /api/recommendations/recipes` accepts a structured planning request with:
@@ -122,6 +130,12 @@ deduction, surplus quantity, mapping completeness, and budget result.
 `refresh=true` bypasses a fresh cache entry. If a live lookup fails, the API
 returns fixture results with `fallback_used=true` and a warning; the source is
 never silently misrepresented.
+
+Every product response also carries a retrieval trace with requested source,
+provider used, `live`/`cache`/`fixture` mode, success or degradation status,
+query, fetch time, parser version, candidate count and warnings. Live lookup is
+triggered only for the current product or Shopping List demand; broad catalog
+crawling is outside this contract.
 
 ## Weekly Meal Plans
 

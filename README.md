@@ -199,6 +199,9 @@ for users, contributors, maintainers, and coding agents.
   dependencies, hand-offs, readiness gates, and Evaluation v2 design
 - [Data Engineering Handoff](docs/data/README.md) - recipe and ingredient
   sources, cleaning layers, review policy, release gates, and teammate hand-off
+- [External Retrieval and RAG Handoff](docs/design/external-retrieval-rag.md) -
+  on-demand FairPrice retrieval, YouTube Top-1 tutorial selection, evidence
+  packets, degradation states, teammate work packages, and acceptance metrics
 - [API Contracts](docs/api-contracts.md) - current HTTP and schema contracts
 - [Development](docs/development.md) - setup, run, debug, test, and recovery
 - [MVP Boundary](docs/mvp-boundary.md) - minimum baseline and exact current

@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     fairprice_timeout_seconds: float = 12.0
     fairprice_cache_ttl_minutes: int = 15
     product_fixture_path: str = "data/fixtures/fairprice-products.json"
+    youtube_timeout_seconds: float = 12.0
+    youtube_fixture_path: str = "data/fixtures/youtube-tutorials.json"
+    youtube_api_key: SecretStr | None = None
     agent_parser_provider: Literal["fixture", "openai"] = "fixture"
     agent_max_history_messages: int = 20
     openai_api_key: SecretStr | None = None

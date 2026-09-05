@@ -50,3 +50,7 @@ def test_live_failure_returns_explicit_fixture_fallback() -> None:
     assert response.fallback_used is True
     assert response.items[0].external_id == "fixture-brown-rice-1kg"
     assert "simulated network failure" in response.warning
+    assert response.retrieval.requested_source == "fairprice"
+    assert response.retrieval.status == "degraded"
+    assert response.retrieval.mode == "fixture"
+    assert response.retrieval.candidate_count == len(response.items)

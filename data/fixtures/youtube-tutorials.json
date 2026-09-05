@@ -1,0 +1,42 @@
+[
+  {
+    "video_id": "fixture-lemon-chicken-best",
+    "title": "Lemon Chicken Cooking Tutorial",
+    "channel_title": "MealCraft Fixture Kitchen",
+    "thumbnail_url": null,
+    "duration_seconds": 540,
+    "embeddable": true,
+    "language_hint": "en",
+    "query_terms": ["lemon", "chicken", "mediterranean"]
+  },
+  {
+    "video_id": "fixture-lemon-chicken-short",
+    "title": "Quick Chicken Recipe",
+    "channel_title": "MealCraft Fixture Kitchen",
+    "thumbnail_url": null,
+    "duration_seconds": 210,
+    "embeddable": true,
+    "language_hint": "en",
+    "query_terms": ["lemon", "chicken"]
+  },
+  {
+    "video_id": "fixture-lemon-chicken-blocked",
+    "title": "Perfect Lemon Chicken Cooking Tutorial",
+    "channel_title": "Blocked Fixture Channel",
+    "thumbnail_url": null,
+    "duration_seconds": 600,
+    "embeddable": false,
+    "language_hint": "en",
+    "query_terms": ["lemon", "chicken", "mediterranean"]
+  },
+  {
+    "video_id": "fixture-tofu-soba-best",
+    "title": "Japanese Tofu Soba Noodle Recipe Tutorial",
+    "channel_title": "MealCraft Fixture Kitchen",
+    "thumbnail_url": null,
+    "duration_seconds": 720,
+    "embeddable": true,
+    "language_hint": "en",
+    "query_terms": ["tofu", "soba", "japanese", "noodle"]
+  }
+]

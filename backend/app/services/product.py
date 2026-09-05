@@ -8,6 +8,7 @@ from app.products.provider import (
 )
 from app.repositories.product import ProductSnapshotRepository
 from app.schemas.product import ProductSearchResponse
+from app.schemas.retrieval import RetrievalTrace
 
 
 def create_product_search_service(repository: ProductSnapshotRepository) -> "ProductSearchService":
@@ -57,6 +58,14 @@ class ProductSearchService:
                 cached=False,
                 warning=None,
                 items=items,
+                retrieval=self._trace(
+                    query=normalized_query,
+                    provider_used="fixture",
+                    mode="fixture",
+                    status="success",
+                    items=items,
+                    parser_version="fairprice-fixture-v1",
+                ),
             )
 
         if not refresh:
@@ -75,6 +84,14 @@ class ProductSearchService:
                     cached=True,
                     warning=None,
                     items=cached,
+                    retrieval=self._trace(
+                        query=normalized_query,
+                        provider_used="fairprice",
+                        mode="cache",
+                        status="success",
+                        items=cached,
+                        parser_version="fairprice-next-data-v1",
+                    ),
                 )
 
         try:
@@ -93,6 +110,14 @@ class ProductSearchService:
                 cached=False,
                 warning=None,
                 items=items,
+                retrieval=self._trace(
+                    query=normalized_query,
+                    provider_used="fairprice",
+                    mode="live",
+                    status="success",
+                    items=items,
+                    parser_version="fairprice-next-data-v1",
+                ),
             )
         except ProductProviderError as error:
             fallback_items = self.fixture_provider.search(normalized_query, limit=limit)
@@ -103,4 +128,38 @@ class ProductSearchService:
                 cached=False,
                 warning=f"Live FairPrice lookup was unavailable; stable fixture pricing was used. ({error})",
                 items=fallback_items,
+                retrieval=self._trace(
+                    query=normalized_query,
+                    provider_used="fixture",
+                    mode="fixture",
+                    status="degraded",
+                    items=fallback_items,
+                    parser_version="fairprice-fixture-v1",
+                    warning=str(error),
+                ),
             )
+
+    @staticmethod
+    def _trace(
+        *,
+        query: str,
+        provider_used: str,
+        mode: str,
+        status: str,
+        items: list,
+        parser_version: str,
+        warning: str | None = None,
+    ) -> RetrievalTrace:
+        fetched_at = max((item.fetched_at for item in items), default=datetime.now(UTC))
+        return RetrievalTrace(
+            requested_source="fairprice",
+            provider_used=provider_used,
+            mode=mode,
+            status=status,
+            query=query,
+            fetched_at=fetched_at,
+            parser_version=parser_version,
+            candidate_count=len(items),
+            selected_external_id=None,
+            warnings=[warning] if warning else [],
+        )
