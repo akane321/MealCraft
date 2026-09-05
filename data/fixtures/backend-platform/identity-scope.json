@@ -1,0 +1,23 @@
+{
+  "fixture_version": "backend-platform-identity-scope-v1",
+  "users": [
+    {"key": "alice", "email": "alice@example.test", "system_role": "ordinary_user"},
+    {"key": "bob", "email": "bob@example.test", "system_role": "ordinary_user"},
+    {"key": "reviewer", "email": "reviewer@example.test", "system_role": "data_reviewer"}
+  ],
+  "households": [
+    {"key": "alice-home", "owner": "alice"},
+    {"key": "bob-home", "owner": "bob"}
+  ],
+  "expected_access": [
+    {"user": "alice", "household": "alice-home", "action": "create_plan", "allowed": true},
+    {"user": "alice", "household": "bob-home", "action": "view", "allowed": false},
+    {"user": "bob", "household": "alice-home", "action": "view", "allowed": false},
+    {"user": "reviewer", "operations_action": "review_data", "allowed": true},
+    {"user": "alice", "operations_action": "review_data", "allowed": false}
+  ],
+  "notes": [
+    "AgentSession is a conversation object and must never be treated as an authentication session.",
+    "This fixture contains synthetic identities only and no usable password or token."
+  ]
+}
