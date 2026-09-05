@@ -6,6 +6,10 @@ development and automated testing.
 Fixture files:
 
 - `fairprice-products.json`: stable FairPrice-shaped products used for deterministic development and tests.
+- `planning-v2/final-scope-multislot.json`: final-scope algorithm integration
+  packet with explicit multi-meal slots, nutrition bands, pantry states,
+  product packages and a purchase budget. It is a scaffold fixture, not a
+  representative evaluation dataset.
 
 Reference data is deliberately separated from database migrations:
 

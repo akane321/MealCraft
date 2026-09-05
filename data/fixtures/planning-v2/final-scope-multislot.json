@@ -1,0 +1,134 @@
+{
+  "problem_id": "final-scope-multislot-v1",
+  "slots": [
+    {"slot_id": "2026-09-07-breakfast", "planned_date": "2026-09-07", "meal_type": "breakfast", "servings": 2, "max_time_minutes": 20, "required": true, "locked_recipe_id": "overnight-oats"},
+    {"slot_id": "2026-09-07-lunch", "planned_date": "2026-09-07", "meal_type": "lunch", "servings": 2, "max_time_minutes": 35, "required": true},
+    {"slot_id": "2026-09-07-dinner", "planned_date": "2026-09-07", "meal_type": "dinner", "servings": 2, "max_time_minutes": 55, "required": true},
+    {"slot_id": "2026-09-07-snack", "planned_date": "2026-09-07", "meal_type": "snack", "servings": 2, "max_time_minutes": 10, "required": false},
+    {"slot_id": "2026-09-08-breakfast", "planned_date": "2026-09-08", "meal_type": "breakfast", "servings": 2, "max_time_minutes": 20, "required": true},
+    {"slot_id": "2026-09-08-lunch", "planned_date": "2026-09-08", "meal_type": "lunch", "servings": 2, "max_time_minutes": 35, "required": true},
+    {"slot_id": "2026-09-08-dinner", "planned_date": "2026-09-08", "meal_type": "dinner", "servings": 2, "max_time_minutes": 55, "required": true},
+    {"slot_id": "2026-09-08-snack", "planned_date": "2026-09-08", "meal_type": "snack", "servings": 2, "max_time_minutes": 10, "required": false}
+  ],
+  "recipes": [
+    {
+      "recipe_id": "overnight-oats",
+      "title": "Overnight oats with banana",
+      "servings": 2,
+      "allowed_meal_types": ["breakfast", "snack"],
+      "total_time_minutes": 10,
+      "dietary_tags": ["vegetarian"],
+      "allergens": ["milk"],
+      "ingredients": [
+        {"ingredient_id": "rolled_oats", "quantity": 100, "unit": "g"},
+        {"ingredient_id": "milk", "quantity": 400, "unit": "ml"},
+        {"ingredient_id": "banana", "quantity": 2, "unit": "whole"},
+        {"ingredient_id": "salt", "quantity": 1, "unit": "g"}
+      ],
+      "nutrients_per_serving": {"calories_kcal": 410, "protein_g": 16, "carbohydrate_g": 66, "fat_g": 10, "sodium_mg": 310, "sugar_g": 18},
+      "cuisine": "international"
+    },
+    {
+      "recipe_id": "yogurt-berry-bowl",
+      "title": "Yogurt berry bowl",
+      "servings": 2,
+      "allowed_meal_types": ["breakfast", "snack"],
+      "total_time_minutes": 8,
+      "dietary_tags": ["vegetarian"],
+      "allergens": ["milk"],
+      "ingredients": [
+        {"ingredient_id": "yogurt", "quantity": 400, "unit": "g"},
+        {"ingredient_id": "berries", "quantity": 200, "unit": "g"},
+        {"ingredient_id": "granola", "quantity": 100, "unit": "g"},
+        {"ingredient_id": "salt", "quantity": 1, "unit": "g"}
+      ],
+      "nutrients_per_serving": {"calories_kcal": 360, "protein_g": 17, "carbohydrate_g": 52, "fat_g": 9, "sodium_mg": 240, "sugar_g": 22},
+      "cuisine": "international"
+    },
+    {
+      "recipe_id": "chickpea-wrap",
+      "title": "Chickpea vegetable wrap",
+      "servings": 2,
+      "allowed_meal_types": ["lunch", "dinner"],
+      "total_time_minutes": 25,
+      "dietary_tags": ["vegetarian", "vegan"],
+      "allergens": ["gluten"],
+      "ingredients": [
+        {"ingredient_id": "chickpeas", "quantity": 300, "unit": "g"},
+        {"ingredient_id": "tortilla", "quantity": 4, "unit": "whole"},
+        {"ingredient_id": "mixed_vegetables", "quantity": 250, "unit": "g"},
+        {"ingredient_id": "salt", "quantity": 2, "unit": "g"}
+      ],
+      "nutrients_per_serving": {"calories_kcal": 610, "protein_g": 23, "carbohydrate_g": 92, "fat_g": 17, "sodium_mg": 590, "sugar_g": 11},
+      "cuisine": "mediterranean"
+    },
+    {
+      "recipe_id": "salmon-rice-bowl",
+      "title": "Salmon brown rice bowl",
+      "servings": 2,
+      "allowed_meal_types": ["lunch", "dinner"],
+      "total_time_minutes": 40,
+      "dietary_tags": ["pescatarian"],
+      "allergens": ["fish"],
+      "ingredients": [
+        {"ingredient_id": "salmon", "quantity": 320, "unit": "g"},
+        {"ingredient_id": "brown_rice", "quantity": 180, "unit": "g"},
+        {"ingredient_id": "broccoli", "quantity": 250, "unit": "g"},
+        {"ingredient_id": "salt", "quantity": 2, "unit": "g"}
+      ],
+      "nutrients_per_serving": {"calories_kcal": 690, "protein_g": 40, "carbohydrate_g": 73, "fat_g": 24, "sodium_mg": 640, "sugar_g": 5},
+      "cuisine": "asian-inspired"
+    },
+    {
+      "recipe_id": "tofu-curry",
+      "title": "Tofu vegetable curry",
+      "servings": 2,
+      "allowed_meal_types": ["lunch", "dinner"],
+      "total_time_minutes": 45,
+      "dietary_tags": ["vegetarian", "vegan"],
+      "allergens": ["soy"],
+      "ingredients": [
+        {"ingredient_id": "tofu", "quantity": 400, "unit": "g"},
+        {"ingredient_id": "brown_rice", "quantity": 180, "unit": "g"},
+        {"ingredient_id": "mixed_vegetables", "quantity": 300, "unit": "g"},
+        {"ingredient_id": "salt", "quantity": 2, "unit": "g"}
+      ],
+      "nutrients_per_serving": {"calories_kcal": 640, "protein_g": 31, "carbohydrate_g": 78, "fat_g": 22, "sodium_mg": 620, "sugar_g": 10},
+      "cuisine": "south-asian-inspired"
+    }
+  ],
+  "pantry": [
+    {"ingredient_id": "rolled_oats", "quantity": 50, "unit": "g", "priority_use": true},
+    {"ingredient_id": "salt", "quantity": null, "unit": null, "priority_use": true}
+  ],
+  "products": [
+    {"ingredient_id": "rolled_oats", "product_id": "fp-oats-1kg", "package_quantity": 1000, "package_unit": "g", "price_sgd": 5.2},
+    {"ingredient_id": "milk", "product_id": "fp-milk-1l", "package_quantity": 1000, "package_unit": "ml", "price_sgd": 3.45},
+    {"ingredient_id": "banana", "product_id": "fp-banana-5", "package_quantity": 5, "package_unit": "whole", "price_sgd": 3.1},
+    {"ingredient_id": "yogurt", "product_id": "fp-yogurt-500g", "package_quantity": 500, "package_unit": "g", "price_sgd": 5.4},
+    {"ingredient_id": "berries", "product_id": "fp-berries-300g", "package_quantity": 300, "package_unit": "g", "price_sgd": 6.8},
+    {"ingredient_id": "granola", "product_id": "fp-granola-400g", "package_quantity": 400, "package_unit": "g", "price_sgd": 6.2},
+    {"ingredient_id": "chickpeas", "product_id": "fp-chickpeas-400g", "package_quantity": 400, "package_unit": "g", "price_sgd": 2.2},
+    {"ingredient_id": "tortilla", "product_id": "fp-tortilla-8", "package_quantity": 8, "package_unit": "whole", "price_sgd": 4.9},
+    {"ingredient_id": "mixed_vegetables", "product_id": "fp-vegetables-1kg", "package_quantity": 1000, "package_unit": "g", "price_sgd": 4.6},
+    {"ingredient_id": "salmon", "product_id": "fp-salmon-500g", "package_quantity": 500, "package_unit": "g", "price_sgd": 16.9},
+    {"ingredient_id": "brown_rice", "product_id": "fp-brown-rice-1kg", "package_quantity": 1000, "package_unit": "g", "price_sgd": 5.8},
+    {"ingredient_id": "broccoli", "product_id": "fp-broccoli-500g", "package_quantity": 500, "package_unit": "g", "price_sgd": 4.3},
+    {"ingredient_id": "tofu", "product_id": "fp-tofu-300g", "package_quantity": 300, "package_unit": "g", "price_sgd": 2.4},
+    {"ingredient_id": "salt", "product_id": "fp-salt-500g", "package_quantity": 500, "package_unit": "g", "price_sgd": 1.2}
+  ],
+  "allergens": [],
+  "excluded_ingredients": [],
+  "dietary_requirements": [],
+  "health_preferences": ["low-sodium"],
+  "nutrition_bands": [
+    {"metric": "calories_kcal", "scope": "per_day", "lower": 1200, "upper": 2300, "hard": true},
+    {"metric": "protein_g", "scope": "horizon_average", "lower": 55, "upper": null, "hard": false}
+  ],
+  "purchase_budget_sgd": 100,
+  "budget_is_hard": true,
+  "preference_weights": {"nutrition": 0.35, "variety": 0.25, "time": 0.15, "pantry": 0.15, "health": 0.10},
+  "catalog_version": "planning-fixture-recipes-v1",
+  "product_snapshot_version": "planning-fixture-products-v1",
+  "policy_version": "planning-policy-v2-draft"
+}

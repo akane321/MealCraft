@@ -27,7 +27,7 @@ next pieces should fit together.
 | Recipe and ingredient knowledge | [Recipe and Ingredient Data](recipe-ingredient-data.md) and [Data Engineering Handoff](../data/README.md) | Validated recipes, canonical ingredients, nutrition, provenance and release manifest |
 | FairPrice retrieval and grounding | [FairPrice Product Grounding](fairprice-product-grounding.md) | Timestamped products, package facts, ingredient-product mappings |
 | External retrieval and RAG handoff | [External Retrieval and RAG](external-retrieval-rag.md) | On-demand FairPrice evidence, YouTube Top-1 tutorial, traces, fixtures and teammate work packages |
-| Planning and deterministic validation | [Planning Engine](planning-engine.md) | Feasible plan, trace, conflict result and derived Shopping List |
+| Planning and deterministic validation | [Planning Engine](planning-engine.md) and [Algorithm Engineering Handoff](algorithm-engineering-handoff.md) | Final-scope problem/solution contract, feasible plan, trace, conflict result and derived Shopping List |
 | Language understanding and orchestration | [Agent Orchestration](agent-orchestration.md) | Validated user intent, clarification state and tool trace |
 | Product interaction and human evidence | [Frontend and Human Evaluation](frontend-human-evaluation.md) | Understandable desktop workflow and human-task evidence |
 | Comparative research evaluation | [Capability-centred Evaluation v2](comparative-evaluation-v2.md) | Fair baseline comparison, metrics, statistics and failure analysis |

@@ -130,6 +130,13 @@ design targets, not verified current capabilities.
 Hard constraints, soft penalties, tolerance policies, and output explanations
 must remain explicit and testable.
 
+The accepted final-scope contract replaces a fixed seven-dinner assumption with
+explicit multi-day breakfast, lunch, dinner and optional snack slots. The new
+schemas, deterministic reference planner and independent validator are runnable
+design scaffolds; they are not yet wired into the current API or persistence
+model. The mathematical model and remaining implementation boundary are in the
+[Algorithm Engineering Handoff](design/algorithm-engineering-handoff.md).
+
 ### Grocery provider and Shopping engine
 
 - Maps normalized ingredients to FairPrice-shaped products.
@@ -279,6 +286,10 @@ Agent orchestration, frontend evidence and Evaluation v2.
 The detailed provider, evidence-packet, Top-1, degradation and teammate
 contracts are defined in
 [External Retrieval and RAG](design/external-retrieval-rag.md).
+
+Planning, validation, package optimization and the bounded retrieval-repair
+loop are defined in the
+[Algorithm Engineering Handoff](design/algorithm-engineering-handoff.md).
 
 The core dependency chain is:
 

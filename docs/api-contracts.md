@@ -93,6 +93,12 @@ payloads are intentionally absent from this user-facing contract.
 
 ## Recipe Recommendations
 
+> Design boundary: `backend/app/schemas/planning_v2.py` is an internal
+> final-scope algorithm contract. It does not create or change an HTTP endpoint
+> in the current release. A production API and persistence migration must be
+> reviewed separately before the final-scope planner replaces current planning
+> behaviour.
+
 `POST /api/recommendations/recipes` accepts a structured planning request with:
 
 - household size and maximum cooking time
