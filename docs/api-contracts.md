@@ -239,3 +239,22 @@ deterministic replanning service and exposes the persisted preview as
 with the same revision check as the plan API. `discard` clears the session link
 and draft without modifying the plan. The draft and event link survive reloads
 and container restarts.
+
+### Target orchestration contracts
+
+The current endpoints above retain their verified behaviour. The additive
+`backend/app/orchestration/` package freezes target contracts for scope classes,
+run states, capability/tool effects, structured interactions and evidence-linked
+claims; it does not add or change an HTTP endpoint yet.
+
+Future session/message responses may include a typed `interaction` object. A
+selection response must carry the stable `question_id`, option IDs,
+`context_version` and optional `plan_revision`. The backend rejects stale or
+unknown selections rather than translating a localized button label back into
+natural language.
+
+Future tool execution is capability-gated. Read and preview tools may be called
+only for a supported intent and authorized household. Commit tools additionally
+require an unexpired confirmation linked to the matching preview and revision.
+Scope, authorization, tool, grounding and action-receipt records belong to an
+Agent run; they are not free-form assistant messages.

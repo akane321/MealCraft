@@ -103,6 +103,7 @@ backend/app/repositories/ persistence adapters
 backend/app/evaluation/   repeatable evaluation workbench
 backend/app/planning/     deterministic planning, shopping and validation algorithms
 backend/app/auth/         session-token and authorization foundations
+backend/app/orchestration/ scope, capability, interaction and grounding foundations
 frontend/app/pages/       user-facing product routes
 frontend/app/components/  reusable interface components
 data/recipes/             versioned recipe catalog
@@ -210,6 +211,9 @@ for users, contributors, maintainers, and coding agents.
 - [Backend Platform Engineering Handoff](docs/design/backend-platform-engineering.md) -
   accounts, revocable sessions, household data isolation, durable jobs,
   operations traces, internal Console design, security gates, and work packages
+- [Agent Orchestration Engineering Handoff](docs/design/agent-orchestration.md) -
+  bounded scope, capability/tool policy, structured interaction, checkpoints,
+  hallucination controls, grounded response evaluation, and work packages
 - [API Contracts](docs/api-contracts.md) - current HTTP and schema contracts
 - [Development](docs/development.md) - setup, run, debug, test, and recovery
 - [MVP Boundary](docs/mvp-boundary.md) - minimum baseline and exact current
