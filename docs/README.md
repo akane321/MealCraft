@@ -25,7 +25,10 @@ already implemented.
    before changing a boundary between modules.
 5. Use the [Design Contracts](design/README.md) to identify producer, consumer,
    fixture and readiness dependencies across modules.
-6. Read the relevant evaluation protocol before changing planning, Agent,
+6. For recipe or ingredient work, follow the
+   [Data Engineering Handoff](data/README.md) before changing source, schema,
+   normalization, review or release behaviour.
+7. Read the relevant evaluation protocol before changing planning, Agent,
    grocery, nutrition, or evaluation semantics.
 
 ### I am a coding agent
@@ -58,6 +61,7 @@ already implemented.
 | How do I operate the product? | [User Guide](user-guide.md) |
 | How do I contribute safely? | [CONTRIBUTING.md](../CONTRIBUTING.md) |
 | What must each module produce for other modules? | [Design Contracts](design/README.md) |
+| How is recipe and ingredient data sourced, cleaned, reviewed and released? | [Data Engineering Handoff](data/README.md) |
 | What evaluation is executable now? | [Evaluation Protocol v1](evaluation/protocol-v1.md) |
 | What comparative capability evaluation are we building? | [Comparative Evaluation v2](design/comparative-evaluation-v2.md) |
 

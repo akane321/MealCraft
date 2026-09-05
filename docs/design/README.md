@@ -24,7 +24,7 @@ next pieces should fit together.
 
 | Design area | Canonical design detail | Primary output |
 | --- | --- | --- |
-| Recipe and ingredient knowledge | [Recipe and Ingredient Data](recipe-ingredient-data.md) | Validated recipes, canonical ingredients, nutrition and provenance |
+| Recipe and ingredient knowledge | [Recipe and Ingredient Data](recipe-ingredient-data.md) and [Data Engineering Handoff](../data/README.md) | Validated recipes, canonical ingredients, nutrition, provenance and release manifest |
 | FairPrice retrieval and grounding | [FairPrice Product Grounding](fairprice-product-grounding.md) | Timestamped products, package facts, ingredient-product mappings |
 | Planning and deterministic validation | [Planning Engine](planning-engine.md) | Feasible plan, trace, conflict result and derived Shopping List |
 | Language understanding and orchestration | [Agent Orchestration](agent-orchestration.md) | Validated user intent, clarification state and tool trace |
