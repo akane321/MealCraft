@@ -22,6 +22,14 @@ a high-dimensional catalog.
 
 ## Accepted target pipeline
 
+The target is not hard-coded to seven dinners. It accepts an explicit set of
+multi-day breakfast, lunch, dinner and optional snack slots, with per-slot
+servings, time limits, required/optional state and locks. A one-week plan is one
+instance of this model, not its upper or lower boundary. See the detailed
+[Algorithm Engineering Handoff](algorithm-engineering-handoff.md) for the
+mathematical model, Beam Search proposal, retrieval-repair loop, work packages
+and completion criteria.
+
 ```text
 validated request and immutable context
   -> candidate retrieval
@@ -108,7 +116,7 @@ credible implementation a competent developer could build without an Agent.
 - strict feasible/infeasible classification accuracy;
 - episode-level hard-constraint violation rate;
 - violation count per planned meal and per applicable constraint;
-- seven-day completion rate for feasible cases;
+- required-slot completion rate for feasible cases;
 - nutrition absolute deviation and rate within predeclared tolerance;
 - weekly-budget compliance and cost regret against the best known valid plan;
 - adjacent repetition and distinct-recipe count;
@@ -131,6 +139,15 @@ recipe ingestion or FairPrice retrieval:
 4. a pantry unit-compatible and unit-incompatible pair;
 5. a product-unavailable packet;
 6. a replanning packet with completed and locked meals.
+
+`data/fixtures/planning-v2/final-scope-multislot.json` is the first runnable
+final-scope-shaped packet. It covers explicit breakfast, lunch, dinner and
+optional snack slots, serving scaling, a locked meal, scoped nutrition bands,
+known and unknown pantry quantities, product packages and purchase budget.
+
+The accompanying deterministic greedy reference and independent validator are
+integration scaffolds. They are not the final Beam Search implementation and
+must not be used to claim global optimality or production completion.
 
 These fixtures let Agent, frontend and Evaluation contributors integrate before
 full upstream data is ready.

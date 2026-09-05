@@ -101,6 +101,7 @@ backend/app/api/          HTTP routes and request boundaries
 backend/app/services/     deterministic application and domain services
 backend/app/repositories/ persistence adapters
 backend/app/evaluation/   repeatable evaluation workbench
+backend/app/planning/     deterministic planning, shopping and validation algorithms
 frontend/app/pages/       user-facing product routes
 frontend/app/components/  reusable interface components
 data/recipes/             versioned recipe catalog
@@ -202,6 +203,9 @@ for users, contributors, maintainers, and coding agents.
 - [External Retrieval and RAG Handoff](docs/design/external-retrieval-rag.md) -
   on-demand FairPrice retrieval, YouTube Top-1 tutorial selection, evidence
   packets, degradation states, teammate work packages, and acceptance metrics
+- [Algorithm Engineering Handoff](docs/design/algorithm-engineering-handoff.md) -
+  final-scope multi-meal mathematical model, deterministic validation,
+  Beam Search proposal, product-repair loop, work packages, and completion gates
 - [API Contracts](docs/api-contracts.md) - current HTTP and schema contracts
 - [Development](docs/development.md) - setup, run, debug, test, and recovery
 - [MVP Boundary](docs/mvp-boundary.md) - minimum baseline and exact current
