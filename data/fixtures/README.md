@@ -13,6 +13,9 @@ Fixture files:
 - `backend-platform/identity-scope.json`: synthetic account, household and
   expected-access cases for authorization and cross-tenant testing. It contains
   no usable password, token or personal information.
+- `agent-orchestration/scope-and-grounding-v1.json`: synthetic scope and claim
+  examples for independent orchestration development. It freezes starter
+  semantics only and is not a final multilingual or hallucination benchmark.
 
 Reference data is deliberately separated from database migrations:
 

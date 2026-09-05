@@ -111,6 +111,15 @@ household-scoped until the complete ownership migration is implemented.
 Fixture parsing is the default. OpenAI parsing is optional and requires a local
 runtime key.
 
+The accepted final orchestration layer adds a scope/policy gate before
+constraint extraction, a machine-readable capability/tool allowlist, typed
+human-in-the-loop interactions, per-action Agent runs with bounded execution
+and checkpoints, and evidence-linked response grounding. The additive
+`app/orchestration` package freezes starter contracts and reference behaviour;
+it is not wired into the current Agent API or proof of production multilingual
+classification and hallucination control. See the
+[Agent Orchestration Engineering Handoff](design/agent-orchestration.md).
+
 ### Recipe knowledge
 
 - Uses versioned recipe and normalized ingredient data as the trusted current

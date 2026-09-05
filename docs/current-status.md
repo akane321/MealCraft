@@ -1,10 +1,10 @@
 # MealCraft Current Status
 
-> Last verified public snapshot: 2026-09-05
+> Last verified public snapshot: 2026-09-06
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `8245468` - `docs: define capability evaluation and module contracts (#18)`
+> Verified remote `main`: `1797f23` - `feat: scaffold backend platform foundation (#22)`
 
 ## How to Read This Document
 
@@ -83,6 +83,7 @@ improved.
 | Nutrition elastic policy | Partial | Complete source-aware target deviation, lower-sodium/lower-sugar policy, tolerance, missing-data behaviour, and dedicated evaluation |
 | Grocery grounding robustness | Partial | Measure live/cache/fixture degradation, mapping quality, package parsing, and source freshness |
 | Dynamic replanning | Partial | Add broader event semantics, temporary versus persistent preference handling, disruption metrics, and Shopping List consistency stress tests |
+| Agent scope, interaction and grounding | Partial | Additive contracts, lexical reference policy, capability allowlist, stale-interaction guard and structured claim verifier exist; production multilingual classification, run persistence, full graph, UI and hallucination evidence remain target work |
 | Evaluation scale | Partial | Expand toward 150-200 verified requests, 150-250 recipes, 80-120 planning scenarios, and complete grocery coverage for benchmark demand; preserve frozen splits and digests |
 | Multiple baselines | Partial | Add structured-planner and carefully controlled LLM-only comparisons where cost and safety allow |
 | Capability-centred Evaluation v2 | Target | Implement the accepted strong Rule-only, context-matched LLM-only, Plain LLM and Human Manual Planning design; v1 remains the only current report |
@@ -97,8 +98,9 @@ improved.
    deterministic validation.
 3. Complete nutrition-target and elastic-preference semantics and evidence.
 4. Test FairPrice live/cache/fixture degradation against real changes.
-5. Fix high-value Agent failures, then run a bounded live-model comparison only
-   with explicit API authorization.
+5. Add scope/mixed-intent governance, typed clarification, bounded tool guards
+   and response grounding; then run a bounded live-model comparison only with
+   explicit API authorization.
 6. Expand dynamic-replanning stress cases and measure unnecessary disruption.
 7. Increase browser coverage and prepare a repeatable demonstration path.
 8. Progressively close the final-design gaps documented above rather than
