@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from math import isfinite
 
 from app.schemas.planning_v2 import (
     CheckStatus,
@@ -68,10 +69,16 @@ class FinalPlanningValidator:
 
         checks.extend(self._nutrition_checks(problem, assigned_by_slot))
         checks.extend(self._shopping_checks(problem, shopping))
-        purchase_total = round(sum(line.purchase_cost_sgd for line in shopping), 2)
+        demand_checks = self._demand_checks(problem, assigned_by_slot, shopping)
+        checks.extend(demand_checks)
+        product_checks, purchase_total, cost_complete = self._product_checks(problem, shopping)
+        checks.extend(product_checks)
+        cost_complete = cost_complete and not demand_checks
         if problem.purchase_budget_sgd is not None:
             margin = round(problem.purchase_budget_sgd - purchase_total, 2)
             status: CheckStatus = "passed" if margin >= -0.005 else "failed"
+            if not cost_complete:
+                status = "indeterminate"
             checks.append(
                 PlanningConstraintCheck(
                     code="purchase_budget",
@@ -79,8 +86,8 @@ class FinalPlanningValidator:
                     hard=problem.budget_is_hard,
                     actual=purchase_total,
                     limit=problem.purchase_budget_sgd,
-                    margin=margin,
-                    detail="Purchase budget is checked against package checkout cost.",
+                    margin=margin if cost_complete else None,
+                    detail="Budget uses snapshot prices and package counts; missing prices leave a known subtotal.",
                 )
             )
 
@@ -223,6 +230,156 @@ class FinalPlanningValidator:
             margin=round(margin, 3) if margin is not None else None,
             detail="Nutrition is recomputed from selected canonical recipes per person.",
         )
+
+    @staticmethod
+    def _demand_checks(
+        problem: FinalPlanningProblem,
+        assignments: dict[str, PlanningAssignment],
+        shopping: list[PlanningShoppingSelection],
+    ) -> list[PlanningConstraintCheck]:
+        """Rebuild demand from assignments; never reuse the planner's shopping builder."""
+        checks: list[PlanningConstraintCheck] = []
+        recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
+        amounts: dict[tuple[str, str | None], list[float | None]] = defaultdict(list)
+        for slot in problem.slots:
+            assignment = assignments.get(slot.slot_id)
+            recipe = recipes.get(assignment.recipe_id) if assignment else None
+            if recipe is None:
+                continue  # Assignment validation reports invalid or missing recipes.
+            for item in recipe.ingredients:
+                amounts[item.ingredient_id, item.unit].append(
+                    None if item.quantity is None else item.quantity / recipe.servings * slot.servings
+                )
+        lines: dict[tuple[str, str | None], list[PlanningShoppingSelection]] = defaultdict(list)
+        for line in shopping:
+            lines[line.ingredient_id, line.unit].append(line)
+        pantry = defaultdict(list)
+        for item in problem.pantry:
+            pantry[item.ingredient_id].append(item)
+
+        def issue(code: str, ingredient: str, detail: str, unknown: bool = False) -> None:
+            checks.append(
+                PlanningConstraintCheck(
+                    code=code,
+                    status="indeterminate" if unknown else "failed",
+                    scope_id=ingredient,
+                    detail=detail,
+                )
+            )
+
+        def matches(actual: float | None, expected: float) -> bool:
+            # Existing shopping output rounds quantities to three decimal places.
+            return actual is not None and isfinite(actual) and abs(actual - expected) <= 0.000500001
+
+        for key in sorted(set(amounts) | set(lines), key=lambda value: (value[0], value[1] or "")):
+            ingredient, unit = key
+            rows = lines.get(key, [])
+            if key not in amounts:
+                issue("unexpected_shopping_line", ingredient, "Shopping line has no assigned recipe demand.")
+                continue
+            if len(rows) != 1:
+                issue(
+                    "shopping_line_count", ingredient, "Each ingredient/unit demand requires exactly one shopping line."
+                )
+                continue
+            line = rows[0]
+            values = amounts[key]
+            if unit is None or any(value is None or not isfinite(value) for value in values):
+                issue("demand_unknown", ingredient, "Recipe demand cannot be determined from source quantities.", True)
+                continue
+            required = sum(value for value in values if value is not None)
+            stocks = pantry[ingredient]
+            if len(stocks) > 1:
+                issue(
+                    "pantry_identity", ingredient, "Repeated pantry IDs require an explicit aggregation policy.", True
+                )
+                continue
+            deduction = 0.0
+            if stocks and stocks[0].unit == unit and stocks[0].quantity is not None:
+                if not isfinite(stocks[0].quantity):
+                    issue("pantry_quantity", ingredient, "Pantry quantity must be finite.", True)
+                    continue
+                deduction = min(required, stocks[0].quantity)
+            remaining = required - deduction
+            for code, actual, expected in (
+                ("required_quantity", line.required_quantity, required),
+                ("pantry_deduction", line.pantry_deduction, deduction),
+                ("remaining_quantity", line.remaining_quantity, remaining),
+            ):
+                if not matches(actual, expected):
+                    issue(code, ingredient, f"Submitted quantity {actual} differs from recomputed quantity {expected}.")
+            products = [product for product in problem.products if product.product_id == line.selected_product_id]
+            if len(products) == 1 and products[0].package_unit == unit:
+                coverage = products[0].package_quantity * line.packages
+                if not isfinite(coverage) or coverage + 1e-9 < remaining:
+                    issue("demand_coverage", ingredient, "Packages do not cover independently recomputed demand.")
+                if not matches(line.surplus_quantity, coverage - remaining):
+                    issue(
+                        "surplus_quantity", ingredient, "Surplus differs from package coverage minus remaining demand."
+                    )
+            elif line.selected_product_id is None and remaining == 0:
+                if not matches(line.surplus_quantity, 0):
+                    issue("surplus_quantity", ingredient, "A fully pantry-covered demand has zero purchase surplus.")
+        return checks
+
+    @staticmethod
+    def _product_checks(
+        problem: FinalPlanningProblem,
+        shopping: list[PlanningShoppingSelection],
+    ) -> tuple[list[PlanningConstraintCheck], float, bool]:
+        """Check selected products without trusting submitted checkout amounts."""
+        checks: list[PlanningConstraintCheck] = []
+        products = defaultdict(list)
+        for product in problem.products:
+            products[product.product_id].append(product)
+        total = 0.0
+        complete = True
+        for line in shopping:
+
+            def reject(code: str, detail: str, scope_id: str = line.ingredient_id) -> None:
+                checks.append(FinalPlanningValidator._failed(code, detail, scope_id))
+
+            if line.selected_product_id is None:
+                if line.packages != 0 or line.purchase_cost_sgd != 0:
+                    reject("product_selection", "A purchase requires an identified product.")
+                    complete = False
+                if line.remaining_quantity is None or line.remaining_quantity > 0:
+                    complete = False
+                continue
+            matches = products[line.selected_product_id]
+            if len(matches) != 1:
+                reject("product_identity", "Selected product must identify exactly one snapshot record.")
+                complete = False
+                continue
+            product = matches[0]
+            if not isfinite(product.price_sgd) or not isfinite(product.package_quantity):
+                reject("product_numeric", "Snapshot price and package quantity must be finite.")
+                complete = False
+                continue
+            expected = round(product.price_sgd * line.packages, 2)
+            total += expected
+            if not isfinite(line.purchase_cost_sgd) or abs(line.purchase_cost_sgd - expected) > 0.005:
+                checks.append(
+                    PlanningConstraintCheck(
+                        code="purchase_cost",
+                        status="failed",
+                        scope_id=line.ingredient_id,
+                        actual=line.purchase_cost_sgd,
+                        limit=expected,
+                        detail="Submitted cost differs from snapshot price multiplied by packages.",
+                    )
+                )
+            if not product.available:
+                reject("product_available", "Selected product is unavailable in the snapshot.")
+            if product.ingredient_id != line.ingredient_id:
+                reject("product_ingredient", "Selected product belongs to a different ingredient.")
+            if product.package_unit != line.unit:
+                reject("product_unit", "Package and demand units are incompatible.")
+            elif line.remaining_quantity is not None:
+                coverage = product.package_quantity * line.packages
+                if coverage + 0.0005 < line.remaining_quantity:
+                    reject("package_coverage", "Purchased packages do not cover the stated remaining demand.")
+        return checks, round(total, 2), complete
 
     @staticmethod
     def _shopping_checks(
