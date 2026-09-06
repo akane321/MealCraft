@@ -17,6 +17,7 @@ htmlcov/
 
 # Node and Nuxt
 node_modules/
+.pnpm-store/
 .playwright/
 playwright-report/
 test-results/

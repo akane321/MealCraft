@@ -18,7 +18,8 @@ remaining design gaps.
 3. Recipe ingredients are mapped to FairPrice products.
 4. The system produces a grocery list with package quantities and prices.
 5. The user marks planned dishes as consumed.
-6. The dashboard displays daily nutrition and weekly trends.
+6. The dashboard leads with cumulative nutrition for completed MealCraft dishes
+   and retains clearly labelled daily nutrition detail.
 7. The user may preview and confirm a minimal meal-plan adjustment; the system
    updates the affected shopping demand and keeps an event history.
 
