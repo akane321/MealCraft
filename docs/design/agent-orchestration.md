@@ -226,12 +226,14 @@ Before response generation, deterministic services produce an evidence bundle
 with stable IDs, typed values, source references, timestamps and validation
 status. The LLM may verbalize it but may not redo arithmetic.
 
-The additive `verify_structured_claims` function demonstrates exact matching of
-typed claims to evidence. Full work must extract atomic claims from the final
-response, deterministically verify names, IDs, numbers, timestamps and action
-status where possible, block unsupported high-risk claims or use a deterministic
-fallback, and persist only safe evidence references. Only a committed action
-receipt permits wording such as `saved`; only a live trace permits `live price`.
+The additive `verify_structured_claims` function now exactly matches typed
+claims to facts or successful commit receipts. It rejects fixture/cached facts
+presented as live unless they carry timestamped `live_retrieval` provenance,
+and rejects preview receipts presented as saved actions. Full work must still
+extract atomic claims from the final natural-language response, block or replace
+unsupported high-risk wording, and persist safe evidence references. Only a
+committed action receipt permits wording such as `saved`; only a live trace
+permits `live price`.
 
 ## LangGraph target
 

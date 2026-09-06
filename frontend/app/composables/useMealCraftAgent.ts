@@ -1,5 +1,6 @@
 import type {
   AgentConfirmation,
+  AgentInteractionAnswer,
   AgentReplanConfirmation,
   AgentSession,
   AgentSessionCollection,
@@ -42,6 +43,15 @@ export function useMealCraftAgent() {
     const result = await run(() => $fetch<AgentSession>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/messages`,
       { method: "POST", body: { message } },
+    ));
+    if (result) session.value = result;
+  }
+
+  async function answerInteraction(answer: AgentInteractionAnswer) {
+    if (!session.value) return;
+    const result = await run(() => $fetch<AgentSession>(
+      `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/interactions`,
+      { method: "POST", body: answer },
     ));
     if (result) session.value = result;
   }
@@ -95,6 +105,7 @@ export function useMealCraftAgent() {
   }
 
   return {
+    answerInteraction,
     confirm,
     confirmReplan,
     create,

@@ -14,6 +14,7 @@ This diagnostic protocol asks four concrete questions:
 2. Does weekly selection improve diversity over a transparent greedy baseline?
 3. Can MealCraft turn eligible recipes into a complete, budget-aware shopping estimate?
 4. Can the Agent extract only stated constraints, ask the expected clarification and preserve the non-medical boundary?
+5. Does the deterministic scope gate reject unsupported, restricted and adversarial input without contaminating planning state?
 
 The protocol evaluates the current MVP. It does not claim clinical validity,
 optimal nutrition, real-world waste reduction or superiority over commercial
@@ -23,7 +24,12 @@ meal-planning products.
 
 - **Greedy baseline**: apply the same recipe eligibility filters, select the
   highest-ranked eligible recipe and repeat it for all seven days. It has no
-  diversity penalty and no weekly-budget look-ahead.
+  diversity penalty and no weekly-budget look-ahead. It is retained as a weak
+  lower bound, not the main comparator.
+- **Strong Rule-only baseline**: receive the same already-structured constraints
+  and eligible recipe/product facts; apply a fixed cheapest, then fastest, then
+  score tie-break and avoid adjacent repetition. It has no language parsing,
+  conversation, proactive clarification, or learned orchestration.
 - **MealCraft planner**: apply the same eligibility filters, then use the
   deterministic weekly selector with diversity and budget-aware look-ahead.
 - **Fixture Agent**: the deterministic rule-based parser used by CI and the
@@ -44,6 +50,11 @@ The versioned inputs live under `data/evaluation/`.
   deliberately infeasible cases.
 - The 24-case Agent split covers English, Chinese and mixed-language inputs,
   extraction, clarification, pantry quantities and the medical boundary.
+- The 36-case bilingual orchestration developer set covers domain actions and
+  questions, non-medical health preferences, social,
+  off-topic, restricted, adversarial, mixed-intent and ambiguous inputs. It is
+  visible during implementation and therefore is diagnostic rather than
+  final held-out evidence.
 
 Planner weights, thresholds and catalog entries must not be tuned after reading
 held-out outcomes. If a material error in a gold label is discovered, create a
@@ -91,6 +102,28 @@ visible instead of being tuned away.
 - **Clarification accuracy** comparing the complete missing-field set.
 - **Medical-boundary accuracy** checking that disease-specific requests produce
   the non-medical limitation message.
+- **Scope classification accuracy**: correctly classified scope cases divided
+  by all orchestration developer cases.
+- **Scope macro-F1**: unweighted mean of per-class F1 across all represented
+  scope classes.
+- **False-accept rate**: non-mutating cases incorrectly permitted to mutate
+  state, divided by labelled non-mutating cases.
+- **False-reject rate**: mutating domain cases incorrectly blocked, divided by
+  labelled mutating cases.
+- **State-contamination rate**: non-mutating cases that change constraints,
+  context version or mutation status, divided by labelled non-mutating cases.
+- **Tool-policy accuracy**: cases with the expected allow/deny tool policy,
+  divided by all orchestration cases.
+- **Grounding verification accuracy**: typed claim cases whose supported or
+  blocked decision matches the label, divided by all grounding developer cases.
+- **Unsupported-claim escape rate**: labelled unsupported claims accepted by
+  the verifier, divided by all labelled unsupported grounding cases.
+- **Supported-claim rejection rate**: labelled supported claims blocked by the
+  verifier, divided by all labelled supported grounding cases.
+
+The grounding developer set supplies already-structured atomic claims. It
+tests deterministic numeric, provenance, action-receipt and explanation checks;
+it does not measure the future natural-language claim extraction stage.
 
 ## 5. Failure analysis
 
@@ -103,6 +136,11 @@ medical boundary.
 The generated report lists every failure with its case ID and reason. At least
 ten cases are discussed in the final report; the registry may contain more.
 Expected infeasibility is not counted as failure when the system rejects it.
+
+The strong Rule-only result must be reported alongside the greedy lower bound.
+Any MealCraft advantage should be attributed to the measured dimension (for
+example diversity), not to Agent architecture when both systems began from
+already-structured constraints.
 
 ## 6. Reproduction
 

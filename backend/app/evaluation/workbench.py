@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from app.evaluation.agent_benchmark import evaluate_agent
+from app.evaluation.orchestration_benchmark import evaluate_grounding, evaluate_scope_policy
 from app.evaluation.runner import evaluate
 
 
@@ -21,6 +22,8 @@ def build_workbench(
     developer_path: Path,
     heldout_path: Path,
     agent_path: Path,
+    scope_path: Path,
+    grounding_path: Path,
     fixture_path: Path,
     agent_provider: str = "fixture",
     allow_live_api: bool = False,
@@ -41,6 +44,14 @@ def build_workbench(
         system="greedy-baseline",
         enforce_gates=False,
     )
+    rule_only = evaluate(
+        ingredient_path=ingredient_path,
+        recipe_path=recipe_path,
+        scenario_path=heldout_path,
+        fixture_path=fixture_path,
+        system="rule-only-baseline",
+        enforce_gates=False,
+    )
     planner = evaluate(
         ingredient_path=ingredient_path,
         recipe_path=recipe_path,
@@ -56,8 +67,10 @@ def build_workbench(
         api_key=api_key,
         model=model,
     )
+    scope = evaluate_scope_policy(dataset_path=scope_path)
+    grounding = evaluate_grounding(dataset_path=grounding_path)
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "protocol": "docs/evaluation/protocol-v1.md",
         "developer_gate_passed": developer["passed"],
         "api_evaluation": {
@@ -75,14 +88,31 @@ def build_workbench(
                 baseline["metrics"]["failure_case_count"] - planner["metrics"]["failure_case_count"]
             ),
         },
+        "strong_rule_comparison": {
+            "expectation_rate_delta": _delta(planner, rule_only, "scenario_expectation_rate"),
+            "mean_distinct_recipes_delta": _delta(planner, rule_only, "mean_distinct_recipes"),
+            "consecutive_repetition_reduction": (
+                rule_only["metrics"]["consecutive_repetition_count"]
+                - planner["metrics"]["consecutive_repetition_count"]
+            ),
+            "failure_case_reduction": (
+                rule_only["metrics"]["failure_case_count"] - planner["metrics"]["failure_case_count"]
+            ),
+        },
         "developer_planning": developer,
         "heldout_greedy_baseline": baseline,
+        "heldout_rule_only_baseline": rule_only,
         "heldout_mealcraft_planner": planner,
         "agent_benchmark": agent,
+        "scope_developer_benchmark": scope,
+        "grounding_developer_benchmark": grounding,
         "failure_registry": [
             *[{"source": "heldout-greedy-baseline", **item} for item in baseline["failure_cases"]],
+            *[{"source": "heldout-rule-only-baseline", **item} for item in rule_only["failure_cases"]],
             *[{"source": "heldout-mealcraft-planner", **item} for item in planner["failure_cases"]],
             *[{"source": "agent-benchmark", **item} for item in agent["failure_cases"]],
+            *[{"source": "scope-developer-benchmark", **item} for item in scope["failure_cases"]],
+            *[{"source": "grounding-developer-benchmark", **item} for item in grounding["failure_cases"]],
         ],
     }
 
@@ -92,10 +122,14 @@ def write_workbench(report: dict[str, Any], json_path: Path, markdown_path: Path
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
     json_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     comparison = report["comparison"]
+    strong_rule_comparison = report["strong_rule_comparison"]
     developer = report["developer_planning"]
     baseline = report["heldout_greedy_baseline"]
+    rule_only = report["heldout_rule_only_baseline"]
     planner = report["heldout_mealcraft_planner"]
     agent = report["agent_benchmark"]
+    scope = report["scope_developer_benchmark"]
+    grounding = report["grounding_developer_benchmark"]
     lines = [
         "# MealCraft Evaluation Workbench",
         "",
@@ -138,12 +172,66 @@ def write_workbench(report: dict[str, Any], json_path: Path, markdown_path: Path
             f"-{comparison['failure_case_reduction']} |"
         ),
         "",
+        "## Held-out strong Rule-only comparison",
+        "",
+        "| Metric | Rule-only baseline | MealCraft planner | Delta |",
+        "|---|---:|---:|---:|",
+        (
+            "| Scenario expectation rate | "
+            f"{rule_only['metrics']['scenario_expectation_rate']} | "
+            f"{planner['metrics']['scenario_expectation_rate']} | "
+            f"{strong_rule_comparison['expectation_rate_delta']} |"
+        ),
+        (
+            "| Mean distinct recipes | "
+            f"{rule_only['metrics']['mean_distinct_recipes']} | "
+            f"{planner['metrics']['mean_distinct_recipes']} | "
+            f"{strong_rule_comparison['mean_distinct_recipes_delta']} |"
+        ),
+        (
+            "| Consecutive repetitions | "
+            f"{rule_only['metrics']['consecutive_repetition_count']} | "
+            f"{planner['metrics']['consecutive_repetition_count']} | "
+            f"-{strong_rule_comparison['consecutive_repetition_reduction']} |"
+        ),
+        (
+            "| Failure cases | "
+            f"{rule_only['metrics']['failure_case_count']} | "
+            f"{planner['metrics']['failure_case_count']} | "
+            f"-{strong_rule_comparison['failure_case_reduction']} |"
+        ),
+        "",
         "## Offline Agent benchmark",
         "",
         "| Metric | Result |",
         "|---|---:|",
     ]
     lines.extend(f"| `{key}` | {value} |" for key, value in agent["metrics"].items())
+    lines.extend(
+        [
+            "",
+            "## Agent scope developer set",
+            "",
+            "> Diagnostic only: this set was visible during implementation and is not held-out evidence.",
+            "",
+            "| Metric | Result |",
+            "|---|---:|",
+        ]
+    )
+    lines.extend(f"| `{key}` | {value} |" for key, value in scope["metrics"].items())
+    lines.extend(
+        [
+            "",
+            "## Grounding developer set",
+            "",
+            "> Diagnostic only: typed claims are supplied directly; natural-language claim extraction "
+            "is not evaluated.",
+            "",
+            "| Metric | Result |",
+            "|---|---:|",
+        ]
+    )
+    lines.extend(f"| `{key}` | {value} |" for key, value in grounding["metrics"].items())
     lines.extend(
         [
             "",
@@ -167,6 +255,16 @@ def main() -> None:
     parser.add_argument("--developer", type=Path, default=Path("data/evaluation/dev/planning-v1.json"))
     parser.add_argument("--heldout", type=Path, default=Path("data/evaluation/heldout/planning-v1.json"))
     parser.add_argument("--agent-dataset", type=Path, default=Path("data/evaluation/agent/fixture-v1.json"))
+    parser.add_argument(
+        "--scope-dataset",
+        type=Path,
+        default=Path("data/evaluation/agent-orchestration/scope-developer-v1.json"),
+    )
+    parser.add_argument(
+        "--grounding-dataset",
+        type=Path,
+        default=Path("data/evaluation/agent-orchestration/grounding-developer-v1.json"),
+    )
     parser.add_argument("--fixtures", type=Path, default=Path("data/fixtures/fairprice-products.json"))
     parser.add_argument("--agent-provider", choices=("fixture", "openai"), default="fixture")
     parser.add_argument("--allow-live-api", action="store_true")
@@ -182,6 +280,8 @@ def main() -> None:
         developer_path=args.developer,
         heldout_path=args.heldout,
         agent_path=args.agent_dataset,
+        scope_path=args.scope_dataset,
+        grounding_path=args.grounding_dataset,
         fixture_path=args.fixtures,
         agent_provider=args.agent_provider,
         allow_live_api=args.allow_live_api,

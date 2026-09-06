@@ -22,7 +22,13 @@ class ReferenceScopePolicy:
         "budget",
         "fairprice",
         "grocery",
+        "groceries",
         "snack",
+        "plan",
+        "replan",
+        "replace",
+        "swap",
+        "unavailable",
         "食谱",
         "菜谱",
         "做饭",
@@ -34,6 +40,15 @@ class ReferenceScopePolicy:
         "购物清单",
         "食材",
         "零食",
+        "计划",
+        "规划",
+        "早餐",
+        "午餐",
+        "晚餐",
+        "替换",
+        "换掉",
+        "换餐",
+        "缺货",
     )
     _off_topic_tokens = (
         "movie",
@@ -75,6 +90,12 @@ class ReferenceScopePolicy:
         "显示 api key",
         "数据库密码",
     )
+    _domain_question_patterns = (
+        r"\bwhy\b.*\b(?:recipe|meal|plan|selected|chosen)\b",
+        r"\bexplain\b.*\b(?:recipe|meal|plan|nutrition|grocery)\b",
+        r"(?:为什么|为何).*(?:食谱|菜谱|餐|计划|规划|选中|选择)",
+        r"解释.*(?:食谱|菜谱|营养|购物清单|计划|规划)",
+    )
 
     def classify(self, message: str) -> ScopeDecision:
         text = message.strip()
@@ -106,13 +127,15 @@ class ReferenceScopePolicy:
                 reason_code="MEDICAL_TARGET_DERIVATION_NOT_ALLOWED",
             )
         if has_domain and has_off_topic:
+            supported, unsupported = self._partition_segments(text)
             return ScopeDecision(
                 scope_class=ScopeClass.PARTIALLY_SUPPORTED,
                 detected_intents=["create_plan"],
-                supported_segments=[text],
-                unsupported_segments=["non-meal recommendation segment"],
-                should_mutate_state=True,
-                should_call_tools=True,
+                supported_segments=supported,
+                unsupported_segments=unsupported,
+                should_mutate_state=bool(supported),
+                should_call_tools=bool(supported),
+                requires_clarification=not supported,
                 reason_code="MIXED_SUPPORTED_AND_UNSUPPORTED",
             )
         if has_off_topic:
@@ -120,6 +143,15 @@ class ReferenceScopePolicy:
                 scope_class=ScopeClass.OUT_OF_SCOPE,
                 unsupported_segments=[text],
                 reason_code="OUT_OF_DOMAIN",
+            )
+        if has_domain and any(re.search(pattern, lower) for pattern in self._domain_question_patterns):
+            return ScopeDecision(
+                scope_class=ScopeClass.DOMAIN_QUESTION,
+                detected_intents=["explain_plan"],
+                supported_segments=[text],
+                should_mutate_state=False,
+                should_call_tools=False,
+                reason_code="GROUNDED_DOMAIN_QUESTION_DEFERRED",
             )
         if has_domain:
             return ScopeDecision(
@@ -136,3 +168,27 @@ class ReferenceScopePolicy:
             requires_clarification=True,
             reason_code="DOMAIN_RELATION_UNCLEAR",
         )
+
+    def _partition_segments(self, message: str) -> tuple[list[str], list[str]]:
+        segments = [
+            segment.strip(" \t\r\n.,!?。！？")
+            for segment in re.split(
+                r"(?:[。！？!?;；]|，再|,\s*then\s+|\s+and\s+then\s+|"
+                r"\s+and\s+(?=(?:plan|create|find|recommend|book|show|tell|write)\b)|"
+                r"(?=并(?:规划|计划|查找|推荐|预订|查询|写)))",
+                message,
+                flags=re.IGNORECASE,
+            )
+            if segment.strip(" \t\r\n.,!?。！？")
+        ]
+        supported: list[str] = []
+        unsupported: list[str] = []
+        for segment in segments:
+            lower = segment.lower()
+            has_domain = any(token in lower for token in self._domain_tokens)
+            has_off_topic = any(token in lower for token in self._off_topic_tokens)
+            if has_domain and not has_off_topic:
+                supported.append(segment)
+            else:
+                unsupported.append(segment)
+        return supported, unsupported

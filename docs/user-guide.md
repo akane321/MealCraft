@@ -52,7 +52,15 @@ Important semantics:
 
 Open <http://localhost:3000/assistant> and describe the request in English or
 Chinese. The Assistant persists the conversation, extracts structured fields,
-and asks a focused clarification when required.
+and asks a focused clarification when required. Household-size and pantry
+quantity questions may appear as buttons or a typed input. Use those controls
+when available; each answer is tied to the displayed conversation version so a
+stale browser choice cannot silently overwrite newer constraints.
+
+MealCraft handles meal planning, recipes, groceries, budgets and explicit
+dietary constraints. Social, unrelated, disease-treatment and instruction-
+bypassing requests receive a scope boundary and do not change planning state.
+For a mixed request, only the supported meal-planning segment is processed.
 
 Review the structured constraint summary before confirmation. The Agent does
 not independently calculate prices or decide whether allergens are safe; it
