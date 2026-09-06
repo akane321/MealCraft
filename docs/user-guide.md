@@ -115,6 +115,12 @@ Only completed MealCraft dishes contribute to actual nutrition totals and weekly
 trends. The Dashboard does not know about food eaten outside MealCraft and must
 not be interpreted as complete dietary monitoring.
 
+The Dashboard leads with cumulative per-person nutrition for the selected plan.
+Its primary curve compares completed cumulative actuals with the current
+non-skipped plan. A separate daily table keeps each day's calories, protein,
+carbohydrate, fat, sodium, and sugar visible while labelling values as completed
+actuals, planned previews, or not counted after a skip.
+
 ### 6. Preview a plan change
 
 Use the available replanning action from the weekly plan or Assistant. A change

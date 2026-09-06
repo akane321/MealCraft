@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import {
   chartPointCoordinates,
-  completedNutritionValues,
+  cumulativeNutritionValues,
   lineSegments,
   nutritionMetrics,
+  nutritionProgressPercentage,
   type NutritionMetric,
 } from "~/lib/dashboard";
 import { formatNutrition, formatPlanDate } from "~/lib/meal-plan-format";
@@ -52,12 +53,46 @@ const selectedMetricDefinition = computed(() => {
   if (!metric) throw new Error(`Unknown nutrition metric: ${selectedMetric.value}`);
   return metric;
 });
-const chartValues = computed(() => (
-  dashboard.value ? completedNutritionValues(dashboard.value.days, selectedMetric.value) : []
+const completedCumulativeValues = computed(() => (
+  dashboard.value
+    ? cumulativeNutritionValues(dashboard.value.days, selectedMetric.value, "completed")
+    : []
 ));
-const chartPoints = computed(() => chartPointCoordinates(chartValues.value));
-const chartSegments = computed(() => lineSegments(chartPoints.value));
+const plannedCumulativeValues = computed(() => (
+  dashboard.value
+    ? cumulativeNutritionValues(dashboard.value.days, selectedMetric.value, "planned")
+    : []
+));
+const cumulativeChartMaximum = computed(() => Math.max(
+  ...completedCumulativeValues.value,
+  ...plannedCumulativeValues.value,
+  1,
+));
+const completedChartPoints = computed(() => chartPointCoordinates(
+  completedCumulativeValues.value,
+  760,
+  220,
+  28,
+  cumulativeChartMaximum.value,
+));
+const plannedChartPoints = computed(() => chartPointCoordinates(
+  plannedCumulativeValues.value,
+  760,
+  220,
+  28,
+  cumulativeChartMaximum.value,
+));
+const completedChartSegments = computed(() => lineSegments(completedChartPoints.value));
+const plannedChartSegments = computed(() => lineSegments(plannedChartPoints.value));
 const selectedPlanId = computed(() => dashboard.value?.plan_id || null);
+
+function cumulativeProgress(metric: NutritionMetric): number | null {
+  if (!dashboard.value) return null;
+  return nutritionProgressPercentage(
+    dashboard.value.completed_nutrition_per_person[metric],
+    dashboard.value.planned_nutrition_per_person[metric],
+  );
+}
 
 function queryPlanId(): number | null {
   const value = Array.isArray(route.query.plan) ? route.query.plan[0] : route.query.plan;
@@ -159,27 +194,26 @@ onMounted(async () => {
     </section>
 
     <template v-else>
-      <section class="dashboard-summary" aria-label="Weekly execution summary">
-        <div class="dashboard-summary-primary">
-          <span>Completed meals</span>
-          <strong>{{ dashboard.status_counts.completed }} of {{ dashboard.days.length }}</strong>
+      <section class="dashboard-summary" aria-label="Cumulative nutrition totals">
+        <div class="dashboard-summary-intro">
+          <span>Plan-based actuals</span>
+          <strong>Cumulative nutrition</strong>
+          <small>{{ dashboard.status_counts.completed }} completed meals · per person</small>
         </div>
-        <div class="dashboard-progress-summary">
-          <span>Weekly progress</span>
-          <div><progress :value="dashboard.completion_rate" max="100" /><strong>{{ Math.round(dashboard.completion_rate) }}%</strong></div>
+        <div v-for="metric in nutritionMetrics" :key="metric.key" class="cumulative-metric-card">
+          <span>{{ metric.label }}</span>
+          <strong>{{ formatNutrition(dashboard.completed_nutrition_per_person[metric.key], metric.unit) }}</strong>
+          <small>
+            <template v-if="cumulativeProgress(metric.key) !== null">{{ cumulativeProgress(metric.key) }}% of current plan</template>
+            <template v-else>No counted plan total</template>
+          </small>
         </div>
-        <div><span>Calories</span><strong>{{ formatNutrition(dashboard.completed_nutrition_per_person.calories_kcal, "kcal") }}</strong></div>
-        <div><span>Protein</span><strong>{{ formatNutrition(dashboard.completed_nutrition_per_person.protein_g, "g") }}</strong></div>
-        <div><span>Carbohydrate</span><strong>{{ formatNutrition(dashboard.completed_nutrition_per_person.carbohydrate_g, "g") }}</strong></div>
-        <div><span>Fat</span><strong>{{ formatNutrition(dashboard.completed_nutrition_per_person.fat_g, "g") }}</strong></div>
-        <div><span>Sodium</span><strong>{{ formatNutrition(dashboard.completed_nutrition_per_person.sodium_mg, "mg") }}</strong></div>
-        <div><span>Sugar</span><strong>{{ formatNutrition(dashboard.completed_nutrition_per_person.sugar_g, "g") }}</strong></div>
       </section>
 
       <section class="dashboard-analytics">
         <div class="nutrition-trend-panel">
           <div class="dashboard-section-heading">
-            <div><h2>Daily nutrition</h2><p>Completed MealCraft dishes only</p></div>
+            <div><h2>Cumulative nutrition curve</h2><p>Completed actuals against the current non-skipped plan</p></div>
             <div class="metric-tabs" aria-label="Nutrition metric">
               <button
                 v-for="metric in nutritionMetrics"
@@ -192,28 +226,41 @@ onMounted(async () => {
           </div>
 
           <div class="nutrition-chart">
-            <svg viewBox="0 0 760 220" role="img" :aria-label="`${selectedMetricDefinition.label} by completed meal`">
+            <div class="chart-legend" aria-hidden="true">
+              <span class="completed">Completed cumulative</span>
+              <span class="planned">Current plan cumulative</span>
+            </div>
+            <svg viewBox="0 0 760 220" role="img" :aria-label="`Cumulative ${selectedMetricDefinition.label} for completed meals compared with the current plan`">
               <line v-for="y in [28, 83, 138, 192]" :key="y" x1="28" :y1="y" x2="732" :y2="y" class="chart-grid-line" />
               <polyline
-                v-for="segment in chartSegments"
-                :key="segment"
+                v-for="segment in plannedChartSegments"
+                :key="`planned-${segment}`"
                 :points="segment"
                 fill="none"
-                :stroke="selectedMetricDefinition.color"
+                class="chart-planned-line"
                 stroke-width="3"
                 stroke-linecap="round"
                 stroke-linejoin="round"
               />
-              <g v-for="(point, index) in chartPoints" :key="index">
-                <circle v-if="point.value !== null" :cx="point.x" :cy="point.y" r="5" :fill="selectedMetricDefinition.color" />
-                <circle v-else :cx="point.x" cy="192" r="4" class="chart-empty-point" />
+              <polyline
+                v-for="segment in completedChartSegments"
+                :key="`completed-${segment}`"
+                :points="segment"
+                fill="none"
+                :stroke="selectedMetricDefinition.color"
+                stroke-width="4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <g v-for="(point, index) in completedChartPoints" :key="index">
+                <circle :cx="point.x" :cy="point.y" r="5" :fill="selectedMetricDefinition.color" />
               </g>
             </svg>
             <div class="chart-day-labels">
               <span v-for="day in dashboard.days" :key="day.entry_id">{{ formatPlanDate(day.planned_date) }}</span>
             </div>
           </div>
-          <p class="chart-note">Values are {{ selectedMetricDefinition.label.toLowerCase() }} per person ({{ selectedMetricDefinition.unit }}). Planned and skipped meals are shown as empty points.</p>
+          <p class="chart-note">Running {{ selectedMetricDefinition.label.toLowerCase() }} per person ({{ selectedMetricDefinition.unit }}). Completed meals add to actuals; planned days hold the actual line flat, and skipped meals are excluded from both current totals.</p>
         </div>
 
         <aside class="completion-panel" aria-label="Completion status">
@@ -229,6 +276,35 @@ onMounted(async () => {
           </div>
           <p>Only completed planned dishes contribute to the nutrition totals.</p>
         </aside>
+      </section>
+
+      <section class="daily-nutrition-section" aria-labelledby="daily-nutrition-title">
+        <div class="dashboard-section-heading">
+          <div>
+            <h2 id="daily-nutrition-title">Daily nutrition detail</h2>
+            <p>Completed rows are actuals; planned rows are previews; skipped rows never enter cumulative totals.</p>
+          </div>
+        </div>
+        <div class="daily-nutrition-table">
+          <div class="daily-nutrition-header" aria-hidden="true">
+            <span>Date</span><span>Basis</span><span>Calories</span><span>Protein</span><span>Carbs</span><span>Fat</span><span>Sodium</span><span>Sugar</span>
+          </div>
+          <article
+            v-for="day in dashboard.days"
+            :key="day.entry_id"
+            class="daily-nutrition-row"
+            :class="day.status"
+          >
+            <time :datetime="day.planned_date">{{ formatPlanDate(day.planned_date) }}</time>
+            <strong>{{ day.status === "completed" ? "Actual" : day.status === "planned" ? "Planned" : "Not counted" }}</strong>
+            <span>{{ formatNutrition(day.nutrition_per_person.calories_kcal, "kcal") }}</span>
+            <span>{{ formatNutrition(day.nutrition_per_person.protein_g, "g") }}</span>
+            <span>{{ formatNutrition(day.nutrition_per_person.carbohydrate_g, "g") }}</span>
+            <span>{{ formatNutrition(day.nutrition_per_person.fat_g, "g") }}</span>
+            <span>{{ formatNutrition(day.nutrition_per_person.sodium_mg, "mg") }}</span>
+            <span>{{ formatNutrition(day.nutrition_per_person.sugar_g, "g") }}</span>
+          </article>
+        </div>
       </section>
 
       <section class="meal-checkin-section">

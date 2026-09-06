@@ -189,7 +189,7 @@ and clearly stated limitations.
 | Grocery grounding | Map normalized ingredients to purchasable FairPrice products, packages, observed prices, and timestamps |
 | Shopping engine | Aggregate final demand, deduct known pantry quantities, round packages, and derive an auditable Shopping List |
 | Recipe execution | Present selected recipe attributes, quantities, instructions, provenance, and optional tutorial support |
-| Dashboard | Track planned/completed/skipped MealCraft dishes and calculate plan-based daily and weekly nutrition |
+| Dashboard | Track planned/completed/skipped MealCraft dishes, lead with plan-based cumulative nutrition, and retain clearly labelled daily nutrition detail |
 | Replanning | Preview, validate, confirm or discard local changes while preserving history and Shopping List consistency |
 | Operations | Expose health, data quality, mapping, plan, Agent, and evaluation diagnostics needed to maintain the product |
 | Evaluation | Measure extraction, clarification, validity, cost, shopping consistency, nutrition, infeasibility, robustness, and user-facing behaviour |
@@ -260,7 +260,7 @@ the following outcomes:
    and known pantry quantities.
 8. Recipe execution support through structured details, provenance, and optional
    tutorial search after selection.
-9. Plan-based nutrition tracking with correct completed-meal aggregation.
+9. Plan-based nutrition tracking with completed-meal cumulative totals as the primary view and traceable daily detail.
 10. Robust local replanning and stress tests for realistic changes.
 11. Multiple fair baselines, separated development/validation/held-out evidence,
     category metrics, and concrete failure analysis.

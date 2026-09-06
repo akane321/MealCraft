@@ -2002,7 +2002,7 @@ a {
 
 .dashboard-summary {
   display: grid;
-  grid-template-columns: 1.15fr 1.8fr repeat(6, minmax(100px, 1fr));
+  grid-template-columns: minmax(190px, 1.45fr) repeat(6, minmax(112px, 1fr));
   margin-bottom: 22px;
   border: 1px solid var(--border);
 }
@@ -2034,37 +2034,33 @@ a {
   text-overflow: ellipsis;
 }
 
-.dashboard-summary-primary strong {
-  color: var(--success);
-  font-size: 28px;
+.dashboard-summary-intro {
+  color: #ffffff;
+  background: #17261f;
 }
 
-.dashboard-progress-summary > div {
-  display: grid;
-  grid-template-columns: minmax(80px, 1fr) auto;
-  align-items: center;
-  gap: 12px;
+.dashboard-summary .dashboard-summary-intro > span,
+.dashboard-summary .dashboard-summary-intro > small {
+  color: #b8c9c0;
 }
 
-.dashboard-progress-summary progress {
-  width: 100%;
-  height: 10px;
-  overflow: hidden;
-  border: 0;
-  border-radius: 99px;
-  background: #e8ebee;
+.dashboard-summary-intro strong {
+  font-size: 25px;
+  line-height: 1.08;
 }
 
-.dashboard-progress-summary progress::-webkit-progress-bar {
-  background: #e8ebee;
+.dashboard-summary small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
 }
 
-.dashboard-progress-summary progress::-webkit-progress-value {
-  background: var(--success);
+.cumulative-metric-card strong {
+  font-variant-numeric: tabular-nums;
 }
 
-.dashboard-progress-summary progress::-moz-progress-bar {
-  background: var(--success);
+.cumulative-metric-card small {
+  min-height: 30px;
 }
 
 .dashboard-analytics {
@@ -2120,6 +2116,29 @@ a {
   margin-top: 22px;
 }
 
+.chart-legend {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  gap: 18px;
+}
+
+.chart-legend span::before {
+  display: inline-block;
+  width: 23px;
+  margin-right: 7px;
+  border-top: 3px solid var(--link);
+  vertical-align: middle;
+  content: "";
+}
+
+.chart-legend .planned::before {
+  border-top-color: #aeb5bc;
+  border-top-style: dashed;
+}
+
 .nutrition-chart svg {
   display: block;
   width: 100%;
@@ -2137,6 +2156,11 @@ a {
   fill: #ffffff;
   stroke: #b8bec5;
   stroke-width: 2;
+}
+
+.chart-planned-line {
+  stroke: #aeb5bc;
+  stroke-dasharray: 7 7;
 }
 
 .chart-day-labels {
@@ -2215,12 +2239,77 @@ a {
   text-align: center;
 }
 
+.daily-nutrition-section,
 .meal-checkin-section {
   overflow: hidden;
+  border: 1px solid var(--border);
 }
 
+.daily-nutrition-section {
+  margin-bottom: 22px;
+}
+
+.daily-nutrition-section > .dashboard-section-heading,
 .meal-checkin-section > .dashboard-section-heading {
   padding: 24px 24px 20px;
+}
+
+.daily-nutrition-header,
+.daily-nutrition-row {
+  display: grid;
+  grid-template-columns: 118px 100px repeat(6, minmax(82px, 1fr));
+  align-items: center;
+  min-width: 900px;
+  column-gap: 14px;
+}
+
+.daily-nutrition-table {
+  overflow-x: auto;
+}
+
+.daily-nutrition-header {
+  min-height: 42px;
+  padding-inline: 24px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.daily-nutrition-row {
+  min-height: 58px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.daily-nutrition-row:last-child {
+  border-bottom: 0;
+}
+
+.daily-nutrition-row time,
+.daily-nutrition-row span {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.daily-nutrition-row strong {
+  color: var(--success);
+  font-size: 12px;
+}
+
+.daily-nutrition-row.planned strong {
+  color: var(--link);
+}
+
+.daily-nutrition-row.skipped {
+  background: #fafafa;
+}
+
+.daily-nutrition-row.skipped strong,
+.daily-nutrition-row.skipped span {
+  color: #8a8f95;
 }
 
 .meal-checkin-header,
@@ -2661,6 +2750,10 @@ a {
 
   .dashboard-summary > div:nth-child(-n + 4) {
     border-bottom: 1px solid var(--border);
+  }
+
+  .dashboard-summary > div:last-child {
+    border-right: 1px solid var(--border);
   }
 
   .meal-checkin-header,

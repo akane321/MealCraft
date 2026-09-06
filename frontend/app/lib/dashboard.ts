@@ -2,6 +2,7 @@ import type { NutritionDashboardDay } from "~/types/meal-plan";
 import type { RecipeNutrition } from "~/types/recipe";
 
 export type NutritionMetric = keyof RecipeNutrition;
+export type NutritionSeriesScope = "completed" | "planned";
 
 export interface NutritionMetricDefinition {
   key: NutritionMetric;
@@ -26,14 +27,35 @@ export function completedNutritionValues(
   return days.map(day => day.status === "completed" ? day.nutrition_per_person[metric] : null);
 }
 
+export function cumulativeNutritionValues(
+  days: NutritionDashboardDay[],
+  metric: NutritionMetric,
+  scope: NutritionSeriesScope,
+): number[] {
+  let runningTotal = 0;
+  return days.map((day) => {
+    const isCounted = scope === "completed"
+      ? day.status === "completed"
+      : day.status !== "skipped";
+    if (isCounted) runningTotal += day.nutrition_per_person[metric];
+    return runningTotal;
+  });
+}
+
+export function nutritionProgressPercentage(completed: number, planned: number): number | null {
+  if (planned <= 0) return null;
+  return Math.round(completed / planned * 100);
+}
+
 export function chartPointCoordinates(
   values: Array<number | null>,
   width = 760,
   height = 220,
   padding = 28,
+  maximumOverride?: number,
 ): Array<{ x: number; y: number; value: number | null }> {
   const nonNullValues = values.filter((value): value is number => value !== null);
-  const maximum = Math.max(...nonNullValues, 1);
+  const maximum = Math.max(maximumOverride ?? 0, ...nonNullValues, 1);
   const usableWidth = width - padding * 2;
   const usableHeight = height - padding * 2;
   const denominator = Math.max(values.length - 1, 1);
