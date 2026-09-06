@@ -2,8 +2,11 @@ from datetime import date
 
 from app.agent.parser import ConstraintParser
 from app.agent.replanning import AgentReplanInterpreter
-from app.agent.workflow import AgentConstraintWorkflow
 from app.models.agent import AgentSession
+from app.orchestration.contracts import InteractionAnswer, InteractionRequest, ScopeClass, ScopeDecision
+from app.orchestration.interactions import InteractionAnswerError, validate_interaction_answer
+from app.orchestration.runtime import BoundedAgentOrchestrator
+from app.orchestration.scope_policy import ReferenceScopePolicy
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.agent import AgentSessionRepository
 from app.schemas.agent import (
@@ -43,7 +46,8 @@ class AgentSessionService:
     ) -> None:
         self.repository = repository
         self.parser = parser
-        self.workflow = AgentConstraintWorkflow(parser)
+        self.orchestrator = BoundedAgentOrchestrator(parser)
+        self.scope_policy = ReferenceScopePolicy()
         self.meal_plan_service = meal_plan_service
         self.replanning_service = replanning_service
         self.replan_interpreter = AgentReplanInterpreter()
@@ -51,21 +55,28 @@ class AgentSessionService:
 
     def create(self, message: str) -> AgentSessionResponse:
         current = AgentConstraintState()
-        result = self.workflow.run(
+        result = self.orchestrator.process(
             message,
             current=current,
             acknowledged_unknowns=[],
             history=[],
+            current_status="collecting",
+            current_missing_fields=[],
+            current_questions=[],
+            context_version=0,
         )
         agent_session = self.repository.create(
             provider=self.parser.provider,
             user_message=message,
-            assistant_message=result["assistant_message"],
-            constraints=AgentConstraintState.model_validate(result["merged_constraints"]),
-            status=result["status"],
-            missing_fields=result["missing_fields"],
-            clarification_questions=result["clarification_questions"],
-            acknowledged_unknowns=result["merged_acknowledged_unknowns"],
+            assistant_message=result.assistant_message,
+            constraints=result.constraints,
+            status=result.status,
+            missing_fields=result.missing_fields,
+            clarification_questions=result.clarification_questions,
+            acknowledged_unknowns=result.acknowledged_unknowns,
+            context_version=result.context_version,
+            scope_decision=result.scope_decision,
+            pending_interaction=result.pending_interaction,
         )
         return self._to_response(agent_session)
 
@@ -89,25 +100,79 @@ class AgentSessionService:
         acknowledged = list(agent_session.acknowledged_unknown_quantities)
         self.repository.end_read_transaction()
 
-        result = self.workflow.run(
+        result = self.orchestrator.process(
             message,
             current=snapshot.constraints,
             acknowledged_unknowns=acknowledged,
             history=snapshot.messages[-self.max_history_messages :],
+            current_status=snapshot.status,
+            current_missing_fields=snapshot.missing_fields,
+            current_questions=snapshot.clarification_questions,
+            context_version=snapshot.context_version,
+            pending_interaction=snapshot.pending_interaction,
         )
+        if not result.state_mutated:
+            updated = self.repository.append_bounded_exchange(
+                session_id,
+                user_message=message,
+                assistant_message=result.assistant_message,
+                scope_decision=result.scope_decision,
+            )
+            if updated is None:
+                raise AgentSessionNotFoundError
+            return self._to_response(updated)
         updated = self.repository.append_exchange(
             session_id,
             user_message=message,
-            assistant_message=result["assistant_message"],
-            constraints=AgentConstraintState.model_validate(result["merged_constraints"]),
-            status=result["status"],
-            missing_fields=result["missing_fields"],
-            clarification_questions=result["clarification_questions"],
-            acknowledged_unknowns=result["merged_acknowledged_unknowns"],
+            assistant_message=result.assistant_message,
+            constraints=result.constraints,
+            status=result.status,
+            missing_fields=result.missing_fields,
+            clarification_questions=result.clarification_questions,
+            acknowledged_unknowns=result.acknowledged_unknowns,
+            context_version=result.context_version,
+            scope_decision=result.scope_decision,
+            pending_interaction=result.pending_interaction,
         )
         if updated is None:
             raise AgentSessionNotFoundError
         return self._to_response(updated)
+
+    def answer_interaction(self, session_id: int, answer: InteractionAnswer) -> AgentSessionResponse:
+        agent_session = self.repository.get(session_id)
+        if agent_session is None:
+            raise AgentSessionNotFoundError
+        snapshot = self._to_response(agent_session)
+        self.repository.end_read_transaction()
+        if snapshot.pending_interaction is None:
+            raise AgentSessionNotReadyError("There is no pending structured interaction.")
+        try:
+            values = validate_interaction_answer(
+                snapshot.pending_interaction,
+                answer,
+                current_context_version=snapshot.context_version,
+                current_plan_revision=(
+                    snapshot.pending_replan.base_revision if snapshot.pending_replan is not None else None
+                ),
+            )
+        except InteractionAnswerError as error:
+            raise AgentSessionNotReadyError(str(error)) from error
+        if len(values) != 1:
+            raise AgentSessionNotReadyError("This interaction requires exactly one answer.")
+        message = self._interaction_value_as_message(snapshot.pending_interaction, values[0])
+        return self.reply(session_id, message)
+
+    @staticmethod
+    def _interaction_value_as_message(request: InteractionRequest, value: object) -> str:
+        if request.field_path == "household_size":
+            if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+                raise AgentSessionNotReadyError("Household size must be a number.")
+            if isinstance(value, str) and not value.strip().isdigit():
+                return value.strip()
+            return f"{int(value)} people"
+        if request.field_path and request.field_path.endswith(".quantity"):
+            return str(value)
+        raise AgentSessionNotReadyError("This interaction field is not supported by the current runtime.")
 
     def _reply_to_planned(
         self,
@@ -117,6 +182,26 @@ class AgentSessionService:
     ) -> AgentSessionResponse:
         if snapshot.plan_id is None:
             raise AgentSessionNotReadyError("Generate a plan before requesting a replanning event.")
+        scope_decision = self.scope_policy.classify(message)
+        if scope_decision.scope_class is ScopeClass.AMBIGUOUS and snapshot.clarification_questions:
+            scope_decision = ScopeDecision(
+                scope_class=ScopeClass.DOMAIN_ACTION,
+                detected_intents=["replan_clarification_answer"],
+                supported_segments=[message],
+                should_mutate_state=True,
+                reason_code="PENDING_REPLAN_CLARIFICATION_RESPONSE",
+            )
+        if not scope_decision.should_mutate_state:
+            updated = self.repository.append_bounded_exchange(
+                session_id,
+                user_message=message,
+                assistant_message=self.orchestrator.boundary_message(scope_decision),
+                scope_decision=scope_decision,
+            )
+            if updated is None:
+                raise AgentSessionNotFoundError
+            return self._to_response(updated)
+
         plan = self.meal_plan_service.get(snapshot.plan_id)
         if plan is None:
             raise AgentSessionNotFoundError
@@ -133,6 +218,7 @@ class AgentSessionService:
                 draft=draft,
                 clarification_questions=questions,
                 pending_event_id=None,
+                scope_decision=scope_decision,
             )
         else:
             try:
@@ -155,6 +241,7 @@ class AgentSessionService:
                     draft=AgentReplanDraft(),
                     clarification_questions=[],
                     pending_event_id=None,
+                    scope_decision=scope_decision,
                 )
             else:
                 updated = self.repository.append_replan_exchange(
@@ -168,6 +255,7 @@ class AgentSessionService:
                     draft=draft,
                     clarification_questions=[],
                     pending_event_id=preview.id,
+                    scope_decision=scope_decision,
                 )
         if updated is None:
             raise AgentSessionNotFoundError
@@ -276,6 +364,17 @@ class AgentSessionService:
             plan_id=agent_session.plan_id,
             replan_draft=AgentReplanDraft.model_validate(agent_session.replan_draft or {}),
             pending_replan=pending_replan,
+            context_version=agent_session.context_version,
+            last_scope_decision=(
+                ScopeDecision.model_validate(agent_session.last_scope_decision)
+                if agent_session.last_scope_decision
+                else None
+            ),
+            pending_interaction=(
+                InteractionRequest.model_validate(agent_session.pending_interaction)
+                if agent_session.pending_interaction
+                else None
+            ),
             can_confirm=agent_session.status == "ready" and agent_session.plan_id is None,
             created_at=agent_session.created_at,
             updated_at=agent_session.updated_at,

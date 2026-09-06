@@ -6,7 +6,9 @@ useHead({ title: "Planning assistant · MealCraft" });
 
 const starterMessage = ref("");
 const replyMessage = ref("");
+const interactionFreeText = ref("");
 const {
+  answerInteraction,
   confirm,
   confirmReplan,
   create,
@@ -52,6 +54,37 @@ async function sendReply() {
   await reply(message);
   if (!errorMessage.value) replyMessage.value = "";
 }
+
+async function chooseInteractionOption(optionId: string) {
+  const interaction = session.value?.pending_interaction;
+  if (!interaction) return;
+  await answerInteraction({
+    question_id: interaction.question_id,
+    option_ids: [optionId],
+    free_text: null,
+    context_version: interaction.context_version,
+    plan_revision: interaction.plan_revision,
+  });
+}
+
+async function submitInteractionText() {
+  const interaction = session.value?.pending_interaction;
+  const value = interactionFreeText.value.trim();
+  if (!interaction || !value) return;
+  await answerInteraction({
+    question_id: interaction.question_id,
+    option_ids: [],
+    free_text: value,
+    context_version: interaction.context_version,
+    plan_revision: interaction.plan_revision,
+  });
+  if (!errorMessage.value) interactionFreeText.value = "";
+}
+
+watch(
+  () => session.value?.pending_interaction?.question_id,
+  () => { interactionFreeText.value = ""; },
+);
 
 onMounted(restoreLatest);
 </script>
@@ -109,6 +142,47 @@ onMounted(restoreLatest);
               <p>{{ message.content }}</p>
             </article>
           </div>
+
+          <section
+            v-if="session.pending_interaction"
+            class="assistant-interaction"
+            aria-label="Structured clarification"
+          >
+            <div class="assistant-interaction-heading">
+              <div>
+                <span>Quick clarification</span>
+                <p>{{ session.pending_interaction.prompt }}</p>
+              </div>
+              <small>Context {{ session.pending_interaction.context_version }}</small>
+            </div>
+            <div v-if="session.pending_interaction.options.length" class="assistant-interaction-options">
+              <button
+                v-for="option in session.pending_interaction.options"
+                :key="option.id"
+                type="button"
+                :disabled="isLoading"
+                @click="chooseInteractionOption(option.id)"
+              >
+                {{ option.label }}
+              </button>
+            </div>
+            <form
+              v-if="session.pending_interaction.allow_free_text"
+              class="assistant-interaction-input"
+              @submit.prevent="submitInteractionText"
+            >
+              <input
+                v-model="interactionFreeText"
+                type="text"
+                :placeholder="session.pending_interaction.type === 'quantity_input' ? 'Example: 500 g' : 'Enter another answer'"
+                :aria-label="session.pending_interaction.prompt"
+              >
+              <button type="submit" :disabled="isLoading || !interactionFreeText.trim()">
+                {{ isLoading ? 'Submitting…' : 'Use this answer' }}
+              </button>
+            </form>
+            <p class="assistant-interaction-note">Answers are tied to this conversation version; stale choices are rejected.</p>
+          </section>
 
           <form class="assistant-composer" @submit.prevent="sendReply">
             <textarea v-model="replyMessage" rows="3" required :placeholder="session.clarification_questions[0] || (session.status === 'planned' ? 'Example: Replace day 3 because chicken is unavailable…' : 'Add or revise a constraint…')" />

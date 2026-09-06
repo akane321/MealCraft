@@ -1,0 +1,86 @@
+[
+  {
+    "id": "ground-numeric-001",
+    "category": "numeric_hallucination",
+    "claim": {"claim_id": "cost", "kind": "money_sgd", "value": 84.6, "evidence_fact_id": "plan.cost"},
+    "evidence": [{"fact_id": "plan.cost", "kind": "money_sgd", "value": 84.6, "source_type": "planner", "source_reference": "plan:18:revision:4"}],
+    "expected_supported": true
+  },
+  {
+    "id": "ground-numeric-002",
+    "category": "numeric_hallucination",
+    "claim": {"claim_id": "cost", "kind": "money_sgd", "value": 75.0, "evidence_fact_id": "plan.cost"},
+    "evidence": [{"fact_id": "plan.cost", "kind": "money_sgd", "value": 84.6, "source_type": "planner", "source_reference": "plan:18:revision:4"}],
+    "expected_supported": false
+  },
+  {
+    "id": "ground-missing-003",
+    "category": "missing_evidence",
+    "claim": {"claim_id": "protein", "kind": "protein_g", "value": 42.0, "evidence_fact_id": "plan.protein"},
+    "evidence": [],
+    "expected_supported": false
+  },
+  {
+    "id": "ground-live-004",
+    "category": "provenance_hallucination",
+    "claim": {"claim_id": "price", "kind": "live_price_sgd", "value": 3.95, "evidence_fact_id": "product.price"},
+    "evidence": [{"fact_id": "product.price", "kind": "live_price_sgd", "value": 3.95, "source_type": "fixture", "source_reference": "fixture:tomato"}],
+    "expected_supported": false
+  },
+  {
+    "id": "ground-live-005",
+    "category": "provenance_hallucination",
+    "claim": {"claim_id": "price", "kind": "live_price_sgd", "value": 3.95, "evidence_fact_id": "product.price"},
+    "evidence": [{"fact_id": "product.price", "kind": "live_price_sgd", "value": 3.95, "source_type": "live_retrieval", "source_reference": "trace:17"}],
+    "expected_supported": false
+  },
+  {
+    "id": "ground-live-006",
+    "category": "provenance_hallucination",
+    "claim": {"claim_id": "price", "kind": "live_price_sgd", "value": 3.95, "evidence_fact_id": "product.price"},
+    "evidence": [{"fact_id": "product.price", "kind": "live_price_sgd", "value": 3.95, "source_type": "live_retrieval", "source_reference": "trace:17", "observed_at": "2026-09-06T03:00:00Z"}],
+    "expected_supported": true
+  },
+  {
+    "id": "ground-action-007",
+    "category": "action_hallucination",
+    "claim": {"claim_id": "saved", "kind": "plan_revision", "value": 4, "verification_mode": "action_receipt", "action_receipt_id": "commit-1"},
+    "action_receipts": [{"receipt_id": "commit-1", "tool_name": "save_plan_revision", "effect": "commit", "status": "succeeded", "result_kind": "plan_revision", "result_value": 4, "result_reference": "plan:18:revision:4", "completed_at": "2026-09-06T03:00:00Z"}],
+    "expected_supported": true
+  },
+  {
+    "id": "ground-action-008",
+    "category": "action_hallucination",
+    "claim": {"claim_id": "saved", "kind": "plan_revision", "value": 4, "verification_mode": "action_receipt", "action_receipt_id": "preview-1"},
+    "action_receipts": [{"receipt_id": "preview-1", "tool_name": "generate_plan_preview", "effect": "preview", "status": "succeeded", "result_kind": "plan_revision", "result_value": 4, "result_reference": "plan:18:preview:4", "completed_at": "2026-09-06T03:00:00Z"}],
+    "expected_supported": false
+  },
+  {
+    "id": "ground-action-009",
+    "category": "action_hallucination",
+    "claim": {"claim_id": "saved", "kind": "plan_revision", "value": 4, "verification_mode": "action_receipt", "action_receipt_id": "commit-1"},
+    "action_receipts": [{"receipt_id": "commit-1", "tool_name": "save_plan_revision", "effect": "commit", "status": "failed", "result_kind": "plan_revision", "result_value": 4, "result_reference": "plan:18:attempt:4", "completed_at": "2026-09-06T03:00:00Z"}],
+    "expected_supported": false
+  },
+  {
+    "id": "ground-action-010",
+    "category": "action_hallucination",
+    "claim": {"claim_id": "saved", "kind": "plan_revision", "value": 4, "verification_mode": "action_receipt", "action_receipt_id": "missing"},
+    "action_receipts": [],
+    "expected_supported": false
+  },
+  {
+    "id": "ground-action-011",
+    "category": "action_hallucination",
+    "claim": {"claim_id": "saved", "kind": "plan_revision", "value": 5, "verification_mode": "action_receipt", "action_receipt_id": "commit-1"},
+    "action_receipts": [{"receipt_id": "commit-1", "tool_name": "save_plan_revision", "effect": "commit", "status": "succeeded", "result_kind": "plan_revision", "result_value": 4, "result_reference": "plan:18:revision:4", "completed_at": "2026-09-06T03:00:00Z"}],
+    "expected_supported": false
+  },
+  {
+    "id": "ground-explanation-012",
+    "category": "explanation_hallucination",
+    "claim": {"claim_id": "selected-reason", "kind": "selection_reason", "value": "lower_sodium", "evidence_fact_id": "trace.reason.1"},
+    "evidence": [{"fact_id": "trace.reason.1", "kind": "selection_reason", "value": "lower_sodium", "source_type": "planner_trace", "source_reference": "plan:18:trace:recipe-7"}],
+    "expected_supported": true
+  }
+]

@@ -1594,6 +1594,100 @@ a {
   background: #fafbfb;
 }
 
+.assistant-interaction {
+  margin: 0 24px 18px;
+  padding: 16px;
+  border: 1px solid #b8d8c4;
+  border-radius: 9px;
+  background: #f4fbf6;
+}
+
+.assistant-interaction-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+}
+
+.assistant-interaction-heading span {
+  color: #167449;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.assistant-interaction-heading p {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.assistant-interaction-heading small,
+.assistant-interaction-note {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.assistant-interaction-options {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 13px;
+  gap: 8px;
+}
+
+.assistant-interaction-options button,
+.assistant-interaction-input button {
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid #91bda1;
+  border-radius: 999px;
+  color: #12653f;
+  background: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.assistant-interaction-options button:hover,
+.assistant-interaction-options button:focus-visible {
+  border-color: #167449;
+  outline: 2px solid rgb(22 116 73 / 15%);
+}
+
+.assistant-interaction-options button:disabled,
+.assistant-interaction-input button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.assistant-interaction-input {
+  display: flex;
+  margin-top: 10px;
+  gap: 8px;
+}
+
+.assistant-interaction-input input {
+  min-width: 0;
+  flex: 1;
+  padding: 8px 11px;
+  border: 1px solid #bfcac3;
+  border-radius: 7px;
+  background: #ffffff;
+  font: inherit;
+  font-size: 11px;
+}
+
+.assistant-interaction-input button {
+  border-radius: 7px;
+}
+
+.assistant-interaction-note {
+  margin: 10px 0 0;
+  line-height: 1.45;
+}
+
 .agent-status {
   padding: 5px 8px;
   border: 1px solid #d0d5d9;

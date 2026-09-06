@@ -1,4 +1,9 @@
-from app.orchestration.contracts import CapabilitySpec, ToolEffect, ToolSpec
+from app.orchestration.contracts import (
+    CapabilitySpec,
+    ToolAuthorizationDecision,
+    ToolEffect,
+    ToolSpec,
+)
 
 TOOL_SPECS: dict[str, ToolSpec] = {
     item.name: item
@@ -70,3 +75,44 @@ def allowed_tools_for(intent: str, *, confirmed: bool = False) -> set[str]:
     if not confirmed:
         tools = {name for name in tools if TOOL_SPECS[name].effect is not ToolEffect.COMMIT}
     return tools
+
+
+def authorize_tool_call(
+    intent: str,
+    tool_name: str,
+    *,
+    confirmed: bool = False,
+) -> ToolAuthorizationDecision:
+    """Return an auditable deny-by-default decision for a proposed tool call."""
+    capability = CAPABILITIES.get(intent)
+    if capability is None:
+        return ToolAuthorizationDecision(
+            intent=intent,
+            tool_name=tool_name,
+            allowed=False,
+            confirmation_present=confirmed,
+            reason_code="UNKNOWN_CAPABILITY",
+        )
+    if tool_name not in TOOL_SPECS or tool_name not in capability.allowed_tools:
+        return ToolAuthorizationDecision(
+            intent=intent,
+            tool_name=tool_name,
+            allowed=False,
+            confirmation_present=confirmed,
+            reason_code="TOOL_NOT_ALLOWED_FOR_CAPABILITY",
+        )
+    if TOOL_SPECS[tool_name].effect is ToolEffect.COMMIT and not confirmed:
+        return ToolAuthorizationDecision(
+            intent=intent,
+            tool_name=tool_name,
+            allowed=False,
+            confirmation_present=False,
+            reason_code="CONFIRMATION_REQUIRED",
+        )
+    return ToolAuthorizationDecision(
+        intent=intent,
+        tool_name=tool_name,
+        allowed=True,
+        confirmation_present=confirmed,
+        reason_code="AUTHORIZED",
+    )

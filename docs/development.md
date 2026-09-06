@@ -64,11 +64,12 @@ imports the reference catalog, and then starts Uvicorn.
 Generated weekly plans are persisted in `meal_plans`, `meal_plan_entries`, and
 `meal_plan_grocery_items`. Meal execution status and completion timestamps are
 stored on `meal_plan_entries`. Agent conversations, extracted constraints,
-outstanding clarifications, and the generated-plan link are persisted in
-`agent_sessions` and `agent_messages`. Replanning previews and confirmations are
+outstanding clarifications, context version, last scope decision, pending typed
+interaction, and generated-plan link are persisted in `agent_sessions` and
+`agent_messages`. Replanning previews and confirmations are
 stored in `meal_plan_events`; `meal_plans.revision` provides optimistic
 concurrency and `meal_plan_entries.is_locked` protects selected meals. The
-current migration head is `20260902_0009`. Household profile identity and
+current migration head is `20260906_0011`. Household profile identity and
 immutable versions are stored in `household_profiles` and
 `household_profile_versions`; linked plans preserve the exact profile version
 and optional replaced-plan ID. Agent replanning drafts and pending
@@ -92,6 +93,12 @@ OPENAI_MODEL=gpt-5.4-mini
 The model only extracts explicit fields. The deterministic planner still owns
 all hard filters, scoring, grocery calculations, and persistence. Do not commit
 API keys.
+
+The deterministic scope gate runs before either parser. Its visible bilingual
+developer set is reproduced as part of the offline workbench; it is not a
+held-out claim. Agent responses also expose typed interactions and reject stale
+or forged option IDs through
+`/api/agent/sessions/{session_id}/interactions`.
 
 ## Product Pricing Modes
 

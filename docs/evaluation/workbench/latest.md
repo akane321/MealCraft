@@ -18,6 +18,15 @@
 | Consecutive repetitions | 216 | 0 | -216 |
 | Failure cases | 36 | 0 | -36 |
 
+## Held-out strong Rule-only comparison
+
+| Metric | Rule-only baseline | MealCraft planner | Delta |
+|---|---:|---:|---:|
+| Scenario expectation rate | 1.0 | 1.0 | 0.0 |
+| Mean distinct recipes | 2.0 | 6.1389 | 4.1389 |
+| Consecutive repetitions | 0 | 0 | -0 |
+| Failure cases | 0 | 0 | -0 |
+
 ## Offline Agent benchmark
 
 | Metric | Result |
@@ -31,6 +40,40 @@
 | `clarification_accuracy` | 0.875 |
 | `medical_boundary_accuracy` | 1.0 |
 | `failure_case_count` | 8 |
+
+## Agent scope developer set
+
+> Diagnostic only: this set was visible during implementation and is not held-out evidence.
+
+| Metric | Result |
+|---|---:|
+| `classification_accuracy` | 1.0 |
+| `macro_f1` | 1.0 |
+| `mutating_case_count` | 13 |
+| `non_mutating_case_count` | 23 |
+| `false_accept_count` | 0 |
+| `false_accept_rate` | 0.0 |
+| `false_reject_count` | 0 |
+| `false_reject_rate` | 0.0 |
+| `state_contamination_count` | 0 |
+| `state_contamination_rate` | 0.0 |
+| `tool_policy_accuracy` | 1.0 |
+| `failure_case_count` | 0 |
+
+## Grounding developer set
+
+> Diagnostic only: typed claims are supplied directly; natural-language claim extraction is not evaluated.
+
+| Metric | Result |
+|---|---:|
+| `verification_accuracy` | 1.0 |
+| `supported_case_count` | 4 |
+| `unsupported_case_count` | 8 |
+| `unsupported_claim_escape_count` | 0 |
+| `unsupported_claim_escape_rate` | 0.0 |
+| `supported_claim_rejection_count` | 0 |
+| `supported_claim_rejection_rate` | 0.0 |
+| `failure_case_count` | 0 |
 
 ## Failure registry
 

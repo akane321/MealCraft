@@ -44,7 +44,7 @@ Those operations remain deterministic and testable.
 | Capability | Current implementation |
 | --- | --- |
 | Household profile | One shared household profile with member servings, safety constraints, shared defaults, and immutable versions |
-| Planning assistant | Persistent English/Chinese conversations, structured constraint state, targeted clarification, confirmation, and tool delegation |
+| Planning assistant | Persistent English/Chinese conversations, bounded scope routing, structured constraints and clarification controls, confirmation, and tool delegation |
 | Weekly planning | Persisted seven-day main-meal plans with hard filtering, soft ranking, diversity control, and per-person nutrition |
 | Grocery grounding | FairPrice product lookup with normalized packages, PostgreSQL cache, and reproducible fixtures |
 | Shopping List | Consolidated ingredient demand, known-quantity pantry deduction, package rounding, and budget results |
@@ -160,17 +160,24 @@ scenarios, 40 held-out planning scenarios (36 feasible and 4 infeasible), and 24
 Agent fixtures. On the recorded held-out run, the transparent greedy baseline
 and MealCraft used the same eligible recipe pool:
 
-| Metric | Greedy baseline | MealCraft |
-| --- | ---: | ---: |
-| Adjacent repetitions | 216 | 0 |
-| Mean distinct recipes per plan | 1.0 | 6.1389 |
-| Feasible-case failures | 36 | 0 |
+| Metric | Greedy lower bound | Strong Rule-only | MealCraft |
+| --- | ---: | ---: | ---: |
+| Adjacent repetitions | 216 | 0 | 0 |
+| Mean distinct recipes per plan | 1.0 | 2.0 | 6.1389 |
+| Recorded failure cases | 36 | 0 | 0 |
 
 The recorded MealCraft run had zero hard-constraint violations. The offline
 Agent fixture result was field F1 `0.907` and exact-case rate `16/24`; eight
 failures remain visible for regression work. These results describe curated,
 versioned fixtures, not clinical outcomes, representative Singapore households,
 or the reliability of the live FairPrice website.
+
+Two visible orchestration developer sets add 36 bilingual scope/state-isolation
+cases and 12 typed grounding cases. The current deterministic reference passes
+all known cases with zero false accepts, false rejects, state contamination, or
+unsupported-claim escapes. These are implementation diagnostics, not held-out
+evidence; the final comparative protocol still requires independently frozen
+episodes.
 
 Run the deterministic developer gate and full offline workbench:
 

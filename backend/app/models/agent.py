@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, Identity, Index, String, Text, func
+from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, Identity, Index, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -31,6 +31,9 @@ class AgentSession(Base):
     clarification_questions: Mapped[list[str]] = mapped_column(JSON, default=list)
     acknowledged_unknown_quantities: Mapped[list[str]] = mapped_column(JSON, default=list)
     replan_draft: Mapped[dict] = mapped_column(JSON, default=dict)
+    context_version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
+    last_scope_decision: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    pending_interaction: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     plan_id: Mapped[int | None] = mapped_column(
         BIGINT_ID,
         ForeignKey("meal_plans.id", ondelete="SET NULL"),

@@ -73,6 +73,12 @@ This comparison isolates the incremental value of Agent-driven requirement
 understanding, clarification and orchestration beyond a conventional structured
 planner.
 
+The first executable reference now uses the fixed ordering `consumed ingredient
+cost -> cooking time -> recommendation score -> recipe ID`, with adjacent
+repetition excluded whenever another eligible recipe exists. Its v1 held-out
+output is a diagnostic implementation checkpoint; B1 still requires the frozen
+v2 packets and common final validator before it supports the comparative claim.
+
 ### B2 — Context-matched LLM-only
 
 This is the primary architecture baseline. It uses the same base model and

@@ -46,6 +46,16 @@ class ToolEffect(StrEnum):
     COMMIT = "commit"
 
 
+class ToolRunStatus(StrEnum):
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+
+
+class ClaimVerificationMode(StrEnum):
+    EVIDENCE_FACT = "evidence_fact"
+    ACTION_RECEIPT = "action_receipt"
+
+
 class ToolSpec(BaseModel):
     name: str
     effect: ToolEffect
@@ -59,6 +69,14 @@ class CapabilitySpec(BaseModel):
     confirmation_required: bool = False
 
 
+class ToolAuthorizationDecision(BaseModel):
+    intent: str
+    tool_name: str
+    allowed: bool
+    confirmation_present: bool
+    reason_code: str
+
+
 class ScopeDecision(BaseModel):
     scope_class: ScopeClass
     detected_intents: list[str] = Field(default_factory=list)
@@ -68,6 +86,20 @@ class ScopeDecision(BaseModel):
     should_call_tools: bool = False
     requires_clarification: bool = False
     reason_code: str
+
+
+class ScopeMetrics(BaseModel):
+    total_cases: int
+    correct_classifications: int
+    false_accepts: int
+    false_rejects: int
+    state_contamination_cases: int
+
+    @property
+    def accuracy(self) -> float:
+        if self.total_cases == 0:
+            return 1.0
+        return self.correct_classifications / self.total_cases
 
 
 class InteractionOption(BaseModel):
@@ -117,19 +149,43 @@ class EvidenceFact(BaseModel):
     value: ScalarValue
     source_type: str
     source_reference: str
+    observed_at: datetime | None = None
+
+
+class ActionReceipt(BaseModel):
+    receipt_id: str
+    tool_name: str
+    effect: ToolEffect
+    status: ToolRunStatus
+    result_kind: str
+    result_value: ScalarValue
+    result_reference: str
+    completed_at: datetime
 
 
 class ResponseClaim(BaseModel):
     claim_id: str
     kind: str
     value: ScalarValue
+    verification_mode: ClaimVerificationMode = ClaimVerificationMode.EVIDENCE_FACT
     evidence_fact_id: str | None = None
+    action_receipt_id: str | None = None
+
+    @model_validator(mode="after")
+    def validate_verification_reference(self) -> "ResponseClaim":
+        if self.verification_mode is ClaimVerificationMode.EVIDENCE_FACT:
+            if not self.evidence_fact_id or self.action_receipt_id:
+                raise ValueError("evidence-fact claims require exactly one evidence_fact_id")
+        elif not self.action_receipt_id or self.evidence_fact_id:
+            raise ValueError("action claims require exactly one action_receipt_id")
+        return self
 
 
 class GroundingReport(BaseModel):
     total_claims: int
     supported_claim_ids: list[str]
     unsupported_claim_ids: list[str]
+    unsupported_reason_codes: dict[str, str] = Field(default_factory=dict)
 
     @property
     def grounded_claim_precision(self) -> float:

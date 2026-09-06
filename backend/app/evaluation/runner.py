@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.data.catalog import Catalog, import_catalog, load_catalog
 from app.db.base import Base
-from app.evaluation.baseline import greedy_repeat_selector
+from app.evaluation.baseline import greedy_repeat_selector, strong_rule_only_selector
 from app.planning.grocery_estimator import GroceryEstimator
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
@@ -24,7 +24,7 @@ from app.schemas.meal_plan import WeeklyMealPlanRequest
 from app.services.product import ProductSearchService
 from app.services.recommendation import RecipeRecommendationService
 
-PlanningSystem = Literal["greedy-baseline", "mealcraft-planner"]
+PlanningSystem = Literal["greedy-baseline", "rule-only-baseline", "mealcraft-planner"]
 
 
 class EvaluationScenario(BaseModel):
@@ -195,6 +195,9 @@ def evaluate(
                 if system == "greedy-baseline":
                     selected, _ = greedy_repeat_selector(recommendation_result.recommendations, request)
                     second, _ = greedy_repeat_selector(recommendation_result.recommendations, request)
+                elif system == "rule-only-baseline":
+                    selected, _ = strong_rule_only_selector(recommendation_result.recommendations, request)
+                    second, _ = strong_rule_only_selector(recommendation_result.recommendations, request)
                 else:
                     selected, _ = selector.select(recommendation_result.recommendations, request)
                     second, _ = selector.select(recommendation_result.recommendations, request)
