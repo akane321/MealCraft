@@ -2,8 +2,10 @@
 
 ## Document status
 
-**Accepted design target; implementation is not complete.** This document
-defines the next formal evaluation direction. The existing
+**Accepted design target; partial developer infrastructure is executable.** The
+matched-information developer packet compiler and strong Rule-only reference
+are implemented, but held-out labels, the common output validator, model runs,
+human study and statistical comparison are not complete. The existing
 [Protocol v1](../evaluation/protocol-v1.md) and its committed reports remain the
 reproducible record of what is currently implemented.
 
@@ -216,6 +218,16 @@ Use one frozen timestamped snapshot containing:
 
 The packet should cover all ingredients in the candidate recipes, not just the
 ingredients of MealCraft's final selections.
+
+The executable developer compiler enforces this coverage rule, validates all
+declared recipe/product references against versioned catalogs, rejects unknown
+fields, and records source plus canonical packet digests. Its two visible
+developer scenarios validate the contract only: they are not held-out evidence
+and are not a reported comparison result. Run it with:
+
+```bash
+uv run --project backend --no-sync python -m app.evaluation.v2_packets
+```
 
 ### Information that must not be shared as input
 

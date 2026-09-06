@@ -145,6 +145,19 @@ planner comparison and offline Agent fixture benchmark and writes
 `docs/evaluation/workbench/latest.json` and `latest.md`. Both commands are
 fixture-only by default and do not make a paid API call.
 
+Compile the leakage-resistant Evaluation v2 developer packets without calling
+an external model:
+
+```bash
+docker compose exec backend uv run --no-sync python -m app.evaluation.v2_packets
+```
+
+This creates `data/evaluation/v2/dev/packets-v1.json`. The compiler fails if a
+candidate recipe or product reference is unknown, or if the frozen product
+snapshot does not cover every ingredient in the candidate recipe pool. These
+visible packets exercise the comparison contract and must not be described as
+held-out results.
+
 ## Run Frontend Quality Checks
 
 ```bash
