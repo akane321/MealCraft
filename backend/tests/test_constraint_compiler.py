@@ -109,3 +109,48 @@ def test_optional_locked_recipe_still_reports_all_safety_conflicts():
     row = pair(packet, slot.slot_id, recipe.recipe_id)
     assert row.rejection_codes == ("allergen", "time_limit")
     assert not row.eligible
+
+
+@pytest.mark.parametrize("required,locked,blocked", [(True, False, True), (False, False, False), (False, True, True)])
+def test_empty_domains_only_block_required_or_locked_slots(required, locked, blocked):
+    from app.planning.constraint_compiler import compile_search_domains
+
+    packet = problem()
+    recipe = packet.recipes[0].model_copy(update={"allergens": ["milk"]})
+    slot = packet.slots[0].model_copy(
+        update={"required": required, "locked_recipe_id": recipe.recipe_id if locked else None}
+    )
+    packet = packet.model_copy(update={"slots": [slot], "recipes": [recipe], "allergens": ["milk"]})
+    compiled = compile_search_domains(packet)
+    assert compiled.slots[0].eligible_recipe_ids == ()
+    assert compiled.blocked_slot_ids == ((slot.slot_id,) if blocked else ())
+    assert "allergen" in compiled.decisions[0].rejection_codes
+
+
+def test_empty_reviewed_allergen_lists_and_new_catalog_values_use_same_logic():
+    from app.planning.constraint_compiler import compile_search_domains
+
+    packet = problem()
+    slot = packet.slots[0].model_copy(update={"locked_recipe_id": None, "max_time_minutes": None})
+    recipe = packet.recipes[0].model_copy(update={"allowed_meal_types": [slot.meal_type], "allergens": []})
+    packet = packet.model_copy(
+        update={"slots": [slot], "recipes": [recipe], "allergens": ["milk"], "nutrition_bands": []}
+    )
+    assert compile_search_domains(packet).slots[0].eligible_recipe_ids == (recipe.recipe_id,)
+    packet = packet.model_copy(update={"recipes": [recipe.model_copy(update={"allergens": ["milk"]})]})
+    assert compile_search_domains(packet).blocked_slot_ids == (slot.slot_id,)
+    packet = packet.model_copy(update={"allergens": []})
+    assert compile_search_domains(packet).slots[0].eligible_recipe_ids == (recipe.recipe_id,)
+
+
+def test_nonempty_domains_do_not_claim_aggregate_budget_feasibility():
+    from app.planning.constraint_compiler import compile_search_domains
+
+    packet = problem().model_copy(update={"purchase_budget_sgd": 0.01})
+    compiled = compile_search_domains(packet)
+    assert compiled.blocked_slot_ids == ()
+    assert not hasattr(compiled, "feasible")
+    reversed_packet = packet.model_copy(
+        update={"slots": list(reversed(packet.slots)), "recipes": list(reversed(packet.recipes))}
+    )
+    assert compiled == compile_search_domains(reversed_packet)

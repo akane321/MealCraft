@@ -20,6 +20,49 @@ class CandidateEligibility:
         return not self.rejection_codes
 
 
+@dataclass(frozen=True)
+class SlotCandidates:
+    slot_id: str
+    must_assign: bool
+    eligible_recipe_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class CompiledConstraints:
+    """Search domains and rejection evidence for the supplied candidate packet."""
+
+    decisions: tuple[CandidateEligibility, ...]
+    slots: tuple[SlotCandidates, ...]
+
+    @property
+    def blocked_slot_ids(self) -> tuple[str, ...]:
+        """Required or locked slots with no locally eligible recipe.
+
+        This proves no assignment exists within this candidate packet for these
+        slots. It says nothing about recipes outside the packet. Nonempty domains
+        also do not prove that aggregate nutrition or budget can be satisfied.
+        """
+        return tuple(slot.slot_id for slot in self.slots if slot.must_assign and not slot.eligible_recipe_ids)
+
+
+def compile_search_domains(problem: FinalPlanningProblem) -> CompiledConstraints:
+    """Compile once and group candidates for search, preserving every rejection."""
+    decisions = compile_constraints(problem)
+    candidates: dict[str, list[str]] = {slot.slot_id: [] for slot in problem.slots}
+    for decision in decisions:
+        if decision.eligible:
+            candidates[decision.slot_id].append(decision.recipe_id)
+    slots = tuple(
+        SlotCandidates(
+            slot.slot_id,
+            slot.required or slot.locked_recipe_id is not None,
+            tuple(candidates[slot.slot_id]),
+        )
+        for slot in sorted(problem.slots, key=lambda item: item.slot_id)
+    )
+    return CompiledConstraints(decisions, slots)
+
+
 def compile_constraints(problem: FinalPlanningProblem) -> tuple[CandidateEligibility, ...]:
     """Return every slot/recipe pair, ordered by stable IDs, without mutation.
 
