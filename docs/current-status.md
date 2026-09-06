@@ -4,7 +4,7 @@
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `e1460f8` - `feat: enforce bounded agent orchestration (#25)`
+> Verified remote `main`: `3b2dc98` - `feat: prioritize cumulative nutrition dashboard (#27)`
 
 ## How to Read This Document
 
@@ -26,7 +26,7 @@
 | Weekly planning | Seven persisted main meals, hard filtering, soft ranking, diversity handling, nutrition aggregation | One main meal per day is the current baseline |
 | FairPrice | Live lookup, normalized results, 15-minute PostgreSQL cache, explicit fixture mode | Live-site robustness requires further observation |
 | Shopping List | Aggregated demand, known-quantity deduction, package rounding, price and budget results | Unknown pantry quantities are never deducted |
-| Check-in and Dashboard | Planned/completed/skipped states, daily totals, weekly trends, completion coverage | Counts completed MealCraft dishes only |
+| Check-in and Dashboard | Planned/completed/skipped states, completed cumulative nutrition KPIs and curves, current-plan comparison, labelled daily detail, completion coverage | Cumulative actuals count completed MealCraft dishes only; planned rows are previews and skipped rows are not counted |
 | Replanning | Preview, confirm/discard, plan revision, event history, local meal changes, price and Shopping List deltas | Broader preference and stress-event semantics remain partial |
 | Evaluation | Developer, held-out, Agent, scope and grounding fixtures; greedy and Strong Rule-only references; matched-information v2 developer packets; failure registry; state and 1280×720 desktop browser tests | Visible orchestration/v2 packets validate contracts but are not independent held-out comparative evidence |
 
@@ -96,7 +96,7 @@ improved.
 | Evaluation scale | Partial | Expand toward 150-200 verified requests, 150-250 recipes, 80-120 planning scenarios, and complete grocery coverage for benchmark demand; preserve frozen splits and digests |
 | Multiple baselines | Partial | Strong Rule-only is executable; run frozen Context-matched LLM-only, Plain LLM and Human Manual comparisons only after common outputs and held-out labels are ready |
 | Capability-centred Evaluation v2 | Partial | Packet compiler, coverage/leakage gates and visible developer packets are executable; common output validator, independent held-out set, repeated model runs, human study and paired statistics remain open |
-| User-facing quality | Partial | Typed quick clarification passed 1280×720 Browser and Playwright acceptance; deepen loading, empty, error, degraded and accessibility coverage |
+| User-facing quality | Partial | Typed quick clarification and cumulative-plus-daily Dashboard passed 1280×720 Browser and Playwright acceptance; deepen loading, empty, error, degraded and accessibility coverage |
 | Operations and maintainability | Target beyond the original proposal | Add health, data-quality, mapping, trace, and evaluation diagnostics where they reduce maintenance and demo risk |
 
 ## Current Priorities
