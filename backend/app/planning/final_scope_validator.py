@@ -50,6 +50,9 @@ class FinalPlanningValidator:
 
         for slot in problem.slots:
             assignment = assigned_by_slot.get(slot.slot_id)
+            if slot.locked_recipe_id is not None and assignment is None:
+                checks.append(self._failed("locked_slot", "Locked slot must retain its assigned recipe.", slot.slot_id))
+                continue
             if slot.required and assignment is None:
                 checks.append(self._failed("required_slot", "Required slot is empty.", slot.slot_id))
                 continue
@@ -67,13 +70,14 @@ class FinalPlanningValidator:
                 continue
             checks.extend(self._slot_checks(problem, slot.slot_id, assignment.recipe_id))
 
+        assignment_checks_passed = not checks
         checks.extend(self._nutrition_checks(problem, assigned_by_slot))
         checks.extend(self._shopping_checks(problem, shopping))
         demand_checks = self._demand_checks(problem, assigned_by_slot, shopping)
         checks.extend(demand_checks)
         product_checks, purchase_total, cost_complete = self._product_checks(problem, shopping)
         checks.extend(product_checks)
-        cost_complete = cost_complete and not demand_checks
+        cost_complete = cost_complete and not demand_checks and assignment_checks_passed
         if problem.purchase_budget_sgd is not None:
             margin = round(problem.purchase_budget_sgd - purchase_total, 2)
             status: CheckStatus = "passed" if margin >= -0.005 else "failed"
@@ -87,7 +91,7 @@ class FinalPlanningValidator:
                     actual=purchase_total,
                     limit=problem.purchase_budget_sgd,
                     margin=margin if cost_complete else None,
-                    detail="Budget uses snapshot prices and package counts; missing prices leave a known subtotal.",
+                    detail="Budget requires valid assignments and complete demand and product costs.",
                 )
             )
 

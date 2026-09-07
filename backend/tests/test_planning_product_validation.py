@@ -241,3 +241,40 @@ def test_nonfinite_snapshot_price_cannot_produce_a_budget_pass():
     assert report.status == "failed"
     assert any(check.code == "product_numeric" for check in report.checks)
     assert next(check for check in report.checks if check.code == "purchase_budget").status == "indeterminate"
+
+
+def test_optional_locked_slot_cannot_be_omitted():
+    problem, _, _ = hand_calculated_case()
+    problem = problem.model_copy(
+        update={"slots": [slot.model_copy(update={"required": False}) for slot in problem.slots]}
+    )
+    report = FinalPlanningValidator().validate(problem, [], [])
+    assert report.status == "failed"
+    assert any(check.code == "locked_slot" for check in report.checks)
+    assert next(check for check in report.checks if check.code == "purchase_budget").status == "indeterminate"
+
+
+def test_missing_required_assignments_cannot_claim_zero_budget_pass():
+    problem, _, _ = hand_calculated_case()
+    report = FinalPlanningValidator().validate(problem, [], [])
+    assert report.status == "failed"
+    assert next(check for check in report.checks if check.code == "purchase_budget").status == "indeterminate"
+
+
+def test_all_unlocked_optional_slots_can_be_skipped():
+    problem, _, _ = hand_calculated_case()
+    problem = problem.model_copy(
+        update={
+            "slots": [slot.model_copy(update={"required": False, "locked_recipe_id": None}) for slot in problem.slots]
+        }
+    )
+    report = FinalPlanningValidator().validate(problem, [], [])
+    assert report.status == "passed"
+    assert report.purchase_total_sgd == 0
+
+
+def test_duplicate_assignments_cannot_report_budget_compliance():
+    problem, assignments, lines = hand_calculated_case()
+    report = FinalPlanningValidator().validate(problem, assignments + [assignments[0]], lines)
+    assert report.status == "failed"
+    assert next(check for check in report.checks if check.code == "purchase_budget").status == "indeterminate"
