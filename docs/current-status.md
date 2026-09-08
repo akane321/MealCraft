@@ -1,10 +1,10 @@
 # MealCraft Current Status
 
-> Last verified public snapshot: 2026-09-06
+> Last verified public snapshot: 2026-09-08
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `3b2dc98` - `feat: prioritize cumulative nutrition dashboard (#27)`
+> Verified remote `main`: `43866b0` - `chore(deps-dev): bump typescript from 5.9.3 to 6.0.3 in /frontend (#31)`
 
 ## How to Read This Document
 
@@ -23,7 +23,7 @@
 | Household profile | One shared profile, member servings and safety constraints, shared defaults, immutable versions, profile-linked plans | Does not generate separate dishes for each member |
 | Recipe catalog | 30 validated recipes and 34 normalized ingredients imported idempotently | Smaller and less dimensional than the final benchmark target |
 | Agent | Persistent sessions, bilingual scope isolation, structured constraints, typed clarification, confirmation, bounded tool authorization, grounded claims, and Agent-driven replanning | Default parser is deterministic fixture mode; durable AgentRun checkpoints and formal live-model evidence are deferred |
-| Weekly planning | Seven persisted main meals, hard filtering, soft ranking, diversity handling, nutrition aggregation | One main meal per day is the current baseline |
+| Weekly planning | Seven persisted main meals plus independently callable Planning v2 constraint compilation, bounded Beam Search, conservative nutrition bounds, independent shopping/budget recomputation, and a small exhaustive oracle | The product API still uses the current baseline path; Beam parameters are untuned and the oracle proves results only for small packets under the fixed shopping policy |
 | FairPrice | Live lookup, normalized results, 15-minute PostgreSQL cache, explicit fixture mode | Live-site robustness requires further observation |
 | Shopping List | Aggregated demand, known-quantity deduction, package rounding, price and budget results | Unknown pantry quantities are never deducted |
 | Check-in and Dashboard | Planned/completed/skipped states, completed cumulative nutrition KPIs and curves, current-plan comparison, labelled daily detail, completion coverage | Cumulative actuals count completed MealCraft dishes only; planned rows are previews and skipped rows are not counted |
@@ -89,6 +89,7 @@ improved.
 | Validated web-recipe supplementation | Target | Implement search, parsing, normalization, provenance, validation, and trusted fallback |
 | Semantic preference retrieval | Target | Combine semantic matching with strict metadata filtering and evaluate its incremental value |
 | Recipe execution side panel | Partial | Unify attributes, ingredients, instructions, provenance, and optional post-selection tutorial support |
+| Final-scope planning and validation | Partial | Constraint compilation, bounded Beam Search, conservative bounds, independent shopping/budget validation and a small exhaustive oracle are executable; integrate them into the production API, add bounded retrieve-repair and mixed-package optimization, tune parameters, and run controlled ablations |
 | Nutrition elastic policy | Partial | Complete source-aware target deviation, lower-sodium/lower-sugar policy, tolerance, missing-data behaviour, and dedicated evaluation |
 | Grocery grounding robustness | Partial | Measure live/cache/fixture degradation, mapping quality, package parsing, and source freshness |
 | Dynamic replanning | Partial | Add broader event semantics, temporary versus persistent preference handling, disruption metrics, and Shopping List consistency stress tests |
@@ -107,12 +108,15 @@ improved.
    deterministic validation.
 3. Complete nutrition-target and elastic-preference semantics and evidence.
 4. Test FairPrice live/cache/fixture degradation against real changes.
-5. Complete durable AgentRun checkpoints and bounded tool adapters, then build
+5. Integrate the verified Planning v2 components into the product path, then
+   evaluate Beam parameters, retrieve-repair and package optimization without
+   overstating global optimality or infeasibility.
+6. Complete durable AgentRun checkpoints and bounded tool adapters, then build
    an independent held-out orchestration set and common v2 output validator
    before any explicitly authorized, budget-capped live-model comparison.
-6. Expand dynamic-replanning stress cases and measure unnecessary disruption.
-7. Increase browser coverage and prepare a repeatable demonstration path.
-8. Progressively close the final-design gaps documented above rather than
+7. Expand dynamic-replanning stress cases and measure unnecessary disruption.
+8. Increase browser coverage and prepare a repeatable demonstration path.
+9. Progressively close the final-design gaps documented above rather than
    treating the current MVP as the finished product.
 
 ## Verification Boundary
