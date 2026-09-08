@@ -1,12 +1,12 @@
 # API Contracts
 
-> Backend platform boundary: account and tenancy models introduced by the
-> backend-platform scaffold do not yet expose registration/login endpoints and
-> do not secure the current anonymous routes. Target auth, household membership
-> and `/api/ops` contracts are documented in
+> Backend platform boundary: the first authentication slice exposes account and
+> revocable-session endpoints, but it does not yet secure the current anonymous
+> Profile, Plan, Agent, Shopping List or Dashboard routes. Target household
+> ownership and `/api/ops` contracts are documented in
 > [Backend Platform Engineering Handoff](design/backend-platform-engineering.md)
-> and require a complete route-plus-ownership migration before they become
-> current API behaviour.
+> and require a complete route-plus-ownership migration before MealCraft may be
+> described as multi-user.
 
 The system will define the following shared objects:
 
@@ -26,6 +26,12 @@ Available endpoints:
 
 - GET /api/health
 - GET /api/info
+- POST /api/auth/register
+- POST /api/auth/login
+- POST /api/auth/logout
+- GET /api/auth/me
+- GET /api/auth/sessions
+- DELETE /api/auth/sessions/{session_id}
 - GET /api/recipes?limit=20&after_id={recipe_id}
 - GET /api/recipes/{slug}
 - GET /api/recipes/{slug}/tutorial?live={boolean}&language={language}
@@ -54,6 +60,33 @@ Available endpoints:
 - GET /api/household-profiles/{profile_id}/versions
 - POST /api/household-profiles/{profile_id}/plans
 - POST /api/household-profiles/{profile_id}/plans/{plan_id}/replan
+
+## Authentication
+
+`POST /api/auth/register` creates an active `User`, Argon2id credential,
+default `Household`, owner membership and opaque browser session in one
+transaction. `POST /api/auth/login` verifies the maintained Argon2id policy,
+upgrades an older valid hash opportunistically, applies bounded failed-login
+locking, records the successful login and issues a separate device session.
+
+The raw session token is returned only as an `HttpOnly`, `SameSite=Lax` cookie.
+PostgreSQL stores its SHA-256 digest. Secure cookies are automatic outside the
+development and test environments. A separate browser-readable CSRF token is
+returned in the response and cookie while only its digest is stored; logout
+and device revocation require the matching `X-CSRF-Token` header.
+
+`GET /api/auth/me` resolves the active user and first active household
+membership. `GET /api/auth/sessions` lists only the caller's unexpired,
+non-revoked sessions. `DELETE /api/auth/sessions/{session_id}` can revoke only
+a session owned by the current user, and revoking the current session clears
+both cookies. Missing, expired, revoked and suspended-user sessions fail
+closed. Login failures use the same response for unknown email and incorrect
+password.
+
+This slice proves identity and Session lifecycle only. The existing business
+repositories still lack non-null household ownership, so their anonymous APIs
+remain intentionally unchanged until the staged tenant migration and complete
+Alice/Bob isolation suite are ready.
 
 ## Household Profiles
 

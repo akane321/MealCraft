@@ -34,6 +34,14 @@ class AccountRegistrationRequest(BaseModel):
     def normalize_account_email(cls, value: str) -> str:
         return normalize_email(value)
 
+    @field_validator("display_name")
+    @classmethod
+    def normalize_display_name(cls, value: str) -> str:
+        normalized = " ".join(value.split())
+        if not normalized:
+            raise ValueError("display_name cannot be blank")
+        return normalized
+
     @model_validator(mode="after")
     def require_reasonable_password_length(self) -> AccountRegistrationRequest:
         length = len(self.password.get_secret_value())
@@ -95,6 +103,20 @@ class CurrentActor(BaseModel):
     user: AccountPublic
     active_household_id: int | None
     household_role: HouseholdRoleValue | None
+
+
+class AuthenticationResponse(BaseModel):
+    actor: CurrentActor
+    session: AuthSessionPublic
+    csrf_token: str
+
+
+class AuthSessionCollectionResponse(BaseModel):
+    items: list[AuthSessionPublic]
+
+
+class AuthenticationMessageResponse(BaseModel):
+    detail: str
 
 
 class OperationRunEnvelope(BaseModel):
