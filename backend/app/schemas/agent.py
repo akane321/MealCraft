@@ -3,6 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.orchestration.contracts import InteractionAnswer, InteractionRequest, ScopeDecision
 from app.schemas.meal_plan import (
     MealPlanEventType,
     MealPlanReplanEventResponse,
@@ -23,6 +24,10 @@ AgentParserProvider = Literal["fixture", "openai"]
 
 class AgentMessageInput(BaseModel):
     message: str = Field(min_length=1, max_length=4000)
+
+
+class AgentInteractionInput(InteractionAnswer):
+    pass
 
 
 class AgentMessageResponse(BaseModel):
@@ -83,6 +88,9 @@ class AgentSessionResponse(BaseModel):
     plan_id: int | None
     replan_draft: AgentReplanDraft
     pending_replan: MealPlanReplanEventResponse | None
+    context_version: int = Field(ge=1)
+    last_scope_decision: ScopeDecision | None
+    pending_interaction: InteractionRequest | None
     can_confirm: bool
     created_at: datetime
     updated_at: datetime

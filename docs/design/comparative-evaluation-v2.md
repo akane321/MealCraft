@@ -2,8 +2,10 @@
 
 ## Document status
 
-**Accepted design target; implementation is not complete.** This document
-defines the next formal evaluation direction. The existing
+**Accepted design target; partial developer infrastructure is executable.** The
+matched-information developer packet compiler and strong Rule-only reference
+are implemented, but held-out labels, the common output validator, model runs,
+human study and statistical comparison are not complete. The existing
 [Protocol v1](../evaluation/protocol-v1.md) and its committed reports remain the
 reproducible record of what is currently implemented.
 
@@ -72,6 +74,12 @@ independently runnable, not deliberately weakened to favour MealCraft.
 This comparison isolates the incremental value of Agent-driven requirement
 understanding, clarification and orchestration beyond a conventional structured
 planner.
+
+The first executable reference now uses the fixed ordering `consumed ingredient
+cost -> cooking time -> recommendation score -> recipe ID`, with adjacent
+repetition excluded whenever another eligible recipe exists. Its v1 held-out
+output is a diagnostic implementation checkpoint; B1 still requires the frozen
+v2 packets and common final validator before it supports the comparative claim.
 
 ### B2 — Context-matched LLM-only
 
@@ -210,6 +218,16 @@ Use one frozen timestamped snapshot containing:
 
 The packet should cover all ingredients in the candidate recipes, not just the
 ingredients of MealCraft's final selections.
+
+The executable developer compiler enforces this coverage rule, validates all
+declared recipe/product references against versioned catalogs, rejects unknown
+fields, and records source plus canonical packet digests. Its two visible
+developer scenarios validate the contract only: they are not held-out evidence
+and are not a reported comparison result. Run it with:
+
+```bash
+uv run --project backend --no-sync python -m app.evaluation.v2_packets
+```
 
 ### Information that must not be shared as input
 

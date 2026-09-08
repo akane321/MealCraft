@@ -16,6 +16,7 @@ from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.agent import AgentSessionRepository
 from app.schemas.agent import (
     AgentConfirmationResponse,
+    AgentInteractionInput,
     AgentMessageInput,
     AgentReplanConfirmationResponse,
     AgentSessionCollectionResponse,
@@ -99,6 +100,20 @@ def reply_to_agent_session(
 ) -> AgentSessionResponse:
     try:
         return service.reply(session_id, payload.message)
+    except AgentSessionNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
+    except AgentSessionNotReadyError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+
+
+@router.post("/{session_id}/interactions", response_model=AgentSessionResponse)
+def answer_agent_interaction(
+    session_id: int,
+    payload: AgentInteractionInput,
+    service: AgentServiceDependency,
+) -> AgentSessionResponse:
+    try:
+        return service.answer_interaction(session_id, payload)
     except AgentSessionNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
     except AgentSessionNotReadyError as error:

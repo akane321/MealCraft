@@ -52,7 +52,15 @@ Important semantics:
 
 Open <http://localhost:3000/assistant> and describe the request in English or
 Chinese. The Assistant persists the conversation, extracts structured fields,
-and asks a focused clarification when required.
+and asks a focused clarification when required. Household-size and pantry
+quantity questions may appear as buttons or a typed input. Use those controls
+when available; each answer is tied to the displayed conversation version so a
+stale browser choice cannot silently overwrite newer constraints.
+
+MealCraft handles meal planning, recipes, groceries, budgets and explicit
+dietary constraints. Social, unrelated, disease-treatment and instruction-
+bypassing requests receive a scope boundary and do not change planning state.
+For a mixed request, only the supported meal-planning segment is processed.
 
 Review the structured constraint summary before confirmation. The Agent does
 not independently calculate prices or decide whether allergens are safe; it
@@ -106,6 +114,12 @@ Open <http://localhost:3000/dashboard>. Each planned meal can be marked:
 Only completed MealCraft dishes contribute to actual nutrition totals and weekly
 trends. The Dashboard does not know about food eaten outside MealCraft and must
 not be interpreted as complete dietary monitoring.
+
+The Dashboard leads with cumulative per-person nutrition for the selected plan.
+Its primary curve compares completed cumulative actuals with the current
+non-skipped plan. A separate daily table keeps each day's calories, protein,
+carbohydrate, fat, sodium, and sugar visible while labelling values as completed
+actuals, planned previews, or not counted after a skip.
 
 ### 6. Preview a plan change
 

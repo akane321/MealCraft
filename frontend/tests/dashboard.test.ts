@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   chartPointCoordinates,
   completedNutritionValues,
+  cumulativeNutritionValues,
   lineSegments,
+  nutritionProgressPercentage,
 } from "../app/lib/dashboard";
 import type { NutritionDashboardDay } from "../app/types/meal-plan";
 
@@ -48,11 +50,27 @@ describe("nutrition dashboard helpers", () => {
     )).toEqual([480, null, null]);
   });
 
+  it("builds completed and planned cumulative series without counting skipped meals", () => {
+    const days = [day("completed", 1), day("skipped", 2), day("planned", 3)];
+    expect(cumulativeNutritionValues(days, "calories_kcal", "completed")).toEqual([480, 480, 480]);
+    expect(cumulativeNutritionValues(days, "calories_kcal", "planned")).toEqual([480, 480, 960]);
+  });
+
+  it("reports cumulative progress only when a planned total exists", () => {
+    expect(nutritionProgressPercentage(480, 960)).toBe(50);
+    expect(nutritionProgressPercentage(0, 0)).toBeNull();
+  });
+
   it("keeps chart coordinates finite for empty and partial weeks", () => {
     const points = chartPointCoordinates([480, null, 510, null, null, null, null]);
     expect(points).toHaveLength(7);
     expect(points.every(point => Number.isFinite(point.x) && Number.isFinite(point.y))).toBe(true);
     expect(lineSegments(points)).toEqual([]);
+  });
+
+  it("uses one shared maximum for comparable cumulative lines", () => {
+    const points = chartPointCoordinates([480, 960], 760, 220, 28, 1920);
+    expect(points[1]?.y).toBe(110);
   });
 
   it("creates separate line segments across missing check-ins", () => {

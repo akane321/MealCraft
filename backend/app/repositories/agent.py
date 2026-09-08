@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.agent import AgentMessage, AgentSession
+from app.orchestration.contracts import InteractionRequest, ScopeDecision
 from app.schemas.agent import AgentConstraintState, AgentReplanDraft
 
 
@@ -20,6 +21,9 @@ class AgentSessionRepository:
         missing_fields: list[str],
         clarification_questions: list[str],
         acknowledged_unknowns: list[str],
+        context_version: int,
+        scope_decision: ScopeDecision,
+        pending_interaction: InteractionRequest | None,
     ) -> AgentSession:
         agent_session = AgentSession(
             parser_provider=provider,
@@ -28,6 +32,9 @@ class AgentSessionRepository:
             missing_fields=missing_fields,
             clarification_questions=clarification_questions,
             acknowledged_unknown_quantities=acknowledged_unknowns,
+            context_version=context_version,
+            last_scope_decision=scope_decision.model_dump(mode="json"),
+            pending_interaction=(pending_interaction.model_dump(mode="json") if pending_interaction else None),
             messages=[
                 AgentMessage(role="user", content=user_message),
                 AgentMessage(role="assistant", content=assistant_message),
@@ -63,6 +70,9 @@ class AgentSessionRepository:
         missing_fields: list[str],
         clarification_questions: list[str],
         acknowledged_unknowns: list[str],
+        context_version: int,
+        scope_decision: ScopeDecision,
+        pending_interaction: InteractionRequest | None,
     ) -> AgentSession | None:
         agent_session = self.get(session_id)
         if agent_session is None:
@@ -72,6 +82,32 @@ class AgentSessionRepository:
         agent_session.missing_fields = missing_fields
         agent_session.clarification_questions = clarification_questions
         agent_session.acknowledged_unknown_quantities = acknowledged_unknowns
+        agent_session.context_version = context_version
+        agent_session.last_scope_decision = scope_decision.model_dump(mode="json")
+        agent_session.pending_interaction = pending_interaction.model_dump(mode="json") if pending_interaction else None
+        agent_session.messages.extend(
+            [
+                AgentMessage(role="user", content=user_message),
+                AgentMessage(role="assistant", content=assistant_message),
+            ]
+        )
+        self.session.commit()
+        return self.get(session_id)
+
+    def append_bounded_exchange(
+        self,
+        session_id: int,
+        *,
+        user_message: str,
+        assistant_message: str,
+        scope_decision: ScopeDecision,
+    ) -> AgentSession | None:
+        """Persist an out-of-scope exchange without changing planning state."""
+
+        agent_session = self.get(session_id)
+        if agent_session is None:
+            return None
+        agent_session.last_scope_decision = scope_decision.model_dump(mode="json")
         agent_session.messages.extend(
             [
                 AgentMessage(role="user", content=user_message),
@@ -89,6 +125,7 @@ class AgentSessionRepository:
         agent_session.plan_id = plan_id
         agent_session.clarification_questions = []
         agent_session.missing_fields = []
+        agent_session.pending_interaction = None
         agent_session.messages.append(
             AgentMessage(
                 role="assistant",
@@ -107,6 +144,7 @@ class AgentSessionRepository:
         draft: AgentReplanDraft,
         clarification_questions: list[str],
         pending_event_id: int | None,
+        scope_decision: ScopeDecision | None = None,
     ) -> AgentSession | None:
         agent_session = self.get(session_id)
         if agent_session is None:
@@ -115,6 +153,8 @@ class AgentSessionRepository:
         agent_session.missing_fields = ["replan"] if clarification_questions else []
         agent_session.clarification_questions = clarification_questions[:1]
         agent_session.pending_event_id = pending_event_id
+        if scope_decision is not None:
+            agent_session.last_scope_decision = scope_decision.model_dump(mode="json")
         agent_session.messages.extend(
             [
                 AgentMessage(role="user", content=user_message),
@@ -132,6 +172,7 @@ class AgentSessionRepository:
         agent_session.pending_event_id = None
         agent_session.missing_fields = []
         agent_session.clarification_questions = []
+        agent_session.pending_interaction = None
         agent_session.messages.append(AgentMessage(role="assistant", content=assistant_message))
         self.session.commit()
         return self.get(session_id)

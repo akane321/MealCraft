@@ -13,6 +13,25 @@ import type {
 
 export type AgentSessionStatus = "collecting" | "ready" | "planned";
 export type AgentParserProvider = "fixture" | "openai";
+export type AgentScopeClass =
+  | "domain_action"
+  | "domain_question"
+  | "social"
+  | "partially_supported"
+  | "out_of_scope"
+  | "restricted"
+  | "ambiguous"
+  | "adversarial";
+export type AgentInteractionType =
+  | "quick_reply"
+  | "single_select"
+  | "multi_select"
+  | "number_input"
+  | "date_range"
+  | "quantity_input"
+  | "confirmation"
+  | "free_text";
+export type AgentScalarValue = string | number | boolean | null;
 
 export interface AgentMessage {
   id: number;
@@ -43,6 +62,43 @@ export interface AgentReplanDraft {
   reason: string | null;
 }
 
+export interface AgentScopeDecision {
+  scope_class: AgentScopeClass;
+  detected_intents: string[];
+  supported_segments: string[];
+  unsupported_segments: string[];
+  should_mutate_state: boolean;
+  should_call_tools: boolean;
+  requires_clarification: boolean;
+  reason_code: string;
+}
+
+export interface AgentInteractionOption {
+  id: string;
+  label: string;
+  value: AgentScalarValue;
+}
+
+export interface AgentInteractionRequest {
+  type: AgentInteractionType;
+  prompt: string;
+  field_path: string | null;
+  question_id: string;
+  options: AgentInteractionOption[];
+  allow_free_text: boolean;
+  context_version: number;
+  plan_revision: number | null;
+  expires_at: string | null;
+}
+
+export interface AgentInteractionAnswer {
+  question_id: string;
+  option_ids: string[];
+  free_text: string | null;
+  context_version: number;
+  plan_revision: number | null;
+}
+
 export interface AgentSession {
   id: number;
   status: AgentSessionStatus;
@@ -54,6 +110,9 @@ export interface AgentSession {
   plan_id: number | null;
   replan_draft: AgentReplanDraft;
   pending_replan: MealPlanReplanEvent | null;
+  context_version: number;
+  last_scope_decision: AgentScopeDecision | null;
+  pending_interaction: AgentInteractionRequest | null;
   can_confirm: boolean;
   created_at: string;
   updated_at: string;

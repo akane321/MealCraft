@@ -43,6 +43,7 @@ Available endpoints:
 - GET /api/agent/sessions
 - GET /api/agent/sessions/{session_id}
 - POST /api/agent/sessions/{session_id}/messages
+- POST /api/agent/sessions/{session_id}/interactions
 - POST /api/agent/sessions/{session_id}/confirm
 - POST /api/agent/sessions/{session_id}/replan/confirm
 - POST /api/agent/sessions/{session_id}/replan/discard
@@ -211,12 +212,29 @@ chronological order.
 `POST /api/agent/sessions` accepts an initial natural-language `message` and
 returns the persisted messages, parser provider, current structured constraints,
 missing fields, clarification questions, readiness, and optional generated plan
-ID. `POST /api/agent/sessions/{session_id}/messages` appends another turn and
-merges only explicitly extracted values into the current state.
+ID. The response also returns `context_version`, `last_scope_decision`, and an
+optional typed `pending_interaction`. `POST
+/api/agent/sessions/{session_id}/messages` appends another turn and merges only
+explicitly extracted values into the current state.
+
+Every message first passes through the deterministic reference scope gate.
+Supported meal-planning input may reach constraint parsing. Social, off-topic,
+disease-treatment and adversarial requests receive a bounded response without
+changing constraints, clarification state, pending interaction or context
+version. A mixed request sends only its supported segment to the parser. The
+persisted `last_scope_decision` makes this routing visible to clients and tests.
 
 The assistant requires household size and resolves any unquantified available
 ingredient before confirmation. A user may answer `unknown`; the quantity then
 remains null, so the ingredient improves recipe ranking but is never deducted.
+
+When clarification can be represented structurally, the response includes a
+`pending_interaction` with a stable `question_id`, `field_path`, option IDs and
+`context_version`. `POST /api/agent/sessions/{session_id}/interactions` accepts
+the matching IDs rather than localized button labels. The backend rejects
+expired, stale, forged, duplicate or mixed option/free-text answers with HTTP
+409. The first runtime slice supports household-size buttons and pantry
+quantity input; other questions continue to work through the messages endpoint.
 
 `POST /api/agent/sessions/{session_id}/confirm` is accepted only when
 `can_confirm=true`. It passes the validated state to the same deterministic
@@ -240,21 +258,24 @@ with the same revision check as the plan API. `discard` clears the session link
 and draft without modifying the plan. The draft and event link survive reloads
 and container restarts.
 
-### Target orchestration contracts
+### Orchestration contracts and remaining target
 
-The current endpoints above retain their verified behaviour. The additive
-`backend/app/orchestration/` package freezes target contracts for scope classes,
-run states, capability/tool effects, structured interactions and evidence-linked
-claims; it does not add or change an HTTP endpoint yet.
-
-Future session/message responses may include a typed `interaction` object. A
-selection response must carry the stable `question_id`, option IDs,
-`context_version` and optional `plan_revision`. The backend rejects stale or
-unknown selections rather than translating a localized button label back into
-natural language.
+The `backend/app/orchestration/` package now supplies the scope gate, structured
+interaction validator, capability registry, deny-by-default tool authorization
+decision, action receipts and typed claim verification. These are deterministic
+foundations: the current scope classifier is a transparent bilingual lexical
+reference, not a production multilingual model, and the full LangGraph/tool-run
+runtime is still a target.
 
 Future tool execution is capability-gated. Read and preview tools may be called
 only for a supported intent and authorized household. Commit tools additionally
 require an unexpired confirmation linked to the matching preview and revision.
 Scope, authorization, tool, grounding and action-receipt records belong to an
 Agent run; they are not free-form assistant messages.
+
+A factual claim must exactly match its referenced typed evidence. A claim that
+data is `live` additionally requires a timestamped `live_retrieval` fact. A
+claim that an action was saved or applied requires a successful `commit`
+receipt whose result kind and value match the claim; a successful preview is
+not enough. Natural-language atomic-claim extraction and persistent Agent-run
+traces remain future work.

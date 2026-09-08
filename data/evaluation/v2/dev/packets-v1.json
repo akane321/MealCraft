@@ -1,0 +1,1566 @@
+{
+  "schema_version": "evaluation-packets-v2-dev-1",
+  "evaluation_role": "developer_set",
+  "live_api_used": false,
+  "source_digests": {
+    "scenario_source_sha256": "9380560a707ecf380fadced001b100de52810f98df6bd4e1e74b01ee6fa63382",
+    "ingredient_catalog_sha256": "ee72b831e89b5bc24e16dbc82d9ad0861aadcf86276c58d631786717202bcece",
+    "recipe_catalog_sha256": "f35c55874b15c3a16510aded46921cf52b5f20eb0aab15d41690879c30ac2066",
+    "product_snapshot_sha256": "19e760bd53e438fac44c77569724460cf6a69269690c302f3d1a59edb7a0323c"
+  },
+  "packet_count": 2,
+  "packet_set_sha256": "d6423fb911a5dadaaca94e0c5ee67fe1432aa7bd6cdb107a4cdf0fbc747722bc",
+  "packets": [
+    {
+      "scenario_id": "packet-dev-001",
+      "scenario_category": "budget_nutrition",
+      "user_request": "Plan seven dinners for two people under S$70. Prefer lower sodium, but do not invent a medical target.",
+      "conversation_history": [],
+      "household_profile": {
+        "household_size": 2,
+        "allergens": [],
+        "excluded_ingredients": [],
+        "dietary_preferences": []
+      },
+      "pantry": [],
+      "planning_horizon": {
+        "start_date": "2026-09-07",
+        "slots": [
+          "mon-dinner",
+          "tue-dinner",
+          "wed-dinner",
+          "thu-dinner",
+          "fri-dinner",
+          "sat-dinner",
+          "sun-dinner"
+        ]
+      },
+      "locked_or_completed_meals": [],
+      "recipe_candidates": [
+        {
+          "recipe_id": "lemon-herb-chicken-rice-bowl",
+          "title": "Lemon Herb Chicken Rice Bowl",
+          "servings": 2,
+          "total_time_minutes": 40,
+          "cuisine": "Mediterranean-inspired",
+          "meal_type": "main",
+          "dietary_tags": [
+            "dairy-free",
+            "gluten-free",
+            "high-protein"
+          ],
+          "ingredients": [
+            {
+              "ingredient_id": "chicken_breast",
+              "quantity": 300.0,
+              "unit": "g",
+              "preparation": "sliced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "brown_rice",
+              "quantity": 140.0,
+              "unit": "g",
+              "preparation": "rinsed",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "lemon",
+              "quantity": 1.0,
+              "unit": "whole",
+              "preparation": "zested and juiced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "cucumber",
+              "quantity": 120.0,
+              "unit": "g",
+              "preparation": "diced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "cherry_tomato",
+              "quantity": 150.0,
+              "unit": "g",
+              "preparation": "halved",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "olive_oil",
+              "quantity": 1.0,
+              "unit": "tbsp",
+              "preparation": null,
+              "allergen": null
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 540.0,
+            "protein_g": 43.0,
+            "carbohydrate_g": 58.0,
+            "fat_g": 16.0,
+            "sodium_mg": 620.0,
+            "sugar_g": 8.0,
+            "complete": true
+          },
+          "source_reference": "data/recipes/recipes.json#lemon-herb-chicken-rice-bowl"
+        },
+        {
+          "recipe_id": "tomato-lentil-stew",
+          "title": "Tomato Lentil Stew",
+          "servings": 4,
+          "total_time_minutes": 50,
+          "cuisine": "Middle Eastern-inspired",
+          "meal_type": "main",
+          "dietary_tags": [
+            "vegan",
+            "gluten-free",
+            "dairy-free",
+            "high-fibre"
+          ],
+          "ingredients": [
+            {
+              "ingredient_id": "red_lentil",
+              "quantity": 240.0,
+              "unit": "g",
+              "preparation": "rinsed",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "canned_tomato",
+              "quantity": 800.0,
+              "unit": "g",
+              "preparation": null,
+              "allergen": null
+            },
+            {
+              "ingredient_id": "baby_spinach",
+              "quantity": 150.0,
+              "unit": "g",
+              "preparation": null,
+              "allergen": null
+            },
+            {
+              "ingredient_id": "yellow_onion",
+              "quantity": 1.0,
+              "unit": "whole",
+              "preparation": "diced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "ground_cumin",
+              "quantity": 2.0,
+              "unit": "tsp",
+              "preparation": null,
+              "allergen": null
+            },
+            {
+              "ingredient_id": "vegetable_stock",
+              "quantity": 900.0,
+              "unit": "ml",
+              "preparation": null,
+              "allergen": null
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 430.0,
+            "protein_g": 22.0,
+            "carbohydrate_g": 67.0,
+            "fat_g": 9.0,
+            "sodium_mg": 520.0,
+            "sugar_g": 11.0,
+            "complete": true
+          },
+          "source_reference": "data/recipes/recipes.json#tomato-lentil-stew"
+        },
+        {
+          "recipe_id": "salmon-quinoa-bowl",
+          "title": "Salmon Quinoa Bowl",
+          "servings": 2,
+          "total_time_minutes": 35,
+          "cuisine": "Contemporary",
+          "meal_type": "main",
+          "dietary_tags": [
+            "dairy-free",
+            "gluten-free",
+            "high-protein"
+          ],
+          "ingredients": [
+            {
+              "ingredient_id": "salmon_fillet",
+              "quantity": 300.0,
+              "unit": "g",
+              "preparation": null,
+              "allergen": "fish"
+            },
+            {
+              "ingredient_id": "quinoa",
+              "quantity": 140.0,
+              "unit": "g",
+              "preparation": "rinsed",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "cucumber",
+              "quantity": 120.0,
+              "unit": "g",
+              "preparation": "diced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "cherry_tomato",
+              "quantity": 150.0,
+              "unit": "g",
+              "preparation": "halved",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "lemon",
+              "quantity": 1.0,
+              "unit": "whole",
+              "preparation": "juiced",
+              "allergen": null
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 590.0,
+            "protein_g": 39.0,
+            "carbohydrate_g": 52.0,
+            "fat_g": 24.0,
+            "sodium_mg": 410.0,
+            "sugar_g": 7.0,
+            "complete": true
+          },
+          "source_reference": "data/recipes/recipes.json#salmon-quinoa-bowl"
+        },
+        {
+          "recipe_id": "chickpea-quinoa-salad",
+          "title": "Chickpea Quinoa Salad",
+          "servings": 2,
+          "total_time_minutes": 30,
+          "cuisine": "Mediterranean-inspired",
+          "meal_type": "main",
+          "dietary_tags": [
+            "vegan",
+            "gluten-free",
+            "dairy-free",
+            "high-fibre"
+          ],
+          "ingredients": [
+            {
+              "ingredient_id": "chickpea",
+              "quantity": 300.0,
+              "unit": "g",
+              "preparation": "drained",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "quinoa",
+              "quantity": 120.0,
+              "unit": "g",
+              "preparation": "rinsed",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "cucumber",
+              "quantity": 150.0,
+              "unit": "g",
+              "preparation": "diced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "cherry_tomato",
+              "quantity": 160.0,
+              "unit": "g",
+              "preparation": "halved",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "lemon",
+              "quantity": 1.0,
+              "unit": "whole",
+              "preparation": "juiced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "olive_oil",
+              "quantity": 1.0,
+              "unit": "tbsp",
+              "preparation": null,
+              "allergen": null
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 475.0,
+            "protein_g": 18.0,
+            "carbohydrate_g": 71.0,
+            "fat_g": 14.0,
+            "sodium_mg": 360.0,
+            "sugar_g": 8.0,
+            "complete": true
+          },
+          "source_reference": "data/recipes/recipes.json#chickpea-quinoa-salad"
+        },
+        {
+          "recipe_id": "mushroom-spinach-pasta",
+          "title": "Mushroom Spinach Pasta",
+          "servings": 2,
+          "total_time_minutes": 30,
+          "cuisine": "Italian-inspired",
+          "meal_type": "main",
+          "dietary_tags": [
+            "vegan",
+            "dairy-free"
+          ],
+          "ingredients": [
+            {
+              "ingredient_id": "wholewheat_pasta",
+              "quantity": 180.0,
+              "unit": "g",
+              "preparation": null,
+              "allergen": "gluten"
+            },
+            {
+              "ingredient_id": "mushroom",
+              "quantity": 250.0,
+              "unit": "g",
+              "preparation": "sliced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "baby_spinach",
+              "quantity": 120.0,
+              "unit": "g",
+              "preparation": null,
+              "allergen": null
+            },
+            {
+              "ingredient_id": "garlic",
+              "quantity": 12.0,
+              "unit": "g",
+              "preparation": "minced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "olive_oil",
+              "quantity": 1.0,
+              "unit": "tbsp",
+              "preparation": null,
+              "allergen": null
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 465.0,
+            "protein_g": 17.0,
+            "carbohydrate_g": 76.0,
+            "fat_g": 10.0,
+            "sodium_mg": 390.0,
+            "sugar_g": 7.0,
+            "complete": true
+          },
+          "source_reference": "data/recipes/recipes.json#mushroom-spinach-pasta"
+        },
+        {
+          "recipe_id": "spinach-oat-egg-cakes",
+          "title": "Spinach Oat Egg Cakes",
+          "servings": 2,
+          "total_time_minutes": 25,
+          "cuisine": "Contemporary",
+          "meal_type": "main",
+          "dietary_tags": [
+            "vegetarian",
+            "dairy-free"
+          ],
+          "ingredients": [
+            {
+              "ingredient_id": "rolled_oats",
+              "quantity": 120.0,
+              "unit": "g",
+              "preparation": "blended",
+              "allergen": "gluten"
+            },
+            {
+              "ingredient_id": "egg",
+              "quantity": 4.0,
+              "unit": "whole",
+              "preparation": "beaten",
+              "allergen": "egg"
+            },
+            {
+              "ingredient_id": "baby_spinach",
+              "quantity": 100.0,
+              "unit": "g",
+              "preparation": "chopped",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "cherry_tomato",
+              "quantity": 150.0,
+              "unit": "g",
+              "preparation": "halved",
+              "allergen": null
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 420.0,
+            "protein_g": 25.0,
+            "carbohydrate_g": 42.0,
+            "fat_g": 17.0,
+            "sodium_mg": 450.0,
+            "sugar_g": 5.0,
+            "complete": true
+          },
+          "source_reference": "data/recipes/recipes.json#spinach-oat-egg-cakes"
+        }
+      ],
+      "fairprice_snapshot": [
+        {
+          "provider_product_id": "fixture-spinach-200g",
+          "raw_title": "Baby Spinach",
+          "mapped_ingredient_ids": [
+            "baby_spinach"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 200.0,
+          "package_unit": "g",
+          "observed_price_sgd": 3.2,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=baby%20spinach",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-brown-rice-1kg",
+          "raw_title": "FairPrice Brown Rice",
+          "mapped_ingredient_ids": [
+            "brown_rice"
+          ],
+          "brand": "FairPrice",
+          "category": "Rice",
+          "package_quantity": 1000.0,
+          "package_unit": "g",
+          "observed_price_sgd": 4.85,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=brown%20rice",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-canned-tomato-400g",
+          "raw_title": "No Added Salt Canned Tomatoes",
+          "mapped_ingredient_ids": [
+            "canned_tomato"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Canned Food",
+          "package_quantity": 400.0,
+          "package_unit": "g",
+          "observed_price_sgd": 2.2,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=canned%20tomatoes",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "10762156",
+          "raw_title": "Pasar Cherry Tomato",
+          "mapped_ingredient_ids": [
+            "cherry_tomato",
+            "tomato"
+          ],
+          "brand": "Pasar",
+          "category": "Tomatoes",
+          "package_quantity": 500.0,
+          "package_unit": "g",
+          "observed_price_sgd": 4.05,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product/pasar-cherry-tomato-500g-10762156",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-chicken-breast-300g",
+          "raw_title": "Fresh Chicken Breast",
+          "mapped_ingredient_ids": [
+            "chicken_breast"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Meat & Seafood",
+          "package_quantity": 300.0,
+          "package_unit": "g",
+          "observed_price_sgd": 3.95,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=chicken%20breast",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-chickpeas-400g",
+          "raw_title": "Canned Chickpeas",
+          "mapped_ingredient_ids": [
+            "chickpea"
+          ],
+          "brand": "FairPrice",
+          "category": "Canned Food",
+          "package_quantity": 400.0,
+          "package_unit": "g",
+          "observed_price_sgd": 1.85,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=chickpeas",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-cucumber-500g",
+          "raw_title": "Fresh Cucumber",
+          "mapped_ingredient_ids": [
+            "cucumber"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 500.0,
+          "package_unit": "g",
+          "observed_price_sgd": 2.2,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=cucumber",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-eggs-10",
+          "raw_title": "Fresh Eggs",
+          "mapped_ingredient_ids": [
+            "egg"
+          ],
+          "brand": "FairPrice",
+          "category": "Eggs",
+          "package_quantity": 10.0,
+          "package_unit": "whole",
+          "observed_price_sgd": 3.45,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=eggs",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-garlic-300g",
+          "raw_title": "Fresh Garlic",
+          "mapped_ingredient_ids": [
+            "garlic"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 300.0,
+          "package_unit": "g",
+          "observed_price_sgd": 2.65,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=garlic",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-cumin-20tsp",
+          "raw_title": "Ground Cumin",
+          "mapped_ingredient_ids": [
+            "ground_cumin"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Herbs & Spices",
+          "package_quantity": 20.0,
+          "package_unit": "tsp",
+          "observed_price_sgd": 2.7,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=ground%20cumin",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-lemon-5",
+          "raw_title": "Fresh Lemons",
+          "mapped_ingredient_ids": [
+            "lemon"
+          ],
+          "brand": "Pasar",
+          "category": "Fruits",
+          "package_quantity": 5.0,
+          "package_unit": "whole",
+          "observed_price_sgd": 3.25,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=lemon",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-mushroom-300g",
+          "raw_title": "Fresh Mushrooms",
+          "mapped_ingredient_ids": [
+            "mushroom"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 300.0,
+          "package_unit": "g",
+          "observed_price_sgd": 3.5,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=mushrooms",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-olive-oil-500ml",
+          "raw_title": "Extra Virgin Olive Oil",
+          "mapped_ingredient_ids": [
+            "olive_oil"
+          ],
+          "brand": "FairPrice",
+          "category": "Cooking Oil",
+          "package_quantity": 500.0,
+          "package_unit": "ml",
+          "observed_price_sgd": 12.95,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=olive%20oil",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-quinoa-500g",
+          "raw_title": "White Quinoa",
+          "mapped_ingredient_ids": [
+            "quinoa"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Grains",
+          "package_quantity": 500.0,
+          "package_unit": "g",
+          "observed_price_sgd": 7.8,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=quinoa",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-red-lentil-500g",
+          "raw_title": "Red Lentils",
+          "mapped_ingredient_ids": [
+            "red_lentil"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Dried Goods",
+          "package_quantity": 500.0,
+          "package_unit": "g",
+          "observed_price_sgd": 4.9,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=red%20lentils",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-oats-1kg",
+          "raw_title": "FairPrice Rolled Oats",
+          "mapped_ingredient_ids": [
+            "rolled_oats"
+          ],
+          "brand": "FairPrice",
+          "category": "Breakfast",
+          "package_quantity": 1000.0,
+          "package_unit": "g",
+          "observed_price_sgd": 4.95,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=rolled%20oats",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-salmon-300g",
+          "raw_title": "Fresh Salmon Fillet",
+          "mapped_ingredient_ids": [
+            "salmon_fillet"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Seafood",
+          "package_quantity": 300.0,
+          "package_unit": "g",
+          "observed_price_sgd": 10.9,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=salmon%20fillet",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-stock-1l",
+          "raw_title": "Low Sodium Vegetable Stock",
+          "mapped_ingredient_ids": [
+            "vegetable_stock"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Stock",
+          "package_quantity": 1000.0,
+          "package_unit": "ml",
+          "observed_price_sgd": 4.5,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=vegetable%20stock",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-wholewheat-pasta-500g",
+          "raw_title": "Wholewheat Pasta",
+          "mapped_ingredient_ids": [
+            "wholewheat_pasta"
+          ],
+          "brand": "FairPrice",
+          "category": "Pasta",
+          "package_quantity": 500.0,
+          "package_unit": "g",
+          "observed_price_sgd": 3.2,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=wholewheat%20pasta",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-onion-5",
+          "raw_title": "Fresh Yellow Onions",
+          "mapped_ingredient_ids": [
+            "yellow_onion"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 5.0,
+          "package_unit": "whole",
+          "observed_price_sgd": 2.8,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=yellow%20onion",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        }
+      ],
+      "output_schema_version": "evaluation-output-v2",
+      "policy_version": "planning-policy-v2"
+    },
+    {
+      "scenario_id": "packet-dev-002",
+      "scenario_category": "allergen_diet",
+      "user_request": "我们两个人吃素，而且芝麻过敏。请做一周晚餐计划。",
+      "conversation_history": [],
+      "household_profile": {
+        "household_size": 2,
+        "allergens": [
+          "sesame"
+        ],
+        "excluded_ingredients": [],
+        "dietary_preferences": [
+          "vegetarian"
+        ]
+      },
+      "pantry": [
+        {
+          "ingredient_id": "firm_tofu",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "planning_horizon": {
+        "start_date": "2026-09-07",
+        "slots": [
+          "mon-dinner",
+          "tue-dinner",
+          "wed-dinner",
+          "thu-dinner",
+          "fri-dinner",
+          "sat-dinner",
+          "sun-dinner"
+        ]
+      },
+      "locked_or_completed_meals": [],
+      "recipe_candidates": [
+        {
+          "recipe_id": "tofu-vegetable-soba",
+          "title": "Tofu Vegetable Soba",
+          "servings": 2,
+          "total_time_minutes": 40,
+          "cuisine": "Japanese-inspired",
+          "meal_type": "main",
+          "dietary_tags": [
+            "vegetarian",
+            "dairy-free"
+          ],
+          "ingredients": [
+            {
+              "ingredient_id": "firm_tofu",
+              "quantity": 300.0,
+              "unit": "g",
+              "preparation": "cubed",
+              "allergen": "soy"
+            },
+            {
+              "ingredient_id": "soba_noodle",
+              "quantity": 160.0,
+              "unit": "g",
+              "preparation": null,
+              "allergen": "gluten"
+            },
+            {
+              "ingredient_id": "broccoli",
+              "quantity": 180.0,
+              "unit": "g",
+              "preparation": "florets",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "carrot",
+              "quantity": 1.0,
+              "unit": "whole",
+              "preparation": "julienned",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "soy_sauce",
+              "quantity": 2.0,
+              "unit": "tbsp",
+              "preparation": null,
+              "allergen": "soy"
+            },
+            {
+              "ingredient_id": "sesame_oil",
+              "quantity": 1.0,
+              "unit": "tsp",
+              "preparation": null,
+              "allergen": "sesame"
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 510.0,
+            "protein_g": 25.0,
+            "carbohydrate_g": 64.0,
+            "fat_g": 18.0,
+            "sodium_mg": 680.0,
+            "sugar_g": 9.0,
+            "complete": true
+          },
+          "source_reference": "data/recipes/recipes.json#tofu-vegetable-soba"
+        },
+        {
+          "recipe_id": "tomato-lentil-stew",
+          "title": "Tomato Lentil Stew",
+          "servings": 4,
+          "total_time_minutes": 50,
+          "cuisine": "Middle Eastern-inspired",
+          "meal_type": "main",
+          "dietary_tags": [
+            "vegan",
+            "gluten-free",
+            "dairy-free",
+            "high-fibre"
+          ],
+          "ingredients": [
+            {
+              "ingredient_id": "red_lentil",
+              "quantity": 240.0,
+              "unit": "g",
+              "preparation": "rinsed",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "canned_tomato",
+              "quantity": 800.0,
+              "unit": "g",
+              "preparation": null,
+              "allergen": null
+            },
+            {
+              "ingredient_id": "baby_spinach",
+              "quantity": 150.0,
+              "unit": "g",
+              "preparation": null,
+              "allergen": null
+            },
+            {
+              "ingredient_id": "yellow_onion",
+              "quantity": 1.0,
+              "unit": "whole",
+              "preparation": "diced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "ground_cumin",
+              "quantity": 2.0,
+              "unit": "tsp",
+              "preparation": null,
+              "allergen": null
+            },
+            {
+              "ingredient_id": "vegetable_stock",
+              "quantity": 900.0,
+              "unit": "ml",
+              "preparation": null,
+              "allergen": null
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 430.0,
+            "protein_g": 22.0,
+            "carbohydrate_g": 67.0,
+            "fat_g": 9.0,
+            "sodium_mg": 520.0,
+            "sugar_g": 11.0,
+            "complete": true
+          },
+          "source_reference": "data/recipes/recipes.json#tomato-lentil-stew"
+        },
+        {
+          "recipe_id": "chickpea-quinoa-salad",
+          "title": "Chickpea Quinoa Salad",
+          "servings": 2,
+          "total_time_minutes": 30,
+          "cuisine": "Mediterranean-inspired",
+          "meal_type": "main",
+          "dietary_tags": [
+            "vegan",
+            "gluten-free",
+            "dairy-free",
+            "high-fibre"
+          ],
+          "ingredients": [
+            {
+              "ingredient_id": "chickpea",
+              "quantity": 300.0,
+              "unit": "g",
+              "preparation": "drained",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "quinoa",
+              "quantity": 120.0,
+              "unit": "g",
+              "preparation": "rinsed",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "cucumber",
+              "quantity": 150.0,
+              "unit": "g",
+              "preparation": "diced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "cherry_tomato",
+              "quantity": 160.0,
+              "unit": "g",
+              "preparation": "halved",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "lemon",
+              "quantity": 1.0,
+              "unit": "whole",
+              "preparation": "juiced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "olive_oil",
+              "quantity": 1.0,
+              "unit": "tbsp",
+              "preparation": null,
+              "allergen": null
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 475.0,
+            "protein_g": 18.0,
+            "carbohydrate_g": 71.0,
+            "fat_g": 14.0,
+            "sodium_mg": 360.0,
+            "sugar_g": 8.0,
+            "complete": true
+          },
+          "source_reference": "data/recipes/recipes.json#chickpea-quinoa-salad"
+        },
+        {
+          "recipe_id": "tofu-brown-rice-stir-fry",
+          "title": "Tofu Brown Rice Stir-fry",
+          "servings": 2,
+          "total_time_minutes": 35,
+          "cuisine": "Asian-inspired",
+          "meal_type": "main",
+          "dietary_tags": [
+            "vegetarian",
+            "dairy-free",
+            "gluten-free"
+          ],
+          "ingredients": [
+            {
+              "ingredient_id": "firm_tofu",
+              "quantity": 300.0,
+              "unit": "g",
+              "preparation": "cubed",
+              "allergen": "soy"
+            },
+            {
+              "ingredient_id": "brown_rice",
+              "quantity": 140.0,
+              "unit": "g",
+              "preparation": "rinsed",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "broccoli",
+              "quantity": 180.0,
+              "unit": "g",
+              "preparation": "florets",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "bell_pepper",
+              "quantity": 1.0,
+              "unit": "whole",
+              "preparation": "sliced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "ginger",
+              "quantity": 15.0,
+              "unit": "g",
+              "preparation": "grated",
+              "allergen": null
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 500.0,
+            "protein_g": 24.0,
+            "carbohydrate_g": 62.0,
+            "fat_g": 18.0,
+            "sodium_mg": 610.0,
+            "sugar_g": 7.0,
+            "complete": true
+          },
+          "source_reference": "data/recipes/recipes.json#tofu-brown-rice-stir-fry"
+        },
+        {
+          "recipe_id": "mushroom-spinach-pasta",
+          "title": "Mushroom Spinach Pasta",
+          "servings": 2,
+          "total_time_minutes": 30,
+          "cuisine": "Italian-inspired",
+          "meal_type": "main",
+          "dietary_tags": [
+            "vegan",
+            "dairy-free"
+          ],
+          "ingredients": [
+            {
+              "ingredient_id": "wholewheat_pasta",
+              "quantity": 180.0,
+              "unit": "g",
+              "preparation": null,
+              "allergen": "gluten"
+            },
+            {
+              "ingredient_id": "mushroom",
+              "quantity": 250.0,
+              "unit": "g",
+              "preparation": "sliced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "baby_spinach",
+              "quantity": 120.0,
+              "unit": "g",
+              "preparation": null,
+              "allergen": null
+            },
+            {
+              "ingredient_id": "garlic",
+              "quantity": 12.0,
+              "unit": "g",
+              "preparation": "minced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "olive_oil",
+              "quantity": 1.0,
+              "unit": "tbsp",
+              "preparation": null,
+              "allergen": null
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 465.0,
+            "protein_g": 17.0,
+            "carbohydrate_g": 76.0,
+            "fat_g": 10.0,
+            "sodium_mg": 390.0,
+            "sugar_g": 7.0,
+            "complete": true
+          },
+          "source_reference": "data/recipes/recipes.json#mushroom-spinach-pasta"
+        },
+        {
+          "recipe_id": "vegetable-rice-skillet",
+          "title": "Vegetable Rice Skillet",
+          "servings": 2,
+          "total_time_minutes": 40,
+          "cuisine": "Contemporary",
+          "meal_type": "main",
+          "dietary_tags": [
+            "vegan",
+            "gluten-free",
+            "dairy-free"
+          ],
+          "ingredients": [
+            {
+              "ingredient_id": "brown_rice",
+              "quantity": 160.0,
+              "unit": "g",
+              "preparation": "rinsed",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "bell_pepper",
+              "quantity": 1.0,
+              "unit": "whole",
+              "preparation": "diced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "zucchini",
+              "quantity": 200.0,
+              "unit": "g",
+              "preparation": "diced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "mushroom",
+              "quantity": 180.0,
+              "unit": "g",
+              "preparation": "sliced",
+              "allergen": null
+            },
+            {
+              "ingredient_id": "baby_spinach",
+              "quantity": 100.0,
+              "unit": "g",
+              "preparation": null,
+              "allergen": null
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 430.0,
+            "protein_g": 13.0,
+            "carbohydrate_g": 71.0,
+            "fat_g": 12.0,
+            "sodium_mg": 350.0,
+            "sugar_g": 9.0,
+            "complete": true
+          },
+          "source_reference": "data/recipes/recipes.json#vegetable-rice-skillet"
+        }
+      ],
+      "fairprice_snapshot": [
+        {
+          "provider_product_id": "fixture-spinach-200g",
+          "raw_title": "Baby Spinach",
+          "mapped_ingredient_ids": [
+            "baby_spinach"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 200.0,
+          "package_unit": "g",
+          "observed_price_sgd": 3.2,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=baby%20spinach",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-pepper-3",
+          "raw_title": "Fresh Bell Peppers",
+          "mapped_ingredient_ids": [
+            "bell_pepper"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 3.0,
+          "package_unit": "whole",
+          "observed_price_sgd": 4.25,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=bell%20pepper",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-broccoli-300g",
+          "raw_title": "Fresh Broccoli",
+          "mapped_ingredient_ids": [
+            "broccoli"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 300.0,
+          "package_unit": "g",
+          "observed_price_sgd": 2.9,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=broccoli",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-brown-rice-1kg",
+          "raw_title": "FairPrice Brown Rice",
+          "mapped_ingredient_ids": [
+            "brown_rice"
+          ],
+          "brand": "FairPrice",
+          "category": "Rice",
+          "package_quantity": 1000.0,
+          "package_unit": "g",
+          "observed_price_sgd": 4.85,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=brown%20rice",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-canned-tomato-400g",
+          "raw_title": "No Added Salt Canned Tomatoes",
+          "mapped_ingredient_ids": [
+            "canned_tomato"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Canned Food",
+          "package_quantity": 400.0,
+          "package_unit": "g",
+          "observed_price_sgd": 2.2,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=canned%20tomatoes",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-carrot-4",
+          "raw_title": "Fresh Carrots",
+          "mapped_ingredient_ids": [
+            "carrot"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 4.0,
+          "package_unit": "whole",
+          "observed_price_sgd": 2.2,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=carrot",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "10762156",
+          "raw_title": "Pasar Cherry Tomato",
+          "mapped_ingredient_ids": [
+            "cherry_tomato",
+            "tomato"
+          ],
+          "brand": "Pasar",
+          "category": "Tomatoes",
+          "package_quantity": 500.0,
+          "package_unit": "g",
+          "observed_price_sgd": 4.05,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product/pasar-cherry-tomato-500g-10762156",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-chickpeas-400g",
+          "raw_title": "Canned Chickpeas",
+          "mapped_ingredient_ids": [
+            "chickpea"
+          ],
+          "brand": "FairPrice",
+          "category": "Canned Food",
+          "package_quantity": 400.0,
+          "package_unit": "g",
+          "observed_price_sgd": 1.85,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=chickpeas",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-cucumber-500g",
+          "raw_title": "Fresh Cucumber",
+          "mapped_ingredient_ids": [
+            "cucumber"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 500.0,
+          "package_unit": "g",
+          "observed_price_sgd": 2.2,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=cucumber",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-firm-tofu-300g",
+          "raw_title": "FairPrice Firm Tofu",
+          "mapped_ingredient_ids": [
+            "firm_tofu"
+          ],
+          "brand": "FairPrice",
+          "category": "Tofu",
+          "package_quantity": 300.0,
+          "package_unit": "g",
+          "observed_price_sgd": 1.95,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=firm%20tofu",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-garlic-300g",
+          "raw_title": "Fresh Garlic",
+          "mapped_ingredient_ids": [
+            "garlic"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 300.0,
+          "package_unit": "g",
+          "observed_price_sgd": 2.65,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=garlic",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-ginger-300g",
+          "raw_title": "Fresh Ginger",
+          "mapped_ingredient_ids": [
+            "ginger"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 300.0,
+          "package_unit": "g",
+          "observed_price_sgd": 2.2,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=ginger",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-cumin-20tsp",
+          "raw_title": "Ground Cumin",
+          "mapped_ingredient_ids": [
+            "ground_cumin"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Herbs & Spices",
+          "package_quantity": 20.0,
+          "package_unit": "tsp",
+          "observed_price_sgd": 2.7,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=ground%20cumin",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-lemon-5",
+          "raw_title": "Fresh Lemons",
+          "mapped_ingredient_ids": [
+            "lemon"
+          ],
+          "brand": "Pasar",
+          "category": "Fruits",
+          "package_quantity": 5.0,
+          "package_unit": "whole",
+          "observed_price_sgd": 3.25,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=lemon",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-mushroom-300g",
+          "raw_title": "Fresh Mushrooms",
+          "mapped_ingredient_ids": [
+            "mushroom"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 300.0,
+          "package_unit": "g",
+          "observed_price_sgd": 3.5,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=mushrooms",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-olive-oil-500ml",
+          "raw_title": "Extra Virgin Olive Oil",
+          "mapped_ingredient_ids": [
+            "olive_oil"
+          ],
+          "brand": "FairPrice",
+          "category": "Cooking Oil",
+          "package_quantity": 500.0,
+          "package_unit": "ml",
+          "observed_price_sgd": 12.95,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=olive%20oil",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-quinoa-500g",
+          "raw_title": "White Quinoa",
+          "mapped_ingredient_ids": [
+            "quinoa"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Grains",
+          "package_quantity": 500.0,
+          "package_unit": "g",
+          "observed_price_sgd": 7.8,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=quinoa",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-red-lentil-500g",
+          "raw_title": "Red Lentils",
+          "mapped_ingredient_ids": [
+            "red_lentil"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Dried Goods",
+          "package_quantity": 500.0,
+          "package_unit": "g",
+          "observed_price_sgd": 4.9,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=red%20lentils",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-sesame-oil-200ml",
+          "raw_title": "Pure Sesame Oil",
+          "mapped_ingredient_ids": [
+            "sesame_oil"
+          ],
+          "brand": "FairPrice",
+          "category": "Cooking Oil",
+          "package_quantity": 200.0,
+          "package_unit": "ml",
+          "observed_price_sgd": 4.8,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=sesame%20oil",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-soba-300g",
+          "raw_title": "Japanese Soba Noodles",
+          "mapped_ingredient_ids": [
+            "soba_noodle"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Noodles",
+          "package_quantity": 300.0,
+          "package_unit": "g",
+          "observed_price_sgd": 4.2,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=soba%20noodles",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-soy-sauce-640ml",
+          "raw_title": "Reduced Sodium Soy Sauce",
+          "mapped_ingredient_ids": [
+            "soy_sauce"
+          ],
+          "brand": "FairPrice",
+          "category": "Sauces",
+          "package_quantity": 640.0,
+          "package_unit": "ml",
+          "observed_price_sgd": 3.55,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=soy%20sauce",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-stock-1l",
+          "raw_title": "Low Sodium Vegetable Stock",
+          "mapped_ingredient_ids": [
+            "vegetable_stock"
+          ],
+          "brand": "FairPrice Fixture",
+          "category": "Stock",
+          "package_quantity": 1000.0,
+          "package_unit": "ml",
+          "observed_price_sgd": 4.5,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=vegetable%20stock",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-wholewheat-pasta-500g",
+          "raw_title": "Wholewheat Pasta",
+          "mapped_ingredient_ids": [
+            "wholewheat_pasta"
+          ],
+          "brand": "FairPrice",
+          "category": "Pasta",
+          "package_quantity": 500.0,
+          "package_unit": "g",
+          "observed_price_sgd": 3.2,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=wholewheat%20pasta",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-onion-5",
+          "raw_title": "Fresh Yellow Onions",
+          "mapped_ingredient_ids": [
+            "yellow_onion"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 5.0,
+          "package_unit": "whole",
+          "observed_price_sgd": 2.8,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=yellow%20onion",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        },
+        {
+          "provider_product_id": "fixture-zucchini-500g",
+          "raw_title": "Fresh Zucchini",
+          "mapped_ingredient_ids": [
+            "zucchini"
+          ],
+          "brand": "Pasar",
+          "category": "Vegetables",
+          "package_quantity": 500.0,
+          "package_unit": "g",
+          "observed_price_sgd": 3.6,
+          "available": true,
+          "source_url": "https://www.fairprice.com.sg/product-listing?pageType=search&url=zucchini",
+          "provider_mode": "fixture",
+          "observed_at": "2026-09-01T00:00:00Z"
+        }
+      ],
+      "output_schema_version": "evaluation-output-v2",
+      "policy_version": "planning-policy-v2"
+    }
+  ]
+}

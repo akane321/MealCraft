@@ -115,9 +115,13 @@ The accepted final orchestration layer adds a scope/policy gate before
 constraint extraction, a machine-readable capability/tool allowlist, typed
 human-in-the-loop interactions, per-action Agent runs with bounded execution
 and checkpoints, and evidence-linked response grounding. The additive
-`app/orchestration` package freezes starter contracts and reference behaviour;
-it is not wired into the current Agent API or proof of production multilingual
-classification and hallucination control. See the
+`app/orchestration` package now wires its first deterministic slice into Agent
+sessions: unsupported input cannot mutate planning state, mixed input is
+partitioned, scope decisions persist, and typed household/pantry clarifications
+reject stale answers. It also provides deny-by-default tool authorization and
+receipt/evidence claim verification as foundations. This is not yet proof of
+production multilingual classification, a complete guarded graph, or
+natural-language hallucination control. See the
 [Agent Orchestration Engineering Handoff](design/agent-orchestration.md).
 
 ### Recipe knowledge
@@ -205,9 +209,11 @@ Nuxt profile form
 ```text
 User message
  -> persist message
- -> fixture or optional model parser
+ -> deterministic scope and policy gate
+ -> bounded response without state mutation, or supported segment
+ -> fixture or optional model constraint parser
  -> Pydantic-validated constraint state
- -> clarification when materially incomplete
+ -> typed interaction or text clarification when materially incomplete
  -> user confirmation
  -> deterministic planner and validator
  -> persist and return authoritative plan
@@ -283,6 +289,7 @@ User event
 | Household constraints | Profile version plus request override | Profile ID, version, effective snapshot |
 | Recipe and ingredient facts | Validated catalog | Stable IDs, schema validation, source where available |
 | Parsed request | Agent session state | User message, parser mode, validated structured output |
+| Scope decision | Agent session state | Scope class, reason code, supported/unsupported segments, mutation/tool policy |
 | Plan | Deterministic planning service | Effective constraints, selected recipes, revision, replacement link |
 | Product and price | Grocery provider/cache/fixture | Provider, source mode, package, observed price, timestamp |
 | Tutorial candidate and selection | Tutorial provider plus deterministic ranker | Query, provider mode, candidate count, ranking policy, selected video ID, timestamp, warnings |
