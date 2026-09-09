@@ -8,6 +8,11 @@ It is developed for **DSS5105 Data Science Projects in Practice**. The project
 targets a polished, evidence-backed final product: the current MVP is a minimum
 acceptance baseline, not the scope or quality ceiling.
 
+The course deliverable is evaluated as a locally runnable system. Cloud hosting
+or public deployment is not required; `Readme.pdf` and this repository should
+make setup, requirements, and local execution reproducible. Docker Compose
+remains the supported local runtime rather than evidence of a hosted service.
+
 ## Product Vision
 
 MealCraft addresses a planning problem that ordinary recipe search and one-shot

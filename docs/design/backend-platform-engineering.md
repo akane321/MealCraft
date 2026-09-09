@@ -269,8 +269,10 @@ scheduling requirements justify another service.
    cancellation.
 10. **Operations APIs and Console integration**: role-protected read models,
     planning inspector, data/retrieval/Agent/evaluation views and safe actions.
-11. **Deployment hardening**: reverse proxy, secure cookie configuration,
-    trusted hosts, rate limiting, secret rotation, backups and restore drill.
+11. **Local delivery and security hardening**: reproducible local startup,
+    secure cookie configuration, trusted hosts, rate limiting, secret rotation,
+    backups and restore drill. Reverse-proxy or hosted-environment work is
+    optional and must not displace core reliability or product depth.
 12. **Documentation and evaluation**: threat model, OpenAPI, migrations,
     failure states, usability tasks and reproducible evidence.
 
