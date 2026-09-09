@@ -1,9 +1,17 @@
 from datetime import datetime
+from decimal import Decimal
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.orchestration.contracts import InteractionAnswer, InteractionRequest, ScopeDecision
+from app.orchestration.contracts import (
+    AgentRunStatus,
+    InteractionAnswer,
+    InteractionRequest,
+    ScopeDecision,
+    ToolEffect,
+    ToolRunStatus,
+)
 from app.schemas.meal_plan import (
     MealPlanEventType,
     MealPlanReplanEventResponse,
@@ -77,6 +85,73 @@ class AgentReplanDraft(BaseModel):
     reason: str | None = None
 
 
+class AgentRunCheckpointResponse(BaseModel):
+    id: int
+    sequence: int
+    stage: str
+    status: str
+    state_digest: str
+    state_payload: dict
+    evidence_references: list[dict]
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class AgentToolExecutionResponse(BaseModel):
+    id: int
+    sequence: int
+    tool_name: str
+    effect: ToolEffect
+    status: ToolRunStatus
+    arguments_digest: str
+    result_reference: str | None
+    provider_mode: str | None
+    error_code: str | None
+    started_at: datetime
+    completed_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class AgentRunResponse(BaseModel):
+    id: int
+    agent_session_id: int
+    intent: str
+    status: AgentRunStatus
+    input_digest: str
+    context_version: int
+    plan_revision: int | None
+    scope_decision: dict | None
+    checkpoint_version: int
+    max_llm_calls: int
+    used_llm_calls: int
+    max_tool_calls: int
+    used_tool_calls: int
+    max_retrieval_retries: int
+    used_retrieval_retries: int
+    max_planning_attempts: int
+    used_planning_attempts: int
+    max_wall_seconds: int
+    max_api_cost_usd: Decimal | None
+    used_api_cost_usd: Decimal
+    deadline_at: datetime
+    termination_reason_code: str | None
+    error_code: str | None
+    started_at: datetime | None
+    completed_at: datetime | None
+    created_at: datetime
+    updated_at: datetime
+    checkpoints: list[AgentRunCheckpointResponse] = Field(default_factory=list)
+    tool_executions: list[AgentToolExecutionResponse] = Field(default_factory=list)
+
+    model_config = {"from_attributes": True}
+
+
+class AgentRunCollectionResponse(BaseModel):
+    items: list[AgentRunResponse]
+
+
 class AgentSessionResponse(BaseModel):
     id: int
     status: AgentSessionStatus
@@ -91,6 +166,7 @@ class AgentSessionResponse(BaseModel):
     context_version: int = Field(ge=1)
     last_scope_decision: ScopeDecision | None
     pending_interaction: InteractionRequest | None
+    latest_run: AgentRunResponse | None = None
     can_confirm: bool
     created_at: datetime
     updated_at: datetime

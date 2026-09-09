@@ -111,17 +111,18 @@ household-scoped until the complete ownership migration is implemented.
 Fixture parsing is the default. OpenAI parsing is optional and requires a local
 runtime key.
 
-The accepted final orchestration layer adds a scope/policy gate before
-constraint extraction, a machine-readable capability/tool allowlist, typed
-human-in-the-loop interactions, per-action Agent runs with bounded execution
-and checkpoints, and evidence-linked response grounding. The additive
-`app/orchestration` package now wires its first deterministic slice into Agent
-sessions: unsupported input cannot mutate planning state, mixed input is
-partitioned, scope decisions persist, and typed household/pantry clarifications
-reject stale answers. It also provides deny-by-default tool authorization and
-receipt/evidence claim verification as foundations. This is not yet proof of
-production multilingual classification, a complete guarded graph, or
-natural-language hallucination control. See the
+The orchestration layer applies a scope/policy gate before constraint
+extraction, a machine-readable capability/tool allowlist, typed
+human-in-the-loop interactions and persistent per-action `AgentRun` records.
+Unsupported input cannot mutate planning state, mixed input is partitioned,
+scope decisions persist, and typed household/pantry clarifications reject stale
+answers. Each existing-session action now carries an input digest, bounded
+execution budget, deadline, state transition, checkpoints and ordered tool
+receipts. Idempotent replay prevents duplicate plan commits while conflicting
+reuse fails closed. The same package provides deny-by-default tool authorization
+and receipt/evidence claim verification as foundations. This is not yet proof
+of production multilingual classification, a complete asynchronous guarded
+graph, or natural-language hallucination control. See the
 [Agent Orchestration Engineering Handoff](design/agent-orchestration.md).
 
 ### Recipe knowledge

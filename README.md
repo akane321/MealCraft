@@ -108,7 +108,7 @@ backend/app/repositories/ persistence adapters
 backend/app/evaluation/   repeatable evaluation workbench
 backend/app/planning/     deterministic planning, shopping and validation algorithms
 backend/app/auth/         session-token and authorization foundations
-backend/app/orchestration/ scope, capability, interaction and grounding foundations
+backend/app/orchestration/ scope, interaction, bounded runs and grounding foundations
 frontend/app/pages/       user-facing product routes
 frontend/app/components/  reusable interface components
 data/recipes/             versioned recipe catalog

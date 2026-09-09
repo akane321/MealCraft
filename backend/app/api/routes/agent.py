@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.agent.parser import (
@@ -12,13 +12,17 @@ from app.agent.parser import (
 from app.api.routes.meal_plans import get_meal_plan_service, get_replanning_service
 from app.core.config import Settings, get_settings
 from app.db.session import get_db_session
+from app.orchestration.run_lifecycle import AgentRunLifecycleError, AgentRunNotFoundError
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.agent import AgentSessionRepository
+from app.repositories.agent_runs import AgentRunRepository
 from app.schemas.agent import (
     AgentConfirmationResponse,
     AgentInteractionInput,
     AgentMessageInput,
     AgentReplanConfirmationResponse,
+    AgentRunCollectionResponse,
+    AgentRunResponse,
     AgentSessionCollectionResponse,
     AgentSessionResponse,
 )
@@ -58,6 +62,7 @@ def get_agent_service(
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(error)) from error
     return AgentSessionService(
         repository=AgentSessionRepository(database),
+        run_repository=AgentRunRepository(database),
         parser=parser,
         meal_plan_service=get_meal_plan_service(database),
         replanning_service=get_replanning_service(database),
@@ -66,6 +71,7 @@ def get_agent_service(
 
 
 AgentServiceDependency = Annotated[AgentSessionService, Depends(get_agent_service)]
+IdempotencyKey = Annotated[str | None, Header(alias="Idempotency-Key")]
 
 
 @router.post("", response_model=AgentSessionResponse, status_code=status.HTTP_201_CREATED)
@@ -73,7 +79,10 @@ def create_agent_session(
     payload: AgentMessageInput,
     service: AgentServiceDependency,
 ) -> AgentSessionResponse:
-    return service.create(payload.message)
+    try:
+        return service.create(payload.message)
+    except AgentRunLifecycleError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
 
 @router.get("", response_model=AgentSessionCollectionResponse)
@@ -97,12 +106,15 @@ def reply_to_agent_session(
     session_id: int,
     payload: AgentMessageInput,
     service: AgentServiceDependency,
+    idempotency_key: IdempotencyKey = None,
 ) -> AgentSessionResponse:
     try:
-        return service.reply(session_id, payload.message)
+        return service.reply(session_id, payload.message, idempotency_key=idempotency_key)
     except AgentSessionNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
     except AgentSessionNotReadyError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    except AgentRunLifecycleError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
 
@@ -111,12 +123,15 @@ def answer_agent_interaction(
     session_id: int,
     payload: AgentInteractionInput,
     service: AgentServiceDependency,
+    idempotency_key: IdempotencyKey = None,
 ) -> AgentSessionResponse:
     try:
-        return service.answer_interaction(session_id, payload)
+        return service.answer_interaction(session_id, payload, idempotency_key=idempotency_key)
     except AgentSessionNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
     except AgentSessionNotReadyError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    except AgentRunLifecycleError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
 
@@ -124,29 +139,35 @@ def answer_agent_interaction(
 def confirm_agent_session(
     session_id: int,
     service: AgentServiceDependency,
+    idempotency_key: IdempotencyKey = None,
 ) -> AgentConfirmationResponse:
     try:
-        return service.confirm(session_id)
+        return service.confirm(session_id, idempotency_key=idempotency_key)
     except AgentSessionNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
     except AgentSessionNotReadyError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
     except WeeklyPlanSelectionError as error:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
+    except AgentRunLifecycleError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
 
 @router.post("/{session_id}/replan/confirm", response_model=AgentReplanConfirmationResponse)
 def confirm_agent_replan(
     session_id: int,
     service: AgentServiceDependency,
+    idempotency_key: IdempotencyKey = None,
 ) -> AgentReplanConfirmationResponse:
     try:
-        return service.confirm_replan(session_id)
+        return service.confirm_replan(session_id, idempotency_key=idempotency_key)
     except AgentSessionNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
     except MealPlanReplanNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
     except (AgentSessionNotReadyError, MealPlanReplanConflictError) as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    except AgentRunLifecycleError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
 
@@ -154,10 +175,43 @@ def confirm_agent_replan(
 def discard_agent_replan(
     session_id: int,
     service: AgentServiceDependency,
+    idempotency_key: IdempotencyKey = None,
 ) -> AgentSessionResponse:
     try:
-        return service.discard_replan(session_id)
+        return service.discard_replan(session_id, idempotency_key=idempotency_key)
     except AgentSessionNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
     except AgentSessionNotReadyError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    except AgentRunLifecycleError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+
+
+@router.get("/{session_id}/runs", response_model=AgentRunCollectionResponse)
+def list_agent_runs(
+    session_id: int,
+    service: AgentServiceDependency,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> AgentRunCollectionResponse:
+    try:
+        return service.list_runs(session_id, limit=limit)
+    except AgentSessionNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
+
+
+@router.get("/{session_id}/runs/{run_id}", response_model=AgentRunResponse)
+def get_agent_run(session_id: int, run_id: int, service: AgentServiceDependency) -> AgentRunResponse:
+    try:
+        return service.get_run(session_id, run_id)
+    except AgentRunNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent run not found") from error
+
+
+@router.post("/{session_id}/runs/{run_id}/cancel", response_model=AgentRunResponse)
+def cancel_agent_run(session_id: int, run_id: int, service: AgentServiceDependency) -> AgentRunResponse:
+    try:
+        return service.cancel_run(session_id, run_id)
+    except AgentRunNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent run not found") from error
+    except AgentRunLifecycleError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error

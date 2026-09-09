@@ -309,6 +309,58 @@ def test_agent_confirmation_calls_weekly_planner_and_persists_plan_link(
     assert persisted["messages"][-1]["content"].endswith(f"plan #{payload['plan']['id']}.")
 
 
+def test_agent_runs_are_auditable_and_confirmation_is_idempotent(recipe_client: TestClient) -> None:
+    created = recipe_client.post(
+        "/api/agent/sessions",
+        json={"message": "Build a weekly plan for 2 people with a S$20 per meal budget."},
+    ).json()
+
+    assert created["latest_run"]["status"] == "ready_for_confirmation"
+    assert created["latest_run"]["checkpoint_version"] == 1
+    assert created["latest_run"]["input_digest"] != "Build a weekly plan for 2 people with a S$20 per meal budget."
+
+    headers = {"Idempotency-Key": "confirm-plan-once"}
+    first = recipe_client.post(f"/api/agent/sessions/{created['id']}/confirm", headers=headers)
+    replay = recipe_client.post(f"/api/agent/sessions/{created['id']}/confirm", headers=headers)
+    assert first.status_code == replay.status_code == 200
+    assert replay.json()["plan"]["id"] == first.json()["plan"]["id"]
+
+    runs = recipe_client.get(f"/api/agent/sessions/{created['id']}/runs").json()["items"]
+    assert [run["status"] for run in runs[:2]] == ["committed", "ready_for_confirmation"]
+    committed = runs[0]
+    assert committed["used_tool_calls"] == 2
+    assert committed["used_planning_attempts"] == 1
+    assert [item["tool_name"] for item in committed["tool_executions"]] == [
+        "generate_plan_preview",
+        "save_plan_revision",
+    ]
+    detail = recipe_client.get(f"/api/agent/sessions/{created['id']}/runs/{committed['id']}")
+    assert detail.status_code == 200
+    assert detail.json()["termination_reason_code"] == "PLAN_SAVED"
+
+
+def test_agent_message_idempotency_prevents_duplicate_state_or_history(recipe_client: TestClient) -> None:
+    created = recipe_client.post(
+        "/api/agent/sessions",
+        json={"message": "Build a weekly plan for 2 people with a S$20 per meal budget."},
+    ).json()
+    path = f"/api/agent/sessions/{created['id']}/messages"
+    headers = {"Idempotency-Key": "off-topic-once"}
+    body = {"message": "What movie should I watch tomorrow?"}
+
+    first = recipe_client.post(path, json=body, headers=headers)
+    replay = recipe_client.post(path, json=body, headers=headers)
+    conflict = recipe_client.post(path, json={"message": "Book a hotel."}, headers=headers)
+
+    assert first.status_code == replay.status_code == 200
+    assert first.json()["latest_run"]["status"] == "degraded"
+    assert len(first.json()["messages"]) == len(replay.json()["messages"]) == 4
+    assert conflict.status_code == 409
+    assert "different request payload" in conflict.json()["detail"]
+    restored = recipe_client.get(f"/api/agent/sessions/{created['id']}").json()
+    assert len(restored["messages"]) == 4
+
+
 def test_agent_clarifies_replanning_target_then_persists_preview(
     recipe_client: TestClient,
 ) -> None:
