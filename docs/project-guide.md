@@ -176,6 +176,16 @@ Success is not “the menu looks plausible”. Claims require versioned inputs,
 explicit metrics, comparable baselines, failure cases, reproducible commands,
 and clearly stated limitations.
 
+### Depth and local reproducibility before hosting
+
+The course deliverable does not require cloud deployment or public hosting.
+MealCraft therefore treats a clean clone, documented requirements, deterministic
+fixtures, Docker-based local startup, reliability checks, and a repeatable demo
+as the delivery boundary. Hosting work is optional future engineering and must
+not displace deeper planning, grounding, Agent, evaluation, or user-workflow
+quality. A few useful capabilities completed end to end are more valuable than
+many shallow feature stubs.
+
 ## Functional Model
 
 | Capability | Final responsibility |
@@ -341,4 +351,5 @@ MealCraft succeeds when a new user can express a realistic household request,
 understand any clarification, inspect why a plan is valid or relaxed, see what
 must actually be purchased, follow and update the plan, and trust the origin and
 limits of the displayed information. A new contributor must also be able to run,
-inspect, test, and extend the system without relying on undocumented knowledge.
+inspect, test, and extend the system locally without relying on undocumented
+knowledge or a hosted environment.

@@ -5,6 +5,15 @@ MealCraft development environment. New contributors should first read the
 [Project Guide](project-guide.md), [Current Status](current-status.md), and
 [Contributing Guide](../CONTRIBUTING.md).
 
+## Course Delivery Boundary
+
+MealCraft is submitted and assessed as a locally runnable system. Cloud hosting
+and a deployment guide are not course requirements. The maintained delivery
+path is a clean clone followed by the documented environment setup and Docker
+Compose startup below. Contributors should spend engineering effort on clean
+code, reliability, scalability, core capability depth, and reproducible local
+evidence before considering optional hosting.
+
 ## Prerequisites
 
 - Git
