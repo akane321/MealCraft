@@ -164,8 +164,10 @@ edit numeric results or emit a free-form Shopping List as authoritative output.
 ## Session, run and state model
 
 Keep `AuthSession`, long-lived `AgentSession`, single-action `AgentRun` and
-immutable `PlanRevision` separate. The current `collecting/ready/planned`
-session status is a verified baseline, not the final run model.
+immutable `PlanRevision` separate. The application now persists the first
+single-action run model alongside the existing `collecting/ready/planned`
+conversation state; these two state machines answer different questions and
+must not be collapsed.
 
 A run should support:
 
@@ -175,9 +177,11 @@ created -> needs_clarification -> ready_for_confirmation -> running
         -> degraded | failed | cancelled
 ```
 
-Persist active goal, pending action, complete missing-field set, selected
-question, field provenance, tool trace, checkpoint and current plan revision.
-An unrelated message cannot change these fields.
+The current slice persists run input digest, status, budgets, deadline,
+termination/error data, checkpoints and ordered tool-execution receipts. The
+session remains the source of active constraints, pending interaction and plan
+link. An unrelated message receives a degraded run outcome but cannot change
+those session fields.
 
 Every material constraint eventually needs value, source, turn/source-span,
 confidence where relevant and status. Distinguish `not_mentioned`,
@@ -191,13 +195,23 @@ acknowledgement. The Agent never derives BMR/TDEE or disease-treatment targets.
 
 Each run has explicit maximum LLM calls, tool calls, retrieval retries,
 planning/repair attempts, wall-clock deadline and approved API-cost limit.
-Checkpoints follow confirmed constraints, candidate retrieval, product
-retrieval, planning, validation, preview creation and commit.
+The lifecycle enforces these limits before recording use. The current
+synchronous Agent path writes checkpoints around scope, extraction,
+clarification/confirmation, planning and commit, plus parser/planner/persistence
+receipts. Retrieval and validation adapters must add their checkpoints as they
+become part of the same runtime path.
 
-A retry rechecks household access, profile version, plan revision and external
-freshness. Retrieval may trigger only a documented bounded repair loop. Tool
-timeout or validator failure cannot commit a partial plan. Cancellation,
-idempotency and stale-revision behaviour need explicit tests.
+For actions within an existing session, an optional `Idempotency-Key` maps the
+same payload to the saved terminal run and rejects a different payload or an
+in-progress duplicate. Cancellation and budget/deadline failure are terminal
+and cannot rewrite a completed run. Unit and API tests cover replay, conflict,
+in-progress duplication, budget exhaustion, deadline expiry, cancellation and
+duplicate confirmation without a second plan mutation.
+
+A future retry that reaches external systems must also recheck household
+access, profile version, plan revision and external freshness. Retrieval may
+trigger only a documented bounded repair loop. Tool timeout or validator
+failure cannot commit a partial plan.
 
 FairPrice pages, YouTube metadata, external recipes and user-authored content
 are untrusted data, never instructions. They cannot select tools, change roles,

@@ -137,6 +137,23 @@ held-out claim. Agent responses also expose typed interactions and reject stale
 or forged option IDs through
 `/api/agent/sessions/{session_id}/interactions`.
 
+Every action after session creation can carry an `Idempotency-Key` header. Keep
+one key for one intended operation and payload; a completed duplicate replays
+the saved result, while conflicting or concurrent reuse returns HTTP 409. This
+is especially important for confirmation calls because a browser retry must not
+create a second plan revision.
+
+Inspect the persisted execution audit through:
+
+```bash
+curl http://localhost:8000/api/agent/sessions/<session-id>/runs
+curl http://localhost:8000/api/agent/sessions/<session-id>/runs/<run-id>
+```
+
+The detail response includes checkpoints, ordered tool receipts, consumed
+budgets, terminal status and error/termination metadata. Tests use deterministic
+fixture parsing and zero live API calls.
+
 ## Product Pricing Modes
 
 The planner defaults to `fixture` pricing for repeatable development and tests.

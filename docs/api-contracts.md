@@ -53,6 +53,9 @@ Available endpoints:
 - POST /api/agent/sessions/{session_id}/confirm
 - POST /api/agent/sessions/{session_id}/replan/confirm
 - POST /api/agent/sessions/{session_id}/replan/discard
+- GET /api/agent/sessions/{session_id}/runs
+- GET /api/agent/sessions/{session_id}/runs/{run_id}
+- POST /api/agent/sessions/{session_id}/runs/{run_id}/cancel
 - POST /api/household-profiles
 - GET /api/household-profiles/current
 - GET /api/household-profiles/{profile_id}
@@ -291,24 +294,48 @@ with the same revision check as the plan API. `discard` clears the session link
 and draft without modifying the plan. The draft and event link survive reloads
 and container restarts.
 
-### Orchestration contracts and remaining target
+### Orchestration runs, recovery and remaining target
 
-The `backend/app/orchestration/` package now supplies the scope gate, structured
+The `backend/app/orchestration/` package supplies the scope gate, structured
 interaction validator, capability registry, deny-by-default tool authorization
-decision, action receipts and typed claim verification. These are deterministic
-foundations: the current scope classifier is a transparent bilingual lexical
-reference, not a production multilingual model, and the full LangGraph/tool-run
-runtime is still a target.
+decision, action receipts, typed claim verification and a persistent per-action
+run lifecycle. Every message, interaction, confirmation or replanning decision
+creates an `AgentRun` with an input digest, explicit state, bounded budgets,
+deadline and terminal outcome. Checkpoints and ordered tool-execution receipts
+are stored separately so a client or evaluator can reconstruct what happened
+without treating free-form assistant text as an audit trail.
+
+After a session exists, state-changing Agent endpoints accept an optional
+`Idempotency-Key` header. Reusing the same key with the same completed request
+replays the persisted result without repeating a plan commit or conversation
+mutation. Reusing it with a different payload, or while the first request is
+still in progress, returns HTTP 409. Session creation itself does not advertise
+cross-session idempotency.
+
+`GET /api/agent/sessions/{session_id}/runs` returns recent runs and
+`GET /api/agent/sessions/{session_id}/runs/{run_id}` returns its checkpoints and
+tool receipts. `POST .../cancel` records a fail-closed cancellation for a
+cancellable non-terminal run; completed runs cannot be rewritten. Tool-call,
+LLM-call, retrieval-retry, planning-attempt, elapsed-time and API-cost budgets
+are checked before usage is persisted. Budget or deadline exhaustion terminates
+the run instead of committing partial state.
+
+These remain deterministic foundations: the current scope classifier is a
+transparent bilingual lexical reference, not a production multilingual model,
+and the full asynchronous LangGraph execution graph is still a target.
 
 Future tool execution is capability-gated. Read and preview tools may be called
 only for a supported intent and authorized household. Commit tools additionally
 require an unexpired confirmation linked to the matching preview and revision.
 Scope, authorization, tool, grounding and action-receipt records belong to an
-Agent run; they are not free-form assistant messages.
+Agent run; they are not free-form assistant messages. The current synchronous
+slice records logical parser, planner and persistence boundaries. Later
+external adapters must add source timestamps, retries and evidence references
+to the same receipt model rather than inventing a parallel log format.
 
 A factual claim must exactly match its referenced typed evidence. A claim that
 data is `live` additionally requires a timestamped `live_retrieval` fact. A
 claim that an action was saved or applied requires a successful `commit`
 receipt whose result kind and value match the claim; a successful preview is
-not enough. Natural-language atomic-claim extraction and persistent Agent-run
-traces remain future work.
+not enough. Natural-language atomic-claim extraction and response-level
+evidence linking remain future work.

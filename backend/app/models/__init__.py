@@ -1,4 +1,4 @@
-from app.models.agent import AgentMessage, AgentSession
+from app.models.agent import AgentMessage, AgentRun, AgentRunCheckpoint, AgentSession, AgentToolExecution
 from app.models.household import HouseholdProfile, HouseholdProfileVersion
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent, MealPlanGroceryItem
 from app.models.platform import (
@@ -15,7 +15,10 @@ from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrit
 
 __all__ = [
     "AgentMessage",
+    "AgentRun",
+    "AgentRunCheckpoint",
     "AgentSession",
+    "AgentToolExecution",
     "AuditEvent",
     "AuthSession",
     "Household",
