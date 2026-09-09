@@ -12,6 +12,7 @@ from typing import Literal
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss
 from app.planning.final_scope_validator import FinalPlanningValidator
+from app.planning.whole_plan_scoring import WholePlanPolicy, score_plan
 from app.schemas.planning_v2 import FinalPlanningProblem, PlanningAssignment
 
 
@@ -26,7 +27,9 @@ class OracleResult:
     best_loss: float | None
 
 
-def exhaustive_assignments(problem: FinalPlanningProblem, *, max_combinations: int = 10000) -> OracleResult:
+def exhaustive_assignments(
+    problem: FinalPlanningProblem, *, max_combinations: int = 10000, scoring_policy: WholePlanPolicy | None = None
+) -> OracleResult:
     """Enumerate raw recipe candidates without beam filtering, pruning or dominance.
 
     Refuse oversized searches before starting, so a truncated run cannot be
@@ -73,6 +76,8 @@ def exhaustive_assignments(problem: FinalPlanningProblem, *, max_combinations: i
             loss += 0.1 * previous.count(recipe_id)
             loss += 0.35 if previous and previous[-1] == recipe_id else 0.0
             previous.append(recipe_id)
+        if scoring_policy:
+            loss = score_plan(problem, assignments, scoring_policy).total_loss
         key = (loss, choices)
         if best is None or key < best:
             best = key
