@@ -78,11 +78,39 @@ interaction, and generated-plan link are persisted in `agent_sessions` and
 `agent_messages`. Replanning previews and confirmations are
 stored in `meal_plan_events`; `meal_plans.revision` provides optimistic
 concurrency and `meal_plan_entries.is_locked` protects selected meals. The
-current migration head is `20260906_0011`. Household profile identity and
+current migration head is `20260908_0012`. Household profile identity and
 immutable versions are stored in `household_profiles` and
 `household_profile_versions`; linked plans preserve the exact profile version
 and optional replaced-plan ID. Agent replanning drafts and pending
 event links are stored on `agent_sessions`.
+
+## Authentication API
+
+The authentication slice uses Argon2id credentials and server-side opaque
+sessions. Register through Swagger or the API:
+
+```bash
+curl -i -c mealcraft.cookies -X POST http://localhost:8000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.test","display_name":"Alice","password":"correct-horse-battery-staple"}'
+```
+
+The response contains a non-secret CSRF token and sets two cookies. The raw
+session token is `HttpOnly`; only its SHA-256 digest is stored in PostgreSQL.
+Use the cookie jar to resume the session:
+
+```bash
+curl -b mealcraft.cookies http://localhost:8000/api/auth/me
+curl -b mealcraft.cookies http://localhost:8000/api/auth/sessions
+```
+
+Logout and device-session revocation require the returned CSRF token in the
+`X-CSRF-Token` header. `AUTH_COOKIE_SECURE` is inferred as true outside
+development/test; do not force it to false in a deployed environment.
+
+These endpoints do not yet protect the existing Profile, Plan, Agent or
+Dashboard routes. Complete household ownership and adversarial isolation tests
+before describing the application as multi-user.
 
 ## Planning Assistant Parser
 

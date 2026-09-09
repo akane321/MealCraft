@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, Identity, Index, Integer, String, Text, func
+from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, Identity, Index, Integer, String, Text, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -87,6 +87,13 @@ class AuthSession(Base):
     __table_args__ = (
         Index("auth_sessions_user_expiry_idx", "user_id", "expires_at", "id"),
         Index("auth_sessions_active_expiry_idx", "revoked_at", "expires_at"),
+        Index(
+            "auth_sessions_user_active_idx",
+            "user_id",
+            "expires_at",
+            "id",
+            postgresql_where=text("revoked_at IS NULL"),
+        ),
     )
 
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
@@ -95,6 +102,7 @@ class AuthSession(Base):
         ForeignKey("users.id", ondelete="CASCADE"),
     )
     token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    csrf_token_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
     ip_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

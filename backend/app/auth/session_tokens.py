@@ -6,11 +6,20 @@ import secrets
 from dataclasses import dataclass
 
 SESSION_TOKEN_BYTES = 32
+CSRF_TOKEN_BYTES = 32
 
 
 @dataclass(frozen=True)
 class IssuedSessionToken:
     """Return the raw token once and persist only its SHA-256 digest."""
+
+    raw_token: str
+    token_hash: str
+
+
+@dataclass(frozen=True)
+class IssuedCsrfToken:
+    """Return the browser-readable CSRF token while storing only its digest."""
 
     raw_token: str
     token_hash: str
@@ -25,6 +34,11 @@ def hash_session_token(raw_token: str) -> str:
 def issue_session_token() -> IssuedSessionToken:
     raw_token = secrets.token_urlsafe(SESSION_TOKEN_BYTES)
     return IssuedSessionToken(raw_token=raw_token, token_hash=hash_session_token(raw_token))
+
+
+def issue_csrf_token() -> IssuedCsrfToken:
+    raw_token = secrets.token_urlsafe(CSRF_TOKEN_BYTES)
+    return IssuedCsrfToken(raw_token=raw_token, token_hash=hash_session_token(raw_token))
 
 
 def session_token_matches(raw_token: str, expected_hash: str) -> bool:

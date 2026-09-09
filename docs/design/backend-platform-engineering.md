@@ -7,7 +7,7 @@ the contributor completing it. MealCraft already has useful FastAPI,
 PostgreSQL, repository, planning, Agent and Dashboard foundations, but its
 current HTTP surface is still an anonymous single-tenant baseline.
 
-This branch adds an additive persistence scaffold:
+The merged foundation provides an additive persistence scaffold:
 
 - account, credential and revocable authentication-session models;
 - household and household-membership models;
@@ -18,11 +18,14 @@ This branch adds an additive persistence scaffold:
 - low-level identity persistence methods;
 - synthetic cross-household isolation fixtures and focused tests.
 
-It deliberately does **not** expose registration/login routes or claim that
-existing plans, profiles and Agent sessions are user-isolated. Wiring an
-incomplete authentication dependency into selected routes would create a false
-security boundary. The remaining work packages below must be completed before
-MealCraft is described as a multi-user application.
+The first authentication slice now adds the reviewed Argon2id adapter,
+registration/login/logout/current-actor/device-session APIs, per-session CSRF
+digests, bounded account locking and digest-only opaque cookies. It deliberately
+does **not** claim that existing plans, profiles and Agent sessions are
+user-isolated. Wiring authentication into selected routes before every private
+repository has household ownership would create a false security boundary. The
+remaining work packages below must be completed before MealCraft is described
+as a multi-user application.
 
 ## Final backend goal
 
@@ -149,9 +152,11 @@ Do not combine destructive cleanup with the first ownership migration. Preserve
 the current demo data and provide a reversible downgrade until the migration is
 accepted.
 
-## Planned API surface
+## Current authentication and planned account API surface
 
-These are target contracts, not current endpoints:
+The first six authentication endpoints are executable in the authentication
+slice. Password lifecycle, household collaboration and account-lifecycle
+endpoints remain target contracts:
 
 ```text
 POST   /api/auth/register
@@ -247,12 +252,14 @@ scheduling requirements justify another service.
 - deterministic services remain the authority for allergens, nutrition,
   packages, costs and validation.
 
-## Work packages left for the backend contributor
+## Work-package progress for the backend contributor
 
-1. **Password adapter**: add Argon2id, policy versioning, verification,
-   upgrade-on-login and secret-leak tests.
-2. **Authentication service and routes**: registration, login, logout, current
-   actor, device sessions, cookie and CSRF policy.
+1. **Password adapter — implemented first slice**: Argon2id, policy versioning,
+   verification, upgrade-on-login and secret-boundary tests are executable.
+2. **Authentication service and routes — implemented first slice**:
+   registration, login, logout, current actor, device sessions, secure-by-
+   environment cookie policy, per-session CSRF and failed-login locking are
+   executable. Origin-level rate limiting and deployment proxy validation remain.
 3. **Account lifecycle**: email verification, reset tokens, password change,
    suspension, export and deletion.
 4. **Tenant migration**: add/backfill household ownership across every private

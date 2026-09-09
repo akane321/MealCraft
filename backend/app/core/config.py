@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import SecretStr
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -24,12 +24,25 @@ class Settings(BaseSettings):
     agent_max_history_messages: int = 20
     openai_api_key: SecretStr | None = None
     openai_model: str = "gpt-5.4-mini"
+    auth_cookie_name: str = Field(default="mealcraft_session", min_length=1, max_length=80)
+    auth_csrf_cookie_name: str = Field(default="mealcraft_csrf", min_length=1, max_length=80)
+    auth_cookie_secure: bool | None = None
+    auth_session_ttl_hours: int = Field(default=168, ge=1, le=720)
+    auth_last_seen_interval_seconds: int = Field(default=300, ge=0, le=3600)
+    auth_login_max_failures: int = Field(default=5, ge=1, le=20)
+    auth_login_lock_minutes: int = Field(default=15, ge=1, le=1440)
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+    @property
+    def effective_auth_cookie_secure(self) -> bool:
+        if self.auth_cookie_secure is not None:
+            return self.auth_cookie_secure
+        return self.environment.casefold() not in {"development", "test"}
 
 
 @lru_cache
