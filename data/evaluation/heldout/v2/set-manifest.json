@@ -69,6 +69,13 @@
   },
   "min_languages_per_category": 2,
 
+  "_comment_tolerances": "Declared before authoring, per ADR-0020. Scoring compares against these rather than against whatever threshold makes a result look better afterwards. Money is compared in cents; quantities carry catalog units, so the tolerance is relative.",
+  "tolerances": {
+    "cost_sgd_absolute": 0.01,
+    "quantity_relative": 1e-06,
+    "nutrition_relative": 0.02
+  },
+
   "_comment_review": "Every episode needs one reviewer who is neither the author nor an owner of a system under test. Disagreements are resolved before freezing.",
   "review_policy": {
     "reviewers_per_episode": 1,
