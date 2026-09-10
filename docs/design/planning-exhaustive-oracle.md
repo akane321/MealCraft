@@ -1,5 +1,11 @@
 # Exhaustive assignment oracle
 
+> **Scope of this document.** It is a component contract: what the component
+> promises, what it refuses, and what it must never be read as proving. Run
+> counts, local timings and per-PR verification logs are not contracts - they go
+> stale on the next commit - and live in the pull request and in the private
+> task history instead. Current test status comes from CI.
+
 `exhaustive_assignments(problem, max_combinations=10000)` checks every recipe assignment in a small frozen packet. Optional unlocked slots include a skip choice. The oracle uses raw recipe candidates and the independent validator rather than the compiler, beam pruning or dominance logic.
 
 The returned counts show total, checked, feasible and indeterminate combinations. `best_choices` and `best_loss` describe the best validated assignment under the current reference local-loss and repetition policy.
@@ -15,4 +21,4 @@ Shopping selection deliberately uses the reference builder, which chooses one pr
 
 Regression example: two slots and two recipes create four combinations. Only the slower recipe repeated twice satisfies the frozen package budget. Width-one Beam Search misses it; width four and exhaustive enumeration find it. With only time loss active, the known score is 0.5 + 0.5 + 0.1 + 0.35 = 1.45.
 
-Verification: 74 targeted tests passed, including seven oracle tests. Ruff check and format check passed. Tests cover enumeration counts, the hand-computed score, a narrow-beam miss, missing evidence, resource limits, raw-candidate validation, optional skips and stable ordering.
+Required test coverage for this component: enumeration counts, the hand-computed score in the worked example above, a narrow-beam miss, missing evidence, resource limits, raw-candidate validation, optional skips and stable ordering.

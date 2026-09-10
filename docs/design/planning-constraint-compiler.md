@@ -1,12 +1,18 @@
 # Planning constraint compiler
 
+> **Scope of this document.** It is a component contract: what the component
+> promises, what it refuses, and what it must never be read as proving. Run
+> counts, local timings and per-PR verification logs are not contracts - they go
+> stale on the next commit - and live in the pull request and in the private
+> task history instead. Current test status comes from CI.
+
 `app.planning.constraint_compiler.compile_constraints(problem)` consumes an already validated `FinalPlanningProblem` and returns an immutable tuple of slot/recipe decisions sorted by stable IDs. Each decision exposes `eligible` and sorted `rejection_codes`.
 
 Implemented: meal type, time, allergens, excluded ingredients, dietary tags, locks, and explicit hard per-slot nutrient bounds. Numeric comparisons use the existing validator's 1e-6 tolerance. Nutrition is per person, not multiplied by household servings. Soft bands and general health preferences do not reject candidates. Daily and horizon targets remain aggregate constraints.
 
 This is an independently callable component for the next search implementation. The greedy reference planner and public API remain on their existing paths. An eligible candidate is not proof of plan feasibility or data completeness. The current input schema requires numeric nutrition and does not carry all upstream completeness/provenance states; missing-data support is pending contract alignment. No global infeasibility claim is made for an empty candidate set.
 
-Verification from backend: `python -m pytest tests/test_constraint_compiler.py tests/test_planning_v2.py` (26 passed). Ruff check and format were run on the two Python files. Tests cover each filter, deterministic matrix ordering, input preservation, nutrition scope, soft preferences, inclusive numeric boundaries, tolerance, and safety conflicts in optional locked slots. These are component tests, not an end-to-end evaluation.
+Required test coverage for this component: every filter, deterministic matrix ordering, input preservation, nutrition scope, soft-preference exclusion, inclusive numeric boundaries, tolerance behaviour, and safety conflicts in optional locked slots. These are component tests. Passing them is not end-to-end evaluation evidence and must not be reported as such.
 
 
 ## Search domains

@@ -41,6 +41,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\memory-preflight.ps1 `
 
 The command prints the mandatory context, recent task records, and current MealCraft Git state, then stores a local preflight receipt under `.local/`.
 
+The reading scope is defined once, in the knowledge repository's `memory-manifest.json`. The preflight output is authoritative; do not decide what to read from a handoff note or from memory. Preflight prints a baseline - if the task touches evaluation, a cross-module contract, planning, auth, Agent orchestration, retrieval, recipe data or course requirements, also read the documents named in the trigger tables in both `AGENTS.md` files.
+
 ## Finish a task
 
 After tests and before the final handoff:
@@ -58,7 +60,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\memory-finalize.ps1 `
   -NextAction "Exact next step"
 ```
 
-Review the generated `history/YYYY-MM/*.md` file. If an accepted decision or merged capability changed, also update the relevant ADR or `CURRENT_STATE.md`. Then:
+Review the generated `history/YYYY-MM/*.md` file. If an accepted decision changed, add or supersede an ADR and regenerate the index with `python scripts/build_decision_index.py`. If merged behaviour changed, update the private `CURRENT_STATE.md` and the public `docs/current-status.md` together - updating one side alone leaves two disagreeing records of the same fact. Then:
 
 ```powershell
 git switch -c memory/short-task-id
@@ -75,8 +77,11 @@ Open a PR in the private knowledge repository. Do not paste private memory conte
 ```text
 Before making any material MealCraft change, read and follow the public AGENTS.md,
 locate MealCraft-Knowledge, and run its memory-preflight script with the correct
-impact level. After verification, run memory-finalize and update shared memory
-only with evidence-backed facts. Never store secrets or real health data.
+impact level. Treat the preflight output as the reading scope, and additionally read
+whatever the AGENTS.md trigger tables name for this task. After verification, run
+memory-finalize and update shared memory only with evidence-backed facts. If any
+document disagrees with code, tests or GitHub, fix that document in the same task
+rather than only reporting it. Never store secrets or real health data.
 ```
 
 ## Failure behavior
