@@ -8,7 +8,7 @@
 
 ## 1. Purpose and research questions
 
-This diagnostic protocol asks four concrete questions:
+This diagnostic protocol asks five concrete questions:
 
 1. Does the planner respect explicit hard constraints?
 2. Does weekly selection improve diversity over a transparent greedy baseline?

@@ -49,6 +49,7 @@ Those operations remain deterministic and testable.
 | Capability | Current implementation |
 | --- | --- |
 | Household profile | One shared household profile with member servings, safety constraints, shared defaults, and immutable versions |
+| Accounts and sessions | Argon2id credentials, registration and login, digest-only revocable sessions, CSRF, and per-device revocation. Business routes are still anonymous and single-tenant |
 | Planning assistant | Persistent English/Chinese conversations, bounded scope routing, structured constraints and clarification controls, confirmation, and tool delegation |
 | Weekly planning | Persisted seven-day main-meal plans with hard filtering, soft ranking, diversity control, and per-person nutrition |
 | Grocery grounding | FairPrice product lookup with normalized packages, PostgreSQL cache, and reproducible fixtures |
@@ -56,7 +57,8 @@ Those operations remain deterministic and testable.
 | Plan execution | `planned`, `completed`, and `skipped` check-in states |
 | Nutrition Dashboard | Daily totals, weekly trends, and completion coverage for completed MealCraft dishes only |
 | Replanning | Revision-safe preview, confirmation or discard, local meal changes, Shopping List deltas, and event history |
-| Evaluation | Versioned developer, held-out, and Agent fixtures; greedy baseline; failure registry; frontend state and browser tests |
+| Agent runs | Synchronous per-action `AgentRun` with input digests, explicit deadlines and budgets, durable checkpoints, ordered tool receipts, idempotent replay, and run list/detail/cancel APIs |
+| Evaluation | Versioned developer, held-out, Agent, scope and grounding fixtures; greedy lower bound and strong Rule-only references; matched-information v2 developer packets; failure registry; frontend state and browser tests |
 
 This table reports capabilities verified on remote `main`, not every final
 design target. Read [Current Status](docs/current-status.md) for the evidence
@@ -171,9 +173,19 @@ and MealCraft used the same eligible recipe pool:
 | Mean distinct recipes per plan | 1.0 | 2.0 | 6.1389 |
 | Recorded failure cases | 36 | 0 | 0 |
 
-The recorded MealCraft run had zero hard-constraint violations. The offline
-Agent fixture result was field F1 `0.907` and exact-case rate `16/24`; eight
-failures remain visible for regression work. These results describe curated,
+The recorded MealCraft run had zero hard-constraint violations. Against the
+strong Rule-only reference the two systems tie on scenario expectation rate,
+hard-constraint violations and recorded failure cases; only mean distinct
+recipes separates them. A metric that saturates for both systems does not by
+itself support a superiority claim - see
+[Current Status](docs/current-status.md) for how to read this table.
+
+The 44-record failure registry is not a defect list: 36 entries are greedy
+baseline failures, which are the reason the baseline exists, and 8 are Agent
+extraction or clarification failures in MealCraft itself.
+
+The offline Agent fixture result was field F1 `0.907` and exact-case rate
+`16/24`; those eight failures remain visible for regression work. These results describe curated,
 versioned fixtures, not clinical outcomes, representative Singapore households,
 or the reliability of the live FairPrice website.
 

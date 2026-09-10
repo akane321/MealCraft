@@ -118,6 +118,12 @@ See [docs/development.md](docs/development.md) for setup and troubleshooting.
 
 ## 7. Standard Quality Commands
 
+Documentation integrity. Runs in CI on every pull request, needs no container:
+
+```bash
+python scripts/check_docs_integrity.py
+```
+
 Validate Compose:
 
 ```bash
@@ -198,8 +204,31 @@ Update documentation in the same pull request when behaviour changes:
   gate -> the relevant document under `docs/design/`;
 - coding-agent safety or workflow -> `AGENTS.md`.
 
-Do not duplicate the same changing fact across multiple files without a clear
-canonical source.
+### One fact, one carrier
+
+Do not duplicate a changing fact across files. Each question in the table in
+`docs/README.md` has exactly one canonical source; everywhere else links to it.
+
+Two rules are checked by `scripts/check_docs_integrity.py` and will fail CI:
+
+1. **Mutable state belongs only to `docs/current-status.md` and the generated
+   evaluation reports.** No other document may assert a `main` SHA, whether a
+   numbered pull request has merged, a "last verified" value, or a current
+   metric. Reference a path plus a decision id instead. A pull-request number
+   becomes wrong the moment it merges, and that stale sentence usually sits in
+   the first line of the document.
+2. **Every internal documentation link must resolve.** A reading path that
+   points at a moved file quietly becomes a shorter reading path, and the reader
+   never learns what they missed.
+
+Metric values are generated artifacts. Link
+`docs/evaluation/workbench/latest.md` rather than copying numbers into prose,
+and never recompute them by hand.
+
+When a merged change alters verified behaviour, update `docs/current-status.md`
+in the same pull request, and update the private `CURRENT_STATE.md` in the
+paired memory pull request. Updating only one side creates two disagreeing
+records of the same fact.
 
 ## 10. Commit and Open a Pull Request
 

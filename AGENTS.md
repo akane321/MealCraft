@@ -17,6 +17,25 @@ Before reasoning about a material change, read:
    `docs/design/comparative-evaluation-v2.md` for accepted next-stage evaluation
    semantics.
 
+## Triggered reading
+
+The list above is the baseline. These topics require their contract to be read
+*before* the change, not after. Reading them afterwards is how a change ships
+against a contract that already said something different.
+
+| The task touches | Read first |
+| --- | --- |
+| evaluation metrics, baselines, datasets, held-out splits, capability claims | `docs/design/comparative-evaluation-v2.md`, `docs/evaluation/protocol-v1.md` |
+| a cross-module field, schema, provenance or unknown-value semantics | `docs/design/README.md` and the owning module contract |
+| planning, validation, package or budget arithmetic | `docs/design/algorithm-engineering-handoff.md` |
+| accounts, household isolation, migrations, operations | `docs/design/backend-platform-engineering.md` |
+| Agent scope, tool authorization, grounding, runs | `docs/design/agent-orchestration.md` |
+| FairPrice, YouTube, external evidence or RAG | `docs/design/external-retrieval-rag.md` |
+| recipe or ingredient sourcing, cleaning, release | `docs/data/README.md` |
+
+When the private knowledge repository is available, its `AGENTS.md` section 2.1
+carries the same table with the corresponding decision records.
+
 The initial proposal defines a minimum final-product ambition. Its maintained
 public interpretation is `docs/project-guide.md`; do not require every agent to
 infer the current target from an old PDF. The current MVP is not the final scope.
@@ -33,6 +52,30 @@ course authority explicitly overrides it:
 5. `docs/project-guide.md`, roadmap, Issues, and proposals.
 
 A design target, Issue, branch, or roadmap entry is not implemented behaviour.
+
+## One fact, one carrier
+
+A fact has exactly one authoritative document. Every other mention links to it
+rather than restating it. `docs/README.md` lists the canonical source for each
+question; the private repository's `memory-manifest.json` carries the same table
+for project memory.
+
+Two consequences that are easy to get wrong:
+
+- **Mutable state belongs only to `docs/current-status.md` and the generated
+  evaluation reports.** A `main` SHA, whether a numbered pull request has
+  merged, a "last verified" date, or a current metric value must not appear in a
+  design document, contract, handoff or guide. Point at a path plus a decision
+  id. A pull-request number stops being true the moment it merges, and the stale
+  claim usually sits in the first line a reader sees.
+- **Metric values are generated artifacts.** Quote them by linking
+  `docs/evaluation/workbench/latest.md`. Do not hand-copy numbers into prose as
+  an independent claim, and never recompute them by hand.
+
+If two documents disagree, follow the evidence hierarchy above, then fix the
+losing document in the same task or record the conflict as an open question in
+the private repository. Leaving both versions in place is how the disagreement
+reaches the next reader.
 
 ## Public code map
 

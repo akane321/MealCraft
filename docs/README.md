@@ -41,11 +41,22 @@ already implemented.
 
 ### I am a coding agent
 
+This path is not a shortened version of the contributor path. The two lists
+differ only in ordering; an agent that skips the design contracts reaches wrong
+conclusions faster than a human does, because it has no colleague to correct it.
+
 1. Read [AGENTS.md](../AGENTS.md) first.
-2. Follow its private-memory preflight when the repository is available.
+2. Follow its private-memory preflight when the repository is available. The
+   preflight output is the authoritative reading scope, not this page.
 3. Read [Project Guide](project-guide.md), [Current Status](current-status.md),
    and [Architecture](architecture.md).
-4. Inspect current code and tests before treating any document as runtime fact.
+4. Read [Design Contracts](design/README.md) and open the module contract for
+   whatever the task touches. AGENTS.md has the trigger table.
+5. For anything that reports a number, compares systems, or claims a capability,
+   read [Evaluation Protocol v1](evaluation/protocol-v1.md) and the accepted
+   [Comparative Evaluation v2](design/comparative-evaluation-v2.md) before
+   changing code or documentation.
+6. Inspect current code and tests before treating any document as runtime fact.
 
 ### I want to understand the evidence
 
@@ -78,7 +89,16 @@ already implemented.
 
 ## Documentation Update Rules
 
-- Update `current-status.md` only after behaviour is merged and verified.
+- One fact has one canonical carrier. Every other document links to it instead
+  of restating it. The canonical source for each question is the table above.
+- Only `current-status.md` and generated evaluation reports may carry mutable
+  state: a `main` SHA, a "last verified" date, or current metric values. A
+  design document, contract or guide must point at a path plus a decision id,
+  never at a pull-request number, because a PR number stops being true the
+  moment it merges.
+- Update `current-status.md` only after behaviour is merged and verified, and
+  update it in the same task that merges the behaviour. The private
+  `CURRENT_STATE.md` and this file are updated together or not at all.
 - Update `project-guide.md` when the accepted final product direction changes.
 - Update `mvp-boundary.md` when minimum acceptance semantics change.
 - Update `architecture.md` and `api-contracts.md` with code that changes system
