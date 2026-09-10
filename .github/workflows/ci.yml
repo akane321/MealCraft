@@ -38,6 +38,9 @@ jobs:
       - name: Held-out episode integrity
         run: python scripts/check_heldout_episodes.py
 
+      - name: Catalog reality page is current
+        run: python scripts/report_catalog_reality.py --check
+
   backend:
     name: backend
     runs-on: ubuntu-latest

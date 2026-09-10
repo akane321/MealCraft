@@ -35,7 +35,11 @@ EPISODES = SET_DIR / "episodes"
 
 RECIPES = ROOT / "data" / "recipes" / "recipes.json"
 INGREDIENTS = ROOT / "data" / "ingredients" / "ingredients.json"
-PRODUCTS = ROOT / "data" / "fixtures" / "fairprice-products.json"
+# The held-out set uses the v2 snapshot, which carries several package sizes per
+# ingredient. The unversioned file stays frozen because protocol-v1's committed
+# reports were computed against it, and ADR-0020 section 3 forbids rewriting a
+# condition that has already been reported.
+PRODUCTS = ROOT / "data" / "fixtures" / "fairprice-products-v2.json"
 
 VALID_CLASSES = {"feasible", "needs_clarification", "infeasible"}
 VALID_LANGUAGES = {"en", "zh", "mixed"}
@@ -253,7 +257,7 @@ def validate(strict: bool) -> tuple[list[str], dict[str, int], dict[str, int], i
     slugs, ingredients, products = catalogs()
 
     per_category: dict[str, int] = {name: 0 for name in manifest["categories"]}
-    per_language: dict[str, int] = {name: 0 for name in manifest["language_plan"]}
+    per_language: dict[str, int] = {name: 0 for name in manifest["languages_allowed"]}
     languages_seen: dict[str, set[str]] = {name: set() for name in manifest["categories"]}
     reviewed = 0
     seen_ids: set[str] = set()
@@ -318,9 +322,12 @@ def validate(strict: bool) -> tuple[list[str], dict[str, int], dict[str, int], i
                     f"the plan requires at least {manifest['min_languages_per_category']} so "
                     "that language does not become a proxy for difficulty"
                 )
-        for language, planned in manifest["language_plan"].items():
-            if per_language[language] != planned:
-                errors.append(f"language '{language}': {per_language[language]} episodes, plan is {planned}")
+        # Both languages must appear, because understanding either is ordinary
+        # capability and a set exercising only one does not show it. There is
+        # deliberately no ratio: language is not an evaluation dimension here.
+        for language in manifest["languages_required"]:
+            if not per_language.get(language):
+                errors.append(f"no episode is written in '{language}'; both languages must appear")
 
     return errors, per_category, per_language, reviewed
 
@@ -344,8 +351,7 @@ def main() -> int:
     print(f"Authored {total}/{quota} episodes, {reviewed} reviewed.")
     for category, spec in manifest["categories"].items():
         print(f"  {category:<22} {per_category[category]:>3}/{spec['quota']}")
-    plan = manifest["language_plan"]
-    print("  language                " + ", ".join(f"{name} {per_language[name]}/{plan[name]}" for name in plan))
+    print("  language                " + ", ".join(f"{name} {count}" for name, count in per_language.items()))
 
     if errors:
         print("\nProblems:")

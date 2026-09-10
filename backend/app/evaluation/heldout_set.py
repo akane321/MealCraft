@@ -98,7 +98,7 @@ def compile_heldout_packets(root: Path | None = None) -> dict[str, Any]:
         },
         "products": {
             item["external_id"]: item
-            for item in json.loads((root / "data/fixtures/fairprice-products.json").read_text(encoding="utf-8"))
+            for item in json.loads((root / "data/fixtures/fairprice-products-v2.json").read_text(encoding="utf-8"))
         },
     }
 
