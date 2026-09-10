@@ -21,7 +21,6 @@ import re
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 # The only documents allowed to assert mutable state.
@@ -47,9 +46,7 @@ VOLATILE_PATTERNS = {
     # A claim, not a cross-reference: requires a value after the label.
     "dated verification claim": re.compile(r"(?i)last verified[^.\n]{0,40}:\s*\S"),
 }
-EXEMPT_LINE = re.compile(
-    r"(?i)(?:must not|never|do not|<number>|YYYY-MM-DD|123)"
-)
+EXEMPT_LINE = re.compile(r"(?i)(?:must not|never|do not|<number>|YYYY-MM-DD|123)")
 
 LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)#]+?)(?:#[^)]*)?\)")
 
@@ -104,13 +101,10 @@ def check_status_freshness(errors: list[str]) -> None:
     text = path.read_text(encoding="utf-8")
     if not re.search(r"Verified remote `main`:\s*`[0-9a-f]{7,40}`", text):
         errors.append(
-            "docs/current-status.md must record the verified remote main commit "
-            "as: Verified remote `main`: `<sha>`"
+            "docs/current-status.md must record the verified remote main commit as: Verified remote `main`: `<sha>`"
         )
     if not re.search(r"Last verified public snapshot:\s*20\d\d-\d\d-\d\d", text):
-        errors.append(
-            "docs/current-status.md must record a Last verified public snapshot date"
-        )
+        errors.append("docs/current-status.md must record a Last verified public snapshot date")
 
 
 def main() -> int:

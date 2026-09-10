@@ -57,11 +57,14 @@ jobs:
       - name: Install backend dependencies
         run: uv sync --project backend --frozen --dev
 
+      # `scripts` is included because the container mounts the repository under
+      # /app, so `ruff check .` there covers it. Linting a narrower set here
+      # would let CI stay green while the documented command reports errors.
       - name: Ruff lint
-        run: uv run --project backend ruff check backend
+        run: uv run --project backend ruff check backend scripts
 
       - name: Ruff format
-        run: uv run --project backend ruff format --check backend
+        run: uv run --project backend ruff format --check backend scripts
 
       - name: Backend tests
         run: uv run --project backend pytest backend/tests
