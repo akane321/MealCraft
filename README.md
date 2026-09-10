@@ -58,7 +58,7 @@ Those operations remain deterministic and testable.
 | Nutrition Dashboard | Daily totals, weekly trends, and completion coverage for completed MealCraft dishes only |
 | Replanning | Revision-safe preview, confirmation or discard, local meal changes, Shopping List deltas, and event history |
 | Agent runs | Synchronous per-action `AgentRun` with input digests, explicit deadlines and budgets, durable checkpoints, ordered tool receipts, idempotent replay, and run list/detail/cancel APIs |
-| Evaluation | Versioned developer, held-out, Agent, scope and grounding fixtures; greedy lower bound and strong Rule-only references; matched-information v2 developer packets; failure registry; frontend state and browser tests |
+| Evaluation | Versioned developer, held-out, Agent, scope and grounding fixtures; greedy and strong Rule-only references; matched-information v2 developer packets; a Strict End-to-End Task Success scorer that recomputes rather than trusting claims; held-out episode authoring, compilation and freeze tooling; failure registry; frontend state and browser tests |
 
 This table reports capabilities verified on remote `main`, not every final
 design target. Read [Current Status](docs/current-status.md) for the evidence
@@ -112,13 +112,14 @@ backend/app/planning/     deterministic planning, shopping and validation algori
 backend/app/auth/         session-token and authorization foundations
 backend/app/orchestration/ scope, interaction, bounded runs and grounding foundations
 frontend/app/pages/       user-facing product routes
-frontend/app/components/  reusable interface components
+frontend/app/composables/ shared frontend state and API access
 data/recipes/             versioned recipe catalog
 data/ingredients/         normalized ingredient catalog
 data/fixtures/            reproducible grocery fixtures
 data/evaluation/          versioned evaluation inputs
 docs/                     product, architecture, operation and evaluation docs
-.github/                   CI, issue, PR and ownership configuration
+scripts/                  repository checks that run without a container
+.github/                  CI, issue, PR and ownership configuration
 ```
 
 ## Quick Start
@@ -160,55 +161,64 @@ Follow the [User Guide](docs/user-guide.md) for the product workflow and the
 [Development Guide](docs/development.md) for setup, testing, debugging, pricing
 modes, migrations, and troubleshooting.
 
-## Evaluation Snapshot
+## Evaluation
 
-The committed offline-first workbench currently contains 20 developer planning
-scenarios, 40 held-out planning scenarios (36 feasible and 4 infeasible), and 24
-Agent fixtures. On the recorded held-out run, the transparent greedy baseline
-and MealCraft used the same eligible recipe pool:
+### What exists today
 
-| Metric | Greedy lower bound | Strong Rule-only | MealCraft |
-| --- | ---: | ---: | ---: |
-| Adjacent repetitions | 216 | 0 | 0 |
-| Mean distinct recipes per plan | 1.0 | 2.0 | 6.1389 |
-| Recorded failure cases | 36 | 0 | 0 |
-
-The recorded MealCraft run had zero hard-constraint violations. Against the
-strong Rule-only reference the two systems tie on scenario expectation rate,
-hard-constraint violations and recorded failure cases; only mean distinct
-recipes separates them. A metric that saturates for both systems does not by
-itself support a superiority claim - see
-[Current Status](docs/current-status.md) for how to read this table.
-
-The 44-record failure registry is not a defect list: 36 entries are greedy
-baseline failures, which are the reason the baseline exists, and 8 are Agent
-extraction or clarification failures in MealCraft itself.
-
-The offline Agent fixture result was field F1 `0.907` and exact-case rate
-`16/24`; those eight failures remain visible for regression work. These results describe curated,
-versioned fixtures, not clinical outcomes, representative Singapore households,
-or the reliability of the live FairPrice website.
-
-Two visible orchestration developer sets add 36 bilingual scope/state-isolation
-cases and 12 typed grounding cases. The current deterministic reference passes
-all known cases with zero false accepts, false rejects, state contamination, or
-unsupported-claim escapes. These are implementation diagnostics, not held-out
-evidence; the final comparative protocol still requires independently frozen
-episodes.
-
-Run the deterministic developer gate and full offline workbench:
+An offline, fixture-only workbench: 20 developer planning scenarios, 40 held-out
+planning scenarios, 24 Agent extraction fixtures, and two orchestration developer
+sets covering bilingual scope routing and typed claim grounding. Every report
+records the SHA-256 digest of its input, so a dataset change is a new
+experimental condition rather than a quiet edit.
 
 ```bash
 docker compose exec backend uv run --no-sync python -m app.evaluation
 docker compose exec backend uv run --no-sync python -m app.evaluation.workbench
 ```
 
-Neither command makes a paid API call by default. Read the
-[Evaluation Protocol](docs/evaluation/protocol-v1.md) and the
-[latest workbench report](docs/evaluation/workbench/latest.md) before quoting
-results. The accepted next-stage design is the
+Neither command makes a paid API call. Current numbers live in the
+[generated workbench report](docs/evaluation/workbench/latest.md) and are not
+copied here: a metric table in a README goes stale without anyone noticing,
+and this one did.
+
+### What that evidence does not yet show
+
+**It does not show that MealCraft beats a competent alternative.** Against the
+strong Rule-only reference, the two systems tie on task success, on
+hard-constraint violations and on recorded failures. Only recipe diversity
+separates them, and a primary metric that saturates for both systems is
+measuring the difficulty of the evaluation set rather than the strength of the
+planner.
+
+Track 5 requires evidence of improvement over a simple approach, so closing this
+is the point of
 [Capability-centred Comparative Evaluation v2](docs/design/comparative-evaluation-v2.md),
-which is not yet an implemented or reported result.
+which is an accepted design and not a reported result.
+
+Two further limits worth stating plainly:
+
+- The Agent fixture numbers describe a **deterministic fixture parser**, not a
+  model. They say nothing about what a language model would score.
+- The scope and grounding sets were visible during implementation. They are
+  diagnostics, not held-out evidence.
+
+### What is being built
+
+Strict End-to-End Task Success is the accepted primary endpoint, and the scorer
+for it recomputes every requirement from frozen facts rather than reading a
+system's claims. An independent held-out set of roughly 80 episodes is being
+authored under cross-authoring rules - nobody writes episodes that test their
+own module - and must be frozen before the components it evaluates are tuned,
+because that ordering cannot be repaired afterwards.
+
+The 44-record failure registry is **not** a defect list. 36 entries are greedy
+baseline failures, which are the reason the baseline exists; 8 are Agent
+extraction or clarification failures in MealCraft itself.
+
+Read the [Evaluation Protocol](docs/evaluation/protocol-v1.md) before quoting
+any result, and the
+[authoring guide](docs/evaluation/heldout-authoring-guide.md) before writing an
+episode.
 
 ## Documentation
 
@@ -244,6 +254,11 @@ for users, contributors, maintainers, and coding agents.
   semantics
 - [Evaluation v1](docs/evaluation/protocol-v1.md) - currently executable
   datasets, metrics, limitations, and commands
+- [Comparative Evaluation v2](docs/design/comparative-evaluation-v2.md) - the
+  accepted comparison design: baselines, matched information, strict end-to-end
+  success, statistics, and failure analysis
+- [Held-out Authoring Guide](docs/evaluation/heldout-authoring-guide.md) - how
+  to write an episode, what the checker enforces, and what it cannot judge
 - [Contributing](CONTRIBUTING.md) - Issue, branch, validation, review, and merge
   workflow
 - [Agent Instructions](AGENTS.md) - mandatory context and safety rules for coding
