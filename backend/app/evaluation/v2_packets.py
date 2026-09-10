@@ -126,7 +126,7 @@ class PacketSourceScenario(StrictModel):
 
 class PacketSourceFile(StrictModel):
     schema_version: Literal["packet-source-v1"]
-    evaluation_role: Literal["developer_set"]
+    evaluation_role: Literal["developer_set", "held_out_set"]
     provider_mode: Literal["fixture", "frozen_live"]
     observed_at: datetime
     scenarios: list[PacketSourceScenario]
@@ -145,18 +145,20 @@ def _load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def compile_v2_developer_packets(
+def compile_packets(
+    source: PacketSourceFile,
     *,
-    source_path: Path,
-    ingredient_path: Path,
-    recipe_path: Path,
-    product_path: Path,
-) -> dict[str, Any]:
-    """Compile selected neutral facts and fail on missing source references."""
-    source = PacketSourceFile.model_validate(_load_json(source_path))
-    ingredients = {item["normalized_name"]: item for item in _load_json(ingredient_path)}
-    recipes = {item["slug"]: item for item in _load_json(recipe_path)}
-    products = {item["external_id"]: item for item in _load_json(product_path)}
+    ingredients: dict[str, Any],
+    recipes: dict[str, Any],
+    products: dict[str, Any],
+) -> list[FrozenEvaluationPacket]:
+    """Turn source scenarios into frozen packets, or fail loudly.
+
+    Separated from file loading so that a caller holding a `PacketSourceFile` in
+    memory - the held-out compiler builds one from authored episodes - reuses
+    this logic rather than copying it. Two implementations would drift, and a
+    packet compiled by the second is not comparable to one compiled by the first.
+    """
     packets: list[FrozenEvaluationPacket] = []
 
     for scenario in source.scenarios:
@@ -245,6 +247,24 @@ def compile_v2_developer_packets(
             )
         )
 
+    return packets
+
+
+def compile_v2_developer_packets(
+    *,
+    source_path: Path,
+    ingredient_path: Path,
+    recipe_path: Path,
+    product_path: Path,
+) -> dict[str, Any]:
+    """Compile selected neutral facts and fail on missing source references."""
+    source = PacketSourceFile.model_validate(_load_json(source_path))
+    packets = compile_packets(
+        source,
+        ingredients={item["normalized_name"]: item for item in _load_json(ingredient_path)},
+        recipes={item["slug"]: item for item in _load_json(recipe_path)},
+        products={item["external_id"]: item for item in _load_json(product_path)},
+    )
     packet_payloads = [packet.model_dump(mode="json") for packet in packets]
     return {
         "schema_version": "evaluation-packets-v2-dev-1",

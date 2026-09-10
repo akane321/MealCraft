@@ -40,6 +40,10 @@ services:
       - ./backend/tests:/app/tests
       - ./data:/app/data:ro
       - ./docs:/app/docs
+      # The repository-level scripts are part of the documented workflow: the
+      # held-out freeze command runs the authoring checker rather than restating
+      # its rules, and that file has to exist inside the container too.
+      - ./scripts:/app/scripts:ro
     depends_on:
       database:
         condition: service_healthy

@@ -167,6 +167,40 @@ under `ADR-0012`. But the evaluation report must say plainly that safety
 coverage spans six allergens rather than a realistic range, and that will read
 better than letting a reader assume otherwise.
 
+## Compiling, and what freezing means
+
+Authoring an episode is not the same as proving it can be run. Compiling is:
+
+```bash
+docker compose exec backend uv run --no-sync python -m app.evaluation.heldout_set compile
+```
+
+That turns each episode's `scenario` into the frozen packet every compared
+system receives. It fails loudly if the product snapshot does not cover the
+candidate ingredients, because no system could run such an episode - better to
+learn that while writing it than on the day the comparison is due.
+
+**Gold never enters a packet.** The compiler reads only `scenario`, field by
+field. Your expected class, required clarification fields and constraint answers
+stay out of what the systems see; a test asserts no gold value appears anywhere
+in a compiled bundle.
+
+When the set is complete and reviewed:
+
+```bash
+docker compose exec backend uv run --no-sync python -m app.evaluation.heldout_set freeze
+```
+
+Freeze runs the authoring rules in strict mode, compiles every episode, records
+a digest over both, and stamps the manifest. It refuses if anything is unmet,
+and it refuses to freeze an already frozen set.
+
+Anyone can check later that a frozen set has not drifted:
+
+```bash
+docker compose exec backend uv run --no-sync python -m app.evaluation.heldout_set verify
+```
+
 ## After the set is frozen
 
 Do not edit an episode. A corrected label creates a new set version with a new
