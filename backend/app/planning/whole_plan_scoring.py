@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from math import isfinite
 
 from app.planning.final_scope_scoring import energy_proportional_sodium_benchmark, flexible_upper_loss
+from app.planning.input_audit import require_finite_problem
 from app.schemas.planning_v2 import FinalPlanningProblem, PlanningAssignment
 
 
@@ -42,6 +43,7 @@ def score_plan(
     removed from the weighted denominator. Zero active weight gives zero loss.
     Horizon averages follow current validator semantics (dates with chosen meals).
     """
+    require_finite_problem(problem)
     policy = policy or WholePlanPolicy()
     slots = {slot.slot_id: slot for slot in problem.slots}
     recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}

@@ -12,6 +12,7 @@ from typing import Literal
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss
 from app.planning.final_scope_validator import FinalPlanningValidator
+from app.planning.input_audit import require_finite_problem
 from app.planning.whole_plan_scoring import WholePlanPolicy, score_plan
 from app.schemas.planning_v2 import FinalPlanningProblem, PlanningAssignment
 
@@ -35,6 +36,7 @@ def exhaustive_assignments(
     Refuse oversized searches before starting, so a truncated run cannot be
     mistaken for exhaustive evidence. Every completed assignment is validated.
     """
+    require_finite_problem(problem)
     if max_combinations < 1:
         raise ValueError("max_combinations must be positive")
     slots = sorted(problem.slots, key=FinalScopeReferencePlanner._slot_key)

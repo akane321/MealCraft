@@ -7,6 +7,7 @@ from pathlib import Path
 
 from app.planning.beam_planner import BeamLimits, BeamPlanner
 from app.planning.exhaustive_oracle import exhaustive_assignments
+from app.planning.input_audit import nonfinite_issues
 from app.planning.mixed_beam import solve_mixed_beam
 from app.planning.mixed_plan_oracle import exhaustive_mixed_plan
 from app.planning.mixed_repair import solve_mixed_with_repair
@@ -17,6 +18,13 @@ from app.planning.snapshot_repair import ProductSnapshot, RetrievalUnavailable, 
 from app.planning.whole_plan_scoring import WholePlanPolicy, score_plan
 from app.schemas.planning_v2 import FinalPlanningProblem, PlanningProductOption
 from app.schemas.retrieval import RetrievalTrace
+
+
+def reject_nonfinite(value):
+    issues = nonfinite_issues(value)
+    if issues:
+        print(json.dumps({"status": "invalid_input", "issues": [asdict(i) for i in issues]}, allow_nan=False))
+        raise SystemExit(2)
 
 
 class FileSnapshots:
@@ -31,9 +39,9 @@ class FileSnapshots:
         trace = RetrievalTrace.model_validate(value["trace"])
         if trace.mode != "fixture" or trace.provider_used != "fixture":
             raise ValueError("The offline workbench accepts fixture snapshots only")
-        return ProductSnapshot(
-            value["version"], tuple(PlanningProductOption.model_validate(p) for p in value["products"]), trace
-        )
+        products = tuple(PlanningProductOption.model_validate(p) for p in value["products"])
+        reject_nonfinite({"snapshot": {"products": [p.model_dump() for p in products]}})
+        return ProductSnapshot(value["version"], products, trace)
 
 
 def main():
@@ -58,8 +66,10 @@ def main():
         parser.error("--cp-sat is supported for packages and mixed-oracle only")
     scoring = WholePlanPolicy() if args.whole_plan else None
     data = json.loads(args.input.read_text(encoding="utf-8-sig"))
+    reject_nonfinite(data)
     if args.operation == "packages":
         products = [PlanningProductOption.model_validate(p) for p in data["products"]]
+        reject_nonfinite({"products": [p.model_dump() for p in products]})
         if args.cp_sat:
             from app.planning.package_cp_sat import solve_packages_cp_sat
 
@@ -79,6 +89,7 @@ def main():
         )
     else:
         problem = FinalPlanningProblem.model_validate(data)
+        reject_nonfinite(problem.model_dump())
         if args.operation == "plan":
             solution = BeamPlanner(BeamLimits(args.width, args.limit), scoring).solve(problem)
             output = solution.model_dump(mode="json")
@@ -100,6 +111,7 @@ def main():
             if args.options is None:
                 parser.error("--options is required for repair and relax")
             options = json.loads(args.options.read_text(encoding="utf-8-sig"))
+            reject_nonfinite({"options": options})
             if args.operation == "relax":
                 output = asdict(
                     propose_relaxations(

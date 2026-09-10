@@ -10,6 +10,7 @@ from math import prod
 
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss
+from app.planning.input_audit import require_finite_problem
 from app.planning.mixed_shopping import MixedShoppingResult, build_mixed_shopping
 from app.planning.whole_plan_scoring import WholePlanPolicy, score_plan
 from app.schemas.planning_v2 import FinalPlanningProblem, PlanningAssignment
@@ -35,6 +36,7 @@ def exhaustive_mixed_plan(
     use_cp_sat: bool = False,
     scoring_policy: WholePlanPolicy | None = None,
 ) -> MixedPlanOracleResult:
+    require_finite_problem(problem)
     if isinstance(max_assignments, bool) or not isinstance(max_assignments, int) or max_assignments < 1:
         raise ValueError("max_assignments must be a positive integer")
     slots = sorted(problem.slots, key=FinalScopeReferencePlanner._slot_key)

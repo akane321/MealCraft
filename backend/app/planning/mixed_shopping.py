@@ -6,6 +6,7 @@ from fractions import Fraction
 from math import isfinite
 
 from app.planning.final_scope_validator import FinalPlanningValidator
+from app.planning.input_audit import nonfinite_issues
 from app.planning.package_optimizer import PackageResult, optimize_packages
 from app.planning.package_validator import validate_packages
 from app.schemas.planning_v2 import FinalPlanningProblem, PlanningAssignment
@@ -32,6 +33,9 @@ class MixedShoppingResult:
 
 def assignment_issues(problem: FinalPlanningProblem, assignments: list[PlanningAssignment]) -> tuple[str, ...]:
     """Reuse canonical slot/nutrition checks, independently of shopping policy."""
+    numeric = nonfinite_issues(problem.model_dump(exclude={"products"}))
+    if numeric:
+        return tuple(f"input_numeric:{issue.path}" for issue in numeric)
     validator = FinalPlanningValidator()
     slots = {s.slot_id: s for s in problem.slots}
     recipes = {r.recipe_id: r for r in problem.recipes}
