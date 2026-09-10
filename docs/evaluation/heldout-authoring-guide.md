@@ -34,7 +34,26 @@ of the evaluation grade this work exists to earn.
 ## What one episode is
 
 One JSON file in `data/evaluation/heldout/v2/episodes/`, named after its
-`episode_id`. Copy `data/evaluation/heldout/v2/TEMPLATE-episode.json` and edit.
+`episode_id`. Generate the skeleton rather than copying by hand:
+
+```bash
+python scripts/new_episode.py --category safety_diet --author retrieval --language zh
+```
+
+That fills in the parts with no judgement in them - a free id, the meal slots, a
+candidate recipe pool, and **the product ids that cover every ingredient in that
+pool**. The last one matters: the packet compiler requires full product
+coverage, and picking those by hand usually surfaces a gap only when
+compilation fails much later. The tool also refuses outright if you are not an
+eligible author for that category.
+
+Everything that carries meaning is written as a `TODO:` placeholder, and the
+checker rejects an episode that still contains one. Add `--dry-run` to preview,
+`--recipes slug-a,slug-b` to choose the pool yourself, and `--seed` to make the
+draw reproducible.
+
+`data/evaluation/heldout/v2/TEMPLATE-episode.json` remains a filled-in worked
+example to read when a field is unclear.
 
 An episode has two halves.
 
