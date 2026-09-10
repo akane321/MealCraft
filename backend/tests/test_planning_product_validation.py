@@ -277,3 +277,38 @@ def test_duplicate_assignments_cannot_report_budget_compliance():
     report = FinalPlanningValidator().validate(problem, assignments + [assignments[0]], lines)
     assert report.status == "failed"
     assert next(check for check in report.checks if check.code == "purchase_budget").status == "indeterminate"
+
+
+def budget_status(budget):
+    problem, solution = sample()
+    report = FinalPlanningValidator().validate(
+        problem.model_copy(update={"purchase_budget_sgd": budget, "budget_is_hard": True}),
+        solution.assignments,
+        solution.shopping,
+    )
+    return next(check for check in report.checks if check.code == "purchase_budget").status
+
+
+def test_budget_is_compared_at_cent_granularity_with_no_tolerance():
+    """ADR-0021 section 2.
+
+    The previous rule allowed the margin to fall half a cent below zero. It
+    agreed with this one on every cent-valued input, so nothing here changes an
+    existing result; what changes is that there is now a single rule, and no band
+    in which two components can disagree about the same plan.
+    """
+    total = 77.05  # the fixture's checkout total, asserted above
+
+    assert budget_status(total) == "passed", "a plan exactly on budget is within it"
+    assert budget_status(total + 0.01) == "passed"
+    assert budget_status(total - 0.01) == "failed", "one cent over is over"
+
+
+def test_a_sub_cent_overage_no_longer_passes():
+    """The case the two rules disagreed on.
+
+    Under the old half-cent allowance a budget of 77.045 accepted a 77.05 total.
+    Cent granularity rejects it. Sub-cent money is a data problem, reported by
+    the input audit rather than rounded into compliance.
+    """
+    assert budget_status(77.045) == "failed"

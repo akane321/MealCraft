@@ -6,6 +6,7 @@ independent validation. This compiler does not infer missing source facts.
 
 from dataclasses import dataclass
 
+from app.planning.input_audit import require_finite_problem
 from app.schemas.planning_v2 import FinalPlanningProblem
 
 
@@ -70,6 +71,7 @@ def compile_constraints(problem: FinalPlanningProblem) -> tuple[CandidateEligibi
     and horizon bands cannot be applied independently to each candidate.
     The 1e-6 boundary matches the existing V2 validator's numeric tolerance.
     """
+    require_finite_problem(problem)
     result: list[CandidateEligibility] = []
     for slot in sorted(problem.slots, key=lambda item: item.slot_id):
         for recipe in sorted(problem.recipes, key=lambda item: item.recipe_id):
