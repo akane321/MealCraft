@@ -5,6 +5,7 @@ from collections import defaultdict
 
 from app.planning.final_scope_scoring import local_recipe_loss
 from app.planning.final_scope_validator import FinalPlanningValidator
+from app.planning.input_audit import require_finite_problem
 from app.schemas.planning_v2 import (
     FinalPlanningProblem,
     FinalPlanningSolution,
@@ -24,6 +25,7 @@ class FinalScopeReferencePlanner:
         self.validator = validator or FinalPlanningValidator()
 
     def solve(self, problem: FinalPlanningProblem) -> FinalPlanningSolution:
+        require_finite_problem(problem)
         assignments = self._assign(problem)
         shopping = self._build_shopping(problem, assignments)
         validation = self.validator.validate(problem, assignments, shopping)

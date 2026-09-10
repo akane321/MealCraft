@@ -6,6 +6,7 @@ from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss
 from app.planning.search_bounds import SearchBounds
+from app.planning.whole_plan_scoring import WholePlanPolicy, nutrition_lower_bound, score_plan
 from app.schemas.planning_v2 import FinalPlanningProblem, FinalPlanningSolution, PlanningAssignment, PlanningTrace
 
 
@@ -25,6 +26,16 @@ class SearchState:
     loss: float = 0.0
 
 
+@dataclass(frozen=True)
+class BeamSearchResult:
+    states: tuple[SearchState, ...]
+    expansions: int
+    pruned: bool
+    exhausted: bool
+    nutrition_pruned: int
+    dominated: int
+
+
 class BeamPlanner(FinalScopeReferencePlanner):
     """Retain multiple partial plans; independently validate every retained completion.
 
@@ -32,11 +43,13 @@ class BeamPlanner(FinalScopeReferencePlanner):
     separate. This is a bounded search, not an optimality or infeasibility proof.
     """
 
-    def __init__(self, limits: BeamLimits | None = None):
+    def __init__(self, limits: BeamLimits | None = None, scoring_policy: WholePlanPolicy | None = None):
         super().__init__()
         self.limits = limits or BeamLimits()
+        self.scoring_policy = scoring_policy
 
-    def solve(self, problem: FinalPlanningProblem) -> FinalPlanningSolution:
+    def search_candidates(self, problem: FinalPlanningProblem) -> BeamSearchResult:
+        """Return retained complete assignments before selecting a shopping policy."""
         compiled = compile_search_domains(problem)
         domains = {slot.slot_id: slot for slot in compiled.slots}
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
@@ -84,7 +97,9 @@ class BeamPlanner(FinalScopeReferencePlanner):
                 if not bounds.nutrition_possible(state, slot_index + 1):
                     nutrition_pruned += 1
                     continue
-                key = bounds.dominance_key(state)
+                # Reference dominance does not preserve every experimental score
+                # component (for example which time-limited optional slot is used).
+                key = state.choices if self.scoring_policy else bounds.dominance_key(state)
                 previous = survivors.get(key)
                 if previous is not None:
                     dominated += 1
@@ -92,12 +107,26 @@ class BeamPlanner(FinalScopeReferencePlanner):
                     survivors[key] = state
             next_states = sorted(
                 survivors.values(),
-                key=lambda state: (bounds.loss_lower_bound(state, slot_index + 1), state.loss, state.choices),
+                key=lambda state: (
+                    nutrition_lower_bound(
+                        problem, state.choices, ordered_slots[slot_index + 1 :], domains, self.scoring_policy
+                    )
+                    if self.scoring_policy
+                    else bounds.loss_lower_bound(state, slot_index + 1),
+                    state.loss,
+                    state.choices,
+                ),
             )
             pruned = pruned or len(next_states) > self.limits.width
             states = next_states[: self.limits.width]
             if not states:
                 break
+
+        return BeamSearchResult(tuple(states), expansions, pruned, exhausted, nutrition_pruned, dominated)
+
+    def solve(self, problem: FinalPlanningProblem) -> FinalPlanningSolution:
+        search = self.search_candidates(problem)
+        states = search.states
 
         results = []
         for state in states:
@@ -105,8 +134,11 @@ class BeamPlanner(FinalScopeReferencePlanner):
             shopping = self._build_shopping(problem, assignments)
             report = self.validator.validate(problem, assignments, shopping)
             priority = {"passed": 0, "indeterminate": 1, "failed": 2}[report.status]
+            final_loss = (
+                score_plan(problem, assignments, self.scoring_policy).total_loss if self.scoring_policy else state.loss
+            )
             results.append(
-                ((priority, report.hard_failure_count, state.loss, state.choices), assignments, shopping, report)
+                ((priority, report.hard_failure_count, final_loss, state.choices), assignments, shopping, report)
             )
         if results:
             _, assignments, shopping, report = min(results, key=lambda result: result[0])
@@ -114,7 +146,7 @@ class BeamPlanner(FinalScopeReferencePlanner):
             assignments, shopping = [], []
             report = self.validator.validate(problem, assignments, shopping)
         status = {"passed": "feasible", "indeterminate": "needs_data", "failed": "candidate_rejected"}[report.status]
-        if exhausted or not states:
+        if search.exhausted or not states:
             status = "candidate_rejected"
         return FinalPlanningSolution(
             problem_id=problem.problem_id,
@@ -128,9 +160,12 @@ class BeamPlanner(FinalScopeReferencePlanner):
                 deterministic=True,
                 warnings=[
                     f"beam_width={self.limits.width}; max_expansions={self.limits.max_expansions}; "
-                    f"expansions={expansions}",
-                    f"beam_pruned={pruned}; expansion_limit_reached={exhausted}; completed_candidates={len(results)}",
-                    f"nutrition_pruned={nutrition_pruned}; dominated={dominated}",
+                    f"expansions={search.expansions}",
+                    f"beam_pruned={search.pruned}; expansion_limit_reached={search.exhausted}; "
+                    f"completed_candidates={len(results)}",
+                    f"nutrition_pruned={search.nutrition_pruned}; dominated={search.dominated}",
+                    f"final_score_policy={self.scoring_policy.version if self.scoring_policy else 'reference'}; "
+                    f"partial_search_policy={'soft-nutrition-bound' if self.scoring_policy else 'reference-bound'}",
                     "Uses reference local loss and repetition penalties. No global infeasibility or optimality claim.",
                 ],
             ),
