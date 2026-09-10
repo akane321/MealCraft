@@ -22,3 +22,19 @@ Required test coverage for this component: every filter, deterministic matrix or
 An empty mandatory domain rules out an assignment within the supplied candidate packet. Nonempty domains still require aggregate nutrition and shopping validation. This result does not choose recipes or report overall plan feasibility.
 
 Inputs must contain canonical, reviewed facts. An empty user allergen list means no user restriction. An empty reviewed recipe allergen list has no recorded allergen conflict. Updating either list changes filtering without changing the algorithm. Unknown source completeness must be handled before this input boundary.
+
+## Running this component
+
+From the repository root, without starting the stack:
+
+```bash
+uv run --project backend pytest backend/tests/test_constraint_compiler.py backend/tests/test_planning_v2.py
+```
+
+Inside a running stack:
+
+```bash
+docker compose exec backend uv run --no-sync pytest tests/test_constraint_compiler.py tests/test_planning_v2.py
+```
+
+Current pass/fail status comes from CI, not from this page.

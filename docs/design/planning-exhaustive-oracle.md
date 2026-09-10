@@ -22,3 +22,16 @@ Shopping selection deliberately uses the reference builder, which chooses one pr
 Regression example: two slots and two recipes create four combinations. Only the slower recipe repeated twice satisfies the frozen package budget. Width-one Beam Search misses it; width four and exhaustive enumeration find it. With only time loss active, the known score is 0.5 + 0.5 + 0.1 + 0.35 = 1.45.
 
 Required test coverage for this component: enumeration counts, the hand-computed score in the worked example above, a narrow-beam miss, missing evidence, resource limits, raw-candidate validation, optional skips and stable ordering.
+
+## Running this component
+
+From the repository root, without starting the stack:
+
+```bash
+uv run --project backend pytest backend/tests/test_exhaustive_oracle.py
+```
+
+The oracle is a developer tool. It has no product entry point, and it is not
+wired into the evaluation workbench.
+
+Current pass/fail status comes from CI, not from this page.

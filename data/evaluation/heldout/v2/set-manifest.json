@@ -1,0 +1,85 @@
+{
+  "schema_version": "heldout-set-v2",
+  "set_id": "heldout-v2",
+  "status": "authoring",
+  "frozen_at": null,
+  "frozen_digest": null,
+
+  "_comment_status": "authoring -> review -> frozen. Only a frozen set may be used to report held-out results. ADR-0020 section 2 requires the freeze to happen before the components under test are tuned; freezing after tuning does not restore independence, it only hides that it was lost.",
+
+  "_comment_roles": "Contributor roles, not names. The cross-authoring rule is checked against these.",
+  "roles": [
+    "dataset",
+    "retrieval",
+    "planning",
+    "agent",
+    "backend",
+    "frontend-evaluation"
+  ],
+
+  "_comment_categories": "Quotas come from docs/design/comparative-evaluation-v2.md section 8. `systems_under_test` drives the cross-authoring rule: an episode in a category may not be authored or reviewed by an owner of a system that category evaluates.",
+  "categories": {
+    "standard": {
+      "quota": 12,
+      "systems_under_test": ["planning"],
+      "description": "Complete, ordinary planning requests with no missing information and no conflict."
+    },
+    "clarification": {
+      "quota": 12,
+      "systems_under_test": ["agent"],
+      "description": "Required information is missing or ambiguous; the system must ask before planning."
+    },
+    "safety_diet": {
+      "quota": 12,
+      "systems_under_test": ["planning", "dataset"],
+      "description": "Allergens, prohibited ingredients and dietary types. Violations here are never offset by other qualities."
+    },
+    "budget_package": {
+      "quota": 10,
+      "systems_under_test": ["planning", "retrieval"],
+      "description": "Real package sizes, package rounding, checkout totals and budget truthfulness."
+    },
+    "nutrition_preference": {
+      "quota": 10,
+      "systems_under_test": ["planning", "dataset"],
+      "description": "User-stated calorie or macro targets and broad preferences such as lower sodium."
+    },
+    "pantry_expiry": {
+      "quota": 8,
+      "systems_under_test": ["planning"],
+      "description": "Known and unknown pantry quantities. Unknown quantity may affect ranking but must never be deducted."
+    },
+    "infeasible_conflict": {
+      "quota": 8,
+      "systems_under_test": ["planning"],
+      "description": "No valid plan exists. The system must refuse to fabricate compliance and must name the conflict."
+    },
+    "multiturn_replan": {
+      "quota": 8,
+      "systems_under_test": ["agent", "planning"],
+      "description": "The user changes something after a plan exists. Unrelated meals must survive."
+    }
+  },
+
+  "_comment_language": "Predeclared before authoring, per docs/design/comparative-evaluation-v2.md section 8. Languages are spread across categories rather than forming their own category, so that language never becomes a proxy for difficulty.",
+  "language_plan": {
+    "en": 32,
+    "zh": 32,
+    "mixed": 16
+  },
+  "min_languages_per_category": 2,
+
+  "_comment_tolerances": "Declared before authoring, per ADR-0020. Scoring compares against these rather than against whatever threshold makes a result look better afterwards. Money is compared in cents; quantities carry catalog units, so the tolerance is relative.",
+  "tolerances": {
+    "cost_sgd_absolute": 0.01,
+    "quantity_relative": 1e-06,
+    "nutrition_relative": 0.02
+  },
+
+  "_comment_review": "Every episode needs one reviewer who is neither the author nor an owner of a system under test. Disagreements are resolved before freezing.",
+  "review_policy": {
+    "reviewers_per_episode": 1,
+    "reviewer_may_be_author": false,
+    "reviewer_may_own_system_under_test": false
+  }
+}

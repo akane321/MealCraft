@@ -12,6 +12,7 @@ generalisation performance.
 | `agent-orchestration/grounding-developer-v1.json` | v1 | May be inspected and used while developing | Typed numeric, provenance, action and explanation-claim verification |
 | `v2/dev/packet-source-v1.json` | v1 | May be inspected and changed with review | Neutral scenario references used to compile matched-information packets |
 | `v2/dev/packets-v1.json` | dev-1 | Generated; do not edit by hand | Frozen, digest-protected facts for Rule-only, MealCraft and Context-matched LLM-only development runs |
+| `heldout/v2/episodes/` | v2 (authoring) | Cross-authored; not yet frozen, and must be frozen before the components they evaluate are tuned | Independent end-to-end held-out episodes with gold labels. See the [authoring guide](../../docs/evaluation/heldout-authoring-guide.md) |
 
 Every generated report records the SHA-256 digest of its input dataset. A
 dataset change therefore creates a new experimental condition and must be
