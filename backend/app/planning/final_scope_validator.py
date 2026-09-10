@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from math import isfinite
 
+from app.planning.dietary_tags import expand_tags
 from app.planning.input_audit import nonfinite_issues
 from app.schemas.planning_v2 import (
     CheckStatus,
@@ -201,7 +202,7 @@ class FinalPlanningValidator:
                     slot_id,
                 )
             )
-        missing_diets = sorted(set(problem.dietary_requirements).difference(recipe.dietary_tags))
+        missing_diets = sorted(set(problem.dietary_requirements).difference(expand_tags(recipe.dietary_tags)))
         if missing_diets:
             checks.append(
                 self._failed(

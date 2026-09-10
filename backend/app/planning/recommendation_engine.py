@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from app.models.recipe import Recipe
+from app.planning.dietary_tags import expand_tags
 from app.schemas.recipe import RecipeListItemResponse
 from app.schemas.recommendation import (
     ExcludedRecipeResponse,
@@ -89,11 +90,13 @@ class RecipeRecommendationEngine:
 
     @staticmethod
     def _satisfies_dietary_preference(preference: str, recipe_tags: set[str]) -> bool:
-        if preference == "vegetarian":
-            return bool({"vegetarian", "vegan"}.intersection(recipe_tags))
-        if preference == "dairy-free" and "vegan" in recipe_tags:
-            return True
-        return preference in recipe_tags
+        """Entailments come from the shared table, not from this function.
+
+        These two rules used to live here as literals, which is how this path
+        ended up more permissive than the v2 planner: both encoded the same idea
+        and only one of them was updated. One definition, one place.
+        """
+        return preference in expand_tags(recipe_tags)
 
     def _score_recipe(
         self,
