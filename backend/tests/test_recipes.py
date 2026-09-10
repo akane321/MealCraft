@@ -4,10 +4,13 @@ from decimal import Decimal
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import SecretStr
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.core import config
+from app.core.config import get_settings
 from app.db.base import Base
 from app.db.session import get_db_session
 from app.main import app
@@ -139,7 +142,30 @@ def test_get_recipe_tutorial_returns_one_ranked_video(recipe_client: TestClient)
     assert payload["retrieval"]["selected_external_id"] == "fixture-lemon-chicken-best"
 
 
-def test_get_recipe_tutorial_live_scaffold_degrades_visibly(recipe_client: TestClient) -> None:
+@pytest.mark.parametrize(
+    "api_key,expected_warning",
+    [
+        (None, "not configured"),
+        ("a-key-that-is-present-but-unused", "not implemented"),
+    ],
+    ids=["no-key", "key-configured"],
+)
+def test_get_recipe_tutorial_live_scaffold_degrades_visibly(
+    recipe_client: TestClient, monkeypatch: pytest.MonkeyPatch, api_key: str | None, expected_warning: str
+) -> None:
+    """Both branches, with the key set explicitly rather than inherited.
+
+    This test used to read whatever `YOUTUBE_API_KEY` the developer happened to
+    have in `.env`. It passed on CI, where none is set, and failed on any machine
+    that had configured one - the same shape as a green pipeline reporting on a
+    different environment from the one people work in. Neither branch is more
+    correct than the other, so both are asserted.
+    """
+    settings = get_settings().model_copy(update={"youtube_api_key": SecretStr(api_key) if api_key else None})
+    # `create_tutorial_service` reads configuration directly rather than through a
+    # FastAPI dependency, so a dependency override would not reach it.
+    monkeypatch.setattr(config, "get_settings", lambda: settings)
+
     response = recipe_client.get("/api/recipes/lemon-chicken/tutorial", params={"live": True})
 
     assert response.status_code == 200
@@ -147,7 +173,7 @@ def test_get_recipe_tutorial_live_scaffold_degrades_visibly(recipe_client: TestC
     assert payload["selected_video"] is not None
     assert payload["retrieval"]["status"] == "degraded"
     assert payload["retrieval"]["provider_used"] == "fixture"
-    assert "not configured" in payload["warning"]
+    assert expected_warning in payload["warning"]
 
 
 def test_recommendations_apply_hard_filters_and_return_score_reasons(recipe_client: TestClient) -> None:

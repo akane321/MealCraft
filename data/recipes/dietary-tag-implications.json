@@ -1,0 +1,16 @@
+{
+  "schema_version": "dietary-implications-v1",
+
+  "_comment_purpose": "Some dietary tags entail others by definition. Without this table the entailment is invisible: a vegetarian household sees only recipes literally tagged `vegetarian`, and every vegan recipe - which is vegetarian by definition - is filtered out. Measured on the committed catalog, that was 8 recipes instead of 20.",
+
+  "_comment_admission_rule": "A pair belongs here only when the entailment is true by definition of the terms, so that no reasonable person would dispute it and no user would be surprised. Anything weaker becomes an implicit rule the user cannot see and did not ask for, which is worse than the omission it fixes. `dairy-free` does not entail `vegetarian` - chicken is both. `gluten-free` entails nothing. `high-protein` and `high-fibre` are descriptive, not restrictions, and never appear here. The table is open: add a pair when a new tag genuinely entails another, and record the reason.",
+
+  "_comment_direction": "Read `\"vegan\": [\"vegetarian\"]` as: a recipe tagged vegan also satisfies a requirement for vegetarian. The reverse does not hold. Entailments compose transitively and the compiler closes over them, so a chain need not be written out.",
+
+  "implications": {
+    "vegan": {
+      "entails": ["vegetarian", "dairy-free"],
+      "reason": "A vegan recipe excludes every animal product, so it excludes meat and dairy by definition."
+    }
+  }
+}

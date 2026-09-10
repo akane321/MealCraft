@@ -6,6 +6,7 @@ independent validation. This compiler does not infer missing source facts.
 
 from dataclasses import dataclass
 
+from app.planning.dietary_tags import satisfies
 from app.planning.input_audit import require_finite_problem
 from app.schemas.planning_v2 import FinalPlanningProblem
 
@@ -86,7 +87,10 @@ def compile_constraints(problem: FinalPlanningProblem) -> tuple[CandidateEligibi
                 reasons.add("allergen")
             if {item.ingredient_id for item in recipe.ingredients}.intersection(problem.excluded_ingredients):
                 reasons.add("excluded_ingredient")
-            if not set(problem.dietary_requirements).issubset(recipe.dietary_tags):
+            # Tags are closed over the entailments that hold by definition, so a
+            # vegan recipe satisfies a vegetarian requirement. See
+            # data/recipes/dietary-tag-implications.json for the admission rule.
+            if not satisfies(problem.dietary_requirements, recipe.dietary_tags):
                 reasons.add("dietary_requirement")
             for band in problem.nutrition_bands:
                 if not band.hard or band.scope != "per_slot":
