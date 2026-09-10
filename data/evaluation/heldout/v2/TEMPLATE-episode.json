@@ -1,0 +1,77 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-<category>-<nnn>",
+  "category": "safety_diet",
+  "language": "zh",
+
+  "authored_by": "<your role from set-manifest.json roles>",
+  "reviewed_by": null,
+  "review_notes": null,
+
+  "scenario": {
+    "user_request": "我们两个人，一个芝麻过敏，另一个不吃蘑菇。请安排一周晚餐。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": ["sesame"],
+      "excluded_ingredients": ["mushroom"],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      { "ingredient_id": "brown_rice", "quantity": 500, "unit": "g" },
+      { "ingredient_id": "olive_oil", "quantity": null, "unit": null }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner",
+        "fri-dinner",
+        "sat-dinner",
+        "sun-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tomato-lentil-stew",
+      "chickpea-quinoa-salad",
+      "tofu-brown-rice-stir-fry"
+    ],
+    "fairprice_product_ids": [
+      "fixture-canned-tomato-400g",
+      "fixture-red-lentil-500g",
+      "fixture-chickpeas-400g"
+    ]
+  },
+
+  "gold": {
+    "class": "feasible",
+
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": ["household_size"],
+
+    "applicable_hard_constraints": {
+      "allergens_absent": ["sesame"],
+      "excluded_ingredients_absent": ["mushroom"],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+
+    "pantry_ground_truth": {
+      "deductible": [{ "ingredient_id": "brown_rice", "quantity": 500, "unit": "g" }],
+      "not_deductible_unknown_quantity": ["olive_oil"]
+    },
+
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+
+    "required_disclosures": [],
+
+    "replan_invariants": null,
+
+    "author_rationale": "Why this episode is worth an evaluation slot, and what a wrong answer would look like. One or two sentences. This is read during review, not scored."
+  }
+}

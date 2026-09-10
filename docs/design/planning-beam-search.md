@@ -19,3 +19,19 @@ Every retained complete plan goes through independent validation. A resource lim
 Required test coverage for this component: bound admissibility, preservation of valid nutrition completions, and agreement with the exhaustive objective on a toy packet. Passing these does not establish production performance on realistic packets.
 
 **The default width of 32 and expansion cap of 10000 are development settings, not selected production parameters.** They have never been fitted against an evaluation set, and under `ADR-0020` they must not be fitted against the held-out set at all: the held-out episodes for this component have to be frozen before its parameters are chosen. Choosing them requires a developer-split parameter study plus a controlled ablation, and the resulting values belong in `OPEN_QUESTIONS.md` item 15 until that study exists.
+
+## Running this component
+
+From the repository root, without starting the stack:
+
+```bash
+uv run --project backend pytest backend/tests/test_beam_planner.py backend/tests/test_search_bounds.py
+```
+
+Exercise a final-scope-shaped packet end to end through the reference path:
+
+```bash
+uv run --project backend python -m app.planning.final_scope_cli
+```
+
+Current pass/fail status and timings come from CI, not from this page.
