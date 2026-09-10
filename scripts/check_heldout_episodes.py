@@ -229,6 +229,28 @@ def check_gold(episode: dict, label: str, errors: list[str]) -> None:
         errors.append(f"{label}: gold.author_rationale is empty")
 
 
+def check_unfilled_scaffold(episode: dict, label: str, errors: list[str]) -> None:
+    """`scripts/new_episode.py` writes TODO placeholders for every field that
+    carries meaning. An episode still holding one has not been authored yet, and
+    a half-filled scaffold in a frozen set is worse than a missing episode
+    because it looks finished."""
+    for path, value in walk_strings(episode):
+        if value.startswith("TODO"):
+            errors.append(f"{label}: {path} is still a scaffold placeholder")
+
+
+def walk_strings(node, path: str = ""):
+    if isinstance(node, dict):
+        for key, value in node.items():
+            yield from walk_strings(value, f"{path}.{key}" if path else key)
+    elif isinstance(node, list):
+        for index, value in enumerate(node):
+            yield from walk_strings(value, f"{path}[{index}]")
+    elif isinstance(node, str):
+        yield path, node
+
+
+
 def validate(strict: bool) -> tuple[list[str], dict[str, int], dict[str, int], int]:
     errors: list[str] = []
     manifest = load_json(MANIFEST)
@@ -283,6 +305,7 @@ def validate(strict: bool) -> tuple[list[str], dict[str, int], dict[str, int], i
         check_authorship(episode, manifest, label, errors)
         check_references(episode, slugs, ingredients, products, label, errors)
         check_gold(episode, label, errors)
+        check_unfilled_scaffold(episode, label, errors)
 
         if episode.get("reviewed_by"):
             reviewed += 1
