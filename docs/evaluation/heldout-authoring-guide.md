@@ -7,6 +7,11 @@ cannot check.
 Read `docs/design/comparative-evaluation-v2.md` sections 8 to 10 first if you
 want the reasoning. This page is the working instructions.
 
+> Before choosing a constraint, read
+> [目录现状与选题建议](heldout-catalog-reality.md). It measures what the committed
+> catalog can express. A constraint the catalog cannot express produces an
+> episode that tests nothing, and that is not visible from the episode itself.
+
 ## Why you are writing episodes for somebody else's module
 
 The set exists to answer one question: compared with reasonable alternatives,

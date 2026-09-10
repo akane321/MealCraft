@@ -89,6 +89,7 @@ conclusions faster than a human does, because it has no colleague to correct it.
 | What evaluation is executable now? | [Evaluation Protocol v1](evaluation/protocol-v1.md) |
 | What comparative capability evaluation are we building? | [Comparative Evaluation v2](design/comparative-evaluation-v2.md) |
 | How do I author a held-out episode? | [Held-out Authoring Guide](evaluation/heldout-authoring-guide.md) |
+| What can the current catalog actually express? | [目录现状与选题建议](evaluation/heldout-catalog-reality.md) |
 
 ## Documentation Update Rules
 

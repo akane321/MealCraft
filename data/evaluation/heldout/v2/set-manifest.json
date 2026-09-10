@@ -61,12 +61,9 @@
     }
   },
 
-  "_comment_language": "Predeclared before authoring, per docs/design/comparative-evaluation-v2.md section 8. Languages are spread across categories rather than forming their own category, so that language never becomes a proxy for difficulty.",
-  "language_plan": {
-    "en": 32,
-    "zh": 32,
-    "mixed": 16
-  },
+  "_comment_language": "Understanding English and Chinese is ordinary Agent capability, not a research direction. The course asks for depth over breadth, so this set does not carry a language ratio, does not treat language as an evaluation dimension, and results are not broken out by language. What remains is one methodological guard: both languages must appear, and no category may be single-language, so that difficulty and language cannot be confounded. `mixed` - a Chinese sentence carrying an English ingredient or brand - is allowed anywhere and is what people actually write; it is not a quota to fill.",
+  "languages_allowed": ["en", "zh", "mixed"],
+  "languages_required": ["en", "zh"],
   "min_languages_per_category": 2,
 
   "_comment_tolerances": "Declared before authoring, per ADR-0020. Scoring compares against these rather than against whatever threshold makes a result look better afterwards. Money is compared in cents; quantities carry catalog units, so the tolerance is relative.",

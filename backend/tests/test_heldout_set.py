@@ -28,7 +28,9 @@ def build_set(tmp_path, episodes):
     manifest["categories"] = {
         "standard": {"quota": len(episodes), "systems_under_test": ["planning"], "description": "x"}
     }
-    manifest["language_plan"] = {"en": len(episodes), "zh": 0, "mixed": 0}
+    # The synthetic set is single-language on purpose; these tests are about
+    # compiling and freezing, not about language coverage.
+    manifest["languages_required"] = ["en"]
     manifest["min_languages_per_category"] = 1
     (set_dir / "set-manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     for episode in episodes:

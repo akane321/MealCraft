@@ -86,3 +86,17 @@ provenance and quantity precision, followed by owner-coordinated API,
 persistence and UI integration. `ADR-0021` section 3 keeps the V2 shopping shape
 unchanged until then, because Shopping List rendering, replanning deltas and
 evaluation all read it.
+
+## When the snapshot has one size per ingredient
+
+A FairPrice snapshot may carry a single package size for an ingredient. That is
+a limit of what has been captured, not evidence that mixed purchasing is
+unnecessary: real supermarkets sell one ingredient in several sizes, and the
+capability applies the moment a second size appears.
+
+`data/fixtures/fairprice-products.json` had exactly one size per ingredient,
+which meant this planner could not be exercised at all outside its own developer
+fixture. `fairprice-products-v2.json` adds further sizes for the ingredients
+recipes lean on most, so the held-out set can test it. No code changes when a
+snapshot gains sizes.
+
