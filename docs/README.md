@@ -66,6 +66,8 @@ conclusions faster than a human does, because it has no colleague to correct it.
    to understand the stronger planned baselines and capability claims.
 4. Use the [frontend state matrix](evaluation/frontend-state-matrix.md) for the
    current browser and state coverage boundary.
+5. If you are authoring held-out episodes, follow the
+   [Held-out Authoring Guide](evaluation/heldout-authoring-guide.md).
 
 ## Canonical Documents
 
@@ -86,6 +88,7 @@ conclusions faster than a human does, because it has no colleague to correct it.
 | How should accounts, tenancy, operations and the internal Console be completed? | [Backend Platform Engineering Handoff](design/backend-platform-engineering.md) |
 | What evaluation is executable now? | [Evaluation Protocol v1](evaluation/protocol-v1.md) |
 | What comparative capability evaluation are we building? | [Comparative Evaluation v2](design/comparative-evaluation-v2.md) |
+| How do I author a held-out episode? | [Held-out Authoring Guide](evaluation/heldout-authoring-guide.md) |
 
 ## Documentation Update Rules
 
