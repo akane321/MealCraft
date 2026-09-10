@@ -28,7 +28,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parents[1]
 SET_DIR = ROOT / "data" / "evaluation" / "heldout" / "v2"
 MANIFEST = SET_DIR / "set-manifest.json"
@@ -108,8 +107,7 @@ def check_authorship(episode: dict, manifest: dict, label: str, errors: list[str
         errors.append(f"{label}: reviewed by its own author '{reviewer}'")
     if reviewer in under_test and not policy["reviewer_may_own_system_under_test"]:
         errors.append(
-            f"{label}: reviewed by '{reviewer}', which owns a system this category "
-            f"evaluates ({sorted(under_test)})"
+            f"{label}: reviewed by '{reviewer}', which owns a system this category evaluates ({sorted(under_test)})"
         )
 
 
@@ -176,8 +174,7 @@ def check_gold(episode: dict, label: str, errors: list[str]) -> None:
             )
         if clarifications:
             errors.append(
-                f"{label}: class is infeasible but required_clarification_fields is not "
-                "empty; choose one class"
+                f"{label}: class is infeasible but required_clarification_fields is not empty; choose one class"
             )
     if klass == "feasible" and gold.get("conflict_reason"):
         errors.append(f"{label}: class is feasible but conflict_reason is set")
@@ -250,7 +247,6 @@ def walk_strings(node, path: str = ""):
         yield path, node
 
 
-
 def validate(strict: bool) -> tuple[list[str], dict[str, int], dict[str, int], int]:
     errors: list[str] = []
     manifest = load_json(MANIFEST)
@@ -315,10 +311,7 @@ def validate(strict: bool) -> tuple[list[str], dict[str, int], dict[str, int], i
     if strict:
         for category, spec in manifest["categories"].items():
             if per_category[category] != spec["quota"]:
-                errors.append(
-                    f"category '{category}': {per_category[category]} episodes, quota is "
-                    f"{spec['quota']}"
-                )
+                errors.append(f"category '{category}': {per_category[category]} episodes, quota is {spec['quota']}")
             if len(languages_seen[category]) < manifest["min_languages_per_category"]:
                 errors.append(
                     f"category '{category}': uses {len(languages_seen[category])} language(s); "
@@ -327,9 +320,7 @@ def validate(strict: bool) -> tuple[list[str], dict[str, int], dict[str, int], i
                 )
         for language, planned in manifest["language_plan"].items():
             if per_language[language] != planned:
-                errors.append(
-                    f"language '{language}': {per_language[language]} episodes, plan is {planned}"
-                )
+                errors.append(f"language '{language}': {per_language[language]} episodes, plan is {planned}")
 
     return errors, per_category, per_language, reviewed
 
@@ -354,10 +345,7 @@ def main() -> int:
     for category, spec in manifest["categories"].items():
         print(f"  {category:<22} {per_category[category]:>3}/{spec['quota']}")
     plan = manifest["language_plan"]
-    print(
-        "  language                "
-        + ", ".join(f"{name} {per_language[name]}/{plan[name]}" for name in plan)
-    )
+    print("  language                " + ", ".join(f"{name} {per_language[name]}/{plan[name]}" for name in plan))
 
     if errors:
         print("\nProblems:")

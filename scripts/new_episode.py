@@ -21,7 +21,6 @@ import re
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 SET_DIR = ROOT / "data" / "evaluation" / "heldout" / "v2"
 MANIFEST = SET_DIR / "set-manifest.json"
@@ -152,8 +151,7 @@ def build(args, manifest: dict) -> dict:
             "allowed_relaxations": [],
             "required_disclosures": [],
             "replan_invariants": None,
-            "author_rationale": TODO
-            + "what would a plausible-looking wrong answer be here? If you cannot "
+            "author_rationale": TODO + "what would a plausible-looking wrong answer be here? If you cannot "
             "say, this episode is not testing anything - pick a different one",
         },
     }

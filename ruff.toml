@@ -1,0 +1,17 @@
+# Repository-level Ruff settings for the standard-library scripts in `scripts/`.
+#
+# These mirror `backend/pyproject.toml` on purpose. Inside the container the
+# repository is laid out under `/app`, so the backend's configuration applies to
+# `/app/scripts` as well and `ruff check .` covers them. From a checkout there is
+# nothing above `scripts/` to configure them, so the same command would use
+# Ruff's defaults and disagree with the container.
+#
+# Two paths that lint the same file differently is the shape of the defect
+# `docs/current-status.md` records under the container verification fix: CI
+# stayed green while the documented command reported errors. Keeping one setting
+# in both places is cheaper than explaining the difference later.
+target-version = "py312"
+line-length = 120
+
+[lint]
+select = ["B", "E", "F", "I", "UP"]
