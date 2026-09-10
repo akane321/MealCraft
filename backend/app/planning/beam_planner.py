@@ -25,6 +25,16 @@ class SearchState:
     loss: float = 0.0
 
 
+@dataclass(frozen=True)
+class BeamSearchResult:
+    states: tuple[SearchState, ...]
+    expansions: int
+    pruned: bool
+    exhausted: bool
+    nutrition_pruned: int
+    dominated: int
+
+
 class BeamPlanner(FinalScopeReferencePlanner):
     """Retain multiple partial plans; independently validate every retained completion.
 
@@ -36,7 +46,8 @@ class BeamPlanner(FinalScopeReferencePlanner):
         super().__init__()
         self.limits = limits or BeamLimits()
 
-    def solve(self, problem: FinalPlanningProblem) -> FinalPlanningSolution:
+    def search_candidates(self, problem: FinalPlanningProblem) -> BeamSearchResult:
+        """Return retained complete assignments before selecting a shopping policy."""
         compiled = compile_search_domains(problem)
         domains = {slot.slot_id: slot for slot in compiled.slots}
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
@@ -99,6 +110,12 @@ class BeamPlanner(FinalScopeReferencePlanner):
             if not states:
                 break
 
+        return BeamSearchResult(tuple(states), expansions, pruned, exhausted, nutrition_pruned, dominated)
+
+    def solve(self, problem: FinalPlanningProblem) -> FinalPlanningSolution:
+        search = self.search_candidates(problem)
+        states = search.states
+
         results = []
         for state in states:
             assignments = [PlanningAssignment(slot_id=slot, recipe_id=recipe) for slot, recipe in state.choices]
@@ -114,7 +131,7 @@ class BeamPlanner(FinalScopeReferencePlanner):
             assignments, shopping = [], []
             report = self.validator.validate(problem, assignments, shopping)
         status = {"passed": "feasible", "indeterminate": "needs_data", "failed": "candidate_rejected"}[report.status]
-        if exhausted or not states:
+        if search.exhausted or not states:
             status = "candidate_rejected"
         return FinalPlanningSolution(
             problem_id=problem.problem_id,
@@ -128,9 +145,10 @@ class BeamPlanner(FinalScopeReferencePlanner):
                 deterministic=True,
                 warnings=[
                     f"beam_width={self.limits.width}; max_expansions={self.limits.max_expansions}; "
-                    f"expansions={expansions}",
-                    f"beam_pruned={pruned}; expansion_limit_reached={exhausted}; completed_candidates={len(results)}",
-                    f"nutrition_pruned={nutrition_pruned}; dominated={dominated}",
+                    f"expansions={search.expansions}",
+                    f"beam_pruned={search.pruned}; expansion_limit_reached={search.exhausted}; "
+                    f"completed_candidates={len(results)}",
+                    f"nutrition_pruned={search.nutrition_pruned}; dominated={search.dominated}",
                     "Uses reference local loss and repetition penalties. No global infeasibility or optimality claim.",
                 ],
             ),
