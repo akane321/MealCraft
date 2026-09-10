@@ -1,0 +1,102 @@
+{
+  "problem_id": "mixed-package-developer-v1",
+  "slots": [
+    {
+      "slot_id": "0",
+      "planned_date": "2026-09-07",
+      "meal_type": "breakfast",
+      "servings": 3,
+      "max_time_minutes": 20,
+      "required": true,
+      "locked_recipe_id": null
+    },
+    {
+      "slot_id": "1",
+      "planned_date": "2026-09-07",
+      "meal_type": "breakfast",
+      "servings": 3,
+      "max_time_minutes": 20,
+      "required": true,
+      "locked_recipe_id": null
+    }
+  ],
+  "recipes": [
+    {
+      "recipe_id": "a",
+      "title": "Overnight oats with banana",
+      "servings": 2,
+      "allowed_meal_types": [
+        "breakfast",
+        "snack"
+      ],
+      "total_time_minutes": 10,
+      "dietary_tags": [
+        "vegetarian"
+      ],
+      "allergens": [
+        "milk"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "rice",
+          "quantity": 100.0,
+          "unit": "g"
+        }
+      ],
+      "nutrients_per_serving": {
+        "calories_kcal": 410.0,
+        "protein_g": 16.0,
+        "carbohydrate_g": 66.0,
+        "fat_g": 10.0,
+        "sodium_mg": 310.0,
+        "sugar_g": 18.0
+      },
+      "cuisine": "international"
+    }
+  ],
+  "pantry": [
+    {
+      "ingredient_id": "rice",
+      "quantity": 50.0,
+      "unit": "g",
+      "priority_use": false
+    }
+  ],
+  "products": [
+    {
+      "ingredient_id": "rice",
+      "product_id": "150",
+      "package_quantity": 150.0,
+      "package_unit": "g",
+      "price_sgd": 2.0,
+      "available": true
+    },
+    {
+      "ingredient_id": "rice",
+      "product_id": "100",
+      "package_quantity": 100.0,
+      "package_unit": "g",
+      "price_sgd": 1.5,
+      "available": true
+    }
+  ],
+  "allergens": [],
+  "excluded_ingredients": [],
+  "dietary_requirements": [],
+  "health_preferences": [
+    "low-sodium"
+  ],
+  "nutrition_bands": [],
+  "purchase_budget_sgd": 3.5,
+  "budget_is_hard": true,
+  "preference_weights": {
+    "nutrition": 0.35,
+    "variety": 0.25,
+    "time": 0.15,
+    "pantry": 0.15,
+    "health": 0.1
+  },
+  "catalog_version": "synthetic-mixed-v1",
+  "product_snapshot_version": "fixture-mixed-v1",
+  "policy_version": "planning-policy-v2-draft"
+}

@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from math import isfinite
 
+from app.planning.input_audit import nonfinite_issues
 from app.schemas.planning_v2 import (
     CheckStatus,
     FinalPlanningProblem,
@@ -23,6 +24,39 @@ class FinalPlanningValidator:
         assignments: list[PlanningAssignment],
         shopping: list[PlanningShoppingSelection],
     ) -> PlanningValidationReport:
+        # Selected product numbers retain the existing product_numeric checks.
+        # Other malformed numbers must not reach arithmetic or JSON report values.
+        numeric_issues = nonfinite_issues(problem.model_dump(exclude={"products"})) + nonfinite_issues(
+            {"shopping": [line.model_dump() for line in shopping]}
+        )
+        if numeric_issues:
+            checks = [self._failed("input_numeric", issue.detail, issue.path) for issue in numeric_issues]
+            checks.append(
+                PlanningConstraintCheck(
+                    code="purchase_total",
+                    status="indeterminate",
+                    detail="Total was not computed because numeric input is invalid.",
+                )
+            )
+            if problem.purchase_budget_sgd is not None:
+                checks.append(
+                    PlanningConstraintCheck(
+                        code="purchase_budget",
+                        status="indeterminate",
+                        hard=problem.budget_is_hard,
+                        detail="Budget was not evaluated because numeric input is invalid.",
+                    )
+                )
+            return PlanningValidationReport(
+                status="failed",
+                hard_failure_count=len(numeric_issues),
+                indeterminate_count=len(checks) - len(numeric_issues),
+                checks=checks,
+                purchase_total_sgd=0,
+                catalog_version=problem.catalog_version,
+                product_snapshot_version=problem.product_snapshot_version,
+                policy_version=problem.policy_version,
+            )
         checks: list[PlanningConstraintCheck] = []
         slots = {slot.slot_id: slot for slot in problem.slots}
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
@@ -79,8 +113,16 @@ class FinalPlanningValidator:
         checks.extend(product_checks)
         cost_complete = cost_complete and not demand_checks and assignment_checks_passed
         if problem.purchase_budget_sgd is not None:
-            margin = round(problem.purchase_budget_sgd - purchase_total, 2)
-            status: CheckStatus = "passed" if margin >= -0.005 else "failed"
+            # ADR-0021: compare in whole cents with no tolerance in either
+            # direction. Money is discrete, and a tolerance on it only creates a
+            # band where two components disagree about the same plan. The
+            # previous half-cent allowance agreed with this on every cent-valued
+            # input; it differed only for sub-cent prices, which the input audit
+            # now reports as a data problem rather than rounding into compliance.
+            budget_cents = round(problem.purchase_budget_sgd * 100)
+            total_cents = round(purchase_total * 100)
+            margin = round((budget_cents - total_cents) / 100, 2)
+            status: CheckStatus = "passed" if total_cents <= budget_cents else "failed"
             if not cost_complete:
                 status = "indeterminate"
             checks.append(
@@ -219,6 +261,14 @@ class FinalPlanningValidator:
         scope_id: str,
         actual: float,
     ) -> PlanningConstraintCheck:
+        if not isfinite(actual):
+            return PlanningConstraintCheck(
+                code=f"nutrition_{band.metric}_{band.scope}",
+                status="indeterminate",
+                hard=band.hard,
+                scope_id=scope_id,
+                detail="Nutrition aggregation exceeded finite arithmetic; no margin was computed.",
+            )
         lower_margin = actual - band.lower if band.lower is not None else None
         upper_margin = band.upper - actual if band.upper is not None else None
         margins = [value for value in (lower_margin, upper_margin) if value is not None]
@@ -361,6 +411,10 @@ class FinalPlanningValidator:
                 complete = False
                 continue
             expected = round(product.price_sgd * line.packages, 2)
+            if not isfinite(expected) or not isfinite(total + expected):
+                reject("purchase_numeric", "Package cost or running total exceeded finite arithmetic.")
+                complete = False
+                continue
             total += expected
             if not isfinite(line.purchase_cost_sgd) or abs(line.purchase_cost_sgd - expected) > 0.005:
                 checks.append(
