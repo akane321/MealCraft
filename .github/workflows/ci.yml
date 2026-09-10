@@ -15,8 +15,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Keep the job's `name` stable. It is what a branch ruleset matches on, and
+  # renaming a check silently makes every pull request unmergeable while still
+  # reporting green. This job now also validates the held-out episode data.
   docs:
-    name: docs-and-data
+    name: docs
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
