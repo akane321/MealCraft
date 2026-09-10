@@ -116,10 +116,31 @@ jobs:
         working-directory: frontend
         run: pnpm test:e2e
 
+  # Named `compose` because that is the required status check on `main`. The job
+  # is no longer only a Compose config check - see the comment below - but the
+  # check name is part of the branch ruleset, and renaming it silently makes
+  # every pull request unmergeable while still reporting green.
   compose:
     name: compose
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 25
+
+    # The `backend` job runs the suite from a checkout: `<repo>/backend/tests`.
+    # CONTRIBUTING.md and AGENTS.md tell contributors to verify through the
+    # container instead, where the same files live at `/app/tests` and the
+    # catalogs are bind-mounted at `/app/data`. Those are different directory
+    # depths, so code that located data by counting parent directories worked in
+    # one and not the other. CI covered only the first, so the suite stayed green
+    # while the documented command reported 82 failures on a missing file.
+    #
+    # This job runs the documented commands themselves. A green CI should mean
+    # the instructions we give people actually work.
+    #
+    # Scope: backend only. The documented frontend commands
+    # (`docker compose run --rm frontend pnpm ...`) are still exercised on the
+    # host by the `frontend` job and not through the container, because building
+    # that image on every pull request costs more than the risk it retires. That
+    # gap is deliberate and stated rather than assumed away.
 
     steps:
       - name: Checkout
@@ -130,3 +151,29 @@ jobs:
 
       - name: Validate Docker Compose
         run: docker compose config --quiet
+
+      - name: Build and start the database and backend
+        run: docker compose up -d --build --wait database backend
+
+      - name: Backend tests through the documented command
+        run: docker compose exec -T backend uv run --no-sync pytest
+
+      - name: Deterministic data and planning evaluation
+        run: docker compose exec -T backend uv run --no-sync python -m app.evaluation
+
+      - name: Offline evaluation workbench
+        run: docker compose exec -T backend uv run --no-sync python -m app.evaluation.workbench
+
+      - name: Generated evaluation reports are reproducible
+        # The workbench writes into the bind-mounted `docs/evaluation`. Regenerating
+        # it must not change the committed report, or the numbers we publish are
+        # not the numbers the command produces.
+        run: git diff --exit-code -- docs/evaluation
+
+      - name: Backend logs
+        if: failure()
+        run: docker compose logs --no-color backend
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

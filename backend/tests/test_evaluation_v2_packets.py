@@ -4,13 +4,14 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
+from app.core.paths import repository_root
 from app.evaluation.v2_packets import (
     FrozenEvaluationPacket,
     compile_v2_developer_packets,
     context_matched_llm_prompt,
 )
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = repository_root()
 SOURCE = ROOT / "data/evaluation/v2/dev/packet-source-v1.json"
 BUNDLE = ROOT / "data/evaluation/v2/dev/packets-v1.json"
 INGREDIENTS = ROOT / "data/ingredients/ingredients.json"

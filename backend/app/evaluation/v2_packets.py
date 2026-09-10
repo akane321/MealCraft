@@ -14,6 +14,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.paths import repository_root
+
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -286,32 +288,31 @@ def write_v2_packet_bundle(bundle: dict[str, Any], output_path: Path) -> None:
 
 
 def main() -> None:
-    repository_root = Path(__file__).resolve().parents[3]
     parser = argparse.ArgumentParser(description="Compile Evaluation v2 developer packets")
     parser.add_argument(
         "--source",
         type=Path,
-        default=repository_root / "data/evaluation/v2/dev/packet-source-v1.json",
+        default=repository_root() / "data/evaluation/v2/dev/packet-source-v1.json",
     )
     parser.add_argument(
         "--ingredients",
         type=Path,
-        default=repository_root / "data/ingredients/ingredients.json",
+        default=repository_root() / "data/ingredients/ingredients.json",
     )
     parser.add_argument(
         "--recipes",
         type=Path,
-        default=repository_root / "data/recipes/recipes.json",
+        default=repository_root() / "data/recipes/recipes.json",
     )
     parser.add_argument(
         "--products",
         type=Path,
-        default=repository_root / "data/fixtures/fairprice-products.json",
+        default=repository_root() / "data/fixtures/fairprice-products.json",
     )
     parser.add_argument(
         "--output",
         type=Path,
-        default=repository_root / "data/evaluation/v2/dev/packets-v1.json",
+        default=repository_root() / "data/evaluation/v2/dev/packets-v1.json",
     )
     args = parser.parse_args()
     bundle = compile_v2_developer_packets(

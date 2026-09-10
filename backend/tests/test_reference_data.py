@@ -1,17 +1,17 @@
 import json
-from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
+from app.core.paths import repository_root
 from app.data.catalog import Catalog, import_catalog, load_catalog
 from app.db.base import Base
 from app.evaluation.runner import evaluate
 from app.models.recipe import Ingredient, Recipe
 
-ROOT = Path("/app") if Path("/app/data").exists() else Path(__file__).resolve().parents[2]
+ROOT = repository_root()
 INGREDIENTS = ROOT / "data/ingredients/ingredients.json"
 RECIPES = ROOT / "data/recipes/recipes.json"
 SCENARIOS = ROOT / "data/evaluation/dev/planning-v1.json"

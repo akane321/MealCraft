@@ -124,6 +124,13 @@ Documentation integrity. Runs in CI on every pull request, needs no container:
 python scripts/check_docs_integrity.py
 ```
 
+The backend commands below run in CI twice: from a checkout in the `backend`
+job, and through the container in the `compose` job. Those are different
+directory layouts, and code has passed in one while failing in the other, so a
+green run now means the documented command works rather than that some
+equivalent of it works. The frontend commands are covered on the host only;
+running them through the container is not verified by CI.
+
 Validate Compose:
 
 ```bash

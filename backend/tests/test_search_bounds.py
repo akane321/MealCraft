@@ -1,8 +1,8 @@
 from itertools import product
-from pathlib import Path
 
 import pytest
 
+from app.core.paths import repository_root
 from app.planning.beam_planner import BeamLimits, BeamPlanner, SearchState
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
@@ -12,9 +12,7 @@ from app.schemas.planning_v2 import FinalPlanningProblem
 
 def scenario(bands=None):
     data = FinalPlanningProblem.model_validate_json(
-        (Path(__file__).resolve().parents[2] / "data/fixtures/planning-v2/final-scope-multislot.json").read_text(
-            encoding="utf-8"
-        )
+        (repository_root() / "data/fixtures/planning-v2/final-scope-multislot.json").read_text(encoding="utf-8")
     ).model_dump()
     base = data["recipes"][0]
     recipes = []

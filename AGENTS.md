@@ -165,6 +165,11 @@ Run `python -m app.evaluation.workbench` for evaluation-affecting changes and
 Playwright for affected desktop user journeys. Do not claim visual quality from
 a successful build alone. Mobile and tablet product design are out of scope.
 
+CI runs the backend checks in both layouts: from a checkout in the `backend`
+job, and through the container in the `compose` job, using the commands above. A green run therefore means the documented
+command works, not only that some equivalent of it works. The frontend container
+commands are not covered; the frontend job runs them on the host.
+
 Update the canonical document identified in `docs/README.md` when behaviour,
 contracts, setup, final direction, or evaluation semantics change.
 

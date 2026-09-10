@@ -1,13 +1,12 @@
-from pathlib import Path
-
 import pytest
 
 from app.agent.parser import AgentConfigurationError
+from app.core.paths import repository_root
 from app.evaluation.agent_benchmark import evaluate_agent
 from app.evaluation.orchestration_benchmark import evaluate_grounding, evaluate_scope_policy
 from app.evaluation.runner import evaluate
 
-ROOT = Path("/app") if Path("/app/data").exists() else Path(__file__).resolve().parents[2]
+ROOT = repository_root()
 INGREDIENTS = ROOT / "data/ingredients/ingredients.json"
 RECIPES = ROOT / "data/recipes/recipes.json"
 HELDOUT = ROOT / "data/evaluation/heldout/planning-v1.json"

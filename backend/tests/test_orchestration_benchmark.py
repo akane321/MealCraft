@@ -1,12 +1,13 @@
 from pathlib import Path
 
+from app.core.paths import repository_root
 from app.evaluation.orchestration_benchmark import (
     evaluate_grounding,
     evaluate_scope_policy,
     write_scope_report,
 )
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = repository_root()
 DATASET = ROOT / "data" / "evaluation" / "agent-orchestration" / "scope-developer-v1.json"
 GROUNDING_DATASET = ROOT / "data/evaluation/agent-orchestration/grounding-developer-v1.json"
 
