@@ -1,12 +1,11 @@
-from pathlib import Path
-
 import pytest
 
+from app.core.paths import repository_root
 from app.planning.beam_planner import BeamLimits, BeamPlanner
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.schemas.planning_v2 import FinalPlanningProblem
 
-FIXTURE = Path(__file__).resolve().parents[2] / "data/fixtures/planning-v2/final-scope-multislot.json"
+FIXTURE = repository_root() / "data/fixtures/planning-v2/final-scope-multislot.json"
 
 
 def packet():

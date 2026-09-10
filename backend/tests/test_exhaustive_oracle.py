@@ -1,14 +1,13 @@
-from pathlib import Path
-
 import pytest
 
+from app.core.paths import repository_root
 from app.planning.beam_planner import BeamLimits, BeamPlanner
 from app.planning.exhaustive_oracle import exhaustive_assignments
 from app.schemas.planning_v2 import FinalPlanningProblem
 
 
 def small_packet():
-    path = Path(__file__).resolve().parents[2] / "data/fixtures/planning-v2/final-scope-multislot.json"
+    path = repository_root() / "data/fixtures/planning-v2/final-scope-multislot.json"
     data = FinalPlanningProblem.model_validate_json(path.read_text(encoding="utf-8")).model_dump()
     recipe = data["recipes"][0]
     data["recipes"] = [

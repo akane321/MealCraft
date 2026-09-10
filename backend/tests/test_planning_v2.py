@@ -1,10 +1,9 @@
-from pathlib import Path
-
+from app.core.paths import repository_root
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import energy_proportional_sodium_benchmark, flexible_upper_loss
 from app.schemas.planning_v2 import FinalPlanningProblem
 
-FIXTURE_PATH = Path(__file__).resolve().parents[2] / "data" / "fixtures" / "planning-v2" / "final-scope-multislot.json"
+FIXTURE_PATH = repository_root() / "data/fixtures/planning-v2/final-scope-multislot.json"
 
 
 def load_problem() -> FinalPlanningProblem:
