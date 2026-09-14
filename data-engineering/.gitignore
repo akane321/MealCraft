@@ -1,0 +1,40 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Licensed or downloaded source data must stay local. The directory negation
+# below is required because "data/raw/**/*" also matches an intermediate
+# directory name (e.g. "data/raw/recipenlg"); without re-including directories
+# a file-level "!" negation for anything nested under one cannot take effect.
+data/raw/**/*
+!data/raw/**/
+!data/raw/**/README.md
+!data/raw/**/.gitkeep
+!data/raw/**/PUT_DATA_HERE.txt
+# Provenance records are safe to commit; the raw payload above is not.
+!data/raw/**/raw_manifest.json
+!data/raw/**/source_registry.json
+
+# Reproducible generated artefacts.
+data/staging/**/*
+data/curated/**/*
+data/review/**/*
+reports/**/*
+!data/staging/.gitkeep
+!data/curated/.gitkeep
+!data/curated/PUT_DATA_HERE.txt
+!data/review/.gitkeep
+!reports/.gitkeep
+
+# Downloaded reference data is reproducible and should not be committed.
+data/reference/downloads/**/*
+!data/reference/downloads/.gitkeep
+
+
+# Ad-hoc run logs from local experimentation; the formal, reproducible record
+# lives in reports/run_manifest.json + reports/latest.{json,md} (excluded above
+# by the same "reports/**/*" rule, which also applies here).
+*.log
