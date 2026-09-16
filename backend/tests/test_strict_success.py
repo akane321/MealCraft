@@ -312,6 +312,95 @@ def test_packages_must_cover_the_remaining_demand(catalogs):
     assert "packages_cover_demand" in score(episode(), resp, catalogs).failed_codes
 
 
+# --- one ingredient, several package sizes (ADR-0021) --------------------------
+# Lines used to be keyed by ingredient, so the last line for an ingredient
+# silently replaced the others and a correct mixed purchase was scored as short.
+
+SMALL_RICE = {
+    "external_id": "p-rice-small",
+    "package_size": 300,
+    "package_unit": "g",
+    "price_sgd": 2.5,
+    "ingredient_keys": ["brown_rice"],
+}
+
+
+@pytest.fixture
+def mixed_catalogs():
+    return Catalogs.build(RECIPES, PRODUCTS + [SMALL_RICE], INGREDIENTS)
+
+
+def mixed_episode(**overrides):
+    return episode(**{"scenario.fairprice_product_ids": ["p-rice", "p-sesame", "p-rice-small"], **overrides})
+
+
+def rice_lines(*lines):
+    """800 g of rice needed; each entry is (product, packages, price, pantry_deduction)."""
+    shopping = [
+        {
+            "ingredient_id": "brown_rice",
+            "unit": "g",
+            "required_quantity": 800,
+            "pantry_deduction": deduction,
+            "product_id": product,
+            "packages": packages,
+            "line_cost_sgd": price * packages,
+        }
+        for product, packages, price, deduction in lines
+    ]
+    return response(
+        plan={
+            "assignments": [{"slot_id": "mon-dinner", "recipe_id": "safe-bowl", "servings": 8}],
+            "shopping": shopping,
+            "total_cost_sgd": sum(line["line_cost_sgd"] for line in shopping),
+        }
+    )
+
+
+def test_a_mixed_package_purchase_that_covers_demand_passes(mixed_catalogs):
+    # 500 g + 300 g = 800 g, exactly the demand. Only the last line, 300 g, was counted before.
+    resp = rice_lines(("p-rice", 1, 4.0, 0), ("p-rice-small", 1, 2.5, 0))
+    result = score(mixed_episode(), resp, mixed_catalogs)
+    assert result.strict_success, result.failed_codes + result.indeterminate_codes
+
+
+def test_a_mixed_package_purchase_that_falls_short_still_fails(mixed_catalogs):
+    resp = rice_lines(("p-rice", 1, 4.0, 0), ("p-rice-small", 0, 2.5, 0))
+    assert "packages_cover_demand" in score(mixed_episode(), resp, mixed_catalogs).failed_codes
+
+
+def test_pantry_deduction_is_summed_across_an_ingredients_lines(mixed_catalogs):
+    ep = mixed_episode(
+        **{
+            "gold.pantry_ground_truth": {
+                "deductible": [{"ingredient_id": "brown_rice", "quantity": 300, "unit": "g"}],
+                "not_deductible_unknown_quantity": [],
+            }
+        }
+    )
+    # 300 g in the pantry, stated once; 500 g bought covers the remaining 500 g.
+    once = rice_lines(("p-rice", 1, 4.0, 300), ("p-rice-small", 0, 2.5, 0))
+    assert score(ep, once, mixed_catalogs).strict_success
+
+    # Repeating the deduction on every line claims 600 g that the pantry does not hold.
+    repeated = rice_lines(("p-rice", 1, 4.0, 300), ("p-rice-small", 0, 2.5, 300))
+    assert "pantry_known_deduction_correct" in score(ep, repeated, mixed_catalogs).failed_codes
+
+
+def test_an_unknown_quantity_deducted_on_any_line_fails(mixed_catalogs):
+    ep = mixed_episode(
+        **{
+            "gold.pantry_ground_truth": {
+                "deductible": [],
+                "not_deductible_unknown_quantity": ["brown_rice"],
+            }
+        }
+    )
+    # The deducting line comes first: a scorer that keeps only the last line misses it.
+    resp = rice_lines(("p-rice-small", 1, 2.5, 50), ("p-rice", 1, 4.0, 0))
+    assert "pantry_unknown_not_deducted" in score(ep, resp, mixed_catalogs).failed_codes
+
+
 def test_line_cost_must_match_the_frozen_price(catalogs):
     resp = response(
         plan={

@@ -30,7 +30,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
-from app.evaluation.common_output import CommonEpisodeResponse
+from app.evaluation.common_output import CommonEpisodeResponse, ShoppingLine
 
 CheckOutcome = Literal["passed", "failed", "indeterminate", "not_applicable"]
 
@@ -387,7 +387,16 @@ def _check_shopping(
     known = {row["ingredient_id"]: (float(row["quantity"]), row["unit"]) for row in gold_pantry.get("deductible") or []}
 
     demand, unit_problems = _plan_demand(response, catalogs)
-    lines = {line.ingredient_id: line for line in plan.shopping}
+    # One ingredient may be bought as several package sizes (ADR-0021), which
+    # the output expresses as several lines. Keying lines by ingredient kept only
+    # the last one, so a correct mixed purchase was scored as short.
+    lines: dict[str, list[ShoppingLine]] = {}
+    for line in plan.shopping:
+        lines.setdefault(line.ingredient_id, []).append(line)
+
+    def deducted(name: str) -> float:
+        return sum(line.pantry_deduction for line in lines.get(name, []))
+
     checks: list[Check] = []
 
     missing = sorted(set(demand) - set(lines))
@@ -401,7 +410,7 @@ def _check_shopping(
         )
     )
 
-    deducted_unknown = sorted(name for name in unknown if name in lines and lines[name].pantry_deduction > 0)
+    deducted_unknown = sorted(name for name in unknown if deducted(name) > 0)
     checks.append(
         Check(
             "pantry_unknown_not_deducted",
@@ -414,16 +423,16 @@ def _check_shopping(
 
     wrong: list[str] = []
     for name, (quantity, unit) in known.items():
-        line = lines.get(name)
-        if line is None:
+        if name not in lines:
             continue
-        expected = compatible(quantity, unit, line.unit)
+        stated_units = {line.unit for line in lines[name]}
+        expected = compatible(quantity, unit, next(iter(stated_units))) if len(stated_units) == 1 else None
         if expected is None:
             wrong.append(f"{name} (units not comparable)")
-        elif abs(line.pantry_deduction - expected) > max(
+        elif abs(deducted(name) - expected) > max(
             tolerances.quantity_relative * max(expected, 1.0), tolerances.quantity_relative
         ):
-            wrong.append(f"{name} deducted {line.pantry_deduction}, expected {expected}")
+            wrong.append(f"{name} deducted {deducted(name)}, expected {expected}")
     checks.append(
         Check(
             "pantry_known_deduction_correct",
@@ -435,18 +444,25 @@ def _check_shopping(
     short: list[str] = []
     indeterminate: list[str] = []
     for name, (quantity, unit) in demand.items():
-        line = lines.get(name)
-        if line is None or line.product_id is None:
+        bought = [
+            (line, catalogs.products[line.product_id])
+            for line in lines.get(name, [])
+            if line.product_id is not None and line.product_id in catalogs.products
+        ]
+        if not bought:
             continue
-        product = catalogs.products.get(line.product_id)
-        if product is None:
+        remaining = max(quantity - deducted(name), 0.0)
+        amounts = [
+            compatible(float(product["package_size"]) * line.packages, product["package_unit"], unit)
+            for line, product in bought
+        ]
+        if any(amount is None for amount in amounts):
+            units = sorted({product["package_unit"] for _, product in bought})
+            indeterminate.append(f"{name} ({', '.join(units)} vs {unit})")
             continue
-        remaining = max(quantity - line.pantry_deduction, 0.0)
-        supplied = compatible(float(product["package_size"]) * line.packages, product["package_unit"], unit)
-        if supplied is None:
-            indeterminate.append(f"{name} ({product['package_unit']} vs {unit})")
-        elif supplied + tolerances.quantity_relative < remaining:
-            short.append(f"{name}: {supplied} supplied, {remaining} needed")
+        supplied = sum(amounts)
+        if supplied + tolerances.quantity_relative < remaining:
+            short.append(f"{name}: {supplied:g} supplied, {remaining:g} needed")
     outcome: CheckOutcome = "passed"
     detail = "package counts cover the remaining demand"
     if short:

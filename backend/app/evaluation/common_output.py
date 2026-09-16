@@ -49,6 +49,14 @@ class SlotAssignment(StrictModel):
 
 
 class ShoppingLine(StrictModel):
+    """One product purchase for one ingredient.
+
+    An ingredient bought in several package sizes appears as several lines
+    (ADR-0021). Across those lines, supplied quantities and `pantry_deduction`
+    both add up: state the ingredient's pantry deduction once, on any one of its
+    lines, and zero on the others.
+    """
+
     ingredient_id: str
     required_quantity: float | None = Field(default=None, ge=0)
     unit: str | None = None
