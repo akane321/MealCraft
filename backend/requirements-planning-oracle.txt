@@ -1,2 +1,2 @@
 # Optional offline solver. Does not change production dependencies.
-ortools==9.14.6206
+ortools==9.15.6755
