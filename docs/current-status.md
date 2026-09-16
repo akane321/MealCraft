@@ -1,10 +1,10 @@
 # MealCraft Current Status
 
-> Last verified public snapshot: 2026-09-10
+> Last verified public snapshot: 2026-09-16
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `f979052` - `feat: add durable bounded agent runs (#37)`
+> Verified remote `main`: `55df434`
 
 ## How to Read This Document
 
@@ -23,9 +23,10 @@
 | Household profile | One shared profile, member servings and safety constraints, shared defaults, immutable versions, profile-linked plans | Does not generate separate dishes for each member |
 | Identity and sessions | Argon2id credentials with upgrade-on-login, atomic account and default-household registration, login lockout, digest-only opaque sessions, per-session CSRF, current-actor lookup, session listing, logout and per-device revocation | **Authentication is not enforced on any business route.** Profile, Plan, Dashboard, Agent, Replanning and Shopping remain anonymous and single-tenant; no private domain table carries an owner column, and the frontend has no login page |
 | Recipe catalog | 30 validated recipes and 34 normalized ingredients imported idempotently | Smaller and less dimensional than the final benchmark target |
+| Data engineering | Independent `data-engineering/` pipeline with a frozen schema v1, a four-condition release gate, and a first versioned release of 8,718 recipes and 443 canonical ingredients selected from 1,642,647 upstream records | **Not imported into the runtime catalog.** Every released recipe has `nutrition.status = not_computed`, and `dietary_tags`, `meal_types`, `cuisine`, `methods`, `equipment` and `difficulty` are empty for all of them; allergen labels are deterministic-rule-only with no reviewed gold subset |
 | Agent | Persistent sessions, bilingual scope isolation, structured constraints, typed clarification, confirmation, bounded tool authorization, grounded claims, Agent-driven replanning, and synchronous per-action `AgentRun` with input digests, explicit deadlines and budgets, durable checkpoints, ordered tool receipts, idempotent replay and run list/detail/cancel APIs | Default parser is deterministic fixture mode. Runs are synchronous: asynchronous pause/resume/retry, external-tool evidence, natural-language claim extraction and formal live-model evidence are deferred. `AgentRun.household_id` is nullable and is not yet bound to an authenticated actor |
 | Weekly planning | Seven persisted main meals plus independently callable Planning v2 constraint compilation, bounded Beam Search, conservative nutrition bounds, independent shopping/budget recomputation, and a small exhaustive oracle | The product API still uses the current baseline path; Beam parameters are untuned and the oracle proves results only for small packets under the fixed shopping policy |
-| FairPrice | Live lookup, normalized results, 15-minute PostgreSQL cache, explicit fixture mode | Live-site robustness requires further observation |
+| FairPrice | Live lookup verified against the live site, normalized results, 15-minute PostgreSQL cache, fixture fallback on provider error with a warning and a `degraded` trace, source and cache state shown on the products page | An empty live result is converted into a provider error and answered with fixture products, so an ingredient FairPrice does not stock is presented with invented prices. The failure path also skips a merely-expired cache entry in favour of fixture data, and no end-to-end disconnected run has been performed |
 | Shopping List | Aggregated demand, known-quantity deduction, package rounding, price and budget results | Unknown pantry quantities are never deducted |
 | Check-in and Dashboard | Planned/completed/skipped states, completed cumulative nutrition KPIs and curves, current-plan comparison, labelled daily detail, completion coverage | Cumulative actuals count completed MealCraft dishes only; planned rows are previews and skipped rows are not counted |
 | Replanning | Preview, confirm/discard, plan revision, event history, local meal changes, price and Shopping List deltas | Broader preference and stress-event semantics remain partial |
@@ -41,6 +42,25 @@
 - 36 bilingual scope developer cases and 12 typed grounding developer cases;
 - two fully covered, leakage-resistant matched-information Evaluation v2 developer packets;
 - 30 recipes and 34 normalized ingredients in the recorded catalog.
+
+### Held-out v2 authoring progress
+
+Three of the planned episodes are authored, all in the `clarification` category
+and none yet reviewed. Authoring is governed by a cross-authoring rule: no
+contributor writes or reviews an episode for a category that evaluates a system
+they own.
+
+Two limits are recorded here because they bound every claim the set can support.
+A paired comparison at the sizes this team can author detects a true difference
+of roughly fifteen percentage points or more; smaller differences would need
+several hundred episodes. Per-category success rates are not reportable at eight
+to twelve episodes a category, so categories serve coverage and error analysis
+rather than per-category comparison.
+
+Episodes may be drafted by an AI agent working from a sealed packet containing
+the catalogs, authoring rules and checker but no implementation of any system
+under test. Each draft is read and accepted by an eligible human contributor,
+whose role is what `authored_by` records.
 
 ### Held-out planner comparison
 
