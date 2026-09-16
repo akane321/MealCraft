@@ -44,6 +44,7 @@ class MealPlan(Base):
             name="meal_plans_consumed_total_nonnegative",
         ),
         Index("meal_plans_start_created_idx", "start_date", "created_at"),
+        Index("meal_plans_household_created_idx", "household_id", "created_at", "id"),
         Index("meal_plans_household_profile_idx", "household_profile_id", "household_profile_version"),
         ForeignKeyConstraint(
             ["household_profile_id", "household_profile_version"],
@@ -59,6 +60,11 @@ class MealPlan(Base):
     )
 
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
+    household_id: Mapped[int] = mapped_column(
+        BIGINT_ID,
+        ForeignKey("households.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     start_date: Mapped[date] = mapped_column(Date)
     end_date: Mapped[date] = mapped_column(Date)
     day_count: Mapped[int] = mapped_column(Integer, default=7)

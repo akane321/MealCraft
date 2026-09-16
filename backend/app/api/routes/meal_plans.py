@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.api.routes.auth import CurrentHouseholdCsrfDependency, CurrentHouseholdDependency
 from app.db.session import get_db_session
 from app.planning.grocery_estimator import GroceryEstimator
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
@@ -36,7 +37,7 @@ router = APIRouter(prefix="/plans", tags=["meal plans"])
 DatabaseDependency = Annotated[Session, Depends(get_db_session)]
 
 
-def get_meal_plan_service(database: DatabaseDependency) -> WeeklyMealPlanService:
+def build_meal_plan_service(database: Session, household_id: int) -> WeeklyMealPlanService:
     recipe_repository = RecipeRepository(database)
     product_service = create_product_search_service(ProductSnapshotRepository(database))
     recommendation_service = RecipeRecommendationService(
@@ -44,17 +45,24 @@ def get_meal_plan_service(database: DatabaseDependency) -> WeeklyMealPlanService
         grocery_estimator=GroceryEstimator(product_service),
     )
     return WeeklyMealPlanService(
-        repository=MealPlanRepository(database),
+        repository=MealPlanRepository(database, household_id=household_id),
         recipe_repository=recipe_repository,
         recommendation_service=recommendation_service,
         grocery_aggregator=WeeklyGroceryAggregator(product_service),
     )
 
 
+def get_meal_plan_service(
+    database: DatabaseDependency,
+    current: CurrentHouseholdDependency,
+) -> WeeklyMealPlanService:
+    return build_meal_plan_service(database, current.active_membership.household_id)
+
+
 MealPlanServiceDependency = Annotated[WeeklyMealPlanService, Depends(get_meal_plan_service)]
 
 
-def get_replanning_service(database: DatabaseDependency) -> MealPlanReplanningService:
+def build_replanning_service(database: Session, household_id: int) -> MealPlanReplanningService:
     recipe_repository = RecipeRepository(database)
     product_service = create_product_search_service(ProductSnapshotRepository(database))
     recommendation_service = RecipeRecommendationService(
@@ -62,11 +70,18 @@ def get_replanning_service(database: DatabaseDependency) -> MealPlanReplanningSe
         grocery_estimator=GroceryEstimator(product_service),
     )
     return MealPlanReplanningService(
-        repository=MealPlanRepository(database),
+        repository=MealPlanRepository(database, household_id=household_id),
         recipe_repository=recipe_repository,
         recommendation_service=recommendation_service,
         grocery_aggregator=WeeklyGroceryAggregator(product_service),
     )
+
+
+def get_replanning_service(
+    database: DatabaseDependency,
+    current: CurrentHouseholdDependency,
+) -> MealPlanReplanningService:
+    return build_replanning_service(database, current.active_membership.household_id)
 
 
 ReplanningServiceDependency = Annotated[MealPlanReplanningService, Depends(get_replanning_service)]
@@ -76,6 +91,7 @@ ReplanningServiceDependency = Annotated[MealPlanReplanningService, Depends(get_r
 def generate_weekly_plan(
     constraints: WeeklyMealPlanRequest,
     service: MealPlanServiceDependency,
+    _current: CurrentHouseholdCsrfDependency,
 ) -> WeeklyMealPlanResponse:
     try:
         return service.generate(constraints)
@@ -100,6 +116,7 @@ def preview_meal_plan_change(
     plan_id: int,
     request: MealPlanReplanPreviewRequest,
     service: ReplanningServiceDependency,
+    _current: CurrentHouseholdCsrfDependency,
 ) -> MealPlanReplanEventResponse:
     try:
         return service.preview(plan_id=plan_id, request=request)
@@ -117,6 +134,7 @@ def confirm_meal_plan_change(
     plan_id: int,
     event_id: int,
     service: ReplanningServiceDependency,
+    _current: CurrentHouseholdCsrfDependency,
 ) -> MealPlanReplanConfirmationResponse:
     try:
         return service.confirm(plan_id=plan_id, event_id=event_id)
@@ -152,6 +170,7 @@ def update_meal_status(
     entry_id: int,
     update: MealPlanEntryStatusUpdate,
     service: MealPlanServiceDependency,
+    _current: CurrentHouseholdCsrfDependency,
 ) -> WeeklyMealPlanResponse:
     plan = service.update_entry_status(
         plan_id=plan_id,

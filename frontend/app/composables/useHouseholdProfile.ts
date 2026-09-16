@@ -8,6 +8,7 @@ import type {
 
 export function useHouseholdProfile() {
   const config = useRuntimeConfig();
+  const apiFetch = useApiFetch();
   const current = ref<HouseholdProfile | null>(null);
   const planResult = ref<HouseholdProfilePlanResult | null>(null);
   const errorMessage = ref<string | null>(null);
@@ -23,7 +24,7 @@ export function useHouseholdProfile() {
     isLoading.value = true;
     errorMessage.value = null;
     try {
-      current.value = await $fetch<HouseholdProfile>(
+      current.value = await apiFetch<HouseholdProfile>(
         `${config.public.apiBase}/api/household-profiles/current`,
       );
     }
@@ -51,13 +52,13 @@ export function useHouseholdProfile() {
           ...payload,
           expected_version: current.value.current_version,
         };
-        current.value = await $fetch<HouseholdProfile>(
+        current.value = await apiFetch<HouseholdProfile>(
           `${config.public.apiBase}/api/household-profiles/${current.value.id}`,
           { method: "PUT", body: update },
         );
       }
       else {
-        current.value = await $fetch<HouseholdProfile>(
+        current.value = await apiFetch<HouseholdProfile>(
           `${config.public.apiBase}/api/household-profiles`,
           { method: "POST", body: payload },
         );
@@ -78,7 +79,7 @@ export function useHouseholdProfile() {
     isPlanning.value = true;
     errorMessage.value = null;
     try {
-      planResult.value = await $fetch<HouseholdProfilePlanResult>(
+      planResult.value = await apiFetch<HouseholdProfilePlanResult>(
         `${config.public.apiBase}/api/household-profiles/${current.value.id}/plans`,
         { method: "POST", body: payload },
       );
@@ -99,7 +100,7 @@ export function useHouseholdProfile() {
     isPlanning.value = true;
     errorMessage.value = null;
     try {
-      planResult.value = await $fetch<HouseholdProfilePlanResult>(
+      planResult.value = await apiFetch<HouseholdProfilePlanResult>(
         `${config.public.apiBase}/api/household-profiles/${current.value.id}/plans/${current.value.latest_plan_id}/replan`,
         { method: "POST", body: payload },
       );
