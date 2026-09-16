@@ -218,6 +218,34 @@ def test_unassigned_required_slot_fails(catalogs):
     assert "required_slots_assigned" in result.failed_codes
 
 
+def test_a_meal_must_feed_the_whole_household(catalogs):
+    """Cooking for one in a household of two halves the shopping and must not pass."""
+    one_serving = response(
+        plan={
+            "assignments": [{"slot_id": "mon-dinner", "recipe_id": "safe-bowl", "servings": 1}],
+            "shopping": [
+                {
+                    "ingredient_id": "brown_rice",
+                    "unit": "g",
+                    "required_quantity": 100,
+                    "product_id": "p-rice",
+                    "packages": 1,
+                    "line_cost_sgd": 4.0,
+                }
+            ],
+            "total_cost_sgd": 4.0,
+        }
+    )
+    result = score(episode(), one_serving, catalogs)
+    assert "servings_feed_household" in result.failed_codes
+    assert not result.strict_success
+
+
+def test_a_feasible_episode_without_a_household_size_cannot_be_scored(catalogs):
+    ep = episode(**{"scenario.household_profile.household_size": None})
+    assert "servings_feed_household" in score(ep, response(), catalogs).indeterminate_codes
+
+
 def test_recipe_outside_the_frozen_pool_fails(catalogs):
     resp = response(
         plan={
