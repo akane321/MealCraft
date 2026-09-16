@@ -11,8 +11,9 @@ from app.orchestration.contracts import AgentRunStatus, ToolEffect, ToolRunStatu
 
 
 class AgentRunRepository:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, *, household_id: int) -> None:
         self.session = session
+        self.household_id = household_id
 
     @staticmethod
     def _load_options():
@@ -24,7 +25,7 @@ class AgentRunRepository:
     def get(self, run_id: int) -> AgentRun | None:
         statement = (
             select(AgentRun)
-            .where(AgentRun.id == run_id)
+            .where(AgentRun.id == run_id, AgentRun.household_id == self.household_id)
             .options(*self._load_options())
             .execution_options(populate_existing=True)
         )
@@ -33,7 +34,11 @@ class AgentRunRepository:
     def get_for_session(self, agent_session_id: int, run_id: int) -> AgentRun | None:
         statement = (
             select(AgentRun)
-            .where(AgentRun.id == run_id, AgentRun.agent_session_id == agent_session_id)
+            .where(
+                AgentRun.id == run_id,
+                AgentRun.agent_session_id == agent_session_id,
+                AgentRun.household_id == self.household_id,
+            )
             .options(*self._load_options())
             .execution_options(populate_existing=True)
         )
@@ -45,6 +50,7 @@ class AgentRunRepository:
             .where(
                 AgentRun.agent_session_id == agent_session_id,
                 AgentRun.idempotency_key == idempotency_key,
+                AgentRun.household_id == self.household_id,
             )
             .options(*self._load_options())
             .execution_options(populate_existing=True)
@@ -54,7 +60,10 @@ class AgentRunRepository:
     def list_for_session(self, agent_session_id: int, *, limit: int = 20) -> list[AgentRun]:
         statement = (
             select(AgentRun)
-            .where(AgentRun.agent_session_id == agent_session_id)
+            .where(
+                AgentRun.agent_session_id == agent_session_id,
+                AgentRun.household_id == self.household_id,
+            )
             .options(*self._load_options())
             .order_by(AgentRun.created_at.desc(), AgentRun.id.desc())
             .limit(limit)
@@ -63,6 +72,8 @@ class AgentRunRepository:
         return list(self.session.scalars(statement).unique().all())
 
     def create(self, **values) -> AgentRun:
+        if values.get("household_id") is None:
+            values["household_id"] = self.household_id
         run = AgentRun(**values)
         self.session.add(run)
         self.session.flush()

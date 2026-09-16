@@ -9,7 +9,8 @@ from app.agent.parser import (
     OpenAIConstraintParser,
     RuleBasedConstraintParser,
 )
-from app.api.routes.meal_plans import get_meal_plan_service, get_replanning_service
+from app.api.routes.auth import CurrentHouseholdCsrfDependency, CurrentHouseholdDependency
+from app.api.routes.meal_plans import build_meal_plan_service, build_replanning_service
 from app.core.config import Settings, get_settings
 from app.db.session import get_db_session
 from app.orchestration.run_lifecycle import AgentRunLifecycleError, AgentRunNotFoundError
@@ -55,17 +56,21 @@ def create_constraint_parser(settings: Settings) -> ConstraintParser:
 def get_agent_service(
     database: Annotated[Session, Depends(get_db_session)],
     settings: Annotated[Settings, Depends(get_settings)],
+    current: CurrentHouseholdDependency,
 ) -> AgentSessionService:
     try:
         parser = create_constraint_parser(settings)
     except AgentConfigurationError as error:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(error)) from error
+    household_id = current.active_membership.household_id
     return AgentSessionService(
-        repository=AgentSessionRepository(database),
-        run_repository=AgentRunRepository(database),
+        repository=AgentSessionRepository(database, household_id=household_id),
+        run_repository=AgentRunRepository(database, household_id=household_id),
         parser=parser,
-        meal_plan_service=get_meal_plan_service(database),
-        replanning_service=get_replanning_service(database),
+        meal_plan_service=build_meal_plan_service(database, household_id),
+        replanning_service=build_replanning_service(database, household_id),
+        actor_user_id=current.user.id,
+        household_id=household_id,
         max_history_messages=settings.agent_max_history_messages,
     )
 
@@ -78,6 +83,7 @@ IdempotencyKey = Annotated[str | None, Header(alias="Idempotency-Key")]
 def create_agent_session(
     payload: AgentMessageInput,
     service: AgentServiceDependency,
+    _current: CurrentHouseholdCsrfDependency,
 ) -> AgentSessionResponse:
     try:
         return service.create(payload.message)
@@ -106,6 +112,7 @@ def reply_to_agent_session(
     session_id: int,
     payload: AgentMessageInput,
     service: AgentServiceDependency,
+    _current: CurrentHouseholdCsrfDependency,
     idempotency_key: IdempotencyKey = None,
 ) -> AgentSessionResponse:
     try:
@@ -123,6 +130,7 @@ def answer_agent_interaction(
     session_id: int,
     payload: AgentInteractionInput,
     service: AgentServiceDependency,
+    _current: CurrentHouseholdCsrfDependency,
     idempotency_key: IdempotencyKey = None,
 ) -> AgentSessionResponse:
     try:
@@ -139,6 +147,7 @@ def answer_agent_interaction(
 def confirm_agent_session(
     session_id: int,
     service: AgentServiceDependency,
+    _current: CurrentHouseholdCsrfDependency,
     idempotency_key: IdempotencyKey = None,
 ) -> AgentConfirmationResponse:
     try:
@@ -157,6 +166,7 @@ def confirm_agent_session(
 def confirm_agent_replan(
     session_id: int,
     service: AgentServiceDependency,
+    _current: CurrentHouseholdCsrfDependency,
     idempotency_key: IdempotencyKey = None,
 ) -> AgentReplanConfirmationResponse:
     try:
@@ -175,6 +185,7 @@ def confirm_agent_replan(
 def discard_agent_replan(
     session_id: int,
     service: AgentServiceDependency,
+    _current: CurrentHouseholdCsrfDependency,
     idempotency_key: IdempotencyKey = None,
 ) -> AgentSessionResponse:
     try:
@@ -208,7 +219,12 @@ def get_agent_run(session_id: int, run_id: int, service: AgentServiceDependency)
 
 
 @router.post("/{session_id}/runs/{run_id}/cancel", response_model=AgentRunResponse)
-def cancel_agent_run(session_id: int, run_id: int, service: AgentServiceDependency) -> AgentRunResponse:
+def cancel_agent_run(
+    session_id: int,
+    run_id: int,
+    service: AgentServiceDependency,
+    _current: CurrentHouseholdCsrfDependency,
+) -> AgentRunResponse:
     try:
         return service.cancel_run(session_id, run_id)
     except AgentRunNotFoundError as error:

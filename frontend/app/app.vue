@@ -1,3 +1,9 @@
+<script setup lang="ts">
+const { actor, load, logout } = useAuth();
+
+onMounted(load);
+</script>
+
 <template>
   <div class="app-shell">
     <header class="app-header">
@@ -12,6 +18,10 @@
           <NuxtLink to="/recipes">Recipes</NuxtLink>
           <NuxtLink to="/products">Products</NuxtLink>
           <NuxtLink to="/">System</NuxtLink>
+          <button v-if="actor" class="nav-auth" type="button" @click="logout">
+            Sign out {{ actor.user.display_name }}
+          </button>
+          <NuxtLink v-else to="/login">Sign in</NuxtLink>
         </nav>
       </div>
     </header>

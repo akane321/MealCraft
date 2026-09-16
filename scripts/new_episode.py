@@ -27,7 +27,11 @@ MANIFEST = SET_DIR / "set-manifest.json"
 EPISODES = SET_DIR / "episodes"
 
 RECIPES = ROOT / "data" / "recipes" / "recipes.json"
-PRODUCTS = ROOT / "data" / "fixtures" / "fairprice-products.json"
+# Must match check_heldout_episodes.py: the held-out set validates against the
+# v2 snapshot, which is the only one carrying multiple package sizes per
+# ingredient. Drawing from v1 here silently produced budget_package skeletons
+# that could not exercise mixed packaging at all.
+PRODUCTS = ROOT / "data" / "fixtures" / "fairprice-products-v2.json"
 
 TODO = "TODO: "
 DEFAULT_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
