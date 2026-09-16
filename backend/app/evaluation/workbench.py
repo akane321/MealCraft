@@ -1,6 +1,7 @@
 """Generate the versioned MealCraft evaluation evidence bundle."""
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -13,6 +14,21 @@ from app.evaluation.runner import evaluate
 
 def _delta(full: dict[str, Any], baseline: dict[str, Any], metric: str) -> float:
     return round(full["metrics"][metric] - baseline["metrics"][metric], 4)
+
+
+def _input_digests(**paths: Path) -> dict[str, dict[str, str]]:
+    """Record what every reported number was computed over.
+
+    `ADR-0020` section 3 requires a generated report to carry the path and
+    SHA-256 of its datasets. Without it a report stays byte-identical while the
+    catalog underneath it changes, and afterwards nobody can say which world a
+    published number came from - not even that it moved.
+    """
+    digests: dict[str, dict[str, str]] = {}
+    for name, path in sorted(paths.items()):
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        digests[name] = {"path": path.as_posix(), "sha256": digest}
+    return digests
 
 
 def build_workbench(
@@ -99,6 +115,16 @@ def build_workbench(
                 rule_only["metrics"]["failure_case_count"] - planner["metrics"]["failure_case_count"]
             ),
         },
+        "inputs": _input_digests(
+            ingredients=ingredient_path,
+            recipes=recipe_path,
+            developer=developer_path,
+            heldout=heldout_path,
+            agent=agent_path,
+            scope=scope_path,
+            grounding=grounding_path,
+            fixtures=fixture_path,
+        ),
         "developer_planning": developer,
         "heldout_greedy_baseline": baseline,
         "heldout_rule_only_baseline": rule_only,
@@ -142,6 +168,18 @@ def write_workbench(report: dict[str, Any], json_path: Path, markdown_path: Path
         f"- Agent provider: **{agent['provider']}**",
         f"- Live API used: **{'yes' if agent['live_api_used'] else 'no'}**",
         f"- Recorded failure cases: **{len(report['failure_registry'])}**",
+        "",
+        "## Inputs",
+        "",
+        "Every number below was computed over exactly these files. A report whose "
+        "inputs differ is a different report, even where the numbers coincide.",
+        "",
+        "| Input | Path | SHA-256 |",
+        "|---|---|---|",
+        *[
+            f"| `{name}` | `{entry['path']}` | `{entry['sha256'][:16]}...` |"
+            for name, entry in report["inputs"].items()
+        ],
         "",
         "## Held-out comparison",
         "",

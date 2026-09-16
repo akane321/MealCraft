@@ -60,6 +60,15 @@ recipe ID. On the same v1 held-out set it recorded zero adjacent repetitions,
 `2.0` mean distinct recipes, zero feasible-case failures and zero hard-constraint
 violations.
 
+The conditions these numbers were computed over are recorded in
+[`conditions-v1.json`](evaluation/workbench/conditions-v1.json): the path and
+SHA-256 of all eight inputs, attested by checking that none of them was
+committed after the report was generated. This comparison is therefore
+attributable to a 30-recipe catalog and a 34-product fixture, and it stays
+attributable once those grow. Growing them supersedes these numbers rather than
+preserving them; a report generated afterwards carries its own input digests and
+is a different report even where a value coincides.
+
 **Read this comparison carefully.** Against the strong reference, MealCraft ties
 on scenario expectation rate (`1.0` each), hard-constraint violations (`0` each)
 and recorded failure cases (`0` each). The only separation is mean distinct
