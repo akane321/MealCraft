@@ -1,0 +1,2014 @@
+ingredient_id,canonical_name,alias,food_group,allergens
+ING_WATER,water,water,liquid,
+ING_WATER,water,cold water,liquid,
+ING_WATER,water,hot water,liquid,
+ING_WATER,water,warm water,liquid,
+ING_WATER,water,boiling water,liquid,
+ING_WATER,water,ice water,liquid,
+ING_WATER,water,lukewarm water,liquid,
+ING_WATER,water,warm water divided,liquid,
+ING_WATER,water,very warm water,liquid,
+ING_ONION,onion,onion,vegetable,
+ING_ONION,onion,onions,vegetable,
+ING_ONION,onion,yellow onion,vegetable,
+ING_ONION,onion,white onion,vegetable,
+ING_ONION,onion,sweet onion,vegetable,
+ING_ONION,onion,cooking onion,vegetable,
+ING_ONION,onion,spanish onion,vegetable,
+ING_ONION,onion,vidalia onion,vegetable,
+ING_RED_ONION,red onion,red onion,vegetable,
+ING_RED_ONION,red onion,red onions,vegetable,
+ING_RED_ONION,red onion,purple onion,vegetable,
+ING_GREEN_ONION,green onion,green onion,vegetable,
+ING_GREEN_ONION,green onion,green onions,vegetable,
+ING_GREEN_ONION,green onion,scallion,vegetable,
+ING_GREEN_ONION,green onion,scallions,vegetable,
+ING_GREEN_ONION,green onion,spring onion,vegetable,
+ING_GREEN_ONION,green onion,spring onions,vegetable,
+ING_SHALLOT,shallot,shallot,vegetable,
+ING_SHALLOT,shallot,shallots,vegetable,
+ING_LEEK,leek,leek,vegetable,
+ING_LEEK,leek,leeks,vegetable,
+ING_GARLIC,garlic,garlic,vegetable,
+ING_GARLIC,garlic,garlic clove,vegetable,
+ING_GARLIC,garlic,garlic cloves,vegetable,
+ING_GARLIC,garlic,clove garlic,vegetable,
+ING_GARLIC,garlic,cloves garlic,vegetable,
+ING_GARLIC,garlic,fresh garlic,vegetable,
+ING_GARLIC,garlic,minced garlic,vegetable,
+ING_GARLIC_POWDER,garlic powder,garlic powder,seasoning,
+ING_GARLIC_POWDER,garlic powder,granulated garlic,seasoning,
+ING_GARLIC_SALT,garlic salt,garlic salt,seasoning,
+ING_TOMATO,tomato,tomato,vegetable,
+ING_TOMATO,tomato,tomatoes,vegetable,
+ING_TOMATO,tomato,plum tomato,vegetable,
+ING_TOMATO,tomato,plum tomatoes,vegetable,
+ING_TOMATO,tomato,roma tomato,vegetable,
+ING_TOMATO,tomato,roma tomatoes,vegetable,
+ING_TOMATO,tomato,cherry tomatoes,vegetable,
+ING_TOMATO,tomato,grape tomatoes,vegetable,
+ING_TOMATO,tomato,fresh tomatoes,vegetable,
+ING_TOMATO,tomato,vine ripened tomatoes,vegetable,
+ING_CANNED_TOMATOES,canned tomatoes,canned tomatoes,vegetable,
+ING_CANNED_TOMATOES,canned tomatoes,can tomatoes,vegetable,
+ING_CANNED_TOMATOES,canned tomatoes,diced tomatoes,vegetable,
+ING_CANNED_TOMATOES,canned tomatoes,can diced tomatoes,vegetable,
+ING_CANNED_TOMATOES,canned tomatoes,crushed tomatoes,vegetable,
+ING_CANNED_TOMATOES,canned tomatoes,whole tomatoes,vegetable,
+ING_CANNED_TOMATOES,canned tomatoes,stewed tomatoes,vegetable,
+ING_CANNED_TOMATOES,canned tomatoes,can stewed tomatoes,vegetable,
+ING_CANNED_TOMATOES,canned tomatoes,petite diced tomatoes,vegetable,
+ING_TOMATO_PASTE,tomato paste,tomato paste,vegetable,
+ING_TOMATO_PASTE,tomato paste,can tomato paste,vegetable,
+ING_TOMATO_SAUCE,tomato sauce,tomato sauce,vegetable,
+ING_TOMATO_SAUCE,tomato sauce,can tomato sauce,vegetable,
+ING_TOMATO_SOUP,condensed tomato soup,condensed tomato soup,prepared,
+ING_TOMATO_SOUP,condensed tomato soup,tomato soup,prepared,
+ING_TOMATO_SOUP,condensed tomato soup,can tomato soup,prepared,
+ING_CELERY,celery,celery,vegetable,
+ING_CELERY,celery,celery stalk,vegetable,
+ING_CELERY,celery,celery stalks,vegetable,
+ING_CELERY,celery,stalk celery,vegetable,
+ING_CELERY,celery,stalks celery,vegetable,
+ING_CELERY,celery,celery rib,vegetable,
+ING_CELERY,celery,celery ribs,vegetable,
+ING_CELERY,celery,rib celery,vegetable,
+ING_CELERY,celery,ribs celery,vegetable,
+ING_CELERY,celery,chopped celery,vegetable,
+ING_CARROT,carrot,carrot,vegetable,
+ING_CARROT,carrot,carrots,vegetable,
+ING_CARROT,carrot,baby carrots,vegetable,
+ING_CARROT,carrot,shredded carrots,vegetable,
+ING_CARROT,carrot,grated carrots,vegetable,
+ING_CARROT,carrot,carrot shredded,vegetable,
+ING_CARROT,carrot,large carrot,vegetable,
+ING_CARROT,carrot,large carrots,vegetable,
+ING_POTATO,potato,potato,vegetable,
+ING_POTATO,potato,potatoes,vegetable,
+ING_POTATO,potato,russet potatoes,vegetable,
+ING_POTATO,potato,baking potatoes,vegetable,
+ING_POTATO,potato,white potatoes,vegetable,
+ING_POTATO,potato,red potatoes,vegetable,
+ING_POTATO,potato,new potatoes,vegetable,
+ING_POTATO,potato,peeled potatoes,vegetable,
+ING_SWEET_POTATO,sweet potato,sweet potato,vegetable,
+ING_SWEET_POTATO,sweet potato,sweet potatoes,vegetable,
+ING_SWEET_POTATO,sweet potato,yam,vegetable,
+ING_SWEET_POTATO,sweet potato,yams,vegetable,
+ING_BELL_PEPPER,bell pepper,bell pepper,vegetable,
+ING_BELL_PEPPER,bell pepper,bell peppers,vegetable,
+ING_BELL_PEPPER,bell pepper,green bell pepper,vegetable,
+ING_BELL_PEPPER,bell pepper,green bell peppers,vegetable,
+ING_BELL_PEPPER,bell pepper,red bell pepper,vegetable,
+ING_BELL_PEPPER,bell pepper,red bell peppers,vegetable,
+ING_BELL_PEPPER,bell pepper,yellow bell pepper,vegetable,
+ING_BELL_PEPPER,bell pepper,sweet pepper,vegetable,
+ING_BELL_PEPPER,bell pepper,sweet peppers,vegetable,
+ING_BELL_PEPPER,bell pepper,green pepper,vegetable,
+ING_BELL_PEPPER,bell pepper,green peppers,vegetable,
+ING_JALAPENO,jalapeno pepper,jalapeno pepper,vegetable,
+ING_JALAPENO,jalapeno pepper,jalapeno,vegetable,
+ING_JALAPENO,jalapeno pepper,jalapenos,vegetable,
+ING_JALAPENO,jalapeno pepper,jalapeno peppers,vegetable,
+ING_JALAPENO,jalapeno pepper,jalapeno chiles,vegetable,
+ING_GREEN_CHILI,green chili,green chili,vegetable,
+ING_GREEN_CHILI,green chili,green chilies,vegetable,
+ING_GREEN_CHILI,green chili,green chiles,vegetable,
+ING_GREEN_CHILI,green chili,can green chilies,vegetable,
+ING_GREEN_CHILI,green chili,diced green chilies,vegetable,
+ING_MUSHROOM,mushroom,mushroom,vegetable,
+ING_MUSHROOM,mushroom,mushrooms,vegetable,
+ING_MUSHROOM,mushroom,button mushrooms,vegetable,
+ING_MUSHROOM,mushroom,white mushrooms,vegetable,
+ING_MUSHROOM,mushroom,cremini mushrooms,vegetable,
+ING_MUSHROOM,mushroom,baby bella mushrooms,vegetable,
+ING_MUSHROOM,mushroom,sliced mushrooms,vegetable,
+ING_MUSHROOM,mushroom,can mushrooms,vegetable,
+ING_MUSHROOM,mushroom,mushrooms sliced,vegetable,
+ING_MUSHROOM_SOUP,condensed cream of mushroom soup,condensed cream of mushroom soup,prepared,
+ING_MUSHROOM_SOUP,condensed cream of mushroom soup,cream of mushroom soup,prepared,
+ING_MUSHROOM_SOUP,condensed cream of mushroom soup,can cream of mushroom soup,prepared,
+ING_MUSHROOM_SOUP,condensed cream of mushroom soup,mushroom soup,prepared,
+ING_CHICKEN_SOUP,condensed cream of chicken soup,condensed cream of chicken soup,prepared,
+ING_CHICKEN_SOUP,condensed cream of chicken soup,cream of chicken soup,prepared,
+ING_CHICKEN_SOUP,condensed cream of chicken soup,can cream of chicken soup,prepared,
+ING_CELERY_SOUP,condensed cream of celery soup,condensed cream of celery soup,prepared,
+ING_CELERY_SOUP,condensed cream of celery soup,cream of celery soup,prepared,
+ING_CELERY_SOUP,condensed cream of celery soup,can cream of celery soup,prepared,
+ING_BROCCOLI,broccoli,broccoli,vegetable,
+ING_BROCCOLI,broccoli,broccoli florets,vegetable,
+ING_BROCCOLI,broccoli,chopped broccoli,vegetable,
+ING_BROCCOLI,broccoli,pkg broccoli,vegetable,
+ING_BROCCOLI,broccoli,package broccoli,vegetable,
+ING_BROCCOLI,broccoli,frozen broccoli,vegetable,
+ING_BROCCOLI,broccoli,broccoli spears,vegetable,
+ING_CAULIFLOWER,cauliflower,cauliflower,vegetable,
+ING_CAULIFLOWER,cauliflower,head cauliflower,vegetable,
+ING_CAULIFLOWER,cauliflower,cauliflower florets,vegetable,
+ING_SPINACH,spinach,spinach,vegetable,
+ING_SPINACH,spinach,baby spinach,vegetable,
+ING_SPINACH,spinach,fresh spinach,vegetable,
+ING_SPINACH,spinach,chopped spinach,vegetable,
+ING_SPINACH,spinach,pkg spinach,vegetable,
+ING_SPINACH,spinach,package spinach,vegetable,
+ING_SPINACH,spinach,frozen spinach,vegetable,
+ING_SPINACH,spinach,spinach leaves,vegetable,
+ING_LETTUCE,lettuce,lettuce,vegetable,
+ING_LETTUCE,lettuce,head lettuce,vegetable,
+ING_LETTUCE,lettuce,iceberg lettuce,vegetable,
+ING_LETTUCE,lettuce,romaine lettuce,vegetable,
+ING_LETTUCE,lettuce,leaf lettuce,vegetable,
+ING_LETTUCE,lettuce,shredded lettuce,vegetable,
+ING_CABBAGE,cabbage,cabbage,vegetable,
+ING_CABBAGE,cabbage,head cabbage,vegetable,
+ING_CABBAGE,cabbage,green cabbage,vegetable,
+ING_CABBAGE,cabbage,shredded cabbage,vegetable,
+ING_CABBAGE,cabbage,napa cabbage,vegetable,
+ING_CUCUMBER,cucumber,cucumber,vegetable,
+ING_CUCUMBER,cucumber,cucumbers,vegetable,
+ING_CUCUMBER,cucumber,english cucumber,vegetable,
+ING_ZUCCHINI,zucchini,zucchini,vegetable,
+ING_ZUCCHINI,zucchini,zucchinis,vegetable,
+ING_ZUCCHINI,zucchini,courgette,vegetable,
+ING_YELLOW_SQUASH,yellow squash,yellow squash,vegetable,
+ING_YELLOW_SQUASH,yellow squash,summer squash,vegetable,
+ING_YELLOW_SQUASH,yellow squash,crookneck squash,vegetable,
+ING_BUTTERNUT_SQUASH,butternut squash,butternut squash,vegetable,
+ING_CORN,corn,corn,vegetable,
+ING_CORN,corn,whole kernel corn,vegetable,
+ING_CORN,corn,kernel corn,vegetable,
+ING_CORN,corn,corn kernels,vegetable,
+ING_CORN,corn,sweet corn,vegetable,
+ING_CORN,corn,frozen corn,vegetable,
+ING_CORN,corn,can corn,vegetable,
+ING_CORN,corn,can whole kernel corn,vegetable,
+ING_CREAMED_CORN,cream style corn,cream style corn,vegetable,
+ING_CREAMED_CORN,cream style corn,creamed corn,vegetable,
+ING_CREAMED_CORN,cream style corn,can cream style corn,vegetable,
+ING_PEAS,peas,peas,vegetable,
+ING_PEAS,peas,green peas,vegetable,
+ING_PEAS,peas,frozen peas,vegetable,
+ING_PEAS,peas,sweet peas,vegetable,
+ING_PEAS,peas,english peas,vegetable,
+ING_GREEN_BEANS,green beans,green beans,vegetable,
+ING_GREEN_BEANS,green beans,green bean,vegetable,
+ING_GREEN_BEANS,green beans,can green beans,vegetable,
+ING_GREEN_BEANS,green beans,frozen green beans,vegetable,
+ING_GREEN_BEANS,green beans,french green beans,vegetable,
+ING_GREEN_BEANS,green beans,cut green beans,vegetable,
+ING_ASPARAGUS,asparagus,asparagus,vegetable,
+ING_ASPARAGUS,asparagus,asparagus spears,vegetable,
+ING_EGGPLANT,eggplant,eggplant,vegetable,
+ING_EGGPLANT,eggplant,aubergine,vegetable,
+ING_AVOCADO,avocado,avocado,fruit,
+ING_AVOCADO,avocado,avocados,fruit,
+ING_AVOCADO,avocado,ripe avocado,fruit,
+ING_AVOCADO,avocado,hass avocado,fruit,
+ING_PUMPKIN,pumpkin,pumpkin,vegetable,
+ING_PUMPKIN,pumpkin,can pumpkin,vegetable,
+ING_PUMPKIN,pumpkin,pumpkin puree,vegetable,
+ING_PUMPKIN,pumpkin,canned pumpkin,vegetable,
+ING_CUCUMBER_PICKLE,pickle,pickle,vegetable,
+ING_CUCUMBER_PICKLE,pickle,pickles,vegetable,
+ING_CUCUMBER_PICKLE,pickle,dill pickle,vegetable,
+ING_CUCUMBER_PICKLE,pickle,dill pickles,vegetable,
+ING_WATER_CHESTNUT,water chestnut,water chestnut,vegetable,
+ING_WATER_CHESTNUT,water chestnut,water chestnuts,vegetable,
+ING_WATER_CHESTNUT,water chestnut,can water chestnuts,vegetable,
+ING_OLIVE,olive,olive,vegetable,
+ING_OLIVE,olive,olives,vegetable,
+ING_OLIVE,olive,black olives,vegetable,
+ING_OLIVE,olive,can black olives,vegetable,
+ING_OLIVE,olive,ripe olives,vegetable,
+ING_OLIVE,olive,green olives,vegetable,
+ING_OLIVE,olive,sliced olives,vegetable,
+ING_OLIVE,olive,kalamata olives,vegetable,
+ING_PIMENTO,pimento,pimento,vegetable,
+ING_PIMENTO,pimento,pimentos,vegetable,
+ING_PIMENTO,pimento,pimiento,vegetable,
+ING_PIMENTO,pimento,jar pimento,vegetable,
+ING_PIMENTO,pimento,jar pimentos,vegetable,
+ING_MIXED_VEGETABLES,mixed vegetables,mixed vegetables,vegetable,
+ING_MIXED_VEGETABLES,mixed vegetables,frozen mixed vegetables,vegetable,
+ING_MIXED_VEGETABLES,mixed vegetables,vegetables,vegetable,
+ING_MIXED_VEGETABLES,mixed vegetables,veggies,vegetable,
+ING_PARSLEY,parsley,parsley,herb,
+ING_PARSLEY,parsley,fresh parsley,herb,
+ING_PARSLEY,parsley,parsley flakes,herb,
+ING_PARSLEY,parsley,dried parsley,herb,
+ING_PARSLEY,parsley,chopped parsley,herb,
+ING_PARSLEY,parsley,flat leaf parsley,herb,
+ING_PARSLEY,parsley,flat-leaf parsley,herb,
+ING_PARSLEY,parsley,italian parsley,herb,
+ING_PARSLEY,parsley,curly parsley,herb,
+ING_CILANTRO,cilantro,cilantro,herb,
+ING_CILANTRO,cilantro,fresh cilantro,herb,
+ING_CILANTRO,cilantro,cilantro leaves,herb,
+ING_CILANTRO,cilantro,coriander leaves,herb,
+ING_BASIL,basil,basil,herb,
+ING_BASIL,basil,fresh basil,herb,
+ING_BASIL,basil,dried basil,herb,
+ING_BASIL,basil,basil leaves,herb,
+ING_BASIL,basil,sweet basil,herb,
+ING_MINT,mint,mint,herb,
+ING_MINT,mint,fresh mint,herb,
+ING_MINT,mint,mint leaves,herb,
+ING_MINT,mint,spearmint,herb,
+ING_CHIVES,chives,chives,herb,
+ING_CHIVES,chives,fresh chives,herb,
+ING_CHIVES,chives,chopped chives,herb,
+ING_DILL,dill,dill,herb,
+ING_DILL,dill,fresh dill,herb,
+ING_DILL,dill,dill weed,herb,
+ING_DILL,dill,dried dill,herb,
+ING_ROSEMARY,rosemary,rosemary,herb,
+ING_ROSEMARY,rosemary,fresh rosemary,herb,
+ING_ROSEMARY,rosemary,dried rosemary,herb,
+ING_THYME,thyme,thyme,herb,
+ING_THYME,thyme,fresh thyme,herb,
+ING_THYME,thyme,dried thyme,herb,
+ING_THYME,thyme,thyme leaves,herb,
+ING_THYME,thyme,sprigs thyme,herb,
+ING_THYME,thyme,sprig thyme,herb,
+ING_OREGANO,oregano,oregano,herb,
+ING_OREGANO,oregano,dried oregano,herb,
+ING_OREGANO,oregano,fresh oregano,herb,
+ING_OREGANO,oregano,mexican oregano,herb,
+ING_SAGE,sage,sage,herb,
+ING_SAGE,sage,dried sage,herb,
+ING_SAGE,sage,fresh sage,herb,
+ING_SAGE,sage,rubbed sage,herb,
+ING_TARRAGON,tarragon,tarragon,herb,
+ING_TARRAGON,tarragon,dried tarragon,herb,
+ING_MARJORAM,marjoram,marjoram,herb,
+ING_MARJORAM,marjoram,dried marjoram,herb,
+ING_BAY_LEAF,bay leaf,bay leaf,herb,
+ING_BAY_LEAF,bay leaf,bay leaves,herb,
+ING_BAY_LEAF,bay leaf,dried bay leaf,herb,
+ING_SALT,salt,salt,seasoning,
+ING_SALT,salt,table salt,seasoning,
+ING_SALT,salt,kosher salt,seasoning,
+ING_SALT,salt,sea salt,seasoning,
+ING_SALT,salt,coarse salt,seasoning,
+ING_SALT,salt,fine salt,seasoning,
+ING_SALT,salt,iodized salt,seasoning,
+ING_SALT,salt,flaky salt,seasoning,
+ING_SALT,salt,salt to taste,seasoning,
+ING_SALT_AND_PEPPER,salt and pepper,salt and pepper,seasoning,
+ING_SALT_AND_PEPPER,salt and pepper,salt and black pepper,seasoning,
+ING_SALT_AND_PEPPER,salt and pepper,salt & pepper,seasoning,
+ING_SALT_AND_PEPPER,salt and pepper,salt & black pepper,seasoning,
+ING_SALT_AND_PEPPER,salt and pepper,salt and ground black pepper,seasoning,
+ING_SALT_AND_PEPPER,salt and pepper,salt and freshly ground black pepper,seasoning,
+ING_SALT_AND_PEPPER,salt and pepper,salt & freshly ground black pepper,seasoning,
+ING_SALT_AND_PEPPER,salt and pepper,kosher salt and pepper,seasoning,
+ING_SALT_AND_PEPPER,salt and pepper,salt and white pepper,seasoning,
+ING_SALT_AND_PEPPER,salt and pepper,salt pepper,seasoning,
+ING_SALT_AND_PEPPER,salt and pepper,salt and freshly ground pepper,seasoning,
+ING_SEASONED_SALT,seasoned salt,seasoned salt,seasoning,
+ING_SEASONED_SALT,seasoned salt,seasoning salt,seasoning,
+ING_SEASONED_SALT,seasoned salt,lawry's seasoned salt,seasoning,
+ING_CELERY_SALT,celery salt,celery salt,seasoning,
+ING_BLACK_PEPPER,black pepper,black pepper,seasoning,
+ING_BLACK_PEPPER,black pepper,pepper,seasoning,
+ING_BLACK_PEPPER,black pepper,ground black pepper,seasoning,
+ING_BLACK_PEPPER,black pepper,ground pepper,seasoning,
+ING_BLACK_PEPPER,black pepper,cracked black pepper,seasoning,
+ING_BLACK_PEPPER,black pepper,coarse black pepper,seasoning,
+ING_BLACK_PEPPER,black pepper,coarsely ground black pepper,seasoning,
+ING_BLACK_PEPPER,black pepper,fresh ground black pepper,seasoning,
+ING_BLACK_PEPPER,black pepper,fresh ground pepper,seasoning,
+ING_BLACK_PEPPER,black pepper,freshly ground black pepper,seasoning,
+ING_BLACK_PEPPER,black pepper,freshly ground pepper,seasoning,
+ING_BLACK_PEPPER,black pepper,pepper to taste,seasoning,
+ING_BLACK_PEPPER,black pepper,white pepper,seasoning,
+ING_CAYENNE,cayenne pepper,cayenne pepper,seasoning,
+ING_CAYENNE,cayenne pepper,cayenne,seasoning,
+ING_CAYENNE,cayenne pepper,ground cayenne,seasoning,
+ING_CAYENNE,cayenne pepper,ground red pepper,seasoning,
+ING_CAYENNE,cayenne pepper,red pepper flakes,seasoning,
+ING_CAYENNE,cayenne pepper,crushed red pepper,seasoning,
+ING_CAYENNE,cayenne pepper,crushed red pepper flakes,seasoning,
+ING_CAYENNE,cayenne pepper,red pepper flake,seasoning,
+ING_CHILI_POWDER,chili powder,chili powder,seasoning,
+ING_CHILI_POWDER,chili powder,chile powder,seasoning,
+ING_PAPRIKA,paprika,paprika,seasoning,
+ING_PAPRIKA,paprika,sweet paprika,seasoning,
+ING_PAPRIKA,paprika,smoked paprika,seasoning,
+ING_PAPRIKA,paprika,hungarian paprika,seasoning,
+ING_PAPRIKA,paprika,spanish paprika,seasoning,
+ING_CUMIN,cumin,cumin,seasoning,
+ING_CUMIN,cumin,ground cumin,seasoning,
+ING_CUMIN,cumin,cumin seed,seasoning,
+ING_CUMIN,cumin,cumin seeds,seasoning,
+ING_CORIANDER,coriander,coriander,seasoning,
+ING_CORIANDER,coriander,ground coriander,seasoning,
+ING_CORIANDER,coriander,coriander seed,seasoning,
+ING_TURMERIC,turmeric,turmeric,seasoning,
+ING_TURMERIC,turmeric,ground turmeric,seasoning,
+ING_CINNAMON,cinnamon,cinnamon,seasoning,
+ING_CINNAMON,cinnamon,ground cinnamon,seasoning,
+ING_CINNAMON,cinnamon,cinnamon stick,seasoning,
+ING_CINNAMON,cinnamon,cinnamon sticks,seasoning,
+ING_CINNAMON,cinnamon,stick cinnamon,seasoning,
+ING_NUTMEG,nutmeg,nutmeg,seasoning,
+ING_NUTMEG,nutmeg,ground nutmeg,seasoning,
+ING_NUTMEG,nutmeg,freshly grated nutmeg,seasoning,
+ING_CLOVES_SPICE,cloves,cloves,seasoning,
+ING_CLOVES_SPICE,cloves,ground cloves,seasoning,
+ING_CLOVES_SPICE,cloves,whole cloves,seasoning,
+ING_ALLSPICE,allspice,allspice,seasoning,
+ING_ALLSPICE,allspice,ground allspice,seasoning,
+ING_GINGER,ginger,ginger,seasoning,
+ING_GINGER,ginger,fresh ginger,seasoning,
+ING_GINGER,ginger,ground ginger,seasoning,
+ING_GINGER,ginger,gingerroot,seasoning,
+ING_GINGER,ginger,ginger root,seasoning,
+ING_GINGER,ginger,grated ginger,seasoning,
+ING_CARDAMOM,cardamom,cardamom,seasoning,
+ING_CARDAMOM,cardamom,ground cardamom,seasoning,
+ING_CURRY_POWDER,curry powder,curry powder,seasoning,
+ING_CURRY_POWDER,curry powder,curry,seasoning,
+ING_ITALIAN_SEASONING,italian seasoning,italian seasoning,seasoning,
+ING_ITALIAN_SEASONING,italian seasoning,italian herb seasoning,seasoning,
+ING_POULTRY_SEASONING,poultry seasoning,poultry seasoning,seasoning,
+ING_ONION_POWDER,onion powder,onion powder,seasoning,
+ING_DRY_MUSTARD,mustard powder,mustard powder,seasoning,
+ING_DRY_MUSTARD,mustard powder,dry mustard,seasoning,
+ING_DRY_MUSTARD,mustard powder,ground mustard,seasoning,
+ING_DRY_MUSTARD,mustard powder,powdered mustard,seasoning,
+ING_CREAM_OF_TARTAR,cream of tartar,cream of tartar,seasoning,
+ING_PEPPERCORN,peppercorn,peppercorn,seasoning,
+ING_PEPPERCORN,peppercorn,peppercorns,seasoning,
+ING_PEPPERCORN,peppercorn,whole peppercorns,seasoning,
+ING_FENNEL_SEED,fennel seed,fennel seed,seasoning,
+ING_FENNEL_SEED,fennel seed,fennel seeds,seasoning,
+ING_SESAME_SEED,sesame seed,sesame seed,seasoning,sesame
+ING_SESAME_SEED,sesame seed,sesame seeds,seasoning,sesame
+ING_SESAME_SEED,sesame seed,toasted sesame seeds,seasoning,sesame
+ING_POPPY_SEED,poppy seed,poppy seed,seasoning,
+ING_POPPY_SEED,poppy seed,poppy seeds,seasoning,
+ING_CELERY_SEED,celery seed,celery seed,seasoning,
+ING_CELERY_SEED,celery seed,celery seeds,seasoning,
+ING_BAKING_POWDER,baking powder,baking powder,leavening,
+ING_BAKING_POWDER,baking powder,double acting baking powder,leavening,
+ING_BAKING_SODA,baking soda,baking soda,leavening,
+ING_BAKING_SODA,baking soda,soda,leavening,
+ING_BAKING_SODA,baking soda,bicarbonate of soda,leavening,
+ING_BAKING_SODA,baking soda,sodium bicarbonate,leavening,
+ING_YEAST,yeast,yeast,leavening,
+ING_YEAST,yeast,active dry yeast,leavening,
+ING_YEAST,yeast,dry yeast,leavening,
+ING_YEAST,yeast,instant yeast,leavening,
+ING_YEAST,yeast,rapid rise yeast,leavening,
+ING_YEAST,yeast,pkg yeast,leavening,
+ING_YEAST,yeast,package yeast,leavening,
+ING_YEAST,yeast,pkg dry yeast,leavening,
+ING_YEAST,yeast,bread machine yeast,leavening,
+ING_MILK,milk,milk,dairy,milk
+ING_MILK,milk,whole milk,dairy,milk
+ING_MILK,milk,2% milk,dairy,milk
+ING_MILK,milk,1% milk,dairy,milk
+ING_MILK,milk,skim milk,dairy,milk
+ING_MILK,milk,reduced fat milk,dairy,milk
+ING_MILK,milk,low fat milk,dairy,milk
+ING_MILK,milk,nonfat milk,dairy,milk
+ING_MILK,milk,fresh milk,dairy,milk
+ING_BUTTERMILK,buttermilk,buttermilk,dairy,milk
+ING_BUTTERMILK,buttermilk,cultured buttermilk,dairy,milk
+ING_EVAPORATED_MILK,evaporated milk,evaporated milk,dairy,milk
+ING_EVAPORATED_MILK,evaporated milk,can evaporated milk,dairy,milk
+ING_CONDENSED_MILK,sweetened condensed milk,sweetened condensed milk,dairy,milk
+ING_CONDENSED_MILK,sweetened condensed milk,condensed milk,dairy,milk
+ING_CONDENSED_MILK,sweetened condensed milk,can sweetened condensed milk,dairy,milk
+ING_CONDENSED_MILK,sweetened condensed milk,eagle brand milk,dairy,milk
+ING_CONDENSED_MILK,sweetened condensed milk,can condensed milk,dairy,milk
+ING_CREAM,cream,cream,dairy,milk
+ING_CREAM,cream,heavy cream,dairy,milk
+ING_CREAM,cream,heavy whipping cream,dairy,milk
+ING_CREAM,cream,whipping cream,dairy,milk
+ING_CREAM,cream,light cream,dairy,milk
+ING_CREAM,cream,table cream,dairy,milk
+ING_CREAM,cream,double cream,dairy,milk
+ING_SOUR_CREAM,sour cream,sour cream,dairy,milk
+ING_SOUR_CREAM,sour cream,carton sour cream,dairy,milk
+ING_SOUR_CREAM,sour cream,light sour cream,dairy,milk
+ING_SOUR_CREAM,sour cream,reduced fat sour cream,dairy,milk
+ING_SOUR_CREAM,sour cream,pkg sour cream,dairy,milk
+ING_SOUR_CREAM,sour cream,container sour cream,dairy,milk
+ING_YOGURT,yogurt,yogurt,dairy,milk
+ING_YOGURT,yogurt,plain yogurt,dairy,milk
+ING_YOGURT,yogurt,greek yogurt,dairy,milk
+ING_YOGURT,yogurt,plain greek yogurt,dairy,milk
+ING_YOGURT,yogurt,vanilla yogurt,dairy,milk
+ING_YOGURT,yogurt,natural yogurt,dairy,milk
+ING_YOGURT,yogurt,yoghurt,dairy,milk
+ING_BUTTER,butter,butter,dairy,milk
+ING_BUTTER,butter,unsalted butter,dairy,milk
+ING_BUTTER,butter,salted butter,dairy,milk
+ING_BUTTER,butter,sweet cream butter,dairy,milk
+ING_BUTTER,butter,stick butter,dairy,milk
+ING_BUTTER,butter,sticks butter,dairy,milk
+ING_BUTTER,butter,butter softened,dairy,milk
+ING_BUTTER,butter,butter melted,dairy,milk
+ING_BUTTER,butter,real butter,dairy,milk
+ING_MARGARINE,margarine,margarine,fat,
+ING_MARGARINE,margarine,oleo,fat,
+ING_MARGARINE,margarine,stick margarine,fat,
+ING_MARGARINE,margarine,sticks margarine,fat,
+ING_MARGARINE,margarine,stick oleo,fat,
+ING_MARGARINE,margarine,soft margarine,fat,
+ING_BUTTER_OR_MARGARINE,butter or margarine,butter or margarine,fat,
+ING_BUTTER_OR_MARGARINE,butter or margarine,margarine or butter,fat,
+ING_BUTTER_OR_MARGARINE,butter or margarine,butter or oleo,fat,
+ING_BUTTER_OR_MARGARINE,butter or margarine,oleo or butter,fat,
+ING_BUTTER_OR_MARGARINE,butter or margarine,stick butter or margarine,fat,
+ING_CREAM_CHEESE,cream cheese,cream cheese,dairy,milk
+ING_CREAM_CHEESE,cream cheese,pkg cream cheese,dairy,milk
+ING_CREAM_CHEESE,cream cheese,package cream cheese,dairy,milk
+ING_CREAM_CHEESE,cream cheese,block cream cheese,dairy,milk
+ING_CREAM_CHEESE,cream cheese,softened cream cheese,dairy,milk
+ING_CREAM_CHEESE,cream cheese,light cream cheese,dairy,milk
+ING_CREAM_CHEESE,cream cheese,neufchatel,dairy,milk
+ING_CREAM_CHEESE,cream cheese,philadelphia cream cheese,dairy,milk
+ING_CREAM_CHEESE,cream cheese,weight cream cheese,dairy,milk
+ING_CREAM_CHEESE,cream cheese,whipped cream cheese,dairy,milk
+ING_CHEESE,cheese,cheese,dairy,milk
+ING_CHEESE,cheese,shredded cheese,dairy,milk
+ING_CHEESE,cheese,grated cheese,dairy,milk
+ING_CHEDDAR,cheddar cheese,cheddar cheese,dairy,milk
+ING_CHEDDAR,cheddar cheese,cheddar,dairy,milk
+ING_CHEDDAR,cheddar cheese,sharp cheddar,dairy,milk
+ING_CHEDDAR,cheddar cheese,sharp cheddar cheese,dairy,milk
+ING_CHEDDAR,cheddar cheese,sharp cheese,dairy,milk
+ING_CHEDDAR,cheddar cheese,mild cheddar,dairy,milk
+ING_CHEDDAR,cheddar cheese,shredded cheddar,dairy,milk
+ING_CHEDDAR,cheddar cheese,shredded cheddar cheese,dairy,milk
+ING_CHEDDAR,cheddar cheese,grated cheddar,dairy,milk
+ING_MOZZARELLA,mozzarella cheese,mozzarella cheese,dairy,milk
+ING_MOZZARELLA,mozzarella cheese,mozzarella,dairy,milk
+ING_MOZZARELLA,mozzarella cheese,shredded mozzarella,dairy,milk
+ING_MOZZARELLA,mozzarella cheese,part skim mozzarella cheese,dairy,milk
+ING_MOZZARELLA,mozzarella cheese,fresh mozzarella,dairy,milk
+ING_MOZZARELLA,mozzarella cheese,part-skim mozzarella cheese,dairy,milk
+ING_PARMESAN,parmesan cheese,parmesan cheese,dairy,milk
+ING_PARMESAN,parmesan cheese,parmesan,dairy,milk
+ING_PARMESAN,parmesan cheese,grated parmesan,dairy,milk
+ING_PARMESAN,parmesan cheese,grated parmesan cheese,dairy,milk
+ING_PARMESAN,parmesan cheese,parmigiano reggiano,dairy,milk
+ING_PARMESAN,parmesan cheese,shredded parmesan,dairy,milk
+ING_PARMESAN,parmesan cheese,parmesan cheese grated,dairy,milk
+ING_MONTEREY_JACK,monterey jack cheese,monterey jack cheese,dairy,milk
+ING_MONTEREY_JACK,monterey jack cheese,monterey jack,dairy,milk
+ING_MONTEREY_JACK,monterey jack cheese,pepper jack,dairy,milk
+ING_MONTEREY_JACK,monterey jack cheese,pepper jack cheese,dairy,milk
+ING_MONTEREY_JACK,monterey jack cheese,jack cheese,dairy,milk
+ING_SWISS_CHEESE,swiss cheese,swiss cheese,dairy,milk
+ING_SWISS_CHEESE,swiss cheese,swiss,dairy,milk
+ING_FETA,feta cheese,feta cheese,dairy,milk
+ING_FETA,feta cheese,feta,dairy,milk
+ING_FETA,feta cheese,crumbled feta cheese,dairy,milk
+ING_FETA,feta cheese,crumbled feta,dairy,milk
+ING_RICOTTA,ricotta cheese,ricotta cheese,dairy,milk
+ING_RICOTTA,ricotta cheese,ricotta,dairy,milk
+ING_RICOTTA,ricotta cheese,part skim ricotta,dairy,milk
+ING_COTTAGE_CHEESE,cottage cheese,cottage cheese,dairy,milk
+ING_COTTAGE_CHEESE,cottage cheese,small curd cottage cheese,dairy,milk
+ING_PARMESAN_ROMANO,romano cheese,romano cheese,dairy,milk
+ING_PARMESAN_ROMANO,romano cheese,pecorino romano,dairy,milk
+ING_AMERICAN_CHEESE,american cheese,american cheese,dairy,milk
+ING_AMERICAN_CHEESE,american cheese,processed cheese,dairy,milk
+ING_AMERICAN_CHEESE,american cheese,velveeta,dairy,milk
+ING_AMERICAN_CHEESE,american cheese,velveeta cheese,dairy,milk
+ING_GOAT_CHEESE,goat cheese,goat cheese,dairy,milk
+ING_GOAT_CHEESE,goat cheese,chevre,dairy,milk
+ING_EGG,egg,egg,protein,eggs
+ING_EGG,egg,eggs,protein,eggs
+ING_EGG,egg,large egg,protein,eggs
+ING_EGG,egg,large eggs,protein,eggs
+ING_EGG,egg,whole egg,protein,eggs
+ING_EGG,egg,whole eggs,protein,eggs
+ING_EGG,egg,extra large eggs,protein,eggs
+ING_EGG,egg,egg beaten,protein,eggs
+ING_EGG,egg,eggs beaten,protein,eggs
+ING_EGG,egg,beaten egg,protein,eggs
+ING_EGG,egg,beaten eggs,protein,eggs
+ING_EGG,egg,hard boiled eggs,protein,eggs
+ING_EGG,egg,hard cooked eggs,protein,eggs
+ING_EGG_WHITE,egg white,egg white,protein,eggs
+ING_EGG_WHITE,egg white,egg whites,protein,eggs
+ING_EGG_YOLK,egg yolk,egg yolk,protein,eggs
+ING_EGG_YOLK,egg yolk,egg yolks,protein,eggs
+ING_EGG_YOLK,egg yolk,yolk,protein,eggs
+ING_EGG_YOLK,egg yolk,yolks,protein,eggs
+ING_CHICKEN,chicken,chicken,protein,
+ING_CHICKEN,chicken,whole chicken,protein,
+ING_CHICKEN,chicken,cut up chicken,protein,
+ING_CHICKEN,chicken,fryer chicken,protein,
+ING_CHICKEN,chicken,chicken pieces,protein,
+ING_CHICKEN_BREAST,chicken breast,chicken breast,protein,
+ING_CHICKEN_BREAST,chicken breast,chicken breasts,protein,
+ING_CHICKEN_BREAST,chicken breast,boneless chicken breast,protein,
+ING_CHICKEN_BREAST,chicken breast,boneless chicken breasts,protein,
+ING_CHICKEN_BREAST,chicken breast,boneless skinless chicken breast,protein,
+ING_CHICKEN_BREAST,chicken breast,boneless skinless chicken breasts,protein,
+ING_CHICKEN_BREAST,chicken breast,chicken breast halves,protein,
+ING_CHICKEN_BREAST,chicken breast,split chicken breasts,protein,
+ING_CHICKEN_BREAST,chicken breast,skinless boneless chicken breasts,protein,
+ING_CHICKEN_THIGH,chicken thigh,chicken thigh,protein,
+ING_CHICKEN_THIGH,chicken thigh,chicken thighs,protein,
+ING_CHICKEN_THIGH,chicken thigh,boneless chicken thighs,protein,
+ING_CHICKEN_THIGH,chicken thigh,boneless skinless chicken thighs,protein,
+ING_COOKED_CHICKEN,cooked chicken,cooked chicken,protein,
+ING_COOKED_CHICKEN,cooked chicken,diced cooked chicken,protein,
+ING_COOKED_CHICKEN,cooked chicken,shredded chicken,protein,
+ING_COOKED_CHICKEN,cooked chicken,shredded cooked chicken,protein,
+ING_COOKED_CHICKEN,cooked chicken,chopped cooked chicken,protein,
+ING_COOKED_CHICKEN,cooked chicken,rotisserie chicken,protein,
+ING_GROUND_BEEF,ground beef,ground beef,protein,
+ING_GROUND_BEEF,ground beef,lean ground beef,protein,
+ING_GROUND_BEEF,ground beef,extra lean ground beef,protein,
+ING_GROUND_BEEF,ground beef,ground chuck,protein,
+ING_GROUND_BEEF,ground beef,ground round,protein,
+ING_GROUND_BEEF,ground beef,hamburger,protein,
+ING_GROUND_BEEF,ground beef,hamburger meat,protein,
+ING_GROUND_BEEF,ground beef,ground sirloin,protein,
+ING_GROUND_BEEF,ground beef,80/20 ground beef,protein,
+ING_BEEF,beef,beef,protein,
+ING_BEEF,beef,beef chuck,protein,
+ING_BEEF,beef,chuck,protein,
+ING_BEEF,beef,chuck roast,protein,
+ING_BEEF,beef,beef roast,protein,
+ING_BEEF,beef,stew beef,protein,
+ING_BEEF,beef,beef stew meat,protein,
+ING_BEEF,beef,stewing beef,protein,
+ING_BEEF,beef,beef cubes,protein,
+ING_BEEF,beef,sirloin,protein,
+ING_BEEF,beef,beef tips,protein,
+ING_BEEF,beef,round steak,protein,
+ING_BEEF,beef,beef brisket,protein,
+ING_BEEF,beef,brisket,protein,
+ING_CHICKEN_WINGS,chicken wings,chicken wings,protein,
+ING_CHICKEN_WINGS,chicken wings,chicken wing,protein,
+ING_CHICKEN_WINGS,chicken wings,wingettes,protein,
+ING_CHICKEN_WINGS,chicken wings,chicken drumettes,protein,
+ING_BEEF_STEAK,steak,steak,protein,
+ING_BEEF_STEAK,steak,steaks,protein,
+ING_BEEF_STEAK,steak,flank steak,protein,
+ING_BEEF_STEAK,steak,sirloin steak,protein,
+ING_BEEF_STEAK,steak,ribeye,protein,
+ING_BEEF_STEAK,steak,rib eye steak,protein,
+ING_PORK,pork,pork,protein,
+ING_PORK,pork,pork loin,protein,
+ING_PORK,pork,pork shoulder,protein,
+ING_PORK,pork,pork roast,protein,
+ING_PORK,pork,pork tenderloin,protein,
+ING_PORK,pork,pork butt,protein,
+ING_PORK_CHOP,pork chop,pork chop,protein,
+ING_PORK_CHOP,pork chop,pork chops,protein,
+ING_PORK_CHOP,pork chop,boneless pork chops,protein,
+ING_GROUND_PORK,ground pork,ground pork,protein,
+ING_BACON,bacon,bacon,protein,
+ING_BACON,bacon,bacon slices,protein,
+ING_BACON,bacon,bacon strips,protein,
+ING_BACON,bacon,thick cut bacon,protein,
+ING_BACON,bacon,cooked bacon,protein,
+ING_BACON,bacon,crumbled bacon,protein,
+ING_HAM,ham,ham,protein,
+ING_HAM,ham,cooked ham,protein,
+ING_HAM,ham,diced ham,protein,
+ING_HAM,ham,ham steak,protein,
+ING_HAM,ham,deli ham,protein,
+ING_HAM,ham,cubed ham,protein,
+ING_SAUSAGE,sausage,sausage,protein,
+ING_SAUSAGE,sausage,pork sausage,protein,
+ING_SAUSAGE,sausage,italian sausage,protein,
+ING_SAUSAGE,sausage,breakfast sausage,protein,
+ING_SAUSAGE,sausage,ground sausage,protein,
+ING_SAUSAGE,sausage,bulk sausage,protein,
+ING_SAUSAGE,sausage,smoked sausage,protein,
+ING_SAUSAGE,sausage,kielbasa,protein,
+ING_PEPPERONI,pepperoni,pepperoni,protein,
+ING_PEPPERONI,pepperoni,pepperoni slices,protein,
+ING_PEPPERONI,pepperoni,turkey pepperoni,protein,
+ING_PROSCIUTTO,prosciutto,prosciutto,protein,
+ING_PROSCIUTTO,prosciutto,parma ham,protein,
+ING_GROUND_TURKEY,ground turkey,ground turkey,protein,
+ING_GROUND_TURKEY,ground turkey,lean ground turkey,protein,
+ING_TURKEY,turkey,turkey,protein,
+ING_TURKEY,turkey,turkey breast,protein,
+ING_TURKEY,turkey,cooked turkey,protein,
+ING_TURKEY,turkey,roast turkey,protein,
+ING_TURKEY,turkey,diced turkey,protein,
+ING_CHIPPED_BEEF,dried beef,dried beef,protein,
+ING_CHIPPED_BEEF,dried beef,chipped beef,protein,
+ING_CHIPPED_BEEF,dried beef,jar dried beef,protein,
+ING_SHRIMP,shrimp,shrimp,protein,crustaceans
+ING_SHRIMP,shrimp,medium shrimp,protein,crustaceans
+ING_SHRIMP,shrimp,large shrimp,protein,crustaceans
+ING_SHRIMP,shrimp,raw shrimp,protein,crustaceans
+ING_SHRIMP,shrimp,cooked shrimp,protein,crustaceans
+ING_SHRIMP,shrimp,peeled shrimp,protein,crustaceans
+ING_SHRIMP,shrimp,jumbo shrimp,protein,crustaceans
+ING_SHRIMP,shrimp,prawns,protein,crustaceans
+ING_SALMON,salmon,salmon,protein,fish
+ING_SALMON,salmon,salmon fillet,protein,fish
+ING_SALMON,salmon,salmon fillets,protein,fish
+ING_SALMON,salmon,salmon steak,protein,fish
+ING_SALMON,salmon,can salmon,protein,fish
+ING_SALMON,salmon,canned salmon,protein,fish
+ING_TUNA,tuna,tuna,protein,fish
+ING_TUNA,tuna,can tuna,protein,fish
+ING_TUNA,tuna,canned tuna,protein,fish
+ING_TUNA,tuna,tuna fish,protein,fish
+ING_TUNA,tuna,albacore tuna,protein,fish
+ING_TUNA,tuna,chunk light tuna,protein,fish
+ING_CRAB,crab,crab,protein,crustaceans
+ING_CRAB,crab,crabmeat,protein,crustaceans
+ING_CRAB,crab,crab meat,protein,crustaceans
+ING_CRAB,crab,lump crabmeat,protein,crustaceans
+ING_CRAB,crab,imitation crab,protein,crustaceans
+ING_FISH_FILLET,fish fillet,fish fillet,protein,fish
+ING_FISH_FILLET,fish fillet,fish,protein,fish
+ING_FISH_FILLET,fish fillet,fish fillets,protein,fish
+ING_FISH_FILLET,fish fillet,white fish,protein,fish
+ING_FISH_FILLET,fish fillet,cod,protein,fish
+ING_FISH_FILLET,fish fillet,tilapia,protein,fish
+ING_FISH_FILLET,fish fillet,haddock,protein,fish
+ING_ANCHOVY,anchovy,anchovy,protein,fish
+ING_ANCHOVY,anchovy,anchovies,protein,fish
+ING_ANCHOVY,anchovy,anchovy paste,protein,fish
+ING_ANCHOVY,anchovy,anchovy fillets,protein,fish
+ING_BLACK_BEANS,black beans,black beans,protein,
+ING_BLACK_BEANS,black beans,can black beans,protein,
+ING_BLACK_BEANS,black beans,black bean,protein,
+ING_KIDNEY_BEANS,kidney beans,kidney beans,protein,
+ING_KIDNEY_BEANS,kidney beans,can kidney beans,protein,
+ING_KIDNEY_BEANS,kidney beans,red kidney beans,protein,
+ING_KIDNEY_BEANS,kidney beans,dark red kidney beans,protein,
+ING_PINTO_BEANS,pinto beans,pinto beans,protein,
+ING_PINTO_BEANS,pinto beans,can pinto beans,protein,
+ING_CANNELLINI,white beans,white beans,protein,
+ING_CANNELLINI,white beans,cannellini beans,protein,
+ING_CANNELLINI,white beans,great northern beans,protein,
+ING_CANNELLINI,white beans,navy beans,protein,
+ING_BAKED_BEANS,baked beans,baked beans,protein,
+ING_BAKED_BEANS,baked beans,can baked beans,protein,
+ING_BAKED_BEANS,baked beans,pork and beans,protein,
+ING_CHICKPEA,chickpea,chickpea,protein,
+ING_CHICKPEA,chickpea,chickpeas,protein,
+ING_CHICKPEA,chickpea,garbanzo beans,protein,
+ING_CHICKPEA,chickpea,can chickpeas,protein,
+ING_LENTIL,lentil,lentil,protein,
+ING_LENTIL,lentil,lentils,protein,
+ING_LENTIL,lentil,red lentils,protein,
+ING_LENTIL,lentil,green lentils,protein,
+ING_LENTIL,lentil,brown lentils,protein,
+ING_REFRIED_BEANS,refried beans,refried beans,protein,
+ING_REFRIED_BEANS,refried beans,can refried beans,protein,
+ING_BEAN_SPROUTS,bean sprouts,bean sprouts,vegetable,soy
+ING_BEAN_SPROUTS,bean sprouts,bean sprout,vegetable,soy
+ING_BEAN_SPROUTS,bean sprouts,mung bean sprouts,vegetable,soy
+ING_PEANUT,peanut,peanut,protein,peanuts
+ING_PEANUT,peanut,peanuts,protein,peanuts
+ING_PEANUT,peanut,dry roasted peanuts,protein,peanuts
+ING_PEANUT,peanut,salted peanuts,protein,peanuts
+ING_PEANUT,peanut,spanish peanuts,protein,peanuts
+ING_PEANUT_BUTTER,peanut butter,peanut butter,protein,peanuts
+ING_PEANUT_BUTTER,peanut butter,creamy peanut butter,protein,peanuts
+ING_PEANUT_BUTTER,peanut butter,crunchy peanut butter,protein,peanuts
+ING_PEANUT_BUTTER,peanut butter,chunky peanut butter,protein,peanuts
+ING_PEANUT_BUTTER,peanut butter,natural peanut butter,protein,peanuts
+ING_PEANUT_BUTTER,peanut butter,smooth peanut butter,protein,peanuts
+ING_ALMOND,almond,almond,protein,tree_nuts
+ING_ALMOND,almond,almonds,protein,tree_nuts
+ING_ALMOND,almond,sliced almonds,protein,tree_nuts
+ING_ALMOND,almond,slivered almonds,protein,tree_nuts
+ING_ALMOND,almond,chopped almonds,protein,tree_nuts
+ING_ALMOND,almond,whole almonds,protein,tree_nuts
+ING_ALMOND,almond,blanched almonds,protein,tree_nuts
+ING_ALMOND,almond,toasted almonds,protein,tree_nuts
+ING_ALMOND,almond,ground almonds,protein,tree_nuts
+ING_WALNUT,walnut,walnut,protein,tree_nuts
+ING_WALNUT,walnut,walnuts,protein,tree_nuts
+ING_WALNUT,walnut,chopped walnuts,protein,tree_nuts
+ING_WALNUT,walnut,walnut halves,protein,tree_nuts
+ING_WALNUT,walnut,walnut pieces,protein,tree_nuts
+ING_WALNUT,walnut,english walnuts,protein,tree_nuts
+ING_PECAN,pecan,pecan,protein,tree_nuts
+ING_PECAN,pecan,pecans,protein,tree_nuts
+ING_PECAN,pecan,chopped pecans,protein,tree_nuts
+ING_PECAN,pecan,pecan halves,protein,tree_nuts
+ING_PECAN,pecan,pecan pieces,protein,tree_nuts
+ING_PECAN,pecan,toasted pecans,protein,tree_nuts
+ING_CASHEW,cashew,cashew,protein,tree_nuts
+ING_CASHEW,cashew,cashews,protein,tree_nuts
+ING_CASHEW,cashew,cashew nuts,protein,tree_nuts
+ING_CASHEW,cashew,roasted cashews,protein,tree_nuts
+ING_PISTACHIO,pistachio,pistachio,protein,tree_nuts
+ING_PISTACHIO,pistachio,pistachios,protein,tree_nuts
+ING_PISTACHIO,pistachio,shelled pistachios,protein,tree_nuts
+ING_HAZELNUT,hazelnut,hazelnut,protein,tree_nuts
+ING_HAZELNUT,hazelnut,hazelnuts,protein,tree_nuts
+ING_HAZELNUT,hazelnut,filberts,protein,tree_nuts
+ING_PINE_NUT,pine nut,pine nut,protein,tree_nuts
+ING_PINE_NUT,pine nut,pine nuts,protein,tree_nuts
+ING_PINE_NUT,pine nut,pignoli,protein,tree_nuts
+ING_MIXED_NUTS,nuts,nuts,protein,tree_nuts
+ING_MIXED_NUTS,nuts,chopped nuts,protein,tree_nuts
+ING_MIXED_NUTS,nuts,mixed nuts,protein,tree_nuts
+ING_MIXED_NUTS,nuts,nut pieces,protein,tree_nuts
+ING_MIXED_NUTS,nuts,broken nuts,protein,tree_nuts
+ING_SUNFLOWER_SEED,sunflower seed,sunflower seed,protein,
+ING_SUNFLOWER_SEED,sunflower seed,sunflower seeds,protein,
+ING_SUNFLOWER_SEED,sunflower seed,sunflower kernels,protein,
+ING_PUMPKIN_SEED,pumpkin seed,pumpkin seed,protein,
+ING_PUMPKIN_SEED,pumpkin seed,pumpkin seeds,protein,
+ING_PUMPKIN_SEED,pumpkin seed,pepitas,protein,
+ING_FLAX,flaxseed,flaxseed,protein,
+ING_FLAX,flaxseed,flax seed,protein,
+ING_FLAX,flaxseed,ground flaxseed,protein,
+ING_FLAX,flaxseed,flax seeds,protein,
+ING_CHIA,chia seed,chia seed,protein,
+ING_CHIA,chia seed,chia seeds,protein,
+ING_TOFU,tofu,tofu,protein,soy
+ING_TOFU,tofu,firm tofu,protein,soy
+ING_TOFU,tofu,silken tofu,protein,soy
+ING_TOFU,tofu,extra firm tofu,protein,soy
+ING_TOFU,tofu,soft tofu,protein,soy
+ING_WHEAT_GERM,wheat germ,wheat germ,grain,gluten
+ING_WHEAT_GERM,wheat germ,toasted wheat germ,grain,gluten
+ING_FLOUR,all-purpose flour,all-purpose flour,grain,gluten
+ING_FLOUR,all-purpose flour,flour,grain,gluten
+ING_FLOUR,all-purpose flour,all purpose flour,grain,gluten
+ING_FLOUR,all-purpose flour,plain flour,grain,gluten
+ING_FLOUR,all-purpose flour,unbleached flour,grain,gluten
+ING_FLOUR,all-purpose flour,sifted flour,grain,gluten
+ING_FLOUR,all-purpose flour,sifted all purpose flour,grain,gluten
+ING_FLOUR,all-purpose flour,white flour,grain,gluten
+ING_FLOUR,all-purpose flour,unbleached all purpose flour,grain,gluten
+ING_SELF_RISING_FLOUR,self-rising flour,self-rising flour,grain,gluten
+ING_SELF_RISING_FLOUR,self-rising flour,self rising flour,grain,gluten
+ING_SELF_RISING_FLOUR,self-rising flour,self raising flour,grain,gluten
+ING_WHOLE_WHEAT_FLOUR,whole wheat flour,whole wheat flour,grain,gluten
+ING_WHOLE_WHEAT_FLOUR,whole wheat flour,wheat flour,grain,gluten
+ING_WHOLE_WHEAT_FLOUR,whole wheat flour,whole-wheat flour,grain,gluten
+ING_WHOLE_WHEAT_FLOUR,whole wheat flour,graham flour,grain,gluten
+ING_BREAD_FLOUR,bread flour,bread flour,grain,gluten
+ING_CAKE_FLOUR,cake flour,cake flour,grain,gluten
+ING_CORNSTARCH,cornstarch,cornstarch,grain,
+ING_CORNSTARCH,cornstarch,corn starch,grain,
+ING_CORNSTARCH,cornstarch,cornflour,grain,
+ING_CORNMEAL,cornmeal,cornmeal,grain,
+ING_CORNMEAL,cornmeal,corn meal,grain,
+ING_CORNMEAL,cornmeal,yellow cornmeal,grain,
+ING_CORNMEAL,cornmeal,stone ground cornmeal,grain,
+ING_CORN_FLOUR_MASA,masa harina,masa harina,grain,
+ING_CORN_FLOUR_MASA,masa harina,masa,grain,
+ING_RICE,rice,rice,grain,
+ING_RICE,rice,white rice,grain,
+ING_RICE,rice,long grain rice,grain,
+ING_RICE,rice,long grain white rice,grain,
+ING_RICE,rice,jasmine rice,grain,
+ING_RICE,rice,basmati rice,grain,
+ING_RICE,rice,uncooked rice,grain,
+ING_RICE,rice,cooked rice,grain,
+ING_RICE,rice,minute rice,grain,
+ING_RICE,rice,instant rice,grain,
+ING_BROWN_RICE,brown rice,brown rice,grain,
+ING_BROWN_RICE,brown rice,long grain brown rice,grain,
+ING_OATS,oats,oats,grain,gluten_candidate
+ING_OATS,oats,rolled oats,grain,gluten_candidate
+ING_OATS,oats,old fashioned oats,grain,gluten_candidate
+ING_OATS,oats,old-fashioned oats,grain,gluten_candidate
+ING_OATS,oats,quick oats,grain,gluten_candidate
+ING_OATS,oats,quick cooking oats,grain,gluten_candidate
+ING_OATS,oats,quick-cooking oats,grain,gluten_candidate
+ING_OATS,oats,oatmeal,grain,gluten_candidate
+ING_OATS,oats,instant oats,grain,gluten_candidate
+ING_QUINOA,quinoa,quinoa,grain,
+ING_BARLEY,barley,barley,grain,gluten
+ING_BARLEY,barley,pearl barley,grain,gluten
+ING_BARLEY,barley,pearled barley,grain,gluten
+ING_COUSCOUS,couscous,couscous,grain,gluten
+ING_PASTA,pasta,pasta,grain,gluten
+ING_PASTA,pasta,spaghetti,grain,gluten
+ING_PASTA,pasta,penne,grain,gluten
+ING_PASTA,pasta,rigatoni,grain,gluten
+ING_PASTA,pasta,linguine,grain,gluten
+ING_PASTA,pasta,fettuccine,grain,gluten
+ING_PASTA,pasta,rotini,grain,gluten
+ING_PASTA,pasta,bow tie pasta,grain,gluten
+ING_PASTA,pasta,farfalle,grain,gluten
+ING_PASTA,pasta,ziti,grain,gluten
+ING_PASTA,pasta,angel hair pasta,grain,gluten
+ING_PASTA,pasta,lasagna noodles,grain,gluten
+ING_MACARONI,macaroni,macaroni,grain,gluten
+ING_MACARONI,macaroni,elbow macaroni,grain,gluten
+ING_MACARONI,macaroni,elbow noodles,grain,gluten
+ING_MACARONI,macaroni,macaroni noodles,grain,gluten
+ING_EGG_NOODLES,egg noodles,egg noodles,grain,gluten;eggs
+ING_EGG_NOODLES,egg noodles,wide egg noodles,grain,gluten;eggs
+ING_EGG_NOODLES,egg noodles,medium egg noodles,grain,gluten;eggs
+ING_EGG_NOODLES,egg noodles,noodles,grain,gluten;eggs
+ING_BREAD,bread,bread,grain,gluten
+ING_BREAD,bread,white bread,grain,gluten
+ING_BREAD,bread,sliced bread,grain,gluten
+ING_BREAD,bread,sandwich bread,grain,gluten
+ING_BREAD,bread,bread slices,grain,gluten
+ING_BREAD,bread,day old bread,grain,gluten
+ING_BREAD,bread,italian bread,grain,gluten
+ING_BREAD,bread,french bread,grain,gluten
+ING_BREAD,bread,sourdough bread,grain,gluten
+ING_BREADCRUMBS,bread crumbs,bread crumbs,grain,gluten
+ING_BREADCRUMBS,bread crumbs,breadcrumbs,grain,gluten
+ING_BREADCRUMBS,bread crumbs,dry bread crumbs,grain,gluten
+ING_BREADCRUMBS,bread crumbs,fine bread crumbs,grain,gluten
+ING_BREADCRUMBS,bread crumbs,soft bread crumbs,grain,gluten
+ING_BREADCRUMBS,bread crumbs,panko,grain,gluten
+ING_BREADCRUMBS,bread crumbs,panko bread crumbs,grain,gluten
+ING_BREADCRUMBS,bread crumbs,italian bread crumbs,grain,gluten
+ING_BREADCRUMBS,bread crumbs,seasoned bread crumbs,grain,gluten
+ING_CRACKER_CRUMBS,cracker crumbs,cracker crumbs,grain,gluten
+ING_CRACKER_CRUMBS,cracker crumbs,ritz crackers,grain,gluten
+ING_CRACKER_CRUMBS,cracker crumbs,saltine crackers,grain,gluten
+ING_CRACKER_CRUMBS,cracker crumbs,crushed crackers,grain,gluten
+ING_CRACKER_CRUMBS,cracker crumbs,graham crackers,grain,gluten
+ING_CRACKER_CRUMBS,cracker crumbs,graham cracker crumbs,grain,gluten
+ING_CRACKER_CRUMBS,cracker crumbs,crushed graham crackers,grain,gluten
+ING_CROUTONS,croutons,croutons,grain,gluten
+ING_CROUTONS,croutons,seasoned croutons,grain,gluten
+ING_TORTILLA,tortilla,tortilla,grain,
+ING_TORTILLA,tortilla,tortillas,grain,
+ING_TORTILLA,tortilla,flour tortillas,grain,
+ING_TORTILLA,tortilla,corn tortillas,grain,
+ING_TORTILLA,tortilla,flour tortilla,grain,
+ING_TORTILLA,tortilla,corn tortilla,grain,
+ING_TORTILLA_CHIPS,tortilla chips,tortilla chips,grain,
+ING_TORTILLA_CHIPS,tortilla chips,corn chips,grain,
+ING_STUFFING_MIX,stuffing mix,stuffing mix,grain,gluten
+ING_STUFFING_MIX,stuffing mix,herb stuffing mix,grain,gluten
+ING_STUFFING_MIX,stuffing mix,seasoned stuffing mix,grain,gluten
+ING_STUFFING_MIX,stuffing mix,cornbread stuffing mix,grain,gluten
+ING_STUFFING_MIX,stuffing mix,stove top stuffing,grain,gluten
+ING_STUFFING_MIX,stuffing mix,herb seasoned stuffing mix,grain,gluten
+ING_BISCUIT_MIX,baking mix,baking mix,grain,gluten
+ING_BISCUIT_MIX,baking mix,biscuit mix,grain,gluten
+ING_BISCUIT_MIX,baking mix,bisquick,grain,gluten
+ING_BISCUIT_MIX,baking mix,buttermilk baking mix,grain,gluten
+ING_CAKE_MIX,cake mix,cake mix,grain,gluten
+ING_CAKE_MIX,cake mix,yellow cake mix,grain,gluten
+ING_CAKE_MIX,cake mix,white cake mix,grain,gluten
+ING_CAKE_MIX,cake mix,chocolate cake mix,grain,gluten
+ING_CAKE_MIX,cake mix,box cake mix,grain,gluten
+ING_CAKE_MIX,cake mix,box yellow cake mix,grain,gluten
+ING_CAKE_MIX,cake mix,devils food cake mix,grain,gluten
+ING_CAKE_MIX,cake mix,spice cake mix,grain,gluten
+ING_CAKE_MIX,cake mix,german chocolate cake mix,grain,gluten
+ING_PUDDING_MIX,instant pudding mix,instant pudding mix,prepared,
+ING_PUDDING_MIX,instant pudding mix,pudding mix,prepared,
+ING_PUDDING_MIX,instant pudding mix,vanilla pudding mix,prepared,
+ING_PUDDING_MIX,instant pudding mix,vanilla pudding,prepared,
+ING_PUDDING_MIX,instant pudding mix,instant vanilla pudding,prepared,
+ING_PUDDING_MIX,instant pudding mix,chocolate pudding mix,prepared,
+ING_PUDDING_MIX,instant pudding mix,pkg vanilla pudding,prepared,
+ING_PUDDING_MIX,instant pudding mix,instant pudding,prepared,
+ING_PUDDING_MIX,instant pudding mix,pkg instant pudding,prepared,
+ING_GELATIN,gelatin,gelatin,prepared,
+ING_GELATIN,gelatin,unflavored gelatin,prepared,
+ING_GELATIN,gelatin,knox gelatin,prepared,
+ING_GELATIN,gelatin,jello,prepared,
+ING_GELATIN,gelatin,jell-o,prepared,
+ING_GELATIN,gelatin,flavored gelatin,prepared,
+ING_PIE_CRUST,pie crust,pie crust,grain,gluten
+ING_PIE_CRUST,pie crust,unbaked pie crust,grain,gluten
+ING_PIE_CRUST,pie crust,pie shell,grain,gluten
+ING_PIE_CRUST,pie crust,unbaked pie shell,grain,gluten
+ING_PIE_CRUST,pie crust,pastry shell,grain,gluten
+ING_PIE_CRUST,pie crust,graham cracker crust,grain,gluten
+ING_PIE_CRUST,pie crust,graham cracker pie crust,grain,gluten
+ING_PIE_CRUST,pie crust,deep dish pie crust,grain,gluten
+ING_PIE_CRUST,pie crust,pie crusts,grain,gluten
+ING_PIE_CRUST,pie crust,refrigerated pie crust,grain,gluten
+ING_PUFF_PASTRY,puff pastry,puff pastry,grain,gluten
+ING_PUFF_PASTRY,puff pastry,puff pastry sheets,grain,gluten
+ING_CRESCENT_ROLLS,crescent rolls,crescent rolls,grain,gluten
+ING_CRESCENT_ROLLS,crescent rolls,crescent roll dough,grain,gluten
+ING_CRESCENT_ROLLS,crescent rolls,can crescent rolls,grain,gluten
+ING_PHYLLO,phyllo dough,phyllo dough,grain,gluten
+ING_PHYLLO,phyllo dough,phyllo,grain,gluten
+ING_PHYLLO,phyllo dough,filo dough,grain,gluten
+ING_PHYLLO,phyllo dough,phyllo sheets,grain,gluten
+ING_HAMBURGER_BUN,hamburger bun,hamburger bun,grain,gluten
+ING_HAMBURGER_BUN,hamburger bun,hamburger buns,grain,gluten
+ING_HAMBURGER_BUN,hamburger bun,burger buns,grain,gluten
+ING_HAMBURGER_BUN,hamburger bun,sandwich buns,grain,gluten
+ING_HOT_DOG_BUN,hot dog bun,hot dog bun,grain,gluten
+ING_HOT_DOG_BUN,hot dog bun,hot dog buns,grain,gluten
+ING_DINNER_ROLL,dinner roll,dinner roll,grain,gluten
+ING_DINNER_ROLL,dinner roll,dinner rolls,grain,gluten
+ING_DINNER_ROLL,dinner roll,rolls,grain,gluten
+ING_CEREAL_RICE,crisp rice cereal,crisp rice cereal,grain,
+ING_CEREAL_RICE,crisp rice cereal,rice krispies,grain,
+ING_CEREAL_RICE,crisp rice cereal,rice crispies,grain,
+ING_CEREAL_RICE,crisp rice cereal,crispy rice cereal,grain,
+ING_CEREAL_CORNFLAKE,corn flakes,corn flakes,grain,
+ING_CEREAL_CORNFLAKE,corn flakes,cornflakes,grain,
+ING_CEREAL_CORNFLAKE,corn flakes,crushed corn flakes,grain,
+ING_SHREDDED_WHEAT,shredded wheat,shredded wheat,grain,gluten
+ING_SHREDDED_WHEAT,shredded wheat,shredded rice biscuits,grain,gluten
+ING_SHREDDED_WHEAT,shredded wheat,bite size shredded rice biscuits,grain,gluten
+ING_VEGETABLE_OIL,vegetable oil,vegetable oil,fat,
+ING_VEGETABLE_OIL,vegetable oil,oil,fat,
+ING_VEGETABLE_OIL,vegetable oil,cooking oil,fat,
+ING_VEGETABLE_OIL,vegetable oil,salad oil,fat,
+ING_VEGETABLE_OIL,vegetable oil,canola oil,fat,
+ING_VEGETABLE_OIL,vegetable oil,corn oil,fat,
+ING_VEGETABLE_OIL,vegetable oil,wesson oil,fat,
+ING_VEGETABLE_OIL,vegetable oil,frying oil,fat,
+ING_VEGETABLE_OIL,vegetable oil,neutral oil,fat,
+ING_OLIVE_OIL,olive oil,olive oil,fat,
+ING_OLIVE_OIL,olive oil,extra virgin olive oil,fat,
+ING_OLIVE_OIL,olive oil,extra-virgin olive oil,fat,
+ING_OLIVE_OIL,olive oil,light olive oil,fat,
+ING_OLIVE_OIL,olive oil,pure olive oil,fat,
+ING_SESAME_OIL,sesame oil,sesame oil,fat,sesame
+ING_SESAME_OIL,sesame oil,toasted sesame oil,fat,sesame
+ING_SESAME_OIL,sesame oil,dark sesame oil,fat,sesame
+ING_PEANUT_OIL,peanut oil,peanut oil,fat,peanuts
+ING_COCONUT_OIL,coconut oil,coconut oil,fat,
+ING_COCONUT_OIL,coconut oil,virgin coconut oil,fat,
+ING_SHORTENING,shortening,shortening,fat,
+ING_SHORTENING,shortening,vegetable shortening,fat,
+ING_SHORTENING,shortening,crisco,fat,
+ING_SHORTENING,shortening,butter flavored shortening,fat,
+ING_COOKING_SPRAY,cooking spray,cooking spray,fat,
+ING_COOKING_SPRAY,cooking spray,nonstick cooking spray,fat,
+ING_COOKING_SPRAY,cooking spray,non stick spray,fat,
+ING_COOKING_SPRAY,cooking spray,pam,fat,
+ING_LARD,lard,lard,fat,
+ING_SUGAR,granulated sugar,granulated sugar,sweetener,
+ING_SUGAR,granulated sugar,sugar,sweetener,
+ING_SUGAR,granulated sugar,white sugar,sweetener,
+ING_SUGAR,granulated sugar,cane sugar,sweetener,
+ING_SUGAR,granulated sugar,caster sugar,sweetener,
+ING_SUGAR,granulated sugar,superfine sugar,sweetener,
+ING_BROWN_SUGAR,brown sugar,brown sugar,sweetener,
+ING_BROWN_SUGAR,brown sugar,light brown sugar,sweetener,
+ING_BROWN_SUGAR,brown sugar,dark brown sugar,sweetener,
+ING_BROWN_SUGAR,brown sugar,packed brown sugar,sweetener,
+ING_BROWN_SUGAR,brown sugar,firmly packed brown sugar,sweetener,
+ING_BROWN_SUGAR,brown sugar,golden brown sugar,sweetener,
+ING_POWDERED_SUGAR,powdered sugar,powdered sugar,sweetener,
+ING_POWDERED_SUGAR,powdered sugar,confectioners sugar,sweetener,
+ING_POWDERED_SUGAR,powdered sugar,confectioners' sugar,sweetener,
+ING_POWDERED_SUGAR,powdered sugar,icing sugar,sweetener,
+ING_POWDERED_SUGAR,powdered sugar,10x sugar,sweetener,
+ING_POWDERED_SUGAR,powdered sugar,box powdered sugar,sweetener,
+ING_POWDERED_SUGAR,powdered sugar,sifted powdered sugar,sweetener,
+ING_HONEY,honey,honey,sweetener,
+ING_HONEY,honey,raw honey,sweetener,
+ING_HONEY,honey,clover honey,sweetener,
+ING_HONEY,honey,local honey,sweetener,
+ING_MAPLE_SYRUP,maple syrup,maple syrup,sweetener,
+ING_MAPLE_SYRUP,maple syrup,pure maple syrup,sweetener,
+ING_MAPLE_SYRUP,maple syrup,real maple syrup,sweetener,
+ING_CORN_SYRUP,corn syrup,corn syrup,sweetener,
+ING_CORN_SYRUP,corn syrup,light corn syrup,sweetener,
+ING_CORN_SYRUP,corn syrup,dark corn syrup,sweetener,
+ING_CORN_SYRUP,corn syrup,karo syrup,sweetener,
+ING_MOLASSES,molasses,molasses,sweetener,
+ING_MOLASSES,molasses,dark molasses,sweetener,
+ING_MOLASSES,molasses,blackstrap molasses,sweetener,
+ING_MOLASSES,molasses,unsulphured molasses,sweetener,
+ING_AGAVE,agave nectar,agave nectar,sweetener,
+ING_AGAVE,agave nectar,agave,sweetener,
+ING_AGAVE,agave nectar,agave syrup,sweetener,
+ING_VANILLA,vanilla extract,vanilla extract,flavoring,
+ING_VANILLA,vanilla extract,vanilla,flavoring,
+ING_VANILLA,vanilla extract,pure vanilla extract,flavoring,
+ING_VANILLA,vanilla extract,vanilla flavoring,flavoring,
+ING_VANILLA,vanilla extract,imitation vanilla,flavoring,
+ING_VANILLA,vanilla extract,real vanilla,flavoring,
+ING_ALMOND_EXTRACT,almond extract,almond extract,flavoring,tree_nuts
+ING_ALMOND_EXTRACT,almond extract,pure almond extract,flavoring,tree_nuts
+ING_LEMON_EXTRACT,lemon extract,lemon extract,flavoring,
+ING_COCOA,cocoa powder,cocoa powder,flavoring,
+ING_COCOA,cocoa powder,cocoa,flavoring,
+ING_COCOA,cocoa powder,unsweetened cocoa,flavoring,
+ING_COCOA,cocoa powder,unsweetened cocoa powder,flavoring,
+ING_COCOA,cocoa powder,baking cocoa,flavoring,
+ING_COCOA,cocoa powder,dutch process cocoa,flavoring,
+ING_COCOA,cocoa powder,hershey's cocoa,flavoring,
+ING_CHOCOLATE_CHIPS,chocolate chips,chocolate chips,flavoring,milk
+ING_CHOCOLATE_CHIPS,chocolate chips,semisweet chocolate chips,flavoring,milk
+ING_CHOCOLATE_CHIPS,chocolate chips,semi sweet chocolate chips,flavoring,milk
+ING_CHOCOLATE_CHIPS,chocolate chips,semi-sweet chocolate chips,flavoring,milk
+ING_CHOCOLATE_CHIPS,chocolate chips,milk chocolate chips,flavoring,milk
+ING_CHOCOLATE_CHIPS,chocolate chips,mini chocolate chips,flavoring,milk
+ING_CHOCOLATE_CHIPS,chocolate chips,pkg chocolate chips,flavoring,milk
+ING_CHOCOLATE_CHIPS,chocolate chips,chocolate morsels,flavoring,milk
+ING_BAKING_CHOCOLATE,baking chocolate,baking chocolate,flavoring,milk
+ING_BAKING_CHOCOLATE,baking chocolate,unsweetened chocolate,flavoring,milk
+ING_BAKING_CHOCOLATE,baking chocolate,bittersweet chocolate,flavoring,milk
+ING_BAKING_CHOCOLATE,baking chocolate,semisweet chocolate,flavoring,milk
+ING_BAKING_CHOCOLATE,baking chocolate,german chocolate,flavoring,milk
+ING_BAKING_CHOCOLATE,baking chocolate,chocolate squares,flavoring,milk
+ING_BAKING_CHOCOLATE,baking chocolate,unsweetened baking chocolate,flavoring,milk
+ING_BAKING_CHOCOLATE,baking chocolate,plain chocolate,flavoring,milk
+ING_WHITE_CHOCOLATE,white chocolate,white chocolate,flavoring,milk
+ING_WHITE_CHOCOLATE,white chocolate,white chocolate chips,flavoring,milk
+ING_WHITE_CHOCOLATE,white chocolate,white baking chips,flavoring,milk
+ING_MAYO,mayonnaise,mayonnaise,condiment,eggs
+ING_MAYO,mayonnaise,mayo,condiment,eggs
+ING_MAYO,mayonnaise,real mayonnaise,condiment,eggs
+ING_MAYO,mayonnaise,light mayonnaise,condiment,eggs
+ING_MAYO,mayonnaise,miracle whip,condiment,eggs
+ING_MUSTARD,prepared mustard,prepared mustard,condiment,
+ING_MUSTARD,prepared mustard,mustard,condiment,
+ING_MUSTARD,prepared mustard,yellow mustard,condiment,
+ING_MUSTARD,prepared mustard,spicy brown mustard,condiment,
+ING_DIJON,dijon mustard,dijon mustard,condiment,
+ING_DIJON,dijon mustard,dijon,condiment,
+ING_DIJON,dijon mustard,grainy mustard,condiment,
+ING_DIJON,dijon mustard,whole grain mustard,condiment,
+ING_KETCHUP,ketchup,ketchup,condiment,
+ING_KETCHUP,ketchup,catsup,condiment,
+ING_KETCHUP,ketchup,tomato ketchup,condiment,
+ING_WORCESTERSHIRE,worcestershire sauce,worcestershire sauce,condiment,fish
+ING_WORCESTERSHIRE,worcestershire sauce,worcestershire,condiment,fish
+ING_WORCESTERSHIRE,worcestershire sauce,worchestershire sauce,condiment,fish
+ING_SOY_SAUCE,soy sauce,soy sauce,condiment,soy;gluten
+ING_SOY_SAUCE,soy sauce,light soy sauce,condiment,soy;gluten
+ING_SOY_SAUCE,soy sauce,dark soy sauce,condiment,soy;gluten
+ING_SOY_SAUCE,soy sauce,low sodium soy sauce,condiment,soy;gluten
+ING_SOY_SAUCE,soy sauce,tamari,condiment,soy;gluten
+ING_HOT_SAUCE,hot sauce,hot sauce,condiment,
+ING_HOT_SAUCE,hot sauce,hot pepper sauce,condiment,
+ING_HOT_SAUCE,hot sauce,tabasco,condiment,
+ING_HOT_SAUCE,hot sauce,tabasco sauce,condiment,
+ING_HOT_SAUCE,hot sauce,louisiana hot sauce,condiment,
+ING_HOT_SAUCE,hot sauce,franks red hot,condiment,
+ING_HOT_SAUCE,hot sauce,frank's redhot,condiment,
+ING_HOT_SAUCE,hot sauce,sriracha,condiment,
+ING_BBQ_SAUCE,barbecue sauce,barbecue sauce,condiment,
+ING_BBQ_SAUCE,barbecue sauce,bbq sauce,condiment,
+ING_BBQ_SAUCE,barbecue sauce,barbeque sauce,condiment,
+ING_SALSA,salsa,salsa,condiment,
+ING_SALSA,salsa,picante sauce,condiment,
+ING_SALSA,salsa,chunky salsa,condiment,
+ING_SALSA,salsa,jar salsa,condiment,
+ING_CHILI_SAUCE,chili sauce,chili sauce,condiment,
+ING_CHILI_SAUCE,chili sauce,heinz chili sauce,condiment,
+ING_HORSERADISH,horseradish,horseradish,condiment,
+ING_HORSERADISH,horseradish,prepared horseradish,condiment,
+ING_HORSERADISH,horseradish,horseradish sauce,condiment,
+ING_RELISH,pickle relish,pickle relish,condiment,
+ING_RELISH,pickle relish,relish,condiment,
+ING_RELISH,pickle relish,sweet pickle relish,condiment,
+ING_RELISH,pickle relish,dill relish,condiment,
+ING_FISH_SAUCE,fish sauce,fish sauce,condiment,fish
+ING_FISH_SAUCE,fish sauce,nam pla,condiment,fish
+ING_OYSTER_SAUCE,oyster sauce,oyster sauce,condiment,molluscs
+ING_TERIYAKI,teriyaki sauce,teriyaki sauce,condiment,soy;gluten
+ING_TERIYAKI,teriyaki sauce,teriyaki,condiment,soy;gluten
+ING_PESTO,pesto,pesto,condiment,tree_nuts;milk
+ING_PESTO,pesto,basil pesto,condiment,tree_nuts;milk
+ING_PESTO,pesto,prepared pesto,condiment,tree_nuts;milk
+ING_MARINARA,marinara sauce,marinara sauce,condiment,
+ING_MARINARA,marinara sauce,marinara,condiment,
+ING_MARINARA,marinara sauce,pasta sauce,condiment,
+ING_MARINARA,marinara sauce,spaghetti sauce,condiment,
+ING_MARINARA,marinara sauce,jar spaghetti sauce,condiment,
+ING_CAPERS,capers,capers,condiment,
+ING_CAPERS,capers,caper,condiment,
+ING_JAM,jam,jam,condiment,
+ING_JAM,jam,jelly,condiment,
+ING_JAM,jam,preserves,condiment,
+ING_JAM,jam,fruit preserves,condiment,
+ING_JAM,jam,strawberry jam,condiment,
+ING_JAM,jam,grape jelly,condiment,
+ING_JAM,jam,apricot preserves,condiment,
+ING_NUTELLA,chocolate hazelnut spread,chocolate hazelnut spread,condiment,tree_nuts;milk
+ING_NUTELLA,chocolate hazelnut spread,nutella,condiment,tree_nuts;milk
+ING_VINEGAR,vinegar,vinegar,condiment,
+ING_VINEGAR,vinegar,white vinegar,condiment,
+ING_VINEGAR,vinegar,distilled vinegar,condiment,
+ING_VINEGAR,vinegar,distilled white vinegar,condiment,
+ING_CIDER_VINEGAR,apple cider vinegar,apple cider vinegar,condiment,
+ING_CIDER_VINEGAR,apple cider vinegar,cider vinegar,condiment,
+ING_RED_WINE_VINEGAR,red wine vinegar,red wine vinegar,condiment,
+ING_WHITE_WINE_VINEGAR,white wine vinegar,white wine vinegar,condiment,
+ING_BALSAMIC,balsamic vinegar,balsamic vinegar,condiment,
+ING_BALSAMIC,balsamic vinegar,balsamic,condiment,
+ING_RICE_VINEGAR,rice vinegar,rice vinegar,condiment,
+ING_RICE_VINEGAR,rice vinegar,rice wine vinegar,condiment,
+ING_RICE_VINEGAR,rice vinegar,seasoned rice vinegar,condiment,
+ING_RED_WINE,red wine,red wine,beverage,sulfites
+ING_RED_WINE,red wine,dry red wine,beverage,sulfites
+ING_RED_WINE,red wine,burgundy,beverage,sulfites
+ING_RED_WINE,red wine,cabernet,beverage,sulfites
+ING_WHITE_WINE,white wine,white wine,beverage,sulfites
+ING_WHITE_WINE,white wine,dry white wine,beverage,sulfites
+ING_WHITE_WINE,white wine,dry sherry,beverage,sulfites
+ING_WHITE_WINE,white wine,sherry,beverage,sulfites
+ING_WHITE_WINE,white wine,marsala,beverage,sulfites
+ING_WHITE_WINE,white wine,marsala wine,beverage,sulfites
+ING_BEER,beer,beer,beverage,gluten
+ING_BEER,beer,lager,beverage,gluten
+ING_BEER,beer,ale,beverage,gluten
+ING_VODKA,vodka,vodka,beverage,
+ING_RUM,rum,rum,beverage,
+ING_RUM,rum,dark rum,beverage,
+ING_RUM,rum,light rum,beverage,
+ING_CHICKEN_BROTH,chicken broth,chicken broth,prepared,
+ING_CHICKEN_BROTH,chicken broth,chicken stock,prepared,
+ING_CHICKEN_BROTH,chicken broth,can chicken broth,prepared,
+ING_CHICKEN_BROTH,chicken broth,low sodium chicken broth,prepared,
+ING_CHICKEN_BROTH,chicken broth,chicken base,prepared,
+ING_BEEF_BROTH,beef broth,beef broth,prepared,
+ING_BEEF_BROTH,beef broth,beef stock,prepared,
+ING_BEEF_BROTH,beef broth,can beef broth,prepared,
+ING_BEEF_BROTH,beef broth,beef consomme,prepared,
+ING_VEGETABLE_BROTH,vegetable broth,vegetable broth,prepared,
+ING_VEGETABLE_BROTH,vegetable broth,vegetable stock,prepared,
+ING_VEGETABLE_BROTH,vegetable broth,veggie broth,prepared,
+ING_BOUILLON,bouillon cube,bouillon cube,prepared,
+ING_BOUILLON,bouillon cube,bouillon,prepared,
+ING_BOUILLON,bouillon cube,bouillon cubes,prepared,
+ING_BOUILLON,bouillon cube,chicken bouillon cube,prepared,
+ING_BOUILLON,bouillon cube,chicken bouillon,prepared,
+ING_BOUILLON,bouillon cube,instant chicken bouillon,prepared,
+ING_BOUILLON,bouillon cube,beef bouillon,prepared,
+ING_BOUILLON,bouillon cube,beef bouillon cube,prepared,
+ING_BOUILLON,bouillon cube,vegetable bouillon,prepared,
+ING_BOUILLON,bouillon cube,bouillon granules,prepared,
+ING_LEMON,lemon,lemon,fruit,
+ING_LEMON,lemon,lemons,fruit,
+ING_LEMON,lemon,fresh lemon,fruit,
+ING_LEMON_JUICE,lemon juice,lemon juice,fruit,
+ING_LEMON_JUICE,lemon juice,fresh lemon juice,fruit,
+ING_LEMON_JUICE,lemon juice,juice of lemon,fruit,
+ING_LEMON_JUICE,lemon juice,bottled lemon juice,fruit,
+ING_LEMON_ZEST,lemon zest,lemon zest,fruit,
+ING_LEMON_ZEST,lemon zest,lemon peel,fruit,
+ING_LEMON_ZEST,lemon zest,lemon rind,fruit,
+ING_LEMON_ZEST,lemon zest,grated lemon peel,fruit,
+ING_LEMON_ZEST,lemon zest,grated lemon rind,fruit,
+ING_LIME,lime,lime,fruit,
+ING_LIME,lime,limes,fruit,
+ING_LIME_JUICE,lime juice,lime juice,fruit,
+ING_LIME_JUICE,lime juice,fresh lime juice,fruit,
+ING_LIME_JUICE,lime juice,juice of lime,fruit,
+ING_ORANGE,orange,orange,fruit,
+ING_ORANGE,orange,oranges,fruit,
+ING_ORANGE,orange,navel orange,fruit,
+ING_ORANGE,orange,mandarin oranges,fruit,
+ING_ORANGE,orange,can mandarin oranges,fruit,
+ING_ORANGE_JUICE,orange juice,orange juice,fruit,
+ING_ORANGE_JUICE,orange juice,fresh orange juice,fruit,
+ING_ORANGE_JUICE,orange juice,oj,fruit,
+ING_ORANGE_ZEST,orange zest,orange zest,fruit,
+ING_ORANGE_ZEST,orange zest,orange peel,fruit,
+ING_ORANGE_ZEST,orange zest,grated orange peel,fruit,
+ING_ORANGE_ZEST,orange zest,orange rind,fruit,
+ING_APPLE,apple,apple,fruit,
+ING_APPLE,apple,apples,fruit,
+ING_APPLE,apple,granny smith apples,fruit,
+ING_APPLE,apple,granny smith apple,fruit,
+ING_APPLE,apple,gala apples,fruit,
+ING_APPLE,apple,honeycrisp apples,fruit,
+ING_APPLE,apple,cooking apples,fruit,
+ING_APPLE,apple,tart apples,fruit,
+ING_APPLESAUCE,applesauce,applesauce,fruit,
+ING_APPLESAUCE,applesauce,apple sauce,fruit,
+ING_APPLESAUCE,applesauce,unsweetened applesauce,fruit,
+ING_BANANA,banana,banana,fruit,
+ING_BANANA,banana,bananas,fruit,
+ING_BANANA,banana,ripe bananas,fruit,
+ING_BANANA,banana,ripe banana,fruit,
+ING_BANANA,banana,mashed banana,fruit,
+ING_BANANA,banana,mashed bananas,fruit,
+ING_STRAWBERRY,strawberry,strawberry,fruit,
+ING_STRAWBERRY,strawberry,strawberries,fruit,
+ING_STRAWBERRY,strawberry,fresh strawberries,fruit,
+ING_STRAWBERRY,strawberry,frozen strawberries,fruit,
+ING_STRAWBERRY,strawberry,sliced strawberries,fruit,
+ING_BLUEBERRY,blueberry,blueberry,fruit,
+ING_BLUEBERRY,blueberry,blueberries,fruit,
+ING_BLUEBERRY,blueberry,fresh blueberries,fruit,
+ING_BLUEBERRY,blueberry,frozen blueberries,fruit,
+ING_RASPBERRY,raspberry,raspberry,fruit,
+ING_RASPBERRY,raspberry,raspberries,fruit,
+ING_RASPBERRY,raspberry,fresh raspberries,fruit,
+ING_RASPBERRY,raspberry,frozen raspberries,fruit,
+ING_CRANBERRY,cranberry,cranberry,fruit,
+ING_CRANBERRY,cranberry,cranberries,fruit,
+ING_CRANBERRY,cranberry,fresh cranberries,fruit,
+ING_CRANBERRY,cranberry,dried cranberries,fruit,
+ING_CRANBERRY,cranberry,craisins,fruit,
+ING_CRANBERRY_SAUCE,cranberry sauce,cranberry sauce,fruit,
+ING_CRANBERRY_SAUCE,cranberry sauce,whole cranberry sauce,fruit,
+ING_CRANBERRY_SAUCE,cranberry sauce,jellied cranberry sauce,fruit,
+ING_CRANBERRY_SAUCE,cranberry sauce,can cranberry sauce,fruit,
+ING_PEACH,peach,peach,fruit,
+ING_PEACH,peach,peaches,fruit,
+ING_PEACH,peach,sliced peaches,fruit,
+ING_PEACH,peach,can peaches,fruit,
+ING_PEACH,peach,frozen peaches,fruit,
+ING_PEACH,peach,fresh peaches,fruit,
+ING_PINEAPPLE,pineapple,pineapple,fruit,
+ING_PINEAPPLE,pineapple,crushed pineapple,fruit,
+ING_PINEAPPLE,pineapple,can crushed pineapple,fruit,
+ING_PINEAPPLE,pineapple,pineapple chunks,fruit,
+ING_PINEAPPLE,pineapple,can pineapple,fruit,
+ING_PINEAPPLE,pineapple,pineapple tidbits,fruit,
+ING_PINEAPPLE,pineapple,pineapple slices,fruit,
+ING_PINEAPPLE_JUICE,pineapple juice,pineapple juice,fruit,
+ING_GRAPE,grape,grape,fruit,
+ING_GRAPE,grape,grapes,fruit,
+ING_GRAPE,grape,seedless grapes,fruit,
+ING_GRAPE,grape,red grapes,fruit,
+ING_GRAPE,grape,green grapes,fruit,
+ING_CHERRY,cherry,cherry,fruit,
+ING_CHERRY,cherry,cherries,fruit,
+ING_CHERRY,cherry,maraschino cherries,fruit,
+ING_CHERRY,cherry,dried cherries,fruit,
+ING_CHERRY,cherry,frozen cherries,fruit,
+ING_FRUIT_PIE_FILLING,fruit pie filling,fruit pie filling,prepared,
+ING_FRUIT_PIE_FILLING,fruit pie filling,cherry pie filling,prepared,
+ING_FRUIT_PIE_FILLING,fruit pie filling,can cherry pie filling,prepared,
+ING_FRUIT_PIE_FILLING,fruit pie filling,apple pie filling,prepared,
+ING_FRUIT_PIE_FILLING,fruit pie filling,blueberry pie filling,prepared,
+ING_FRUIT_PIE_FILLING,fruit pie filling,peach pie filling,prepared,
+ING_FRUIT_PIE_FILLING,fruit pie filling,lemon pie filling,prepared,
+ING_FRUIT_PIE_FILLING,fruit pie filling,strawberry pie filling,prepared,
+ING_RAISIN,raisin,raisin,fruit,
+ING_RAISIN,raisin,raisins,fruit,
+ING_RAISIN,raisin,golden raisins,fruit,
+ING_RAISIN,raisin,seedless raisins,fruit,
+ING_DATE,date,date,fruit,
+ING_DATE,date,dates,fruit,
+ING_DATE,date,pitted dates,fruit,
+ING_DATE,date,chopped dates,fruit,
+ING_DATE,date,medjool dates,fruit,
+ING_COCONUT,coconut,coconut,fruit,
+ING_COCONUT,coconut,shredded coconut,fruit,
+ING_COCONUT,coconut,flaked coconut,fruit,
+ING_COCONUT,coconut,sweetened coconut,fruit,
+ING_COCONUT,coconut,sweetened shredded coconut,fruit,
+ING_COCONUT,coconut,unsweetened coconut,fruit,
+ING_COCONUT,coconut,coconut flakes,fruit,
+ING_COCONUT,coconut,desiccated coconut,fruit,
+ING_COCONUT_MILK,coconut milk,coconut milk,plant_milk,
+ING_COCONUT_MILK,coconut milk,can coconut milk,plant_milk,
+ING_COCONUT_MILK,coconut milk,light coconut milk,plant_milk,
+ING_MANGO,mango,mango,fruit,
+ING_MANGO,mango,mangoes,fruit,
+ING_MANGO,mango,mangos,fruit,
+ING_KIWI,kiwi,kiwi,fruit,
+ING_KIWI,kiwi,kiwifruit,fruit,
+ING_KIWI,kiwi,kiwis,fruit,
+ING_BROWNIE_MIX,brownie mix,brownie mix,grain,gluten
+ING_BROWNIE_MIX,brownie mix,box brownie mix,grain,gluten
+ING_BROWNIE_MIX,brownie mix,fudge brownie mix,grain,gluten
+ING_MARSHMALLOW,marshmallow,marshmallow,sweetener,
+ING_MARSHMALLOW,marshmallow,marshmallows,sweetener,
+ING_MARSHMALLOW,marshmallow,miniature marshmallows,sweetener,
+ING_MARSHMALLOW,marshmallow,mini marshmallows,sweetener,
+ING_MARSHMALLOW,marshmallow,large marshmallows,sweetener,
+ING_MARSHMALLOW,marshmallow,marshmallow creme,sweetener,
+ING_MARSHMALLOW,marshmallow,marshmallow fluff,sweetener,
+ING_WHIPPED_TOPPING,whipped topping,whipped topping,dairy,milk
+ING_WHIPPED_TOPPING,whipped topping,cool whip,dairy,milk
+ING_WHIPPED_TOPPING,whipped topping,frozen whipped topping,dairy,milk
+ING_WHIPPED_TOPPING,whipped topping,container cool whip,dairy,milk
+ING_WHIPPED_TOPPING,whipped topping,carton cool whip,dairy,milk
+ING_WHIPPED_TOPPING,whipped topping,tub cool whip,dairy,milk
+ING_WHIPPED_TOPPING,whipped topping,whipped cream,dairy,milk
+ING_WHIPPED_TOPPING,whipped topping,extra creamy cool whip,dairy,milk
+ING_PEANUT_BUTTER_CHIPS,peanut butter chips,peanut butter chips,flavoring,peanuts
+ING_PEANUT_BUTTER_CHIPS,peanut butter chips,peanut butter morsels,flavoring,peanuts
+ING_BUTTERSCOTCH_CHIPS,butterscotch chips,butterscotch chips,flavoring,milk
+ING_BUTTERSCOTCH_CHIPS,butterscotch chips,butterscotch morsels,flavoring,milk
+ING_TOFFEE_BITS,toffee bits,toffee bits,flavoring,milk
+ING_TOFFEE_BITS,toffee bits,heath bits,flavoring,milk
+ING_TOFFEE_BITS,toffee bits,english toffee bits,flavoring,milk
+ING_SPRINKLES,sprinkles,sprinkles,flavoring,
+ING_SPRINKLES,sprinkles,jimmies,flavoring,
+ING_SPRINKLES,sprinkles,candy sprinkles,flavoring,
+ING_SPRINKLES,sprinkles,nonpareils,flavoring,
+ING_FOOD_COLORING,food coloring,food coloring,flavoring,
+ING_FOOD_COLORING,food coloring,food color,flavoring,
+ING_FOOD_COLORING,food coloring,gel food coloring,flavoring,
+ING_ICE,ice,ice,liquid,
+ING_ICE,ice,ice cubes,liquid,
+ING_ICE,ice,crushed ice,liquid,
+ING_COFFEE,coffee,coffee,beverage,
+ING_COFFEE,coffee,brewed coffee,beverage,
+ING_COFFEE,coffee,strong coffee,beverage,
+ING_COFFEE,coffee,hot coffee,beverage,
+ING_COFFEE,coffee,cold coffee,beverage,
+ING_COFFEE,coffee,espresso,beverage,
+ING_INSTANT_COFFEE,instant coffee,instant coffee,beverage,
+ING_INSTANT_COFFEE,instant coffee,instant coffee granules,beverage,
+ING_TEA,tea,tea,beverage,
+ING_TEA,tea,black tea,beverage,
+ING_TEA,tea,tea bags,beverage,
+ING_TEA,tea,brewed tea,beverage,
+ING_COLA,cola,cola,beverage,
+ING_COLA,cola,coca cola,beverage,
+ING_COLA,cola,coke,beverage,
+ING_COLA,cola,pepsi,beverage,
+ING_COLA,cola,soda pop,beverage,
+ING_GINGER_ALE,ginger ale,ginger ale,beverage,
+ING_GINGER_ALE,ginger ale,ginger soda,beverage,
+ING_LEMON_LIME_SODA,lemon-lime soda,lemon-lime soda,beverage,
+ING_LEMON_LIME_SODA,lemon-lime soda,lemon lime soda,beverage,
+ING_LEMON_LIME_SODA,lemon-lime soda,sprite,beverage,
+ING_LEMON_LIME_SODA,lemon-lime soda,7-up,beverage,
+ING_LEMON_LIME_SODA,lemon-lime soda,7 up,beverage,
+ING_LEMON_LIME_SODA,lemon-lime soda,sierra mist,beverage,
+ING_CLUB_SODA,club soda,club soda,beverage,
+ING_CLUB_SODA,club soda,soda water,beverage,
+ING_CLUB_SODA,club soda,seltzer,beverage,
+ING_CLUB_SODA,club soda,sparkling water,beverage,
+ING_CLUB_SODA,club soda,carbonated water,beverage,
+ING_BROTH_TOMATO_JUICE,tomato juice,tomato juice,beverage,
+ING_BROTH_TOMATO_JUICE,tomato juice,v8 juice,beverage,
+ING_BROTH_TOMATO_JUICE,tomato juice,vegetable juice,beverage,
+ING_CHOW_MEIN_NOODLES,chow mein noodles,chow mein noodles,grain,gluten
+ING_CHOW_MEIN_NOODLES,chow mein noodles,crispy chow mein noodles,grain,gluten
+ING_SESAME_TAHINI,tahini,tahini,condiment,sesame
+ING_SESAME_TAHINI,tahini,sesame paste,condiment,sesame
+ING_SESAME_TAHINI,tahini,tahini paste,condiment,sesame
+ING_CURRY_PASTE,curry paste,curry paste,condiment,
+ING_CURRY_PASTE,curry paste,red curry paste,condiment,
+ING_CURRY_PASTE,curry paste,green curry paste,condiment,
+ING_CURRY_PASTE,curry paste,thai curry paste,condiment,
+ING_GINGER_GARLIC,ginger garlic paste,ginger garlic paste,condiment,
+ING_ONION_SOUP_MIX,dry onion soup mix,dry onion soup mix,prepared,
+ING_ONION_SOUP_MIX,dry onion soup mix,onion soup mix,prepared,
+ING_ONION_SOUP_MIX,dry onion soup mix,dried onion soup mix,prepared,
+ING_ONION_SOUP_MIX,dry onion soup mix,envelope onion soup mix,prepared,
+ING_ONION_SOUP_MIX,dry onion soup mix,lipton onion soup mix,prepared,
+ING_ONION_SOUP_MIX,dry onion soup mix,pkg onion soup mix,prepared,
+ING_ONION_SOUP_MIX,dry onion soup mix,onion soup,prepared,
+ING_TACO_SEASONING,taco seasoning mix,taco seasoning mix,seasoning,
+ING_TACO_SEASONING,taco seasoning mix,taco seasoning,seasoning,
+ING_TACO_SEASONING,taco seasoning mix,pkg taco seasoning,seasoning,
+ING_TACO_SEASONING,taco seasoning mix,envelope taco seasoning,seasoning,
+ING_RANCH_MIX,ranch dressing mix,ranch dressing mix,prepared,milk
+ING_RANCH_MIX,ranch dressing mix,ranch mix,prepared,milk
+ING_RANCH_MIX,ranch dressing mix,dry ranch dressing mix,prepared,milk
+ING_RANCH_MIX,ranch dressing mix,hidden valley ranch mix,prepared,milk
+ING_RANCH_MIX,ranch dressing mix,ranch salad dressing mix,prepared,milk
+ING_GRAVY_MIX,brown gravy mix,brown gravy mix,prepared,
+ING_GRAVY_MIX,brown gravy mix,gravy mix,prepared,
+ING_GRAVY_MIX,brown gravy mix,pkg gravy mix,prepared,
+ING_AU_JUS_MIX,au jus mix,au jus mix,prepared,
+ING_AU_JUS_MIX,au jus mix,au jus gravy mix,prepared,
+ING_AU_JUS_MIX,au jus mix,pkg au jus mix,prepared,
+ING_AU_JUS_MIX,au jus mix,au jus seasoning mix,prepared,
+ING_CHEESE_SOUP,condensed cheddar cheese soup,condensed cheddar cheese soup,prepared,milk
+ING_CHEESE_SOUP,condensed cheddar cheese soup,cheddar cheese soup,prepared,milk
+ING_CHEESE_SOUP,condensed cheddar cheese soup,can cheddar cheese soup,prepared,milk
+ING_CHEESE_SOUP,condensed cheddar cheese soup,cheese soup,prepared,milk
+ING_CHEESE_SOUP,condensed cheddar cheese soup,nacho cheese soup,prepared,milk
+ING_CHEESE_SOUP,condensed cheddar cheese soup,fiesta nacho cheese soup,prepared,milk
+ING_ITALIAN_DRESSING,italian dressing,italian dressing,condiment,
+ING_ITALIAN_DRESSING,italian dressing,italian salad dressing,condiment,
+ING_ITALIAN_DRESSING,italian dressing,zesty italian dressing,condiment,
+ING_ITALIAN_DRESSING,italian dressing,italian dressing mix,condiment,
+ING_ITALIAN_DRESSING,italian dressing,dry italian dressing mix,condiment,
+ING_RANCH_DRESSING,ranch dressing,ranch dressing,condiment,eggs;milk
+ING_RANCH_DRESSING,ranch dressing,prepared ranch dressing,condiment,eggs;milk
+ING_RHUBARB,rhubarb,rhubarb,vegetable,
+ING_RHUBARB,rhubarb,diced rhubarb,vegetable,
+ING_RHUBARB,rhubarb,frozen rhubarb,vegetable,
+ING_LIMA_BEANS,lima beans,lima beans,protein,
+ING_LIMA_BEANS,lima beans,baby lima beans,protein,
+ING_LIMA_BEANS,lima beans,butter beans,protein,
+ING_LIMA_BEANS,lima beans,frozen lima beans,protein,
+ING_SQUASH,squash,squash,vegetable,
+ING_SQUASH,squash,acorn squash,vegetable,
+ING_SQUASH,squash,winter squash,vegetable,
+ING_SPAGHETTI_SQUASH,spaghetti squash,spaghetti squash,vegetable,
+ING_PEAR,pear,pear,fruit,
+ING_PEAR,pear,pears,fruit,
+ING_PEAR,pear,bartlett pears,fruit,
+ING_PEAR,pear,bosc pears,fruit,
+ING_PEAR,pear,canned pears,fruit,
+ING_ARTICHOKE,artichoke heart,artichoke heart,vegetable,
+ING_ARTICHOKE,artichoke heart,artichoke,vegetable,
+ING_ARTICHOKE,artichoke heart,artichokes,vegetable,
+ING_ARTICHOKE,artichoke heart,artichoke hearts,vegetable,
+ING_ARTICHOKE,artichoke heart,can artichoke hearts,vegetable,
+ING_ARTICHOKE,artichoke heart,marinated artichoke hearts,vegetable,
+ING_ARTICHOKE,artichoke heart,quartered artichoke hearts,vegetable,
+ING_FENNEL,fennel,fennel,vegetable,
+ING_FENNEL,fennel,fennel bulb,vegetable,
+ING_FENNEL,fennel,fennel bulbs,vegetable,
+ING_OKRA,okra,okra,vegetable,
+ING_OKRA,okra,frozen okra,vegetable,
+ING_OKRA,okra,sliced okra,vegetable,
+ING_BRUSSELS_SPROUTS,brussels sprouts,brussels sprouts,vegetable,
+ING_BRUSSELS_SPROUTS,brussels sprouts,brussel sprouts,vegetable,
+ING_BEET,beet,beet,vegetable,
+ING_BEET,beet,beets,vegetable,
+ING_BEET,beet,can beets,vegetable,
+ING_BEET,beet,canned beets,vegetable,
+ING_TURNIP,turnip,turnip,vegetable,
+ING_TURNIP,turnip,turnips,vegetable,
+ING_PARSNIP,parsnip,parsnip,vegetable,
+ING_PARSNIP,parsnip,parsnips,vegetable,
+ING_RADISH,radish,radish,vegetable,
+ING_RADISH,radish,radishes,vegetable,
+ING_COLLARD,collard greens,collard greens,vegetable,
+ING_COLLARD,collard greens,collards,vegetable,
+ING_COLLARD,collard greens,mustard greens,vegetable,
+ING_COLLARD,collard greens,turnip greens,vegetable,
+ING_KALE,kale,kale,vegetable,
+ING_KALE,kale,chopped kale,vegetable,
+ING_KALE,kale,baby kale,vegetable,
+ING_CANTALOUPE,cantaloupe,cantaloupe,fruit,
+ING_CANTALOUPE,cantaloupe,muskmelon,fruit,
+ING_WATERMELON,watermelon,watermelon,fruit,
+ING_APRICOT,apricot,apricot,fruit,
+ING_APRICOT,apricot,apricots,fruit,
+ING_APRICOT,apricot,dried apricots,fruit,
+ING_APRICOT,apricot,canned apricots,fruit,
+ING_PLUM,plum,plum,fruit,
+ING_PLUM,plum,plums,fruit,
+ING_FIG,fig,fig,fruit,
+ING_FIG,fig,figs,fruit,
+ING_FIG,fig,dried figs,fruit,
+ING_PROD_TOMATILLO,tomatillo,tomatillo,vegetable,
+ING_PROD_TOMATILLO,tomatillo,tomatillos,vegetable,
+ING_RED_CABBAGE,red cabbage,red cabbage,vegetable,
+ING_RED_CABBAGE,red cabbage,purple cabbage,vegetable,
+ING_TOMATO_PUREE,tomato puree,tomato puree,vegetable,
+ING_TOMATO_PUREE,tomato puree,can tomato puree,vegetable,
+ING_TOMATO_PUREE,tomato puree,strained tomatoes,vegetable,
+ING_TOMATO_PUREE,tomato puree,tomato passata,vegetable,
+ING_ICE_CREAM,vanilla ice cream,vanilla ice cream,dairy,milk
+ING_ICE_CREAM,vanilla ice cream,ice cream,dairy,milk
+ING_ICE_CREAM,vanilla ice cream,chocolate ice cream,dairy,milk
+ING_ICE_CREAM,vanilla ice cream,softened ice cream,dairy,milk
+ING_BLUE_CHEESE,blue cheese,blue cheese,dairy,milk
+ING_BLUE_CHEESE,blue cheese,bleu cheese,dairy,milk
+ING_BLUE_CHEESE,blue cheese,gorgonzola,dairy,milk
+ING_BLUE_CHEESE,blue cheese,gorgonzola cheese,dairy,milk
+ING_BLUE_CHEESE,blue cheese,blue cheese crumbles,dairy,milk
+ING_PROVOLONE,provolone cheese,provolone cheese,dairy,milk
+ING_PROVOLONE,provolone cheese,provolone,dairy,milk
+ING_MASCARPONE,mascarpone,mascarpone,dairy,milk
+ING_MASCARPONE,mascarpone,mascarpone cheese,dairy,milk
+ING_VANILLA_WAFER,vanilla wafers,vanilla wafers,grain,gluten
+ING_VANILLA_WAFER,vanilla wafers,nilla wafers,grain,gluten
+ING_VANILLA_WAFER,vanilla wafers,crushed vanilla wafers,grain,gluten
+ING_LADYFINGERS,ladyfingers,ladyfingers,grain,gluten;eggs
+ING_LADYFINGERS,ladyfingers,lady fingers,grain,gluten;eggs
+ING_APPLE_JUICE,apple juice,apple juice,beverage,
+ING_APPLE_JUICE,apple juice,apple cider,beverage,
+ING_APPLE_JUICE,apple juice,unfiltered apple juice,beverage,
+ING_LEMONADE,lemonade concentrate,lemonade concentrate,beverage,
+ING_LEMONADE,lemonade concentrate,lemonade,beverage,
+ING_LEMONADE,lemonade concentrate,frozen lemonade concentrate,beverage,
+ING_LEMONADE,lemonade concentrate,pink lemonade concentrate,beverage,
+ING_LIMEADE,limeade concentrate,limeade concentrate,beverage,
+ING_LIMEADE,limeade concentrate,limeade,beverage,
+ING_LIMEADE,limeade concentrate,frozen limeade concentrate,beverage,
+ING_ORANGE_JUICE_CONC,orange juice concentrate,orange juice concentrate,beverage,
+ING_ORANGE_JUICE_CONC,orange juice concentrate,frozen orange juice concentrate,beverage,
+ING_GRAPE_JUICE,grape juice,grape juice,beverage,
+ING_GRAPE_JUICE,grape juice,white grape juice,beverage,
+ING_CRANBERRY_JUICE,cranberry juice,cranberry juice,beverage,
+ING_CRANBERRY_JUICE,cranberry juice,cranberry juice cocktail,beverage,
+ING_BOURBON,bourbon,bourbon,beverage,
+ING_BOURBON,bourbon,whiskey,beverage,
+ING_BOURBON,bourbon,whisky,beverage,
+ING_BRANDY,brandy,brandy,beverage,
+ING_BRANDY,brandy,cognac,beverage,
+ING_KAHLUA,coffee liqueur,coffee liqueur,beverage,
+ING_KAHLUA,coffee liqueur,kahlua,beverage,
+ING_GRAND_MARNIER,orange liqueur,orange liqueur,beverage,
+ING_GRAND_MARNIER,orange liqueur,grand marnier,beverage,
+ING_GRAND_MARNIER,orange liqueur,triple sec,beverage,
+ING_GRAND_MARNIER,orange liqueur,cointreau,beverage,
+ING_WINE_COOKING,cooking wine,cooking wine,beverage,
+ING_WINE_COOKING,cooking wine,cooking sherry,beverage,
+ING_CARAWAY,caraway seed,caraway seed,seasoning,
+ING_CARAWAY,caraway seed,caraway seeds,seasoning,
+ING_CARAWAY,caraway seed,caraway,seasoning,
+ING_MUSTARD_SEED,mustard seed,mustard seed,seasoning,
+ING_MUSTARD_SEED,mustard seed,mustard seeds,seasoning,
+ING_MUSTARD_SEED,mustard seed,yellow mustard seed,seasoning,
+ING_DILL_SEED,dill seed,dill seed,seasoning,
+ING_DILL_SEED,dill seed,dill seeds,seasoning,
+ING_ANISE,anise,anise,seasoning,
+ING_ANISE,anise,anise seed,seasoning,
+ING_ANISE,anise,star anise,seasoning,
+ING_SAFFRON,saffron,saffron,seasoning,
+ING_SAFFRON,saffron,saffron threads,seasoning,
+ING_JERK_SEASONING,jerk seasoning,jerk seasoning,seasoning,
+ING_JERK_SEASONING,jerk seasoning,jamaican jerk seasoning,seasoning,
+ING_CAJUN_SEASONING,cajun seasoning,cajun seasoning,seasoning,
+ING_CAJUN_SEASONING,cajun seasoning,creole seasoning,seasoning,
+ING_CAJUN_SEASONING,cajun seasoning,cajun spice,seasoning,
+ING_OLD_BAY,old bay seasoning,old bay seasoning,seasoning,
+ING_OLD_BAY,old bay seasoning,old bay,seasoning,
+ING_CHINESE_FIVE_SPICE,five spice powder,five spice powder,seasoning,
+ING_CHINESE_FIVE_SPICE,five spice powder,chinese five spice,seasoning,
+ING_CHINESE_FIVE_SPICE,five spice powder,5 spice powder,seasoning,
+ING_PUMPKIN_PIE_SPICE,pumpkin pie spice,pumpkin pie spice,seasoning,
+ING_PUMPKIN_PIE_SPICE,pumpkin pie spice,pumpkin spice,seasoning,
+ING_APPLE_PIE_SPICE,apple pie spice,apple pie spice,seasoning,
+ING_LEMON_PEPPER,lemon pepper seasoning,lemon pepper seasoning,seasoning,
+ING_LEMON_PEPPER,lemon pepper seasoning,lemon pepper,seasoning,
+ING_MEAT_TENDERIZER,meat tenderizer,meat tenderizer,seasoning,
+ING_MSG,msg,msg,seasoning,
+ING_MSG,msg,accent seasoning,seasoning,
+ING_MSG,msg,monosodium glutamate,seasoning,
+ING_LIQUID_SMOKE,liquid smoke,liquid smoke,condiment,
+ING_KITCHEN_BOUQUET,browning sauce,browning sauce,condiment,
+ING_KITCHEN_BOUQUET,browning sauce,kitchen bouquet,condiment,
+ING_KITCHEN_BOUQUET,browning sauce,gravy master,condiment,
+ING_ROTEL,diced tomatoes and green chilies,diced tomatoes and green chilies,vegetable,
+ING_ROTEL,diced tomatoes and green chilies,ro-tel tomatoes,vegetable,
+ING_ROTEL,diced tomatoes and green chilies,rotel tomatoes,vegetable,
+ING_ROTEL,diced tomatoes and green chilies,ro-tel,vegetable,
+ING_ROTEL,diced tomatoes and green chilies,rotel,vegetable,
+ING_ROTEL,diced tomatoes and green chilies,can ro-tel,vegetable,
+ING_ROTEL,diced tomatoes and green chilies,can rotel,vegetable,
+ING_ROTEL,diced tomatoes and green chilies,diced tomatoes with green chilies,vegetable,
+ING_ROTEL,diced tomatoes and green chilies,tomatoes and green chilies,vegetable,
+ING_ENCHILADA_SAUCE,enchilada sauce,enchilada sauce,condiment,
+ING_ENCHILADA_SAUCE,enchilada sauce,red enchilada sauce,condiment,
+ING_ENCHILADA_SAUCE,enchilada sauce,can enchilada sauce,condiment,
+ING_TACO_SAUCE,taco sauce,taco sauce,condiment,
+ING_HOISIN,hoisin sauce,hoisin sauce,condiment,soy;gluten
+ING_HOISIN,hoisin sauce,hoisin,condiment,soy;gluten
+ING_STEAK_SAUCE,steak sauce,steak sauce,condiment,
+ING_STEAK_SAUCE,steak sauce,a1 sauce,condiment,
+ING_STEAK_SAUCE,steak sauce,a.1. sauce,condiment,
+ING_STEAK_SAUCE,steak sauce,a-1 sauce,condiment,
+ING_SWEET_CHILI_SAUCE,sweet chili sauce,sweet chili sauce,condiment,
+ING_SWEET_CHILI_SAUCE,sweet chili sauce,thai sweet chili sauce,condiment,
+ING_APPLE_BUTTER,apple butter,apple butter,condiment,
+ING_PEANUT_SAUCE,peanut sauce,peanut sauce,condiment,peanuts
+ING_PEANUT_SAUCE,peanut sauce,thai peanut sauce,condiment,peanuts
+ING_COCONUT_CREAM,cream of coconut,cream of coconut,plant_milk,
+ING_COCONUT_CREAM,cream of coconut,coconut cream,plant_milk,
+ING_COCONUT_CREAM,cream of coconut,can cream of coconut,plant_milk,
+ING_PRETZEL,pretzel,pretzel,grain,gluten
+ING_PRETZEL,pretzel,pretzels,grain,gluten
+ING_PRETZEL,pretzel,pretzel sticks,grain,gluten
+ING_PRETZEL,pretzel,crushed pretzels,grain,gluten
+ING_POTATO_CHIP,potato chips,potato chips,grain,
+ING_POTATO_CHIP,potato chips,crushed potato chips,grain,
+ING_POTATO_CHIP,potato chips,potato chip,grain,
+ING_WONTON_WRAPPER,wonton wrapper,wonton wrapper,grain,gluten;eggs
+ING_WONTON_WRAPPER,wonton wrapper,wonton wrappers,grain,gluten;eggs
+ING_WONTON_WRAPPER,wonton wrapper,won ton wrappers,grain,gluten;eggs
+ING_WONTON_WRAPPER,wonton wrapper,egg roll wrappers,grain,gluten;eggs
+ING_PIZZA_CRUST,pizza crust,pizza crust,grain,gluten
+ING_PIZZA_CRUST,pizza crust,pizza dough,grain,gluten
+ING_PIZZA_CRUST,pizza crust,prepared pizza crust,grain,gluten
+ING_PIZZA_CRUST,pizza crust,refrigerated pizza dough,grain,gluten
+ING_BISCUIT_DOUGH,refrigerated biscuits,refrigerated biscuits,grain,gluten
+ING_BISCUIT_DOUGH,refrigerated biscuits,can biscuits,grain,gluten
+ING_BISCUIT_DOUGH,refrigerated biscuits,canned biscuits,grain,gluten
+ING_BISCUIT_DOUGH,refrigerated biscuits,biscuit dough,grain,gluten
+ING_CORN_BREAD_MIX,corn muffin mix,corn muffin mix,grain,gluten
+ING_CORN_BREAD_MIX,corn muffin mix,cornbread mix,grain,gluten
+ING_CORN_BREAD_MIX,corn muffin mix,jiffy corn muffin mix,grain,gluten
+ING_ANGEL_FOOD_CAKE,angel food cake,angel food cake,grain,gluten;eggs
+ING_ANGEL_FOOD_CAKE,angel food cake,angel food cake mix,grain,gluten;eggs
+ING_ANGEL_FOOD_CAKE,angel food cake,prepared angel food cake,grain,gluten;eggs
+ING_POUND_CAKE,pound cake,pound cake,grain,gluten;eggs;milk
+ING_POUND_CAKE,pound cake,frozen pound cake,grain,gluten;eggs;milk
+ING_COOKIE_DOUGH,refrigerated cookie dough,refrigerated cookie dough,grain,gluten;eggs
+ING_COOKIE_DOUGH,refrigerated cookie dough,cookie dough,grain,gluten;eggs
+ING_COOKIE_DOUGH,refrigerated cookie dough,sugar cookie dough,grain,gluten;eggs
+ING_HASH_BROWN,hash brown potatoes,hash brown potatoes,vegetable,
+ING_HASH_BROWN,hash brown potatoes,hash browns,vegetable,
+ING_HASH_BROWN,hash brown potatoes,frozen hash browns,vegetable,
+ING_HASH_BROWN,hash brown potatoes,shredded hash browns,vegetable,
+ING_HASH_BROWN,hash brown potatoes,diced hash browns,vegetable,
+ING_TATER_TOTS,tater tots,tater tots,vegetable,
+ING_TATER_TOTS,tater tots,potato tots,vegetable,
+ING_FRENCH_FRIED_ONIONS,french fried onions,french fried onions,vegetable,gluten
+ING_FRENCH_FRIED_ONIONS,french fried onions,can french fried onions,vegetable,gluten
+ING_FRENCH_FRIED_ONIONS,french fried onions,french's fried onions,vegetable,gluten
+ING_CHOCOLATE_SYRUP,chocolate syrup,chocolate syrup,sweetener,
+ING_CHOCOLATE_SYRUP,chocolate syrup,hershey's syrup,sweetener,
+ING_CHOCOLATE_SYRUP,chocolate syrup,chocolate sauce,sweetener,
+ING_CARAMEL,caramel,caramel,sweetener,milk
+ING_CARAMEL,caramel,caramels,sweetener,milk
+ING_CARAMEL,caramel,caramel sauce,sweetener,milk
+ING_CARAMEL,caramel,caramel topping,sweetener,milk
+ING_CARAMEL,caramel,dulce de leche,sweetener,milk
+ING_BUTTERSCOTCH_TOPPING,butterscotch topping,butterscotch topping,sweetener,milk
+ING_BUTTERSCOTCH_TOPPING,butterscotch topping,butterscotch sauce,sweetener,milk
+ING_SUGAR_SUBSTITUTE,sugar substitute,sugar substitute,sweetener,
+ING_SUGAR_SUBSTITUTE,sugar substitute,splenda,sweetener,
+ING_SUGAR_SUBSTITUTE,sugar substitute,stevia,sweetener,
+ING_SUGAR_SUBSTITUTE,sugar substitute,sweetener,sweetener,
+ING_SUGAR_SUBSTITUTE,sugar substitute,artificial sweetener,sweetener,
+ING_SUGAR_SUBSTITUTE,sugar substitute,equal,sweetener,
+ING_SUGAR_SUBSTITUTE,sugar substitute,sweet n low,sweetener,
+ING_ROSE_WATER,rose water,rose water,flavoring,
+ING_ROSE_WATER,rose water,rosewater,flavoring,
+ING_ORANGE_BLOSSOM,orange blossom water,orange blossom water,flavoring,
+ING_MINT_EXTRACT,mint extract,mint extract,flavoring,
+ING_MINT_EXTRACT,mint extract,peppermint extract,flavoring,
+ING_RUM_EXTRACT,rum extract,rum extract,flavoring,
+ING_COCONUT_EXTRACT,coconut extract,coconut extract,flavoring,
+ING_MAPLE_EXTRACT,maple extract,maple extract,flavoring,
+ING_MAPLE_EXTRACT,maple extract,maple flavoring,flavoring,
+ING_SAUERKRAUT,sauerkraut,sauerkraut,vegetable,
+ING_SAUERKRAUT,sauerkraut,can sauerkraut,vegetable,
+ING_SAUERKRAUT,sauerkraut,bag sauerkraut,vegetable,
+ING_SUN_DRIED_TOMATO,sun-dried tomato,sun-dried tomato,vegetable,
+ING_SUN_DRIED_TOMATO,sun-dried tomato,sun dried tomatoes,vegetable,
+ING_SUN_DRIED_TOMATO,sun-dried tomato,sun-dried tomatoes,vegetable,
+ING_SUN_DRIED_TOMATO,sun-dried tomato,sundried tomatoes,vegetable,
+ING_SUN_DRIED_TOMATO,sun-dried tomato,julienned sun-dried tomatoes,vegetable,
+ING_ROASTED_RED_PEPPER,roasted red pepper,roasted red pepper,vegetable,
+ING_ROASTED_RED_PEPPER,roasted red pepper,roasted red peppers,vegetable,
+ING_ROASTED_RED_PEPPER,roasted red pepper,jar roasted red peppers,vegetable,
+ING_ROASTED_RED_PEPPER,roasted red pepper,fire roasted red peppers,vegetable,
+ING_CHILI_PEPPER,chili pepper,chili pepper,vegetable,
+ING_CHILI_PEPPER,chili pepper,chile pepper,vegetable,
+ING_CHILI_PEPPER,chili pepper,hot pepper,vegetable,
+ING_CHILI_PEPPER,chili pepper,thai chili,vegetable,
+ING_CHILI_PEPPER,chili pepper,serrano pepper,vegetable,
+ING_CHILI_PEPPER,chili pepper,serrano,vegetable,
+ING_CHILI_PEPPER,chili pepper,poblano pepper,vegetable,
+ING_CHILI_PEPPER,chili pepper,poblano,vegetable,
+ING_CHILI_PEPPER,chili pepper,anaheim pepper,vegetable,
+ING_HOMINY,hominy,hominy,grain,
+ING_HOMINY,hominy,can hominy,grain,
+ING_HOMINY,hominy,white hominy,grain,
+ING_HOMINY,hominy,golden hominy,grain,
+ING_SCALLOP,scallop,scallop,protein,molluscs
+ING_SCALLOP,scallop,scallops,protein,molluscs
+ING_SCALLOP,scallop,sea scallops,protein,molluscs
+ING_SCALLOP,scallop,bay scallops,protein,molluscs
+ING_CLAM,clam,clam,protein,molluscs
+ING_CLAM,clam,clams,protein,molluscs
+ING_CLAM,clam,can clams,protein,molluscs
+ING_CLAM,clam,minced clams,protein,molluscs
+ING_CLAM,clam,chopped clams,protein,molluscs
+ING_CLAM,clam,littleneck clams,protein,molluscs
+ING_CLAM_JUICE,clam juice,clam juice,prepared,fish
+ING_CLAM_JUICE,clam juice,bottled clam juice,prepared,fish
+ING_MUSSEL,mussel,mussel,protein,molluscs
+ING_MUSSEL,mussel,mussels,protein,molluscs
+ING_OYSTER,oyster,oyster,protein,molluscs
+ING_OYSTER,oyster,oysters,protein,molluscs
+ING_OYSTER,oyster,can oysters,protein,molluscs
+ING_OYSTER,oyster,shucked oysters,protein,molluscs
+ING_LOBSTER,lobster,lobster,protein,crustaceans
+ING_LOBSTER,lobster,lobster meat,protein,crustaceans
+ING_LOBSTER,lobster,lobster tail,protein,crustaceans
+ING_LOBSTER,lobster,lobster tails,protein,crustaceans
+ING_PANCETTA,pancetta,pancetta,protein,
+ING_CORNED_BEEF,corned beef,corned beef,protein,
+ING_CORNED_BEEF,corned beef,corned beef brisket,protein,
+ING_CORNED_BEEF,corned beef,can corned beef,protein,
+ING_HOT_DOG,hot dog,hot dog,protein,
+ING_HOT_DOG,hot dog,hot dogs,protein,
+ING_HOT_DOG,hot dog,frankfurters,protein,
+ING_HOT_DOG,hot dog,wieners,protein,
+ING_HOT_DOG,hot dog,franks,protein,
+ING_GRUYERE,gruyere cheese,gruyere cheese,dairy,milk
+ING_GRUYERE,gruyere cheese,gruyere,dairy,milk
+ING_QUESO_FRESCO,queso fresco,queso fresco,dairy,milk
+ING_QUESO_FRESCO,queso fresco,cotija cheese,dairy,milk
+ING_QUESO_FRESCO,queso fresco,cotija,dairy,milk
+ING_HALF_AND_HALF,half and half,half and half,dairy,milk
+ING_HALF_AND_HALF,half and half,half-and-half,dairy,milk
+ING_HALF_AND_HALF,half and half,half and half cream,dairy,milk
+ING_HALF_AND_HALF,half and half,half-and-half cream,dairy,milk
+ING_SOUR_MILK,sour milk,sour milk,dairy,milk
+ING_SOUR_MILK,sour milk,soured milk,dairy,milk
+ING_ALMOND_MILK,almond milk,almond milk,plant_milk,tree_nuts
+ING_ALMOND_MILK,almond milk,unsweetened almond milk,plant_milk,tree_nuts
+ING_SOY_MILK,soy milk,soy milk,plant_milk,soy
+ING_SOY_MILK,soy milk,soymilk,plant_milk,soy
+ING_OAT_MILK,oat milk,oat milk,plant_milk,gluten_candidate
+ING_OAT_MILK,oat milk,oatmilk,plant_milk,gluten_candidate
+ING_EGG_SUBSTITUTE,egg substitute,egg substitute,protein,
+ING_EGG_SUBSTITUTE,egg substitute,egg beaters,protein,
+ING_EGG_SUBSTITUTE,egg substitute,liquid egg substitute,protein,
+ING_EGG_SUBSTITUTE,egg substitute,egg replacer,protein,
+ING_ALMOND_FLOUR,almond flour,almond flour,grain,tree_nuts
+ING_ALMOND_FLOUR,almond flour,almond meal,grain,tree_nuts
+ING_COCONUT_FLOUR,coconut flour,coconut flour,grain,
+ING_ORZO,orzo,orzo,grain,gluten
+ING_ORZO,orzo,orzo pasta,grain,gluten
+ING_GNOCCHI,gnocchi,gnocchi,grain,gluten
+ING_GNOCCHI,gnocchi,potato gnocchi,grain,gluten
+ING_RAMEN,ramen noodles,ramen noodles,grain,gluten
+ING_RAMEN,ramen noodles,ramen,grain,gluten
+ING_RAMEN,ramen noodles,instant ramen,grain,gluten
+ING_RAMEN,ramen noodles,top ramen,grain,gluten
+ING_RICE_NOODLES,rice noodles,rice noodles,grain,
+ING_RICE_NOODLES,rice noodles,rice vermicelli,grain,
+ING_RICE_NOODLES,rice noodles,rice stick noodles,grain,
+ING_SANDWICH_COOKIE,chocolate sandwich cookies,chocolate sandwich cookies,grain,gluten
+ING_SANDWICH_COOKIE,chocolate sandwich cookies,oreo cookies,grain,gluten
+ING_SANDWICH_COOKIE,chocolate sandwich cookies,oreos,grain,gluten
+ING_SANDWICH_COOKIE,chocolate sandwich cookies,oreo cookie crumbs,grain,gluten
+ING_MACE,mace,mace,seasoning,
+ING_MACE,mace,ground mace,seasoning,
+ING_GARAM_MASALA,garam masala,garam masala,seasoning,
+ING_HERBES_DE_PROVENCE,herbes de provence,herbes de provence,seasoning,
+ING_ZAATAR,za'atar,za'atar,seasoning,sesame
+ING_ZAATAR,za'atar,zaatar,seasoning,sesame
+ING_ZAATAR,za'atar,zatar,seasoning,sesame
+ING_SUMAC,sumac,sumac,seasoning,
+ING_SUMAC,sumac,ground sumac,seasoning,
+ING_AMARETTO,amaretto,amaretto,beverage,tree_nuts
+ING_KIRSCH,kirsch,kirsch,beverage,
+ING_KIRSCH,kirsch,cherry brandy,beverage,
+ING_SAKE,sake,sake,beverage,
+ING_SAKE,sake,mirin,beverage,
+ING_SAKE,sake,rice wine,beverage,
+ING_FRUIT_COCKTAIL,fruit cocktail,fruit cocktail,fruit,
+ING_FRUIT_COCKTAIL,fruit cocktail,can fruit cocktail,fruit,
+ING_INSTANT_MASHED_POTATO,instant mashed potato flakes,instant mashed potato flakes,vegetable,
+ING_INSTANT_MASHED_POTATO,instant mashed potato flakes,instant mashed potatoes,vegetable,
+ING_INSTANT_MASHED_POTATO,instant mashed potato flakes,mashed potato flakes,vegetable,
+ING_INSTANT_MASHED_POTATO,instant mashed potato flakes,potato flakes,vegetable,
+ING_INSTANT_MASHED_POTATO,instant mashed potato flakes,instant potato flakes,vegetable,
+ING_INSTANT_MASHED_POTATO,instant mashed potato flakes,instant potatoes,vegetable,
+ING_MASHED_POTATOES,mashed potatoes,mashed potatoes,vegetable,
+ING_MASHED_POTATOES,mashed potatoes,leftover mashed potatoes,vegetable,
+ING_FROZEN_BREAD_DOUGH,frozen bread dough,frozen bread dough,grain,gluten
+ING_FROZEN_BREAD_DOUGH,frozen bread dough,bread dough,grain,gluten
+ING_FROZEN_BREAD_DOUGH,frozen bread dough,loaf frozen bread dough,grain,gluten
+ING_MEAT,meat,meat,protein,
+ING_DARK_CHOCOLATE,dark chocolate,dark chocolate,flavoring,milk
+ING_GRAPESEED_OIL,grapeseed oil,grapeseed oil,fat,
+ING_BLACK_EYED_PEAS,black-eyed peas,black-eyed peas,protein,
+ING_BLACK_EYED_PEAS,black-eyed peas,black eyed peas,protein,
+ING_POWDERED_MILK,powdered milk,powdered milk,dairy,milk
+ING_POWDERED_MILK,powdered milk,dry milk,dairy,milk
+ING_ONION_SALT,onion salt,onion salt,seasoning,
+ING_SHERRY_VINEGAR,sherry vinegar,sherry vinegar,condiment,
+ING_LIME_ZEST,lime zest,lime zest,fruit,
+ING_ARUGULA,arugula,arugula,vegetable,
+ING_LEMONGRASS,lemongrass,lemongrass,herb,
+ING_CONDENSED_CREAM_OF_POTATO_SOUP,condensed cream of potato soup,condensed cream of potato soup,prepared,
+ING_CONDENSED_CREAM_OF_POTATO_SOUP,condensed cream of potato soup,cream of potato soup,prepared,
+ING_BUTTER_FLAVORING,butter flavoring,butter flavoring,flavoring,
+ING_ALUM,alum,alum,seasoning,
+ING_PITA_BREAD,pita bread,pita bread,grain,gluten
+ING_PITA_BREAD,pita bread,pita breads,grain,gluten
+ING_COCONUT_SUGAR,coconut sugar,coconut sugar,sweetener,
+ING_FRUIT,fruit,fruit,fruit,
+ING_PRUNE,prune,prune,fruit,
+ING_PRUNE,prune,prunes,fruit,
+ING_BERRIES,berries,berries,fruit,
+ING_OAT_FLOUR,oat flour,oat flour,grain,gluten_candidate
+ING_SUNFLOWER_OIL,sunflower oil,sunflower oil,fat,
+ING_PROCESSED_CHEESE_SAUCE,processed cheese sauce,processed cheese sauce,dairy,milk
+ING_PROCESSED_CHEESE_SAUCE,processed cheese sauce,cheez whiz,dairy,milk
+ING_PROCESSED_CHEESE_SAUCE,processed cheese sauce,cheese whiz,dairy,milk
+ING_SNOW_PEAS,snow peas,snow peas,vegetable,
+ING_PIZZA_SAUCE,pizza sauce,pizza sauce,condiment,
+ING_SOUP,soup,soup,prepared,
+ING_SYRUP,syrup,syrup,sweetener,
+ING_BROTH,broth,broth,prepared,
+ING_MACADAMIA_NUT,macadamia nut,macadamia nut,protein,tree_nuts
+ING_MACADAMIA_NUT,macadamia nut,macadamia nuts,protein,tree_nuts
+ING_TEQUILA,tequila,tequila,beverage,
+ING_MEATBALL,meatball,meatball,protein,
+ING_MEATBALL,meatball,meatballs,protein,
+ING_BULGUR,bulgur,bulgur,grain,gluten
+ING_RABBIT,rabbit,rabbit,protein,
+ING_RABBIT,rabbit,rabbits,protein,
+ING_OAT_BRAN,oat bran,oat bran,grain,gluten_candidate
+ING_BAGUETTE,baguette,baguette,grain,gluten
+ING_HABANERO_PEPPER,habanero pepper,habanero pepper,vegetable,
+ING_POMEGRANATE_SEEDS,pomegranate seeds,pomegranate seeds,fruit,
+ING_RUTABAGA,rutabaga,rutabaga,vegetable,
+ING_APRICOT_NECTAR,apricot nectar,apricot nectar,beverage,
+ING_POMEGRANATE_MOLASSES,pomegranate molasses,pomegranate molasses,condiment,
+ING_ALMOND_PASTE,almond paste,almond paste,prepared,tree_nuts
+ING_CAYENNE,cayenne pepper,red pepper,seasoning,
+ING_CREAM_CHEESE,cream cheese,pkg. cream cheese,dairy,milk
+ING_CHICKEN,chicken,fryer,protein,
+ING_BELL_PEPPER,bell pepper,sweet red pepper,vegetable,
+ING_COOKING_SPRAY,cooking spray,vegetable cooking spray,fat,
+ING_LEMON,lemon,1 lemon,fruit,
+ING_SALT,salt,fine sea salt,seasoning,
+ING_ALMOND_EXTRACT,almond extract,almond flavoring,flavoring,tree_nuts
+ING_SALT_AND_PEPPER,salt and pepper,kosher salt and black pepper,seasoning,
+ING_LIME,lime,lime wedges,fruit,
+ING_SWEET_POTATO,sweet potato,mashed sweet potatoes,vegetable,
+ING_BISCUIT_DOUGH,refrigerated biscuits,biscuits,grain,gluten
+ING_BACON,bacon,strips bacon,protein,
+ING_FOOD_COLORING,food coloring,green food coloring,flavoring,
+ING_THYME,thyme,thyme sprigs,herb,
+ING_SPINACH,spinach,baby spinach leaves,vegetable,
+ING_BUTTER,butter,t butter,dairy,milk
+ING_BAKING_CHOCOLATE,baking chocolate,chocolate,flavoring,milk
+ING_SAGE,sage,sage leaves,herb,
+ING_PINEAPPLE,pineapple,pineapple with juice,fruit,
+ING_VINEGAR,vinegar,wine vinegar,condiment,
+ING_OREGANO,oregano,dried oregano leaves,herb,
+ING_GELATIN,gelatin,strawberry jello,prepared,
+ING_BREADCRUMBS,bread crumbs,dry breadcrumbs,grain,gluten
+ING_LETTUCE,lettuce,lettuce leaves,vegetable,
+ING_GELATIN,gelatin,knox gelatine,prepared,
+ING_PARSLEY,parsley,dried parsley flakes,herb,
+ING_THYME,thyme,dried thyme leaves,herb,
+ING_GELATIN,gelatin,lemon jello,prepared,
+ING_CONDENSED_MILK,sweetened condensed milk,eagle brand sweetened condensed milk,dairy,milk
+ING_PUDDING_MIX,instant pudding mix,chocolate pudding,prepared,
+ING_MARSHMALLOW,marshmallow,marshmallow cream,sweetener,
+ING_BREAD,bread,bread cubes,grain,gluten
+ING_FOOD_COLORING,food coloring,red food coloring,flavoring,
+ING_GELATIN,gelatin,strawberry jell-o,prepared,
+ING_BOUILLON,bouillon cube,beef bouillon cubes,prepared,
+ING_HAM,ham,fully ham,protein,
+ING_BASIL,basil,basil leaf,herb,
+ING_CARAMEL,caramel,caramel ice cream topping,sweetener,milk
+ING_PEPPERCORN,peppercorn,black peppercorns,seasoning,
+ING_CORN_SYRUP,corn syrup,white karo syrup,sweetener,
+ING_EVAPORATED_MILK,evaporated milk,canned milk,dairy,milk
+ING_MILK,milk,sweet milk,dairy,milk
+ING_CRACKER_CRUMBS,cracker crumbs,soda crackers,grain,gluten
+ING_TOMATO,tomato,italian tomatoes,vegetable,
+ING_PESTO,pesto,pesto sauce,condiment,tree_nuts;milk
+ING_INSTANT_COFFEE,instant coffee,coffee granules,beverage,
+ING_VEGETABLE_OIL,vegetable oil,crisco oil,fat,
+ING_EGG,egg,hard- eggs,protein,eggs
+ING_CORN_SYRUP,corn syrup,white corn syrup,sweetener,
+ING_CORN_SYRUP,corn syrup,white syrup,sweetener,
+ING_OREGANO,oregano,oregano leaves,herb,
+ING_MSG,msg,accent,seasoning,
+ING_WATER,water,soup can water,liquid,
+ING_SAUSAGE,sausage,hot sausage,protein,
+ING_CELERY_SOUP,condensed cream of celery soup,celery soup,prepared,
+ING_WHIPPED_TOPPING,whipped topping,dream whip,dairy,milk
+ING_TARRAGON,tarragon,tarragon leaves,herb,
+ING_POWDERED_MILK,powdered milk,dry milk powder,dairy,milk
+ING_PINEAPPLE_JUICE,pineapple juice,unsweetened pineapple juice,fruit,
+ING_CRACKER_CRUMBS,cracker crumbs,crackers,grain,gluten
+ING_LEMON,lemon,lemon wedges,fruit,
+ING_PEANUT,peanut,roasted peanuts,protein,peanuts
+ING_BELL_PEPPER,bell pepper,yellow pepper,vegetable,
+ING_LEMON_EXTRACT,lemon extract,lemon flavoring,flavoring,
+ING_PASTA,pasta,penne pasta,grain,gluten
+ING_MIXED_VEGETABLES,mixed vegetables,veg-all,vegetable,
+ING_TOMATO,tomato,green tomatoes,vegetable,
+ING_CRACKER_CRUMBS,cracker crumbs,fine cracker crumbs,grain,gluten
+ING_BACON,bacon,bacon bits,protein,
+ING_CHICKEN,chicken,frying chicken,protein,
+ING_RAISIN,raisin,golden raisin,fruit,
+ING_DIJON,dijon mustard,dijon-style mustard,condiment,
+ING_GREEN_BEANS,green beans,french-style green beans,vegetable,
+ING_CEREAL_CORNFLAKE,corn flakes,corn flake crumbs,grain,
+ING_EGG,egg,boiled eggs,protein,eggs
+ING_GROUND_BEEF,ground beef,hamburg,protein,
+ING_OATS,oats,quick oatmeal,grain,gluten_candidate
+ING_VEGETABLE_OIL,vegetable oil,vegetable oil for frying,fat,
+ING_CHERRY,cherry,candied cherries,fruit,
+ING_PINEAPPLE,pineapple,candied pineapple,fruit,
+ING_CAKE_MIX,cake mix,devil's food cake mix,grain,gluten
+ING_VEGETABLE_OIL,vegetable oil,oil for frying,fat,
+ING_FRUIT_PIE_FILLING,fruit pie filling,pie filling,prepared,
+ING_PECAN,pecan,broken pecans,protein,tree_nuts
+ING_CHOCOLATE_CHIPS,chocolate chips,chocolate bits,flavoring,milk
+ING_MILK,milk,soup can milk,dairy,milk
+ING_SOY_SAUCE,soy sauce,soya sauce,condiment,soy;gluten
+ING_LEMON,lemon,1/2 lemon,fruit,
+ING_GINGER,ginger,powdered ginger,seasoning,
+ING_ALLSPICE,allspice,allspice berries,seasoning,
+ING_BERRIES,berries,mixed berries,fruit,
+ING_RICE,rice,raw rice,grain,
+ING_CAKE_MIX,cake mix,duncan hines butter cake mix,grain,gluten
+ING_COCONUT,coconut,angel flake coconut,fruit,
+ING_BREADCRUMBS,bread crumbs,italian seasoned breadcrumbs,grain,gluten
+ING_PARMESAN,parmesan cheese,parmigiano-reggiano cheese,dairy,milk
+ING_WATER,water,hot tap water,liquid,
+ING_CHOCOLATE_CHIPS,chocolate chips,pkg. chocolate chips,flavoring,milk
+ING_GELATIN,gelatin,pkg. strawberry jello,prepared,
+ING_SALT_AND_PEPPER,salt and pepper,sea salt and black pepper,seasoning,
+ING_CHICKEN_SOUP,condensed cream of chicken soup,cream of chicken,prepared,
+ING_MILK,milk,scalded milk,dairy,milk
+ING_PARSLEY,parsley,loosely flat-leaf parsley leaves,herb,
+ING_MILK,milk,hot milk,dairy,milk
+ING_BEEF,beef,beef chuck roast,protein,
+ING_BREAD,bread,crusty bread,grain,gluten
+ING_CLOVES_SPICE,cloves,clove,seasoning,
+ING_CORN_SYRUP,corn syrup,dark karo syrup,sweetener,
+ING_PORK,pork,pork loin roast,protein,
+ING_SEASONED_SALT,seasoned salt,season salt,seasoning,
+ING_BEEF_BROTH,beef broth,condensed beef broth,prepared,
+ING_CAKE_MIX,cake mix,lemon cake mix,grain,gluten
+ING_BEEF,beef,stew meat,protein,
+ING_PARSLEY,parsley,parsley leaves,herb,
+ING_GELATIN,gelatin,lemon jell-o,prepared,
+ING_SALT,salt,t salt,seasoning,
+ING_BREADCRUMBS,bread crumbs,panko breadcrumbs,grain,gluten
+ING_VANILLA_BEAN,vanilla bean,vanilla bean,flavoring,
+ING_VANILLA_BEAN,vanilla bean,vanilla beans,flavoring,
+ING_VANILLA_BEAN,vanilla bean,vanilla pod,flavoring,
+ING_SALAD_DRESSING,salad dressing,salad dressing,condiment,
+ING_SALAD_DRESSING,salad dressing,bottled salad dressing,condiment,
+ING_BLACKBERRY,blackberry,blackberry,fruit,
+ING_BLACKBERRY,blackberry,blackberries,fruit,
+ING_BLACKBERRY,blackberry,fresh blackberries,fruit,
+ING_DRIED_ONION_FLAKES,dried onion flakes,dried onion flakes,vegetable,
+ING_DRIED_ONION_FLAKES,dried onion flakes,dried onion,vegetable,
+ING_DRIED_ONION_FLAKES,dried onion flakes,dried minced onion,vegetable,
+ING_DRIED_ONION_FLAKES,dried onion flakes,onion flakes,vegetable,
+ING_DRIED_ONION_FLAKES,dried onion flakes,instant onion flakes,vegetable,
+ING_DRIED_ONION_FLAKES,dried onion flakes,minced dried onion,vegetable,
+ING_CURRANT,currant,currant,fruit,
+ING_CURRANT,currant,currants,fruit,
+ING_CURRANT,currant,dried currants,fruit,
+ING_CURRANT,currant,zante currants,fruit,
+ING_XANTHAN_GUM,xanthan gum,xanthan gum,prepared,
+ING_MILK_CHOCOLATE,milk chocolate,milk chocolate,flavoring,milk
+ING_MILK_CHOCOLATE,milk chocolate,milk chocolate bar,flavoring,milk
+ING_CRYSTALLIZED_GINGER,crystallized ginger,crystallized ginger,seasoning,
+ING_CRYSTALLIZED_GINGER,crystallized ginger,candied ginger,seasoning,
+ING_RYE_FLOUR,rye flour,rye flour,grain,gluten
+ING_RYE_FLOUR,rye flour,dark rye flour,grain,gluten
+ING_RYE_FLOUR,rye flour,medium rye flour,grain,gluten
+ING_WILD_RICE,wild rice,wild rice,grain,
+ING_DRINK_MIX_POWDER,powdered orange drink mix,powdered orange drink mix,beverage,
+ING_DRINK_MIX_POWDER,powdered orange drink mix,tang,beverage,
+ING_DRINK_MIX_POWDER,powdered orange drink mix,orange drink mix,beverage,
+ING_ESPRESSO_POWDER,espresso powder,espresso powder,flavoring,
+ING_ESPRESSO_POWDER,espresso powder,instant espresso powder,flavoring,
+ING_ESPRESSO_POWDER,espresso powder,instant espresso,flavoring,
+ING_ORANGE_EXTRACT,orange extract,orange extract,flavoring,
+ING_RICE_FLOUR,rice flour,rice flour,grain,
+ING_RICE_FLOUR,rice flour,sweet rice flour,grain,
+ING_RICE_FLOUR,rice flour,glutinous rice flour,grain,
+ING_BAKING_CHOCOLATE,baking chocolate,sq. unsweetened chocolate,flavoring,milk
+ING_PEANUT,peanut,raw peanuts,protein,peanuts
+ING_JAM,jam,orange marmalade,condiment,
+ING_JAM,jam,marmalade,condiment,
+ING_WHOLE_WHEAT_FLOUR,whole wheat flour,wheat pastry flour,grain,gluten
+ING_WHOLE_WHEAT_FLOUR,whole wheat flour,whole wheat pastry flour,grain,gluten
+ING_BISCUIT_MIX,baking mix,bisquick baking mix,grain,gluten
+ING_BISCUIT_MIX,baking mix,bisquick mix,grain,gluten
+ING_CHOCOLATE_CHIPS,chocolate chips,dark chocolate chips,flavoring,milk
+ING_SHORTENING,shortening,crisco shortening,fat,
+ING_SUGAR_SUBSTITUTE,sugar substitute,splenda sugar substitute,sweetener,
+ING_PIE_CRUST,pie crust,baked pie shell,grain,gluten
+ING_WALNUT,walnut,black walnuts,protein,tree_nuts
+ING_WALNUT,walnut,black walnut,protein,tree_nuts
+ING_DILL,dill,dried dill weed,herb,
+ING_CORN_SYRUP,corn syrup,white karo,sweetener,
+ING_CORN_SYRUP,corn syrup,karo,sweetener,
+ING_SOUR_CREAM,sour cream,dairy sour cream,dairy,milk
