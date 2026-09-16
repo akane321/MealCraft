@@ -1,0 +1,19 @@
+{
+    "source_name":  "RecipeNLG",
+    "source_url":  "https://www.kaggle.com/datasets/saldenisov/recipenlg",
+    "source_record_id":  "recipenlg-full_dataset.csv",
+    "source_license":  "Research/education, non-commercial. Some rows originate from Recipe1M+; the \u0027source\u0027 column must be preserved.",
+    "retrieved_at":  "2026-09-09T11:51:00Z",
+    "source_version":  "full_dataset.csv (single published release)",
+    "transformation_version":  "mealcraft-data-cleaning/0.1.0",
+    "permitted_uses":  [
+                           "Local parsing, NER cross-check, cleaning and sampling",
+                           "Derived curated records whose redistribution is permitted"
+                       ],
+    "prohibited_uses":  [
+                            "Committing the raw CSV or archive to any Git repository",
+                            "Commercial use",
+                            "Redistributing raw RecipeNLG rows through MealCraft"
+                        ],
+    "raw_manifest":  "data\\raw\\recipenlg\\raw_manifest.json"
+}
