@@ -44,9 +44,7 @@ REPORT = "docs/evaluation/workbench/latest.json"
 
 
 def git(*args: str) -> str:
-    return subprocess.run(
-        ["git", "-C", str(ROOT), *args], capture_output=True, text=True, check=True
-    ).stdout.strip()
+    return subprocess.run(["git", "-C", str(ROOT), *args], capture_output=True, text=True, check=True).stdout.strip()
 
 
 def last_commit(path: str) -> str:
