@@ -81,6 +81,21 @@ leavening / liquid / beverage / grain）。
 
 **批量用本地版本化下载，不要打 USDA API**（配额和不稳定性）。API 只用于个别核查。
 
+> **动手前先量一件事：Foundation Foods 可能不够用。**
+>
+> `data/reference/usda-foundation-manifest.json` 登记的是 FoodData Central 的
+> **Foundation Foods** 子集，它只有约 400 条，而你要映射 **411 种食材**；而且它偏重
+> 生鲜原料，像 `bread crumbs`、`worcestershire sauce`、`hot dog` 这类基本没有。
+>
+> 所以第一步不是开始映射，是**量一下用它能覆盖多少**。覆盖率太低就换更大的 FDC 数据集
+> （`SR Legacy` 约 7,800 条，`FNDDS` 约 5,600 条，都是 CC0），照现有 manifest 的格式
+> 登记版本、URL 和 SHA-256。
+>
+> 换数据集是你自己的决定，不用等人；把选择理由和覆盖率对比写进 quality report 即可。
+>
+> 参考数据不提交进仓库（只提交 manifest）。本地没有就跑
+> `scripts/fetch_open_references.ps1`。
+
 置信度低、或候选之间差异会显著改变营养的，**保持 `unresolved`**。不要用零，不要猜，
 不要拿相近食材顶替。`unknown` 在下游是有明确语义的，零不是。
 
