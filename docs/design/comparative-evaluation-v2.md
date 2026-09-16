@@ -348,7 +348,11 @@ For a labelled feasible episode, success requires:
 1. correct interpretation or completion of required clarification;
 2. a complete assignment for every required slot in the frozen packet;
 3. zero applicable hard-constraint violations;
-4. nutrition claims calculated under the frozen semantics;
+4. nutrition claims calculated under the frozen semantics - every nutrition
+   target in a gold label declares whether it binds each planned dish
+   (`per_serving`) or only the average over the planned slots
+   (`horizon_average`), with no default, and is recomputed from frozen
+   per-serving catalog values within the manifest's declared tolerance;
 5. Shopping List ingredients consistent with the final plan;
 6. correct known-pantry deduction and no unknown-quantity deduction;
 7. correct package counts and costs within predeclared numeric tolerance;

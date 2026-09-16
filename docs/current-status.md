@@ -1,10 +1,10 @@
 # MealCraft Current Status
 
-> Last verified public snapshot: 2026-09-16
+> Last verified public snapshot: 2026-09-17
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `55df434`
+> Verified remote `main`: `3ed07af`
 
 ## How to Read This Document
 
@@ -56,6 +56,12 @@ of roughly fifteen percentage points or more; smaller differences would need
 several hundred episodes. Per-category success rates are not reportable at eight
 to twelve episodes a category, so categories serve coverage and error analysis
 rather than per-category comparison.
+
+Nutrition targets in gold labels are scored against frozen per-serving catalog
+values. Each target must state whether it binds every planned dish or only the
+average over the planned slots; there is no default, and the authoring checker
+refuses a target that does not say. A daily-total scope is not yet supported,
+which does not affect episodes that plan one meal a day.
 
 Episodes may be drafted by an AI agent working from a sealed packet containing
 the catalogs, authoring rules and checker but no implementation of any system
