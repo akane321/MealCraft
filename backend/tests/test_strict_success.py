@@ -464,6 +464,25 @@ def test_pantry_deduction_is_summed_across_an_ingredients_lines(mixed_catalogs):
     assert "pantry_known_deduction_correct" in score(ep, repeated, mixed_catalogs).failed_codes
 
 
+def test_only_what_the_plan_uses_is_deducted_from_a_larger_pantry(mixed_catalogs):
+    """800 g needed, 1000 g in stock: deduct 800 and buy nothing."""
+    ep = mixed_episode(
+        **{
+            "gold.pantry_ground_truth": {
+                "deductible": [{"ingredient_id": "brown_rice", "quantity": 1000, "unit": "g"}],
+                "not_deductible_unknown_quantity": [],
+            }
+        }
+    )
+    used = rice_lines(("p-rice", 0, 4.0, 800))
+    result = score(ep, used, mixed_catalogs)
+    assert result.strict_success, result.failed_codes + result.indeterminate_codes
+
+    # Claiming the whole pantry was used overstates consumption by 200 g.
+    claimed_all = rice_lines(("p-rice", 0, 4.0, 1000))
+    assert "pantry_known_deduction_correct" in score(ep, claimed_all, mixed_catalogs).failed_codes
+
+
 def test_an_unknown_quantity_deducted_on_any_line_fails(mixed_catalogs):
     ep = mixed_episode(
         **{

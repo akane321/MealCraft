@@ -469,7 +469,14 @@ def _check_shopping(
         if name not in lines:
             continue
         stated_units = {line.unit for line in lines[name]}
-        expected = compatible(quantity, unit, next(iter(stated_units))) if len(stated_units) == 1 else None
+        line_unit = next(iter(stated_units)) if len(stated_units) == 1 else None
+        held = compatible(quantity, unit, line_unit)
+        # Only what the plan uses can be deducted. Comparing against the whole
+        # pantry quantity failed a plan that needed 440 g from 1000 g in stock
+        # and deducted 440, and passed one that claimed all 1000.
+        need = demand.get(name)
+        needed = compatible(need[0], need[1], line_unit) if need else 0.0
+        expected = None if held is None or needed is None else min(held, needed)
         if expected is None:
             wrong.append(f"{name} (units not comparable)")
         elif abs(deducted(name) - expected) > max(
