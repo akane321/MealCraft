@@ -21,6 +21,7 @@ class MixedBeamResult:
     product_snapshot_version: str = ""
     policy_version: str = ""
     repair_choices: tuple[tuple[str, str], ...] = ()
+    candidate_issues: tuple[str, ...] = ()
 
 
 def solve_mixed_beam(
@@ -34,12 +35,14 @@ def solve_mixed_beam(
     best_shopping = None
     unresolved = 0
     repair = None
+    candidate_issues = set()
     for state in search.states:
         assignments = [PlanningAssignment(slot_id=s, recipe_id=r) for s, r in state.choices]
         shopping = build_mixed_shopping(problem, assignments, max_combinations=max_package_combinations)
         if shopping.status not in ("feasible", "candidate_rejected"):
             unresolved += 1
         if shopping.status != "feasible":
+            candidate_issues.update(shopping.issues)
             if shopping.issues and all(
                 issue == "purchase_budget" or issue.startswith("package_needs_data:") for issue in shopping.issues
             ):
@@ -65,4 +68,5 @@ def solve_mixed_beam(
         problem.product_snapshot_version,
         problem.policy_version,
         repair[1] if repair and best is None else (),
+        tuple(sorted(candidate_issues)),
     )
