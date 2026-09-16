@@ -7,8 +7,9 @@ from app.schemas.agent import AgentConstraintState, AgentReplanDraft
 
 
 class AgentSessionRepository:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, *, household_id: int) -> None:
         self.session = session
+        self.household_id = household_id
 
     def create(
         self,
@@ -26,6 +27,7 @@ class AgentSessionRepository:
         pending_interaction: InteractionRequest | None,
     ) -> AgentSession:
         agent_session = AgentSession(
+            household_id=self.household_id,
             parser_provider=provider,
             constraints=constraints.model_dump(mode="json"),
             status=status,
@@ -46,13 +48,16 @@ class AgentSessionRepository:
 
     def get(self, session_id: int) -> AgentSession | None:
         statement = (
-            select(AgentSession).where(AgentSession.id == session_id).options(selectinload(AgentSession.messages))
+            select(AgentSession)
+            .where(AgentSession.id == session_id, AgentSession.household_id == self.household_id)
+            .options(selectinload(AgentSession.messages))
         )
         return self.session.scalars(statement).unique().one_or_none()
 
     def list_recent(self, *, limit: int) -> list[AgentSession]:
         statement = (
             select(AgentSession)
+            .where(AgentSession.household_id == self.household_id)
             .options(selectinload(AgentSession.messages))
             .order_by(AgentSession.updated_at.desc(), AgentSession.id.desc())
             .limit(limit)

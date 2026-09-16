@@ -8,6 +8,7 @@ import type {
 
 export function useNutritionDashboard() {
   const config = useRuntimeConfig();
+  const apiFetch = useApiFetch();
   const plans = ref<WeeklyMealPlanListItem[]>([]);
   const dashboard = ref<WeeklyNutritionDashboard | null>(null);
   const errorMessage = ref<string | null>(null);
@@ -18,7 +19,7 @@ export function useNutritionDashboard() {
     isLoading.value = true;
     errorMessage.value = null;
     try {
-      const collection = await $fetch<WeeklyMealPlanCollection>(`${config.public.apiBase}/api/plans`);
+      const collection = await apiFetch<WeeklyMealPlanCollection>(`${config.public.apiBase}/api/plans`);
       plans.value = collection.items;
       const selected = plans.value.find(plan => plan.id === preferredPlanId) || plans.value[0];
       if (selected) await loadDashboard(selected.id);
@@ -34,7 +35,7 @@ export function useNutritionDashboard() {
   }
 
   async function loadDashboard(planId: number) {
-    dashboard.value = await $fetch<WeeklyNutritionDashboard>(
+    dashboard.value = await apiFetch<WeeklyNutritionDashboard>(
       `${config.public.apiBase}/api/plans/${planId}/dashboard`,
     );
   }
@@ -44,7 +45,7 @@ export function useNutritionDashboard() {
     updatingEntryId.value = entryId;
     errorMessage.value = null;
     try {
-      await $fetch<WeeklyMealPlan>(
+      await apiFetch<WeeklyMealPlan>(
         `${config.public.apiBase}/api/plans/${dashboard.value.plan_id}/entries/${entryId}`,
         { method: "PATCH", body: { status } },
       );

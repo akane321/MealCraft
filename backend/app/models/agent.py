@@ -33,12 +33,18 @@ class AgentSession(Base):
             name="agent_sessions_parser_provider_valid",
         ),
         Index("agent_sessions_updated_id_idx", "updated_at", "id"),
+        Index("agent_sessions_household_updated_idx", "household_id", "updated_at", "id"),
         Index("agent_sessions_plan_id_idx", "plan_id"),
         Index("agent_sessions_pending_event_id_idx", "pending_event_id"),
         Index("agent_sessions_latest_run_id_idx", "latest_run_id"),
     )
 
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
+    household_id: Mapped[int] = mapped_column(
+        BIGINT_ID,
+        ForeignKey("households.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     status: Mapped[str] = mapped_column(String(20), default="collecting", server_default="collecting")
     parser_provider: Mapped[str] = mapped_column(String(20))
     constraints: Mapped[dict] = mapped_column(JSON, default=dict)

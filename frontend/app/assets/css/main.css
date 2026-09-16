@@ -85,6 +85,16 @@ a {
   color: #17191c;
 }
 
+.nav-auth {
+  padding: 9px 0;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .main-content {
   padding-block: 62px 72px;
 }

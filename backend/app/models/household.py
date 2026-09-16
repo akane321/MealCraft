@@ -24,10 +24,16 @@ class HouseholdProfile(Base):
     __tablename__ = "household_profiles"
     __table_args__ = (
         CheckConstraint("current_version > 0", name="household_profiles_current_version_positive"),
+        UniqueConstraint("household_id", name="household_profiles_household_key"),
         Index("household_profiles_updated_idx", "updated_at", "id"),
     )
 
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
+    household_id: Mapped[int] = mapped_column(
+        BIGINT_ID,
+        ForeignKey("households.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     name: Mapped[str] = mapped_column(String(120))
     current_version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -3,6 +3,7 @@ import type { HouseholdProfilePlanRequest, HouseholdProfilePlanResult } from "~/
 
 export function useWeeklyMealPlan() {
   const config = useRuntimeConfig();
+  const apiFetch = useApiFetch();
   const result = ref<WeeklyMealPlan | null>(null);
   const errorMessage = ref<string | null>(null);
   const isGenerating = ref(false);
@@ -11,7 +12,7 @@ export function useWeeklyMealPlan() {
     isGenerating.value = true;
     errorMessage.value = null;
     try {
-      result.value = await $fetch<WeeklyMealPlan>(`${config.public.apiBase}/api/plans/generate`, {
+      result.value = await apiFetch<WeeklyMealPlan>(`${config.public.apiBase}/api/plans/generate`, {
         method: "POST",
         body: payload,
       });
@@ -29,7 +30,7 @@ export function useWeeklyMealPlan() {
     isGenerating.value = true;
     errorMessage.value = null;
     try {
-      const response = await $fetch<HouseholdProfilePlanResult>(
+      const response = await apiFetch<HouseholdProfilePlanResult>(
         `${config.public.apiBase}/api/household-profiles/${profileId}/plans`,
         { method: "POST", body: payload },
       );

@@ -24,6 +24,7 @@ def lifecycle() -> tuple[AgentRunLifecycle, Session, int]:
     Base.metadata.create_all(engine)
     database = Session(engine, expire_on_commit=False)
     agent_session = AgentSession(
+        household_id=1,
         parser_provider="fixture",
         constraints={},
         missing_fields=[],
@@ -33,7 +34,7 @@ def lifecycle() -> tuple[AgentRunLifecycle, Session, int]:
     )
     database.add(agent_session)
     database.commit()
-    service = AgentRunLifecycle(AgentRunRepository(database))
+    service = AgentRunLifecycle(AgentRunRepository(database, household_id=1))
     try:
         yield service, database, agent_session.id
     finally:
