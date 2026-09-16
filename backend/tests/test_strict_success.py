@@ -9,6 +9,8 @@ from app.evaluation.strict_success import (
     Catalogs,
     Tolerances,
     compatible,
+    load_tag_implications,
+    satisfied_tags,
     schema_failure_score,
     score_episode,
 )
@@ -71,7 +73,7 @@ INGREDIENTS = [
 
 @pytest.fixture
 def catalogs():
-    return Catalogs.build(RECIPES, PRODUCTS, INGREDIENTS)
+    return Catalogs.build(RECIPES, PRODUCTS, INGREDIENTS, tag_implications={})
 
 
 def episode(**overrides):
@@ -259,6 +261,81 @@ def test_cooking_time_limit_is_enforced(catalogs):
     assert "cooking_time_respected" in score(ep, resp, catalogs).failed_codes
 
 
+# --- dietary tags entailed by definition ------------------------------------
+# The scorer compared raw tags, so a vegan dish served to a vegetarian household
+# was scored as a violation. Twelve committed recipes are tagged vegan without
+# also being tagged vegetarian.
+
+IMPLICATIONS_FILE = "data/recipes/dietary-tag-implications.json"
+VEGAN_BOWL = dict(RECIPES[0], slug="vegan-bowl", dietary_tags=["vegan"])
+
+
+def vegetarian_episode():
+    return episode(
+        **{
+            "scenario.recipe_candidate_slugs": ["vegan-bowl"],
+            "gold.applicable_hard_constraints": {
+                "allergens_absent": [],
+                "excluded_ingredients_absent": [],
+                "dietary_tags_required": ["vegetarian"],
+                "max_cooking_time_minutes": None,
+                "budget_sgd": None,
+                "nutrition_bands": [],
+            },
+        }
+    )
+
+
+def vegan_plan():
+    return response(
+        plan={
+            "assignments": [{"slot_id": "mon-dinner", "recipe_id": "vegan-bowl", "servings": 2}],
+            "shopping": [
+                {
+                    "ingredient_id": "brown_rice",
+                    "unit": "g",
+                    "required_quantity": 200,
+                    "product_id": "p-rice",
+                    "packages": 1,
+                    "line_cost_sgd": 4.0,
+                }
+            ],
+            "total_cost_sgd": 4.0,
+        }
+    )
+
+
+def test_a_vegan_dish_satisfies_a_vegetarian_requirement():
+    implications = load_tag_implications(repository_root() / IMPLICATIONS_FILE)
+    catalogs = Catalogs.build(RECIPES + [VEGAN_BOWL], PRODUCTS, INGREDIENTS, tag_implications=implications)
+    result = score(vegetarian_episode(), vegan_plan(), catalogs)
+    assert result.strict_success, result.failed_codes + result.indeterminate_codes
+
+
+def test_entailment_only_runs_one_way():
+    # vegetarian does not entail vegan: a vegetarian dish is no answer to a vegan household.
+    implications = load_tag_implications(repository_root() / IMPLICATIONS_FILE)
+    assert "vegan" not in satisfied_tags(["vegetarian"], implications)
+    assert {"vegetarian", "dairy-free"} <= satisfied_tags(["vegan"], implications)
+
+
+def test_without_the_table_the_same_dish_is_a_violation():
+    """Guards the reason the table is a required argument rather than a default."""
+    catalogs = Catalogs.build(RECIPES + [VEGAN_BOWL], PRODUCTS, INGREDIENTS, tag_implications={})
+    assert "dietary_tags_respected" in score(vegetarian_episode(), vegan_plan(), catalogs).failed_codes
+
+
+def test_scorer_and_planner_close_tags_identically_on_the_committed_catalog():
+    """Independent implementations of one definition; divergence must surface here."""
+    from app.planning.dietary_tags import expand_tags, load_implications
+
+    ours = load_tag_implications(repository_root() / IMPLICATIONS_FILE)
+    recipes = json.loads((repository_root() / "data/recipes/recipes.json").read_text(encoding="utf-8"))
+    for recipe in recipes:
+        theirs = {tag.lower() for tag in expand_tags(recipe["dietary_tags"], load_implications())}
+        assert satisfied_tags(recipe["dietary_tags"], ours) == theirs, recipe["slug"]
+
+
 def test_missing_shopping_line_fails(catalogs):
     resp = response(
         plan={
@@ -327,7 +404,7 @@ SMALL_RICE = {
 
 @pytest.fixture
 def mixed_catalogs():
-    return Catalogs.build(RECIPES, PRODUCTS + [SMALL_RICE], INGREDIENTS)
+    return Catalogs.build(RECIPES, PRODUCTS + [SMALL_RICE], INGREDIENTS, tag_implications={})
 
 
 def mixed_episode(**overrides):
@@ -509,7 +586,7 @@ BARE = dict(RECIPES[0], slug="bare-bowl")  # no nutrition recorded at all
 
 @pytest.fixture
 def nutrition_catalogs():
-    return Catalogs.build(RECIPES + [LEAN, RICH, BARE], PRODUCTS, INGREDIENTS)
+    return Catalogs.build(RECIPES + [LEAN, RICH, BARE], PRODUCTS, INGREDIENTS, tag_implications={})
 
 
 def nutrition_episode(*bands, slots=("mon-dinner",)):
@@ -775,7 +852,7 @@ def test_incomparable_units_are_indeterminate_and_block_success(catalogs):
             "ingredient_keys": ["brown_rice"],
         }
     ]
-    cat = Catalogs.build(RECIPES, odd_products, INGREDIENTS)
+    cat = Catalogs.build(RECIPES, odd_products, INGREDIENTS, tag_implications={})
     ep = episode(**{"scenario.fairprice_product_ids": ["p-rice", "p-sesame", "p-odd"]})
     resp = response(
         plan={

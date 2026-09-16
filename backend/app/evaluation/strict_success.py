@@ -26,8 +26,10 @@ satisfied is how a benchmark drifts upward without the system improving.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+import json
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 
 from app.evaluation.common_output import CommonEpisodeResponse, ShoppingLine
@@ -128,6 +130,31 @@ class Tolerances:
         return cls(**{key: float(value) for key, value in declared.items()})
 
 
+def load_tag_implications(path: Path) -> dict[str, frozenset[str]]:
+    """Read the definitional entailments, e.g. vegan entails vegetarian.
+
+    Parsed here rather than through app.planning.dietary_tags for the reason the
+    module docstring gives: the planner's helper must not be what decides
+    whether the planner's output is correct. The data file is the definition and
+    both read it; `test_strict_success.py` checks the two closures agree.
+    """
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return {tag: frozenset(entry["entails"]) for tag, entry in (payload.get("implications") or {}).items()}
+
+
+def satisfied_tags(tags: Iterable[str], implications: Mapping[str, frozenset[str]]) -> frozenset[str]:
+    """Every tag a recipe satisfies: its own, and everything they entail, transitively."""
+    closed: set[str] = set()
+    pending = [str(tag).lower() for tag in tags]
+    while pending:
+        tag = pending.pop()
+        if tag in closed:
+            continue
+        closed.add(tag)
+        pending.extend(implications.get(tag, ()))
+    return frozenset(closed)
+
+
 @dataclass(frozen=True)
 class Catalogs:
     """Frozen facts, keyed for lookup. Built once per run."""
@@ -135,13 +162,25 @@ class Catalogs:
     recipes: dict[str, dict]
     products: dict[str, dict]
     ingredient_allergens: dict[str, str | None]
+    tag_implications: Mapping[str, frozenset[str]]
 
     @classmethod
-    def build(cls, recipes: Iterable[dict], products: Iterable[dict], ingredients: Iterable[dict]) -> Catalogs:
+    def build(
+        cls,
+        recipes: Iterable[dict],
+        products: Iterable[dict],
+        ingredients: Iterable[dict],
+        *,
+        tag_implications: Mapping[str, frozenset[str]],
+    ) -> Catalogs:
+        # Required rather than defaulted: a vegan dish chosen for a vegetarian
+        # household is correct, and a caller that forgot the table would score it
+        # as a violation with no sign that anything was missing.
         return cls(
             recipes={row["slug"]: row for row in recipes},
             products={row["external_id"]: row for row in products},
             ingredient_allergens={row["normalized_name"]: row.get("allergen") for row in ingredients},
+            tag_implications=tag_implications,
         )
 
 
@@ -343,7 +382,11 @@ def _check_hard_constraints(
 
     required_tags = {str(t).lower() for t in gold.get("dietary_tags_required") or []}
     offenders = sorted(
-        {r["slug"] for r in present if not required_tags.issubset({str(t).lower() for t in r["dietary_tags"]})}
+        {
+            r["slug"]
+            for r in present
+            if not required_tags.issubset(satisfied_tags(r["dietary_tags"], catalogs.tag_implications))
+        }
     )
     checks.append(
         Check(
