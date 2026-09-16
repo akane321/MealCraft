@@ -1,0 +1,153 @@
+chopped
+finely chopped
+roughly chopped
+coarsely chopped
+diced
+finely diced
+sliced
+thinly sliced
+minced
+finely minced
+julienned
+shredded
+finely shredded
+grated
+finely grated
+freshly grated
+freshly squeezed
+freshly ground
+coarsely ground
+finely ground
+sifted
+unsifted
+shelled
+stemmed
+pitted
+cored
+deveined
+blanched
+crumbled
+crushed
+peeled
+grated
+shredded
+melted
+softened
+cooked
+fully cooked
+uncooked
+drained
+rinsed
+divided
+beaten
+lightly beaten
+well beaten
+room temperature
+at room temperature
+extra virgin
+extra-virgin
+extra large
+extra-large
+medium size
+medium-size
+large size
+bite size
+bite-size
+cold
+warm
+soft
+toasted
+fresh
+fresh or frozen
+frozen or fresh
+freshly
+raw
+very
+frozen
+optional
+boneless
+skinless
+skinned
+deboned
+trimmed of fat
+cut into strips
+cut into cubes
+cut into chunks
+cut up
+cut in half
+cut into bite size pieces
+cut into bite-sized pieces
+well drained
+undrained
+packed in water
+packed in oil
+at room temperature
+slightly beaten
+lightly packed
+firm
+plain
+large
+small
+medium
+cubed
+florets
+instant
+juice of
+ground
+whole
+ripe
+boiling
+lukewarm
+warmed
+chilled
+packed
+firmly packed
+sifted
+granulated
+prepared
+extra
+virgin
+pure
+unsalted
+salted
+lean
+hard-boiled
+hard boiled
+crumbled
+flaked
+slivered
+halved
+quartered
+seeded
+trimmed
+thawed
+fat free
+fat-free
+low fat
+low-fat
+reduced fat
+reduced-fat
+nonfat
+non-fat
+low sodium
+low-sodium
+less sodium
+less-sodium
+reduced sodium
+reduced-sodium
+low calorie
+low-calorie
+sugar free
+sugar-free
+no sugar added
+low-moisture
+part skim
+part-skim
+2%
+1%
+skim
+light
+lite
+mild
+none
+n/a

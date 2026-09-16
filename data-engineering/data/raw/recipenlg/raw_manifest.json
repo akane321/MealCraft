@@ -1,0 +1,19 @@
+{
+    "source":  "RecipeNLG",
+    "source_url":  "https://www.kaggle.com/datasets/saldenisov/recipenlg",
+    "source_repo":  "https://github.com/Glorf/recipenlg",
+    "source_license":  "Research and education, non-commercial only; terms accepted by downloader",
+    "terms_accepted_by":  "dujiayu",
+    "retrieved_at":  "2026-09-09T11:51:00Z",
+    "local_path":  "data\\raw\\recipenlg\\full_dataset.csv",
+    "committed_to_git":  false,
+    "file_bytes":  2294981083,
+    "file_sha256":  "f376ee0bb9f99f323761abf6270d453f4eff2002c3625d04cabcf8b57dca0803",
+    "record_count":  2231142,
+    "record_count_method":  "csv_parse",
+    "record_count_by_source":  {
+                                   "Gathered":  1643098,
+                                   "Recipes1M":  588044
+                               },
+    "csv_header":  ",title,ingredients,directions,link,source,NER"
+}
