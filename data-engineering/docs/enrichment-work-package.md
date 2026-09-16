@@ -127,20 +127,36 @@ leavening / liquid / beverage / grain）。
 
 ## 2. 红线（这几条没有例外）
 
-### 🔴 不要碰 `data/recipes/recipes.json`
+### 🟡 可以原地扩 `data/recipes/recipes.json`，但必须是**追加**
 
-这是仓库根目录下那个 30 道菜的运行时目录。它同时是：
+v1 那份评价报告（`docs/evaluation/workbench/latest.md` 里 MealCraft 对强规则基线
+`6.1389` 对 `2.0` 那组数）是在 30 道菜的目录上跑出来的粗糙版本。**不值得为了维持它的
+可解释性而把目录一直冻在 30 道。**
 
-- `backend/app/evaluation/workbench.py`、`v2_packets.py`、`heldout_set.py` 的默认输入
-- `scripts/check_heldout_episodes.py` 和 `report_catalog_reality.py` 的校验基准
-- `backend/app/core/paths.py` 定位仓库根目录的标记文件
+它的条件已经固化在 `docs/evaluation/workbench/conditions-v1.json`——八个输入文件的路径和
+SHA-256，并用 `git merge-base --is-ancestor` 验证过没有一个是在报告生成之后才提交的。
+所以那组数字**永远可以追溯到它是在什么上面算出来的**，即使目录后来长到几千道。目录扩容
+**取代**这组数字，而不是破坏它；之后重跑的报告自带输入 digest，是另一份报告。
 
-**原地扩容会改变所有已经报告过的 v1 评价数字的计算条件**，那违反 `ADR-0020` 第 3 节。
-这个坑已经踩过一次：给商品加包装规格改掉了一份已提交的评价报告，最后是另开
-`fairprice-products-v2.json` 解决的。
+**但扩容必须是追加，不能是替换。** 现有 30 个 slug 要全部保留：
 
-**照同样的办法**：输出写到 `data/recipes/recipes-v2.json` 和
-`data/ingredients/ingredients-v2.json`，`recipes.json` 保持不动。
+- `scripts/check_heldout_episodes.py` 按 `recipes.json` 校验题目引用的 slug；
+- 已经写好的 3 条 `clarification` 题引用了其中 10 个 slug，删掉任何一个都会让它们失效。
+
+扩完之后必须跑通：
+
+```bash
+python scripts/check_heldout_episodes.py     # 必须仍然 No problems found.
+python scripts/report_catalog_reality.py     # 重新生成目录现状页
+```
+
+`backend/app/core/paths.py` 用这个文件作为定位仓库根目录的标记，**路径和文件名不能改**。
+
+扩完之后重跑一次评价工作台，让新报告带上自己的输入 digest：
+
+```bash
+docker compose run --rm backend uv run --no-sync python -m app.evaluation.workbench
+```
 
 ### 🔴 不要碰过敏原
 
