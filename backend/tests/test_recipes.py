@@ -89,6 +89,16 @@ def recipe_client() -> Generator[TestClient, None, None]:
 
     app.dependency_overrides[get_db_session] = override_database
     with TestClient(app) as client:
+        registered = client.post(
+            "/api/auth/register",
+            json={
+                "email": "alice@example.test",
+                "password": "correct horse battery staple",
+                "display_name": "Alice",
+            },
+        )
+        assert registered.status_code == 201
+        client.headers.update({"X-CSRF-Token": registered.json()["csrf_token"]})
         yield client
     app.dependency_overrides.clear()
     Base.metadata.drop_all(engine)
@@ -1077,3 +1087,60 @@ def test_household_profile_generates_traceable_plan_and_explains_replanning(
     current = recipe_client.get("/api/household-profiles/current")
     assert current.status_code == 200
     assert current.json()["latest_plan_id"] == second["plan"]["id"]
+
+
+def test_private_routes_require_authentication_and_reject_cross_household_ids(
+    recipe_client: TestClient,
+) -> None:
+    profile = recipe_client.post("/api/household-profiles", json=_household_profile_payload()).json()
+    plan = recipe_client.post(
+        "/api/plans/generate",
+        json={
+            "start_date": "2026-12-01",
+            "household_size": 2,
+            "max_cooking_time_minutes": 60,
+            "pricing_mode": "fixture",
+        },
+    ).json()
+    agent_session = recipe_client.post(
+        "/api/agent/sessions",
+        json={"message": "Plan dinners for two people with a 60 minute cooking limit."},
+    ).json()
+
+    with TestClient(app) as anonymous:
+        assert anonymous.get("/api/plans").status_code == 401
+        assert anonymous.get(f"/api/plans/{plan['id']}").status_code == 401
+        assert anonymous.get(f"/api/agent/sessions/{agent_session['id']}").status_code == 401
+
+    with TestClient(app) as bob:
+        registered = bob.post(
+            "/api/auth/register",
+            json={
+                "email": "bob@example.test",
+                "password": "another correct horse battery staple",
+                "display_name": "Bob",
+            },
+        )
+        assert registered.status_code == 201
+        assert bob.post("/api/household-profiles", json=_household_profile_payload()).status_code == 403
+        bob.headers.update({"X-CSRF-Token": registered.json()["csrf_token"]})
+        assert bob.get("/api/plans").json()["items"] == []
+        assert bob.get("/api/agent/sessions").json()["items"] == []
+        assert bob.get("/api/household-profiles/current").status_code == 404
+        assert bob.get(f"/api/household-profiles/{profile['id']}").status_code == 404
+        assert bob.get(f"/api/plans/{plan['id']}").status_code == 404
+        assert bob.get(f"/api/agent/sessions/{agent_session['id']}").status_code == 404
+        assert (
+            bob.patch(
+                f"/api/plans/{plan['id']}/entries/{plan['days'][0]['entry_id']}",
+                json={"status": "completed"},
+            ).status_code
+            == 404
+        )
+        assert (
+            bob.post(
+                f"/api/agent/sessions/{agent_session['id']}/messages",
+                json={"message": "Change the saved plan."},
+            ).status_code
+            == 404
+        )

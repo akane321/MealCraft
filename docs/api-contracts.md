@@ -1,12 +1,10 @@
 # API Contracts
 
-> Backend platform boundary: the first authentication slice exposes account and
-> revocable-session endpoints, but it does not yet secure the current anonymous
-> Profile, Plan, Agent, Shopping List or Dashboard routes. Target household
-> ownership and `/api/ops` contracts are documented in
+> Backend platform boundary: authentication now protects household-owned
+> Profile, Plan, Agent, Shopping List and Dashboard data. Target `/api/ops`
+> contracts are documented in
 > [Backend Platform Engineering Handoff](design/backend-platform-engineering.md)
-> and require a complete route-plus-ownership migration before MealCraft may be
-> described as multi-user.
+> and remain a separate delivery slice.
 
 The system will define the following shared objects:
 
@@ -86,14 +84,23 @@ both cookies. Missing, expired, revoked and suspended-user sessions fail
 closed. Login failures use the same response for unknown email and incorrect
 password.
 
-This slice proves identity and Session lifecycle only. The existing business
-repositories still lack non-null household ownership, so their anonymous APIs
-remain intentionally unchanged until the staged tenant migration and complete
-Alice/Bob isolation suite are ready.
+Household Profile, Plan and Agent endpoints require an authenticated session and
+an active household membership. Their root records carry non-null
+`household_id` ownership, and repositories include that household in every
+lookup. A resource owned by another household is reported as HTTP 404 rather
+than revealing its existence. Mutating household routes also require the
+session's `X-CSRF-Token`; public catalog and recommendation reads remain
+available without a session.
+
+The tenancy migration preserves pre-authentication rows by assigning them to a
+reserved, suspended migration household with no login credential. Those rows
+remain inaccessible to normal users until an administrator explicitly reassigns
+them; they are never attached to the first account that logs in.
 
 ## Household Profiles
 
-The current implementation maintains one household profile. Each member supplies a name, one to
+The current implementation maintains one profile per authenticated household.
+Each member supplies a name, one to
 three planned servings, allergens, prohibited ingredient IDs, and dietary
 requirements. The backend deterministically sums servings and merges every
 member's safety constraints into the shared-plan hard constraints.

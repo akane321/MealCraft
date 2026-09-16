@@ -7,6 +7,7 @@ import type {
 
 export function useMealReplanning() {
   const config = useRuntimeConfig();
+  const apiFetch = useApiFetch();
   const preview = ref<MealPlanReplanEvent | null>(null);
   const events = ref<MealPlanReplanEvent[]>([]);
   const errorMessage = ref<string | null>(null);
@@ -14,7 +15,7 @@ export function useMealReplanning() {
   const isConfirming = ref(false);
 
   async function loadEvents(planId: number) {
-    const collection = await $fetch<MealPlanReplanEventCollection>(
+    const collection = await apiFetch<MealPlanReplanEventCollection>(
       `${config.public.apiBase}/api/plans/${planId}/events`,
     );
     events.value = collection.items;
@@ -25,7 +26,7 @@ export function useMealReplanning() {
     errorMessage.value = null;
     preview.value = null;
     try {
-      preview.value = await $fetch<MealPlanReplanEvent>(
+      preview.value = await apiFetch<MealPlanReplanEvent>(
         `${config.public.apiBase}/api/plans/${planId}/replan/preview`,
         { method: "POST", body: request },
       );
@@ -46,7 +47,7 @@ export function useMealReplanning() {
     isConfirming.value = true;
     errorMessage.value = null;
     try {
-      const result = await $fetch<MealPlanReplanConfirmation>(
+      const result = await apiFetch<MealPlanReplanConfirmation>(
         `${config.public.apiBase}/api/plans/${planId}/replan/${preview.value.id}/confirm`,
         { method: "POST" },
       );

@@ -31,9 +31,10 @@ Open <http://localhost:3000>. The health endpoint at
 
 ## Recommended Product Walkthrough
 
-### 1. Create or update the household profile
+### 1. Sign in and create or update the household profile
 
-Open <http://localhost:3000/profile>.
+Open <http://localhost:3000/login> to register or sign in. Each new account
+receives its own household. Then open <http://localhost:3000/profile>.
 
 Record household members and servings, then configure shared defaults such as
 budget, maximum cooking time, general preferences, optional user-entered
@@ -180,9 +181,9 @@ being discarded.
 
 ## Current Limitations
 
-The current product primarily supports one shared household and one main meal
-per day for seven days. The validated recipe catalog and browser-test coverage
-remain smaller than the final design target. Authentication, a unified recipe
+The current product supports one profile per authenticated household and one
+main meal per day for seven days. The validated recipe catalog and browser-test
+coverage remain smaller than the final design target. A unified recipe
 execution side panel, validated web-recipe supplementation, semantic retrieval,
 and broader dynamic stress cases are final-design gaps rather than verified
 current capabilities.

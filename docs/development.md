@@ -58,6 +58,7 @@ docker compose up --build --detach
 Available services:
 
 - Frontend: <http://localhost:3000>
+- Sign in or register: <http://localhost:3000/login>
 - Planning assistant: <http://localhost:3000/assistant>
 - Household profile: <http://localhost:3000/profile>
 - FairPrice product search: <http://localhost:3000/products>
@@ -78,7 +79,7 @@ interaction, and generated-plan link are persisted in `agent_sessions` and
 `agent_messages`. Replanning previews and confirmations are
 stored in `meal_plan_events`; `meal_plans.revision` provides optimistic
 concurrency and `meal_plan_entries.is_locked` protects selected meals. The
-current migration head is `20260908_0012`. Household profile identity and
+current migration head is `20260916_0014`. Household profile identity and
 immutable versions are stored in `household_profiles` and
 `household_profile_versions`; linked plans preserve the exact profile version
 and optional replaced-plan ID. Agent replanning drafts and pending
@@ -108,9 +109,16 @@ Logout and device-session revocation require the returned CSRF token in the
 `X-CSRF-Token` header. `AUTH_COOKIE_SECURE` is inferred as true outside
 development/test; do not force it to false in a deployed environment.
 
-These endpoints do not yet protect the existing Profile, Plan, Agent or
-Dashboard routes. Complete household ownership and adversarial isolation tests
-before describing the application as multi-user.
+The browser login page is available at <http://localhost:3000/login>. Profile,
+Plan, Agent and Dashboard data require an authenticated active household
+membership. Mutations require the CSRF token returned at login or registration;
+the frontend sends it automatically. Repository lookups are household-scoped,
+and cross-household identifiers fail as HTTP 404.
+
+Migration `20260916_0014` places rows created before tenancy enforcement in a
+reserved suspended household with no login credential. Reassign those rows only
+through an explicit administrative migration; do not attach them implicitly to
+a newly registered user.
 
 ## Planning Assistant Parser
 
