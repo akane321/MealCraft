@@ -1,0 +1,109 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-clarification-002",
+  "category": "clarification",
+  "language": "en",
+  "authored_by": "planning",
+  "reviewed_by": null,
+  "review_notes": null,
+  "scenario": {
+    "user_request": "I need to correct that: I do have a food allergy. Please plan the dinners with that in mind.",
+    "conversation_history": [
+      {
+        "role": "user",
+        "content": "Please plan dinners for two people for the week starting 7 September 2026. Neither of us has a food allergy. We have no ingredient dislikes and no pantry items to use."
+      },
+      {
+        "role": "assistant",
+        "content": "I have two diners, no allergies or ingredient dislikes, and no pantry items recorded."
+      }
+    ],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner",
+        "fri-dinner",
+        "sat-dinner",
+        "sun-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "black-bean-quinoa-skillet",
+      "chicken-broccoli-rice",
+      "egg-tomato-quinoa",
+      "ginger-salmon-soba",
+      "lentil-quinoa-soup",
+      "mushroom-spinach-pasta",
+      "salmon-sweet-potato-tray",
+      "tofu-mushroom-soba",
+      "tomato-lentil-stew",
+      "tuna-tomato-pasta"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-black-beans-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-canned-tomato-400g",
+      "fixture-carrot-4",
+      "fixture-chicken-breast-300g",
+      "fixture-cumin-20tsp",
+      "fixture-eggs-10",
+      "fixture-firm-tofu-300g",
+      "fixture-garlic-300g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-500g",
+      "fixture-red-lentil-500g",
+      "fixture-salmon-300g",
+      "fixture-soba-300g",
+      "fixture-soy-sauce-640ml",
+      "fixture-spinach-200g",
+      "fixture-stock-1l",
+      "fixture-sweet-potato-1kg",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-500g"
+    ]
+  },
+  "gold": {
+    "class": "needs_clarification",
+    "required_clarification_fields": [
+      "allergens"
+    ],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "excluded_ingredients"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "The latest message withdraws the earlier no-allergy statement without naming the allergen. The assistant must ask which food causes the allergy, rather than rely on stale history or choose an allergen itself. The number of diners remains known."
+  }
+}
