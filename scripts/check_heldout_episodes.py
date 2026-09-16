@@ -42,6 +42,10 @@ INGREDIENTS = ROOT / "data" / "ingredients" / "ingredients.json"
 PRODUCTS = ROOT / "data" / "fixtures" / "fairprice-products-v2.json"
 
 VALID_CLASSES = {"feasible", "needs_clarification", "infeasible"}
+# Copies of the scorer's vocabulary in app.evaluation.strict_success; this script
+# runs without the backend installed. test_strict_success.py holds them equal.
+NUTRITION_METRICS = {"calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sugar_g", "sodium_mg"}
+NUTRITION_SCOPES = {"per_serving", "horizon_average"}
 VALID_LANGUAGES = {"en", "zh", "mixed"}
 REQUIRED_TOP_LEVEL = {
     "schema_version",
@@ -220,6 +224,13 @@ def check_gold(episode: dict, label: str, errors: list[str]) -> None:
                     "in gold.pantry_ground_truth.not_deductible_unknown_quantity"
                 )
 
+    # A band the scorer cannot read is recorded as indeterminate at scoring time,
+    # which blocks every system equally and so measures nothing. Catch it here.
+    for band in (gold.get("applicable_hard_constraints") or {}).get("nutrition_bands") or []:
+        problem = nutrition_band_problem(band)
+        if problem:
+            errors.append(f"{label}: nutrition band {problem}")
+
     if episode.get("category") == "multiturn_replan" and not gold.get("replan_invariants"):
         errors.append(
             f"{label}: a replanning episode must declare replan_invariants, or there is "
@@ -228,6 +239,32 @@ def check_gold(episode: dict, label: str, errors: list[str]) -> None:
 
     if not str(gold.get("author_rationale") or "").strip():
         errors.append(f"{label}: gold.author_rationale is empty")
+
+
+def nutrition_band_problem(band: object) -> str | None:
+    if not isinstance(band, dict):
+        return "must be an object"
+    metric = band.get("metric")
+    if metric not in NUTRITION_METRICS:
+        return f"has unknown metric {metric!r}; use one of {sorted(NUTRITION_METRICS)}"
+    if band.get("scope") not in NUTRITION_SCOPES:
+        return (
+            f"'{metric}' needs scope {sorted(NUTRITION_SCOPES)}. There is no default: say whether "
+            "the target binds every dish or only the average over the planned slots"
+        )
+    bounds = {}
+    for key in ("min", "max"):
+        value = band.get(key)
+        if value is None:
+            continue
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            return f"'{metric}' {key} must be a number"
+        bounds[key] = float(value)
+    if not bounds:
+        return f"'{metric}' needs a min, a max, or both"
+    if "min" in bounds and "max" in bounds and bounds["min"] > bounds["max"]:
+        return f"'{metric}' min exceeds max"
+    return None
 
 
 def check_unfilled_scaffold(episode: dict, label: str, errors: list[str]) -> None:

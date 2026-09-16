@@ -98,6 +98,31 @@ the specific contradiction - a budget below the cheapest possible basket, an
 allergen that excludes every candidate. If you are not certain, it is a
 `feasible` episode with a tight constraint, and that is still a good episode.
 
+## Writing a nutrition target
+
+A nutrition target goes in `gold.applicable_hard_constraints.nutrition_bands`,
+one object per metric:
+
+```json
+{"metric": "protein_g", "scope": "per_serving", "min": 30}
+```
+
+- `metric` is one of `calories_kcal`, `protein_g`, `carbohydrate_g`, `fat_g`,
+  `sugar_g`, `sodium_mg`. These are the per-serving values every catalog recipe
+  carries.
+- `min`, `max`, or both.
+- `scope` is required, and there is no default. `per_serving` means every
+  planned dish must meet the target; `horizon_average` means only the average
+  over the planned slots must. "Every dinner under 500 kcal" and "about 500 kcal
+  a night on average" are different requests and produce different correct
+  answers, so the episode has to say which the household meant.
+
+The scorer recomputes each band from the frozen catalog with the relative
+tolerance declared in the set manifest. A band it cannot read - a missing scope,
+an unknown metric - makes the check indeterminate, which blocks every system
+alike and so measures nothing. The checker refuses such a band when you save the
+file rather than leaving it to be discovered at scoring time.
+
 ## Rules the checker enforces
 
 Run this from the repository root whenever you save a file. No container, no
