@@ -1,0 +1,9 @@
+{
+  "bytes": 10089343,
+  "license": "CC BY 4.0",
+  "local_path": "data\\reference\\downloads\\foodon-synonyms.tsv",
+  "retrieved_at": "2026-09-04T18:37:03+00:00",
+  "sha256": "1900fb2c80d834287cfdd0b52a98957b18269e86c197617711bc3a5d8541deb2",
+  "source": "FoodOn",
+  "source_url": "https://raw.githubusercontent.com/FoodOntology/foodon/master/foodon-synonyms.tsv"
+}

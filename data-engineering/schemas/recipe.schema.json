@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mealcraft.example/schemas/recipe.schema.json",
+  "title": "MealCraft curated recipe",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recipe_id",
+    "schema_version",
+    "title",
+    "language",
+    "source",
+    "servings",
+    "servings_basis",
+    "prep_minutes",
+    "cook_minutes",
+    "cuisine",
+    "meal_types",
+    "dietary_tags",
+    "methods",
+    "equipment",
+    "difficulty",
+    "ingredients",
+    "instructions",
+    "nutrition",
+    "quality",
+    "provenance"
+  ],
+  "properties": {
+    "recipe_id": {"type": "string", "pattern": "^RCP_[A-F0-9]+$"},
+    "schema_version": {"const": "mealcraft.recipe.v1"},
+    "title": {"type": "string", "minLength": 1},
+    "language": {"type": "string"},
+    "source": {
+      "type": "object",
+      "required": ["dataset", "subset", "source_row", "source_url", "source_license"]
+    },
+    "servings": {"type": ["number", "null"], "exclusiveMinimum": 0},
+    "servings_basis": {
+      "enum": ["stated_exact", "range_lower_bound", null],
+      "description": "stated_exact: source states one number. range_lower_bound: source gave a range (e.g. 'serves 10 to 12'); the lower bound is stored as a conservative estimate, not an exact count. null: servings is null."
+    },
+    "prep_minutes": {"type": ["number", "null"], "minimum": 0},
+    "cook_minutes": {"type": ["number", "null"], "minimum": 0},
+    "cuisine": {"type": ["string", "null"]},
+    "meal_types": {"type": "array", "items": {"type": "string"}},
+    "dietary_tags": {"type": "array", "items": {"type": "string"}},
+    "methods": {"type": "array", "items": {"type": "string"}},
+    "equipment": {"type": "array", "items": {"type": "string"}},
+    "difficulty": {"type": ["string", "null"]},
+    "ingredients": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/ingredientOccurrence"}
+    },
+    "instructions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["step_number", "text"],
+        "properties": {
+          "step_number": {"type": "integer", "minimum": 1},
+          "text": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "nutrition": {"type": "object"},
+    "quality": {"type": "object"},
+    "provenance": {"type": "object"}
+  },
+  "$defs": {
+    "ingredientOccurrence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "original_text",
+        "quantity_min",
+        "quantity_max",
+        "unit_raw",
+        "unit_normalized",
+        "unit_dimension",
+        "ingredient_text",
+        "canonical_ingredient_id",
+        "canonical_name",
+        "preparation",
+        "optional",
+        "allergens",
+        "normalization_status",
+        "confidence",
+        "source_ner_match",
+        "review_reasons"
+      ],
+      "properties": {
+        "original_text": {"type": "string"},
+        "quantity_min": {"type": ["number", "null"], "minimum": 0},
+        "quantity_max": {"type": ["number", "null"], "minimum": 0},
+        "unit_raw": {"type": ["string", "null"]},
+        "unit_normalized": {"type": ["string", "null"]},
+        "unit_dimension": {"type": ["string", "null"]},
+        "ingredient_text": {"type": "string"},
+        "canonical_ingredient_id": {"type": ["string", "null"]},
+        "canonical_name": {"type": ["string", "null"]},
+        "preparation": {"type": "array", "items": {"type": "string"}},
+        "optional": {"type": "boolean"},
+        "allergens": {"type": "array", "items": {"type": "string"}},
+        "normalization_status": {"enum": ["mapped", "candidate", "unresolved"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "source_ner_match": {"type": ["boolean", "null"]},
+        "review_reasons": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}
+

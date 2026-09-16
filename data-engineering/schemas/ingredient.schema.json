@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mealcraft.example/schemas/ingredient.schema.json",
+  "title": "MealCraft canonical ingredient",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ingredient_id",
+    "canonical_name",
+    "language",
+    "aliases",
+    "food_group",
+    "allergens",
+    "foodon_id",
+    "fdc_id",
+    "nutrition_basis",
+    "mapping_status",
+    "occurrence_count",
+    "recipe_count",
+    "provenance"
+  ],
+  "properties": {
+    "ingredient_id": {"type": "string", "minLength": 1},
+    "canonical_name": {"type": "string", "minLength": 1},
+    "language": {"type": "string"},
+    "aliases": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "food_group": {"type": "string"},
+    "allergens": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "foodon_id": {"type": ["string", "null"]},
+    "fdc_id": {"type": ["integer", "string", "null"]},
+    "nutrition_basis": {"type": ["string", "null"]},
+    "mapping_status": {"enum": ["internal_mapped", "candidate", "externally_reviewed"]},
+    "occurrence_count": {"type": "integer", "minimum": 1},
+    "recipe_count": {"type": "integer", "minimum": 1},
+    "provenance": {"type": "object"}
+  }
+}
+
