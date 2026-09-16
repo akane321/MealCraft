@@ -9,6 +9,8 @@ from app.evaluation.strict_success import (
     Catalogs,
     Tolerances,
     compatible,
+    load_tag_implications,
+    satisfied_tags,
     schema_failure_score,
     score_episode,
 )
@@ -71,7 +73,7 @@ INGREDIENTS = [
 
 @pytest.fixture
 def catalogs():
-    return Catalogs.build(RECIPES, PRODUCTS, INGREDIENTS)
+    return Catalogs.build(RECIPES, PRODUCTS, INGREDIENTS, tag_implications={})
 
 
 def episode(**overrides):
@@ -259,6 +261,81 @@ def test_cooking_time_limit_is_enforced(catalogs):
     assert "cooking_time_respected" in score(ep, resp, catalogs).failed_codes
 
 
+# --- dietary tags entailed by definition ------------------------------------
+# The scorer compared raw tags, so a vegan dish served to a vegetarian household
+# was scored as a violation. Twelve committed recipes are tagged vegan without
+# also being tagged vegetarian.
+
+IMPLICATIONS_FILE = "data/recipes/dietary-tag-implications.json"
+VEGAN_BOWL = dict(RECIPES[0], slug="vegan-bowl", dietary_tags=["vegan"])
+
+
+def vegetarian_episode():
+    return episode(
+        **{
+            "scenario.recipe_candidate_slugs": ["vegan-bowl"],
+            "gold.applicable_hard_constraints": {
+                "allergens_absent": [],
+                "excluded_ingredients_absent": [],
+                "dietary_tags_required": ["vegetarian"],
+                "max_cooking_time_minutes": None,
+                "budget_sgd": None,
+                "nutrition_bands": [],
+            },
+        }
+    )
+
+
+def vegan_plan():
+    return response(
+        plan={
+            "assignments": [{"slot_id": "mon-dinner", "recipe_id": "vegan-bowl", "servings": 2}],
+            "shopping": [
+                {
+                    "ingredient_id": "brown_rice",
+                    "unit": "g",
+                    "required_quantity": 200,
+                    "product_id": "p-rice",
+                    "packages": 1,
+                    "line_cost_sgd": 4.0,
+                }
+            ],
+            "total_cost_sgd": 4.0,
+        }
+    )
+
+
+def test_a_vegan_dish_satisfies_a_vegetarian_requirement():
+    implications = load_tag_implications(repository_root() / IMPLICATIONS_FILE)
+    catalogs = Catalogs.build(RECIPES + [VEGAN_BOWL], PRODUCTS, INGREDIENTS, tag_implications=implications)
+    result = score(vegetarian_episode(), vegan_plan(), catalogs)
+    assert result.strict_success, result.failed_codes + result.indeterminate_codes
+
+
+def test_entailment_only_runs_one_way():
+    # vegetarian does not entail vegan: a vegetarian dish is no answer to a vegan household.
+    implications = load_tag_implications(repository_root() / IMPLICATIONS_FILE)
+    assert "vegan" not in satisfied_tags(["vegetarian"], implications)
+    assert {"vegetarian", "dairy-free"} <= satisfied_tags(["vegan"], implications)
+
+
+def test_without_the_table_the_same_dish_is_a_violation():
+    """Guards the reason the table is a required argument rather than a default."""
+    catalogs = Catalogs.build(RECIPES + [VEGAN_BOWL], PRODUCTS, INGREDIENTS, tag_implications={})
+    assert "dietary_tags_respected" in score(vegetarian_episode(), vegan_plan(), catalogs).failed_codes
+
+
+def test_scorer_and_planner_close_tags_identically_on_the_committed_catalog():
+    """Independent implementations of one definition; divergence must surface here."""
+    from app.planning.dietary_tags import expand_tags, load_implications
+
+    ours = load_tag_implications(repository_root() / IMPLICATIONS_FILE)
+    recipes = json.loads((repository_root() / "data/recipes/recipes.json").read_text(encoding="utf-8"))
+    for recipe in recipes:
+        theirs = {tag.lower() for tag in expand_tags(recipe["dietary_tags"], load_implications())}
+        assert satisfied_tags(recipe["dietary_tags"], ours) == theirs, recipe["slug"]
+
+
 def test_missing_shopping_line_fails(catalogs):
     resp = response(
         plan={
@@ -312,6 +389,95 @@ def test_packages_must_cover_the_remaining_demand(catalogs):
     assert "packages_cover_demand" in score(episode(), resp, catalogs).failed_codes
 
 
+# --- one ingredient, several package sizes (ADR-0021) --------------------------
+# Lines used to be keyed by ingredient, so the last line for an ingredient
+# silently replaced the others and a correct mixed purchase was scored as short.
+
+SMALL_RICE = {
+    "external_id": "p-rice-small",
+    "package_size": 300,
+    "package_unit": "g",
+    "price_sgd": 2.5,
+    "ingredient_keys": ["brown_rice"],
+}
+
+
+@pytest.fixture
+def mixed_catalogs():
+    return Catalogs.build(RECIPES, PRODUCTS + [SMALL_RICE], INGREDIENTS, tag_implications={})
+
+
+def mixed_episode(**overrides):
+    return episode(**{"scenario.fairprice_product_ids": ["p-rice", "p-sesame", "p-rice-small"], **overrides})
+
+
+def rice_lines(*lines):
+    """800 g of rice needed; each entry is (product, packages, price, pantry_deduction)."""
+    shopping = [
+        {
+            "ingredient_id": "brown_rice",
+            "unit": "g",
+            "required_quantity": 800,
+            "pantry_deduction": deduction,
+            "product_id": product,
+            "packages": packages,
+            "line_cost_sgd": price * packages,
+        }
+        for product, packages, price, deduction in lines
+    ]
+    return response(
+        plan={
+            "assignments": [{"slot_id": "mon-dinner", "recipe_id": "safe-bowl", "servings": 8}],
+            "shopping": shopping,
+            "total_cost_sgd": sum(line["line_cost_sgd"] for line in shopping),
+        }
+    )
+
+
+def test_a_mixed_package_purchase_that_covers_demand_passes(mixed_catalogs):
+    # 500 g + 300 g = 800 g, exactly the demand. Only the last line, 300 g, was counted before.
+    resp = rice_lines(("p-rice", 1, 4.0, 0), ("p-rice-small", 1, 2.5, 0))
+    result = score(mixed_episode(), resp, mixed_catalogs)
+    assert result.strict_success, result.failed_codes + result.indeterminate_codes
+
+
+def test_a_mixed_package_purchase_that_falls_short_still_fails(mixed_catalogs):
+    resp = rice_lines(("p-rice", 1, 4.0, 0), ("p-rice-small", 0, 2.5, 0))
+    assert "packages_cover_demand" in score(mixed_episode(), resp, mixed_catalogs).failed_codes
+
+
+def test_pantry_deduction_is_summed_across_an_ingredients_lines(mixed_catalogs):
+    ep = mixed_episode(
+        **{
+            "gold.pantry_ground_truth": {
+                "deductible": [{"ingredient_id": "brown_rice", "quantity": 300, "unit": "g"}],
+                "not_deductible_unknown_quantity": [],
+            }
+        }
+    )
+    # 300 g in the pantry, stated once; 500 g bought covers the remaining 500 g.
+    once = rice_lines(("p-rice", 1, 4.0, 300), ("p-rice-small", 0, 2.5, 0))
+    assert score(ep, once, mixed_catalogs).strict_success
+
+    # Repeating the deduction on every line claims 600 g that the pantry does not hold.
+    repeated = rice_lines(("p-rice", 1, 4.0, 300), ("p-rice-small", 0, 2.5, 300))
+    assert "pantry_known_deduction_correct" in score(ep, repeated, mixed_catalogs).failed_codes
+
+
+def test_an_unknown_quantity_deducted_on_any_line_fails(mixed_catalogs):
+    ep = mixed_episode(
+        **{
+            "gold.pantry_ground_truth": {
+                "deductible": [],
+                "not_deductible_unknown_quantity": ["brown_rice"],
+            }
+        }
+    )
+    # The deducting line comes first: a scorer that keeps only the last line misses it.
+    resp = rice_lines(("p-rice-small", 1, 2.5, 50), ("p-rice", 1, 4.0, 0))
+    assert "pantry_unknown_not_deducted" in score(ep, resp, mixed_catalogs).failed_codes
+
+
 def test_line_cost_must_match_the_frozen_price(catalogs):
     resp = response(
         plan={
@@ -352,7 +518,61 @@ def test_total_must_match_the_lines(catalogs):
     assert "total_cost_matches_lines" in score(episode(), resp, catalogs).failed_codes
 
 
-def test_a_false_budget_claim_fails_even_when_the_plan_is_valid(catalogs):
+def budget_episode(budget):
+    return episode(
+        **{
+            "gold.applicable_hard_constraints": {
+                "allergens_absent": [],
+                "excluded_ingredients_absent": [],
+                "dietary_tags_required": [],
+                "max_cooking_time_minutes": None,
+                "budget_sgd": budget,
+                "nutrition_bands": [],
+            }
+        }
+    )
+
+
+def four_dollar_plan(within_budget):
+    return response(
+        plan={
+            "assignments": [{"slot_id": "mon-dinner", "recipe_id": "safe-bowl", "servings": 2}],
+            "shopping": [
+                {
+                    "ingredient_id": "brown_rice",
+                    "unit": "g",
+                    "required_quantity": 200,
+                    "product_id": "p-rice",
+                    "packages": 1,
+                    "line_cost_sgd": 4.0,
+                }
+            ],
+            "total_cost_sgd": 4.0,
+            "within_budget": within_budget,
+        }
+    )
+
+
+def test_exceeding_a_hard_budget_fails_even_when_the_system_admits_it(catalogs):
+    """Truthfulness alone used to be scored, so an honest over-budget plan succeeded."""
+    result = score(budget_episode(1.0), four_dollar_plan(within_budget=False), catalogs)
+    assert "budget_respected" in result.failed_codes
+    assert "budget_truthful" not in result.failed_codes
+    assert not result.strict_success
+
+
+def test_budget_is_compared_in_whole_cents_without_tolerance(catalogs):
+    exact = score(budget_episode(4.0), four_dollar_plan(within_budget=True), catalogs)
+    assert exact.strict_success, exact.failed_codes + exact.indeterminate_codes
+
+    # One cent over fails, although the cost tolerance is also one cent, and a
+    # system that says so is being truthful rather than contradicting the total.
+    over = score(budget_episode(3.99), four_dollar_plan(within_budget=False), catalogs)
+    assert "budget_respected" in over.failed_codes
+    assert "budget_truthful" not in over.failed_codes
+
+
+def test_a_false_budget_claim_is_a_failure_of_its_own(catalogs):
     ep = episode(
         **{
             "gold.applicable_hard_constraints": {
@@ -420,7 +640,7 @@ BARE = dict(RECIPES[0], slug="bare-bowl")  # no nutrition recorded at all
 
 @pytest.fixture
 def nutrition_catalogs():
-    return Catalogs.build(RECIPES + [LEAN, RICH, BARE], PRODUCTS, INGREDIENTS)
+    return Catalogs.build(RECIPES + [LEAN, RICH, BARE], PRODUCTS, INGREDIENTS, tag_implications={})
 
 
 def nutrition_episode(*bands, slots=("mon-dinner",)):
@@ -686,7 +906,7 @@ def test_incomparable_units_are_indeterminate_and_block_success(catalogs):
             "ingredient_keys": ["brown_rice"],
         }
     ]
-    cat = Catalogs.build(RECIPES, odd_products, INGREDIENTS)
+    cat = Catalogs.build(RECIPES, odd_products, INGREDIENTS, tag_implications={})
     ep = episode(**{"scenario.fairprice_product_ids": ["p-rice", "p-sesame", "p-odd"]})
     resp = response(
         plan={

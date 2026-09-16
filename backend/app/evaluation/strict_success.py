@@ -26,11 +26,13 @@ satisfied is how a benchmark drifts upward without the system improving.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+import json
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 
-from app.evaluation.common_output import CommonEpisodeResponse
+from app.evaluation.common_output import CommonEpisodeResponse, ShoppingLine
 
 CheckOutcome = Literal["passed", "failed", "indeterminate", "not_applicable"]
 
@@ -128,6 +130,31 @@ class Tolerances:
         return cls(**{key: float(value) for key, value in declared.items()})
 
 
+def load_tag_implications(path: Path) -> dict[str, frozenset[str]]:
+    """Read the definitional entailments, e.g. vegan entails vegetarian.
+
+    Parsed here rather than through app.planning.dietary_tags for the reason the
+    module docstring gives: the planner's helper must not be what decides
+    whether the planner's output is correct. The data file is the definition and
+    both read it; `test_strict_success.py` checks the two closures agree.
+    """
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return {tag: frozenset(entry["entails"]) for tag, entry in (payload.get("implications") or {}).items()}
+
+
+def satisfied_tags(tags: Iterable[str], implications: Mapping[str, frozenset[str]]) -> frozenset[str]:
+    """Every tag a recipe satisfies: its own, and everything they entail, transitively."""
+    closed: set[str] = set()
+    pending = [str(tag).lower() for tag in tags]
+    while pending:
+        tag = pending.pop()
+        if tag in closed:
+            continue
+        closed.add(tag)
+        pending.extend(implications.get(tag, ()))
+    return frozenset(closed)
+
+
 @dataclass(frozen=True)
 class Catalogs:
     """Frozen facts, keyed for lookup. Built once per run."""
@@ -135,13 +162,25 @@ class Catalogs:
     recipes: dict[str, dict]
     products: dict[str, dict]
     ingredient_allergens: dict[str, str | None]
+    tag_implications: Mapping[str, frozenset[str]]
 
     @classmethod
-    def build(cls, recipes: Iterable[dict], products: Iterable[dict], ingredients: Iterable[dict]) -> Catalogs:
+    def build(
+        cls,
+        recipes: Iterable[dict],
+        products: Iterable[dict],
+        ingredients: Iterable[dict],
+        *,
+        tag_implications: Mapping[str, frozenset[str]],
+    ) -> Catalogs:
+        # Required rather than defaulted: a vegan dish chosen for a vegetarian
+        # household is correct, and a caller that forgot the table would score it
+        # as a violation with no sign that anything was missing.
         return cls(
             recipes={row["slug"]: row for row in recipes},
             products={row["external_id"]: row for row in products},
             ingredient_allergens={row["normalized_name"]: row.get("allergen") for row in ingredients},
+            tag_implications=tag_implications,
         )
 
 
@@ -343,7 +382,11 @@ def _check_hard_constraints(
 
     required_tags = {str(t).lower() for t in gold.get("dietary_tags_required") or []}
     offenders = sorted(
-        {r["slug"] for r in present if not required_tags.issubset({str(t).lower() for t in r["dietary_tags"]})}
+        {
+            r["slug"]
+            for r in present
+            if not required_tags.issubset(satisfied_tags(r["dietary_tags"], catalogs.tag_implications))
+        }
     )
     checks.append(
         Check(
@@ -387,7 +430,16 @@ def _check_shopping(
     known = {row["ingredient_id"]: (float(row["quantity"]), row["unit"]) for row in gold_pantry.get("deductible") or []}
 
     demand, unit_problems = _plan_demand(response, catalogs)
-    lines = {line.ingredient_id: line for line in plan.shopping}
+    # One ingredient may be bought as several package sizes (ADR-0021), which
+    # the output expresses as several lines. Keying lines by ingredient kept only
+    # the last one, so a correct mixed purchase was scored as short.
+    lines: dict[str, list[ShoppingLine]] = {}
+    for line in plan.shopping:
+        lines.setdefault(line.ingredient_id, []).append(line)
+
+    def deducted(name: str) -> float:
+        return sum(line.pantry_deduction for line in lines.get(name, []))
+
     checks: list[Check] = []
 
     missing = sorted(set(demand) - set(lines))
@@ -401,7 +453,7 @@ def _check_shopping(
         )
     )
 
-    deducted_unknown = sorted(name for name in unknown if name in lines and lines[name].pantry_deduction > 0)
+    deducted_unknown = sorted(name for name in unknown if deducted(name) > 0)
     checks.append(
         Check(
             "pantry_unknown_not_deducted",
@@ -414,16 +466,16 @@ def _check_shopping(
 
     wrong: list[str] = []
     for name, (quantity, unit) in known.items():
-        line = lines.get(name)
-        if line is None:
+        if name not in lines:
             continue
-        expected = compatible(quantity, unit, line.unit)
+        stated_units = {line.unit for line in lines[name]}
+        expected = compatible(quantity, unit, next(iter(stated_units))) if len(stated_units) == 1 else None
         if expected is None:
             wrong.append(f"{name} (units not comparable)")
-        elif abs(line.pantry_deduction - expected) > max(
+        elif abs(deducted(name) - expected) > max(
             tolerances.quantity_relative * max(expected, 1.0), tolerances.quantity_relative
         ):
-            wrong.append(f"{name} deducted {line.pantry_deduction}, expected {expected}")
+            wrong.append(f"{name} deducted {deducted(name)}, expected {expected}")
     checks.append(
         Check(
             "pantry_known_deduction_correct",
@@ -435,18 +487,25 @@ def _check_shopping(
     short: list[str] = []
     indeterminate: list[str] = []
     for name, (quantity, unit) in demand.items():
-        line = lines.get(name)
-        if line is None or line.product_id is None:
+        bought = [
+            (line, catalogs.products[line.product_id])
+            for line in lines.get(name, [])
+            if line.product_id is not None and line.product_id in catalogs.products
+        ]
+        if not bought:
             continue
-        product = catalogs.products.get(line.product_id)
-        if product is None:
+        remaining = max(quantity - deducted(name), 0.0)
+        amounts = [
+            compatible(float(product["package_size"]) * line.packages, product["package_unit"], unit)
+            for line, product in bought
+        ]
+        if any(amount is None for amount in amounts):
+            units = sorted({product["package_unit"] for _, product in bought})
+            indeterminate.append(f"{name} ({', '.join(units)} vs {unit})")
             continue
-        remaining = max(quantity - line.pantry_deduction, 0.0)
-        supplied = compatible(float(product["package_size"]) * line.packages, product["package_unit"], unit)
-        if supplied is None:
-            indeterminate.append(f"{name} ({product['package_unit']} vs {unit})")
-        elif supplied + tolerances.quantity_relative < remaining:
-            short.append(f"{name}: {supplied} supplied, {remaining} needed")
+        supplied = sum(amounts)
+        if supplied + tolerances.quantity_relative < remaining:
+            short.append(f"{name}: {supplied:g} supplied, {remaining:g} needed")
     outcome: CheckOutcome = "passed"
     detail = "package counts cover the remaining demand"
     if short:
@@ -490,9 +549,23 @@ def _check_shopping(
 
     budget = episode["gold"]["applicable_hard_constraints"].get("budget_sgd")
     if budget is None:
+        checks.append(Check("budget_respected", "not_applicable", "no stated budget"))
         checks.append(Check("budget_truthful", "not_applicable", "no stated budget"))
     else:
-        actually_within = summed <= float(budget) + tolerances.cost_sgd_absolute
+        # Whole cents with no tolerance, as ADR-0021 section 2 fixes for every
+        # path. Both checks use this one comparison: with a one-cent tolerance on
+        # the truthfulness side, a system correctly reporting 4.00 against 3.99
+        # as over budget was scored as dishonest.
+        actually_within = round(summed * 100) <= round(float(budget) * 100)
+        # A hard budget is a constraint, not only something to report honestly:
+        # an over-budget plan that admits it is still over budget.
+        checks.append(
+            Check(
+                "budget_respected",
+                "passed" if actually_within else "failed",
+                f"total {summed} {'is within' if actually_within else 'exceeds'} budget {budget}",
+            )
+        )
         claimed = plan.within_budget
         if claimed is None:
             checks.append(Check("budget_truthful", "failed", "a budget was stated but no claim was made"))
