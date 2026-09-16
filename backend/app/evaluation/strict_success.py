@@ -549,9 +549,23 @@ def _check_shopping(
 
     budget = episode["gold"]["applicable_hard_constraints"].get("budget_sgd")
     if budget is None:
+        checks.append(Check("budget_respected", "not_applicable", "no stated budget"))
         checks.append(Check("budget_truthful", "not_applicable", "no stated budget"))
     else:
-        actually_within = summed <= float(budget) + tolerances.cost_sgd_absolute
+        # Whole cents with no tolerance, as ADR-0021 section 2 fixes for every
+        # path. Both checks use this one comparison: with a one-cent tolerance on
+        # the truthfulness side, a system correctly reporting 4.00 against 3.99
+        # as over budget was scored as dishonest.
+        actually_within = round(summed * 100) <= round(float(budget) * 100)
+        # A hard budget is a constraint, not only something to report honestly:
+        # an over-budget plan that admits it is still over budget.
+        checks.append(
+            Check(
+                "budget_respected",
+                "passed" if actually_within else "failed",
+                f"total {summed} {'is within' if actually_within else 'exceeds'} budget {budget}",
+            )
+        )
         claimed = plan.within_budget
         if claimed is None:
             checks.append(Check("budget_truthful", "failed", "a budget was stated but no claim was made"))
