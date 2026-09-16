@@ -409,6 +409,166 @@ def test_claiming_a_constraint_held_when_it_did_not_is_its_own_failure(catalogs)
     assert "no_allergen_violation" in result.failed_codes
 
 
+# --- nutrition targets ---------------------------------------------------------
+# The gold field existed from the start, but nothing read it: a system that
+# ignored a calorie or protein target passed exactly as one that met it.
+
+LEAN = dict(RECIPES[0], slug="lean-bowl", nutrition={"protein_g": 20, "calories_kcal": 400})
+RICH = dict(RECIPES[0], slug="rich-bowl", nutrition={"protein_g": 40, "calories_kcal": 600})
+BARE = dict(RECIPES[0], slug="bare-bowl")  # no nutrition recorded at all
+
+
+@pytest.fixture
+def nutrition_catalogs():
+    return Catalogs.build(RECIPES + [LEAN, RICH, BARE], PRODUCTS, INGREDIENTS)
+
+
+def nutrition_episode(*bands, slots=("mon-dinner",)):
+    return episode(
+        **{
+            "scenario.planning_horizon": {"slots": list(slots)},
+            "scenario.recipe_candidate_slugs": ["lean-bowl", "rich-bowl", "bare-bowl"],
+            "gold.applicable_hard_constraints": {
+                "allergens_absent": [],
+                "excluded_ingredients_absent": [],
+                "dietary_tags_required": [],
+                "max_cooking_time_minutes": None,
+                "budget_sgd": None,
+                "nutrition_bands": list(bands),
+            },
+        }
+    )
+
+
+def rice_plan(*recipe_ids, claims=()):
+    """A plan whose shopping is correct, so only nutrition can decide the score."""
+    grams = 200 * len(recipe_ids)
+    packages = -(-grams // 500)
+    return response(
+        plan={
+            "assignments": [
+                {"slot_id": f"{day}-dinner", "recipe_id": rid, "servings": 2}
+                for day, rid in zip(("mon", "tue", "wed"), recipe_ids, strict=False)
+            ],
+            "shopping": [
+                {
+                    "ingredient_id": "brown_rice",
+                    "unit": "g",
+                    "required_quantity": grams,
+                    "product_id": "p-rice",
+                    "packages": packages,
+                    "line_cost_sgd": 4.0 * packages,
+                }
+            ],
+            "total_cost_sgd": 4.0 * packages,
+            "constraint_claims": list(claims),
+        }
+    )
+
+
+def outcome(result, code):
+    return next(check.outcome for check in result.checks if check.code == code)
+
+
+def test_no_band_means_nutrition_is_not_applicable(nutrition_catalogs):
+    result = score(nutrition_episode(), rice_plan("bare-bowl"), nutrition_catalogs)
+    assert outcome(result, "nutrition_bands_respected") == "not_applicable"
+    assert result.strict_success, result.failed_codes + result.indeterminate_codes
+
+
+def test_a_per_serving_minimum_binds_every_dish(nutrition_catalogs):
+    band = {"metric": "protein_g", "scope": "per_serving", "min": 30}
+    met = score(nutrition_episode(band), rice_plan("rich-bowl"), nutrition_catalogs)
+    assert met.strict_success, met.failed_codes + met.indeterminate_codes
+
+    missed = score(nutrition_episode(band), rice_plan("lean-bowl"), nutrition_catalogs)
+    assert "nutrition_bands_respected" in missed.failed_codes
+    assert not missed.strict_success
+
+
+def test_a_horizon_average_tolerates_one_low_dish_but_not_a_low_week(nutrition_catalogs):
+    slots = ("mon-dinner", "tue-dinner")
+    # 20 and 40 average to 30: the week meets the target though one dish does not.
+    average = {"metric": "protein_g", "scope": "horizon_average", "min": 30}
+    mixed = score(nutrition_episode(average, slots=slots), rice_plan("lean-bowl", "rich-bowl"), nutrition_catalogs)
+    assert outcome(mixed, "nutrition_bands_respected") == "passed"
+
+    # The same plan fails when the target binds every dish.
+    per_dish = dict(average, scope="per_serving")
+    strict = score(nutrition_episode(per_dish, slots=slots), rice_plan("lean-bowl", "rich-bowl"), nutrition_catalogs)
+    assert outcome(strict, "nutrition_bands_respected") == "failed"
+
+    low_week = score(nutrition_episode(average, slots=slots), rice_plan("lean-bowl", "lean-bowl"), nutrition_catalogs)
+    assert outcome(low_week, "nutrition_bands_respected") == "failed"
+
+
+def test_the_declared_relative_tolerance_applies_and_no_further(nutrition_catalogs):
+    # 400 kcal against a 392 cap is 2.04% over: outside the 2% manifest slack.
+    over = {"metric": "calories_kcal", "scope": "per_serving", "max": 392}
+    assert (
+        outcome(score(nutrition_episode(over), rice_plan("lean-bowl"), nutrition_catalogs), "nutrition_bands_respected")
+        == "failed"
+    )
+    # 400 against 393 is 1.78% over: inside it.
+    inside = dict(over, max=393)
+    assert (
+        outcome(
+            score(nutrition_episode(inside), rice_plan("lean-bowl"), nutrition_catalogs), "nutrition_bands_respected"
+        )
+        == "passed"
+    )
+
+
+def test_a_band_without_a_scope_cannot_be_scored_and_blocks_success(nutrition_catalogs):
+    unscoped = {"metric": "protein_g", "min": 30}
+    result = score(nutrition_episode(unscoped), rice_plan("rich-bowl"), nutrition_catalogs)
+    assert "nutrition_bands_respected" in result.indeterminate_codes
+    assert not result.strict_success
+
+
+def test_a_recipe_without_the_nutrient_is_indeterminate_not_a_pass(nutrition_catalogs):
+    band = {"metric": "protein_g", "scope": "per_serving", "min": 1}
+    result = score(nutrition_episode(band), rice_plan("bare-bowl"), nutrition_catalogs)
+    assert "nutrition_bands_respected" in result.indeterminate_codes
+    assert not result.strict_success
+
+
+def test_claiming_a_nutrition_target_was_met_when_it_was_not_is_caught(nutrition_catalogs):
+    band = {"metric": "protein_g", "scope": "per_serving", "min": 30}
+    claim = {"code": "nutrition_bands_respected", "satisfied": True}
+    result = score(nutrition_episode(band), rice_plan("lean-bowl", claims=[claim]), nutrition_catalogs)
+    assert "constraint_claims_truthful" in result.failed_codes
+
+
+def test_the_authoring_checker_uses_the_scorer_vocabulary():
+    """The checker runs without the backend, so it carries a copy. Keep them one."""
+    import importlib.util
+
+    from app.evaluation import strict_success
+
+    path = repository_root() / "scripts" / "check_heldout_episodes.py"
+    spec = importlib.util.spec_from_file_location("check_heldout_episodes", path)
+    checker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(checker)
+
+    assert checker.NUTRITION_METRICS == set(strict_success.NUTRITION_METRICS)
+    assert checker.NUTRITION_SCOPES == set(strict_success.NUTRITION_SCOPES)
+
+    cases = [
+        {"metric": "protein_g", "scope": "per_serving", "min": 30},
+        {"metric": "protein_g", "min": 30},
+        {"metric": "fibre_g", "scope": "per_serving", "min": 1},
+        {"metric": "protein_g", "scope": "per_serving"},
+        {"metric": "protein_g", "scope": "per_serving", "min": 40, "max": 30},
+        {"metric": "protein_g", "scope": "per_serving", "min": True},
+        "protein",
+    ]
+    for band in cases:
+        assert (checker.nutrition_band_problem(band) is None) == (
+            strict_success.nutrition_band_problem(band) is None
+        ), band
+
+
 # --- clarification and infeasible --------------------------------------------
 
 

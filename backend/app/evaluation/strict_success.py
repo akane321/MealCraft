@@ -68,6 +68,40 @@ def compatible(quantity: float, unit: str | None, target_unit: str | None) -> fl
     return source[1] / target[1]
 
 
+# What a gold nutrition band may constrain, and over what. Every catalog recipe
+# carries these metrics per serving. `scripts/check_heldout_episodes.py` keeps its
+# own copy because it runs without the backend installed; a test holds them equal.
+NUTRITION_METRICS = frozenset({"calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sugar_g", "sodium_mg"})
+# There is deliberately no default scope. Whether a target binds every dish or the
+# week's average is still an open question (OPEN_QUESTIONS item 1), and a default
+# here would answer it silently for every episode that forgot to say.
+NUTRITION_SCOPES = frozenset({"per_serving", "horizon_average"})
+
+
+def nutrition_band_problem(band: object) -> str | None:
+    """Why a band cannot be scored, or None when it is well formed."""
+    if not isinstance(band, dict):
+        return "a nutrition band must be an object"
+    metric = band.get("metric")
+    if metric not in NUTRITION_METRICS:
+        return f"unknown nutrition metric {metric!r}"
+    if band.get("scope") not in NUTRITION_SCOPES:
+        return f"{metric}: scope must be one of {sorted(NUTRITION_SCOPES)}, got {band.get('scope')!r}"
+    bounds = {}
+    for key in ("min", "max"):
+        value = band.get(key)
+        if value is None:
+            continue
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            return f"{metric}: {key} must be a number"
+        bounds[key] = float(value)
+    if not bounds:
+        return f"{metric}: a band needs a min, a max, or both"
+    if "min" in bounds and "max" in bounds and bounds["min"] > bounds["max"]:
+        return f"{metric}: min {bounds['min']:g} exceeds max {bounds['max']:g}"
+    return None
+
+
 @dataclass(frozen=True)
 class Check:
     code: str
@@ -211,7 +245,61 @@ def _check_invented_entities(episode: dict, response: CommonEpisodeResponse, cat
     return checks
 
 
-def _check_hard_constraints(episode: dict, response: CommonEpisodeResponse, catalogs: Catalogs) -> list[Check]:
+def _nutrient(recipe: dict | None, metric: str) -> float | None:
+    if recipe is None:
+        return None
+    value = (recipe.get("nutrition") or {}).get(metric)
+    return None if value is None else float(value)
+
+
+def _check_nutrition(gold: dict, recipes: list[dict | None], tolerance: float) -> Check:
+    """Recompute every stated nutrition target from the frozen per-serving facts.
+
+    The relative tolerance is the one declared in the set manifest before
+    authoring, applied as slack in the system's favour on both bounds.
+    """
+    bands = gold.get("nutrition_bands") or []
+    if not bands:
+        return Check("nutrition_bands_respected", "not_applicable", "no nutrition target stated")
+
+    violations: list[str] = []
+    unscorable: list[str] = []
+    for band in bands:
+        problem = nutrition_band_problem(band)
+        if problem:
+            unscorable.append(problem)
+            continue
+        metric = band["metric"]
+        values = [_nutrient(recipe, metric) for recipe in recipes]
+        if not values or any(value is None for value in values):
+            unscorable.append(f"{metric}: a selected recipe has no {metric} value")
+            continue
+        if band["scope"] == "per_serving":
+            observed = [(recipe["slug"], value) for recipe, value in zip(recipes, values, strict=True)]
+        else:
+            observed = [("horizon average", sum(values) / len(values))]
+        for label, value in observed:
+            low, high = band.get("min"), band.get("max")
+            if low is not None and value < float(low) * (1 - tolerance):
+                violations.append(f"{label} {metric} {value:g} < {low}")
+            if high is not None and value > float(high) * (1 + tolerance):
+                violations.append(f"{label} {metric} {value:g} > {high}")
+
+    # A real violation is reported even when another band could not be scored,
+    # so a false claim of compliance is still caught.
+    if violations:
+        return Check("nutrition_bands_respected", "failed", "; ".join(violations + unscorable))
+    if unscorable:
+        return Check("nutrition_bands_respected", "indeterminate", "; ".join(unscorable))
+    return Check("nutrition_bands_respected", "passed", "every stated nutrition target holds")
+
+
+def _check_hard_constraints(
+    episode: dict,
+    response: CommonEpisodeResponse,
+    catalogs: Catalogs,
+    tolerances: Tolerances,
+) -> list[Check]:
     gold = episode["gold"]["applicable_hard_constraints"]
     assert response.plan is not None
     recipes = [catalogs.recipes.get(a.recipe_id) for a in response.plan.assignments]
@@ -282,6 +370,7 @@ def _check_hard_constraints(episode: dict, response: CommonEpisodeResponse, cata
             )
         )
 
+    checks.append(_check_nutrition(gold, recipes, tolerances.nutrition_relative))
     return checks
 
 
@@ -487,7 +576,7 @@ def score_episode(
             )
         )
 
-        constraint_checks = _check_hard_constraints(episode, response, catalogs)
+        constraint_checks = _check_hard_constraints(episode, response, catalogs, tolerances)
         score.checks.extend(constraint_checks)
         shopping_checks = _check_shopping(episode, response, catalogs, tolerances)
         score.checks.extend(shopping_checks)
