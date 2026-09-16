@@ -1,0 +1,99 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-budget_package-010",
+  "category": "budget_package",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Infeasibility check: the only breakfast candidate requires 1,200g Greek yogurt across three mornings. The 1kg tub alone under-covers; 1kg + 500g is the cheapest coverage at S$12.85. Oats 300g, milk 450ml and 3 lemons are covered by pantry. Minimum checkout therefore exceeds S$10.50 by S$2.35.",
+  "scenario": {
+    "user_request": "Please plan breakfast for two of us for the next three mornings. We have no allergies or foods to exclude, and repeating breakfast is fine. Use the pantry first, but the actual packaged checkout must stay within S$10.50; if it cannot, say so rather than estimating a per-gram cost.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "rolled_oats",
+        "quantity": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "milk",
+        "quantity": 450,
+        "unit": "ml"
+      },
+      {
+        "ingredient_id": "lemon",
+        "quantity": 3,
+        "unit": "whole"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-breakfast",
+        "tue-breakfast",
+        "wed-breakfast"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "yogurt-oat-bowl"
+    ],
+    "fairprice_product_ids": [
+      "fixture-greek-yogurt-1000g",
+      "fixture-greek-yogurt-500g",
+      "fixture-lemon-5",
+      "fixture-milk-1l",
+      "fixture-oats-1kg",
+      "fixture-rolled-oats-500g"
+    ]
+  },
+  "gold": {
+    "class": "infeasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "budget_sgd",
+      "planning_horizon",
+      "allergens",
+      "excluded_ingredients"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": 10.5,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "rolled_oats",
+          "quantity": 300,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "milk",
+          "quantity": 450,
+          "unit": "ml"
+        },
+        {
+          "ingredient_id": "lemon",
+          "quantity": 3,
+          "unit": "whole"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": "Three yogurt-oat-bowl breakfasts for two require 400g×3=1,200g Greek yogurt. Pantry covers the other ingredients. The cheapest frozen package coverage is 1×1,000g + 1×500g = 1,500g for S$6.90 + S$5.95 = S$12.85, which is S$2.35 above the S$10.50 budget, so the request is infeasible.",
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer prorates 1.2 kg of yogurt from the larger tub or buys only the 1 kg tub and claims the breakfast plan fits; the smallest package combination that actually covers 1.2 kg costs S$12.85."
+  }
+}

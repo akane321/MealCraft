@@ -1,0 +1,133 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-budget_package-001",
+  "category": "budget_package",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Legal witness: use lemon-herb-chicken-rice-bowl for Mon–Thu. For two diners it needs 300 g chicken per dinner, 1,200 g total. The listed pantry exactly covers its other ingredients. Buy 1× fixture-chicken-breast-1000g + 1× fixture-chicken-breast-300g = 1,300 g for S$11.50 + S$3.95 = S$15.45, so checkout is within S$15.50.",
+  "scenario": {
+    "user_request": "Please plan four dinners for two of us. We have no allergies or foods we avoid, and repeating a meal is fine. Use what is already in the pantry first, and keep the actual grocery checkout at or under S$15.50.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "brown_rice",
+        "quantity": 560,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "lemon",
+        "quantity": 4,
+        "unit": "whole"
+      },
+      {
+        "ingredient_id": "cucumber",
+        "quantity": 480,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "cherry_tomato",
+        "quantity": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "olive_oil",
+        "quantity": 4,
+        "unit": "tbsp"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "lemon-herb-chicken-rice-bowl",
+      "chicken-broccoli-rice",
+      "chicken-quinoa-pepper"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-cucumber-500g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "budget_sgd",
+      "planning_horizon",
+      "allergens",
+      "excluded_ingredients"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": 15.5,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "brown_rice",
+          "quantity": 560,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "lemon",
+          "quantity": 4,
+          "unit": "whole"
+        },
+        {
+          "ingredient_id": "cucumber",
+          "quantity": 480,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "cherry_tomato",
+          "quantity": 600,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "olive_oil",
+          "quantity": 4,
+          "unit": "tbsp"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer buys only one package size for 1.2–1.28 kg of chicken (for example two 1 kg packs or several 500 g packs), making the checkout exceed the tight budget even though a 1 kg + 300 g mixed purchase fits."
+  }
+}

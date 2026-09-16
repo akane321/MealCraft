@@ -1,0 +1,148 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-infeasible_conflict-006",
+  "category": "infeasible_conflict",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "复核数字：三顿最低 chicken_breast 需求 1350 g；300 g=S$3.95、500 g=S$6.20、1000 g=S$11.50。最低覆盖组合 1000+500 g=S$17.70，预算差 S$2.50；已列 pantry 足以覆盖候选菜的其余食材。",
+  "scenario": {
+    "user_request": "我们三个人，帮我安排周一到周三三顿晚饭。家里 quinoa、意面、彩椒、西葫芦、番茄、蒜和柠檬都够，这次主要买鸡胸肉就行。三顿需要买的东西总预算最多 S$15.20。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 3,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "quinoa",
+        "quantity": 1000,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "wholewheat_pasta",
+        "quantity": 1000,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "bell_pepper",
+        "quantity": 6,
+        "unit": "whole"
+      },
+      {
+        "ingredient_id": "zucchini",
+        "quantity": 2000,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "canned_tomato",
+        "quantity": 1500,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "garlic",
+        "quantity": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "lemon",
+        "quantity": 6,
+        "unit": "whole"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "chicken-quinoa-pepper",
+      "chicken-zucchini-pasta"
+    ],
+    "fairprice_product_ids": [
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-garlic-300g",
+      "fixture-lemon-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "infeasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "budget_sgd",
+      "pantry",
+      "planning_horizon"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": 15.2,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "quinoa",
+          "quantity": 1000,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "wholewheat_pasta",
+          "quantity": 1000,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "bell_pepper",
+          "quantity": 6,
+          "unit": "whole"
+        },
+        {
+          "ingredient_id": "zucchini",
+          "quantity": 2000,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "canned_tomato",
+          "quantity": 1500,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "garlic",
+          "quantity": 100,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "lemon",
+          "quantity": 6,
+          "unit": "whole"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": "三个人吃三顿时，chicken-zucchini-pasta 每顿需要 300 g × (3/2) = 450 g chicken_breast；chicken-quinoa-pepper 每顿需要 320 g × (3/2) = 480 g。即使三顿都选用鸡肉较少的 chicken-zucchini-pasta，总鸡肉需求也至少是 1350 g。冻结商品中覆盖 >=1350 g 的最便宜组合是 1×1000 g（S$11.50）+ 1×500 g（S$6.20）= S$17.70。其他 pantry 食材的已知数量足以覆盖三顿，因此 S$17.70 已经是最低实际结账成本，仍比 S$15.20 预算高 S$2.50。",
+    "allowed_relaxations": [
+      "把总预算提高到至少 S$17.70"
+    ],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "一个看起来合理但错误的答案会按食材用量比例算出鸡肉的“消耗成本”后认为 S$15.20 够用，却没有按真实包装取整；真正最便宜的可购买鸡胸肉组合也要 S$17.70。"
+  }
+}

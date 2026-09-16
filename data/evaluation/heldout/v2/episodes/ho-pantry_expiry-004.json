@@ -1,0 +1,116 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-pantry_expiry-004",
+  "category": "pantry_expiry",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Reviewer note: one valid five-dinner plan is chickpea-tomato-stew, tomato-lentil-stew, lentil-sweet-potato-curry, tuna-tomato-pasta, and chicken-zucchini-pasta. For one diner, the catalog serving scales are 1/3, 1/4, 1/4, 1/2, and 1/2 respectively. Canned_tomato demand is 400/3 + 800/4 + 400/4 + 400/2 + 300/2 = 783.33 g, so the exact 500 g pantry stock leaves about 283.33 g to buy. Garlic demand across the selected recipes is nonzero, but its pantry quantity is unknown and cannot be deducted. All selected meals are within 50 minutes.",
+  "scenario": {
+    "user_request": "I'm cooking just for myself from Monday through Friday. No allergies or foods to avoid, and up to 50 minutes is fine. I have exactly 500 g of canned tomato left from several opened tins and want to use that up soon. There is also some garlic in the kitchen, but I haven't weighed it and don't know how much remains.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 1,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "canned_tomato",
+        "quantity": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "garlic",
+        "quantity": null,
+        "unit": null
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner",
+        "fri-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "chickpea-tomato-stew",
+      "tomato-lentil-stew",
+      "lentil-sweet-potato-curry",
+      "tuna-tomato-pasta",
+      "chicken-zucchini-pasta",
+      "mushroom-spinach-pasta",
+      "black-bean-quinoa-skillet"
+    ],
+    "fairprice_product_ids": [
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cumin-20tsp",
+      "fixture-garlic-300g",
+      "fixture-mushroom-300g",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-red-lentil-250g",
+      "fixture-red-lentil-500g",
+      "fixture-spinach-200g",
+      "fixture-stock-1l",
+      "fixture-sweet-potato-1kg",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "planning_horizon",
+      "pantry"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": 50,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "canned_tomato",
+          "quantity": 500,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": [
+        "garlic"
+      ]
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer subtracts the unmeasured garlic from shopping and forgets that catalog recipes have different serving counts, so a one-person plan underestimates ingredient demand even though each individual recipe choice looks valid."
+  }
+}

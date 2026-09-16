@@ -1,0 +1,106 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-clarification-009",
+  "category": "clarification",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": null,
+  "scenario": {
+    "user_request": "我们两个人，下周七天晚饭都在家吃，没有食物过敏，家里也没有库存要扣。还有一点，我最近不想吃“豆类”，但我说的主要是平时那种豆子，像 chickpea、lentil 这些算不算我也没想清楚。先别替我猜，帮我安排前确认一下。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner",
+        "fri-dinner",
+        "sat-dinner",
+        "sun-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tomato-lentil-stew",
+      "chickpea-quinoa-salad",
+      "black-bean-sweet-potato-bowl",
+      "chickpea-tomato-stew",
+      "black-bean-quinoa-skillet",
+      "tofu-chickpea-bowl",
+      "chicken-broccoli-rice",
+      "salmon-quinoa-bowl"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-cumin-20tsp",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-garlic-300g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-red-lentil-250g",
+      "fixture-red-lentil-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-spinach-200g",
+      "fixture-stock-1l",
+      "fixture-sweet-potato-1kg"
+    ]
+  },
+  "gold": {
+    "class": "needs_clarification",
+    "required_clarification_fields": [
+      "excluded_ingredients"
+    ],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "planning_horizon"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "用户把“豆类”作为排除范围，但同时明确没有界定 chickpea、red lentil 等是否包含在内，而候选池里这些食材会直接影响可选菜。一个看起来合理但错误的回答会自行把所有豆科食材全排除，或只排 black bean，正确做法是先确认具体不吃哪些标准化食材。"
+  }
+}

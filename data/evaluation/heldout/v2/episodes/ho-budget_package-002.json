@@ -1,0 +1,116 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-budget_package-002",
+  "category": "budget_package",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "无解核算：三晚均选 chicken-zucchini-pasta 已由 pantry 覆盖 chicken_breast 900g、wholewheat_pasta 540g、zucchini 750g、garlic 36g，只剩 canned_tomato 900g。最便宜覆盖方式为 fixture-canned-tomato-800g + fixture-canned-tomato-400g，共 S$4.65，仍超预算 S$2.50；其他候选不会把最小结账成本降到 S$2.15。",
+  "scenario": {
+    "user_request": "我们两个人接下来三晚都在家吃，没有过敏也没有忌口。家里现有食材先用掉，结账预算最多 S$2.15；如果这个预算真的做不到，请直接告诉我，不要按“实际吃掉多少”来折算价格。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "chicken_breast",
+        "quantity": 900,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "wholewheat_pasta",
+        "quantity": 540,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "zucchini",
+        "quantity": 750,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "garlic",
+        "quantity": 36,
+        "unit": "g"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tuna-tomato-pasta",
+      "chicken-zucchini-pasta"
+    ],
+    "fairprice_product_ids": [
+      "fixture-baby-spinach-400g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-garlic-300g",
+      "fixture-spinach-200g",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "infeasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "budget_sgd",
+      "planning_horizon",
+      "allergens",
+      "excluded_ingredients"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": 2.15,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "chicken_breast",
+          "quantity": 900,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "wholewheat_pasta",
+          "quantity": 540,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "zucchini",
+          "quantity": 750,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "garlic",
+          "quantity": 36,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": "即使三晚都选 chicken-zucchini-pasta，canned_tomato 也需要 300g×3=900g；覆盖 900g 的最低冻结结账成本是 1×800g + 1×400g = 1,200g，S$2.45 + S$2.20 = S$4.65，比 S$2.15 预算高 S$2.50，因此无解。",
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "一个看起来合理但错误的答案会按食材实际消耗量折算罐头成本，或只买一罐 800g 番茄来假装满足 900g 以上的需求，从而声称 S$2.15 预算可行。"
+  }
+}

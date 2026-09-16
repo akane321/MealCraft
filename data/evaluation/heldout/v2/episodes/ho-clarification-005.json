@@ -1,0 +1,117 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-clarification-005",
+  "category": "clarification",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": null,
+  "scenario": {
+    "user_request": "好，那就照这些条件帮我排吧。",
+    "conversation_history": [
+      {
+        "role": "user",
+        "content": "我们两个人，下周七天晚饭都想在家吃。没有过敏，也没有特别不吃的东西，家里库存不用算。预算先记 60 新币。"
+      },
+      {
+        "role": "assistant",
+        "content": "好的，我记下两个人、一周七顿晚饭、没有过敏或忌口、无库存，以及 S$60 的预算。"
+      }
+    ],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner",
+        "fri-dinner",
+        "sat-dinner",
+        "sun-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "black-bean-sweet-potato-bowl",
+      "chickpea-sweet-potato-curry",
+      "egg-tomato-quinoa",
+      "lemon-herb-chicken-rice-bowl",
+      "salmon-quinoa-bowl",
+      "spinach-oat-egg-cakes",
+      "tuna-tomato-pasta",
+      "vegetable-rice-skillet"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-cumin-20tsp",
+      "fixture-eggs-10",
+      "fixture-garlic-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-oats-1kg",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-rolled-oats-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-spinach-200g",
+      "fixture-sweet-potato-1kg",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "needs_clarification",
+    "required_clarification_fields": [
+      "budget_sgd"
+    ],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "planning_horizon"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "前文只说“预算 60 新币”，没有说明是整周七顿晚饭的总预算还是每顿/每天的额度。一个看起来合理但错误的回答会直接把 S$60 当作周预算（或单餐预算）开始排餐，导致后续可行性和采购成本判断建立在未经确认的口径上。"
+  }
+}

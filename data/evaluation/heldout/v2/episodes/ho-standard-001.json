@@ -1,0 +1,120 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-standard-001",
+  "category": "standard",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Feasibility evidence: mon-dinner=lemon-herb-chicken-rice-bowl; tue-dinner=chicken-broccoli-rice; wed-dinner=tofu-brown-rice-stir-fry. Their total times are 40, 35, and 35 minutes. For two diners the selected recipes require 430 g brown rice and 620 g chicken breast in total; after the stated pantry, 230 g rice and 470 g chicken remain to buy.",
+  "scenario": {
+    "user_request": "There are two of us. Please plan dinner for Monday through Wednesday. Each dinner must take no more than 40 minutes in total, including prep and cooking. We have no allergies, no ingredients we avoid, and no special diet. I have exactly 200 g of brown rice and 150 g of chicken breast to use; those are the only pantry items to count. There is no budget cap.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "brown_rice",
+        "quantity": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "chicken_breast",
+        "quantity": 150,
+        "unit": "g"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "lemon-herb-chicken-rice-bowl",
+      "chicken-broccoli-rice",
+      "tofu-brown-rice-stir-fry",
+      "salmon-quinoa-bowl",
+      "tuna-cucumber-rice-bowl",
+      "tomato-lentil-stew"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-cucumber-500g",
+      "fixture-cumin-20tsp",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-red-lentil-250g",
+      "fixture-red-lentil-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-spinach-200g",
+      "fixture-stock-1l",
+      "fixture-tuna-185g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon",
+      "pantry",
+      "budget_sgd"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": 40,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "brown_rice",
+          "quantity": 200,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "chicken_breast",
+          "quantity": 150,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible-looking wrong plan checks only active cooking time and schedules the 50-minute tomato-lentil stew under a 40-minute total-time limit, or otherwise ignores the stated total-time boundary."
+  }
+}

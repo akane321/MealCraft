@@ -1,0 +1,115 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-standard-009",
+  "category": "standard",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Feasibility evidence: mon=chicken-broccoli-rice, tue=tuna-cucumber-rice-bowl, wed=egg-tomato-quinoa, thu=chickpea-quinoa-salad. None contains mushroom. vegetable-rice-skillet must also be excluded despite its generic title because its catalog ingredients include 180g mushroom. The first two chosen rice dishes need 300g brown_rice total; after 250g pantry, 50g remains.",
+  "scenario": {
+    "user_request": "Plan Monday through Thursday dinners for two people. Neither of us has food allergies or a special diet, but we do not eat mushrooms at all. There is no time or budget limit. I have exactly 250 g brown rice in the pantry and no other stock to count.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [
+        "mushroom"
+      ],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "brown_rice",
+        "quantity": 250,
+        "unit": "g"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "vegetable-rice-skillet",
+      "mushroom-spinach-pasta",
+      "chicken-broccoli-rice",
+      "tuna-cucumber-rice-bowl",
+      "egg-tomato-quinoa",
+      "chickpea-quinoa-salad",
+      "tofu-brown-rice-stir-fry"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-eggs-10",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-garlic-300g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-spinach-200g",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon",
+      "pantry",
+      "budget_sgd"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [
+        "mushroom"
+      ],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "brown_rice",
+          "quantity": 250,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer filters exclusions only from recipe titles and accepts vegetable-rice-skillet because “mushroom” is absent from its name even though mushroom is one of its catalog ingredients."
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-infeasible_conflict-002",
+  "category": "infeasible_conflict",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "请复核 30 分钟内的三道 vegan 候选：chickpea-quinoa-salad 含 cucumber；mushroom-spinach-pasta 和 savoury-vegan-oats 都含 mushroom。",
+  "scenario": {
+    "user_request": "我们两个人，帮我排周一到周四的晚饭。四顿都要纯素，而且我晚上不想做太久，每顿总时间最多 30 分钟。另外我不吃蘑菇，也不吃黄瓜。家里没有要优先用掉的食材。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [
+        "mushroom",
+        "cucumber"
+      ],
+      "dietary_preferences": [
+        "vegan"
+      ]
+    },
+    "pantry": [],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "chickpea-quinoa-salad",
+      "mushroom-spinach-pasta",
+      "savoury-vegan-oats",
+      "black-bean-quinoa-skillet",
+      "chickpea-tomato-stew",
+      "vegetable-rice-skillet"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-cumin-20tsp",
+      "fixture-garlic-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-oats-1kg",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-rolled-oats-500g",
+      "fixture-spinach-200g",
+      "fixture-stock-1l",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "infeasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [
+        "mushroom",
+        "cucumber"
+      ],
+      "dietary_tags_required": [
+        "vegan"
+      ],
+      "max_cooking_time_minutes": 30,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": "在这个候选池里，30 分钟内的纯素菜只有三道：chickpea-quinoa-salad（30 分钟，含 cucumber）、mushroom-spinach-pasta（30 分钟，含 mushroom）和 savoury-vegan-oats（25 分钟，含 mushroom）。其余不含这两个禁忌食材的纯素候选至少需要 35 分钟，因此不存在同时满足 vegan、<=30 分钟、无 mushroom、无 cucumber 的候选。",
+    "allowed_relaxations": [
+      "把最长烹饪时间放宽到至少 35 分钟"
+    ],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "一个看起来合理但错误的答案会为了凑出 30 分钟内的纯素晚餐，偷偷放进含蘑菇或黄瓜的菜；也可能保留禁忌食材之外的菜，却忽略 30 分钟的上限。"
+  }
+}

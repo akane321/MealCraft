@@ -1,0 +1,113 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-clarification-006",
+  "category": "clarification",
+  "language": "mixed",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": null,
+  "scenario": {
+    "user_request": "我们两个人下周七天晚饭都在家吃，没有过敏也没有忌口。家里还有一些 brown rice，但我没称过；如果至少有 500g，我想把这周晚饭采购控制在 S$45，不够 500g 的话预算可以放到 S$55。其他 pantry 不用算。先帮我安排。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "brown_rice",
+        "quantity": null,
+        "unit": null
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner",
+        "fri-dinner",
+        "sat-dinner",
+        "sun-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "black-bean-quinoa-skillet",
+      "chicken-quinoa-pepper",
+      "chickpea-sweet-potato-curry",
+      "lentil-sweet-potato-curry",
+      "tofu-chickpea-bowl",
+      "tofu-vegetable-soba",
+      "tomato-lentil-stew",
+      "vegetable-rice-skillet"
+    ],
+    "fairprice_product_ids": [
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-carrot-4",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-cumin-20tsp",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-red-lentil-250g",
+      "fixture-red-lentil-500g",
+      "fixture-sesame-oil-200ml",
+      "fixture-soba-300g",
+      "fixture-soy-sauce-640ml",
+      "fixture-spinach-200g",
+      "fixture-stock-1l",
+      "fixture-sweet-potato-1kg",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "needs_clarification",
+    "required_clarification_fields": [
+      "pantry"
+    ],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "planning_horizon"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [],
+      "not_deductible_unknown_quantity": [
+        "brown_rice"
+      ]
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "用户给的是一个取决于 brown rice 实际库存量的条件预算；在不知道库存是否达到 500g 前，适用的周预算究竟是 S$45 还是 S$55 不能确定。看起来合理但错误的答案会直接按较宽松的 S$55 排餐，或把“有一些米”当作足够 500g 扣减，而不是先确认库存量。"
+  }
+}

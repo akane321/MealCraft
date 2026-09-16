@@ -1,0 +1,124 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-standard-008",
+  "category": "standard",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "可行性证据：mon=tofu-vegetable-soba，tue=lemon-herb-chicken-rice-bowl，wed=salmon-sweet-potato-tray；三道菜的总时长都恰好是 40 分钟，因此满足“最多 40 分钟”。三人份时三道 2-serving 菜都 ×1.5；tofu 需求 450g，扣 150g 后剩 300g；sweet_potato 需求 675g，扣 300g 后剩 375g。其余三道候选分别为 45、50、50 分钟。",
+  "scenario": {
+    "user_request": "三个人，周一到周三三顿晚饭。每顿从准备开始到做完最多 40 分钟，40 分钟整也可以。没有过敏、忌口或特殊饮食，也没有预算限制。家里有准确称过的 150g firm tofu 和 300g sweet potato，其他库存不用算。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 3,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "firm_tofu",
+        "quantity": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "sweet_potato",
+        "quantity": 300,
+        "unit": "g"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tofu-vegetable-soba",
+      "lemon-herb-chicken-rice-bowl",
+      "salmon-sweet-potato-tray",
+      "black-bean-sweet-potato-bowl",
+      "tomato-lentil-stew",
+      "lentil-quinoa-soup"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-carrot-4",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-cucumber-500g",
+      "fixture-cumin-20tsp",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-lemon-5",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-red-lentil-250g",
+      "fixture-red-lentil-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-sesame-oil-200ml",
+      "fixture-soba-300g",
+      "fixture-soy-sauce-640ml",
+      "fixture-spinach-200g",
+      "fixture-stock-1l",
+      "fixture-sweet-potato-1kg"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon",
+      "pantry",
+      "budget_sgd"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": 40,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "firm_tofu",
+          "quantity": 150,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "sweet_potato",
+          "quantity": 300,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "一个看似谨慎但错误的答案会把“最多 40 分钟”解释成严格小于 40 分钟，从而把三道恰好 40 分钟的可行菜全部排除并错误声称无解。"
+  }
+}

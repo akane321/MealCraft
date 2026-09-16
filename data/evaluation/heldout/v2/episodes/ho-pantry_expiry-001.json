@@ -1,0 +1,114 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-pantry_expiry-001",
+  "category": "pantry_expiry",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "给复核人：一份合法计划是 Mon tuna-tomato-pasta、Tue mushroom-spinach-pasta、Wed egg-tomato-quinoa，三道都≤40分钟。两人份 spinach 总需求 100+120+100=320g，库存只能扣一次 180g，所以仍需购买 140g；olive_oil 数量未知，即使用户说家里有，也不能从购物需求中扣减。临期 spinach 只表示优先使用偏好，不是硬约束。",
+  "scenario": {
+    "user_request": "我们两个人，下周一到周三的晚饭帮我安排一下。没有过敏，也没有特别不吃的东西，做饭最好都在40分钟以内。冰箱里还有180克 baby spinach，已经有点蔫了想先用掉；olive oil 也还有一些，但我没量过还剩多少。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "baby_spinach",
+        "quantity": 180,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "olive_oil",
+        "quantity": null,
+        "unit": null
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tuna-tomato-pasta",
+      "mushroom-spinach-pasta",
+      "egg-tomato-quinoa",
+      "chickpea-quinoa-salad",
+      "lemon-herb-chicken-rice-bowl",
+      "salmon-sweet-potato-tray"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-eggs-10",
+      "fixture-garlic-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-spinach-200g",
+      "fixture-sweet-potato-1kg",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "planning_horizon",
+      "pantry"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": 40,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "baby_spinach",
+          "quantity": 180,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": [
+        "olive_oil"
+      ]
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer notices that there is \"some\" olive oil at home and subtracts it from the shopping demand even though its quantity is unknown, while also failing to deduct the exact 180 g of spinach only once from the combined horizon demand."
+  }
+}

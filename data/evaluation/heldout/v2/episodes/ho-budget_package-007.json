@@ -1,0 +1,131 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-budget_package-007",
+  "category": "budget_package",
+  "language": "mixed",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Legal witness: use salmon-quinoa-bowl for Mon–Wed. Raw salmon demand is 300g×3=900g; deduct the known 150g pantry once, leaving 750g to buy. Pantry covers the other ingredients. Buy 1× fixture-salmon-fillet-500g + 1× fixture-salmon-300g = 800g for S$16.80+S$10.90=S$27.70 <= S$27.75.",
+  "scenario": {
+    "user_request": "我们两个人排三晚 dinner，没有过敏或其他忌口。家里 salmon 还有 150g，其他库存也先用；最后按实际包装结账请不要超过 S$27.75。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "salmon_fillet",
+        "quantity": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "quinoa",
+        "quantity": 420,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "cucumber",
+        "quantity": 360,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "cherry_tomato",
+        "quantity": 450,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "lemon",
+        "quantity": 3,
+        "unit": "whole"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "salmon-quinoa-bowl",
+      "ginger-salmon-soba",
+      "salmon-sweet-potato-tray"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-broccoli-300g",
+      "fixture-cucumber-500g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-soba-300g",
+      "fixture-soy-sauce-640ml",
+      "fixture-sweet-potato-1kg"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "budget_sgd",
+      "planning_horizon",
+      "allergens",
+      "excluded_ingredients",
+      "pantry"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": 27.75,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "salmon_fillet",
+          "quantity": 150,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "quinoa",
+          "quantity": 420,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "cucumber",
+          "quantity": 360,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "cherry_tomato",
+          "quantity": 450,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "lemon",
+          "quantity": 3,
+          "unit": "whole"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "The tempting wrong answer either ignores the 150g salmon already in the pantry and buys for all 900g, or under-covers the post-pantry 750g demand with one 500g pack; correct checkout requires a 500g + 300g mix."
+  }
+}

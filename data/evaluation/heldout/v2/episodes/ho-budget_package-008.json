@@ -1,0 +1,123 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-budget_package-008",
+  "category": "budget_package",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Legal witness: use tuna-spinach-pasta for Mon–Wed. Pasta demand is 180g×3=540g; pantry covers 555g tuna, 390g spinach, 3 lemons and 30g garlic. Buy 1× fixture-wholewheat-pasta-500g + 1× fixture-wholewheat-pasta-250g = 750g for S$3.20+S$1.95=S$5.15 <= S$5.20.",
+  "scenario": {
+    "user_request": "I need three dinners for two people. We have no allergies or ingredient exclusions, repeats are fine, and the saved pantry should be used first. Keep the actual package checkout at S$5.20 or less.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "canned_tuna",
+        "quantity": 555,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "baby_spinach",
+        "quantity": 390,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "lemon",
+        "quantity": 3,
+        "unit": "whole"
+      },
+      {
+        "ingredient_id": "garlic",
+        "quantity": 30,
+        "unit": "g"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tuna-tomato-pasta",
+      "mushroom-spinach-pasta",
+      "chicken-zucchini-pasta",
+      "tuna-spinach-pasta"
+    ],
+    "fairprice_product_ids": [
+      "fixture-baby-spinach-400g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-garlic-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-spinach-200g",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "budget_sgd",
+      "planning_horizon",
+      "allergens",
+      "excluded_ingredients"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": 5.2,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "canned_tuna",
+          "quantity": 555,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "baby_spinach",
+          "quantity": 390,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "lemon",
+          "quantity": 3,
+          "unit": "whole"
+        },
+        {
+          "ingredient_id": "garlic",
+          "quantity": 30,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer buys two 500 g pasta bags for S$6.40 or three 250 g bags for S$5.85 and misses the cheaper 500 g + 250 g mix that covers 540 g for S$5.15."
+  }
+}

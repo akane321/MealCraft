@@ -1,0 +1,102 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-clarification-010",
+  "category": "clarification",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": null,
+  "scenario": {
+    "user_request": "Please plan dinners for three of us for the week starting 7 September. No ingredient dislikes and no pantry items to use. I have one allergy note for this household that says either soy or egg, but I can't tell from the note which one is the actual allergy. Please check with me before you choose the meals rather than guessing.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 3,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner",
+        "fri-dinner",
+        "sat-dinner",
+        "sun-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tofu-vegetable-soba",
+      "tofu-brown-rice-stir-fry",
+      "tofu-mushroom-soba",
+      "egg-vegetable-rice",
+      "spinach-oat-egg-cakes",
+      "egg-tomato-quinoa",
+      "chicken-broccoli-rice",
+      "salmon-quinoa-bowl"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-carrot-4",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-cucumber-500g",
+      "fixture-eggs-10",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-oats-1kg",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-rolled-oats-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-sesame-oil-200ml",
+      "fixture-soba-300g",
+      "fixture-soy-sauce-640ml",
+      "fixture-spinach-200g"
+    ]
+  },
+  "gold": {
+    "class": "needs_clarification",
+    "required_clarification_fields": [
+      "allergens"
+    ],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "excluded_ingredients",
+      "planning_horizon"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "The candidate pool contains dishes affected differently by soy and egg, but the household has not established which allergen must be avoided. A plausible wrong answer picks one allergen, treats both as allergens, or ignores the note and still produces a full plan instead of clarifying the safety-critical field."
+  }
+}

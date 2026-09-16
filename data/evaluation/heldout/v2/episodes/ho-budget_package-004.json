@@ -1,0 +1,124 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-budget_package-004",
+  "category": "budget_package",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "可行证据：Mon–Wed 都选 tofu-chickpea-bowl。firm_tofu 需求 250g×3=750g，其余 chickpea 750g、quinoa 360g、cucumber 420g、lemon 3 个均由 pantry 覆盖。购买 1×600g tofu + 1×300g tofu，共 900g，S$3.10+S$1.95=S$5.05，低于 S$5.10。",
+  "scenario": {
+    "user_request": "我们两个人安排三晚晚餐就好，没有过敏和忌口，菜重复也可以。优先用家里的库存，最后真正去结账的钱不要超过 S$5.10。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "chickpea",
+        "quantity": 750,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "quinoa",
+        "quantity": 360,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "cucumber",
+        "quantity": 420,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "lemon",
+        "quantity": 3,
+        "unit": "whole"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tofu-vegetable-soba",
+      "tofu-brown-rice-stir-fry",
+      "tofu-mushroom-soba",
+      "tofu-chickpea-bowl"
+    ],
+    "fairprice_product_ids": [
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-carrot-4",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-sesame-oil-200ml",
+      "fixture-soba-300g",
+      "fixture-soy-sauce-640ml"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "budget_sgd",
+      "planning_horizon",
+      "allergens",
+      "excluded_ingredients"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": 5.1,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "chickpea",
+          "quantity": 750,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "quinoa",
+          "quantity": 360,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "cucumber",
+          "quantity": 420,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "lemon",
+          "quantity": 3,
+          "unit": "whole"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "错误答案会只用 600g 大包装，买两盒花 S$6.20，或者买三盒 300g 花 S$5.85，然后误判预算超支；正确的 600g+300g 混合买只要 S$5.05。"
+  }
+}

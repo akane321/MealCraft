@@ -1,0 +1,131 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-standard-003",
+  "category": "standard",
+  "language": "mixed",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Feasibility evidence: mon=tuna-tomato-pasta, tue=mushroom-spinach-pasta, wed=egg-vegetable-rice, thu=spinach-oat-egg-cakes, fri=savoury-vegan-oats. All are <=30 minutes total. Each catalog recipe serves 2, so quantities are ×0.5 for one diner. Across the chosen meals: rolled_oats demand is 130g, minus 60g pantry =70g; egg demand is 4 whole, minus 2=2; canned_tomato demand is 300g, minus 100g=200g.",
+  "scenario": {
+    "user_request": "我一个人吃，Monday 到 Friday 五顿 dinner 都帮我排一下。每顿从 prep 到 cooking 加起来最多 30 分钟。没有 allergy、忌口或特殊饮食。家里有 60g rolled oats、2 个 eggs 和 100g canned tomato，数量都确定；不用管其他库存，也没有 budget limit。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 1,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "rolled_oats",
+        "quantity": 60,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "egg",
+        "quantity": 2,
+        "unit": "whole"
+      },
+      {
+        "ingredient_id": "canned_tomato",
+        "quantity": 100,
+        "unit": "g"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner",
+        "fri-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tuna-tomato-pasta",
+      "mushroom-spinach-pasta",
+      "egg-vegetable-rice",
+      "spinach-oat-egg-cakes",
+      "savoury-vegan-oats",
+      "tuna-cucumber-rice-bowl",
+      "salmon-quinoa-bowl"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-carrot-4",
+      "fixture-cucumber-500g",
+      "fixture-eggs-10",
+      "fixture-garlic-300g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-oats-1kg",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-rolled-oats-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-spinach-200g",
+      "fixture-stock-1l",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon",
+      "pantry",
+      "budget_sgd"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": 30,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "rolled_oats",
+          "quantity": 60,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "egg",
+          "quantity": 2,
+          "unit": "whole"
+        },
+        {
+          "ingredient_id": "canned_tomato",
+          "quantity": 100,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer uses the catalog quantities as if they were already one-person portions, so every two-serving recipe is over-purchased by roughly 2× even though the request is for one diner."
+  }
+}

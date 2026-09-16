@@ -1,0 +1,122 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-standard-002",
+  "category": "standard",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "可行性证据：周一 chickpea-tomato-stew（原本 3 人份，×1）；周二 black-bean-quinoa-skillet（3 人份，×1）；周三 tomato-lentil-stew（4 人份，×0.75）；周四 salmon-quinoa-bowl（2 人份，×1.5）。前三道合计需要 canned_tomato 1400g，扣除库存 500g 后剩 900g；chickpea-tomato-stew 需要 chickpea 500g，扣除 200g 后剩 300g。",
+  "scenario": {
+    "user_request": "我们三个人吃，帮我排周一到周四四顿晚饭。没有过敏、忌口或特殊饮食要求，也不限制预算和时间。家里现有 500g 罐装番茄和 200g 鹰嘴豆，这两样数量是确定的，其他库存不用算。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 3,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "canned_tomato",
+        "quantity": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "chickpea",
+        "quantity": 200,
+        "unit": "g"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "chickpea-tomato-stew",
+      "black-bean-quinoa-skillet",
+      "tomato-lentil-stew",
+      "salmon-quinoa-bowl",
+      "egg-vegetable-rice",
+      "chicken-quinoa-pepper"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-carrot-4",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-cumin-20tsp",
+      "fixture-eggs-10",
+      "fixture-garlic-300g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-red-lentil-250g",
+      "fixture-red-lentil-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-spinach-200g",
+      "fixture-stock-1l",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon",
+      "pantry",
+      "budget_sgd"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "canned_tomato",
+          "quantity": 500,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "chickpea",
+          "quantity": 200,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "一个看似合理但错误的答案会把目录里的食材数量直接当成三个人的用量，忘记 4 人份菜谱要乘 0.75、2 人份菜谱要乘 1.5，导致采购数量系统性错误。"
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-clarification-007",
+  "category": "clarification",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": null,
+  "scenario": {
+    "user_request": "Yes, keep that plant-based preference when you make the plan.",
+    "conversation_history": [
+      {
+        "role": "user",
+        "content": "There are two of us. No allergies, no specific ingredients we refuse to eat, and no pantry items to use. Please plan dinners for the week starting 7 September."
+      },
+      {
+        "role": "assistant",
+        "content": "Got it: two diners, seven dinners, no allergies or ingredient exclusions, and no pantry deductions."
+      },
+      {
+        "role": "user",
+        "content": "One more thing: my partner wants us to eat plant-based that week."
+      }
+    ],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner",
+        "fri-dinner",
+        "sat-dinner",
+        "sun-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "chickpea-quinoa-salad",
+      "chickpea-sweet-potato-curry",
+      "chickpea-tomato-stew",
+      "lentil-sweet-potato-curry",
+      "mushroom-black-bean-stew",
+      "salmon-sweet-potato-tray",
+      "savoury-vegan-oats",
+      "tofu-mushroom-soba"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-broccoli-300g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-cumin-20tsp",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-garlic-300g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-oats-1kg",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-red-lentil-250g",
+      "fixture-red-lentil-500g",
+      "fixture-rolled-oats-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-soba-300g",
+      "fixture-soy-sauce-640ml",
+      "fixture-spinach-200g",
+      "fixture-stock-1l",
+      "fixture-sweet-potato-1kg"
+    ]
+  },
+  "gold": {
+    "class": "needs_clarification",
+    "required_clarification_fields": [
+      "dietary_preferences"
+    ],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "planning_horizon"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "The phrase 'plant-based' does not establish whether the household requires a strict vegan plan or only a vegetarian/no-meat plan. A plausible wrong answer silently hard-codes one interpretation and filters recipes accordingly instead of clarifying the intended dietary type."
+  }
+}

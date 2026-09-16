@@ -1,0 +1,106 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-standard-007",
+  "category": "standard",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Feasibility evidence: mon=salmon-quinoa-bowl, tue=chicken-broccoli-rice, wed=tuna-cucumber-rice-bowl, thu=egg-vegetable-rice, fri=tofu-brown-rice-stir-fry, sat=chicken-broccoli-rice, sun=salmon-quinoa-bowl. Repetition is allowed and every slot is filled using only the five candidates. The two salmon-quinoa-bowl meals use 280g quinoa total; after 100g pantry, 180g remains to buy.",
+  "scenario": {
+    "user_request": "Please plan all seven dinners from Monday through Sunday for two people. We have no allergies, foods to exclude, or special diet, and there is no time or budget cap. I have exactly 100 g quinoa in the pantry; ignore anything else. Repeating a dinner is completely fine.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "quinoa",
+        "quantity": 100,
+        "unit": "g"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner",
+        "fri-dinner",
+        "sat-dinner",
+        "sun-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "salmon-quinoa-bowl",
+      "chicken-broccoli-rice",
+      "tuna-cucumber-rice-bowl",
+      "egg-vegetable-rice",
+      "tofu-brown-rice-stir-fry"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-carrot-4",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-cucumber-500g",
+      "fixture-eggs-10",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-tuna-185g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon",
+      "pantry",
+      "budget_sgd"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "quinoa",
+          "quantity": 100,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer assumes every candidate recipe may be used at most once, so with five candidates for seven dinners it either leaves two slots empty or invents dishes outside the frozen candidate pool instead of repeating valid meals."
+  }
+}

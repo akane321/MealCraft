@@ -1,0 +1,111 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-pantry_expiry-007",
+  "category": "pantry_expiry",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Reviewer note: one valid plan is Mon tuna-tomato-pasta, Tue mushroom-spinach-pasta, Wed chicken-zucchini-pasta; each is within 35 minutes. The three meals need 180+180+180=540 g wholewheat_pasta in total. The exact 250 g pantry amount is deducted once from the weekly aggregate, leaving 290 g to buy. Garlic is required by all three selected meals (12+12+12=36 g) but its pantry quantity is unknown, so none of that demand may be deducted.",
+  "scenario": {
+    "user_request": "Please plan three dinners for two people, Monday to Wednesday. No allergies or ingredients to avoid, and I'd like each dinner within 35 minutes. I have exactly 250 g of wholewheat pasta left and want to finish it soon. There is some garlic at home too, but I don't know how much is left.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "wholewheat_pasta",
+        "quantity": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "garlic",
+        "quantity": null,
+        "unit": null
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tuna-tomato-pasta",
+      "mushroom-spinach-pasta",
+      "chicken-zucchini-pasta",
+      "tuna-spinach-pasta",
+      "chickpea-tomato-stew",
+      "salmon-quinoa-bowl"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-garlic-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-spinach-200g",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "planning_horizon",
+      "pantry"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": 35,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "wholewheat_pasta",
+          "quantity": 250,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": [
+        "garlic"
+      ]
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer reuses the same 250 g pasta pantry stock separately for each meal instead of deducting it once from the horizon aggregate, and may also treat the unmeasured garlic as fully available, producing a materially understated shopping list."
+  }
+}

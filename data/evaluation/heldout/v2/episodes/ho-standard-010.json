@@ -1,0 +1,102 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-standard-010",
+  "category": "standard",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "可行性证据：mon=lemon-herb-chicken-rice-bowl，tue=egg-vegetable-rice，wed=tuna-cucumber-rice-bowl。三道菜对两人分别需要 140g、150g、150g brown_rice，共 440g；已知库存 1000g 足够覆盖，brown_rice 的购买量应为 0，且库存仍余 560g。",
+  "scenario": {
+    "user_request": "两个人，安排周一到周三三顿晚饭。没有过敏、忌口或特殊饮食，不限时间和预算。家里 brown rice 还有整整 1000g，数量确定，其他库存不计。请把这 1kg 米统一用于这几顿饭，不要按每顿分别算库存。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "brown_rice",
+        "quantity": 1000,
+        "unit": "g"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "lemon-herb-chicken-rice-bowl",
+      "chicken-broccoli-rice",
+      "tofu-brown-rice-stir-fry",
+      "egg-vegetable-rice",
+      "tuna-cucumber-rice-bowl",
+      "black-bean-sweet-potato-bowl"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-black-beans-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-carrot-4",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-cucumber-500g",
+      "fixture-cumin-20tsp",
+      "fixture-eggs-10",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-pepper-3",
+      "fixture-sweet-potato-1kg",
+      "fixture-tuna-185g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon",
+      "pantry",
+      "budget_sgd"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "brown_rice",
+          "quantity": 1000,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "一个看似合理但错误的购物结果会先按每顿饭把 brown rice 向上取整成商品包装，再扣库存；正确顺序下 1kg 已知库存已经覆盖三顿饭的全部米需求，根本不该购买米。"
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-pantry_expiry-002",
+  "category": "pantry_expiry",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Reviewer note: one valid plan is Mon tofu-vegetable-soba, Tue tofu-mushroom-soba, Wed chicken-broccoli-rice, Thu chicken-quinoa-pepper; all are within 40 minutes. The two tofu meals require 600 g firm_tofu in total, so the known 250 g pantry stock leaves 350 g to buy. The soy_sauce needed by the two soba dishes has unknown pantry quantity and therefore remains non-deductible. The opened tofu is a use-soon preference, not a hard requirement.",
+  "scenario": {
+    "user_request": "Please plan four dinners for two people from Monday to Thursday. We have no allergies or ingredient exclusions, and I'd like everything to take no more than 40 minutes. There are 250 g of firm tofu in the fridge that I opened yesterday, so please use it soon. We also have some soy sauce, but I have no idea how much is left.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "firm_tofu",
+        "quantity": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "soy_sauce",
+        "quantity": null,
+        "unit": null
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tofu-vegetable-soba",
+      "tofu-mushroom-soba",
+      "tofu-brown-rice-stir-fry",
+      "chicken-broccoli-rice",
+      "chicken-quinoa-pepper",
+      "ginger-salmon-soba"
+    ],
+    "fairprice_product_ids": [
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-carrot-4",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-sesame-oil-200ml",
+      "fixture-soba-300g",
+      "fixture-soy-sauce-640ml",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "planning_horizon",
+      "pantry"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": 40,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "firm_tofu",
+          "quantity": 250,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": [
+        "soy_sauce"
+      ]
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer treats the unmeasured soy sauce as fully available and omits it from shopping, while using the exact 250 g tofu stock inconsistently across multiple tofu meals instead of deducting it once from the combined demand."
+  }
+}
