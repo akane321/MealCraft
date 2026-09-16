@@ -518,7 +518,61 @@ def test_total_must_match_the_lines(catalogs):
     assert "total_cost_matches_lines" in score(episode(), resp, catalogs).failed_codes
 
 
-def test_a_false_budget_claim_fails_even_when_the_plan_is_valid(catalogs):
+def budget_episode(budget):
+    return episode(
+        **{
+            "gold.applicable_hard_constraints": {
+                "allergens_absent": [],
+                "excluded_ingredients_absent": [],
+                "dietary_tags_required": [],
+                "max_cooking_time_minutes": None,
+                "budget_sgd": budget,
+                "nutrition_bands": [],
+            }
+        }
+    )
+
+
+def four_dollar_plan(within_budget):
+    return response(
+        plan={
+            "assignments": [{"slot_id": "mon-dinner", "recipe_id": "safe-bowl", "servings": 2}],
+            "shopping": [
+                {
+                    "ingredient_id": "brown_rice",
+                    "unit": "g",
+                    "required_quantity": 200,
+                    "product_id": "p-rice",
+                    "packages": 1,
+                    "line_cost_sgd": 4.0,
+                }
+            ],
+            "total_cost_sgd": 4.0,
+            "within_budget": within_budget,
+        }
+    )
+
+
+def test_exceeding_a_hard_budget_fails_even_when_the_system_admits_it(catalogs):
+    """Truthfulness alone used to be scored, so an honest over-budget plan succeeded."""
+    result = score(budget_episode(1.0), four_dollar_plan(within_budget=False), catalogs)
+    assert "budget_respected" in result.failed_codes
+    assert "budget_truthful" not in result.failed_codes
+    assert not result.strict_success
+
+
+def test_budget_is_compared_in_whole_cents_without_tolerance(catalogs):
+    exact = score(budget_episode(4.0), four_dollar_plan(within_budget=True), catalogs)
+    assert exact.strict_success, exact.failed_codes + exact.indeterminate_codes
+
+    # One cent over fails, although the cost tolerance is also one cent, and a
+    # system that says so is being truthful rather than contradicting the total.
+    over = score(budget_episode(3.99), four_dollar_plan(within_budget=False), catalogs)
+    assert "budget_respected" in over.failed_codes
+    assert "budget_truthful" not in over.failed_codes
+
+
+def test_a_false_budget_claim_is_a_failure_of_its_own(catalogs):
     ep = episode(
         **{
             "gold.applicable_hard_constraints": {
