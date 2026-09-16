@@ -13,11 +13,12 @@ class HouseholdProfileVersionConflictError(RuntimeError):
 
 
 class HouseholdProfileRepository:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, *, household_id: int) -> None:
         self.session = session
+        self.household_id = household_id
 
     def create(self, payload: HouseholdProfileWrite) -> HouseholdProfile:
-        profile = HouseholdProfile(name=payload.name, current_version=1)
+        profile = HouseholdProfile(household_id=self.household_id, name=payload.name, current_version=1)
         profile.versions.append(self._build_version(payload=payload, version=1))
         self.session.add(profile)
         self.session.commit()
@@ -44,7 +45,7 @@ class HouseholdProfileRepository:
     def get(self, profile_id: int) -> HouseholdProfile | None:
         statement = (
             select(HouseholdProfile)
-            .where(HouseholdProfile.id == profile_id)
+            .where(HouseholdProfile.id == profile_id, HouseholdProfile.household_id == self.household_id)
             .options(selectinload(HouseholdProfile.versions))
         )
         return self.session.scalars(statement).unique().one_or_none()
@@ -52,6 +53,7 @@ class HouseholdProfileRepository:
     def get_current(self) -> HouseholdProfile | None:
         statement = (
             select(HouseholdProfile)
+            .where(HouseholdProfile.household_id == self.household_id)
             .options(selectinload(HouseholdProfile.versions))
             .order_by(HouseholdProfile.updated_at.desc(), HouseholdProfile.id.desc())
             .limit(1)
@@ -62,13 +64,17 @@ class HouseholdProfileRepository:
         statement = select(HouseholdProfileVersion).where(
             HouseholdProfileVersion.profile_id == profile_id,
             HouseholdProfileVersion.version == version,
+            HouseholdProfileVersion.profile.has(HouseholdProfile.household_id == self.household_id),
         )
         return self.session.scalars(statement).one_or_none()
 
     def latest_plan_id(self, profile_id: int) -> int | None:
         statement = (
             select(MealPlan.id)
-            .where(MealPlan.household_profile_id == profile_id)
+            .where(
+                MealPlan.household_profile_id == profile_id,
+                MealPlan.household_id == self.household_id,
+            )
             .order_by(MealPlan.created_at.desc(), MealPlan.id.desc())
             .limit(1)
         )

@@ -61,6 +61,8 @@ class AgentSessionService:
         meal_plan_service: WeeklyMealPlanService,
         replanning_service: MealPlanReplanningService,
         run_repository: AgentRunRepository,
+        actor_user_id: int,
+        household_id: int,
         max_history_messages: int = 20,
     ) -> None:
         self.repository = repository
@@ -71,6 +73,8 @@ class AgentSessionService:
         self.replanning_service = replanning_service
         self.replan_interpreter = AgentReplanInterpreter()
         self.run_lifecycle = AgentRunLifecycle(run_repository)
+        self.actor_user_id = actor_user_id
+        self.household_id = household_id
         self.max_history_messages = max_history_messages
 
     def create(self, message: str, *, idempotency_key: str | None = None) -> AgentSessionResponse:
@@ -608,6 +612,8 @@ class AgentSessionService:
             context_version=max(context_version, 1),
             plan_revision=plan_revision,
             scope_decision=scope_decision.model_dump(mode="json") if scope_decision is not None else None,
+            actor_user_id=self.actor_user_id,
+            household_id=self.household_id,
         )
 
     def _finish_turn_run(

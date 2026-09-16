@@ -8,6 +8,7 @@ import type {
 
 export function useMealCraftAgent() {
   const config = useRuntimeConfig();
+  const apiFetch = useApiFetch();
   const session = ref<AgentSession | null>(null);
   const generatedPlan = ref<AgentConfirmation["plan"] | null>(null);
   const errorMessage = ref<string | null>(null);
@@ -31,7 +32,7 @@ export function useMealCraftAgent() {
 
   async function create(message: string) {
     generatedPlan.value = null;
-    const result = await run(() => $fetch<AgentSession>(`${config.public.apiBase}/api/agent/sessions`, {
+    const result = await run(() => apiFetch<AgentSession>(`${config.public.apiBase}/api/agent/sessions`, {
       method: "POST",
       body: { message },
     }));
@@ -40,7 +41,7 @@ export function useMealCraftAgent() {
 
   async function reply(message: string) {
     if (!session.value) return;
-    const result = await run(() => $fetch<AgentSession>(
+    const result = await run(() => apiFetch<AgentSession>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/messages`,
       { method: "POST", body: { message } },
     ));
@@ -49,7 +50,7 @@ export function useMealCraftAgent() {
 
   async function answerInteraction(answer: AgentInteractionAnswer) {
     if (!session.value) return;
-    const result = await run(() => $fetch<AgentSession>(
+    const result = await run(() => apiFetch<AgentSession>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/interactions`,
       { method: "POST", body: answer },
     ));
@@ -58,7 +59,7 @@ export function useMealCraftAgent() {
 
   async function confirm() {
     if (!session.value) return;
-    const result = await run(() => $fetch<AgentConfirmation>(
+    const result = await run(() => apiFetch<AgentConfirmation>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/confirm`,
       { method: "POST" },
     ));
@@ -70,7 +71,7 @@ export function useMealCraftAgent() {
 
   async function confirmReplan() {
     if (!session.value) return null;
-    const result = await run(() => $fetch<AgentReplanConfirmation>(
+    const result = await run(() => apiFetch<AgentReplanConfirmation>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/replan/confirm`,
       { method: "POST" },
     ));
@@ -83,7 +84,7 @@ export function useMealCraftAgent() {
 
   async function discardReplan() {
     if (!session.value) return;
-    const result = await run(() => $fetch<AgentSession>(
+    const result = await run(() => apiFetch<AgentSession>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/replan/discard`,
       { method: "POST" },
     ));
@@ -91,7 +92,7 @@ export function useMealCraftAgent() {
   }
 
   async function restoreLatest() {
-    const result = await run(() => $fetch<AgentSessionCollection>(
+    const result = await run(() => apiFetch<AgentSessionCollection>(
       `${config.public.apiBase}/api/agent/sessions`,
       { query: { limit: 1 } },
     ));

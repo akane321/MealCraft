@@ -19,8 +19,9 @@ class MealPlanRevisionConflictError(RuntimeError):
 
 
 class MealPlanRepository:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, *, household_id: int) -> None:
         self.session = session
+        self.household_id = household_id
 
     def create(
         self,
@@ -34,6 +35,7 @@ class MealPlanRepository:
         replaces_plan_id: int | None = None,
     ) -> MealPlan:
         plan = MealPlan(
+            household_id=self.household_id,
             start_date=constraints.start_date,
             end_date=scheduled[-1][0],
             day_count=constraints.day_count,
@@ -79,7 +81,7 @@ class MealPlanRepository:
     def get(self, plan_id: int) -> MealPlan | None:
         statement = (
             select(MealPlan)
-            .where(MealPlan.id == plan_id)
+            .where(MealPlan.id == plan_id, MealPlan.household_id == self.household_id)
             .options(
                 selectinload(MealPlan.entries).joinedload(MealPlanEntry.recipe).joinedload(Recipe.nutrition),
                 selectinload(MealPlan.grocery_items),
@@ -89,7 +91,12 @@ class MealPlanRepository:
         return self.session.scalars(statement).unique().one_or_none()
 
     def list_recent(self, *, limit: int) -> list[MealPlan]:
-        statement = select(MealPlan).order_by(MealPlan.created_at.desc(), MealPlan.id.desc()).limit(limit)
+        statement = (
+            select(MealPlan)
+            .where(MealPlan.household_id == self.household_id)
+            .order_by(MealPlan.created_at.desc(), MealPlan.id.desc())
+            .limit(limit)
+        )
         return list(self.session.scalars(statement).all())
 
     def update_entry_status(
@@ -99,6 +106,8 @@ class MealPlanRepository:
         entry_id: int,
         status: MealPlanEntryStatus,
     ) -> MealPlan | None:
+        if self.get(plan_id) is None:
+            return None
         statement = select(MealPlanEntry).where(
             MealPlanEntry.id == entry_id,
             MealPlanEntry.plan_id == plan_id,
@@ -153,6 +162,8 @@ class MealPlanRepository:
         return event
 
     def get_event(self, *, plan_id: int, event_id: int) -> MealPlanEvent | None:
+        if self.get(plan_id) is None:
+            return None
         statement = select(MealPlanEvent).where(
             MealPlanEvent.id == event_id,
             MealPlanEvent.plan_id == plan_id,
@@ -160,6 +171,8 @@ class MealPlanRepository:
         return self.session.scalars(statement).one_or_none()
 
     def list_events(self, *, plan_id: int, limit: int) -> list[MealPlanEvent]:
+        if self.get(plan_id) is None:
+            return []
         statement = (
             select(MealPlanEvent)
             .where(MealPlanEvent.plan_id == plan_id)

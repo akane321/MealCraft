@@ -82,6 +82,30 @@ def require_current_authentication(
 CurrentAuthenticationDependency = Annotated[CurrentAuthentication, Depends(require_current_authentication)]
 
 
+def require_current_household(current: CurrentAuthenticationDependency) -> CurrentAuthentication:
+    if current.active_membership is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="An active household membership is required",
+        )
+    return current
+
+
+CurrentHouseholdDependency = Annotated[CurrentAuthentication, Depends(require_current_household)]
+
+
+def require_current_household_csrf(
+    current: CurrentHouseholdDependency,
+    service: AuthenticationServiceDependency,
+    csrf_token: Annotated[str | None, Header(alias="X-CSRF-Token")] = None,
+) -> CurrentAuthentication:
+    _require_csrf(service, current, csrf_token)
+    return current
+
+
+CurrentHouseholdCsrfDependency = Annotated[CurrentAuthentication, Depends(require_current_household_csrf)]
+
+
 @router.post("/register", response_model=AuthenticationResponse, status_code=status.HTTP_201_CREATED)
 def register(
     payload: AccountRegistrationRequest,
