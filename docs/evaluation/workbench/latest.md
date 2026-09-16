@@ -9,6 +9,21 @@
 - Live API used: **no**
 - Recorded failure cases: **44**
 
+## Inputs
+
+Every number below was computed over exactly these files. A report whose inputs differ is a different report, even where the numbers coincide.
+
+| Input | Path | SHA-256 |
+|---|---|---|
+| `agent` | `data/evaluation/agent/fixture-v1.json` | `6fd3bd8d01a10f0b...` |
+| `developer` | `data/evaluation/dev/planning-v1.json` | `ba128503501c09bc...` |
+| `fixtures` | `data/fixtures/fairprice-products.json` | `19e760bd53e438fa...` |
+| `grounding` | `data/evaluation/agent-orchestration/grounding-developer-v1.json` | `b8d61c8d5c107a58...` |
+| `heldout` | `data/evaluation/heldout/planning-v1.json` | `95d13610fbd537c4...` |
+| `ingredients` | `data/ingredients/ingredients.json` | `ee72b831e89b5bc2...` |
+| `recipes` | `data/recipes/recipes.json` | `f35c55874b15c3a1...` |
+| `scope` | `data/evaluation/agent-orchestration/scope-developer-v1.json` | `062446e2467ba273...` |
+
 ## Held-out comparison
 
 | Metric | Greedy baseline | MealCraft planner | Delta |

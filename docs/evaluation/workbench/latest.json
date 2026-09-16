@@ -19,6 +19,40 @@
     "consecutive_repetition_reduction": 0,
     "failure_case_reduction": 0
   },
+  "inputs": {
+    "agent": {
+      "path": "data/evaluation/agent/fixture-v1.json",
+      "sha256": "6fd3bd8d01a10f0bd6457988ffa7a215b487507b80a56a58e842eddac9bfacb3"
+    },
+    "developer": {
+      "path": "data/evaluation/dev/planning-v1.json",
+      "sha256": "ba128503501c09bcdcb1bcc938600dd228800f638af1baddb731595d03f47627"
+    },
+    "fixtures": {
+      "path": "data/fixtures/fairprice-products.json",
+      "sha256": "19e760bd53e438fac44c77569724460cf6a69269690c302f3d1a59edb7a0323c"
+    },
+    "grounding": {
+      "path": "data/evaluation/agent-orchestration/grounding-developer-v1.json",
+      "sha256": "b8d61c8d5c107a58f4a1c054c46f33356e076b0f2de00b04781c5aef86c35dbd"
+    },
+    "heldout": {
+      "path": "data/evaluation/heldout/planning-v1.json",
+      "sha256": "95d13610fbd537c48153d38dec16bd4eb34a27d21336e66c4f67f2b8cc8db037"
+    },
+    "ingredients": {
+      "path": "data/ingredients/ingredients.json",
+      "sha256": "ee72b831e89b5bc24e16dbc82d9ad0861aadcf86276c58d631786717202bcece"
+    },
+    "recipes": {
+      "path": "data/recipes/recipes.json",
+      "sha256": "f35c55874b15c3a16510aded46921cf52b5f20eb0aab15d41690879c30ac2066"
+    },
+    "scope": {
+      "path": "data/evaluation/agent-orchestration/scope-developer-v1.json",
+      "sha256": "062446e2467ba27337455d56651d7ce67e52f08eaa5750e031539e526d3620a1"
+    }
+  },
   "developer_planning": {
     "schema_version": "2.0",
     "system": "mealcraft-planner",
