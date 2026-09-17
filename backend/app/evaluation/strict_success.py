@@ -469,7 +469,14 @@ def _check_shopping(
         if name not in lines:
             continue
         stated_units = {line.unit for line in lines[name]}
-        expected = compatible(quantity, unit, next(iter(stated_units))) if len(stated_units) == 1 else None
+        line_unit = next(iter(stated_units)) if len(stated_units) == 1 else None
+        held = compatible(quantity, unit, line_unit)
+        # Only what the plan uses can be deducted. Comparing against the whole
+        # pantry quantity failed a plan that needed 440 g from 1000 g in stock
+        # and deducted 440, and passed one that claimed all 1000.
+        need = demand.get(name)
+        needed = compatible(need[0], need[1], line_unit) if need else 0.0
+        expected = None if held is None or needed is None else min(held, needed)
         if expected is None:
             wrong.append(f"{name} (units not comparable)")
         elif abs(deducted(name) - expected) > max(
@@ -583,6 +590,28 @@ def _check_shopping(
     return checks
 
 
+def _check_servings(episode: dict, response: CommonEpisodeResponse) -> Check:
+    """Every planned meal must feed the whole household.
+
+    Nothing compared servings with the household before, so a plan cooking one
+    serving for a household of two halved its shopping and passed a budget that
+    no plan feeding everyone could meet. Cooking more than needed is not checked
+    here: it only raises demand and cost, which the other checks already bound.
+    """
+    assert response.plan is not None
+    size = episode["scenario"]["household_profile"].get("household_size")
+    if size is None:
+        return Check("servings_feed_household", "indeterminate", "the scenario states no household size")
+    short = sorted(
+        f"{a.slot_id} ({a.servings:g})" for a in response.plan.assignments if a.servings + 1e-9 < float(size)
+    )
+    return Check(
+        "servings_feed_household",
+        "failed" if short else "passed",
+        f"fewer than {size} servings: {', '.join(short)}" if short else f"every meal serves at least {size}",
+    )
+
+
 def _check_claims(response: CommonEpisodeResponse, recomputed: list[Check]) -> Check:
     """A claim of satisfaction must agree with the recomputation."""
     assert response.plan is not None
@@ -648,6 +677,7 @@ def score_episode(
                 f"unassigned: {', '.join(missing)}" if missing else "every required slot was assigned",
             )
         )
+        score.checks.append(_check_servings(episode, response))
 
         constraint_checks = _check_hard_constraints(episode, response, catalogs, tolerances)
         score.checks.extend(constraint_checks)
