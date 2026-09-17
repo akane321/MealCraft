@@ -5,9 +5,9 @@
   "language": "mixed",
   "authored_by": "frontend-evaluation",
   "reviewed_by": null,
-  "review_notes": "给复核人：可用计划为 Mon chicken-broccoli-rice、Tue egg-vegetable-rice、Wed tofu-brown-rice-stir-fry。三道菜原始 servings 都是2，三人吃要乘1.5；brown_rice 需求分别225g、225g、210g，共660g，已知库存300g只能扣一次，剩360g需购买。ginger 总需求为22.5g+15g+22.5g=60g，但库存数量未知，所以不能扣减。三道菜均≤40分钟。",
+  "review_notes": "给复核人：可用计划为 Mon chicken-broccoli-rice、Tue egg-vegetable-rice、Wed tofu-brown-rice-stir-fry。三道菜原始 servings 都是2，三人吃要乘1.5；brown_rice 需求分别225g、225g、210g，共660g，已知库存300g只能扣一次，剩360g需购买。ginger 总需求为22.5g+15g+22.5g=60g，但库存数量未知，所以不能扣减。三道菜均≤40分钟。\n[复核修正 2026-09-17] 按复核意见把偏好措辞改成与 gold 一致的硬约束（gold 中 max_cooking_time_minutes=40 未变）。只改了 user_request，场景其余字段、候选池与 gold 均未改动。原句：「最好每顿40分钟内。」 → 现句：「每顿都必须在40分钟内做完，晚上时间很紧。」",
   "scenario": {
-    "user_request": "我们三个人，想排周一到周三三顿 dinner，没有过敏也没有忌口，最好每顿40分钟内。家里 brown rice 还有准确的300g，开封有一阵子了想先吃掉；ginger 也有一点，但我完全不知道还剩多少。",
+    "user_request": "我们三个人，想排周一到周三三顿 dinner，没有过敏也没有忌口，每顿都必须在40分钟内做完，晚上时间很紧。家里 brown rice 还有准确的300g，开封有一阵子了想先吃掉；ginger 也有一点，但我完全不知道还剩多少。",
     "conversation_history": [],
     "household_profile": {
       "household_size": 3,

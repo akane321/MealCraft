@@ -5,9 +5,9 @@
   "language": "en",
   "authored_by": "frontend-evaluation",
   "reviewed_by": null,
-  "review_notes": null,
+  "review_notes": "[复核修正 2026-09-17] 按复核意见删除了教系统怎么答的提示性措辞。只改了 user_request，场景其余字段、候选池与 gold 均未改动。原句：「I have one allergy note for this household that says either soy or egg, but I can't tell from the note which one is the actual allergy. Please check with me before you choose the meals rather than guessing.」 → 现句：「I have one allergy note for this household that says either soy or egg, but I can't tell from the note which one is the actual allergy.」",
   "scenario": {
-    "user_request": "Please plan dinners for three of us for the week starting 7 September. No ingredient dislikes and no pantry items to use. I have one allergy note for this household that says either soy or egg, but I can't tell from the note which one is the actual allergy. Please check with me before you choose the meals rather than guessing.",
+    "user_request": "Please plan dinners for three of us for the week starting 7 September. No ingredient dislikes and no pantry items to use. I have one allergy note for this household that says either soy or egg, but I can't tell from the note which one is the actual allergy.",
     "conversation_history": [],
     "household_profile": {
       "household_size": 3,

@@ -5,9 +5,9 @@
   "language": "en",
   "authored_by": "frontend-evaluation",
   "reviewed_by": null,
-  "review_notes": "Infeasibility check: the only breakfast candidate requires 1,200g Greek yogurt across three mornings. The 1kg tub alone under-covers; 1kg + 500g is the cheapest coverage at S$12.85. Oats 300g, milk 450ml and 3 lemons are covered by pantry. Minimum checkout therefore exceeds S$10.50 by S$2.35.",
+  "review_notes": "Infeasibility check: the only breakfast candidate requires 1,200g Greek yogurt across three mornings. The 1kg tub alone under-covers; 1kg + 500g is the cheapest coverage at S$12.85. Oats 300g, milk 450ml and 3 lemons are covered by pantry. Minimum checkout therefore exceeds S$10.50 by S$2.35.\n[复核修正 2026-09-17] 按复核意见删除了教系统怎么答的提示性措辞。只改了 user_request，场景其余字段、候选池与 gold 均未改动。原句：「Use the pantry first, but the actual packaged checkout must stay within S$10.50; if it cannot, say so rather than estimating a per-gram cost.」 → 现句：「Use the pantry first; I can spend at most S$10.50 at the store this time.」",
   "scenario": {
-    "user_request": "Please plan breakfast for two of us for the next three mornings. We have no allergies or foods to exclude, and repeating breakfast is fine. Use the pantry first, but the actual packaged checkout must stay within S$10.50; if it cannot, say so rather than estimating a per-gram cost.",
+    "user_request": "Please plan breakfast for two of us for the next three mornings. We have no allergies or foods to exclude, and repeating breakfast is fine. Use the pantry first; I can spend at most S$10.50 at the store this time.",
     "conversation_history": [],
     "household_profile": {
       "household_size": 2,

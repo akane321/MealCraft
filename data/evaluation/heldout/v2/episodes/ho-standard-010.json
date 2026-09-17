@@ -5,9 +5,9 @@
   "language": "zh",
   "authored_by": "frontend-evaluation",
   "reviewed_by": null,
-  "review_notes": "可行性证据：mon=lemon-herb-chicken-rice-bowl，tue=egg-vegetable-rice，wed=tuna-cucumber-rice-bowl。三道菜对两人分别需要 140g、150g、150g brown_rice，共 440g；已知库存 1000g 足够覆盖，brown_rice 的购买量应为 0，且库存仍余 560g。",
+  "review_notes": "可行性证据：mon=lemon-herb-chicken-rice-bowl，tue=egg-vegetable-rice，wed=tuna-cucumber-rice-bowl。三道菜对两人分别需要 140g、150g、150g brown_rice，共 440g；已知库存 1000g 足够覆盖，brown_rice 的购买量应为 0，且库存仍余 560g。\n[复核修正 2026-09-17] 按复核意见删除了教系统怎么答的提示性措辞。只改了 user_request，场景其余字段、候选池与 gold 均未改动。原句：「家里 brown rice 还有整整 1000g，数量确定，其他库存不计。请把这 1kg 米统一用于这几顿饭，不要按每顿分别算库存。」 → 现句：「家里 brown rice 还有整整 1000g，数量确定，其他库存不计。」",
   "scenario": {
-    "user_request": "两个人，安排周一到周三三顿晚饭。没有过敏、忌口或特殊饮食，不限时间和预算。家里 brown rice 还有整整 1000g，数量确定，其他库存不计。请把这 1kg 米统一用于这几顿饭，不要按每顿分别算库存。",
+    "user_request": "两个人，安排周一到周三三顿晚饭。没有过敏、忌口或特殊饮食，不限时间和预算。家里 brown rice 还有整整 1000g，数量确定，其他库存不计。",
     "conversation_history": [],
     "household_profile": {
       "household_size": 2,
