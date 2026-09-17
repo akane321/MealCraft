@@ -103,13 +103,31 @@ is not done here (it would mean guessing, not extracting).
   a quantity→mass conversion path, none of which exist yet. This is R12's
   next real sub-project, not a v1 deliverable.
 - **Allergen labels are deterministic-rule-only.** They come from
-  `config/ingredient_aliases.csv`'s hand-assigned allergen column, which is
-  reviewed as config, but there is no independently reviewed gold subset
-  checking labelling precision/recall on real recipes (ADR-0012's
-  "safety-critical labels require deterministic rules *plus* review
-  evidence" — only the first half is done). **Do not treat v1 allergen labels
-  as sufficient for a production hard-constraint safety claim** until that
-  review exists (task #9 in the original data-engineering task list).
+  `config/ingredient_aliases.csv`'s hand-assigned allergen column. A
+  round-2 human review pass (`data/review/MealCraft_review_packet_round2*`,
+  `safety_allergens` sheet) re-checked a random sample against the principle
+  that `confirmed_allergens` at the canonical-ingredient level should record
+  **Definite/inherent** allergen content only (an ingredient that always
+  contains the allergen), not **Possible/conservative** exposure (an
+  ingredient that sometimes does, e.g. via shared-facility or ambiguous-brand
+  risk) — because this field feeds a hard-constraint filter, where
+  over-labeling causes false positives (recipes wrongly excluded) without
+  protecting anyone, rather than a soft warning where caution costs little.
+  This is consistent with FDA's 9-category major-allergen list (milk, egg,
+  fish, **Crustacean shellfish**, tree nuts, wheat, peanuts, soybeans,
+  sesame; molluscan shellfish and coconut are *not* on it as of the FDA's
+  5th-edition Food Allergen Q&A guidance, effective ~2025-01-06). Applying
+  this round-2 review corrected 3 canonical ingredients (coconut milk,
+  coconut flavoring/extract → no tree-nut label; imitation crabmeat → fish,
+  not crustacean) and, in the process, caught and fixed a real pre-existing
+  bug where `"imitation crab"` was wrongly aliased to actual crab
+  (`ING_CRAB`, crustaceans). There is still no independently reviewed gold
+  subset checking labelling precision/recall end-to-end on real recipes
+  (ADR-0012's "safety-critical labels require deterministic rules *plus*
+  review evidence" — only the first half is done). **Do not treat v1
+  allergen labels as sufficient for a production hard-constraint safety
+  claim** until that review exists (task #9 in the original data-engineering
+  task list).
 - **High-dimensional fields are empty by design**: `cuisine`, `meal_types`,
   `methods`, `equipment`, `difficulty`, `dietary_tags` are all `null`/`[]`
   for every recipe. No controlled vocabulary or coverage study exists for
@@ -124,9 +142,86 @@ is not done here (it would mean guessing, not extracting).
   four-condition release filter above, but they represent known-incorrect or
   known-unreviewed rows in the *non*-released 99.6% of the dataset.
 
+## Open questions (deferred — not decided by this pipeline)
+
+These surfaced during the round-2 allergen review. Both are data-taxonomy
+decisions (ADR-0012 territory), not parsing bugs, so they are recorded here
+undecided rather than resolved unilaterally in config:
+
+- **Is `molluscs` a legitimate allergen taxonomy category?** FDA's major-
+  allergen list covers **Crustacean shellfish** only (shrimp, crab, lobster);
+  molluscan shellfish (clams, mussels, oysters, scallops, squid) is not a US
+  major allergen, though it is regulated/labeled in some other jurisdictions
+  (e.g. EU). `config/ingredient_aliases.csv` currently has no `molluscs`
+  category at all — molluscan ingredients carry no allergen tag. Before
+  adding one (or before treating its absence as intentional), the team needs
+  to decide which regulatory framework(s) `confirmed_allergens` is meant to
+  satisfy; that scope decision should get an ADR, not a config patch.
+- **A "layer 2" product-level allergen check does not exist.**
+  `confirmed_allergens` labels the *canonical ingredient* ("butter" always
+  has milk). It cannot capture genuine *product-instance* uncertainty (e.g.
+  a specific "imitation crabmeat" brand that blends in real crab, or a
+  margarine formulated with milk solids) — that needs a separate,
+  not-yet-built check at the point of product selection, distinct from this
+  recipe-level dataset. v1 does not attempt this; anything that surfaces
+  `confirmed_allergens` to an end user as a safety claim should be paired
+  with a product-level check, not treated as sufficient on its own.
+
 ## What changes this freeze
 
 A new field, a changed unit-recognition rule, or a changed release-gate
 condition all require bumping `schema_version` (e.g. `mealcraft.recipe.v2`)
 and re-declaring thresholds against fresh full-dataset evidence — not editing
 this document's numbers in place.
+
+## v1.1 release (2026-09-17)
+
+Same frozen schema, same four-condition gate, same `schema_version`
+(`mealcraft.recipe.v1`) as above — nothing in "What is frozen" changed. What
+changed is data quality: a round of human-reviewed config fixes
+(`config/ingredient_aliases.csv` — new aliases, 3 allergen corrections
+documented below, an `ambiguous_or` parser false-positive fix) improved
+mapping coverage on the same full 1,642,647-recipe input. `dietary_tags`
+went from always-empty to populated for release-eligible recipes, using the
+field `schemas/recipe.schema.json` already declared (an array of strings) —
+not a schema addition. A companion field, `dietary_tags_basis` (per-tag
+`derived_true` / `derived_false` / `unknown_ingredient`), *is* new; a
+recipe's `dietary_tags` list is only ever a positive claim, so this basis
+map is what lets a consumer tell "confirmed not vegan" apart from "can't
+tell" without it looking identical to a recipe that just isn't vegan (see
+`scripts/derive_dietary_tags.py` for the derivation rules and
+`scripts/build_dietary_origin.py` for the per-ingredient classification
+behind it).
+
+| Metric | v1 | v1.1 |
+| --- | --- | --- |
+| Ingredient-level mapping coverage | 81.77% | 82.5% |
+| Ingredient-level quantity coverage | 91.97% | 91.97% (unchanged — round-6 didn't touch quantity parsing) |
+| Ingredient-level unit coverage | 92.09% | 92.1% (unchanged) |
+| Recipe-level servings coverage | 5.09% (83,689) | 5.09% (unchanged — round-6 didn't touch servings extraction) |
+| **Recipes clearing all four conditions** | 8,718 / 1,642,647 (0.531%) | **9,282 / 1,642,647 (0.565%)** |
+| Released canonical ingredients | 443 | 465 |
+| `dietary_tags` populated, of released recipes | n/a (field always empty) | vegetarian 5,625 (60.6%) · gluten-free 4,507 (48.6%) · dairy-free 3,602 (38.8%) · vegan 1,030 (11.1%) |
+
+The +564 released recipes come from round-6's added aliases raising mapping
+coverage, not from any change to the release gate itself. `dietary_tags`
+coverage is much lower dataset-wide than per-ingredient mapping coverage
+because a recipe only gets a positive tag when *every* one of its
+ingredients is mapped — the same compounding effect that makes the
+four-condition gate itself select 0.565% out of 82.5% per-ingredient
+coverage. Full-dataset (not just released-subset) `dietary_tags` numbers:
+68.85% of all 1,642,647 recipes have at least one unmapped ingredient and so
+carry no positive tag (`dietary_tags_basis` says `unknown_ingredient`, not
+`derived_false`) — see `scripts/derive_dietary_tags.py`'s own output for the
+full breakdown.
+
+Round-6 also corrected 3 canonical ingredients' allergen labels (coconut
+milk, coconut flavoring, imitation crabmeat) per the Definite-vs-Possible
+principle described above, and fixed a real pre-existing bug where
+`"imitation crab"` was aliased to real crab's crustacean allergen — both
+already folded into the "Known gaps" allergen entry above, since that entry
+describes the *current* state rather than a v1-frozen one.
+
+Release artifacts: `data/release/v1.1/` (same shape as `data/release/v1/`).
+v1's artifacts are untouched — this is an additional release, not a
+correction in place.
