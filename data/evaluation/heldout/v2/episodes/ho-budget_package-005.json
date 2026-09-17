@@ -1,0 +1,116 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-budget_package-005",
+  "category": "budget_package",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": "dataset",
+  "review_notes": "Legal witness: use mushroom-spinach-pasta for Mon–Thu. Baby spinach demand is 120g×4=480g; the pantry covers 720g pasta, 1,000g mushrooms, 48g garlic and 4 tbsp olive oil. Buy 1× fixture-baby-spinach-400g + 1× fixture-spinach-200g = 600g for S$4.60+S$3.20=S$7.80 <= S$7.85.",
+  "scenario": {
+    "user_request": "Plan four dinners for two people. No allergies or exclusions, and repeats are okay. Please use the pantry first and keep the real packaged checkout no higher than S$7.85.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "wholewheat_pasta",
+        "quantity": 720,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "mushroom",
+        "quantity": 1000,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "garlic",
+        "quantity": 48,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "olive_oil",
+        "quantity": 4,
+        "unit": "tbsp"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "mushroom-spinach-pasta",
+      "tuna-spinach-pasta"
+    ],
+    "fairprice_product_ids": [
+      "fixture-baby-spinach-400g",
+      "fixture-garlic-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-spinach-200g",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "budget_sgd",
+      "planning_horizon",
+      "allergens",
+      "excluded_ingredients"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": 7.85,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "wholewheat_pasta",
+          "quantity": 720,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "mushroom",
+          "quantity": 1000,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "garlic",
+          "quantity": 48,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "olive_oil",
+          "quantity": 4,
+          "unit": "tbsp"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer rounds 480–520 g of spinach up to two 400 g bags (S$9.20) and rejects the budget, instead of mixing one 400 g and one 200 g bag for S$7.80."
+  }
+}

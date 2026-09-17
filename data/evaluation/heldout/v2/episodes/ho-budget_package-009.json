@@ -1,0 +1,123 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-budget_package-009",
+  "category": "budget_package",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "可行证据：Mon–Fri 都选 chicken-broccoli-rice。每道菜原本 2 servings，三人份倍率 1.5；brown_rice 每餐 150g×1.5=225g，五餐共 1,125g。其他食材由 pantry 覆盖。购买 1×1kg rice + 1×500g rice，共 1,500g，S$4.85+S$2.75=S$7.60 <= S$7.65。",
+  "scenario": {
+    "user_request": "我们三个人接下来五晚都在家吃，没有过敏也没有不吃的食材。请按三人份算，库存先用，FairPrice 真正结账金额最多 S$7.65。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 3,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "chicken_breast",
+        "quantity": 2400,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "broccoli",
+        "quantity": 1800,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "ginger",
+        "quantity": 112.5,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "olive_oil",
+        "quantity": 7.5,
+        "unit": "tbsp"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner",
+        "fri-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "chicken-broccoli-rice",
+      "egg-vegetable-rice",
+      "tuna-cucumber-rice-bowl"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-carrot-4",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-cucumber-500g",
+      "fixture-eggs-10",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-tuna-185g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "budget_sgd",
+      "planning_horizon",
+      "allergens",
+      "excluded_ingredients"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": 7.65,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "chicken_breast",
+          "quantity": 2400,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "broccoli",
+          "quantity": 1800,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "ginger",
+          "quantity": 112.5,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "olive_oil",
+          "quantity": 7.5,
+          "unit": "tbsp"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "错误答案容易忘记三人份需要把两人份菜谱乘 1.5，或者只用单一规格买米；正确的五餐 rice 总需求 1125g，需要 1kg+500g 的混合包装才能在 S$7.65 内。"
+  }
+}

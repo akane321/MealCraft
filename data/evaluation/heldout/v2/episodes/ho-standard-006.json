@@ -1,0 +1,115 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-standard-006",
+  "category": "standard",
+  "language": "mixed",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Feasibility evidence: mon-dinner=tuna-cucumber-rice-bowl; tue-dinner=spinach-oat-egg-cakes. Aggregate needs after pantry: brown_rice 50g, egg 2 whole, canned_tuna 185g, cucumber 150g, cherry_tomato 310g, lemon 1 whole, rolled_oats 120g, baby_spinach 100g. Purchase 1×fixture-brown-rice-500g S$2.75; 1×fixture-eggs-10 S$3.45; 1×fixture-tuna-185g S$2.75; 1×fixture-cucumber-500g S$2.20; 1×10762156 S$4.05; 1×fixture-lemon-5 S$3.25; 1×fixture-rolled-oats-500g S$2.35; 1×fixture-spinach-200g S$3.20. Total S$24.00 <= S$25.00.",
+  "scenario": {
+    "user_request": "好，就按刚才的 S$25 total budget 和 pantry，Monday、Tuesday 两顿 dinner 就行。其他条件也不变，可以直接排。",
+    "conversation_history": [
+      {
+        "role": "user",
+        "content": "There are two of us, with no allergies, excluded ingredients, or special diet. For these two dinners I can spend at most S$25 in total. I have exactly 100g brown rice and 2 eggs available; ignore other pantry stock."
+      },
+      {
+        "role": "assistant",
+        "content": "Got it: 2 diners, S$25 total budget, 100g brown rice and 2 eggs deductible, with no dietary restrictions."
+      }
+    ],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "brown_rice",
+        "quantity": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "egg",
+        "quantity": 2,
+        "unit": "whole"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tuna-cucumber-rice-bowl",
+      "spinach-oat-egg-cakes",
+      "tuna-tomato-pasta",
+      "egg-vegetable-rice"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-carrot-4",
+      "fixture-cucumber-500g",
+      "fixture-eggs-10",
+      "fixture-garlic-300g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-oats-1kg",
+      "fixture-rolled-oats-500g",
+      "fixture-spinach-200g",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon",
+      "pantry",
+      "budget_sgd"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": 25.0,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "brown_rice",
+          "quantity": 100,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "egg",
+          "quantity": 2,
+          "unit": "whole"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer rounds each dinner to grocery packages before aggregating shared ingredients, buying two cherry-tomato packs instead of one and pushing an otherwise valid S$24 basket over the remembered S$25 total budget."
+  }
+}

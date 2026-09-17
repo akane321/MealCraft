@@ -1,0 +1,107 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-infeasible_conflict-007",
+  "category": "infeasible_conflict",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Reviewer check: among the three vegan candidates at <=30 minutes, the only gluten-free one is chickpea-quinoa-salad and it contains cucumber; the two other quick vegan candidates carry gluten through wholewheat_pasta or rolled_oats.",
+  "scenario": {
+    "user_request": "Plan three dinners for two people. Everything needs to be vegan, one of us cannot have gluten, and we also do not eat cucumber. On those nights we only have 30 minutes from prep to finish. There is no pantry stock to use.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [
+        "gluten"
+      ],
+      "excluded_ingredients": [
+        "cucumber"
+      ],
+      "dietary_preferences": [
+        "vegan"
+      ]
+    },
+    "pantry": [],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "chickpea-quinoa-salad",
+      "mushroom-spinach-pasta",
+      "savoury-vegan-oats",
+      "chickpea-tomato-stew",
+      "black-bean-quinoa-skillet",
+      "tomato-lentil-stew"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-cumin-20tsp",
+      "fixture-garlic-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-oats-1kg",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-red-lentil-250g",
+      "fixture-red-lentil-500g",
+      "fixture-rolled-oats-500g",
+      "fixture-spinach-200g",
+      "fixture-stock-1l",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g"
+    ]
+  },
+  "gold": {
+    "class": "infeasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [
+        "gluten"
+      ],
+      "excluded_ingredients_absent": [
+        "cucumber"
+      ],
+      "dietary_tags_required": [
+        "vegan"
+      ],
+      "max_cooking_time_minutes": 30,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": "The vegan candidates at <=30 minutes are chickpea-quinoa-salad (30 min), mushroom-spinach-pasta (30 min), and savoury-vegan-oats (25 min). chickpea-quinoa-salad is gluten-free but contains cucumber. mushroom-spinach-pasta contains wholewheat_pasta, whose allergen is gluten, and savoury-vegan-oats contains rolled_oats, whose allergen is gluten. The remaining vegan, gluten-free, cucumber-free candidates in this pool take at least 35 minutes.",
+    "allowed_relaxations": [
+      "increase the maximum cooking time to at least 35 minutes"
+    ],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible-looking wrong answer will pick the only quick gluten-free vegan option even though it contains cucumber, or pick a different quick vegan dish that contains gluten; satisfying three of the four constraints is not enough."
+  }
+}

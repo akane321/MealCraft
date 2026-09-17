@@ -1,0 +1,108 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-infeasible_conflict-004",
+  "category": "infeasible_conflict",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": "backend",
+  "review_notes": "复核点：四道 <=30 分钟且 gluten-free 的候选热量最低是 tuna-cucumber-rice-bowl 的 470 kcal；所有 <=450 kcal 的 gluten-free 候选都至少需要 35 分钟。",
+  "scenario": {
+    "user_request": "我们两个人，周一到周四晚饭都要无麸质。最近晚上时间比较紧，每顿从准备到做完最多 30 分钟，而且我希望每份不超过 450 kcal。家里没有现成食材要算进去。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": [
+        "gluten-free"
+      ]
+    },
+    "pantry": [],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "chickpea-quinoa-salad",
+      "egg-vegetable-rice",
+      "tuna-cucumber-rice-bowl",
+      "egg-tomato-quinoa",
+      "chickpea-tomato-stew",
+      "black-bean-quinoa-skillet",
+      "vegetable-rice-skillet",
+      "mushroom-black-bean-stew"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-carrot-4",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-cumin-20tsp",
+      "fixture-eggs-10",
+      "fixture-garlic-300g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-spinach-200g",
+      "fixture-tuna-185g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "infeasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "dietary_preferences",
+      "planning_horizon"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [
+        "gluten-free"
+      ],
+      "max_cooking_time_minutes": 30,
+      "budget_sgd": null,
+      "nutrition_bands": [
+        {
+          "metric": "calories_kcal",
+          "scope": "per_serving",
+          "max": 450
+        }
+      ]
+    },
+    "pantry_ground_truth": {
+      "deductible": [],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": "候选池里 gluten-free 且 <=30 分钟的四道菜分别是 chickpea-quinoa-salad 475 kcal、egg-vegetable-rice 480 kcal、tuna-cucumber-rice-bowl 470 kcal、egg-tomato-quinoa 490 kcal，全部高于 450 kcal。而 <=450 kcal 的 gluten-free 候选中，chickpea-tomato-stew 和 black-bean-quinoa-skillet 都要 35 分钟，vegetable-rice-skillet 要 40 分钟，mushroom-black-bean-stew 要 45 分钟。因此三项条件没有交集。",
+    "allowed_relaxations": [
+      "把最长烹饪时间放宽到至少 35 分钟",
+      "把每份热量上限提高到至少 470 kcal"
+    ],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "一个看起来合理但错误的答案会挑 30 分钟内的 gluten-free 菜，却忽略它们都超过 450 kcal；或者挑 450 kcal 以下的菜，却把 35–45 分钟的菜说成符合半小时限制。"
+  }
+}

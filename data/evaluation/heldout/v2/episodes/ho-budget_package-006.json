@@ -1,0 +1,131 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-budget_package-006",
+  "category": "budget_package",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "可行证据：Mon–Fri 都选 tofu-chickpea-bowl。quinoa 需求 120g×5=600g；其他食材由 pantry 覆盖。买 1× fixture-quinoa-500g + 1× fixture-quinoa-250g = 750g，S$7.80+S$4.20=S$12.00，满足 S$12.05 预算。",
+  "scenario": {
+    "user_request": "我们两个人这周有五晚在家吃，没有食物过敏或忌口，重复一两道没问题。库存先用，买菜按实际包装结账，总预算最多 S$12.05。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "firm_tofu",
+        "quantity": 1250,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "chickpea",
+        "quantity": 1250,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "cucumber",
+        "quantity": 700,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "lemon",
+        "quantity": 5,
+        "unit": "whole"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner",
+        "thu-dinner",
+        "fri-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "chickpea-quinoa-salad",
+      "tofu-chickpea-bowl",
+      "salmon-quinoa-bowl",
+      "chicken-quinoa-pepper",
+      "egg-tomato-quinoa"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-eggs-10",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-lemon-5",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-spinach-200g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "budget_sgd",
+      "planning_horizon",
+      "allergens",
+      "excluded_ingredients"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": 12.05,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "firm_tofu",
+          "quantity": 1250,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "chickpea",
+          "quantity": 1250,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "cucumber",
+          "quantity": 700,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "lemon",
+          "quantity": 5,
+          "unit": "whole"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "一个合理但错误的答案会把 600–700g quinoa 直接买成两包 500g（S$15.60），从而错判 S$12.05 不够；500g+250g 的组合只需 S$12.00。"
+  }
+}

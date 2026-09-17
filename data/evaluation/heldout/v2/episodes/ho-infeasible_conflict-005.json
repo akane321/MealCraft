@@ -1,0 +1,118 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-infeasible_conflict-005",
+  "category": "infeasible_conflict",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Reviewer check: after removing fish-containing and chicken_breast-containing candidates, the highest-protein remaining recipe is tofu-chickpea-bowl at 31 g/serving.",
+  "scenario": {
+    "user_request": "Please plan three dinners for two people. One of us is allergic to fish, and we also do not eat chicken. I want every dinner to have at least 35 g of protein per serving. We have no pantry ingredients to count.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [
+        "fish"
+      ],
+      "excluded_ingredients": [
+        "chicken_breast"
+      ],
+      "dietary_preferences": []
+    },
+    "pantry": [],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "chicken-broccoli-rice",
+      "chicken-quinoa-pepper",
+      "lemon-herb-chicken-rice-bowl",
+      "salmon-quinoa-bowl",
+      "ginger-salmon-soba",
+      "tuna-tomato-pasta",
+      "tuna-spinach-pasta",
+      "tofu-chickpea-bowl",
+      "egg-tomato-quinoa"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-eggs-10",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-garlic-300g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-soba-300g",
+      "fixture-soy-sauce-640ml",
+      "fixture-spinach-200g",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "infeasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "planning_horizon"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [
+        "fish"
+      ],
+      "excluded_ingredients_absent": [
+        "chicken_breast"
+      ],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": [
+        {
+          "metric": "protein_g",
+          "scope": "per_serving",
+          "min": 35
+        }
+      ]
+    },
+    "pantry_ground_truth": {
+      "deductible": [],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": "Every candidate in this pool with protein >=35 g per serving is disallowed by one of the two safety/exclusion constraints. The chicken candidates provide 43-46 g protein but contain chicken_breast, which the household excludes. The salmon/tuna candidates provide 36-40 g protein but contain the fish allergen. The remaining safe non-chicken candidates are tofu-chickpea-bowl at 31 g and egg-tomato-quinoa at 26 g, both below 35 g.",
+    "allowed_relaxations": [
+      "lower the protein minimum to 31 g per serving or below"
+    ],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible-looking wrong answer will meet the >=35 g protein target by choosing either a chicken dish or a fish dish, while quietly violating the user's explicit no-chicken rule or the fish allergy; the safe non-chicken alternatives top out below 35 g."
+  }
+}

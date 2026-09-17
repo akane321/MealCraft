@@ -1,0 +1,115 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-standard-004",
+  "category": "standard",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "Feasibility evidence: mon=egg-vegetable-rice, tue=egg-tomato-quinoa, wed=black-bean-quinoa-skillet. For four diners the first two recipes each scale from 2 servings to 4 and need 8 eggs, so aggregate egg demand is 16; deducting the pantry once leaves 10 eggs. Quinoa demand is 280g from egg-tomato-quinoa plus 213.333333g from black-bean-quinoa-skillet (4/3 scaling), 493.333333g total; minus 200g pantry leaves 293.333333g.",
+  "scenario": {
+    "user_request": "Please plan Monday to Wednesday dinners for four people. We have no allergies, ingredient exclusions, or special diet, and there is no time or budget limit. In the fridge I have exactly 6 eggs, and in the cupboard exactly 200 g quinoa; count those once across the whole plan and ignore other pantry stock.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 4,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "egg",
+        "quantity": 6,
+        "unit": "whole"
+      },
+      {
+        "ingredient_id": "quinoa",
+        "quantity": 200,
+        "unit": "g"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "egg-vegetable-rice",
+      "egg-tomato-quinoa",
+      "black-bean-quinoa-skillet",
+      "tomato-lentil-stew",
+      "chicken-broccoli-rice"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-carrot-4",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-cumin-20tsp",
+      "fixture-eggs-10",
+      "fixture-ginger-300g",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-red-lentil-250g",
+      "fixture-red-lentil-500g",
+      "fixture-spinach-200g",
+      "fixture-stock-1l"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon",
+      "pantry",
+      "budget_sgd"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "egg",
+          "quantity": 6,
+          "unit": "whole"
+        },
+        {
+          "ingredient_id": "quinoa",
+          "quantity": 200,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer deducts the same six pantry eggs separately from each egg-based dinner instead of aggregating the horizon first and deducting the six eggs once, which materially under-buys eggs."
+  }
+}

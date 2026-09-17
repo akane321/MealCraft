@@ -1,0 +1,124 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-standard-005",
+  "category": "standard",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": "dataset",
+  "review_notes": "可行性证据：mon-dinner=chicken-quinoa-pepper（35 分钟）；wed-dinner=egg-vegetable-rice（30 分钟）；fri-dinner=salmon-sweet-potato-tray（40 分钟）。salmon tray 对 2 人需要 450g sweet_potato，扣除已知库存 300g 后剩 150g。black-bean-sweet-potato-bowl 为 45 分钟、tomato-lentil-stew 为 50 分钟，不应进入这个计划。",
+  "scenario": {
+    "user_request": "对，最后改成只做周一、周三和周五这三顿晚饭，其他天不用排。前面说的条件都不变。",
+    "conversation_history": [
+      {
+        "role": "user",
+        "content": "我们两个人，没有过敏、忌口或特殊饮食；每顿从准备到做完最多 40 分钟。家里有 300g sweet potato 可以用，这次不设预算上限。"
+      },
+      {
+        "role": "assistant",
+        "content": "好的：2 人、总时长最多 40 分钟、300g sweet potato 可扣减、无过敏或忌口，且不设预算上限。"
+      }
+    ],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "sweet_potato",
+        "quantity": 300,
+        "unit": "g"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "wed-dinner",
+        "fri-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "chicken-quinoa-pepper",
+      "egg-vegetable-rice",
+      "salmon-sweet-potato-tray",
+      "black-bean-sweet-potato-bowl",
+      "tomato-lentil-stew",
+      "tofu-mushroom-soba"
+    ],
+    "fairprice_product_ids": [
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-carrot-4",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-cumin-20tsp",
+      "fixture-eggs-10",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-red-lentil-250g",
+      "fixture-red-lentil-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-soba-300g",
+      "fixture-soy-sauce-640ml",
+      "fixture-spinach-200g",
+      "fixture-stock-1l",
+      "fixture-sweet-potato-1kg",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon",
+      "pantry",
+      "budget_sgd"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": 40,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "sweet_potato",
+          "quantity": 300,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "一个看起来正常但错误的答案会丢掉对话里已经确定的人数、40 分钟上限和库存，或者无视用户最新说的“只做周一、周三、周五”而按连续三天排餐。"
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-standard-011",
+  "category": "standard",
+  "language": "zh",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "可行性证据：thu=salmon-quinoa-bowl，fri=chicken-broccoli-rice，sat=chickpea-quinoa-salad，sun=egg-tomato-quinoa。四个餐位与 2026-09-10 至 2026-09-13 对齐。所选三道含 quinoa 的菜分别需要 140g、120g、140g，共 400g；扣除 200g pantry 后剩 200g。",
+  "scenario": {
+    "user_request": "从 2026 年 9 月 10 日星期四开始，到星期日为止，帮我们两个人安排四顿晚饭。没有过敏、忌口或特殊饮食，也没有时间和预算限制。家里有准确的 200g quinoa，其他库存不用算。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "quinoa",
+        "quantity": 200,
+        "unit": "g"
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-10",
+      "slots": [
+        "thu-dinner",
+        "fri-dinner",
+        "sat-dinner",
+        "sun-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "salmon-quinoa-bowl",
+      "chicken-broccoli-rice",
+      "chickpea-quinoa-salad",
+      "egg-tomato-quinoa",
+      "tofu-mushroom-soba",
+      "tuna-spinach-pasta"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-eggs-10",
+      "fixture-firm-tofu-300g",
+      "fixture-firm-tofu-600g",
+      "fixture-garlic-300g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-soba-300g",
+      "fixture-soy-sauce-640ml",
+      "fixture-spinach-200g",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "dietary_preferences",
+      "planning_horizon",
+      "pantry",
+      "budget_sgd"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "quinoa",
+          "quantity": 200,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "一个看起来完整但错误的答案会把任何多日计划都强行从周一开始，忽略 2026-09-10 是星期四，结果把应当是周四到周日的四个餐位整体错位。"
+  }
+}

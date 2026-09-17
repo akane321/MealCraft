@@ -1,0 +1,108 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-infeasible_conflict-008",
+  "category": "infeasible_conflict",
+  "language": "mixed",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": null,
+  "review_notes": "复核人可枚举两餐（允许重复）：在 average calories 不超过 474.3（465 加 2% 容差）的组合中，最高 average protein=34 g（tuna-cucumber-rice-bowl×2），低于 34.3；在 average protein 不低于 34.3（35 减 2% 容差）的组合中，最低 average calories=477.5 kcal（chicken-quinoa-pepper + spinach-oat-egg-cakes）。\n核验修正：起草时热量上限为 470。按 2% 容差，470 实际上限为 479.4，477.5 的组合会被判为合格，题目因此有解、与 infeasible 标签矛盾。已将上限改为 465，并对全部组合穷举确认无解。只改了 user_request 中的数字、nutrition_bands 的 max、conflict_reason 与本说明，场景、候选池和考点均未改动。",
+  "scenario": {
+    "user_request": "我们两个人只排周一、周二两顿晚饭。最近在看 macros：这两顿合起来平均每份 protein 至少 35 g，同时平均每份 calories 不超过 465 kcal。没有过敏、忌口，也没有 pantry 食材要扣。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "chicken-quinoa-pepper",
+      "spinach-oat-egg-cakes",
+      "chickpea-tomato-stew",
+      "lemon-herb-chicken-rice-bowl",
+      "mushroom-black-bean-stew",
+      "tuna-cucumber-rice-bowl"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-black-beans-400g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cucumber-500g",
+      "fixture-cumin-20tsp",
+      "fixture-eggs-10",
+      "fixture-garlic-300g",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-oats-1kg",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-rolled-oats-500g",
+      "fixture-spinach-200g",
+      "fixture-tuna-185g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "infeasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "planning_horizon"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": null,
+      "budget_sgd": null,
+      "nutrition_bands": [
+        {
+          "metric": "protein_g",
+          "scope": "horizon_average",
+          "min": 35
+        },
+        {
+          "metric": "calories_kcal",
+          "scope": "horizon_average",
+          "max": 465
+        }
+      ]
+    },
+    "pantry_ground_truth": {
+      "deductible": [],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": "在这个两餐候选池里，允许重复也不存在同时满足两个 horizon-average 目标的组合。按评分的 2% 容差，蛋白下限实际为 34.3 g，热量上限实际为 474.3 kcal。热量达标的组合中平均 protein 最高的是重复 tuna-cucumber-rice-bowl：34 g、470 kcal，仍低于 34.3 g。蛋白达标的组合中平均 calories 最低的是 chicken-quinoa-pepper + spinach-oat-egg-cakes：平均 protein=(45+25)/2=35 g，平均 calories=(535+420)/2=477.5 kcal，超过容差后的上限 474.3 kcal 3.2 kcal。",
+    "allowed_relaxations": [
+      "把平均热量上限提高到至少 477.5 kcal",
+      "把平均蛋白质下限降低到 34 g per serving"
+    ],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "一个看起来合理但错误的答案会分别找到“平均 protein 够高”的组合和“平均 calories 够低”的组合，却没有核对两项 horizon-average 约束必须由同一份两晚计划同时满足。"
+  }
+}

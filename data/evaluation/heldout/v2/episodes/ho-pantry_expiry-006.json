@@ -1,0 +1,108 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-pantry_expiry-006",
+  "category": "pantry_expiry",
+  "language": "mixed",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": "backend",
+  "review_notes": "给复核人：一份合法计划是 black-bean-sweet-potato-bowl、lentil-sweet-potato-curry、chickpea-sweet-potato-curry。两人份 sweet_potato 需求为400g + 500×(2/4)=250g + 450×(2/3)=300g，共950g；已知库存500g只能扣一次，所以还需450g。ground_cumin 对应需求为2 + 2×(2/4) + 2×(2/3)=4.33 tsp 左右，但库存量未知，不能扣减。三道都≤50分钟。",
+  "scenario": {
+    "user_request": "两个人吃，帮我排周一到周三三顿 dinner。没有过敏或忌口，50分钟以内都可以。sweet potato 我称过还有500g，放了一阵子想尽快用；ground cumin 也有一些，但剩多少完全不清楚。",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [
+      {
+        "ingredient_id": "sweet_potato",
+        "quantity": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient_id": "ground_cumin",
+        "quantity": null,
+        "unit": null
+      }
+    ],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "black-bean-sweet-potato-bowl",
+      "lentil-sweet-potato-curry",
+      "salmon-sweet-potato-tray",
+      "chickpea-sweet-potato-curry",
+      "mushroom-black-bean-stew",
+      "black-bean-quinoa-skillet"
+    ],
+    "fairprice_product_ids": [
+      "fixture-black-beans-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chickpea-800g",
+      "fixture-chickpeas-400g",
+      "fixture-cumin-20tsp",
+      "fixture-lemon-5",
+      "fixture-mushroom-300g",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-onion-5",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-red-lentil-250g",
+      "fixture-red-lentil-500g",
+      "fixture-salmon-300g",
+      "fixture-salmon-fillet-500g",
+      "fixture-sweet-potato-1kg"
+    ]
+  },
+  "gold": {
+    "class": "feasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "excluded_ingredients",
+      "planning_horizon",
+      "pantry"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": 50,
+      "budget_sgd": null,
+      "nutrition_bands": []
+    },
+    "pantry_ground_truth": {
+      "deductible": [
+        {
+          "ingredient_id": "sweet_potato",
+          "quantity": 500,
+          "unit": "g"
+        }
+      ],
+      "not_deductible_unknown_quantity": [
+        "ground_cumin"
+      ]
+    },
+    "conflict_reason": null,
+    "allowed_relaxations": [],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible wrong answer treats the unknown amount of ground cumin as fully stocked and also misses the fractional serving scales of the 3- and 4-serving curries, producing a shopping list that looks plausible but undercounts both seasoning and sweet potato demand."
+  }
+}

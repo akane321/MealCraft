@@ -1,0 +1,106 @@
+{
+  "schema_version": "heldout-episode-v1",
+  "episode_id": "ho-infeasible_conflict-001",
+  "category": "infeasible_conflict",
+  "language": "en",
+  "authored_by": "frontend-evaluation",
+  "reviewed_by": "backend",
+  "review_notes": "Reviewer check: in the frozen candidate pool, the three <=30-minute recipes meeting >=30 g protein are all tuna/fish; the two fish-free recipes meeting >=30 g protein are both 35 minutes. Please verify the three-way intersection is empty.",
+  "scenario": {
+    "user_request": "Please plan Monday to Wednesday dinners for two of us. One of us has a fish allergy, so no fish at all. Each dinner also needs to take no more than 30 minutes in total and provide at least 30 g of protein per serving. We do not have pantry ingredients to use.",
+    "conversation_history": [],
+    "household_profile": {
+      "household_size": 2,
+      "allergens": [
+        "fish"
+      ],
+      "excluded_ingredients": [],
+      "dietary_preferences": []
+    },
+    "pantry": [],
+    "planning_horizon": {
+      "start_date": "2026-09-07",
+      "slots": [
+        "mon-dinner",
+        "tue-dinner",
+        "wed-dinner"
+      ]
+    },
+    "recipe_candidate_slugs": [
+      "tuna-tomato-pasta",
+      "tuna-cucumber-rice-bowl",
+      "tuna-spinach-pasta",
+      "chicken-broccoli-rice",
+      "chicken-quinoa-pepper",
+      "spinach-oat-egg-cakes",
+      "egg-tomato-quinoa"
+    ],
+    "fairprice_product_ids": [
+      "10762156",
+      "fixture-baby-spinach-400g",
+      "fixture-broccoli-300g",
+      "fixture-brown-rice-1kg",
+      "fixture-brown-rice-500g",
+      "fixture-canned-tomato-400g",
+      "fixture-canned-tomato-800g",
+      "fixture-chicken-breast-1000g",
+      "fixture-chicken-breast-300g",
+      "fixture-chicken-breast-500g",
+      "fixture-cucumber-500g",
+      "fixture-eggs-10",
+      "fixture-garlic-300g",
+      "fixture-ginger-300g",
+      "fixture-lemon-5",
+      "fixture-oats-1kg",
+      "fixture-olive-oil-1000ml",
+      "fixture-olive-oil-250ml",
+      "fixture-olive-oil-500ml",
+      "fixture-pepper-3",
+      "fixture-quinoa-250g",
+      "fixture-quinoa-500g",
+      "fixture-rolled-oats-500g",
+      "fixture-spinach-200g",
+      "fixture-tuna-185g",
+      "fixture-wholewheat-pasta-250g",
+      "fixture-wholewheat-pasta-500g",
+      "fixture-zucchini-500g"
+    ]
+  },
+  "gold": {
+    "class": "infeasible",
+    "required_clarification_fields": [],
+    "forbidden_clarification_fields": [
+      "household_size",
+      "allergens",
+      "planning_horizon"
+    ],
+    "applicable_hard_constraints": {
+      "allergens_absent": [
+        "fish"
+      ],
+      "excluded_ingredients_absent": [],
+      "dietary_tags_required": [],
+      "max_cooking_time_minutes": 30,
+      "budget_sgd": null,
+      "nutrition_bands": [
+        {
+          "metric": "protein_g",
+          "scope": "per_serving",
+          "min": 30
+        }
+      ]
+    },
+    "pantry_ground_truth": {
+      "deductible": [],
+      "not_deductible_unknown_quantity": []
+    },
+    "conflict_reason": "No candidate satisfies fish-free + total cooking time <=30 minutes + protein >=30 g per serving. The only candidates in this pool that are both <=30 minutes and >=30 g protein are tuna-tomato-pasta (36 g, 30 min), tuna-cucumber-rice-bowl (34 g, 30 min), and tuna-spinach-pasta (37 g, 30 min); all contain canned_tuna, whose allergen is fish. The fish-free candidates with >=30 g protein are chicken-broccoli-rice (46 g) and chicken-quinoa-pepper (45 g), but both take 35 minutes.",
+    "allowed_relaxations": [
+      "increase the maximum cooking time to at least 35 minutes",
+      "lower the protein minimum below 30 g per serving"
+    ],
+    "required_disclosures": [],
+    "replan_invariants": null,
+    "author_rationale": "A plausible-looking wrong answer will satisfy any two of the three hard constraints but quietly break the third: the 30-minute, >=30 g protein candidates are tuna dishes that contain fish, while the fish-free >=30 g protein candidates take 35 minutes or more."
+  }
+}
