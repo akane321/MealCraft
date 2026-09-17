@@ -1,0 +1,25 @@
+{
+  "archive_bytes": 3325692,
+  "archive_path": "data\\reference\\downloads\\FoodData_Central_survey_food_csv_2024-10-31.zip",
+  "archive_sha256": "5ccc25ec2777a8982fbb61378a42f415316173eb11e48c9a8ba4cb19f5a4f29c",
+  "extracted_files": [
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\Download API Field Descriptions.xlsx",
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\fndds_derivation.csv",
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\food.csv",
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\food_attribute.csv",
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\food_attribute_type.csv",
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\food_nutrient.csv",
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\food_portion.csv",
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\food_update_log_entry.csv",
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\input_food.csv",
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\measure_unit.csv",
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\nutrient.csv",
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\survey_fndds_food.csv",
+    "data\\reference\\downloads\\usda-fndds-2024-10-31\\FoodData_Central_survey_food_csv_2024-10-31\\wweia_food_category.csv"
+  ],
+  "license": "CC0 1.0 / public domain",
+  "retrieved_at": "2026-09-17T13:06:34+00:00",
+  "source": "USDA FoodData Central FNDDS",
+  "source_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_survey_food_csv_2024-10-31.zip",
+  "source_version": "2024-10-31"
+}
