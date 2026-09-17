@@ -4,7 +4,7 @@
   "category": "standard",
   "language": "mixed",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "dataset",
   "review_notes": "Feasibility evidence: mon=tuna-tomato-pasta, tue=mushroom-spinach-pasta, wed=egg-vegetable-rice, thu=spinach-oat-egg-cakes, fri=savoury-vegan-oats. All are <=30 minutes total. Each catalog recipe serves 2, so quantities are ×0.5 for one diner. Across the chosen meals: rolled_oats demand is 130g, minus 60g pantry =70g; egg demand is 4 whole, minus 2=2; canned_tomato demand is 300g, minus 100g=200g.",
   "scenario": {
     "user_request": "我一个人吃，Monday 到 Friday 五顿 dinner 都帮我排一下。每顿从 prep 到 cooking 加起来最多 30 分钟。没有 allergy、忌口或特殊饮食。家里有 60g rolled oats、2 个 eggs 和 100g canned tomato，数量都确定；不用管其他库存，也没有 budget limit。",

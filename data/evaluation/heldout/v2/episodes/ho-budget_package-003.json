@@ -4,7 +4,7 @@
   "category": "budget_package",
   "language": "mixed",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "dataset",
   "review_notes": "Legal witness: use tofu-chickpea-bowl on Mon–Thu. Chickpea demand is 250g×4=1,000g; pantry covers tofu 1,000g, quinoa 480g, cucumber 560g and 4 lemons. Buy 1× fixture-chickpea-800g + 1× fixture-chickpeas-400g = 1,200g for S$2.60 + S$1.85 = S$4.45 <= S$4.50.\n[复核修正 2026-09-17] 按复核意见删除了教系统怎么答的提示性措辞。只改了 user_request，场景其余字段、候选池与 gold 均未改动。原句：「Pantry 里的东西先用，FairPrice 实际 checkout 请控制在 S$4.50 以内，不要用按克数折算的“食材成本”。」 → 现句：「Pantry 里的东西先用，这次去 FairPrice 买菜最多花 S$4.50。」",
   "scenario": {
     "user_request": "我们两个人要排四晚 dinner，没有过敏也不忌口，重复没关系。Pantry 里的东西先用，这次去 FairPrice 买菜最多花 S$4.50。",

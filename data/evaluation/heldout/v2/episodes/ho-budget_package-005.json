@@ -4,7 +4,7 @@
   "category": "budget_package",
   "language": "en",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "dataset",
   "review_notes": "Legal witness: use mushroom-spinach-pasta for Mon–Thu. Baby spinach demand is 120g×4=480g; the pantry covers 720g pasta, 1,000g mushrooms, 48g garlic and 4 tbsp olive oil. Buy 1× fixture-baby-spinach-400g + 1× fixture-spinach-200g = 600g for S$4.60+S$3.20=S$7.80 <= S$7.85.",
   "scenario": {
     "user_request": "Plan four dinners for two people. No allergies or exclusions, and repeats are okay. Please use the pantry first and keep the real packaged checkout no higher than S$7.85.",

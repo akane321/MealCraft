@@ -4,7 +4,7 @@
   "category": "budget_package",
   "language": "zh",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "dataset",
   "review_notes": "无解核算：三晚均选 chicken-zucchini-pasta 已由 pantry 覆盖 chicken_breast 900g、wholewheat_pasta 540g、zucchini 750g、garlic 36g，只剩 canned_tomato 900g。最便宜覆盖方式为 fixture-canned-tomato-800g + fixture-canned-tomato-400g，共 S$4.65，仍超预算 S$2.50；其他候选不会把最小结账成本降到 S$2.15。\n[复核修正 2026-09-17] 按复核意见删除了教系统怎么答的提示性措辞。只改了 user_request，场景其余字段、候选池与 gold 均未改动。原句：「家里现有食材先用掉，结账预算最多 S$2.15；如果这个预算真的做不到，请直接告诉我，不要按“实际吃掉多少”来折算价格。」 → 现句：「家里现有食材先用掉，这次买菜最多花 S$2.15。」",
   "scenario": {
     "user_request": "我们两个人接下来三晚都在家吃，没有过敏也没有忌口。家里现有食材先用掉，这次买菜最多花 S$2.15。",

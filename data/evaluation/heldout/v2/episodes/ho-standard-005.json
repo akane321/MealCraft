@@ -4,7 +4,7 @@
   "category": "standard",
   "language": "zh",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "dataset",
   "review_notes": "可行性证据：mon-dinner=chicken-quinoa-pepper（35 分钟）；wed-dinner=egg-vegetable-rice（30 分钟）；fri-dinner=salmon-sweet-potato-tray（40 分钟）。salmon tray 对 2 人需要 450g sweet_potato，扣除已知库存 300g 后剩 150g。black-bean-sweet-potato-bowl 为 45 分钟、tomato-lentil-stew 为 50 分钟，不应进入这个计划。",
   "scenario": {
     "user_request": "对，最后改成只做周一、周三和周五这三顿晚饭，其他天不用排。前面说的条件都不变。",

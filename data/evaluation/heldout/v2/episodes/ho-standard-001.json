@@ -4,7 +4,7 @@
   "category": "standard",
   "language": "en",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "dataset",
   "review_notes": "Feasibility evidence: mon-dinner=lemon-herb-chicken-rice-bowl; tue-dinner=chicken-broccoli-rice; wed-dinner=tofu-brown-rice-stir-fry. Their total times are 40, 35, and 35 minutes. For two diners the selected recipes require 430 g brown rice and 620 g chicken breast in total; after the stated pantry, 230 g rice and 470 g chicken remain to buy.",
   "scenario": {
     "user_request": "There are two of us. Please plan dinner for Monday through Wednesday. Each dinner must take no more than 40 minutes in total, including prep and cooking. We have no allergies, no ingredients we avoid, and no special diet. I have exactly 200 g of brown rice and 150 g of chicken breast to use; those are the only pantry items to count. There is no budget cap.",

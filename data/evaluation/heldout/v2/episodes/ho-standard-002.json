@@ -4,7 +4,7 @@
   "category": "standard",
   "language": "zh",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "dataset",
   "review_notes": "可行性证据：周一 chickpea-tomato-stew（原本 3 人份，×1）；周二 black-bean-quinoa-skillet（3 人份，×1）；周三 tomato-lentil-stew（4 人份，×0.75）；周四 salmon-quinoa-bowl（2 人份，×1.5）。前三道合计需要 canned_tomato 1400g，扣除库存 500g 后剩 900g；chickpea-tomato-stew 需要 chickpea 500g，扣除 200g 后剩 300g。",
   "scenario": {
     "user_request": "我们三个人吃，帮我排周一到周四四顿晚饭。没有过敏、忌口或特殊饮食要求，也不限制预算和时间。家里现有 500g 罐装番茄和 200g 鹰嘴豆，这两样数量是确定的，其他库存不用算。",

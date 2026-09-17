@@ -4,7 +4,7 @@
   "category": "budget_package",
   "language": "zh",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "dataset",
   "review_notes": "可行证据：Mon–Wed 都选 tofu-chickpea-bowl。firm_tofu 需求 250g×3=750g，其余 chickpea 750g、quinoa 360g、cucumber 420g、lemon 3 个均由 pantry 覆盖。购买 1×600g tofu + 1×300g tofu，共 900g，S$3.10+S$1.95=S$5.05，低于 S$5.10。",
   "scenario": {
     "user_request": "我们两个人安排三晚晚餐就好，没有过敏和忌口，菜重复也可以。优先用家里的库存，最后真正去结账的钱不要超过 S$5.10。",
