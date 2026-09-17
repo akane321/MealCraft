@@ -4,7 +4,7 @@
   "category": "infeasible_conflict",
   "language": "mixed",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "backend",
   "review_notes": "请复核 dietary-tag-implications：vegan 也满足 vegetarian；即便计入这些菜，候选池里唯一达到 30 g protein 的 vegetarian 是 tofu-chickpea-bowl（31 g），但含 soy。",
   "scenario": {
     "user_request": "我们两个人吃三晚晚饭，必须是 vegetarian。家里有人有 soy allergy，所以含 soy 的东西都不能用。另外希望每份至少有 30 g protein。没有 pantry 食材需要扣。",

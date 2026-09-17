@@ -4,7 +4,7 @@
   "category": "infeasible_conflict",
   "language": "en",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "backend",
   "review_notes": "Reviewer check: in the frozen candidate pool, the three <=30-minute recipes meeting >=30 g protein are all tuna/fish; the two fish-free recipes meeting >=30 g protein are both 35 minutes. Please verify the three-way intersection is empty.",
   "scenario": {
     "user_request": "Please plan Monday to Wednesday dinners for two of us. One of us has a fish allergy, so no fish at all. Each dinner also needs to take no more than 30 minutes in total and provide at least 30 g of protein per serving. We do not have pantry ingredients to use.",

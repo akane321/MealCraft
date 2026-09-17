@@ -4,7 +4,7 @@
   "category": "pantry_expiry",
   "language": "zh",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "backend",
   "review_notes": "给复核人：一份合法计划是 salmon-quinoa-bowl、chickpea-quinoa-salad、chicken-quinoa-pepper、tofu-chickpea-bowl。四人吃这四道 servings=2 的菜都要乘2，quinoa 需求分别280g、240g、280g、240g，共1040g；已知库存250g只扣一次，剩790g需买。四道菜都需要 lemon，但 pantry 的 lemon 数量未知，所以不能从购买量中扣减。四道菜总时长均≤40分钟。",
   "scenario": {
     "user_request": "我们四个人，想排周一到周四四顿晚饭，没有过敏也没有忌口，每顿40分钟以内就好。家里 quinoa 还准确剩250g，开封挺久了希望优先吃掉；另外还有几个 lemon，但我没数，不知道具体有多少。",

@@ -4,7 +4,7 @@
   "category": "pantry_expiry",
   "language": "zh",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "backend",
   "review_notes": "给复核人：按冻结商品计算，salmon-quinoa-bowl 是三道候选里最便宜的：salmon 300g S$10.90 + quinoa 250g S$4.20 + cucumber 500g S$2.20 + cherry tomato 500g S$4.05 = S$21.35；lemon 由已知的1个库存覆盖。ginger-salmon-soba 至少要 salmon S$10.90 + soba S$4.20 + broccoli S$2.90 + ginger S$2.20 + soy sauce S$3.55 = S$23.75。salmon-sweet-potato-tray 还需 salmon、sweet potato、broccoli 和 olive oil，亦高于 S$21.35。salmon 库存数量未知，不能假定足够，因此不能把 S$10.90 的 salmon 从采购中扣掉。",
   "scenario": {
     "user_request": "我们两个人，今晚想吃三文鱼，40分钟以内都可以。没有过敏或忌口。家里有1个 lemon 快放坏了，想优先用掉；冰箱也还有一点 salmon fillet，但我完全不知道有多重。今晚最多再花 S$18.50 买东西。",

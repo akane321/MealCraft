@@ -4,7 +4,7 @@
   "category": "pantry_expiry",
   "language": "mixed",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "backend",
   "review_notes": "给复核人：一份合法计划是 black-bean-sweet-potato-bowl、lentil-sweet-potato-curry、chickpea-sweet-potato-curry。两人份 sweet_potato 需求为400g + 500×(2/4)=250g + 450×(2/3)=300g，共950g；已知库存500g只能扣一次，所以还需450g。ground_cumin 对应需求为2 + 2×(2/4) + 2×(2/3)=4.33 tsp 左右，但库存量未知，不能扣减。三道都≤50分钟。",
   "scenario": {
     "user_request": "两个人吃，帮我排周一到周三三顿 dinner。没有过敏或忌口，50分钟以内都可以。sweet potato 我称过还有500g，放了一阵子想尽快用；ground cumin 也有一些，但剩多少完全不清楚。",

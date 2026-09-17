@@ -4,7 +4,7 @@
   "category": "infeasible_conflict",
   "language": "zh",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "backend",
   "review_notes": "复核点：四道 <=30 分钟且 gluten-free 的候选热量最低是 tuna-cucumber-rice-bowl 的 470 kcal；所有 <=450 kcal 的 gluten-free 候选都至少需要 35 分钟。",
   "scenario": {
     "user_request": "我们两个人，周一到周四晚饭都要无麸质。最近晚上时间比较紧，每顿从准备到做完最多 30 分钟，而且我希望每份不超过 450 kcal。家里没有现成食材要算进去。",

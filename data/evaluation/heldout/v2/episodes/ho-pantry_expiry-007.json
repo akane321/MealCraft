@@ -4,7 +4,7 @@
   "category": "pantry_expiry",
   "language": "en",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "backend",
   "review_notes": "Reviewer note: one valid plan is Mon tuna-tomato-pasta, Tue mushroom-spinach-pasta, Wed chicken-zucchini-pasta; each is within 35 minutes. The three meals need 180+180+180=540 g wholewheat_pasta in total. The exact 250 g pantry amount is deducted once from the weekly aggregate, leaving 290 g to buy. Garlic is required by all three selected meals (12+12+12=36 g) but its pantry quantity is unknown, so none of that demand may be deducted.",
   "scenario": {
     "user_request": "Please plan three dinners for two people, Monday to Wednesday. No allergies or ingredients to avoid, and I'd like each dinner within 35 minutes. I have exactly 250 g of wholewheat pasta left and want to finish it soon. There is some garlic at home too, but I don't know how much is left.",

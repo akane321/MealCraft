@@ -4,7 +4,7 @@
   "category": "infeasible_conflict",
   "language": "zh",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "backend",
   "review_notes": "请复核 30 分钟内的三道 vegan 候选：chickpea-quinoa-salad 含 cucumber；mushroom-spinach-pasta 和 savoury-vegan-oats 都含 mushroom。",
   "scenario": {
     "user_request": "我们两个人，帮我排周一到周四的晚饭。四顿都要纯素，而且我晚上不想做太久，每顿总时间最多 30 分钟。另外我不吃蘑菇，也不吃黄瓜。家里没有要优先用掉的食材。",

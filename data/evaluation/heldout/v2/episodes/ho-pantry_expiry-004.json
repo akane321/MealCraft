@@ -4,7 +4,7 @@
   "category": "pantry_expiry",
   "language": "en",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "backend",
   "review_notes": "Reviewer note: one valid five-dinner plan is chickpea-tomato-stew, tomato-lentil-stew, lentil-sweet-potato-curry, tuna-tomato-pasta, and chicken-zucchini-pasta. For one diner, the catalog serving scales are 1/3, 1/4, 1/4, 1/2, and 1/2 respectively. Canned_tomato demand is 400/3 + 800/4 + 400/4 + 400/2 + 300/2 = 783.33 g, so the exact 500 g pantry stock leaves about 283.33 g to buy. Garlic demand across the selected recipes is nonzero, but its pantry quantity is unknown and cannot be deducted. All selected meals are within 50 minutes.",
   "scenario": {
     "user_request": "I'm cooking just for myself from Monday through Friday. No allergies or foods to avoid, and up to 50 minutes is fine. I have exactly 500 g of canned tomato left from several opened tins and want to use that up soon. There is also some garlic in the kitchen, but I haven't weighed it and don't know how much remains.",
