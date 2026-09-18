@@ -4,8 +4,8 @@
   "category": "clarification",
   "language": "en",
   "authored_by": "planning",
-  "reviewed_by": null,
-  "review_notes": null,
+  "reviewed_by": "frontend-evaluation",
+  "review_notes": "[review 2026-09-18 frontend-evaluation] agent pre-check PASS on class, clarification validity, gold non-uniqueness and answer leakage; confirmed by Zhang Naiqian",
   "scenario": {
     "user_request": "I need to correct that: I do have a food allergy. Please plan the dinners with that in mind.",
     "conversation_history": [
