@@ -5,7 +5,7 @@ from decimal import Decimal
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -14,6 +14,7 @@ from app.core.config import get_settings
 from app.db.base import Base
 from app.db.session import get_db_session
 from app.main import app
+from app.models.platform import HouseholdMembership
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 
 
@@ -102,6 +103,18 @@ def recipe_client() -> Generator[TestClient, None, None]:
         yield client
     app.dependency_overrides.clear()
     Base.metadata.drop_all(engine)
+
+
+def _set_authenticated_household_role(role: str) -> None:
+    override_database = app.dependency_overrides[get_db_session]
+    database_generator = override_database()
+    database = next(database_generator)
+    try:
+        membership = database.scalars(select(HouseholdMembership)).one()
+        membership.role = role
+        database.commit()
+    finally:
+        database_generator.close()
 
 
 def test_list_recipes_returns_cursor_collection(recipe_client: TestClient) -> None:
@@ -1144,3 +1157,128 @@ def test_private_routes_require_authentication_and_reject_cross_household_ids(
             ).status_code
             == 404
         )
+
+
+@pytest.mark.parametrize(
+    "role,expected_status",
+    [("owner", 201), ("editor", 201), ("member", 403), ("viewer", 403)],
+)
+def test_profile_writes_enforce_edit_profile_action(
+    recipe_client: TestClient,
+    role: str,
+    expected_status: int,
+) -> None:
+    _set_authenticated_household_role(role)
+
+    response = recipe_client.post("/api/household-profiles", json=_household_profile_payload())
+
+    assert response.status_code == expected_status
+    if expected_status == 403:
+        assert response.json() == {"detail": "Household action is not permitted"}
+
+
+@pytest.mark.parametrize(
+    "role,expected_status",
+    [("owner", 201), ("editor", 201), ("member", 201), ("viewer", 403)],
+)
+def test_plan_writes_enforce_create_plan_action(
+    recipe_client: TestClient,
+    role: str,
+    expected_status: int,
+) -> None:
+    _set_authenticated_household_role(role)
+
+    response = recipe_client.post(
+        "/api/plans/generate",
+        json={
+            "start_date": "2026-12-08",
+            "household_size": 2,
+            "max_cooking_time_minutes": 60,
+            "pricing_mode": "fixture",
+        },
+    )
+
+    assert response.status_code == expected_status
+    if expected_status == 403:
+        assert response.json() == {"detail": "Household action is not permitted"}
+
+
+@pytest.mark.parametrize(
+    "role,expected_status",
+    [("owner", 201), ("editor", 201), ("member", 201), ("viewer", 403)],
+)
+def test_agent_session_writes_enforce_create_plan_action(
+    recipe_client: TestClient,
+    role: str,
+    expected_status: int,
+) -> None:
+    _set_authenticated_household_role(role)
+
+    response = recipe_client.post(
+        "/api/agent/sessions",
+        json={"message": "Plan dinners for two people with a 60 minute cooking limit."},
+    )
+
+    assert response.status_code == expected_status
+    if expected_status == 403:
+        assert response.json() == {"detail": "Household action is not permitted"}
+
+
+@pytest.mark.parametrize(
+    "role,expected_status",
+    [("owner", 200), ("editor", 200), ("member", 200), ("viewer", 403)],
+)
+def test_check_in_writes_enforce_check_in_action(
+    recipe_client: TestClient,
+    role: str,
+    expected_status: int,
+) -> None:
+    plan = recipe_client.post(
+        "/api/plans/generate",
+        json={
+            "start_date": "2026-12-15",
+            "household_size": 2,
+            "max_cooking_time_minutes": 60,
+            "pricing_mode": "fixture",
+        },
+    ).json()
+    _set_authenticated_household_role(role)
+
+    response = recipe_client.patch(
+        f"/api/plans/{plan['id']}/entries/{plan['days'][0]['entry_id']}",
+        json={"status": "completed"},
+    )
+
+    assert response.status_code == expected_status
+    if expected_status == 403:
+        assert response.json() == {"detail": "Household action is not permitted"}
+
+
+@pytest.mark.parametrize("role", ["owner", "editor", "member", "viewer"])
+def test_all_household_roles_can_read_private_resources(
+    recipe_client: TestClient,
+    role: str,
+) -> None:
+    _set_authenticated_household_role(role)
+
+    assert recipe_client.get("/api/plans").status_code == 200
+
+
+def test_authorized_write_still_requires_csrf(recipe_client: TestClient) -> None:
+    _set_authenticated_household_role("member")
+    csrf_token = recipe_client.headers.pop("X-CSRF-Token")
+    try:
+        response = recipe_client.post(
+            "/api/plans/generate",
+            json={
+                "start_date": "2026-12-22",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "pricing_mode": "fixture",
+            },
+        )
+    finally:
+        recipe_client.headers.update({"X-CSRF-Token": csrf_token})
+
+    assert response.status_code == 403
+    assert response.json() == {"detail": "CSRF validation failed"}

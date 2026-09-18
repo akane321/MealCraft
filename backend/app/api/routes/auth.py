@@ -7,6 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
+from app.auth.authorization import HouseholdAction, may_access_household
 from app.auth.passwords import Argon2PasswordAdapter
 from app.core.config import Settings, get_settings
 from app.db.session import get_db_session
@@ -94,6 +95,33 @@ def require_current_household(current: CurrentAuthenticationDependency) -> Curre
 CurrentHouseholdDependency = Annotated[CurrentAuthentication, Depends(require_current_household)]
 
 
+def _authorize_household_action(
+    current: CurrentAuthentication,
+    action: HouseholdAction,
+) -> CurrentAuthentication:
+    membership = current.active_membership
+    if membership is None or not may_access_household(membership.role, action):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Household action is not permitted",
+        )
+    return current
+
+
+class _HouseholdActionDependency:
+    def __init__(self, action: HouseholdAction) -> None:
+        self.action = action
+
+    def __call__(self, current: CurrentHouseholdDependency) -> CurrentAuthentication:
+        return _authorize_household_action(current, self.action)
+
+
+def require_household_action(action: HouseholdAction) -> _HouseholdActionDependency:
+    """Build a deny-by-default dependency for one household action."""
+
+    return _HouseholdActionDependency(action)
+
+
 def require_current_household_csrf(
     current: CurrentHouseholdDependency,
     service: AuthenticationServiceDependency,
@@ -104,6 +132,49 @@ def require_current_household_csrf(
 
 
 CurrentHouseholdCsrfDependency = Annotated[CurrentAuthentication, Depends(require_current_household_csrf)]
+
+
+class _HouseholdActionCsrfDependency:
+    def __init__(self, action: HouseholdAction) -> None:
+        self.action = action
+
+    def __call__(
+        self,
+        current: CurrentHouseholdDependency,
+        service: AuthenticationServiceDependency,
+        csrf_token: Annotated[str | None, Header(alias="X-CSRF-Token")] = None,
+    ) -> CurrentAuthentication:
+        _authorize_household_action(current, self.action)
+        _require_csrf(service, current, csrf_token)
+        return current
+
+
+def require_household_action_csrf(action: HouseholdAction) -> _HouseholdActionCsrfDependency:
+    """Build a write dependency that authorizes before validating CSRF."""
+
+    return _HouseholdActionCsrfDependency(action)
+
+
+CurrentHouseholdViewDependency = Annotated[
+    CurrentAuthentication,
+    Depends(require_household_action(HouseholdAction.VIEW)),
+]
+CurrentHouseholdEditProfileCsrfDependency = Annotated[
+    CurrentAuthentication,
+    Depends(require_household_action_csrf(HouseholdAction.EDIT_PROFILE)),
+]
+CurrentHouseholdCreatePlanCsrfDependency = Annotated[
+    CurrentAuthentication,
+    Depends(require_household_action_csrf(HouseholdAction.CREATE_PLAN)),
+]
+CurrentHouseholdCheckInCsrfDependency = Annotated[
+    CurrentAuthentication,
+    Depends(require_household_action_csrf(HouseholdAction.CHECK_IN)),
+]
+CurrentHouseholdManageMembersCsrfDependency = Annotated[
+    CurrentAuthentication,
+    Depends(require_household_action_csrf(HouseholdAction.MANAGE_MEMBERS)),
+]
 
 
 @router.post("/register", response_model=AuthenticationResponse, status_code=status.HTTP_201_CREATED)
