@@ -10,7 +10,7 @@ worth asking is not "which row looks worst" but "which decision unblocks the mos
 recipes". This orders by that, greedily: repeatedly take the unresolved
 ingredient blocking the most otherwise-ready recipes.
 
-Run from the DataCleaning project root:
+Run from the data-engineering directory:
 
     python build_priority_queue.py
 

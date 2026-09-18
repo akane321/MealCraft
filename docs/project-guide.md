@@ -282,7 +282,7 @@ The proposal-scale evaluation ambition is:
 | Evaluation asset | Final design target |
 | --- | ---: |
 | Human-verified natural-language requests | 150-200 |
-| Verified high-dimensional recipes | 150-250 |
+| Verified high-dimensional recipes | Every recipe that passes the release gate (no fixed range, decision ADR-0024) |
 | Planning scenarios with feasibility labels | 80-120 |
 | Grocery snapshot | Complete mapping coverage for benchmark ingredient demand |
 

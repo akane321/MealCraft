@@ -4,7 +4,8 @@
 
 **Accepted design target; partial developer infrastructure is executable.** The
 matched-information developer packet compiler and strong Rule-only reference
-are implemented, but held-out labels, the common output validator, model runs,
+are implemented, and the common output schema and strict-success scorer exist
+with tests but are not yet called by a runner; held-out labels, model runs,
 human study and statistical comparison are not complete. The existing
 [Protocol v1](../evaluation/protocol-v1.md) and its committed reports remain the
 reproducible record of what is currently implemented.
@@ -252,7 +253,7 @@ coverage score or resolved conflict.
 ## 6. Candidate-pool policy
 
 With the current 30-recipe catalog, all systems may receive all recipes if the
-context remains tractable. As the catalog grows toward 150-250 recipes, use two
+context remains tractable. As the catalog grows past what fits in one context, use two
 separate experiments:
 
 1. **Planning-only:** a neutral harness selects a fixed 20-30 recipe packet
@@ -541,10 +542,11 @@ of the same weak-baseline behaviour. Each selected failure record should include
 - proposed fix and regression test;
 - whether another baseline won and why.
 
-The existing v1 registry has 44 records, but 36 represent the same greedy-repeat
-failure pattern. It satisfies useful diagnostic coverage; it should not be
-presented as 44 distinct MealCraft weaknesses or as sufficient v2 qualitative
-analysis.
+Most records in the existing v1 registry (counts in
+[the latest workbench report](../evaluation/workbench/latest.md)) are one
+greedy-repeat failure pattern. It gives useful diagnostic coverage; it should
+not be presented as that many distinct MealCraft weaknesses or as sufficient v2
+qualitative analysis.
 
 ## 14. Dependency and claim-readiness matrix
 

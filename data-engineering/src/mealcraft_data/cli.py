@@ -26,7 +26,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="mealcraft-data",
         description="MealCraft recipe and ingredient data-cleaning demonstration",
     )
-    parser.add_argument("--project-root", help="Override the DataCleaning project root")
+    parser.add_argument("--project-root", help="Override the data-engineering directory")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     run = subparsers.add_parser("run", help="Run the RecipeNLG cleaning pipeline")

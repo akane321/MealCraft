@@ -1,31 +1,51 @@
-# MealCraft Data Cleaning Demonstration
+# MealCraft Data Engineering
 
-本目录演示如何把大型但不完整的 RecipeNLG 原始食谱，转换成 MealCraft 可使用、可审计、可继续补充营养和超市商品信息的数据层。
+本目录把大型但不完整的 RecipeNLG 原始食谱，转换成 MealCraft 可使用、可审计、可继续补充营养和
+超市商品信息的数据层，并切出版本化 release。Release 目前**尚未导入**运行时目录
+（`data/recipes/recipes.json`）；导入进度见 `docs/current-status.md`。
 
 核心原则：
 
 1. 原始数据只读，清洗结果写入新的分层目录。
-2. 原始值、解析值和人工修正值分开保存。
-3. 缺失信息保持 `null`，不使用大模型捏造营养、份量或过敏原事实。
-4. 每条记录保留来源、许可、处理版本、置信度和复核状态。
+2. 原始值、解析值和修正值分开保存。
+3. 缺失信息保持 `null`；任何补全（agent 或规则）都必须记录依据、置信度和被否决的备选
+   （ADR-0024）。过敏原只由确定性规则判定。
+4. 每条记录保留来源、许可、处理版本和置信度。
 5. 食材库、食谱库、营养参考库和 FairPrice 商品库使用独立 ID，通过映射表连接。
+
+## 版本化 release 与三个食材数
+
+`data/release/<版本>/` 下每个 release 都带 `release_manifest.json`（计数、哈希、上游扫描量）
+和 `quality_report.md`；release 一经发布不再修改，修正以新版本发布。
+
+三个食材数量含义不同，都对：
+
+- **规范食材词表**：`config/ingredient_aliases.csv` 中的全部 `ingredient_id`，即管道能识别的
+  所有食材（营养映射在它上面做）；
+- **release 中的食材**：某个 release 里实际被收录菜谱用到的那部分，记在该 release 的
+  `release_manifest.json` 的 `released_ingredients`；
+- 因此词表总数总是大于等于任一 release 的食材数；具体数值以文件为准，不在文档里复写。
 
 ## 目录
 
 ```text
-DataCleaning/
+data-engineering/
 ├── config/                    # 可审查的单位、别名、过敏原规则
 ├── data/
 │   ├── fixtures/              # 可公开的 synthetic 脏数据
-│   ├── raw/                   # 本地原始数据，不提交 Git
-│   ├── staging/               # 解析后的中间结果
-│   ├── curated/               # 可被 MealCraft 导入的数据
-│   ├── review/                # 人工复核队列
-│   └── reference/             # USDA/FoodOn 等参考源
+│   ├── raw/                   # 本地原始数据，不提交 Git（只有 raw_manifest.json 提交）
+│   ├── staging/               # 解析后的中间结果（生成物，不提交）
+│   ├── curated/               # 清洗产出（生成物，不提交）
+│   ├── review/                # 复核与抽查队列（生成物，不提交）
+│   ├── reference/             # USDA/FoodOn 等参考源
+│   ├── enrichment/            # 富化结果，如营养映射（提交）
+│   └── release/               # 版本化 release（提交）
+├── docs/                      # 决定、数据字典、schema 冻结、富化进度
 ├── schemas/                   # JSON Schema 数据契约
+├── scripts/                   # 发布、富化、流式校验脚本
 ├── src/mealcraft_data/        # 清洗实现
 ├── tests/                     # 单元测试
-└── reports/                   # 质量报告和运行清单
+└── reports/                   # 质量报告和运行清单（生成物，不提交）
 ```
 
 ## 先跑通 synthetic 示例

@@ -56,7 +56,7 @@ per `docs/team-workflow.md`, not a code change.
 - `servings_basis ∈ {stated_exact, range_lower_bound, null}` is the **only**
   sanctioned approximation in the schema: a source range ("Serves 10 to 12")
   is stored as its lower bound with `range_lower_bound` so it is never
-  conflated with a source-stated exact count. See `src/servings.py` for the
+  conflated with a source-stated exact count. See `src/mealcraft_data/servings.py` for the
   full extraction rules and why range-derived estimates are a conservative
   (not arbitrary) choice for a diet-planning consumer.
 
@@ -133,7 +133,7 @@ is not done here (it would mean guessing, not extracting).
   for every recipe. No controlled vocabulary or coverage study exists for
   them yet; populating them is out of scope for this freeze.
 - **`servings_basis = range_lower_bound` is an estimate, not a fact.** It is
-  a documented, one-directional-safe approximation (see `src/servings.py`),
+  a documented, one-directional-safe approximation (see `src/mealcraft_data/servings.py`),
   not a source-verified number. Anything that needs to distinguish the two
   can filter on this field; the release manifest reports both counts
   separately for that reason.

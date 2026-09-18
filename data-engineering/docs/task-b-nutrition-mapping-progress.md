@@ -146,7 +146,8 @@ supporting evidence, not proof of zero remaining errors.
 
 `scripts/apply_nutrition_mapping.py` wrote this back onto
 `data/curated/ingredients.jsonl`: 211 ingredients got `fdc_id` set (213
-mapped minus 3 whose canonical ingredients happen to have zero occurrences
+mapped minus 3 — note 213 − 3 is 210, so one of these two counts needs
+rechecking when the curated file is next regenerated — whose canonical ingredients happen to have zero occurrences
 in the current full 1,642,647-recipe run — `ground_turkey`,
 `shredded_wheat`, `ground_pork` — so they never materialized as catalog
 rows to begin with); 530 ingredients (every `mapped` + `needs_review` +

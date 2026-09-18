@@ -1,10 +1,11 @@
 """Record what a published evaluation report was actually computed over.
 
 `ADR-0020` section 3 requires every generated report to carry the path and
-SHA-256 of its datasets. The workbench did not do this, so
-`docs/evaluation/workbench/latest.json` carries metric values with no record of
-the catalog behind them. A report in that state stays byte-identical while the
-data underneath it changes, and afterwards nobody can say which world a
+SHA-256 of its datasets. The workbench now records them in every report it
+generates; this script exists for the v1 report that was published before it
+did, which carried metric values with no record of the catalog behind them.
+A report in that state stays byte-identical while the data underneath it
+changes, and afterwards nobody can say which world a
 published number came from - not even that it moved.
 
 This script closes that gap for a report that has already been published. It

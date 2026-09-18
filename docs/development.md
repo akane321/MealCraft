@@ -17,11 +17,10 @@ evidence before considering optional hosting.
 ## Prerequisites
 
 - Git
-- Docker Desktop
-- WSL 2
-- Ubuntu
-- Visual Studio Code
-- Dev Containers extension
+- Docker Desktop (on Windows, with WSL 2)
+
+Running the checks on the host instead of in containers additionally needs
+Python 3.12 with `uv`, and Node 24 with `pnpm` through Corepack.
 
 ## Initial Setup
 
@@ -260,7 +259,7 @@ docker compose exec backend uv run --no-sync alembic upgrade head
 ```bash
 docker compose logs --follow backend
 docker compose logs --follow frontend
-docker compose logs --follow db
+docker compose logs --follow database
 ```
 
 ### Inspect API contracts
@@ -275,12 +274,6 @@ Use repository/service tests or a PostgreSQL client connected to
 `localhost:15432`. Do not manually edit production-like data to make a test
 pass; add an explicit seed, fixture, migration, or reproducible setup.
 
-### Work in a Dev Container
-
-Open the repository folder in VS Code after Docker Desktop and WSL 2 are ready.
-Use **Dev Containers: Reopen in Container** when the repository configuration is
-detected. If the command is absent, confirm that the Dev Containers extension is
-installed and that the repository root, not a parent directory, is open.
 
 ## Common Problems
 

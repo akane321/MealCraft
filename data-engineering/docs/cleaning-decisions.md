@@ -54,7 +54,7 @@ NER 是候选食材实体，不包含可靠数量、单位、处理方式或内�
 `config/ingredient_aliases.csv` 由 `scripts/build_ingredient_aliases.py` 生成，分两部分：
 `TABLE`（作者手写、分组、带注释的基础映射）+ `REVIEWED_ADDITIONS`/`REVIEWED_ALIASES`
 （人工复核包 `data/review/packet/` 的决定，逐条来自 `unmapped_high_freq`/`ner_mismatch_sample`
-sheet 的 `decision` 列，来源可追溯）。当前覆盖约 448 个 canonical ID，把 5,000 行样本的
+sheet 的 `decision` 列，来源可追溯）。写作时覆盖约 448 个 canonical ID（现行词表见 `config/ingredient_aliases.csv`），把 5,000 行样本的
 内部映射覆盖率从 25.85% 提到 **81.50%**。
 
 描述词（`ground`、`whole`、`medium`、`fresh`、`unsalted`、`extra-virgin`、`cold`、`soft` 等）

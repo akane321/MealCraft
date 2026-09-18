@@ -12,21 +12,8 @@ the interface.
 
 ## Start the Application
 
-From the repository root:
-
-```bash
-cp .env.example .env
-docker compose up --build --detach
-docker compose ps
-```
-
-PowerShell users can replace the first command with:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Open <http://localhost:3000>. The health endpoint at
+Start the stack as described in [Development](development.md#initial-setup),
+then open <http://localhost:3000>. The health endpoint at
 <http://localhost:8000/api/health> should return a successful response.
 
 ## Recommended Product Walkthrough

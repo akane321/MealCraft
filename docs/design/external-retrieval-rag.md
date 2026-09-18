@@ -38,9 +38,11 @@ rounding, purchase cost, ingredient-use cost and surplus quantity.
 - explicit fixture fallback for an unavailable live YouTube provider;
 - an offline fixture proving that only one selected tutorial is returned.
 
-The live YouTube request, advanced relevance features, persistent video cache,
-frontend player, broad FairPrice package handling and production RAG
-orchestration remain teammate-owned. A scaffold is not a complete live feature.
+The home surface already embeds the selected video for tonight's dinner and
+labels a sample one as such. The live YouTube request, advanced relevance
+features, persistent video cache, broad FairPrice package handling and
+production RAG orchestration remain teammate-owned. A scaffold is not a complete
+live feature.
 
 ## One external-evidence architecture
 
@@ -134,7 +136,7 @@ results keep tests or demos running but are never labelled current FairPrice.
 
 ### Product boundary
 
-YouTube runs only after a recipe is selected or its Recipe Side Panel opens. It
+YouTube runs only after a recipe is selected or shown as tonight's dinner. It
 is execution support, not a planning input. Video content cannot replace
 MealCraft ingredients, safety labels, nutrition, quantities or written steps.
 
@@ -153,7 +155,7 @@ The initial ranking scores recipe-title, cuisine and ingredient overlap,
 tutorial intent, practical duration and language match. Tie-breaking is stable.
 
 All candidates and score components remain available internally for review and
-evaluation. The public API and Recipe Side Panel return only the highest-ranked
+evaluation. The public API and the home surface's week panel return only the highest-ranked
 eligible video. If none is eligible, return an explicit unavailable state.
 
 The UI should show title, channel, source attribution, a privacy-aware embed or
@@ -201,7 +203,7 @@ current `ProductSnapshot` remains the runtime baseline.
 2. Fetch only required metadata and track provider/quota state.
 3. Complete eligibility checks and freeze a ranking-policy version.
 4. Add cache/persistence and refresh behaviour.
-5. Add Recipe Side Panel loading, unavailable, degraded and Top-1 states.
+5. Add week-panel tutorial loading, unavailable and degraded states (Top-1 and sample labelling exist).
 6. Build reviewed query-video labels and report Top-1 and candidate recall.
 
 ### C. RAG integration
