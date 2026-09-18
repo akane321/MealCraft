@@ -48,7 +48,7 @@ function grocery(name: string, category: string, cost: number, size: number, pac
     unit: "g",
     pantry_deduction: 0,
     remaining_quantity: size * packages,
-    product: { category, package_size: size, package_unit: "g", fetched_at: "2026-09-14T08:00:00Z" },
+    product: { category, package_size: size, package_unit: "g", fetched_at: "2026-09-14T08:00:00Z", source: "fixture" },
     match_score: 1,
     packages_required: packages,
     purchase_cost_sgd: cost,
@@ -159,6 +159,7 @@ async function stubApi(page: Page) {
     recipe_slug: "dinner-4",
     recipe_title: "Tofu Brown Rice Stir-fry",
     selected_video: null,
+    retrieval: { provider_used: "fixture", mode: "fixture", status: "success" },
     warning: null,
   })));
 }

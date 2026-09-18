@@ -109,6 +109,30 @@ class YouTubeDataApiProvider:
         raise TutorialProviderError("Live YouTube Data API retrieval is a scaffold hand-off and is not implemented")
 
 
+# A video that names one of these but the recipe doesn't is for a different dish:
+# a lemon chicken tutorial is not a how-to for a lemon chickpea salad.
+PROTEIN_WORDS = frozenset(
+    {
+        "beef",
+        "chicken",
+        "duck",
+        "egg",
+        "eggs",
+        "fish",
+        "lamb",
+        "mutton",
+        "pork",
+        "prawn",
+        "prawns",
+        "salmon",
+        "shrimp",
+        "tofu",
+        "tuna",
+        "turkey",
+    }
+)
+
+
 def rank_tutorial_candidates(
     *,
     recipe_title: str,
@@ -120,6 +144,7 @@ def rank_tutorial_candidates(
     recipe_tokens = tokenize(recipe_title)
     cuisine_tokens = tokenize(cuisine)
     ingredient_tokens = set().union(*(tokenize(name) for name in ingredient_names[:3])) if ingredient_names else set()
+    all_ingredient_tokens = set().union(*(tokenize(name) for name in ingredient_names)) if ingredient_names else set()
     language_token = language.casefold().strip()
 
     ranked: list[tuple[float, list[str], TutorialCandidate]] = []
@@ -128,6 +153,8 @@ def rank_tutorial_candidates(
             continue
 
         title_tokens = tokenize(candidate.title)
+        if title_tokens.intersection(PROTEIN_WORDS) - recipe_tokens - all_ingredient_tokens:
+            continue
         score = 0.0
         reasons: list[str] = []
 
@@ -158,6 +185,12 @@ def rank_tutorial_candidates(
             score += 1.0
             reasons.append("language match")
 
+        # Generic points (intent, duration, language) never qualify a video, and
+        # one shared word is not the same dish: "Lemon Chicken" is no how-to for
+        # "Chicken Broccoli Rice". The video title must carry two words of the
+        # dish's name (all of them for a one-word name).
+        if title_matches < min(2, len(recipe_tokens)):
+            continue
         ranked.append((score, reasons, candidate))
 
     ranked.sort(key=lambda item: (-item[0], item[2].video_id))
