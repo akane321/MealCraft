@@ -57,7 +57,8 @@ docker compose up --build --detach
 
 Available services:
 
-- Frontend: <http://localhost:3000>
+- Frontend home (chat with week, nutrition and shopping list panels): <http://localhost:3000>
+- Service status: <http://localhost:3000/system>
 - Sign in or register: <http://localhost:3000/login>
 - Planning assistant: <http://localhost:3000/assistant>
 - Household profile: <http://localhost:3000/profile>

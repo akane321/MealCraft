@@ -1,0 +1,109 @@
+/* Home surface: film entry, glass chat and edge panels. Scoped by the .mc-surface root. */
+.mc-surface {
+  --mc-base: #0e0c0a;
+  --mc-ivory: #f2ede4;
+  --mc-text-2: #cfc6b8;
+  --mc-text-3: #a89f90;
+  --mc-accent: #e8906f;
+  --mc-accent-fill: #c2553a;
+  --mc-sage: #a9b79a;
+  --mc-line: rgba(220, 200, 160, 0.16);
+  --mc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --mc-serif: Fraunces, Georgia, serif;
+
+  position: fixed;
+  inset: 0;
+  /* clip, not hidden: a hidden box is still a scroll container and focus can scroll it. */
+  overflow: clip;
+  background: var(--mc-base);
+  color: var(--mc-ivory);
+  font-family: Figtree, system-ui, sans-serif;
+}
+
+.mc-surface button { font-family: inherit; cursor: pointer; }
+.mc-surface button:disabled { cursor: default; opacity: 0.55; }
+.mc-surface :focus-visible { outline: 2px solid var(--mc-accent); outline-offset: 2px; }
+
+.mc-pill {
+  border-radius: 999px;
+  border: 1px solid rgba(220, 200, 160, 0.2);
+  background: linear-gradient(160deg, rgba(242, 237, 228, 0.12), rgba(242, 237, 228, 0.04));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 14px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(18px) saturate(150%);
+  color: var(--mc-ivory);
+}
+
+.mc-frost {
+  box-sizing: border-box;
+  background: rgba(242, 237, 228, 0.06);
+  border: 1px solid var(--mc-line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 30px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(24px) saturate(140%);
+}
+
+.mc-ribbed {
+  box-sizing: border-box;
+  border-radius: 28px;
+  border: 1px solid rgba(220, 200, 160, 0.2);
+  background:
+    repeating-linear-gradient(90deg, rgba(242, 237, 228, 0.035) 0 2px, rgba(242, 237, 228, 0) 2px 9px),
+    linear-gradient(170deg, rgba(40, 33, 27, 0.8), rgba(20, 17, 14, 0.74));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 30px 70px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(34px) saturate(150%);
+}
+
+.mc-primary {
+  border: 0;
+  border-radius: 999px;
+  background: var(--mc-ivory);
+  color: var(--mc-base);
+  font-weight: 600;
+}
+
+.mc-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mc-accent);
+}
+
+.mc-serif { font-family: var(--mc-serif); font-weight: 400; }
+
+@keyframes mc-rise {
+  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+.mc-rise { animation: mc-rise 560ms var(--mc-ease) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-surface *, .mc-surface *::before, .mc-surface *::after {
+    transition-duration: 0ms !important;
+    animation: none !important;
+  }
+}
+
+/* Only the shopping list sheet prints. */
+@media print {
+  body * { visibility: hidden; }
+  .mc-print-sheet, .mc-print-sheet * { visibility: visible; }
+  .mc-print-sheet {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  .mc-surface, .mc-sheet-overlay { position: static !important; display: block !important; background: #ffffff; }
+  .mc-sheet-overlay > * { max-height: none !important; overflow: visible !important; box-shadow: none !important; }
+  .app-shell { min-height: 0 !important; }
+  .mc-surface > :not(.mc-sheet-overlay), .mc-sheet-overlay > :not(:has(.mc-print-sheet)) { display: none !important; }
+  /* Print restarts animations; a fade-in would print a blank page. */
+  .mc-surface *, .mc-sheet-overlay {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+  }
+}

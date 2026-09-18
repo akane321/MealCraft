@@ -1,88 +1,497 @@
 <script setup lang="ts">
-import { createServiceStatuses } from "~/lib/system-status";
+import type { AgentMessage } from "~/types/agent";
+import type { WeeklyMealPlan } from "~/types/meal-plan";
+
+useHead({
+  title: "MealCraft",
+  link: [
+    { rel: "preconnect", href: "https://fonts.googleapis.com" },
+    { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Figtree:wght@400;500;600&display=swap" },
+  ],
+});
+
+const DRAFT_KEY = "mealcraft-draft";
+const starters = ["Dinners for two this week, around S$90", "A high-protein week", "Vegetarian, under S$60"];
 
 const config = useRuntimeConfig();
-const { data, error, refresh, status } = await useBackendStatus();
+const apiFetch = useApiFetch();
+const { actor } = useAuth();
+const agent = useMealCraftAgent();
+const { session, isLoading, errorMessage, generatedPlan } = agent;
+const nutrition = useNutritionDashboard();
 
-const services = computed(() => createServiceStatuses(data.value?.health));
-const isHealthy = computed(() => services.value.every(service => service.healthy));
-const apiDocumentationUrl = computed(() => `${config.public.apiBase}/docs`);
-const healthCheckUrl = computed(() => `${config.public.apiBase}/api/health`);
+const view = ref<"landing" | "app">("landing");
+const draft = ref("");
+const plan = ref<WeeklyMealPlan | null>(null);
+const hover = reactive({ left: false, right: false });
+const pinned = reactive({ left: false, right: false });
+const open = computed(() => ({ left: hover.left || pinned.left, right: hover.right || pinned.right }));
+const previewOpen = ref(false);
+const log = ref<HTMLElement | null>(null);
+const film = ref<HTMLVideoElement | null>(null);
+
+const messages = computed<AgentMessage[]>(() => session.value?.messages.filter(m => m.role !== "system") ?? []);
+const interaction = computed(() => session.value?.pending_interaction ?? null);
+const contextLabel = computed(() => {
+  const c = session.value?.constraints;
+  if (!c?.household_size) return null;
+  const people = `${c.household_size} ${c.household_size === 1 ? "person" : "people"}`;
+  return c.weekly_budget_sgd ? `${people} · S$${c.weekly_budget_sgd}` : people;
+});
+const rangeLabel = computed(() => {
+  if (!plan.value) return "";
+  const fmt = (d: string) => new Date(`${d}T00:00:00`).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
+  return `${fmt(plan.value.start_date)} – ${fmt(plan.value.end_date)}`;
+});
+const days = computed(() => nutrition.dashboard.value?.days ?? []);
+const initials = computed(() => (actor.value?.user.display_name ?? "?")
+  .split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]!.toUpperCase()).join(""));
+const layoutVars = computed(() => ({
+  "--pad-l": open.value.left ? "424px" : "0px",
+  "--pad-r": open.value.right ? "424px" : "0px",
+}));
+
+async function requireAccount(): Promise<boolean> {
+  if (actor.value) return true;
+  try { sessionStorage.setItem(DRAFT_KEY, draft.value); }
+  catch { /* storage may be blocked; the draft is only a convenience */ }
+  await navigateTo({ path: "/login", query: { next: "/" } });
+  return false;
+}
+
+async function enter() {
+  if (!(await requireAccount())) return;
+  view.value = "app";
+  if (!session.value) await agent.restoreLatest();
+}
+
+async function send(text = draft.value) {
+  const message = text.trim();
+  if (!message) return;
+  draft.value = message;
+  if (!(await requireAccount())) return;
+  view.value = "app";
+  const pending = interaction.value;
+  if (pending?.allow_free_text) {
+    await agent.answerInteraction({
+      question_id: pending.question_id,
+      option_ids: [],
+      free_text: message,
+      context_version: pending.context_version,
+      plan_revision: pending.plan_revision,
+    });
+  }
+  else if (session.value) await agent.reply(message);
+  else await agent.create(message);
+  if (!errorMessage.value) draft.value = "";
+}
+
+async function choose(optionId: string) {
+  const pending = interaction.value;
+  if (!pending) return;
+  await agent.answerInteraction({
+    question_id: pending.question_id,
+    option_ids: [optionId],
+    free_text: null,
+    context_version: pending.context_version,
+    plan_revision: pending.plan_revision,
+  });
+}
+
+async function loadPlan(planId: number) {
+  try {
+    plan.value = await apiFetch<WeeklyMealPlan>(`${config.public.apiBase}/api/plans/${planId}`);
+    await nutrition.loadDashboard(planId);
+  }
+  catch {
+    errorMessage.value = "Your week couldn't be loaded. Try again in a moment.";
+  }
+}
+
+async function markCooked(entryId: number) {
+  await nutrition.updateStatus(entryId, "completed");
+}
+
+function exportPdf() {
+  window.print();
+}
+
+function newChat() {
+  agent.reset();
+  plan.value = null;
+  nutrition.dashboard.value = null;
+}
+
+watch(generatedPlan, (value) => {
+  if (value) void loadPlan(value.id);
+});
+watch(() => session.value?.plan_id, (planId) => {
+  if (planId && planId !== plan.value?.id) void loadPlan(planId);
+});
+watch(() => [messages.value.length, isLoading.value, session.value?.pending_replan?.id], async () => {
+  await nextTick();
+  log.value?.scrollTo({ top: log.value.scrollHeight, behavior: "smooth" });
+});
+
+onMounted(() => {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) film.value?.pause();
+  try {
+    const saved = sessionStorage.getItem(DRAFT_KEY);
+    if (saved) draft.value = saved;
+    sessionStorage.removeItem(DRAFT_KEY);
+  }
+  catch { /* ignore */ }
+});
 </script>
 
 <template>
-  <main class="page-width main-content">
-      <section class="intro" aria-labelledby="page-title">
-        <h1 id="page-title">Development environment</h1>
-        <p>
-          {{ isHealthy ? "The application services are ready and operating as expected." : "Some application services are currently unavailable." }}
+  <div class="mc-surface" :class="{ 'is-app': view === 'app' }" :style="layoutVars">
+    <div class="film" aria-hidden="true">
+      <video ref="film" autoplay muted loop playsinline preload="auto" poster="/media/hero-poster.jpg">
+        <source src="/media/hero.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="scrim" aria-hidden="true" />
+
+    <header class="top">
+      <button type="button" class="brand" aria-label="MealCraft home" @click="view = 'landing'">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="18" r="10.5" /><path class="leaf" d="M16 7.5c1.4-3.2 4.6-4.2 7-3.3-.9 2.8-3.7 4.4-7 3.3z" /></svg>
+        <span class="mc-serif">MealCraft</span>
+      </button>
+      <div class="top-actions">
+        <template v-if="view === 'landing'">
+          <NuxtLink v-if="!actor" to="/login?next=/" class="link">Sign in</NuxtLink>
+          <button type="button" class="mc-pill" @click="enter">Open my week</button>
+        </template>
+        <template v-else>
+          <button type="button" class="mc-pill" @click="newChat">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>New chat
+          </button>
+          <NuxtLink to="/profile" class="mc-pill avatar" :aria-label="`Household settings for ${actor?.user.display_name ?? 'you'}`">
+            {{ initials }}
+          </NuxtLink>
+        </template>
+      </div>
+    </header>
+
+    <h1 class="hero mc-serif">Plan the week. Shop it once.<br>Eat <em>well.</em></h1>
+
+    <div class="starters">
+      <button v-for="starter in starters" :key="starter" type="button" class="mc-pill" @click="send(starter)">{{ starter }}</button>
+    </div>
+    <p class="trust">
+      <span>Allergies and dislikes respected</span><span>·</span><span>Prices from FairPrice</span><span>·</span><span>Nutrition counted as you cook</span>
+    </p>
+
+    <section ref="log" class="chat" aria-label="Conversation" aria-live="polite">
+      <div class="chat-inner">
+        <p v-if="!messages.length && !isLoading" class="empty mc-rise">
+          Tell me who's eating, what you can spend and anything to avoid.
         </p>
-      </section>
+        <div v-for="message in messages" :key="message.id" class="msg mc-rise" :class="message.role">{{ message.content }}</div>
 
-      <section class="status-panel" aria-label="Application service status">
-        <div class="status-table" role="table" aria-label="Services">
-          <div class="status-row status-heading" role="row">
-            <span role="columnheader">Service</span>
-            <span role="columnheader">Status</span>
-          </div>
+        <div v-if="interaction?.options.length" class="options mc-rise">
+          <button v-for="option in interaction.options" :key="option.id" type="button" class="mc-pill" :disabled="isLoading" @click="choose(option.id)">
+            {{ option.label }}
+          </button>
+        </div>
 
-          <div v-for="service in services" :key="service.name" class="status-row" role="row">
-            <span class="service-name" role="cell">{{ service.name }}</span>
-            <span :class="['service-state', { unavailable: !service.healthy }]" role="cell">
-              <svg v-if="service.healthy" aria-hidden="true" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="9" />
-                <path d="m8.5 12 2.2 2.2 4.8-5" />
-              </svg>
-              <svg v-else aria-hidden="true" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M12 7.5v5" />
-                <path d="M12 16.5h.01" />
-              </svg>
-              {{ status === "pending" && service.name !== "Frontend" ? "Checking" : service.state }}
-            </span>
+        <div v-if="session?.can_confirm && session.status !== 'planned'" class="mc-frost card mc-rise">
+          <p>Ready to plan your week with these details.</p>
+          <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirm()">
+            {{ isLoading ? "Planning seven dinners…" : "Plan my week" }}
+          </button>
+        </div>
+
+        <div v-if="session?.pending_replan" class="mc-frost card mc-rise">
+          <span class="mc-eyebrow">Suggested change</span>
+          <p class="swap"><s>{{ session.pending_replan.before_entry.recipe_title }}</s><strong class="mc-serif">{{ session.pending_replan.after_entry.recipe_title }}</strong></p>
+          <small>
+            {{ session.pending_replan.nutrition_delta.calories_kcal >= 0 ? "+" : "" }}{{ Math.round(session.pending_replan.nutrition_delta.calories_kcal) }} kcal ·
+            groceries {{ session.pending_replan.purchase_total_delta_sgd >= 0 ? "+" : "−" }}S${{ Math.abs(session.pending_replan.purchase_total_delta_sgd).toFixed(2) }} ·
+            other dinners unchanged
+          </small>
+          <div class="card-actions">
+            <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirmReplan()">Confirm change</button>
+            <button type="button" class="mc-pill" :disabled="isLoading" @click="agent.discardReplan()">Keep as is</button>
           </div>
         </div>
 
-        <div class="technical-details">
-          <div class="detail-copy">
-            <h2>Technical details</h2>
-            <dl>
-              <div>
-                <dt>API Version</dt>
-                <dd>{{ data?.info.version ?? "—" }}</dd>
-              </div>
-              <div>
-                <dt>Environment</dt>
-                <dd>{{ data?.info.environment ?? "—" }}</dd>
-              </div>
-            </dl>
-          </div>
-
-          <nav class="technical-links" aria-label="Technical links">
-            <NuxtLink to="/recipes">
-              <svg aria-hidden="true" viewBox="0 0 24 24">
-                <path d="M5 4h14v16H5z" />
-                <path d="M9 8h6M9 12h6M9 16h4" />
-              </svg>
-              Browse recipe catalog
-            </NuxtLink>
-            <a :href="apiDocumentationUrl" target="_blank" rel="noreferrer">
-              <svg aria-hidden="true" viewBox="0 0 24 24">
-                <path d="M6 3.5h8l4 4V20.5H6z" />
-                <path d="M14 3.5v4h4" />
-                <path d="M9 12h6M9 15.5h6" />
-              </svg>
-              Open API documentation
-            </a>
-            <a :href="healthCheckUrl" target="_blank" rel="noreferrer">
-              <svg aria-hidden="true" viewBox="0 0 24 24">
-                <path d="M3 13h4l2-6 4 11 2-6h6" />
-              </svg>
-              Run health check
-            </a>
-            <button v-if="error" type="button" @click="refresh()">Retry connection</button>
-          </nav>
+        <div v-if="plan && session?.status === 'planned' && !session.pending_replan" class="jump mc-rise">
+          <button type="button" class="mc-pill" @click="pinned.left = true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>See the week
+          </button>
+          <button type="button" class="mc-pill" @click="pinned.right = true">
+            Groceries &amp; nutrition<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+          </button>
         </div>
-      </section>
-  </main>
+
+        <div v-if="isLoading" class="typing" aria-label="MealCraft is thinking"><span /><span /><span /></div>
+        <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
+      </div>
+    </section>
+
+    <form class="composer" @submit.prevent="send()">
+      <span v-if="contextLabel" class="context">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" /><path d="M10 20v-5h4v5" /></svg>
+        {{ contextLabel }}
+      </span>
+      <label for="mc-ask" class="visually-hidden">Message MealCraft</label>
+      <input
+        id="mc-ask"
+        v-model="draft"
+        type="text"
+        autocomplete="off"
+        :placeholder="view === 'app' ? (interaction?.prompt || 'Ask or change anything…') : 'What should this week look like…  e.g. dinners for two, no seafood'"
+      >
+      <button type="submit" class="send" aria-label="Send" :disabled="isLoading || !draft.trim()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+      </button>
+    </form>
+    <p class="disclaimer">Suggestions can be wrong. Check allergens on product labels.</p>
+
+    <template v-if="view === 'app'">
+      <div
+        class="edge left"
+        :class="{ open: open.left }"
+        @mouseenter="hover.left = true"
+        @mouseleave="hover.left = false"
+        @focusin="hover.left = true"
+        @focusout="hover.left = false"
+      >
+        <button type="button" class="handle mc-pill" aria-label="Show this week's dinners" @click="pinned.left = !pinned.left">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+        </button>
+        <aside class="drawer mc-ribbed" aria-label="This week">
+          <HomeWeekPanel
+            v-if="days.length"
+            :days="days"
+            :range-label="rangeLabel"
+            :cooked-count="nutrition.dashboard.value?.status_counts.completed ?? 0"
+            :updating-entry-id="nutrition.updatingEntryId.value"
+            @mark-cooked="markCooked"
+          >
+            <template #actions>
+              <button type="button" class="mc-pill pin" :aria-label="pinned.left ? 'Close this panel' : 'Keep this panel open'" @click="pinned.left = !pinned.left">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path :d="pinned.left ? 'M6 6l12 12M18 6L6 18' : 'M9 6l6 6-6 6'" /></svg>
+              </button>
+            </template>
+          </HomeWeekPanel>
+          <p v-else class="panel-empty">Your week shows up here once it's planned.</p>
+        </aside>
+      </div>
+
+      <div
+        class="edge right"
+        :class="{ open: open.right }"
+        @mouseenter="hover.right = true"
+        @mouseleave="hover.right = false"
+        @focusin="hover.right = true"
+        @focusout="hover.right = false"
+      >
+        <button type="button" class="handle mc-pill" aria-label="Show nutrition and groceries" @click="pinned.right = !pinned.right">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6" /></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l2 11h10l2-8H7" /></svg>
+        </button>
+        <aside class="drawer mc-ribbed" aria-label="Nutrition and groceries">
+          <HomeKitchenPanel
+            v-if="plan"
+            :days="days"
+            :eaten="nutrition.dashboard.value?.completed_nutrition_per_person ?? null"
+            :estimate="plan.grocery_estimate"
+            @preview="previewOpen = true"
+            @export="exportPdf"
+          >
+            <template #actions>
+              <button type="button" class="mc-pill pin" :aria-label="pinned.right ? 'Close this panel' : 'Keep this panel open'" @click="pinned.right = !pinned.right">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path :d="pinned.right ? 'M6 6l12 12M18 6L6 18' : 'M15 6l-6 6 6 6'" /></svg>
+              </button>
+            </template>
+          </HomeKitchenPanel>
+          <p v-else class="panel-empty">Nutrition and your shopping list show up here once the week is planned.</p>
+        </aside>
+      </div>
+    </template>
+
+    <div v-if="plan" v-show="previewOpen" class="mc-sheet-overlay" role="dialog" aria-modal="true" aria-label="Shopping list preview" @keydown.esc="previewOpen = false">
+      <div class="sheet-frame">
+        <HomeShoppingSheet class="mc-print-sheet" :estimate="plan.grocery_estimate" :range-label="rangeLabel" :household-size="plan.household_size" />
+      </div>
+      <div class="sheet-actions">
+        <button type="button" class="mc-pill" @click="previewOpen = false">Back</button>
+        <button type="button" class="mc-primary" @click="exportPdf">Export PDF</button>
+      </div>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.mc-surface {
+  --chat-w: min(720px, calc(100vw - var(--pad-l) - var(--pad-r) - 48px));
+  --chat-x: calc(var(--pad-l) + (100vw - var(--pad-l) - var(--pad-r) - var(--chat-w)) / 2);
+}
+
+svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Film and backdrop */
+.film {
+  position: absolute;
+  inset: -40px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(194, 85, 58, 0.4), transparent 55%),
+    radial-gradient(circle at 75% 60%, rgba(222, 170, 98, 0.18), transparent 55%),
+    var(--mc-base);
+  transition: opacity 1000ms var(--mc-ease), transform 1400ms var(--mc-ease), filter 1000ms var(--mc-ease);
+}
+.film video { width: 100%; height: 100%; object-fit: cover; }
+.is-app .film { opacity: 0.7; transform: scale(1.06); filter: blur(22px) saturate(120%); }
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(14, 12, 10, 0.2) 0%, rgba(14, 12, 10, 0.55) 55%, rgba(14, 12, 10, 0.92) 100%);
+  transition: background-color 900ms ease;
+}
+.is-app .scrim {
+  background-color: rgba(14, 12, 10, 0.45);
+  background-image:
+    linear-gradient(rgba(242, 237, 228, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(242, 237, 228, 0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Header */
+.top { position: absolute; top: 0; left: 0; right: 0; z-index: 8; height: 72px; padding: 0 32px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0; border: 0; background: none; color: var(--mc-ivory); }
+.brand svg { width: 26px; height: 26px; stroke-width: 1.6; }
+.brand .leaf { fill: var(--mc-accent-fill); stroke: none; }
+.brand span { font-size: 21px; letter-spacing: 0.02em; }
+.top-actions { display: flex; align-items: center; gap: 8px; }
+.top-actions .mc-pill { min-height: 44px; padding: 0 18px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.top-actions svg { width: 15px; height: 15px; }
+.link { padding: 0 14px; font-size: 14px; font-weight: 500; color: var(--mc-text-2); text-decoration: none; }
+.avatar { width: 44px; padding: 0 !important; justify-content: center; font-size: 12px !important; font-weight: 600; color: #e8a48c !important; }
+
+/* Landing copy: dissolves on send */
+.hero, .starters, .trust {
+  transition: opacity 520ms ease, transform 760ms var(--mc-ease), filter 520ms ease, visibility 0s linear 0s;
+}
+.is-app .hero, .is-app .starters, .is-app .trust {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 520ms ease, transform 760ms var(--mc-ease), filter 520ms ease, visibility 0s linear 760ms;
+}
+.hero { position: absolute; left: 0; right: 0; bottom: 260px; margin: 0; text-align: center; font-weight: 300; font-size: clamp(48px, 4.6vw, 66px); line-height: 1.06; }
+.hero em { color: var(--mc-accent); }
+.is-app .hero { transform: translateY(-60px) scale(1.04); filter: blur(18px); }
+.starters { position: absolute; left: 0; right: 0; bottom: 104px; display: flex; justify-content: center; gap: 10px; }
+.starters .mc-pill { min-height: 40px; padding: 0 16px; font-size: 13px; font-weight: 500; color: var(--mc-text-2); }
+.is-app .starters { transform: translateY(20px); filter: blur(8px); }
+.trust { position: absolute; left: 0; right: 0; bottom: 28px; margin: 0; display: flex; justify-content: center; gap: 20px; font-size: 12px; letter-spacing: 0.06em; color: var(--mc-text-3); }
+.is-app .trust { transform: translateY(12px); }
+
+/* Conversation */
+.chat {
+  position: absolute;
+  top: 80px;
+  bottom: 128px;
+  left: var(--chat-x);
+  width: var(--chat-w);
+  overflow-y: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(180deg, transparent 0, #000 48px);
+  opacity: 0;
+  visibility: hidden;
+  transition: left 700ms var(--mc-ease), width 700ms var(--mc-ease), opacity 400ms ease, visibility 0s linear 400ms;
+}
+.is-app .chat { opacity: 1; visibility: visible; transition: left 700ms var(--mc-ease), width 700ms var(--mc-ease), opacity 600ms ease 200ms; }
+.chat-inner { min-height: 100%; box-sizing: border-box; padding: 48px 8px 12px; display: flex; flex-direction: column; justify-content: flex-end; gap: 16px; }
+.empty { margin: 0 auto; font-size: 15px; color: var(--mc-text-2); }
+.msg { max-width: 82%; font-size: 15px; line-height: 1.6; white-space: pre-line; }
+.msg.user { align-self: flex-end; padding: 12px 16px; border-radius: 20px 20px 6px 20px; background: rgba(242, 237, 228, 0.11); border: 1px solid var(--mc-line); backdrop-filter: blur(24px); }
+.msg.assistant { align-self: flex-start; }
+.options, .jump { display: flex; flex-wrap: wrap; gap: 8px; }
+.options .mc-pill, .jump .mc-pill { min-height: 38px; padding: 0 14px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.jump svg { width: 14px; height: 14px; }
+.card { align-self: flex-start; width: min(440px, 100%); padding: 14px 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 8px; }
+.card p { margin: 0; font-size: 14px; }
+.card > .mc-primary { min-height: 44px; font-size: 13px; }
+.card small { font-size: 12px; color: var(--mc-text-3); }
+.swap { display: flex; flex-direction: column; }
+.swap s { font-size: 13px; color: var(--mc-text-3); }
+.swap strong { font-size: 21px; }
+.card-actions { display: flex; gap: 8px; }
+.card-actions button { flex: 1; min-height: 44px; font-size: 13px; }
+.typing { align-self: flex-start; display: flex; gap: 5px; padding: 8px 0; }
+.typing span { width: 7px; height: 7px; border-radius: 999px; background: var(--mc-text-3); animation: mc-dot 1.2s ease-in-out infinite; }
+.typing span:nth-child(2) { animation-delay: 150ms; }
+.typing span:nth-child(3) { animation-delay: 300ms; }
+@keyframes mc-dot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+.error { margin: 0; font-size: 13px; color: var(--mc-accent); }
+
+/* Composer: glides from the middle of the film to the foot of the chat */
+.composer {
+  position: absolute;
+  z-index: 6;
+  left: calc(50vw - 390px);
+  bottom: 156px;
+  width: 780px;
+  height: 68px;
+  box-sizing: border-box;
+  padding: 0 7px;
+  margin: 0;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(200, 180, 140, 0.22);
+  background: rgba(28, 24, 20, 0.62);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(28px) saturate(140%);
+  transition: left 700ms var(--mc-ease), width 700ms var(--mc-ease), bottom 950ms var(--mc-ease), height 950ms var(--mc-ease), background 800ms ease;
+}
+.is-app .composer {
+  left: var(--chat-x);
+  width: var(--chat-w);
+  bottom: 36px;
+  height: 64px;
+  border-color: rgba(220, 200, 160, 0.24);
+  background: linear-gradient(160deg, rgba(242, 237, 228, 0.13), rgba(242, 237, 228, 0.05));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+.context { height: 46px; flex-shrink: 0; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(220, 200, 160, 0.16); background: rgba(242, 237, 228, 0.05); display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--mc-text-2); }
+.context svg { width: 16px; height: 16px; stroke-width: 1.4; }
+.composer input { flex-grow: 1; min-width: 0; height: 44px; padding: 0 10px; border: 0; background: transparent; color: var(--mc-ivory); font: inherit; font-size: 15px; }
+.composer input::placeholder { color: #8c8476; }
+.composer input:focus { outline: none; }
+.send { width: 46px; height: 46px; flex-shrink: 0; border: 0; border-radius: 999px; background: var(--mc-ivory); color: var(--mc-base); display: flex; align-items: center; justify-content: center; }
+.send svg { width: 17px; height: 17px; stroke-width: 1.8; }
+.disclaimer { position: absolute; bottom: 12px; left: var(--chat-x); width: var(--chat-w); margin: 0; text-align: center; font-size: 11px; color: var(--mc-text-3); opacity: 0; transition: opacity 600ms ease, left 700ms var(--mc-ease), width 700ms var(--mc-ease); }
+.is-app .disclaimer { opacity: 1; transition-delay: 900ms, 0ms, 0ms; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Edge panels: hover the edge (or tab into it) to slide one out; the chat moves aside */
+.edge { position: absolute; top: 72px; bottom: 0; z-index: 7; width: 40px; }
+.edge.left { left: 0; }
+.edge.right { right: 0; }
+.handle { position: absolute; top: calc(50% - 90px); width: 30px; height: 132px; padding: 0; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--mc-text-2); transition: opacity 240ms ease; animation: mc-rise 560ms var(--mc-ease) 1200ms both; }
+.handle svg { width: 16px; height: 16px; }
+.left .handle { left: 6px; }
+.right .handle { right: 6px; }
+.edge.open .handle { opacity: 0; pointer-events: none; }
+.drawer { position: absolute; top: 12px; bottom: 24px; width: 392px; padding: 18px; overflow-y: auto; opacity: 0; visibility: hidden; pointer-events: none; transition: transform 560ms var(--mc-ease), opacity 360ms ease, visibility 0s linear 560ms; }
+.left .drawer { left: 16px; transform: translateX(-430px) scale(0.98); }
+.right .drawer { right: 16px; transform: translateX(430px) scale(0.98); }
+.edge.open .drawer { transform: none; opacity: 1; visibility: visible; pointer-events: auto; transition: transform 560ms var(--mc-ease), opacity 360ms ease; }
+.pin { width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; }
+.pin svg { width: 15px; height: 15px; }
+.panel-empty { margin: 40px 8px; font-size: 14px; line-height: 1.6; color: var(--mc-text-2); }
+
+/* Shopping list preview */
+.mc-sheet-overlay { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: rgba(14, 12, 10, 0.6); backdrop-filter: blur(12px); animation: mc-rise 420ms var(--mc-ease) both; }
+.sheet-frame { width: 680px; max-height: calc(100vh - 160px); overflow-y: auto; border-radius: 6px; box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6); }
+.sheet-actions { display: flex; gap: 10px; }
+.sheet-actions button { min-width: 140px; min-height: 44px; font-size: 14px; }
+</style>
