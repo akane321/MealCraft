@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
-from app.planning.final_scope_scoring import local_recipe_loss
+from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.search_bounds import SearchBounds
 from app.schemas.planning_v2 import FinalPlanningProblem, FinalPlanningSolution, PlanningAssignment, PlanningTrace
 
@@ -81,6 +81,7 @@ class BeamPlanner(FinalScopeReferencePlanner):
                             max_time_minutes=slot.max_time_minutes,
                             health_preferences=problem.health_preferences,
                         )
+                        + meal_affinity_loss(recipes[recipe_id], slot.meal_type)
                         + previous.count(recipe_id) * 0.10
                         + (0.35 if previous and previous[-1] == recipe_id else 0.0)
                     )

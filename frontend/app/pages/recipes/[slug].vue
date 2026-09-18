@@ -58,14 +58,14 @@ useHead(() => ({
       <div class="recipe-content-grid">
         <section class="recipe-section" aria-labelledby="ingredients-title">
           <h2 id="ingredients-title">Ingredients</h2>
-          <p class="section-note">Quantities are for {{ recipe.servings }} servings.</p>
+          <p class="section-note">Quantities are for {{ recipe.servings }} servings. Allergens come from ingredient data; check product labels.</p>
           <ul class="ingredient-list">
             <li v-for="ingredient in recipe.ingredients" :key="ingredient.normalized_name">
               <div>
                 <strong>{{ formatIngredient(ingredient) }}</strong>
                 <span v-if="ingredient.preparation">{{ ingredient.preparation }}</span>
               </div>
-              <span v-if="ingredient.allergen" class="allergen-label">Contains {{ ingredient.allergen }}</span>
+              <span v-if="ingredient.allergens.length" class="allergen-label">Contains {{ ingredient.allergens.join(", ") }}</span>
             </li>
           </ul>
         </section>

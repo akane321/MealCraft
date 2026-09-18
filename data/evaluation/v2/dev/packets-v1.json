@@ -4,12 +4,12 @@
   "live_api_used": false,
   "source_digests": {
     "scenario_source_sha256": "9380560a707ecf380fadced001b100de52810f98df6bd4e1e74b01ee6fa63382",
-    "ingredient_catalog_sha256": "ee72b831e89b5bc24e16dbc82d9ad0861aadcf86276c58d631786717202bcece",
+    "ingredient_catalog_sha256": "c995508b5d9dde109b62d0cf3d8fad2e9086a115eaee5bdc50a7a5937f573fe8",
     "recipe_catalog_sha256": "f35c55874b15c3a16510aded46921cf52b5f20eb0aab15d41690879c30ac2066",
     "product_snapshot_sha256": "19e760bd53e438fac44c77569724460cf6a69269690c302f3d1a59edb7a0323c"
   },
   "packet_count": 2,
-  "packet_set_sha256": "d6423fb911a5dadaaca94e0c5ee67fe1432aa7bd6cdb107a4cdf0fbc747722bc",
+  "packet_set_sha256": "903ea8327dc0e027103ab069a7433bad94b6b4b0166fa92676e703731da2e082",
   "packets": [
     {
       "scenario_id": "packet-dev-001",
@@ -55,42 +55,42 @@
               "quantity": 300.0,
               "unit": "g",
               "preparation": "sliced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "brown_rice",
               "quantity": 140.0,
               "unit": "g",
               "preparation": "rinsed",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "lemon",
               "quantity": 1.0,
               "unit": "whole",
               "preparation": "zested and juiced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "cucumber",
               "quantity": 120.0,
               "unit": "g",
               "preparation": "diced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "cherry_tomato",
               "quantity": 150.0,
               "unit": "g",
               "preparation": "halved",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "olive_oil",
               "quantity": 1.0,
               "unit": "tbsp",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             }
           ],
           "nutrition_per_serving": {
@@ -123,42 +123,42 @@
               "quantity": 240.0,
               "unit": "g",
               "preparation": "rinsed",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "canned_tomato",
               "quantity": 800.0,
               "unit": "g",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "baby_spinach",
               "quantity": 150.0,
               "unit": "g",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "yellow_onion",
               "quantity": 1.0,
               "unit": "whole",
               "preparation": "diced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "ground_cumin",
               "quantity": 2.0,
               "unit": "tsp",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "vegetable_stock",
               "quantity": 900.0,
               "unit": "ml",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             }
           ],
           "nutrition_per_serving": {
@@ -190,35 +190,37 @@
               "quantity": 300.0,
               "unit": "g",
               "preparation": null,
-              "allergen": "fish"
+              "allergens": [
+                "fish"
+              ]
             },
             {
               "ingredient_id": "quinoa",
               "quantity": 140.0,
               "unit": "g",
               "preparation": "rinsed",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "cucumber",
               "quantity": 120.0,
               "unit": "g",
               "preparation": "diced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "cherry_tomato",
               "quantity": 150.0,
               "unit": "g",
               "preparation": "halved",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "lemon",
               "quantity": 1.0,
               "unit": "whole",
               "preparation": "juiced",
-              "allergen": null
+              "allergens": []
             }
           ],
           "nutrition_per_serving": {
@@ -251,42 +253,42 @@
               "quantity": 300.0,
               "unit": "g",
               "preparation": "drained",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "quinoa",
               "quantity": 120.0,
               "unit": "g",
               "preparation": "rinsed",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "cucumber",
               "quantity": 150.0,
               "unit": "g",
               "preparation": "diced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "cherry_tomato",
               "quantity": 160.0,
               "unit": "g",
               "preparation": "halved",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "lemon",
               "quantity": 1.0,
               "unit": "whole",
               "preparation": "juiced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "olive_oil",
               "quantity": 1.0,
               "unit": "tbsp",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             }
           ],
           "nutrition_per_serving": {
@@ -317,35 +319,37 @@
               "quantity": 180.0,
               "unit": "g",
               "preparation": null,
-              "allergen": "gluten"
+              "allergens": [
+                "gluten"
+              ]
             },
             {
               "ingredient_id": "mushroom",
               "quantity": 250.0,
               "unit": "g",
               "preparation": "sliced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "baby_spinach",
               "quantity": 120.0,
               "unit": "g",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "garlic",
               "quantity": 12.0,
               "unit": "g",
               "preparation": "minced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "olive_oil",
               "quantity": 1.0,
               "unit": "tbsp",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             }
           ],
           "nutrition_per_serving": {
@@ -376,28 +380,32 @@
               "quantity": 120.0,
               "unit": "g",
               "preparation": "blended",
-              "allergen": "gluten"
+              "allergens": [
+                "gluten"
+              ]
             },
             {
               "ingredient_id": "egg",
               "quantity": 4.0,
               "unit": "whole",
               "preparation": "beaten",
-              "allergen": "egg"
+              "allergens": [
+                "egg"
+              ]
             },
             {
               "ingredient_id": "baby_spinach",
               "quantity": 100.0,
               "unit": "g",
               "preparation": "chopped",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "cherry_tomato",
               "quantity": 150.0,
               "unit": "g",
               "preparation": "halved",
-              "allergen": null
+              "allergens": []
             }
           ],
           "nutrition_per_serving": {
@@ -791,42 +799,51 @@
               "quantity": 300.0,
               "unit": "g",
               "preparation": "cubed",
-              "allergen": "soy"
+              "allergens": [
+                "soy"
+              ]
             },
             {
               "ingredient_id": "soba_noodle",
               "quantity": 160.0,
               "unit": "g",
               "preparation": null,
-              "allergen": "gluten"
+              "allergens": [
+                "gluten"
+              ]
             },
             {
               "ingredient_id": "broccoli",
               "quantity": 180.0,
               "unit": "g",
               "preparation": "florets",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "carrot",
               "quantity": 1.0,
               "unit": "whole",
               "preparation": "julienned",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "soy_sauce",
               "quantity": 2.0,
               "unit": "tbsp",
               "preparation": null,
-              "allergen": "soy"
+              "allergens": [
+                "gluten",
+                "soy"
+              ]
             },
             {
               "ingredient_id": "sesame_oil",
               "quantity": 1.0,
               "unit": "tsp",
               "preparation": null,
-              "allergen": "sesame"
+              "allergens": [
+                "sesame"
+              ]
             }
           ],
           "nutrition_per_serving": {
@@ -859,42 +876,42 @@
               "quantity": 240.0,
               "unit": "g",
               "preparation": "rinsed",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "canned_tomato",
               "quantity": 800.0,
               "unit": "g",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "baby_spinach",
               "quantity": 150.0,
               "unit": "g",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "yellow_onion",
               "quantity": 1.0,
               "unit": "whole",
               "preparation": "diced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "ground_cumin",
               "quantity": 2.0,
               "unit": "tsp",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "vegetable_stock",
               "quantity": 900.0,
               "unit": "ml",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             }
           ],
           "nutrition_per_serving": {
@@ -927,42 +944,42 @@
               "quantity": 300.0,
               "unit": "g",
               "preparation": "drained",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "quinoa",
               "quantity": 120.0,
               "unit": "g",
               "preparation": "rinsed",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "cucumber",
               "quantity": 150.0,
               "unit": "g",
               "preparation": "diced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "cherry_tomato",
               "quantity": 160.0,
               "unit": "g",
               "preparation": "halved",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "lemon",
               "quantity": 1.0,
               "unit": "whole",
               "preparation": "juiced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "olive_oil",
               "quantity": 1.0,
               "unit": "tbsp",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             }
           ],
           "nutrition_per_serving": {
@@ -994,35 +1011,37 @@
               "quantity": 300.0,
               "unit": "g",
               "preparation": "cubed",
-              "allergen": "soy"
+              "allergens": [
+                "soy"
+              ]
             },
             {
               "ingredient_id": "brown_rice",
               "quantity": 140.0,
               "unit": "g",
               "preparation": "rinsed",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "broccoli",
               "quantity": 180.0,
               "unit": "g",
               "preparation": "florets",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "bell_pepper",
               "quantity": 1.0,
               "unit": "whole",
               "preparation": "sliced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "ginger",
               "quantity": 15.0,
               "unit": "g",
               "preparation": "grated",
-              "allergen": null
+              "allergens": []
             }
           ],
           "nutrition_per_serving": {
@@ -1053,35 +1072,37 @@
               "quantity": 180.0,
               "unit": "g",
               "preparation": null,
-              "allergen": "gluten"
+              "allergens": [
+                "gluten"
+              ]
             },
             {
               "ingredient_id": "mushroom",
               "quantity": 250.0,
               "unit": "g",
               "preparation": "sliced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "baby_spinach",
               "quantity": 120.0,
               "unit": "g",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "garlic",
               "quantity": 12.0,
               "unit": "g",
               "preparation": "minced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "olive_oil",
               "quantity": 1.0,
               "unit": "tbsp",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             }
           ],
           "nutrition_per_serving": {
@@ -1113,35 +1134,35 @@
               "quantity": 160.0,
               "unit": "g",
               "preparation": "rinsed",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "bell_pepper",
               "quantity": 1.0,
               "unit": "whole",
               "preparation": "diced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "zucchini",
               "quantity": 200.0,
               "unit": "g",
               "preparation": "diced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "mushroom",
               "quantity": 180.0,
               "unit": "g",
               "preparation": "sliced",
-              "allergen": null
+              "allergens": []
             },
             {
               "ingredient_id": "baby_spinach",
               "quantity": 100.0,
               "unit": "g",
               "preparation": null,
-              "allergen": null
+              "allergens": []
             }
           ],
           "nutrition_per_serving": {

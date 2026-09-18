@@ -41,7 +41,7 @@ class RecipeService:
                     quantity=float(item.quantity) if item.quantity is not None else None,
                     unit=item.unit,
                     preparation=item.preparation,
-                    allergen=item.ingredient.allergen,
+                    allergens=list(item.ingredient.allergens),
                 )
                 for item in recipe.recipe_ingredients
             ],

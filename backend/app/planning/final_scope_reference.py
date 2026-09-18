@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 
-from app.planning.final_scope_scoring import local_recipe_loss
+from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.input_audit import require_finite_problem
 from app.schemas.planning_v2 import (
@@ -72,6 +72,7 @@ class FinalScopeReferencePlanner:
                         max_time_minutes=slot.max_time_minutes,
                         health_preferences=problem.health_preferences,
                     )
+                    + meal_affinity_loss(recipe, slot.meal_type)
                     + use_counts[recipe.recipe_id] * 0.10
                     + (0.35 if recipe.recipe_id == last_recipe_id else 0.0),
                     recipe.recipe_id,
@@ -95,11 +96,11 @@ class FinalScopeReferencePlanner:
         eligible: list[PlanningRecipeCandidate] = []
         for recipe in problem.recipes:
             ingredient_ids = {item.ingredient_id for item in recipe.ingredients}
-            if slot.meal_type not in recipe.allowed_meal_types:
-                continue
             if slot.max_time_minutes is not None and recipe.total_time_minutes > slot.max_time_minutes:
                 continue
             if set(recipe.allergens).intersection(problem.allergens):
+                continue
+            if set(problem.allergens).difference(problem.allergen_vocabulary or []):
                 continue
             if ingredient_ids.intersection(problem.excluded_ingredients):
                 continue

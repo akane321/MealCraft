@@ -39,7 +39,7 @@ def recipe_input(
         allowed_meal_types=sorted(set(allowed_meal_types)),
         total_time_minutes=source.total_time_minutes,
         dietary_tags=list(source.dietary_tags),
-        allergens=sorted({i.allergen for i in source.ingredients if i.allergen is not None}),
+        allergens=sorted({allergen for i in source.ingredients for allergen in i.allergens}),
         ingredients=[
             dict(ingredient_id=i.normalized_name, quantity=i.quantity, unit=i.unit) for i in source.ingredients
         ],
@@ -54,7 +54,7 @@ def recipe_input(
             blank.append(f"blank_ingredient_id:{index}")
         if item.unit is not None and not item.unit.strip():
             blank.append(f"blank_ingredient_unit:{index}")
-        if item.allergen is not None and not item.allergen.strip():
+        if any(not allergen.strip() for allergen in item.allergens):
             blank.append(f"blank_allergen:{index}")
     if blank:
         return RecipeInputResult(None, source, tuple(sorted(blank)))

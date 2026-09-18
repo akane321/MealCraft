@@ -1,10 +1,11 @@
 import json
 from pathlib import Path
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.data.allergens import checked_allergens
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 
 SUPPORTED_UNITS = {"g", "kg", "ml", "l", "tbsp", "tsp", "whole", "pc", "pcs"}
@@ -13,7 +14,16 @@ SUPPORTED_UNITS = {"g", "kg", "ml", "l", "tbsp", "tsp", "whole", "pc", "pcs"}
 class IngredientRecord(BaseModel):
     normalized_name: str = Field(pattern=r"^[a-z0-9]+(?:_[a-z0-9]+)*$")
     display_name: str = Field(min_length=1, max_length=160)
-    allergen: str | None = Field(default=None, max_length=80)
+    # Every checked allergen the ingredient contains; [] means checked and none.
+    allergens: list[str]
+
+    @field_validator("allergens")
+    @classmethod
+    def validate_allergens(cls, values: list[str]) -> list[str]:
+        unchecked = sorted(set(values).difference(checked_allergens()))
+        if unchecked:
+            raise ValueError(f"allergens outside the checked vocabulary: {', '.join(unchecked)}")
+        return sorted(set(values))
 
 
 class NutritionRecord(BaseModel):
@@ -95,7 +105,7 @@ def import_catalog(session: Session, catalog: Catalog) -> tuple[int, int]:
             ingredient = Ingredient(normalized_name=record.normalized_name)
             session.add(ingredient)
         ingredient.display_name = record.display_name
-        ingredient.allergen = record.allergen
+        ingredient.allergens = record.allergens
         ingredients_by_name[record.normalized_name] = ingredient
     session.flush()
 

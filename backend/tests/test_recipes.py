@@ -55,8 +55,8 @@ def recipe_client() -> Generator[TestClient, None, None]:
             ],
             steps=[RecipeStep(step_number=1, instruction="Cook the chicken and finish with lemon.")],
         )
-        tofu = Ingredient(normalized_name="firm_tofu", display_name="Firm tofu", allergen="soy")
-        soba = Ingredient(normalized_name="soba_noodle", display_name="Soba noodles", allergen="gluten")
+        tofu = Ingredient(normalized_name="firm_tofu", display_name="Firm tofu", allergens=["soy"])
+        soba = Ingredient(normalized_name="soba_noodle", display_name="Soba noodles", allergens=["gluten"])
         tofu_recipe = Recipe(
             slug="tofu-soba",
             title="Tofu Soba",
@@ -141,7 +141,7 @@ def test_get_recipe_returns_ingredients_and_steps(recipe_client: TestClient) -> 
         "quantity": 300.0,
         "unit": "g",
         "preparation": None,
-        "allergen": None,
+        "allergens": [],
     }
     assert payload["steps"] == [{"step_number": 1, "instruction": "Cook the chicken and finish with lemon."}]
 
@@ -223,6 +223,17 @@ def test_recommendations_apply_hard_filters_and_return_score_reasons(recipe_clie
     assert any("flexible 700 mg" in reason for reason in payload["recommendations"][0]["reasons"])
     assert payload["excluded"][0]["slug"] == "tofu-soba"
     assert payload["excluded"][0]["reasons"] == ["Contains selected allergen: soy."]
+
+
+def test_an_allergen_nobody_checked_for_excludes_every_recipe(recipe_client: TestClient) -> None:
+    # mustard is outside data/ingredients/allergen-vocabulary.json, so no recipe
+    # can be shown to be free of it: unknown is excluded, not admitted.
+    response = recipe_client.post("/api/recommendations/recipes", json={"household_size": 2, "allergens": ["mustard"]})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["recommendations"] == []
+    assert all("Cannot confirm it is free of: mustard." in item["reasons"] for item in payload["excluded"])
 
 
 def test_recommendations_enforce_budget_with_fixture_product_costs(recipe_client: TestClient) -> None:

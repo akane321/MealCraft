@@ -156,7 +156,8 @@ A recipe detail contains:
 - identity, title, slug, cuisine, meal type, serving count, and preparation time
 - dietary tags
 - nutrition values per serving
-- normalized ingredients, amounts, preparation notes, and allergen labels
+- normalized ingredients, amounts, preparation notes, and each ingredient's
+  `allergens` list
 - ordered cooking steps
 
 Nutrition values are descriptive planning data. They are not medical advice.
@@ -188,6 +189,13 @@ payloads are intentionally absent from this user-facing contract.
 Hard filters remove recipes that violate allergens, excluded ingredients,
 dietary requirements, cooking-time limits, an explicit sodium ceiling, or a
 complete ingredient-use estimate above the user-entered budget.
+
+Allergens follow one rule everywhere: every catalog ingredient lists each
+allergen it contains out of the checked vocabulary in
+`data/ingredients/allergen-vocabulary.json`, and an empty list means checked and
+none. A requested allergen outside that vocabulary cannot be shown absent, so it
+excludes every recipe with the reason "Cannot confirm it is free of: ...".
+Unknown is excluded, not admitted.
 
 Eligible recipes receive an explainable weighted score:
 

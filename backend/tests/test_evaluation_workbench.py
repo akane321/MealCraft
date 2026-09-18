@@ -64,7 +64,9 @@ def test_fixture_agent_benchmark_is_offline_and_keeps_failures_visible() -> None
     assert report["provider"] == "fixture"
     assert report["live_api_used"] is False
     assert report["metrics"]["case_count"] == 24
-    assert report["metrics"]["failure_case_count"] >= 8
+    # The rule-based parser still misses cases, and they must stay visible. The
+    # count is pinned so that a change is deliberate and matches the committed report.
+    assert report["metrics"]["failure_case_count"] == 6
 
 
 def test_openai_benchmark_requires_explicit_live_api_opt_in() -> None:

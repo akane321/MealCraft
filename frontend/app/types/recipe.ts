@@ -31,7 +31,7 @@ export interface RecipeIngredient {
   quantity: number | null;
   unit: string | null;
   preparation: string | null;
-  allergen: string | null;
+  allergens: string[];
 }
 
 export interface RecipeStep {
@@ -58,5 +58,6 @@ export interface TutorialRecommendation {
   recipe_slug: string;
   recipe_title: string;
   selected_video: TutorialVideo | null;
+  retrieval: { provider_used: "youtube" | "fixture"; mode: string; status: string };
   warning: string | null;
 }

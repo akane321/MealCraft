@@ -93,7 +93,7 @@ function statusLabel(day: NutritionDashboardDay) {
           @click="playing = true"
         >
           <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg></span>
-          <span class="caption">How-to video · best match on YouTube</span>
+          <span class="caption">{{ tutorial.retrieval.provider_used === "youtube" ? "How-to video · best match on YouTube" : "Sample how-to video" }}</span>
         </button>
         <p v-else class="no-video">No how-to video for this dish yet.</p>
       </div>
