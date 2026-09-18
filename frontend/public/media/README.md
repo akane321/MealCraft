@@ -1,12 +1,14 @@
 # Hero film
 
-The home page plays `hero.mp4` (muted, looping, 1920×1080, about 20 s) with
-`hero-poster.jpg` as its first frame. Both files are ignored by Git: the current
-cut comes from downloaded stock footage whose licence does not allow
-redistribution in a public repository.
+`hero.mp4` is the home page's background film: muted, looping, 854×480, 34 s,
+made by the team for MealCraft and free to publish. `hero-poster.jpg` is its
+first frame, shown until the video can play.
 
-Without them the page falls back to a dark gradient and still works.
+Re-encoded from the team's master file for the web (no audio track, H.264
+CRF 25, fast start). Keep replacements dark-set, without text or watermarks,
+and under about 10 MB:
 
-Replace them with footage the team is licensed to publish (or self-generated
-footage) before committing video to the repository. Keep it dark-set,
-single-subject ingredient shots, no text or watermarks, under about 10 MB.
+```bash
+ffmpeg -i master.mp4 -an -c:v libx264 -crf 25 -preset slow -pix_fmt yuv420p -movflags +faststart hero.mp4
+ffmpeg -ss 0.5 -i hero.mp4 -frames:v 1 -q:v 3 hero-poster.jpg
+```

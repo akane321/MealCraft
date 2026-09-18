@@ -40,7 +40,3 @@ Thumbs.db
 postgres-data/
 local-data/
 *.db
-
-# Hero film footage is licensed per user, not redistributed here (see public/media/README.md)
-frontend/public/media/*.mp4
-frontend/public/media/*.jpg
