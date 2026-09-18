@@ -28,6 +28,13 @@ class ConstraintParser(Protocol):
 class RuleBasedConstraintParser:
     provider = "fixture"
 
+    @staticmethod
+    def _mentions(text: str, token: str) -> bool:
+        # Whole words for Latin tokens, so "shellfish" does not also mean "fish".
+        if token.isascii():
+            return re.search(rf"\b{re.escape(token)}s?\b", text) is not None
+        return token in text
+
     _ingredient_aliases = {
         "chicken breast": "chicken_breast",
         "鸡胸肉": "chicken_breast",
@@ -53,6 +60,20 @@ class RuleBasedConstraintParser:
         "芝麻": "sesame",
         "dairy": "dairy",
         "乳制品": "dairy",
+        "milk": "dairy",
+        "牛奶": "dairy",
+        "egg": "egg",
+        "鸡蛋": "egg",
+        "fish": "fish",
+        "鱼": "fish",
+        "shellfish": "shellfish",
+        "shrimp": "shellfish",
+        "贝类": "shellfish",
+        "虾": "shellfish",
+        "tree nut": "tree_nut",
+        "坚果": "tree_nut",
+        "wheat": "gluten",
+        "小麦": "gluten",
     }
 
     def parse(
@@ -125,7 +146,9 @@ class RuleBasedConstraintParser:
         extraction.dietary_preferences = dietary or None
 
         allergy_context = any(token in lower for token in ("allerg", "过敏"))
-        allergens = [value for token, value in self._allergen_aliases.items() if token in lower and allergy_context]
+        allergens = [
+            value for token, value in self._allergen_aliases.items() if allergy_context and self._mentions(lower, token)
+        ]
         extraction.allergens = sorted(set(allergens)) or None
         excluded: list[str] = []
         for alias, normalized_name in {**self._ingredient_aliases, **self._allergen_aliases}.items():

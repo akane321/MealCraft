@@ -58,6 +58,8 @@ class PlanningRecipeCandidate(BaseModel):
     recipe_id: str = Field(min_length=1, max_length=120)
     title: str = Field(min_length=1, max_length=240)
     servings: int = Field(ge=1, le=24)
+    # The meal types this recipe usually belongs to: a soft affinity the search
+    # prefers, never a filter (ADR-0024 section 5).
     allowed_meal_types: list[MealType] = Field(min_length=1)
     total_time_minutes: int = Field(ge=0, le=720)
     dietary_tags: list[str] = Field(default_factory=list)
@@ -120,6 +122,10 @@ class FinalPlanningProblem(BaseModel):
     pantry: list[PlanningPantryItem] = Field(default_factory=list)
     products: list[PlanningProductOption] = Field(default_factory=list)
     allergens: list[str] = Field(default_factory=list)
+    # Allergens every candidate's `allergens` list was checked against. A requested
+    # allergen outside it is unknown for every recipe and excludes them all
+    # (ADR-0024 section 3); None means nothing was checked.
+    allergen_vocabulary: list[str] | None = None
     excluded_ingredients: list[str] = Field(default_factory=list)
     dietary_requirements: list[str] = Field(default_factory=list)
     health_preferences: list[Literal["low-sodium", "low-sugar", "lower-calorie"]] = Field(default_factory=list)

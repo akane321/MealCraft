@@ -48,7 +48,7 @@ class RecipeServiceStub:
                     quantity=300,
                     unit="g",
                     preparation=None,
-                    allergen=None,
+                    allergens=[],
                 ),
                 RecipeIngredientResponse(
                     name="Lemon",
@@ -56,7 +56,7 @@ class RecipeServiceStub:
                     quantity=1,
                     unit="whole",
                     preparation=None,
-                    allergen=None,
+                    allergens=[],
                 ),
             ],
             steps=[RecipeStepResponse(step_number=1, instruction="Cook.")],

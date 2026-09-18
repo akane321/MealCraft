@@ -40,7 +40,7 @@ class RecipeIngredientResponse(BaseModel):
     quantity: float | None
     unit: str | None
     preparation: str | None
-    allergen: str | None
+    allergens: list[str]
 
 
 class RecipeStepResponse(BaseModel):

@@ -101,7 +101,8 @@ class Ingredient(Base):
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
     normalized_name: Mapped[str] = mapped_column(String(160), unique=True, index=True)
     display_name: Mapped[str] = mapped_column(String(160))
-    allergen: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
+    # Checked allergens this ingredient contains; see app/data/allergens.py.
+    allergens: Mapped[list[str]] = mapped_column(JSON, default=list)
 
     recipe_ingredients: Mapped[list["RecipeIngredient"]] = relationship(back_populates="ingredient")
 

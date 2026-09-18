@@ -47,6 +47,11 @@ class CompiledConstraints:
         return tuple(slot.slot_id for slot in self.slots if slot.must_assign and not slot.eligible_recipe_ids)
 
 
+def unverifiable_allergens(problem: FinalPlanningProblem) -> list[str]:
+    """Requested allergens no candidate was checked for: unknown, so excluded."""
+    return sorted(set(problem.allergens).difference(problem.allergen_vocabulary or []))
+
+
 def compile_search_domains(problem: FinalPlanningProblem) -> CompiledConstraints:
     """Compile once and group candidates for search, preserving every rejection."""
     decisions = compile_constraints(problem)
@@ -77,13 +82,11 @@ def compile_constraints(problem: FinalPlanningProblem) -> tuple[CandidateEligibi
     for slot in sorted(problem.slots, key=lambda item: item.slot_id):
         for recipe in sorted(problem.recipes, key=lambda item: item.recipe_id):
             reasons: set[str] = set()
-            if slot.meal_type not in recipe.allowed_meal_types:
-                reasons.add("meal_type")
             if slot.locked_recipe_id is not None and recipe.recipe_id != slot.locked_recipe_id:
                 reasons.add("locked_slot")
             if slot.max_time_minutes is not None and recipe.total_time_minutes > slot.max_time_minutes:
                 reasons.add("time_limit")
-            if set(recipe.allergens).intersection(problem.allergens):
+            if set(recipe.allergens).intersection(problem.allergens) or unverifiable_allergens(problem):
                 reasons.add("allergen")
             if {item.ingredient_id for item in recipe.ingredients}.intersection(problem.excluded_ingredients):
                 reasons.add("excluded_ingredient")
