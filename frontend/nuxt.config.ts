@@ -1,6 +1,6 @@
 export default defineNuxtConfig({
   compatibilityDate: "2026-08-31",
-  css: ["~/assets/css/main.css"],
+  css: ["~/assets/css/main.css", "~/assets/css/surface.css"],
   devtools: { enabled: true },
   modules: ["@nuxt/eslint"],
   runtimeConfig: {

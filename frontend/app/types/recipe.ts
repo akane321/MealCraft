@@ -43,3 +43,20 @@ export interface RecipeDetail extends RecipeListItem {
   ingredients: RecipeIngredient[];
   steps: RecipeStep[];
 }
+
+export interface TutorialVideo {
+  video_id: string;
+  title: string;
+  channel_title: string;
+  watch_url: string;
+  embed_url: string;
+  thumbnail_url: string | null;
+  duration_seconds: number | null;
+}
+
+export interface TutorialRecommendation {
+  recipe_slug: string;
+  recipe_title: string;
+  selected_video: TutorialVideo | null;
+  warning: string | null;
+}
