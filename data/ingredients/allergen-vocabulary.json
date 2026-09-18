@@ -1,0 +1,5 @@
+{
+  "version": "allergen-vocabulary-v1",
+  "checked": ["dairy", "egg", "fish", "gluten", "peanut", "sesame", "shellfish", "soy", "tree_nut"],
+  "rule": "Every ingredient in ingredients.json lists each of these allergens it contains in `allergens`; an empty list means it was checked against all of them and contains none. An allergen outside `checked` is unknown for every ingredient, so a request that names one excludes every recipe (ADR-0024 section 3: unknown is excluded, not admitted)."
+}

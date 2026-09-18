@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+from app.data.allergens import allergen_conflicts
 from app.data.catalog import Catalog, import_catalog, load_catalog
 from app.db.base import Base
 from app.evaluation.baseline import greedy_repeat_selector, strong_rule_only_selector
@@ -80,8 +81,9 @@ def _dietary_match(preference: str, tags: set[str]) -> bool:
 def _hard_violations(recipe, request: WeeklyMealPlanRequest) -> list[str]:
     violations: list[str] = []
     ingredient_names = {item.ingredient.normalized_name for item in recipe.recipe_ingredients}
-    allergens = {item.ingredient.allergen for item in recipe.recipe_ingredients if item.ingredient.allergen}
-    if allergens.intersection(request.allergens):
+    allergens = {allergen for item in recipe.recipe_ingredients for allergen in item.ingredient.allergens}
+    present, unverifiable = allergen_conflicts(request.allergens, allergens)
+    if present or unverifiable:
         violations.append("allergen")
     if ingredient_names.intersection(request.excluded_ingredients):
         violations.append("excluded_ingredient")
