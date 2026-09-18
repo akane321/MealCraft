@@ -169,6 +169,20 @@ def test_empty_reviewed_allergen_lists_and_new_catalog_values_use_same_logic():
     assert compile_search_domains(packet).slots[0].eligible_recipe_ids == (recipe.recipe_id,)
 
 
+def test_an_allergen_outside_the_checked_vocabulary_excludes_every_recipe():
+    from app.planning.constraint_compiler import compile_search_domains
+
+    packet = problem()
+    slot = packet.slots[0].model_copy(update={"locked_recipe_id": None, "max_time_minutes": None})
+    recipe = packet.recipes[0].model_copy(update={"allowed_meal_types": [slot.meal_type], "allergens": []})
+    packet = packet.model_copy(
+        update={"slots": [slot], "recipes": [recipe], "allergens": ["mustard"], "nutrition_bands": []}
+    )
+    assert compile_search_domains(packet).slots[0].eligible_recipe_ids == ()
+    packet = packet.model_copy(update={"allergens": ["milk"], "allergen_vocabulary": None})
+    assert compile_search_domains(packet).slots[0].eligible_recipe_ids == ()
+
+
 def test_nonempty_domains_do_not_claim_aggregate_budget_feasibility():
     from app.planning.constraint_compiler import compile_search_domains
 

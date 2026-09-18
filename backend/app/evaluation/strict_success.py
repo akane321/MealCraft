@@ -161,7 +161,8 @@ class Catalogs:
 
     recipes: dict[str, dict]
     products: dict[str, dict]
-    ingredient_allergens: dict[str, str | None]
+    ingredient_allergens: dict[str, frozenset[str]]
+    checked_allergens: frozenset[str]
     tag_implications: Mapping[str, frozenset[str]]
 
     @classmethod
@@ -172,6 +173,7 @@ class Catalogs:
         ingredients: Iterable[dict],
         *,
         tag_implications: Mapping[str, frozenset[str]],
+        checked_allergens: Iterable[str],
     ) -> Catalogs:
         # Required rather than defaulted: a vegan dish chosen for a vegetarian
         # household is correct, and a caller that forgot the table would score it
@@ -179,7 +181,8 @@ class Catalogs:
         return cls(
             recipes={row["slug"]: row for row in recipes},
             products={row["external_id"]: row for row in products},
-            ingredient_allergens={row["normalized_name"]: row.get("allergen") for row in ingredients},
+            ingredient_allergens={row["normalized_name"]: frozenset(row["allergens"]) for row in ingredients},
+            checked_allergens=frozenset(checked_allergens),
             tag_implications=tag_implications,
         )
 
@@ -345,16 +348,24 @@ def _check_hard_constraints(
     present = [r for r in recipes if r is not None]
     checks: list[Check] = []
 
+    # Unknown is a violation, not a pass: an allergen the catalog never checked,
+    # or an ingredient missing from it, cannot be shown absent (ADR-0024 section 3).
     banned_allergens = {str(a).lower() for a in gold.get("allergens_absent") or []}
+    unchecked = sorted(banned_allergens - catalogs.checked_allergens)
     hits = sorted(
         {
             f"{r['slug']}:{item['ingredient']}"
             for r in present
             for item in r["ingredients"]
-            if (catalogs.ingredient_allergens.get(item["ingredient"]) or "").lower() in banned_allergens
-            and banned_allergens
+            if banned_allergens
+            and (
+                item["ingredient"] not in catalogs.ingredient_allergens
+                or banned_allergens & catalogs.ingredient_allergens[item["ingredient"]]
+            )
         }
     )
+    if unchecked and present:
+        hits.append(f"unchecked allergens: {', '.join(unchecked)}")
     checks.append(
         Check(
             "no_allergen_violation",

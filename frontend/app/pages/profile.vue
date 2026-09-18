@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { allergenLabel, CHECKED_ALLERGENS } from "~/lib/allergens";
 import { todayIsoDate } from "~/lib/meal-plan-format";
 import { summarizeHouseholdMembers } from "~/lib/household-profile";
 import {
@@ -24,7 +25,7 @@ interface MemberForm {
   dietaryPreferences: DietaryPreference[];
 }
 
-const allergenOptions = ["peanut", "soy", "gluten", "sesame", "dairy", "egg", "shellfish"];
+const allergenOptions = CHECKED_ALLERGENS;
 const dietaryOptions: { label: string; value: DietaryPreference }[] = [
   { label: "Vegetarian", value: "vegetarian" },
   { label: "Vegan", value: "vegan" },
@@ -241,7 +242,7 @@ onMounted(async () => {
               <p>Allergens</p>
               <div class="choice-grid">
                 <label v-for="allergen in allergenOptions" :key="allergen" class="choice-card">
-                  <input v-model="member.allergens" type="checkbox" :value="allergen"><span>{{ allergen }}</span>
+                  <input v-model="member.allergens" type="checkbox" :value="allergen"><span>{{ allergenLabel(allergen) }}</span>
                 </label>
               </div>
             </div>

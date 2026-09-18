@@ -66,14 +66,15 @@ PRODUCTS = [
     },
 ]
 INGREDIENTS = [
-    {"normalized_name": "brown_rice", "allergen": None},
-    {"normalized_name": "sesame_oil", "allergen": "sesame"},
+    {"normalized_name": "brown_rice", "allergens": []},
+    {"normalized_name": "sesame_oil", "allergens": ["sesame"]},
 ]
+CHECKED = frozenset({"gluten", "sesame", "soy"})
 
 
 @pytest.fixture
 def catalogs():
-    return Catalogs.build(RECIPES, PRODUCTS, INGREDIENTS, tag_implications={})
+    return Catalogs.build(RECIPES, PRODUCTS, INGREDIENTS, tag_implications={}, checked_allergens=CHECKED)
 
 
 def episode(**overrides):
@@ -188,6 +189,13 @@ def test_a_correct_plan_is_a_strict_success(catalogs):
 
 
 # --- each way a feasible episode can fail ------------------------------------
+
+
+def test_an_allergen_the_catalog_never_checked_is_a_violation(catalogs):
+    # peanut is outside CHECKED, so no recipe can be shown to be free of it.
+    ep = episode(**{"gold.applicable_hard_constraints.allergens_absent": ["peanut"]})
+    result = score(ep, response(), catalogs)
+    assert "no_allergen_violation" in result.failed_codes
 
 
 def test_allergen_violation_fails(catalogs):
@@ -335,7 +343,9 @@ def vegan_plan():
 
 def test_a_vegan_dish_satisfies_a_vegetarian_requirement():
     implications = load_tag_implications(repository_root() / IMPLICATIONS_FILE)
-    catalogs = Catalogs.build(RECIPES + [VEGAN_BOWL], PRODUCTS, INGREDIENTS, tag_implications=implications)
+    catalogs = Catalogs.build(
+        RECIPES + [VEGAN_BOWL], PRODUCTS, INGREDIENTS, tag_implications=implications, checked_allergens=CHECKED
+    )
     result = score(vegetarian_episode(), vegan_plan(), catalogs)
     assert result.strict_success, result.failed_codes + result.indeterminate_codes
 
@@ -349,7 +359,9 @@ def test_entailment_only_runs_one_way():
 
 def test_without_the_table_the_same_dish_is_a_violation():
     """Guards the reason the table is a required argument rather than a default."""
-    catalogs = Catalogs.build(RECIPES + [VEGAN_BOWL], PRODUCTS, INGREDIENTS, tag_implications={})
+    catalogs = Catalogs.build(
+        RECIPES + [VEGAN_BOWL], PRODUCTS, INGREDIENTS, tag_implications={}, checked_allergens=CHECKED
+    )
     assert "dietary_tags_respected" in score(vegetarian_episode(), vegan_plan(), catalogs).failed_codes
 
 
@@ -432,7 +444,7 @@ SMALL_RICE = {
 
 @pytest.fixture
 def mixed_catalogs():
-    return Catalogs.build(RECIPES, PRODUCTS + [SMALL_RICE], INGREDIENTS, tag_implications={})
+    return Catalogs.build(RECIPES, PRODUCTS + [SMALL_RICE], INGREDIENTS, tag_implications={}, checked_allergens=CHECKED)
 
 
 def mixed_episode(**overrides):
@@ -687,7 +699,9 @@ BARE = dict(RECIPES[0], slug="bare-bowl")  # no nutrition recorded at all
 
 @pytest.fixture
 def nutrition_catalogs():
-    return Catalogs.build(RECIPES + [LEAN, RICH, BARE], PRODUCTS, INGREDIENTS, tag_implications={})
+    return Catalogs.build(
+        RECIPES + [LEAN, RICH, BARE], PRODUCTS, INGREDIENTS, tag_implications={}, checked_allergens=CHECKED
+    )
 
 
 def nutrition_episode(*bands, slots=("mon-dinner",)):
@@ -953,7 +967,7 @@ def test_incomparable_units_are_indeterminate_and_block_success(catalogs):
             "ingredient_keys": ["brown_rice"],
         }
     ]
-    cat = Catalogs.build(RECIPES, odd_products, INGREDIENTS, tag_implications={})
+    cat = Catalogs.build(RECIPES, odd_products, INGREDIENTS, tag_implications={}, checked_allergens=CHECKED)
     ep = episode(**{"scenario.fairprice_product_ids": ["p-rice", "p-sesame", "p-odd"]})
     resp = response(
         plan={

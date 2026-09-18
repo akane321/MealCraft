@@ -36,6 +36,24 @@ def test_catalog_rejects_unknown_ingredient() -> None:
         Catalog.model_validate({"ingredients": ingredients, "recipes": recipes})
 
 
+def test_catalog_rejects_an_allergen_nobody_checked_for() -> None:
+    ingredients = json.loads(INGREDIENTS.read_text(encoding="utf-8"))
+    recipes = json.loads(RECIPES.read_text(encoding="utf-8"))
+    ingredients[0]["allergens"] = ["mustard"]
+
+    with pytest.raises(ValidationError, match="outside the checked vocabulary"):
+        Catalog.model_validate({"ingredients": ingredients, "recipes": recipes})
+
+
+def test_catalog_requires_every_ingredient_to_state_its_allergens() -> None:
+    ingredients = json.loads(INGREDIENTS.read_text(encoding="utf-8"))
+    recipes = json.loads(RECIPES.read_text(encoding="utf-8"))
+    del ingredients[0]["allergens"]
+
+    with pytest.raises(ValidationError):
+        Catalog.model_validate({"ingredients": ingredients, "recipes": recipes})
+
+
 def test_catalog_import_is_idempotent() -> None:
     engine = create_engine("sqlite+pysqlite:///:memory:")
     Base.metadata.create_all(engine)

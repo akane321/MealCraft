@@ -118,6 +118,7 @@
     {"ingredient_id": "salt", "product_id": "fp-salt-500g", "package_quantity": 500, "package_unit": "g", "price_sgd": 1.2}
   ],
   "allergens": [],
+  "allergen_vocabulary": ["dairy", "egg", "fish", "gluten", "milk", "peanut", "sesame", "shellfish", "soy", "tree_nut"],
   "excluded_ingredients": [],
   "dietary_requirements": [],
   "health_preferences": ["low-sodium"],

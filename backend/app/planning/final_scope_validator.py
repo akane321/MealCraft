@@ -201,6 +201,15 @@ class FinalPlanningValidator:
                     slot_id,
                 )
             )
+        unchecked = sorted(set(problem.allergens).difference(problem.allergen_vocabulary or []))
+        if unchecked:
+            checks.append(
+                self._failed(
+                    "allergen",
+                    f"No recipe was checked for: {', '.join(unchecked)}.",
+                    slot_id,
+                )
+            )
         ingredient_ids = {item.ingredient_id for item in recipe.ingredients}
         excluded_hits = sorted(ingredient_ids.intersection(problem.excluded_ingredients))
         if excluded_hits:
