@@ -65,10 +65,16 @@ class WeeklyPlanSelector:
                 feasible = [
                     item
                     for item in choices
-                    if used_budget
-                    + (item.consumed_cost or 0.0)
-                    + self._minimum_future_cost(candidates, remaining_days, item.recipe_id)
-                    <= weekly_budget + 0.005
+                    # Whole cents on both sides, as every budget path does (ADR-0021).
+                    if round(
+                        (
+                            used_budget
+                            + (item.consumed_cost or 0.0)
+                            + self._minimum_future_cost(candidates, remaining_days, item.recipe_id)
+                        )
+                        * 100
+                    )
+                    <= round(weekly_budget * 100)
                 ]
                 if feasible:
                     choices = feasible
