@@ -27,18 +27,21 @@
 
 ## Category results
 
-| Category | N | Expectation rate | Violations | Failures |
-|---|---:|---:|---:|---:|
-| allergen | 4 | 1.0 | 0 | 0 |
-| basic | 1 | 1.0 | 0 | 0 |
-| budget | 1 | 1.0 | 0 | 0 |
-| dietary | 4 | 1.0 | 0 | 0 |
-| exclusion | 1 | 1.0 | 0 | 0 |
-| infeasible | 2 | 1.0 | 0 | 0 |
-| nutrition | 2 | 1.0 | 0 | 0 |
-| pantry | 2 | 1.0 | 0 | 0 |
-| preference | 2 | 1.0 | 0 | 0 |
-| time | 1 | 1.0 | 0 | 0 |
+Per category: scenario count, hard-constraint violations and recorded failures.
+Rates are reported only for the whole set.
+
+| Category | N | Violations | Failures |
+|---|---:|---:|---:|
+| allergen | 4 | 0 | 0 |
+| basic | 1 | 0 | 0 |
+| budget | 1 | 0 | 0 |
+| dietary | 4 | 0 | 0 |
+| exclusion | 1 | 0 | 0 |
+| infeasible | 2 | 0 | 0 |
+| nutrition | 2 | 0 | 0 |
+| pantry | 2 | 0 | 0 |
+| preference | 2 | 0 | 0 |
+| time | 1 | 0 | 0 |
 
 ## Failure cases
 

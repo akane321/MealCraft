@@ -519,6 +519,9 @@ Two consequences bind the write-up:
   percentage points. Categories exist for coverage claims and error analysis -
   naming which failures occurred and where - so report per-category counts and
   failure mechanisms rather than per-category rates or between-system deltas.
+  This is how the report meets the course's "per-category breakdown"
+  (decision ADR-0028): each category lists its episode count and each failure
+  by mechanism, with no rate column and no per-category winner.
 - A difference below the floor is reported as not detectable at this set size,
   never as evidence of equivalence.
 
