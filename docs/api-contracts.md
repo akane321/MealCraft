@@ -156,7 +156,8 @@ A recipe detail contains:
 - identity, title, slug, cuisine, meal type, serving count, and preparation time
 - dietary tags
 - nutrition values per serving
-- normalized ingredients, amounts, preparation notes, and allergen labels
+- normalized ingredients, amounts, preparation notes, and each ingredient's
+  `allergens` list
 - ordered cooking steps
 
 Nutrition values are descriptive planning data. They are not medical advice.
@@ -189,6 +190,13 @@ Hard filters remove recipes that violate allergens, excluded ingredients,
 dietary requirements, cooking-time limits, an explicit sodium ceiling, or a
 complete ingredient-use estimate above the user-entered budget.
 
+Allergens follow one rule everywhere: every catalog ingredient lists each
+allergen it contains out of the checked vocabulary in
+`data/ingredients/allergen-vocabulary.json`, and an empty list means checked and
+none. A requested allergen outside that vocabulary cannot be shown absent, so it
+excludes every recipe with the reason "Cannot confirm it is free of: ...".
+Unknown is excluded, not admitted.
+
 Eligible recipes receive an explainable weighted score:
 
 - nutrition alignment: 45%
@@ -210,12 +218,16 @@ deduction, surplus quantity, mapping completeness, and budget result.
 - `live=false`: deterministic FairPrice-shaped fixtures for tests and demos
 - `live=true`: current FairPrice catalogue lookup with a 15-minute PostgreSQL cache
 
-`refresh=true` bypasses a fresh cache entry. If a live lookup fails, the API
-returns fixture results with `fallback_used=true` and a warning; the source is
-never silently misrepresented.
+`refresh=true` bypasses a fresh cache entry. A live lookup degrades in a fixed
+order: live, then the most recent cached FairPrice snapshot of any age (mode
+`cache`, status `degraded`, with the date it was saved), then fixture results.
+Every fallback sets `fallback_used=true` and a warning; the source is never
+silently misrepresented. When FairPrice answers with no products, the response
+is empty with status `no_match`: that ingredient is left unpriced rather than
+given sample prices.
 
 Every product response also carries a retrieval trace with requested source,
-provider used, `live`/`cache`/`fixture` mode, success or degradation status,
+provider used, `live`/`cache`/`fixture` mode, `success`/`no_match`/`degraded` status,
 query, fetch time, parser version, candidate count and warnings. Live lookup is
 triggered only for the current product or Shopping List demand; broad catalog
 crawling is outside this contract.

@@ -23,9 +23,7 @@ def recipe():
         total_time_minutes=20,
         dietary_tags=["vegan"],
         nutrition=dict(calories_kcal=100, protein_g=3, carbohydrate_g=20, fat_g=1, sodium_mg=0, sugar_g=0),
-        ingredients=[
-            dict(name="Rice", normalized_name="rice", quantity=100, unit="g", preparation=None, allergen=None)
-        ],
+        ingredients=[dict(name="Rice", normalized_name="rice", quantity=100, unit="g", preparation=None, allergens=[])],
         steps=[],
     )
 
@@ -51,7 +49,7 @@ def test_serving_basis_identity_and_zero_nutrition_are_preserved():
 def test_unknown_quantity_and_source_allergens_are_preserved():
     source = recipe()
     source.ingredients[0].quantity = None
-    source.ingredients[0].allergen = "soy"
+    source.ingredients[0].allergens = ["soy"]
     result = convert(source)
     assert result.candidate.ingredients[0].quantity is None
     assert result.candidate.allergens == ["soy"]

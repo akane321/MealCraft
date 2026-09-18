@@ -54,3 +54,84 @@ def test_live_failure_returns_explicit_fixture_fallback() -> None:
     assert response.retrieval.status == "degraded"
     assert response.retrieval.mode == "fixture"
     assert response.retrieval.candidate_count == len(response.items)
+
+
+class EmptyLiveProvider:
+    def search(self, query: str, *, limit: int):
+        return []
+
+
+class StaleProductRepository:
+    """Holds one snapshot older than any TTL; returns it only when asked for any age."""
+
+    def __init__(self) -> None:
+        from datetime import UTC, datetime
+
+        product = FixtureProductProvider(str(FIXTURE_PATH)).search("brown rice", limit=1)[0]
+        self.snapshot = product.model_copy(
+            update={"source": "fairprice", "fetched_at": datetime(2026, 9, 1, 8, 0, tzinfo=UTC)}
+        )
+
+    def get_fresh(self, *, fetched_after, **kwargs):
+        return [self.snapshot] if self.snapshot.fetched_at >= fetched_after else []
+
+    def replace_query_results(self, **kwargs):
+        raise AssertionError("nothing new was fetched, so nothing may be cached")
+
+
+def test_an_empty_live_result_is_a_data_gap_not_a_failure() -> None:
+    service = ProductSearchService(
+        fixture_provider=FixtureProductProvider(str(FIXTURE_PATH)),
+        live_provider=EmptyLiveProvider(),
+        repository=EmptyProductRepository(),
+        cache_ttl_minutes=15,
+    )
+
+    response = service.search("brown rice", live=True)
+
+    # No sample prices are borrowed for an item FairPrice does not stock.
+    assert response.items == []
+    assert response.provider_used == "fairprice"
+    assert response.fallback_used is False
+    assert response.retrieval.status == "no_match"
+
+
+def test_a_live_failure_uses_an_expired_cache_before_fixture_prices() -> None:
+    service = ProductSearchService(
+        fixture_provider=FixtureProductProvider(str(FIXTURE_PATH)),
+        live_provider=FailingLiveProvider(),
+        repository=StaleProductRepository(),
+        cache_ttl_minutes=15,
+    )
+
+    response = service.search("brown rice", live=True)
+
+    assert response.provider_used == "fairprice"
+    assert response.cached is True
+    assert response.fallback_used is True
+    assert response.items[0].source == "fairprice"
+    assert response.retrieval.mode == "cache"
+    assert response.retrieval.status == "degraded"
+    assert "saved on 01 Sep 2026" in response.warning
+
+
+def test_a_search_page_without_a_product_key_parses_as_no_results(monkeypatch) -> None:
+    import io
+    import json
+
+    from app.products import provider as provider_module
+
+    page = {"props": {"pageProps": {"data": {"data": {"filters": []}}}}}
+    html = f'<script id="__NEXT_DATA__" type="application/json">{json.dumps(page)}</script>'
+
+    class Response(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+    monkeypatch.setattr(provider_module, "urlopen", lambda request, timeout: Response(html.encode("utf-8")))
+    live = provider_module.FairPriceProductProvider(base_url="https://example.invalid", timeout_seconds=1)
+
+    assert live.search("dragonfruit jam", limit=5) == []

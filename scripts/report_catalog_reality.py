@@ -37,13 +37,13 @@ def measure() -> dict:
     ingredients = {row["normalized_name"]: row for row in load(INGREDIENTS)}
     products = load(PRODUCTS_V2)
 
-    allergens = sorted({row["allergen"] for row in ingredients.values() if row.get("allergen")})
+    allergens = sorted({a for row in ingredients.values() for a in row["allergens"]})
     allergen_rows = []
     for allergen in allergens:
         hit = {
             r["slug"]
             for r in recipes
-            if any(ingredients.get(i["ingredient"], {}).get("allergen") == allergen for i in r["ingredients"])
+            if any(allergen in ingredients.get(i["ingredient"], {}).get("allergens", []) for i in r["ingredients"])
         }
         allergen_rows.append((allergen, len(hit), len(recipes) - len(hit)))
 

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from app.data.allergens import allergen_conflicts, conflict_reasons
 from app.models.recipe import Recipe
 from app.planning.dietary_tags import expand_tags
 from app.schemas.recipe import RecipeListItemResponse
@@ -56,13 +57,8 @@ class RecipeRecommendationEngine:
     def _exclusion_reasons(self, recipe: Recipe, constraints: RecipeRecommendationRequest) -> list[str]:
         reasons: list[str] = []
         ingredient_names = {item.ingredient.normalized_name for item in recipe.recipe_ingredients}
-        recipe_allergens = {
-            item.ingredient.allergen.lower() for item in recipe.recipe_ingredients if item.ingredient.allergen
-        }
-
-        allergen_matches = sorted(recipe_allergens.intersection(constraints.allergens))
-        if allergen_matches:
-            reasons.append(f"Contains selected allergen: {', '.join(allergen_matches)}.")
+        recipe_allergens = {allergen for item in recipe.recipe_ingredients for allergen in item.ingredient.allergens}
+        reasons.extend(conflict_reasons(*allergen_conflicts(constraints.allergens, recipe_allergens)))
 
         excluded_matches = sorted(ingredient_names.intersection(constraints.excluded_ingredients))
         if excluded_matches:

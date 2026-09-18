@@ -242,7 +242,8 @@ never auto-relaxed. The user chooses whether to accept a relaxation.
 ### Recipe and ingredient data
 
 Required fields are canonical IDs, recipe serving basis, normalized quantities
-and units, meal-type eligibility, time, allergens, dietary tags, per-serving
+and units, meal-type affinity (a preference, never a filter), time, allergens and
+the allergen vocabulary they were checked against, dietary tags, per-serving
 nutrition, cuisine/preference attributes, provenance and completeness flags.
 The planner must reject or mark unknown unsupported facts rather than patching
 the database locally.

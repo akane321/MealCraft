@@ -47,14 +47,19 @@ export function groceryGroups(items: GroceryLineEstimate[]): Array<{ name: strin
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/** Short, user-facing note on where prices came from; live and sample prices must stay distinguishable. */
+/**
+ * Short, user-facing note on where prices came from, read from the products
+ * actually used rather than the mode that was asked for: a live request that
+ * fell back to sample data must not be labelled as FairPrice prices.
+ */
 export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
-  if (estimate.pricing_mode !== "live") return "Sample prices";
-  const fetched = estimate.items
-    .map(line => line.product?.fetched_at)
-    .filter((value): value is string => Boolean(value))
-    .sort()[0];
-  if (!fetched) return "FairPrice prices";
+  const products = estimate.items.map(line => line.product).filter(product => product !== null);
+  const samples = products.filter(product => product.source !== "fairprice").length;
+  if (!products.length || samples === products.length) {
+    return estimate.pricing_mode === "live" ? "Sample prices: FairPrice didn't respond" : "Sample prices";
+  }
+  if (samples) return "Some prices are samples: FairPrice didn't respond";
+  const fetched = products.map(product => product.fetched_at).sort()[0]!;
   const date = new Date(fetched).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
   return `FairPrice prices from ${date}`;
 }
