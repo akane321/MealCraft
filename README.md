@@ -147,13 +147,8 @@ committed.
 
 - Product home: <http://localhost:3000> (chat, with the week on the left edge and nutrition and groceries on the right)
 - Service status: <http://localhost:3000/system>
-- Planning assistant: <http://localhost:3000/assistant>
+- Sign in or register: <http://localhost:3000/login>
 - Household profile: <http://localhost:3000/profile>
-- Recipe catalog: <http://localhost:3000/recipes>
-- Constraint matching: <http://localhost:3000/plan>
-- Seven-day planning: <http://localhost:3000/weekly-plan>
-- Meal check-in Dashboard: <http://localhost:3000/dashboard>
-- FairPrice product search: <http://localhost:3000/products>
 - Backend API: <http://localhost:8000>
 - Swagger: <http://localhost:8000/docs>
 - Health check: <http://localhost:8000/api/health>

@@ -214,3 +214,120 @@ test("sending from the film entry opens the chat, and edge panels move it aside"
     await page.screenshot({ path: `${SHOTS}/7-min-size.png` });
   }
 });
+
+async function planWeek(page: Page) {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await stubApi(page);
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+  await expect(page.getByText("Seven dinners for S$82.60")).toBeVisible();
+}
+
+test("a clarification option sends a stable structured answer", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await stubApi(page);
+  const asking = {
+    ...session(false),
+    status: "collecting",
+    can_confirm: false,
+    constraints: { ...session(false).constraints, household_size: null },
+    messages: [{ id: 1, role: "user", content: "Plan dinners under S$15 per meal.", created_at: "2026-09-14T08:00:00Z" }],
+    context_version: 1,
+    pending_interaction: {
+      type: "single_select",
+      prompt: "How many people should this plan serve?",
+      field_path: "household_size",
+      question_id: "context-1:household_size",
+      options: [
+        { id: "household_size_1", label: "1 person", value: 1 },
+        { id: "household_size_2", label: "2 people", value: 2 },
+      ],
+      allow_free_text: true,
+      context_version: 1,
+      plan_revision: null,
+      expires_at: null,
+    },
+  };
+  await page.route("**/api/agent/sessions", route => route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify(asking) }));
+  let answer: unknown = null;
+  await page.route("**/api/agent/sessions/51/interactions", async (route) => {
+    answer = route.request().postDataJSON();
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(session(false)) });
+  });
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Plan dinners under S$15 per meal.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "2 people" }).click();
+
+  await expect(page.getByRole("button", { name: "Plan my week" })).toBeVisible();
+  expect(answer).toEqual({
+    question_id: "context-1:household_size",
+    option_ids: ["household_size_2"],
+    free_text: null,
+    context_version: 1,
+    plan_revision: null,
+  });
+});
+
+test("nutrition details show all six nutrients and let a dinner be skipped", async ({ page }) => {
+  await planWeek(page);
+  let patched: unknown = null;
+  await page.route("**/api/plans/9001/entries/5", async (route) => {
+    patched = route.request().postDataJSON();
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(plan) });
+  });
+
+  await page.getByRole("button", { name: /Groceries & nutrition/ }).click();
+  await page.getByRole("button", { name: "All six nutrients & daily detail" }).click();
+  const details = page.getByRole("dialog", { name: "Nutrition details" });
+  for (const label of ["Calories", "Protein", "Carbohydrate", "Fat", "Sodium", "Sugar"]) {
+    await expect(details.getByRole("button", { name: new RegExp(`^${label}`) })).toBeVisible();
+  }
+  await expect(details.getByText("Actual").first()).toBeVisible();
+  if (SHOTS) await page.waitForTimeout(500).then(() => page.screenshot({ path: `${SHOTS}/8-nutrition.png` }));
+  await details.getByRole("row", { name: /Mushroom Spinach Pasta/ }).getByRole("button", { name: "Skip" }).click();
+  await expect.poll(() => patched).toEqual({ status: "skipped" });
+});
+
+test("a dinner opens its recipe with steps on the same surface", async ({ page }) => {
+  await planWeek(page);
+  await page.route("**/api/recipes/dinner-4", route => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      ...days[3]!.recipe,
+      ingredients: [
+        { name: "Firm tofu", normalized_name: "firm_tofu", quantity: 300, unit: "g", preparation: "cubed", allergens: ["soy"] },
+        { name: "Brown rice", normalized_name: "brown_rice", quantity: 150, unit: "g", preparation: null, allergens: [] },
+      ],
+      steps: [{ step_number: 1, instruction: "Cook the rice." }, { step_number: 2, instruction: "Stir-fry the tofu." }],
+    }),
+  }));
+
+  await page.getByRole("button", { name: /See the week/ }).click();
+  await page.getByRole("button", { name: "Recipe & steps" }).click();
+  const recipe = page.getByRole("dialog", { name: "Tofu Brown Rice Stir-fry" });
+  await expect(recipe.getByText("Stir-fry the tofu.")).toBeVisible();
+  await expect(recipe.getByText("Contains soy")).toBeVisible();
+  await expect(recipe.getByText(/Allergens come from ingredient data/)).toBeVisible();
+  if (SHOTS) await page.waitForTimeout(500).then(() => page.screenshot({ path: `${SHOTS}/9-recipe.png` }));
+});
+
+test("a failed request says so in the conversation", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await stubApi(page);
+  await page.route("**/api/agent/sessions", route => route.fulfill({
+    status: 503,
+    contentType: "application/json",
+    body: JSON.stringify({ detail: "The planning service is unavailable." }),
+  }));
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week.");
+  await page.getByRole("button", { name: "Send" }).click();
+
+  await expect(page.getByRole("alert")).toHaveText("The planning service is unavailable.");
+});

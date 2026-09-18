@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AgentMessage } from "~/types/agent";
-import type { WeeklyMealPlan } from "~/types/meal-plan";
+import type { MealPlanEntryStatus, WeeklyMealPlan, WeeklyMealPlanCollection } from "~/types/meal-plan";
 
 useHead({
   title: "MealCraft",
@@ -37,6 +37,8 @@ const hover = reactive({ left: false, right: false });
 const pinned = reactive({ left: false, right: false });
 const open = computed(() => ({ left: hover.left || pinned.left, right: hover.right || pinned.right }));
 const previewOpen = ref(false);
+const nutritionOpen = ref(false);
+const recipeSlug = ref<string | null>(null);
 const log = ref<HTMLElement | null>(null);
 const film = ref<HTMLVideoElement | null>(null);
 const filmPlaying = ref(true);
@@ -74,6 +76,16 @@ async function enter() {
   if (!(await requireAccount())) return;
   view.value = "app";
   if (!session.value) await agent.restoreLatest();
+  // A plan made on the profile page has no conversation; show the latest one.
+  if (!session.value?.plan_id && !plan.value) await loadLatestPlan();
+}
+
+async function loadLatestPlan() {
+  try {
+    const latest = await apiFetch<WeeklyMealPlanCollection>(`${config.public.apiBase}/api/plans`);
+    if (latest.items[0]) await loadPlan(latest.items[0].id);
+  }
+  catch { /* no plan yet is not an error */ }
 }
 
 async function send(text = draft.value) {
@@ -121,6 +133,10 @@ async function loadPlan(planId: number) {
 
 async function markCooked(entryId: number) {
   await nutrition.updateStatus(entryId, "completed");
+}
+
+async function setStatus(entryId: number, status: MealPlanEntryStatus) {
+  await nutrition.updateStatus(entryId, status);
 }
 
 function exportPdf() {
@@ -312,6 +328,7 @@ onMounted(() => {
             :cooked-count="nutrition.dashboard.value?.status_counts.completed ?? 0"
             :updating-entry-id="nutrition.updatingEntryId.value"
             @mark-cooked="markCooked"
+            @open-recipe="recipeSlug = $event"
           >
             <template #actions>
               <button type="button" class="mc-pill pin" :aria-label="pinned.left ? 'Close this panel' : 'Keep this panel open'" @click="pinned.left = !pinned.left">
@@ -343,6 +360,7 @@ onMounted(() => {
             :eaten="nutrition.dashboard.value?.completed_nutrition_per_person ?? null"
             :estimate="plan.grocery_estimate"
             @preview="previewOpen = true"
+            @details="nutritionOpen = true"
             @export="exportPdf"
           >
             <template #actions>
@@ -355,6 +373,15 @@ onMounted(() => {
         </aside>
       </div>
     </template>
+
+    <HomeNutritionSheet
+      v-if="nutritionOpen && nutrition.dashboard.value"
+      :dashboard="nutrition.dashboard.value"
+      :updating-entry-id="nutrition.updatingEntryId.value"
+      @close="nutritionOpen = false"
+      @set-status="setStatus"
+    />
+    <HomeRecipeSheet v-if="recipeSlug" :slug="recipeSlug" @close="recipeSlug = null" />
 
     <div v-if="plan" v-show="previewOpen" class="mc-sheet-overlay" role="dialog" aria-modal="true" aria-label="Shopping list preview" @keydown.esc="previewOpen = false">
       <div class="sheet-frame">

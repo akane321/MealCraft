@@ -8,7 +8,7 @@ const props = defineProps<{
   eaten: RecipeNutrition | null;
   estimate: WeeklyGroceryEstimate | null;
 }>();
-const emit = defineEmits<{ preview: []; export: [] }>();
+const emit = defineEmits<{ preview: []; export: []; details: [] }>();
 
 const cooked = computed(() => props.days.filter(day => day.status === "completed").length);
 const counted = computed(() => props.days.filter(day => day.status !== "skipped"));
@@ -61,6 +61,7 @@ const budgetShare = computed(() => {
         <span><i class="swatch planned" />Planned</span>
         <span class="note">General guidance, not medical advice</span>
       </p>
+      <button type="button" class="mc-pill details" @click="emit('details')">All six nutrients &amp; daily detail</button>
     </section>
 
     <section v-if="estimate" class="mc-frost card groceries" aria-label="Groceries">
@@ -113,6 +114,7 @@ h2 { flex-grow: 1; margin: 0; font-size: 22px; }
 .legend { margin: 0; display: flex; align-items: center; gap: 14px; font-size: 11px; color: var(--mc-text-3); }
 .legend span { display: flex; align-items: center; gap: 5px; }
 .legend .note { margin-left: auto; }
+.details { min-height: 38px; font-size: 12px; font-weight: 500; }
 .swatch { width: 10px; height: 10px; box-sizing: border-box; border-radius: 3px; }
 .swatch.completed { background: var(--mc-ivory); }
 .swatch.planned { border: 1.5px dashed var(--mc-text-2); }

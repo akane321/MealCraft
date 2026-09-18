@@ -99,6 +99,18 @@
     var(--lg-tint);
 }
 
+.mc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(14, 12, 10, 0.55);
+  backdrop-filter: blur(10px);
+  animation: mc-rise 420ms var(--mc-ease) both;
+}
+
 .mc-primary {
   border: 0;
   border-radius: 999px;
