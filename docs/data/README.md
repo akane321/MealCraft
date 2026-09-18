@@ -22,31 +22,18 @@ remains the canonical cross-module contract.
 | State | Meaning |
 | --- | --- |
 | Verified baseline | Merged runtime behaviour supported by current code and tests |
-| Prototype evidence | A separate data-cleaning pilot has run successfully, but its pipeline and outputs are not yet integrated into MealCraft |
+| Released data | A versioned release cut by the `data-engineering/` pipeline, not yet imported into the runtime catalog |
 | Accepted target | The intended module responsibility and release contract |
-| Working target | A planning number or threshold that must be reviewed after real-data profiling |
 
-The verified runtime baseline is 30 recipes and 34 normalized ingredients in
-`data/recipes/recipes.json` and `data/ingredients/ingredients.json`. The current
-schema is deliberately compact and is loaded by `backend/app/data/catalog.py`.
+The runtime catalog is the compact one in `data/recipes/recipes.json` and
+`data/ingredients/ingredients.json`, loaded by `backend/app/data/catalog.py`.
 
-A separate prototype verified the proposed pipeline mechanics on 20 synthetic
-RecipeNLG-shaped recipes. It produced 96 ingredient occurrences and 50
-canonical/candidate ingredient records, with:
-
-- `83.33%` internal ingredient resolution coverage (`80/96` occurrences);
-- `85.42%` quantity coverage (`82/96` occurrences);
-- `62.50%` recognized-unit coverage (`60/96` occurrences);
-- zero duplicate recipe and ingredient IDs;
-- all three prototype quality gates passing;
-- 11 automated tests passing;
-- 31,341 FoodOn terms loaded and 244 mapping candidates generated;
-- 395 USDA Foundation Food entries loaded, with 116 candidates generated for
-  37 internally resolved ingredient queries.
-
-These numbers demonstrate that the pipeline, manifests, review queues and
-reference matching can run. They do **not** establish production accuracy,
-catalog coverage, safety-label quality, or readiness for Evaluation v2.
+The pipeline lives in [`data-engineering/`](../../data-engineering/README.md):
+RecipeNLG schema v1 is frozen, releases pass a four-condition gate, and each
+release carries a manifest and quality report under
+`data-engineering/data/release/`. Release sizes, enrichment progress and what
+is not yet imported are recorded only in [Current Status](../current-status.md).
+Released data is not runtime behaviour until an import is merged.
 
 ## 3. Final product target
 
@@ -62,11 +49,12 @@ following without silent guessing:
 6. reproducible Rule-only, LLM-only, MealCraft and human-planning comparisons;
 7. traceable correction when a source, parser or mapping rule is wrong.
 
-The proposal-scale working target is 150-250 independently checked recipes,
-plus enough canonical ingredients to cover every released recipe and every
-benchmark grocery demand. This is a working range, not permission to lower the
-quality gates. A smaller high-quality release is preferable to a larger catalog
-whose quantities, safety labels or provenance cannot support planning claims.
+There is no fixed recipe-count target (decision ADR-0024 withdrew the earlier
+150-250 range). Every released recipe must pass the release gate, and the
+canonical ingredients must cover every released recipe and every benchmark
+grocery demand. A smaller release whose quantities, safety labels and
+provenance hold up is preferable to a larger one that cannot support planning
+claims.
 
 Every release must provide:
 
@@ -121,7 +109,7 @@ external source
   -> raw snapshot + checksum + source manifest
   -> parsed staging records that preserve original text
   -> normalization candidates + automatic validation
-  -> human review decisions
+  -> resolutions recorded with evidence (rules, or an agent under ADR-0024)
   -> curated canonical ingredients and recipes
   -> quality gates + release manifest
   -> runtime import and frozen evaluation fixtures
@@ -176,7 +164,7 @@ defined.
 | Classification | food group, parent ingredient, variant | Controlled vocabulary and source required |
 | Safety | allergen categories, diet compatibility, review state | Safety labels require deterministic rules plus review evidence |
 | Quantity | canonical dimension/unit, density, piece weight | Density or piece conversions require a cited source and applicability |
-| Nutrition link | reference source, FDC ID, basis, matched description | External match remains a candidate until reviewed |
+| Nutrition link | reference source, FDC ID, basis, matched description, confidence, rejected alternatives | Only a `mapped` resolution carries an FDC ID; `needs_review` is a candidate, not a fact |
 | Provenance | source, extraction/rule, version, reviewer | Every accepted value can be traced |
 | Quality | completeness, resolution status, flags | Confidence is a triage score, not a truth probability |
 
@@ -212,28 +200,35 @@ The current runtime format remains supported during migration. New fields
 should first be added to a versioned schema and import adapter; consumers should
 not parse ad hoc pipeline files directly.
 
-## 9. Normalization and review policy
+## 9. Normalization and resolution policy
 
-Automatic processing should narrow the human workload, not make final claims
-on insufficient evidence.
+Automatic processing and agent resolution are accepted paths when every
+resolved value records its evidence (decision ADR-0024): the candidate chosen,
+the source it came from, a confidence, and the alternatives rejected. Human
+review is a sampling audit of those records, not a gate on each one.
 
 1. Preserve the raw value before parsing.
 2. Parse quantity, unit, ingredient phrase and preparation separately.
-3. Resolve exact reviewed aliases first.
+3. Resolve exact aliases first.
 4. Generate ranked candidates for unresolved values.
 5. Validate dimensions and cross-field consistency.
-6. Route uncertain, safety-critical, composite, or conflicting rows to review.
-7. Store the accepted/rejected decision and reason.
-8. Rebuild curated outputs deterministically from raw inputs, configuration and
-   review decisions.
+6. Resolve with recorded evidence, or leave the row explicitly unresolved or
+   composite.
+7. Rebuild curated outputs deterministically from raw inputs, configuration and
+   recorded resolutions.
+
+Allergen labels are the exception: they are derived only by deterministic rules
+over canonical ingredients, never by agent inference, and an unknown allergen
+status excludes a recipe rather than admitting it.
 
 The following are prohibited:
 
-- automatically accepting the first FoodOn or USDA search result;
+- accepting a FoodOn or USDA candidate without recording why it won;
 - treating `0` as missing nutrition or quantity;
 - converting count, volume and mass without a sourced conversion;
 - deriving disease-specific medical advice from recipe data;
-- asking an LLM to invent a serving size, nutrient value or allergen fact;
+- producing a serving size, nutrient value or allergen fact with no recorded
+  basis;
 - changing a previously frozen evaluation catalog without a new version.
 
 ## 10. Quality gates and metric definitions
@@ -313,39 +308,31 @@ Use a feature branch and Pull Request for each coherent change. Review schema
 and controlled-vocabulary changes before bulk annotation, because changing an
 ID or field meaning later invalidates mappings, fixtures and evaluation labels.
 
-## 13. Recommended delivery sequence
+## 13. Delivery sequence
 
-### D0 - Reproduce the pilot
+Schema v1 is frozen and releases are being cut (see
+[Current Status](../current-status.md) for which). The remaining steps are:
 
-- Run the synthetic pipeline and tests from a clean environment.
-- Confirm manifests, review queues, quality report and deterministic outputs.
-- Treat the observed coverage as diagnostics, not acceptance targets.
+### Enrich the release
 
-### D1 - Profile a real sample
+- Map canonical ingredients to nutrition sources with recorded evidence, then
+  convert quantities to mass and aggregate per-recipe nutrition.
+- Derive cooking time and meal affinity with a recorded basis; meal affinity is
+  a preference, never a filter (ADR-0024 section 5).
+- Audit a sample of each enrichment and publish the audit with its
+  denominators.
 
-- After personally accepting the RecipeNLG terms, store the raw dataset
-  outside Git and record its checksum.
-- Run a fixed-seed, source-filtered 5,000-row sample.
-- Review a stratified set of at least 200 ingredient/recipe issues.
-- Measure the long tail of aliases, units, composites, duplicates and missing
-  serving information before freezing new thresholds.
+### Import into the runtime
 
-### D2 - Produce the first integrated catalog release
-
-- Freeze schema v1, controlled units and canonical ingredient IDs.
-- Curate the first 150-250-recipe working range subject to quality gates.
-- Add an adapter/migration into the existing MealCraft runtime.
+- Add an adapter or migration from the release into the runtime catalog.
 - Add planner and grocery fixtures and regression tests.
-- Publish the quality report, release manifest and known gaps.
+- Publish the quality report, release manifest and known gaps with the import.
 
-### D3 - Freeze evaluation-ready data
+### Freeze evaluation-ready data
 
-- Create independent gold subsets for safety labels, normalization and
-  ingredient-product mappings.
 - Freeze the catalog and FairPrice snapshot used by all relevant baselines.
 - Record missingness and coverage by scenario difficulty.
-- Prevent train/development examples or review feedback from leaking into the
-  held-out set.
+- Keep development examples and review feedback out of the held-out set.
 
 ## 14. Definition of done
 
@@ -357,8 +344,8 @@ The data-engineering module is complete for a release when:
    deterministically;
 3. canonical ingredient and recipe schemas, IDs, vocabularies and missing
    semantics are versioned;
-4. review decisions are auditable and safety-critical facts are independently
-   checked or explicitly unresolved;
+4. every resolution is auditable from its recorded evidence, a sampling audit
+   is published, and allergen labels are rule-derived or explicitly unresolved;
 5. all release gates pass and the quality report states denominators;
 6. the current runtime imports the release idempotently;
 7. planner, FairPrice, frontend and Evaluation consumers have frozen fixtures
@@ -371,13 +358,13 @@ The data-engineering module is complete for a release when:
 
 ## 15. Decisions still requiring evidence
 
-- Whether full recipe text from each source may be redistributed publicly.
 - Which household-unit, density and piece-weight conversions are reliable
   enough for FairPrice package arithmetic.
-- Whether nutrition should be source-reported, ingredient-calculated, or both
-  with a disagreement field.
 - Which taste, method, equipment and difficulty vocabularies achieve enough
-  coverage and reviewer agreement to justify product use.
-- The exact release thresholds after the real 5,000-row profile.
-- Whether the pilot pipeline should be integrated directly, adapted into an
-  import package, or retained as a separate data-build repository.
+  coverage to justify product use.
+
+Settled since this handoff was written: the committed releases are published
+under the owner's confirmed non-commercial educational licence (the upstream
+dump stays local); the pipeline lives in `data-engineering/` in this
+repository; the release gate is frozen with schema v1; and nutrition is
+ingredient-calculated from recorded mappings (ADR-0024).

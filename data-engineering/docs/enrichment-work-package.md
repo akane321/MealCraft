@@ -1,6 +1,7 @@
 # 数据富化工作包（交给 dataset 组员的 agent 执行）
 
-v1 release 已经冻结：8,718 道菜谱 / 443 个规范食材，来自 1,642,647 条上游记录。
+本工作包写于 v1 release（8,718 道菜谱 / 443 个食材）之时；之后已发布 v1.1，并派生了饮食标签，
+营养映射在完整的规范食材词表上进行。以下数字是当时的量，动手前按第 0 节自己重量。
 这个工作包把它补齐到能支撑规划、安全过滤和 held-out 出题的程度。
 
 依据 `decisions/ADR-0024`（私有知识库）：**复核不再是发布门槛。** 你做完即算完成，
@@ -216,7 +217,7 @@ docker compose run --rm backend uv run --no-sync python -m app.evaluation.workbe
 
 ### 🔴 不要原地改 v1
 
-v1 是冻结快照。所有产出进 `data/release/v2/`，带自己的 `release_manifest.json`、
+v1 是冻结快照。所有产出进 `data/release/<新版本>/`，带自己的 `release_manifest.json`、
 `quality_report.md` 和 digest。
 
 ---
@@ -225,7 +226,7 @@ v1 是冻结快照。所有产出进 `data/release/v2/`，带自己的 `release_
 
 做完之后这些必须成立：
 
-1. `data/release/v2/` 存在，manifest 里 `known_gaps` 如实列出仍然缺的东西
+1. `data/release/<新版本>/` 存在，manifest 里 `known_gaps` 如实列出仍然缺的东西
    （**不要写空数组来显得干净**，v1 的 manifest 就是个好样板）
 2. 每一条 `nutrition_mapping` 都有 `evidence` 和 `rejected`；抽 20 条人工看过去，
    理由要站得住

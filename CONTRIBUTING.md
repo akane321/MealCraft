@@ -82,17 +82,8 @@ personal branch as a substitute for task branches.
 
 ## 5. Run the Development Environment
 
-```bash
-cp .env.example .env
-docker compose up --build --detach
-docker compose ps
-```
-
-PowerShell:
-
-```powershell
-Copy-Item .env.example .env
-```
+Follow the setup in [Development](docs/development.md#initial-setup); it is the
+one maintained copy of the prerequisites and start-up commands.
 
 The `.env` file is local-only and must not be committed. Use fixture modes for
 repeatable development unless live external behaviour is the explicit subject
@@ -124,12 +115,11 @@ Documentation integrity. Runs in CI on every pull request, needs no container:
 python scripts/check_docs_integrity.py
 ```
 
-The backend commands below run in CI twice: from a checkout in the `backend`
-job, and through the container in the `compose` job. Those are different
-directory layouts, and code has passed in one while failing in the other, so a
-green run now means the documented command works rather than that some
-equivalent of it works. The frontend commands are covered on the host only;
-running them through the container is not verified by CI.
+In CI the `backend` job runs Ruff (over `backend` and `scripts`) and pytest from
+a checkout; the `compose` job runs pytest and the evaluation commands through the
+container, because code has passed in one layout while failing in the other.
+Ruff through the container, and the frontend commands through the container, are
+not run in CI; the frontend job runs them on the host.
 
 Validate Compose:
 

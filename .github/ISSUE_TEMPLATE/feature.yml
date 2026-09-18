@@ -42,6 +42,10 @@ body:
         - Backend / API
         - Planning engine
         - Recipe / data
+        - Data engineering / release
+        - Agent / conversation
+        - Accounts / authorization
+        - Evaluation / held-out
         - FairPrice integration
         - Database / migration
         - Docker / CI

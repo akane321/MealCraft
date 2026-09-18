@@ -28,13 +28,20 @@ So: **you author episodes for categories that test modules you do not own.**
 it evaluates, and `scripts/check_heldout_episodes.py` refuses an episode whose
 author or reviewer owns one of them.
 
-The same reasoning gives the set its deadline. Under
-`ADR-0020` section 2 the set must be frozen **before** the components it
-evaluates are tuned. This ordering cannot be repaired afterwards: once
-parameters have been fitted with knowledge of these cases, no amount of later
-disclosure makes the split independent again. If we miss it, the honest move is
-to report that MealCraft has no independent test set, and that costs us the part
-of the evaluation grade this work exists to earn.
+The same reasoning limits what tuning may touch (decision ADR-0020, as amended):
+
+- parameters, prompts and thresholds may be fitted on **synthetic or developer
+  data** at any time, including before the freeze;
+- nothing may ever be fitted against held-out episodes, their gold labels or a
+  metric computed from them, and held-out content may not be read in order to
+  choose a parameter, prompt or threshold, before or after the freeze;
+- tuning results, parameter sweeps and developer comparison reports are not
+  shared with episode authors until the set is frozen, because they tell an
+  author where to aim.
+
+Once a component has been fitted with knowledge of these cases, no later
+disclosure makes the split independent again; the honest report would then be
+that MealCraft has no independent test set.
 
 ## What one episode is
 
@@ -146,8 +153,9 @@ It will tell you if:
   raise a recipe's ranking; it may never reduce what the user has to buy;
 - a replanning episode does not declare what should have stayed unchanged.
 
-Before freezing, `--strict` additionally requires the full quota, the declared
-language balance, and a reviewer on every episode.
+Before freezing, `--strict` additionally requires the full quota, at least two
+languages in every category, both languages somewhere in the set, and a reviewer
+on every episode.
 
 ## What the checker cannot judge
 
@@ -169,8 +177,8 @@ round.
 
 ## Language
 
-The plan is 32 English, 32 Chinese, 16 mixed, declared before authoring. Spread
-them across categories: `min_languages_per_category` is 2, so no category may be
+There is no language ratio (decision ADR-0023): both English and Chinese must
+appear in the set, and `min_languages_per_category` is 2, so no category may be
 single-language. If all the hard episodes were in one language, language would
 silently become a difficulty proxy and the comparison would be unreadable.
 
@@ -183,6 +191,14 @@ Each episode needs one reviewer who is neither its author nor an owner of a
 system under test. The reviewer checks that the class is right, the conflict or
 missing field is real, and the gold does not encode one arbitrary correct plan.
 Record disagreements in `review_notes` and resolve them before the freeze.
+
+Record a review with the command rather than by editing the file; it refuses a
+reviewer the cross-authoring rule excludes and leaves nothing half-written:
+
+```bash
+python scripts/mark_reviewed.py --reviewer backend ho-standard-004 ho-standard-006
+python scripts/mark_reviewed.py --reviewer dataset ho-budget_package-006 --note "budget checked by hand"
+```
 
 ## A known limitation, stated up front
 

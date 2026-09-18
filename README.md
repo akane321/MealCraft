@@ -9,8 +9,9 @@ targets a polished, evidence-backed final product: the current MVP is a minimum
 acceptance baseline, not the scope or quality ceiling.
 
 The course deliverable is evaluated as a locally runnable system. Cloud hosting
-or public deployment is not required; `Readme.pdf` and this repository should
-make setup, requirements, and local execution reproducible. Docker Compose
+or public deployment is not required; this repository, and the `Readme.pdf`
+prepared from it for the final submission, make setup, requirements, and local
+execution reproducible. Docker Compose
 remains the supported local runtime rather than evidence of a hosted service.
 
 ## Product Vision
@@ -48,17 +49,18 @@ Those operations remain deterministic and testable.
 
 | Capability | Current implementation |
 | --- | --- |
+| Home surface | One page for everything: a film entry that becomes a conversation, the week and tonight's Top-1 tutorial on one edge, cooked nutrition and the Shopping List on the other, recipe and six-nutrient detail overlays, and a printable Shopping List exported through the browser |
 | Household profile | One shared household profile with member servings, safety constraints, shared defaults, and immutable versions |
-| Accounts, sessions, and tenancy | Authentication, revocable browser sessions, CSRF, and private-data tenancy foundations. See [Current Status](docs/current-status.md) for the verified route and ownership boundary |
+| Accounts, sessions, and tenancy | Authentication, revocable browser sessions, CSRF, household-scoped private data and per-action household authorization. See [Current Status](docs/current-status.md) for what remains |
 | Planning assistant | Persistent English/Chinese conversations, bounded scope routing, structured constraints and clarification controls, confirmation, and tool delegation |
 | Weekly planning | Persisted seven-day main-meal plans with hard filtering, soft ranking, diversity control, and per-person nutrition |
 | Grocery grounding | FairPrice product lookup with normalized packages, PostgreSQL cache, and reproducible fixtures |
 | Shopping List | Consolidated ingredient demand, known-quantity pantry deduction, package rounding, and budget results |
 | Plan execution | `planned`, `completed`, and `skipped` check-in states |
-| Nutrition Dashboard | Daily totals, weekly trends, and completion coverage for completed MealCraft dishes only |
+| Nutrition | Cumulative per-person actuals against the current plan for six nutrients, with labelled daily detail, counting cooked MealCraft dishes only |
 | Replanning | Revision-safe preview, confirmation or discard, local meal changes, Shopping List deltas, and event history |
 | Agent runs | Synchronous per-action `AgentRun` with input digests, explicit deadlines and budgets, durable checkpoints, ordered tool receipts, idempotent replay, and run list/detail/cancel APIs |
-| Evaluation | Versioned developer, held-out, Agent, scope and grounding fixtures; greedy and strong Rule-only references; matched-information v2 developer packets; a Strict End-to-End Task Success scorer that recomputes rather than trusting claims; held-out episode authoring, compilation and freeze tooling; failure registry; frontend state and browser tests |
+| Evaluation | Versioned developer, held-out, Agent, scope and grounding fixtures; greedy and strong Rule-only references; matched-information v2 developer packets; a Strict End-to-End Task Success scorer and common output schema that recompute rather than trust claims (tested, not yet called by an evaluation runner); held-out episode authoring, compilation and freeze tooling; failure registry; frontend state and browser tests |
 
 This table reports capabilities verified on remote `main`, not every final
 design target. Read [Current Status](docs/current-status.md) for the evidence
@@ -202,14 +204,17 @@ Two further limits worth stating plainly:
 
 Strict End-to-End Task Success is the accepted primary endpoint, and the scorer
 for it recomputes every requirement from frozen facts rather than reading a
-system's claims. An independent held-out set of roughly 80 episodes is being
-authored under cross-authoring rules - nobody writes episodes that test their
-own module - and must be frozen before the components it evaluates are tuned,
-because that ordering cannot be repaired afterwards.
+system's claims; it is tested but no evaluation runner calls it yet. An
+independent held-out set of roughly 80 episodes is being authored under
+cross-authoring rules - nobody writes episodes that test their own module - and
+nothing may ever be tuned against it (see the
+[authoring guide](docs/evaluation/heldout-authoring-guide.md)).
 
-The 44-record failure registry is **not** a defect list. 36 entries are greedy
-baseline failures, which are the reason the baseline exists; 8 are Agent
-extraction or clarification failures in MealCraft itself.
+The failure registry in the
+[latest workbench report](docs/evaluation/workbench/latest.md) is **not** a
+defect list: most entries are greedy-baseline failures, which are the reason the
+baseline exists, and the rest are Agent extraction or clarification failures in
+MealCraft itself.
 
 Read the [Evaluation Protocol](docs/evaluation/protocol-v1.md) before quoting
 any result, and the

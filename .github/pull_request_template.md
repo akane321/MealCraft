@@ -25,6 +25,10 @@
 
 - [ ] 后端 Ruff 与 Pytest 通过，或本 PR 不涉及后端
 - [ ] 前端 ESLint、Vitest、typecheck 与 build 通过，或本 PR 不涉及前端
+- [ ] 涉及用户流程时 Playwright（`pnpm test:e2e`）通过
+- [ ] 涉及评价时运行 `python -m app.evaluation.workbench`，并提交重新生成的报告
+- [ ] `python scripts/check_docs_integrity.py`、`scripts/check_heldout_episodes.py` 与 `scripts/report_catalog_reality.py --check` 通过
+- [ ] 涉及 `data-engineering/` 时其单元测试（`python -m unittest discover -s tests`）通过
 - [ ] Docker Compose 配置检查通过
 - [ ] 已在最低 1280×720 桌面视口检查相关页面，或本 PR 不涉及页面
 - [ ] 已更新相关 API、架构或使用文档

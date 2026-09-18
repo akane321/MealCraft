@@ -62,10 +62,9 @@ versioned policy and constant-time verification. The database stores only the
 encoded password hash. Logs, traces, audit metadata and error responses must
 never contain the password.
 
-The scaffold intentionally stores an externally produced `password_hash` and
-does not implement an improvised password algorithm. The contributor must add a
-maintained password-hashing dependency, its policy wrapper, upgrade-on-login
-behaviour and tests before exposing login.
+This is implemented in `backend/app/auth/passwords.py`: Argon2id through a
+maintained library, a versioned policy, and upgrade-on-login when the policy
+changes, with tests. No improvised password algorithm is used.
 
 ### Recommended session model
 

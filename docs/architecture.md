@@ -38,7 +38,7 @@ Shopping List correctness.
 | User | <--> | MealCraft Web Application  | <--> | FairPrice Web  |
 +------+      | Nuxt + FastAPI + Services  |      +----------------+
               +-------------+--------------+      +----------------+
-                            |              <----> | YouTube API    |
+                            |              <----> | YouTube (target)|
                      +------v-------+              +----------------+
                      | PostgreSQL   |
                      +--------------+
@@ -51,11 +51,11 @@ must keep the core flow runnable without an API key or live retailer response.
 
 | Container | Technology | Responsibility |
 | --- | --- | --- |
-| Frontend | Nuxt 4, Vue 3, TypeScript | Product navigation, forms, Assistant, plans, recipes, products, Shopping List, Dashboard, and replanning interaction |
+| Frontend | Nuxt 4, Vue 3, TypeScript | The one-surface home (conversation, week and kitchen edge panels, recipe, nutrition and Shopping List overlays) plus sign-in, household profile and service status pages |
 | Backend | Python 3.12, FastAPI, Pydantic | HTTP contracts, orchestration, deterministic services, external adapters, and evaluation entry points |
 | Database | PostgreSQL | Profiles and versions, recipes, ingredients, products/cache, plans, entries, grocery items, events, check-ins, and Agent sessions |
 | External provider | FairPrice public catalogue | Current product, package, and observed-price information |
-| Optional tutorial provider | YouTube Data API | Bounded tutorial candidates after recipe selection; only one deterministic Top-1 reaches the user |
+| Tutorial provider | Sample tutorial fixture; YouTube Data API is a scaffold | Bounded tutorial candidates after recipe selection; only one deterministic Top-1 reaches the user, labelled as a sample while the fixture is used |
 | Optional model provider | OpenAI through structured parsing | Explicit field extraction when locally enabled; never the calculator or validator |
 
 Docker Compose provides the local integration boundary. The backend applies
@@ -95,10 +95,12 @@ depend on frontend presentation. Repositories should not decide product policy.
   version.
 - Creates a replacement plan rather than rewriting history after profile change.
 
-The accepted final backend adds `User`, `AuthSession`, `Household` and
-`HouseholdMembership` as identity and tenancy concepts. These additive models
-are currently a scaffold: existing routes are not authenticated or
-household-scoped until the complete ownership migration is implemented.
+`User`, `AuthSession`, `Household` and `HouseholdMembership` carry identity and
+tenancy. Private routes require an authenticated session and an active
+household, authorize each action through one `HouseholdAction` dependency, and
+read only rows owned by that household; a cross-household identifier resolves
+as not found. What is still missing is listed in
+[Current Status](current-status.md).
 
 ### Agent
 
@@ -249,7 +251,7 @@ Selected canonical recipe
  -> bounded YouTube candidates or fixture
  -> eligibility filter and scored ranking
  -> one Top-1 tutorial plus retrieval trace
- -> Recipe Side Panel
+ -> week panel on the home surface (tonight's dinner)
 ```
 
 Candidate evidence and score components remain internal for evaluation. Video

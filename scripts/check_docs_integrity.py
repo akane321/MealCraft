@@ -5,7 +5,8 @@ AGENTS.md states two rules that a reader cannot be relied on to enforce:
   1. mutable state (a `main` SHA, whether a numbered pull request has merged, a
      "last verified" date, current metric values) belongs only to
      `docs/current-status.md` and the generated evaluation reports;
-  2. every internal documentation link must resolve.
+  2. every internal documentation link, and every backtick-quoted repository
+     path, must resolve.
 
 Rule 1 exists because a stale "PR #22 is not merged yet" line sits in the first
 paragraph a contributor reads and stays wrong forever. Rule 2 exists because a
@@ -29,6 +30,8 @@ DATED_STATE_DOCUMENTS = {
     "docs/evaluation/latest.md",
     "docs/evaluation/workbench/latest.md",
 }
+# Generated per-release reports record the commit they were built from.
+GENERATED_REPORT_PREFIXES = ("data-engineering/data/release/",)
 # Documents whose job is to state the rule have to quote the forbidden shapes.
 RULE_DEFINING_DOCUMENTS = {
     "AGENTS.md",
@@ -37,7 +40,7 @@ RULE_DEFINING_DOCUMENTS = {
     "docs/memory-bootstrap.md",
 }
 
-SCAN_ROOTS = ["docs", "data"]
+SCAN_ROOTS = ["docs", "data", "data-engineering", ".github"]
 SCAN_FILES = ["README.md", "AGENTS.md", "CONTRIBUTING.md"]
 
 VOLATILE_PATTERNS = {
@@ -49,6 +52,18 @@ VOLATILE_PATTERNS = {
 EXEMPT_LINE = re.compile(r"(?i)(?:must not|never|do not|<number>|YYYY-MM-DD|123)")
 
 LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)#]+?)(?:#[^)]*)?\)")
+# A backtick-quoted path rooted at a top-level directory, e.g. `docs/x.md`.
+REPO_PATH_PATTERN = re.compile(r"`((?:docs|backend|frontend|scripts|data|data-engineering|evaluation)/[\w./-]+)`")
+# Generated or local-only output; a quoted path there need not exist in a checkout.
+GENERATED_PREFIXES = (
+    "data-engineering/data/raw/",
+    "data-engineering/data/staging/",
+    "data-engineering/data/curated/",
+    "data-engineering/data/review/",
+    "data-engineering/reports/",
+    "frontend/.output/",
+    "frontend/node_modules/",
+)
 
 
 def documents() -> list[Path]:
@@ -66,6 +81,8 @@ def check_volatile_state(errors: list[str]) -> None:
     for path in documents():
         relative = path.relative_to(ROOT).as_posix()
         if relative in DATED_STATE_DOCUMENTS or relative in RULE_DEFINING_DOCUMENTS:
+            continue
+        if relative.startswith(GENERATED_REPORT_PREFIXES):
             continue
         for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             if EXEMPT_LINE.search(line):
@@ -90,6 +107,15 @@ def check_links(errors: list[str]) -> None:
                 if (path.parent / target).resolve().exists():
                     continue
                 errors.append(f"{relative}:{number} links to a missing path: {target}")
+            for target in REPO_PATH_PATTERN.findall(line):
+                if any(c in target for c in "<*"):
+                    continue
+                # data-engineering documents quote paths relative to their own folder.
+                bases = [""] + (["data-engineering/"] if relative.startswith("data-engineering/") else [])
+                if any((base + target).startswith(GENERATED_PREFIXES) for base in bases):
+                    continue
+                if not any((ROOT / (base + target).rstrip("/")).exists() for base in bases):
+                    errors.append(f"{relative}:{number} names a missing path: {target}")
 
 
 def check_status_freshness(errors: list[str]) -> None:

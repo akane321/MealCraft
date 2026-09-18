@@ -25,16 +25,18 @@ against a contract that already said something different.
 
 | The task touches | Read first |
 | --- | --- |
-| evaluation metrics, baselines, datasets, held-out splits, capability claims | `docs/design/comparative-evaluation-v2.md`, `docs/evaluation/protocol-v1.md` |
+| evaluation metrics, baselines, datasets, held-out splits, capability claims | `docs/design/comparative-evaluation-v2.md`, `docs/evaluation/protocol-v1.md`, `docs/evaluation/heldout-authoring-guide.md` |
 | a cross-module field, schema, provenance or unknown-value semantics | `docs/design/README.md` and the owning module contract |
 | planning, validation, package or budget arithmetic | `docs/design/algorithm-engineering-handoff.md` |
 | accounts, household isolation, migrations, operations | `docs/design/backend-platform-engineering.md` |
 | Agent scope, tool authorization, grounding, runs | `docs/design/agent-orchestration.md` |
 | FairPrice, YouTube, external evidence or RAG | `docs/design/external-retrieval-rag.md` |
-| recipe or ingredient sourcing, cleaning, release | `docs/data/README.md` |
+| recipe or ingredient sourcing, cleaning, release | `docs/data/README.md`, `data-engineering/README.md` |
+| the user interface or any user-facing wording | `docs/evaluation/frontend-state-matrix.md` and the home-surface components in `frontend/app/components/home/` |
 
 When the private knowledge repository is available, its `AGENTS.md` section 2.1
-carries the same table with the corresponding decision records.
+carries the same table with the decision records that govern each topic; read
+those too, because a contract here may lag a newer decision there.
 
 The initial proposal defines a minimum final-product ambition. Its maintained
 public interpretation is `docs/project-guide.md`; do not require every agent to
@@ -84,12 +86,16 @@ backend/app/api/          HTTP routes and request/response boundaries
 backend/app/services/     deterministic workflows and domain services
 backend/app/repositories/ persistence adapters
 backend/app/evaluation/   repeatable datasets, metrics and reports
-frontend/app/pages/       user-facing routes
-frontend/app/components/  reusable product interface
+backend/app/planning/     product planner, plus the offline Planning v2 components
+backend/app/auth/         password hashing, sessions, household action authorization
+frontend/app/pages/       the home surface (index) and sign-in, profile, status pages
+frontend/app/components/  home-surface panels and overlays
 data/recipes/             validated recipe catalog
 data/ingredients/         normalized ingredient catalog
 data/fixtures/            deterministic grocery fixtures
 data/evaluation/          versioned evaluation inputs
+data-engineering/         RecipeNLG pipeline, versioned releases, enrichment
+scripts/                  repository checks, held-out authoring and review tools
 docs/                     maintained product and engineering documentation
 ```
 
@@ -128,6 +134,7 @@ If the private knowledge repository cannot be accessed, state that the context i
   where required, and a documented consumer. Use `docs/design/README.md`.
 - Preserve unrelated user changes and use feature branches plus pull requests.
 - Keep numeric constraints, nutrition, cost, package quantity, Shopping List, and evaluation logic deterministic and testable. The Agent may parse intent and explain tool results.
+- Never read held-out episodes, their gold labels or any metric computed from them in order to choose a parameter, prompt or threshold, and do not pass tuning results to episode authors before the set is frozen (decision ADR-0020 as amended). Fit on synthetic or developer data.
 - Never commit secrets, `.env`, real personal health data, private memory content, or raw restricted course material to this public repository.
 
 ## Protected product invariants
@@ -165,10 +172,11 @@ Run `python -m app.evaluation.workbench` for evaluation-affecting changes and
 Playwright for affected desktop user journeys. Do not claim visual quality from
 a successful build alone. Mobile and tablet product design are out of scope.
 
-CI runs the backend checks in both layouts: from a checkout in the `backend`
-job, and through the container in the `compose` job, using the commands above. A green run therefore means the documented
-command works, not only that some equivalent of it works. The frontend container
-commands are not covered; the frontend job runs them on the host.
+CI runs Ruff and pytest from a checkout in the `backend` job (Ruff over
+`backend` and `scripts`, the same files the container's `ruff check .` sees), and
+pytest plus the evaluation commands through the container in the `compose` job.
+Ruff through the container and the frontend container commands are not run in
+CI; the frontend job runs its commands on the host.
 
 Update the canonical document identified in `docs/README.md` when behaviour,
 contracts, setup, final direction, or evaluation semantics change.
