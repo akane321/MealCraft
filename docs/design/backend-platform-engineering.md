@@ -3,11 +3,11 @@
 ## Status and purpose
 
 This document defines the accepted final backend direction and the handoff for
-the contributor completing it. MealCraft already has useful FastAPI,
-PostgreSQL, repository, planning, Agent and Dashboard foundations, but its
-current HTTP surface is still an anonymous single-tenant baseline.
+the contributor completing it. It is a long-lived design contract, not a record
+of mutable implementation progress. Read [Current Status](../current-status.md)
+for the verified backend boundary, evidence and next gaps.
 
-The merged foundation provides an additive persistence scaffold:
+The platform foundation consists of:
 
 - account, credential and revocable authentication-session models;
 - household and household-membership models;
@@ -18,14 +18,10 @@ The merged foundation provides an additive persistence scaffold:
 - low-level identity persistence methods;
 - synthetic cross-household isolation fixtures and focused tests.
 
-The first authentication slice now adds the reviewed Argon2id adapter,
-registration/login/logout/current-actor/device-session APIs, per-session CSRF
-digests, bounded account locking and digest-only opaque cookies. It deliberately
-does **not** claim that existing plans, profiles and Agent sessions are
-user-isolated. Wiring authentication into selected routes before every private
-repository has household ownership would create a false security boundary. The
-remaining work packages below must be completed before MealCraft is described
-as a multi-user application.
+Authentication, tenancy and authorization must be described as complete only
+when every private route and repository satisfies the security invariants below.
+Partial route protection must never be presented as a complete multi-user
+boundary.
 
 ## Final backend goal
 
@@ -152,11 +148,10 @@ Do not combine destructive cleanup with the first ownership migration. Preserve
 the current demo data and provide a reversible downgrade until the migration is
 accepted.
 
-## Current authentication and planned account API surface
+## Account and household API surface
 
-The first six authentication endpoints are executable in the authentication
-slice. Password lifecycle, household collaboration and account-lifecycle
-endpoints remain target contracts:
+The platform contract includes the following endpoints. Their implementation
+status belongs in [Current Status](../current-status.md):
 
 ```text
 POST   /api/auth/register
@@ -252,14 +247,13 @@ scheduling requirements justify another service.
 - deterministic services remain the authority for allergens, nutrition,
   packages, costs and validation.
 
-## Work-package progress for the backend contributor
+## Backend work packages
 
-1. **Password adapter — implemented first slice**: Argon2id, policy versioning,
-   verification, upgrade-on-login and secret-boundary tests are executable.
-2. **Authentication service and routes — implemented first slice**:
-   registration, login, logout, current actor, device sessions, secure-by-
-   environment cookie policy, per-session CSRF and failed-login locking are
-   executable. Origin-level rate limiting and deployment proxy validation remain.
+1. **Password adapter**: Argon2id, policy versioning, verification,
+   upgrade-on-login and secret-boundary tests.
+2. **Authentication service and routes**: registration, login, logout, current
+   actor, device sessions, secure-by-environment cookie policy, per-session CSRF,
+   failed-login locking, origin-level rate limiting and proxy validation.
 3. **Account lifecycle**: email verification, reset tokens, password change,
    suspension, export and deletion.
 4. **Tenant migration**: add/backfill household ownership across every private
@@ -300,5 +294,5 @@ scheduling requirements justify another service.
 - account export/deletion semantics are documented and tested;
 - no real credential, token, cookie or personal health data exists in fixtures,
   logs or repository history;
-- current anonymous behaviour is not called multi-user until the complete route
-  and ownership migration is merged and verified.
+- the product is not called multi-user until complete route protection,
+  ownership migration and per-action authorization are merged and verified.

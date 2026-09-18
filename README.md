@@ -49,7 +49,7 @@ Those operations remain deterministic and testable.
 | Capability | Current implementation |
 | --- | --- |
 | Household profile | One shared household profile with member servings, safety constraints, shared defaults, and immutable versions |
-| Accounts and sessions | Argon2id credentials, registration and login, digest-only revocable sessions, CSRF, and per-device revocation. Business routes are still anonymous and single-tenant |
+| Accounts, sessions, and tenancy | Authentication, revocable browser sessions, CSRF, and private-data tenancy foundations. See [Current Status](docs/current-status.md) for the verified route and ownership boundary |
 | Planning assistant | Persistent English/Chinese conversations, bounded scope routing, structured constraints and clarification controls, confirmation, and tool delegation |
 | Weekly planning | Persisted seven-day main-meal plans with hard filtering, soft ranking, diversity control, and per-person nutrition |
 | Grocery grounding | FairPrice product lookup with normalized packages, PostgreSQL cache, and reproducible fixtures |
