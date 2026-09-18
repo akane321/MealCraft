@@ -51,6 +51,17 @@ Important semantics:
 
 ### 2. Use the planning assistant
 
+The home page at <http://localhost:3000> is the main way in. Type what the week
+should look like and the page turns into a conversation. Move the pointer to the
+left edge for the week's dinners and tonight's how-to video, or to the right
+edge for nutrition and the shopping list; the conversation moves aside while a
+panel is open, and the pin button keeps one open. **Preview list** shows the
+shopping list as it will print, and **Export PDF** opens the browser's print
+dialog, where you can save it as a PDF. The home page asks you to sign in first
+and brings you back afterwards.
+
+The standalone Assistant page remains available:
+
 Open <http://localhost:3000/assistant> and describe the request in English or
 Chinese. The Assistant persists the conversation, extracts structured fields,
 and asks a focused clarification when required. Household-size and pantry

@@ -6,15 +6,18 @@ const email = ref("");
 const password = ref("");
 const displayName = ref("");
 const { actor, authenticate, errorMessage, isLoading } = useAuth();
+const requested = useRoute().query.next;
+// Only same-site paths, so a crafted link cannot bounce the user elsewhere.
+const next = typeof requested === "string" && /^\/(?![/\\])/.test(requested) ? requested : "/profile";
 
 watchEffect(() => {
-  if (actor.value) navigateTo("/profile");
+  if (actor.value) navigateTo(next);
 });
 
 async function submit() {
   const payload: Record<string, string> = { email: email.value, password: password.value };
   if (mode.value === "register") payload.display_name = displayName.value;
-  if (await authenticate(mode.value, payload)) await navigateTo("/profile");
+  if (await authenticate(mode.value, payload)) await navigateTo(next);
 }
 </script>
 

@@ -1,0 +1,156 @@
+/* Home surface: film entry, glass chat and edge panels. Scoped by the .mc-surface root. */
+.mc-surface {
+  --mc-base: #0e0c0a;
+  --mc-ivory: #f2ede4;
+  --mc-text-2: #cfc6b8;
+  --mc-text-3: #a89f90;
+  --mc-accent: #e8906f;
+  --mc-accent-fill: #c2553a;
+  --mc-sage: #a9b79a;
+  --mc-line: rgba(220, 200, 160, 0.16);
+  --mc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --mc-serif: Fraunces, Georgia, serif;
+
+  position: fixed;
+  inset: 0;
+  /* clip, not hidden: a hidden box is still a scroll container and focus can scroll it. */
+  overflow: clip;
+  background: var(--mc-base);
+  color: var(--mc-ivory);
+  font-family: Figtree, system-ui, sans-serif;
+}
+
+.mc-surface button { font-family: inherit; cursor: pointer; }
+.mc-surface button:disabled { cursor: default; opacity: 0.55; }
+.mc-surface :focus-visible { outline: 2px solid var(--mc-accent); outline-offset: 2px; }
+
+/*
+ * Liquid glass. Each glass element paints nothing itself: ::before lenses what
+ * is behind it (blur + saturation, and in Chromium the #mc-liquid lens bends it
+ * at the edges), ::after carries the tint, sheen and rim light. Variables
+ * tune the three strengths below; components may override them.
+ */
+.mc-pill, .mc-frost, .mc-ribbed {
+  --lg-blur: 2px;
+  --lg-tint: rgba(242, 237, 228, 0.05);
+  --lg-sheen: 0.16;
+  isolation: isolate;
+  box-sizing: border-box;
+  border: 0;
+  background: transparent;
+  color: var(--mc-ivory);
+}
+:where(.mc-pill, .mc-frost, .mc-ribbed) { position: relative; }
+
+.mc-pill::before, .mc-frost::before, .mc-ribbed::before,
+.mc-pill::after, .mc-frost::after, .mc-ribbed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.mc-pill::before, .mc-frost::before, .mc-ribbed::before {
+  backdrop-filter: blur(var(--lg-blur)) saturate(185%) brightness(1.06);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(185%) brightness(1.06);
+}
+.mc-refract :is(.mc-pill, .mc-frost, .mc-ribbed)::before {
+  backdrop-filter: blur(var(--lg-blur)) url(#mc-liquid) saturate(185%) brightness(1.06);
+}
+
+.mc-pill::after, .mc-frost::after, .mc-ribbed::after {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, var(--lg-sheen)) 0%, rgba(255, 255, 255, 0) 42%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, calc(var(--lg-sheen) * 0.5)) 100%),
+    var(--lg-tint);
+  box-shadow:
+    inset 1.5px 1.5px 0.5px -0.5px rgba(255, 255, 255, 0.55),
+    inset -1px -1px 0.5px -0.5px rgba(255, 255, 255, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 0 18px rgba(255, 255, 255, 0.05);
+}
+
+.mc-pill {
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+/* Cards hold reading text, so they blur and tint more than pills. */
+.mc-frost {
+  --lg-blur: 8px;
+  --lg-tint: rgba(24, 19, 15, 0.38);
+  --lg-sheen: 0.1;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+.mc-ribbed {
+  --lg-blur: 14px;
+  --lg-tint: rgba(22, 18, 14, 0.62);
+  --lg-sheen: 0.12;
+  border-radius: 28px;
+  overflow: clip;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+}
+.mc-ribbed::after {
+  background:
+    repeating-linear-gradient(90deg, rgba(242, 237, 228, 0.03) 0 2px, rgba(242, 237, 228, 0) 2px 9px),
+    linear-gradient(135deg, rgba(255, 255, 255, var(--lg-sheen)) 0%, rgba(255, 255, 255, 0) 40%),
+    var(--lg-tint);
+}
+
+.mc-primary {
+  border: 0;
+  border-radius: 999px;
+  background: var(--mc-ivory);
+  color: var(--mc-base);
+  font-weight: 600;
+}
+
+.mc-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mc-accent);
+}
+
+.mc-serif { font-family: var(--mc-serif); font-weight: 400; }
+
+@keyframes mc-rise {
+  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+.mc-rise { animation: mc-rise 560ms var(--mc-ease) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-surface *, .mc-surface *::before, .mc-surface *::after {
+    transition-duration: 0ms !important;
+    animation: none !important;
+  }
+}
+
+/* Only the shopping list sheet prints. */
+@media print {
+  body * { visibility: hidden; }
+  .mc-print-sheet, .mc-print-sheet * { visibility: visible; }
+  .mc-print-sheet {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  .mc-surface, .mc-sheet-overlay { position: static !important; display: block !important; background: #ffffff; }
+  .mc-sheet-overlay > * { max-height: none !important; overflow: visible !important; box-shadow: none !important; }
+  .app-shell { min-height: 0 !important; }
+  .mc-surface > :not(.mc-sheet-overlay), .mc-sheet-overlay > :not(:has(.mc-print-sheet)) { display: none !important; }
+  /* Print restarts animations; a fade-in would print a blank page. */
+  .mc-surface *, .mc-surface *::before, .mc-sheet-overlay {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+  }
+}

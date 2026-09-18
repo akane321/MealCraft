@@ -145,7 +145,8 @@ committed.
 
 ### Local entry points
 
-- Product home: <http://localhost:3000>
+- Product home: <http://localhost:3000> (chat, with the week on the left edge and nutrition and groceries on the right)
+- Service status: <http://localhost:3000/system>
 - Planning assistant: <http://localhost:3000/assistant>
 - Household profile: <http://localhost:3000/profile>
 - Recipe catalog: <http://localhost:3000/recipes>
