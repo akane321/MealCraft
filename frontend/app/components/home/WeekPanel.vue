@@ -9,7 +9,7 @@ const props = defineProps<{
   cookedCount: number;
   updatingEntryId: number | null;
 }>();
-const emit = defineEmits<{ markCooked: [entryId: number] }>();
+const emit = defineEmits<{ markCooked: [entryId: number]; openRecipe: [slug: string] }>();
 
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
@@ -64,7 +64,7 @@ function statusLabel(day: NutritionDashboardDay) {
       >
         <span class="date"><small>{{ dayParts(day.planned_date).weekday }}</small>{{ dayParts(day.planned_date).date }}</span>
         <span class="dish">
-          <strong>{{ day.recipe.title }}</strong>
+          <button type="button" class="title" @click="emit('openRecipe', day.recipe.slug)">{{ day.recipe.title }}</button>
           <small>{{ Math.round(day.nutrition_per_person.calories_kcal) }} kcal · {{ day.recipe.total_time_minutes }} min</small>
         </span>
         <span class="status" :class="day.status">
@@ -97,6 +97,8 @@ function statusLabel(day: NutritionDashboardDay) {
         </button>
         <p v-else class="no-video">No how-to video for this dish yet.</p>
       </div>
+      <div class="tonight-actions">
+      <button type="button" class="mc-pill cooked" @click="emit('openRecipe', tonight.day.recipe.slug)">Recipe &amp; steps</button>
       <button
         v-if="tonight.day.status === 'planned'"
         type="button"
@@ -106,6 +108,7 @@ function statusLabel(day: NutritionDashboardDay) {
       >
         {{ updatingEntryId === tonight.day.entry_id ? "Saving…" : "Mark as cooked" }}
       </button>
+      </div>
     </section>
   </div>
 </template>
@@ -125,7 +128,10 @@ header p { margin: 2px 0 0; font-size: 12px; color: var(--mc-text-3); }
 .date { width: 34px; display: flex; flex-direction: column; font-size: 15px; line-height: 1.15; }
 .date small { font-size: 11px; font-weight: 600; color: var(--mc-text-3); }
 .dish { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
-.dish strong { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dish .title { padding: 0; border: 0; background: none; color: var(--mc-ivory); text-align: left; font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dish .title:hover { text-decoration: underline; }
+.tonight-actions { display: flex; gap: 8px; }
+.tonight-actions button { flex: 1; }
 .dish small { font-size: 11px; color: var(--mc-text-3); }
 .status { flex-shrink: 0; display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--mc-text-3); }
 .status.completed { color: var(--mc-sage); }

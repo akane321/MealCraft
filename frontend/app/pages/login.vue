@@ -8,7 +8,7 @@ const displayName = ref("");
 const { actor, authenticate, errorMessage, isLoading } = useAuth();
 const requested = useRoute().query.next;
 // Only same-site paths, so a crafted link cannot bounce the user elsewhere.
-const next = typeof requested === "string" && /^\/(?![/\\])/.test(requested) ? requested : "/profile";
+const next = typeof requested === "string" && /^\/(?![/\\])/.test(requested) ? requested : "/";
 
 watchEffect(() => {
   if (actor.value) navigateTo(next);

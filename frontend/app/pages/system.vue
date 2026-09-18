@@ -59,13 +59,6 @@ const healthCheckUrl = computed(() => `${config.public.apiBase}/api/health`);
           </div>
 
           <nav class="technical-links" aria-label="Technical links">
-            <NuxtLink to="/recipes">
-              <svg aria-hidden="true" viewBox="0 0 24 24">
-                <path d="M5 4h14v16H5z" />
-                <path d="M9 8h6M9 12h6M9 16h4" />
-              </svg>
-              Browse recipe catalog
-            </NuxtLink>
             <a :href="apiDocumentationUrl" target="_blank" rel="noreferrer">
               <svg aria-hidden="true" viewBox="0 0 24 24">
                 <path d="M6 3.5h8l4 4V20.5H6z" />

@@ -174,7 +174,7 @@ async function saveProfile() {
 async function generateFromProfile() {
   saveNotice.value = null;
   const generated = await generatePlan({ start_date: form.planningStartDate });
-  if (generated) saveNotice.value = `Plan #${generated.plan.id} was generated from profile version ${generated.profile_version}.`;
+  if (generated) saveNotice.value = `Plan #${generated.plan.id} was generated from profile version ${generated.profile_version}; it is now your week on the home page.`;
 }
 
 async function rebuildLatestPlan() {

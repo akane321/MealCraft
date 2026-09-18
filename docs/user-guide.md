@@ -31,10 +31,15 @@ Open <http://localhost:3000>. The health endpoint at
 
 ## Recommended Product Walkthrough
 
-### 1. Sign in and create or update the household profile
+Everything below happens on the home page at <http://localhost:3000>. Besides
+it there are only three pages: `/login`, `/profile` (the household settings
+behind the avatar) and `/system` (service status).
 
-Open <http://localhost:3000/login> to register or sign in. Each new account
-receives its own household. Then open <http://localhost:3000/profile>.
+### 1. Sign in and set up the household
+
+The home page asks you to sign in before the first message and brings you back
+afterwards; <http://localhost:3000/login> also registers a new account, and each
+new account receives its own household. The avatar opens the household profile.
 
 Record household members and servings, then configure shared defaults such as
 budget, maximum cooking time, general preferences, optional user-entered
@@ -44,111 +49,73 @@ Important semantics:
 
 - member allergens, prohibited ingredients, and diet requirements are merged
   into the safety boundary for the shared plan;
-- saving an edit creates a new profile version;
-- a plan records the exact profile version used to generate it;
+- an allergen MealCraft cannot check for excludes every recipe rather than
+  none, and allergen labels come from ingredient data, so check product labels;
+- saving an edit creates a new profile version, and a plan records the exact
+  profile version used to generate it;
 - only known, unit-compatible pantry quantities may reduce purchase demand;
 - an ingredient without a quantity influences ranking only.
 
-### 2. Use the planning assistant
+A week generated from the profile page shows up on the home page.
 
-The home page at <http://localhost:3000> is the main way in. Type what the week
-should look like and the page turns into a conversation. Move the pointer to the
-left edge for the week's dinners and tonight's how-to video, or to the right
-edge for nutrition and the shopping list; the conversation moves aside while a
-panel is open, and the pin button keeps one open. **Preview list** shows the
-shopping list as it will print, and **Export PDF** opens the browser's print
-dialog, where you can save it as a PDF. The home page asks you to sign in first
-and brings you back afterwards.
+### 2. Plan the week in the conversation
 
-The standalone Assistant page remains available:
-
-Open <http://localhost:3000/assistant> and describe the request in English or
-Chinese. The Assistant persists the conversation, extracts structured fields,
-and asks a focused clarification when required. Household-size and pantry
-quantity questions may appear as buttons or a typed input. Use those controls
-when available; each answer is tied to the displayed conversation version so a
-stale browser choice cannot silently overwrite newer constraints.
+Type what the week should look like, in English or Chinese. The page turns into
+a conversation: the assistant extracts structured constraints and asks a focused
+question when something is missing. Household-size and pantry-quantity questions
+may appear as buttons; each answer is tied to the displayed conversation
+version, so a stale choice cannot overwrite newer constraints. When the details
+are complete, **Plan my week** generates seven dinners.
 
 MealCraft handles meal planning, recipes, groceries, budgets and explicit
-dietary constraints. Social, unrelated, disease-treatment and instruction-
-bypassing requests receive a scope boundary and do not change planning state.
-For a mixed request, only the supported meal-planning segment is processed.
-
-Review the structured constraint summary before confirmation. The Agent does
-not independently calculate prices or decide whether allergens are safe; it
-delegates the confirmed request to deterministic services.
+dietary constraints. Social, unrelated, disease-treatment and
+instruction-bypassing requests receive a scope boundary and do not change
+planning state; for a mixed request only the supported segment is processed. The
+assistant does not calculate prices or decide allergen safety itself; it hands
+the confirmed request to deterministic services.
 
 The default fixture parser works without an API key. Model-based parsing is an
 explicit local configuration described in [Development](development.md).
 
-### 3. Generate and inspect the weekly plan
+### 3. The week, recipes and tutorials (left edge)
 
-Open <http://localhost:3000/weekly-plan> directly or follow the result from the
-profile or Assistant flow.
+Move the pointer to the left edge, or choose **See the week**. The panel lists
+the seven dinners with calories, time and status, and tonight's dinner with a
+how-to video when one matches the dish. Choosing a dish, or **Recipe & steps**,
+opens its ingredients, allergen labels and steps. **Mark as cooked** records the
+dinner. The conversation moves aside while a panel is open, and the pin button
+keeps it open.
 
-Inspect:
+Tutorials currently come from a small sample set and are labelled as samples;
+most dishes say that no video is available yet.
 
-- the seven planned main meals;
-- recipe and serving information;
-- per-person nutrition;
-- constraints and budget outcome;
-- consolidated grocery demand;
-- package quantities and prices;
-- pantry deductions.
+### 4. Nutrition and the shopping list (right edge)
 
-The weekly planner avoids consecutive repetition when alternatives are
-available. If the request is infeasible, the product should report the conflict
-instead of returning a plan that silently violates hard constraints.
+Move the pointer to the right edge, or choose **Groceries & nutrition**.
 
-### 4. Inspect recipes and products
+Nutrition leads with what has actually been eaten: only dinners marked cooked
+count as actuals. **All six nutrients & daily detail** opens the full view:
+calories, protein, carbohydrate, fat, sodium and sugar per person, a cumulative
+curve comparing cooked dinners with the current plan, and a daily table that
+labels each dinner as actual, planned or not counted. Each dinner can be marked
+cooked, skipped, or back to planned there. MealCraft does not know about food
+eaten elsewhere, so this is not complete dietary monitoring.
 
-Use <http://localhost:3000/recipes> to browse the validated internal catalog and
-open recipe details. Use <http://localhost:3000/products> to search FairPrice
-products.
+The shopping list shows the total against the weekly budget and the costliest
+lines. The price label says where prices came from: FairPrice with the date they
+were fetched, prices saved earlier when FairPrice did not respond, or sample
+prices. An ingredient FairPrice does not stock is listed as not priced rather
+than given a made-up price. **Preview list** shows the sheet as it will print;
+**Export PDF** opens the browser's print dialog, where you can save it as a PDF.
 
-Product results may come from:
+### 5. Change a dinner
 
-- `live`: a current FairPrice lookup;
-- cache: a recent result stored in PostgreSQL;
-- fixture: stable FairPrice-shaped development data.
-
-Use fixture mode for reproducible demonstrations and tests. Live data may change
-or become temporarily unavailable.
-
-### 5. Record plan execution
-
-Open <http://localhost:3000/dashboard>. Each planned meal can be marked:
-
-- `planned`;
-- `completed`;
-- `skipped`.
-
-Only completed MealCraft dishes contribute to actual nutrition totals and weekly
-trends. The Dashboard does not know about food eaten outside MealCraft and must
-not be interpreted as complete dietary monitoring.
-
-The Dashboard leads with cumulative per-person nutrition for the selected plan.
-Its primary curve compares completed cumulative actuals with the current
-non-skipped plan. A separate daily table keeps each day's calories, protein,
-carbohydrate, fat, sodium, and sugar visible while labelling values as completed
-actuals, planned previews, or not counted after a skip.
-
-### 6. Preview a plan change
-
-Use the available replanning action from the weekly plan or Assistant. A change
-is first stored as a preview. Review the replacement recipe, nutrition changes,
-Shopping List changes, price delta, and validation result before confirming or
-discarding it.
-
-Confirmed changes update the plan revision and event history. Completed and
-locked meals are protected, and a stale preview is rejected after another
+Ask in the conversation, for example to replace Friday's dinner. The change is
+first shown as a preview: the replacement recipe, the calorie and grocery
+differences, and that other dinners are unchanged. **Confirm change** applies
+it and updates the plan revision; **Keep as is** discards it. Completed and
+locked dinners are protected, and a stale preview is rejected after another
 confirmed change.
-
-## Structured Planning Form
-
-The form at <http://localhost:3000/plan> provides direct constraint matching
-without a conversation. It is useful for inspecting deterministic recommendation
-behaviour and comparing structured input with Agent-parsed input.
 
 ## Reading Nutrition Information
 
@@ -157,11 +124,11 @@ behaviour and comparing structured input with Agent-parsed input.
 - Broad lower-sodium, lower-sugar, or lower-calorie preferences are soft ranking
   signals unless the user enters an explicit limit.
 - Missing nutrition data must not be interpreted as a successful validation.
-- Dashboard actuals cover completed MealCraft dishes only.
+- Nutrition actuals cover dinners marked cooked in MealCraft only.
 
 ## Common Recovery Steps
 
-### A page cannot reach the backend
+### The home page cannot reach the backend
 
 ```bash
 docker compose ps
@@ -172,8 +139,8 @@ Confirm that <http://localhost:8000/api/health> is available.
 
 ### FairPrice live lookup fails
 
-Retry without forcing a refresh or use fixture mode. The application should
-degrade visibly rather than presenting old or fixture data as current live data.
+The shopping list falls back to prices saved earlier, then to sample prices, and
+its price label says which. Retry later for current prices.
 
 ### The database schema is behind
 
@@ -194,7 +161,7 @@ being discarded.
 
 The current product supports one profile per authenticated household and one
 main meal per day for seven days. The validated recipe catalog and browser-test
-coverage remain smaller than the final design target. A unified recipe
-execution side panel, validated web-recipe supplementation, semantic retrieval,
-and broader dynamic stress cases are final-design gaps rather than verified
-current capabilities.
+coverage remain smaller than the final design target. Live YouTube tutorial
+search, validated web-recipe supplementation, semantic retrieval, and broader
+dynamic stress cases are final-design gaps rather than verified current
+capabilities.
