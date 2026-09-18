@@ -58,5 +58,6 @@ export interface TutorialRecommendation {
   recipe_slug: string;
   recipe_title: string;
   selected_video: TutorialVideo | null;
+  retrieval: { provider_used: "youtube" | "fixture"; mode: string; status: string };
   warning: string | null;
 }

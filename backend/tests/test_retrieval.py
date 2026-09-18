@@ -122,7 +122,30 @@ def test_ranker_filters_non_embeddable_candidates_and_prefers_recipe_overlap() -
         candidates=candidates,
     )
 
-    assert [item[2].video_id for item in ranked] == ["available-match", "available-decoy"]
+    # The cake video shares nothing with the dish, so generic points cannot select it.
+    assert [item[2].video_id for item in ranked] == ["available-match"]
+
+
+def test_ranker_rejects_a_video_for_a_protein_the_dish_does_not_contain() -> None:
+    fetched_at = datetime(2026, 9, 19, tzinfo=UTC)
+    chicken = TutorialCandidate(
+        video_id="lemon-chicken",
+        title="Lemon Chicken Cooking Tutorial",
+        channel_title="Fixture",
+        duration_seconds=540,
+        embeddable=True,
+        language_hint="en",
+        source="fixture",
+        fetched_at=fetched_at,
+    )
+    ranked = rank_tutorial_candidates(
+        recipe_title="Lemon Chickpea Salad",
+        cuisine="Mediterranean",
+        ingredient_names=["Chickpeas", "Lemon", "Cucumber"],
+        language="en",
+        candidates=[chicken],
+    )
+    assert ranked == []
 
 
 def test_tutorial_service_returns_only_the_best_fixture_candidate() -> None:
