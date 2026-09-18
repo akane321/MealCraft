@@ -28,7 +28,7 @@ So: **you author episodes for categories that test modules you do not own.**
 it evaluates, and `scripts/check_heldout_episodes.py` refuses an episode whose
 author or reviewer owns one of them.
 
-The same reasoning limits what tuning may touch (decision ADR-0020, as amended):
+The same reasoning limits what tuning may touch (decision ADR-0020, as amended by ADR-0029):
 
 - parameters, prompts and thresholds may be fitted on **synthetic or developer
   data** at any time, including before the freeze;

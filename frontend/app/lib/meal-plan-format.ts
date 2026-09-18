@@ -3,15 +3,10 @@ export function todayIsoDate(now = new Date()): string {
   return local.toISOString().slice(0, 10);
 }
 
-export function formatPlanDate(value: string): string {
-  return new Intl.DateTimeFormat("en-SG", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-  }).format(new Date(`${value}T00:00:00Z`));
-}
-
-export function formatNutrition(value: number, unit: string): string {
-  return `${Math.round(value).toLocaleString("en-SG")} ${unit}`;
+/** Format a plan's `YYYY-MM-DD` date. Read as UTC so no timezone shifts the day. */
+export function formatPlanDate(
+  value: string,
+  options: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric", month: "short" },
+): string {
+  return new Date(`${value}T00:00:00Z`).toLocaleDateString("en-SG", { ...options, timeZone: "UTC" });
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatPlanDate } from "~/lib/meal-plan-format";
 import type { AgentMessage } from "~/types/agent";
 import type { MealPlanEntryStatus, WeeklyMealPlan, WeeklyMealPlanCollection } from "~/types/meal-plan";
 
@@ -53,7 +54,7 @@ const contextLabel = computed(() => {
 });
 const rangeLabel = computed(() => {
   if (!plan.value) return "";
-  const fmt = (d: string) => new Date(`${d}T00:00:00`).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
+  const fmt = (d: string) => formatPlanDate(d, { day: "numeric", month: "short" });
   return `${fmt(plan.value.start_date)} – ${fmt(plan.value.end_date)}`;
 });
 const days = computed(() => nutrition.dashboard.value?.days ?? []);

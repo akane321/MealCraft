@@ -33,9 +33,7 @@ from typing import NamedTuple
 
 _RANGE_SEP = r"(?:to|-|–|—|or)"
 
-_SERVES_RANGE_RE = re.compile(
-    rf"\bserves?\s+(\d+)\s*{_RANGE_SEP}\s*(\d+)\b", re.IGNORECASE
-)
+_SERVES_RANGE_RE = re.compile(rf"\bserves?\s+(\d+)\s*{_RANGE_SEP}\s*(\d+)\b", re.IGNORECASE)
 _SERVES_RE = re.compile(r"\bserves?\s+(\d+)\b", re.IGNORECASE)
 _MAKES_RANGE_RE = re.compile(
     rf"\b(?:makes|yields?)\s*:?\s+(?:about|approximately)?\s*(\d+)\s*{_RANGE_SEP}\s*(\d+)"
@@ -72,9 +70,7 @@ def extract_servings(instruction_text: str) -> ServingsResult | None:
     conservatively certain is present. A range ("Serves 10 to 12") yields its
     lower bound with basis="range_lower_bound"; an exact statement
     ("Serves 8.") yields basis="stated_exact". Never a guess beyond that."""
-    range_match = _SERVES_RANGE_RE.search(instruction_text) or _MAKES_RANGE_RE.search(
-        instruction_text
-    )
+    range_match = _SERVES_RANGE_RE.search(instruction_text) or _MAKES_RANGE_RE.search(instruction_text)
     if range_match:
         low, high = int(range_match.group(1)), int(range_match.group(2))
         if low <= high and _plausible(low) and _plausible(high):

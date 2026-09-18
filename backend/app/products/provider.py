@@ -6,6 +6,7 @@ from typing import Protocol
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+from app.data.units import UNIT_BASE
 from app.schemas.product import ProductResponse
 
 NEXT_DATA_PATTERN = re.compile(
@@ -66,15 +67,11 @@ def parse_package_size(value: str | None) -> tuple[float | None, str | None]:
 
 def _to_base_unit(size: float, unit: str) -> tuple[float, str]:
     normalized = unit.lower()
-    if normalized == "kg":
-        return size * 1000.0, "g"
-    if normalized == "l":
-        return size * 1000.0, "ml"
-    if normalized in {"g", "gm"}:
-        return size, "g"
-    if normalized == "ml":
-        return size, "ml"
-    return size, "whole"
+    base = UNIT_BASE.get("g" if normalized == "gm" else normalized)
+    if base is None:  # piece, pieces, "s" (as in "10s")
+        return size, "whole"
+    base_unit, multiplier = base
+    return size * multiplier, base_unit
 
 
 class FixtureProductProvider:

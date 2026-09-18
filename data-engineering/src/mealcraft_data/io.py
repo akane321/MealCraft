@@ -5,8 +5,9 @@ import csv
 import json
 import random
 import sys
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 
 def parse_list_cell(value: str | None) -> list[str]:
@@ -47,9 +48,7 @@ def iter_recipenlg(path: Path, source_filter: str | None = None) -> Iterator[dic
             }
 
 
-def reservoir_sample(
-    rows: Iterator[dict[str, Any]], sample_size: int, seed: int
-) -> tuple[list[dict[str, Any]], int]:
+def reservoir_sample(rows: Iterator[dict[str, Any]], sample_size: int, seed: int) -> tuple[list[dict[str, Any]], int]:
     if sample_size <= 0:
         raise ValueError("sample_size must be positive")
     rng = random.Random(seed)

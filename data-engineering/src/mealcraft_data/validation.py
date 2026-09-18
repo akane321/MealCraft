@@ -107,4 +107,3 @@ def validate_outputs(recipe_path: Path, ingredient_path: Path) -> list[str]:
     if not ingredients:
         errors.append("ingredient file contains no records")
     return errors
-

@@ -14,22 +14,11 @@ from typing import Any
 
 from .utils import read_jsonl, sha256_file, slugify, utc_now_iso, write_json
 
-FOODON_SYNONYMS_URL = (
-    "https://raw.githubusercontent.com/FoodOntology/foodon/master/foodon-synonyms.tsv"
-)
+FOODON_SYNONYMS_URL = "https://raw.githubusercontent.com/FoodOntology/foodon/master/foodon-synonyms.tsv"
 FDC_SEARCH_URL = "https://api.nal.usda.gov/fdc/v1/foods/search"
-USDA_FOUNDATION_URL = (
-    "https://fdc.nal.usda.gov/fdc-datasets/"
-    "FoodData_Central_foundation_food_csv_2026-04-30.zip"
-)
-USDA_SR_LEGACY_URL = (
-    "https://fdc.nal.usda.gov/fdc-datasets/"
-    "FoodData_Central_sr_legacy_food_csv_2018-04.zip"
-)
-USDA_FNDDS_URL = (
-    "https://fdc.nal.usda.gov/fdc-datasets/"
-    "FoodData_Central_survey_food_csv_2024-10-31.zip"
-)
+USDA_FOUNDATION_URL = "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_foundation_food_csv_2026-04-30.zip"
+USDA_SR_LEGACY_URL = "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip"
+USDA_FNDDS_URL = "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_survey_food_csv_2024-10-31.zip"
 USER_AGENT = "MealCraft-DSS5105-data-research/0.1"
 
 
@@ -64,19 +53,11 @@ def fetch_usda_foundation(project_root: Path) -> dict[str, Any]:
     _download(USDA_FOUNDATION_URL, archive)
     extract_dir.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(archive) as bundle:
-        unsafe = [
-            name
-            for name in bundle.namelist()
-            if Path(name).is_absolute() or ".." in Path(name).parts
-        ]
+        unsafe = [name for name in bundle.namelist() if Path(name).is_absolute() or ".." in Path(name).parts]
         if unsafe:
             raise ValueError(f"Unsafe paths in USDA archive: {unsafe[:3]}")
         bundle.extractall(extract_dir)
-    extracted_files = sorted(
-        str(path.relative_to(project_root))
-        for path in extract_dir.rglob("*")
-        if path.is_file()
-    )
+    extracted_files = sorted(str(path.relative_to(project_root)) for path in extract_dir.rglob("*") if path.is_file())
     manifest = {
         "source": "USDA FoodData Central Foundation Foods",
         "source_url": USDA_FOUNDATION_URL,
@@ -104,19 +85,11 @@ def fetch_usda_sr_legacy(project_root: Path) -> dict[str, Any]:
     _download(USDA_SR_LEGACY_URL, archive)
     extract_dir.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(archive) as bundle:
-        unsafe = [
-            name
-            for name in bundle.namelist()
-            if Path(name).is_absolute() or ".." in Path(name).parts
-        ]
+        unsafe = [name for name in bundle.namelist() if Path(name).is_absolute() or ".." in Path(name).parts]
         if unsafe:
             raise ValueError(f"Unsafe paths in USDA archive: {unsafe[:3]}")
         bundle.extractall(extract_dir)
-    extracted_files = sorted(
-        str(path.relative_to(project_root))
-        for path in extract_dir.rglob("*")
-        if path.is_file()
-    )
+    extracted_files = sorted(str(path.relative_to(project_root)) for path in extract_dir.rglob("*") if path.is_file())
     manifest = {
         "source": "USDA FoodData Central SR Legacy",
         "source_url": USDA_SR_LEGACY_URL,
@@ -144,19 +117,11 @@ def fetch_usda_fndds(project_root: Path) -> dict[str, Any]:
     _download(USDA_FNDDS_URL, archive)
     extract_dir.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(archive) as bundle:
-        unsafe = [
-            name
-            for name in bundle.namelist()
-            if Path(name).is_absolute() or ".." in Path(name).parts
-        ]
+        unsafe = [name for name in bundle.namelist() if Path(name).is_absolute() or ".." in Path(name).parts]
         if unsafe:
             raise ValueError(f"Unsafe paths in USDA archive: {unsafe[:3]}")
         bundle.extractall(extract_dir)
-    extracted_files = sorted(
-        str(path.relative_to(project_root))
-        for path in extract_dir.rglob("*")
-        if path.is_file()
-    )
+    extracted_files = sorted(str(path.relative_to(project_root)) for path in extract_dir.rglob("*") if path.is_file())
     manifest = {
         "source": "USDA FoodData Central FNDDS",
         "source_url": USDA_FNDDS_URL,
@@ -229,9 +194,7 @@ def create_usda_foundation_candidates(
     food_files = list(foundation_dir.rglob("food.csv"))
     foundation_files = list(foundation_dir.rglob("foundation_food.csv"))
     if not food_files or not foundation_files:
-        raise FileNotFoundError(
-            "USDA Foundation Foods CSV files are missing; run fetch-usda-foundation first."
-        )
+        raise FileNotFoundError("USDA Foundation Foods CSV files are missing; run fetch-usda-foundation first.")
 
     with foundation_files[0].open("r", encoding="utf-8-sig", newline="") as handle:
         foundation_ids = {row["fdc_id"] for row in csv.DictReader(handle)}
@@ -242,21 +205,14 @@ def create_usda_foundation_candidates(
                 foods.append(row)
 
     all_ingredients = read_jsonl(ingredient_path)
-    ingredients = [
-        ingredient
-        for ingredient in all_ingredients
-        if ingredient["mapping_status"] == "internal_mapped"
-    ]
+    ingredients = [ingredient for ingredient in all_ingredients if ingredient["mapping_status"] == "internal_mapped"]
     if limit is not None:
         ingredients = ingredients[:limit]
 
     candidate_rows: list[dict[str, Any]] = []
     for ingredient in ingredients:
         scored = sorted(
-            (
-                (_food_similarity(ingredient["canonical_name"], food["description"]), food)
-                for food in foods
-            ),
+            ((_food_similarity(ingredient["canonical_name"], food["description"]), food) for food in foods),
             key=lambda item: (-item[0], item[1]["fdc_id"]),
         )
         scored = [item for item in scored if item[0] >= 0.35][:5]
@@ -299,9 +255,8 @@ def create_usda_foundation_candidates(
         "license": "CC0 1.0 / public domain",
         "foundation_food_records": len(foods),
         "ingredient_queries": len(ingredients),
-        "unreviewed_candidates_skipped": len(all_ingredients) - len(
-            [item for item in all_ingredients if item["mapping_status"] == "internal_mapped"]
-        ),
+        "unreviewed_candidates_skipped": len(all_ingredients)
+        - len([item for item in all_ingredients if item["mapping_status"] == "internal_mapped"]),
         "candidate_rows": len(candidate_rows),
         "automatic_acceptance": False,
         "output": str(output.relative_to(project_root)),
@@ -337,9 +292,7 @@ def create_foodon_candidates(
     synonyms_path: Path | None = None,
     limit: int | None = None,
 ) -> dict[str, Any]:
-    synonyms_path = synonyms_path or (
-        project_root / "data" / "reference" / "downloads" / "foodon-synonyms.tsv"
-    )
+    synonyms_path = synonyms_path or (project_root / "data" / "reference" / "downloads" / "foodon-synonyms.tsv")
     if not synonyms_path.exists():
         raise FileNotFoundError("FoodOn synonym file is missing; run fetch-foodon first.")
 
@@ -349,13 +302,18 @@ def create_foodon_candidates(
             class_uri = (row.get("?class") or "").strip()
             term_type = _foodon_value(row.get("?type") or "")
             label = _foodon_value(row.get("?label") or "")
-            if "FOODON_" not in class_uri or not label or term_type not in {
-                "label",
-                "synonym (exact)",
-                "synonym (broad)",
-                "synonym (related)",
-                "synonym (narrow)",
-            }:
+            if (
+                "FOODON_" not in class_uri
+                or not label
+                or term_type
+                not in {
+                    "label",
+                    "synonym (exact)",
+                    "synonym (broad)",
+                    "synonym (related)",
+                    "synonym (narrow)",
+                }
+            ):
                 continue
             terms.append(
                 {
@@ -446,9 +404,7 @@ def _fdc_search(query: str, api_key: str, page_size: int = 3) -> dict[str, Any]:
             "dataType": "Foundation,SR Legacy",
         }
     )
-    request = urllib.request.Request(
-        f"{FDC_SEARCH_URL}?{parameters}", headers={"User-Agent": USER_AGENT}
-    )
+    request = urllib.request.Request(f"{FDC_SEARCH_URL}?{parameters}", headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(request, timeout=60) as response:
         return json.loads(response.read().decode("utf-8"))
 
@@ -529,9 +485,8 @@ def create_usda_candidates(
         "source": "USDA FoodData Central",
         "license": "CC0 1.0",
         "ingredient_queries": len(ingredients),
-        "unreviewed_candidates_skipped": len(all_ingredients) - len(
-            [item for item in all_ingredients if item["mapping_status"] == "internal_mapped"]
-        )
+        "unreviewed_candidates_skipped": len(all_ingredients)
+        - len([item for item in all_ingredients if item["mapping_status"] == "internal_mapped"])
         if not include_unreviewed_candidates
         else 0,
         "candidate_rows": len(candidate_rows),

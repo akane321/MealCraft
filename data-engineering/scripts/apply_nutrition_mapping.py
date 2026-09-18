@@ -10,6 +10,7 @@ Streams the (potentially large) ingredients.jsonl line by line rather than
 loading it into memory, matching this project's established pattern
 (run_full_dataset.py, cut_release.py).
 """
+
 from __future__ import annotations
 
 import json

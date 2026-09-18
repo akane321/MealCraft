@@ -91,11 +91,7 @@ def _parse_number(token: str) -> float:
     mixed_hyphen = MIXED_HYPHEN_RE.match(token)
     if mixed_hyphen:
         whole, numerator, denominator = mixed_hyphen.groups()
-        return (
-            float(whole)
-            + float(numerator) / float(denominator)
-            + unicode_value
-        )
+        return float(whole) + float(numerator) / float(denominator) + unicode_value
     if " " in token and "/" in token:
         whole, fraction = token.split(None, 1)
         numerator, denominator = fraction.split("/", 1)
@@ -201,11 +197,7 @@ def parse_ingredient(
     remainder = text
     if quantity_match:
         quantity_min = _parse_number(quantity_match.group("low"))
-        quantity_max = (
-            _parse_number(quantity_match.group("high"))
-            if quantity_match.group("high")
-            else quantity_min
-        )
+        quantity_max = _parse_number(quantity_match.group("high")) if quantity_match.group("high") else quantity_min
         # Some recipes write a range high-to-low ("1/4 to 1/8 tsp nutmeg"). The
         # two numbers are still the range's bounds; swap them so min <= max
         # rather than keeping textual left-to-right order.
@@ -331,9 +323,7 @@ def parse_ingredient(
     if source_ner:
         normalized_ner = {_clean_text(item) for item in source_ner}
         source_ner_match = any(
-            ingredient_text == item
-            or ingredient_text in item
-            or item in ingredient_text
+            ingredient_text == item or ingredient_text in item or item in ingredient_text
             for item in normalized_ner
             if item
         )
@@ -358,4 +348,3 @@ def parse_ingredient(
         source_ner_match=source_ner_match,
         review_reasons=sorted(set(review_reasons)),
     )
-

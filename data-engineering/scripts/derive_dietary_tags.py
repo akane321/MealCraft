@@ -27,6 +27,7 @@ apart from "we don't know". This is the same "absence excludes, it does not
 admit" rule ADR-0024 states for allergens, applied for the same reason a
 false-positive dietary claim is worse than a missed one.
 """
+
 from __future__ import annotations
 
 import csv

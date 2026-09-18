@@ -27,9 +27,7 @@ class ReferenceParsingTests(unittest.TestCase):
 
     def test_generic_fruit_prefers_whole_raw_food(self) -> None:
         apple_raw = _food_similarity("apple", "Apples, gala, with skin, raw")
-        apple_juice = _food_similarity(
-            "apple", "Apple juice, with added vitamin C, from concentrate"
-        )
+        apple_juice = _food_similarity("apple", "Apple juice, with added vitamin C, from concentrate")
         banana_raw = _food_similarity("banana", "Bananas, ripe and slightly ripe, raw")
         banana_pepper = _food_similarity("banana", "Peppers, banana, seeded, raw")
         self.assertGreater(apple_raw, apple_juice)

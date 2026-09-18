@@ -62,8 +62,10 @@ def main() -> int:
     if out_handle:
         out_handle.close()
 
-    print(f"wrote {chunk_index} chunks, {total} '{args.source_filter}' rows total, "
-          f"~{args.chunk_size} rows/chunk -> {args.out_dir}")
+    print(
+        f"wrote {chunk_index} chunks, {total} '{args.source_filter}' rows total, "
+        f"~{args.chunk_size} rows/chunk -> {args.out_dir}"
+    )
     return 0
 
 

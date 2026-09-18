@@ -38,7 +38,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from mealcraft_data.config import load_config  # noqa: E402
 from mealcraft_data.constants import SCHEMA_VERSION, TRANSFORMATION_VERSION  # noqa: E402
-from mealcraft_data.pipeline import run_pipeline, _render_report  # noqa: E402
+from mealcraft_data.pipeline import _render_report, run_pipeline  # noqa: E402
 from mealcraft_data.utils import sha256_file, utc_now_iso, write_json  # noqa: E402
 
 CHUNKS_DIR = ROOT / "data/raw/recipenlg/chunks"
@@ -160,9 +160,7 @@ def rebuild_ingredients_and_report(
     with ingredients_path.open("w", encoding="utf-8") as handle:
         for ingredient_id in sorted(occurrences):
             rule = rule_by_id.get(ingredient_id)
-            canonical_name = (
-                rule.canonical_name if rule else sorted(observed_aliases[ingredient_id])[0]
-            )
+            canonical_name = rule.canonical_name if rule else sorted(observed_aliases[ingredient_id])[0]
             catalog_aliases = sorted(
                 alias
                 for alias, candidate_rule in config.ingredients.items()
@@ -178,15 +176,11 @@ def rebuild_ingredients_and_report(
                 "foodon_id": None,
                 "fdc_id": None,
                 "nutrition_basis": None,
-                "mapping_status": (
-                    "internal_mapped" if statuses[ingredient_id] == {"mapped"} else "candidate"
-                ),
+                "mapping_status": ("internal_mapped" if statuses[ingredient_id] == {"mapped"} else "candidate"),
                 "occurrence_count": occurrences[ingredient_id],
                 "recipe_count": len(recipe_ids[ingredient_id]),
                 "provenance": {
-                    "source": "config/ingredient_aliases.csv"
-                    if rule
-                    else "parsed RecipeNLG candidate",
+                    "source": "config/ingredient_aliases.csv" if rule else "parsed RecipeNLG candidate",
                     "transformation_version": TRANSFORMATION_VERSION,
                 },
             }

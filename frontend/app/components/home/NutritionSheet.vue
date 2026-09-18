@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatPlanDate } from "~/lib/meal-plan-format";
 import {
   chartPointCoordinates,
   cumulativeNutritionValues,
@@ -41,7 +42,7 @@ function statusLabel(day: NutritionDashboardDay) {
 }
 
 function shortDate(value: string) {
-  return new Date(`${value}T00:00:00`).toLocaleDateString("en-SG", { weekday: "short", day: "numeric" });
+  return formatPlanDate(value, { weekday: "short", day: "numeric" });
 }
 </script>
 

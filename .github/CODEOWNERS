@@ -1,8 +1,33 @@
-# Initial ownership for repository governance files.
-# Add two teammates per product area after all six GitHub usernames are known.
-# Code-owner approval is intentionally not required yet, so this file cannot
-# block parallel development.
+# Module ownership (see the private operations/heldout-authoring-assignment.md for
+# the module names). Code-owner approval is intentionally not required, so this
+# file requests reviews without blocking parallel development.
 
+# Governance and shared documentation
 /.github/ @akane321
 /docs/ @akane321
 /README.md @akane321
+/AGENTS.md @akane321
+/CONTRIBUTING.md @akane321
+
+# dataset
+/data-engineering/ @duj27761-dotcom
+/data/ @duj27761-dotcom
+
+# retrieval
+/backend/app/products/ @Liu-ub
+/backend/app/retrieval/ @Liu-ub
+
+# planning
+/backend/app/planning/ @CSH-031
+
+# agent
+/backend/app/agent/ @yangqi0612
+
+# backend
+/backend/app/auth/ @lkxhost1705
+/backend/alembic/ @lkxhost1705
+
+# frontend-evaluation
+/frontend/ @akane321
+/backend/app/evaluation/ @akane321
+/docs/evaluation/ @akane321

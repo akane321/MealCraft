@@ -366,5 +366,7 @@ The data-engineering module is complete for a release when:
 Settled since this handoff was written: the committed releases are published
 under the owner's confirmed non-commercial educational licence (the upstream
 dump stays local); the pipeline lives in `data-engineering/` in this
-repository; the release gate is frozen with schema v1; and nutrition is
-ingredient-calculated from recorded mappings (ADR-0024).
+repository; and the release gate is frozen with schema v1. RecipeNLG carries no
+source-reported nutrition, so its releases compute nutrition from ingredient
+mappings recorded under ADR-0024. Whether a future source's own values would
+also be kept remains open.

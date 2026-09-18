@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatPlanDate } from "~/lib/meal-plan-format";
 import { budgetLine, formatSgd, groceryGroups, packageLabel, priceSourceLabel } from "~/lib/home-surface";
 import type { NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { RecipeNutrition } from "~/types/recipe";
@@ -19,7 +20,7 @@ const bars = computed(() => {
   const max = Math.max(...props.days.map(day => day.nutrition_per_person.calories_kcal), 1);
   return props.days.map(day => ({
     id: day.entry_id,
-    label: new Date(`${day.planned_date}T00:00:00`).toLocaleDateString("en-SG", { weekday: "narrow" }),
+    label: formatPlanDate(day.planned_date, { weekday: "narrow" }),
     height: `${Math.max(6, Math.round(day.nutrition_per_person.calories_kcal / max * 100))}%`,
     status: day.status,
   }));

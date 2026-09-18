@@ -134,7 +134,7 @@ If the private knowledge repository cannot be accessed, state that the context i
   where required, and a documented consumer. Use `docs/design/README.md`.
 - Preserve unrelated user changes and use feature branches plus pull requests.
 - Keep numeric constraints, nutrition, cost, package quantity, Shopping List, and evaluation logic deterministic and testable. The Agent may parse intent and explain tool results.
-- Never read held-out episodes, their gold labels or any metric computed from them in order to choose a parameter, prompt or threshold, and do not pass tuning results to episode authors before the set is frozen (decision ADR-0020 as amended). Fit on synthetic or developer data.
+- Never read held-out episodes, their gold labels or any metric computed from them in order to choose a parameter, prompt or threshold, and do not pass tuning results to episode authors before the set is frozen (decision ADR-0020 as amended by ADR-0029). Fit on synthetic or developer data.
 - Never commit secrets, `.env`, real personal health data, private memory content, or raw restricted course material to this public repository.
 
 ## Protected product invariants
@@ -173,8 +173,10 @@ Playwright for affected desktop user journeys. Do not claim visual quality from
 a successful build alone. Mobile and tablet product design are out of scope.
 
 CI runs Ruff and pytest from a checkout in the `backend` job (Ruff over
-`backend` and `scripts`, the same files the container's `ruff check .` sees), and
-pytest plus the evaluation commands through the container in the `compose` job.
+`backend`, `scripts` and `data-engineering`; the container's `ruff check .` sees
+the first two, since `data-engineering` is not mounted), the data-engineering
+unit tests, and pytest plus the evaluation commands through the container in the
+`compose` job.
 Ruff through the container and the frontend container commands are not run in
 CI; the frontend job runs its commands on the host.
 

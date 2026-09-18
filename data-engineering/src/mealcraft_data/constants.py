@@ -34,4 +34,3 @@ INFORMAL_QUANTITY_TERMS = (
     "dash",
     "of choice",
 )
-
