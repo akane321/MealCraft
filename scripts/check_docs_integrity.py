@@ -46,6 +46,11 @@ SCAN_FILES = ["README.md", "AGENTS.md", "CONTRIBUTING.md"]
 VOLATILE_PATTERNS = {
     "pull request reference": re.compile(r"(?:\bPR\s*#\d+|/pull/\d+)"),
     "commit SHA": re.compile(r"\b[0-9a-f]{40}\b"),
+    # A named evaluation metric followed by a value; values live in the generated reports.
+    "metric value": re.compile(
+        r"(?i)\b(?:exact_case_rate|field_recall|field_precision|expectation_rate"
+        r"|failure_case_count|strict_success(?:_rate)?)`?\s*(?:=|:)\s*`?\d"
+    ),
     # A claim, not a cross-reference: requires a value after the label.
     "dated verification claim": re.compile(r"(?i)last verified[^.\n]{0,40}:\s*\S"),
 }
