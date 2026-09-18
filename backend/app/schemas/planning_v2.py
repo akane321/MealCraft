@@ -58,6 +58,8 @@ class PlanningRecipeCandidate(BaseModel):
     recipe_id: str = Field(min_length=1, max_length=120)
     title: str = Field(min_length=1, max_length=240)
     servings: int = Field(ge=1, le=24)
+    # The meal types this recipe usually belongs to: a soft affinity the search
+    # prefers, never a filter (ADR-0024 section 5).
     allowed_meal_types: list[MealType] = Field(min_length=1)
     total_time_minutes: int = Field(ge=0, le=720)
     dietary_tags: list[str] = Field(default_factory=list)

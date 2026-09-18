@@ -28,16 +28,14 @@ def test_complete_matrix_is_deterministic_and_does_not_mutate_input():
 
 
 @pytest.mark.parametrize(
-    "rule", ["meal_type", "time_limit", "allergen", "excluded_ingredient", "dietary_requirement", "locked_slot"]
+    "rule", ["time_limit", "allergen", "excluded_ingredient", "dietary_requirement", "locked_slot"]
 )
 def test_each_hard_rejection_has_a_stable_reason(rule):
     packet = problem()
     slot = packet.slots[0].model_copy(update={"locked_recipe_id": None, "max_time_minutes": 10})
     recipe = packet.recipes[0].model_copy(update={"allowed_meal_types": [slot.meal_type], "total_time_minutes": 10})
     packet = packet.model_copy(update={"slots": [slot], "recipes": [recipe], "nutrition_bands": []})
-    if rule == "meal_type":
-        recipe.allowed_meal_types = ["snack"] if slot.meal_type != "snack" else ["dinner"]
-    elif rule == "time_limit":
+    if rule == "time_limit":
         recipe.total_time_minutes = 11
     elif rule == "allergen":
         recipe.allergens = ["test-allergen"]
@@ -53,6 +51,35 @@ def test_each_hard_rejection_has_a_stable_reason(rule):
     row = pair(packet, slot.slot_id, recipe.recipe_id)
     assert not row.eligible
     assert rule in row.rejection_codes
+
+
+def test_meal_type_is_an_affinity_not_a_filter():
+    # ADR-0024 section 5: a dish outside its usual meal types stays eligible;
+    # the search pays a penalty for it, and the validator reports it as soft.
+    from app.planning.beam_planner import BeamPlanner
+    from app.planning.final_scope_validator import FinalPlanningValidator
+
+    packet = problem()
+    slot = packet.slots[0].model_copy(update={"locked_recipe_id": None, "max_time_minutes": None})
+    other = "snack" if slot.meal_type != "snack" else "dinner"
+    recipe = packet.recipes[0].model_copy(update={"allowed_meal_types": [other]})
+    packet = packet.model_copy(update={"slots": [slot], "recipes": [recipe], "nutrition_bands": []})
+    row = pair(packet, slot.slot_id, recipe.recipe_id)
+    assert row.eligible
+    assert "meal_type" not in row.rejection_codes
+
+    fitting = recipe.model_copy(update={"recipe_id": "fits-the-slot", "allowed_meal_types": [slot.meal_type]})
+    both = packet.model_copy(update={"recipes": [recipe, fitting]})
+    choices = BeamPlanner().search_candidates(both).states[0].choices
+    assert choices == ((slot.slot_id, "fits-the-slot"),)
+
+    from app.schemas.planning_v2 import PlanningAssignment
+
+    report = FinalPlanningValidator().validate(
+        packet, [PlanningAssignment(slot_id=slot.slot_id, recipe_id=recipe.recipe_id)], []
+    )
+    soft = [check for check in report.checks if check.code == "meal_affinity"]
+    assert soft and not soft[0].hard
 
 
 @pytest.mark.parametrize(

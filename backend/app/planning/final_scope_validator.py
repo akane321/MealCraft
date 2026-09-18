@@ -170,7 +170,16 @@ class FinalPlanningValidator:
         if slot.locked_recipe_id is not None and slot.locked_recipe_id != recipe_id:
             checks.append(self._failed("locked_slot", "Locked assignment was changed.", slot_id))
         if slot.meal_type not in recipe.allowed_meal_types:
-            checks.append(self._failed("meal_type", "Recipe is not eligible for this meal type.", slot_id))
+            # Soft: reported so the placement is visible, never a hard failure.
+            checks.append(
+                PlanningConstraintCheck(
+                    code="meal_affinity",
+                    status="failed",
+                    hard=False,
+                    scope_id=slot_id,
+                    detail="Recipe is placed outside its usual meal types.",
+                )
+            )
         if slot.max_time_minutes is not None and recipe.total_time_minutes > slot.max_time_minutes:
             checks.append(
                 PlanningConstraintCheck(
