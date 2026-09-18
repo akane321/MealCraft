@@ -11,6 +11,16 @@ useHead({
 });
 
 const DRAFT_KEY = "mealcraft-draft";
+// Lens displacement map, stretched over each glass surface: red/green ramps bend
+// the backdrop near the edges, the blurred grey (neutral) centre leaves it clear.
+const lensMap = `data:image/svg+xml;utf8,${encodeURIComponent(
+  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><defs>"
+  + "<linearGradient id='r' x2='1'><stop offset='0' stop-color='#f00'/><stop offset='1' stop-color='#000'/></linearGradient>"
+  + "<linearGradient id='g' x2='0' y2='1'><stop offset='0' stop-color='#0f0'/><stop offset='1' stop-color='#000'/></linearGradient>"
+  + "<filter id='b'><feGaussianBlur stdDeviation='6'/></filter></defs>"
+  + "<rect width='100' height='100' fill='url(#r)'/><rect width='100' height='100' fill='url(#g)' style='mix-blend-mode:screen'/>"
+  + "<rect x='14' y='14' width='72' height='72' rx='14' fill='#808080' filter='url(#b)'/></svg>",
+)}`;
 const starters = ["Dinners for two this week, around S$90", "A high-protein week", "Vegetarian, under S$60"];
 
 const config = useRuntimeConfig();
@@ -146,7 +156,14 @@ watch(() => [messages.value.length, isLoading.value, session.value?.pending_repl
   log.value?.scrollTo({ top: log.value.scrollHeight, behavior: "smooth" });
 });
 
+// Only Chromium bends the backdrop through an SVG filter; elsewhere the glass stays frosted.
+const refracts = () => (navigator as Navigator & { userAgentData?: { brands: { brand: string }[] } })
+  .userAgentData?.brands.some(item => item.brand === "Chromium") ?? false;
+
+onUnmounted(() => document.documentElement.classList.remove("mc-refract"));
+
 onMounted(() => {
+  document.documentElement.classList.toggle("mc-refract", refracts());
   try {
     const saved = sessionStorage.getItem(DRAFT_KEY);
     if (saved) draft.value = saved;
@@ -163,6 +180,13 @@ onMounted(() => {
         <source src="/media/hero.mp4" type="video/mp4">
       </video>
     </div>
+    <!-- Shared lens for every glass surface; Chromium applies it to the backdrop (see surface.css). -->
+    <svg class="lens-defs" aria-hidden="true" width="0" height="0">
+      <filter id="mc-liquid" primitiveUnits="objectBoundingBox" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+        <feImage :href="lensMap" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map" />
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="0.08" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
     <div class="glow" aria-hidden="true"><span class="blob a" /><span class="blob b" /><span class="blob c" /></div>
     <div class="scrim" aria-hidden="true" />
     <button v-if="view === 'landing'" type="button" class="film-toggle mc-pill" :aria-label="filmPlaying ? 'Pause background video' : 'Play background video'" @click="toggleFilm">
@@ -205,7 +229,7 @@ onMounted(() => {
         <p v-if="!messages.length && !isLoading" class="empty mc-rise">
           Tell me who's eating, what you can spend and anything to avoid.
         </p>
-        <div v-for="message in messages" :key="message.id" class="msg mc-rise" :class="message.role">{{ message.content }}</div>
+        <div v-for="message in messages" :key="message.id" class="msg mc-rise" :class="[message.role, { 'mc-frost': message.role === 'user' }]">{{ message.content }}</div>
 
         <div v-if="interaction?.options.length" class="options mc-rise">
           <button v-for="option in interaction.options" :key="option.id" type="button" class="mc-pill" :disabled="isLoading" @click="choose(option.id)">
@@ -248,8 +272,8 @@ onMounted(() => {
       </div>
     </section>
 
-    <form class="composer" @submit.prevent="send()">
-      <span v-if="contextLabel" class="context">
+    <form class="composer mc-pill" @submit.prevent="send()">
+      <span v-if="contextLabel" class="context mc-pill">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" /><path d="M10 20v-5h4v5" /></svg>
         {{ contextLabel }}
       </span>
@@ -417,7 +441,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 .hero em { color: var(--mc-accent); }
 .is-app .hero { transform: translateY(-60px) scale(1.04); filter: blur(18px); }
 .starters { position: absolute; left: 0; right: 0; bottom: 104px; display: flex; justify-content: center; gap: 10px; }
-.starters .mc-pill { min-height: 40px; padding: 0 16px; font-size: 13px; font-weight: 500; color: var(--mc-text-2); }
+.starters .mc-pill { --lg-tint: rgba(14, 12, 10, 0.3); min-height: 40px; padding: 0 16px; font-size: 13px; font-weight: 500; color: var(--mc-text-2); }
 .is-app .starters { transform: translateY(20px); filter: blur(8px); }
 .trust { position: absolute; left: 0; right: 0; bottom: 28px; margin: 0; display: flex; justify-content: center; gap: 20px; font-size: 12px; letter-spacing: 0.06em; color: var(--mc-text-3); }
 .is-app .trust { transform: translateY(12px); }
@@ -440,7 +464,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 .chat-inner { min-height: 100%; box-sizing: border-box; padding: 48px 8px 12px; display: flex; flex-direction: column; justify-content: flex-end; gap: 16px; }
 .empty { margin: 0 auto; font-size: 15px; color: var(--mc-text-2); }
 .msg { max-width: 82%; font-size: 15px; line-height: 1.6; white-space: pre-line; }
-.msg.user { align-self: flex-end; padding: 12px 16px; border-radius: 20px 20px 6px 20px; background: rgba(242, 237, 228, 0.11); border: 1px solid var(--mc-line); backdrop-filter: blur(24px); }
+.msg.user { --lg-tint: rgba(242, 237, 228, 0.1); --lg-blur: 6px; align-self: flex-end; padding: 12px 16px; border-radius: 20px 20px 6px 20px; }
 .msg.assistant { align-self: flex-start; }
 .options, .jump { display: flex; flex-wrap: wrap; gap: 8px; }
 .options .mc-pill, .jump .mc-pill { min-height: 38px; padding: 0 14px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
@@ -463,35 +487,31 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 
 /* Composer: glides from the middle of the film to the foot of the chat */
 .composer {
+  --lg-blur: 4px;
+  --lg-tint: rgba(18, 14, 11, 0.42);
   position: absolute;
   z-index: 6;
   left: calc(50vw - 390px);
   bottom: 156px;
   width: 780px;
   height: 68px;
-  box-sizing: border-box;
   padding: 0 7px;
   margin: 0;
-  border-radius: 999px;
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid rgba(200, 180, 140, 0.22);
-  background: rgba(28, 24, 20, 0.62);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 60px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(28px) saturate(140%);
-  transition: left 700ms var(--mc-ease), width 700ms var(--mc-ease), bottom 950ms var(--mc-ease), height 950ms var(--mc-ease), background 800ms ease;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  transition: left 700ms var(--mc-ease), width 700ms var(--mc-ease), bottom 950ms var(--mc-ease), height 950ms var(--mc-ease);
 }
 .is-app .composer {
+  --lg-blur: 3px;
+  --lg-tint: rgba(242, 237, 228, 0.05);
   left: var(--chat-x);
   width: var(--chat-w);
   bottom: 36px;
   height: 64px;
-  border-color: rgba(220, 200, 160, 0.24);
-  background: linear-gradient(160deg, rgba(242, 237, 228, 0.13), rgba(242, 237, 228, 0.05));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 24px 60px rgba(0, 0, 0, 0.5);
 }
-.context { height: 46px; flex-shrink: 0; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(220, 200, 160, 0.16); background: rgba(242, 237, 228, 0.05); display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--mc-text-2); }
+.context { height: 46px; flex-shrink: 0; padding: 0 14px; box-shadow: none; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--mc-text-2); }
 .context svg { width: 16px; height: 16px; stroke-width: 1.4; }
 .composer input { flex-grow: 1; min-width: 0; height: 44px; padding: 0 10px; border: 0; background: transparent; color: var(--mc-ivory); font: inherit; font-size: 15px; }
 .composer input::placeholder { color: #8c8476; }
@@ -500,6 +520,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 .send svg { width: 17px; height: 17px; stroke-width: 1.8; }
 .disclaimer { position: absolute; bottom: 12px; left: var(--chat-x); width: var(--chat-w); margin: 0; text-align: center; font-size: 11px; color: var(--mc-text-3); opacity: 0; transition: opacity 600ms ease, left 700ms var(--mc-ease), width 700ms var(--mc-ease); }
 .is-app .disclaimer { opacity: 1; transition-delay: 900ms, 0ms, 0ms; }
+.lens-defs { position: absolute; width: 0; height: 0; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Edge panels: hover the edge (or tab into it) to slide one out; the chat moves aside */
@@ -511,7 +532,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 .left .handle { left: 6px; }
 .right .handle { right: 6px; }
 .edge.open .handle { opacity: 0; pointer-events: none; }
-.drawer { position: absolute; top: 12px; bottom: 24px; width: 392px; padding: 18px; overflow-y: auto; opacity: 0; visibility: hidden; pointer-events: none; transition: transform 560ms var(--mc-ease), opacity 360ms ease, visibility 0s linear 560ms; }
+.drawer { position: absolute; top: 12px; bottom: 24px; width: 392px; padding: 18px; opacity: 0; visibility: hidden; pointer-events: none; transition: transform 560ms var(--mc-ease), opacity 360ms ease, visibility 0s linear 560ms; }
 .left .drawer { left: 16px; transform: translateX(-430px) scale(0.98); }
 .right .drawer { right: 16px; transform: translateX(430px) scale(0.98); }
 .edge.open .drawer { transform: none; opacity: 1; visibility: visible; pointer-events: auto; transition: transform 560ms var(--mc-ease), opacity 360ms ease; }

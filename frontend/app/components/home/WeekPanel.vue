@@ -111,13 +111,13 @@ function statusLabel(day: NutritionDashboardDay) {
 </template>
 
 <style scoped>
-.week-panel { display: flex; flex-direction: column; gap: 14px; height: 100%; }
+.week-panel { display: flex; flex-direction: column; gap: 14px; height: 100%; overflow-y: auto; scrollbar-width: none; }
 header { display: flex; align-items: center; gap: 8px; }
 header > div { flex-grow: 1; }
 h2 { margin: 0; font-size: 22px; }
 header p { margin: 2px 0 0; font-size: 12px; color: var(--mc-text-3); }
 
-.week-list { list-style: none; margin: 0; padding: 6px; border-radius: 18px; overflow-y: auto; }
+.week-list { list-style: none; margin: 0; padding: 6px; border-radius: 18px; }
 .week-list li { min-height: 50px; padding: 0 10px; border-radius: 12px; display: flex; align-items: center; gap: 12px; }
 .week-list li:hover { background: rgba(242, 237, 228, 0.06); }
 .week-list li.current { background: rgba(194, 85, 58, 0.16); box-shadow: inset 0 0 0 1px rgba(232, 144, 111, 0.45); }

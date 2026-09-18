@@ -94,7 +94,7 @@ const budgetShare = computed(() => {
 </template>
 
 <style scoped>
-.kitchen-panel { display: flex; flex-direction: column; gap: 14px; height: 100%; }
+.kitchen-panel { display: flex; flex-direction: column; gap: 14px; height: 100%; overflow-y: auto; scrollbar-width: none; }
 header { display: flex; align-items: center; gap: 8px; }
 h2 { flex-grow: 1; margin: 0; font-size: 22px; }
 .card { padding: 14px; border-radius: 18px; display: flex; flex-direction: column; gap: 10px; }
