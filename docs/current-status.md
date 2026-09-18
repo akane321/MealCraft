@@ -4,7 +4,7 @@
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `4d3712c`
+> Verified remote `main`: `031569d`
 
 ## How to Read This Document
 
@@ -21,9 +21,10 @@
 | --- | --- | --- |
 | Full-stack environment | FastAPI, PostgreSQL, Nuxt, Docker Compose, migrations, catalog import, and CI | Local development baseline, not production deployment evidence |
 | Household profile | One shared profile, member servings and safety constraints, shared defaults, immutable versions, profile-linked plans | Does not generate separate dishes for each member |
-| Identity, sessions and tenancy | Argon2id credentials with upgrade-on-login, atomic account and default-household registration, login lockout, digest-only opaque sessions, per-session CSRF, current-actor lookup, session listing, logout and per-device revocation. Private Profile, Plan, Dashboard, Agent, Replanning and Shopping workflows require an active authenticated household; private ownership is non-null, repository queries are household-scoped, cross-household identifiers resolve as not found, and the browser has registration and login flows | Household and system roles are distinct, but the per-action household permission matrix is not yet enforced by business routes. Household collaboration, password lifecycle and account export/deletion remain incomplete |
+| Identity, sessions and tenancy | Argon2id credentials with upgrade-on-login, atomic account and default-household registration, login lockout, digest-only opaque sessions, per-session CSRF, current-actor lookup, session listing, logout and per-device revocation. Private Profile, Plan, Dashboard, Agent, Replanning and Shopping workflows require an active authenticated household; private ownership is non-null, repository queries are household-scoped, cross-household identifiers resolve as not found, and the browser has registration and login flows. Private routes authorize each action through one `HouseholdAction` dependency (`VIEW`, `EDIT_PROFILE`, `CREATE_PLAN`, `CHECK_IN`) in the order authentication, active household, action, CSRF; unknown roles are denied | No member-management routes exist yet, so `MANAGE_MEMBERS` is defined but unused. Household collaboration, password lifecycle and account export/deletion remain incomplete |
 | Recipe catalog | 30 validated recipes and 34 normalized ingredients imported idempotently | Smaller and less dimensional than the final benchmark target |
-| Data engineering | Independent `data-engineering/` pipeline with frozen schema v1, a four-condition release gate, and release v1.1 containing 9,282 recipes and 465 canonical ingredients. Deterministic derived dietary tags cover vegetarian (5,625), gluten-free (4,507), dairy-free (3,602) and vegan (1,030) recipes | **Not imported into the runtime catalog.** Nutrition remains `not_computed`; cuisine, meal types, methods, equipment and difficulty remain empty. Derived dietary tags are not reviewed gold labels, and allergen labels remain deterministic-rule-only |
+| Data engineering | Independent `data-engineering/` pipeline with frozen schema v1, a four-condition release gate, and release v1.1 containing 9,282 recipes and 465 canonical ingredients. Deterministic derived dietary tags cover vegetarian (5,625), gluten-free (4,507), dairy-free (3,602) and vegan (1,030) recipes. A first nutrition-mapping pass matches the curated ingredient set (533 entries) against USDA Foundation Foods, SR Legacy and FNDDS with recorded evidence: 213 `mapped`, 209 `needs_review`, 111 unresolved ([progress report](../data-engineering/docs/task-b-nutrition-mapping-progress.md)) | **Not imported into the runtime catalog.** Nutrition remains `not_computed`: the mapping is not yet turned into per-recipe values (no quantity-to-mass conversion or aggregation). Cuisine, meal types, methods, equipment and difficulty remain empty. Derived dietary tags are not reviewed gold labels, and allergen labels remain deterministic-rule-only |
+| Home surface | `/` is the product surface: a full-bleed film entry whose command bar becomes a chat on the Agent session API (clarification answers, confirmation, replan preview and confirm/discard). Edge panels open on hover, keyboard focus or pin and move the chat aside: the week with tonight's Top-1 tutorial and cooked check-in on the left; cooked nutrition, per-dinner calories and the shopping list against budget on the right. The shopping list previews as a sheet and exports through the browser's print-to-PDF. Liquid-glass styling uses an edge-lens backdrop filter in Chromium and frosted glass elsewhere. The service status page is at `/system`; login returns to a same-site `?next=` path | Browser-tested at 1280×720 against a stubbed API; a signed-in run against the real backend and a real tutorial playback are not yet recorded. Profile editing, recipe detail and replan history still live on separate pages |
 | Agent | Persistent household-scoped sessions, bilingual scope isolation, structured constraints, typed clarification, confirmation, bounded tool authorization, grounded claims, Agent-driven replanning, and synchronous per-action `AgentRun` with authenticated actor/household provenance, input digests, explicit deadlines and budgets, durable checkpoints, ordered tool receipts, idempotent replay and run list/detail/cancel APIs | Default parser is deterministic fixture mode. Runs are synchronous: asynchronous pause/resume/retry, external-tool evidence, natural-language claim extraction and formal live-model evidence are deferred |
 | Weekly planning | Seven persisted main meals plus independently callable Planning v2 constraint compilation, bounded Beam Search, conservative nutrition bounds, independent shopping/budget recomputation, and a small exhaustive oracle | The product API still uses the current baseline path; Beam parameters are untuned and the oracle proves results only for small packets under the fixed shopping policy |
 | FairPrice | Live lookup verified against the live site, normalized results, 15-minute PostgreSQL cache, fixture fallback on provider error with a warning and a `degraded` trace, source and cache state shown on the products page | An empty live result is converted into a provider error and answered with fixture products, so an ingredient FairPrice does not stock is presented with invented prices. The failure path also skips a merely-expired cache entry in favour of fixture data, and no end-to-end disconnected run has been performed |
@@ -47,9 +48,11 @@
 
 Fifty of the planned 80 episodes are authored: 12 `standard`, 12
 `clarification`, 10 `budget_package`, 8 `pantry_expiry` and 8
-`infeasible_conflict`. Nineteen episodes have completed eligible human review
-(10 backend-authored and 9 dataset-authored episodes). The set is not frozen and
-must not yet be treated as final held-out evidence. Authoring is governed by a
+`infeasible_conflict`. Twenty-two have completed eligible human review: 10
+reviewed by `backend`, 9 by `dataset` and 3 by `frontend-evaluation`.
+Twenty-eight await review: 8 `standard`, 9 `clarification`, 5 `budget_package`,
+4 `infeasible_conflict` and 2 `pantry_expiry`. The set is not frozen and must not
+yet be treated as final held-out evidence. Authoring is governed by a
 cross-authoring rule: no contributor writes or reviews an episode for a category
 that evaluates a system they own.
 
@@ -129,8 +132,8 @@ improved.
 
 | Design capability | Status | Remaining work |
 | --- | --- | --- |
-| Unified planning workspace | Partial | Connect Profile, Assistant, Plan, Recipe, Shopping, Dashboard, and Replan into a more coherent workflow |
-| Authentication and user separation | Partial | Authentication, non-null household ownership, household-scoped repositories, cross-household denial and browser registration/login are merged. Remaining: enforce per-action household roles, expand the isolation matrix, and complete household collaboration, password lifecycle and account export/deletion |
+| Unified planning workspace | Partial | The home surface joins conversation, week, tutorial, cooked nutrition and shopping-list export. Remaining: bring profile editing, recipe detail and replan history onto it, and record a signed-in walkthrough against the real backend |
+| Authentication and user separation | Partial | Authentication, non-null household ownership, household-scoped repositories, cross-household denial, per-action household authorization and browser registration/login are merged. Remaining: member-management routes, a wider isolation matrix, household collaboration, password lifecycle and account export/deletion |
 | High-dimensional recipe knowledge | Partial | Expand the catalog and complete cuisine, taste, method, equipment, difficulty, nutrition provenance, instruction, source, and media fields |
 | Verified recipe benchmark | Partial | Grow from 30 recipes toward the proposal's 150-250 design target with quality checks and source coverage |
 | Validated web-recipe supplementation | Target | Implement search, parsing, normalization, provenance, validation, and trusted fallback |
@@ -144,7 +147,7 @@ improved.
 | Evaluation scale | Partial | Expand toward 150-200 verified requests, 150-250 recipes, 80-120 planning scenarios, and complete grocery coverage for benchmark demand; preserve frozen splits and digests |
 | Multiple baselines | Partial | Strong Rule-only is executable; run frozen Context-matched LLM-only, Plain LLM and Human Manual comparisons only after common outputs and held-out labels are ready |
 | Capability-centred Evaluation v2 | Partial | Packet compiler, coverage/leakage gates and visible developer packets are executable; common output validator, independent held-out set, repeated model runs, human study and paired statistics remain open |
-| User-facing quality | Partial | Typed quick clarification and cumulative-plus-daily Dashboard passed 1280×720 Browser and Playwright acceptance; deepen loading, empty, error, degraded and accessibility coverage |
+| User-facing quality | Partial | Typed quick clarification, cumulative-plus-daily Dashboard and the one-surface home journey passed 1280×720 Browser and Playwright acceptance; deepen loading, empty, error, degraded and accessibility coverage |
 | Operations and maintainability | Target beyond the original proposal | Add health, data-quality, mapping, trace, and evaluation diagnostics where they reduce maintenance and demo risk |
 
 ## Backend Capability Traceability
@@ -156,13 +159,13 @@ the next incomplete control. It is a navigation aid, not a second status source.
 | --- | --- | --- |
 | Account and session security | Alembic revisions `20260906_0010` and `20260910_0012`; authentication service and routes; password, session and CSRF tests | Email verification, password reset/change, origin-level rate limiting and account lifecycle |
 | Household tenancy | Alembic revision `20260916_0014`; current-household route dependency; household-scoped repositories; private-route authentication and cross-household integration tests | Broaden the endpoint-by-endpoint isolation matrix as private resources are added |
-| Household authorization | Household/system permission matrices and separate role concepts | Enforce `HouseholdAction` at each protected mutation and test owner/admin/member/viewer behaviour |
+| Household authorization | `backend/app/auth/authorization.py`; action dependencies on the Profile, Plan, Check-in and Agent routes; owner/editor/member/viewer and CSRF-ordering tests in `backend/tests/test_backend_platform.py` | Member-management routes (`MANAGE_MEMBERS`) and system-role enforcement for the Console |
 | Operations and Console | `OperationRun` and `AuditEvent` persistence scaffold plus the accepted backend platform design | Durable worker, safe operations APIs, system-role enforcement and Console user interface |
 
 ## Current Priorities
 
-1. Turn the separate working slices into a stable, understandable end-to-end
-   product journey.
+1. Finish the end-to-end journey on the home surface: record a signed-in run
+   against the real backend, then bring the remaining separate pages onto it.
 2. Expand and deepen the recipe and nutrition data model with provenance and
    deterministic validation.
 3. Complete nutrition-target and elastic-preference semantics and evidence.
@@ -176,10 +179,9 @@ the next incomplete control. It is a navigation aid, not a second status source.
    authorized, budget-capped live-model comparison.
 7. Expand dynamic-replanning stress cases and measure unnecessary disruption.
 8. Increase browser coverage and prepare a repeatable demonstration path.
-9. Enforce the household permission matrix per action, expand the cross-household
-   isolation matrix as private resources grow, and complete household
-   collaboration plus account lifecycle flows, so that tenant isolation is not
-   mistaken for complete authorization.
+9. Add member-management routes, expand the cross-household isolation matrix as
+   private resources grow, and complete household collaboration plus account
+   lifecycle flows.
 10. Raise the discriminating power of the held-out evaluation before tuning
     planner parameters. On the current v1 set the strong Rule-only reference
     matches MealCraft on task success, hard-constraint violations and failure
