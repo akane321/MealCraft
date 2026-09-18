@@ -302,15 +302,56 @@ held-out v2 set of approximately 80 end-to-end episodes:
 | infeasible and conflicting requests | 8 | truthful rejection and relaxation |
 | multi-turn replanning | 8 | state retention, minimal disruption and grocery delta |
 
-Use English, Chinese and mixed-language requests in predeclared proportions.
+The set carries no language ratio. Understanding English and Chinese is
+ordinary Agent capability rather than a research direction, so language is not
+an evaluation dimension and results are not broken out by language. One
+methodological guard remains: both languages must appear, and no category may be
+single-language, so that difficulty and language cannot be confounded. Mixed
+requests - a Chinese sentence carrying an English ingredient or brand name - are
+allowed anywhere and are what people actually write; they are not a quota to
+fill. `set-manifest.json` carries the machine-checked form of this rule.
+
 Include straightforward cases, combined constraints and boundary cases. Avoid
 creating categories only after seeing which system performs well.
 
-Labels should be reviewed independently by at least two people for a meaningful
-subset, with disagreements resolved before freezing. Where possible, some
-held-out cases should be authored by contributors who did not implement the
-planner. Every correction creates a new dataset version; previously reported
-digests remain available.
+Each episode is reviewed by exactly one person who is neither its author nor an
+owner of a system that the episode's category evaluates. At the set sizes this
+team can author, a second full review pass costs more contributor hours than the
+additional agreement evidence is worth; the independence property is carried by
+the cross-authoring rule, which the checker enforces from the `authored_by` and
+`reviewed_by` fields. Every correction creates a new dataset version; previously
+reported digests remain available.
+
+### Episodes are selected for discriminating power, not coverage
+
+An episode that every compared system answers correctly carries no information,
+however realistic it is. Each episode must therefore state, before it is
+written, what a plausible-looking wrong answer would look like on it; an author
+who cannot state that writes a different episode. This is a construction rule,
+not a preference: it follows from the detectable-difference floor recorded in
+section 12.
+
+Because episodes are selected this way, the resulting success rates are a
+contrast between systems on cases built to separate them. They are not an
+estimate of real-world success frequency, and the report must not present them
+as one.
+
+### Drafting method and its disclosure
+
+An episode may be drafted by an AI agent working from a sealed packet - the
+catalogs, the authoring rules, the template and the checker - with no access to
+the implementation of any system under test. The draft is then read in full by
+an eligible human contributor, who accepts or rejects it and whose role is
+recorded in `authored_by`. Accountability does not transfer to the tool.
+
+A drafter that has seen no implementation starts from less knowledge of where
+the system is weak than any human contributor, all of whom have read the
+repository. The residual risk is a human steering during acceptance, which is
+the risk the cross-authoring rule already carried.
+
+The evaluation report must disclose that episodes were drafted this way and
+accepted by contributors who do not own the systems under test. Using the method
+without disclosing it would be the failure this rule exists to prevent.
 
 ## 9. Gold annotations and output schema
 
@@ -460,6 +501,26 @@ secondary composite is useful, publish every weight and a sensitivity analysis.
   and analysis before opening final held-out labels/results.
 - Treat statistical significance as supporting evidence, not a substitute for
   effect size and concrete failures.
+
+### What this set size can and cannot detect
+
+At the set sizes available to this team, a paired comparison can only detect a
+true difference of roughly fifteen percentage points or more. Smaller
+differences require several hundred episodes, which is out of reach. A larger
+set does not fix this: raising the total from eighty to ninety-six narrows a
+single rate's confidence interval by about one percentage point. This floor
+bounds every comparative claim the set can support and must be stated in the
+report alongside the headline result.
+
+Two consequences bind the write-up:
+
+- **Per-category success rates are not reportable as comparisons.** At eight to
+  twelve episodes per category, a rate carries an interval of roughly thirty
+  percentage points. Categories exist for coverage claims and error analysis -
+  naming which failures occurred and where - so report per-category counts and
+  failure mechanisms rather than per-category rates or between-system deltas.
+- A difference below the floor is reported as not detectable at this set size,
+  never as evidence of equivalence.
 
 ## 13. Failure registry
 
