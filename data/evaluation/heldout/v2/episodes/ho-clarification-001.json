@@ -4,8 +4,8 @@
   "category": "clarification",
   "language": "zh",
   "authored_by": "planning",
-  "reviewed_by": null,
-  "review_notes": null,
+  "reviewed_by": "frontend-evaluation",
+  "review_notes": "[review 2026-09-18 frontend-evaluation] agent pre-check PASS on class, clarification validity, gold non-uniqueness and answer leakage; confirmed by Zhang Naiqian",
   "scenario": {
     "user_request": "帮我安排9月7日开始的一周晚餐，没有食物过敏，也没有忌口，不用考虑家里的库存。",
     "conversation_history": [],
