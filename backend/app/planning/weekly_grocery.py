@@ -120,7 +120,9 @@ class WeeklyGroceryAggregator:
         consumed_value = round(consumed_total, 2) if consumed_total_known else None
         weekly_budget = constraints.weekly_budget_sgd
         within_budget = (
-            consumed_value <= weekly_budget if weekly_budget is not None and consumed_value is not None else None
+            round(consumed_value * 100) <= round(weekly_budget * 100)
+            if weekly_budget is not None and consumed_value is not None
+            else None
         )
         return WeeklyGroceryEstimateResponse(
             pricing_mode=constraints.pricing_mode,

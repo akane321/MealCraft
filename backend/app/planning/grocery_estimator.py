@@ -174,7 +174,11 @@ class GroceryEstimator:
 
         consumed_value = round(consumed_total, 2) if consumed_total_known else None
         budget = constraints.budget_per_meal_sgd
-        within_budget = consumed_value <= budget if budget is not None and consumed_value is not None else None
+        within_budget = (
+            round(consumed_value * 100) <= round(budget * 100)
+            if budget is not None and consumed_value is not None
+            else None
+        )
         return GroceryEstimateResponse(
             pricing_mode=constraints.pricing_mode,
             complete=not unmapped and consumed_total_known,

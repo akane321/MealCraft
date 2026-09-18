@@ -865,6 +865,18 @@ def test_meal_checkin_rejects_unknown_entry_and_invalid_status(recipe_client: Te
     assert invalid.status_code == 422
 
 
+def test_a_weekly_total_equal_to_the_budget_is_within_it_to_the_cent(recipe_client: TestClient) -> None:
+    # ADR-0021: budgets are compared in whole cents on every path.
+    request = {"start_date": "2026-09-08", "household_size": 2, "pricing_mode": "fixture"}
+    unbudgeted = recipe_client.post("/api/plans/generate", json=request).json()
+    total = unbudgeted["grocery_estimate"]["consumed_total_sgd"]
+
+    exact = recipe_client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": total}).json()
+
+    assert exact["grocery_estimate"]["consumed_total_sgd"] <= total
+    assert exact["grocery_estimate"]["within_weekly_budget"] is True
+
+
 def _generate_replanning_fixture(recipe_client: TestClient, start_date: str) -> dict:
     response = recipe_client.post(
         "/api/plans/generate",
