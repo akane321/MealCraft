@@ -1,0 +1,39 @@
+{
+  "counts": {
+    "released_ingredients": 465,
+    "released_recipes": 9282,
+    "released_recipes_pct": 0.005651,
+    "servings_basis": {
+      "range_lower_bound": 2824,
+      "stated_exact": 6458
+    },
+    "upstream_recipes_scanned": 1642647
+  },
+  "created_at": "2026-09-17T12:03:10+00:00",
+  "immutability": "This manifest and the files alongside it are a frozen snapshot. Corrections produce a new release_version; this one is not edited in place.",
+  "known_gaps": [
+    "nutrition.status is not_computed for every released recipe (no reviewed USDA mapping or quantity-to-mass conversion yet)",
+    "allergen labels are deterministic-rule-only; no independently reviewed gold subset exists yet (see docs/schema-v1-freeze.md)",
+    "cuisine/meal_types/methods/equipment/difficulty are empty for every released recipe; no controlled vocabulary exists yet",
+    "dietary_tags (dairy-free/gluten-free/vegetarian/vegan) are derived only, not independently reviewed: {'dairy-free': 3602, 'gluten-free': 4507, 'vegan': 1030, 'vegetarian': 5625} of released recipes carry a positive tag; a recipe with any unmapped ingredient carries none, by design (see scripts/derive_dietary_tags.py)",
+    "servings_basis == 'range_lower_bound' rows carry an estimated, not stated, servings count (see src/servings.py)"
+  ],
+  "pipeline_git_revision": "244a84cf7da0723749f2502570a2f921b65f5d99",
+  "release_gate": {
+    "conditions": [
+      "every ingredient normalization_status == 'mapped'",
+      "every ingredient quantity_min is not None",
+      "every ingredient unit_dimension in {mass, volume, count}",
+      "recipe servings is not None"
+    ],
+    "definition_doc": "docs/schema-v1-freeze.md"
+  },
+  "release_version": "v1.1",
+  "schema_version": "mealcraft.recipe.v1",
+  "transformation_version": "mealcraft-data-cleaning/0.1.0",
+  "upstream_source": {
+    "dataset": "RecipeNLG Gathered subset",
+    "input_sha256": "f376ee0bb9f99f323761abf6270d453f4eff2002c3625d04cabcf8b57dca0803",
+    "seed": 5105
+  }
+}

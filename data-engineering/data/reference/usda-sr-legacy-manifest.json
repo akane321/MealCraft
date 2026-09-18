@@ -1,0 +1,30 @@
+{
+  "archive_bytes": 6074592,
+  "archive_path": "data\\reference\\downloads\\FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+  "archive_sha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0",
+  "extracted_files": [
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\Download & API Field Descriptions-2019-10-11-16-22.xlsx",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\all_downloaded_table_record_counts.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\food.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\food_attribute.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\food_attribute_type.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\food_calorie_conversion_factor.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\food_category.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\food_nutrient.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\food_nutrient_conversion_factor.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\food_nutrient_derivation.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\food_nutrient_source.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\food_portion.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\food_protein_conversion_factor.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\food_update_log_entry.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\measure_unit.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\nutrient.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\retention_factor.csv",
+    "data\\reference\\downloads\\usda-sr-legacy-2018-04\\FoodData_Central_sr_legacy_food_csv_2018-04\\sr_legacy_food.csv"
+  ],
+  "license": "CC0 1.0 / public domain",
+  "retrieved_at": "2026-09-17T13:01:09+00:00",
+  "source": "USDA FoodData Central SR Legacy",
+  "source_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+  "source_version": "2018-04"
+}

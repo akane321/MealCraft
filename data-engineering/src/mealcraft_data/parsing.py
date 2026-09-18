@@ -36,9 +36,11 @@ NUMBER_TOKEN = (
     rf"|[{FRACTION_CHARS}]|(?:{WORD_NUMBER_PATTERN})\b)"
 )
 MIXED_HYPHEN_RE = re.compile(r"^(\d+)\s*-\s*(\d+)/(\d+)$")
-# The word ``to`` is only a range separator when it stands alone between spaces,
-# otherwise ``4 toasted buns`` is misread as a ``4``-to-``a`` range.
-RANGE_SEPARATOR = r"(?:\s*(?:--?|–|—)\s*|\s+to\s+)"
+# ``to``/``or`` are only range separators when they stand alone between spaces
+# with a number on both sides (QUANTITY_RE only tries this right after the low
+# number), otherwise ``4 toasted buns`` misreads as a ``4``-to-``a`` range and
+# ``3 or 4 bananas`` never recognizes "or" as meaning "3 to 4".
+RANGE_SEPARATOR = r"(?:\s*(?:--?|–|—)\s*|\s+to\s+|\s+or\s+)"
 # Matches a quantity followed by a bare, case-significant "T" or "t" token
 # (tablespoon vs teaspoon), read from the original text before it is casefolded.
 LEADING_T_UNIT_RE = re.compile(r"^\s*[\d./\s-]*\d[\d./\s-]*\s+([Tt])\.?\s+[a-zA-Z]")
@@ -270,6 +272,12 @@ def parse_ingredient(
                 preparation.append(term)
         segment = _clean_text(segment)
         segment = re.sub(r"\s+and\s*$", "", segment).strip()
+        # A dangling "or" left over once its partner word is stripped is noise,
+        # not a real alternative: "salt or to taste" loses "to taste" as an
+        # informal-quantity phrase and must not keep the "or" it leaves behind.
+        segment = re.sub(r"^\s*or\s+|\s+or\s*$", "", segment, flags=re.IGNORECASE).strip()
+        if segment.casefold() == "or":
+            segment = ""
         reduced.append(segment)
 
     ingredient_text = ""
@@ -281,10 +289,14 @@ def parse_ingredient(
 
     preparation = sorted(set(preparation))
 
-    # Check the whole comma-separated remainder, not just the segment picked as
-    # ingredient_text: "beef, pork or chicken" must still be flagged even though
-    # the alternative ("pork or chicken") ends up in a dropped/preparation segment.
-    if re.search(r"\bor\b", remainder, flags=re.IGNORECASE):
+    # Check every stripped segment, not just the one picked as ingredient_text:
+    # "beef, pork or chicken" must still be flagged even though the alternative
+    # ("pork or chicken") ends up in a dropped/preparation segment. Checking the
+    # *stripped* segments (rather than the raw pre-strip remainder) avoids
+    # false positives from "or" inside a phrase already resolved elsewhere -
+    # "salt or to taste" (an informal-quantity phrase) and "fresh or thawed,
+    # frozen broccoli" (a prep-word idiom) both reduce to no "or" surviving.
+    if any(re.search(r"\bor\b", segment, flags=re.IGNORECASE) for segment in reduced):
         review_reasons.append("ambiguous_alternative")
 
     rule = _lookup_ingredient(ingredient_text, config)

@@ -667,7 +667,6 @@ ING_CRAB,crab,crab,protein,crustaceans
 ING_CRAB,crab,crabmeat,protein,crustaceans
 ING_CRAB,crab,crab meat,protein,crustaceans
 ING_CRAB,crab,lump crabmeat,protein,crustaceans
-ING_CRAB,crab,imitation crab,protein,crustaceans
 ING_FISH_FILLET,fish fillet,fish fillet,protein,fish
 ING_FISH_FILLET,fish fillet,fish,protein,fish
 ING_FISH_FILLET,fish fillet,fish fillets,protein,fish
@@ -2012,3 +2011,127 @@ ING_DILL,dill,dried dill weed,herb,
 ING_CORN_SYRUP,corn syrup,white karo,sweetener,
 ING_CORN_SYRUP,corn syrup,karo,sweetener,
 ING_SOUR_CREAM,sour cream,dairy sour cream,dairy,milk
+ING_PISTACHIO_PUDDING,pistachio pudding mix,pistachio pudding mix,prepared,tree_nuts
+ING_PISTACHIO_PUDDING,pistachio pudding mix,pistachio pudding,prepared,tree_nuts
+ING_ALMOND_BUTTER,almond butter,almond butter,protein,tree_nuts
+ING_BROWN_RICE_FLOUR,brown rice flour,brown rice flour,grain,
+ING_IMITATION_CRAB,imitation crabmeat,imitation crabmeat,protein,fish
+ING_IMITATION_CRAB,imitation crabmeat,imitation crab,protein,fish
+ING_IMITATION_CRAB,imitation crabmeat,imitation crab meat,protein,fish
+ING_TAPIOCA_FLOUR,tapioca flour,tapioca flour,grain,
+ING_TAPIOCA_FLOUR,tapioca flour,tapioca starch,grain,
+ING_EGGNOG,eggnog,eggnog,beverage,eggs;milk
+ING_BUTTERED_BREADCRUMBS,buttered bread crumbs,buttered bread crumbs,grain,gluten;milk
+ING_GHEE,ghee,ghee,fat,milk
+ING_EDAMAME,edamame,edamame,protein,soy
+ING_COCONUT_FLAVORING,coconut flavoring,coconut flavoring,flavoring,
+ING_WALNUT_OIL,walnut oil,walnut oil,fat,tree_nuts
+ING_OYSTER_CRACKERS_NA,oyster crackers,oyster crackers,grain,gluten
+ING_PECAN_OR_WALNUT,pecan or walnut,pecan or walnut,protein,tree_nuts
+ING_PECAN_OR_WALNUT,pecan or walnut,pecans or walnuts,protein,tree_nuts
+ING_PECAN_OR_WALNUT,pecan or walnut,walnuts or pecans,protein,tree_nuts
+ING_MAYO_OR_DRESSING,mayonnaise or salad dressing,mayonnaise or salad dressing,condiment,eggs
+ING_MILK_OR_CREAM,milk or cream,milk or cream,dairy,milk
+ING_MILK_OR_CREAM,milk or cream,cream or milk,dairy,milk
+ING_CHICKEN_OR_TURKEY,chicken or turkey,chicken or turkey,protein,
+ING_CHICKEN_OR_TURKEY,chicken or turkey,turkey or chicken,protein,
+ING_BEEF_OR_TURKEY,beef or turkey,beef or turkey,protein,
+ING_VEG_OR_OLIVE_OIL,vegetable oil or olive oil,vegetable oil or olive oil,fat,
+ING_VEG_OR_OLIVE_OIL,vegetable oil or olive oil,vegetable or olive oil,fat,
+ING_VEG_OR_OLIVE_OIL,vegetable oil or olive oil,olive or vegetable oil,fat,
+ING_BUTTERMILK_OR_SOUR_MILK,buttermilk or sour milk,buttermilk or sour milk,dairy,milk
+ING_CHICKEN_OR_VEG_BROTH,chicken broth or vegetable broth,chicken broth or vegetable broth,prepared,
+ING_CHICKEN_OR_VEG_BROTH,chicken broth or vegetable broth,chicken or vegetable broth,prepared,
+ING_PARM_OR_ROMANO,parmesan cheese or romano cheese,parmesan cheese or romano cheese,dairy,milk
+ING_PARM_OR_ROMANO,parmesan cheese or romano cheese,parmesan or romano cheese,dairy,milk
+ING_WHITE_OR_YELLOW_CAKE_MIX,white cake mix or yellow cake mix,white cake mix or yellow cake mix,grain,gluten
+ING_WHITE_OR_YELLOW_CAKE_MIX,white cake mix or yellow cake mix,white or yellow cake mix,grain,gluten
+ING_BUTTER_OR_SHORTENING,butter or shortening,butter or shortening,fat,milk
+ING_BUTTER_OR_VEG_OIL,butter or vegetable oil,butter or vegetable oil,fat,milk
+ING_BUTTER_OR_VEG_OIL,butter or vegetable oil,butter or oil,fat,milk
+ING_SHORTENING_OR_OIL,shortening or vegetable oil,shortening or vegetable oil,fat,
+ING_SHORTENING_OR_OIL,shortening or vegetable oil,shortening or oil,fat,
+ING_MILK_OR_WATER,milk or water,milk or water,dairy,milk
+ING_SOUR_CREAM_OR_YOGURT,sour cream or yogurt,sour cream or yogurt,dairy,milk
+ING_MAC_AND_CHEESE,macaroni and cheese,macaroni and cheese,prepared,gluten;milk
+ING_SWEET_SOUR_SAUCE,sweet and sour sauce,sweet and sour sauce,condiment,
+ING_CHICKEN_RICE_SOUP,chicken and rice soup,chicken and rice soup,prepared,gluten
+ING_LONG_GRAIN_WILD_RICE_MIX,long grain and wild rice mix,long grain and wild rice mix,grain,
+ING_LONG_GRAIN_WILD_RICE_MIX,long grain and wild rice mix,long grain and wild rice,grain,
+ING_LONG_GRAIN_WILD_RICE_MIX,long grain and wild rice mix,long grain and wild rice blend,grain,
+ING_LONG_GRAIN_WILD_RICE_MIX,long grain and wild rice mix,uncle ben's long grain and wild rice,grain,
+ING_MONTEREY_CHEDDAR_BLEND,monterey jack and cheddar cheese blend,monterey jack and cheddar cheese blend,dairy,milk
+ING_MAYO,mayonnaise,hellmann's mayonnaise,condiment,eggs
+ING_MAYO,mayonnaise,hellmann's or best foods real mayonnaise,condiment,eggs
+ING_COTTAGE_CHEESE,cottage cheese,curd cottage cheese,dairy,milk
+ING_EVAPORATED_MILK,evaporated milk,pet milk,dairy,milk
+ING_EVAPORATED_MILK,evaporated milk,can pet milk,dairy,milk
+ING_EVAPORATED_MILK,evaporated milk,carnation milk,dairy,milk
+ING_CONDENSED_MILK,sweetened condensed milk,eagle brand condensed milk,dairy,milk
+ING_BREAD,bread,wheat bread,grain,gluten
+ING_BREAD,bread,rye bread,grain,gluten
+ING_BREADCRUMBS,bread crumbs,fine dry bread crumbs,grain,gluten
+ING_BREADCRUMBS,bread crumbs,dried breadcrumbs,grain,gluten
+ING_COCONUT_MILK,coconut milk,unsweetened coconut milk,plant_milk,
+ING_SHRIMP,shrimp,and shrimp,protein,crustaceans
+ING_CHEESE,cheese,colby cheese,dairy,milk
+ING_CHEESE,cheese,asiago cheese,dairy,milk
+ING_CHEESE,cheese,fontina cheese,dairy,milk
+ING_CHEESE,cheese,longhorn cheese,dairy,milk
+ING_CHEESE,cheese,colby-monterey jack cheese,dairy,milk
+ING_CHEESE,cheese,mexican cheese blend,dairy,milk
+ING_CHEESE,cheese,mexican blend cheese,dairy,milk
+ING_CHEESE,cheese,brie cheese,dairy,milk
+ING_CHEESE,cheese,gouda cheese,dairy,milk
+ING_CHEESE,cheese,muenster cheese,dairy,milk
+ING_CHEDDAR,cheddar cheese,white cheddar cheese,dairy,milk
+ING_PARMESAN,parmesan cheese,shaved parmesan cheese,dairy,milk
+ING_PARMESAN_ROMANO,romano cheese,pecorino romano cheese,dairy,milk
+ING_MONTEREY_JACK,monterey jack cheese,monterey jack pepper cheese,dairy,milk
+ING_BUTTER,butter,sweet butter,dairy,milk
+ING_BUTTER,butter,cube butter,dairy,milk
+ING_BUTTER,butter,weight butter,dairy,milk
+ING_PASTA,pasta,lasagne noodles,grain,gluten
+ING_PASTA,pasta,wide noodles,grain,gluten
+ING_PASTA,pasta,shell pasta,grain,gluten
+ING_PASTA,pasta,rotini pasta,grain,gluten
+ING_CHOW_MEIN_NOODLES,chow mein noodles,chinese noodles,grain,gluten
+ING_CORN_BREAD_MIX,corn muffin mix,cornbread,grain,gluten
+ING_CORN_BREAD_MIX,corn muffin mix,jiffy cornbread mix,grain,gluten
+ING_FLOUR,all-purpose flour,white wheat flour,grain,gluten
+ING_FLOUR,all-purpose flour,heaping tbsp. flour,grain,gluten
+ING_MIXED_NUTS,nuts,nut meats,protein,tree_nuts
+ING_CRACKER_CRUMBS,cracker crumbs,ritz cracker crumbs,grain,gluten
+ING_CRACKER_CRUMBS,cracker crumbs,stack ritz crackers,grain,gluten
+ING_SALMON,salmon,smoked salmon,protein,fish
+ING_FISH_FILLET,fish fillet,tilapia fillets,protein,fish
+ING_FISH_FILLET,fish fillet,white fish fillets,protein,fish
+ING_FISH_FILLET,fish fillet,catfish fillets,protein,fish
+ING_TUNA,tuna,tuna in water,protein,fish
+ING_TUNA,tuna,tuna steaks,protein,fish
+ING_COTTAGE_CHEESE,cottage cheese,creamed cottage cheese,dairy,milk
+ING_COTTAGE_CHEESE,cottage cheese,carton cottage cheese,dairy,milk
+ING_CREAM_CHEESE,cream cheese,cream cheese frosting,dairy,milk
+ING_MUSHROOM,mushroom,mushroom stems and pieces,vegetable,
+ING_BAKED_BEANS,baked beans,can pork and beans,protein,
+ING_BAKED_BEANS,baked beans,cans pork and beans,protein,
+ING_BAKED_BEANS,baked beans,pork and beans in tomato sauce,protein,
+ING_PINEAPPLE,pineapple,pineapple and juice,fruit,
+ING_PINEAPPLE,pineapple,can pineapple and juice,fruit,
+ING_GREEN_ONION,green onion,green onions and tops,vegetable,
+ING_LEMON,lemon,juice and rind of 1 lemon,fruit,
+ING_LEMON,lemon,zest and 1 lemon,fruit,
+ING_HALF_AND_HALF,half and half,half and half milk,dairy,milk
+ING_PUDDING_MIX,instant pudding mix,vanilla pudding and pie filling,prepared,
+ING_CHERRY,cherry,red and green candied cherries,fruit,
+ING_ROTEL,diced tomatoes and green chilies,ro-tel tomatoes and green chilies,vegetable,
+ING_ROTEL,diced tomatoes and green chilies,tomatoes and green chiles,vegetable,
+ING_ROTEL,diced tomatoes and green chilies,ro-tel tomatoes and chilies,vegetable,
+ING_SALSA,salsa,thick and chunky salsa,condiment,
+ING_BUTTER_OR_MARGARINE,butter or margarine,butter or 1/2 cup margarine,fat,
+ING_BUTTER_OR_MARGARINE,butter or margarine,butter or 2 tablespoons margarine,fat,
+ING_BUTTER_OR_MARGARINE,butter or margarine,butter or 1/4 cup margarine,fat,
+ING_BUTTER_OR_MARGARINE,butter or margarine,butter or 1 tablespoon margarine,fat,
+ING_BUTTER_OR_MARGARINE,butter or margarine,butter or 1 cup margarine,fat,
+ING_BUTTER_OR_MARGARINE,butter or margarine,butter or 3 tablespoons margarine,fat,
+ING_BUTTER_OR_MARGARINE,butter or margarine,butter/margarine,fat,

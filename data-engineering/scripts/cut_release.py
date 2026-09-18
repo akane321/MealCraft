@@ -76,6 +76,7 @@ def main() -> int:
     eligible = 0
     referenced_ids: set[str] = set()
     servings_basis_counts: Counter[str] = Counter()
+    dietary_tag_counts: Counter[str] = Counter()
     out_recipes = args.out_dir / "recipes.jsonl"
     with args.recipes.open("r", encoding="utf-8") as src, out_recipes.open(
         "w", encoding="utf-8"
@@ -92,6 +93,8 @@ def main() -> int:
             servings_basis_counts[recipe["servings_basis"]] += 1
             for item in recipe["ingredients"]:
                 referenced_ids.add(item["canonical_ingredient_id"])
+            for tag in recipe.get("dietary_tags") or []:
+                dietary_tag_counts[tag] += 1
             dst.write(line + "\n")
     print(f"scanned {total} recipes -> {eligible} release-eligible ({eligible / total * 100:.3f}%)")
 
@@ -143,8 +146,17 @@ def main() -> int:
             "mapping or quantity-to-mass conversion yet)",
             "allergen labels are deterministic-rule-only; no independently reviewed gold "
             "subset exists yet (see docs/schema-v1-freeze.md)",
-            "cuisine/meal_types/methods/equipment/difficulty/dietary_tags are empty for "
-            "every released recipe; no controlled vocabulary exists yet",
+            "cuisine/meal_types/methods/equipment/difficulty are empty for every released "
+            "recipe; no controlled vocabulary exists yet",
+            (
+                "dietary_tags are absent for every released recipe; not computed by this "
+                "pipeline"
+                if not dietary_tag_counts
+                else "dietary_tags (dairy-free/gluten-free/vegetarian/vegan) are derived "
+                f"only, not independently reviewed: {dict(sorted(dietary_tag_counts.items()))} "
+                "of released recipes carry a positive tag; a recipe with any unmapped "
+                "ingredient carries none, by design (see scripts/derive_dietary_tags.py)"
+            ),
             "servings_basis == 'range_lower_bound' rows carry an estimated, not stated, "
             "servings count (see src/servings.py)",
         ],

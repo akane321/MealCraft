@@ -10,7 +10,9 @@ from .references import (
     create_usda_candidates,
     create_usda_foundation_candidates,
     fetch_foodon,
+    fetch_usda_fndds,
     fetch_usda_foundation,
+    fetch_usda_sr_legacy,
 )
 from .validation import validate_outputs
 
@@ -41,6 +43,12 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("fetch-foodon", help="Download the FoodOn synonym release")
     subparsers.add_parser(
         "fetch-usda-foundation", help="Download and extract USDA Foundation Foods CSV"
+    )
+    subparsers.add_parser(
+        "fetch-usda-sr-legacy", help="Download and extract USDA SR Legacy CSV"
+    )
+    subparsers.add_parser(
+        "fetch-usda-fndds", help="Download and extract USDA FNDDS CSV"
     )
 
     foodon = subparsers.add_parser(
@@ -103,6 +111,14 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "fetch-usda-foundation":
         print(json.dumps(fetch_usda_foundation(root), ensure_ascii=False, indent=2))
+        return 0
+
+    if args.command == "fetch-usda-sr-legacy":
+        print(json.dumps(fetch_usda_sr_legacy(root), ensure_ascii=False, indent=2))
+        return 0
+
+    if args.command == "fetch-usda-fndds":
+        print(json.dumps(fetch_usda_fndds(root), ensure_ascii=False, indent=2))
         return 0
 
     if args.command == "match-foodon":

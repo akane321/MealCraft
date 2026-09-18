@@ -22,6 +22,14 @@ USDA_FOUNDATION_URL = (
     "https://fdc.nal.usda.gov/fdc-datasets/"
     "FoodData_Central_foundation_food_csv_2026-04-30.zip"
 )
+USDA_SR_LEGACY_URL = (
+    "https://fdc.nal.usda.gov/fdc-datasets/"
+    "FoodData_Central_sr_legacy_food_csv_2018-04.zip"
+)
+USDA_FNDDS_URL = (
+    "https://fdc.nal.usda.gov/fdc-datasets/"
+    "FoodData_Central_survey_food_csv_2024-10-31.zip"
+)
 USER_AGENT = "MealCraft-DSS5105-data-research/0.1"
 
 
@@ -81,6 +89,86 @@ def fetch_usda_foundation(project_root: Path) -> dict[str, Any]:
         "extracted_files": extracted_files,
     }
     write_json(project_root / "data" / "reference" / "usda-foundation-manifest.json", manifest)
+    return manifest
+
+
+def fetch_usda_sr_legacy(project_root: Path) -> dict[str, Any]:
+    """SR Legacy (~7,800 foods) is the fallback layer when Foundation Foods'
+    ~469 entries don't cover a canonical ingredient (enrichment-work-package.md
+    task B) — SR Legacy skews toward everyday/processed foods rather than
+    Foundation Foods' raw lab-sampled commodities.
+    """
+    download_dir = project_root / "data" / "reference" / "downloads"
+    archive = download_dir / "FoodData_Central_sr_legacy_food_csv_2018-04.zip"
+    extract_dir = download_dir / "usda-sr-legacy-2018-04"
+    _download(USDA_SR_LEGACY_URL, archive)
+    extract_dir.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(archive) as bundle:
+        unsafe = [
+            name
+            for name in bundle.namelist()
+            if Path(name).is_absolute() or ".." in Path(name).parts
+        ]
+        if unsafe:
+            raise ValueError(f"Unsafe paths in USDA archive: {unsafe[:3]}")
+        bundle.extractall(extract_dir)
+    extracted_files = sorted(
+        str(path.relative_to(project_root))
+        for path in extract_dir.rglob("*")
+        if path.is_file()
+    )
+    manifest = {
+        "source": "USDA FoodData Central SR Legacy",
+        "source_url": USDA_SR_LEGACY_URL,
+        "source_version": "2018-04",
+        "license": "CC0 1.0 / public domain",
+        "retrieved_at": utc_now_iso(),
+        "archive_path": str(archive.relative_to(project_root)),
+        "archive_bytes": archive.stat().st_size,
+        "archive_sha256": sha256_file(archive),
+        "extracted_files": extracted_files,
+    }
+    write_json(project_root / "data" / "reference" / "usda-sr-legacy-manifest.json", manifest)
+    return manifest
+
+
+def fetch_usda_fndds(project_root: Path) -> dict[str, Any]:
+    """FNDDS (~5,600 foods, `data_type == "survey_fndds_food"`) is the third
+    fallback layer in enrichment-work-package.md task B — it skews toward
+    prepared/composite dishes as actually consumed (survey respondents'
+    foods), which Foundation Foods and SR Legacy both under-cover.
+    """
+    download_dir = project_root / "data" / "reference" / "downloads"
+    archive = download_dir / "FoodData_Central_survey_food_csv_2024-10-31.zip"
+    extract_dir = download_dir / "usda-fndds-2024-10-31"
+    _download(USDA_FNDDS_URL, archive)
+    extract_dir.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(archive) as bundle:
+        unsafe = [
+            name
+            for name in bundle.namelist()
+            if Path(name).is_absolute() or ".." in Path(name).parts
+        ]
+        if unsafe:
+            raise ValueError(f"Unsafe paths in USDA archive: {unsafe[:3]}")
+        bundle.extractall(extract_dir)
+    extracted_files = sorted(
+        str(path.relative_to(project_root))
+        for path in extract_dir.rglob("*")
+        if path.is_file()
+    )
+    manifest = {
+        "source": "USDA FoodData Central FNDDS",
+        "source_url": USDA_FNDDS_URL,
+        "source_version": "2024-10-31",
+        "license": "CC0 1.0 / public domain",
+        "retrieved_at": utc_now_iso(),
+        "archive_path": str(archive.relative_to(project_root)),
+        "archive_bytes": archive.stat().st_size,
+        "archive_sha256": sha256_file(archive),
+        "extracted_files": extracted_files,
+    }
+    write_json(project_root / "data" / "reference" / "usda-fndds-manifest.json", manifest)
     return manifest
 
 
