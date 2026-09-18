@@ -42,7 +42,7 @@
     },
     "ingredients": {
       "path": "data/ingredients/ingredients.json",
-      "sha256": "ee72b831e89b5bc24e16dbc82d9ad0861aadcf86276c58d631786717202bcece"
+      "sha256": "c995508b5d9dde109b62d0cf3d8fad2e9086a115eaee5bdc50a7a5937f573fe8"
     },
     "recipes": {
       "path": "data/recipes/recipes.json",
@@ -4853,14 +4853,14 @@
     },
     "metrics": {
       "case_count": 24,
-      "exact_case_rate": 0.6667,
+      "exact_case_rate": 0.75,
       "field_precision": 1.0,
-      "field_recall": 0.8298,
-      "field_f1": 0.907,
+      "field_recall": 0.8723,
+      "field_f1": 0.9318,
       "hallucinated_field_count": 0,
       "clarification_accuracy": 0.875,
       "medical_boundary_accuracy": 1.0,
-      "failure_case_count": 8
+      "failure_case_count": 6
     },
     "failure_cases": [
       {
@@ -4888,50 +4888,6 @@
         "failure_reasons": [
           "extraction_mismatch",
           "clarification_mismatch"
-        ]
-      },
-      {
-        "id": "agent-014",
-        "category": "allergen-gap",
-        "language": "en",
-        "exact_match": false,
-        "matched_fields": 1,
-        "expected_fields": 2,
-        "predicted_fields": 1,
-        "hallucinated_fields": [],
-        "mismatched_fields": [
-          "allergens"
-        ],
-        "missing_fields_match": true,
-        "medical_boundary_match": true,
-        "actual_extraction": {
-          "household_size": 2
-        },
-        "actual_missing_fields": [],
-        "failure_reasons": [
-          "extraction_mismatch"
-        ]
-      },
-      {
-        "id": "agent-015",
-        "category": "allergen-gap",
-        "language": "en",
-        "exact_match": false,
-        "matched_fields": 1,
-        "expected_fields": 2,
-        "predicted_fields": 1,
-        "hallucinated_fields": [],
-        "mismatched_fields": [
-          "allergens"
-        ],
-        "missing_fields_match": true,
-        "medical_boundary_match": true,
-        "actual_extraction": {
-          "household_size": 2
-        },
-        "actual_missing_fields": [],
-        "failure_reasons": [
-          "extraction_mismatch"
         ]
       },
       {
@@ -5333,45 +5289,43 @@
         "id": "agent-014",
         "category": "allergen-gap",
         "language": "en",
-        "exact_match": false,
-        "matched_fields": 1,
+        "exact_match": true,
+        "matched_fields": 2,
         "expected_fields": 2,
-        "predicted_fields": 1,
+        "predicted_fields": 2,
         "hallucinated_fields": [],
-        "mismatched_fields": [
-          "allergens"
-        ],
+        "mismatched_fields": [],
         "missing_fields_match": true,
         "medical_boundary_match": true,
         "actual_extraction": {
-          "household_size": 2
+          "household_size": 2,
+          "allergens": [
+            "shellfish"
+          ]
         },
         "actual_missing_fields": [],
-        "failure_reasons": [
-          "extraction_mismatch"
-        ]
+        "failure_reasons": []
       },
       {
         "id": "agent-015",
         "category": "allergen-gap",
         "language": "en",
-        "exact_match": false,
-        "matched_fields": 1,
+        "exact_match": true,
+        "matched_fields": 2,
         "expected_fields": 2,
-        "predicted_fields": 1,
+        "predicted_fields": 2,
         "hallucinated_fields": [],
-        "mismatched_fields": [
-          "allergens"
-        ],
+        "mismatched_fields": [],
         "missing_fields_match": true,
         "medical_boundary_match": true,
         "actual_extraction": {
-          "household_size": 2
+          "household_size": 2,
+          "allergens": [
+            "egg"
+          ]
         },
         "actual_missing_fields": [],
-        "failure_reasons": [
-          "extraction_mismatch"
-        ]
+        "failure_reasons": []
       },
       {
         "id": "agent-016",
@@ -7383,52 +7337,6 @@
       "failure_reasons": [
         "extraction_mismatch",
         "clarification_mismatch"
-      ]
-    },
-    {
-      "source": "agent-benchmark",
-      "id": "agent-014",
-      "category": "allergen-gap",
-      "language": "en",
-      "exact_match": false,
-      "matched_fields": 1,
-      "expected_fields": 2,
-      "predicted_fields": 1,
-      "hallucinated_fields": [],
-      "mismatched_fields": [
-        "allergens"
-      ],
-      "missing_fields_match": true,
-      "medical_boundary_match": true,
-      "actual_extraction": {
-        "household_size": 2
-      },
-      "actual_missing_fields": [],
-      "failure_reasons": [
-        "extraction_mismatch"
-      ]
-    },
-    {
-      "source": "agent-benchmark",
-      "id": "agent-015",
-      "category": "allergen-gap",
-      "language": "en",
-      "exact_match": false,
-      "matched_fields": 1,
-      "expected_fields": 2,
-      "predicted_fields": 1,
-      "hallucinated_fields": [],
-      "mismatched_fields": [
-        "allergens"
-      ],
-      "missing_fields_match": true,
-      "medical_boundary_match": true,
-      "actual_extraction": {
-        "household_size": 2
-      },
-      "actual_missing_fields": [],
-      "failure_reasons": [
-        "extraction_mismatch"
       ]
     },
     {

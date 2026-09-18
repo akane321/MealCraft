@@ -31,7 +31,7 @@ export interface RecipeIngredient {
   quantity: number | null;
   unit: string | null;
   preparation: string | null;
-  allergen: string | null;
+  allergens: string[];
 }
 
 export interface RecipeStep {

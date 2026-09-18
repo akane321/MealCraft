@@ -101,6 +101,8 @@ class FinalScopeReferencePlanner:
                 continue
             if set(recipe.allergens).intersection(problem.allergens):
                 continue
+            if set(problem.allergens).difference(problem.allergen_vocabulary or []):
+                continue
             if ingredient_ids.intersection(problem.excluded_ingredients):
                 continue
             if not set(problem.dietary_requirements).issubset(recipe.dietary_tags):

@@ -7,7 +7,7 @@
 - Developer gate: **PASS**
 - Agent provider: **fixture**
 - Live API used: **no**
-- Recorded failure cases: **44**
+- Recorded failure cases: **42**
 
 ## Inputs
 
@@ -20,7 +20,7 @@ Every number below was computed over exactly these files. A report whose inputs 
 | `fixtures` | `data/fixtures/fairprice-products.json` | `19e760bd53e438fa...` |
 | `grounding` | `data/evaluation/agent-orchestration/grounding-developer-v1.json` | `b8d61c8d5c107a58...` |
 | `heldout` | `data/evaluation/heldout/planning-v1.json` | `95d13610fbd537c4...` |
-| `ingredients` | `data/ingredients/ingredients.json` | `ee72b831e89b5bc2...` |
+| `ingredients` | `data/ingredients/ingredients.json` | `c995508b5d9dde10...` |
 | `recipes` | `data/recipes/recipes.json` | `f35c55874b15c3a1...` |
 | `scope` | `data/evaluation/agent-orchestration/scope-developer-v1.json` | `062446e2467ba273...` |
 
@@ -47,14 +47,14 @@ Every number below was computed over exactly these files. A report whose inputs 
 | Metric | Result |
 |---|---:|
 | `case_count` | 24 |
-| `exact_case_rate` | 0.6667 |
+| `exact_case_rate` | 0.75 |
 | `field_precision` | 1.0 |
-| `field_recall` | 0.8298 |
-| `field_f1` | 0.907 |
+| `field_recall` | 0.8723 |
+| `field_f1` | 0.9318 |
 | `hallucinated_field_count` | 0 |
 | `clarification_accuracy` | 0.875 |
 | `medical_boundary_accuracy` | 1.0 |
-| `failure_case_count` | 8 |
+| `failure_case_count` | 6 |
 
 ## Agent scope developer set
 
@@ -131,10 +131,8 @@ Every number below was computed over exactly these files. A report whose inputs 
 | 35 | heldout-greedy-baseline | hold-035 | consecutive_recipe_repetition |
 | 36 | heldout-greedy-baseline | hold-036 | consecutive_recipe_repetition |
 | 37 | agent-benchmark | agent-005 | extraction_mismatch, clarification_mismatch |
-| 38 | agent-benchmark | agent-014 | extraction_mismatch |
-| 39 | agent-benchmark | agent-015 | extraction_mismatch |
-| 40 | agent-benchmark | agent-016 | extraction_mismatch, clarification_mismatch |
-| 41 | agent-benchmark | agent-017 | extraction_mismatch |
-| 42 | agent-benchmark | agent-018 | extraction_mismatch |
-| 43 | agent-benchmark | agent-019 | extraction_mismatch |
-| 44 | agent-benchmark | agent-024 | extraction_mismatch, clarification_mismatch |
+| 38 | agent-benchmark | agent-016 | extraction_mismatch, clarification_mismatch |
+| 39 | agent-benchmark | agent-017 | extraction_mismatch |
+| 40 | agent-benchmark | agent-018 | extraction_mismatch |
+| 41 | agent-benchmark | agent-019 | extraction_mismatch |
+| 42 | agent-benchmark | agent-024 | extraction_mismatch, clarification_mismatch |
