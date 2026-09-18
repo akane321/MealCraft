@@ -130,6 +130,11 @@ function newChat() {
   nutrition.dashboard.value = null;
 }
 
+// The film only plays on the entry; inside the app the glows take over.
+watch(view, (value) => {
+  if (value === "app") film.value?.pause();
+  else void film.value?.play();
+});
 watch(generatedPlan, (value) => {
   if (value) void loadPlan(value.id);
 });
@@ -158,6 +163,7 @@ onMounted(() => {
         <source src="/media/hero.mp4" type="video/mp4">
       </video>
     </div>
+    <div class="glow" aria-hidden="true"><span class="blob a" /><span class="blob b" /><span class="blob c" /></div>
     <div class="scrim" aria-hidden="true" />
     <button v-if="view === 'landing'" type="button" class="film-toggle mc-pill" :aria-label="filmPlaying ? 'Pause background video' : 'Play background video'" @click="toggleFilm">
       <svg v-if="filmPlaying" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12" /></svg>
@@ -359,7 +365,18 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 .film video { width: 100%; height: 100%; object-fit: cover; }
 .film-toggle { position: absolute; left: 24px; bottom: 22px; z-index: 5; width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; color: var(--mc-text-2); }
 .film-toggle svg { width: 14px; height: 14px; }
-.is-app .film { opacity: 0.7; transform: scale(1.06); filter: blur(22px) saturate(120%); }
+.is-app .film { opacity: 0; transform: scale(1.06); filter: blur(22px); }
+
+/* Inside the app the film gives way to slow warm glows */
+.glow { position: absolute; inset: 0; opacity: 0; transition: opacity 1200ms ease; }
+.is-app .glow { opacity: 1; }
+.blob { position: absolute; border-radius: 50%; }
+.blob.a { left: -8%; top: -12%; width: 62vw; height: 84vh; background: radial-gradient(circle, rgba(194, 85, 58, 0.42), transparent 65%); animation: drift-a 9s ease-in-out infinite alternate; }
+.blob.b { left: 36%; top: 12%; width: 52vw; height: 70vh; background: radial-gradient(circle, rgba(222, 170, 98, 0.2), transparent 65%); animation: drift-b 11s ease-in-out infinite alternate; }
+.blob.c { left: 66%; top: 46%; width: 44vw; height: 62vh; background: radial-gradient(circle, rgba(122, 132, 113, 0.22), transparent 65%); animation: drift-c 7s ease-in-out infinite alternate; }
+@keyframes drift-a { to { transform: translate(60px, 30px) scale(1.12); } }
+@keyframes drift-b { from { transform: scale(1.1); } to { transform: translate(-80px, -20px) scale(0.95); } }
+@keyframes drift-c { to { transform: translate(40px, -50px); } }
 .scrim {
   position: absolute;
   inset: 0;
@@ -367,7 +384,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
   transition: background-color 900ms ease;
 }
 .is-app .scrim {
-  background-color: rgba(14, 12, 10, 0.45);
+  background-color: transparent;
   background-image:
     linear-gradient(rgba(242, 237, 228, 0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(242, 237, 228, 0.025) 1px, transparent 1px);
