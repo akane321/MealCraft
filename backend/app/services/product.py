@@ -97,7 +97,24 @@ class ProductSearchService:
         try:
             items = self.live_provider.search(normalized_query, limit=limit)
             if not items:
-                raise ProductProviderError("FairPrice returned no products")
+                # FairPrice answered and stocks nothing for this: a data gap, so the
+                # line stays unpriced rather than borrowing sample prices.
+                return ProductSearchResponse(
+                    query=normalized_query,
+                    provider_used="fairprice",
+                    fallback_used=False,
+                    cached=False,
+                    warning=f"FairPrice has no product for '{normalized_query}'.",
+                    items=[],
+                    retrieval=self._trace(
+                        query=normalized_query,
+                        provider_used="fairprice",
+                        mode="live",
+                        status="no_match",
+                        items=[],
+                        parser_version="fairprice-next-data-v1",
+                    ),
+                )
             self.repository.replace_query_results(
                 source="fairprice",
                 search_query=normalized_query,
@@ -120,6 +137,33 @@ class ProductSearchService:
                 ),
             )
         except ProductProviderError as error:
+            # Live, then cache, then fixture (ADR-0022 section 2): an expired
+            # snapshot of real prices is still better than sample prices.
+            stale = self.repository.get_fresh(
+                source="fairprice",
+                search_query=normalized_query,
+                fetched_after=datetime.min.replace(tzinfo=UTC),
+                limit=limit,
+            )
+            if stale:
+                saved = min(item.fetched_at for item in stale).strftime("%d %b %Y %H:%M UTC")
+                return ProductSearchResponse(
+                    query=normalized_query,
+                    provider_used="fairprice",
+                    fallback_used=True,
+                    cached=True,
+                    warning=f"Live FairPrice lookup was unavailable; prices saved on {saved} were used. ({error})",
+                    items=stale,
+                    retrieval=self._trace(
+                        query=normalized_query,
+                        provider_used="fairprice",
+                        mode="cache",
+                        status="degraded",
+                        items=stale,
+                        parser_version="fairprice-next-data-v1",
+                        warning=str(error),
+                    ),
+                )
             fallback_items = self.fixture_provider.search(normalized_query, limit=limit)
             return ProductSearchResponse(
                 query=normalized_query,
