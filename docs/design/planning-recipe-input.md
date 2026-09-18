@@ -1,7 +1,8 @@
 # Recipe details as Planning inputs
 
 `app.planning.recipe_input.recipe_input` consumes `RecipeDetailResponse` without
-database access. The caller must explicitly supply V2 `allowed_meal_types` and
+database access. The caller must explicitly supply V2 `allowed_meal_types` (the
+recipe's usual meal types, a soft affinity rather than a filter) and
 confirm `nutrition_basis="per_serving"`. Legacy `main` is not silently mapped
 to breakfast, lunch or dinner; whole-recipe nutrition is not silently divided.
 

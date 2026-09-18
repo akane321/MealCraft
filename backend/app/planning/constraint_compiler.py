@@ -77,8 +77,6 @@ def compile_constraints(problem: FinalPlanningProblem) -> tuple[CandidateEligibi
     for slot in sorted(problem.slots, key=lambda item: item.slot_id):
         for recipe in sorted(problem.recipes, key=lambda item: item.recipe_id):
             reasons: set[str] = set()
-            if slot.meal_type not in recipe.allowed_meal_types:
-                reasons.add("meal_type")
             if slot.locked_recipe_id is not None and recipe.recipe_id != slot.locked_recipe_id:
                 reasons.add("locked_slot")
             if slot.max_time_minutes is not None and recipe.total_time_minutes > slot.max_time_minutes:
