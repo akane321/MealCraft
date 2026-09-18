@@ -9,7 +9,7 @@ from app.agent.parser import (
     OpenAIConstraintParser,
     RuleBasedConstraintParser,
 )
-from app.api.routes.auth import CurrentHouseholdCsrfDependency, CurrentHouseholdDependency
+from app.api.routes.auth import CurrentHouseholdCreatePlanCsrfDependency, CurrentHouseholdViewDependency
 from app.api.routes.meal_plans import build_meal_plan_service, build_replanning_service
 from app.core.config import Settings, get_settings
 from app.db.session import get_db_session
@@ -56,7 +56,7 @@ def create_constraint_parser(settings: Settings) -> ConstraintParser:
 def get_agent_service(
     database: Annotated[Session, Depends(get_db_session)],
     settings: Annotated[Settings, Depends(get_settings)],
-    current: CurrentHouseholdDependency,
+    current: CurrentHouseholdViewDependency,
 ) -> AgentSessionService:
     try:
         parser = create_constraint_parser(settings)
@@ -83,7 +83,7 @@ IdempotencyKey = Annotated[str | None, Header(alias="Idempotency-Key")]
 def create_agent_session(
     payload: AgentMessageInput,
     service: AgentServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
 ) -> AgentSessionResponse:
     try:
         return service.create(payload.message)
@@ -112,7 +112,7 @@ def reply_to_agent_session(
     session_id: int,
     payload: AgentMessageInput,
     service: AgentServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
     idempotency_key: IdempotencyKey = None,
 ) -> AgentSessionResponse:
     try:
@@ -130,7 +130,7 @@ def answer_agent_interaction(
     session_id: int,
     payload: AgentInteractionInput,
     service: AgentServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
     idempotency_key: IdempotencyKey = None,
 ) -> AgentSessionResponse:
     try:
@@ -147,7 +147,7 @@ def answer_agent_interaction(
 def confirm_agent_session(
     session_id: int,
     service: AgentServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
     idempotency_key: IdempotencyKey = None,
 ) -> AgentConfirmationResponse:
     try:
@@ -166,7 +166,7 @@ def confirm_agent_session(
 def confirm_agent_replan(
     session_id: int,
     service: AgentServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
     idempotency_key: IdempotencyKey = None,
 ) -> AgentReplanConfirmationResponse:
     try:
@@ -185,7 +185,7 @@ def confirm_agent_replan(
 def discard_agent_replan(
     session_id: int,
     service: AgentServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
     idempotency_key: IdempotencyKey = None,
 ) -> AgentSessionResponse:
     try:
@@ -223,7 +223,7 @@ def cancel_agent_run(
     session_id: int,
     run_id: int,
     service: AgentServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
 ) -> AgentRunResponse:
     try:
         return service.cancel_run(session_id, run_id)

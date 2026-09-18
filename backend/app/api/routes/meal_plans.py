@@ -3,7 +3,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.routes.auth import CurrentHouseholdCsrfDependency, CurrentHouseholdDependency
+from app.api.routes.auth import (
+    CurrentHouseholdCheckInCsrfDependency,
+    CurrentHouseholdCreatePlanCsrfDependency,
+    CurrentHouseholdViewDependency,
+)
 from app.db.session import get_db_session
 from app.planning.grocery_estimator import GroceryEstimator
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
@@ -54,7 +58,7 @@ def build_meal_plan_service(database: Session, household_id: int) -> WeeklyMealP
 
 def get_meal_plan_service(
     database: DatabaseDependency,
-    current: CurrentHouseholdDependency,
+    current: CurrentHouseholdViewDependency,
 ) -> WeeklyMealPlanService:
     return build_meal_plan_service(database, current.active_membership.household_id)
 
@@ -79,7 +83,7 @@ def build_replanning_service(database: Session, household_id: int) -> MealPlanRe
 
 def get_replanning_service(
     database: DatabaseDependency,
-    current: CurrentHouseholdDependency,
+    current: CurrentHouseholdViewDependency,
 ) -> MealPlanReplanningService:
     return build_replanning_service(database, current.active_membership.household_id)
 
@@ -91,7 +95,7 @@ ReplanningServiceDependency = Annotated[MealPlanReplanningService, Depends(get_r
 def generate_weekly_plan(
     constraints: WeeklyMealPlanRequest,
     service: MealPlanServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
 ) -> WeeklyMealPlanResponse:
     try:
         return service.generate(constraints)
@@ -116,7 +120,7 @@ def preview_meal_plan_change(
     plan_id: int,
     request: MealPlanReplanPreviewRequest,
     service: ReplanningServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
 ) -> MealPlanReplanEventResponse:
     try:
         return service.preview(plan_id=plan_id, request=request)
@@ -134,7 +138,7 @@ def confirm_meal_plan_change(
     plan_id: int,
     event_id: int,
     service: ReplanningServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
 ) -> MealPlanReplanConfirmationResponse:
     try:
         return service.confirm(plan_id=plan_id, event_id=event_id)
@@ -170,7 +174,7 @@ def update_meal_status(
     entry_id: int,
     update: MealPlanEntryStatusUpdate,
     service: MealPlanServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCheckInCsrfDependency,
 ) -> WeeklyMealPlanResponse:
     plan = service.update_entry_status(
         plan_id=plan_id,

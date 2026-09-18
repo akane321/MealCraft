@@ -70,7 +70,11 @@ OPERATIONS_PERMISSIONS: dict[SystemRole, frozenset[OperationsAction]] = {
 
 
 def may_access_household(role: HouseholdRole | str, action: HouseholdAction) -> bool:
-    return action in HOUSEHOLD_PERMISSIONS[HouseholdRole(role)]
+    try:
+        normalized_role = HouseholdRole(role)
+    except ValueError:
+        return False
+    return action in HOUSEHOLD_PERMISSIONS.get(normalized_role, frozenset())
 
 
 def may_access_operations(role: SystemRole | str, action: OperationsAction) -> bool:

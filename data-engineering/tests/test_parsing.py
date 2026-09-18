@@ -111,6 +111,27 @@ class IngredientParsingTests(unittest.TestCase):
         result = parse_ingredient("1 c. cooked beef, pork or chicken", self.config)
         self.assertIn("ambiguous_alternative", result.review_reasons)
 
+    def test_or_inside_an_informal_quantity_phrase_is_not_ambiguous(self) -> None:
+        result = parse_ingredient("1 tsp. salt or to taste", self.config)
+        self.assertEqual(result.ingredient_text, "salt")
+        self.assertNotIn("ambiguous_alternative", result.review_reasons)
+
+    def test_or_inside_a_fresh_or_thawed_idiom_is_not_ambiguous(self) -> None:
+        result = parse_ingredient("2 c. fresh or thawed, frozen broccoli florets", self.config)
+        self.assertEqual(result.ingredient_text, "broccoli")
+        self.assertNotIn("ambiguous_alternative", result.review_reasons)
+
+    def test_or_between_two_numbers_is_a_quantity_range(self) -> None:
+        result = parse_ingredient("3 or 4 bananas", self.config)
+        self.assertEqual(result.quantity_min, 3.0)
+        self.assertEqual(result.quantity_max, 4.0)
+        self.assertEqual(result.ingredient_text, "bananas")
+        self.assertNotIn("ambiguous_alternative", result.review_reasons)
+
+    def test_genuine_alternative_is_still_flagged(self) -> None:
+        result = parse_ingredient("1/3 c. butter or margarine, melted", self.config)
+        self.assertIn("ambiguous_alternative", result.review_reasons)
+
     def test_descending_range_is_swapped_to_min_lte_max(self) -> None:
         result = parse_ingredient("1/4 to 1/8 teaspoon nutmeg", self.config)
         self.assertEqual(result.quantity_min, 0.125)

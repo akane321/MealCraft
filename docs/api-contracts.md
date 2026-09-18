@@ -92,6 +92,31 @@ than revealing its existence. Mutating household routes also require the
 session's `X-CSRF-Token`; public catalog and recommendation reads remain
 available without a session.
 
+Private routes authorize through one parameterized `HouseholdAction`
+dependency. Reads require `VIEW`; profile creation and updates require
+`EDIT_PROFILE`; plan generation, replanning and Agent-session mutations require
+`CREATE_PLAN`; meal-entry status changes require `CHECK_IN`. The current role
+matrix is:
+
+| Household role | View | Edit profile | Create or replan | Check in | Manage members |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| owner | yes | yes | yes | yes | yes |
+| editor | yes | yes | yes | yes | no |
+| member | yes | no | yes | yes | no |
+| viewer | yes | no | no | no | no |
+
+Authorization failures follow one stable boundary:
+
+- missing, expired or revoked authentication returns HTTP 401;
+- an authenticated user without an active membership returns HTTP 403;
+- a valid membership without the required action returns HTTP 403;
+- a private identifier outside the active household returns HTTP 404;
+- an authorized mutation with a missing or invalid CSRF token returns HTTP 403.
+
+Unknown or future database role values fail closed as HTTP 403. Routes never
+accept a client-supplied `household_id`; services receive the household scope
+only from the authenticated active membership.
+
 The tenancy migration preserves pre-authentication rows by assigning them to a
 reserved, suspended migration household with no login credential. Those rows
 remain inaccessible to normal users until an administrator explicitly reassigns
