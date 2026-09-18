@@ -15,9 +15,7 @@ class IngredientParsingTests(unittest.TestCase):
         cls.config = load_config(ROOT)
 
     def test_mixed_fraction_unit_and_preparation(self) -> None:
-        result = parse_ingredient(
-            "1 1/2 cups uncooked rice", self.config, source_ner=["rice"]
-        )
+        result = parse_ingredient("1 1/2 cups uncooked rice", self.config, source_ner=["rice"])
         self.assertEqual(result.quantity_min, 1.5)
         self.assertEqual(result.quantity_max, 1.5)
         self.assertEqual(result.unit_normalized, "cup")
@@ -44,9 +42,7 @@ class IngredientParsingTests(unittest.TestCase):
         self.assertNotIn("quantity_range", result.review_reasons)
 
     def test_hyphenated_mixed_number_with_real_range(self) -> None:
-        result = parse_ingredient(
-            "2-1/2 to 3 cups all-purpose flour", self.config
-        )
+        result = parse_ingredient("2-1/2 to 3 cups all-purpose flour", self.config)
         self.assertEqual(result.quantity_min, 2.5)
         self.assertEqual(result.quantity_max, 3.0)
         self.assertIn("quantity_range", result.review_reasons)
@@ -152,4 +148,3 @@ class IngredientParsingTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

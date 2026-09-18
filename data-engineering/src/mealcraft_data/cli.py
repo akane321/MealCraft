@@ -41,26 +41,16 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--ingredients", required=True, type=Path)
 
     subparsers.add_parser("fetch-foodon", help="Download the FoodOn synonym release")
-    subparsers.add_parser(
-        "fetch-usda-foundation", help="Download and extract USDA Foundation Foods CSV"
-    )
-    subparsers.add_parser(
-        "fetch-usda-sr-legacy", help="Download and extract USDA SR Legacy CSV"
-    )
-    subparsers.add_parser(
-        "fetch-usda-fndds", help="Download and extract USDA FNDDS CSV"
-    )
+    subparsers.add_parser("fetch-usda-foundation", help="Download and extract USDA Foundation Foods CSV")
+    subparsers.add_parser("fetch-usda-sr-legacy", help="Download and extract USDA SR Legacy CSV")
+    subparsers.add_parser("fetch-usda-fndds", help="Download and extract USDA FNDDS CSV")
 
-    foodon = subparsers.add_parser(
-        "match-foodon", help="Create human-review candidates from a local FoodOn release"
-    )
+    foodon = subparsers.add_parser("match-foodon", help="Create human-review candidates from a local FoodOn release")
     foodon.add_argument("--ingredients", required=True, type=Path)
     foodon.add_argument("--synonyms", type=Path)
     foodon.add_argument("--limit", type=int)
 
-    usda = subparsers.add_parser(
-        "enrich-usda", help="Create human-review candidates from USDA FoodData Central"
-    )
+    usda = subparsers.add_parser("enrich-usda", help="Create human-review candidates from USDA FoodData Central")
     usda.add_argument("--ingredients", required=True, type=Path)
     usda.add_argument("--limit", type=int, default=25)
     usda.add_argument(

@@ -173,8 +173,10 @@ Playwright for affected desktop user journeys. Do not claim visual quality from
 a successful build alone. Mobile and tablet product design are out of scope.
 
 CI runs Ruff and pytest from a checkout in the `backend` job (Ruff over
-`backend` and `scripts`, the same files the container's `ruff check .` sees), and
-pytest plus the evaluation commands through the container in the `compose` job.
+`backend`, `scripts` and `data-engineering`; the container's `ruff check .` sees
+the first two, since `data-engineering` is not mounted), the data-engineering
+unit tests, and pytest plus the evaluation commands through the container in the
+`compose` job.
 Ruff through the container and the frontend container commands are not run in
 CI; the frontend job runs its commands on the host.
 

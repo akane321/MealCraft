@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
 import { tonightEntry } from "~/lib/home-surface";
 import type { NutritionDashboardDay } from "~/types/meal-plan";
 import type { TutorialRecommendation } from "~/types/recipe";
@@ -13,7 +14,7 @@ const emit = defineEmits<{ markCooked: [entryId: number]; openRecipe: [slug: str
 
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
-const today = new Date().toLocaleDateString("en-CA");
+const today = todayIsoDate();
 const tonight = computed(() => tonightEntry(props.days, today));
 const tutorial = ref<TutorialRecommendation | null>(null);
 const playing = ref(false);
@@ -31,10 +32,9 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
 }, { immediate: true });
 
 function dayParts(date: string) {
-  const value = new Date(`${date}T00:00:00`);
   return {
-    weekday: value.toLocaleDateString("en-SG", { weekday: "short" }),
-    date: value.getDate(),
+    weekday: formatPlanDate(date, { weekday: "short" }),
+    date: Number(date.slice(8, 10)),
   };
 }
 

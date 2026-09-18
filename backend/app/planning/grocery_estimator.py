@@ -1,22 +1,11 @@
 import math
 from difflib import SequenceMatcher
 
+from app.data.units import UNIT_BASE
 from app.models.recipe import Recipe
 from app.schemas.product import GroceryEstimateResponse, GroceryLineEstimate, ProductResponse
 from app.schemas.recommendation import AvailableIngredientInput, RecipeRecommendationRequest
 from app.services.product import ProductSearchService
-
-UNIT_BASE: dict[str, tuple[str, float]] = {
-    "g": ("g", 1.0),
-    "kg": ("g", 1000.0),
-    "ml": ("ml", 1.0),
-    "l": ("ml", 1000.0),
-    "tbsp": ("ml", 15.0),
-    "tsp": ("ml", 5.0),
-    "whole": ("whole", 1.0),
-    "pc": ("whole", 1.0),
-    "pcs": ("whole", 1.0),
-}
 
 
 def convert_quantity(quantity: float, from_unit: str | None, to_unit: str | None) -> float | None:

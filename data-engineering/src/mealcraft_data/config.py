@@ -31,9 +31,7 @@ class CleaningConfig:
 
 def load_config(project_root: Path) -> CleaningConfig:
     units: dict[str, UnitRule] = {}
-    with (project_root / "config" / "units.csv").open(
-        "r", encoding="utf-8-sig", newline=""
-    ) as handle:
+    with (project_root / "config" / "units.csv").open("r", encoding="utf-8-sig", newline="") as handle:
         for row in csv.DictReader(handle):
             alias = row["alias"].casefold().strip().rstrip(".")
             units[alias] = UnitRule(
@@ -44,9 +42,7 @@ def load_config(project_root: Path) -> CleaningConfig:
             )
 
     ingredients: dict[str, IngredientRule] = {}
-    with (project_root / "config" / "ingredient_aliases.csv").open(
-        "r", encoding="utf-8-sig", newline=""
-    ) as handle:
+    with (project_root / "config" / "ingredient_aliases.csv").open("r", encoding="utf-8-sig", newline="") as handle:
         for row in csv.DictReader(handle):
             alias = row["alias"].casefold().strip()
             ingredients[alias] = IngredientRule(
@@ -54,16 +50,10 @@ def load_config(project_root: Path) -> CleaningConfig:
                 canonical_name=row["canonical_name"],
                 alias=alias,
                 food_group=row["food_group"],
-                allergens=tuple(
-                    item.strip()
-                    for item in row["allergens"].split(";")
-                    if item.strip()
-                ),
+                allergens=tuple(item.strip() for item in row["allergens"].split(";") if item.strip()),
             )
 
-    prep_lines = (project_root / "config" / "preparation_terms.txt").read_text(
-        encoding="utf-8"
-    )
+    prep_lines = (project_root / "config" / "preparation_terms.txt").read_text(encoding="utf-8")
     preparation_terms = tuple(
         sorted(
             (line.strip().casefold() for line in prep_lines.splitlines() if line.strip()),
@@ -76,4 +66,3 @@ def load_config(project_root: Path) -> CleaningConfig:
         ingredients=ingredients,
         preparation_terms=preparation_terms,
     )
-

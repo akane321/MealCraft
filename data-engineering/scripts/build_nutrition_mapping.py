@@ -30,6 +30,7 @@ of an explicit alternative would misrepresent what the source recipe
 actually used, and the work package's own priority table says composites
 should go through the compute-from-components layer, not a single lookup.
 """
+
 from __future__ import annotations
 
 import csv
@@ -79,12 +80,47 @@ STOP = {"and", "or", "of", "the", "a", "an", "style", "plain", "fresh"}
 # tells them apart. A candidate whose extra words are not all in this list
 # is never auto-mapped, no matter how low its extra-word count is.
 BENIGN_QUALIFIERS = {
-    "raw", "dried", "ground", "whole", "table", "iodized",
-    "seedless", "seeded", "skin", "stalk", "bulb", "seed", "seeds",
-    "peeled", "unpeeled", "shelled", "husked", "dehusked", "cooked",
-    "boiled", "drained", "canned", "frozen", "light", "extra",
-    "green", "red", "yellow", "white", "black", "brown", "salted", "unsalted",
-    "stick", "root", "leaf", "leaves", "powder", "powdered", "flake", "flakes",
+    "raw",
+    "dried",
+    "ground",
+    "whole",
+    "table",
+    "iodized",
+    "seedless",
+    "seeded",
+    "skin",
+    "stalk",
+    "bulb",
+    "seed",
+    "seeds",
+    "peeled",
+    "unpeeled",
+    "shelled",
+    "husked",
+    "dehusked",
+    "cooked",
+    "boiled",
+    "drained",
+    "canned",
+    "frozen",
+    "light",
+    "extra",
+    "green",
+    "red",
+    "yellow",
+    "white",
+    "black",
+    "brown",
+    "salted",
+    "unsalted",
+    "stick",
+    "root",
+    "leaf",
+    "leaves",
+    "powder",
+    "powdered",
+    "flake",
+    "flakes",
 }
 CONFIDENCE_FLOOR = 0.4
 
@@ -100,9 +136,7 @@ def singularize(word: str) -> str:
 
 
 def tokens(text: str) -> frozenset[str]:
-    return frozenset(
-        singularize(w) for w in re.findall(r"[a-z]+", text.lower()) if w not in STOP and len(w) > 2
-    )
+    return frozenset(singularize(w) for w in re.findall(r"[a-z]+", text.lower()) if w not in STOP and len(w) > 2)
 
 
 def load_tier(path: Path, want_type: str) -> list[tuple[int, str, frozenset[str]]]:
@@ -165,9 +199,7 @@ def main() -> None:
     for row in rows:
         canon.setdefault(row["ingredient_id"], row["canonical_name"])
 
-    single_word_names = frozenset(
-        singularize(name) for name in canon.values() if " " not in name and "-" not in name
-    )
+    single_word_names = frozenset(singularize(name) for name in canon.values() if " " not in name and "-" not in name)
 
     tier_data = [(source_tier, label, load_tier(path, want_type)) for source_tier, label, path, want_type in TIERS]
     for _, label, data in tier_data:
@@ -206,7 +238,7 @@ def main() -> None:
         # only fall back to the first tier with any match at all if no tier
         # offers a benign one anywhere.
         tier_rankings = []
-        for source_tier, label, candidates in tier_data:
+        for _source_tier, label, candidates in tier_data:
             ranked = rank_candidates(name_tokens, candidates, single_word_names)
             if ranked:
                 tier_rankings.append((label, ranked))
@@ -245,7 +277,7 @@ def main() -> None:
         )
 
         rejected = []
-        for fdc_id, desc, desc_tokens, extra in chosen[1:4]:
+        for fdc_id, desc, _desc_tokens, extra in chosen[1:4]:
             rejected.append(
                 {
                     "fdc_id": fdc_id,

@@ -98,17 +98,36 @@ def main() -> int:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with OUT.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.writer(handle)
-        writer.writerow([
-            "rank", "ingredient_id", "parsed_name", "recipes_blocked",
-            "recipes_usable_after_this_row", "occurrences", "example_texts",
-            "review_decision", "reviewed_canonical_name", "reviewer_notes",
-        ])
+        writer.writerow(
+            [
+                "rank",
+                "ingredient_id",
+                "parsed_name",
+                "recipes_blocked",
+                "recipes_usable_after_this_row",
+                "occurrences",
+                "example_texts",
+                "review_decision",
+                "reviewed_canonical_name",
+                "reviewer_notes",
+            ]
+        )
         for rank, (cid, blocked, cumulative) in enumerate(order, start=1):
             row = ingredients.get(cid, {})
-            writer.writerow([
-                rank, cid, row.get("canonical_name", ""), blocked, cumulative,
-                occurrences[cid], " | ".join(samples.get(cid, [])), "", "", "",
-            ])
+            writer.writerow(
+                [
+                    rank,
+                    cid,
+                    row.get("canonical_name", ""),
+                    blocked,
+                    cumulative,
+                    occurrences[cid],
+                    " | ".join(samples.get(cid, [])),
+                    "",
+                    "",
+                    "",
+                ]
+            )
 
     print(f"Recipes that survive quantity and unit checks: {len(rescuable)} of {len(recipes)}")
     print(f"Usable with no review at all:                  {ready_now}")

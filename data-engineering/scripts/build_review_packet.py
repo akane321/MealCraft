@@ -21,25 +21,87 @@ OUT = ROOT / "data" / "review" / "packet"
 
 # Words that appear as recipe section headers, not ingredients.
 SECTION_WORDS = {
-    "filling", "topping", "sauce", "cake", "dressing", "salad", "frosting",
-    "garnish", "glaze", "crust", "batter", "marinade", "ingredients", "directions",
-    "for the filling", "for the topping", "for the sauce", "for the cake",
-    "for the dressing", "for the crust", "for serving", "to serve", "note", "notes",
-    "meat", "produce", "other", "optional", "base", "assembly",
+    "filling",
+    "topping",
+    "sauce",
+    "cake",
+    "dressing",
+    "salad",
+    "frosting",
+    "garnish",
+    "glaze",
+    "crust",
+    "batter",
+    "marinade",
+    "ingredients",
+    "directions",
+    "for the filling",
+    "for the topping",
+    "for the sauce",
+    "for the cake",
+    "for the dressing",
+    "for the crust",
+    "for serving",
+    "to serve",
+    "note",
+    "notes",
+    "meat",
+    "produce",
+    "other",
+    "optional",
+    "base",
+    "assembly",
 }
 
 ALLERGEN_HINTS = {
     "peanuts": ["peanut"],
-    "tree_nuts": ["almond", "walnut", "pecan", "cashew", "pistachio", "hazelnut",
-                  "pine nut", "macadamia", "nutella", "praline", "marzipan", "nut "],
-    "milk": ["milk", "cream", "cheese", "butter", "yogurt", "yoghurt", "ghee",
-             "custard", "whey", "curd", "buttermilk"],
+    "tree_nuts": [
+        "almond",
+        "walnut",
+        "pecan",
+        "cashew",
+        "pistachio",
+        "hazelnut",
+        "pine nut",
+        "macadamia",
+        "nutella",
+        "praline",
+        "marzipan",
+        "nut ",
+    ],
+    "milk": ["milk", "cream", "cheese", "butter", "yogurt", "yoghurt", "ghee", "custard", "whey", "curd", "buttermilk"],
     "eggs": ["egg", "mayonnaise", "mayo", "meringue", "aioli"],
     "soy": ["soy", "tofu", "edamame", "tempeh", "miso"],
-    "gluten": ["flour", "wheat", "bread", "pasta", "noodle", "cracker", "barley",
-               "rye", "couscous", "semolina", "farro", "bulgur", "crouton", "panko"],
-    "fish": ["fish", "salmon", "tuna", "cod", "tilapia", "anchovy", "sardine",
-             "haddock", "halibut", "trout", "fish sauce", "worcestershire"],
+    "gluten": [
+        "flour",
+        "wheat",
+        "bread",
+        "pasta",
+        "noodle",
+        "cracker",
+        "barley",
+        "rye",
+        "couscous",
+        "semolina",
+        "farro",
+        "bulgur",
+        "crouton",
+        "panko",
+    ],
+    "fish": [
+        "fish",
+        "salmon",
+        "tuna",
+        "cod",
+        "tilapia",
+        "anchovy",
+        "sardine",
+        "haddock",
+        "halibut",
+        "trout",
+        "fish sauce",
+        "worcestershire",
+    ],
     "crustaceans": ["shrimp", "prawn", "crab", "lobster", "crayfish", "langoustine"],
     "molluscs": ["clam", "mussel", "oyster", "scallop", "squid", "octopus", "snail"],
     "sesame": ["sesame", "tahini", "za'atar"],
@@ -47,7 +109,7 @@ ALLERGEN_HINTS = {
 
 
 def load():
-    recs = [json.loads(l) for l in CURATED.open(encoding="utf-8")]
+    recs = [json.loads(line) for line in CURATED.open(encoding="utf-8")]
     occ = [(r, i) for r in recs for i in r["ingredients"]]
     return recs, occ
 
@@ -83,67 +145,97 @@ def propose_for_unmapped(text: str, known_names: set[str]) -> str:
 def build():
     recs, occ = load()
     total = len(occ)
-    freq = collections.Counter(i["ingredient_text"] for _, i in occ)
     rec_of = collections.defaultdict(set)
     example = {}
     for r, i in occ:
         rec_of[i["ingredient_text"]].add(r["recipe_id"])
         example.setdefault(i["ingredient_text"], i["original_text"])
 
-    known_names = {i["canonical_name"] for _, i in occ
-                   if i["normalization_status"] == "mapped" and i["canonical_name"]}
+    known_names = {i["canonical_name"] for _, i in occ if i["normalization_status"] == "mapped" and i["canonical_name"]}
 
     print(f"curated: {len(recs)} recipes, {total} ingredient occurrences")
 
     # 1. unmapped high frequency ------------------------------------------
-    cand = collections.Counter(
-        i["ingredient_text"] for _, i in occ if i["normalization_status"] == "candidate"
-    )
+    cand = collections.Counter(i["ingredient_text"] for _, i in occ if i["normalization_status"] == "candidate")
     rows = []
     for text, c in cand.most_common(180):
-        rows.append([
-            text, c, len(rec_of[text]), example[text][:70],
-            propose_for_unmapped(text, known_names),
-            "", "", "", "",  # decision, canonical_name, food_group, allergens
-            "",  # notes
-        ])
+        rows.append(
+            [
+                text,
+                c,
+                len(rec_of[text]),
+                example[text][:70],
+                propose_for_unmapped(text, known_names),
+                "",
+                "",
+                "",
+                "",  # decision, canonical_name, food_group, allergens
+                "",  # notes
+            ]
+        )
     _write(
         "01_unmapped_high_freq.csv",
-        ["ingredient_text", "occurrences", "recipes", "example_source",
-         "PROPOSED", "decision(add/skip/remap)", "canonical_name", "food_group",
-         "allergens(;)", "notes"],
+        [
+            "ingredient_text",
+            "occurrences",
+            "recipes",
+            "example_source",
+            "PROPOSED",
+            "decision(add/skip/remap)",
+            "canonical_name",
+            "food_group",
+            "allergens(;)",
+            "notes",
+        ],
         rows,
     )
 
     # 2. ambiguous "or" -------------------------------------------------
-    amb = collections.Counter(
-        i["ingredient_text"] for _, i in occ if "ambiguous_alternative" in i["review_reasons"]
-    )
+    amb = collections.Counter(i["ingredient_text"] for _, i in occ if "ambiguous_alternative" in i["review_reasons"])
     rows = []
     for text, c in amb.most_common(60):
-        prop = "keep composite" if re.search(r"\bbutter\b.*\bor\b.*\bmargarine\b|\bmargarine\b.*\bor\b.*\bbutter\b", text) else "?"
-        rows.append([text, c, len(rec_of[text]), example[text][:70], prop,
-                     "", "", ""])
+        prop = (
+            "keep composite"
+            if re.search(r"\bbutter\b.*\bor\b.*\bmargarine\b|\bmargarine\b.*\bor\b.*\bbutter\b", text)
+            else "?"
+        )
+        rows.append([text, c, len(rec_of[text]), example[text][:70], prop, "", "", ""])
     _write(
         "02_ambiguous_or.csv",
-        ["ingredient_text", "occurrences", "recipes", "example_source", "PROPOSED",
-         "decision(composite/pick-first/pick-other/skip)", "canonical_name", "notes"],
+        [
+            "ingredient_text",
+            "occurrences",
+            "recipes",
+            "example_source",
+            "PROPOSED",
+            "decision(composite/pick-first/pick-other/skip)",
+            "canonical_name",
+            "notes",
+        ],
         rows,
     )
 
     # 3. composites "and" ---------------------------------------------
     comp = collections.Counter(
-        i["ingredient_text"] for _, i in occ
+        i["ingredient_text"]
+        for _, i in occ
         if " and " in (i["ingredient_text"] or "") and i["normalization_status"] != "mapped"
     )
     rows = []
     for text, c in comp.most_common(40):
-        rows.append([text, c, len(rec_of[text]), example[text][:70],
-                     "composite ID or keep unresolved", "", "", ""])
+        rows.append([text, c, len(rec_of[text]), example[text][:70], "composite ID or keep unresolved", "", "", ""])
     _write(
         "03_composites.csv",
-        ["ingredient_text", "occurrences", "recipes", "example_source", "PROPOSED",
-         "decision(composite/decompose/unresolved)", "canonical_name", "notes"],
+        [
+            "ingredient_text",
+            "occurrences",
+            "recipes",
+            "example_source",
+            "PROPOSED",
+            "decision(composite/decompose/unresolved)",
+            "canonical_name",
+            "notes",
+        ],
         rows,
     )
 
@@ -152,48 +244,38 @@ def build():
     seen = {}
     for _, i in occ:
         if i["normalization_status"] == "mapped":
-            seen.setdefault(i["canonical_ingredient_id"],
-                            (i["canonical_name"], tuple(i["allergens"])))
-    a_occ = collections.Counter(
-        i["canonical_ingredient_id"] for _, i in occ if i["normalization_status"] == "mapped"
-    )
+            seen.setdefault(i["canonical_ingredient_id"], (i["canonical_name"], tuple(i["allergens"])))
+    a_occ = collections.Counter(i["canonical_ingredient_id"] for _, i in occ if i["normalization_status"] == "mapped")
     rows = []
     for iid, (name, alg) in sorted(seen.items(), key=lambda kv: -a_occ[kv[0]]):
         if alg:
             rows.append([name, iid, ";".join(alg), a_occ[iid], "confirm", "", ""])
     # (b) unmapped candidates whose name hints at an allergen
     for text, c in cand.most_common(400):
-        hits = sorted({a for a, kws in ALLERGEN_HINTS.items()
-                       if any(k in text.lower() for k in kws)})
+        hits = sorted({a for a, kws in ALLERGEN_HINTS.items() if any(k in text.lower() for k in kws)})
         if hits:
-            rows.append([text, "(unmapped)", "", c,
-                         "check: " + ";".join(hits), "", ""])
+            rows.append([text, "(unmapped)", "", c, "check: " + ";".join(hits), "", ""])
     _write(
         "04_safety_allergens.csv",
-        ["ingredient", "mapped_id", "current_allergens", "occurrences",
-         "PROPOSED", "confirmed_allergens(;)", "notes"],
+        ["ingredient", "mapped_id", "current_allergens", "occurrences", "PROPOSED", "confirmed_allergens(;)", "notes"],
         rows,
     )
 
     # 5. NER mismatch sample (possible wrong mapping) ----------------
-    mm = [(r, i) for r, i in occ
-          if i["normalization_status"] == "mapped" and i["source_ner_match"] is False]
+    mm = [(r, i) for r, i in occ if i["normalization_status"] == "mapped" and i["source_ner_match"] is False]
     mm.sort(key=lambda ri: ri[1]["ingredient_text"])
     rows = []
-    for r, i in mm[:120]:
-        rows.append([i["original_text"][:70], i["ingredient_text"],
-                     i["canonical_name"], "", "", ""])
+    for _r, i in mm[:120]:
+        rows.append([i["original_text"][:70], i["ingredient_text"], i["canonical_name"], "", "", ""])
     _write(
         "05_ner_mismatch_sample.csv",
-        ["example_source", "parsed_name", "mapped_to", "ok?(y/n)",
-         "corrected_name", "notes"],
+        ["example_source", "parsed_name", "mapped_to", "ok?(y/n)", "corrected_name", "notes"],
         rows,
     )
 
     # 6. leftover empty-after-parsing --------------------------------
     eap = [(r, i) for r, i in occ if "empty_after_parsing" in i["review_reasons"]]
-    rows = [[i["original_text"][:80], ";".join(i["preparation"])[:60], "", ""]
-            for r, i in eap]
+    rows = [[i["original_text"][:80], ";".join(i["preparation"])[:60], "", ""] for r, i in eap]
     _write(
         "06_empty_after_parsing.csv",
         ["source_line", "extracted_notes", "keep-as?(drop/attach/ingredient)", "notes"],
@@ -209,21 +291,22 @@ def build():
     with alias_csv.open(encoding="utf-8-sig") as fh:
         for row in csv.DictReader(fh):
             iid = row["ingredient_id"]
-            entry = by_id.setdefault(iid, {
-                "canonical_name": row["canonical_name"],
-                "food_group": row["food_group"],
-                "allergens": row["allergens"],
-                "aliases": [],
-            })
+            entry = by_id.setdefault(
+                iid,
+                {
+                    "canonical_name": row["canonical_name"],
+                    "food_group": row["food_group"],
+                    "allergens": row["allergens"],
+                    "aliases": [],
+                },
+            )
             entry["aliases"].append(row["alias"])
     rows = []
     for iid, d in sorted(by_id.items(), key=lambda kv: kv[1]["canonical_name"]):
-        rows.append([iid, d["canonical_name"], d["food_group"], d["allergens"],
-                     "; ".join(sorted(d["aliases"]))])
+        rows.append([iid, d["canonical_name"], d["food_group"], d["allergens"], "; ".join(sorted(d["aliases"]))])
     _write(
         "07_reference_canonical_list.csv",
-        ["ingredient_id", "canonical_name", "food_group", "allergens",
-         "already_covers_these_words"],
+        ["ingredient_id", "canonical_name", "food_group", "allergens", "already_covers_these_words"],
         rows,
     )
 

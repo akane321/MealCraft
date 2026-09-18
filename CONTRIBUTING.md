@@ -115,8 +115,9 @@ Documentation integrity. Runs in CI on every pull request, needs no container:
 python scripts/check_docs_integrity.py
 ```
 
-In CI the `backend` job runs Ruff (over `backend` and `scripts`) and pytest from
-a checkout; the `compose` job runs pytest and the evaluation commands through the
+In CI the `backend` job runs Ruff (over `backend`, `scripts` and
+`data-engineering`), pytest and the data-engineering unit tests from a checkout;
+the `compose` job runs pytest and the evaluation commands through the
 container, because code has passed in one layout while failing in the other.
 Ruff through the container, and the frontend commands through the container, are
 not run in CI; the frontend job runs them on the host.

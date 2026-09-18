@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from mealcraft_data.constants import SCHEMA_VERSION, TRANSFORMATION_VERSION  # noqa: E402
-from mealcraft_data.utils import sha256_file, utc_now_iso, write_json  # noqa: E402
+from mealcraft_data.utils import utc_now_iso, write_json  # noqa: E402
 
 # "package" and "informal" units (can/jar/bottle/pinch/dash/...) cannot support
 # package or shopping arithmetic without a separate, sourced size/weight
@@ -78,9 +78,7 @@ def main() -> int:
     servings_basis_counts: Counter[str] = Counter()
     dietary_tag_counts: Counter[str] = Counter()
     out_recipes = args.out_dir / "recipes.jsonl"
-    with args.recipes.open("r", encoding="utf-8") as src, out_recipes.open(
-        "w", encoding="utf-8"
-    ) as dst:
+    with args.recipes.open("r", encoding="utf-8") as src, out_recipes.open("w", encoding="utf-8") as dst:
         for line in src:
             line = line.strip()
             if not line:
@@ -100,9 +98,7 @@ def main() -> int:
 
     out_ingredients = args.out_dir / "ingredients.jsonl"
     kept_ingredients = 0
-    with args.ingredients.open("r", encoding="utf-8") as src, out_ingredients.open(
-        "w", encoding="utf-8"
-    ) as dst:
+    with args.ingredients.open("r", encoding="utf-8") as src, out_ingredients.open("w", encoding="utf-8") as dst:
         for line in src:
             line = line.strip()
             if not line:
@@ -149,8 +145,7 @@ def main() -> int:
             "cuisine/meal_types/methods/equipment/difficulty are empty for every released "
             "recipe; no controlled vocabulary exists yet",
             (
-                "dietary_tags are absent for every released recipe; not computed by this "
-                "pipeline"
+                "dietary_tags are absent for every released recipe; not computed by this pipeline"
                 if not dietary_tag_counts
                 else "dietary_tags (dairy-free/gluten-free/vegetarian/vegan) are derived "
                 f"only, not independently reviewed: {dict(sorted(dietary_tag_counts.items()))} "
@@ -170,8 +165,7 @@ def main() -> int:
     report_lines = [
         f"# Data Release {args.version}",
         "",
-        f"Generated {manifest['created_at']} from pipeline revision "
-        f"`{manifest['pipeline_git_revision']}`.",
+        f"Generated {manifest['created_at']} from pipeline revision `{manifest['pipeline_git_revision']}`.",
         "",
         "## Scope",
         "",

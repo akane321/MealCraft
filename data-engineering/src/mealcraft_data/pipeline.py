@@ -80,9 +80,7 @@ def _recipe_record(raw: dict[str, Any], parsed: list[ParsedIngredient]) -> dict[
             "subset": raw["source"],
             "source_row": raw["row_number"],
             "source_url": raw["link"] or None,
-            "source_license": (
-                "Project-authored synthetic fixture" if is_fixture else RECIPENLG_LICENSE
-            ),
+            "source_license": ("Project-authored synthetic fixture" if is_fixture else RECIPENLG_LICENSE),
         },
         "servings": servings,
         "servings_basis": servings_basis,
@@ -95,10 +93,7 @@ def _recipe_record(raw: dict[str, Any], parsed: list[ParsedIngredient]) -> dict[
         "equipment": [],
         "difficulty": None,
         "ingredients": [item.to_dict() for item in parsed],
-        "instructions": [
-            {"step_number": index, "text": step}
-            for index, step in enumerate(raw["directions"], start=1)
-        ],
+        "instructions": [{"step_number": index, "text": step} for index, step in enumerate(raw["directions"], start=1)],
         "nutrition": {
             "status": "not_computed",
             "basis": "per_serving",
@@ -126,9 +121,7 @@ def _recipe_record(raw: dict[str, Any], parsed: list[ParsedIngredient]) -> dict[
     }
 
 
-def _build_ingredient_catalog(
-    recipes: list[dict[str, Any]], config: CleaningConfig
-) -> list[dict[str, Any]]:
+def _build_ingredient_catalog(recipes: list[dict[str, Any]], config: CleaningConfig) -> list[dict[str, Any]]:
     occurrences: Counter[str] = Counter()
     observed_aliases: dict[str, set[str]] = defaultdict(set)
     recipe_ids: dict[str, set[str]] = defaultdict(set)
@@ -151,9 +144,7 @@ def _build_ingredient_catalog(
     result: list[dict[str, Any]] = []
     for ingredient_id in sorted(occurrences):
         rule = rule_by_id.get(ingredient_id)
-        canonical_name = (
-            rule.canonical_name if rule else sorted(observed_aliases[ingredient_id])[0]
-        )
+        canonical_name = rule.canonical_name if rule else sorted(observed_aliases[ingredient_id])[0]
         catalog_aliases = sorted(
             alias
             for alias, candidate_rule in config.ingredients.items()
@@ -170,15 +161,11 @@ def _build_ingredient_catalog(
                 "foodon_id": None,
                 "fdc_id": None,
                 "nutrition_basis": None,
-                "mapping_status": (
-                    "internal_mapped" if statuses[ingredient_id] == {"mapped"} else "candidate"
-                ),
+                "mapping_status": ("internal_mapped" if statuses[ingredient_id] == {"mapped"} else "candidate"),
                 "occurrence_count": occurrences[ingredient_id],
                 "recipe_count": len(recipe_ids[ingredient_id]),
                 "provenance": {
-                    "source": "config/ingredient_aliases.csv"
-                    if rule
-                    else "parsed RecipeNLG candidate",
+                    "source": "config/ingredient_aliases.csv" if rule else "parsed RecipeNLG candidate",
                     "transformation_version": TRANSFORMATION_VERSION,
                 },
             }
@@ -254,9 +241,7 @@ def _write_review_queues(
                 }
             )
 
-    ingredient_rows.sort(
-        key=lambda row: (row["priority"], float(row["confidence"]), row["original_text"])
-    )
+    ingredient_rows.sort(key=lambda row: (row["priority"], float(row["confidence"]), row["original_text"]))
     ingredient_rows = ingredient_rows[:review_limit]
     recipe_rows.sort(key=lambda row: (float(row["completeness"]), row["recipe_id"]))
     recipe_rows = recipe_rows[:review_limit]
@@ -278,9 +263,7 @@ def _quality_report(
 ) -> dict[str, Any]:
     occurrences = [item for recipe in recipes for item in recipe["ingredients"]]
     status_counts = Counter(item["normalization_status"] for item in occurrences)
-    reason_counts = Counter(
-        reason for item in occurrences for reason in item["review_reasons"]
-    )
+    reason_counts = Counter(reason for item in occurrences for reason in item["review_reasons"])
     mapped = status_counts.get("mapped", 0)
     quantified = sum(item["quantity_min"] is not None for item in occurrences)
     unit_recognized = sum(item["unit_normalized"] is not None for item in occurrences)
@@ -299,9 +282,7 @@ def _quality_report(
         "mapped_occurrences": mapped,
         "mapping_coverage": round(mapped / denominator, 4) if denominator else 0.0,
         "quantity_coverage": round(quantified / denominator, 4) if denominator else 0.0,
-        "recognized_unit_coverage": round(unit_recognized / denominator, 4)
-        if denominator
-        else 0.0,
+        "recognized_unit_coverage": round(unit_recognized / denominator, 4) if denominator else 0.0,
         "status_counts": dict(sorted(status_counts.items())),
         "review_reason_counts": dict(sorted(reason_counts.items())),
         "ingredient_review_queue_size": ingredient_review_count,
@@ -310,41 +291,37 @@ def _quality_report(
         "quality_gate": {
             "duplicate_recipe_ids_zero": duplicate_ids == 0,
             "nonempty_recipe_output": bool(recipes),
-            "mapping_coverage_at_least_0_50": (mapped / denominator >= 0.5)
-            if denominator
-            else False,
+            "mapping_coverage_at_least_0_50": (mapped / denominator >= 0.5) if denominator else False,
         },
     }
 
 
 def _render_report(report: dict[str, Any]) -> str:
     gate_lines = "\n".join(
-        f"- {'PASS' if passed else 'FAIL'} — `{name}`"
-        for name, passed in report["quality_gate"].items()
+        f"- {'PASS' if passed else 'FAIL'} — `{name}`" for name, passed in report["quality_gate"].items()
     )
-    reason_lines = "\n".join(
-        f"- `{name}`: {count}" for name, count in report["review_reason_counts"].items()
-    )
+    reason_lines = "\n".join(f"- `{name}`: {count}" for name, count in report["review_reason_counts"].items())
     return f"""# MealCraft Data Quality Report
 
-Generated by `{report['transformation_version']}`.
+Generated by `{report["transformation_version"]}`.
 
 ## Scope
 
-- Source rows examined: {report['source_rows_seen']}
-- Requested sample: {report['requested_sample_size']}
-- Recipes emitted: {report['recipes_output']}
-- Ingredient occurrences: {report['ingredient_occurrences']}
-- Canonical/candidate ingredient records: {report['canonical_ingredient_records']}
+- Source rows examined: {report["source_rows_seen"]}
+- Requested sample: {report["requested_sample_size"]}
+- Recipes emitted: {report["recipes_output"]}
+- Ingredient occurrences: {report["ingredient_occurrences"]}
+- Canonical/candidate ingredient records: {report["canonical_ingredient_records"]}
 
 ## Coverage
 
-- Internal mapping coverage: {report['mapping_coverage']:.2%}
-- Quantity coverage: {report['quantity_coverage']:.2%}
-- Recognized-unit coverage: {report['recognized_unit_coverage']:.2%}
-- Nutrition computed: {report['nutrition_computed_recipes']} recipes
+- Internal mapping coverage: {report["mapping_coverage"]:.2%}
+- Quantity coverage: {report["quantity_coverage"]:.2%}
+- Recognized-unit coverage: {report["recognized_unit_coverage"]:.2%}
+- Nutrition computed: {report["nutrition_computed_recipes"]} recipes
 
-`nutrition_computed_recipes = 0` is intentional in this first pass because RecipeNLG does not provide reliable servings and mass conversions for every row.
+`nutrition_computed_recipes = 0` is intentional in this first pass because RecipeNLG
+does not provide reliable servings and mass conversions for every row.
 
 ## Quality gates
 
@@ -352,12 +329,12 @@ Generated by `{report['transformation_version']}`.
 
 ## Review reasons
 
-{reason_lines or '- None'}
+{reason_lines or "- None"}
 
 ## Human-review queues
 
-- Ingredient rows: {report['ingredient_review_queue_size']}
-- Recipe rows: {report['recipe_review_queue_size']}
+- Ingredient rows: {report["ingredient_review_queue_size"]}
+- Recipe rows: {report["recipe_review_queue_size"]}
 """
 
 
@@ -378,13 +355,8 @@ def run_pipeline(
     recipes: list[dict[str, Any]] = []
     seen_recipe_ids: set[str] = set()
     for raw in raw_rows:
-        parsed = [
-            parse_ingredient(item, config=config, source_ner=raw["ner"])
-            for item in raw["ingredients"]
-        ]
-        staging_rows.append(
-            {"raw": raw, "parsed_ingredients": [item.to_dict() for item in parsed]}
-        )
+        parsed = [parse_ingredient(item, config=config, source_ner=raw["ner"]) for item in raw["ingredients"]]
+        staging_rows.append({"raw": raw, "parsed_ingredients": [item.to_dict() for item in parsed]})
         recipe = _recipe_record(raw, parsed)
         if recipe["recipe_id"] in seen_recipe_ids:
             continue
@@ -397,9 +369,7 @@ def run_pipeline(
     write_jsonl(project_root / "data" / "curated" / "recipes.jsonl", recipes)
     write_jsonl(project_root / "data" / "curated" / "ingredients.jsonl", ingredients)
 
-    ingredient_review_count, recipe_review_count = _write_review_queues(
-        project_root, recipes, review_limit
-    )
+    ingredient_review_count, recipe_review_count = _write_review_queues(project_root, recipes, review_limit)
     report = _quality_report(
         recipes,
         ingredients,

@@ -1,3 +1,4 @@
+# ruff: noqa: E501 - mapping rows and evidence strings read best one per line.
 """Regenerate config/ingredient_aliases.csv from a reviewable mapping table.
 
 The base alias table is large enough that a flat hand-edited CSV is hard to
@@ -724,7 +725,11 @@ TABLE: dict[str, tuple[str, str, str, list[str]]] = {
     "ING_MSG": ("msg", "seasoning", "", ["msg", "accent seasoning", "monosodium glutamate"]),
     "ING_LIQUID_SMOKE": ("liquid smoke", "condiment", "", ["liquid smoke"]),
     "ING_KITCHEN_BOUQUET": ("browning sauce", "condiment", "", ["browning sauce", "kitchen bouquet", "gravy master"]),
-    "ING_ROTEL": ("diced tomatoes and green chilies", "vegetable", "", ["rotel", "ro-tel", "can rotel", "diced tomatoes and green chilies", "diced tomatoes with green chilies"]),
+    "ING_ROTEL": ("diced tomatoes and green chilies", "vegetable", "", [
+        "ro-tel tomatoes", "rotel tomatoes", "ro-tel", "rotel", "can ro-tel", "can rotel",
+        "diced tomatoes and green chilies", "diced tomatoes with green chilies",
+        "tomatoes and green chilies",
+    ]),
     "ING_ENCHILADA_SAUCE": ("enchilada sauce", "condiment", "", ["enchilada sauce", "red enchilada sauce", "can enchilada sauce"]),
     "ING_TACO_SAUCE": ("taco sauce", "condiment", "", ["taco sauce"]),
     "ING_HOISIN": ("hoisin sauce", "condiment", "soy;gluten", ["hoisin sauce", "hoisin"]),
@@ -791,11 +796,6 @@ TABLE: dict[str, tuple[str, str, str, list[str]]] = {
     "ING_HERBES_DE_PROVENCE": ("herbes de provence", "seasoning", "", ["herbes de provence"]),
     "ING_ZAATAR": ("za'atar", "seasoning", "sesame", ["za'atar", "zaatar", "zatar"]),
     "ING_SUMAC": ("sumac", "seasoning", "", ["sumac", "ground sumac"]),
-    "ING_ROTEL": ("diced tomatoes and green chilies", "vegetable", "", [
-        "ro-tel tomatoes", "rotel tomatoes", "ro-tel", "rotel", "can ro-tel", "can rotel",
-        "diced tomatoes and green chilies", "diced tomatoes with green chilies",
-        "tomatoes and green chilies",
-    ]),
     "ING_AMARETTO": ("amaretto", "beverage", "tree_nuts", ["amaretto"]),
     "ING_KIRSCH": ("kirsch", "beverage", "", ["kirsch", "cherry brandy"]),
     "ING_SAKE": ("sake", "beverage", "", ["sake", "mirin", "rice wine"]),
@@ -1042,7 +1042,6 @@ def build_rows() -> list[list[str]]:
     rows: list[list[str]] = []
     seen_alias: dict[str, str] = {}
     name_to_id: dict[str, str] = {}
-    row_by_id: dict[str, list[str]] = {}
 
     def add_ingredient(ingredient_id, canonical_name, food_group, allergens, aliases):
         for alias in [canonical_name, *aliases]:
@@ -1050,9 +1049,7 @@ def build_rows() -> list[list[str]]:
             if not key:
                 continue
             if key in seen_alias and seen_alias[key] != ingredient_id:
-                raise SystemExit(
-                    f"alias {key!r} claimed by {seen_alias[key]} and {ingredient_id}"
-                )
+                raise SystemExit(f"alias {key!r} claimed by {seen_alias[key]} and {ingredient_id}")
             if key in seen_alias:
                 continue
             seen_alias[key] = ingredient_id
@@ -1063,14 +1060,10 @@ def build_rows() -> list[list[str]]:
         for alias_text, target_name in aliases:
             target_id = name_to_id.get(target_name.casefold())
             if target_id is None:
-                raise SystemExit(
-                    f"{source_name}: {alias_text!r} targets unknown canonical_name {target_name!r}"
-                )
+                raise SystemExit(f"{source_name}: {alias_text!r} targets unknown canonical_name {target_name!r}")
             key = alias_text.casefold().strip()
             if key in seen_alias and seen_alias[key] != target_id:
-                raise SystemExit(
-                    f"alias {key!r} claimed by {seen_alias[key]} and {source_name} -> {target_id}"
-                )
+                raise SystemExit(f"alias {key!r} claimed by {seen_alias[key]} and {source_name} -> {target_id}")
             if key in seen_alias:
                 continue
             seen_alias[key] = target_id

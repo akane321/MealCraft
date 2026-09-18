@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 
+from app.data.units import UNIT_BASE
 from app.models.recipe import Recipe
-from app.planning.grocery_estimator import UNIT_BASE, GroceryEstimator, ProductMatcher
+from app.planning.grocery_estimator import GroceryEstimator, ProductMatcher
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse, WeeklyMealPlanRequest
 from app.schemas.product import GroceryLineEstimate
 from app.services.product import ProductSearchService

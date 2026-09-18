@@ -5,7 +5,8 @@ line at a time instead of being materialized as a list.
 
 Run from the project root:
 
-    python scripts/validate_streaming.py --recipes data/curated/recipes.jsonl --ingredients data/curated/ingredients.jsonl
+    python scripts/validate_streaming.py --recipes data/curated/recipes.jsonl \\
+        --ingredients data/curated/ingredients.jsonl
 """
 
 from __future__ import annotations
@@ -40,12 +41,25 @@ def validate_streaming(recipe_path: Path, ingredient_path: Path, max_errors: int
                 ingredient_ids.add(ingredient_id)
 
     recipe_required = {
-        "recipe_id", "schema_version", "title", "source",
-        "ingredients", "instructions", "nutrition", "quality", "provenance",
+        "recipe_id",
+        "schema_version",
+        "title",
+        "source",
+        "ingredients",
+        "instructions",
+        "nutrition",
+        "quality",
+        "provenance",
     }
     occurrence_required = {
-        "original_text", "quantity_min", "quantity_max", "ingredient_text",
-        "canonical_ingredient_id", "normalization_status", "confidence", "review_reasons",
+        "original_text",
+        "quantity_min",
+        "quantity_max",
+        "ingredient_text",
+        "canonical_ingredient_id",
+        "normalization_status",
+        "confidence",
+        "review_reasons",
     }
     recipe_ids: set[str] = set()
     count = 0
