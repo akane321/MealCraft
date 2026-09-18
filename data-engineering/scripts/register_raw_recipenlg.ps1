@@ -8,8 +8,9 @@ param(
     # Where the data was actually obtained. Record the real URL you downloaded
     # from so provenance is honest (official site vs. Kaggle mirror vs. other).
     [string]$SourceUrl = "https://recipenlg.cs.put.poznan.pl/dataset",
-    # Name of the person who personally accepted the RecipeNLG terms.
-    [string]$AcceptedBy = $env:USERNAME
+    # Contributor role that accepted the RecipeNLG terms. The manifest is committed
+    # to a public repository, so record a role, never a personal or OS user name.
+    [string]$AcceptedBy = "dataset"
 )
 
 $ErrorActionPreference = "Stop"

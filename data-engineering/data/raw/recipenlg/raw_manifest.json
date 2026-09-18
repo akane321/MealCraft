@@ -3,7 +3,7 @@
     "source_url":  "https://www.kaggle.com/datasets/saldenisov/recipenlg",
     "source_repo":  "https://github.com/Glorf/recipenlg",
     "source_license":  "Research and education, non-commercial only; terms accepted by downloader",
-    "terms_accepted_by":  "dujiayu",
+    "terms_accepted_by":  "dataset",
     "retrieved_at":  "2026-09-09T11:51:00Z",
     "local_path":  "data\\raw\\recipenlg\\full_dataset.csv",
     "committed_to_git":  false,

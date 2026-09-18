@@ -325,13 +325,17 @@ def write_reports(report: dict[str, Any], json_path: Path, markdown_path: Path) 
             "",
             "## Category results",
             "",
-            "| Category | N | Expectation rate | Violations | Failures |",
-            "|---|---:|---:|---:|---:|",
+            # Counts only: a rate over a handful of scenarios is noise (ADR-0028).
+            "Per category: scenario count, hard-constraint violations and recorded failures.",
+            "Rates are reported only for the whole set.",
+            "",
+            "| Category | N | Violations | Failures |",
+            "|---|---:|---:|---:|",
         ]
     )
     for category, values in report["category_metrics"].items():
         lines.append(
-            f"| {category} | {values['scenario_count']} | {values['expectation_rate']} | "
+            f"| {category} | {values['scenario_count']} | "
             f"{values['hard_constraint_violation_count']} | {values['failure_case_count']} |"
         )
     lines.extend(
