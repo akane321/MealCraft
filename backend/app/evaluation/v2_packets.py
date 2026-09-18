@@ -55,7 +55,7 @@ class PacketIngredient(StrictModel):
     quantity: float
     unit: str
     preparation: str | None
-    allergen: str | None
+    allergens: list[str]
 
 
 class PacketNutrition(StrictModel):
@@ -183,7 +183,7 @@ def compile_packets(
                         quantity=item["quantity"],
                         unit=item["unit"],
                         preparation=item.get("preparation"),
-                        allergen=ingredient.get("allergen"),
+                        allergens=list(ingredient["allergens"]),
                     )
                 )
             nutrition = recipe["nutrition"]

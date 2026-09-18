@@ -8,14 +8,14 @@ function day(date: string, status: NutritionDashboardDay["status"]): NutritionDa
   return { planned_date: date, status } as NutritionDashboardDay;
 }
 
-function line(name: string, cost: number, category: string | null, packages = 1): GroceryLineEstimate {
+function line(name: string, cost: number, category: string | null, packages = 1, source = "fairprice"): GroceryLineEstimate {
   return {
     ingredient_display_name: name,
     packages_required: packages,
     purchase_cost_sgd: cost,
     required_quantity: 300,
     unit: "g",
-    product: category === null ? null : { category, package_size: 500, package_unit: "g", fetched_at: "2026-09-14T08:00:00Z" },
+    product: category === null ? null : { category, package_size: 500, package_unit: "g", fetched_at: "2026-09-14T08:00:00Z", source },
   } as GroceryLineEstimate;
 }
 
@@ -44,10 +44,16 @@ describe("grocery helpers", () => {
     expect(budgetLine({ ...estimate, weekly_budget_sgd: null })).toBeNull();
   });
 
-  it("keeps sample and live prices distinguishable", () => {
+  it("labels prices by the source actually used, not the mode asked for", () => {
     expect(priceSourceLabel(estimate)).toBe("Sample prices");
-    const live = { ...estimate, pricing_mode: "live", items: [line("Salmon", 10.9, "Seafood")] } as WeeklyGroceryEstimate;
-    expect(priceSourceLabel(live)).toMatch(/^FairPrice prices from /);
+    const live = (...sources: string[]) => ({
+      ...estimate,
+      pricing_mode: "live",
+      items: sources.map(source => line("Salmon", 10.9, "Seafood", 1, source)),
+    }) as WeeklyGroceryEstimate;
+    expect(priceSourceLabel(live("fairprice"))).toMatch(/^FairPrice prices from /);
+    expect(priceSourceLabel(live("fixture"))).toBe("Sample prices: FairPrice didn't respond");
+    expect(priceSourceLabel(live("fairprice", "fixture"))).toBe("Some prices are samples: FairPrice didn't respond");
   });
 
   it("groups only lines that need buying, costliest first", () => {

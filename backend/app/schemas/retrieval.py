@@ -4,7 +4,9 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 RetrievalMode = Literal["live", "cache", "fixture"]
-RetrievalStatus = Literal["success", "degraded", "unavailable"]
+# no_match: the source answered and has nothing for the query. It is a data gap,
+# not a failure, and must stay distinct from degraded (ADR-0022 section 3).
+RetrievalStatus = Literal["success", "no_match", "degraded", "unavailable"]
 RetrievalProvider = Literal["fairprice", "youtube", "fixture"]
 ExternalSource = Literal["fairprice", "youtube"]
 

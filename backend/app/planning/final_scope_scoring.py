@@ -23,6 +23,16 @@ def flexible_upper_loss(actual: float, benchmark: float, multiplier: float = 2.0
     return min(1.0, (actual - benchmark) / (upper - benchmark))
 
 
+# ADR-0024 section 5: a recipe's meal types are a soft affinity, never a filter.
+# Placing a dish outside them costs more than repeating one (0.35), so it is a
+# last resort, but it is never refused.
+MEAL_AFFINITY_PENALTY = 0.5
+
+
+def meal_affinity_loss(recipe: PlanningRecipeCandidate, meal_type: str) -> float:
+    return 0.0 if meal_type in recipe.allowed_meal_types else MEAL_AFFINITY_PENALTY
+
+
 def local_recipe_loss(
     recipe: PlanningRecipeCandidate,
     *,

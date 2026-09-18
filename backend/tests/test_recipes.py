@@ -55,8 +55,8 @@ def recipe_client() -> Generator[TestClient, None, None]:
             ],
             steps=[RecipeStep(step_number=1, instruction="Cook the chicken and finish with lemon.")],
         )
-        tofu = Ingredient(normalized_name="firm_tofu", display_name="Firm tofu", allergen="soy")
-        soba = Ingredient(normalized_name="soba_noodle", display_name="Soba noodles", allergen="gluten")
+        tofu = Ingredient(normalized_name="firm_tofu", display_name="Firm tofu", allergens=["soy"])
+        soba = Ingredient(normalized_name="soba_noodle", display_name="Soba noodles", allergens=["gluten"])
         tofu_recipe = Recipe(
             slug="tofu-soba",
             title="Tofu Soba",
@@ -141,7 +141,7 @@ def test_get_recipe_returns_ingredients_and_steps(recipe_client: TestClient) -> 
         "quantity": 300.0,
         "unit": "g",
         "preparation": None,
-        "allergen": None,
+        "allergens": [],
     }
     assert payload["steps"] == [{"step_number": 1, "instruction": "Cook the chicken and finish with lemon."}]
 
@@ -223,6 +223,17 @@ def test_recommendations_apply_hard_filters_and_return_score_reasons(recipe_clie
     assert any("flexible 700 mg" in reason for reason in payload["recommendations"][0]["reasons"])
     assert payload["excluded"][0]["slug"] == "tofu-soba"
     assert payload["excluded"][0]["reasons"] == ["Contains selected allergen: soy."]
+
+
+def test_an_allergen_nobody_checked_for_excludes_every_recipe(recipe_client: TestClient) -> None:
+    # mustard is outside data/ingredients/allergen-vocabulary.json, so no recipe
+    # can be shown to be free of it: unknown is excluded, not admitted.
+    response = recipe_client.post("/api/recommendations/recipes", json={"household_size": 2, "allergens": ["mustard"]})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["recommendations"] == []
+    assert all("Cannot confirm it is free of: mustard." in item["reasons"] for item in payload["excluded"])
 
 
 def test_recommendations_enforce_budget_with_fixture_product_costs(recipe_client: TestClient) -> None:
@@ -772,6 +783,31 @@ def test_weekly_plan_respects_allergen_filter_and_explains_unavoidable_repeat(
     assert any("contains 1 recipe" in warning for warning in payload["warnings"])
 
 
+def test_a_live_plan_still_produces_a_shopping_list_with_the_network_down(
+    recipe_client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # ADR-0022 section 2: with FairPrice unreachable the run must still finish
+    # with a shopping list, and say that it fell back.
+    from app.products import provider as provider_module
+
+    def offline(*args, **kwargs):
+        raise OSError("network is unreachable")
+
+    monkeypatch.setattr(provider_module, "urlopen", offline)
+    response = recipe_client.post(
+        "/api/plans/generate",
+        json={"start_date": "2026-09-08", "household_size": 2, "pricing_mode": "live"},
+    )
+
+    assert response.status_code == 201
+    estimate = response.json()["grocery_estimate"]
+    priced = [line for line in estimate["items"] if line["product"] is not None]
+    assert priced
+    assert all(line["product"]["source"] == "fixture" for line in priced)
+    assert any("unavailable" in warning for warning in estimate["warnings"])
+
+
 def test_weekly_plan_returns_422_when_no_recipe_meets_hard_constraints(recipe_client: TestClient) -> None:
     response = recipe_client.post(
         "/api/plans/generate",
@@ -863,6 +899,18 @@ def test_meal_checkin_rejects_unknown_entry_and_invalid_status(recipe_client: Te
         json={"status": "ate-something-else"},
     )
     assert invalid.status_code == 422
+
+
+def test_a_weekly_total_equal_to_the_budget_is_within_it_to_the_cent(recipe_client: TestClient) -> None:
+    # ADR-0021: budgets are compared in whole cents on every path.
+    request = {"start_date": "2026-09-08", "household_size": 2, "pricing_mode": "fixture"}
+    unbudgeted = recipe_client.post("/api/plans/generate", json=request).json()
+    total = unbudgeted["grocery_estimate"]["consumed_total_sgd"]
+
+    exact = recipe_client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": total}).json()
+
+    assert exact["grocery_estimate"]["consumed_total_sgd"] <= total
+    assert exact["grocery_estimate"]["within_weekly_budget"] is True
 
 
 def _generate_replanning_fixture(recipe_client: TestClient, start_date: str) -> dict:
