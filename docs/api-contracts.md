@@ -218,12 +218,16 @@ deduction, surplus quantity, mapping completeness, and budget result.
 - `live=false`: deterministic FairPrice-shaped fixtures for tests and demos
 - `live=true`: current FairPrice catalogue lookup with a 15-minute PostgreSQL cache
 
-`refresh=true` bypasses a fresh cache entry. If a live lookup fails, the API
-returns fixture results with `fallback_used=true` and a warning; the source is
-never silently misrepresented.
+`refresh=true` bypasses a fresh cache entry. A live lookup degrades in a fixed
+order: live, then the most recent cached FairPrice snapshot of any age (mode
+`cache`, status `degraded`, with the date it was saved), then fixture results.
+Every fallback sets `fallback_used=true` and a warning; the source is never
+silently misrepresented. When FairPrice answers with no products, the response
+is empty with status `no_match`: that ingredient is left unpriced rather than
+given sample prices.
 
 Every product response also carries a retrieval trace with requested source,
-provider used, `live`/`cache`/`fixture` mode, success or degradation status,
+provider used, `live`/`cache`/`fixture` mode, `success`/`no_match`/`degraded` status,
 query, fetch time, parser version, candidate count and warnings. Live lookup is
 triggered only for the current product or Shopping List demand; broad catalog
 crawling is outside this contract.

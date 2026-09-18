@@ -783,6 +783,31 @@ def test_weekly_plan_respects_allergen_filter_and_explains_unavoidable_repeat(
     assert any("contains 1 recipe" in warning for warning in payload["warnings"])
 
 
+def test_a_live_plan_still_produces_a_shopping_list_with_the_network_down(
+    recipe_client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # ADR-0022 section 2: with FairPrice unreachable the run must still finish
+    # with a shopping list, and say that it fell back.
+    from app.products import provider as provider_module
+
+    def offline(*args, **kwargs):
+        raise OSError("network is unreachable")
+
+    monkeypatch.setattr(provider_module, "urlopen", offline)
+    response = recipe_client.post(
+        "/api/plans/generate",
+        json={"start_date": "2026-09-08", "household_size": 2, "pricing_mode": "live"},
+    )
+
+    assert response.status_code == 201
+    estimate = response.json()["grocery_estimate"]
+    priced = [line for line in estimate["items"] if line["product"] is not None]
+    assert priced
+    assert all(line["product"]["source"] == "fixture" for line in priced)
+    assert any("unavailable" in warning for warning in estimate["warnings"])
+
+
 def test_weekly_plan_returns_422_when_no_recipe_meets_hard_constraints(recipe_client: TestClient) -> None:
     response = recipe_client.post(
         "/api/plans/generate",

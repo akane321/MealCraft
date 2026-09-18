@@ -153,9 +153,16 @@ class FairPriceProductProvider:
 
         try:
             payload = json.loads(match.group(1))
-            products = payload["props"]["pageProps"]["data"]["data"]["product"]
+            data = payload["props"]["pageProps"]["data"]["data"]
         except (KeyError, TypeError, json.JSONDecodeError) as error:
             raise ProductProviderError("FairPrice product data structure was not recognised") from error
+        # A search with no results omits the product key: FairPrice answered and
+        # has nothing, which is not a parse failure (ADR-0022 section 3).
+        products = data.get("product") if isinstance(data, dict) else None
+        if products is None and isinstance(data, dict):
+            return []
+        if not isinstance(products, list):
+            raise ProductProviderError("FairPrice product data structure was not recognised")
 
         fetched_at = datetime.now(UTC)
         parsed = [self._parse_product(product, fetched_at) for product in products[:limit]]
