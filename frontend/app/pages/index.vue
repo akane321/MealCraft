@@ -29,6 +29,7 @@ const open = computed(() => ({ left: hover.left || pinned.left, right: hover.rig
 const previewOpen = ref(false);
 const log = ref<HTMLElement | null>(null);
 const film = ref<HTMLVideoElement | null>(null);
+const filmPlaying = ref(true);
 
 const messages = computed<AgentMessage[]>(() => session.value?.messages.filter(m => m.role !== "system") ?? []);
 const interaction = computed(() => session.value?.pending_interaction ?? null);
@@ -116,6 +117,13 @@ function exportPdf() {
   window.print();
 }
 
+function toggleFilm() {
+  const video = film.value;
+  if (!video) return;
+  if (video.paused) void video.play();
+  else video.pause();
+}
+
 function newChat() {
   agent.reset();
   plan.value = null;
@@ -134,7 +142,6 @@ watch(() => [messages.value.length, isLoading.value, session.value?.pending_repl
 });
 
 onMounted(() => {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) film.value?.pause();
   try {
     const saved = sessionStorage.getItem(DRAFT_KEY);
     if (saved) draft.value = saved;
@@ -147,11 +154,15 @@ onMounted(() => {
 <template>
   <div class="mc-surface" :class="{ 'is-app': view === 'app' }" :style="layoutVars">
     <div class="film" aria-hidden="true">
-      <video ref="film" autoplay muted loop playsinline preload="auto" poster="/media/hero-poster.jpg">
+      <video ref="film" autoplay muted loop playsinline preload="auto" poster="/media/hero-poster.jpg" @play="filmPlaying = true" @pause="filmPlaying = false">
         <source src="/media/hero.mp4" type="video/mp4">
       </video>
     </div>
     <div class="scrim" aria-hidden="true" />
+    <button v-if="view === 'landing'" type="button" class="film-toggle mc-pill" :aria-label="filmPlaying ? 'Pause background video' : 'Play background video'" @click="toggleFilm">
+      <svg v-if="filmPlaying" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12" /></svg>
+      <svg v-else viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>
+    </button>
 
     <header class="top">
       <button type="button" class="brand" aria-label="MealCraft home" @click="view = 'landing'">
@@ -346,6 +357,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
   transition: opacity 1000ms var(--mc-ease), transform 1400ms var(--mc-ease), filter 1000ms var(--mc-ease);
 }
 .film video { width: 100%; height: 100%; object-fit: cover; }
+.film-toggle { position: absolute; left: 24px; bottom: 22px; z-index: 5; width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; color: var(--mc-text-2); }
+.film-toggle svg { width: 14px; height: 14px; }
 .is-app .film { opacity: 0.7; transform: scale(1.06); filter: blur(22px) saturate(120%); }
 .scrim {
   position: absolute;
