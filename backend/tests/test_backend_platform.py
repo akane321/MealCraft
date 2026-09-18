@@ -46,9 +46,15 @@ def test_session_token_is_random_and_only_digest_is_persistable() -> None:
 
 def test_household_and_operations_roles_are_independent() -> None:
     assert may_access_household(HouseholdRole.OWNER, HouseholdAction.MANAGE_MEMBERS)
+    assert not may_access_household(HouseholdRole.EDITOR, HouseholdAction.MANAGE_MEMBERS)
+    assert not may_access_household(HouseholdRole.MEMBER, HouseholdAction.EDIT_PROFILE)
     assert not may_access_household(HouseholdRole.VIEWER, HouseholdAction.CREATE_PLAN)
     assert may_access_operations(SystemRole.DATA_REVIEWER, OperationsAction.REVIEW_DATA)
     assert not may_access_operations(SystemRole.ORDINARY_USER, OperationsAction.REVIEW_DATA)
+
+
+def test_unknown_household_role_is_denied_without_an_unhandled_error() -> None:
+    assert not may_access_household("future_role", HouseholdAction.VIEW)
 
 
 def test_repository_persists_revocable_session_and_household_membership() -> None:

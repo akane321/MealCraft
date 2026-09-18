@@ -3,7 +3,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.routes.auth import CurrentHouseholdCsrfDependency, CurrentHouseholdDependency
+from app.api.routes.auth import (
+    CurrentHouseholdCreatePlanCsrfDependency,
+    CurrentHouseholdEditProfileCsrfDependency,
+    CurrentHouseholdViewDependency,
+)
 from app.db.session import get_db_session
 from app.planning.grocery_estimator import GroceryEstimator
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
@@ -37,7 +41,7 @@ DatabaseDependency = Annotated[Session, Depends(get_db_session)]
 
 def get_household_profile_service(
     database: DatabaseDependency,
-    current: CurrentHouseholdDependency,
+    current: CurrentHouseholdViewDependency,
 ) -> HouseholdProfileService:
     household_id = current.active_membership.household_id
     meal_plan_repository = MealPlanRepository(database, household_id=household_id)
@@ -66,7 +70,7 @@ HouseholdProfileServiceDependency = Annotated[HouseholdProfileService, Depends(g
 def create_household_profile(
     payload: HouseholdProfileWrite,
     service: HouseholdProfileServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdEditProfileCsrfDependency,
 ) -> HouseholdProfileResponse:
     try:
         return service.create(payload)
@@ -98,7 +102,7 @@ def update_household_profile(
     profile_id: int,
     payload: HouseholdProfileUpdate,
     service: HouseholdProfileServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdEditProfileCsrfDependency,
 ) -> HouseholdProfileResponse:
     try:
         return service.update(profile_id, payload)
@@ -128,7 +132,7 @@ def generate_plan_from_household_profile(
     profile_id: int,
     payload: HouseholdProfilePlanRequest,
     service: HouseholdProfileServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
 ) -> HouseholdProfilePlanResponse:
     try:
         return service.generate_plan(profile_id, payload)
@@ -148,7 +152,7 @@ def replan_from_household_profile(
     plan_id: int,
     payload: HouseholdProfilePlanRequest,
     service: HouseholdProfileServiceDependency,
-    _current: CurrentHouseholdCsrfDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
 ) -> HouseholdProfilePlanResponse:
     try:
         return service.replan(profile_id, plan_id, payload)
