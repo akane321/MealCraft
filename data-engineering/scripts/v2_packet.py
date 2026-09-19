@@ -127,6 +127,11 @@ def check_ingredient(item: dict, result: dict) -> list[str]:
 
 
 def check_recipe(item: dict, result: dict) -> list[str]:
+    # An item that is not a food recipe at all (a furniture polish, a craft dough) is
+    # excluded with a reason instead of being given invented labels; the build drops it.
+    if "exclude" in result:
+        reason = str(result.get("exclude") or "").strip()
+        return [] if len(reason) >= 10 else ["exclude needs a reason of at least 10 characters"]
     errors = []
     for key, cap in (("prep_minutes", 10080), ("cook_minutes", 10080), ("passive_minutes", 86400)):
         if not (isinstance(result.get(key), int) and 0 <= result[key] <= cap):

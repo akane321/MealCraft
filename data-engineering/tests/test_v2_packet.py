@@ -84,6 +84,10 @@ class PacketTests(unittest.TestCase):
         self.assertTrue(v2_packet.check_recipe(RECIPE, {**GOOD_RECIPE, "line_estimates": []}))
         self.assertTrue(v2_packet.check_recipe(RECIPE, {**GOOD_RECIPE, "cuisine": "martian"}))
         self.assertTrue(v2_packet.check_recipe(RECIPE, {**GOOD_RECIPE, "meal_types": []}))
+        self.assertEqual(
+            v2_packet.check_recipe(RECIPE, {"candidate_id": "x", "exclude": "not food: furniture polish"}), []
+        )
+        self.assertTrue(v2_packet.check_recipe(RECIPE, {"candidate_id": "x", "exclude": "no"}))
         fried = {
             **GOOD_RECIPE,
             "consumed_estimates": [{"index": 1, "quantity": 3, "unit": "tbsp", "basis": "absorbed"}],
