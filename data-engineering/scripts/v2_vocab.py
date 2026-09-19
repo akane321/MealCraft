@@ -290,6 +290,53 @@ def resolver():
     return resolve
 
 
+def apply_review(path: Path) -> int:
+    """Apply a human-reviewed allergen sheet: `ok` keeps the proposal, `none` means no allergen,
+    anything else is the corrected `;`-separated rule. Every new ingredient must be answered."""
+    with path.open(encoding="utf-8-sig") as handle:
+        answers = {r["ingredient_id"]: r for r in csv.DictReader(handle)}
+    rows = decisions()
+    new_ids = {r["ingredient_id"] for r in rows.values() if r["action"] == "new"}
+    problems, final = [], {}
+    for ingredient_id in sorted(new_ids):
+        answer = answers.get(ingredient_id)
+        verdict = (answer or {}).get("confirm_or_correct", "").strip().lower()
+        if not verdict:
+            problems.append(f"{ingredient_id}: no answer")
+            continue
+        proposed = answer["proposed_allergens"].strip()
+        if verdict == "ok":
+            chosen = "" if proposed == "(none)" else proposed
+        elif verdict == "none":
+            chosen = ""
+        else:
+            chosen = verdict
+        parts = [a.strip() for a in chosen.split(";") if a.strip()]
+        if not set(parts) <= ALLERGEN_RULES:
+            problems.append(f"{ingredient_id}: unknown allergen in {chosen!r}")
+            continue
+        final[ingredient_id] = ";".join(parts)
+    extra = sorted(set(answers) - new_ids)
+    problems += [f"{i}: not a new ingredient" for i in extra]
+    if problems:
+        print("\n".join(problems))
+        return 1
+    changed = 0
+    for row in rows.values():
+        if row["action"] == "new":
+            if row["allergens"] != final[row["ingredient_id"]]:
+                changed += 1
+            row["allergens"] = final[row["ingredient_id"]]
+            row["allergen_status"] = "confirmed"
+    with ADDITIONS.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=FIELDS, lineterminator="\n")
+        writer.writeheader()
+        for alias in sorted(rows):
+            writer.writerow(rows[alias])
+    print(f"confirmed {len(final)} new ingredients; {changed} alias rows took a corrected rule")
+    return 0
+
+
 def main() -> int:
     command = sys.argv[1] if len(sys.argv) > 1 else ""
     if command == "worklist":
@@ -300,6 +347,8 @@ def main() -> int:
         review_sheet()
     elif command == "merge-batches":
         return merge_batches()
+    elif command == "apply-review":
+        return apply_review(Path(sys.argv[2]))
     else:
         raise SystemExit(__doc__)
     return 0
