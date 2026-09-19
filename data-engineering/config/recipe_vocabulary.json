@@ -1,0 +1,57 @@
+{
+  "_comment": "Controlled vocabularies for release v2 recipe fields. meal_types matches backend/app/schemas/planning_v2.py MealType.",
+  "course": [
+    "main",
+    "side",
+    "soup",
+    "salad",
+    "breakfast",
+    "dessert",
+    "baked_good",
+    "snack_appetizer",
+    "sauce_condiment",
+    "drink"
+  ],
+  "cuisine": [
+    "american",
+    "southern_us",
+    "cajun_creole",
+    "tex_mex",
+    "mexican",
+    "latin_american",
+    "caribbean",
+    "italian",
+    "french",
+    "spanish_portuguese",
+    "greek",
+    "german",
+    "eastern_european",
+    "british_irish",
+    "scandinavian",
+    "middle_eastern",
+    "turkish",
+    "north_african",
+    "african",
+    "indian",
+    "chinese",
+    "japanese",
+    "korean",
+    "thai",
+    "vietnamese",
+    "malaysian_singaporean",
+    "indonesian",
+    "filipino",
+    "international"
+  ],
+  "meal_types": [
+    "breakfast",
+    "lunch",
+    "dinner",
+    "snack"
+  ],
+  "difficulty": [
+    "easy",
+    "medium",
+    "hard"
+  ]
+}

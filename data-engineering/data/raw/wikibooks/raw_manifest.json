@@ -1,0 +1,30 @@
+{
+  "source": "Wikibooks Cookbook",
+  "source_url": "https://en.wikibooks.org/wiki/Cookbook:Table_of_Contents",
+  "source_license": "CC BY-SA 4.0; each record keeps its page URL and revision id for attribution.",
+  "categories": [
+    "Chinese recipes",
+    "Japanese recipes",
+    "Korean recipes",
+    "Malaysian recipes",
+    "Singaporean recipes",
+    "Indonesian recipes",
+    "Thai recipes",
+    "Vietnamese recipes",
+    "Filipino recipes",
+    "Indian recipes",
+    "Middle Eastern recipes",
+    "Lebanese recipes",
+    "Turkish recipes",
+    "Iranian recipes",
+    "Israeli recipes",
+    "Arab recipes",
+    "Moroccan recipes",
+    "Egyptian recipes"
+  ],
+  "retrieved_at": "2026-09-19T05:15:17+00:00",
+  "local_path": "data/raw/wikibooks/wikibooks.json",
+  "committed_to_git": false,
+  "record_count": 454,
+  "file_sha256": "5d434af1b6f6271123314d6c202d15a4254616a1a4c3e2cd60abd57e8f5c0c26"
+}
