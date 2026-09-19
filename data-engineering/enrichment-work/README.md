@@ -157,6 +157,14 @@ Use only the recipe itself; no web search is needed. Output one object:
   Nutrition uses this amount; the recipe still shows the stated one.
 - Every `evidence` and `confidence` field is required.
 
+### An item that is not a recipe
+
+If a recipe item is not food at all (a furniture polish, play dough, a bird
+feeder mix), do not invent labels for it. Submit only
+`{"candidate_id": "...", "exclude": "not a food recipe: furniture polish of water, vinegar and oil"}`;
+it counts as done and is left out of the release with that reason. Use this for
+nothing else: an odd or badly written recipe is still a recipe.
+
 ### Do not
 
 - invent a source URL: a source must be a page you actually found;

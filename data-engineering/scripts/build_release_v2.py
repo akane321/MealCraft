@@ -291,6 +291,10 @@ def main() -> int:
         if result is None:
             dropped["not enriched"] += 1
             continue
+        if "exclude" in result:
+            dropped["excluded by enricher"] += 1
+            drop_log.append({"candidate_id": candidate_id, "title": record["title"], "reason": result["exclude"]})
+            continue
         recipe, reason = build_recipe(record, result, forms, rules)
         if recipe is None:
             dropped[re.sub(r"ING_\S+|\d+(\.\d+)?|\([^)]*\)", "#", reason).split(":")[0].strip()] += 1
