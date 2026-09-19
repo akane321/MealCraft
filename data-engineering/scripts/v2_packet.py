@@ -57,9 +57,21 @@ def part_of(item_id: str) -> tuple[str, str | None]:
 
 
 def read_jsonl(path: Path) -> list[dict]:
+    """Read one object per line; a last line still being written by another agent is ignored."""
     if not path.exists():
         return []
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    records = []
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for number, line in enumerate(lines, 1):
+        if not line.strip():
+            continue
+        try:
+            records.append(json.loads(line))
+        except json.JSONDecodeError:
+            if number == len(lines):
+                break
+            raise
+    return records
 
 
 # ------------------------------------------------------------------------ validation

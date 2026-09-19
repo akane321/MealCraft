@@ -34,7 +34,9 @@ Code has it; in Codex enable it).
 
 Several agents may work on one part at once: give each a different
 `--shard i/n` on `next` (for example `--shard 1/3`, `2/3`, `3/3`); `submit`
-is safe to call concurrently.
+is safe to call concurrently. Give every scratch file a name no other agent
+will use (include the part, shard and a timestamp), because agents may share a
+temp directory.
 
 You are enriching one part of the MealCraft recipe release. Work only through
 `scripts/v2_packet.py`, from the `data-engineering/` directory. Never edit an
