@@ -78,6 +78,13 @@ class PacketTests(unittest.TestCase):
         self.assertTrue(v2_packet.check_recipe(RECIPE, {**GOOD_RECIPE, "line_estimates": []}))
         self.assertTrue(v2_packet.check_recipe(RECIPE, {**GOOD_RECIPE, "cuisine": "martian"}))
         self.assertTrue(v2_packet.check_recipe(RECIPE, {**GOOD_RECIPE, "meal_types": []}))
+        fried = {
+            **GOOD_RECIPE,
+            "consumed_estimates": [{"index": 1, "quantity": 3, "unit": "tbsp", "basis": "absorbed"}],
+        }
+        self.assertEqual(v2_packet.check_recipe(RECIPE, fried), [])
+        wrong_line = {**GOOD_RECIPE, "consumed_estimates": [{"index": 2, "quantity": 3, "unit": "tbsp", "basis": "x"}]}
+        self.assertTrue(v2_packet.check_recipe(RECIPE, wrong_line))
 
 
 if __name__ == "__main__":

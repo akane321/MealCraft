@@ -2,6 +2,7 @@
 
     python scripts/v2_vocab.py worklist       # names to decide -> data/staging/v2_vocab_worklist.jsonl
     python scripts/v2_vocab.py status         # decided / pending counts, allergen rules awaiting a human
+    python scripts/v2_vocab.py merge-batches  # batch decisions -> config/ingredient_aliases_v2_additions.csv
     python scripts/v2_vocab.py review-sheet   # new ingredients' proposed allergen rules, for a human
 
 Decisions live in `config/ingredient_aliases_v2_additions.csv`, one row per
@@ -190,6 +191,105 @@ def review_sheet() -> None:
     print(f"{len(by_id)} new ingredients -> {path.relative_to(ROOT)}")
 
 
+def merge_batches() -> int:
+    """Validate the batch decisions and write them to the additions table."""
+    folder = STAGING / "vocab_batches"
+    known = existing()
+    rows: dict[str, dict] = decisions()
+    problems = 0
+    for inp in sorted(folder.glob("batch-*.in.jsonl")):
+        out = inp.with_name(inp.name.replace(".in.", ".out."))
+        names = [json.loads(line)["name"] for line in inp.read_text(encoding="utf-8").splitlines() if line]
+        if not out.exists():
+            print(f"{out.name}: missing")
+            problems += 1
+            continue
+        got = {}
+        for line in out.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                row = json.loads(line)
+                got[row.get("alias")] = {f: str(row.get(f) or "") for f in FIELDS}
+        missing = [n for n in names if n not in got]
+        extra = [n for n in got if n not in names]
+        if missing or extra:
+            print(f"{out.name}: {len(missing)} names missing, {len(extra)} unexpected")
+            problems += 1
+        for name in names:
+            if name in got:
+                rows[name] = got[name]
+    # Synonymous new ids from different batches are unified by id_merges.json ({"old": "kept"}).
+    merges_path = folder / "id_merges.json"
+    merges = json.loads(merges_path.read_text(encoding="utf-8")) if merges_path.exists() else {}
+    for row in rows.values():
+        row["ingredient_id"] = merges.get(row["ingredient_id"], row["ingredient_id"])
+        if row["action"] == "new" and row["ingredient_id"] in known:
+            # A batch minted an id that already exists: the existing definition wins.
+            row.update(
+                {f: "" for f in ("canonical_name", "food_group", "allergens", "dietary_origin", "allergen_status")},
+                action="alias",
+            )
+    # Reviewed definitions for new ids whose batches disagreed ({"ING_X": {"allergens": "..."}}).
+    definitions_path = folder / "id_definitions.json"
+    definitions = json.loads(definitions_path.read_text(encoding="utf-8")) if definitions_path.exists() else {}
+    for row in rows.values():
+        if row["action"] == "new" and row["ingredient_id"] in definitions:
+            row.update(definitions[row["ingredient_id"]])
+    # One definition per new id: the first batch's wins when the allergen rule agrees;
+    # a disagreement on allergens is a safety question and is reported instead.
+    first: dict[str, dict] = {}
+    for alias in sorted(rows):
+        row = rows[alias]
+        if row["action"] != "new":
+            continue
+        kept = first.setdefault(row["ingredient_id"], row)
+        if kept is row:
+            continue
+        if kept["allergens"] != row["allergens"]:
+            print(f"{row['ingredient_id']}: allergens differ ({kept['allergens']!r} vs {row['allergens']!r})")
+            problems += 1
+        for field in ("canonical_name", "food_group", "allergens", "dietary_origin", "allergen_status"):
+            row[field] = kept[field]
+    new_ids = set(first)
+    by_new_id = first
+    invalid = [(a, e) for a, r in rows.items() if (e := check_row(r, known, new_ids))]
+    for alias, errors in invalid[:50]:
+        print(f"{alias!r}: " + "; ".join(errors))
+    problems += len(invalid)
+    with ADDITIONS.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=FIELDS, lineterminator="\n")
+        writer.writeheader()
+        for alias in sorted(rows):
+            writer.writerow(rows[alias])
+    print(f"{len(rows)} decisions written; {len(by_new_id)} new ingredients; problems: {problems}")
+    return 1 if problems else 0
+
+
+def resolver():
+    """Return a function mapping an unmapped ingredient name to (id, name, allergens) or "drop" / None."""
+    known = existing()
+    rows = decisions()
+    new = {r["ingredient_id"]: r for r in rows.values() if r["action"] == "new"}
+
+    def resolve(name: str, by_id: bool = False):
+        if by_id:
+            row = new.get(name)
+            if row is None:
+                return None
+            return row["ingredient_id"], row["canonical_name"], row["allergens"], row["allergen_status"]
+        row = rows.get(name.strip())
+        if row is None:
+            return None
+        if row["action"] == "drop":
+            return "drop"
+        target = new.get(row["ingredient_id"]) or row
+        if row["action"] == "alias" and row["ingredient_id"] in known:
+            base = known[row["ingredient_id"]]
+            return row["ingredient_id"], base["canonical_name"], base["allergens"], "confirmed"
+        return target["ingredient_id"], target["canonical_name"], target["allergens"], target["allergen_status"]
+
+    return resolve
+
+
 def main() -> int:
     command = sys.argv[1] if len(sys.argv) > 1 else ""
     if command == "worklist":
@@ -198,6 +298,8 @@ def main() -> int:
         return status()
     elif command == "review-sheet":
         review_sheet()
+    elif command == "merge-batches":
+        return merge_batches()
     else:
         raise SystemExit(__doc__)
     return 0

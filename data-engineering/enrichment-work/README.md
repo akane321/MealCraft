@@ -66,7 +66,8 @@ Output one object:
 
 - `nutrition_per_100g` is for the form the `examples` measure: dry rice and
   pasta, raw meat, canned goods as canned. A `#cooked` id is the cooked form.
-- `unit_grams` gives grams for **one** of every unit in `units_to_weigh`: `cup`
+- `unit_grams` gives grams for **one** of every unit in `units_to_weigh`, which
+  always includes `cup`: `cup`
   is one US cup (236.6 ml) of the ingredient as measured (packed brown sugar,
   chopped onion); count units (`piece`, `clove`, `slice`, `stick`, `head`,
   `bunch`, `can` ...) are one typical item, medium when no size is given.
@@ -112,9 +113,15 @@ Use only the recipe itself; no web search is needed. Output one object:
   technique or many stages.
 - `line_estimates`: exactly one entry for every ingredient line whose
   `needs_amount` is true (such as "salt to taste" or "oil for frying"), with a
-  realistic amount for the stated servings, a unit from
-  `g, kg, oz, lb, ml, l, tsp, tbsp, cup, piece, clove, slice`, and a basis. For
+  realistic amount for the stated servings, a mass or volume unit from
+  `g, kg, oz, lb, ml, l, tsp, tbsp, cup` (never a count), and a basis. For
   frying oil, estimate what is absorbed, not what is in the pan.
+- `consumed_estimates` (optional, but required whenever it applies): for a line
+  whose stated amount is mostly **not eaten** — oil for deep frying, water for
+  boiling pasta or rice, a marinade or brine that is discarded — give the amount
+  actually consumed by the whole recipe, e.g.
+  `{"index": 16, "quantity": 3, "unit": "tbsp", "basis": "3 cups oil for deep frying; ~3 tbsp absorbed by 4 omelets"}`.
+  Nutrition uses this amount; the recipe still shows the stated one.
 - Every `evidence` and `confidence` field is required.
 
 ### Do not

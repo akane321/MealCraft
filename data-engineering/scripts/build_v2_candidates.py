@@ -371,7 +371,8 @@ def course_group(course: str) -> str:
     return "main"
 
 
-def select(pool: list[dict]) -> list[dict]:
+def select(pool: list[dict], factor: float | None = None) -> list[dict]:
+    """Pick each bucket by course mix; `factor` overrides every bucket's oversample."""
     rng = random.Random(SEED)
     rng.shuffle(pool)
     basis_rank = {"source_category": 0, "source_area": 0, "title": 0, "ingredients": 1, "default": 2}
@@ -389,7 +390,7 @@ def select(pool: list[dict]) -> list[dict]:
         by_bucket[bucket_of[record["triage"]["cuisine"]]].append(record)
     chosen = []
     for bucket, spec in QUOTAS["buckets"].items():
-        want = round(spec["target"] * spec.get("oversample", QUOTAS["candidate_oversample"]))
+        want = round(spec["target"] * (factor or spec.get("oversample", QUOTAS["candidate_oversample"])))
         records = by_bucket.get(bucket, [])
         groups = collections.defaultdict(list)
         for record in records:

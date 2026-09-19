@@ -1,0 +1,5 @@
+{
+  "_comment": "Existing aliases that release v2 re-points to a more specific ingredient created in stage 3. Applied to already-mapped lines by prepare_v2_inputs.py select.",
+  "mirin": {"ingredient_id": "ING_MIRIN", "basis": "mirin is a sweet cooking wine; its sugar content differs markedly from sake"},
+  "rice wine": {"ingredient_id": "ING_RICE_WINE", "basis": "rice wine (shaoxing, michiu) is a distinct product from sake"}
+}

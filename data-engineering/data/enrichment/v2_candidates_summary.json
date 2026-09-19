@@ -1,0 +1,1372 @@
+{
+ "seed": 5105,
+ "sources_passing_gate": {
+  "recipenlg_v1.1": 9282,
+  "recipenlg_new": 253630,
+  "wikibooks": 202,
+  "themealdb": 446
+ },
+ "recipenlg_triaged_non_american": {
+  "italian": 78089,
+  "mexican": 33039,
+  "chinese": 32817,
+  "southern_us": 27012,
+  "french": 22231,
+  "indian": 19139,
+  "tex_mex": 16308,
+  "german": 13845,
+  "british_irish": 12475,
+  "greek": 12055,
+  "eastern_european": 11430,
+  "middle_eastern": 10064,
+  "japanese": 9757,
+  "spanish_portuguese": 9226,
+  "cajun_creole": 8636,
+  "thai": 5629,
+  "north_african": 5338,
+  "scandinavian": 5040,
+  "caribbean": 3294,
+  "latin_american": 2571,
+  "korean": 1867,
+  "indonesian": 1274,
+  "vietnamese": 1272,
+  "filipino": 1185,
+  "turkish": 1102,
+  "malaysian_singaporean": 1021,
+  "african": 971
+ },
+ "duplicates_removed": 10923,
+ "pool_by_cuisine": {
+  "italian": 55726,
+  "chinese": 23738,
+  "southern_us": 21329,
+  "mexican": 21166,
+  "french": 17878,
+  "indian": 12155,
+  "german": 10482,
+  "british_irish": 9679,
+  "tex_mex": 9128,
+  "eastern_european": 9041,
+  "greek": 8776,
+  "american": 7471,
+  "middle_eastern": 7041,
+  "spanish_portuguese": 6596,
+  "cajun_creole": 6357,
+  "japanese": 6093,
+  "scandinavian": 4265,
+  "north_african": 3620,
+  "thai": 2890,
+  "caribbean": 2257,
+  "latin_american": 1767,
+  "korean": 1050,
+  "filipino": 837,
+  "turkish": 811,
+  "african": 706,
+  "indonesian": 694,
+  "vietnamese": 563,
+  "malaysian_singaporean": 521
+ },
+ "selected_total": 17359,
+ "selected_by_bucket": {
+  "chinese": {
+   "target": 1200,
+   "selected": 1920
+  },
+  "japanese": {
+   "target": 600,
+   "selected": 960
+  },
+  "korean": {
+   "target": 450,
+   "selected": 967
+  },
+  "southeast_asian": {
+   "target": 600,
+   "selected": 1500
+  },
+  "thai": {
+   "target": 500,
+   "selected": 1250
+  },
+  "vietnamese": {
+   "target": 300,
+   "selected": 467
+  },
+  "indian": {
+   "target": 700,
+   "selected": 1120
+  },
+  "mena": {
+   "target": 600,
+   "selected": 960
+  },
+  "italian": {
+   "target": 600,
+   "selected": 960
+  },
+  "french": {
+   "target": 400,
+   "selected": 640
+  },
+  "greek_mediterranean": {
+   "target": 300,
+   "selected": 480
+  },
+  "german_eastern_european": {
+   "target": 350,
+   "selected": 560
+  },
+  "british_irish": {
+   "target": 300,
+   "selected": 480
+  },
+  "spanish_portuguese": {
+   "target": 250,
+   "selected": 400
+  },
+  "scandinavian": {
+   "target": 100,
+   "selected": 160
+  },
+  "american": {
+   "target": 1700,
+   "selected": 2720
+  },
+  "mexican": {
+   "target": 500,
+   "selected": 800
+  },
+  "latin_caribbean": {
+   "target": 400,
+   "selected": 640
+  },
+  "african": {
+   "target": 150,
+   "selected": 375
+  }
+ },
+ "selected_by_source": {
+  "recipenlg": 12905,
+  "recipenlg_v1.1": 3806,
+  "themealdb": 446,
+  "wikibooks": 202
+ },
+ "selected_by_course": {
+  "main": 9066,
+  "side": 2470,
+  "dessert": 1310,
+  "salad": 1167,
+  "breakfast": 968,
+  "sauce_condiment": 722,
+  "soup": 635,
+  "baked_good": 471,
+  "snack_appetizer": 348,
+  "drink": 202
+ },
+ "selected_with_unmapped": 5854,
+ "selected_missing_servings": 13264,
+ "selected_with_unquantified": 3375,
+ "distinct_unmapped_names": 5681,
+ "top_unmapped_names": [
+  [
+   "tempeh",
+   83
+  ],
+  [
+   "sambal oelek",
+   78
+  ],
+  [
+   "kimchi",
+   68
+  ],
+  [
+   "thai red curry paste",
+   49
+  ],
+  [
+   "gochujang",
+   48
+  ],
+  [
+   "asian fish sauce",
+   39
+  ],
+  [
+   "red chilies",
+   37
+  ],
+  [
+   "beef short ribs",
+   33
+  ],
+  [
+   "kaffir lime leaves",
+   32
+  ],
+  [
+   "red chili pepper",
+   30
+  ],
+  [
+   "sesame seed oil",
+   29
+  ],
+  [
+   "chili paste",
+   29
+  ],
+  [
+   "hot rice",
+   27
+  ],
+  [
+   "thai basil",
+   27
+  ],
+  [
+   "bok choy",
+   26
+  ],
+  [
+   "lamb",
+   25
+  ],
+  [
+   "marinade",
+   24
+  ],
+  [
+   "baby bok choy",
+   23
+  ],
+  [
+   "chicken drumsticks",
+   23
+  ],
+  [
+   "cabbage kimchi",
+   23
+  ],
+  [
+   "tamarind paste",
+   23
+  ],
+  [
+   "shiitake mushrooms",
+   22
+  ],
+  [
+   "thai fish sauce",
+   22
+  ],
+  [
+   "red chilli",
+   22
+  ],
+  [
+   "asian sesame oil",
+   21
+  ],
+  [
+   "palm sugar",
+   21
+  ],
+  [
+   "kecap manis",
+   21
+  ],
+  [
+   "lemon grass",
+   21
+  ],
+  [
+   "sauce",
+   20
+  ],
+  [
+   "daikon radish",
+   20
+  ],
+  [
+   "inch ginger",
+   20
+  ],
+  [
+   "chili",
+   19
+  ],
+  [
+   "sriracha sauce",
+   19
+  ],
+  [
+   "red chile",
+   19
+  ],
+  [
+   "asian pear",
+   19
+  ],
+  [
+   "chili-garlic sauce",
+   19
+  ],
+  [
+   "beef flank steak",
+   18
+  ],
+  [
+   "patis",
+   18
+  ],
+  [
+   "chorizo",
+   18
+  ],
+  [
+   "gochugaru",
+   17
+  ],
+  [
+   "ginger powder",
+   16
+  ],
+  [
+   "chicken legs",
+   16
+  ],
+  [
+   "squid",
+   16
+  ],
+  [
+   "sushi rice",
+   15
+  ],
+  [
+   "lower-sodium soy sauce",
+   15
+  ],
+  [
+   "red chili",
+   15
+  ],
+  [
+   "",
+   15
+  ],
+  [
+   "red chili peppers",
+   15
+  ],
+  [
+   "shoyu",
+   14
+  ],
+  [
+   "cilantro leaf",
+   14
+  ],
+  [
+   "dried red pepper",
+   13
+  ],
+  [
+   "m.s.g",
+   13
+  ],
+  [
+   "dried red pepper flakes",
+   13
+  ],
+  [
+   "hot chili paste",
+   13
+  ],
+  [
+   "sweet soy sauce",
+   13
+  ],
+  [
+   "turmeric powder",
+   13
+  ],
+  [
+   "fenugreek seeds",
+   13
+  ],
+  [
+   "corn flour",
+   12
+  ],
+  [
+   "chinese cabbage",
+   12
+  ],
+  [
+   "chili oil",
+   12
+  ],
+  [
+   "korean red pepper paste",
+   12
+  ],
+  [
+   "pork belly",
+   12
+  ],
+  [
+   "serrano chile",
+   12
+  ],
+  [
+   "chili flakes",
+   11
+  ],
+  [
+   "miso",
+   11
+  ],
+  [
+   "soba noodles",
+   11
+  ],
+  [
+   "steamed rice",
+   11
+  ],
+  [
+   "unseasoned rice vinegar",
+   11
+  ],
+  [
+   "coleslaw mix",
+   11
+  ],
+  [
+   "cracked pepper",
+   11
+  ],
+  [
+   "glutinous rice",
+   11
+  ],
+  [
+   "pandan leaves",
+   11
+  ],
+  [
+   "chutney",
+   11
+  ],
+  [
+   "cardamom pods",
+   11
+  ],
+  [
+   "dried rice noodles",
+   11
+  ],
+  [
+   "clear honey",
+   10
+  ],
+  [
+   "bamboo shoots",
+   10
+  ],
+  [
+   "sugar snap peas",
+   10
+  ],
+  [
+   "cornish hens",
+   10
+  ],
+  [
+   "beef sirloin",
+   10
+  ],
+  [
+   "short ribs",
+   10
+  ],
+  [
+   "green chile peppers",
+   10
+  ],
+  [
+   "sheets rice paper",
+   10
+  ],
+  [
+   "beef sirloin steak",
+   9
+  ],
+  [
+   "dried red chilies",
+   9
+  ],
+  [
+   "beef top sirloin steak",
+   9
+  ],
+  [
+   "apricot jam",
+   9
+  ],
+  [
+   "broccoli floret",
+   9
+  ],
+  [
+   "king prawns",
+   9
+  ],
+  [
+   "dried shiitake mushrooms",
+   9
+  ],
+  [
+   "wasabi powder",
+   9
+  ],
+  [
+   "short-grain rice",
+   9
+  ],
+  [
+   "korean chili paste",
+   9
+  ],
+  [
+   "chili garlic sauce",
+   9
+  ],
+  [
+   "roasted sesame seeds",
+   9
+  ],
+  [
+   "dipping sauce",
+   9
+  ],
+  [
+   "red chili pepper flakes",
+   9
+  ],
+  [
+   "red chile pepper",
+   9
+  ],
+  [
+   "pork loin chops",
+   9
+  ],
+  [
+   "shrimp paste",
+   9
+  ],
+  [
+   "adobo seasoning",
+   9
+  ],
+  [
+   "thai chiles",
+   9
+  ],
+  [
+   "ketjap manis",
+   9
+  ],
+  [
+   "mango chutney",
+   9
+  ],
+  [
+   "spring roll wrappers",
+   9
+  ],
+  [
+   "kikkoman soy sauce",
+   8
+  ],
+  [
+   "chicken parts",
+   8
+  ],
+  [
+   "pork spareribs",
+   8
+  ],
+  [
+   "beef tenderloin",
+   8
+  ],
+  [
+   "rump roast",
+   8
+  ],
+  [
+   "lemon or lime juice",
+   8
+  ],
+  [
+   "bamboo skewers",
+   8
+  ],
+  [
+   "hot pepper flakes",
+   8
+  ],
+  [
+   "sherry wine",
+   8
+  ],
+  [
+   "bone-in chicken thighs",
+   8
+  ],
+  [
+   "hot chili sauce",
+   8
+  ],
+  [
+   "red pepper paste",
+   8
+  ],
+  [
+   "thai chili paste",
+   8
+  ],
+  [
+   "korean red pepper powder",
+   8
+  ],
+  [
+   "chile paste with garlic",
+   8
+  ],
+  [
+   "shiitake mushroom",
+   8
+  ],
+  [
+   "chickpea flour",
+   8
+  ],
+  [
+   "roasting chickens",
+   8
+  ],
+  [
+   "serrano chilies",
+   8
+  ],
+  [
+   "cumin powder",
+   8
+  ],
+  [
+   "cardamom seeds",
+   8
+  ],
+  [
+   "thai chile",
+   8
+  ],
+  [
+   "green chile pepper",
+   8
+  ],
+  [
+   "chicken stock cube",
+   8
+  ],
+  [
+   "tinned tomatos",
+   8
+  ],
+  [
+   "yellow curry paste",
+   8
+  ],
+  [
+   "hot brown rice",
+   7
+  ],
+  [
+   "chicken breast fillets",
+   7
+  ],
+  [
+   "bottled garlic",
+   7
+  ],
+  [
+   "top sirloin steak",
+   7
+  ],
+  [
+   "yellow curry powder",
+   7
+  ],
+  [
+   "dried shrimp",
+   7
+  ],
+  [
+   "vermicelli rice noodles",
+   7
+  ],
+  [
+   "chorizo sausage",
+   7
+  ],
+  [
+   "mint leaf",
+   7
+  ],
+  [
+   "long red chili",
+   7
+  ],
+  [
+   "chicken meat",
+   7
+  ],
+  [
+   "wooden skewers",
+   7
+  ],
+  [
+   "dashi",
+   7
+  ],
+  [
+   "rice paper sheets",
+   7
+  ],
+  [
+   "arborio rice",
+   7
+  ],
+  [
+   "black sesame seeds",
+   7
+  ],
+  [
+   "korean red pepper flakes",
+   7
+  ],
+  [
+   "coarse sea salt",
+   7
+  ],
+  [
+   "watercress",
+   7
+  ],
+  [
+   "dry red pepper",
+   7
+  ],
+  [
+   "egg roll wraps",
+   7
+  ],
+  [
+   "hot red pepper flakes",
+   7
+  ],
+  [
+   "dressing",
+   7
+  ],
+  [
+   "russet potato",
+   7
+  ],
+  [
+   "egg plants",
+   7
+  ],
+  [
+   "for frying vegetable oil",
+   7
+  ],
+  [
+   "chicken liver",
+   7
+  ],
+  [
+   "green chili pepper",
+   7
+  ],
+  [
+   "rice sticks",
+   7
+  ],
+  [
+   "sambal oelek chili paste",
+   7
+  ],
+  [
+   "galangal",
+   7
+  ],
+  [
+   "red lentil",
+   7
+  ],
+  [
+   "thin rice noodles",
+   7
+  ],
+  [
+   "bamboo shoot",
+   7
+  ],
+  [
+   "chili paste with garlic",
+   7
+  ],
+  [
+   "thai green curry paste",
+   7
+  ],
+  [
+   "thai basil leaves",
+   7
+  ],
+  [
+   "rice paper",
+   7
+  ],
+  [
+   "green chilli",
+   7
+  ],
+  [
+   "golden syrup",
+   7
+  ],
+  [
+   "plantains",
+   7
+  ],
+  [
+   "chinese five spice powder",
+   6
+  ],
+  [
+   "head bok choy",
+   6
+  ],
+  [
+   "spareribs",
+   6
+  ],
+  [
+   "steamed white rice",
+   6
+  ],
+  [
+   "rice vermicelli noodles",
+   6
+  ],
+  [
+   "inch piece ginger",
+   6
+  ],
+  [
+   "dried chili pepper flakes",
+   6
+  ],
+  [
+   "potato starch",
+   6
+  ],
+  [
+   "udon noodles",
+   6
+  ],
+  [
+   "miso paste",
+   6
+  ],
+  [
+   "chicken breast meat",
+   6
+  ],
+  [
+   "canola or vegetable oil",
+   6
+  ],
+  [
+   "steel cut oats",
+   6
+  ],
+  [
+   "creme fraiche",
+   6
+  ],
+  [
+   "water to cover",
+   6
+  ],
+  [
+   "korean chili powder",
+   6
+  ],
+  [
+   "recipe",
+   6
+  ],
+  [
+   "chinese five-spice powder",
+   6
+  ],
+  [
+   "ingredients",
+   6
+  ],
+  [
+   "cm ginger",
+   6
+  ],
+  [
+   "tamarind pulp",
+   6
+  ],
+  [
+   "thai red chili peppers",
+   6
+  ],
+  [
+   "chilies",
+   6
+  ],
+  [
+   "vegetable or peanut oil",
+   6
+  ],
+  [
+   "chinese sausage",
+   6
+  ],
+  [
+   "adobo sauce",
+   6
+  ],
+  [
+   "dried bay leaves",
+   6
+  ],
+  [
+   "orange bell pepper",
+   6
+  ],
+  [
+   "tumeric",
+   6
+  ],
+  [
+   "pandan leaf",
+   6
+  ],
+  [
+   "chicken breast halves cut into thin strips",
+   6
+  ],
+  [
+   "thai chili sauce",
+   6
+  ],
+  [
+   "fish stock",
+   6
+  ],
+  [
+   "semolina",
+   6
+  ],
+  [
+   "vietnamese fish sauce",
+   6
+  ],
+  [
+   "cornish game hens",
+   6
+  ],
+  [
+   "fenugreek",
+   6
+  ],
+  [
+   "harissa spice",
+   6
+  ],
+  [
+   "scotch bonnet",
+   6
+  ],
+  [
+   "chilli",
+   5
+  ],
+  [
+   "inch piece gingerroot",
+   5
+  ],
+  [
+   "hokkien noodles",
+   5
+  ],
+  [
+   "fat",
+   5
+  ],
+  [
+   "sheets puff pastry",
+   5
+  ],
+  [
+   "chicken bouillon granules",
+   5
+  ],
+  [
+   "short grain rice",
+   5
+  ],
+  [
+   "chicken tenders",
+   5
+  ],
+  [
+   "wasabi paste",
+   5
+  ],
+  [
+   "dashi stock",
+   5
+  ],
+  [
+   "white miso",
+   5
+  ],
+  [
+   "mixed salad greens",
+   5
+  ],
+  [
+   "semolina flour",
+   5
+  ],
+  [
+   "yukon gold potatoes",
+   5
+  ],
+  [
+   "sriracha hot sauce",
+   5
+  ],
+  [
+   "kaffir lime leaf",
+   5
+  ],
+  [
+   "dried red chile peppers",
+   5
+  ],
+  [
+   "chili pepper flakes",
+   5
+  ],
+  [
+   "beef top sirloin",
+   5
+  ],
+  [
+   "korean-style short ribs",
+   5
+  ],
+  [
+   "gochujang sauce",
+   5
+  ],
+  [
+   "korean hot pepper paste",
+   5
+  ],
+  [
+   "korean chile powder",
+   5
+  ],
+  [
+   "korean chile paste",
+   5
+  ],
+  [
+   "hot chile paste",
+   5
+  ],
+  [
+   "star anise pods",
+   5
+  ],
+  [
+   "bottled ginger",
+   5
+  ],
+  [
+   "jalapeno chile",
+   5
+  ],
+  [
+   "hot pepper paste",
+   5
+  ],
+  [
+   "seedless cucumber",
+   5
+  ],
+  [
+   "vermicelli",
+   5
+  ],
+  [
+   "wide rice noodles",
+   5
+  ],
+  [
+   "pork ribs",
+   5
+  ],
+  [
+   "pickling spice",
+   5
+  ],
+  [
+   "thick coconut milk",
+   5
+  ],
+  [
+   "string beans",
+   5
+  ],
+  [
+   "red chillies",
+   5
+  ],
+  [
+   "green cardamom pods",
+   5
+  ],
+  [
+   "unsweetened coconut cream",
+   5
+  ],
+  [
+   "black peppercorn",
+   5
+  ],
+  [
+   "canned coconut milk",
+   5
+  ],
+  [
+   "matchstick-cut carrots",
+   5
+  ],
+  [
+   "salad",
+   5
+  ],
+  [
+   "wide rice stick noodles",
+   5
+  ],
+  [
+   "dry couscous",
+   5
+  ],
+  [
+   "inches ginger",
+   5
+  ],
+  [
+   "sriracha chili sauce",
+   5
+  ],
+  [
+   "lumpia wrappers",
+   5
+  ],
+  [
+   "cayenne powder",
+   5
+  ],
+  [
+   "lime peel",
+   5
+  ],
+  [
+   "flat rice noodles",
+   5
+  ],
+  [
+   "sweet chilli sauce",
+   5
+  ],
+  [
+   "natural-style peanut butter",
+   5
+  ],
+  [
+   "nuoc nam",
+   5
+  ],
+  [
+   "single cream",
+   5
+  ],
+  [
+   "fava beans",
+   5
+  ],
+  [
+   "dusting flour",
+   5
+  ],
+  [
+   "vegetable stock cube",
+   5
+  ],
+  [
+   "swede",
+   5
+  ],
+  [
+   "for frying oil",
+   5
+  ],
+  [
+   "shortcrust pastry",
+   5
+  ],
+  [
+   "berbere",
+   5
+  ],
+  [
+   "shaoxing wine",
+   4
+  ],
+  [
+   "chilli powder",
+   4
+  ],
+  [
+   "hotsauce",
+   4
+  ],
+  [
+   "thick rice noodles",
+   4
+  ],
+  [
+   "papaya",
+   4
+  ],
+  [
+   "sugar snap pea",
+   4
+  ],
+  [
+   "lemon slices",
+   4
+  ],
+  [
+   "stir-fry vegetables",
+   4
+  ],
+  [
+   "chicken tenderloins",
+   4
+  ],
+  [
+   "oil or margarine",
+   4
+  ],
+  [
+   "plum sauce",
+   4
+  ],
+  [
+   "beef round steak",
+   4
+  ],
+  [
+   "canned bean sprouts",
+   4
+  ],
+  [
+   "chinese broccoli",
+   4
+  ],
+  [
+   "thin egg noodles",
+   4
+  ],
+  [
+   "snow pea pods",
+   4
+  ],
+  [
+   "teriyaki marinade",
+   4
+  ],
+  [
+   "sirloin beef",
+   4
+  ],
+  [
+   "wheat spaghetti",
+   4
+  ],
+  [
+   "ginger juice",
+   4
+  ],
+  [
+   "glutinous white rice",
+   4
+  ],
+  [
+   "root ginger",
+   4
+  ],
+  [
+   "short-grain white rice",
+   4
+  ],
+  [
+   "asian chili-garlic sauce",
+   4
+  ],
+  [
+   "inches piece ginger",
+   4
+  ],
+  [
+   "korean radish",
+   4
+  ],
+  [
+   "chile paste",
+   4
+  ]
+ ]
+}

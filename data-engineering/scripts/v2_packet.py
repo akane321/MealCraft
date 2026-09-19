@@ -41,7 +41,8 @@ OVERLAP_RATE = 0.03
 KINDS = ("ingredients", "recipes")
 ALLERGENS = {"milk", "eggs", "fish", "crustaceans", "tree_nuts", "peanuts", "gluten", "soy", "sesame"}
 NUTRIENTS = ("energy_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
-ESTIMATE_UNITS = {"g", "kg", "oz", "lb", "ml", "l", "tsp", "tbsp", "cup", "piece", "clove", "slice"}
+# Estimated amounts use mass or volume only: every ingredient has grams per cup, so both always convert.
+ESTIMATE_UNITS = {"g", "kg", "oz", "lb", "ml", "l", "tsp", "tbsp", "cup"}
 ID_FIELD = {"ingredients": "ingredient_id", "recipes": "candidate_id"}
 
 
@@ -144,6 +145,23 @@ def check_recipe(item: dict, result: dict) -> list[str]:
             errors.append(
                 f"line_estimates for ingredient line {index} needs quantity, unit in {sorted(ESTIMATE_UNITS)} and basis"
             )
+    # Lines whose stated amount is mostly not eaten (deep-frying oil, pasta water, a discarded
+    # marinade or brine) carry the amount actually consumed; nutrition uses it.
+    consumed = [e for e in result.get("consumed_estimates") or [] if isinstance(e, dict)]
+    stated = {line["index"] for line in item["ingredients"] if not line.get("needs_amount")}
+    for estimate in consumed:
+        valid = (
+            estimate.get("index") in stated
+            and _num(estimate.get("quantity"), 0, 5000)
+            and estimate.get("unit") in ESTIMATE_UNITS
+            and str(estimate.get("basis", "")).strip()
+        )
+        if not valid:
+            errors.append(
+                "consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in "
+                f"{sorted(ESTIMATE_UNITS)} and basis"
+            )
+            break
     if set(estimates) - wanted:
         errors.append(f"line_estimates given for lines that already have an amount: {sorted(set(estimates) - wanted)}")
     evidence = result.get("evidence") or {}
