@@ -128,9 +128,9 @@ def check_ingredient(item: dict, result: dict) -> list[str]:
 
 def check_recipe(item: dict, result: dict) -> list[str]:
     errors = []
-    for key in ("prep_minutes", "cook_minutes", "passive_minutes"):
-        if not (isinstance(result.get(key), int) and 0 <= result[key] <= 10080):
-            errors.append(f"{key} must be an integer 0-10080")
+    for key, cap in (("prep_minutes", 10080), ("cook_minutes", 10080), ("passive_minutes", 86400)):
+        if not (isinstance(result.get(key), int) and 0 <= result[key] <= cap):
+            errors.append(f"{key} must be an integer 0-{cap}")
     if not errors and result["prep_minutes"] + result["cook_minutes"] <= 0:
         errors.append("prep_minutes + cook_minutes must be > 0")
     if result.get("time_basis") not in {"stated", "estimated"}:
