@@ -34,7 +34,9 @@ Code has it; in Codex enable it).
 
 Several agents may work on one part at once: give each a different
 `--shard i/n` on `next` (for example `--shard 1/3`, `2/3`, `3/3`); `submit`
-is safe to call concurrently.
+is safe to call concurrently. Give every scratch file a name no other agent
+will use (include the part, shard and a timestamp), because agents may share a
+temp directory.
 
 You are enriching one part of the MealCraft recipe release. Work only through
 `scripts/v2_packet.py`, from the `data-engineering/` directory. Never edit an
@@ -70,7 +72,9 @@ Input fields: `ingredient_id`, `canonical_name`, `food_group`, `aliases`,
 `units_to_weigh`, `examples` (how recipes write it). An id ending in `#cooked` is
 the cooked form of that ingredient.
 
-Use **web search** for every ingredient. Prefer, in order: USDA FoodData Central
+Use **web search** for every ingredient, but sparingly: a session allows about
+200 searches, so spend at most 2 per ingredient (one good USDA FoodData Central
+or national-table query usually gives both nutrition and cup/piece weights). Prefer, in order: USDA FoodData Central
 pages, other national food-composition tables, manufacturer nutrition labels,
 reputable weight charts (King Arthur, etc.). When no source gives a figure, give
 a reasoned estimate and say so in `notes`. Never leave a number out.
