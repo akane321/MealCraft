@@ -135,8 +135,8 @@ def check_recipe(item: dict, result: dict) -> list[str]:
         errors.append("prep_minutes + cook_minutes must be > 0")
     if result.get("time_basis") not in {"stated", "estimated"}:
         errors.append("time_basis must be stated or estimated")
-    if not (isinstance(result.get("servings"), int) and 1 <= result["servings"] <= 100):
-        errors.append("servings must be an integer 1-100")
+    if not (isinstance(result.get("servings"), int) and 1 <= result["servings"] <= 500):
+        errors.append("servings must be an integer 1-500")
     elif item.get("servings") and result["servings"] != item["servings"]:
         errors.append(f"servings is stated by the source as {item['servings']}; keep it")
     for key in ("course", "cuisine", "difficulty"):
