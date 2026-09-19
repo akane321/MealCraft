@@ -29,8 +29,10 @@ import argparse
 import collections
 import hashlib
 import json
+import os
 import re
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -187,23 +189,63 @@ def status(parts: list[str]) -> None:
             print(f"part {part} {kind:<11} {done:>6}/{total:<6} done")
 
 
-def next_items(part: str, kind: str, n: int) -> None:
+def in_shard(item_id: str, shard: str | None) -> bool:
+    """`--shard i/n` splits a part into n disjoint slices, for several agents on one part."""
+    if not shard:
+        return True
+    index, count = (int(x) for x in shard.split("/"))
+    return int(hashlib.sha256(("shard:" + item_id).encode("utf-8")).hexdigest(), 16) % count == index - 1
+
+
+def next_items(part: str, kind: str, n: int, shard: str | None = None) -> None:
     folder = WORK / f"part-{part}"
     done = {r[ID_FIELD[kind]] for r in read_jsonl(folder / f"{kind}.output.jsonl")}
-    todo = [item for item in read_jsonl(folder / f"{kind}.input.jsonl") if item[ID_FIELD[kind]] not in done]
+    todo = [
+        item
+        for item in read_jsonl(folder / f"{kind}.input.jsonl")
+        if item[ID_FIELD[kind]] not in done and in_shard(item[ID_FIELD[kind]], shard)
+    ]
     for item in todo[:n]:
         print(json.dumps(item, ensure_ascii=False))
     print(f"# {len(todo)} {kind} left in part {part}", file=sys.stderr)
 
 
+class _Lock:
+    """Exclusive lock file, so agents submitting to one part at the same time never interleave lines."""
+
+    def __init__(self, path: Path) -> None:
+        self.path = path
+
+    def __enter__(self):
+        for _ in range(600):
+            try:
+                self.fd = os.open(self.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                return self
+            except FileExistsError:
+                if time.time() - self.path.stat().st_mtime > 120:  # a crashed holder
+                    self.path.unlink(missing_ok=True)
+                time.sleep(0.2)
+        raise SystemExit(f"could not lock {self.path}")
+
+    def __exit__(self, *exc):
+        os.close(self.fd)
+        self.path.unlink(missing_ok=True)
+
+
 def submit(part: str, kind: str, by: str) -> int:
     folder = WORK / f"part-{part}"
+    lines = sys.stdin.read().splitlines()
+    with _Lock(folder / f".{kind}.lock"):
+        return _submit_locked(folder, kind, by, lines, part)
+
+
+def _submit_locked(folder: Path, kind: str, by: str, lines: list[str], part: str) -> int:
     items = {i[ID_FIELD[kind]]: i for i in read_jsonl(folder / f"{kind}.input.jsonl")}
     out_path = folder / f"{kind}.output.jsonl"
     done = {r[ID_FIELD[kind]] for r in read_jsonl(out_path)}
     accepted, rejected = 0, 0
     with out_path.open("a", encoding="utf-8", newline="\n") as out:
-        for number, line in enumerate(sys.stdin, 1):
+        for number, line in enumerate(lines, 1):
             if not line.strip():
                 continue
             try:
@@ -330,6 +372,7 @@ def main() -> int:
             command.add_argument("--kind", choices=KINDS, required=True)
         if name == "next":
             command.add_argument("--n", type=int, default=10)
+            command.add_argument("--shard", help="i/n: only the i-th of n disjoint slices of this part")
         if name == "submit":
             command.add_argument("--by", required=True, help='who produced it, e.g. "claude/alice" or "codex/bob"')
     sub.add_parser("merge")
@@ -341,7 +384,9 @@ def main() -> int:
     if args.command == "status":
         status([args.part] if args.part else list(PARTS))
     elif args.command == "next":
-        next_items(args.part, args.kind, args.n)
+        if args.shard and not re.fullmatch(r"\d+/\d+", args.shard):
+            raise SystemExit("--shard must look like 2/5")
+        next_items(args.part, args.kind, args.n, args.shard)
     elif args.command == "submit":
         if not re.fullmatch(r"(claude|codex|human)/[\w.-]+", args.by):
             raise SystemExit('--by must look like "claude/<name>", "codex/<name>" or "human/<name>"')

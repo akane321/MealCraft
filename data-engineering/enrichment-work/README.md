@@ -16,6 +16,26 @@
 
 ## Instructions for the AI agent (Claude or Codex)
 
+### Why this exists
+
+MealCraft plans a household's week of meals under hard constraints (allergens,
+diet, budget, cooking time) and reports nutrition. Release v2 is its recipe
+database: about 10,000 recipes across cuisines, weighted towards Asian food for
+users in Singapore. Every recipe needs its time, servings, course, cuisine,
+meal types and difficulty, and every ingredient its nutrition and unit weights,
+so the planner can compute per-serving nutrition and respect time limits.
+
+What matters most, in order: numbers that are **plausible and traceable**
+(a stated source, or an estimate that says it is one), then **consistency**
+(the same kind of thing judged the same way), then speed. A figure off by 15%
+is acceptable; an invented source, an unexplained outlier or a silently wrong
+unit is not. You need **web search** enabled for the ingredient items (Claude
+Code has it; in Codex enable it).
+
+Several agents may work on one part at once: give each a different
+`--shard i/n` on `next` (for example `--shard 1/3`, `2/3`, `3/3`); `submit`
+is safe to call concurrently.
+
 You are enriching one part of the MealCraft recipe release. Work only through
 `scripts/v2_packet.py`, from the `data-engineering/` directory. Never edit an
 `*.input.jsonl` file, another part's files, or any script.
@@ -24,7 +44,7 @@ You are enriching one part of the MealCraft recipe release. Work only through
 
 ```text
 python scripts/v2_packet.py status --part X
-python scripts/v2_packet.py next --part X --kind ingredients --n 5     # do ingredients first
+python scripts/v2_packet.py next --part X --kind ingredients --n 5     # do ingredients first (add --shard i/n if several agents share part X)
 # ... produce one JSON object per item, one per line, into a scratch file ...
 python scripts/v2_packet.py submit --part X --kind ingredients --by "claude/<name>" < scratch.jsonl
 ```

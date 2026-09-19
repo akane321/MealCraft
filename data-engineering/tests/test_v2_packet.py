@@ -59,6 +59,12 @@ class PacketTests(unittest.TestCase):
         self.assertTrue(30 < len(overlaps) < 180)
         self.assertTrue(all(p != o for p, o in overlaps))
 
+    def test_shards_split_a_part_without_overlap(self):
+        ids = [f"recipenlg:{n}" for n in range(500)]
+        slices = [{i for i in ids if v2_packet.in_shard(i, f"{k}/4")} for k in range(1, 5)]
+        self.assertEqual(set().union(*slices), set(ids))
+        self.assertEqual(sum(len(s) for s in slices), len(ids))
+
     def test_valid_results_pass(self):
         self.assertEqual(v2_packet.check_ingredient(INGREDIENT, GOOD_INGREDIENT), [])
         self.assertEqual(v2_packet.check_recipe(RECIPE, GOOD_RECIPE), [])
