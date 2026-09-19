@@ -30,7 +30,13 @@ python scripts/v2_packet.py submit --part X --kind ingredients --by "claude/<nam
 ```
 
 Repeat until `next` prints nothing for `ingredients`, then do the same for
-`recipes` (batches of about 10). `submit` validates every line and appends only
+`recipes` with `--n 25`.
+
+**Work in large batches and keep it short; this is what makes the job
+finishable.** Read this file once per session, not once per batch. Take 5
+ingredients or 25 recipes at a time, write all their results into one scratch
+file in one go, and submit once. Keep every `evidence`, `basis` and `notes`
+string under about 15 words. Do not re-read items you have already submitted. `submit` validates every line and appends only
 valid ones; fix and resubmit any line it rejects. Items already accepted are
 skipped, so resubmitting is always safe. Commit the two output files every few
 batches so a stopped session loses nothing.
@@ -67,7 +73,8 @@ Output one object:
 - `nutrition_per_100g` is for the form the `examples` measure: dry rice and
   pasta, raw meat, canned goods as canned. A `#cooked` id is the cooked form.
 - `unit_grams` gives grams for **one** of every unit in `units_to_weigh`, which
-  always includes `cup`: `cup`
+  always includes `cup`; say in `basis` which form and packing you assumed
+  (agar strands and agar powder differ about twentyfold). `cup`
   is one US cup (236.6 ml) of the ingredient as measured (packed brown sugar,
   chopped onion); count units (`piece`, `clove`, `slice`, `stick`, `head`,
   `bunch`, `can` ...) are one typical item, medium when no size is given.
@@ -102,14 +109,16 @@ Use only the recipe itself; no web search is needed. Output one object:
 - Times are whole minutes for the whole recipe: `prep_minutes` hands-on work,
   `cook_minutes` on heat or in an appliance, `passive_minutes` unattended waiting
   (chilling, marinating, rising, cooling). Use the stated durations; estimate the
-  rest as an experienced home cook. `time_basis` is `stated` only when every
+  rest as an experienced home cook. Follow the recipe text literally ("soak
+  overnight" is 480 passive minutes). `time_basis` is `stated` only when every
   cooking and waiting step gives a duration.
 - `servings`: keep the source's number when it is given. When it is null,
   estimate from the quantities and say how in `evidence.servings`.
 - `course`, `cuisine`, `meal_types`, `difficulty` use the vocabularies in
   `config/recipe_vocabulary.json`. `cuisine_hint` came from a keyword rule and
-  may be wrong; decide from the recipe. Desserts, drinks and snacks normally suit
-  `snack`. `difficulty`: easy = basic skills and few steps; hard = demanding
+  may be wrong; decide from the recipe. `course` says what the dish is
+  (`dessert`, `drink` ...); `meal_types` says when it is eaten, and desserts,
+  drinks and snacks normally get `meal_types: ["snack"]`. `difficulty`: easy = basic skills and few steps; hard = demanding
   technique or many stages.
 - `line_estimates`: exactly one entry for every ingredient line whose
   `needs_amount` is true (such as "salt to taste" or "oil for frying"), with a

@@ -259,7 +259,7 @@ def merge() -> int:
                 else:
                     merged[item_id] = result
         agreement = _agreement(kind, merged, duplicates)
-        path = WORK / f"merged.{kind}.jsonl"
+        path = ROOT / "data" / "staging" / f"v2_merged.{kind}.jsonl"
         path.write_text(
             "".join(json.dumps(merged[k], ensure_ascii=False, sort_keys=True) + "\n" for k in sorted(merged)),
             encoding="utf-8",
