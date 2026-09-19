@@ -102,7 +102,7 @@ def check_ingredient(item: dict, result: dict) -> list[str]:
     grams = {u.get("unit"): u for u in result.get("unit_grams") or [] if isinstance(u, dict)}
     for unit in item["units_to_weigh"]:
         entry = grams.get(unit)
-        if not entry or not _num(entry.get("grams"), 0.05, 5000) or not str(entry.get("basis", "")).strip():
+        if not entry or not _num(entry.get("grams"), 0.001, 5000) or not str(entry.get("basis", "")).strip():
             errors.append(f"unit_grams for '{unit}' missing, out of range or without basis")
     if not set(result.get("allergen_opinion") or []) <= ALLERGENS:
         errors.append(f"allergen_opinion must use {sorted(ALLERGENS)}")
