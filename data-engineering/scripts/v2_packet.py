@@ -244,18 +244,19 @@ class _Lock:
         self.path.unlink(missing_ok=True)
 
 
-def submit(part: str, kind: str, by: str) -> int:
+def submit(part: str, kind: str, by: str, replace: bool = False) -> int:
     folder = WORK / f"part-{part}"
     lines = sys.stdin.read().splitlines()
     with _Lock(folder / f".{kind}.lock"):
-        return _submit_locked(folder, kind, by, lines, part)
+        return _submit_locked(folder, kind, by, lines, part, replace)
 
 
-def _submit_locked(folder: Path, kind: str, by: str, lines: list[str], part: str) -> int:
+def _submit_locked(folder: Path, kind: str, by: str, lines: list[str], part: str, replace: bool = False) -> int:
     items = {i[ID_FIELD[kind]]: i for i in read_jsonl(folder / f"{kind}.input.jsonl")}
     out_path = folder / f"{kind}.output.jsonl"
     done = {r[ID_FIELD[kind]] for r in read_jsonl(out_path)}
     accepted, rejected = 0, 0
+    replaced: dict[str, dict] = {}
     with out_path.open("a", encoding="utf-8", newline="\n") as out:
         for number, line in enumerate(lines, 1):
             if not line.strip():
@@ -271,7 +272,7 @@ def _submit_locked(folder: Path, kind: str, by: str, lines: list[str], part: str
                 print(f"line {number}: {ID_FIELD[kind]} {item_id!r} is not in part {part}")
                 rejected += 1
                 continue
-            if item_id in done:
+            if item_id in done and not replace:
                 print(f"line {number}: {item_id} already done, skipped")
                 continue
             errors = CHECKS[kind](items[item_id], result)
@@ -280,9 +281,21 @@ def _submit_locked(folder: Path, kind: str, by: str, lines: list[str], part: str
                 rejected += 1
                 continue
             result["enriched_by"] = by
-            out.write(json.dumps(result, ensure_ascii=False, sort_keys=True) + "\n")
-            done.add(item_id)
+            if item_id in done:
+                replaced[item_id] = result
+            else:
+                out.write(json.dumps(result, ensure_ascii=False, sort_keys=True) + "\n")
+                done.add(item_id)
             accepted += 1
+    if replaced:
+        # --replace: a re-verified result supersedes the earlier line for the same item.
+        kept = [r for r in read_jsonl(out_path) if r[ID_FIELD[kind]] not in replaced]
+        out_path.write_text(
+            "".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in [*kept, *replaced.values()]),
+            encoding="utf-8",
+            newline="\n",
+        )
+        print(f"replaced {len(replaced)}")
     print(f"accepted {accepted}, rejected {rejected}")
     return 1 if rejected else 0
 
@@ -387,6 +400,7 @@ def main() -> int:
             command.add_argument("--shard", help="i/n: only the i-th of n disjoint slices of this part")
         if name == "submit":
             command.add_argument("--by", required=True, help='who produced it, e.g. "claude/alice" or "codex/bob"')
+            command.add_argument("--replace", action="store_true", help="re-verified results replace earlier ones")
     sub.add_parser("merge")
     build = sub.add_parser("build-inputs")
     build.add_argument("--recipes", type=Path, required=True)
@@ -402,7 +416,7 @@ def main() -> int:
     elif args.command == "submit":
         if not re.fullmatch(r"(claude|codex|human)/[\w.-]+", args.by):
             raise SystemExit('--by must look like "claude/<name>", "codex/<name>" or "human/<name>"')
-        return submit(args.part, args.kind, args.by)
+        return submit(args.part, args.kind, args.by, args.replace)
     elif args.command == "merge":
         return merge()
     elif args.command == "build-inputs":
