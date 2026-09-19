@@ -1,0 +1,167 @@
+{
+  "_comment": "Release v2 cuisine quotas and course mix, approved 2026-09-19 (ADR-0030). Buckets group vocabulary cuisines; targets are final recipe counts. Korean is a ceiling set by supply. A bucket's own `oversample` overrides candidate_oversample where supply is thin.",
+  "total_target": 10000,
+  "candidate_oversample": 1.6,
+  "buckets": {
+    "chinese": {
+      "cuisines": [
+        "chinese"
+      ],
+      "target": 1200
+    },
+    "japanese": {
+      "cuisines": [
+        "japanese"
+      ],
+      "target": 600
+    },
+    "korean": {
+      "cuisines": [
+        "korean"
+      ],
+      "target": 450,
+      "oversample": 3.0
+    },
+    "southeast_asian": {
+      "cuisines": [
+        "malaysian_singaporean",
+        "indonesian",
+        "filipino"
+      ],
+      "target": 600,
+      "oversample": 2.5
+    },
+    "thai": {
+      "cuisines": [
+        "thai"
+      ],
+      "target": 500,
+      "oversample": 2.5
+    },
+    "vietnamese": {
+      "cuisines": [
+        "vietnamese"
+      ],
+      "target": 300,
+      "oversample": 3.0
+    },
+    "indian": {
+      "cuisines": [
+        "indian"
+      ],
+      "target": 700
+    },
+    "mena": {
+      "cuisines": [
+        "middle_eastern",
+        "turkish",
+        "north_african"
+      ],
+      "target": 600
+    },
+    "italian": {
+      "cuisines": [
+        "italian"
+      ],
+      "target": 600
+    },
+    "french": {
+      "cuisines": [
+        "french"
+      ],
+      "target": 400
+    },
+    "greek_mediterranean": {
+      "cuisines": [
+        "greek"
+      ],
+      "target": 300
+    },
+    "german_eastern_european": {
+      "cuisines": [
+        "german",
+        "eastern_european"
+      ],
+      "target": 350
+    },
+    "british_irish": {
+      "cuisines": [
+        "british_irish"
+      ],
+      "target": 300
+    },
+    "spanish_portuguese": {
+      "cuisines": [
+        "spanish_portuguese"
+      ],
+      "target": 250
+    },
+    "scandinavian": {
+      "cuisines": [
+        "scandinavian"
+      ],
+      "target": 100
+    },
+    "american": {
+      "cuisines": [
+        "american",
+        "southern_us",
+        "cajun_creole"
+      ],
+      "target": 1700
+    },
+    "mexican": {
+      "cuisines": [
+        "mexican",
+        "tex_mex"
+      ],
+      "target": 500
+    },
+    "latin_caribbean": {
+      "cuisines": [
+        "latin_american",
+        "caribbean"
+      ],
+      "target": 400
+    },
+    "african": {
+      "cuisines": [
+        "african"
+      ],
+      "target": 150,
+      "oversample": 2.5
+    }
+  },
+  "course_mix": {
+    "_comment": "Share of the final release. min = at least, max = at most.",
+    "main": {
+      "min": 0.45
+    },
+    "side_soup_salad": {
+      "courses": [
+        "side",
+        "soup",
+        "salad"
+      ],
+      "approx": 0.25
+    },
+    "breakfast": {
+      "approx": 0.08
+    },
+    "dessert_baked": {
+      "courses": [
+        "dessert",
+        "baked_good"
+      ],
+      "max": 0.12
+    },
+    "other": {
+      "courses": [
+        "snack_appetizer",
+        "drink",
+        "sauce_condiment"
+      ],
+      "max": 0.1
+    }
+  }
+}

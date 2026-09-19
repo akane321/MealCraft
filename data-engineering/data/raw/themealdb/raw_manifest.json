@@ -1,0 +1,11 @@
+{
+  "source": "TheMealDB",
+  "source_url": "https://www.themealdb.com/",
+  "source_license": "TheMealDB terms of use: content may be copied and modified via the official API endpoints; attribution to TheMealDB is kept. Non-commercial course use.",
+  "terms_url": "https://www.themealdb.com/terms_of_use.php",
+  "retrieved_at": "2026-09-19T05:08:19+00:00",
+  "local_path": "data/raw/themealdb/themealdb.json",
+  "committed_to_git": false,
+  "record_count": 790,
+  "file_sha256": "fea7e8fa1cf1548c21fd60f91f373694f3e9e6dad70cfe43f1954ea104fd42a0"
+}
