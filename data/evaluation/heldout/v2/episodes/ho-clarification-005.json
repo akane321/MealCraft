@@ -5,7 +5,7 @@
   "language": "zh",
   "authored_by": "frontend-evaluation",
   "reviewed_by": null,
-  "review_notes": null,
+  "review_notes": "[review 2026-09-20 planning HOLD] 对话已确定一周七顿晚饭，并在同一上下文给出 S$60 预算。按整周预算理解有语境依据，当前 rationale 尚未充分说明为什么必须再次询问 budget_sgd。请作者补充要求追问预算口径的规则依据，或在题面自然呈现实际未解决的预算范围冲突，再复核。不要加入直接要求先问的提示。",
   "scenario": {
     "user_request": "好，那就照这些条件帮我排吧。",
     "conversation_history": [

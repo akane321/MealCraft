@@ -4,7 +4,7 @@
   "category": "clarification",
   "language": "mixed",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "planning",
   "review_notes": null,
   "scenario": {
     "user_request": "那就按我们之前说的 budget 来排吧。对了，周三或周四会有一天在外面吃，但现在还没定是哪一天。",

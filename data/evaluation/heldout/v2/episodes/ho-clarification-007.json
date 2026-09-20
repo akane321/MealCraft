@@ -5,7 +5,7 @@
   "language": "en",
   "authored_by": "frontend-evaluation",
   "reviewed_by": null,
-  "review_notes": null,
+  "review_notes": "[review 2026-09-20 planning HOLD] plant-based 的范围有歧义，但题面明确称其为 preference。请作者说明为何这是必须先澄清的饮食限制，不能按软偏好安全处理；若意图为硬限制，建议自然说明约束性质并保留范围未定。当前 required_clarification_fields 的必要性仍待确认，未改动 scenario 或 gold。",
   "scenario": {
     "user_request": "Yes, keep that plant-based preference when you make the plan.",
     "conversation_history": [
