@@ -164,6 +164,10 @@ MealCraft recipe.
 
 ## External recipe retrieval
 
+The full intake pipeline now has its own contract:
+[External Recipe Intake](external-recipe-intake.md) (decision ADR-0032).
+
+
 Web recipes use the same evidence pattern but have a higher admission gate. A
 retrieved recipe cannot enter planning until it is parsed, ingredient-
 normalized, safety-checked, nutrition-linked where required and released under

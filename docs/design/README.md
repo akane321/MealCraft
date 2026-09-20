@@ -31,6 +31,7 @@ next pieces should fit together.
 | Language understanding and orchestration | [Agent Orchestration Engineering Handoff](agent-orchestration.md) | Scope decision, validated intent, clarification interaction, capability/tool trace, evidence bundle and grounding report |
 | Identity, tenancy and operations | [Backend Platform Engineering Handoff](backend-platform-engineering.md) | Accounts, revocable sessions, household authorization, durable runs and audit evidence |
 | Internal operations console | [Operations Console](operations-console.md) | The role-gated `/ops` surface: what it shows, its endpoints, durable jobs, and the experiment and ablation rules |
+| External recipe intake | [External Recipe Intake](external-recipe-intake.md) | Turning a web recipe into a catalog record: parsing, duplicates, ingredient mapping, the allergen question, source tiers and the admission gate |
 | Product interaction and human evidence | [Frontend and Human Evaluation](frontend-human-evaluation.md) and the [frontend state matrix](../evaluation/frontend-state-matrix.md) | The one-surface desktop home and human-task evidence |
 | Comparative research evaluation | [Capability-centred Evaluation v2](comparative-evaluation-v2.md) | Fair baseline comparison, metrics, statistics and failure analysis |
 

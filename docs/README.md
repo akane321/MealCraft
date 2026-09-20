@@ -87,6 +87,7 @@ conclusions faster than a human does, because it has no colleague to correct it.
 | How should the final-scope planner and validator be completed? | [Algorithm Engineering Handoff](design/algorithm-engineering-handoff.md) |
 | How should accounts, tenancy, operations and the internal Console be completed? | [Backend Platform Engineering Handoff](design/backend-platform-engineering.md) |
 | What exactly must the internal console do, and how do experiments stay citable? | [Operations Console](design/operations-console.md) |
+| How does a recipe the catalog lacks get imported from the web? | [External Recipe Intake](design/external-recipe-intake.md) |
 | What evaluation is executable now? | [Evaluation Protocol v1](evaluation/protocol-v1.md) |
 | What comparative capability evaluation are we building? | [Comparative Evaluation v2](design/comparative-evaluation-v2.md) |
 | How do I author a held-out episode? | [Held-out Authoring Guide](evaluation/heldout-authoring-guide.md) |
