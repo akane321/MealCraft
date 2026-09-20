@@ -48,6 +48,7 @@ def get_household_profile_service(
     recipe_repository = RecipeRepository(database)
     product_service = create_product_search_service(ProductSnapshotRepository(database))
     meal_plan_service = WeeklyMealPlanService(
+        actor_user_id=current.user.id,
         repository=meal_plan_repository,
         recipe_repository=recipe_repository,
         recommendation_service=RecipeRecommendationService(

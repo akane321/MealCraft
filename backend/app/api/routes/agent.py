@@ -67,7 +67,7 @@ def get_agent_service(
         repository=AgentSessionRepository(database, household_id=household_id),
         run_repository=AgentRunRepository(database, household_id=household_id),
         parser=parser,
-        meal_plan_service=build_meal_plan_service(database, household_id),
+        meal_plan_service=build_meal_plan_service(database, household_id, current.user.id),
         replanning_service=build_replanning_service(database, household_id),
         actor_user_id=current.user.id,
         household_id=household_id,

@@ -1,6 +1,9 @@
 from datetime import UTC, datetime, timedelta
+from uuid import uuid4
 
 from app.models.meal_plan import MealPlan
+from app.models.platform import OperationRun
+from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
 from app.repositories.meal_plan import MealPlanRepository
@@ -32,12 +35,16 @@ class WeeklyMealPlanService:
         recommendation_service: RecipeRecommendationService,
         grocery_aggregator: WeeklyGroceryAggregator,
         selector: WeeklyPlanSelector | None = None,
+        planning_engine: ProductPlanningEngine | None = None,
+        actor_user_id: int | None = None,
     ) -> None:
         self.repository = repository
         self.recipe_repository = recipe_repository
         self.recommendation_service = recommendation_service
         self.grocery_aggregator = grocery_aggregator
         self.selector = selector or WeeklyPlanSelector()
+        self.planning_engine = planning_engine or ProductPlanningEngine()
+        self.actor_user_id = actor_user_id
 
     def generate(
         self,
@@ -47,33 +54,38 @@ class WeeklyMealPlanService:
         household_profile_version: int | None = None,
         replaces_plan_id: int | None = None,
     ) -> WeeklyMealPlanResponse:
+        started_at = datetime.now(UTC)
         recommendation_result = self.recommendation_service.recommend(
             constraints,
             deduct_pantry_from_cost=False,
         )
-        selected, selection_warnings = self.selector.select(
-            recommendation_result.recommendations,
-            constraints,
-        )
         recipes = self.recipe_repository.list_for_recommendation()
-        recipes_by_id = {recipe.id: recipe for recipe in recipes}
-        selected_recipes = [recipes_by_id[item.recipe.id] for item in selected]
-        grocery = self.grocery_aggregator.estimate(selected_recipes, constraints)
+        try:
+            result = self.planning_engine.plan(
+                constraints,
+                recommendation_result.recommendations,
+                recipes,
+                selector=self.selector,
+                profile_version=household_profile_version,
+            )
+        except ProductPlanningError as error:
+            error.trace["profile_id"] = household_profile_id
+            self.repository.session.add(self._operation_run(error.trace, started_at, error=str(error)))
+            self.repository.session.commit()
+            raise
+        selected, grocery = result.selected, result.grocery
+        result.trace["profile_id"] = household_profile_id
 
-        warnings = self._deduplicate(recommendation_result.warnings + selection_warnings + grocery.warnings)
+        warnings = self._deduplicate(recommendation_result.warnings + grocery.warnings)
         eligible_count = len({item.recipe.id for item in recommendation_result.recommendations})
+        if eligible_count == 1:
+            warnings.append("Only one eligible recipe was available, so consecutive repetition could not be avoided.")
         if eligible_count < constraints.day_count:
             recipe_label = "recipe" if eligible_count == 1 else "recipes"
             warnings.append(
                 f"The current eligible catalog contains {eligible_count} {recipe_label}; "
                 "recipes are rotated across the seven days."
             )
-        if grocery.within_weekly_budget is False:
-            warnings.append(
-                f"The aggregated ingredient-use cost S${grocery.consumed_total_sgd:.2f} exceeds the "
-                f"S${constraints.weekly_budget_sgd:.2f} weekly budget."
-            )
-
         scheduled = [
             (constraints.start_date + timedelta(days=index), recommendation)
             for index, recommendation in enumerate(selected)
@@ -86,8 +98,30 @@ class WeeklyMealPlanService:
             household_profile_id=household_profile_id,
             household_profile_version=household_profile_version,
             replaces_plan_id=replaces_plan_id,
+            operation_run=self._operation_run(result.trace, started_at),
         )
         return self._to_response(plan)
+
+    def _operation_run(self, trace: dict, started_at: datetime, *, error: str | None = None) -> OperationRun:
+        return OperationRun(
+            trace_id=f"planning-{uuid4().hex}",
+            run_type="planning",
+            status="failed" if error else "succeeded",
+            triggered_by_user_id=self.actor_user_id,
+            household_id=self.repository.household_id,
+            input_digest=trace["input_digest"],
+            catalog_version=trace.get("catalog_version"),
+            product_snapshot_version=trace.get("product_snapshot_version"),
+            policy_version=trace["policy_version"],
+            algorithm_version=f"{trace['algorithm']}-product-v1",
+            provider_mode=",".join(trace.get("observed_sources", [])) or None,
+            artifact_references=[{"kind": "planning_trace", "data": trace}],
+            warnings=[],
+            error_code=trace["status"] if error else None,
+            error_detail=error,
+            started_at=started_at,
+            finished_at=datetime.now(UTC),
+        )
 
     def get(self, plan_id: int) -> WeeklyMealPlanResponse | None:
         plan = self.repository.get(plan_id)
@@ -261,7 +295,11 @@ class WeeklyMealPlanService:
                 image_url=item.product_image_url,
                 in_stock=True,
                 source=item.product_source,
-                fetched_at=item.product_fetched_at,
+                fetched_at=(
+                    item.product_fetched_at.replace(tzinfo=UTC)
+                    if item.product_fetched_at.tzinfo is None
+                    else item.product_fetched_at
+                ),
             )
         return GroceryLineEstimate(
             ingredient_name=item.ingredient_name,

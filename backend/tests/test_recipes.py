@@ -819,7 +819,7 @@ def test_weekly_plan_returns_422_when_no_recipe_meets_hard_constraints(recipe_cl
     )
 
     assert response.status_code == 422
-    assert response.json() == {"detail": "No recipes satisfy the supplied hard constraints."}
+    assert response.json() == {"detail": "No candidate plan was found; try a different recipe selection."}
 
 
 def test_meal_checkin_is_idempotent_and_dashboard_counts_completed_meals(recipe_client: TestClient) -> None:
@@ -905,11 +905,11 @@ def test_a_weekly_total_equal_to_the_budget_is_within_it_to_the_cent(recipe_clie
     # ADR-0021: budgets are compared in whole cents on every path.
     request = {"start_date": "2026-09-08", "household_size": 2, "pricing_mode": "fixture"}
     unbudgeted = recipe_client.post("/api/plans/generate", json=request).json()
-    total = unbudgeted["grocery_estimate"]["consumed_total_sgd"]
+    total = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
 
     exact = recipe_client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": total}).json()
 
-    assert exact["grocery_estimate"]["consumed_total_sgd"] <= total
+    assert exact["grocery_estimate"]["purchase_total_sgd"] <= total
     assert exact["grocery_estimate"]["within_weekly_budget"] is True
 
 
