@@ -182,6 +182,14 @@ def quality_report(summary: dict, manifest: dict, agreement: dict, audit: dict, 
     for reason, count in dropped.items():
         lines += [f"| {reason} | {count} |"]
     lines += ["", "The full list with titles is in `dropped.jsonl`.", ""]
+    unbucketed = counts.get("unbucketed_cuisine")
+    if unbucketed:
+        lines += [
+            f"A further {unbucketed} built recipes carry a cuisine no quota bucket claims "
+            "(`international`) and are not released. A dish with a recognisable origin should "
+            "carry that origin instead; `international` is for a dish that genuinely has none.",
+            "",
+        ]
 
     lines += ["## Agreement between producers", ""]
     if agreement:
