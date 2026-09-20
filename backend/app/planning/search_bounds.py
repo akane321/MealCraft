@@ -7,17 +7,21 @@ from app.planning.final_scope_scoring import local_recipe_loss
 
 
 class SearchBounds:
-    def __init__(self, problem, slots, domains):
+    def __init__(self, problem, slots, domains, *, local_losses=None):
         self.problem = problem
         self.slots = slots
         self.domains = domains
         self.recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
         self.by_slot = {slot.slot_id: slot for slot in slots}
         self.costs = {
-            (slot.slot_id, recipe_id): local_recipe_loss(
-                self.recipes[recipe_id],
-                max_time_minutes=slot.max_time_minutes,
-                health_preferences=problem.health_preferences,
+            (slot.slot_id, recipe_id): (
+                local_losses[recipe_id]
+                if local_losses is not None
+                else local_recipe_loss(
+                    self.recipes[recipe_id],
+                    max_time_minutes=slot.max_time_minutes,
+                    health_preferences=problem.health_preferences,
+                )
             )
             for slot in slots
             for recipe_id in domains[slot.slot_id].eligible_recipe_ids

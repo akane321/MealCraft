@@ -34,6 +34,10 @@ const nutrition = useNutritionDashboard();
 const view = ref<"landing" | "app">("landing");
 const draft = ref("");
 const plan = ref<WeeklyMealPlan | null>(null);
+// A request in flight, a failed one and "nothing planned yet" are three different
+// things; the drawers used to show the same sentence for all three.
+const planState = ref<"empty" | "loading" | "error" | "ready">("empty");
+const lastPlanId = ref<number | null>(null);
 const hover = reactive({ left: false, right: false });
 const pinned = reactive({ left: false, right: false });
 const open = computed(() => ({ left: hover.left || pinned.left, right: hover.right || pinned.right }));
@@ -41,6 +45,9 @@ const previewOpen = ref(false);
 const nutritionOpen = ref(false);
 const recipeSlug = ref<string | null>(null);
 const log = ref<HTMLElement | null>(null);
+// Stays mounted while closed so the export can print it, so the dialog
+// behaviour follows `previewOpen` rather than the element existing.
+const preview = ref<HTMLElement | null>(null);
 const film = ref<HTMLVideoElement | null>(null);
 const filmPlaying = ref(true);
 
@@ -123,13 +130,26 @@ async function choose(optionId: string) {
 }
 
 async function loadPlan(planId: number) {
+  // Both the generated-plan watcher and the session watcher fire for the same
+  // plan; one fetch is enough.
+  if (planState.value === "loading" && lastPlanId.value === planId) return;
+  lastPlanId.value = planId;
+  planState.value = "loading";
   try {
     plan.value = await apiFetch<WeeklyMealPlan>(`${config.public.apiBase}/api/plans/${planId}`);
     await nutrition.loadDashboard(planId);
+    planState.value = "ready";
   }
   catch {
+    planState.value = "error";
     errorMessage.value = "Your week couldn't be loaded. Try again in a moment.";
   }
+}
+
+function retryPlan() {
+  errorMessage.value = null;
+  if (lastPlanId.value) void loadPlan(lastPlanId.value);
+  else void loadLatestPlan();
 }
 
 async function markCooked(entryId: number) {
@@ -154,6 +174,8 @@ function toggleFilm() {
 function newChat() {
   agent.reset();
   plan.value = null;
+  planState.value = "empty";
+  lastPlanId.value = null;
   nutrition.dashboard.value = null;
 }
 
@@ -176,6 +198,8 @@ watch(() => [messages.value.length, isLoading.value, session.value?.pending_repl
 // Only Chromium bends the backdrop through an SVG filter; elsewhere the glass stays frosted.
 const refracts = () => (navigator as Navigator & { userAgentData?: { brands: { brand: string }[] } })
   .userAgentData?.brands.some(item => item.brand === "Chromium") ?? false;
+
+useDialog(preview, () => { previewOpen.value = false; }, previewOpen);
 
 onUnmounted(() => document.documentElement.classList.remove("mc-refract"));
 
@@ -328,6 +352,7 @@ onMounted(() => {
             :range-label="rangeLabel"
             :cooked-count="nutrition.dashboard.value?.status_counts.completed ?? 0"
             :updating-entry-id="nutrition.updatingEntryId.value"
+            :plan-id="plan?.id ?? null"
             @mark-cooked="markCooked"
             @open-recipe="recipeSlug = $event"
           >
@@ -337,7 +362,15 @@ onMounted(() => {
               </button>
             </template>
           </HomeWeekPanel>
-          <p v-else class="panel-empty">Your week shows up here once it's planned.</p>
+          <HomePanelState
+            v-else
+            :state="planState === 'ready' ? 'empty' : planState"
+            title="This week"
+            empty-text="Your week shows up here once it's planned."
+            error-text="Your week couldn't be loaded."
+            :rows="5"
+            @retry="retryPlan"
+          />
         </aside>
       </div>
 
@@ -370,7 +403,15 @@ onMounted(() => {
               </button>
             </template>
           </HomeKitchenPanel>
-          <p v-else class="panel-empty">Nutrition and your shopping list show up here once the week is planned.</p>
+          <HomePanelState
+            v-else
+            :state="planState === 'ready' ? 'empty' : planState"
+            title="Kitchen"
+            empty-text="Nutrition and your shopping list show up here once the week is planned."
+            error-text="Nutrition and your shopping list couldn't be loaded."
+            :rows="4"
+            @retry="retryPlan"
+          />
         </aside>
       </div>
     </template>
@@ -384,7 +425,7 @@ onMounted(() => {
     />
     <HomeRecipeSheet v-if="recipeSlug" :slug="recipeSlug" @close="recipeSlug = null" />
 
-    <div v-if="plan" v-show="previewOpen" class="mc-sheet-overlay" role="dialog" aria-modal="true" aria-label="Shopping list preview" @keydown.esc="previewOpen = false">
+    <div v-if="plan" v-show="previewOpen" ref="preview" class="mc-sheet-overlay" role="dialog" aria-modal="true" aria-label="Shopping list preview">
       <div class="sheet-frame">
         <HomeShoppingSheet class="mc-print-sheet" :estimate="plan.grocery_estimate" :range-label="rangeLabel" :household-size="plan.household_size" />
       </div>
@@ -549,7 +590,6 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 .disclaimer { position: absolute; bottom: 12px; left: var(--chat-x); width: var(--chat-w); margin: 0; text-align: center; font-size: 11px; color: var(--mc-text-3); opacity: 0; transition: opacity 600ms ease, left 700ms var(--mc-ease), width 700ms var(--mc-ease); }
 .is-app .disclaimer { opacity: 1; transition-delay: 900ms, 0ms, 0ms; }
 .lens-defs { position: absolute; width: 0; height: 0; }
-.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Edge panels: hover the edge (or tab into it) to slide one out; the chat moves aside */
 .edge { position: absolute; top: 72px; bottom: 0; z-index: 7; width: 40px; }
@@ -566,7 +606,6 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 .edge.open .drawer { transform: none; opacity: 1; visibility: visible; pointer-events: auto; transition: transform 560ms var(--mc-ease), opacity 360ms ease; }
 .pin { width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; }
 .pin svg { width: 15px; height: 15px; }
-.panel-empty { margin: 40px 8px; font-size: 14px; line-height: 1.6; color: var(--mc-text-2); }
 
 /* Shopping list preview */
 .mc-sheet-overlay { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: rgba(14, 12, 10, 0.6); backdrop-filter: blur(12px); animation: mc-rise 420ms var(--mc-ease) both; }
