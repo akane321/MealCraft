@@ -57,6 +57,10 @@ def test_unknown_household_role_is_denied_without_an_unhandled_error() -> None:
     assert not may_access_household("future_role", HouseholdAction.VIEW)
 
 
+def test_unknown_system_role_is_denied_without_an_unhandled_error() -> None:
+    assert not may_access_operations("future_role", OperationsAction.VIEW_RUNS)
+
+
 def test_repository_persists_revocable_session_and_household_membership() -> None:
     engine = create_engine("sqlite+pysqlite:///:memory:")
     Base.metadata.create_all(engine)
