@@ -86,6 +86,7 @@ conclusions faster than a human does, because it has no colleague to correct it.
 | How are FairPrice, YouTube and external evidence retrieved and handed off? | [External Retrieval and RAG Handoff](design/external-retrieval-rag.md) |
 | How should the final-scope planner and validator be completed? | [Algorithm Engineering Handoff](design/algorithm-engineering-handoff.md) |
 | How should accounts, tenancy, operations and the internal Console be completed? | [Backend Platform Engineering Handoff](design/backend-platform-engineering.md) |
+| How does the finished planning engine reach a real request, and what happens when there is no plan? | [Planning and Validation v2](design/planning-validation-v2.md) |
 | What exactly must the internal console do, and how do experiments stay citable? | [Operations Console](design/operations-console.md) |
 | How does a recipe the catalog lacks get imported from the web? | [External Recipe Intake](design/external-recipe-intake.md) |
 | What evaluation is executable now? | [Evaluation Protocol v1](evaluation/protocol-v1.md) |
