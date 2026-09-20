@@ -1,0 +1,44 @@
+{
+  "release_version": "v2",
+  "created_at": "2026-09-20T06:35:39+00:00",
+  "coverage": {
+    "released_recipes": 12,
+    "enrichment_set": 11971,
+    "released_ingredients": 29,
+    "recipes_with_every_field": 12
+  },
+  "by_cuisine": {
+    "middle_eastern": 3,
+    "american": 3,
+    "greek": 2,
+    "japanese": 1,
+    "indian": 1,
+    "french": 1,
+    "latin_american": 1
+  },
+  "by_course": {
+    "sauce_condiment": 4,
+    "dessert": 3,
+    "side": 2,
+    "main": 1,
+    "snack_appetizer": 1,
+    "breakfast": 1
+  },
+  "by_source": {
+    "RecipeNLG (Gathered)": 12
+  },
+  "estimated_share": {
+    "servings": 0.75,
+    "times": 0.5,
+    "ingredient_amounts": 0.0227
+  },
+  "dropped_by_reason": {
+    "not enriched": 7994,
+    "ingredient form # not enriched": 3964,
+    "excluded by enricher": 1
+  },
+  "allergen_rules_pending_human": 0,
+  "nutrition_per_serving": {
+    "median_energy_kcal": 167.9
+  }
+}

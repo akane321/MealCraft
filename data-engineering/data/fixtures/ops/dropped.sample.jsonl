@@ -1,0 +1,50 @@
+{"candidate_id": "themealdb:53370", "title": "Egg Foo Young", "reason": "ingredient form ING_BEEF_BROTH not enriched"}
+{"candidate_id": "themealdb:52953", "title": "Shrimp Chow Fun", "reason": "ingredient form ING_RICE_NOODLES not enriched"}
+{"candidate_id": "themealdb:52950", "title": "Szechuan Beef", "reason": "ingredient form ING_SESAME_OIL not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_6BE8B0893D54E547", "title": "Chinese Pepper Chicken", "reason": "ingredient form ING_SOY_SAUCE not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_9C480EBD5AFD845C", "title": "Mandarin Chicken", "reason": "ingredient form ING_CHICKEN_BREAST not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_01D023FE80BD4FB8", "title": "Chicken Stir-Fry", "reason": "ingredient form ING_CHICKEN_BROTH not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_AF0899B1C29C4523", "title": "Peking Shrimp", "reason": "ingredient form ING_CORN_SYRUP not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_06CF5313F0DA0AB0", "title": "Oriental Vegetable Stir-Fry(Microwave)", "reason": "ingredient form ING_GREEN_ONION not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_36C3FFB57250884D", "title": "Children'S Choice Chinese Pepper Steak", "reason": "ingredient form ING_SUGAR not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_FF64ED268BC4F1BA", "title": "Chinese Stir-Fry", "reason": "ingredient form ING_GARLIC not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_CFFC9584028E13BC", "title": "10 Minute Szechuan Chicken", "reason": "ingredient form ING_CHICKEN_BREAST not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_8797FA3A6E582B78", "title": "Mandarin Chicken", "reason": "ingredient form ING_ORANGE_JUICE not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_DADCA540D1215969", "title": "Chinese Pork Chops", "reason": "ingredient form ING_SOY_SAUCE not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_46DBD2E0F69035FB", "title": "Fat-Free Vegie Stir-Fry", "reason": "ingredient form ING_ONION not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_E904127B811B4B0F", "title": "Stir-Fry Vegetable Batter", "reason": "ingredient form ING_FLOUR not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_24CC81BBC8EB71B1", "title": "Baked Orange Chicken", "reason": "ingredient form ING_CHICKEN_BREAST not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_295BCFFA342C5FE8", "title": "Chinese Walnut Chicken", "reason": "ingredient form ING_CHICKEN_BREAST not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_C92F379A26933118", "title": "Vegetable-Shrimp Stir-Fry", "reason": "ingredient form ING_GREEN_ONION not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_EB5AE49639C5D9B1", "title": "Lemon Chicken", "reason": "ingredient form ING_CHICKEN_BREAST not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_40B41E084D24E3A0", "title": "Beef Stir-Fry", "reason": "ingredient form ING_GARLIC not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_8BD9996F15A7F250", "title": "Green Bean Stir-Fry", "reason": "ingredient form ING_SOY_SAUCE not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_090C4AB06BC771AD", "title": "Chinese Pepper Steak", "reason": "ingredient form ING_BEEF_STEAK not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_C165B9F2C2086F01", "title": "Chinese Sesame Chicken Kabobs", "reason": "ingredient form ING_CHICKEN_BREAST not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_2858A602C4BE43D3", "title": "Carrot Parsnip Stir-Fry", "reason": "ingredient form ING_PARSNIP not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_23EDCE1B2EC696F2", "title": "Carrot-Mushroom Stir-Fry", "reason": "ingredient form ING_BUTTER_OR_MARGARINE not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_50E8513BB4EF7AB9", "title": "Tofu Egg Foo Young", "reason": "ingredient form ING_GREEN_ONION not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_5FEE0823A525EA3F", "title": "Snow Pea Stir-Fry", "reason": "ingredient form ING_CARROT not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_372550DB3EEAFA0D", "title": "Chicken-Vegetable Stir-Fry", "reason": "ingredient form ING_VEGETABLE_BROTH not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_F7B3213590D7E842", "title": "Spicy Barbecued Pork", "reason": "ingredient form ING_PORK_CHOP not enriched"}
+{"candidate_id": "recipenlg_v1.1:RCP_AB670495B88A1AF8", "title": "Burgers 'N Sprouts", "reason": "ingredient form ING_BEAN_SPROUTS not enriched"}
+{"candidate_id": "recipenlg:1093261", "title": "Vegan Egg Foo Yung (Tofu Yung)", "reason": "ingredient form ING_SOY_SAUCE not enriched"}
+{"candidate_id": "recipenlg:928054", "title": "Chinese Tomato And Egg", "reason": "ingredient form ING_SOY_SAUCE not enriched"}
+{"candidate_id": "recipenlg:703701", "title": "Stir-Fry Chicken And Peppers", "reason": "ingredient form ING_WHITE_WINE not enriched"}
+{"candidate_id": "recipenlg:1129986", "title": "Hoisin Eggplant Chicken", "reason": "ingredient form ING_HOISIN not enriched"}
+{"candidate_id": "recipenlg:1499414", "title": "Hoisin Salmon Fillets", "reason": "ingredient form ING_GREEN_ONION not enriched"}
+{"candidate_id": "recipenlg:694205", "title": "Beef Stir Fry With Tri-Colored Peppers", "reason": "ingredient form ING_SESAME_OIL not enriched"}
+{"candidate_id": "recipenlg:647346", "title": "Chinese Chews", "reason": "ingredient form ING_FLOUR not enriched"}
+{"candidate_id": "recipenlg:681409", "title": "Lemon Chicken", "reason": "ingredient form ING_CHICKEN_BREAST not enriched"}
+{"candidate_id": "recipenlg:1320645", "title": "Lemon Chicken", "reason": "ingredient form ING_CHICKEN not enriched"}
+{"candidate_id": "recipenlg:287745", "title": "Stir-Fry Zucchini", "reason": "ingredient form ING_SUGAR not enriched"}
+{"candidate_id": "recipenlg:1237516", "title": "Hoisin-Marinated Chicken", "reason": "ingredient form ING_HOISIN not enriched"}
+{"candidate_id": "recipenlg:1124737", "title": "Crock Pot Greek Lemon Chicken", "reason": "ingredient form ING_CHICKEN_BREAST not enriched"}
+{"candidate_id": "recipenlg:498060", "title": "Chinese Pepper Steak", "reason": "ingredient form ING_ONION not enriched"}
+{"candidate_id": "recipenlg:545207", "title": "Chinese Chews", "reason": "ingredient form ING_FLOUR not enriched"}
+{"candidate_id": "recipenlg:282208", "title": "Chinese Chews", "reason": "ingredient form ING_MARGARINE not enriched"}
+{"candidate_id": "recipenlg:172404", "title": "Chinese Chews", "reason": "ingredient form ING_FLOUR not enriched"}
+{"candidate_id": "recipenlg:1190080", "title": "Crock Pot Orange Chicken", "reason": "ingredient form ING_CHICKEN_BREAST not enriched"}
+{"candidate_id": "recipenlg:818240", "title": "Chicken Stir-Fry", "reason": "ingredient form ING_GARLIC not enriched"}
+{"candidate_id": "recipenlg:147912", "title": "Oven Orange Chicken", "reason": "ingredient form ING_CHICKEN not enriched"}
+{"candidate_id": "recipenlg:548815", "title": "Chinese Chows", "reason": "ingredient form ING_FLOUR not enriched"}
