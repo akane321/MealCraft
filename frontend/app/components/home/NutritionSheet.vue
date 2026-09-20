@@ -44,10 +44,13 @@ function statusLabel(day: NutritionDashboardDay) {
 function shortDate(value: string) {
   return formatPlanDate(value, { weekday: "short", day: "numeric" });
 }
+
+const overlay = ref<HTMLElement | null>(null);
+useDialog(overlay, () => emit("close"));
 </script>
 
 <template>
-  <div class="mc-overlay" role="dialog" aria-modal="true" aria-label="Nutrition details" @keydown.esc="emit('close')">
+  <div ref="overlay" class="mc-overlay" role="dialog" aria-modal="true" aria-label="Nutrition details">
     <section class="mc-ribbed panel">
       <header>
         <div>
@@ -146,5 +149,4 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .days tr.skipped td { color: var(--mc-text-3); }
 .days .actions { white-space: nowrap; }
 .days .actions button { min-height: 32px; padding: 0 12px; margin-left: 6px; font-size: 12px; }
-.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 </style>

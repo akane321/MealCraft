@@ -9,6 +9,7 @@ const props = defineProps<{
   rangeLabel: string;
   cookedCount: number;
   updatingEntryId: number | null;
+  planId: number | null;
 }>();
 const emit = defineEmits<{ markCooked: [entryId: number]; openRecipe: [slug: string] }>();
 
@@ -73,6 +74,8 @@ function statusLabel(day: NutritionDashboardDay) {
         </span>
       </li>
     </ol>
+
+    <HomeChangeLog :plan-id="planId" />
 
     <section v-if="tonight" class="mc-frost tonight" aria-label="Tonight's dinner">
       <p><span class="mc-eyebrow">{{ tonight.isToday ? "Tonight" : "Next up" }}</span> <strong class="mc-serif">{{ tonight.day.recipe.title }}</strong></p>

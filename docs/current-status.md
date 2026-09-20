@@ -137,7 +137,7 @@ improved.
 
 | Design capability | Status | Remaining work |
 | --- | --- | --- |
-| Unified planning workspace | Partial | The home surface joins conversation, week, tutorial, recipe detail, nutrition detail and shopping-list export; the earlier separate pages are removed. Remaining: show replan history again, and record a signed-in walkthrough against the real backend |
+| Unified planning workspace | Partial | The home surface joins conversation, week, tutorial, recipe detail, nutrition detail and shopping-list export; the earlier separate pages are removed. Applied replan history is listed again in the week panel. Remaining: record a signed-in walkthrough against the real backend |
 | Authentication and user separation | Partial | Authentication, non-null household ownership, household-scoped repositories, cross-household denial, per-action household authorization and browser registration/login are merged. Remaining: member-management routes, a wider isolation matrix, household collaboration, password lifecycle and account export/deletion |
 | High-dimensional recipe knowledge | Partial | Expand the catalog and complete cuisine, taste, method, equipment, difficulty, nutrition provenance, instruction, source, and media fields |
 | Verified recipe benchmark | Partial | Import a gated, enriched data release into the runtime catalog; the recipe count is set by what passes the release gate, not by a fixed range (decision ADR-0024) |
@@ -152,7 +152,7 @@ improved.
 | Evaluation scale | Partial | Expand toward 150-200 verified requests, a gated imported recipe release, 80-120 planning scenarios, and complete grocery coverage for benchmark demand; preserve frozen splits and digests |
 | Multiple baselines | Partial | Strong Rule-only is executable; run frozen Context-matched LLM-only, Plain LLM and Human Manual comparisons only after common outputs and held-out labels are ready |
 | Capability-centred Evaluation v2 | Partial | Packet compiler, coverage/leakage gates and visible developer packets are executable; the common output schema and strict-success scorer exist with tests but no runner calls them yet; independent held-out set, repeated model runs, human study and paired statistics remain open |
-| User-facing quality | Partial | Typed quick clarification, cumulative-plus-daily Dashboard and the one-surface home journey passed 1280×720 Browser and Playwright acceptance; deepen loading, empty, error, degraded and accessibility coverage |
+| User-facing quality | Partial | Typed quick clarification, cumulative-plus-daily Dashboard and the one-surface home journey passed 1280×720 Browser and Playwright acceptance. Each drawer now distinguishes loading (skeleton with `aria-busy`), failed (with a working retry) and empty, and the three overlays behave as dialogs: Escape from anywhere, focus moved in and restored, Tab trapped, background locked. Remaining: degraded-state coverage beyond price provenance, and a wider accessibility pass |
 | Operations and maintainability | Target beyond the original proposal | Specified in [Operations Console](design/operations-console.md) (decision ADR-0031): a role-gated internal `/ops` surface for health, task runs, data quality, the planning-run inspector, retrieval and agent traces, and the experiment and ablation module with its recorded conditions. Not built |
 
 ## Backend Capability Traceability
@@ -169,8 +169,7 @@ the next incomplete control. It is a navigation aid, not a second status source.
 
 ## Current Priorities
 
-1. Record a signed-in run of the home surface against the real backend, and
-   show replan history on it again.
+1. Record a signed-in run of the home surface against the real backend.
 2. Finish release v2: parts B and C of the enrichment packets, then merge,
    build, attribution, quality report and the sampled audit, and import the
    result into the runtime catalog. Every catalog-dependent measurement in this
