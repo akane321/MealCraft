@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 import sqlalchemy as sa
+from alembic.config import Config
 from sqlalchemy.engine import Engine
 
 from alembic import command
-from alembic.config import Config
 from app.core.config import get_settings
 from tests.migrations.support import DATABASE_URL_ENV, PRE_TENANCY_REVISION, MigrationDatabase
 

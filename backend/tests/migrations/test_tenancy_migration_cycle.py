@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 
-from tests.migrations.support import PRE_TENANCY_REVISION, TENANCY_REVISION, MigrationDatabase
+from tests.migrations.support import PRE_TENANCY_REVISION, MigrationDatabase
 
 LEGACY_EMAIL = "legacy-import@mealcraft.invalid"
 TENANT_ROOTS = ("household_profiles", "meal_plans", "agent_sessions")
@@ -49,8 +49,8 @@ def test_tenancy_upgrade_downgrade_upgrade_is_repeatable(migration_database: Mig
 
     assert _legacy_identity(migration_database) == first_legacy_identity
     assert migration_database.counts() == counts_after_first_upgrade
+    assert migration_database.current_revision() == migration_database.head_revision()
     with migration_database.engine.connect() as connection:
-        assert connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one() == TENANCY_REVISION
         for table in TENANT_ROOTS:
             assert connection.execute(
                 sa.text(f'SELECT count(*) FROM "{table}" WHERE household_id IS NULL')

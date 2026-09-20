@@ -1,7 +1,7 @@
 import pytest
 import sqlalchemy as sa
 
-from tests.migrations.support import TENANCY_REVISION, MigrationDatabase
+from tests.migrations.support import MigrationDatabase
 
 LEGACY_EMAIL = "legacy-import@mealcraft.invalid"
 TENANT_ROOTS = ("household_profiles", "meal_plans", "agent_sessions")
@@ -17,9 +17,8 @@ def test_tenancy_upgrade_backfills_and_constrains_private_roots(
     migration_database.upgrade()
 
     inspector = sa.inspect(migration_database.engine)
+    assert migration_database.current_revision() == migration_database.head_revision()
     with migration_database.engine.connect() as connection:
-        assert connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one() == TENANCY_REVISION
-
         legacy_user = connection.execute(
             sa.text("SELECT id, status FROM users WHERE normalized_email = :email"),
             {"email": LEGACY_EMAIL},

@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 
 import sqlalchemy as sa
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy.engine import Engine
 
 from alembic import command
-from alembic.config import Config
 
 PRE_TENANCY_REVISION = "20260909_0013"
 TENANCY_REVISION = "20260916_0014"
@@ -36,6 +37,16 @@ class MigrationDatabase:
 
     def downgrade(self, revision: str) -> None:
         command.downgrade(self.alembic_config, revision)
+
+    def head_revision(self) -> str:
+        heads = ScriptDirectory.from_config(self.alembic_config).get_heads()
+        if len(heads) != 1:
+            raise AssertionError(f"Expected one Alembic head, found {heads!r}")
+        return heads[0]
+
+    def current_revision(self) -> str:
+        with self.engine.connect() as connection:
+            return connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one()
 
     def counts(self) -> dict[str, int]:
         with self.engine.connect() as connection:
