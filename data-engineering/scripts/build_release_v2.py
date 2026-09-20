@@ -365,6 +365,37 @@ def main() -> int:
         "licensing": "Each record keeps its own licence in source.license; the release is a collection, not "
         "relicensed. Non-commercial use only. See ATTRIBUTION.md.",
     }
+    summary = {
+        "release_version": manifest["release_version"],
+        "created_at": manifest["created_at"],
+        "coverage": {
+            "released_recipes": len(release),
+            "enrichment_set": len(enrich_set),
+            "released_ingredients": len(used),
+            "recipes_with_every_field": len(release),
+        },
+        "by_cuisine": manifest["counts"]["by_cuisine"],
+        "by_course": manifest["counts"]["by_course"],
+        "by_source": manifest["counts"]["by_source"],
+        "estimated_share": {
+            "servings": round(manifest["counts"]["servings_estimated"] / max(len(release), 1), 4),
+            "times": round(manifest["counts"]["time_estimated"] / max(len(release), 1), 4),
+            "ingredient_amounts": round(
+                manifest["counts"]["lines_with_estimated_amount"] / max(sum(len(r["ingredients"]) for r in release), 1),
+                4,
+            ),
+        },
+        "dropped_by_reason": manifest["counts"]["dropped_by_reason"],
+        "allergen_rules_pending_human": sum(1 for rule in rules.values() if rule.get("allergen_status") != "confirmed"),
+        "nutrition_per_serving": {
+            "median_energy_kcal": (
+                sorted(r["nutrition"]["energy_kcal"] for r in release)[len(release) // 2] if release else None
+            )
+        },
+    }
+    (RELEASE / "quality_summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     (RELEASE / "release_manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
