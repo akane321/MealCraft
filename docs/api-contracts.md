@@ -1,10 +1,10 @@
 # API Contracts
 
 > Backend platform boundary: authentication now protects household-owned
-> Profile, Plan, Agent, Shopping List and Dashboard data. Target `/api/ops`
-> contracts are documented in
-> [Backend Platform Engineering Handoff](design/backend-platform-engineering.md)
-> and remain a separate delivery slice.
+> Profile, Plan, Agent, Shopping List and Dashboard data. The first read-only
+> `/api/ops` slice is defined below; the complete target remains in the
+> [Operations Console](design/operations-console.md) and
+> [Backend Platform Engineering Handoff](design/backend-platform-engineering.md).
 
 The system will define the following shared objects:
 
@@ -30,6 +30,8 @@ Available endpoints:
 - GET /api/auth/me
 - GET /api/auth/sessions
 - DELETE /api/auth/sessions/{session_id}
+- GET /api/ops/overview
+- GET /api/ops/runs?type={run_type}&status={status}&since={timestamp}&limit={limit}
 - GET /api/recipes?limit=20&after_id={recipe_id}
 - GET /api/recipes/{slug}
 - GET /api/recipes/{slug}/tutorial?live={boolean}&language={language}
@@ -121,6 +123,32 @@ The tenancy migration preserves pre-authentication rows by assigning them to a
 reserved, suspended migration household with no login credential. Those rows
 remain inaccessible to normal users until an administrator explicitly reassigns
 them; they are never attached to the first account that logs in.
+
+## Operations reads
+
+`GET /api/ops/overview` and `GET /api/ops/runs` require an authenticated system
+role with `VIEW_RUNS`. `data_reviewer`, `operator` and `admin` have that action;
+`ordinary_user` does not. Household roles are independent, so household
+ownership grants no Operations access. A signed-in caller without the action
+receives the same HTTP 404 body as an unknown route. Missing authentication
+continues to use the common HTTP 401 session response.
+
+The overview reports API and database availability, application version, queued
+and running counts, failures and provider modes recorded during the preceding
+24 hours, and the latest non-null code, catalog and product-snapshot versions
+found in `OperationRun`. A version with no recorded evidence is `null`; the API
+does not inspect a Git checkout or invent deployment metadata.
+
+The run list accepts optional exact `type` and `status` filters, an inclusive
+`since` creation timestamp, and a bounded `limit` from 1 to 200 (default 50).
+Rows are ordered by creation time and ID, newest first. `total` is the complete
+number matching the filters before the limit is applied.
+
+Each list item contains the trace ID, type, status, triggering user ID, input
+digest, safe version and provider fields, error classification, timestamps and
+a derived duration when both start and finish are known. It deliberately omits
+`error_detail`, warnings and artifact references. Both endpoints are read-only
+and neither creates an `AuditEvent` nor changes an `OperationRun`.
 
 ## Household Profiles
 
