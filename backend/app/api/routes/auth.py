@@ -7,7 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
-from app.auth.authorization import HouseholdAction, may_access_household
+from app.auth.authorization import HouseholdAction, OperationsAction, may_access_household, may_access_operations
 from app.auth.passwords import Argon2PasswordAdapter
 from app.core.config import Settings, get_settings
 from app.db.session import get_db_session
@@ -174,6 +174,35 @@ CurrentHouseholdCheckInCsrfDependency = Annotated[
 CurrentHouseholdManageMembersCsrfDependency = Annotated[
     CurrentAuthentication,
     Depends(require_household_action_csrf(HouseholdAction.MANAGE_MEMBERS)),
+]
+
+
+def _authorize_operations_action(
+    current: CurrentAuthentication,
+    action: OperationsAction,
+) -> CurrentAuthentication:
+    if not may_access_operations(current.user.system_role, action):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
+    return current
+
+
+class _OperationsActionDependency:
+    def __init__(self, action: OperationsAction) -> None:
+        self.action = action
+
+    def __call__(self, current: CurrentAuthenticationDependency) -> CurrentAuthentication:
+        return _authorize_operations_action(current, self.action)
+
+
+def require_operations_action(action: OperationsAction) -> _OperationsActionDependency:
+    """Build a fail-closed dependency without disclosing the internal surface."""
+
+    return _OperationsActionDependency(action)
+
+
+CurrentOperationsViewDependency = Annotated[
+    CurrentAuthentication,
+    Depends(require_operations_action(OperationsAction.VIEW_RUNS)),
 ]
 
 

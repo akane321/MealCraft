@@ -78,4 +78,8 @@ def may_access_household(role: HouseholdRole | str, action: HouseholdAction) -> 
 
 
 def may_access_operations(role: SystemRole | str, action: OperationsAction) -> bool:
-    return action in OPERATIONS_PERMISSIONS[SystemRole(role)]
+    try:
+        normalized_role = SystemRole(role)
+    except ValueError:
+        return False
+    return action in OPERATIONS_PERMISSIONS.get(normalized_role, frozenset())
