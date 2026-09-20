@@ -4,7 +4,7 @@
   "category": "clarification",
   "language": "mixed",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "planning",
   "review_notes": null,
   "scenario": {
     "user_request": "我们两个人下周七天晚饭都在家吃，没有过敏也没有忌口。家里还有一些 brown rice，但我没称过；如果至少有 500g，我想把这周晚饭采购控制在 S$45，不够 500g 的话预算可以放到 S$55。其他 pantry 不用算。先帮我安排。",
