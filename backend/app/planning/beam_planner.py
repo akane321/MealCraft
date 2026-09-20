@@ -1,6 +1,7 @@
 """Bounded deterministic beam search using the existing reference scoring policy."""
 
 from dataclasses import dataclass
+from math import isfinite
 
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
@@ -33,6 +34,7 @@ class BeamSearchResult:
     exhausted: bool
     nutrition_pruned: int
     dominated: int
+    width_pruned_count: int = 0
 
 
 class BeamPlanner(FinalScopeReferencePlanner):
@@ -42,22 +44,28 @@ class BeamPlanner(FinalScopeReferencePlanner):
     separate. This is a bounded search, not an optimality or infeasibility proof.
     """
 
-    def __init__(self, limits: BeamLimits | None = None):
+    def __init__(self, limits: BeamLimits | None = None, *, local_losses: dict[str, float] | None = None):
         super().__init__()
         self.limits = limits or BeamLimits()
+        self.local_losses = dict(local_losses) if local_losses is not None else None
+        if self.local_losses is not None and any(not isfinite(v) or v < 0 for v in self.local_losses.values()):
+            raise ValueError("Local ranking losses must be finite and nonnegative")
 
     def search_candidates(self, problem: FinalPlanningProblem) -> BeamSearchResult:
         """Return retained complete assignments before selecting a shopping policy."""
         compiled = compile_search_domains(problem)
         domains = {slot.slot_id: slot for slot in compiled.slots}
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
+        if self.local_losses is not None and not recipes.keys() <= self.local_losses.keys():
+            raise ValueError("Local ranking losses must cover every recipe")
         states = [SearchState()]
         expansions = 0
         pruned = False
         exhausted = False
         ordered_slots = sorted(problem.slots, key=self._slot_key)
-        bounds = SearchBounds(problem, ordered_slots, domains)
+        bounds = SearchBounds(problem, ordered_slots, domains, local_losses=self.local_losses)
         nutrition_pruned = dominated = 0
+        width_pruned_count = 0
         # Chronological order preserves the reference policy's adjacency meaning.
         for slot_index, slot in enumerate(ordered_slots):
             domain = domains[slot.slot_id]
@@ -76,10 +84,14 @@ class BeamPlanner(FinalScopeReferencePlanner):
                         continue
                     previous = [chosen for _, chosen in state.choices]
                     loss = (
-                        local_recipe_loss(
-                            recipes[recipe_id],
-                            max_time_minutes=slot.max_time_minutes,
-                            health_preferences=problem.health_preferences,
+                        (
+                            self.local_losses[recipe_id]
+                            if self.local_losses is not None
+                            else local_recipe_loss(
+                                recipes[recipe_id],
+                                max_time_minutes=slot.max_time_minutes,
+                                health_preferences=problem.health_preferences,
+                            )
                         )
                         + meal_affinity_loss(recipes[recipe_id], slot.meal_type)
                         + previous.count(recipe_id) * 0.10
@@ -107,11 +119,14 @@ class BeamPlanner(FinalScopeReferencePlanner):
                 key=lambda state: (bounds.loss_lower_bound(state, slot_index + 1), state.loss, state.choices),
             )
             pruned = pruned or len(next_states) > self.limits.width
+            width_pruned_count += max(0, len(next_states) - self.limits.width)
             states = next_states[: self.limits.width]
             if not states:
                 break
 
-        return BeamSearchResult(tuple(states), expansions, pruned, exhausted, nutrition_pruned, dominated)
+        return BeamSearchResult(
+            tuple(states), expansions, pruned, exhausted, nutrition_pruned, dominated, width_pruned_count
+        )
 
     def solve(self, problem: FinalPlanningProblem) -> FinalPlanningSolution:
         search = self.search_candidates(problem)

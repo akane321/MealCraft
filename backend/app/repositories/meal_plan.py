@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent, MealPlanGroceryItem
+from app.models.platform import OperationRun
 from app.models.recipe import Recipe
 from app.schemas.meal_plan import (
     MealPlanEntryStatus,
@@ -33,6 +34,7 @@ class MealPlanRepository:
         household_profile_id: int | None = None,
         household_profile_version: int | None = None,
         replaces_plan_id: int | None = None,
+        operation_run: OperationRun | None = None,
     ) -> MealPlan:
         plan = MealPlan(
             household_id=self.household_id,
@@ -75,6 +77,13 @@ class MealPlanRepository:
         self._replace_grocery_items(plan, grocery)
 
         self.session.add(plan)
+        if operation_run is not None:
+            self.session.flush()
+            operation_run.artifact_references = [
+                *operation_run.artifact_references,
+                {"kind": "meal_plan", "id": plan.id},
+            ]
+            self.session.add(operation_run)
         self.session.commit()
         return self.get(plan.id) or plan
 

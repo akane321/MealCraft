@@ -15,6 +15,21 @@
 - **Target** means the accepted product direction; it is not current behaviour.
 - Current code and tests take precedence if this snapshot becomes stale.
 
+## Planning P1 branch work
+
+The P1 implementation routes new weekly-plan generation through bounded beam
+search and independent validation, including the shared profile and Agent entry
+points. An explicitly selected greedy baseline uses the same acceptance gate.
+Plan storage and a redacted `OperationRun` are atomic; failed or indeterminate
+results create no plan. See the [product adapter](design/planning-product-path.md)
+and [API contract](api-contracts.md#weekly-meal-plans).
+
+This is local branch work pending review, not verified remote `main` behaviour.
+P2 conflict explanations, P3 hard variety caps, P4 scoped nutrition, P5 mixed
+shopping, P6 minimal-change replanning, P7 learned ordering/themes and P8 console
+experiments remain separate packets. Existing legacy nutrition targets remain
+soft ranking inputs. This slice does not claim that the whole v2 contract is done.
+
 ## Verified Product Baseline
 
 | Area | Verified behaviour | Important boundary |
