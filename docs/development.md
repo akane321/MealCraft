@@ -17,10 +17,11 @@ evidence before considering optional hosting.
 ## Prerequisites
 
 - Git
-- Docker Desktop (on Windows, with WSL 2)
-
-Running the checks on the host instead of in containers additionally needs
-Python 3.12 with `uv`, and Node 24 with `pnpm` through Corepack.
+- Docker Desktop
+- WSL 2
+- Ubuntu
+- Visual Studio Code
+- Dev Containers extension
 
 ## Initial Setup
 
@@ -56,10 +57,13 @@ docker compose up --build --detach
 
 Available services:
 
-- Frontend home (chat with week, nutrition and shopping list panels): <http://localhost:3000>
-- Service status: <http://localhost:3000/system>
+- Frontend: <http://localhost:3000>
 - Sign in or register: <http://localhost:3000/login>
+- Planning assistant: <http://localhost:3000/assistant>
 - Household profile: <http://localhost:3000/profile>
+- FairPrice product search: <http://localhost:3000/products>
+- Seven-day planner: <http://localhost:3000/weekly-plan>
+- Meal check-in dashboard: <http://localhost:3000/dashboard>
 - Backend API: <http://localhost:8000>
 - Swagger documentation: <http://localhost:8000/docs>
 - PostgreSQL: `localhost:15432` (container-internal port remains `5432`)
@@ -240,6 +244,31 @@ and tablet layouts are outside the current product and evaluation scope.
 
 ## Database Migrations
 
+### Tenancy migration verification
+
+Migration `20260916_0014` has a destructive-schema smoke suite that runs against a dedicated PostgreSQL database. The suite creates the schema at `20260909_0013`, loads historical private rows plus two already-tenanted households, and then proves the full `upgrade -> downgrade -> upgrade` cycle.
+
+Never point this suite at a development, shared, staging, or production database. It refuses to reset any database whose name does not end with `_migration_test`.
+
+Run it locally with a disposable PostgreSQL database:
+
+```powershell
+$env:DATABASE_URL = "postgresql+psycopg://mealcraft:migration_test_only@localhost:5432/mealcraft_migration_test"
+$env:MEALCRAFT_MIGRATION_TEST_DATABASE_URL = $env:DATABASE_URL
+uv run --project backend pytest backend/tests/migrations
+```
+
+The suite verifies all of the following before CI accepts the migration:
+
+- historical household profiles, meal plans, Agent sessions, and Agent runs receive the suspended legacy household;
+- the legacy account has no credential row and therefore cannot authenticate;
+- existing Alpha and Beta household-scoped operations and audit events retain their assignments;
+- tenant root columns are non-null, foreign keys and uniqueness rules exist, and lookup indexes have the expected column order;
+- row counts survive downgrade and re-upgrade;
+- rerunning `upgrade head` does not create duplicate legacy users, households, or memberships.
+
+If an upgrade fails, retain the database and migration logs before changing anything. Correct the cause, then rerun `alembic upgrade head`; Alembic will continue from the recorded revision. If application compatibility requires rollback and `20260916_0014` is still the latest applied migration, run `alembic downgrade 20260909_0013`, verify that the three tenant-root columns were removed and row counts are unchanged, then retry the upgrade. Do not manually delete the suspended legacy user or household: later upgrades reuse that identity to avoid duplicate imports.
+
 Show the current revision:
 
 ```bash
@@ -259,7 +288,7 @@ docker compose exec backend uv run --no-sync alembic upgrade head
 ```bash
 docker compose logs --follow backend
 docker compose logs --follow frontend
-docker compose logs --follow database
+docker compose logs --follow db
 ```
 
 ### Inspect API contracts
@@ -274,6 +303,12 @@ Use repository/service tests or a PostgreSQL client connected to
 `localhost:15432`. Do not manually edit production-like data to make a test
 pass; add an explicit seed, fixture, migration, or reproducible setup.
 
+### Work in a Dev Container
+
+Open the repository folder in VS Code after Docker Desktop and WSL 2 are ready.
+Use **Dev Containers: Reopen in Container** when the repository configuration is
+detected. If the command is absent, confirm that the Dev Containers extension is
+installed and that the repository root, not a parent directory, is open.
 
 ## Common Problems
 
