@@ -4,7 +4,7 @@
   "category": "clarification",
   "language": "en",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "planning",
   "review_notes": null,
   "scenario": {
     "user_request": "Please plan dinners for the whole week starting 7 September for me, my partner, and the kids. No allergies, no ingredient dislikes, and nothing in the pantry needs using.",

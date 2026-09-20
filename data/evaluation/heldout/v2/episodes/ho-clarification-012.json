@@ -4,7 +4,7 @@
   "category": "clarification",
   "language": "zh",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "planning",
   "review_notes": null,
   "scenario": {
     "user_request": "我们两个人，下周七天晚饭都在家吃，预算最多 65 新币，没有过敏也没有忌口。Pantry 便签上只写着“豆腐 2、糙米 1”，我当时没写单位；包装还在，需要的话我可以去看每包到底是多少克。想先用掉这些库存再算购物清单。",

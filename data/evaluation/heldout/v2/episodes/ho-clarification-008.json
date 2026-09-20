@@ -4,7 +4,7 @@
   "category": "clarification",
   "language": "zh",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "planning",
   "review_notes": null,
   "scenario": {
     "user_request": "我们两个人，下周晚饭想控制在 80 新币以内，没有过敏也没有忌口，家里库存不用算。不过那周有两个晚上会在外面吃，只是还没定到底是哪两天。剩下的晚饭请帮我安排。",

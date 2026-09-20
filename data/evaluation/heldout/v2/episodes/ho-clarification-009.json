@@ -4,7 +4,7 @@
   "category": "clarification",
   "language": "zh",
   "authored_by": "frontend-evaluation",
-  "reviewed_by": null,
+  "reviewed_by": "planning",
   "review_notes": "[复核修正 2026-09-17] 按复核意见删除了教系统怎么答的提示性措辞。只改了 user_request，场景其余字段、候选池与 gold 均未改动。原句：「还有一点，我最近不想吃“豆类”，但我说的主要是平时那种豆子，像 chickpea、lentil 这些算不算我也没想清楚。先别替我猜，帮我安排前确认一下。」 → 现句：「还有一点，我最近不想吃“豆类”，但我说的主要是平时那种豆子，像 chickpea、lentil 这些算不算我也没想清楚。」",
   "scenario": {
     "user_request": "我们两个人，下周七天晚饭都在家吃，没有食物过敏，家里也没有库存要扣。还有一点，我最近不想吃“豆类”，但我说的主要是平时那种豆子，像 chickpea、lentil 这些算不算我也没想清楚。",
