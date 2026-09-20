@@ -64,13 +64,20 @@ jobs:
       # /app, so `ruff check .` there covers it. Linting a narrower set here
       # would let CI stay green while the documented command reports errors.
       - name: Ruff lint
-        run: uv run --project backend ruff check backend scripts
+        run: uv run --project backend ruff check backend scripts data-engineering
 
       - name: Ruff format
-        run: uv run --project backend ruff format --check backend scripts
+        run: uv run --project backend ruff format --check backend scripts data-engineering
 
       - name: Backend tests
         run: uv run --project backend pytest backend/tests
+
+      # The data pipeline is standard-library only and has its own package root.
+      - name: Data-engineering tests
+        working-directory: data-engineering
+        env:
+          PYTHONPATH: src
+        run: uv run --no-project --python 3.12 python -m unittest discover -s tests
 
       - name: MVP data and planning evaluation
         run: uv run --project backend python -m app.evaluation
