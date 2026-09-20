@@ -17,12 +17,10 @@ console](operations-console.md).
 
 ## Where it stands
 
-**Product path.** A request reaches `backend/app/services/meal_plan.py`, which
-calls `backend/app/planning/weekly_planner.py`: a greedy day-by-day selector
-over a truncated candidate list with a fixed diversity penalty. It applies a
-budget only when every candidate's cost is known, and nothing recomputes its
-result. It works, it is fast, and it cannot tell you why it chose what it chose,
-or whether what it chose is actually feasible.
+For verified implementation status and pending branch work, see
+[current status](../current-status.md). The
+[product adapter](planning-product-path.md) documents P1's input, validation,
+storage and trace boundary.
 
 **Engine.** `backend/app/planning/` holds about 3,500 lines of v2 work, with
 tests: `constraint_compiler.py`, `beam_planner.py` and `mixed_beam.py`,
@@ -31,8 +29,8 @@ tests: `constraint_compiler.py`, `beam_planner.py` and `mixed_beam.py`,
 and `mixed_repair.py`, `relaxation_search.py`, `input_audit.py`, `preview.py`,
 and the adapters `recipe_input.py` / `product_input.py`.
 
-No product request reaches any of it. That is the gap; P1 closes it, and
-everything after P1 is a deepening.
+P1 connects these components to product requests. The remaining packets deepen
+that integration without bypassing the independent validator.
 
 ## Why it is shaped this way
 

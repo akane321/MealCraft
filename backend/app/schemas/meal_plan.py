@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from math import isfinite
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -13,9 +14,16 @@ MealPlanEventStatus = Literal["previewed", "applied"]
 
 
 class WeeklyMealPlanRequest(RecipeRecommendationRequest):
+    planner_strategy: Literal["beam", "greedy-baseline"] = "beam"
     start_date: date = Field(default_factory=date.today)
     day_count: int = Field(default=7, ge=7, le=7)
     weekly_budget_sgd: float | None = Field(default=None, gt=0, le=7000)
+
+    @model_validator(mode="after")
+    def finite_pantry_quantities(self) -> "WeeklyMealPlanRequest":
+        if any(p.quantity is not None and not isfinite(p.quantity) for p in self.available_ingredients):
+            raise ValueError("Pantry quantities must be finite")
+        return self
 
 
 class WeeklyPlanDayResponse(BaseModel):

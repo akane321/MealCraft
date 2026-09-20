@@ -41,7 +41,9 @@ router = APIRouter(prefix="/plans", tags=["meal plans"])
 DatabaseDependency = Annotated[Session, Depends(get_db_session)]
 
 
-def build_meal_plan_service(database: Session, household_id: int) -> WeeklyMealPlanService:
+def build_meal_plan_service(
+    database: Session, household_id: int, actor_user_id: int | None = None
+) -> WeeklyMealPlanService:
     recipe_repository = RecipeRepository(database)
     product_service = create_product_search_service(ProductSnapshotRepository(database))
     recommendation_service = RecipeRecommendationService(
@@ -49,6 +51,7 @@ def build_meal_plan_service(database: Session, household_id: int) -> WeeklyMealP
         grocery_estimator=GroceryEstimator(product_service),
     )
     return WeeklyMealPlanService(
+        actor_user_id=actor_user_id,
         repository=MealPlanRepository(database, household_id=household_id),
         recipe_repository=recipe_repository,
         recommendation_service=recommendation_service,
@@ -60,7 +63,7 @@ def get_meal_plan_service(
     database: DatabaseDependency,
     current: CurrentHouseholdViewDependency,
 ) -> WeeklyMealPlanService:
-    return build_meal_plan_service(database, current.active_membership.household_id)
+    return build_meal_plan_service(database, current.active_membership.household_id, current.user.id)
 
 
 MealPlanServiceDependency = Annotated[WeeklyMealPlanService, Depends(get_meal_plan_service)]

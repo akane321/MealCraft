@@ -239,11 +239,23 @@ crawling is outside this contract.
 - `start_date` and a currently fixed `day_count` of 7
 - an optional `weekly_budget_sgd`
 - the existing optional per-meal budget and fixture/live pricing mode
+- `planner_strategy`: `beam` (default) or the explicit `greedy-baseline`
 
 The response contains seven persisted main-meal entries, per-person weekly
 nutrition totals, an aggregated shopping list, package checkout cost,
 ingredient-use cost, weekly budget status, and explicit warnings. Known pantry
 quantities are deducted once after the seven recipe requirements are combined.
+
+New plans must pass independent validation before storage. The weekly budget
+caps whole-package checkout cost; the legacy per-meal budget still caps
+ingredient-use cost without pantry deduction. Both comparisons use whole cents;
+sub-cent budgets require clarification. A missing price or unverified demand
+cannot produce a successfully validated plan.
+
+Non-plans return HTTP 422 with one actionable `detail` sentence. Internal status
+and proof scope are recorded in `OperationRun`, not added to the product view.
+See the [Planning product adapter](design/planning-product-path.md) for trace
+fields and the distinction between a search limit and infeasibility.
 
 `GET /api/plans/{plan_id}` returns the persisted snapshot. `GET /api/plans`
 returns recent plan summaries for later history and dashboard integration.
