@@ -155,6 +155,7 @@ async function stubApi(page: Page) {
   await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: session(true), plan })));
   await page.route("**/api/plans/9001", route => route.fulfill(json(plan)));
   await page.route("**/api/plans/9001/dashboard", route => route.fulfill(json(dashboard)));
+  await page.route("**/api/plans/9001/events", route => route.fulfill(json({ items: [] })));
   await page.route("**/api/recipes/*/tutorial", route => route.fulfill(json({
     recipe_slug: "dinner-4",
     recipe_title: "Tofu Brown Rice Stir-fry",
@@ -330,4 +331,115 @@ test("a failed request says so in the conversation", async ({ page }) => {
   await page.getByRole("button", { name: "Send" }).click();
 
   await expect(page.getByRole("alert")).toHaveText("The planning service is unavailable.");
+});
+
+const replanEvent = {
+  id: 7,
+  plan_id: 9001,
+  base_revision: 1,
+  applied_revision: 2,
+  event_type: "meal_change",
+  status: "applied",
+  reason: "Salmon was out of stock",
+  unavailable_ingredient: "salmon",
+  before_entry: { entry_id: 3, day_index: 3, planned_date: isoDay(-1), recipe_id: 3, recipe_slug: "dinner-3", recipe_title: "Salmon Quinoa Bowl" },
+  after_entry: { entry_id: 3, day_index: 3, planned_date: isoDay(-1), recipe_id: 8, recipe_slug: "dinner-8", recipe_title: "Miso Tofu Bowl" },
+  nutrition_delta: { calories_kcal: -85, protein_g: -6, carbohydrate_g: 4, fat_g: -5, sodium_mg: 120, sugar_g: 1 },
+  grocery_delta: [],
+  purchase_total_delta_sgd: -2.4,
+  created_at: "2026-09-14T09:00:00Z",
+  applied_at: "2026-09-14T09:01:00Z",
+};
+
+test("a week still loading shows a skeleton rather than the empty message", async ({ page }) => {
+  await stubApi(page);
+  // Hold the plan request open so the loading state is observable.
+  let release = () => {};
+  const held = new Promise<void>((resolve) => { release = resolve; });
+  await page.route("**/api/plans/9001", async (route) => {
+    await held;
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(plan) });
+  });
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+
+  const week = page.getByRole("complementary", { name: "This week" });
+  // The panel opens on edge hover; its own handle sits behind it once open.
+  await page.mouse.move(12, 450);
+  await expect(week.locator("[aria-busy='true']")).toBeVisible();
+  await expect(week.getByText("Your week shows up here once it's planned.")).toBeHidden();
+  // The drawer slides in; wait for it before capturing.
+  if (SHOTS) await page.waitForTimeout(700).then(() => page.screenshot({ path: `${SHOTS}/11-loading.png` }));
+
+  release();
+  await expect(week.getByText("Tofu Brown Rice Stir-fry").first()).toBeVisible();
+  await expect(week.locator("[aria-busy='true']")).toBeHidden();
+});
+
+test("a week that failed to load offers a retry that works", async ({ page }) => {
+  await stubApi(page);
+  // The fetch layer retries a GET on its own, so the stub fails until the test
+  // says otherwise rather than counting attempts.
+  let failing = true;
+  await page.route("**/api/plans/9001", async (route) => {
+    if (failing) return route.fulfill({ status: 500, contentType: "application/json", body: "{}" });
+    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(plan) });
+  });
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+  await page.mouse.move(12, 450);
+
+  const week = page.getByRole("complementary", { name: "This week" });
+  await expect(week.getByText("Your week couldn't be loaded.")).toBeVisible();
+  failing = false;
+  await week.getByRole("button", { name: "Try again" }).click();
+  await expect(week.getByText("Tofu Brown Rice Stir-fry").first()).toBeVisible();
+});
+
+test("Escape closes a sheet from anywhere and focus goes back to what opened it", async ({ page }) => {
+  await planWeek(page);
+  await page.getByRole("button", { name: /Groceries & nutrition/ }).click();
+  const opener = page.getByRole("button", { name: "All six nutrients & daily detail" });
+  await opener.click();
+
+  const details = page.getByRole("dialog", { name: "Nutrition details" });
+  await expect(details).toBeVisible();
+  // Focus starts inside the sheet, not on the page behind it.
+  await expect(details.locator(":focus")).toBeVisible();
+
+  await page.locator("body").click({ position: { x: 5, y: 5 } });
+  await page.keyboard.press("Escape");
+  await expect(details).toBeHidden();
+  await expect(opener).toBeFocused();
+});
+
+test("applied changes are listed in the week panel", async ({ page }) => {
+  await stubApi(page);
+  await page.route("**/api/plans/9001/events", route => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ items: [replanEvent, { ...replanEvent, id: 8, status: "pending", applied_at: null }] }),
+  }));
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+  await page.mouse.move(12, 450);
+
+  const week = page.getByRole("complementary", { name: "This week" });
+  const summary = week.getByText("Changes this week");
+  await expect(summary).toBeVisible();
+  await expect(week.getByText("Miso Tofu Bowl")).toBeHidden();
+  await summary.click();
+  await expect(week.getByText("Miso Tofu Bowl")).toBeVisible();
+  await expect(week.getByText("Salmon was out of stock")).toBeVisible();
+  // A pending suggestion is not history: only the applied event is listed.
+  await expect(week.getByText("Miso Tofu Bowl")).toHaveCount(1);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/10-changes.png` });
 });

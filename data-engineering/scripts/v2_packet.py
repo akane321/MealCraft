@@ -308,6 +308,7 @@ def _submit_locked(folder: Path, kind: str, by: str, lines: list[str], part: str
 def merge() -> int:
     """Validate every part and write the merged outputs; report overlap agreement."""
     problems = 0
+    agreements: dict[str, dict] = {}
     for kind in KINDS:
         merged: dict[str, dict] = {}
         duplicates: dict[str, list[dict]] = collections.defaultdict(list)
@@ -331,6 +332,7 @@ def merge() -> int:
                 else:
                     merged[item_id] = result
         agreement = _agreement(kind, merged, duplicates)
+        agreements[kind] = agreement
         path = ROOT / "data" / "staging" / f"v2_merged.{kind}.jsonl"
         path.write_text(
             "".join(json.dumps(merged[k], ensure_ascii=False, sort_keys=True) + "\n" for k in sorted(merged)),
@@ -338,6 +340,9 @@ def merge() -> int:
             newline="\n",
         )
         print(f"{kind}: {len(merged)} merged, {missing} not done, overlap agreement {agreement}")
+    (ROOT / "data" / "staging" / "v2_agreement.json").write_text(
+        json.dumps(agreements, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     return 1 if problems else 0
 
 

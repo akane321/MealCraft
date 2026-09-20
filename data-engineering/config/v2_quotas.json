@@ -77,9 +77,10 @@
       ],
       "target": 300
     },
-    "german_eastern_european": {
+    "central_european": {
       "cuisines": [
         "german",
+        "dutch_belgian",
         "eastern_european"
       ],
       "target": 350

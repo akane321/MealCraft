@@ -1,0 +1,46 @@
+{
+  "seed": 20260920,
+  "drawn_at": "2026-09-20T09:15:14+00:00",
+  "audited_at": "2026-09-20T09:18:08+00:00",
+  "parts_included": {
+    "recipes": [
+      "A"
+    ],
+    "ingredients": [
+      "A"
+    ]
+  },
+  "results": {
+    "recipes": {
+      "sampled": 40,
+      "verdicts_recorded": 40,
+      "checks": 240,
+      "accepted": 37,
+      "corrected": 3,
+      "unverifiable": 0
+    },
+    "ingredients": {
+      "sampled": 20,
+      "verdicts_recorded": 20,
+      "checks": 60,
+      "accepted": 19,
+      "corrected": 1,
+      "unverifiable": 0
+    }
+  },
+  "findings": [
+    "themealdb:53030: time_basis stated although several steps of a 14-step pastry give no duration",
+    "themealdb:53387: Dutch cake: cook 55 min against stated 1 h rest plus 50 min bake, passive 0",
+    "recipenlg:1159698: time_basis stated on a no-cook recipe; the rule does not say what a no-cook recipe gets",
+    "recipenlg_v1.1:RCP_904A89BAEE39BF39: same vacuous stated basis as the other no-cook items",
+    "recipenlg_v1.1:RCP_8AC37AEC367E82D3: molded moussaka labelled sauce_condiment; cook 10 min for a baked dish",
+    "recipenlg_v1.1:RCP_681BE13C7212B903: hot shoestring potato salad labelled chinese; the wrong hint was kept",
+    "recipenlg_v1.1:RCP_E8B38B27F28A3A6A: cook 5 min looks low for a fried rice cooking raw chicken",
+    "ING_PRESERVED_LEMON: sodium 1200 mg likely understates a salt-packed lemon",
+    "ING_LAMB_CHOP: piece 85 g is a 3 oz portion; a loin chop is nearer 120 g",
+    "ING_PARM_OR_ROMANO: values are USDA but the cited source is Wikipedia",
+    "ING_KAFFIR_LIME_LEAF: no composition table exists; estimate, and leaves are removed before eating",
+    "ING_CRAB: fat 4.1 g high against USDA blue/king crab at 1.5-1.8 g",
+    "ING_FAVA_BEAN: 171 kcal and 8.32 g fat; plain cooked favas are ~110 kcal, 0.4 g fat"
+  ]
+}

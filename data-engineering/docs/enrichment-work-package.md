@@ -1,4 +1,8 @@
-# 数据富化工作包（交给 dataset 组员的 agent 执行）
+# 数据富化工作包（已被取代，保留作记录）
+
+> **已被取代。** 现在的富化工作说明是 `enrichment-work/README.md`（决定依据 `ADR-0030`）。
+> 本文件写于 v1 release 时期，只作为当时做法的记录。release v1 已按 `ADR-0030` 第 1 节
+> 从仓库删除，下面的路径改指向仍然保留的 v1.1。
 
 本工作包写于 v1 release（8,718 道菜谱 / 443 个食材）之时；之后已发布 v1.1，并派生了饮食标签，
 营养映射在完整的规范食材词表上进行。以下数字是当时的量，动手前按第 0 节自己重量。
@@ -16,8 +20,8 @@
 ```bash
 python - <<'PY'
 import json, collections
-ings=[json.loads(l) for l in open("data/release/v1/ingredients.jsonl",encoding="utf-8")]
-rs=[json.loads(l) for l in open("data/release/v1/recipes.jsonl",encoding="utf-8")]
+ings=[json.loads(l) for l in open("data/release/v1.1/ingredients.jsonl",encoding="utf-8")]
+rs=[json.loads(l) for l in open("data/release/v1.1/recipes.jsonl",encoding="utf-8")]
 print("ingredients:",len(ings),"recipes:",len(rs))
 print("有 fdc_id 的食材:",sum(1 for i in ings if i["fdc_id"]))
 print("有 dietary_tags 的菜谱:",sum(1 for r in rs if r["dietary_tags"]))

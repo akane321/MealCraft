@@ -134,13 +134,20 @@ Use only the recipe itself; no web search is needed. Output one object:
   `cook_minutes` on heat or in an appliance, `passive_minutes` unattended waiting
   (chilling, marinating, rising, cooling). Use the stated durations; estimate the
   rest as an experienced home cook. Follow the recipe text literally ("soak
-  overnight" is 480 passive minutes). `time_basis` is `stated` only when every
-  cooking and waiting step gives a duration.
+  overnight" is 480 passive minutes). `time_basis` is `stated` only when the
+  source gives at least one duration **and** every cooking and waiting step gives
+  one. A recipe that states no duration at all is `estimated`, including a
+  no-cook one: prep time is always our estimate.
 - `servings`: keep the source's number when it is given. When it is null,
   estimate from the quantities and say how in `evidence.servings`.
 - `course`, `cuisine`, `meal_types`, `difficulty` use the vocabularies in
   `config/recipe_vocabulary.json`. `cuisine_hint` came from a keyword rule and
-  may be wrong; decide from the recipe. `course` says what the dish is
+  may be wrong; decide from the recipe. Choose the nearest national or regional
+  cuisine the vocabulary offers, even when the dish is not from that country's
+  core tradition (a Dutch cake is `dutch_belgian`, a Swiss dish is the nearest
+  neighbour). `international` is only for a dish with no recognisable origin, and
+  a recipe labelled `international` is **not released**, because no cuisine quota
+  claims it. `course` says what the dish is
   (`dessert`, `drink` ...); `meal_types` says when it is eaten, and desserts,
   drinks and snacks normally get `meal_types: ["snack"]`. `difficulty`: easy = basic skills and few steps; hard = demanding
   technique or many stages.
