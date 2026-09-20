@@ -19,50 +19,71 @@ def test_tenancy_upgrade_backfills_and_constrains_private_roots(
     inspector = sa.inspect(migration_database.engine)
     assert migration_database.current_revision() == migration_database.head_revision()
     with migration_database.engine.connect() as connection:
-        legacy_user = connection.execute(
-            sa.text("SELECT id, status FROM users WHERE normalized_email = :email"),
-            {"email": LEGACY_EMAIL},
-        ).mappings().one()
+        legacy_user = (
+            connection.execute(
+                sa.text("SELECT id, status FROM users WHERE normalized_email = :email"),
+                {"email": LEGACY_EMAIL},
+            )
+            .mappings()
+            .one()
+        )
         assert legacy_user["status"] == "suspended"
-        assert connection.execute(
-            sa.text("SELECT count(*) FROM user_credentials WHERE user_id = :user_id"),
-            {"user_id": legacy_user["id"]},
-        ).scalar_one() == 0
+        assert (
+            connection.execute(
+                sa.text("SELECT count(*) FROM user_credentials WHERE user_id = :user_id"),
+                {"user_id": legacy_user["id"]},
+            ).scalar_one()
+            == 0
+        )
 
-        legacy_membership = connection.execute(
-            sa.text(
-                "SELECT household_id, role, status FROM household_memberships "
-                "WHERE user_id = :user_id"
-            ),
-            {"user_id": legacy_user["id"]},
-        ).mappings().one()
+        legacy_membership = (
+            connection.execute(
+                sa.text("SELECT household_id, role, status FROM household_memberships WHERE user_id = :user_id"),
+                {"user_id": legacy_user["id"]},
+            )
+            .mappings()
+            .one()
+        )
         assert legacy_membership["role"] == "owner"
         assert legacy_membership["status"] == "active"
 
         legacy_household_id = legacy_membership["household_id"]
         for table in TENANT_ROOTS:
-            assert connection.execute(
-                sa.text(f'SELECT count(*) FROM "{table}" WHERE household_id IS NULL')
-            ).scalar_one() == 0
-            assert connection.execute(
-                sa.text(f'SELECT count(*) FROM "{table}" WHERE household_id != :household_id'),
+            assert (
+                connection.execute(sa.text(f'SELECT count(*) FROM "{table}" WHERE household_id IS NULL')).scalar_one()
+                == 0
+            )
+            assert (
+                connection.execute(
+                    sa.text(f'SELECT count(*) FROM "{table}" WHERE household_id != :household_id'),
+                    {"household_id": legacy_household_id},
+                ).scalar_one()
+                == 0
+            )
+
+        assert (
+            connection.execute(sa.text("SELECT count(*) FROM agent_runs WHERE household_id IS NULL")).scalar_one() == 0
+        )
+        assert (
+            connection.execute(
+                sa.text("SELECT count(*) FROM agent_runs WHERE household_id != :household_id"),
                 {"household_id": legacy_household_id},
-            ).scalar_one() == 0
+            ).scalar_one()
+            == 0
+        )
 
-        assert connection.execute(
-            sa.text("SELECT count(*) FROM agent_runs WHERE household_id IS NULL")
-        ).scalar_one() == 0
-        assert connection.execute(
-            sa.text("SELECT count(*) FROM agent_runs WHERE household_id != :household_id"),
-            {"household_id": legacy_household_id},
-        ).scalar_one() == 0
-
-        assert connection.execute(
-            sa.text("SELECT count(*) FROM operation_runs WHERE household_id IN (2001, 2002)")
-        ).scalar_one() == 2
-        assert connection.execute(
-            sa.text("SELECT count(*) FROM audit_events WHERE household_id IN (2001, 2002)")
-        ).scalar_one() == 2
+        assert (
+            connection.execute(
+                sa.text("SELECT count(*) FROM operation_runs WHERE household_id IN (2001, 2002)")
+            ).scalar_one()
+            == 2
+        )
+        assert (
+            connection.execute(
+                sa.text("SELECT count(*) FROM audit_events WHERE household_id IN (2001, 2002)")
+            ).scalar_one()
+            == 2
+        )
 
     assert migration_database.counts() == {
         **migration_database.counts_before_upgrade,

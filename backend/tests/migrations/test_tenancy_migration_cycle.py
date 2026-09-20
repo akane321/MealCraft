@@ -32,17 +32,19 @@ def test_tenancy_upgrade_downgrade_upgrade_is_repeatable(migration_database: Mig
     assert migration_database.counts() == counts_after_first_upgrade
     with migration_database.engine.connect() as connection:
         assert (
-            connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one()
-            == PRE_TENANCY_REVISION
+            connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one() == PRE_TENANCY_REVISION
         )
-        assert connection.execute(
-            sa.text(
-                "SELECT count(*) FROM users LEFT JOIN user_credentials ON user_credentials.user_id = users.id "
-                "WHERE users.normalized_email = :email AND users.status = 'suspended' "
-                "AND user_credentials.user_id IS NULL"
-            ),
-            {"email": LEGACY_EMAIL},
-        ).scalar_one() == 1
+        assert (
+            connection.execute(
+                sa.text(
+                    "SELECT count(*) FROM users LEFT JOIN user_credentials ON user_credentials.user_id = users.id "
+                    "WHERE users.normalized_email = :email AND users.status = 'suspended' "
+                    "AND user_credentials.user_id IS NULL"
+                ),
+                {"email": LEGACY_EMAIL},
+            ).scalar_one()
+            == 1
+        )
 
     migration_database.upgrade()
     migration_database.upgrade()
@@ -52,9 +54,10 @@ def test_tenancy_upgrade_downgrade_upgrade_is_repeatable(migration_database: Mig
     assert migration_database.current_revision() == migration_database.head_revision()
     with migration_database.engine.connect() as connection:
         for table in TENANT_ROOTS:
-            assert connection.execute(
-                sa.text(f'SELECT count(*) FROM "{table}" WHERE household_id IS NULL')
-            ).scalar_one() == 0
-        assert connection.execute(
-            sa.text("SELECT count(*) FROM agent_runs WHERE household_id IS NULL")
-        ).scalar_one() == 0
+            assert (
+                connection.execute(sa.text(f'SELECT count(*) FROM "{table}" WHERE household_id IS NULL')).scalar_one()
+                == 0
+            )
+        assert (
+            connection.execute(sa.text("SELECT count(*) FROM agent_runs WHERE household_id IS NULL")).scalar_one() == 0
+        )
