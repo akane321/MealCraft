@@ -240,6 +240,31 @@ and tablet layouts are outside the current product and evaluation scope.
 
 ## Database Migrations
 
+### Tenancy migration verification
+
+Migration `20260916_0014` has a destructive-schema smoke suite that runs against a dedicated PostgreSQL database. The suite creates the schema at `20260909_0013`, loads historical private rows plus two already-tenanted households, and then proves the full `upgrade -> downgrade -> upgrade` cycle.
+
+Never point this suite at a development, shared, staging, or production database. It refuses to reset any database whose name does not end with `_migration_test`.
+
+Run it locally with a disposable PostgreSQL database:
+
+```powershell
+$env:DATABASE_URL = "postgresql+psycopg://mealcraft:migration_test_only@localhost:5432/mealcraft_migration_test"
+$env:MEALCRAFT_MIGRATION_TEST_DATABASE_URL = $env:DATABASE_URL
+uv run --project backend pytest backend/tests/migrations
+```
+
+The suite verifies all of the following before CI accepts the migration:
+
+- historical household profiles, meal plans, Agent sessions, and Agent runs receive the suspended legacy household;
+- the legacy account has no credential row and therefore cannot authenticate;
+- existing Alpha and Beta household-scoped operations and audit events retain their assignments;
+- tenant root columns are non-null, foreign keys and uniqueness rules exist, and lookup indexes have the expected column order;
+- row counts survive downgrade and re-upgrade;
+- rerunning `upgrade head` does not create duplicate legacy users, households, or memberships.
+
+If an upgrade fails, retain the database and migration logs before changing anything. Correct the cause, then rerun `alembic upgrade head`; Alembic will continue from the recorded revision. If application compatibility requires rollback and `20260916_0014` is still the latest applied migration, run `alembic downgrade 20260909_0013`, verify that the three tenant-root columns were removed and row counts are unchanged, then retry the upgrade. Do not manually delete the suspended legacy user or household: later upgrades reuse that identity to avoid duplicate imports.
+
 Show the current revision:
 
 ```bash
@@ -273,7 +298,6 @@ with [API Contracts](api-contracts.md).
 Use repository/service tests or a PostgreSQL client connected to
 `localhost:15432`. Do not manually edit production-like data to make a test
 pass; add an explicit seed, fixture, migration, or reproducible setup.
-
 
 ## Common Problems
 
