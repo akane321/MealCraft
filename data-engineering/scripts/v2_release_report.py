@@ -191,6 +191,26 @@ def quality_report(summary: dict, manifest: dict, agreement: dict, audit: dict, 
             "",
         ]
 
+    lines += ["## Spread of each producer's answers", ""]
+    lines += [
+        "A producer that fills the same value into almost every record has not read the",
+        "sources, whatever the value is. For each producer this is the share of its released",
+        "recipes sitting on its own single most common value for that field.",
+        "",
+        "| Producer | Recipes | prep | cook | passive | course | difficulty |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    by_producer: dict[str, list[dict]] = {}
+    for recipe in recipes:
+        by_producer.setdefault((recipe.get("enrichment") or {}).get("by") or "unknown", []).append(recipe)
+    for producer, rows in sorted(by_producer.items(), key=lambda kv: -len(kv[1])):
+        shares = []
+        for field in ("prep_minutes", "cook_minutes", "passive_minutes", "course", "difficulty"):
+            top = collections.Counter(r.get(field) for r in rows).most_common(1)[0][1]
+            shares.append(pct(top / len(rows)))
+        lines += [f"| {producer} | {len(rows)} | " + " | ".join(shares) + " |"]
+    lines += [""]
+
     lines += ["## Agreement between producers", ""]
     if agreement:
         lines += [
