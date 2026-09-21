@@ -63,6 +63,15 @@ remains separate; there are no new Console endpoints or controls here.
 
 ## Verified Product Baseline
 
+### Planning P4 local work
+
+The P4 branch adds structured nutrition constraints to new-plan requests,
+selected-slot average compilation, soft per-slot guards, independent checks
+and persisted scope notes. See [Product nutrition scope](design/planning-nutrition-scope.md).
+This is local work pending review. Natural-language parsing and profile
+translation have not been wired by this slice, and legacy scalar targets keep
+their ranking semantics. No frontend or Agent module is changed.
+
 | Area | Verified behaviour | Important boundary |
 | --- | --- | --- |
 | Full-stack environment | FastAPI, PostgreSQL, Nuxt, Docker Compose, migrations, catalog import, and CI (which also lints and tests `data-engineering`) | Local development baseline, not production deployment evidence |

@@ -17,6 +17,7 @@ from app.planning.beam_planner import BeamLimits, BeamPlanner
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
+from app.planning.nutrition_scope import compile_nutrition_targets
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
 from app.planning.recommendation_engine import CANDIDATE_LIMIT
@@ -83,7 +84,9 @@ class ProductPlanningEngine:
             "requested_pricing_mode": constraints.pricing_mode,
             "profile_version": profile_version,
             "input_digest": digest(constraints.model_dump(mode="json")),
-            "policy_version": "product-fixed-shopping-v1",
+            "policy_version": (
+                "product-scoped-nutrition-v1" if constraints.nutrition_constraints else "product-fixed-shopping-v1"
+            ),
             "validation": None,
         }
         for budget in (constraints.weekly_budget_sgd, constraints.budget_per_meal_sgd):
@@ -169,7 +172,9 @@ class ProductPlanningEngine:
         for item in constraints.available_ingredients:
             quantity, unit = normalized(item.quantity, item.unit)
             pantry.append(PlanningPantryItem(ingredient_id=item.normalized_name, quantity=quantity, unit=unit))
-        bands = []
+        bands = compile_nutrition_targets(constraints.nutrition_constraints, constraints.nutrition_guard_band)
+        trace["nutrition_scope"] = [b.model_dump(exclude={"lower", "upper"}) for b in bands]
+        trace["settings"]["nutrition_guard_band"] = constraints.nutrition_guard_band
         if constraints.max_sodium_mg_per_meal is not None:
             bands.append(
                 PlanningNutritionBand(metric="sodium_mg", scope="per_slot", upper=constraints.max_sodium_mg_per_meal)

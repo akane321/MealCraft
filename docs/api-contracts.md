@@ -262,6 +262,14 @@ crawling is outside this contract.
 
 ## Weekly Meal Plans
 
+New-plan requests can supply `nutrition_constraints`, a list of metric/bound
+objects whose omitted scope means a per-person average across selected meals;
+`scope: "per_serving"` applies to each meal. `nutrition_guard_band` (0–1,
+default 0.25) controls the soft guard around average targets. Successful
+responses explain scope in persisted `warnings`. Legacy `nutrition_targets`
+remain ranking-only. See [Product nutrition scope](design/planning-nutrition-scope.md)
+for bounds, compatibility, examples and the Agent handoff.
+
 `POST /api/plans/generate` extends the recipe-constraint request with:
 
 - `start_date` and a currently fixed `day_count` of 7

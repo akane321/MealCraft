@@ -4,6 +4,7 @@ from uuid import uuid4
 from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
 from app.planning.conflict_explanation import explain_infeasibility, product_explanation
+from app.planning.nutrition_scope import nutrition_scope_notes
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
@@ -123,7 +124,9 @@ class WeeklyMealPlanService:
         selected, grocery = result.selected, result.grocery
         result.trace["profile_id"] = household_profile_id
 
-        warnings = self._deduplicate(recommendation_result.warnings + grocery.warnings)
+        warnings = self._deduplicate(
+            recommendation_result.warnings + grocery.warnings + nutrition_scope_notes(constraints.nutrition_constraints)
+        )
         eligible_count = len({item.recipe.id for item in recommendation_result.recommendations})
         if eligible_count == 1:
             warnings.append("Only one eligible recipe was available, so consecutive repetition could not be avoided.")

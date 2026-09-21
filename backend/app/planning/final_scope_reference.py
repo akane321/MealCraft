@@ -7,6 +7,7 @@ from app.planning.diversity import diversity_loss, permits_extension
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.input_audit import require_finite_problem
+from app.planning.nutrition_scope import nutrition_guard_loss
 from app.schemas.planning_v2 import (
     FinalPlanningProblem,
     FinalPlanningSolution,
@@ -75,6 +76,7 @@ class FinalScopeReferencePlanner:
                         health_preferences=problem.health_preferences,
                     )
                     + meal_affinity_loss(recipe, slot.meal_type)
+                    + nutrition_guard_loss(problem, recipe)
                     + diversity_loss(problem, previous, recipe.recipe_id),
                     recipe.recipe_id,
                 ),

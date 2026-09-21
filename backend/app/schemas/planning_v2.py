@@ -97,9 +97,15 @@ class PlanningNutritionBand(BaseModel):
     lower: float | None = Field(default=None, ge=0)
     upper: float | None = Field(default=None, ge=0)
     hard: bool = True
+    average_basis: Literal["represented_days", "selected_slots"] = "represented_days"
+    purpose: Literal["constraint", "guard"] = "constraint"
 
     @model_validator(mode="after")
     def validate_bounds(self) -> "PlanningNutritionBand":
+        if self.purpose == "guard" and (self.hard or self.scope != "per_slot"):
+            raise ValueError("Nutrition guards must be soft per-slot bands")
+        if self.average_basis == "selected_slots" and self.scope != "horizon_average":
+            raise ValueError("Selected-slot averaging requires horizon_average scope")
         if self.lower is None and self.upper is None:
             raise ValueError("at least one nutrition bound is required")
         if self.lower is not None and self.upper is not None and self.lower > self.upper:
