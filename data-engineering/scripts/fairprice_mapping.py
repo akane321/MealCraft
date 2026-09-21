@@ -41,7 +41,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = ROOT / "data" / "release" / "v2"
+RELEASE = ROOT / "data" / "release" / "v2.1"  # the mapping covers v2 and v2.1 ingredients
 SNAPSHOT = ROOT / "data" / "enrichment" / "fairprice" / "v2"
 OBSERVATIONS = SNAPSHOT / "observations.jsonl"
 MAPPING = SNAPSHOT / "mapping.jsonl"

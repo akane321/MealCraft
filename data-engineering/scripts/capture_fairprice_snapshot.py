@@ -28,7 +28,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = ROOT / "data" / "release" / "v2"
+RELEASE = ROOT / "data" / "release" / "v2.1"  # the mapping covers v2 and v2.1 ingredients
 OUTPUT = ROOT / "data" / "enrichment" / "fairprice" / "v2" / "observations.jsonl"
 BASE_URL = "https://www.fairprice.com.sg"
 USER_AGENT = "MealCraft/0.1 academic prototype"

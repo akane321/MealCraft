@@ -119,3 +119,18 @@ def test_live_mode_without_a_reviewed_product_is_visible_and_unpriced() -> None:
     assert estimate.items[0].product is None
     assert estimate.unmapped_ingredients == ["fenugreek"]
     assert any("did not return a reviewed product for Fenugreek" in warning for warning in estimate.warnings)
+
+
+def test_a_week_keeps_lines_in_units_that_cannot_be_added() -> None:
+    from app.planning.weekly_grocery import WeeklyGroceryAggregator
+
+    carrot = Ingredient(normalized_name="carrot", display_name="Carrot", allergens=[])
+
+    def dish(quantity: float, unit: str) -> Recipe:
+        return Recipe(
+            servings=2,
+            recipe_ingredients=[RecipeIngredient(ingredient=carrot, quantity=quantity, unit=unit, sort_order=1)],
+        )
+
+    lines = WeeklyGroceryAggregator._aggregate_ingredients([dish(1, "whole"), dish(64, "g"), dish(36, "g")], 2)
+    assert [(line.unit, line.required_quantity) for line in lines] == [("g", 100.0), ("whole", 1.0)]

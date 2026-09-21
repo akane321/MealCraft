@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.data.allergens import allergen_conflicts
 from app.data.catalog import Catalog, import_catalog, load_catalog
+from app.data.release_v2 import import_release_v2
 from app.db.base import Base
 from app.evaluation.baseline import greedy_repeat_selector, strong_rule_only_selector
 from app.planning.grocery_estimator import GroceryEstimator
@@ -164,6 +165,7 @@ def evaluate(
     fixture_path: Path,
     system: PlanningSystem = "mealcraft-planner",
     enforce_gates: bool = True,
+    release_path: Path | None = None,
 ) -> dict[str, Any]:
     catalog = load_catalog(ingredient_path, recipe_path)
     scenarios = load_scenarios(scenario_path)
@@ -173,7 +175,14 @@ def evaluate(
     results: list[ScenarioResult] = []
     with Session(engine, expire_on_commit=False) as session:
         import_catalog(session, catalog)
+        release = None
+        if release_path is not None:
+            # A larger-catalog condition: the data release beside the curated recipes.
+            release = import_release_v2(session, release_path)
         recipe_repository = RecipeRepository(session)
+        # The pool weekly planning draws from in the product; on the curated
+        # catalog alone it is every recipe, as before.
+        planning_recipes = recipe_repository.list_for_planning()
         product_service = _product_service(session, fixture_path)
         recommendation_service = RecipeRecommendationService(
             recipe_repository,
@@ -184,7 +193,9 @@ def evaluate(
 
         for index, scenario in enumerate(scenarios, start=1):
             request = WeeklyMealPlanRequest.model_validate(scenario.request)
-            recommendation_result = recommendation_service.recommend(request, deduct_pantry_from_cost=False)
+            recommendation_result = recommendation_service.recommend(
+                request, deduct_pantry_from_cost=False, recipes=planning_recipes, priced_release_only=True
+            )
             actual_feasible = bool(recommendation_result.recommendations)
             selected_slugs: list[str] = []
             violations: list[str] = []
@@ -252,8 +263,9 @@ def evaluate(
     feasible_results = [item for item in results if item.expected_feasible]
     selected_results = [item for item in results if item.actual_feasible]
     metrics = {
-        "catalog_recipe_count": len(catalog.recipes),
-        "catalog_ingredient_count": len(catalog.ingredients),
+        "catalog_recipe_count": len(catalog.recipes) + (release.recipes_imported if release else 0),
+        "catalog_ingredient_count": len(catalog.ingredients) + (release.ingredients_added if release else 0),
+        **({"release_recipe_count": release.recipes_imported} if release else {}),
         "scenario_count": len(results),
         "scenario_expectation_rate": round(expectation_matches / max(len(results), 1), 4),
         "feasible_scenario_success_rate": round(

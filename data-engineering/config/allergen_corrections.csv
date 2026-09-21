@@ -1,0 +1,11 @@
+ingredient_id,add_allergens,reason,confirmed_by,confirmed_at
+ING_BUTTER_OR_MARGARINE,milk,"either may be used; butter carries milk",owner,2026-09-21
+ING_CELERY_SOUP,milk;gluten_candidate,"condensed cream soups are thickened with wheat flour and contain milk",owner,2026-09-21
+ING_CHICKEN_SOUP,milk;gluten_candidate,"condensed cream soups are thickened with wheat flour and contain milk",owner,2026-09-21
+ING_MUSHROOM_SOUP,milk;gluten_candidate,"condensed cream soups are thickened with wheat flour and contain milk",owner,2026-09-21
+ING_TORTILLA,gluten_candidate,"unqualified tortillas are commonly wheat flour tortillas",owner,2026-09-21
+ING_CEREAL_RICE,gluten_candidate,"crisp rice cereals are usually made with barley malt",owner,2026-09-21
+ING_EGG_SUBSTITUTE,eggs,"liquid egg substitutes are made from egg whites",owner,2026-09-21
+ING_IMITATION_CRAB,eggs;gluten_candidate;crustaceans,"surimi sticks commonly carry egg white, wheat starch and crab extract",owner,2026-09-21
+ING_MARGARINE,milk,"many margarines and spreads contain whey or buttermilk, and recipes use it interchangeably with butter",owner,2026-09-21
+ING_CLAM_JUICE,molluscs,"clam juice is the cooking liquid of clams",owner,2026-09-21

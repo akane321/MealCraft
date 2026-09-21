@@ -22,17 +22,17 @@ remains the canonical cross-module contract.
 | State | Meaning |
 | --- | --- |
 | Verified baseline | Merged runtime behaviour supported by current code and tests |
-| Released data | A versioned release cut by the `data-engineering/` pipeline; release v2 is imported beside the curated catalog |
+| Released data | A versioned release cut by the `data-engineering/` pipeline; release v2.1 is imported beside the curated catalog |
 | Accepted target | The intended module responsibility and release contract |
 
 The curated runtime catalog is the compact one in `data/recipes/recipes.json` and
 `data/ingredients/ingredients.json`, loaded by `backend/app/data/catalog.py`.
 Held-out episodes, planning fixtures and tests name its slugs, so it stays as it is.
 
-Release v2 is loaded beside it by `python -m app.data.import_release_v2`
+Release v2.1 is loaded beside it by `python -m app.data.import_release_v2`
 (`backend/app/data/release_v2.py`), which compose runs after the curated import:
 
-- v2 recipes carry `release_version = "v2"`, `external_id` (the release
+- release recipes carry `release_version` (`v2.1`), `external_id` (the release
   `recipe_id`) and a slug `v2-<title>-<id suffix>`, plus the release-only fields
   course, meal types, difficulty, passive time, time and servings basis,
   recipe allergens, source/licence and video URL. Curated recipes leave all of
@@ -46,26 +46,35 @@ Release v2 is loaded beside it by `python -m app.data.import_release_v2`
   Ingredients whose normalized name matches a curated one reuse that row, and
   its allergen list only grows.
 - Recipes with fewer than two ingredient lines are skipped and listed.
-- Some RecipeNLG sources list only part of a dish (a crab quiche listing only
-  its crust), so allergens derived from the lines miss what the dish contains.
-  A recipe whose title or steps name a food carrying a checked allergen that no
-  listed ingredient carries is not imported (693 in v2); phrases that only look
-  like one (coconut milk, peanut butter, cream of tartar, rice flour) are
-  removed first. A wrong exclusion costs one recipe; a missed one would serve
-  the allergen unchecked.
-- Six release ingredients get the allergens their usual product carries,
-  added at import and only ever stricter: butter or margarine (dairy), the
-  three condensed cream soups (dairy, gluten), tortilla and crisp rice cereal
-  (gluten).
-- A dietary tag the recipe's own allergens or text contradict is dropped:
-  vegetarian and vegan when the text names meat or fish or the allergens include
-  fish or shellfish, vegan with dairy or egg, dairy-free with dairy, gluten-free
-  with gluten (169 recipes lost vegetarian or vegan).
-- The importer version is part of the recorded digest, so a change to these
-  rules re-imports a release already loaded.
-- `catalog_imports` records the release digest. A rerun with the same files
-  does nothing; changed files re-import, and v2 recipes no longer in the release
-  are deleted unless a meal plan references them.
+- Rows of an earlier release are upgraded in place by `external_id`, so a
+  database that held v2 keeps its recipe ids (and the meal plans pointing at
+  them) when v2.1 arrives.
+- `catalog_imports` records the release digest, which includes the importer
+  version. A rerun with the same files does nothing; changed files or importer
+  logic re-import, and release recipes no longer in the release are deleted
+  unless a meal plan references them.
+
+Release v2.1 differs from v2 only in what the build checks (`data-engineering`,
+[quality report](../../data-engineering/data/release/v2.1/quality_report.md)):
+
+- Some RecipeNLG sources list only part of a dish (a crab quiche listing only its
+  crust), so allergens derived from the lines miss what the dish contains. A
+  recipe whose title or steps name a food carrying an allergen no listed
+  ingredient carries was reviewed one by one
+  (`data-engineering/scripts/recipe_completeness.py`): 220 found incomplete are
+  dropped, 670 whose mention is a serving suggestion or not the food are kept,
+  and a flagged recipe no review has seen is dropped. Look-alike phrases keep
+  the allergen they carry ("peanut butter" is peanut, "almond milk" tree nut)
+  and false friends are removed ("cream of tartar", "eggplant"). A fixed-seed
+  sample of 300 recipes the check did not flag, reviewed in full, found one
+  incomplete (an unlisted mayonnaise); the word list was extended after it.
+- Ten ingredients carry owner-confirmed allergen additions, only ever stricter
+  (`data-engineering/config/allergen_corrections.csv`): butter or margarine and
+  margarine (dairy), the three condensed cream soups (dairy, gluten), tortilla
+  and crisp rice cereal (gluten), egg substitute (egg), imitation crab (fish,
+  egg, gluten, shellfish) and clam juice (shellfish).
+- An ingredient carrying fish or shellfish makes a recipe neither vegetarian nor
+  vegan (kimchi in a fried rice), and so does a title or step naming meat or fish.
 
 ### FairPrice products for release v2 ingredients
 
@@ -399,7 +408,7 @@ Schema v1 is frozen and releases are being cut (see
 
 ### Import into the runtime
 
-- ~~Add an adapter or migration from the release into the runtime catalog.~~ Done for release v2 (see section 2).
+- ~~Add an adapter or migration from the release into the runtime catalog.~~ Done; release v2.1 is imported (see section 2).
 - ~~Let candidate retrieval reach the whole catalog, not the first 500 recipes by id.~~ Done: recommendations rank every recipe whose course can fill a meal (curated, or v2 `main`/`soup`) and keep the best 500 within budget; weekly plans and replacements load only recipes the planner can price (`RecipeRepository.list_for_planning`).
 - ~~Map release ingredients to products.~~ Done for release v2 (see section 2); the owner's sampled review is recorded in `data-engineering/docs/fairprice-v2-sampled-review.json`.
 - Add planner and grocery fixtures and regression tests.
