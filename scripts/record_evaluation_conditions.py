@@ -110,7 +110,7 @@ def main() -> int:
         )
         return 1
 
-    out = args.out or ROOT / f"docs/evaluation/workbench/conditions-{args.label}.json"
+    out = ROOT / (args.out or f"docs/evaluation/workbench/conditions-{args.label}.json")
     document = {
         "schema_version": "evaluation-conditions-v1",
         "label": args.label,
