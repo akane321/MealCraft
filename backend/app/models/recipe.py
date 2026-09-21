@@ -29,6 +29,9 @@ class Recipe(Base):
         CheckConstraint("servings > 0", name="recipes_servings_positive"),
         CheckConstraint("prep_time_minutes >= 0", name="recipes_prep_time_nonnegative"),
         CheckConstraint("cook_time_minutes >= 0", name="recipes_cook_time_nonnegative"),
+        CheckConstraint(
+            "passive_time_minutes IS NULL OR passive_time_minutes >= 0", name="recipes_passive_time_nonnegative"
+        ),
     )
 
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
@@ -41,6 +44,19 @@ class Recipe(Base):
     prep_time_minutes: Mapped[int]
     cook_time_minutes: Mapped[int]
     dietary_tags: Mapped[list[str]] = mapped_column(JSON, default=list)
+    # Filled only for recipes imported from a data-engineering release; the
+    # curated catalog leaves every one of these NULL (app/data/release_v2.py).
+    release_version: Mapped[str | None] = mapped_column(String(20), index=True, nullable=True)
+    external_id: Mapped[str | None] = mapped_column(String(40), unique=True, nullable=True)
+    course: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    meal_types: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    difficulty: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    passive_time_minutes: Mapped[int | None] = mapped_column(nullable=True)
+    time_basis: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    servings_basis: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    allergens: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    source: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    video_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -122,6 +138,8 @@ class RecipeIngredient(Base):
     quantity: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     unit: Mapped[str | None] = mapped_column(String(40), nullable=True)
     preparation: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    grams: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+    original_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     sort_order: Mapped[int]
 
     recipe: Mapped[Recipe] = relationship(back_populates="recipe_ingredients")
@@ -142,3 +160,15 @@ class RecipeStep(Base):
     instruction: Mapped[str] = mapped_column(Text)
 
     recipe: Mapped[Recipe] = relationship(back_populates="steps")
+
+
+class CatalogImport(Base):
+    """Which data-engineering release is loaded, and the digest of its files."""
+
+    __tablename__ = "catalog_imports"
+
+    release_version: Mapped[str] = mapped_column(String(20), primary_key=True)
+    digest: Mapped[str] = mapped_column(String(64))
+    recipe_count: Mapped[int]
+    ingredient_count: Mapped[int]
+    imported_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
