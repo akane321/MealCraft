@@ -48,11 +48,12 @@ def normalized(quantity, unit):
 
 
 class ProductPlanningError(WeeklyPlanSelectionError):
-    def __init__(self, status, message, trace):
+    def __init__(self, status, message, trace, *, problem=None):
         super().__init__(message)
         self.status = status
         trace["status"] = status
         self.trace = trace
+        self.problem = problem
 
 
 @dataclass
@@ -281,7 +282,7 @@ class ProductPlanningEngine:
                 if status == "needs_data"
                 else "No validated plan was found in this search; try another candidate selection."
             )
-            raise ProductPlanningError(status, message, trace)
+            raise ProductPlanningError(status, message, trace, problem=problem.model_copy(deep=True))
         assignments, shopping, report = result
         lines = []
         for row in shopping:

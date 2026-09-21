@@ -257,6 +257,13 @@ and proof scope are recorded in `OperationRun`, not added to the product view.
 See the [Planning product adapter](design/planning-product-path.md) for trace
 fields and the distinction between a search limit and infeasibility.
 
+For proven infeasibility within the candidate packet, `detail` can include up
+to three independently verified time or weekly-budget adjustments. These are
+proposals: choosing one requires a new request and the same validation gate.
+Safety restrictions are never offered for relaxation. Bounded search exhaustion
+produces no adjustment suggestions. See [conflict explanations](design/planning-conflict-explanation.md)
+for the declared-group minimality and resource limits.
+
 `GET /api/plans/{plan_id}` returns the persisted snapshot. `GET /api/plans`
 returns recent plan summaries for later history and dashboard integration.
 
