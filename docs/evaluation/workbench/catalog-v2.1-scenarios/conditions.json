@@ -2,7 +2,7 @@
   "schema_version": "evaluation-conditions-v1",
   "label": "catalog-v2.1-scenarios",
   "report": "docs/evaluation/workbench/catalog-v2.1-scenarios/latest.json",
-  "report_commit": "18be014368e38070d502172df5f13b6199646062",
+  "report_commit": "b0abe10c356b3b506017c686296648802fec59f0",
   "attestation": "Every input below was last committed at or before the commit that produced the report, verified with git merge-base --is-ancestor. The digests therefore describe the data the published numbers were computed over.",
   "inputs": {
     "agent": {
@@ -13,7 +13,7 @@
     "developer": {
       "path": "data/evaluation/dev/planning-catalog-v2.1.json",
       "sha256": "103caaed048b2395152f39cd2bf0bdf0912e853ed4165caa3a090c273bccbdcd",
-      "last_changed_commit": "38a31d4326275887ceba6e67cf74949485f7ea66"
+      "last_changed_commit": "b0abe10c356b3b506017c686296648802fec59f0"
     },
     "fixtures": {
       "path": "data/fixtures/fairprice-products.json",
@@ -28,7 +28,7 @@
     "heldout": {
       "path": "data/evaluation/heldout/planning-catalog-v2.1.json",
       "sha256": "71b1f01a3f9dc78faa8fb2ae120906512308645069cc31096386d3adf732bc6f",
-      "last_changed_commit": "fe565f682318b9f487cfd1cda64c28d626e60e43"
+      "last_changed_commit": "b0abe10c356b3b506017c686296648802fec59f0"
     },
     "ingredients": {
       "path": "data/ingredients/ingredients.json",
