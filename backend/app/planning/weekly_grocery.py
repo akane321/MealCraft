@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from app.data.units import UNIT_BASE
 from app.models.recipe import Recipe
-from app.planning.grocery_estimator import GroceryEstimator, ProductMatcher
+from app.planning.grocery_estimator import GroceryEstimator, ProductMatcher, matchable_ingredients
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse, WeeklyMealPlanRequest
 from app.schemas.product import GroceryLineEstimate
 from app.services.product import ProductSearchService
@@ -66,19 +66,22 @@ class WeeklyGroceryAggregator:
                 )
                 continue
 
-            search = self.product_service.search(
-                ingredient.display_name,
-                live=constraints.pricing_mode == "live",
-                limit=8,
-            )
-            if search.warning and search.warning not in warnings:
-                warnings.append(search.warning)
-            product, match_score = self.matcher.choose(
-                ingredient.name,
-                ingredient.display_name,
-                ingredient.unit,
-                search.items,
-            )
+            product, match_score = None, None
+            # Unmatchable ingredients are never searched: in live mode each search is a request.
+            if ingredient.name in matchable_ingredients():
+                search = self.product_service.search(
+                    ingredient.display_name,
+                    live=constraints.pricing_mode == "live",
+                    limit=8,
+                )
+                if search.warning and search.warning not in warnings:
+                    warnings.append(search.warning)
+                product, match_score = self.matcher.choose(
+                    ingredient.name,
+                    ingredient.display_name,
+                    ingredient.unit,
+                    search.items,
+                )
             if product is None:
                 unmapped.append(ingredient.name)
                 consumed_total_known = False

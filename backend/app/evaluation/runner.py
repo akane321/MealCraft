@@ -208,7 +208,9 @@ def evaluate(
                 repetitions = sum(
                     left == right for left, right in zip(selected_slugs, selected_slugs[1:], strict=False)
                 )
-                recipes_by_id = {recipe.id: recipe for recipe in recipe_repository.list_for_recommendation()}
+                recipes_by_id = {
+                    recipe.id: recipe for recipe in recipe_repository.list_by_ids([item.recipe.id for item in selected])
+                }
                 selected_recipes = [recipes_by_id[item.recipe.id] for item in selected]
                 for day, recipe in enumerate(selected_recipes, start=1):
                     violations.extend(f"day_{day}:{item}" for item in _hard_violations(recipe, request))

@@ -62,8 +62,11 @@ class MealPlanReplanningService:
         self._validate_target(entry, request)
 
         constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
-        recipes = self.recipe_repository.list_for_recommendation()
+        recipes = self.recipe_repository.list_for_planning()
         recipes_by_id = {recipe.id: recipe for recipe in recipes}
+        # A planned recipe may sit outside today's candidate pool; fetch it directly.
+        missing = [item.recipe_id for item in plan.entries if item.recipe_id not in recipes_by_id]
+        recipes_by_id.update((recipe.id, recipe) for recipe in self.recipe_repository.list_by_ids(missing))
         recommendation: RecipeRecommendationResponse | None = None
 
         if request.event_type in {"REPLACE_MEAL", "ITEM_UNAVAILABLE"}:
@@ -72,6 +75,7 @@ class MealPlanReplanningService:
                 entry=entry,
                 request=request,
                 constraints=constraints,
+                recipes=recipes,
                 recipes_by_id=recipes_by_id,
             )
 
@@ -127,8 +131,8 @@ class MealPlanReplanningService:
                 "This preview is stale because the meal plan has changed. Generate a new preview."
             )
 
-        recipes_by_id = {recipe.id: recipe for recipe in self.recipe_repository.list_for_recommendation()}
-        proposed_recipe = recipes_by_id.get(event.proposed_recipe_id) if event.proposed_recipe_id else None
+        proposed = self.recipe_repository.list_by_ids([event.proposed_recipe_id] if event.proposed_recipe_id else [])
+        proposed_recipe = proposed[0] if proposed else None
         grocery = WeeklyGroceryEstimateResponse.model_validate(event.after_grocery)
         try:
             applied_plan, applied_event = self.repository.apply_event(
@@ -175,9 +179,12 @@ class MealPlanReplanningService:
         entry: MealPlanEntry,
         request: MealPlanReplanPreviewRequest,
         constraints: WeeklyMealPlanRequest,
+        recipes: list[Recipe],
         recipes_by_id: dict[int, Recipe],
     ) -> RecipeRecommendationResponse:
-        result = self.recommendation_service.recommend(constraints, deduct_pantry_from_cost=False)
+        result = self.recommendation_service.recommend(
+            constraints, deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
+        )
         candidates = [item for item in result.recommendations if item.recipe.id != entry.recipe_id]
         if request.unavailable_ingredient:
             candidates = [

@@ -17,6 +17,9 @@ FLEXIBLE_SUGAR_BENCHMARK_G = 12.0
 FLEXIBLE_SUGAR_UPPER_RANGE_G = 30.0
 LOWER_CALORIE_BENCHMARK_KCAL = 600.0
 LOWER_CALORIE_UPPER_RANGE_KCAL = 1000.0
+# The planner searches at most this many recommendations. They are the best
+# scored within budget across the whole catalog, not the first rows by id.
+CANDIDATE_LIMIT = 500
 
 
 @dataclass(frozen=True)

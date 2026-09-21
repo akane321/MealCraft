@@ -1,6 +1,9 @@
+import json
 import math
 from difflib import SequenceMatcher
+from functools import lru_cache
 
+from app.core.paths import data_root
 from app.data.units import UNIT_BASE
 from app.models.recipe import Recipe
 from app.schemas.product import GroceryEstimateResponse, GroceryLineEstimate, ProductResponse
@@ -16,6 +19,19 @@ def convert_quantity(quantity: float, from_unit: str | None, to_unit: str | None
     if source is None or target is None or source[0] != target[0]:
         return None
     return quantity * source[1] / target[1]
+
+
+@lru_cache
+def matchable_ingredients() -> frozenset[str]:
+    """Ingredients the name matcher was built and tested against: the curated catalog.
+
+    Release ingredients use generic names ("water", "cherry", "olive") that this
+    token matcher pairs with the wrong product ("Canned Tuna in Water"). Until they
+    have a reviewed product mapping they are left unmapped, so their cost is shown
+    as unknown instead of wrong.
+    """
+    data = json.loads((data_root() / "ingredients/ingredients.json").read_text(encoding="utf-8"))
+    return frozenset(item["normalized_name"] for item in data)
 
 
 class ProductMatcher:
@@ -109,19 +125,22 @@ class GroceryEstimator:
                 )
                 continue
 
-            search = self.product_service.search(
-                ingredient.display_name,
-                live=constraints.pricing_mode == "live",
-                limit=8,
-            )
-            if search.warning and search.warning not in warnings:
-                warnings.append(search.warning)
-            product, match_score = self.matcher.choose(
-                ingredient.normalized_name,
-                ingredient.display_name,
-                recipe_item.unit,
-                search.items,
-            )
+            product, match_score = None, None
+            # Unmatchable ingredients are never searched: in live mode each search is a request.
+            if ingredient.normalized_name in matchable_ingredients():
+                search = self.product_service.search(
+                    ingredient.display_name,
+                    live=constraints.pricing_mode == "live",
+                    limit=8,
+                )
+                if search.warning and search.warning not in warnings:
+                    warnings.append(search.warning)
+                product, match_score = self.matcher.choose(
+                    ingredient.normalized_name,
+                    ingredient.display_name,
+                    recipe_item.unit,
+                    search.items,
+                )
             if product is None:
                 unmapped.append(ingredient.normalized_name)
                 consumed_total_known = False
