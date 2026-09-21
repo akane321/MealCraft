@@ -15,7 +15,13 @@
 - **Target** means the accepted product direction; it is not current behaviour.
 - Current code and tests take precedence if this snapshot becomes stale.
 
-## Planning P1 branch work
+## Planning P1 and P2 follow-up verification
+
+On 2026-09-21, remote main `a4a56c74ea3da9757e71db0949decf4232548ff6`
+contains P1 and P2. The descriptions below cover those merged slices; the
+top-of-file snapshot and unrelated module entries have not been reverified.
+
+## Planning P1
 
 The P1 implementation routes new weekly-plan generation through bounded beam
 search and independent validation, including the shared profile and Agent entry
@@ -24,23 +30,36 @@ Plan storage and a redacted `OperationRun` are atomic; failed or indeterminate
 results create no plan. See the [product adapter](design/planning-product-path.md)
 and [API contract](api-contracts.md#weekly-meal-plans).
 
-This is local branch work pending review, not verified remote `main` behaviour.
-P2 conflict explanations, P3 hard variety caps, P4 scoped nutrition, P5 mixed
+P3 hard variety caps, P4 scoped nutrition, P5 mixed
 shopping, P6 minimal-change replanning, P7 learned ordering/themes and P8 console
 experiments remain separate packets. Existing legacy nutrition targets remain
 soft ranking inputs. This slice does not claim that the whole v2 contract is done.
 
-## Planning P2 branch work
+## Planning P2
 
-P2 builds on the P1 branch with bounded conflict diagnosis and independently
+P2 builds on P1 with bounded conflict diagnosis and independently
 verified numeric proposals. Users apply a proposal by submitting a new request;
 failed requests do not save a relaxed plan. Explanations preserve safety
 constraints and distinguish a declared-group minimum from a global claim.
 See [conflict explanations](design/planning-conflict-explanation.md).
 
-This is local branch work pending review. The implementation is bounded to
-small packets, and may withhold proposals when proof exceeds its limits. It
+The implementation is bounded to small packets, and may withhold proposals when proof exceeds its limits. It
 does not add proposal buttons, a Console view or mixed-package purchasing.
+
+## Planning P3 local packet implementation
+
+The P3 branch adds explicit versioned recipe classification, three hard variety
+rules, bounded non-core overlap scoring and independent final checks. Beam,
+greedy reference and the fixed/mixed shopping paths consume these packet rules.
+See [Planning diversity](design/planning-diversity.md) for the contract and
+synthetic fixture.
+
+This slice is local work pending review. It has not enabled P3 on the weekly
+product API: the runtime catalog has no explicit primary-protein/core-ingredient
+classification. That producer handoff and production adapter remain to be
+completed. Legacy packets without a diversity policy keep their existing
+behavior and must not be described as satisfying P3. Console integration also
+remains separate; there are no new Console endpoints or controls here.
 
 ## Verified Product Baseline
 

@@ -4,6 +4,7 @@ from collections import defaultdict
 from math import isfinite
 
 from app.planning.dietary_tags import expand_tags
+from app.planning.diversity_validation import diversity_checks
 from app.planning.input_audit import nonfinite_issues
 from app.schemas.planning_v2 import (
     CheckStatus,
@@ -106,6 +107,7 @@ class FinalPlanningValidator:
             checks.extend(self._slot_checks(problem, slot.slot_id, assignment.recipe_id))
 
         assignment_checks_passed = not checks
+        checks.extend(diversity_checks(problem, assigned_by_slot))
         checks.extend(self._nutrition_checks(problem, assigned_by_slot))
         checks.extend(self._shopping_checks(problem, shopping))
         demand_checks = self._demand_checks(problem, assigned_by_slot, shopping)

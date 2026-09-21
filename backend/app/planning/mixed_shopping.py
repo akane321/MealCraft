@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 from math import isfinite
 
+from app.planning.diversity_validation import diversity_checks
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.input_audit import nonfinite_issues
 from app.planning.package_optimizer import PackageResult, optimize_packages
@@ -53,6 +54,11 @@ def assignment_issues(problem: FinalPlanningProblem, assignments: list[PlanningA
         if (s.required or s.locked_recipe_id is not None) and s.slot_id not in selected:
             issues.add("missing_assignment")
     issues.update(c.code for c in validator._nutrition_checks(problem, selected) if c.hard and c.status != "passed")
+    issues.update(
+        f"needs_data:{c.code}" if c.status == "indeterminate" else c.code
+        for c in diversity_checks(problem, selected)
+        if c.hard and c.status != "passed"
+    )
     return tuple(sorted(issues))
 
 
@@ -114,7 +120,8 @@ def build_mixed_shopping(
 ) -> MixedShoppingResult:
     issues = assignment_issues(problem, assignments)
     if issues:
-        return MixedShoppingResult("candidate_rejected", issues=issues)
+        status = "needs_data" if all(i.startswith("needs_data:") for i in issues) else "candidate_rejected"
+        return MixedShoppingResult(status, issues=issues)
     demands, issues = derive_mixed_demands(problem, assignments)
     if issues:
         return MixedShoppingResult("needs_data", issues=issues)

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from math import isfinite
 
 from app.planning.constraint_compiler import compile_search_domains
+from app.planning.diversity import diversity_loss, permits_extension
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.search_bounds import SearchBounds
@@ -83,6 +84,8 @@ class BeamPlanner(FinalScopeReferencePlanner):
                         next_states.append(state)
                         continue
                     previous = [chosen for _, chosen in state.choices]
+                    if not permits_extension(problem, previous, recipe_id):
+                        continue
                     loss = (
                         (
                             self.local_losses[recipe_id]
@@ -94,8 +97,7 @@ class BeamPlanner(FinalScopeReferencePlanner):
                             )
                         )
                         + meal_affinity_loss(recipes[recipe_id], slot.meal_type)
-                        + previous.count(recipe_id) * 0.10
-                        + (0.35 if previous and previous[-1] == recipe_id else 0.0)
+                        + diversity_loss(problem, previous, recipe_id)
                     )
                     next_states.append(SearchState(state.choices + ((slot.slot_id, recipe_id),), state.loss + loss))
                 if exhausted:
@@ -159,13 +161,15 @@ class BeamPlanner(FinalScopeReferencePlanner):
                 algorithm="deterministic-beam-search",
                 algorithm_version="beam-reference-policy-v1",
                 deterministic=True,
+                diversity_policy=problem.diversity_policy,
                 warnings=[
                     f"beam_width={self.limits.width}; max_expansions={self.limits.max_expansions}; "
                     f"expansions={search.expansions}",
                     f"beam_pruned={search.pruned}; expansion_limit_reached={search.exhausted}; "
                     f"completed_candidates={len(results)}",
                     f"nutrition_pruned={search.nutrition_pruned}; dominated={search.dominated}",
-                    "Uses reference local loss and repetition penalties. No global infeasibility or optimality claim.",
+                    "Uses recorded diversity policy when supplied, otherwise legacy repetition penalties. "
+                    "No global infeasibility or optimality claim.",
                 ],
             ),
         )

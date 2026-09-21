@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 
+from app.planning.diversity import diversity_loss, permits_extension
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.input_audit import require_finite_problem
@@ -45,6 +46,7 @@ class FinalScopeReferencePlanner:
                 algorithm="deterministic-greedy-reference",
                 algorithm_version="final-scope-reference-v1",
                 deterministic=True,
+                diversity_policy=problem.diversity_policy,
                 warnings=[
                     "This scaffold does not perform Beam Search, bounded live-price repair, "
                     "minimal relaxation, or optimality search."
@@ -54,12 +56,12 @@ class FinalScopeReferencePlanner:
 
     def _assign(self, problem: FinalPlanningProblem) -> list[PlanningAssignment]:
         assignments: list[PlanningAssignment] = []
-        last_recipe_id: str | None = None
-        use_counts: dict[str, int] = defaultdict(int)
         for slot in sorted(problem.slots, key=self._slot_key):
             if not slot.required and slot.locked_recipe_id is None:
                 continue
             candidates = self._eligible(problem, slot)
+            previous = [item.recipe_id for item in assignments]
+            candidates = [r for r in candidates if permits_extension(problem, previous, r.recipe_id)]
             if slot.locked_recipe_id is not None:
                 candidates = [item for item in candidates if item.recipe_id == slot.locked_recipe_id]
             if not candidates:
@@ -73,14 +75,11 @@ class FinalScopeReferencePlanner:
                         health_preferences=problem.health_preferences,
                     )
                     + meal_affinity_loss(recipe, slot.meal_type)
-                    + use_counts[recipe.recipe_id] * 0.10
-                    + (0.35 if recipe.recipe_id == last_recipe_id else 0.0),
+                    + diversity_loss(problem, previous, recipe.recipe_id),
                     recipe.recipe_id,
                 ),
             )
             assignments.append(PlanningAssignment(slot_id=slot.slot_id, recipe_id=chosen.recipe_id))
-            use_counts[chosen.recipe_id] += 1
-            last_recipe_id = chosen.recipe_id
         return assignments
 
     @staticmethod
