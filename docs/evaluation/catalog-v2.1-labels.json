@@ -1,0 +1,70 @@
+{
+  "label": "catalog-v2.1",
+  "rule": "A scenario is feasible when at least one recipe in the planning pool meets every recipe-level hard constraint (time as prep plus cook, allergens, excluded ingredients, dietary requirements with their definitional entailments, sodium). A larger catalog can only add feasible scenarios, so only scenarios labelled infeasible are re-derived; feasible ones keep their label.",
+  "pool": {
+    "recipes": 4556,
+    "definition": "curated recipes plus release main/soup recipes whose every ingredient is priceable; mappings under the snapshot's confidence floor are absent from it"
+  },
+  "sets": {
+    "developer": {
+      "source": "data/evaluation/dev/planning-v1.json",
+      "new_scenarios": "data/evaluation/dev/planning-catalog-v2.1-new.json",
+      "new_count": 13,
+      "derived": "data/evaluation/dev/planning-catalog-v2.1.json",
+      "changed": [
+        {
+          "id": "dev-019",
+          "name": "impossible-five-minute-limit",
+          "from": false,
+          "to": true,
+          "eligible_recipes": 3,
+          "examples": [
+            "RCP2_652681C20298",
+            "RCP2_CBF6D946C772",
+            "RCP2_EE1E665A0D84"
+          ]
+        },
+        {
+          "id": "dev-020",
+          "name": "impossible-vegan-ten-minute-limit",
+          "from": false,
+          "to": true,
+          "eligible_recipes": 1,
+          "examples": [
+            "RCP2_4A02A115DE5D"
+          ]
+        }
+      ]
+    },
+    "heldout": {
+      "source": "data/evaluation/heldout/planning-v1.json",
+      "new_scenarios": "data/evaluation/heldout/planning-catalog-v2.1-new.json",
+      "new_count": 20,
+      "derived": "data/evaluation/heldout/planning-catalog-v2.1.json",
+      "changed": [
+        {
+          "id": "hold-037",
+          "name": "five-minute hard limit",
+          "from": false,
+          "to": true,
+          "eligible_recipes": 3,
+          "examples": [
+            "RCP2_652681C20298",
+            "RCP2_CBF6D946C772",
+            "RCP2_EE1E665A0D84"
+          ]
+        },
+        {
+          "id": "hold-039",
+          "name": "vegetarian dairy-free five-minute limit",
+          "from": false,
+          "to": true,
+          "eligible_recipes": 1,
+          "examples": [
+            "RCP2_652681C20298"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "set": "planning-catalog-v2.1-new",
+  "drafted_by": "AI agent in a sealed packet (catalog facts, request schema and authoring rules only; no system code, no results, no other held-out scenarios)",
+  "packet": [
+    "catalog.jsonl (the 4,556-recipe planning pool as facts)",
+    "request-schema.md",
+    "rules.md",
+    "check_scenarios.py"
+  ],
+  "review_status": "awaiting owner review",
+  "author_notes": "Infeasible scenarios had to be searched for: on this catalog nearly every realistic combination leaves at least one dish, so hold-119 and hold-120 were chosen knowing they are infeasible. Five scenarios remove fewer than 450 of 3,347 dishes at the default time limit.",
+  "scenarios": {
+    "hold-101": {
+      "author_rationale": "a plausible wrong answer serves satay, gado-gado or a stir fry finished in peanut oil because the dish name does not say peanut",
+      "conflict_reason": null
+    },
+    "hold-102": {
+      "author_rationale": "a plausible wrong answer filters out 'pork' but still serves a bacon-topped pasta, a ham fried rice or pepperoni pizza",
+      "conflict_reason": null
+    },
+    "hold-103": {
+      "author_rationale": "a plausible wrong answer serves a laksa, sambal kangkong with belacan or a crab dish that the title does not flag as shellfish",
+      "conflict_reason": null
+    },
+    "hold-104": {
+      "author_rationale": "a plausible wrong answer serves rice dishes seasoned with ordinary soy sauce or a noodle dish, which carry gluten despite looking safe",
+      "conflict_reason": null
+    },
+    "hold-105": {
+      "author_rationale": "a plausible wrong answer meets one constraint and not the other: a gluten-free chicken rice, or a vegetarian pasta or soba",
+      "conflict_reason": null
+    },
+    "hold-106": {
+      "author_rationale": "a plausible wrong answer leans on tofu, tempeh, edamame or soy-sauce stir fries, the default vegan proteins",
+      "conflict_reason": null
+    },
+    "hold-107": {
+      "author_rationale": "a plausible wrong answer serves ordinary vegetarian curries that start from onion, garlic and ginger, or a potato or egg dish",
+      "conflict_reason": null
+    },
+    "hold-108": {
+      "author_rationale": "a plausible wrong answer serves an egg fried rice, a cheesy pasta or a dish with butter, or a 45-minute braise",
+      "conflict_reason": null
+    },
+    "hold-109": {
+      "author_rationale": "a plausible wrong answer picks stir fries that feel quick but are listed at 20 to 30 minutes of prep plus cook",
+      "conflict_reason": null
+    },
+    "hold-110": {
+      "author_rationale": "a plausible wrong answer serves slow vegetarian dishes such as dal or stews, or quick dishes that contain chicken or fish",
+      "conflict_reason": null
+    },
+    "hold-111": {
+      "author_rationale": "a plausible wrong answer serves a microwave egg fried rice, or fills the week with 15-minute dishes to avoid repeating the few that fit",
+      "conflict_reason": null
+    },
+    "hold-112": {
+      "author_rationale": "a plausible wrong answer serves soy-braised or soup dishes above 500 mg sodium because they look light",
+      "conflict_reason": null
+    },
+    "hold-113": {
+      "author_rationale": "a plausible wrong answer ranks cheesy pastas or noodle dishes near 600 kcal but with little protein above lean chicken or fish bowls",
+      "conflict_reason": null
+    },
+    "hold-114": {
+      "author_rationale": "a plausible wrong answer serves sweet-sauce vegetarian dishes or large carb-heavy noodle bowls, or drops the vegetarian rule while chasing low calories",
+      "conflict_reason": null
+    },
+    "hold-115": {
+      "author_rationale": "a plausible wrong answer ignores the pantry and puts rice and chicken on the shopping list again, or buys more than the known quantities cover",
+      "conflict_reason": null
+    },
+    "hold-116": {
+      "author_rationale": "a plausible wrong answer favours dishes that use the pantry's sesame oil, putting the allergen back on the table",
+      "conflict_reason": null
+    },
+    "hold-117": {
+      "author_rationale": "a plausible wrong answer lists tofu and spinach on the shopping list anyway, or invents a quantity for the spinach whose amount is unknown",
+      "conflict_reason": null
+    },
+    "hold-118": {
+      "author_rationale": "a plausible wrong answer satisfies the diets but serves a 700 mg sodium stir fry, or a 40-minute dish",
+      "conflict_reason": null
+    },
+    "hold-119": {
+      "author_rationale": "a plausible wrong answer quietly returns an 8- or 15-minute vegan dish, or a 3-minute cheese sandwich, instead of reporting the conflict",
+      "conflict_reason": "no vegan dish takes 5 minutes or less; the quickest vegan dish (Quick gazpacho) takes 8 minutes"
+    },
+    "hold-120": {
+      "author_rationale": "a plausible wrong answer returns the 8-minute gazpacho, which contains garlic, instead of reporting that nothing fits",
+      "conflict_reason": "only one vegan dish takes 10 minutes or less (Quick gazpacho, 8 minutes) and it contains garlic; the next quickest vegan dishes take 15 minutes"
+    }
+  }
+}

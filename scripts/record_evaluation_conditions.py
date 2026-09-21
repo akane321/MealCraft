@@ -76,8 +76,11 @@ def main() -> int:
     parser.add_argument("--report", default=REPORT)
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--with-release", action="store_true", help="the report was generated with --release")
+    parser.add_argument("--developer", default=None, help="the developer scenarios, when not the default")
+    parser.add_argument("--heldout", default=None, help="the held-out scenarios, when not the default")
     args = parser.parse_args()
     inputs = {**INPUTS, **(RELEASE_INPUTS if args.with_release else {})}
+    inputs.update({key: value for key, value in (("developer", args.developer), ("heldout", args.heldout)) if value})
 
     report_commit = last_commit(args.report)
     entries: dict[str, dict[str, str]] = {}
