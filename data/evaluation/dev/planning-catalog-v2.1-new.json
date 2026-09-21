@@ -1,0 +1,167 @@
+[
+  {
+    "id": "dev-101",
+    "name": "fish-allergy",
+    "category": "allergen",
+    "expected_feasible": true,
+    "request": {
+      "allergens": [
+        "fish"
+      ]
+    }
+  },
+  {
+    "id": "dev-102",
+    "name": "no-beef",
+    "category": "exclusion",
+    "expected_feasible": true,
+    "request": {
+      "excluded_ingredients": [
+        "beef",
+        "ground_beef",
+        "beef_steak"
+      ]
+    }
+  },
+  {
+    "id": "dev-103",
+    "name": "tree-nut-allergy-quick",
+    "category": "allergen",
+    "expected_feasible": true,
+    "request": {
+      "allergens": [
+        "tree_nut"
+      ],
+      "max_cooking_time_minutes": 30
+    }
+  },
+  {
+    "id": "dev-104",
+    "name": "no-mushroom",
+    "category": "exclusion",
+    "expected_feasible": true,
+    "request": {
+      "excluded_ingredients": [
+        "mushroom"
+      ]
+    }
+  },
+  {
+    "id": "dev-105",
+    "name": "ten-minute-dinners",
+    "category": "time",
+    "expected_feasible": true,
+    "request": {
+      "max_cooking_time_minutes": 10
+    }
+  },
+  {
+    "id": "dev-106",
+    "name": "fifteen-minute-vegan",
+    "category": "time",
+    "expected_feasible": true,
+    "request": {
+      "dietary_preferences": [
+        "vegan"
+      ],
+      "max_cooking_time_minutes": 15
+    }
+  },
+  {
+    "id": "dev-107",
+    "name": "gluten-free-dairy-free",
+    "category": "dietary",
+    "expected_feasible": true,
+    "request": {
+      "dietary_preferences": [
+        "gluten-free",
+        "dairy-free"
+      ]
+    }
+  },
+  {
+    "id": "dev-108",
+    "name": "vegetarian-peanut-shellfish",
+    "category": "allergen",
+    "expected_feasible": true,
+    "request": {
+      "allergens": [
+        "peanut",
+        "shellfish"
+      ],
+      "dietary_preferences": [
+        "vegetarian"
+      ]
+    }
+  },
+  {
+    "id": "dev-109",
+    "name": "sodium-ceiling-400",
+    "category": "nutrition",
+    "expected_feasible": true,
+    "request": {
+      "max_sodium_mg_per_meal": 400
+    }
+  },
+  {
+    "id": "dev-110",
+    "name": "all-nine-allergens-ten-minutes",
+    "category": "allergen",
+    "expected_feasible": true,
+    "request": {
+      "allergens": [
+        "dairy",
+        "egg",
+        "fish",
+        "gluten",
+        "peanut",
+        "sesame",
+        "shellfish",
+        "soy",
+        "tree_nut"
+      ],
+      "max_cooking_time_minutes": 10
+    }
+  },
+  {
+    "id": "dev-111",
+    "name": "vegan-gluten-free-ten-minutes",
+    "category": "time",
+    "expected_feasible": true,
+    "request": {
+      "dietary_preferences": [
+        "vegan",
+        "gluten-free"
+      ],
+      "max_cooking_time_minutes": 10
+    }
+  },
+  {
+    "id": "dev-112",
+    "name": "known-rice-pantry",
+    "category": "pantry",
+    "expected_feasible": true,
+    "request": {
+      "available_ingredients": [
+        {
+          "normalized_name": "rice",
+          "quantity": 1000,
+          "unit": "g"
+        }
+      ]
+    }
+  },
+  {
+    "id": "dev-113",
+    "name": "impossible-gluten-free-dairy-free-five-minutes",
+    "category": "infeasible",
+    "expected_feasible": false,
+    "request": {
+      "dietary_preferences": [
+        "gluten-free",
+        "dairy-free"
+      ],
+      "max_cooking_time_minutes": 5
+    }
+  }
+]

@@ -172,9 +172,47 @@ longer holds. Their six repetitions come from those episodes, where one to three
 recipes are eligible. The developer set's two matching episodes (`dev-019`,
 `dev-020`) fail its gate for the same reason. The episodes are not edited here:
 held-out expectations are fixed, and the larger catalog needs its own authored
-conditions (priority 2). Every other episode's shopping list is complete; the
+conditions (authored below). Every other episode's shopping list is complete; the
 run first exposed a weekly-aggregation fault that turned one ingredient needed
 in two units into an unknown amount, fixed before this report.
+
+#### Scenario sets written for the larger catalog
+
+Conditions for the larger catalog were then authored
+([report](evaluation/workbench/catalog-v2.1-scenarios/latest.md),
+[conditions](evaluation/workbench/catalog-v2.1-scenarios/conditions.json)):
+
+- the v1 scenarios relabelled from the catalog alone by
+  `scripts/derive_catalog_labels.py`, which runs no system under test
+  ([record](evaluation/catalog-v2.1-labels.json)): `dev-019`, `dev-020`,
+  `hold-037` and `hold-039` become feasible, and every other label stands,
+  since a larger catalog can only add feasible scenarios;
+- 13 developer scenarios for what the larger catalog can express (fish,
+  tree-nut and nine-allergen requests, excluded meats, 10-15 minute dinners),
+  chosen not to overlap the held-out ones;
+- 20 held-out scenarios drafted by an AI agent in a sealed packet (catalog
+  facts, request schema and authoring rules; no code, results or other held-out
+  cases) and accepted by the owner in two rounds, four revised in between
+  ([review](../data/evaluation/heldout/planning-catalog-v2.1-new.review.json)).
+  None is infeasible: written as household requests first, the two that were
+  meant to be came out feasible, and realistic zero-match requests are rare on
+  this catalog. Infeasibility is covered by v1's `hold-038` and `hold-040`.
+
+| Held-out, 60 scenarios | Greedy baseline | Strong Rule-only | MealCraft |
+| --- | ---: | ---: | ---: |
+| Scenario expectation rate | 1.0 | 1.0 | 1.0 |
+| Adjacent repetitions | 348 | 6 | 6 |
+| Mean distinct recipes | 1.0 | 1.9828 | 6.6897 |
+| Hard-constraint violations | 0 | 0 | 0 |
+| Recorded failure cases | 58 | 1 | 1 |
+
+The one failure MealCraft and the Strong Rule-only reference share is
+`hold-039`, where exactly one dish meets the constraints, so a week of seven
+must repeat it; the protocol counts that as a failure and it is reported as
+one. The same holds for the developer set's two failures (`dev-020`,
+`dev-111`, one eligible dish each), which is why its gate fails. The scoring
+rule is not changed here: changing it after seeing these results would be
+fitting the evaluation to them (priority 2).
 
 **Read this comparison carefully.** Against the strong reference, MealCraft ties
 on scenario expectation rate (`1.0` each), hard-constraint violations (`0` each)
@@ -245,9 +283,9 @@ the next incomplete control. It is a navigation aid, not a second status source.
 ## Current Priorities
 
 1. Record a signed-in run of the home surface against the real backend.
-2. Author evaluation conditions for the larger catalog: two infeasible
-   scenarios (a five-minute limit) are feasible on it, so their expectations
-   hold only for the 30-recipe catalog they were written against.
+2. Decide, independently of the larger-catalog results, whether a repetition
+   the catalog forces (one eligible dish) should count as a planning failure;
+   the protocol counts every adjacent repetition today.
 3. Complete nutrition-target and elastic-preference semantics and evidence.
 4. Test FairPrice live/cache/fixture degradation against real changes.
 5. Integrate the verified Planning v2 components into the product path, then

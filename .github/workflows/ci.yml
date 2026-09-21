@@ -41,6 +41,9 @@ jobs:
       - name: Catalog reality page is current
         run: python scripts/report_catalog_reality.py --check
 
+      - name: Larger-catalog scenario labels are current
+        run: python scripts/derive_catalog_labels.py --check
+
   backend:
     name: backend
     runs-on: ubuntu-latest

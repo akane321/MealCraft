@@ -1,0 +1,837 @@
+[
+  {
+    "id": "hold-001",
+    "name": "three-person default week",
+    "category": "basic",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 3
+    }
+  },
+  {
+    "id": "hold-002",
+    "name": "single-person default week",
+    "category": "basic",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 1
+    }
+  },
+  {
+    "id": "hold-003",
+    "name": "large household default week",
+    "category": "basic",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 6
+    }
+  },
+  {
+    "id": "hold-004",
+    "name": "forty-five-minute meals",
+    "category": "basic",
+    "expected_feasible": true,
+    "request": {
+      "max_cooking_time_minutes": 45
+    }
+  },
+  {
+    "id": "hold-005",
+    "name": "fixture pricing explicit",
+    "category": "basic",
+    "expected_feasible": true,
+    "request": {
+      "pricing_mode": "fixture"
+    }
+  },
+  {
+    "id": "hold-006",
+    "name": "peanut allergy",
+    "category": "hard-restriction",
+    "expected_feasible": true,
+    "request": {
+      "allergens": [
+        "peanut"
+      ]
+    }
+  },
+  {
+    "id": "hold-007",
+    "name": "dairy allergy",
+    "category": "hard-restriction",
+    "expected_feasible": true,
+    "request": {
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "id": "hold-008",
+    "name": "gluten allergy",
+    "category": "hard-restriction",
+    "expected_feasible": true,
+    "request": {
+      "allergens": [
+        "gluten"
+      ]
+    }
+  },
+  {
+    "id": "hold-009",
+    "name": "exclude tofu",
+    "category": "hard-restriction",
+    "expected_feasible": true,
+    "request": {
+      "excluded_ingredients": [
+        "firm_tofu"
+      ]
+    }
+  },
+  {
+    "id": "hold-010",
+    "name": "exclude tomato",
+    "category": "hard-restriction",
+    "expected_feasible": true,
+    "request": {
+      "excluded_ingredients": [
+        "tomato"
+      ]
+    }
+  },
+  {
+    "id": "hold-011",
+    "name": "strict sodium seven hundred",
+    "category": "hard-restriction",
+    "expected_feasible": true,
+    "request": {
+      "max_sodium_mg_per_meal": 700
+    }
+  },
+  {
+    "id": "hold-012",
+    "name": "strict sodium four hundred",
+    "category": "hard-restriction",
+    "expected_feasible": true,
+    "request": {
+      "max_sodium_mg_per_meal": 400
+    }
+  },
+  {
+    "id": "hold-013",
+    "name": "vegetarian household",
+    "category": "hard-restriction",
+    "expected_feasible": true,
+    "request": {
+      "dietary_preferences": [
+        "vegetarian"
+      ]
+    }
+  },
+  {
+    "id": "hold-014",
+    "name": "gluten-free household",
+    "category": "hard-restriction",
+    "expected_feasible": true,
+    "request": {
+      "dietary_preferences": [
+        "gluten-free"
+      ]
+    }
+  },
+  {
+    "id": "hold-015",
+    "name": "vegetarian and dairy-free",
+    "category": "combined-constraints",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "dietary_preferences": [
+        "vegetarian",
+        "dairy-free"
+      ]
+    }
+  },
+  {
+    "id": "hold-016",
+    "name": "vegan low sodium",
+    "category": "combined-constraints",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "dietary_preferences": [
+        "vegan"
+      ],
+      "health_preferences": [
+        "low-sodium"
+      ],
+      "max_sodium_mg_per_meal": 800
+    }
+  },
+  {
+    "id": "hold-017",
+    "name": "quick vegetarian",
+    "category": "combined-constraints",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "dietary_preferences": [
+        "vegetarian"
+      ],
+      "max_cooking_time_minutes": 30
+    }
+  },
+  {
+    "id": "hold-018",
+    "name": "soy-free gluten-free",
+    "category": "combined-constraints",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "allergens": [
+        "soy"
+      ],
+      "dietary_preferences": [
+        "gluten-free"
+      ]
+    }
+  },
+  {
+    "id": "hold-019",
+    "name": "dairy-free exclude chicken",
+    "category": "combined-constraints",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "dietary_preferences": [
+        "dairy-free"
+      ],
+      "excluded_ingredients": [
+        "chicken_breast"
+      ]
+    }
+  },
+  {
+    "id": "hold-020",
+    "name": "four people quick and low sodium",
+    "category": "combined-constraints",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 4,
+      "max_cooking_time_minutes": 35,
+      "max_sodium_mg_per_meal": 750
+    }
+  },
+  {
+    "id": "hold-021",
+    "name": "vegetarian peanut allergy",
+    "category": "combined-constraints",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "dietary_preferences": [
+        "vegetarian"
+      ],
+      "allergens": [
+        "peanut"
+      ]
+    }
+  },
+  {
+    "id": "hold-022",
+    "name": "dairy and egg allergy",
+    "category": "combined-constraints",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "allergens": [
+        "dairy",
+        "egg"
+      ]
+    }
+  },
+  {
+    "id": "hold-023",
+    "name": "ten dollar meal budget",
+    "category": "budget-time",
+    "expected_feasible": true,
+    "request": {
+      "budget_per_meal_sgd": 10
+    }
+  },
+  {
+    "id": "hold-024",
+    "name": "six dollar meal budget",
+    "category": "budget-time",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "budget_per_meal_sgd": 6
+    }
+  },
+  {
+    "id": "hold-025",
+    "name": "seventy dollar weekly budget",
+    "category": "budget-time",
+    "expected_feasible": true,
+    "request": {
+      "weekly_budget_sgd": 70
+    }
+  },
+  {
+    "id": "hold-026",
+    "name": "forty dollar weekly budget",
+    "category": "budget-time",
+    "difficulty": "edge",
+    "expected_feasible": true,
+    "request": {
+      "weekly_budget_sgd": 40
+    }
+  },
+  {
+    "id": "hold-027",
+    "name": "quick meal with weekly budget",
+    "category": "budget-time",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "max_cooking_time_minutes": 30,
+      "weekly_budget_sgd": 65
+    }
+  },
+  {
+    "id": "hold-028",
+    "name": "family per-meal budget",
+    "category": "budget-time",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 5,
+      "budget_per_meal_sgd": 22,
+      "weekly_budget_sgd": 145
+    }
+  },
+  {
+    "id": "hold-029",
+    "name": "calorie and protein targets",
+    "category": "nutrition-preference",
+    "expected_feasible": true,
+    "request": {
+      "nutrition_targets": {
+        "calories_kcal": 600,
+        "protein_g": 40
+      }
+    }
+  },
+  {
+    "id": "hold-030",
+    "name": "balanced macro targets",
+    "category": "nutrition-preference",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "nutrition_targets": {
+        "calories_kcal": 500,
+        "protein_g": 30,
+        "carbohydrate_g": 55,
+        "fat_g": 18
+      }
+    }
+  },
+  {
+    "id": "hold-031",
+    "name": "lower calorie preference",
+    "category": "nutrition-preference",
+    "expected_feasible": true,
+    "request": {
+      "health_preferences": [
+        "lower-calorie"
+      ]
+    }
+  },
+  {
+    "id": "hold-032",
+    "name": "low sugar and low sodium preferences",
+    "category": "nutrition-preference",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "health_preferences": [
+        "low-sugar",
+        "low-sodium"
+      ]
+    }
+  },
+  {
+    "id": "hold-033",
+    "name": "protein target with sodium ceiling",
+    "category": "nutrition-preference",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "nutrition_targets": {
+        "protein_g": 45
+      },
+      "max_sodium_mg_per_meal": 650
+    }
+  },
+  {
+    "id": "hold-034",
+    "name": "known rice pantry",
+    "category": "pantry-grocery",
+    "expected_feasible": true,
+    "request": {
+      "available_ingredients": [
+        {
+          "normalized_name": "brown_rice",
+          "quantity": 1000,
+          "unit": "g"
+        }
+      ]
+    }
+  },
+  {
+    "id": "hold-035",
+    "name": "unknown tofu pantry",
+    "category": "pantry-grocery",
+    "expected_feasible": true,
+    "request": {
+      "available_ingredients": [
+        {
+          "normalized_name": "firm_tofu"
+        }
+      ]
+    }
+  },
+  {
+    "id": "hold-036",
+    "name": "mixed known and unknown pantry",
+    "category": "pantry-grocery",
+    "difficulty": "combined",
+    "expected_feasible": true,
+    "request": {
+      "available_ingredients": [
+        {
+          "normalized_name": "tomato",
+          "quantity": 500,
+          "unit": "g"
+        },
+        {
+          "normalized_name": "chicken_breast"
+        },
+        {
+          "normalized_name": "lemon",
+          "quantity": 2,
+          "unit": "piece"
+        }
+      ]
+    }
+  },
+  {
+    "id": "hold-037",
+    "name": "five-minute hard limit",
+    "category": "infeasible-conflict",
+    "difficulty": "edge",
+    "expected_feasible": true,
+    "request": {
+      "max_cooking_time_minutes": 5
+    }
+  },
+  {
+    "id": "hold-038",
+    "name": "vegan five-minute hard limit",
+    "category": "infeasible-conflict",
+    "difficulty": "edge",
+    "expected_feasible": false,
+    "request": {
+      "dietary_preferences": [
+        "vegan"
+      ],
+      "max_cooking_time_minutes": 5
+    }
+  },
+  {
+    "id": "hold-039",
+    "name": "vegetarian dairy-free five-minute limit",
+    "category": "infeasible-conflict",
+    "difficulty": "edge",
+    "expected_feasible": true,
+    "request": {
+      "dietary_preferences": [
+        "vegetarian",
+        "dairy-free"
+      ],
+      "max_cooking_time_minutes": 5
+    }
+  },
+  {
+    "id": "hold-040",
+    "name": "all major allergens and five-minute limit",
+    "category": "infeasible-conflict",
+    "difficulty": "edge",
+    "expected_feasible": false,
+    "request": {
+      "allergens": [
+        "peanut",
+        "soy",
+        "gluten",
+        "sesame",
+        "dairy",
+        "egg",
+        "fish",
+        "shellfish"
+      ],
+      "max_cooking_time_minutes": 5
+    }
+  },
+  {
+    "id": "hold-101",
+    "name": "child allergic to peanuts and tree nuts, weeknight dinners in 30 minutes",
+    "category": "combined-constraints",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 4,
+      "allergens": [
+        "peanut",
+        "tree_nut"
+      ],
+      "max_cooking_time_minutes": 30
+    }
+  },
+  {
+    "id": "hold-102",
+    "name": "Muslim family, no pork in any form",
+    "category": "hard-restriction",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 5,
+      "excluded_ingredients": [
+        "pork",
+        "pork_chop",
+        "pork_belly",
+        "ground_pork",
+        "bacon",
+        "ham",
+        "pepperoni"
+      ]
+    }
+  },
+  {
+    "id": "hold-103",
+    "name": "son with a shellfish allergy",
+    "category": "hard-restriction",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 3,
+      "allergens": [
+        "shellfish"
+      ]
+    }
+  },
+  {
+    "id": "hold-104",
+    "name": "coeliac mum, whole household eats gluten-free",
+    "category": "hard-restriction",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 4,
+      "dietary_preferences": [
+        "gluten-free"
+      ]
+    }
+  },
+  {
+    "id": "hold-105",
+    "name": "vegetarian couple, one of them coeliac",
+    "category": "combined-constraints",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 2,
+      "dietary_preferences": [
+        "vegetarian",
+        "gluten-free"
+      ]
+    }
+  },
+  {
+    "id": "hold-106",
+    "name": "vegan flat with a soy allergy",
+    "category": "combined-constraints",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 3,
+      "dietary_preferences": [
+        "vegan"
+      ],
+      "allergens": [
+        "soy"
+      ]
+    }
+  },
+  {
+    "id": "hold-107",
+    "name": "vegetarian, no egg, onion (incl. shallot and spring onion), garlic, ginger, potato or carrot",
+    "category": "combined-constraints",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 4,
+      "dietary_preferences": [
+        "vegetarian"
+      ],
+      "excluded_ingredients": [
+        "egg",
+        "onion",
+        "red_onion",
+        "yellow_onion",
+        "green_onion",
+        "shallot",
+        "onion_powder",
+        "garlic",
+        "garlic_powder",
+        "garlic_salt",
+        "ginger_garlic",
+        "ginger",
+        "potato",
+        "hash_brown",
+        "tater_tots",
+        "instant_mashed_potato",
+        "potato_chip",
+        "carrot"
+      ]
+    }
+  },
+  {
+    "id": "hold-108",
+    "name": "toddler allergic to egg and dairy, weeknight dinners in 30 minutes",
+    "category": "combined-constraints",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 3,
+      "allergens": [
+        "egg",
+        "dairy"
+      ],
+      "max_cooking_time_minutes": 30
+    }
+  },
+  {
+    "id": "hold-109",
+    "name": "working couple who want dinner on the table in 15 minutes",
+    "category": "budget-time",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 2,
+      "max_cooking_time_minutes": 15
+    }
+  },
+  {
+    "id": "hold-110",
+    "name": "vegetarian family of five, 20 minutes after school runs",
+    "category": "budget-time",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 5,
+      "dietary_preferences": [
+        "vegetarian"
+      ],
+      "max_cooking_time_minutes": 20
+    }
+  },
+  {
+    "id": "hold-111",
+    "name": "single parent with an egg-allergic child, 10 minutes a night",
+    "category": "budget-time",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 2,
+      "allergens": [
+        "egg"
+      ],
+      "max_cooking_time_minutes": 10
+    }
+  },
+  {
+    "id": "hold-112",
+    "name": "grandfather with high blood pressure, under 500 mg sodium per meal",
+    "category": "nutrition-preference",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 3,
+      "max_sodium_mg_per_meal": 500,
+      "health_preferences": [
+        "low-sodium"
+      ]
+    }
+  },
+  {
+    "id": "hold-113",
+    "name": "gym-goer wanting high-protein, moderate-calorie dinners",
+    "category": "nutrition-preference",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 1,
+      "nutrition_targets": {
+        "calories_kcal": 600,
+        "protein_g": 40,
+        "fat_g": 20
+      }
+    }
+  },
+  {
+    "id": "hold-114",
+    "name": "pre-diabetic Buddhist grandmother, vegetarian, watching sugar and calories",
+    "category": "nutrition-preference",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 2,
+      "dietary_preferences": [
+        "vegetarian"
+      ],
+      "health_preferences": [
+        "low-sugar",
+        "lower-calorie"
+      ],
+      "nutrition_targets": {
+        "calories_kcal": 450,
+        "carbohydrate_g": 45
+      }
+    }
+  },
+  {
+    "id": "hold-115",
+    "name": "Muslim family using up rice, chicken and bok choy already bought",
+    "category": "pantry-grocery",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 4,
+      "excluded_ingredients": [
+        "pork",
+        "pork_chop",
+        "pork_belly",
+        "ground_pork",
+        "bacon",
+        "ham",
+        "pepperoni"
+      ],
+      "available_ingredients": [
+        {
+          "normalized_name": "rice",
+          "quantity": 2000,
+          "unit": "g"
+        },
+        {
+          "normalized_name": "chicken_breast",
+          "quantity": 1000,
+          "unit": "g"
+        },
+        {
+          "normalized_name": "bok_choy",
+          "quantity": 500,
+          "unit": "g"
+        }
+      ]
+    }
+  },
+  {
+    "id": "hold-116",
+    "name": "child just diagnosed with a sesame allergy, cupboard still has sesame oil",
+    "category": "pantry-grocery",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 4,
+      "allergens": [
+        "sesame"
+      ],
+      "available_ingredients": [
+        {
+          "normalized_name": "sesame_oil"
+        },
+        {
+          "normalized_name": "soy_sauce"
+        },
+        {
+          "normalized_name": "garlic"
+        },
+        {
+          "normalized_name": "ginger"
+        }
+      ]
+    }
+  },
+  {
+    "id": "hold-117",
+    "name": "vegetarian pair with tofu in the fridge and some spinach",
+    "category": "pantry-grocery",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 2,
+      "dietary_preferences": [
+        "vegetarian"
+      ],
+      "available_ingredients": [
+        {
+          "normalized_name": "tofu",
+          "quantity": 600,
+          "unit": "g"
+        },
+        {
+          "normalized_name": "spinach"
+        }
+      ]
+    }
+  },
+  {
+    "id": "hold-118",
+    "name": "coeliac with a heart condition: gluten-free, dairy-free, under 400 mg sodium, 30 minutes",
+    "category": "combined-constraints",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 2,
+      "dietary_preferences": [
+        "gluten-free",
+        "dairy-free"
+      ],
+      "max_sodium_mg_per_meal": 400,
+      "max_cooking_time_minutes": 30
+    }
+  },
+  {
+    "id": "hold-119",
+    "name": "grandma on a 300 mg sodium limit, grandpa allergic to shellfish, up to 45 minutes",
+    "category": "combined-constraints",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 2,
+      "max_sodium_mg_per_meal": 300,
+      "allergens": [
+        "shellfish"
+      ],
+      "max_cooking_time_minutes": 45,
+      "health_preferences": [
+        "low-sodium"
+      ]
+    }
+  },
+  {
+    "id": "hold-120",
+    "name": "family that eats no beef, daughter allergic to dairy, dinners in 25 minutes",
+    "category": "combined-constraints",
+    "expected_feasible": true,
+    "request": {
+      "household_size": 4,
+      "excluded_ingredients": [
+        "beef",
+        "beef_steak",
+        "ground_beef",
+        "beef_broth",
+        "corned_beef",
+        "beef_or_turkey"
+      ],
+      "allergens": [
+        "dairy"
+      ],
+      "max_cooking_time_minutes": 25
+    }
+  }
+]
