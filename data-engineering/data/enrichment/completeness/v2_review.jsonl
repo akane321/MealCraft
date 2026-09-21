@@ -1107,7 +1107,7 @@
 {"recipe_id": "RCP2_ECC200832F74", "verdict": "false_positive", "allergens": [], "evidence": "'1 starch/bread' is a diet exchange", "enriched_by": "claude/akane321", "source": "flagged"}
 {"recipe_id": "RCP2_ECD3508409E7", "verdict": "false_positive", "allergens": [], "evidence": "glutinous-rice flour is listed and is gluten-free", "enriched_by": "claude/akane321", "source": "flagged"}
 {"recipe_id": "RCP2_ECF05E63B16F", "verdict": "optional_mention", "allergens": [], "evidence": "'Spoon this sauce over ice milk or cake' serving suggestion", "enriched_by": "claude/akane321", "source": "flagged"}
-{"recipe_id": "RCP2_ED0221465AFC", "verdict": "incomplete", "allergens": ["eggs"], "evidence": "listed 'fat free egg substitute' is egg-white based and used as the egg; not labelled egg (tortilla = omelette)", "enriched_by": "claude/akane321", "source": "flagged"}
+{"recipe_id": "RCP2_ED0221465AFC", "verdict": "false_positive", "allergens": [], "evidence": "the listed 'fat free egg substitute' is what the steps use; nothing unlisted is needed (owner audit)", "enriched_by": "claude/akane321", "source": "flagged", "corrected_by": "owner audit 2026-09-21"}
 {"recipe_id": "RCP2_ED44D4B50BE1", "verdict": "optional_mention", "allergens": [], "evidence": "'with kraft cheese' is a serving suggestion", "enriched_by": "claude/akane321", "source": "flagged"}
 {"recipe_id": "RCP2_ED6DF84AC5AF", "verdict": "complete", "allergens": [], "evidence": "all allergen foods used in the steps are listed", "enriched_by": "claude/akane321", "source": "sample"}
 {"recipe_id": "RCP2_ED77755E2997", "verdict": "false_positive", "allergens": [], "evidence": "\"omit salt and butter\" means no butter is used", "enriched_by": "claude/akane321", "source": "flagged"}

@@ -67,7 +67,9 @@ Release v2.1 differs from v2 only in what the build checks (`data-engineering`,
   the allergen they carry ("peanut butter" is peanut, "almond milk" tree nut)
   and false friends are removed ("cream of tartar", "eggplant"). A fixed-seed
   sample of 300 recipes the check did not flag, reviewed in full, found one
-  incomplete (an unlisted mayonnaise); the word list was extended after it.
+  incomplete (an unlisted mayonnaise); the word list was extended after it. The
+  owner's audit of 40 decisions accepted 39 and found no wrong keep
+  (`data-engineering/docs/completeness-v2.1-sampled-audit.json`).
 - Ten ingredients carry owner-confirmed allergen additions, only ever stricter
   (`data-engineering/config/allergen_corrections.csv`): butter or margarine and
   margarine (dairy), the three condensed cream soups (dairy, gluten), tortilla

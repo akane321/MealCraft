@@ -1,0 +1,222 @@
+{
+ "seed": 20260923,
+ "reviewer": "owner",
+ "sampled": 40,
+ "verdicts_recorded": 40,
+ "by_stratum": {
+  "kept": {
+   "accepted": 25,
+   "corrected": 0
+  },
+  "incomplete": {
+   "accepted": 9,
+   "corrected": 1
+  },
+  "sample": {
+   "accepted": 5,
+   "corrected": 0
+  }
+ },
+ "verdicts": [
+  {
+   "recipe_id": "RCP2_011288A0DAAA",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_0D118A293E03",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_279D7712CA13",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_27B913DB6189",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_28EBE4625B29",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_2EF92D8C1E12",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_30002388F102",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_35B1FDCB2F8A",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_3818E207CF28",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_3E7CE9B2BBD4",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_3FB55AD8597F",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_478193540896",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_57CCE636C4A8",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_584ADDF64470",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_61BEACE4453F",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_634F7CFF5B86",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_66E72B2B21C5",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_6787A3363BE8",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_6C6B9D582D4E",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_721AE807DD51",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_770DAB11456F",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_773D9A398016",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_7B1E7FE75235",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_85D7442E0A42",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_914067642FBA",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_948B2A019A13",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_96B61DA56C6E",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_97212BD62545",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_9D4EEDEC62BC",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_AEF7915901FA",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_B40A6E43C146",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_C2E220BDE3C8",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_C4333C1C5043",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_C7C11F3DB671",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_C9A0E734CB5E",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_CB1B9FADAB7B",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_DA69FB25F14F",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_ED0221465AFC",
+   "verdict": "corrected",
+   "note": "The recipe explicitly lists “1 cup fat free egg substitute,” and the steps use that same egg substitute. Nothing in the text says an unlisted egg is required. The review infers that the substitute is egg-white based, which violates the text-only rule. This should be kept rather than dropped."
+  },
+  {
+   "recipe_id": "RCP2_FFB7894923E0",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_FFDC657F50AE",
+   "verdict": "accepted",
+   "note": ""
+  }
+ ]
+}
