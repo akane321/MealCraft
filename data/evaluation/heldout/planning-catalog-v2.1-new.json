@@ -1,14 +1,16 @@
 [
   {
     "id": "hold-101",
-    "name": "peanut-allergic family of four",
-    "category": "hard-restriction",
+    "name": "child allergic to peanuts and tree nuts, weeknight dinners in 30 minutes",
+    "category": "combined-constraints",
     "expected_feasible": true,
     "request": {
       "household_size": 4,
       "allergens": [
-        "peanut"
-      ]
+        "peanut",
+        "tree_nut"
+      ],
+      "max_cooking_time_minutes": 30
     }
   },
   {
@@ -83,7 +85,7 @@
   },
   {
     "id": "hold-107",
-    "name": "Jain household: vegetarian, no eggs, no onion, garlic or root vegetables",
+    "name": "vegetarian, no egg, onion (incl. shallot and spring onion), garlic, ginger, potato or carrot",
     "category": "combined-constraints",
     "expected_feasible": true,
     "request": {
@@ -98,25 +100,18 @@
         "yellow_onion",
         "green_onion",
         "shallot",
-        "leek",
-        "chives",
+        "onion_powder",
         "garlic",
         "garlic_powder",
         "garlic_salt",
-        "onion_powder",
         "ginger_garlic",
-        "potato",
-        "sweet_potato",
-        "carrot",
         "ginger",
-        "beet",
-        "daikon",
-        "parsnip",
-        "cassava",
+        "potato",
         "hash_brown",
         "tater_tots",
         "instant_mashed_potato",
-        "potato_chip"
+        "potato_chip",
+        "carrot"
       ]
     }
   },
@@ -317,34 +312,40 @@
   },
   {
     "id": "hold-119",
-    "name": "vegan housemates who want 5-minute dinners",
-    "category": "infeasible-conflict",
-    "expected_feasible": false,
+    "name": "grandma on a 300 mg sodium limit, grandpa allergic to shellfish, up to 45 minutes",
+    "category": "combined-constraints",
+    "expected_feasible": true,
     "request": {
-      "household_size": 3,
-      "dietary_preferences": [
-        "vegan"
+      "household_size": 2,
+      "max_sodium_mg_per_meal": 300,
+      "allergens": [
+        "shellfish"
       ],
-      "max_cooking_time_minutes": 5
+      "max_cooking_time_minutes": 45,
+      "health_preferences": [
+        "low-sodium"
+      ]
     }
   },
   {
     "id": "hold-120",
-    "name": "low-FODMAP vegan: no garlic or onion, 10-minute dinners",
-    "category": "infeasible-conflict",
-    "expected_feasible": false,
+    "name": "family that eats no beef, daughter allergic to dairy, dinners in 25 minutes",
+    "category": "combined-constraints",
+    "expected_feasible": true,
     "request": {
-      "household_size": 1,
-      "dietary_preferences": [
-        "vegan"
-      ],
+      "household_size": 4,
       "excluded_ingredients": [
-        "garlic",
-        "onion",
-        "garlic_powder",
-        "onion_powder"
+        "beef",
+        "beef_steak",
+        "ground_beef",
+        "beef_broth",
+        "corned_beef",
+        "beef_or_turkey"
       ],
-      "max_cooking_time_minutes": 10
+      "allergens": [
+        "dairy"
+      ],
+      "max_cooking_time_minutes": 25
     }
   }
 ]

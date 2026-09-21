@@ -7,11 +7,11 @@
     "rules.md",
     "check_scenarios.py"
   ],
-  "review_status": "awaiting owner review",
-  "author_notes": "Infeasible scenarios had to be searched for: on this catalog nearly every realistic combination leaves at least one dish, so hold-119 and hold-120 were chosen knowing they are infeasible. Five scenarios remove fewer than 450 of 3,347 dishes at the default time limit.",
+  "review_status": "accepted by the owner in two rounds (planning-catalog-v2.1-new.review.json)",
+  "author_notes": "Infeasible scenarios had to be searched for: on this catalog nearly every realistic combination leaves at least one dish, so hold-119 and hold-120 were chosen knowing they are infeasible. Five scenarios remove fewer than 450 of 3,347 dishes at the default time limit. After review, the two infeasible drafts were replaced by requests written before querying; both came out feasible, so this set has no infeasible scenario (v1's hold-038 and hold-040 remain infeasible in the combined held-out set). The author notes the replacements were written after heavy querying for the first draft.",
   "scenarios": {
     "hold-101": {
-      "author_rationale": "a plausible wrong answer serves satay, gado-gado or a stir fry finished in peanut oil because the dish name does not say peanut",
+      "author_rationale": "a plausible wrong answer serves satay, a cashew chicken stir fry or a dish finished in peanut oil, or a 45-minute curry",
       "conflict_reason": null
     },
     "hold-102": {
@@ -83,12 +83,18 @@
       "conflict_reason": null
     },
     "hold-119": {
-      "author_rationale": "a plausible wrong answer quietly returns an 8- or 15-minute vegan dish, or a 3-minute cheese sandwich, instead of reporting the conflict",
-      "conflict_reason": "no vegan dish takes 5 minutes or less; the quickest vegan dish (Quick gazpacho) takes 8 minutes"
+      "author_rationale": "a plausible wrong answer serves a soy-braised or stock-based soup above 300 mg sodium, or a prawn dish that looks light and healthy",
+      "conflict_reason": null
     },
     "hold-120": {
-      "author_rationale": "a plausible wrong answer returns the 8-minute gazpacho, which contains garlic, instead of reporting that nothing fits",
-      "conflict_reason": "only one vegan dish takes 10 minutes or less (Quick gazpacho, 8 minutes) and it contains garlic; the next quickest vegan dishes take 15 minutes"
+      "author_rationale": "a plausible wrong answer serves a beef-broth noodle soup, a buttered or cheesy dish, or a 30-minute stir fry",
+      "conflict_reason": null
     }
+  },
+  "revisions": {
+    "hold-101": "owner: too weak for a slot; replaced by a peanut and tree-nut allergy with a 30-minute limit",
+    "hold-107": "owner: wording promised more than the exclusions; name narrowed to the exact foods excluded",
+    "hold-119": "owner: reverse-selected to be infeasible; replaced by a request written first, labelled afterwards (feasible)",
+    "hold-120": "owner: reverse-selected, and 'low-FODMAP' broader than the exclusions; replaced the same way (feasible)"
   }
 }
