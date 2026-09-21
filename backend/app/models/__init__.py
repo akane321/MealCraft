@@ -11,7 +11,7 @@ from app.models.platform import (
     UserCredential,
 )
 from app.models.product import ProductSnapshot
-from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
+from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 
 __all__ = [
     "AgentMessage",
@@ -21,6 +21,7 @@ __all__ = [
     "AgentToolExecution",
     "AuditEvent",
     "AuthSession",
+    "CatalogImport",
     "Household",
     "HouseholdProfile",
     "HouseholdProfileVersion",

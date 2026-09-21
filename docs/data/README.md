@@ -22,11 +22,33 @@ remains the canonical cross-module contract.
 | State | Meaning |
 | --- | --- |
 | Verified baseline | Merged runtime behaviour supported by current code and tests |
-| Released data | A versioned release cut by the `data-engineering/` pipeline, not yet imported into the runtime catalog |
+| Released data | A versioned release cut by the `data-engineering/` pipeline; release v2 is imported beside the curated catalog |
 | Accepted target | The intended module responsibility and release contract |
 
-The runtime catalog is the compact one in `data/recipes/recipes.json` and
+The curated runtime catalog is the compact one in `data/recipes/recipes.json` and
 `data/ingredients/ingredients.json`, loaded by `backend/app/data/catalog.py`.
+Held-out episodes, planning fixtures and tests name its slugs, so it stays as it is.
+
+Release v2 is loaded beside it by `python -m app.data.import_release_v2`
+(`backend/app/data/release_v2.py`), which compose runs after the curated import:
+
+- v2 recipes carry `release_version = "v2"`, `external_id` (the release
+  `recipe_id`) and a slug `v2-<title>-<id suffix>`, plus the release-only fields
+  course, meal types, difficulty, passive time, time and servings basis,
+  recipe allergens, source/licence and video URL. Curated recipes leave all of
+  these NULL.
+- Release allergen names map onto the runtime vocabulary: milk→dairy,
+  eggs→egg, peanuts→peanut, tree_nuts→tree_nut, crustaceans and
+  molluscs→shellfish, gluten_candidate→gluten. Sulfites have no runtime name and
+  are dropped; a request naming them is already unverifiable for every recipe.
+- Ingredient lines are stored in grams (`unit = "g"`) with the source wording in
+  `original_text`. A weight that rounds to 0 g is stored as an unknown quantity.
+  Ingredients whose normalized name matches a curated one reuse that row, and
+  its allergen list only grows.
+- Recipes with fewer than two ingredient lines are skipped and listed.
+- `catalog_imports` records the release digest. A rerun with the same files
+  does nothing; changed files re-import, and v2 recipes no longer in the release
+  are deleted unless a meal plan references them.
 
 The pipeline lives in [`data-engineering/`](../../data-engineering/README.md):
 RecipeNLG schema v1 is frozen, releases pass a four-condition gate, and each
@@ -324,7 +346,8 @@ Schema v1 is frozen and releases are being cut (see
 
 ### Import into the runtime
 
-- Add an adapter or migration from the release into the runtime catalog.
+- ~~Add an adapter or migration from the release into the runtime catalog.~~ Done for release v2 (see section 2).
+- Let recommendation and planning candidate retrieval reach the whole catalog, not the first 500 recipes by id.
 - Add planner and grocery fixtures and regression tests.
 - Publish the quality report, release manifest and known gaps with the import.
 
