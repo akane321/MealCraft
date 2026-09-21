@@ -2,7 +2,7 @@ from sqlalchemy import Select, exists, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient
-from app.planning.grocery_estimator import matchable_ingredients
+from app.planning.grocery_estimator import priceable_ingredients
 
 # Release recipes carry a course; only these can fill a meal. Curated recipes
 # have no course and are always candidates. Sides, sauces, drinks and desserts
@@ -51,7 +51,7 @@ class RecipeRepository:
             .join(Ingredient)
             .where(
                 RecipeIngredient.recipe_id == Recipe.id,
-                Ingredient.normalized_name.not_in(sorted(matchable_ingredients())),
+                Ingredient.normalized_name.not_in(sorted(priceable_ingredients())),
             )
         )
         statement = (

@@ -17,6 +17,7 @@ from app.planning.beam_planner import BeamLimits, BeamPlanner
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
+from app.planning.grocery_estimator import not_purchased
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
 from app.planning.recommendation_engine import CANDIDATE_LIMIT
@@ -69,6 +70,16 @@ class ProductPlanningEngine:
         self.limits = limits or BeamLimits()
         self.validator = validator or FinalPlanningValidator()
 
+    def _packet_limit(self, day_count: int) -> int:
+        """How many candidates the beam search can visit on every day within its expansion budget.
+
+        Each day expands every kept state against every candidate, so a packet
+        larger than max_expansions / (width x days) exhausts the budget before one
+        full week is built. The recommendation limit is far larger on the full
+        catalog; the best-scored candidates are the ones kept.
+        """
+        return min(CANDIDATE_LIMIT, max(1, self.limits.max_expansions // (self.limits.width * day_count)))
+
     def plan(self, constraints, recommendations, recipes, *, selector=None, profile_version=None):
         trace = {
             "trace_version": "planning-product-v1",
@@ -79,7 +90,7 @@ class ProductPlanningEngine:
             "seed": 0,
             "timeout_seconds": None,
             "dominance_rule": "per-day-recipe-multiset-and-last-recipe-v1",
-            "candidate_limit": CANDIDATE_LIMIT,
+            "candidate_limit": self._packet_limit(constraints.day_count),
             "requested_pricing_mode": constraints.pricing_mode,
             "profile_version": profile_version,
             "input_digest": digest(constraints.model_dump(mode="json")),
@@ -102,6 +113,8 @@ class ProductPlanningEngine:
                 "Recipe coverage for a requested allergen is missing; update the allergen data before planning.",
                 trace,
             )
+        # Recommendations arrive best first; keep as many as the search can visit.
+        recommendations = list(recommendations)[: self._packet_limit(constraints.day_count)]
         if not recommendations:
             trace.update(status="candidate_rejected", evidence="bounded_search_exhausted")
             raise ProductPlanningError(
@@ -117,6 +130,8 @@ class ProductPlanningEngine:
                 continue
             source = RecipeService._to_detail(by_id[recommendation.recipe.id])
             recipe_snapshots[source.slug] = RecipeListItemResponse.model_validate(source.model_dump())
+            # Tap water and ice are never bought, so they are not shopping requirements.
+            source.ingredients = [item for item in source.ingredients if not not_purchased(item.normalized_name)]
             for ingredient in source.ingredients:
                 display_names[ingredient.normalized_name] = ingredient.name
                 ingredient.quantity, ingredient.unit = normalized(ingredient.quantity, ingredient.unit)
@@ -145,6 +160,11 @@ class ProductPlanningEngine:
                     continue
                 option = projected.option
                 prior = options.get(option.product_id)
+                if prior is not None and prior.ingredient_id != option.ingredient_id:
+                    # One product bought for two ingredients (eggs for egg and egg yolk)
+                    # is planned as a separate purchase for each.
+                    option = option.model_copy(update={"product_id": f"{option.product_id}@{option.ingredient_id}"})
+                    prior = options.get(option.product_id)
                 if prior is not None and prior != option:
                     diagnostics.append("conflicting_product_observation")
                 options[option.product_id] = option
