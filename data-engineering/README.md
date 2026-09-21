@@ -26,6 +26,24 @@
   `release_manifest.json` 的 `released_ingredients`；
 - 因此词表总数总是大于等于任一 release 的食材数；具体数值以文件为准，不在文档里复写。
 
+## release v2 的收尾顺序
+
+三份富化工作（A/B/C）交齐之后，按顺序跑：
+
+```bash
+python scripts/v2_packet.py merge          # 校验三份、合并、写 data/staging/v2_agreement.json
+python scripts/build_release_v2.py         # 写 data/release/v2/（配额、克数、营养、过敏原、manifest）
+python scripts/v2_audit_sample.py draw     # 抽样（默认 40 条菜谱 + 20 个食材，种子固定）
+#   人工逐条复核，把判定写成 JSONL 喂回去：
+python scripts/v2_audit_sample.py record < verdicts.jsonl
+python scripts/v2_release_report.py        # 写 ATTRIBUTION.md 和 quality_report.md
+```
+
+`v2_audit_sample.py` 的抽样种子固定，所以同一个种子永远抽到同一批；
+抽样工作表是生成物（`data/review/`，不提交），判定结果是人的判断，提交在
+`docs/v2-sampled-audit.json`。抽查是 `ADR-0024` 第 2 节的要求：AI 富化允许，
+条件是事后抽样审计。抽查可以在 A/B/C 没交齐时就先跑，工作表会记录当时包含了哪几份。
+
 ## 目录
 
 ```text

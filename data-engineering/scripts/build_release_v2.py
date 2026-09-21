@@ -234,7 +234,10 @@ def build_recipe(record: dict, result: dict, forms: dict[str, dict], rules: dict
         "cook_minutes": result["cook_minutes"],
         "passive_minutes": result["passive_minutes"],
         "total_minutes": result["prep_minutes"] + result["cook_minutes"] + result["passive_minutes"],
-        "time_basis": result["time_basis"],
+        # "stated" needs the source to have said something: a recipe with no stated
+        # duration anywhere is our estimate however the enricher labelled it. The
+        # durations are the ones the packet showed the enricher, not a second rule.
+        "time_basis": result["time_basis"] if record.get("stated_durations") else "estimated",
         "course": result["course"],
         "cuisine": result["cuisine"],
         "meal_types": result["meal_types"],
@@ -263,7 +266,10 @@ def pick_by_quota(recipes: list[dict]) -> list[dict]:
     chosen = []
     by_bucket = collections.defaultdict(list)
     for recipe in sorted(recipes, key=lambda r: r["recipe_id"]):
-        by_bucket[bucket_of.get(recipe["cuisine"], "american")].append(recipe)
+        # A cuisine no bucket claims (today only `international`) is not released.
+        # Counting it as American would both inflate that quota and disagree with
+        # the cuisine table in the report, which reads the enriched label.
+        by_bucket[bucket_of.get(recipe["cuisine"], "_unbucketed")].append(recipe)
     for bucket, spec in QUOTAS["buckets"].items():
         pool = sorted(by_bucket.get(bucket, []), key=lambda r: course_group(r["course"]) != "main")
         taken, groups = [], collections.Counter()
@@ -281,6 +287,13 @@ def pick_by_quota(recipes: list[dict]) -> list[dict]:
 
 def main() -> int:
     enrich_set = {r["candidate_id"]: r for r in read_jsonl(STAGING / "v2_enrich_set.jsonl")}
+    # The packet inputs carry the durations found in the steps by rule; the enrich
+    # set does not. Attach them so time_basis can be checked against the source.
+    for part in ("A", "B", "C"):
+        for item in read_jsonl(ROOT / "enrichment-work" / f"part-{part}" / "recipes.input.jsonl"):
+            record = enrich_set.get(item["candidate_id"])
+            if record is not None:
+                record["stated_durations"] = item.get("stated_durations") or []
     results = {r["candidate_id"]: r for r in read_jsonl(STAGING / "v2_merged.recipes.jsonl")}
     forms = {r["ingredient_id"]: r for r in read_jsonl(STAGING / "v2_merged.ingredients.jsonl")}
     rules = ingredient_rules()
@@ -352,6 +365,9 @@ def main() -> int:
             "built_before_quota": len(built),
             "enrichment_set": len(enrich_set),
             "released_ingredients": len(used),
+            "unbucketed_cuisine": sum(
+                r["cuisine"] not in {c for spec in QUOTAS["buckets"].values() for c in spec["cuisines"]} for r in built
+            ),
             "dropped_by_reason": dict(dropped.most_common()),
             "by_cuisine": dict(collections.Counter(r["cuisine"] for r in release).most_common()),
             "by_course": dict(collections.Counter(r["course"] for r in release).most_common()),

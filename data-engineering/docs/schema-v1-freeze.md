@@ -222,6 +222,7 @@ principle described above, and fixed a real pre-existing bug where
 already folded into the "Known gaps" allergen entry above, since that entry
 describes the *current* state rather than a v1-frozen one.
 
-Release artifacts: `data/release/v1.1/` (same shape as `data/release/v1/`).
-v1's artifacts are untouched — this is an additional release, not a
-correction in place.
+Release artifacts: `data/release/v1.1/`. v1 was an additional release, not a
+correction in place, and its artifacts were untouched by v1.1. v1 has since been
+deleted from the repository under `ADR-0030` section 1, which makes v1.1 the
+source release; this record describes the freeze as it stood.

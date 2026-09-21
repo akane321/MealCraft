@@ -10,7 +10,7 @@ const apiFetch = useApiFetch();
 const recipe = ref<RecipeDetail | null>(null);
 const failed = ref(false);
 
-watch(() => props.slug, async (slug) => {
+async function load(slug: string) {
   recipe.value = null;
   failed.value = false;
   try {
@@ -19,16 +19,21 @@ watch(() => props.slug, async (slug) => {
   catch {
     failed.value = true;
   }
-}, { immediate: true });
+}
+
+watch(() => props.slug, load, { immediate: true });
 
 function amount(item: RecipeDetail["ingredients"][number]) {
   if (item.quantity === null) return "";
   return `${item.quantity}${item.unit ? ` ${item.unit}` : ""}`;
 }
+
+const overlay = ref<HTMLElement | null>(null);
+useDialog(overlay, () => emit("close"));
 </script>
 
 <template>
-  <div class="mc-overlay" role="dialog" aria-modal="true" :aria-label="recipe ? recipe.title : 'Recipe'" @keydown.esc="emit('close')">
+  <div ref="overlay" class="mc-overlay" role="dialog" aria-modal="true" :aria-label="recipe ? recipe.title : 'Recipe'">
     <section class="mc-ribbed panel">
       <header>
         <div>
@@ -40,8 +45,15 @@ function amount(item: RecipeDetail["ingredients"][number]) {
         </button>
       </header>
 
-      <p v-if="failed" class="note">This recipe couldn't be loaded. Try again in a moment.</p>
-      <p v-else-if="!recipe" class="note">Loading…</p>
+      <HomePanelState
+        v-if="failed || !recipe"
+        :state="failed ? 'error' : 'loading'"
+        title=""
+        empty-text=""
+        error-text="This recipe couldn't be loaded."
+        :rows="3"
+        @retry="load(slug)"
+      />
       <div v-else class="body">
         <section class="mc-frost card" aria-label="Ingredients">
           <h3>Ingredients</h3>

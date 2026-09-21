@@ -85,6 +85,48 @@ jobs:
       - name: Offline evaluation workbench
         run: uv run --project backend python -m app.evaluation.workbench
 
+  migrations:
+    name: migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: mealcraft_migration_test
+          POSTGRES_USER: mealcraft
+          POSTGRES_PASSWORD: migration_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mealcraft -d mealcraft_migration_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+psycopg://mealcraft:migration_test_only@localhost:5432/mealcraft_migration_test
+      MEALCRAFT_MIGRATION_TEST_DATABASE_URL: >-
+        postgresql+psycopg://mealcraft:migration_test_only@localhost:5432/mealcraft_migration_test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install backend dependencies
+        run: uv sync --project backend --frozen --dev
+
+      - name: PostgreSQL tenancy migration smoke suite
+        run: uv run --project backend pytest backend/tests/migrations
+
   frontend:
     name: frontend
     runs-on: ubuntu-latest
