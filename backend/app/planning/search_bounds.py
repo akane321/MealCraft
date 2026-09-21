@@ -3,6 +3,7 @@
 from collections import Counter
 from math import isfinite
 
+from app.planning.diversity import MAX_DIVERSITY_CONTRIBUTION
 from app.planning.final_scope_scoring import local_recipe_loss
 
 
@@ -31,11 +32,22 @@ class SearchBounds:
         # Ignore future repetition increments and adjacency, both nonnegative.
         counts = Counter(recipe for _, recipe in state.choices)
         bound = state.loss
+        policy = self.problem.diversity_policy
+        if policy is not None:
+            bound -= (
+                MAX_DIVERSITY_CONTRIBUTION
+                * policy.overlap_reward_weight
+                * len(self.slots[next_index:])
+                / len(self.slots)
+            )
         for slot in self.slots[next_index:]:
             domain = self.domains[slot.slot_id]
             if domain.must_assign:
                 bound += min(
-                    (self.costs[slot.slot_id, recipe] + 0.1 * counts[recipe] for recipe in domain.eligible_recipe_ids),
+                    (
+                        self.costs[slot.slot_id, recipe] + (0 if policy else 0.1 * counts[recipe])
+                        for recipe in domain.eligible_recipe_ids
+                    ),
                     default=float("inf"),
                 )
         return bound

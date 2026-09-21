@@ -8,8 +8,9 @@ from dataclasses import dataclass
 from itertools import product
 from math import prod
 
+from app.planning.diversity import diversity_loss
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
-from app.planning.final_scope_scoring import local_recipe_loss
+from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.input_audit import require_finite_problem
 from app.planning.mixed_shopping import MixedShoppingResult, build_mixed_shopping
 from app.schemas.planning_v2 import FinalPlanningProblem, PlanningAssignment
@@ -74,7 +75,9 @@ def exhaustive_mixed_plan(
                 max_time_minutes=slot.max_time_minutes,
                 health_preferences=problem.health_preferences,
             )
-            loss += 0.1 * previous.count(recipe_id) + (0.35 if previous and previous[-1] == recipe_id else 0)
+            loss += diversity_loss(problem, previous, recipe_id)
+            if problem.diversity_policy is not None:
+                loss += meal_affinity_loss(recipes[recipe_id], slot.meal_type)
             previous.append(recipe_id)
         key = (loss, tuple((a.slot_id, a.recipe_id) for a in assignments))
         if best is None or key < best:

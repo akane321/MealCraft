@@ -38,6 +38,9 @@ next pieces should fit together.
 
 ## Cross-module contract matrix
 
+Planning diversity packet fields, unknown-value handling and producer/consumer
+responsibilities are defined in [Planning diversity](planning-diversity.md).
+
 | Producer | Versioned artifact | Required consumer | Contract risk if missing |
 | --- | --- | --- | --- |
 | Recipe data | Canonical recipe, ingredient IDs, quantities, tags, nutrition completeness and provenance | retrieval, planner, grocery mapping, Evaluation | a planner may appear correct only because unsafe or missing facts were never represented |

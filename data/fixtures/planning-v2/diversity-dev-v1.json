@@ -1,0 +1,274 @@
+{
+  "problem_id": "planning-diversity-dev-v1",
+  "slots": [
+    {
+      "slot_id": "s0",
+      "planned_date": "2026-09-21",
+      "meal_type": "dinner",
+      "servings": 1,
+      "required": true
+    },
+    {
+      "slot_id": "s1",
+      "planned_date": "2026-09-22",
+      "meal_type": "dinner",
+      "servings": 1,
+      "required": true
+    },
+    {
+      "slot_id": "s2",
+      "planned_date": "2026-09-23",
+      "meal_type": "dinner",
+      "servings": 1,
+      "required": true
+    }
+  ],
+  "recipes": [
+    {
+      "recipe_id": "a-chicken",
+      "title": "a-chicken",
+      "servings": 1,
+      "allowed_meal_types": [
+        "dinner"
+      ],
+      "total_time_minutes": 20,
+      "ingredients": [
+        {
+          "ingredient_id": "chicken",
+          "quantity": 100,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "coriander",
+          "quantity": 5,
+          "unit": "g"
+        }
+      ],
+      "nutrients_per_serving": {
+        "calories_kcal": 500,
+        "protein_g": 20,
+        "carbohydrate_g": 60,
+        "fat_g": 20,
+        "sodium_mg": 400,
+        "sugar_g": 5
+      }
+    },
+    {
+      "recipe_id": "b-chicken",
+      "title": "b-chicken",
+      "servings": 1,
+      "allowed_meal_types": [
+        "dinner"
+      ],
+      "total_time_minutes": 20,
+      "ingredients": [
+        {
+          "ingredient_id": "chicken",
+          "quantity": 100,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "coriander",
+          "quantity": 5,
+          "unit": "g"
+        }
+      ],
+      "nutrients_per_serving": {
+        "calories_kcal": 500,
+        "protein_g": 20,
+        "carbohydrate_g": 60,
+        "fat_g": 20,
+        "sodium_mg": 400,
+        "sugar_g": 5
+      }
+    },
+    {
+      "recipe_id": "c-tofu",
+      "title": "c-tofu",
+      "servings": 1,
+      "allowed_meal_types": [
+        "dinner"
+      ],
+      "total_time_minutes": 20,
+      "ingredients": [
+        {
+          "ingredient_id": "tofu",
+          "quantity": 100,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "coriander",
+          "quantity": 5,
+          "unit": "g"
+        }
+      ],
+      "nutrients_per_serving": {
+        "calories_kcal": 500,
+        "protein_g": 20,
+        "carbohydrate_g": 60,
+        "fat_g": 20,
+        "sodium_mg": 400,
+        "sugar_g": 5
+      }
+    },
+    {
+      "recipe_id": "d-fish",
+      "title": "d-fish",
+      "servings": 1,
+      "allowed_meal_types": [
+        "dinner"
+      ],
+      "total_time_minutes": 20,
+      "ingredients": [
+        {
+          "ingredient_id": "fish",
+          "quantity": 100,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "coriander",
+          "quantity": 5,
+          "unit": "g"
+        }
+      ],
+      "nutrients_per_serving": {
+        "calories_kcal": 500,
+        "protein_g": 20,
+        "carbohydrate_g": 60,
+        "fat_g": 20,
+        "sodium_mg": 400,
+        "sugar_g": 5
+      }
+    },
+    {
+      "recipe_id": "e-lentils",
+      "title": "e-lentils",
+      "servings": 1,
+      "allowed_meal_types": [
+        "dinner"
+      ],
+      "total_time_minutes": 20,
+      "ingredients": [
+        {
+          "ingredient_id": "lentils",
+          "quantity": 100,
+          "unit": "g"
+        },
+        {
+          "ingredient_id": "parsley",
+          "quantity": 5,
+          "unit": "g"
+        }
+      ],
+      "nutrients_per_serving": {
+        "calories_kcal": 500,
+        "protein_g": 20,
+        "carbohydrate_g": 60,
+        "fat_g": 20,
+        "sodium_mg": 400,
+        "sugar_g": 5
+      }
+    }
+  ],
+  "products": [
+    {
+      "ingredient_id": "chicken",
+      "product_id": "bag-chicken",
+      "package_quantity": 1000,
+      "package_unit": "g",
+      "price_sgd": 1
+    },
+    {
+      "ingredient_id": "coriander",
+      "product_id": "bag-coriander",
+      "package_quantity": 1000,
+      "package_unit": "g",
+      "price_sgd": 1
+    },
+    {
+      "ingredient_id": "fish",
+      "product_id": "bag-fish",
+      "package_quantity": 1000,
+      "package_unit": "g",
+      "price_sgd": 1
+    },
+    {
+      "ingredient_id": "lentils",
+      "product_id": "bag-lentils",
+      "package_quantity": 1000,
+      "package_unit": "g",
+      "price_sgd": 1
+    },
+    {
+      "ingredient_id": "parsley",
+      "product_id": "bag-parsley",
+      "package_quantity": 1000,
+      "package_unit": "g",
+      "price_sgd": 1
+    },
+    {
+      "ingredient_id": "tofu",
+      "product_id": "bag-tofu",
+      "package_quantity": 1000,
+      "package_unit": "g",
+      "price_sgd": 1
+    }
+  ],
+  "catalog_version": "synthetic-diversity-v1",
+  "product_snapshot_version": "synthetic-v1",
+  "policy_version": "planning-diversity-dev-v1",
+  "diversity_policy": {
+    "classification_version": "synthetic-roles-v1",
+    "classification_rule": "Explicit synthetic roles: the named protein is core; the herb is non-core. Protein groups are recorded, never inferred.",
+    "classifications": {
+      "a-chicken": {
+        "core_ingredient_ids": [
+          "chicken"
+        ],
+        "primary_proteins": {
+          "chicken": "poultry"
+        },
+        "source_reference": "synthetic-authoring:planning-diversity-v1"
+      },
+      "b-chicken": {
+        "core_ingredient_ids": [
+          "chicken"
+        ],
+        "primary_proteins": {
+          "chicken": "poultry"
+        },
+        "source_reference": "synthetic-authoring:planning-diversity-v1"
+      },
+      "c-tofu": {
+        "core_ingredient_ids": [
+          "tofu"
+        ],
+        "primary_proteins": {
+          "tofu": "soy"
+        },
+        "source_reference": "synthetic-authoring:planning-diversity-v1"
+      },
+      "d-fish": {
+        "core_ingredient_ids": [
+          "fish"
+        ],
+        "primary_proteins": {
+          "fish": "fish"
+        },
+        "source_reference": "synthetic-authoring:planning-diversity-v1"
+      },
+      "e-lentils": {
+        "core_ingredient_ids": [
+          "lentils"
+        ],
+        "primary_proteins": {
+          "lentils": "pulses"
+        },
+        "source_reference": "synthetic-authoring:planning-diversity-v1"
+      }
+    },
+    "max_slots_per_core_ingredient": 2,
+    "diversity_penalty": 0.25,
+    "overlap_reward_weight": 0.15
+  }
+}

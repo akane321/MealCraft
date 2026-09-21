@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 MealType = Literal["breakfast", "lunch", "dinner", "snack"]
 NutrientMetric = Literal[
@@ -115,6 +115,37 @@ class PlanningPreferenceWeights(BaseModel):
     health: float = Field(default=0.10, ge=0, le=1)
 
 
+class PlanningRecipeClassification(BaseModel):
+    """Explicit recipe roles, supplied with the frozen packet; never inferred."""
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    core_ingredient_ids: list[str] = Field(min_length=1)
+    primary_proteins: dict[str, str]
+    source_reference: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_roles(self):
+        cores = self.core_ingredient_ids
+        if any(not item.strip() for item in cores) or len(cores) != len(set(cores)):
+            raise ValueError("core ingredient IDs must be nonblank and unique")
+        if not set(self.primary_proteins) <= set(cores):
+            raise ValueError("primary protein ingredients must be core ingredients")
+        if any(not group.strip() for group in self.primary_proteins.values()):
+            raise ValueError("protein group IDs must be nonblank")
+        return self
+
+
+class PlanningDiversityPolicy(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    schema_version: Literal["planning-diversity-v1"] = "planning-diversity-v1"
+    classification_version: str = Field(min_length=1)
+    classification_rule: str = Field(min_length=1)
+    classifications: dict[str, PlanningRecipeClassification]
+    max_slots_per_core_ingredient: int = Field(default=2, ge=1, le=84, strict=True)
+    diversity_penalty: float = Field(default=0.25, ge=0, le=1, allow_inf_nan=False)
+    overlap_reward_weight: float = Field(default=0.15, ge=0, le=1, allow_inf_nan=False)
+
+
 class FinalPlanningProblem(BaseModel):
     problem_id: str = Field(min_length=1, max_length=120)
     slots: list[PlanningSlot] = Field(min_length=1, max_length=84)
@@ -133,6 +164,8 @@ class FinalPlanningProblem(BaseModel):
     purchase_budget_sgd: float | None = Field(default=None, gt=0)
     budget_is_hard: bool = True
     preference_weights: PlanningPreferenceWeights = Field(default_factory=PlanningPreferenceWeights)
+    # None preserves legacy packets; it does not certify P3 diversity coverage.
+    diversity_policy: PlanningDiversityPolicy | None = None
     catalog_version: str
     product_snapshot_version: str
     policy_version: str
@@ -146,6 +179,14 @@ class FinalPlanningProblem(BaseModel):
         if len(recipe_ids) != len(set(recipe_ids)):
             raise ValueError("planning recipe IDs must be unique")
         known_recipes = set(recipe_ids)
+        if self.diversity_policy is not None:
+            for recipe_id, roles in self.diversity_policy.classifications.items():
+                recipe = next((r for r in self.recipes if r.recipe_id == recipe_id), None)
+                if recipe is None:
+                    raise ValueError("classification refers to an unknown recipe")
+                ingredients = {item.ingredient_id for item in recipe.ingredients}
+                if not set(roles.core_ingredient_ids) <= ingredients:
+                    raise ValueError("core ingredient is absent from recipe")
         unknown_locks = sorted(
             {
                 slot.locked_recipe_id
@@ -204,6 +245,7 @@ class PlanningTrace(BaseModel):
     deterministic: bool
     candidate_limit: int | None = None
     warnings: list[str] = Field(default_factory=list)
+    diversity_policy: PlanningDiversityPolicy | None = None
 
 
 class FinalPlanningSolution(BaseModel):
