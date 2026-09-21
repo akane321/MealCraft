@@ -1,71 +1,71 @@
 {
   "release_version": "v2",
-  "created_at": "2026-09-20T15:40:49+00:00",
+  "created_at": "2026-09-21T06:05:53+00:00",
   "coverage": {
-    "released_recipes": 9788,
+    "released_recipes": 9048,
     "enrichment_set": 11971,
-    "released_ingredients": 714,
-    "recipes_with_every_field": 9788
+    "released_ingredients": 705,
+    "recipes_with_every_field": 9048
   },
   "by_cuisine": {
-    "american": 1496,
-    "chinese": 1104,
-    "indian": 646,
-    "japanese": 600,
-    "italian": 600,
+    "american": 1514,
+    "chinese": 951,
+    "italian": 564,
+    "japanese": 510,
+    "indian": 502,
     "thai": 500,
     "korean": 450,
-    "french": 360,
-    "filipino": 318,
-    "middle_eastern": 307,
-    "mexican": 303,
+    "filipino": 325,
     "vietnamese": 300,
     "greek": 300,
-    "british_irish": 300,
-    "north_african": 242,
-    "spanish_portuguese": 231,
-    "caribbean": 214,
-    "tex_mex": 197,
-    "eastern_european": 186,
-    "latin_american": 186,
+    "tex_mex": 282,
+    "french": 270,
+    "british_irish": 250,
+    "middle_eastern": 231,
+    "caribbean": 225,
+    "mexican": 218,
+    "north_african": 215,
+    "eastern_european": 176,
+    "latin_american": 175,
+    "spanish_portuguese": 171,
+    "german": 168,
     "indonesian": 163,
-    "german": 162,
     "african": 150,
-    "southern_us": 146,
-    "malaysian_singaporean": 119,
-    "scandinavian": 97,
-    "cajun_creole": 58,
-    "turkish": 51,
-    "dutch_belgian": 2
+    "southern_us": 133,
+    "malaysian_singaporean": 112,
+    "scandinavian": 86,
+    "cajun_creole": 53,
+    "turkish": 48,
+    "dutch_belgian": 6
   },
   "by_course": {
-    "main": 7629,
-    "side": 649,
-    "dessert": 283,
-    "salad": 244,
-    "breakfast": 224,
-    "sauce_condiment": 221,
-    "snack_appetizer": 175,
-    "soup": 169,
-    "baked_good": 147,
-    "drink": 47
+    "main": 5456,
+    "side": 1097,
+    "salad": 474,
+    "dessert": 410,
+    "breakfast": 382,
+    "sauce_condiment": 330,
+    "soup": 308,
+    "baked_good": 263,
+    "snack_appetizer": 252,
+    "drink": 76
   },
   "by_source": {
-    "RecipeNLG (Gathered)": 9468,
-    "TheMealDB": 236,
-    "Wikibooks Cookbook": 84
+    "RecipeNLG (Gathered)": 8734,
+    "TheMealDB": 227,
+    "Wikibooks Cookbook": 87
   },
   "estimated_share": {
-    "servings": 0.7541,
-    "times": 0.7365,
-    "ingredient_amounts": 0.0203
+    "servings": 0.7749,
+    "times": 0.4773,
+    "ingredient_amounts": 0.0216
   },
   "dropped_by_reason": {
-    "implausible energy # kcal per serving": 49,
+    "implausible energy # kcal per serving": 70,
     "excluded by enricher": 1
   },
   "allergen_rules_pending_human": 0,
   "nutrition_per_serving": {
-    "median_energy_kcal": 341.6
+    "median_energy_kcal": 326.8
   }
 }

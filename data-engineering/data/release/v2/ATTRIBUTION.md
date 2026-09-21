@@ -11,9 +11,9 @@ Use is non-commercial.
 
 | Source | Recipes | Licence as recorded |
 | --- | ---: | --- |
-| RecipeNLG (Gathered) | 9468 | RecipeNLG: non-commercial research and educational use only |
-| TheMealDB | 236 | TheMealDB terms of use (attribution; non-commercial course use) |
-| Wikibooks Cookbook | 84 | CC BY-SA 4.0 (Wikibooks Cookbook) |
+| RecipeNLG (Gathered) | 8734 | RecipeNLG: non-commercial research and educational use only |
+| TheMealDB | 227 | TheMealDB terms of use (attribution; non-commercial course use) |
+| Wikibooks Cookbook | 87 | CC BY-SA 4.0 (Wikibooks Cookbook) |
 
 **RecipeNLG (Gathered).** RecipeNLG, `Gathered` subset only. Non-commercial research and educational use. Each recipe keeps the URL of the site it was gathered from.
 
@@ -21,7 +21,7 @@ Use is non-commercial.
 
 **Wikibooks Cookbook.** Wikibooks Cookbook, CC BY-SA 4.0. Attribution and share-alike apply to the source text; our derived fields are listed separately below.
 
-Per-recipe source URLs: 9788 of 9788 records carry one. The remainder come from a source that publishes no per-recipe URL; their dataset is named in `source.dataset`.
+Per-recipe source URLs: 9048 of 9048 records carry one. The remainder come from a source that publishes no per-recipe URL; their dataset is named in `source.dataset`.
 
 ## Ingredient nutrition and weights
 
@@ -30,14 +30,14 @@ public food-composition tables and manufacturer labels, and from reasoned estima
 where no table covers the form recipes use. Every value records its basis and its
 sources in `ingredients.jsonl` under `forms.*.sources`. Most-cited sources:
 
-- tools.myfooddata.com — cited 307 times
-- www.recipal.com — cited 83 times
+- tools.myfooddata.com — cited 308 times
+- www.recipal.com — cited 79 times
 - whatyoueat.io — cited 44 times
-- fdc.nal.usda.gov — cited 43 times
-- foods.fatsecret.com — cited 35 times
+- fdc.nal.usda.gov — cited 42 times
+- foods.fatsecret.com — cited 37 times
 - foodstruct.com — cited 35 times
-- www.ars.usda.gov — cited 25 times
-- en.wikipedia.org — cited 22 times
+- www.ars.usda.gov — cited 24 times
+- en.wikipedia.org — cited 21 times
 - batchbase.com.au — cited 17 times
 - bettermenu.live — cited 15 times
 - www.nutritionvalue.org — cited 14 times
