@@ -31,12 +31,12 @@ def session() -> Session:
     with Session(engine) as session:
         data = repository_root() / "data"
         import_catalog(session, load_catalog(data / "ingredients/ingredients.json", data / "recipes/recipes.json"))
-        water = Ingredient(normalized_name="water", display_name="Water", allergens=[])
-        session.add(water)
+        unmapped = Ingredient(normalized_name="unmapped_test_spice", display_name="Unmapped test spice", allergens=[])
+        session.add(unmapped)
         session.flush()
         curated = {row.normalized_name: row for row in session.scalars(select(Ingredient))}
         _release(session, "priced", "main", [curated["chicken_breast"], curated["brown_rice"]])
-        _release(session, "unpriced", "main", [curated["chicken_breast"], water])
+        _release(session, "unpriced", "main", [curated["chicken_breast"], unmapped])
         _release(session, "sauce", "sauce_condiment", [curated["lemon"], curated["brown_rice"]])
         session.commit()
         yield session

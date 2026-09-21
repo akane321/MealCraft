@@ -2,7 +2,13 @@ from dataclasses import dataclass
 
 from app.data.units import UNIT_BASE
 from app.models.recipe import Recipe
-from app.planning.grocery_estimator import GroceryEstimator, ProductMatcher, matchable_ingredients
+from app.planning.grocery_estimator import (
+    GroceryEstimator,
+    ProductMatcher,
+    choose_product,
+    not_purchased,
+    not_purchased_line,
+)
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse, WeeklyMealPlanRequest
 from app.schemas.product import GroceryLineEstimate
 from app.services.product import ProductSearchService
@@ -66,22 +72,24 @@ class WeeklyGroceryAggregator:
                 )
                 continue
 
-            product, match_score = None, None
-            # Unmatchable ingredients are never searched: in live mode each search is a request.
-            if ingredient.name in matchable_ingredients():
-                search = self.product_service.search(
-                    ingredient.display_name,
-                    live=constraints.pricing_mode == "live",
-                    limit=8,
+            if not_purchased(ingredient.name):
+                lines.append(
+                    not_purchased_line(
+                        ingredient.name, ingredient.display_name, ingredient.required_quantity, ingredient.unit
+                    )
                 )
-                if search.warning and search.warning not in warnings:
-                    warnings.append(search.warning)
-                product, match_score = self.matcher.choose(
-                    ingredient.name,
-                    ingredient.display_name,
-                    ingredient.unit,
-                    search.items,
-                )
+                continue
+            choice = choose_product(
+                self.product_service,
+                self.matcher,
+                ingredient.name,
+                ingredient.display_name,
+                ingredient.unit,
+                live=constraints.pricing_mode == "live",
+                quantity=remaining,
+            )
+            warnings.extend(warning for warning in choice.warnings if warning not in warnings)
+            product, match_score = choice.product, choice.match_score
             if product is None:
                 unmapped.append(ingredient.name)
                 consumed_total_known = False
