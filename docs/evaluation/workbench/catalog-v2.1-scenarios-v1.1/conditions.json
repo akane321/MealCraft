@@ -2,7 +2,7 @@
   "schema_version": "evaluation-conditions-v1",
   "label": "catalog-v2.1-scenarios-v1.1",
   "report": "docs/evaluation/workbench/catalog-v2.1-scenarios-v1.1/latest.json",
-  "report_commit": "0f479591b210b2ca915ad9e0b62b5177d9016cda",
+  "report_commit": "ab9e7357aa179c92f92d2d42d640c02f9bdb06ce",
   "attestation": "Every input below was last committed at or before the commit that produced the report, verified with git merge-base --is-ancestor. The digests therefore describe the data the published numbers were computed over.",
   "inputs": {
     "agent": {
@@ -18,7 +18,7 @@
     "eligibility": {
       "path": "docs/evaluation/catalog-v2.1-labels.json",
       "sha256": "97330069ee554a91b9e595e233c4e034e7636450bc4c3e83a065e669d3db3975",
-      "last_changed_commit": "7c51826bd57dc590e3eac32ae5d50c9b3a0a83a4"
+      "last_changed_commit": "ab9e7357aa179c92f92d2d42d640c02f9bdb06ce"
     },
     "fixtures": {
       "path": "data/fixtures/fairprice-products.json",
