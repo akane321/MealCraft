@@ -1,7 +1,7 @@
 {
   "seed": 20260920,
-  "drawn_at": "2026-09-20T15:41:15+00:00",
-  "audited_at": "2026-09-20T15:44:43+00:00",
+  "drawn_at": "2026-09-21T06:06:13+00:00",
+  "audited_at": "2026-09-21T06:07:19+00:00",
   "parts_included": {
     "recipes": [
       "A",
@@ -19,8 +19,8 @@
       "sampled": 39,
       "verdicts_recorded": 40,
       "checks": 240,
-      "accepted": 27,
-      "corrected": 13,
+      "accepted": 35,
+      "corrected": 5,
       "unverifiable": 0
     },
     "ingredients": {
@@ -34,18 +34,10 @@
   },
   "findings": [
     "themealdb:53030: time_basis stated although most steps of the 14-step pastry give no duration",
-    "recipenlg_v1.1:RCP_72C1C0643BB3BCFC: hot German potato salad labelled course=main; it is a side dish",
-    "recipenlg:1185755: a noodle soup labelled course=main instead of soup",
     "recipenlg:426818: cook 44 min against a stated 10-12 min bake; total of several batches read as one bake",
-    "recipenlg:54929: cook 20 min against stated 25-35 min plus 10 min more simmering",
-    "themealdb:53281: time_basis estimated although every cooking step in the source gives a duration",
-    "recipenlg:739682: cornbread labelled course=main, and cook 20 min against a stated 30 min bake",
-    "recipenlg:999583: cook 20 min against a stated 1 hour plus 45 minutes in the oven",
+    "recipenlg:54929: time_basis estimated although both simmers (25-35 and 10 minutes) carry stated durations",
     "recipenlg:1145670: satay soup left as international so it is not released, although the source hint was malaysian_singaporean",
-    "recipenlg:1450618: fried plantains labelled course=main; cook 20 min against a stated 10 min",
     "themealdb:53387: cook 55 min and passive 0 against a stated 1 hour rest plus 50 minute bake",
-    "recipenlg:58633: passive 0 although the source states at least 30 minutes of marinating",
-    "recipenlg:680911: part C read the same source as part B and answered servings 4 / main / italian against 60 / snack_appetizer / american; the source spreads it on 60 slices of party rye",
     "ING_KAFFIR_LIME_LEAF: kaffir lime leaf: round-number macros with confidence 0.4 and no reference form or energy_check_exception"
   ]
 }
