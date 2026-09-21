@@ -819,7 +819,8 @@ def test_weekly_plan_returns_422_when_no_recipe_meets_hard_constraints(recipe_cl
     )
 
     assert response.status_code == 422
-    assert response.json() == {"detail": "No candidate plan was found; try a different recipe selection."}
+    assert "30-minute cooking limit" in response.json()["detail"]
+    assert "submit as a new request" in response.json()["detail"]
 
 
 def test_meal_checkin_is_idempotent_and_dashboard_counts_completed_meals(recipe_client: TestClient) -> None:
