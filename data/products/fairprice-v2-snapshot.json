@@ -406,7 +406,7 @@
   },
   "american_cheese": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13227092",
@@ -1705,7 +1705,7 @@
   },
   "beef": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90020492",
@@ -1969,7 +1969,7 @@
   },
   "beet": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90145599",
@@ -2117,7 +2117,7 @@
   },
   "bitter_melon": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90160953",
@@ -2477,7 +2477,7 @@
   },
   "bok_choy": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13196034",
@@ -4921,7 +4921,7 @@
   },
   "chicken_or_veg_broth": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "12174032",
@@ -5847,7 +5847,7 @@
   },
   "clam": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13244130",
@@ -7095,7 +7095,7 @@
   },
   "cracker_crumbs": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13184021",
@@ -7153,7 +7153,7 @@
   },
   "cranberry": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13270098",
@@ -7737,7 +7737,7 @@
   },
   "curry_sauce": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13015792",
@@ -7761,32 +7761,6 @@
      "package_grams_basis": "printed 240g",
      "price_sgd": 4.25,
      "product_url": "https://www.fairprice.com.sg/product/a1-instant-sauce-chicken-curry-240g-10834359",
-     "in_stock": true,
-     "query": "curry sauce",
-     "fetched_at": "2026-09-21T10:26:01+00:00"
-    },
-    {
-     "external_id": "11008331",
-     "name": "Prima Taste Sauce Kit - Singapore Curry",
-     "brand": "Prima Taste",
-     "category": "Cooking Paste",
-     "package_grams": 300,
-     "package_grams_basis": "printed 300g",
-     "price_sgd": 8.78,
-     "product_url": "https://www.fairprice.com.sg/product/prima-taste-sauce-kit-singapore-curry-300g-11008331",
-     "in_stock": true,
-     "query": "curry sauce",
-     "fetched_at": "2026-09-21T10:26:01+00:00"
-    },
-    {
-     "external_id": "13001010",
-     "name": "Brahim's Curry Sauce - Chicken",
-     "brand": "Brahim'S",
-     "category": "Cooking Paste",
-     "package_grams": 180,
-     "package_grams_basis": "printed 180g",
-     "price_sgd": 2.65,
-     "product_url": "https://www.fairprice.com.sg/product/brahim-s-curry-sauce-chicken-180g-13001010",
      "in_stock": true,
      "query": "curry sauce",
      "fetched_at": "2026-09-21T10:26:01+00:00"
@@ -7840,7 +7814,7 @@
   },
   "date": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90227673",
@@ -8014,7 +7988,7 @@
   },
   "dried_mushroom": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "10520931",
@@ -8149,7 +8123,7 @@
   },
   "duck": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90199886",
@@ -9087,7 +9061,7 @@
   },
   "fish_sauce": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "11229054",
@@ -9980,7 +9954,7 @@
   },
   "glutinous_rice": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13215764",
@@ -10359,21 +10333,8 @@
   },
   "grapefruit_juice": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
-    {
-     "external_id": "10478251",
-     "name": "Ceres 100% Juice Blend Packet Drink - Ruby Grapefruit",
-     "brand": "Ceres",
-     "category": "Orange Juice",
-     "package_grams": 1044,
-     "package_grams_basis": "1000 ml x 1.044 g/ml (247 g per cup)",
-     "price_sgd": 2.7,
-     "product_url": "https://www.fairprice.com.sg/product/ceres-100-juice-ruby-grapefruit-1lt-10478251",
-     "in_stock": true,
-     "query": "grapefruit juice",
-     "fetched_at": "2026-09-21T10:26:58+00:00"
-    },
     {
      "external_id": "90129155",
      "name": "Lakewood Organic Pink Grapefruit Juice",
@@ -10770,7 +10731,7 @@
   },
   "gruyere": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90216430",
@@ -10918,7 +10879,7 @@
   },
   "halibut": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13013999",
@@ -11455,7 +11416,7 @@
   },
   "jaggery": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90004227",
@@ -12792,7 +12753,7 @@
   },
   "lobster": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90061889",
@@ -13415,7 +13376,7 @@
   },
   "milk": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13293648",
@@ -16749,7 +16710,7 @@
   },
   "pomegranate_seeds": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90144387",
@@ -17450,7 +17411,7 @@
   },
   "prune": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13270095",
@@ -17630,7 +17591,7 @@
   },
   "quinoa": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13247904",
@@ -17791,7 +17752,7 @@
   },
   "raspberry": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90144853",
@@ -18376,7 +18337,7 @@
   },
   "rose_water": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90223564",
@@ -18387,32 +18348,6 @@
      "package_grams_basis": "printed 118 ml x 1.0 g/ml (water density)",
      "price_sgd": 16.5,
      "product_url": "https://www.fairprice.com.sg/product/nielsen-massey-flavors---rose-water",
-     "in_stock": true,
-     "query": "rose water",
-     "fetched_at": "2026-09-21T10:10:35+00:00"
-    },
-    {
-     "external_id": "90054292",
-     "name": "Key Brand Rose Water 200Ml -- By Dashmesh",
-     "brand": "KEY BRAND",
-     "category": "Asian Drinks",
-     "package_grams": 200,
-     "package_grams_basis": "printed 200 ml x 1.0 g/ml (water density)",
-     "price_sgd": 1.42,
-     "product_url": "https://www.fairprice.com.sg/product/key-brand-rose-water-200ml-by-dashmesh-200-ml-90054292",
-     "in_stock": true,
-     "query": "rose water",
-     "fetched_at": "2026-09-21T10:10:35+00:00"
-    },
-    {
-     "external_id": "90018935",
-     "name": "Sri Sai's Luxmi Rose Water",
-     "brand": "Sri sai",
-     "category": "Sweeteners",
-     "package_grams": 250,
-     "package_grams_basis": "printed 250 ml x 1.0 g/ml (water density)",
-     "price_sgd": 1.21,
-     "product_url": "https://www.fairprice.com.sg/product/sri-sai-sri-sai-sri-sai-s-luxmi-rose-water-250-ml-90018935",
      "in_stock": true,
      "query": "rose water",
      "fetched_at": "2026-09-21T10:10:35+00:00"
@@ -19085,25 +19020,6 @@
      "in_stock": true,
      "query": "scallop",
      "fetched_at": "2026-09-21T10:01:21+00:00"
-    }
-   ]
-  },
-  "seafood_mix": {
-   "status": "mapped",
-   "review_status": "proposed",
-   "products": [
-    {
-     "external_id": "90033566",
-     "name": "Catch Seafood Mixed Seafood Bag",
-     "brand": "Catch Seafood",
-     "category": "Frozen Fish",
-     "package_grams": 1000,
-     "package_grams_basis": "printed 1 KG",
-     "price_sgd": 6.8,
-     "product_url": "https://www.fairprice.com.sg/product/catch-seafood-mix-seafood-bag-400-g-90033566",
-     "in_stock": false,
-     "query": "seafood mix",
-     "fetched_at": "2026-09-21T10:30:10+00:00"
     }
    ]
   },
@@ -20125,7 +20041,7 @@
   },
   "squash": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90089354",
@@ -20356,7 +20272,7 @@
   },
   "suet": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "90076883",
@@ -20896,7 +20812,7 @@
   },
   "syrup": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13168209",
@@ -22523,7 +22439,7 @@
   },
   "vegetable_oil": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "13241562",
@@ -23272,7 +23188,7 @@
   },
   "yeast": {
    "status": "mapped",
-   "review_status": "proposed",
+   "review_status": "owner_accepted",
    "products": [
     {
      "external_id": "49678",
