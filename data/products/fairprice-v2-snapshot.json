@@ -2,7 +2,7 @@
  "snapshot_version": "fairprice-v2",
  "source": "FairPrice search results captured by data-engineering/scripts/capture_fairprice_snapshot.py",
  "fetched_from": "2026-09-21T09:46:38+00:00",
- "fetched_to": "2026-09-21T11:02:15+00:00",
+ "fetched_to": "2026-09-21T12:55:54+00:00",
  "min_confidence": 0.6,
  "ingredients": {
   "adzuki_bean": {
@@ -15177,6 +15177,51 @@
      "in_stock": true,
      "query": "palm sugar",
      "fetched_at": "2026-09-21T10:09:05+00:00"
+    }
+   ]
+  },
+  "pancake_mix": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "13097420",
+     "name": "Betty Crocker Pancake Mix - Original ",
+     "brand": "Betty Crockers",
+     "category": "Pancake Mix",
+     "package_grams": 400,
+     "package_grams_basis": "printed 400g",
+     "price_sgd": 3.97,
+     "product_url": "https://www.fairprice.com.sg/product/betty-crocker-pancake-mix-original-430g-13097420",
+     "in_stock": true,
+     "query": "pancake mix",
+     "fetched_at": "2026-09-21T12:55:54+00:00"
+    },
+    {
+     "external_id": "13163545",
+     "name": "Prima Flour Mix - Pancake",
+     "brand": "Prima",
+     "category": "Pancake Mix",
+     "package_grams": 400,
+     "package_grams_basis": "printed 400g",
+     "price_sgd": 4.02,
+     "product_url": "https://www.fairprice.com.sg/product/13163545",
+     "in_stock": true,
+     "query": "pancake mix",
+     "fetched_at": "2026-09-21T12:55:54+00:00"
+    },
+    {
+     "external_id": "90018323",
+     "name": "Yamamori Hot Cake Mix Powder",
+     "brand": "Yamamori",
+     "category": "Pancake Mix",
+     "package_grams": 400,
+     "package_grams_basis": "printed 400 G",
+     "price_sgd": 5.95,
+     "product_url": "https://www.fairprice.com.sg/product/yamamori-hot-cake-mix-powder-400-g-90018323",
+     "in_stock": true,
+     "query": "pancake mix",
+     "fetched_at": "2026-09-21T12:55:54+00:00"
     }
    ]
   },

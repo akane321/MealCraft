@@ -6,6 +6,7 @@ from app.planning.grocery_estimator import (
     GroceryEstimator,
     ProductMatcher,
     choose_product,
+    convert_quantity,
     not_purchased,
     not_purchased_line,
 )
@@ -33,7 +34,9 @@ class WeeklyGroceryAggregator:
         constraints: WeeklyMealPlanRequest,
     ) -> WeeklyGroceryEstimateResponse:
         ingredients = self._aggregate_ingredients(recipes, constraints.household_size)
-        pantry = {item.normalized_name: item for item in constraints.available_ingredients}
+        # A copy that each deduction draws down, so an ingredient needed on two
+        # lines (whole carrots and grams of carrot) cannot use the same pantry twice.
+        pantry = {item.normalized_name: item.model_copy() for item in constraints.available_ingredients}
         lines: list[GroceryLineEstimate] = []
         warnings: list[str] = []
         unmapped: list[str] = []
@@ -42,11 +45,15 @@ class WeeklyGroceryAggregator:
         consumed_total_known = True
 
         for ingredient in ingredients:
+            pantry_item = pantry.get(ingredient.name)
             pantry_deduction = GroceryEstimator.pantry_deduction(
-                pantry.get(ingredient.name),
+                pantry_item,
                 ingredient.required_quantity,
                 ingredient.unit,
             )
+            if pantry_deduction and pantry_item is not None and pantry_item.quantity is not None:
+                used = convert_quantity(pantry_deduction, ingredient.unit, pantry_item.unit) or 0.0
+                pantry_item.quantity = max(0.0, pantry_item.quantity - used)
             remaining = (
                 max(0.0, ingredient.required_quantity - pantry_deduction)
                 if ingredient.required_quantity is not None
@@ -150,28 +157,30 @@ class WeeklyGroceryAggregator:
 
     @staticmethod
     def _aggregate_ingredients(recipes: list[Recipe], household_size: int) -> list[AggregatedIngredient]:
-        aggregated: dict[str, AggregatedIngredient] = {}
+        # Keyed by ingredient and unit: lines whose units cannot be added (one whole
+        # carrot and 64 g of carrot) stay separate lines rather than one unknown amount.
+        aggregated: dict[tuple[str, str | None], AggregatedIngredient] = {}
         for recipe in recipes:
             scale = household_size / recipe.servings
             for item in recipe.recipe_ingredients:
                 name = item.ingredient.normalized_name
                 quantity = float(item.quantity) * scale if item.quantity is not None else None
                 normalized_quantity, normalized_unit = WeeklyGroceryAggregator._to_base_unit(quantity, item.unit)
-                current = aggregated.get(name)
+                key = (name, normalized_unit)
+                current = aggregated.get(key)
                 if current is None:
-                    aggregated[name] = AggregatedIngredient(
+                    aggregated[key] = AggregatedIngredient(
                         name=name,
                         display_name=item.ingredient.display_name,
                         required_quantity=normalized_quantity,
                         unit=normalized_unit,
                     )
                     continue
-                if current.required_quantity is None or normalized_quantity is None or current.unit != normalized_unit:
+                if current.required_quantity is None or normalized_quantity is None:
                     current.required_quantity = None
-                    current.unit = normalized_unit if current.unit == normalized_unit else None
                 else:
                     current.required_quantity += normalized_quantity
-        return sorted(aggregated.values(), key=lambda item: item.name)
+        return sorted(aggregated.values(), key=lambda item: (item.name, item.unit or ""))
 
     @staticmethod
     def _to_base_unit(quantity: float | None, unit: str | None) -> tuple[float | None, str | None]:

@@ -39,6 +39,23 @@ python scripts/v2_audit_sample.py record < verdicts.jsonl
 python scripts/v2_release_report.py        # 写 ATTRIBUTION.md 和 quality_report.md
 ```
 
+## release v2.1：食材清单完整性与更严格的过敏原
+
+v2 已发布、不再修改；`build_release_v2.py` 现在输出 `data/release/v2.1/`，比 v2 多三项检查：
+
+```bash
+python scripts/recipe_completeness.py packet --shards 8     # 标题或步骤提到、但食材清单里没有的过敏原食物 -> 逐条复核包
+python scripts/recipe_completeness.py sample --size 300     # 未被标记的菜谱抽样，测漏检
+python scripts/recipe_completeness.py validate FILE...
+python scripts/recipe_completeness.py merge FILE...         # 写入 data/enrichment/completeness/v2_review.jsonl
+python scripts/build_release_v2.py                          # 复核为 incomplete 的丢弃；未复核的被标记菜谱也丢弃
+python scripts/v2_release_report.py
+```
+
+构建会把"被标记但没人复核过"的菜谱写到 `data/review/completeness/awaiting_review.jsonl`，
+再跑一次 `packet` 就会打包它们。`config/allergen_corrections.csv` 是 owner 确认过的过敏原补充
+（只增不减）；含鱼或贝类的食材、或标题步骤提到肉鱼，菜谱就不是素食/纯素。
+
 ## release v2 的 FairPrice 商品映射
 
 ```bash

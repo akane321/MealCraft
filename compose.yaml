@@ -40,9 +40,9 @@ services:
       - ./backend/alembic:/app/alembic
       - ./backend/tests:/app/tests
       - ./data:/app/data:ro
-      # Release v2 recipes, loaded beside the curated catalog; the importer skips
+      # Release v2.1 recipes, loaded beside the curated catalog; the importer skips
       # them when the recorded digest already matches.
-      - ./data-engineering/data/release/v2:/app/data-engineering/data/release/v2:ro
+      - ./data-engineering/data/release/v2.1:/app/data-engineering/data/release/v2.1:ro
       - ./docs:/app/docs
       # The repository-level scripts are part of the documented workflow: the
       # held-out freeze command runs the authoring checker rather than restating
