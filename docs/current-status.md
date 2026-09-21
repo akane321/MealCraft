@@ -30,6 +30,18 @@ shopping, P6 minimal-change replanning, P7 learned ordering/themes and P8 consol
 experiments remain separate packets. Existing legacy nutrition targets remain
 soft ranking inputs. This slice does not claim that the whole v2 contract is done.
 
+## Planning P2 branch work
+
+P2 builds on the P1 branch with bounded conflict diagnosis and independently
+verified numeric proposals. Users apply a proposal by submitting a new request;
+failed requests do not save a relaxed plan. Explanations preserve safety
+constraints and distinguish a declared-group minimum from a global claim.
+See [conflict explanations](design/planning-conflict-explanation.md).
+
+This is local branch work pending review. The implementation is bounded to
+small packets, and may withhold proposals when proof exceeds its limits. It
+does not add proposal buttons, a Console view or mixed-package purchasing.
+
 ## Verified Product Baseline
 
 | Area | Verified behaviour | Important boundary |

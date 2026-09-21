@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
+from app.planning.conflict_explanation import explain_infeasibility, product_explanation
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
@@ -59,20 +60,60 @@ class WeeklyMealPlanService:
             constraints,
             deduct_pantry_from_cost=False,
         )
-        recipes = self.recipe_repository.list_for_recommendation()
-        try:
-            result = self.planning_engine.plan(
-                constraints,
-                recommendation_result.recommendations,
-                recipes,
-                selector=self.selector,
-                profile_version=household_profile_version,
+        broadened = not recommendation_result.recommendations
+        if broadened:
+            # Broaden only the diagnostic candidate pool; the original request
+            # still goes to the compiler and validator. Safety filters stay fixed.
+            recommendation_result = self.recommendation_service.recommend(
+                constraints.model_copy(update={"max_cooking_time_minutes": 240, "dietary_preferences": []}),
+                deduct_pantry_from_cost=False,
             )
-        except ProductPlanningError as error:
-            error.trace["profile_id"] = household_profile_id
-            self.repository.session.add(self._operation_run(error.trace, started_at, error=str(error)))
-            self.repository.session.commit()
-            raise
+        recipes = self.recipe_repository.list_for_recommendation()
+        prior_trace = None
+        for attempt in range(2):
+            try:
+                result = self.planning_engine.plan(
+                    constraints,
+                    recommendation_result.recommendations,
+                    recipes,
+                    selector=self.selector,
+                    profile_version=household_profile_version,
+                )
+                if prior_trace is not None:
+                    result.trace["prior_candidate_attempt"] = prior_trace
+                break
+            except ProductPlanningError as error:
+                if error.status == "infeasible" and not broadened and attempt == 0:
+                    # A time/diet-filtered pool cannot establish which of those
+                    # constraints conflicts with budget. Retain original quotes
+                    # and add diagnostic candidates, then establish evidence again.
+                    previous = {r.recipe.id: r for r in recommendation_result.recommendations}
+                    recommendation_result = self.recommendation_service.recommend(
+                        constraints.model_copy(update={"max_cooking_time_minutes": 240, "dietary_preferences": []}),
+                        deduct_pantry_from_cost=False,
+                    )
+                    recommendation_result.recommendations = [
+                        previous.get(r.recipe.id, r) for r in recommendation_result.recommendations
+                    ]
+                    prior_trace = error.trace
+                    broadened = True
+                    continue
+                if prior_trace is not None:
+                    error.trace["prior_candidate_attempt"] = prior_trace
+                if error.problem is not None and error.status == "infeasible":
+                    explanation = explain_infeasibility(
+                        error.problem,
+                        evidence=error.trace["evidence"],
+                        per_meal_budget=constraints.budget_per_meal_sgd,
+                    )
+                    error.trace["explanation"] = explanation
+                    message = product_explanation(explanation)
+                    if message:
+                        error.args = (message,)
+                error.trace["profile_id"] = household_profile_id
+                self.repository.session.add(self._operation_run(error.trace, started_at, error=str(error)))
+                self.repository.session.commit()
+                raise
         selected, grocery = result.selected, result.grocery
         result.trace["profile_id"] = household_profile_id
 
