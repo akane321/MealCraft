@@ -78,9 +78,11 @@ def main() -> int:
     parser.add_argument("--with-release", action="store_true", help="the report was generated with --release")
     parser.add_argument("--developer", default=None, help="the developer scenarios, when not the default")
     parser.add_argument("--heldout", default=None, help="the held-out scenarios, when not the default")
+    parser.add_argument("--eligibility", default=None, help="protocol v1.1: the forced-repetition record")
     args = parser.parse_args()
     inputs = {**INPUTS, **(RELEASE_INPUTS if args.with_release else {})}
-    inputs.update({key: value for key, value in (("developer", args.developer), ("heldout", args.heldout)) if value})
+    overrides = (("developer", args.developer), ("heldout", args.heldout), ("eligibility", args.eligibility))
+    inputs.update({key: value for key, value in overrides if value})
 
     report_commit = last_commit(args.report)
     entries: dict[str, dict[str, str]] = {}
