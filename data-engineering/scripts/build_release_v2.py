@@ -39,7 +39,14 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from build_v2_candidates import QUOTAS, course_group  # noqa: E402
-from recipe_completeness import QUEUE, kept_by_review, names_meat, reviews, unlisted_allergens  # noqa: E402
+from recipe_completeness import (  # noqa: E402
+    FLAGGED_POOL,
+    QUEUE,
+    kept_by_review,
+    names_meat,
+    reviews,
+    unlisted_allergens,
+)
 from v2_vocab import ADDITIONS  # noqa: E402
 
 STAGING = ROOT / "data" / "staging"
@@ -50,6 +57,8 @@ ENERGY_PER_SERVING = (10, 3000)
 FLESH_ALLERGENS = {"fish", "crustaceans", "molluscs"}
 # Built recipes flagged by the completeness check that no review has seen yet.
 AWAITING_REVIEW: list[dict] = []
+# Every built recipe the check flags, reviewed or not: what the owner's audit reads.
+FLAGGED: list[dict] = []
 PACKAGE = re.compile(r"\(\s*(\d+(?:\.\d+)?)\s*-?\s*(oz|ounces?|lbs?|pounds?|g|grams?|kg|ml|l)\.?\s*\)", re.I)
 PACKAGE_UNIT = {
     "oz": "oz",
@@ -234,6 +243,15 @@ def build_recipe(record: dict, result: dict, forms: dict[str, dict], rules: dict
     reviewed = reviews().get(recipe_id)
     if reviewed is not None and reviewed["verdict"] == "incomplete":
         return None, "reviewed incomplete: " + ", ".join(reviewed["allergens"])
+    if missing:
+        FLAGGED.append(
+            {
+                "recipe_id": recipe_id,
+                "title": record["title"],
+                "ingredients": lines_out,
+                "instructions": record["instructions"],
+            }
+        )
     if missing and not kept_by_review(recipe_id):
         if recipe_id not in reviews():
             AWAITING_REVIEW.append(
@@ -351,6 +369,7 @@ def main() -> int:
     release = pick_by_quota(built)
     QUEUE.parent.mkdir(parents=True, exist_ok=True)
     QUEUE.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in AWAITING_REVIEW), encoding="utf-8")
+    FLAGGED_POOL.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in FLAGGED), encoding="utf-8")
     if AWAITING_REVIEW:
         print(f"{len(AWAITING_REVIEW)} flagged recipes await completeness review: {QUEUE}")
 
