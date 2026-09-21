@@ -2,7 +2,7 @@
   "schema_version": "evaluation-conditions-v1",
   "label": "catalog-v2.1",
   "report": "docs/evaluation/workbench/catalog-v2.1/latest.json",
-  "report_commit": "f96614ba29d8b5e11b3ce964c49c0820539216c5",
+  "report_commit": "dabfa56cb5e1db76ffbba449b1308322bcf9da7a",
   "attestation": "Every input below was last committed at or before the commit that produced the report, verified with git merge-base --is-ancestor. The digests therefore describe the data the published numbers were computed over.",
   "inputs": {
     "agent": {
@@ -43,22 +43,22 @@
     "release_ingredients": {
       "path": "data-engineering/data/release/v2.1/ingredients.jsonl",
       "sha256": "499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25",
-      "last_changed_commit": "35da4a819a0ceddd9be2148b2e603fc62f7440cf"
+      "last_changed_commit": "dabfa56cb5e1db76ffbba449b1308322bcf9da7a"
     },
     "release_manifest": {
       "path": "data-engineering/data/release/v2.1/release_manifest.json",
       "sha256": "7e81e661870b0fb115f09bc83f39bd96f5619aaeb4e0711d5d851320d239570c",
-      "last_changed_commit": "35da4a819a0ceddd9be2148b2e603fc62f7440cf"
+      "last_changed_commit": "dabfa56cb5e1db76ffbba449b1308322bcf9da7a"
     },
     "release_products": {
       "path": "data/products/fairprice-v2-snapshot.json",
-      "sha256": "ff6781288569731eb6566697564e70c3df083e33c0df60466144b92ba3dccc75",
-      "last_changed_commit": "35da4a819a0ceddd9be2148b2e603fc62f7440cf"
+      "sha256": "2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91",
+      "last_changed_commit": "dabfa56cb5e1db76ffbba449b1308322bcf9da7a"
     },
     "release_recipes": {
       "path": "data-engineering/data/release/v2.1/recipes.jsonl",
       "sha256": "df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db",
-      "last_changed_commit": "35da4a819a0ceddd9be2148b2e603fc62f7440cf"
+      "last_changed_commit": "dabfa56cb5e1db76ffbba449b1308322bcf9da7a"
     },
     "scope": {
       "path": "data/evaluation/agent-orchestration/scope-developer-v1.json",
