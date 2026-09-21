@@ -46,6 +46,23 @@ Release v2 is loaded beside it by `python -m app.data.import_release_v2`
   Ingredients whose normalized name matches a curated one reuse that row, and
   its allergen list only grows.
 - Recipes with fewer than two ingredient lines are skipped and listed.
+- Some RecipeNLG sources list only part of a dish (a crab quiche listing only
+  its crust), so allergens derived from the lines miss what the dish contains.
+  A recipe whose title or steps name a food carrying a checked allergen that no
+  listed ingredient carries is not imported (693 in v2); phrases that only look
+  like one (coconut milk, peanut butter, cream of tartar, rice flour) are
+  removed first. A wrong exclusion costs one recipe; a missed one would serve
+  the allergen unchecked.
+- Six release ingredients get the allergens their usual product carries,
+  added at import and only ever stricter: butter or margarine (dairy), the
+  three condensed cream soups (dairy, gluten), tortilla and crisp rice cereal
+  (gluten).
+- A dietary tag the recipe's own allergens or text contradict is dropped:
+  vegetarian and vegan when the text names meat or fish or the allergens include
+  fish or shellfish, vegan with dairy or egg, dairy-free with dairy, gluten-free
+  with gluten (169 recipes lost vegetarian or vegan).
+- The importer version is part of the recorded digest, so a change to these
+  rules re-imports a release already loaded.
 - `catalog_imports` records the release digest. A rerun with the same files
   does nothing; changed files re-import, and v2 recipes no longer in the release
   are deleted unless a meal plan references them.
@@ -384,7 +401,7 @@ Schema v1 is frozen and releases are being cut (see
 
 - ~~Add an adapter or migration from the release into the runtime catalog.~~ Done for release v2 (see section 2).
 - ~~Let candidate retrieval reach the whole catalog, not the first 500 recipes by id.~~ Done: recommendations rank every recipe whose course can fill a meal (curated, or v2 `main`/`soup`) and keep the best 500 within budget; weekly plans and replacements load only recipes the planner can price (`RecipeRepository.list_for_planning`).
-- ~~Map release ingredients to products.~~ Done for release v2 (see section 2); the owner's sampled review of the mapping is outstanding.
+- ~~Map release ingredients to products.~~ Done for release v2 (see section 2); the owner's sampled review is recorded in `data-engineering/docs/fairprice-v2-sampled-review.json`.
 - Add planner and grocery fixtures and regression tests.
 - Publish the quality report, release manifest and known gaps with the import.
 

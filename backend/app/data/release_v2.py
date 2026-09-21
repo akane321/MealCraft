@@ -53,6 +53,85 @@ RELEASE_VERSION = "v2"
 SLUG_PREFIX = "v2-"
 RELEASE_FILES = ("release_manifest.json", "ingredients.jsonl", "recipes.jsonl")
 
+# Importer logic is part of the digest, so a change here re-imports an
+# already-recorded release instead of being skipped as unchanged.
+IMPORTER_VERSION = "2"  # 2: incomplete-list check and stricter allergens
+
+# Some RecipeNLG sources list only part of a dish ("Crab Meat Quiche" listing
+# its crust), so allergens and dietary tags derived from the listed ingredients
+# miss what the title or the steps name. A recipe whose title or steps name a
+# food carrying an allergen that no listed ingredient carries is not imported:
+# a wrong exclusion costs one recipe, a missed one serves an allergen unchecked.
+# A vegetarian or vegan recipe whose text names meat or fish keeps its place but
+# loses those tags. Phrases that only look like a trigger are removed first.
+LOOKALIKES = re.compile(
+    r"coconut (?:milk|cream)|peanut butter|cream of tartar|butternut|butter ?beans?|butterfly|"
+    r"cream(?:ed|ing)? (?:together|the|until|in)|scallop(?:ed)? potato\w*|egg ?plant|nut ?meg|water ?chestnut|"
+    r"imitation crab\w*|crab ?sticks?|spaghetti squash|"
+    r"(?:rice|corn|almond|coconut|tapioca|potato|chickpea|gram|oat|millet|teff|sorghum|buckwheat) "
+    r"(?:flour|noodles?|tortillas?|starch|milk|bread|cream)|cornflour|rice paper|gluten[- ]free \w+|"
+    r"(?:dairy|egg|nut|soy)[- ]free \w+|soy ?milk|almond milk|oat milk|vegan \w+",
+    re.IGNORECASE,
+)
+ALLERGEN_WORDS = {
+    "shellfish": r"crab|shrimps?|prawns?|lobsters?|scallops?|clams?|mussels?|oysters?|squid|calamari|crawfish|octopus",
+    "fish": r"salmon|tuna|cod|tilapia|anchov\w*|sardines?|halibut|trout|mackerel|catfish|haddock|snapper|fish",
+    "egg": r"eggs?|yolks?|omelets?|omelettes?|quiche|frittata|meringue",
+    "dairy": r"cheese|cheddar|parmesan|mozzarella|milk|butter|cream|yogh?urt|ricotta|feta",
+    "peanut": r"peanuts?",
+    "tree_nut": r"almonds?|walnuts?|pecans?|cashews?|pistachios?|hazelnuts?|macadamias?",
+    "sesame": r"sesame|tahini",
+    "soy": r"soy|soya|tofu|edamame|miso|tempeh",
+    "gluten": r"flour|bread|breadcrumbs?|pasta|spaghetti|macaroni|noodles?|wheat|barley|rye|couscous|crackers?|"
+    r"tortillas?|croutons?",
+}
+ALLERGEN_PATTERNS = {name: re.compile(rf"\b(?:{words})\b", re.IGNORECASE) for name, words in ALLERGEN_WORDS.items()}
+MEAT = re.compile(
+    r"\b(?:chicken|beef|pork|bacon|ham|sausages?|lamb|turkey|meat|steak|veal|duck|gelatin|anchov\w*|fish|"
+    r"shrimps?|prawns?|crab|tuna|salmon)\b",
+    re.IGNORECASE,
+)
+MEAT_FREE_TAGS = {"vegetarian", "vegan"}
+# A dietary tag the recipe's own allergens contradict is dropped (kimchi's fish in a
+# "vegetarian" fried rice). Tags are derived by rule, so a contradiction is a gap.
+TAG_CONTRADICTED_BY = {
+    "vegetarian": {"fish", "shellfish"},
+    "vegan": {"fish", "shellfish", "dairy", "egg"},
+    "dairy-free": {"dairy"},
+    "gluten-free": {"gluten"},
+}
+
+# Release v2 ingredients whose rule-derived allergens miss what the usual product
+# carries. Added here, only ever stricter, until a release carries them itself.
+STRICTER_ALLERGENS = {
+    "ING_BUTTER_OR_MARGARINE": ("milk",),
+    "ING_CELERY_SOUP": ("milk", "gluten_candidate"),
+    "ING_CHICKEN_SOUP": ("milk", "gluten_candidate"),
+    "ING_MUSHROOM_SOUP": ("milk", "gluten_candidate"),
+    "ING_TORTILLA": ("gluten_candidate",),
+    "ING_CEREAL_RICE": ("gluten_candidate",),
+}
+
+
+def recipe_allergens(record: dict) -> list[str]:
+    stricter = [
+        a for item in record["ingredients"] for a in STRICTER_ALLERGENS.get(item["canonical_ingredient_id"], ())
+    ]
+    return map_allergens([*record["allergens"], *stricter])
+
+
+def unlisted_allergens(record: dict, listed: Iterable[str]) -> list[str]:
+    """Checked allergens the title or steps name that no listed ingredient carries."""
+    text = LOOKALIKES.sub(" ", " ".join([record["title"], *(step["text"] for step in record["instructions"])]))
+    have = set(listed)
+    return sorted(name for name, pattern in ALLERGEN_PATTERNS.items() if name not in have and pattern.search(text))
+
+
+def names_meat(record: dict) -> bool:
+    text = LOOKALIKES.sub(" ", " ".join([record["title"], *(step["text"] for step in record["instructions"])]))
+    return bool(MEAT.search(text))
+
+
 # Release allergen name -> runtime checked allergen, or None when the runtime has no name for it.
 ALLERGEN_MAP: dict[str, str | None] = {
     "milk": "dairy",
@@ -77,7 +156,7 @@ def release_dir() -> Path:
 
 
 def release_digest(directory: Path) -> str:
-    digest = hashlib.sha256()
+    digest = hashlib.sha256(f"importer:{IMPORTER_VERSION}".encode())
     for name in RELEASE_FILES:
         digest.update(name.encode())
         digest.update((directory / name).read_bytes())
@@ -125,6 +204,8 @@ class ImportReport:
     ingredients_reused: int = 0
     recipes_imported: int = 0
     recipes_skipped: list[str] = field(default_factory=list)
+    recipes_incomplete: dict[str, list[str]] = field(default_factory=dict)
+    meat_free_tags_removed: list[str] = field(default_factory=list)
     recipes_removed: int = 0
     recipes_retained_in_use: int = 0
 
@@ -134,7 +215,10 @@ class ImportReport:
         return (
             f"Release {self.release_version} imported: {self.recipes_imported} recipes, "
             f"{self.ingredients_added} new ingredients, {self.ingredients_reused} already in the catalog, "
-            f"{len(self.recipes_skipped)} recipes skipped, {self.recipes_removed} stale recipes removed, "
+            f"{len(self.recipes_skipped)} recipes skipped, "
+            f"{len(self.recipes_incomplete)} left out because their text names an unlisted allergen, "
+            f"{len(self.meat_free_tags_removed)} lost vegetarian/vegan tags, "
+            f"{self.recipes_removed} stale recipes removed, "
             f"{self.recipes_retained_in_use} stale recipes kept because a meal plan uses them"
         )
 
@@ -178,7 +262,9 @@ def _import_ingredients(session: Session, directory: Path, recipes: list[dict], 
     for record in _jsonl(directory / "ingredients.jsonl"):
         release_id = record["ingredient_id"]
         name = normalized_name(release_id)
-        allergens = map_allergens([*record["allergens"], *line_allergens.get(release_id, ())])
+        allergens = map_allergens(
+            [*record["allergens"], *line_allergens.get(release_id, ()), *STRICTER_ALLERGENS.get(release_id, ())]
+        )
         row = existing.get(name)
         if row is None:
             row = Ingredient(normalized_name=name, display_name=record["canonical_name"][:160], allergens=allergens)
@@ -209,6 +295,10 @@ def _import_recipes(
             if len(record["ingredients"]) < 2 or not steps:
                 report.recipes_skipped.append(record["recipe_id"])
                 continue
+            missing = unlisted_allergens(record, recipe_allergens(record))
+            if missing:
+                report.recipes_incomplete[record["recipe_id"]] = missing
+                continue
             recipe_id = existing_ids.get(record["recipe_id"])
             if recipe_id is not None:
                 session.execute(delete(RecipeIngredient).where(RecipeIngredient.recipe_id == recipe_id))
@@ -217,7 +307,7 @@ def _import_recipes(
             else:
                 recipe = Recipe(external_id=record["recipe_id"], release_version=RELEASE_VERSION)
                 session.add(recipe)
-            _fill_recipe(recipe, record)
+            _fill_recipe(recipe, record, report)
             recipe.recipe_ingredients = [
                 RecipeIngredient(
                     ingredient_id=ingredient_ids[line["canonical_ingredient_id"]],
@@ -263,7 +353,7 @@ def _grams(line: dict) -> Decimal | None:
     return grams if grams > 0 else None
 
 
-def _fill_recipe(recipe: Recipe, record: dict) -> None:
+def _fill_recipe(recipe: Recipe, record: dict, report: ImportReport) -> None:
     nutrition = record["nutrition"]
     source = record["source"]
     recipe.slug = recipe_slug(record["recipe_id"], record["title"])
@@ -282,8 +372,17 @@ def _fill_recipe(recipe: Recipe, record: dict) -> None:
     recipe.cook_time_minutes = int(record["cook_minutes"])
     recipe.passive_time_minutes = int(record["passive_minutes"])
     recipe.time_basis = record["time_basis"]
-    recipe.dietary_tags = list(record["dietary_tags"])
-    recipe.allergens = map_allergens(record["allergens"])
+    allergens = set(recipe_allergens(record))
+    meat = names_meat(record)
+    tags = [
+        tag
+        for tag in record["dietary_tags"]
+        if not (allergens & TAG_CONTRADICTED_BY.get(tag, set())) and not (meat and tag in MEAT_FREE_TAGS)
+    ]
+    if MEAT_FREE_TAGS & set(record["dietary_tags"]) - set(tags):
+        report.meat_free_tags_removed.append(record["recipe_id"])
+    recipe.dietary_tags = tags
+    recipe.allergens = recipe_allergens(record)
     recipe.source = {
         "dataset": source["dataset"],
         "source_id": source["source_id"],
