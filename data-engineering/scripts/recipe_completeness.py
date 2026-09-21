@@ -10,6 +10,8 @@ ingredient carries, unless a reviewer found the mention harmless:
     python scripts/recipe_completeness.py sample --size 300   # unflagged recipes, to measure misses
     python scripts/recipe_completeness.py validate FILE...
     python scripts/recipe_completeness.py merge FILE...       # data/enrichment/completeness/v2_review.jsonl
+    python scripts/recipe_completeness.py audit               # the owner's sample of the review, fixed seed
+    python scripts/recipe_completeness.py record-audit FILE   # record the owner's verdicts
 
 A review line is {"recipe_id", "verdict", "allergens", "evidence", "enriched_by"}:
 
@@ -41,10 +43,17 @@ REVIEW = ROOT / "data" / "enrichment" / "completeness" / "v2_review.jsonl"
 PACKETS = ROOT / "data" / "review" / "completeness"
 # Written by the build: flagged recipes outside release v2 that no review has seen.
 QUEUE = PACKETS / "awaiting_review.jsonl"
+# Written by the build: every built recipe the check flags, reviewed or not.
+FLAGGED_POOL = PACKETS / "flagged_pool.jsonl"
 SOURCE = ROOT / "data" / "release" / "v2" / "recipes.jsonl"
 KEEP = {"optional_mention", "false_positive", "complete"}
 VERDICTS = KEEP | {"incomplete"}
 SEED = 20260922
+AUDIT_SEED = 20260923
+AUDIT = PACKETS / "audit-sample.json"  # redrawable from the seed, so not committed
+AUDIT_RESULT = ROOT / "docs" / "completeness-v2.1-sampled-audit.json"  # the owner's judgement, committed
+# A wrong keep can serve an allergen unchecked, so the sample leans on kept recipes.
+AUDIT_STRATA = {"kept": 25, "incomplete": 10, "sample": 5}
 
 # Phrases rewritten before matching. A phrase keeps the word that carries its
 # allergen ("peanut butter" is peanut, not dairy; "almond milk" is tree nut, not
@@ -149,11 +158,12 @@ def kept_by_review(recipe_id: str) -> bool:
 
 def _records() -> list[dict]:
     rows = [json.loads(line) for line in SOURCE.read_text(encoding="utf-8").splitlines() if line.strip()]
-    if QUEUE.exists():
-        seen = {row["recipe_id"] for row in rows}
-        rows += [
-            r for r in map(json.loads, QUEUE.read_text(encoding="utf-8").splitlines()) if r["recipe_id"] not in seen
-        ]
+    for extra in (QUEUE, FLAGGED_POOL):
+        if extra.exists():
+            seen = {row["recipe_id"] for row in rows}
+            rows += [
+                r for r in map(json.loads, extra.read_text(encoding="utf-8").splitlines()) if r["recipe_id"] not in seen
+            ]
     return rows
 
 
@@ -175,6 +185,76 @@ def _write(name: str, lines: list[dict], shards: int) -> None:
     print(f"{len(lines)} recipes in {shards} {name} packets under {PACKETS}")
 
 
+def _rank(recipe_id: str, seed: int) -> str:
+    return hashlib.sha256(f"{seed}:{recipe_id}".encode()).hexdigest()
+
+
+def draw_audit(records: dict[str, dict]) -> None:
+    # Only reviews that still decide something: the recipe is flagged by the final check,
+    # or it is one of the unflagged sample.
+    rows = [r for r in reviews().values() if r["recipe_id"] in records]
+    strata = {
+        "kept": [
+            r for r in rows if r.get("source") != "sample" and r["verdict"] in {"optional_mention", "false_positive"}
+        ],
+        "incomplete": [r for r in rows if r.get("source") != "sample" and r["verdict"] == "incomplete"],
+        "sample": [r for r in rows if r.get("source") == "sample"],
+    }
+    items = []
+    for stratum, want in AUDIT_STRATA.items():
+        for row in sorted(strata[stratum], key=lambda r: _rank(r["recipe_id"], AUDIT_SEED))[:want]:
+            record = records[row["recipe_id"]]
+            items.append(
+                {
+                    "stratum": stratum,
+                    "review": row,
+                    "title": record["title"],
+                    "ingredients": [
+                        line["original_text"] if isinstance(line, dict) else line for line in record["ingredients"]
+                    ],
+                    "instructions": [
+                        step["text"] if isinstance(step, dict) else step for step in record["instructions"]
+                    ],
+                }
+            )
+    AUDIT.parent.mkdir(parents=True, exist_ok=True)
+    AUDIT.write_text(json.dumps({"seed": AUDIT_SEED, "items": items}, ensure_ascii=False, indent=1) + "\n", "utf-8")
+    print(f"{len(items)} reviews sampled into {AUDIT}")
+
+
+def record_audit(path: Path) -> None:
+    """Verdicts: {"recipe_id", "verdict": accepted|corrected, "note"}; corrections are applied by hand."""
+    sheet = json.loads(AUDIT.read_text(encoding="utf-8"))
+    sampled = {item["review"]["recipe_id"]: item["stratum"] for item in sheet["items"]}
+    verdicts = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    bad = [
+        v for v in verdicts if v.get("recipe_id") not in sampled or v.get("verdict") not in {"accepted", "corrected"}
+    ]
+    if bad:
+        sys.exit(f"verdicts outside the sample or with an unknown verdict: {bad[:3]}")
+    by_stratum: dict[str, dict[str, int]] = {}
+    for verdict in verdicts:
+        counts = by_stratum.setdefault(sampled[verdict["recipe_id"]], {"accepted": 0, "corrected": 0})
+        counts[verdict["verdict"]] += 1
+    AUDIT_RESULT.write_text(
+        json.dumps(
+            {
+                "seed": sheet["seed"],
+                "reviewer": "owner",
+                "sampled": len(sampled),
+                "verdicts_recorded": len(verdicts),
+                "by_stratum": by_stratum,
+                "verdicts": sorted(verdicts, key=lambda v: v["recipe_id"]),
+            },
+            ensure_ascii=False,
+            indent=1,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    print(f"{len(verdicts)} verdicts recorded: {by_stratum}; written to {AUDIT_RESULT}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
@@ -184,6 +264,8 @@ def main() -> None:
     sampler.add_argument("--shards", type=int, default=3)
     for name in ("validate", "merge"):
         commands.add_parser(name).add_argument("files", nargs="+")
+    commands.add_parser("audit")
+    commands.add_parser("record-audit").add_argument("verdicts")
     args = parser.parse_args()
 
     sys.path.insert(0, str(ROOT / "scripts"))
@@ -203,6 +285,19 @@ def main() -> None:
             if flagged and record["recipe_id"] not in done:
                 lines.append(_packet_line(record, flagged))
         _write("flagged", lines, args.shards)
+        return
+    if args.command == "audit":
+        flagged_now = {r["recipe_id"] for r in records if unlisted_allergens(r, listed(r))}
+        by_id = {r["recipe_id"]: r for r in records}
+        live = {
+            rid: rec
+            for rid, rec in by_id.items()
+            if rid in flagged_now or reviews().get(rid, {}).get("source") == "sample"
+        }
+        draw_audit(live)
+        return
+    if args.command == "record-audit":
+        record_audit(Path(args.verdicts))
         return
     if args.command == "sample":
         pool = [r for r in records if not unlisted_allergens(r, listed(r))]
