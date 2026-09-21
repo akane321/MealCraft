@@ -138,6 +138,21 @@ def eligible(request: dict, pool: list[dict]) -> list[dict]:
 
 
 PRICE_CONSTRAINTS = ("budget_per_meal_sgd", "weekly_budget_sgd")
+DAYS = 7  # a weekly plan is seven dinners
+
+
+def forced_repetitions(request: dict, pool: list[dict]) -> tuple[int | None, int]:
+    """Eligible dishes, and the adjacent repetitions any valid week must contain (protocol v1.1).
+
+    Two or more eligible dishes can alternate, so no repetition is forced; one
+    dish forces a repeat on every day after the first. A budget is left to the
+    planner's pricing, which this script does not model, so a budgeted scenario
+    is recorded as forcing none: the strict rule applies to it.
+    """
+    if any(key in request for key in PRICE_CONSTRAINTS):
+        return None, 0
+    count = len(eligible(request, pool))
+    return count, DAYS - 1 if count == 1 else 0
 
 
 def relabel(scenarios: list[dict], pool: list[dict]) -> tuple[list[dict], list[dict]]:
@@ -227,7 +242,13 @@ def main() -> int:
         new = _json(new_path) if new_path.exists() else []
         problems += check_new(new, pool, {s["id"] for s in scenarios})
         outputs[target(path)] = render(scenarios + new)
+        eligibility = {}
+        for scenario in scenarios + new:
+            if scenario["expected_feasible"]:
+                count, forced = forced_repetitions(scenario["request"], pool)
+                eligibility[scenario["id"]] = {"eligible_recipes": count, "forced_repetitions": forced}
         record["sets"][name] = {
+            "eligibility": eligibility,
             "source": path.relative_to(ROOT).as_posix(),
             "new_scenarios": new_path.relative_to(ROOT).as_posix() if new else None,
             "new_count": len(new),

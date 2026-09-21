@@ -210,9 +210,30 @@ The one failure MealCraft and the Strong Rule-only reference share is
 `hold-039`, where exactly one dish meets the constraints, so a week of seven
 must repeat it; the protocol counts that as a failure and it is reported as
 one. The same holds for the developer set's two failures (`dev-020`,
-`dev-111`, one eligible dish each), which is why its gate fails. The scoring
-rule is not changed here: changing it after seeing these results would be
-fitting the evaluation to them (priority 2).
+`dev-111`, one eligible dish each), which is why its gate fails.
+
+The owner then decided that a repetition the catalog forces is not a planning
+failure (protocol v1.1, decision ADR-0035,
+[protocol section 8](evaluation/protocol-v1.md)). The rule was decided after
+these results were seen and is not pre-registered. It is a new protocol
+version, so the v1 report above is unchanged; the same sets rescored under
+v1.1 are reported beside it
+([report](evaluation/workbench/catalog-v2.1-scenarios-v1.1/latest.md),
+[conditions](evaluation/workbench/catalog-v2.1-scenarios-v1.1/conditions.json)).
+The forced count comes from the catalog alone
+([record](evaluation/catalog-v2.1-labels.json)): one eligible dish forces six
+repetitions a week, and a budgeted scenario is recorded as forcing none.
+
+| Held-out, 60 scenarios, v1.1 | Greedy baseline | Strong Rule-only | MealCraft |
+| --- | ---: | ---: | ---: |
+| Adjacent repetitions (raw) | 348 | 6 | 6 |
+| Forced by the catalog | 6 | 6 | 6 |
+| Avoidable repetitions | 342 | 0 | 0 |
+| Recorded failure cases | 57 | 0 | 0 |
+
+The developer gate passes under v1.1: its 12 repetitions are all forced. The
+rule removes the same failure from the Strong Rule-only reference as from
+MealCraft, so it does not separate them; mean distinct recipes still does.
 
 **Read this comparison carefully.** Against the strong reference, MealCraft ties
 on scenario expectation rate (`1.0` each), hard-constraint violations (`0` each)
@@ -283,29 +304,26 @@ the next incomplete control. It is a navigation aid, not a second status source.
 ## Current Priorities
 
 1. Record a signed-in run of the home surface against the real backend.
-2. Decide, independently of the larger-catalog results, whether a repetition
-   the catalog forces (one eligible dish) should count as a planning failure;
-   the protocol counts every adjacent repetition today.
-3. Complete nutrition-target and elastic-preference semantics and evidence.
-4. Test FairPrice live/cache/fixture degradation against real changes.
-5. Integrate the verified Planning v2 components into the product path, then
+2. Complete nutrition-target and elastic-preference semantics and evidence.
+3. Test FairPrice live/cache/fixture degradation against real changes.
+4. Integrate the verified Planning v2 components into the product path, then
    evaluate Beam parameters, retrieve-repair and package optimization without
    overstating global optimality or infeasibility.
-6. Extend the merged synchronous `AgentRun` into asynchronous pause/resume/retry
+5. Extend the merged synchronous `AgentRun` into asynchronous pause/resume/retry
    with bounded external-tool adapters, then build an independent held-out
    orchestration set and the common v2 output validator before any explicitly
    authorized, budget-capped live-model comparison.
-7. Expand dynamic-replanning stress cases and measure unnecessary disruption.
-8. Increase browser coverage and prepare a repeatable demonstration path.
-9. Add member-management routes, expand the cross-household isolation matrix as
+6. Expand dynamic-replanning stress cases and measure unnecessary disruption.
+7. Increase browser coverage and prepare a repeatable demonstration path.
+8. Add member-management routes, expand the cross-household isolation matrix as
    private resources grow, and complete household collaboration plus account
    lifecycle flows.
-10. Raise the discriminating power of the held-out evaluation before the final
-    comparison. Parameters may be tuned on developer data only, never on
-    held-out episodes (decision ADR-0020 as amended by ADR-0029). On the current v1 set the strong Rule-only reference
-    matches MealCraft on task success, hard-constraint violations and failure
-    count; a saturated primary metric cannot support a superiority claim.
-11. Progressively close the final-design gaps documented above rather than
+9. Raise the discriminating power of the held-out evaluation before the final
+   comparison. Parameters may be tuned on developer data only, never on
+   held-out episodes (decision ADR-0020 as amended by ADR-0029). On the current v1 set the strong Rule-only reference
+   matches MealCraft on task success, hard-constraint violations and failure
+   count; a saturated primary metric cannot support a superiority claim.
+10. Progressively close the final-design gaps documented above rather than
     treating the current MVP as the finished product.
 
 ## Verification Boundary

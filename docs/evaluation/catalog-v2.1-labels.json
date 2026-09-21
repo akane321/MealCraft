@@ -7,6 +7,136 @@
   },
   "sets": {
     "developer": {
+      "eligibility": {
+        "dev-001": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "dev-002": {
+          "eligible_recipes": 424,
+          "forced_repetitions": 0
+        },
+        "dev-003": {
+          "eligible_recipes": 137,
+          "forced_repetitions": 0
+        },
+        "dev-004": {
+          "eligible_recipes": 1200,
+          "forced_repetitions": 0
+        },
+        "dev-005": {
+          "eligible_recipes": 2372,
+          "forced_repetitions": 0
+        },
+        "dev-006": {
+          "eligible_recipes": 1858,
+          "forced_repetitions": 0
+        },
+        "dev-007": {
+          "eligible_recipes": 2834,
+          "forced_repetitions": 0
+        },
+        "dev-008": {
+          "eligible_recipes": 2714,
+          "forced_repetitions": 0
+        },
+        "dev-009": {
+          "eligible_recipes": 2907,
+          "forced_repetitions": 0
+        },
+        "dev-010": {
+          "eligible_recipes": 2624,
+          "forced_repetitions": 0
+        },
+        "dev-011": {
+          "eligible_recipes": 943,
+          "forced_repetitions": 0
+        },
+        "dev-012": {
+          "eligible_recipes": 1055,
+          "forced_repetitions": 0
+        },
+        "dev-013": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "dev-014": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "dev-015": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "dev-016": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "dev-017": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "dev-018": {
+          "eligible_recipes": null,
+          "forced_repetitions": 0
+        },
+        "dev-019": {
+          "eligible_recipes": 3,
+          "forced_repetitions": 0
+        },
+        "dev-020": {
+          "eligible_recipes": 1,
+          "forced_repetitions": 6
+        },
+        "dev-101": {
+          "eligible_recipes": 2834,
+          "forced_repetitions": 0
+        },
+        "dev-102": {
+          "eligible_recipes": 2705,
+          "forced_repetitions": 0
+        },
+        "dev-103": {
+          "eligible_recipes": 1563,
+          "forced_repetitions": 0
+        },
+        "dev-104": {
+          "eligible_recipes": 3076,
+          "forced_repetitions": 0
+        },
+        "dev-105": {
+          "eligible_recipes": 35,
+          "forced_repetitions": 0
+        },
+        "dev-106": {
+          "eligible_recipes": 5,
+          "forced_repetitions": 0
+        },
+        "dev-107": {
+          "eligible_recipes": 835,
+          "forced_repetitions": 0
+        },
+        "dev-108": {
+          "eligible_recipes": 393,
+          "forced_repetitions": 0
+        },
+        "dev-109": {
+          "eligible_recipes": 681,
+          "forced_repetitions": 0
+        },
+        "dev-110": {
+          "eligible_recipes": 7,
+          "forced_repetitions": 0
+        },
+        "dev-111": {
+          "eligible_recipes": 1,
+          "forced_repetitions": 6
+        },
+        "dev-112": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        }
+      },
       "source": "data/evaluation/dev/planning-v1.json",
       "new_scenarios": "data/evaluation/dev/planning-catalog-v2.1-new.json",
       "new_count": 13,
@@ -37,6 +167,240 @@
       ]
     },
     "heldout": {
+      "eligibility": {
+        "hold-001": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "hold-002": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "hold-003": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "hold-004": {
+          "eligible_recipes": 2702,
+          "forced_repetitions": 0
+        },
+        "hold-005": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "hold-006": {
+          "eligible_recipes": 3093,
+          "forced_repetitions": 0
+        },
+        "hold-007": {
+          "eligible_recipes": 2372,
+          "forced_repetitions": 0
+        },
+        "hold-008": {
+          "eligible_recipes": 1200,
+          "forced_repetitions": 0
+        },
+        "hold-009": {
+          "eligible_recipes": 3343,
+          "forced_repetitions": 0
+        },
+        "hold-010": {
+          "eligible_recipes": 3016,
+          "forced_repetitions": 0
+        },
+        "hold-011": {
+          "eligible_recipes": 1516,
+          "forced_repetitions": 0
+        },
+        "hold-012": {
+          "eligible_recipes": 681,
+          "forced_repetitions": 0
+        },
+        "hold-013": {
+          "eligible_recipes": 424,
+          "forced_repetitions": 0
+        },
+        "hold-014": {
+          "eligible_recipes": 1200,
+          "forced_repetitions": 0
+        },
+        "hold-015": {
+          "eligible_recipes": 228,
+          "forced_repetitions": 0
+        },
+        "hold-016": {
+          "eligible_recipes": 92,
+          "forced_repetitions": 0
+        },
+        "hold-017": {
+          "eligible_recipes": 194,
+          "forced_repetitions": 0
+        },
+        "hold-018": {
+          "eligible_recipes": 1154,
+          "forced_repetitions": 0
+        },
+        "hold-019": {
+          "eligible_recipes": 1866,
+          "forced_repetitions": 0
+        },
+        "hold-020": {
+          "eligible_recipes": 1082,
+          "forced_repetitions": 0
+        },
+        "hold-021": {
+          "eligible_recipes": 393,
+          "forced_repetitions": 0
+        },
+        "hold-022": {
+          "eligible_recipes": 1996,
+          "forced_repetitions": 0
+        },
+        "hold-023": {
+          "eligible_recipes": null,
+          "forced_repetitions": 0
+        },
+        "hold-024": {
+          "eligible_recipes": null,
+          "forced_repetitions": 0
+        },
+        "hold-025": {
+          "eligible_recipes": null,
+          "forced_repetitions": 0
+        },
+        "hold-026": {
+          "eligible_recipes": null,
+          "forced_repetitions": 0
+        },
+        "hold-027": {
+          "eligible_recipes": null,
+          "forced_repetitions": 0
+        },
+        "hold-028": {
+          "eligible_recipes": null,
+          "forced_repetitions": 0
+        },
+        "hold-029": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "hold-030": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "hold-031": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "hold-032": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "hold-033": {
+          "eligible_recipes": 1373,
+          "forced_repetitions": 0
+        },
+        "hold-034": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "hold-035": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "hold-036": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "hold-037": {
+          "eligible_recipes": 3,
+          "forced_repetitions": 0
+        },
+        "hold-039": {
+          "eligible_recipes": 1,
+          "forced_repetitions": 6
+        },
+        "hold-101": {
+          "eligible_recipes": 1415,
+          "forced_repetitions": 0
+        },
+        "hold-102": {
+          "eligible_recipes": 2904,
+          "forced_repetitions": 0
+        },
+        "hold-103": {
+          "eligible_recipes": 2918,
+          "forced_repetitions": 0
+        },
+        "hold-104": {
+          "eligible_recipes": 1200,
+          "forced_repetitions": 0
+        },
+        "hold-105": {
+          "eligible_recipes": 151,
+          "forced_repetitions": 0
+        },
+        "hold-106": {
+          "eligible_recipes": 84,
+          "forced_repetitions": 0
+        },
+        "hold-107": {
+          "eligible_recipes": 71,
+          "forced_repetitions": 0
+        },
+        "hold-108": {
+          "eligible_recipes": 1024,
+          "forced_repetitions": 0
+        },
+        "hold-109": {
+          "eligible_recipes": 134,
+          "forced_repetitions": 0
+        },
+        "hold-110": {
+          "eligible_recipes": 67,
+          "forced_repetitions": 0
+        },
+        "hold-111": {
+          "eligible_recipes": 30,
+          "forced_repetitions": 0
+        },
+        "hold-112": {
+          "eligible_recipes": 943,
+          "forced_repetitions": 0
+        },
+        "hold-113": {
+          "eligible_recipes": 3347,
+          "forced_repetitions": 0
+        },
+        "hold-114": {
+          "eligible_recipes": 424,
+          "forced_repetitions": 0
+        },
+        "hold-115": {
+          "eligible_recipes": 2904,
+          "forced_repetitions": 0
+        },
+        "hold-116": {
+          "eligible_recipes": 2907,
+          "forced_repetitions": 0
+        },
+        "hold-117": {
+          "eligible_recipes": 424,
+          "forced_repetitions": 0
+        },
+        "hold-118": {
+          "eligible_recipes": 141,
+          "forced_repetitions": 0
+        },
+        "hold-119": {
+          "eligible_recipes": 316,
+          "forced_repetitions": 0
+        },
+        "hold-120": {
+          "eligible_recipes": 603,
+          "forced_repetitions": 0
+        }
+      },
       "source": "data/evaluation/heldout/planning-v1.json",
       "new_scenarios": "data/evaluation/heldout/planning-catalog-v2.1-new.json",
       "new_count": 20,
