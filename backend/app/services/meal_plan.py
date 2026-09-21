@@ -56,9 +56,12 @@ class WeeklyMealPlanService:
         replaces_plan_id: int | None = None,
     ) -> WeeklyMealPlanResponse:
         started_at = datetime.now(UTC)
+        recipes = self.recipe_repository.list_for_planning()
         recommendation_result = self.recommendation_service.recommend(
             constraints,
             deduct_pantry_from_cost=False,
+            recipes=recipes,
+            priced_release_only=True,
         )
         broadened = not recommendation_result.recommendations
         if broadened:
@@ -67,8 +70,9 @@ class WeeklyMealPlanService:
             recommendation_result = self.recommendation_service.recommend(
                 constraints.model_copy(update={"max_cooking_time_minutes": 240, "dietary_preferences": []}),
                 deduct_pantry_from_cost=False,
+                recipes=recipes,
+                priced_release_only=True,
             )
-        recipes = self.recipe_repository.list_for_recommendation()
         prior_trace = None
         for attempt in range(2):
             try:
@@ -91,6 +95,8 @@ class WeeklyMealPlanService:
                     recommendation_result = self.recommendation_service.recommend(
                         constraints.model_copy(update={"max_cooking_time_minutes": 240, "dietary_preferences": []}),
                         deduct_pantry_from_cost=False,
+                        recipes=recipes,
+                        priced_release_only=True,
                     )
                     recommendation_result.recommendations = [
                         previous.get(r.recipe.id, r) for r in recommendation_result.recommendations

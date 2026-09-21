@@ -1,7 +1,13 @@
-from sqlalchemy import Select, select
+from sqlalchemy import Select, exists, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from app.models.recipe import Recipe, RecipeIngredient
+from app.models.recipe import Ingredient, Recipe, RecipeIngredient
+from app.planning.grocery_estimator import matchable_ingredients
+
+# Release recipes carry a course; only these can fill a meal. Curated recipes
+# have no course and are always candidates. Sides, sauces, drinks and desserts
+# stay browsable but never become a planned meal or a meal recommendation.
+MEAL_COURSES = ("main", "soup")
 
 
 class RecipeRepository:
@@ -29,14 +35,42 @@ class RecipeRepository:
         )
         return self.session.scalars(statement).unique().one_or_none()
 
-    def list_for_recommendation(self, *, limit: int = 500) -> list[Recipe]:
+    def list_for_recommendation(self) -> list[Recipe]:
+        """Every recipe that can fill a meal; callers load it once per request and pass it on."""
         statement = (
-            select(Recipe)
-            .options(
-                joinedload(Recipe.nutrition),
-                selectinload(Recipe.recipe_ingredients).joinedload(RecipeIngredient.ingredient),
-            )
+            self._with_ingredients()
+            .where(or_(Recipe.course.is_(None), Recipe.course.in_(MEAL_COURSES)))
             .order_by(Recipe.id)
-            .limit(limit)
         )
         return list(self.session.scalars(statement).unique().all())
+
+    def list_for_planning(self) -> list[Recipe]:
+        """Meal candidates the planner can price: release recipes with an unmatchable ingredient are left out."""
+        unmatchable_line = (
+            select(RecipeIngredient.id)
+            .join(Ingredient)
+            .where(
+                RecipeIngredient.recipe_id == Recipe.id,
+                Ingredient.normalized_name.not_in(sorted(matchable_ingredients())),
+            )
+        )
+        statement = (
+            self._with_ingredients()
+            .where(or_(Recipe.course.is_(None), Recipe.course.in_(MEAL_COURSES)))
+            .where(or_(Recipe.release_version.is_(None), ~exists(unmatchable_line)))
+            .order_by(Recipe.id)
+        )
+        return list(self.session.scalars(statement).unique().all())
+
+    def list_by_ids(self, ids: list[int]) -> list[Recipe]:
+        if not ids:
+            return []
+        statement = self._with_ingredients().where(Recipe.id.in_(set(ids))).order_by(Recipe.id)
+        return list(self.session.scalars(statement).unique().all())
+
+    @staticmethod
+    def _with_ingredients() -> Select[tuple[Recipe]]:
+        return select(Recipe).options(
+            joinedload(Recipe.nutrition),
+            selectinload(Recipe.recipe_ingredients).joinedload(RecipeIngredient.ingredient),
+        )

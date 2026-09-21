@@ -347,7 +347,8 @@ Schema v1 is frozen and releases are being cut (see
 ### Import into the runtime
 
 - ~~Add an adapter or migration from the release into the runtime catalog.~~ Done for release v2 (see section 2).
-- Let recommendation and planning candidate retrieval reach the whole catalog, not the first 500 recipes by id.
+- ~~Let candidate retrieval reach the whole catalog, not the first 500 recipes by id.~~ Done: recommendations rank every recipe whose course can fill a meal (curated, or v2 `main`/`soup`) and keep the best 500 within budget; weekly plans and replacements load only recipes the planner can price (`RecipeRepository.list_for_planning`).
+- Map release ingredients to products. The name matcher is limited to curated ingredients (`matchable_ingredients`) because it paired generic release names with the wrong product; until the mapping exists, no v2 recipe can be priced or planned.
 - Add planner and grocery fixtures and regression tests.
 - Publish the quality report, release manifest and known gaps with the import.
 

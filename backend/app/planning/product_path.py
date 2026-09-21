@@ -19,6 +19,7 @@ from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
+from app.planning.recommendation_engine import CANDIDATE_LIMIT
 from app.planning.weekly_planner import WeeklyPlanSelectionError, WeeklyPlanSelector
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse
 from app.schemas.planning_v2 import (
@@ -78,7 +79,7 @@ class ProductPlanningEngine:
             "seed": 0,
             "timeout_seconds": None,
             "dominance_rule": "per-day-recipe-multiset-and-last-recipe-v1",
-            "candidate_limit": 500,
+            "candidate_limit": CANDIDATE_LIMIT,
             "requested_pricing_mode": constraints.pricing_mode,
             "profile_version": profile_version,
             "input_digest": digest(constraints.model_dump(mode="json")),

@@ -1,5 +1,6 @@
+from app.models.recipe import Recipe
 from app.planning.grocery_estimator import GroceryEstimator
-from app.planning.recommendation_engine import RecipeRecommendationEngine
+from app.planning.recommendation_engine import CANDIDATE_LIMIT, RecipeRecommendationEngine
 from app.repositories.recipe import RecipeRepository
 from app.schemas.recommendation import (
     ExcludedRecipeResponse,
@@ -24,19 +25,33 @@ class RecipeRecommendationService:
         constraints: RecipeRecommendationRequest,
         *,
         deduct_pantry_from_cost: bool = True,
+        recipes: list[Recipe] | None = None,
+        priced_release_only: bool = False,
     ) -> RecipeRecommendationCollectionResponse:
-        recipes = self.repository.list_for_recommendation()
+        """Rank the catalog and keep the best CANDIDATE_LIMIT within budget.
+
+        The planner cannot verify a plan containing an unpriced recipe. With
+        `priced_release_only`, release recipes whose products are not all mapped are
+        dropped before the limit, so they never crowd out plannable ones. Curated
+        recipes always stay, as before.
+        """
+        if recipes is None:
+            recipes = self.repository.list_for_recommendation()
         recommendations, excluded = self.engine.recommend(recipes, constraints)
         warnings: list[str] = []
         recipes_by_id = {recipe.id: recipe for recipe in recipes}
         enriched = []
 
         for recommendation in recommendations:
+            if len(enriched) == CANDIDATE_LIMIT:
+                break
             recipe = recipes_by_id[recommendation.recipe.id]
             estimation_constraints = (
                 constraints if deduct_pantry_from_cost else constraints.model_copy(update={"available_ingredients": []})
             )
             estimate = self.grocery_estimator.estimate(recipe, estimation_constraints)
+            if priced_release_only and recipe.release_version is not None and not estimate.complete:
+                continue
             for warning in estimate.warnings:
                 if warning not in warnings:
                     warnings.append(warning)
