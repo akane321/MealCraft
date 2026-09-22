@@ -39,6 +39,40 @@ python scripts/v2_audit_sample.py record < verdicts.jsonl
 python scripts/v2_release_report.py        # 写 ATTRIBUTION.md 和 quality_report.md
 ```
 
+## release v2.1：食材清单完整性与更严格的过敏原
+
+v2 已发布、不再修改；`build_release_v2.py` 现在输出 `data/release/v2.1/`，比 v2 多三项检查：
+
+```bash
+python scripts/recipe_completeness.py packet --shards 8     # 标题或步骤提到、但食材清单里没有的过敏原食物 -> 逐条复核包
+python scripts/recipe_completeness.py sample --size 300     # 未被标记的菜谱抽样，测漏检
+python scripts/recipe_completeness.py validate FILE...
+python scripts/recipe_completeness.py merge FILE...         # 写入 data/enrichment/completeness/v2_review.jsonl
+python scripts/build_release_v2.py                          # 复核为 incomplete 的丢弃；未复核的被标记菜谱也丢弃
+python scripts/v2_release_report.py
+```
+
+构建会把"被标记但没人复核过"的菜谱写到 `data/review/completeness/awaiting_review.jsonl`，
+再跑一次 `packet` 就会打包它们。`config/allergen_corrections.csv` 是 owner 确认过的过敏原补充
+（只增不减）；含鱼或贝类的食材、或标题步骤提到肉鱼，菜谱就不是素食/纯素。
+
+## release v2 的 FairPrice 商品映射
+
+```bash
+python scripts/capture_fairprice_snapshot.py               # 每个食材搜一次 FairPrice，原始结果写入 data/enrichment/fairprice/v2/observations.jsonl
+python scripts/fairprice_mapping.py packet --shards 8      # 按食材打包候选商品，供逐条判断（data/review/，不提交）
+python scripts/fairprice_mapping.py validate FILE...       # 检查提议：商品必须来自该食材的搜索结果、包装克数和依据齐全
+python scripts/fairprice_mapping.py merge FILE...          # 合并进 mapping.jsonl，review_status 为 proposed
+python scripts/capture_fairprice_snapshot.py --follow-ups 2  # 用提议里的 search_again 再搜一轮
+python scripts/fairprice_mapping.py packet --unavailable   # 只重新打包仍不可用的食材
+python scripts/fairprice_mapping.py sample --size 40       # 抽查样本，种子固定
+python scripts/fairprice_mapping.py record VERDICTS.jsonl  # 记录 owner 的判定
+python scripts/fairprice_mapping.py export                 # 写运行时快照 ../data/products/fairprice-v2-snapshot.json
+```
+
+抓取请求间隔 3 秒，连续失败 3 次就停，可断点续跑。映射由 AI 提议，抽查前都是
+`proposed`；导出时不收录不可用、被 owner 判为需修正、以及置信度低于 0.6 的映射。
+
 `v2_audit_sample.py` 的抽样种子固定，所以同一个种子永远抽到同一批；
 抽样工作表是生成物（`data/review/`，不提交），判定结果是人的判断，提交在
 `docs/v2-sampled-audit.json`。抽查是 `ADR-0024` 第 2 节的要求：AI 富化允许，

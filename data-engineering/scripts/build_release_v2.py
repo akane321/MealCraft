@@ -1,7 +1,7 @@
 """Stage 6 of release v2 (ADR-0030): build the release from the merged enrichment.
 
     python scripts/v2_packet.py merge            # first: validated merge of parts A, B, C
-    python scripts/build_release_v2.py           # writes data/release/v2/
+    python scripts/build_release_v2.py           # writes data/release/v2.1/ (v2 is published and frozen)
 
 For every recipe in data/staging/v2_enrich_set.jsonl with an enrichment result:
 
@@ -16,8 +16,11 @@ For every recipe in data/staging/v2_enrich_set.jsonl with an enrichment result:
    `gluten_candidate` also rules out gluten-free.
 
 A recipe is dropped, with its reason, when an ingredient form or unit weight is
-missing, when per-serving energy is implausible, or when it uses a new
-ingredient whose allergen rule no human has confirmed. The remaining recipes are
+missing, when per-serving energy is implausible, when it uses a new
+ingredient whose allergen rule no human has confirmed, or (from v2.1) when its
+title or steps name a food carrying an allergen no listed ingredient carries and
+the completeness review did not clear it (scripts/recipe_completeness.py). A
+recipe whose text names meat or fish is not vegetarian or vegan. The remaining recipes are
 picked by quota against their enriched cuisine and course (config/v2_quotas.json).
 """
 
@@ -36,12 +39,26 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from build_v2_candidates import QUOTAS, course_group  # noqa: E402
+from recipe_completeness import (  # noqa: E402
+    FLAGGED_POOL,
+    QUEUE,
+    kept_by_review,
+    names_meat,
+    reviews,
+    unlisted_allergens,
+)
 from v2_vocab import ADDITIONS  # noqa: E402
 
 STAGING = ROOT / "data" / "staging"
-RELEASE = ROOT / "data" / "release" / "v2"
+RELEASE_VERSION = "v2.1"
+RELEASE = ROOT / "data" / "release" / RELEASE_VERSION
 NUTRIENTS = ("energy_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
 ENERGY_PER_SERVING = (10, 3000)
+FLESH_ALLERGENS = {"fish", "crustaceans", "molluscs"}
+# Built recipes flagged by the completeness check that no review has seen yet.
+AWAITING_REVIEW: list[dict] = []
+# Every built recipe the check flags, reviewed or not: what the owner's audit reads.
+FLAGGED: list[dict] = []
 PACKAGE = re.compile(r"\(\s*(\d+(?:\.\d+)?)\s*-?\s*(oz|ounces?|lbs?|pounds?|g|grams?|kg|ml|l)\.?\s*\)", re.I)
 PACKAGE_UNIT = {
     "oz": "oz",
@@ -104,6 +121,12 @@ def ingredient_rules() -> dict[str, dict]:
                     "allergen_status": row["allergen_status"],
                     "dietary_origin": row["dietary_origin"],
                 }
+    # Owner-confirmed additions for ingredients whose rule misses what the usual
+    # product carries; only ever stricter (config/allergen_corrections.csv).
+    with (ROOT / "config" / "allergen_corrections.csv").open(encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            rule = rules[row["ingredient_id"]]
+            rule["allergens"] = sorted(set(rule["allergens"]) | set(row["add_allergens"].split(";")))
     return rules
 
 
@@ -141,8 +164,10 @@ def derive_tags(lines: list[dict], rules: dict[str, dict]) -> tuple[list[str], d
         dairy |= rule["food_group"] == "dairy"
         milk |= "milk" in rule["allergens"]
         gluten |= bool({"gluten", "gluten_candidate"} & set(rule["allergens"]))
-        flesh |= rule.get("dietary_origin") == "flesh"
-        secretion |= rule.get("dietary_origin") == "secretion"
+        # An ingredient whose allergens name fish or shellfish is animal flesh
+        # whatever its recorded origin (kimchi carries fish sauce and shrimp).
+        flesh |= rule.get("dietary_origin") == "flesh" or bool(FLESH_ALLERGENS & set(rule["allergens"]))
+        secretion |= rule.get("dietary_origin") == "secretion" or bool({"milk", "eggs"} & set(rule["allergens"]))
     verdicts = {
         "dairy-free": not dairy and not milk,
         "gluten-free": not gluten,
@@ -210,8 +235,35 @@ def build_recipe(record: dict, result: dict, forms: dict[str, dict], rules: dict
     if not ENERGY_PER_SERVING[0] <= per_serving["energy_kcal"] <= ENERGY_PER_SERVING[1]:
         return None, f"implausible energy {per_serving['energy_kcal']} kcal per serving"
     tags, tag_basis = derive_tags(record["ingredients"], rules)
-    source = record["source"].replace("recipenlg_v1.1", "recipenlg")
+    if names_meat(record) and {"vegetarian", "vegan"} & set(tags):
+        tags = [tag for tag in tags if tag not in {"vegetarian", "vegan"}]
+        tag_basis.update(vegetarian="text_names_meat", vegan="text_names_meat")
     recipe_id = "RCP2_" + hashlib.sha256(record["candidate_id"].encode()).hexdigest()[:12].upper()
+    missing = unlisted_allergens(record, {a for line in lines_out for a in line["allergens"]})
+    reviewed = reviews().get(recipe_id)
+    if reviewed is not None and reviewed["verdict"] == "incomplete":
+        return None, "reviewed incomplete: " + ", ".join(reviewed["allergens"])
+    if missing:
+        FLAGGED.append(
+            {
+                "recipe_id": recipe_id,
+                "title": record["title"],
+                "ingredients": lines_out,
+                "instructions": record["instructions"],
+            }
+        )
+    if missing and not kept_by_review(recipe_id):
+        if recipe_id not in reviews():
+            AWAITING_REVIEW.append(
+                {
+                    "recipe_id": recipe_id,
+                    "title": record["title"],
+                    "ingredients": lines_out,
+                    "instructions": record["instructions"],
+                }
+            )
+        return None, "text names allergens no listed ingredient carries: " + ", ".join(missing)
+    source = record["source"].replace("recipenlg_v1.1", "recipenlg")
     return {
         "recipe_id": recipe_id,
         "schema_version": "mealcraft.recipe.v2",
@@ -315,6 +367,11 @@ def main() -> int:
             continue
         built.append(recipe)
     release = pick_by_quota(built)
+    QUEUE.parent.mkdir(parents=True, exist_ok=True)
+    QUEUE.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in AWAITING_REVIEW), encoding="utf-8")
+    FLAGGED_POOL.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in FLAGGED), encoding="utf-8")
+    if AWAITING_REVIEW:
+        print(f"{len(AWAITING_REVIEW)} flagged recipes await completeness review: {QUEUE}")
 
     RELEASE.mkdir(parents=True, exist_ok=True)
     with (RELEASE / "recipes.jsonl").open("w", encoding="utf-8", newline="\n") as out:
@@ -356,7 +413,7 @@ def main() -> int:
         "".join(json.dumps(d, ensure_ascii=False) + "\n" for d in drop_log), encoding="utf-8", newline="\n"
     )
     manifest = {
-        "release_version": "v2",
+        "release_version": RELEASE_VERSION,
         "schema_version": "mealcraft.recipe.v2",
         "decision": "ADR-0030",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),

@@ -1,5 +1,7 @@
 import json
 import math
+from dataclasses import dataclass, field
+from datetime import datetime
 from difflib import SequenceMatcher
 from functools import lru_cache
 
@@ -32,6 +34,141 @@ def matchable_ingredients() -> frozenset[str]:
     """
     data = json.loads((data_root() / "ingredients/ingredients.json").read_text(encoding="utf-8"))
     return frozenset(item["normalized_name"] for item in data)
+
+
+RELEASE_SNAPSHOT_FILE = "products/fairprice-v2-snapshot.json"
+
+
+@lru_cache
+def release_products() -> dict[str, dict]:
+    """The reviewed FairPrice mapping for release ingredients, by normalized name.
+
+    Built by `data-engineering/scripts/fairprice_mapping.py export`. Each entry is
+    `mapped` (products with their package expressed in grams of the ingredient) or
+    `not_purchased` (tap water, ice). An absent file means no release mapping.
+    """
+    path = data_root() / RELEASE_SNAPSHOT_FILE
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))["ingredients"]
+
+
+def priceable_ingredients() -> frozenset[str]:
+    """Ingredients the estimator can price at all, decided without a search."""
+    return matchable_ingredients() | frozenset(release_products())
+
+
+def not_purchased(ingredient_name: str) -> bool:
+    return release_products().get(ingredient_name, {}).get("status") == "not_purchased"
+
+
+@dataclass
+class ProductChoice:
+    product: ProductResponse | None = None
+    match_score: float | None = None
+    warnings: list[str] = field(default_factory=list)
+
+
+def choose_product(
+    product_service: ProductSearchService,
+    matcher: "ProductMatcher",
+    ingredient_name: str,
+    ingredient_display_name: str,
+    unit: str | None,
+    *,
+    live: bool,
+    quantity: float | None = None,
+) -> ProductChoice:
+    """The one place both estimators pick a product for an ingredient line.
+
+    Curated ingredients keep the name matcher they were tuned against. When it
+    finds nothing, or a package the line's unit cannot convert to, a reviewed
+    release mapping is used instead. Unmatchable, unmapped ingredients are never
+    searched: in live mode each search is a request.
+    """
+    choice = ProductChoice()
+    if ingredient_name in matchable_ingredients():
+        search = product_service.search(ingredient_display_name, live=live, limit=8)
+        if search.warning:
+            choice.warnings.append(search.warning)
+        choice.product, choice.match_score = matcher.choose(
+            ingredient_name, ingredient_display_name, unit, search.items
+        )
+        compatible = choice.product is not None and convert_quantity(1.0, unit, choice.product.package_unit)
+        if compatible or ingredient_name not in release_products():
+            return choice
+    entry = release_products().get(ingredient_name)
+    if entry is None or entry["status"] != "mapped" or convert_quantity(1.0, unit, "g") is None:
+        return choice
+    products = [_release_product(item) for item in entry["products"]]
+    if live:
+        search = product_service.search(entry["products"][0]["query"], live=True, limit=20)
+        if search.warning:
+            choice.warnings.append(search.warning)
+        current = {item.external_id: item for item in search.items}
+        products = [
+            product.model_copy(
+                update={
+                    key: getattr(current[product.external_id], key)
+                    for key in ("price_sgd", "in_stock", "source", "fetched_at")
+                }
+            )
+            for product in products
+            if product.external_id in current
+        ]
+        if not products:
+            choice.warnings.append(
+                f"Live FairPrice search did not return a reviewed product for {ingredient_display_name}."
+            )
+    grams = convert_quantity(quantity, unit, "g") if quantity is not None else None
+
+    def cost(item: ProductResponse) -> tuple[float, float, str]:
+        # Cheapest to buy for this quantity, not cheapest per gram: a 25 kg sack
+        # is the best unit price and the wrong purchase for 300 g of flour.
+        packages = max(1, math.ceil(grams / item.package_size)) if grams else 1
+        return packages * item.price_sgd, item.price_sgd / item.package_size, item.external_id
+
+    in_stock = [product for product in products if product.in_stock]
+    choice.product = min(in_stock, key=cost) if in_stock else None
+    choice.match_score = None
+    return choice
+
+
+def _release_product(item: dict) -> ProductResponse:
+    return ProductResponse(
+        external_id=item["external_id"],
+        name=item["name"],
+        brand=item["brand"],
+        category=item["category"],
+        package_size=item["package_grams"],
+        package_unit="g",
+        price_sgd=item["price_sgd"],
+        product_url=item["product_url"],
+        image_url=None,
+        in_stock=item["in_stock"],
+        source="fixture",
+        fetched_at=datetime.fromisoformat(item["fetched_at"]),
+    )
+
+
+def not_purchased_line(
+    ingredient_name: str, ingredient_display_name: str, required: float | None, unit: str | None
+) -> GroceryLineEstimate:
+    return GroceryLineEstimate(
+        ingredient_name=ingredient_name,
+        ingredient_display_name=ingredient_display_name,
+        required_quantity=required,
+        unit=unit,
+        pantry_deduction=0.0,
+        remaining_quantity=required,
+        product=None,
+        match_score=None,
+        packages_required=0,
+        purchase_cost_sgd=0.0,
+        consumed_cost_sgd=0.0,
+        excess_quantity=0.0,
+        note="Not purchased: drinking water and ice come from the tap and the freezer.",
+    )
 
 
 class ProductMatcher:
@@ -125,22 +262,22 @@ class GroceryEstimator:
                 )
                 continue
 
-            product, match_score = None, None
-            # Unmatchable ingredients are never searched: in live mode each search is a request.
-            if ingredient.normalized_name in matchable_ingredients():
-                search = self.product_service.search(
-                    ingredient.display_name,
-                    live=constraints.pricing_mode == "live",
-                    limit=8,
+            if not_purchased(ingredient.normalized_name):
+                lines.append(
+                    not_purchased_line(ingredient.normalized_name, ingredient.display_name, required, recipe_item.unit)
                 )
-                if search.warning and search.warning not in warnings:
-                    warnings.append(search.warning)
-                product, match_score = self.matcher.choose(
-                    ingredient.normalized_name,
-                    ingredient.display_name,
-                    recipe_item.unit,
-                    search.items,
-                )
+                continue
+            choice = choose_product(
+                self.product_service,
+                self.matcher,
+                ingredient.normalized_name,
+                ingredient.display_name,
+                recipe_item.unit,
+                live=constraints.pricing_mode == "live",
+                quantity=remaining,
+            )
+            warnings.extend(warning for warning in choice.warnings if warning not in warnings)
+            product, match_score = choice.product, choice.match_score
             if product is None:
                 unmapped.append(ingredient.normalized_name)
                 consumed_total_known = False

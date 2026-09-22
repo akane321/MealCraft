@@ -1,0 +1,148 @@
+{
+  "set": "data/evaluation/heldout/planning-catalog-v2.1-new.json",
+  "reviewer": "owner",
+  "rounds": [
+    {
+      "round": 1,
+      "reviewed": "2026-09-21",
+      "counts": {
+        "accepted": 16,
+        "corrected": 4
+      },
+      "verdicts": [
+        {
+          "scenario_id": "hold-101",
+          "verdict": "corrected",
+          "note": "The label is correct and the scenario is plausible, but this is too weak for one of only 20 held-out slots: 3,093 of 3,347 dishes still qualify, so it mostly tests whether a basic peanut filter is applied. Consider replacing it with a more selective peanut-allergy scenario or combining the allergy with another realistic hard constraint."
+        },
+        {
+          "scenario_id": "hold-102",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-103",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-104",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-105",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-106",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-107",
+          "verdict": "corrected",
+          "note": "The natural-language scenario says “no root vegetables,” but the exclusion list is a manually authored subset rather than a demonstrated complete mapping of that concept. “Jain household” may also imply restrictions beyond the encoded list. Either narrow the scenario wording to the exact enumerated foods, or derive the exclusions from a canonical Jain/root-vegetable mapping rather than a hand-written list."
+        },
+        {
+          "scenario_id": "hold-108",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-109",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-110",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-111",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-112",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-113",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-114",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-115",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-116",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-117",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-118",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-119",
+          "verdict": "corrected",
+          "note": "The infeasible label is supported by the current catalog, but the scenario appears to have been constructed after inspecting the catalog specifically to obtain zero matches. That conflicts with the scenario-first authoring principle and is also close to an existing infeasible case. Replace it with an independently authored household request and derive feasibility afterward."
+        },
+        {
+          "scenario_id": "hold-120",
+          "verdict": "corrected",
+          "note": "Although the current catalog makes this infeasible, the case has two design problems: it was reverse-selected to produce zero matches and is structurally very similar to hold-119. In addition, “low-FODMAP” is broader than the encoded garlic/onion exclusions, so the natural-language request does not match the actual hard constraints. Replace the scenario, or at minimum remove the low-FODMAP label and describe the exact exclusions."
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "reviewed": "2026-09-21",
+      "scope": "the four scenarios revised after round 1",
+      "counts": {
+        "accepted": 4,
+        "corrected": 0
+      },
+      "verdicts": [
+        {
+          "scenario_id": "hold-101",
+          "verdict": "accepted",
+          "note": ""
+        },
+        {
+          "scenario_id": "hold-107",
+          "verdict": "accepted",
+          "note": "The wording is now exactly what the user said, mapped to the exact aliases needed to enforce it, instead of a dietary tradition whose foods the author inferred; this removes the ground-truth ambiguity."
+        },
+        {
+          "scenario_id": "hold-119",
+          "verdict": "accepted",
+          "note": "Kept feasible rather than forced infeasible to fill a quota: writing the household first and then computing feasibility follows the authoring principle; v1 held-out hold-038 and hold-040 cover infeasibility, and realistic zero-match combinations are rare on this catalog, which the report discloses."
+        },
+        {
+          "scenario_id": "hold-120",
+          "verdict": "accepted",
+          "note": ""
+        }
+      ]
+    }
+  ],
+  "outcome": "all 20 scenarios accepted"
+}

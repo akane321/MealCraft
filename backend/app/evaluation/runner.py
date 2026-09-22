@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.data.allergens import allergen_conflicts
 from app.data.catalog import Catalog, import_catalog, load_catalog
+from app.data.release_v2 import import_release_v2
 from app.db.base import Base
 from app.evaluation.baseline import greedy_repeat_selector, strong_rule_only_selector
 from app.planning.grocery_estimator import GroceryEstimator
@@ -122,6 +123,7 @@ def _failure_reasons(
     repetitions: int,
     grocery_complete: bool | None,
     within_weekly_budget: bool | None,
+    forced_repetitions: int = 0,
 ) -> list[str]:
     reasons: list[str] = []
     if expected_feasible != actual_feasible:
@@ -130,7 +132,7 @@ def _failure_reasons(
         reasons.append("hard_constraint_violation")
     if not deterministic:
         reasons.append("non_deterministic_selection")
-    if expected_feasible and actual_feasible and repetitions:
+    if expected_feasible and actual_feasible and repetitions > forced_repetitions:
         reasons.append("consecutive_recipe_repetition")
     if expected_feasible and actual_feasible and grocery_complete is False:
         reasons.append("incomplete_grocery_mapping")
@@ -164,7 +166,23 @@ def evaluate(
     fixture_path: Path,
     system: PlanningSystem = "mealcraft-planner",
     enforce_gates: bool = True,
+    release_path: Path | None = None,
+    protocol: str = "v1",
+    forced_repetitions: dict[str, int] | None = None,
 ) -> dict[str, Any]:
+    """Score one system on one scenario set.
+
+    Protocol v1 counts every adjacent repetition as a failure. Protocol v1.1
+    (`docs/evaluation/protocol-v1.md` section 8) counts only repetitions beyond
+    those the catalog forces, taken from `forced_repetitions` (scenario id ->
+    count, derived from the catalog by scripts/derive_catalog_labels.py); raw
+    repetitions are still reported.
+    """
+    if protocol not in {"v1", "v1.1"}:
+        raise ValueError(f"unknown protocol {protocol}")
+    if protocol == "v1.1" and forced_repetitions is None:
+        raise ValueError("protocol v1.1 needs the forced repetitions derived from the catalog")
+    forced = forced_repetitions or {}
     catalog = load_catalog(ingredient_path, recipe_path)
     scenarios = load_scenarios(scenario_path)
     engine = create_engine("sqlite+pysqlite:///:memory:")
@@ -173,7 +191,14 @@ def evaluate(
     results: list[ScenarioResult] = []
     with Session(engine, expire_on_commit=False) as session:
         import_catalog(session, catalog)
+        release = None
+        if release_path is not None:
+            # A larger-catalog condition: the data release beside the curated recipes.
+            release = import_release_v2(session, release_path)
         recipe_repository = RecipeRepository(session)
+        # The pool weekly planning draws from in the product; on the curated
+        # catalog alone it is every recipe, as before.
+        planning_recipes = recipe_repository.list_for_planning()
         product_service = _product_service(session, fixture_path)
         recommendation_service = RecipeRecommendationService(
             recipe_repository,
@@ -184,7 +209,9 @@ def evaluate(
 
         for index, scenario in enumerate(scenarios, start=1):
             request = WeeklyMealPlanRequest.model_validate(scenario.request)
-            recommendation_result = recommendation_service.recommend(request, deduct_pantry_from_cost=False)
+            recommendation_result = recommendation_service.recommend(
+                request, deduct_pantry_from_cost=False, recipes=planning_recipes, priced_release_only=True
+            )
             actual_feasible = bool(recommendation_result.recommendations)
             selected_slugs: list[str] = []
             violations: list[str] = []
@@ -226,6 +253,7 @@ def evaluate(
                 repetitions=repetitions,
                 grocery_complete=grocery_complete,
                 within_weekly_budget=within_weekly_budget,
+                forced_repetitions=forced.get(scenario.id or "", 0),
             )
             results.append(
                 ScenarioResult(
@@ -252,8 +280,9 @@ def evaluate(
     feasible_results = [item for item in results if item.expected_feasible]
     selected_results = [item for item in results if item.actual_feasible]
     metrics = {
-        "catalog_recipe_count": len(catalog.recipes),
-        "catalog_ingredient_count": len(catalog.ingredients),
+        "catalog_recipe_count": len(catalog.recipes) + (release.recipes_imported if release else 0),
+        "catalog_ingredient_count": len(catalog.ingredients) + (release.ingredients_added if release else 0),
+        **({"release_recipe_count": release.recipes_imported} if release else {}),
         "scenario_count": len(results),
         "scenario_expectation_rate": round(expectation_matches / max(len(results), 1), 4),
         "feasible_scenario_success_rate": round(
@@ -273,6 +302,10 @@ def evaluate(
         ),
         "failure_case_count": sum(bool(item.failure_reasons) for item in results),
     }
+    avoidable = {item.id: max(0, item.consecutive_repetitions - forced.get(item.id, 0)) for item in results}
+    if protocol == "v1.1":
+        metrics["forced_repetition_count"] = metrics["consecutive_repetition_count"] - sum(avoidable.values())
+        metrics["avoidable_repetition_count"] = sum(avoidable.values())
     thresholds = {
         "catalog_recipe_count": metrics["catalog_recipe_count"] >= 30,
         "scenario_expectation_rate": metrics["scenario_expectation_rate"] >= 0.95,
@@ -283,8 +316,16 @@ def evaluate(
         "fixture_mapping_coverage": metrics["fixture_mapping_coverage"] >= 0.95,
         "complete_grocery_rate": metrics["complete_grocery_rate"] >= 0.95,
     }
+    if protocol == "v1.1":
+        del thresholds["consecutive_repetition_count"]
+        thresholds["avoidable_repetition_count"] = metrics["avoidable_repetition_count"] == 0
+    scenario_rows = [asdict(item) for item in results]
+    if protocol == "v1.1":
+        for row in scenario_rows:
+            row["avoidable_repetitions"] = avoidable[row["id"]]
     return {
         "schema_version": "2.0",
+        **({"protocol": protocol} if protocol != "v1" else {}),
         "system": system,
         "dataset": {
             "path": scenario_path.as_posix(),
@@ -297,7 +338,7 @@ def evaluate(
         "thresholds": thresholds,
         "category_metrics": _category_metrics(results),
         "failure_cases": [asdict(item) for item in results if item.failure_reasons],
-        "scenarios": [asdict(item) for item in results],
+        "scenarios": scenario_rows,
     }
 
 

@@ -1,0 +1,69 @@
+{
+  "schema_version": "evaluation-conditions-v1",
+  "label": "catalog-v2.1-scenarios",
+  "report": "docs/evaluation/workbench/catalog-v2.1-scenarios/latest.json",
+  "report_commit": "b0abe10c356b3b506017c686296648802fec59f0",
+  "attestation": "Every input below was last committed at or before the commit that produced the report, verified with git merge-base --is-ancestor. The digests therefore describe the data the published numbers were computed over.",
+  "inputs": {
+    "agent": {
+      "path": "data/evaluation/agent/fixture-v1.json",
+      "sha256": "6fd3bd8d01a10f0bd6457988ffa7a215b487507b80a56a58e842eddac9bfacb3",
+      "last_changed_commit": "9a94fed68e7e91df9719b7780281ea5242c02fec"
+    },
+    "developer": {
+      "path": "data/evaluation/dev/planning-catalog-v2.1.json",
+      "sha256": "103caaed048b2395152f39cd2bf0bdf0912e853ed4165caa3a090c273bccbdcd",
+      "last_changed_commit": "b0abe10c356b3b506017c686296648802fec59f0"
+    },
+    "fixtures": {
+      "path": "data/fixtures/fairprice-products.json",
+      "sha256": "19e760bd53e438fac44c77569724460cf6a69269690c302f3d1a59edb7a0323c",
+      "last_changed_commit": "9b15e961940f99b1bb929539a21349224502cf20"
+    },
+    "grounding": {
+      "path": "data/evaluation/agent-orchestration/grounding-developer-v1.json",
+      "sha256": "b8d61c8d5c107a58f4a1c054c46f33356e076b0f2de00b04781c5aef86c35dbd",
+      "last_changed_commit": "e1460f8b5bf68a3217a83e97f9e5835ba5494477"
+    },
+    "heldout": {
+      "path": "data/evaluation/heldout/planning-catalog-v2.1.json",
+      "sha256": "71b1f01a3f9dc78faa8fb2ae120906512308645069cc31096386d3adf732bc6f",
+      "last_changed_commit": "b0abe10c356b3b506017c686296648802fec59f0"
+    },
+    "ingredients": {
+      "path": "data/ingredients/ingredients.json",
+      "sha256": "c995508b5d9dde109b62d0cf3d8fad2e9086a115eaee5bdc50a7a5937f573fe8",
+      "last_changed_commit": "43a7ba1d59d7eae86ccdd580da9cece9ace9abea"
+    },
+    "recipes": {
+      "path": "data/recipes/recipes.json",
+      "sha256": "f35c55874b15c3a16510aded46921cf52b5f20eb0aab15d41690879c30ac2066",
+      "last_changed_commit": "9b15e961940f99b1bb929539a21349224502cf20"
+    },
+    "release_ingredients": {
+      "path": "data-engineering/data/release/v2.1/ingredients.jsonl",
+      "sha256": "499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25",
+      "last_changed_commit": "dabfa56cb5e1db76ffbba449b1308322bcf9da7a"
+    },
+    "release_manifest": {
+      "path": "data-engineering/data/release/v2.1/release_manifest.json",
+      "sha256": "7e81e661870b0fb115f09bc83f39bd96f5619aaeb4e0711d5d851320d239570c",
+      "last_changed_commit": "dabfa56cb5e1db76ffbba449b1308322bcf9da7a"
+    },
+    "release_products": {
+      "path": "data/products/fairprice-v2-snapshot.json",
+      "sha256": "2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91",
+      "last_changed_commit": "dabfa56cb5e1db76ffbba449b1308322bcf9da7a"
+    },
+    "release_recipes": {
+      "path": "data-engineering/data/release/v2.1/recipes.jsonl",
+      "sha256": "df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db",
+      "last_changed_commit": "dabfa56cb5e1db76ffbba449b1308322bcf9da7a"
+    },
+    "scope": {
+      "path": "data/evaluation/agent-orchestration/scope-developer-v1.json",
+      "sha256": "062446e2467ba27337455d56651d7ce67e52f08eaa5750e031539e526d3620a1",
+      "last_changed_commit": "e1460f8b5bf68a3217a83e97f9e5835ba5494477"
+    }
+  }
+}

@@ -49,9 +49,13 @@ from app.data.allergens import checked_allergens
 from app.models.meal_plan import MealPlanEntry, MealPlanEvent
 from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 
-RELEASE_VERSION = "v2"
+RELEASE_VERSION = "v2.1"
 SLUG_PREFIX = "v2-"
 RELEASE_FILES = ("release_manifest.json", "ingredients.jsonl", "recipes.jsonl")
+
+# Importer logic is part of the digest, so a change here re-imports an
+# already-recorded release instead of being skipped as unchanged.
+IMPORTER_VERSION = "3"  # 3: v2.1 carries the completeness and allergen corrections itself
 
 # Release allergen name -> runtime checked allergen, or None when the runtime has no name for it.
 ALLERGEN_MAP: dict[str, str | None] = {
@@ -77,7 +81,7 @@ def release_dir() -> Path:
 
 
 def release_digest(directory: Path) -> str:
-    digest = hashlib.sha256()
+    digest = hashlib.sha256(f"importer:{IMPORTER_VERSION}".encode())
     for name in RELEASE_FILES:
         digest.update(name.encode())
         digest.update((directory / name).read_bytes())
@@ -134,7 +138,8 @@ class ImportReport:
         return (
             f"Release {self.release_version} imported: {self.recipes_imported} recipes, "
             f"{self.ingredients_added} new ingredients, {self.ingredients_reused} already in the catalog, "
-            f"{len(self.recipes_skipped)} recipes skipped, {self.recipes_removed} stale recipes removed, "
+            f"{len(self.recipes_skipped)} recipes skipped, "
+            f"{self.recipes_removed} stale recipes removed, "
             f"{self.recipes_retained_in_use} stale recipes kept because a meal plan uses them"
         )
 
@@ -201,7 +206,9 @@ def _import_recipes(
 ) -> None:
     kept_ids: set[str] = set()
     existing_ids = dict(
-        session.execute(select(Recipe.external_id, Recipe.id).where(Recipe.release_version == RELEASE_VERSION)).all()
+        # Rows of any earlier release are upgraded in place: a recipe keeps its
+        # external id (and any meal plan pointing at it) across releases.
+        session.execute(select(Recipe.external_id, Recipe.id).where(Recipe.release_version.is_not(None))).all()
     )
     for start in range(0, len(recipes), CHUNK):
         for record in recipes[start : start + CHUNK]:
@@ -214,6 +221,7 @@ def _import_recipes(
                 session.execute(delete(RecipeIngredient).where(RecipeIngredient.recipe_id == recipe_id))
                 session.execute(delete(RecipeStep).where(RecipeStep.recipe_id == recipe_id))
                 recipe = session.get(Recipe, recipe_id)
+                recipe.release_version = RELEASE_VERSION
             else:
                 recipe = Recipe(external_id=record["recipe_id"], release_version=RELEASE_VERSION)
                 session.add(recipe)

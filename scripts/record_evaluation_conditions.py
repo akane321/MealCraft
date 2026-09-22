@@ -42,6 +42,13 @@ INPUTS = {
     "fixtures": "data/fixtures/fairprice-products.json",
 }
 REPORT = "docs/evaluation/workbench/latest.json"
+# A larger-catalog condition (`--release`) also ran on the release and its products.
+RELEASE_INPUTS = {
+    "release_manifest": "data-engineering/data/release/v2.1/release_manifest.json",
+    "release_recipes": "data-engineering/data/release/v2.1/recipes.jsonl",
+    "release_ingredients": "data-engineering/data/release/v2.1/ingredients.jsonl",
+    "release_products": "data/products/fairprice-v2-snapshot.json",
+}
 
 
 def git(*args: str) -> str:
@@ -68,13 +75,20 @@ def main() -> int:
     parser.add_argument("--label", required=True, help="the version these conditions belong to, e.g. v1")
     parser.add_argument("--report", default=REPORT)
     parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument("--with-release", action="store_true", help="the report was generated with --release")
+    parser.add_argument("--developer", default=None, help="the developer scenarios, when not the default")
+    parser.add_argument("--heldout", default=None, help="the held-out scenarios, when not the default")
+    parser.add_argument("--eligibility", default=None, help="protocol v1.1: the forced-repetition record")
     args = parser.parse_args()
+    inputs = {**INPUTS, **(RELEASE_INPUTS if args.with_release else {})}
+    overrides = (("developer", args.developer), ("heldout", args.heldout), ("eligibility", args.eligibility))
+    inputs.update({key: value for key, value in overrides if value})
 
     report_commit = last_commit(args.report)
     entries: dict[str, dict[str, str]] = {}
     drifted: list[str] = []
 
-    for name, relative in sorted(INPUTS.items()):
+    for name, relative in sorted(inputs.items()):
         path = ROOT / relative
         if not path.is_file():
             raise SystemExit(f"missing input: {relative}")
@@ -101,7 +115,7 @@ def main() -> int:
         )
         return 1
 
-    out = args.out or ROOT / f"docs/evaluation/workbench/conditions-{args.label}.json"
+    out = ROOT / (args.out or f"docs/evaluation/workbench/conditions-{args.label}.json")
     document = {
         "schema_version": "evaluation-conditions-v1",
         "label": args.label,

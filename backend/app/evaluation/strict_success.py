@@ -104,6 +104,93 @@ def nutrition_band_problem(band: object) -> str | None:
     return None
 
 
+# Protocol v2-multidish (docs/evaluation/protocol-v2-multidish.md section 4). The
+# scorer's own copy of ADR-0036's shares and meal-time estimate, independent of
+# app.planning.meal_composition for the reason the module docstring gives; a test
+# holds the two equal.
+PORTION_SHARES = {1: (1.0, None), 2: (0.75, 0.5), 3: (0.6, 0.4), 4: (0.5, 0.35)}
+HANDS_ON_COOK_FRACTION = 0.5
+SWITCH_MINUTES = 5
+ROUND_TO_MINUTES = 5
+
+
+def dish_shares(role_ids: list[str | None]) -> dict[str | None, float] | None:
+    """Each dish's share of its meal: the main the first number, every other dish the second."""
+    shares = PORTION_SHARES.get(len(role_ids))
+    if shares is None:
+        return None
+    if len(role_ids) == 1:
+        return {role_ids[0]: 1.0}
+    main, other = shares
+    return {role: main if role == "main" else other for role in role_ids}
+
+
+def meal_minutes(recipes: list[dict]) -> int:
+    """One cook: hands-on parts in sequence, the longest wait overlapped, a switch-over per extra dish."""
+    if len(recipes) == 1:
+        return int(recipes[0]["prep_time_minutes"]) + int(recipes[0]["cook_time_minutes"])
+    hands_on = [float(r["prep_time_minutes"]) + HANDS_ON_COOK_FRACTION * float(r["cook_time_minutes"]) for r in recipes]
+    waiting = [(1 - HANDS_ON_COOK_FRACTION) * float(r["cook_time_minutes"]) for r in recipes]
+    estimate = sum(hands_on) + max(waiting) + SWITCH_MINUTES * (len(recipes) - 1)
+    steps = -(-round(estimate, 6) // ROUND_TO_MINUTES)
+    return int(steps * ROUND_TO_MINUTES)
+
+
+def _composition(episode: dict) -> list[dict] | None:
+    return (episode["scenario"].get("household_profile") or {}).get("meal_composition")
+
+
+def _meals(response: CommonEpisodeResponse) -> dict[str, list]:
+    assert response.plan is not None
+    meals: dict[str, list] = {}
+    for assignment in response.plan.assignments:
+        meals.setdefault(assignment.slot_id, []).append(assignment)
+    return meals
+
+
+def _check_meal_composition(episode: dict, response: CommonEpisodeResponse, catalogs: Catalogs) -> list[Check]:
+    """Roles filled, each by a course it admits, with no dish twice in a meal."""
+    roles = {role["role_id"]: role for role in _composition(episode) or []}
+    unfilled, wrong_course, unknown_course, repeated = [], [], [], []
+    for slot, dishes in sorted(_meals(response).items()):
+        by_role: dict[str | None, int] = {}
+        for dish in dishes:
+            by_role[dish.role_id] = by_role.get(dish.role_id, 0) + 1
+        unfilled += [f"{slot}:{r}" for r, role in roles.items() if role.get("required", True) and not by_role.get(r)]
+        unfilled += [f"{slot}:{r} x{n}" for r, n in by_role.items() if n > 1]
+        unfilled += [f"{slot}:{r} (no such role)" for r in by_role if r not in roles]
+        for dish in dishes:
+            recipe = catalogs.recipes.get(dish.recipe_id)
+            if recipe is None or dish.role_id not in roles:
+                continue
+            course = recipe.get("course")
+            if course is None:
+                unknown_course.append(f"{slot}:{dish.recipe_id}")
+            elif course not in roles[dish.role_id]["courses"]:
+                wrong_course.append(f"{slot}:{dish.role_id}={course}")
+        ids = [dish.recipe_id for dish in dishes]
+        if len(ids) != len(set(ids)):
+            repeated.append(slot)
+    course_outcome: CheckOutcome = "failed" if wrong_course else "indeterminate" if unknown_course else "passed"
+    return [
+        Check(
+            "meal_roles_filled",
+            "failed" if unfilled else "passed",
+            "; ".join(unfilled) if unfilled else "every required role holds one dish",
+        ),
+        Check(
+            "meal_role_courses",
+            course_outcome,
+            "; ".join(wrong_course + [f"no course: {x}" for x in unknown_course]) or "every dish fits its role",
+        ),
+        Check(
+            "meal_distinct_dishes",
+            "failed" if repeated else "passed",
+            f"a recipe twice in: {', '.join(repeated)}" if repeated else "no meal repeats a dish",
+        ),
+    ]
+
+
 @dataclass(frozen=True)
 class Check:
     code: str
@@ -412,6 +499,19 @@ def _check_hard_constraints(
     limit = gold.get("max_cooking_time_minutes")
     if limit is None:
         checks.append(Check("cooking_time_respected", "not_applicable", "no stated time limit"))
+    elif _composition(episode) is not None:
+        over = []
+        for slot, dishes in sorted(_meals(response).items()):
+            chosen = [catalogs.recipes[d.recipe_id] for d in dishes if d.recipe_id in catalogs.recipes]
+            if chosen and meal_minutes(chosen) > float(limit):
+                over.append(f"{slot} ({meal_minutes(chosen)})")
+        checks.append(
+            Check(
+                "cooking_time_respected",
+                "failed" if over else "passed",
+                f"meals over {limit} minutes: {', '.join(over)}" if over else f"every meal fits {limit} minutes",
+            )
+        )
     else:
         over = sorted(
             {r["slug"] for r in present if float(r["prep_time_minutes"]) + float(r["cook_time_minutes"]) > float(limit)}
@@ -425,7 +525,50 @@ def _check_hard_constraints(
         )
 
     checks.append(_check_nutrition(gold, recipes, tolerances.nutrition_relative))
+    checks.append(_check_repetition(gold, response, catalogs))
     return checks
+
+
+def _check_repetition(gold: dict, response: CommonEpisodeResponse, catalogs: Catalogs) -> Check:
+    """What the household said about repeating, and only that (protocol v2-multidish section 4).
+
+    Saying nothing makes repetition a quality measure, reported but never a failure:
+    a household may want a dish twice, a soup all week, or one ingredient used up.
+    """
+    rules = gold.get("repetition_requirements")
+    if not rules:
+        return Check("repetition_requests_met", "not_applicable", "the household said nothing about repeating")
+    assert response.plan is not None
+    uses: dict[str, int] = {}
+    for a in response.plan.assignments:
+        uses[a.recipe_id] = uses.get(a.recipe_id, 0) + 1
+    broken = []
+    cap = rules.get("max_uses_per_recipe")
+    if cap is not None:
+        broken += [f"{r} x{n} > {cap}" for r, n in sorted(uses.items()) if n > cap]
+    for count in rules.get("recipe_counts") or []:
+        n = uses.get(count["recipe_id"], 0)
+        if n < count.get("min_uses", 0):
+            broken.append(f"{count['recipe_id']} x{n} < {count['min_uses']}")
+        if count.get("max_uses") is not None and n > count["max_uses"]:
+            broken.append(f"{count['recipe_id']} x{n} > {count['max_uses']}")
+    for want in rules.get("ingredient_meals") or []:
+        meals = _meals(response)
+        n = sum(
+            any(
+                want["ingredient_id"] in {i["ingredient"] for i in catalogs.recipes[d.recipe_id]["ingredients"]}
+                for d in dishes
+                if d.recipe_id in catalogs.recipes
+            )
+            for dishes in meals.values()
+        )
+        if n < want["min_meals"]:
+            broken.append(f"{want['ingredient_id']} in {n} meals < {want['min_meals']}")
+    return Check(
+        "repetition_requests_met",
+        "failed" if broken else "passed",
+        "; ".join(broken) if broken else "every stated repetition request holds",
+    )
 
 
 def _check_shopping(
@@ -510,9 +653,13 @@ def _check_shopping(
             for line in lines.get(name, [])
             if line.product_id is not None and line.product_id in catalogs.products
         ]
-        if not bought:
-            continue
         remaining = max(quantity - deducted(name), 0.0)
+        if not bought:
+            # Demand left after the pantry with nothing bought for it is a plan the
+            # household cannot cook. This used to pass silently.
+            if name in lines and remaining > tolerances.quantity_relative * max(quantity, 1.0):
+                short.append(f"{name}: nothing bought for {remaining:g} {unit} still needed")
+            continue
         amounts = [
             compatible(float(product["package_size"]) * line.packages, product["package_unit"], unit)
             for line, product in bought
@@ -613,6 +760,24 @@ def _check_servings(episode: dict, response: CommonEpisodeResponse) -> Check:
     size = episode["scenario"]["household_profile"].get("household_size")
     if size is None:
         return Check("servings_feed_household", "indeterminate", "the scenario states no household size")
+    if _composition(episode) is not None:
+        # Each dish at its share of the meal, and the shares make one whole meal (ADR-0036 section 2).
+        short = []
+        for slot, dishes in sorted(_meals(response).items()):
+            shares = dish_shares([dish.role_id for dish in dishes])
+            if shares is None or sum(shares.values()) < 1 - 1e-9:
+                short.append(f"{slot} ({len(dishes)} dishes have no shares making a whole meal)")
+                continue
+            short += [
+                f"{slot}:{d.role_id} ({d.servings:g} < {float(size) * shares[d.role_id]:g})"
+                for d in dishes
+                if d.servings + 1e-9 < float(size) * shares[d.role_id]
+            ]
+        return Check(
+            "servings_feed_household",
+            "failed" if short else "passed",
+            "; ".join(short) if short else f"every meal feeds {size} at its dishes' shares",
+        )
     short = sorted(
         f"{a.slot_id} ({a.servings:g})" for a in response.plan.assignments if a.servings + 1e-9 < float(size)
     )
@@ -689,6 +854,8 @@ def score_episode(
             )
         )
         score.checks.append(_check_servings(episode, response))
+        if _composition(episode) is not None:
+            score.checks.extend(_check_meal_composition(episode, response, catalogs))
 
         constraint_checks = _check_hard_constraints(episode, response, catalogs, tolerances)
         score.checks.extend(constraint_checks)

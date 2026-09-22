@@ -22,17 +22,17 @@ remains the canonical cross-module contract.
 | State | Meaning |
 | --- | --- |
 | Verified baseline | Merged runtime behaviour supported by current code and tests |
-| Released data | A versioned release cut by the `data-engineering/` pipeline; release v2 is imported beside the curated catalog |
+| Released data | A versioned release cut by the `data-engineering/` pipeline; release v2.1 is imported beside the curated catalog |
 | Accepted target | The intended module responsibility and release contract |
 
 The curated runtime catalog is the compact one in `data/recipes/recipes.json` and
 `data/ingredients/ingredients.json`, loaded by `backend/app/data/catalog.py`.
 Held-out episodes, planning fixtures and tests name its slugs, so it stays as it is.
 
-Release v2 is loaded beside it by `python -m app.data.import_release_v2`
+Release v2.1 is loaded beside it by `python -m app.data.import_release_v2`
 (`backend/app/data/release_v2.py`), which compose runs after the curated import:
 
-- v2 recipes carry `release_version = "v2"`, `external_id` (the release
+- release recipes carry `release_version` (`v2.1`), `external_id` (the release
   `recipe_id`) and a slug `v2-<title>-<id suffix>`, plus the release-only fields
   course, meal types, difficulty, passive time, time and servings basis,
   recipe allergens, source/licence and video URL. Curated recipes leave all of
@@ -46,9 +46,73 @@ Release v2 is loaded beside it by `python -m app.data.import_release_v2`
   Ingredients whose normalized name matches a curated one reuse that row, and
   its allergen list only grows.
 - Recipes with fewer than two ingredient lines are skipped and listed.
-- `catalog_imports` records the release digest. A rerun with the same files
-  does nothing; changed files re-import, and v2 recipes no longer in the release
-  are deleted unless a meal plan references them.
+- Rows of an earlier release are upgraded in place by `external_id`, so a
+  database that held v2 keeps its recipe ids (and the meal plans pointing at
+  them) when v2.1 arrives.
+- `catalog_imports` records the release digest, which includes the importer
+  version. A rerun with the same files does nothing; changed files or importer
+  logic re-import, and release recipes no longer in the release are deleted
+  unless a meal plan references them.
+
+Release v2.1 differs from v2 only in what the build checks (`data-engineering`,
+[quality report](../../data-engineering/data/release/v2.1/quality_report.md)):
+
+- Some RecipeNLG sources list only part of a dish (a crab quiche listing only its
+  crust), so allergens derived from the lines miss what the dish contains. A
+  recipe whose title or steps name a food carrying an allergen no listed
+  ingredient carries was reviewed one by one
+  (`data-engineering/scripts/recipe_completeness.py`): 220 found incomplete are
+  dropped, 670 whose mention is a serving suggestion or not the food are kept,
+  and a flagged recipe no review has seen is dropped. Look-alike phrases keep
+  the allergen they carry ("peanut butter" is peanut, "almond milk" tree nut)
+  and false friends are removed ("cream of tartar", "eggplant"). A fixed-seed
+  sample of 300 recipes the check did not flag, reviewed in full, found one
+  incomplete (an unlisted mayonnaise); the word list was extended after it. The
+  owner's audit of 40 decisions accepted 39 and found no wrong keep
+  (`data-engineering/docs/completeness-v2.1-sampled-audit.json`).
+- Ten ingredients carry owner-confirmed allergen additions, only ever stricter
+  (`data-engineering/config/allergen_corrections.csv`): butter or margarine and
+  margarine (dairy), the three condensed cream soups (dairy, gluten), tortilla
+  and crisp rice cereal (gluten), egg substitute (egg), imitation crab (fish,
+  egg, gluten, shellfish) and clam juice (shellfish).
+- An ingredient carrying fish or shellfish makes a recipe neither vegetarian nor
+  vegan (kimchi in a fried rice), and so does a title or step naming meat or fish.
+
+### FairPrice products for release v2 ingredients
+
+Release ingredients are priced through a reviewed mapping, not the name matcher
+(which serves the curated ingredients it was tuned on and paired generic
+release names with wrong products). The mapping follows
+[FairPrice Product Grounding](../design/fairprice-product-grounding.md):
+
+- `data-engineering/scripts/capture_fairprice_snapshot.py` searched FairPrice
+  once per ingredient, then again with the reviewer's suggested texts for those
+  still unmatched, and keeps every raw result with its query and time
+  (`data-engineering/data/enrichment/fairprice/v2/observations.jsonl`).
+- `data-engineering/scripts/fairprice_mapping.py` packs each ingredient with its
+  candidates for review, validates the proposals and merges them into
+  `mapping.jsonl`: status (`mapped`, `unavailable`, or `not_purchased` for tap
+  water and ice), the selected products with each pack expressed in grams of the
+  ingredient and how (printed weight, volume x density, count x grams per piece,
+  drained weight for canned food in liquid), rejected near-matches with reasons,
+  and a confidence. Proposals are AI-made and stay `proposed` until the owner's
+  sampled review records a verdict (`fairprice_mapping.py record`).
+- `export` writes the runtime view, `data/products/fairprice-v2-snapshot.json`.
+  It leaves out unavailable ingredients, mappings the owner marked for
+  correction, and mappings below confidence 0.6, which are substitutes (dried
+  for fresh herbs) or rough yield estimates rather than the ingredient.
+
+At run time (`choose_product` in `backend/app/planning/grocery_estimator.py`) a
+mapped ingredient buys the in-stock selected product that is cheapest for the
+quantity needed, not cheapest per gram. In live pricing mode the ingredient's
+recorded query is searched and only its reviewed product ids are accepted, with
+the mapped pack weight; if none comes back the line stays unpriced with a
+visible warning. Curated ingredients keep the name matcher and use the mapping
+only when it finds nothing convertible, so curated plans and evaluation outputs
+do not change. Weekly plans and replacements load only recipes whose every
+ingredient is priceable (`RecipeRepository.list_for_planning`), and the planner
+receives as many of the best-scored candidates as its beam budget can visit
+(`ProductPlanningEngine._packet_limit`).
 
 The pipeline lives in [`data-engineering/`](../../data-engineering/README.md):
 RecipeNLG schema v1 is frozen, releases pass a four-condition gate, and each
@@ -346,9 +410,9 @@ Schema v1 is frozen and releases are being cut (see
 
 ### Import into the runtime
 
-- ~~Add an adapter or migration from the release into the runtime catalog.~~ Done for release v2 (see section 2).
+- ~~Add an adapter or migration from the release into the runtime catalog.~~ Done; release v2.1 is imported (see section 2).
 - ~~Let candidate retrieval reach the whole catalog, not the first 500 recipes by id.~~ Done: recommendations rank every recipe whose course can fill a meal (curated, or v2 `main`/`soup`) and keep the best 500 within budget; weekly plans and replacements load only recipes the planner can price (`RecipeRepository.list_for_planning`).
-- Map release ingredients to products. The name matcher is limited to curated ingredients (`matchable_ingredients`) because it paired generic release names with the wrong product; until the mapping exists, no v2 recipe can be priced or planned.
+- ~~Map release ingredients to products.~~ Done for release v2 (see section 2); the owner's sampled review is recorded in `data-engineering/docs/fairprice-v2-sampled-review.json`.
 - Add planner and grocery fixtures and regression tests.
 - Publish the quality report, release manifest and known gaps with the import.
 

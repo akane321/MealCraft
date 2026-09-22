@@ -2,7 +2,14 @@ from dataclasses import dataclass
 
 from app.data.units import UNIT_BASE
 from app.models.recipe import Recipe
-from app.planning.grocery_estimator import GroceryEstimator, ProductMatcher, matchable_ingredients
+from app.planning.grocery_estimator import (
+    GroceryEstimator,
+    ProductMatcher,
+    choose_product,
+    convert_quantity,
+    not_purchased,
+    not_purchased_line,
+)
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse, WeeklyMealPlanRequest
 from app.schemas.product import GroceryLineEstimate
 from app.services.product import ProductSearchService
@@ -25,9 +32,14 @@ class WeeklyGroceryAggregator:
         self,
         recipes: list[Recipe],
         constraints: WeeklyMealPlanRequest,
+        *,
+        shares: list[float] | None = None,
     ) -> WeeklyGroceryEstimateResponse:
-        ingredients = self._aggregate_ingredients(recipes, constraints.household_size)
-        pantry = {item.normalized_name: item for item in constraints.available_ingredients}
+        """`shares` gives each recipe's portion share of its meal (ADR-0036); absent, every dish is a whole meal."""
+        ingredients = self._aggregate_ingredients(recipes, constraints.household_size, shares)
+        # A copy that each deduction draws down, so an ingredient needed on two
+        # lines (whole carrots and grams of carrot) cannot use the same pantry twice.
+        pantry = {item.normalized_name: item.model_copy() for item in constraints.available_ingredients}
         lines: list[GroceryLineEstimate] = []
         warnings: list[str] = []
         unmapped: list[str] = []
@@ -36,11 +48,15 @@ class WeeklyGroceryAggregator:
         consumed_total_known = True
 
         for ingredient in ingredients:
+            pantry_item = pantry.get(ingredient.name)
             pantry_deduction = GroceryEstimator.pantry_deduction(
-                pantry.get(ingredient.name),
+                pantry_item,
                 ingredient.required_quantity,
                 ingredient.unit,
             )
+            if pantry_deduction and pantry_item is not None and pantry_item.quantity is not None:
+                used = convert_quantity(pantry_deduction, ingredient.unit, pantry_item.unit) or 0.0
+                pantry_item.quantity = max(0.0, pantry_item.quantity - used)
             remaining = (
                 max(0.0, ingredient.required_quantity - pantry_deduction)
                 if ingredient.required_quantity is not None
@@ -66,22 +82,24 @@ class WeeklyGroceryAggregator:
                 )
                 continue
 
-            product, match_score = None, None
-            # Unmatchable ingredients are never searched: in live mode each search is a request.
-            if ingredient.name in matchable_ingredients():
-                search = self.product_service.search(
-                    ingredient.display_name,
-                    live=constraints.pricing_mode == "live",
-                    limit=8,
+            if not_purchased(ingredient.name):
+                lines.append(
+                    not_purchased_line(
+                        ingredient.name, ingredient.display_name, ingredient.required_quantity, ingredient.unit
+                    )
                 )
-                if search.warning and search.warning not in warnings:
-                    warnings.append(search.warning)
-                product, match_score = self.matcher.choose(
-                    ingredient.name,
-                    ingredient.display_name,
-                    ingredient.unit,
-                    search.items,
-                )
+                continue
+            choice = choose_product(
+                self.product_service,
+                self.matcher,
+                ingredient.name,
+                ingredient.display_name,
+                ingredient.unit,
+                live=constraints.pricing_mode == "live",
+                quantity=remaining,
+            )
+            warnings.extend(warning for warning in choice.warnings if warning not in warnings)
+            product, match_score = choice.product, choice.match_score
             if product is None:
                 unmapped.append(ingredient.name)
                 consumed_total_known = False
@@ -141,29 +159,34 @@ class WeeklyGroceryAggregator:
         )
 
     @staticmethod
-    def _aggregate_ingredients(recipes: list[Recipe], household_size: int) -> list[AggregatedIngredient]:
-        aggregated: dict[str, AggregatedIngredient] = {}
-        for recipe in recipes:
-            scale = household_size / recipe.servings
+    def _aggregate_ingredients(
+        recipes: list[Recipe], household_size: int, shares: list[float] | None = None
+    ) -> list[AggregatedIngredient]:
+        # Keyed by ingredient and unit: lines whose units cannot be added (one whole
+        # carrot and 64 g of carrot) stay separate lines rather than one unknown amount.
+        aggregated: dict[tuple[str, str | None], AggregatedIngredient] = {}
+        for index, recipe in enumerate(recipes):
+            share = shares[index] if shares is not None else 1
+            scale = household_size / recipe.servings if share == 1 else household_size * share / recipe.servings
             for item in recipe.recipe_ingredients:
                 name = item.ingredient.normalized_name
                 quantity = float(item.quantity) * scale if item.quantity is not None else None
                 normalized_quantity, normalized_unit = WeeklyGroceryAggregator._to_base_unit(quantity, item.unit)
-                current = aggregated.get(name)
+                key = (name, normalized_unit)
+                current = aggregated.get(key)
                 if current is None:
-                    aggregated[name] = AggregatedIngredient(
+                    aggregated[key] = AggregatedIngredient(
                         name=name,
                         display_name=item.ingredient.display_name,
                         required_quantity=normalized_quantity,
                         unit=normalized_unit,
                     )
                     continue
-                if current.required_quantity is None or normalized_quantity is None or current.unit != normalized_unit:
+                if current.required_quantity is None or normalized_quantity is None:
                     current.required_quantity = None
-                    current.unit = normalized_unit if current.unit == normalized_unit else None
                 else:
                     current.required_quantity += normalized_quantity
-        return sorted(aggregated.values(), key=lambda item: item.name)
+        return sorted(aggregated.values(), key=lambda item: (item.name, item.unit or ""))
 
     @staticmethod
     def _to_base_unit(quantity: float | None, unit: str | None) -> tuple[float | None, str | None]:

@@ -31,6 +31,18 @@ def _input_digests(**paths: Path) -> dict[str, dict[str, str]]:
     return digests
 
 
+def _release_inputs(release_path: Path) -> dict[str, Path]:
+    """The release files and the product snapshot a larger-catalog condition also ran on."""
+    from app.planning.grocery_estimator import RELEASE_SNAPSHOT_FILE  # noqa: PLC0415
+
+    return {
+        "release_manifest": release_path / "release_manifest.json",
+        "release_recipes": release_path / "recipes.jsonl",
+        "release_ingredients": release_path / "ingredients.jsonl",
+        "release_products": Path("data") / RELEASE_SNAPSHOT_FILE,
+    }
+
+
 def build_workbench(
     *,
     ingredient_path: Path,
@@ -41,22 +53,41 @@ def build_workbench(
     scope_path: Path,
     grounding_path: Path,
     fixture_path: Path,
+    release_path: Path | None = None,
+    protocol: str = "v1",
+    eligibility_path: Path | None = None,
     agent_provider: str = "fixture",
     allow_live_api: bool = False,
     api_key: str | None = None,
     model: str = "gpt-5.4-mini",
 ) -> dict[str, Any]:
+    forced = None
+    if protocol == "v1.1":
+        if eligibility_path is None:
+            raise ValueError("protocol v1.1 needs --eligibility")
+        record = json.loads(eligibility_path.read_text(encoding="utf-8"))
+        forced = {
+            scenario_id: entry["forced_repetitions"]
+            for split in record["sets"].values()
+            for scenario_id, entry in split["eligibility"].items()
+        }
     developer = evaluate(
         ingredient_path=ingredient_path,
         recipe_path=recipe_path,
         scenario_path=developer_path,
         fixture_path=fixture_path,
+        release_path=release_path,
+        protocol=protocol,
+        forced_repetitions=forced,
     )
     baseline = evaluate(
         ingredient_path=ingredient_path,
         recipe_path=recipe_path,
         scenario_path=heldout_path,
         fixture_path=fixture_path,
+        release_path=release_path,
+        protocol=protocol,
+        forced_repetitions=forced,
         system="greedy-baseline",
         enforce_gates=False,
     )
@@ -65,6 +96,9 @@ def build_workbench(
         recipe_path=recipe_path,
         scenario_path=heldout_path,
         fixture_path=fixture_path,
+        release_path=release_path,
+        protocol=protocol,
+        forced_repetitions=forced,
         system="rule-only-baseline",
         enforce_gates=False,
     )
@@ -73,6 +107,9 @@ def build_workbench(
         recipe_path=recipe_path,
         scenario_path=heldout_path,
         fixture_path=fixture_path,
+        release_path=release_path,
+        protocol=protocol,
+        forced_repetitions=forced,
         system="mealcraft-planner",
         enforce_gates=False,
     )
@@ -124,6 +161,8 @@ def build_workbench(
             scope=scope_path,
             grounding=grounding_path,
             fixtures=fixture_path,
+            **(_release_inputs(release_path) if release_path is not None else {}),
+            **({"eligibility": eligibility_path} if eligibility_path is not None else {}),
         ),
         "developer_planning": developer,
         "heldout_greedy_baseline": baseline,
@@ -143,6 +182,11 @@ def build_workbench(
     }
 
 
+def _relative_to(target: Path, document: Path) -> str:
+    """A link from `document` to `target`, both given relative to the repository root."""
+    return Path(os.path.relpath(target, document.parent)).as_posix()
+
+
 def write_workbench(report: dict[str, Any], json_path: Path, markdown_path: Path) -> None:
     json_path.parent.mkdir(parents=True, exist_ok=True)
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
@@ -160,7 +204,7 @@ def write_workbench(report: dict[str, Any], json_path: Path, markdown_path: Path
         "# MealCraft Evaluation Workbench",
         "",
         "> Generated evidence. Method, split rules and metric definitions are fixed in "
-        "[`protocol-v1.md`](../protocol-v1.md).",
+        f"[`protocol-v1.md`]({_relative_to(Path('docs/evaluation/protocol-v1.md'), markdown_path)}).",
         "",
         "## Run status",
         "",
@@ -304,6 +348,19 @@ def main() -> None:
         default=Path("data/evaluation/agent-orchestration/grounding-developer-v1.json"),
     )
     parser.add_argument("--fixtures", type=Path, default=Path("data/fixtures/fairprice-products.json"))
+    parser.add_argument(
+        "--release",
+        type=Path,
+        default=None,
+        help="also import this data release (a larger-catalog condition; write it to its own report)",
+    )
+    parser.add_argument("--protocol", choices=("v1", "v1.1"), default="v1")
+    parser.add_argument(
+        "--eligibility",
+        type=Path,
+        default=None,
+        help="protocol v1.1: the catalog-derived record of forced repetitions (docs/evaluation/*-labels.json)",
+    )
     parser.add_argument("--agent-provider", choices=("fixture", "openai"), default="fixture")
     parser.add_argument("--allow-live-api", action="store_true")
     parser.add_argument("--openai-model", default="gpt-5.4-mini")
@@ -321,6 +378,9 @@ def main() -> None:
         scope_path=args.scope_dataset,
         grounding_path=args.grounding_dataset,
         fixture_path=args.fixtures,
+        release_path=args.release,
+        protocol=args.protocol,
+        eligibility_path=args.eligibility,
         agent_provider=args.agent_provider,
         allow_live_api=args.allow_live_api,
         api_key=api_key,

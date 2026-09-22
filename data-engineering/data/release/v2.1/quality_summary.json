@@ -1,0 +1,72 @@
+{
+  "release_version": "v2.1",
+  "created_at": "2026-09-21T12:53:49+00:00",
+  "coverage": {
+    "released_recipes": 8968,
+    "enrichment_set": 11971,
+    "released_ingredients": 701,
+    "recipes_with_every_field": 8968
+  },
+  "by_cuisine": {
+    "american": 1505,
+    "chinese": 926,
+    "italian": 551,
+    "japanese": 504,
+    "thai": 500,
+    "indian": 492,
+    "korean": 450,
+    "filipino": 331,
+    "vietnamese": 300,
+    "greek": 300,
+    "tex_mex": 279,
+    "french": 262,
+    "british_irish": 241,
+    "middle_eastern": 228,
+    "caribbean": 224,
+    "mexican": 221,
+    "north_african": 214,
+    "latin_american": 176,
+    "german": 175,
+    "eastern_european": 169,
+    "spanish_portuguese": 166,
+    "indonesian": 160,
+    "african": 150,
+    "southern_us": 143,
+    "malaysian_singaporean": 109,
+    "scandinavian": 86,
+    "cajun_creole": 52,
+    "turkish": 48,
+    "dutch_belgian": 6
+  },
+  "by_course": {
+    "main": 5342,
+    "side": 1115,
+    "salad": 484,
+    "dessert": 421,
+    "breakfast": 381,
+    "sauce_condiment": 330,
+    "soup": 308,
+    "baked_good": 269,
+    "snack_appetizer": 240,
+    "drink": 78
+  },
+  "by_source": {
+    "RecipeNLG (Gathered)": 8664,
+    "TheMealDB": 217,
+    "Wikibooks Cookbook": 87
+  },
+  "estimated_share": {
+    "servings": 0.7736,
+    "times": 0.4744,
+    "ingredient_amounts": 0.0215
+  },
+  "dropped_by_reason": {
+    "reviewed incomplete": 221,
+    "implausible energy # kcal per serving": 70,
+    "excluded by enricher": 1
+  },
+  "allergen_rules_pending_human": 0,
+  "nutrition_per_serving": {
+    "median_energy_kcal": 326.3
+  }
+}

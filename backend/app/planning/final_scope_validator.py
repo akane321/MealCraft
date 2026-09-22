@@ -6,13 +6,16 @@ from math import isfinite
 from app.planning.dietary_tags import expand_tags
 from app.planning.diversity_validation import diversity_checks
 from app.planning.input_audit import nonfinite_issues
+from app.planning.meal_composition import meal_minutes, portion_shares, repetition_shortfalls, role_key
 from app.schemas.planning_v2 import (
     CheckStatus,
     FinalPlanningProblem,
     PlanningAssignment,
     PlanningConstraintCheck,
+    PlanningNutrients,
     PlanningNutritionBand,
     PlanningShoppingSelection,
+    PlanningSlot,
     PlanningValidationReport,
 )
 
@@ -59,58 +62,18 @@ class FinalPlanningValidator:
                 product_snapshot_version=problem.product_snapshot_version,
                 policy_version=problem.policy_version,
             )
-        checks: list[PlanningConstraintCheck] = []
-        slots = {slot.slot_id: slot for slot in problem.slots}
-        recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
-        assigned_by_slot: dict[str, PlanningAssignment] = {}
-
-        for assignment in assignments:
-            if assignment.slot_id not in slots:
-                checks.append(
-                    self._failed(
-                        "unknown_slot",
-                        f"Slot {assignment.slot_id} is not in the frozen planning problem.",
-                        assignment.slot_id,
-                    )
-                )
-                continue
-            if assignment.slot_id in assigned_by_slot:
-                checks.append(
-                    self._failed(
-                        "duplicate_assignment",
-                        f"Slot {assignment.slot_id} has more than one assignment.",
-                        assignment.slot_id,
-                    )
-                )
-            assigned_by_slot[assignment.slot_id] = assignment
-
-        for slot in problem.slots:
-            assignment = assigned_by_slot.get(slot.slot_id)
-            if slot.locked_recipe_id is not None and assignment is None:
-                checks.append(self._failed("locked_slot", "Locked slot must retain its assigned recipe.", slot.slot_id))
-                continue
-            if slot.required and assignment is None:
-                checks.append(self._failed("required_slot", "Required slot is empty.", slot.slot_id))
-                continue
-            if assignment is None:
-                continue
-            recipe = recipes.get(assignment.recipe_id)
-            if recipe is None:
-                checks.append(
-                    self._failed(
-                        "unknown_recipe",
-                        f"Recipe {assignment.recipe_id} is not in the frozen candidate set.",
-                        slot.slot_id,
-                    )
-                )
-                continue
-            checks.extend(self._slot_checks(problem, slot.slot_id, assignment.recipe_id))
-
+        checks, meals = self.assignment_checks(problem, assignments)
         assignment_checks_passed = not checks
-        checks.extend(diversity_checks(problem, assigned_by_slot))
-        checks.extend(self._nutrition_checks(problem, assigned_by_slot))
+        checks.extend(diversity_checks(problem, meals))
+        checks.extend(
+            self._failed("repetition_rule", problem_text)
+            for problem_text in repetition_shortfalls(
+                problem, [[dish.recipe_id for dish in dishes] for dishes in meals.values()]
+            )
+        )
+        checks.extend(self._nutrition_checks(problem, meals))
         checks.extend(self._shopping_checks(problem, shopping))
-        demand_checks = self._demand_checks(problem, assigned_by_slot, shopping)
+        demand_checks = self._demand_checks(problem, meals, shopping)
         checks.extend(demand_checks)
         product_checks, purchase_total, cost_complete = self._product_checks(problem, shopping)
         checks.extend(product_checks)
@@ -160,17 +123,188 @@ class FinalPlanningValidator:
             policy_version=problem.policy_version,
         )
 
+    def assignment_checks(
+        self,
+        problem: FinalPlanningProblem,
+        assignments: list[PlanningAssignment],
+    ) -> tuple[list[PlanningConstraintCheck], dict[str, list[PlanningAssignment]]]:
+        """Check every dish and every meal; return the dishes each known slot holds.
+
+        A one-dish slot keeps its last assignment, reporting any extra, as before.
+        A composed slot holds one dish per role.
+        """
+        checks: list[PlanningConstraintCheck] = []
+        slots = {slot.slot_id: slot for slot in problem.slots}
+        recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
+        grouped: dict[str, list[PlanningAssignment]] = defaultdict(list)
+
+        for assignment in assignments:
+            if assignment.slot_id not in slots:
+                checks.append(
+                    self._failed(
+                        "unknown_slot",
+                        f"Slot {assignment.slot_id} is not in the frozen planning problem.",
+                        assignment.slot_id,
+                    )
+                )
+                continue
+            slot = slots[assignment.slot_id]
+            if grouped[slot.slot_id] and (
+                slot.composition is None or any(prior.role_id == assignment.role_id for prior in grouped[slot.slot_id])
+            ):
+                checks.append(
+                    self._failed(
+                        "duplicate_assignment",
+                        f"Slot {assignment.slot_id} has more than one assignment"
+                        + ("." if slot.composition is None else f" for role {assignment.role_id}."),
+                        assignment.slot_id,
+                    )
+                )
+                if slot.composition is None:
+                    grouped[slot.slot_id] = []
+                else:
+                    continue
+            grouped[slot.slot_id].append(assignment)
+
+        meals: dict[str, list[PlanningAssignment]] = {}
+        for slot in problem.slots:
+            rows = grouped.get(slot.slot_id, [])
+            if slot.locked_recipe_id is not None and not rows:
+                checks.append(self._failed("locked_slot", "Locked slot must retain its assigned recipe.", slot.slot_id))
+                continue
+            if slot.required and not rows:
+                checks.append(self._failed("required_slot", "Required slot is empty.", slot.slot_id))
+                continue
+            if not rows:
+                continue
+            known = []
+            for assignment in rows:
+                if role_key(slot, assignment) is None:
+                    checks.append(
+                        self._failed(
+                            "meal_role",
+                            f"Role {assignment.role_id} is not a dish position of this slot.",
+                            slot.slot_id,
+                        )
+                    )
+                    continue
+                if assignment.recipe_id not in recipes:
+                    checks.append(
+                        self._failed(
+                            "unknown_recipe",
+                            f"Recipe {assignment.recipe_id} is not in the frozen candidate set.",
+                            slot.slot_id,
+                        )
+                    )
+                    continue
+                checks.extend(
+                    self._slot_checks(problem, slot.slot_id, assignment.recipe_id, meal_time=slot.composition is None)
+                )
+                known.append(assignment)
+            if slot.composition is not None:
+                checks.extend(self._meal_checks(problem, slot, known))
+            meals[slot.slot_id] = known
+        return checks, meals
+
+    def _meal_checks(
+        self,
+        problem: FinalPlanningProblem,
+        slot: PlanningSlot,
+        dishes: list[PlanningAssignment],
+    ) -> list[PlanningConstraintCheck]:
+        """Composition, portions, distinct dishes and meal time (ADR-0036 sections 1-4)."""
+        checks: list[PlanningConstraintCheck] = []
+        recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
+        by_role = {dish.role_id: dish for dish in dishes}
+        for role in slot.composition or []:
+            dish = by_role.get(role.role_id)
+            if dish is None:
+                if role.required:
+                    checks.append(
+                        self._failed("meal_role_missing", f"Required role {role.role_id} is empty.", slot.slot_id)
+                    )
+                continue
+            course = recipes[dish.recipe_id].course
+            if course is None:
+                checks.append(
+                    PlanningConstraintCheck(
+                        code="meal_role_course",
+                        status="indeterminate",
+                        scope_id=slot.slot_id,
+                        detail=f"Recipe for role {role.role_id} has no course label to check.",
+                    )
+                )
+            elif course not in role.courses:
+                checks.append(
+                    self._failed(
+                        "meal_role_course",
+                        f"A {course} recipe cannot fill role {role.role_id}.",
+                        slot.slot_id,
+                    )
+                )
+        chosen = [dish.recipe_id for dish in dishes]
+        if len(chosen) != len(set(chosen)):
+            checks.append(self._failed("meal_duplicate_dish", "A meal holds the same recipe twice.", slot.slot_id))
+        if not dishes:
+            return checks
+        shares = portion_shares(problem.composition_policy, [dish.role_id for dish in dishes])
+        if shares is None:
+            checks.append(
+                self._failed("meal_size", f"No portion shares are defined for {len(dishes)} dishes.", slot.slot_id)
+            )
+        elif sum(shares.values()) < 1:
+            checks.append(
+                PlanningConstraintCheck(
+                    code="meal_portion",
+                    status="failed",
+                    scope_id=slot.slot_id,
+                    actual=float(sum(shares.values())),
+                    limit=1.0,
+                    detail="The dishes' portion shares do not make one full meal for the household.",
+                )
+            )
+        if slot.max_time_minutes is not None:
+            minutes = meal_minutes([recipes[dish.recipe_id] for dish in dishes], problem.composition_policy)
+            if minutes > slot.max_time_minutes:
+                checks.append(
+                    PlanningConstraintCheck(
+                        code="time_limit",
+                        status="failed",
+                        scope_id=slot.slot_id,
+                        actual=minutes,
+                        limit=slot.max_time_minutes,
+                        margin=float(slot.max_time_minutes - minutes),
+                        detail="The meal's estimated time (one cook, ADR-0036 section 3) exceeds the slot limit.",
+                    )
+                )
+        return checks
+
     def _slot_checks(
         self,
         problem: FinalPlanningProblem,
         slot_id: str,
         recipe_id: str,
+        *,
+        meal_time: bool = True,
     ) -> list[PlanningConstraintCheck]:
+        """Checks one dish must pass on its own; `meal_time` also applies the slot limit to it."""
         slot = next(item for item in problem.slots if item.slot_id == slot_id)
         recipe = next(item for item in problem.recipes if item.recipe_id == recipe_id)
         checks: list[PlanningConstraintCheck] = []
         if slot.locked_recipe_id is not None and slot.locked_recipe_id != recipe_id:
             checks.append(self._failed("locked_slot", "Locked assignment was changed.", slot_id))
+        if slot.max_dish_time_minutes is not None and recipe.total_time_minutes > slot.max_dish_time_minutes:
+            checks.append(
+                PlanningConstraintCheck(
+                    code="dish_time_limit",
+                    status="failed",
+                    scope_id=slot_id,
+                    actual=recipe.total_time_minutes,
+                    limit=slot.max_dish_time_minutes,
+                    margin=float(slot.max_dish_time_minutes - recipe.total_time_minutes),
+                    detail="Dish exceeds the per-dish time limit.",
+                )
+            )
         if slot.meal_type not in recipe.allowed_meal_types:
             # Soft: reported so the placement is visible, never a hard failure.
             checks.append(
@@ -182,7 +316,7 @@ class FinalPlanningValidator:
                     detail="Recipe is placed outside its usual meal types.",
                 )
             )
-        if slot.max_time_minutes is not None and recipe.total_time_minutes > slot.max_time_minutes:
+        if meal_time and slot.max_time_minutes is not None and recipe.total_time_minutes > slot.max_time_minutes:
             checks.append(
                 PlanningConstraintCheck(
                     code="time_limit",
@@ -236,23 +370,44 @@ class FinalPlanningValidator:
     def _nutrition_checks(
         self,
         problem: FinalPlanningProblem,
-        assigned_by_slot: dict[str, PlanningAssignment],
+        meals: dict[str, list[PlanningAssignment]],
     ) -> list[PlanningConstraintCheck]:
+        """Per person: a meal is its dishes' servings weighted by portion share."""
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
         slots = {slot.slot_id: slot for slot in problem.slots}
         values_by_day: dict[object, list[object]] = defaultdict(list)
         values_by_slot: dict[str, object] = {}
-        for slot_id, assignment in assigned_by_slot.items():
-            recipe = recipes.get(assignment.recipe_id)
+        values_by_dish: dict[str, object] = {}
+        for slot_id, dishes in meals.items():
             slot = slots.get(slot_id)
-            if recipe is None or slot is None:
+            known = [dish for dish in dishes if dish.recipe_id in recipes]
+            if slot is None or not known:
                 continue
-            values_by_slot[slot_id] = recipe.nutrients_per_serving
-            values_by_day[slot.planned_date].append(recipe.nutrients_per_serving)
+            shares = portion_shares(problem.composition_policy, [role_key(slot, dish) for dish in known])
+            if shares is None:
+                continue  # The meal check reports a meal size without shares.
+            for dish in known:
+                label = slot_id if slot.composition is None else f"{slot_id}/{dish.role_id}"
+                values_by_dish[label] = recipes[dish.recipe_id].nutrients_per_serving
+            if len(known) == 1:
+                meal = recipes[known[0].recipe_id].nutrients_per_serving
+            else:
+                meal = PlanningNutrients(
+                    **{
+                        field: sum(
+                            float(shares[role_key(slot, dish)])
+                            * getattr(recipes[dish.recipe_id].nutrients_per_serving, field)
+                            for dish in known
+                        )
+                        for field in PlanningNutrients.model_fields
+                    }
+                )
+            values_by_slot[slot_id] = meal
+            values_by_day[slot.planned_date].append(meal)
 
         checks: list[PlanningConstraintCheck] = []
         for band in problem.nutrition_bands:
-            observations = self._nutrition_observations(band, values_by_slot, values_by_day)
+            observations = self._nutrition_observations(band, values_by_slot, values_by_day, values_by_dish)
             for scope_id, actual in observations:
                 checks.append(self._band_check(band, scope_id, actual))
         return checks
@@ -262,7 +417,12 @@ class FinalPlanningValidator:
         band: PlanningNutritionBand,
         values_by_slot: dict[str, object],
         values_by_day: dict[object, list[object]],
+        values_by_dish: dict[str, object] | None = None,
     ) -> list[tuple[str, float]]:
+        if band.scope == "per_dish":
+            return [
+                (label, float(getattr(values, band.metric))) for label, values in sorted((values_by_dish or {}).items())
+            ]
         if band.scope == "per_slot":
             return [
                 (slot_id, float(getattr(values, band.metric))) for slot_id, values in sorted(values_by_slot.items())
@@ -312,7 +472,7 @@ class FinalPlanningValidator:
     @staticmethod
     def _demand_checks(
         problem: FinalPlanningProblem,
-        assignments: dict[str, PlanningAssignment],
+        meals: dict[str, list[PlanningAssignment]],
         shopping: list[PlanningShoppingSelection],
     ) -> list[PlanningConstraintCheck]:
         """Rebuild demand from assignments; never reuse the planner's shopping builder."""
@@ -320,14 +480,20 @@ class FinalPlanningValidator:
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
         amounts: dict[tuple[str, str | None], list[float | None]] = defaultdict(list)
         for slot in problem.slots:
-            assignment = assignments.get(slot.slot_id)
-            recipe = recipes.get(assignment.recipe_id) if assignment else None
-            if recipe is None:
-                continue  # Assignment validation reports invalid or missing recipes.
-            for item in recipe.ingredients:
-                amounts[item.ingredient_id, item.unit].append(
-                    None if item.quantity is None else item.quantity / recipe.servings * slot.servings
-                )
+            dishes = [dish for dish in meals.get(slot.slot_id, []) if dish.recipe_id in recipes]
+            # Assignment validation reports invalid or missing recipes.
+            shares = portion_shares(problem.composition_policy, [role_key(slot, dish) for dish in dishes])
+            for dish in dishes if shares is not None else []:
+                recipe = recipes[dish.recipe_id]
+                servings = slot.servings * shares[role_key(slot, dish)]
+                for item in recipe.ingredients:
+                    amounts[item.ingredient_id, item.unit].append(
+                        None
+                        if item.quantity is None
+                        else item.quantity / recipe.servings * slot.servings
+                        if len(dishes) == 1
+                        else item.quantity / recipe.servings * float(servings)
+                    )
         lines: dict[tuple[str, str | None], list[PlanningShoppingSelection]] = defaultdict(list)
         for line in shopping:
             lines[line.ingredient_id, line.unit].append(line)

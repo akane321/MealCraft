@@ -89,3 +89,19 @@ def test_grounding_benchmark_is_offline_and_keeps_denominators() -> None:
     assert report["metrics"]["supported_case_count"] == 4
     assert report["metrics"]["unsupported_case_count"] == 8
     assert report["metrics"]["unsupported_claim_escape_rate"] == 0.0
+
+
+def test_protocol_v1_1_fails_only_repetitions_the_catalog_does_not_force() -> None:
+    from app.evaluation.runner import _failure_reasons
+
+    common = {
+        "expected_feasible": True,
+        "actual_feasible": True,
+        "violations": [],
+        "deterministic": True,
+        "grocery_complete": True,
+        "within_weekly_budget": None,
+    }
+    assert _failure_reasons(**common, repetitions=6) == ["consecutive_recipe_repetition"]
+    assert _failure_reasons(**common, repetitions=6, forced_repetitions=6) == []
+    assert _failure_reasons(**common, repetitions=2, forced_repetitions=0) == ["consecutive_recipe_repetition"]

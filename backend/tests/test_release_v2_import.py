@@ -3,13 +3,13 @@ import shutil
 from pathlib import Path
 
 import pytest
-from sqlalchemy import create_engine, func, select
+from sqlalchemy import create_engine, delete, func, select, update
 from sqlalchemy.orm import Session
 
 from app.core.paths import repository_root
 from app.data.allergens import checked_allergens
 from app.data.catalog import import_catalog, load_catalog
-from app.data.release_v2 import import_release_v2, map_allergens, release_dir
+from app.data.release_v2 import RELEASE_VERSION, import_release_v2, map_allergens, release_dir
 from app.db.base import Base
 from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient
 
@@ -28,7 +28,7 @@ def session() -> Session:
 
 @pytest.fixture
 def release(tmp_path: Path) -> Path:
-    """The first real v2 recipes plus one with a single ingredient line, which must be skipped."""
+    """The first real release recipes plus one with a single ingredient line, which must be skipped."""
     source = release_dir()
     for name in ("release_manifest.json", "ingredients.jsonl"):
         shutil.copy(source / name, tmp_path / name)
@@ -48,22 +48,28 @@ def _curated(session: Session) -> list[str]:
     return list(session.scalars(select(Recipe.slug).where(Recipe.release_version.is_(None)).order_by(Recipe.slug)))
 
 
+def _release_count(session: Session) -> int:
+    return session.scalar(select(func.count()).select_from(Recipe).where(Recipe.release_version == RELEASE_VERSION))
+
+
 def test_release_is_added_beside_the_curated_catalog(session: Session, release: Path) -> None:
     curated_before = _curated(session)
     report = import_release_v2(session, release)
 
-    assert report.recipes_imported == SAMPLE
     assert report.recipes_skipped == ["RCP2_SHORT"]
+    assert report.recipes_imported == SAMPLE
     assert _curated(session) == curated_before
-    imported = session.scalars(select(Recipe).where(Recipe.release_version == "v2")).all()
+    imported = session.scalars(select(Recipe).where(Recipe.release_version == RELEASE_VERSION)).all()
     assert len(imported) == SAMPLE
     assert all(recipe.slug.startswith("v2-") and recipe.external_id.startswith("RCP2_") for recipe in imported)
     assert all(set(recipe.allergens) <= checked_allergens() for recipe in imported)
     assert all(recipe.nutrition is not None and recipe.steps for recipe in imported)
-    lines = session.scalars(select(RecipeIngredient).join(Recipe).where(Recipe.release_version == "v2")).all()
+    lines = session.scalars(
+        select(RecipeIngredient).join(Recipe).where(Recipe.release_version == RELEASE_VERSION)
+    ).all()
     assert lines and all(line.quantity == line.grams and line.original_text for line in lines)
     assert all(set(row.allergens) <= checked_allergens() for row in session.scalars(select(Ingredient)))
-    assert session.get(CatalogImport, "v2").recipe_count == SAMPLE
+    assert session.get(CatalogImport, RELEASE_VERSION).recipe_count == SAMPLE
 
 
 def test_same_release_is_skipped_and_a_changed_one_drops_stale_recipes(session: Session, release: Path) -> None:
@@ -72,14 +78,33 @@ def test_same_release_is_skipped_and_a_changed_one_drops_stale_recipes(session: 
 
     with (release / "recipes.jsonl").open(encoding="utf-8") as handle:
         records = [json.loads(line) for line in handle]
-    _write_recipes(release, records[1:])
+    dropped = records[-2]
+    _write_recipes(release, [record for record in records if record is not dropped])
     report = import_release_v2(session, release)
 
     assert not report.skipped_unchanged
     assert report.recipes_removed == 1
-    count = session.scalar(select(func.count()).select_from(Recipe).where(Recipe.release_version == "v2"))
-    assert count == SAMPLE - 1
-    assert session.scalar(select(Recipe).where(Recipe.external_id == records[0]["recipe_id"])) is None
+    assert _release_count(session) == SAMPLE - 1
+    assert session.scalar(select(Recipe).where(Recipe.external_id == dropped["recipe_id"])) is None
+
+
+def test_an_earlier_release_is_upgraded_in_place(session: Session, release: Path) -> None:
+    import_release_v2(session, release)
+    ids_before = dict(
+        session.execute(select(Recipe.external_id, Recipe.id).where(Recipe.release_version.is_not(None))).all()
+    )
+    # Pretend the rows came from release v2, as a database imported before v2.1 holds them.
+    session.execute(update(Recipe).where(Recipe.release_version.is_not(None)).values(release_version="v2"))
+    session.execute(delete(CatalogImport))
+    session.commit()
+
+    import_release_v2(session, release)
+
+    ids_after = dict(
+        session.execute(select(Recipe.external_id, Recipe.id).where(Recipe.release_version.is_not(None))).all()
+    )
+    assert ids_after == ids_before
+    assert _release_count(session) == SAMPLE
 
 
 def test_release_allergen_names_map_to_the_runtime_vocabulary() -> None:

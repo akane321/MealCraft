@@ -8,7 +8,7 @@ from app.planning.nutrition_scope import nutrition_scope_notes
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
-from app.repositories.meal_plan import MealPlanRepository
+from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
 from app.repositories.recipe import RecipeRepository
 from app.schemas.meal_plan import (
     MealPlanEntryStatus,
@@ -57,7 +57,9 @@ class WeeklyMealPlanService:
         replaces_plan_id: int | None = None,
     ) -> WeeklyMealPlanResponse:
         started_at = datetime.now(UTC)
-        recipes = self.recipe_repository.list_for_planning()
+        composition = constraints.meal_composition
+        courses = sorted({c for role in composition for c in role.courses}) if composition is not None else None
+        recipes = self.recipe_repository.list_for_planning(courses=courses)
         recommendation_result = self.recommendation_service.recommend(
             constraints,
             deduct_pantry_from_cost=False,
@@ -136,9 +138,19 @@ class WeeklyMealPlanService:
                 f"The current eligible catalog contains {eligible_count} {recipe_label}; "
                 "recipes are rotated across the seven days."
             )
+        placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(selected))]
         scheduled = [
-            (constraints.start_date + timedelta(days=index), recommendation)
-            for index, recommendation in enumerate(selected)
+            ScheduledDish(
+                planned_date=constraints.start_date + timedelta(days=slot_index),
+                day_index=slot_index + 1,
+                meal_type=meal_type,
+                role_id=role_id,
+                portion_share=portion_share,
+                recommendation=recommendation,
+            )
+            for (slot_index, meal_type, role_id, portion_share), recommendation in zip(
+                placements, selected, strict=True
+            )
         ]
         plan = self.repository.create(
             constraints=constraints,
@@ -214,6 +226,19 @@ class WeeklyMealPlanService:
         )
         return self._to_response(plan) if plan is not None else None
 
+    def update_meal_status(
+        self,
+        *,
+        plan_id: int,
+        day_index: int,
+        meal_type: str,
+        status: MealPlanEntryStatus,
+    ) -> WeeklyMealPlanResponse | None:
+        plan = self.repository.update_meal_status(
+            plan_id=plan_id, day_index=day_index, meal_type=meal_type, status=status
+        )
+        return self._to_response(plan) if plan is not None else None
+
     def dashboard(self, plan_id: int) -> WeeklyNutritionDashboardResponse | None:
         plan = self.repository.get(plan_id)
         if plan is None:
@@ -282,6 +307,9 @@ class WeeklyMealPlanService:
                     entry_id=entry.id,
                     day_index=entry.day_index,
                     planned_date=entry.planned_date,
+                    meal_type=entry.meal_type,
+                    role_id=entry.role_id,
+                    portion_share=float(entry.portion_share),
                     recipe=RecipeListItemResponse.model_validate(entry.recipe),
                     recommendation_score=float(entry.recommendation_score),
                     nutrition_per_person=nutrition,

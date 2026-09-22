@@ -179,3 +179,33 @@ approved for a formal experiment.
   is not evidence of LLM quality until a separately approved live run is made.
 - Browser tests cover critical UI state transitions, not a formal usability
   study. User-task completion time and qualitative feedback remain future work.
+
+## 8. Amendment v1.1: only an avoidable repetition is a failure
+
+Decision `ADR-0035`, 2026-09-22. Protocol v1 counts every adjacent repetition
+as a planning failure and requires none for the developer gate. On the larger
+catalog, a scenario whose constraints leave exactly one eligible dish forces
+the same dinner on all seven days, so every system fails it and the scenario
+says nothing about repetition. Protocol v1.1 changes that one rule:
+
+- A scenario fails on repetition only when its plan repeats **more** than the
+  catalog forces. The forced count is derived from the catalog alone by
+  `scripts/derive_catalog_labels.py` and recorded per scenario in
+  `docs/evaluation/catalog-v2.1-labels.json`: two or more eligible dishes force
+  none (they can alternate); one forces six in a seven-day week. A scenario with
+  a budget is recorded as forcing none, because that script does not price
+  recipes; the strict rule applies to it.
+- The developer gate requires zero **avoidable** repetitions.
+- Raw adjacent repetitions are still reported beside the forced and avoidable
+  counts, so the change is visible in every v1.1 report.
+
+The principle is that no system is penalised for what no system could do. It is
+not tied to any system: it applies to every compared system alike, and it
+removes a failure from the Strong Rule-only reference exactly as from MealCraft.
+
+**Disclosure.** This rule was decided after the larger-catalog results were
+seen, in which the only failures shared by MealCraft and the Strong Rule-only
+reference were forced repetitions. It is therefore not pre-registered. Under
+section 3 and `ADR-0020` section 3, no reported condition is rescored in place:
+every v1 report keeps its numbers, the default evaluation run stays v1, and a
+v1.1 report is a separate condition, reported beside the v1 one.

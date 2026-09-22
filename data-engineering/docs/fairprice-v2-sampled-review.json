@@ -1,0 +1,214 @@
+{
+ "seed": 20260921,
+ "drawn_at": "2026-09-21T11:07:54+00:00",
+ "reviewed_at": "2026-09-21T12:15:20+00:00",
+ "reviewer": "owner",
+ "sampled": 40,
+ "verdicts_recorded": 40,
+ "results": {
+  "accepted": 40,
+  "corrected": 0
+ },
+ "verdicts": [
+  {
+   "ingredient_id": "ING_AMERICAN_CHEESE",
+   "verdict": "accepted",
+   "note": "Kraft Singles500g采购规格成立；不能自动满足 light Velveeta 等特定产品/脂肪要求。"
+  },
+  {
+   "ingredient_id": "ING_BACON_GREASE",
+   "verdict": "accepted",
+   "note": "FairPrice 200g、Tradition 270g、Aw's 200g、Kelly's 500g，均是培根不是现成油脂。30% 炼油率未得到网页证实；Kelly's 标题 streaky、正文 back bacon 也有源冲突。"
+  },
+  {
+   "ingredient_id": "ING_BAGUETTE",
+   "verdict": "accepted",
+   "note": "未匹配，不证明FairPrice没有法棍；原菜谱1 None仍需数据清洗"
+  },
+  {
+   "ingredient_id": "ING_BEEF",
+   "verdict": "accepted",
+   "note": "Aw's mince 150g、flank 200g、Hego mince 400/500g。网站明确 mince 和 steak/cut，不能统一满足 sirloin/brisket 等菜谱。"
+  },
+  {
+   "ingredient_id": "ING_BEET",
+   "verdict": "accepted",
+   "note": "Agro500g、Yuan800g、ZENXIN350g、Baby250g。原料甜菜采购可用；已煮/切片/沙拉的重量和状态需另外处理。"
+  },
+  {
+   "ingredient_id": "ING_BITTER_MELON",
+   "verdict": "accepted",
+   "note": "Agro1 S、Pasar baby250g、Simply Finest baby250g。品类匹配合理，1 S→225g以及去籽产率仍待依据。"
+  },
+  {
+   "ingredient_id": "ING_BOK_CHOY",
+   "verdict": "accepted",
+   "note": "Pasar 200g、Yuan Zhen Yuan 220g、Agro 250g、Simply Finest 300g；Agro 缺货。名称及包装量可支持采购匹配，不能验证 head/cup 换算。"
+  },
+  {
+   "ingredient_id": "ING_CALAMANSI",
+   "verdict": "accepted",
+   "note": "Simply Finest Small Lime 250g；照片可见小型绿色柑橘及切面，但页面未明确物种，图片不能独自证明 calamansi。95g 出汁/可食量仍是估计，不是标签事实"
+  },
+  {
+   "ingredient_id": "ING_CELERY_SOUP",
+   "verdict": "accepted",
+   "note": "未匹配；不据此认定不存在，需保留 condensed/undiluted 限定。"
+  },
+  {
+   "ingredient_id": "ING_CHICKEN_OR_VEG_BROTH",
+   "verdict": "accepted",
+   "note": "Swanson1L/250ml、Heinz1L、Campbell's1L，全部为鸡汤。不能满足素食或默认低钠；Swanson1L列1064mg sodium/250ml，且有额外过敏原。"
+  },
+  {
+   "ingredient_id": "ING_CLAM",
+   "verdict": "accepted",
+   "note": "Ocean Fresh boiled400g、Catch去壳400g、Rich Seas500g、Lulina盐水110g。Lulina背标沥干65g；需区分生熟、活体带壳、沥干/含汁。"
+  },
+  {
+   "ingredient_id": "ING_COCONUT_FLAVORING",
+   "verdict": "accepted",
+   "note": "保留快照未匹配，不宣称市场无货；后续保留 alcohol-free 条件。"
+  },
+  {
+   "ingredient_id": "ING_CRACKER_CRUMBS",
+   "verdict": "accepted",
+   "note": "Sanwa saltine 480g、FairPrice cream 220g、Khong Guan cream 300g、Hup Seng cream 428g。均可加购物车；不能把 saltine、cream、Ritz 无条件等同。"
+  },
+  {
+   "ingredient_id": "ING_CRANBERRY",
+   "verdict": "accepted",
+   "note": "Harvest70g、Nature's Wonders150g、Foodsterr250g、Laobanniang500g，全部干制，后者明确sweetened。不能用raw定义和营养无条件覆盖。"
+  },
+  {
+   "ingredient_id": "ING_CURRY_SAUCE",
+   "verdict": "accepted",
+   "note": "Mak Nyonya 200g、A1 240g、Prima kit 300g、Brahim's 180g。Prima paste+premix需两次加水，Brahim's需加500ml水；不可直接按成品酱重量换算。配料不支持统一 tomato-based 定义。"
+  },
+  {
+   "ingredient_id": "ING_DATE",
+   "verdict": "accepted",
+   "note": "RedMan pitted250g、Deglet Noor250g/1kg均缺货；Green Earth Medjool200g可加购物车。页面未充分证明其去核状态及88%产率，176g不是核实净果肉重量。"
+  },
+  {
+   "ingredient_id": "ING_DRIED_MUSHROOM",
+   "verdict": "accepted",
+   "note": "Pasar50g、切片100g、Sun Kee花菇180g、AAA mini shiitake250g。网站支持干菇/浸泡处理；whole button需求、按个计量不能无条件迁移到切片。"
+  },
+  {
+   "ingredient_id": "ING_DUCK",
+   "verdict": "accepted",
+   "note": "FarmFresh boneless breast400g、Aw's breast400g、FarmFresh leg250g、Aw's thigh240g。Aw's明确breast带皮无骨、thigh带骨带皮；不能当烤熟去皮肉。FarmFresh正文误写chickens，需保留源冲突。"
+  },
+  {
+   "ingredient_id": "ING_FISH_SAUCE",
+   "verdict": "accepted",
+   "note": "Golden Elephant300ml、Knife300ml、Tiparos700ml、Knife750ml。匹配合理；含鱼。Golden Elephant与Knife300ml分别列1480/1560mg sodium每15ml，不能共用一个钠数值。"
+  },
+  {
+   "ingredient_id": "ING_GLUTINOUS_RICE",
+   "verdict": "accepted",
+   "note": "Songhe 1kg、Sun Eagle 2kg、FairPrice 2.5kg、SongHe 5kg，均支持干糯米匹配。浸泡/煮熟重量另算。"
+  },
+  {
+   "ingredient_id": "ING_GRAPEFRUIT_JUICE",
+   "verdict": "accepted",
+   "note": "Ceres1L配料含grapefruit/apple/pear，是混合汁；Lakewood946ml明确纯葡萄柚汁但缺货。原菜谱pomelo与canonical grapefruit差异仍需上游核对。"
+  },
+  {
+   "ingredient_id": "ING_GRUYERE",
+   "verdict": "accepted",
+   "note": "French 200g、Swiss 200g。匹配成立；两页均含 animal rennet、标记非素食，饮食过滤需保留。"
+  },
+  {
+   "ingredient_id": "ING_HALIBUT",
+   "verdict": "accepted",
+   "note": "Seaco 320g、Catch 标题400g/正文500g、Pan Royal 500g缺货。网页没有充分物种证据证明 Pacific；产地不能独自证明物种。数量冲突与营养代理分别处理。"
+  },
+  {
+   "ingredient_id": "ING_HOMINY",
+   "verdict": "accepted",
+   "note": "未匹配；不能拿普通甜玉米充当hominy。"
+  },
+  {
+   "ingredient_id": "ING_JAGGERY",
+   "verdict": "accepted",
+   "note": "Ambikas round500g/powder500g均缺货；Laobanniang Red Jaggery500g可加购物车。后者配料证据仍不足，固态/粉末的体积换算也需分开。"
+  },
+  {
+   "ingredient_id": "ING_LOBSTER",
+   "verdict": "accepted",
+   "note": "Boston tail110g、slipper150g、rock350g、熟整只Boston400g；照片确认最后一项是整只带壳。不能全部计为生可食龙虾肉；rock正文范围300–400g也应保留。"
+  },
+  {
+   "ingredient_id": "ING_MILK",
+   "verdict": "accepted",
+   "note": "Meiji 830ml、Magnolia 946ml、Farm Fresh 2L、Meiji 2L。通用牛奶采购匹配合理，3.25%脂肪不能统一当产品实测。三款页面另列 $0.10 deposit，预算应分列押金。"
+  },
+  {
+   "ingredient_id": "ING_POMEGRANATE_SEEDS",
+   "verdict": "accepted",
+   "note": "Agro Indian Pomegranate 1 S，整果。无 130g 果粒保证；购买单位与估计产率分开。"
+  },
+  {
+   "ingredient_id": "ING_PRUNE",
+   "verdict": "accepted",
+   "note": "Harvest Fields 100/220g、Sunsweet340g、RedMan1kg（缺货），均为干去核西梅。炖制/罐装用量应另建状态。"
+  },
+  {
+   "ingredient_id": "ING_QUINOA",
+   "verdict": "accepted",
+   "note": "Origins白500g、Superfarm白1kg、Origins三色450g、Bob's三色369g。支持干藜麦；熟重不能直接等量采购。Superfarm营养表缺清晰份量基准，暂不据此计算每100g。"
+  },
+  {
+   "ingredient_id": "ING_RASPBERRY",
+   "verdict": "accepted",
+   "note": "OOB frozen 450g，配料 Organic Raspberries。支持冷冻莓果菜谱，不证明所有鲜果用途等价。"
+  },
+  {
+   "ingredient_id": "ING_ROSE_WATER",
+   "verdict": "accepted",
+   "note": "Nielsen118ml缺货；Key200ml、Sri Sai250ml、Anarkali270ml可加购物车。Nielsen和Anarkali有烹饪用途说明；Sri Sai同时写护肤/宗教/烹饪用途，需核实食品标签。Key标题玫瑰水却正文称pandan leaf water，不能无条件放行。"
+  },
+  {
+   "ingredient_id": "ING_ROTEL",
+   "verdict": "accepted",
+   "note": "Hunt's diced tomato411g，配料明确无green chilies。只能标为需补辣椒/用户同意的替代，不是exact RoTel。"
+  },
+  {
+   "ingredient_id": "ING_RUM_EXTRACT",
+   "verdict": "accepted",
+   "note": "| 未匹配；酒精、仿制提取物等限定需留存。"
+  },
+  {
+   "ingredient_id": "ING_SEAFOOD_MIX",
+   "verdict": "accepted",
+   "note": "Catch标题1kg且缺货；正文与配料却写snapper。暂停自动匹配，不能只保留名称一致的旧Accept判断。"
+  },
+  {
+   "ingredient_id": "ING_SQUASH",
+   "verdict": "accepted",
+   "note": "ZENXIN pumpkin300g、Yuan butternut切块500g/整果1kg、Japanese pumpkin切块1kg。适合冬南瓜类别，不保证适合所有 summer squash；皮籽产率未验证。"
+  },
+  {
+   "ingredient_id": "ING_SUET",
+   "verdict": "accepted",
+   "note": "Tasty Food Affair500g、Aw's300g均写beef fat；后者说来自修整牛肉的脂肪。图片/正文不能证明特定肾周脂肪suet。完整卡片已补齐，但exact匹配仍未证实。"
+  },
+  {
+   "ingredient_id": "ING_SYRUP",
+   "verdict": "accepted",
+   "note": "Maple Joe100% pure maple syrup190ml成立。253g来自1.33g/ml估计而非网页标注克数；generic syrup可条件选maple，若特定其他糖浆则不能直接代换。"
+  },
+  {
+   "ingredient_id": "ING_VEGETABLE_OIL",
+   "verdict": "accepted",
+   "note": "FairPrice 500ml/1L/2L/3L。部分页面明确 palm olein + soya bean oil。保留体积；派生克数使用完整密度与统一舍入。不能仅因展示密度截断就断言原计算错。"
+  },
+  {
+   "ingredient_id": "ING_YEAST",
+   "verdict": "accepted",
+   "note": "Bake King instant 50g、Saf instant 55g、Bruggeman instant 125g、Bob's active dry 227g。后两款缺货。确有 active/instant 混合，须按菜谱保留种类与替代规则。"
+  }
+ ]
+}

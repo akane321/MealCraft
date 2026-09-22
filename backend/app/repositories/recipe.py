@@ -2,7 +2,7 @@ from sqlalchemy import Select, exists, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient
-from app.planning.grocery_estimator import matchable_ingredients
+from app.planning.grocery_estimator import priceable_ingredients
 
 # Release recipes carry a course; only these can fill a meal. Curated recipes
 # have no course and are always candidates. Sides, sauces, drinks and desserts
@@ -44,19 +44,22 @@ class RecipeRepository:
         )
         return list(self.session.scalars(statement).unique().all())
 
-    def list_for_planning(self) -> list[Recipe]:
-        """Meal candidates the planner can price: release recipes with an unmatchable ingredient are left out."""
+    def list_for_planning(self, *, courses: list[str] | None = None) -> list[Recipe]:
+        """Meal candidates the planner can price: release recipes with an unmatchable ingredient are left out.
+
+        `courses` widens the pool beyond mains and soups for a composed meal's roles (ADR-0036).
+        """
         unmatchable_line = (
             select(RecipeIngredient.id)
             .join(Ingredient)
             .where(
                 RecipeIngredient.recipe_id == Recipe.id,
-                Ingredient.normalized_name.not_in(sorted(matchable_ingredients())),
+                Ingredient.normalized_name.not_in(sorted(priceable_ingredients())),
             )
         )
         statement = (
             self._with_ingredients()
-            .where(or_(Recipe.course.is_(None), Recipe.course.in_(MEAL_COURSES)))
+            .where(or_(Recipe.course.is_(None), Recipe.course.in_(courses or MEAL_COURSES)))
             .where(or_(Recipe.release_version.is_(None), ~exists(unmatchable_line)))
             .order_by(Recipe.id)
         )

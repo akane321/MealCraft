@@ -14,9 +14,13 @@ from math import isfinite
 from app.data.allergens import checked_allergens
 from app.data.units import UNIT_BASE
 from app.planning.beam_planner import BeamLimits, BeamPlanner
+from app.planning.capability import PlanningCapabilityError, require_composition_enabled
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
+from app.planning.grocery_estimator import not_purchased
+from app.planning.meal_beam import MealBeamPlanner, assignments_of
+from app.planning.meal_composition import dish_servings
 from app.planning.nutrition_scope import compile_nutrition_targets
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
@@ -34,6 +38,8 @@ from app.schemas.planning_v2 import (
 from app.schemas.product import GroceryLineEstimate
 from app.schemas.recipe import RecipeListItemResponse
 from app.services.recipe import RecipeService
+
+MEAL_TYPES = ("breakfast", "lunch", "dinner", "snack")
 
 
 def digest(value) -> str:
@@ -63,12 +69,28 @@ class ProductPlan:
     selected: list
     grocery: WeeklyGroceryEstimateResponse
     trace: dict
+    # One per selected recommendation: (slot index, meal type, role, portion share).
+    placements: list[tuple[int, str, str, Fraction]] | None = None
+
+
+# Recommendations kept for each course a composed meal's roles admit.
+COMPOSED_CANDIDATES_PER_COURSE = 24
 
 
 class ProductPlanningEngine:
     def __init__(self, *, limits=None, validator=None):
         self.limits = limits or BeamLimits()
         self.validator = validator or FinalPlanningValidator()
+
+    def _packet_limit(self, day_count: int) -> int:
+        """How many candidates the beam search can visit on every day within its expansion budget.
+
+        Each day expands every kept state against every candidate, so a packet
+        larger than max_expansions / (width x days) exhausts the budget before one
+        full week is built. The recommendation limit is far larger on the full
+        catalog; the best-scored candidates are the ones kept.
+        """
+        return min(CANDIDATE_LIMIT, max(1, self.limits.max_expansions // (self.limits.width * day_count)))
 
     def plan(self, constraints, recommendations, recipes, *, selector=None, profile_version=None):
         trace = {
@@ -80,7 +102,7 @@ class ProductPlanningEngine:
             "seed": 0,
             "timeout_seconds": None,
             "dominance_rule": "per-day-recipe-multiset-and-last-recipe-v1",
-            "candidate_limit": CANDIDATE_LIMIT,
+            "candidate_limit": self._packet_limit(constraints.day_count),
             "requested_pricing_mode": constraints.pricing_mode,
             "profile_version": profile_version,
             "input_digest": digest(constraints.model_dump(mode="json")),
@@ -89,6 +111,15 @@ class ProductPlanningEngine:
             ),
             "validation": None,
         }
+        composition = getattr(constraints, "meal_composition", None)
+        try:
+            require_composition_enabled(composition)
+        except PlanningCapabilityError as error:
+            raise ProductPlanningError("needs_clarification", str(error), trace) from error
+        if composition is not None and constraints.planner_strategy != "beam":
+            raise ProductPlanningError(
+                "needs_clarification", "The baseline plans one dish a meal; use the beam planner for several.", trace
+            )
         for budget in (constraints.weekly_budget_sgd, constraints.budget_per_meal_sgd):
             if budget is not None and (Fraction(str(budget)) * 100).denominator != 1:
                 raise ProductPlanningError("needs_clarification", "Enter a budget in whole cents and try again.", trace)
@@ -105,6 +136,22 @@ class ProductPlanningEngine:
                 "Recipe coverage for a requested allergen is missing; update the allergen data before planning.",
                 trace,
             )
+        # Recommendations arrive best first; keep as many as the search can visit.
+        if composition is None:
+            recommendations = list(recommendations)[: self._packet_limit(constraints.day_count)]
+        else:
+            # The meal beam ranks each role's dishes itself; keep the best of every course it may fill.
+            courses = {course for role in composition for course in role.courses}
+            by_id = {r.id: r for r in recipes}
+            kept: dict[str, int] = {}
+            packet = []
+            for recommendation in recommendations:
+                course = getattr(by_id.get(recommendation.recipe.id), "course", None) or "main"
+                if course in courses and kept.get(course, 0) < COMPOSED_CANDIDATES_PER_COURSE:
+                    kept[course] = kept.get(course, 0) + 1
+                    packet.append(recommendation)
+            recommendations = packet
+            trace["candidate_limit"] = COMPOSED_CANDIDATES_PER_COURSE
         if not recommendations:
             trace.update(status="candidate_rejected", evidence="bounded_search_exhausted")
             raise ProductPlanningError(
@@ -120,19 +167,24 @@ class ProductPlanningEngine:
                 continue
             source = RecipeService._to_detail(by_id[recommendation.recipe.id])
             recipe_snapshots[source.slug] = RecipeListItemResponse.model_validate(source.model_dump())
+            # Tap water and ice are never bought, so they are not shopping requirements.
+            source.ingredients = [item for item in source.ingredients if not not_purchased(item.normalized_name)]
             for ingredient in source.ingredients:
                 display_names[ingredient.normalized_name] = ingredient.name
                 ingredient.quantity, ingredient.unit = normalized(ingredient.quantity, ingredient.unit)
-            affinity = (
-                (source.meal_type,)
-                if source.meal_type in ("breakfast", "lunch", "dinner", "snack")
-                else ("lunch", "dinner")
-            )
+            # A release recipe states its meal types (ADR-0038); a curated one's
+            # meal_type may name one; otherwise it is a lunch or dinner dish.
+            stated = tuple(m for m in source.meal_types or () if m in MEAL_TYPES)
+            affinity = stated or ((source.meal_type,) if source.meal_type in MEAL_TYPES else ("lunch", "dinner"))
             converted = recipe_input(source, allowed_meal_types=affinity, nutrition_basis="per_serving")
             if converted.candidate is None:
                 diagnostics.extend(converted.issues)
                 continue
-            candidates.append(converted.candidate)
+            candidate = converted.candidate
+            if composition is not None and candidate.course is None:
+                # The curated catalog predates course labels and holds only dinner mains.
+                candidate = candidate.model_copy(update={"course": "main"})
+            candidates.append(candidate)
             estimate = recommendation.grocery_estimate
             for line in estimate.items if estimate else []:
                 if line.product is None:
@@ -148,6 +200,11 @@ class ProductPlanningEngine:
                     continue
                 option = projected.option
                 prior = options.get(option.product_id)
+                if prior is not None and prior.ingredient_id != option.ingredient_id:
+                    # One product bought for two ingredients (eggs for egg and egg yolk)
+                    # is planned as a separate purchase for each.
+                    option = option.model_copy(update={"product_id": f"{option.product_id}@{option.ingredient_id}"})
+                    prior = options.get(option.product_id)
                 if prior is not None and prior != option:
                     diagnostics.append("conflicting_product_observation")
                 options[option.product_id] = option
@@ -165,6 +222,7 @@ class ProductPlanningEngine:
                 meal_type="dinner",
                 servings=constraints.household_size,
                 max_time_minutes=constraints.max_cooking_time_minutes,
+                composition=composition,
             )
             for i in range(constraints.day_count)
         ]
@@ -201,8 +259,9 @@ class ProductPlanningEngine:
             catalog_version=problem.catalog_version,
             product_snapshot_version=problem.product_snapshot_version,
         )
-        compiled = compile_search_domains(problem)
-        trace["compiled"] = asdict(compiled)
+        # Slot-local eligibility is one-dish arithmetic; composed meals are checked by the meal beam.
+        compiled = compile_search_domains(problem) if composition is None else None
+        trace["compiled"] = asdict(compiled) if compiled is not None else None
         trace["proof_scope"] = "supplied_candidate_packet_only"
         trace["validation_attempts"] = []
         builder = FinalScopeReferencePlanner()
@@ -226,13 +285,22 @@ class ProductPlanningEngine:
             # These scores only order candidates; the validator never reads them.
             losses = {r.recipe.slug: 1 - r.total_score / 100 for r in recommendations}
             trace["ranking"] = {"policy": "recommendation-score-v1", "digest": digest(losses)}
-            search = BeamPlanner(self.limits, local_losses=losses).search_candidates(problem.model_copy(deep=True))
+            if composition is None:
+                search = BeamPlanner(self.limits, local_losses=losses).search_candidates(problem.model_copy(deep=True))
+                assignments_list = [
+                    [PlanningAssignment(slot_id=s, recipe_id=r) for s, r in state.choices]
+                    for state in sorted(search.states, key=lambda s: (s.loss, s.choices))
+                ]
+            else:
+                meal_beam = MealBeamPlanner(local_losses=losses)
+                search = meal_beam.search_candidates(problem.model_copy(deep=True))
+                trace["settings"] = asdict(meal_beam.limits)
+                trace["dominance_rule"] = None
+                assignments_list = [
+                    assignments_of(state) for state in sorted(search.states, key=lambda s: (s.loss, s.choices))
+                ]
             trace["search"] = {k: v for k, v in asdict(search).items() if k != "states"}
             trace["search"]["completed_candidates"] = len(search.states)
-            assignments_list = [
-                [PlanningAssignment(slot_id=s, recipe_id=r) for s, r in state.choices]
-                for state in sorted(search.states, key=lambda s: (s.loss, s.choices))
-            ]
         result = None
         uncertain = bool(diagnostics)
         only_budget_failures = bool(assignments_list)
@@ -273,11 +341,12 @@ class ProductPlanningEngine:
                 not uncertain
                 and only_budget_failures
                 and constraints.planner_strategy == "beam"
+                and composition is None  # the meal beam keeps only the best dishes per role
                 and not search.pruned
                 and not search.exhausted
             ):
                 evidence, status = "exhaustively_infeasible", "infeasible"
-            if compiled.blocked_slot_ids:
+            if compiled is not None and compiled.blocked_slot_ids:
                 if set(problem.allergens) - set(problem.allergen_vocabulary):
                     evidence, status = "needs_data", "needs_data"
                 else:
@@ -333,7 +402,13 @@ class ProductPlanningEngine:
             by_slug[a.recipe_id].model_copy(deep=True, update={"recipe": recipe_snapshots[a.recipe_id]})
             for a in assignments
         ]
-        return ProductPlan(selected, grocery, trace)
+        servings = dish_servings(problem, assignments)
+        slot_index = {slot.slot_id: index for index, slot in enumerate(slots)}
+        placements = [
+            (slot_index[a.slot_id], "dinner", a.role_id or "main", servings[i] / constraints.household_size)
+            for i, a in enumerate(assignments)
+        ]
+        return ProductPlan(selected, grocery, trace, placements)
 
 
 def per_meal_budget_checks(problem, assignments, budget):
@@ -344,10 +419,12 @@ def per_meal_budget_checks(problem, assignments, budget):
     """
     recipes = {r.recipe_id: r for r in problem.recipes}
     slots = {s.slot_id: s for s in problem.slots}
-    checks = []
-    for assignment in assignments:
+    servings = dish_servings(problem, assignments)
+    # A meal's dishes share one ceiling, reported once per slot in first-dish order.
+    meals: dict[str, list[tuple[int, int] | None]] = {}
+    for index, assignment in enumerate(assignments):
         recipe, slot = recipes.get(assignment.recipe_id), slots.get(assignment.slot_id)
-        if recipe is None or slot is None:
+        if recipe is None or slot is None or index not in servings:
             continue  # The core validator reports the invalid assignment.
         total_cents, missing = 0, False
         for item in recipe.ingredients:
@@ -359,16 +436,21 @@ def per_meal_budget_checks(problem, assignments, budget):
             if item.quantity is None or not products:
                 missing = True
                 continue
-            demand = Fraction(str(item.quantity)) * slot.servings / recipe.servings
+            demand = Fraction(str(item.quantity)) * servings[index] / recipe.servings
             total_cents += min(
                 round(demand * Fraction(str(p.price_sgd)) * 100 / Fraction(str(p.package_quantity))) for p in products
             )
+        meals.setdefault(assignment.slot_id, []).append((total_cents, missing))
+    checks = []
+    for slot_id, dishes in meals.items():
+        missing = any(dish_missing for _, dish_missing in dishes)
+        total_cents = sum(cents for cents, _ in dishes)
         status = "indeterminate" if missing else "passed" if total_cents <= Fraction(str(budget)) * 100 else "failed"
         checks.append(
             PlanningConstraintCheck(
                 code="per_meal_budget",
                 status=status,
-                scope_id=assignment.slot_id,
+                scope_id=slot_id,
                 detail="Recomputed ingredient-use cost without pantry deduction.",
             )
         )

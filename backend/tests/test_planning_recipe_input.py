@@ -114,3 +114,16 @@ def test_converted_recipe_and_products_reach_mixed_planner_without_double_scalin
     assert result.shopping.lines[0].required_quantity == 300
     assert result.shopping.lines[0].pantry_deduction == 50
     assert result.shopping.purchase_total_sgd == 3.5
+
+
+def test_release_course_and_time_split_reach_the_candidate():
+    source = recipe().model_copy(update={"course": "soup", "prep_time_minutes": 5, "cook_time_minutes": 15})
+    candidate = convert(source).candidate
+
+    assert (candidate.course, candidate.prep_minutes, candidate.cook_minutes, candidate.passive_minutes) == (
+        "soup",
+        5,
+        15,
+        0,
+    )
+    assert convert(recipe()).candidate.course is None

@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.schemas.planning_nutrition import ProductNutritionTarget
+from app.schemas.planning_v2 import MealComposition
 from app.schemas.product import GroceryLineEstimate, PricingMode
 from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
 from app.schemas.recommendation import NutritionTargets, RecipeRecommendationRequest
@@ -21,6 +22,8 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     start_date: date = Field(default_factory=date.today)
     day_count: int = Field(default=7, ge=7, le=7)
     weekly_budget_sgd: float | None = Field(default=None, gt=0, le=7000)
+    # Dish roles of every dinner (ADR-0036); None is one dish, the MVP.
+    meal_composition: MealComposition | None = None
 
     @model_validator(mode="after")
     def finite_pantry_quantities(self) -> "WeeklyMealPlanRequest":
@@ -33,6 +36,9 @@ class WeeklyPlanDayResponse(BaseModel):
     entry_id: int
     day_index: int = Field(ge=1, le=7)
     planned_date: date
+    meal_type: str = "dinner"
+    role_id: str = "main"
+    portion_share: float = 1.0
     recipe: RecipeListItemResponse
     recommendation_score: float
     nutrition_per_person: RecipeNutritionResponse
@@ -162,6 +168,9 @@ class MealPlanReplanPreviewRequest(BaseModel):
 
 class MealPlanEntrySnapshot(BaseModel):
     entry_id: int
+    meal_type: str = "dinner"
+    role_id: str = "main"
+    portion_share: float = 1.0
     recipe_id: int
     recipe_slug: str
     recipe_title: str

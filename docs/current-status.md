@@ -78,10 +78,10 @@ their ranking semantics. No frontend or Agent module is changed.
 | Household profile | One shared profile, member servings and safety constraints, shared defaults, immutable versions, profile-linked plans. Each ingredient carries an allergen list; an allergen outside the checked vocabulary (`data/ingredients/allergen-vocabulary.json`) excludes every recipe rather than none, and the profile offers only allergens the catalog can check | Does not generate separate dishes for each member. Allergen labels are rule-derived from ingredient data, not verified against products |
 | Identity, sessions and tenancy | Argon2id credentials with upgrade-on-login, atomic account and default-household registration, login lockout, digest-only opaque sessions, per-session CSRF, current-actor lookup, session listing, logout and per-device revocation. Private Profile, Plan, Dashboard, Agent, Replanning and Shopping workflows require an active authenticated household; private ownership is non-null, repository queries are household-scoped, cross-household identifiers resolve as not found, and the browser has registration and login flows. Private routes authorize each action through one `HouseholdAction` dependency (`VIEW`, `EDIT_PROFILE`, `CREATE_PLAN`, `CHECK_IN`) in the order authentication, active household, action, CSRF; unknown roles are denied | No member-management or household-deletion routes exist yet, so `MANAGE_MEMBERS` and `DELETE_HOUSEHOLD` are defined but unused. Household collaboration, password lifecycle and account export/deletion remain incomplete |
 | Recipe catalog | 30 validated recipes and 34 normalized ingredients imported idempotently | Smaller and less dimensional than the final benchmark target |
-| Data engineering | Independent `data-engineering/` pipeline with frozen schema v1, a four-condition release gate, and release v1.1 containing 9,282 recipes and 465 canonical ingredients. Deterministic derived dietary tags cover vegetarian (5,625), gluten-free (4,507), dairy-free (3,602) and vegan (1,030) recipes. A first nutrition-mapping pass matches the curated ingredient set (533 entries) against USDA Foundation Foods, SR Legacy and FNDDS with recorded evidence: 213 `mapped`, 209 `needs_review`, 111 unresolved ([progress report](../data-engineering/docs/task-b-nutrition-mapping-progress.md)). Release v2 (decision ADR-0030) is built: all three enrichment packets are complete (838 ingredient forms, 12,333 recipes), and the build cuts 9,048 released recipes over 29 cuisines with a per-serving energy median of 327 kcal ([quality report](../data-engineering/data/release/v2/quality_report.md), [attribution](../data-engineering/data/release/v2/ATTRIBUTION.md)). Part C was re-enriched item by item on 2026-09-21, replacing the constant fill; the fixed-seed sampled audit, re-judged for part C, accepted 35 of 39 recipes (5 corrections recorded) and 19 of 19 ingredients ([verdicts](../data-engineering/docs/v2-sampled-audit.json)). Release v1 is deleted as ADR-0030 requires; v1.1 remains the source | The re-audit of part C was done by the same producer family (Claude) that re-enriched it, so it is not an independent review. Real course labels now bind the per-bucket side/dessert caps, which is why fewer recipes are released than before. Imported into the runtime catalog beside the curated recipes (`python -m app.data.import_release_v2`, run at compose start; see [Data](data/README.md)): 9,046 recipes, 2 skipped for having fewer than two ingredient lines, and 11 lines whose weight rounds to 0 g (mostly dill) stored as unknown quantities. Recommendations rank every meal-course recipe (curated, and v2 `main`/`soup`) and keep the best 500 within budget. Weekly plans and replacements take only recipes the planner can price; no v2 recipe is fully priced yet, because release ingredients have no reviewed product mapping (the name matcher paired generic names such as `water` with the wrong product, so it now serves curated ingredients only), so plans still come from the curated recipes. Nutrition remains `not_computed`: the mapping is not yet turned into per-recipe values (no quantity-to-mass conversion or aggregation). Cuisine, meal types, methods, equipment and difficulty remain empty. Derived dietary tags are not reviewed gold labels, and allergen labels remain deterministic-rule-only |
+| Data engineering | Independent `data-engineering/` pipeline with frozen schema v1, a four-condition release gate, and release v1.1 containing 9,282 recipes and 465 canonical ingredients. Deterministic derived dietary tags cover vegetarian (5,625), gluten-free (4,507), dairy-free (3,602) and vegan (1,030) recipes. A first nutrition-mapping pass matches the curated ingredient set (533 entries) against USDA Foundation Foods, SR Legacy and FNDDS with recorded evidence: 213 `mapped`, 209 `needs_review`, 111 unresolved ([progress report](../data-engineering/docs/task-b-nutrition-mapping-progress.md)). Release v2 (decision ADR-0030) is built: all three enrichment packets are complete (838 ingredient forms, 12,333 recipes), and the build cuts 9,048 released recipes over 29 cuisines with a per-serving energy median of 327 kcal ([quality report](../data-engineering/data/release/v2/quality_report.md), [attribution](../data-engineering/data/release/v2/ATTRIBUTION.md)). Part C was re-enriched item by item on 2026-09-21, replacing the constant fill; the fixed-seed sampled audit, re-judged for part C, accepted 35 of 39 recipes (5 corrections recorded) and 19 of 19 ingredients ([verdicts](../data-engineering/docs/v2-sampled-audit.json)). Release v1 is deleted as ADR-0030 requires; v1.1 remains the source | The re-audit of part C was done by the same producer family (Claude) that re-enriched it, so it is not an independent review. Real course labels now bind the per-bucket side/dessert caps, which is why fewer recipes are released than before. Release v2.1 carries the checks v2 lacked: 220 recipes whose steps use an unlisted allergen food (some RecipeNLG sources list only part of a dish) are dropped after a per-recipe review, ten ingredients carry owner-confirmed stricter allergens, and fish or shellfish rules out vegetarian and vegan ([quality report](../data-engineering/data/release/v2.1/quality_report.md)); a 300-recipe sample the check did not flag found one miss. The owner's fixed-seed audit of 40 review decisions ([audit](../data-engineering/docs/completeness-v2.1-sampled-audit.json)) accepted all 25 kept recipes, 9 of 10 dropped ones and all 5 unflagged ones; the one correction (a listed egg substitute read as a missing egg) keeps a recipe the next release restores. It is imported beside the curated recipes (`python -m app.data.import_release_v2`, run at compose start; see [Data](data/README.md)): 8,967 recipes, upgrading v2 rows in place. Recommendations rank every meal-course recipe (curated, and release `main`/`soup`) and keep the best 500 within budget. Release ingredients are priced through a FairPrice mapping captured and proposed on 2026-09-21 (707 ingredients, 563 mapped, 142 unavailable, water and ice not purchased; mappings under confidence 0.6 are left unpriced), so 4,556 of the 5,680 meal-course recipes can enter weekly plans. The mapping is AI-proposed; the owner's fixed-seed review of 40 ingredients accepted all 40, and four product choices its notes identified as wrong were removed ([review](../data-engineering/docs/fairprice-v2-sampled-review.json)). Nutrition remains `not_computed`: the mapping is not yet turned into per-recipe values (no quantity-to-mass conversion or aggregation). Cuisine, meal types and difficulty are filled by the v2 enrichment and imported (agent-labelled, not reviewed; decision ADR-0038 corrects an earlier statement that they were empty), and the planner reads meal types as a soft affinity; methods and equipment are not in the release. Course labels decide which dish role a recipe may fill (decision ADR-0036), so the owner audited a fixed-seed sample of 80, ten per role course ([audit](../data-engineering/docs/course-v2.1-sampled-audit.json)): 78 accepted, and two desserts that are cookies corrected to `baked_good`, a correction the next release applies. Derived dietary tags are not reviewed gold labels, and allergen labels remain deterministic-rule-only |
 | Home surface | `/` is the product surface: a full-bleed film entry whose command bar becomes a chat on the Agent session API (clarification answers, confirmation, replan preview and confirm/discard). Edge panels open on hover, keyboard focus or pin and move the chat aside: the week with tonight's Top-1 tutorial and cooked check-in on the left; cooked nutrition, per-dinner calories and the shopping list against budget on the right. The shopping list previews as a sheet and exports through the browser's print-to-PDF. Liquid-glass styling uses an edge-lens backdrop filter in Chromium and frosted glass elsewhere. A nutrition sheet (six nutrients, cumulative curve, daily table with cooked/skip/undo) and a recipe sheet (ingredients with allergen labels, steps) open over the surface. The only other pages are `/login`, `/profile` (behind the avatar) and `/system` (service status); login returns to a same-site `?next=` path | Browser-tested at 1280×720 against a stubbed API; a signed-in run against the real backend is not yet recorded. Tutorials come from a four-video sample set (live YouTube search is a scaffold), so only dishes whose name matches a sample video show one, labelled as a sample; the rest say no video is available yet. Price labels read the products actually used, so a live request that fell back to sample data says so. Replan events are recorded by the backend but no longer shown in the interface |
 | Agent | Persistent household-scoped sessions, bilingual scope isolation, structured constraints, typed clarification, confirmation, bounded tool authorization, grounded claims, Agent-driven replanning, and synchronous per-action `AgentRun` with authenticated actor/household provenance, input digests, explicit deadlines and budgets, durable checkpoints, ordered tool receipts, idempotent replay and run list/detail/cancel APIs | Default parser is deterministic fixture mode. Plan confirmation is not yet bound to a specific preview: `POST /api/agent/sessions/{id}/confirm` takes no preview id, context version or expiry, generates and saves the plan in one call, and records the generation step as a preview although it already persists the plan; ADR-0016's matched, unexpired confirmation is target work. Runs are synchronous: asynchronous pause/resume/retry, external-tool evidence, natural-language claim extraction and formal live-model evidence are deferred |
-| Weekly planning | Seven persisted main meals plus independently callable Planning v2 constraint compilation, bounded Beam Search, conservative nutrition bounds, independent shopping/budget recomputation, and a small exhaustive oracle. Weekly budgets are compared in whole cents on both sides (ADR-0021). In Planning v2 a recipe's meal type is a soft affinity, not a filter (ADR-0024 section 5); the CP-SAT package oracle's tests run in CI | The product API still uses the current baseline path; Beam parameters are untuned and the oracle proves results only for small packets under the fixed shopping policy. How the engine enters the product, and which deepenings follow, is decided (ADR-0033) and specified in [Planning and Validation v2](design/planning-validation-v2.md); none of it is built yet |
+| Weekly planning | Seven persisted main meals plus independently callable Planning v2 constraint compilation, bounded Beam Search, conservative nutrition bounds, independent shopping/budget recomputation, and a small exhaustive oracle. Weekly budgets are compared in whole cents on both sides (ADR-0021). In Planning v2 a recipe's meal type is a soft affinity, not a filter (ADR-0024 section 5); the CP-SAT package oracle's tests run in CI. A meal can hold several dishes (ADR-0036): dish roles such as main, vegetable and optional soup, each cooked at a portion share (1.0, 0.75/0.5, 0.6/0.4, 0.5/0.35) with a one-cook meal-time estimate, validated dish by dish and meal by meal and planned by a meal beam search; the API stores dishes per meal, swaps one dish, checks in a whole meal and has the agent ask which dish. It is switched off unless `PLANNING_CAPABILITY=full` (default `mvp`, the Sprint 1 demonstration) | Multi-dish meals have no user interface yet (profile setting, meals grouped by day) and are not yet evaluated; the product API still uses the current baseline path; Beam parameters are untuned and the oracle proves results only for small packets under the fixed shopping policy. How the engine enters the product, and which deepenings follow, is decided (ADR-0033) and specified in [Planning and Validation v2](design/planning-validation-v2.md); none of it is built yet |
 | FairPrice | Live lookup verified against the live site, normalized results, 15-minute PostgreSQL cache, and a live → saved-snapshot → fixture degradation chain with a warning and a `degraded` trace. An empty live result is a typed `no_match`: the ingredient stays unpriced instead of borrowing sample prices. A test generates a live-priced weekly plan with every FairPrice request failing and still gets a Shopping List | The disconnected run is covered by an automated test with the network stubbed out, not yet by a demonstration on a physically disconnected machine |
 | Shopping List | Aggregated demand, known-quantity deduction, package rounding, price and budget results | Unknown pantry quantities are never deducted |
 | Check-in and Dashboard | Planned/completed/skipped states, completed cumulative nutrition KPIs and curves, current-plan comparison, labelled daily detail, completion coverage | Cumulative actuals count completed MealCraft dishes only; planned rows are previews and skipped rows are not counted |
@@ -97,7 +97,7 @@ their ranking semantics. No frontend or Agent module is changed.
 - 24 offline Agent fixtures;
 - 36 bilingual scope developer cases and 12 typed grounding developer cases;
 - two fully covered, leakage-resistant matched-information Evaluation v2 developer packets;
-- 30 curated recipes and 34 normalized ingredients in the recorded catalog, plus 9,046 release v2 recipes imported beside them (slugs prefixed `v2-`).
+- 30 curated recipes and 34 normalized ingredients in the recorded catalog, plus 8,967 release v2.1 recipes imported beside them (slugs prefixed `v2-`).
 
 ### Held-out v2 authoring progress
 
@@ -155,6 +155,94 @@ attributable to a 30-recipe catalog and a 34-product fixture, and it stays
 attributable once those grow. Growing them supersedes these numbers rather than
 preserving them; a report generated afterwards carries its own input digests and
 is a different report even where a value coincides.
+
+#### The same comparison on the larger catalog
+
+Run again with release v2.1 imported beside the curated recipes
+(`python -m app.evaluation.workbench --release data-engineering/data/release/v2.1`,
+[report](evaluation/workbench/catalog-v2.1/latest.md),
+[conditions](evaluation/workbench/catalog-v2.1/conditions.json)): 8,997 recipes,
+the release priced through its FairPrice snapshot. It is a separate condition
+and does not replace the numbers above.
+
+| Metric | Greedy baseline | Strong Rule-only | MealCraft |
+| --- | ---: | ---: | ---: |
+| Scenario expectation rate | 0.95 | 0.95 | 0.95 |
+| Adjacent repetitions | 228 | 6 | 6 |
+| Mean distinct recipes | 1.0 | 1.9737 | 6.7368 |
+| Hard-constraint violations | 0 | 0 | 0 |
+| Recorded failure cases | 38 | 2 | 2 |
+
+The two cases every system now fails are held-out episodes written as
+infeasible against the 30-recipe catalog (`hold-037`, a five-minute limit, and
+`hold-039`, vegetarian dairy-free in five minutes): the release holds microwave
+dishes that meet them, so all three systems plan a week and the expectation no
+longer holds. Their six repetitions come from those episodes, where one to three
+recipes are eligible. The developer set's two matching episodes (`dev-019`,
+`dev-020`) fail its gate for the same reason. The episodes are not edited here:
+held-out expectations are fixed, and the larger catalog needs its own authored
+conditions (authored below). Every other episode's shopping list is complete; the
+run first exposed a weekly-aggregation fault that turned one ingredient needed
+in two units into an unknown amount, fixed before this report.
+
+#### Scenario sets written for the larger catalog
+
+Conditions for the larger catalog were then authored
+([report](evaluation/workbench/catalog-v2.1-scenarios/latest.md),
+[conditions](evaluation/workbench/catalog-v2.1-scenarios/conditions.json)):
+
+- the v1 scenarios relabelled from the catalog alone by
+  `scripts/derive_catalog_labels.py`, which runs no system under test
+  ([record](evaluation/catalog-v2.1-labels.json)): `dev-019`, `dev-020`,
+  `hold-037` and `hold-039` become feasible, and every other label stands,
+  since a larger catalog can only add feasible scenarios;
+- 13 developer scenarios for what the larger catalog can express (fish,
+  tree-nut and nine-allergen requests, excluded meats, 10-15 minute dinners),
+  chosen not to overlap the held-out ones;
+- 20 held-out scenarios drafted by an AI agent in a sealed packet (catalog
+  facts, request schema and authoring rules; no code, results or other held-out
+  cases) and accepted by the owner in two rounds, four revised in between
+  ([review](../data/evaluation/heldout/planning-catalog-v2.1-new.review.json)).
+  None is infeasible: written as household requests first, the two that were
+  meant to be came out feasible, and realistic zero-match requests are rare on
+  this catalog. Infeasibility is covered by v1's `hold-038` and `hold-040`.
+
+| Held-out, 60 scenarios | Greedy baseline | Strong Rule-only | MealCraft |
+| --- | ---: | ---: | ---: |
+| Scenario expectation rate | 1.0 | 1.0 | 1.0 |
+| Adjacent repetitions | 348 | 6 | 6 |
+| Mean distinct recipes | 1.0 | 1.9828 | 6.6897 |
+| Hard-constraint violations | 0 | 0 | 0 |
+| Recorded failure cases | 58 | 1 | 1 |
+
+The one failure MealCraft and the Strong Rule-only reference share is
+`hold-039`, where exactly one dish meets the constraints, so a week of seven
+must repeat it; the protocol counts that as a failure and it is reported as
+one. The same holds for the developer set's two failures (`dev-020`,
+`dev-111`, one eligible dish each), which is why its gate fails.
+
+The owner then decided that a repetition the catalog forces is not a planning
+failure (protocol v1.1, decision ADR-0035,
+[protocol section 8](evaluation/protocol-v1.md)). The rule was decided after
+these results were seen and is not pre-registered. It is a new protocol
+version, so the v1 report above is unchanged; the same sets rescored under
+v1.1 are reported beside it
+([report](evaluation/workbench/catalog-v2.1-scenarios-v1.1/latest.md),
+[conditions](evaluation/workbench/catalog-v2.1-scenarios-v1.1/conditions.json)).
+The forced count comes from the catalog alone
+([record](evaluation/catalog-v2.1-labels.json)): one eligible dish forces six
+repetitions a week, and a budgeted scenario is recorded as forcing none.
+
+| Held-out, 60 scenarios, v1.1 | Greedy baseline | Strong Rule-only | MealCraft |
+| --- | ---: | ---: | ---: |
+| Adjacent repetitions (raw) | 348 | 6 | 6 |
+| Forced by the catalog | 6 | 6 | 6 |
+| Avoidable repetitions | 342 | 0 | 0 |
+| Recorded failure cases | 57 | 0 | 0 |
+
+The developer gate passes under v1.1: its 12 repetitions are all forced. The
+rule removes the same failure from the Strong Rule-only reference as from
+MealCraft, so it does not separate them; mean distinct recipes still does.
 
 **Read this comparison carefully.** Against the strong reference, MealCraft ties
 on scenario expectation rate (`1.0` each), hard-constraint violations (`0` each)
@@ -225,30 +313,26 @@ the next incomplete control. It is a navigation aid, not a second status source.
 ## Current Priorities
 
 1. Record a signed-in run of the home surface against the real backend.
-2. Map release v2 ingredients to products with recorded evidence, so v2
-   recipes can be priced and enter weekly plans (they already reach
-   recommendations), then re-run the catalog-dependent measurements in this
-   document against the larger catalog.
-3. Complete nutrition-target and elastic-preference semantics and evidence.
-4. Test FairPrice live/cache/fixture degradation against real changes.
-5. Integrate the verified Planning v2 components into the product path, then
+2. Complete nutrition-target and elastic-preference semantics and evidence.
+3. Test FairPrice live/cache/fixture degradation against real changes.
+4. Integrate the verified Planning v2 components into the product path, then
    evaluate Beam parameters, retrieve-repair and package optimization without
    overstating global optimality or infeasibility.
-6. Extend the merged synchronous `AgentRun` into asynchronous pause/resume/retry
+5. Extend the merged synchronous `AgentRun` into asynchronous pause/resume/retry
    with bounded external-tool adapters, then build an independent held-out
    orchestration set and the common v2 output validator before any explicitly
    authorized, budget-capped live-model comparison.
-7. Expand dynamic-replanning stress cases and measure unnecessary disruption.
-8. Increase browser coverage and prepare a repeatable demonstration path.
-9. Add member-management routes, expand the cross-household isolation matrix as
+6. Expand dynamic-replanning stress cases and measure unnecessary disruption.
+7. Increase browser coverage and prepare a repeatable demonstration path.
+8. Add member-management routes, expand the cross-household isolation matrix as
    private resources grow, and complete household collaboration plus account
    lifecycle flows.
-10. Raise the discriminating power of the held-out evaluation before the final
-    comparison. Parameters may be tuned on developer data only, never on
-    held-out episodes (decision ADR-0020 as amended by ADR-0029). On the current v1 set the strong Rule-only reference
-    matches MealCraft on task success, hard-constraint violations and failure
-    count; a saturated primary metric cannot support a superiority claim.
-11. Progressively close the final-design gaps documented above rather than
+9. Raise the discriminating power of the held-out evaluation before the final
+   comparison. Parameters may be tuned on developer data only, never on
+   held-out episodes (decision ADR-0020 as amended by ADR-0029). On the current v1 set the strong Rule-only reference
+   matches MealCraft on task success, hard-constraint violations and failure
+   count; a saturated primary metric cannot support a superiority claim.
+10. Progressively close the final-design gaps documented above rather than
     treating the current MVP as the finished product.
 
 ## Verification Boundary

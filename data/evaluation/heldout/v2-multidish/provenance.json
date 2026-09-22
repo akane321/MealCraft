@@ -1,0 +1,63 @@
+{
+ "schema_version": "multidish-provenance-v1",
+ "set_id": "heldout-v2-multidish",
+ "drafting": {
+  "who": "an AI agent (Claude, this project's implementation model family) running as a separate sealed agent",
+  "what_it_could_see": "only the sealed packet below: the catalog facts, the episode format, the authoring rules and a standalone check tool. No repository, no planner code, no evaluation results.",
+  "what_it_could_not_see": "the systems under test, any report, and every other file on the machine",
+  "packet_digests": {
+   "rules.md": "06a874237d3cd0f76052eafeb9ba25cfeacbce3521ae597373dec661c8ce8d55",
+   "episode-format.md": "cb45474516b9cb7bb47cf1c4074e08ddbd62ef161566671cfd1b9a552d2427f4",
+   "catalog.jsonl": "f910af37bc3d9c5fb05fde02d88c48e10967e1a05bce235e205e6e4b77d92dfb",
+   "products.jsonl": "53d6a7b44796c22d5e225a7dca10493f0867234cc97263c592c96958f0ab493b",
+   "ingredients.jsonl": "0ece0add3c136b7c6f44810efbfd133e753e7750f10c45cc5b9f72fc71e2ce48",
+   "facts.json": "c9981d7fd0e7024cb32160e4600e3a25bee8a2a80df528d8f158a163e9051498",
+   "check.py": "bf554d5b2cd512868972b036bd285089b858039df2ce7c47bb6686e940422f28"
+  }
+ },
+ "independence": {
+  "held": "the drafting agent never saw the systems, their code or any result",
+  "not_held": "the set is not blind of feedback. After the first draft, the owner reviewed every episode and the same agent revised 10, then 1, on the owner's written notes. Those notes name wording and design problems, never system behaviour, and no result of any system was shown to the drafter. A report must describe this as reviewer-guided revision, not as independent scenario-first drafting.",
+  "pools_and_labels": "candidate pools are drawn by a script from the episode id, and every label is proven from catalog facts by a tool that runs no system under test. Neither the author nor the reviewer chose them."
+ },
+ "rounds": [
+  {
+   "round": 0,
+   "what": "40 episodes drafted from the sealed packet",
+   "outcome": "all 40 passed the packet's own checks"
+  },
+  {
+   "round": 1,
+   "what": "owner reviewed all 40 for request/gold agreement, realism and whether each earns a slot",
+   "outcome": "30 accepted, 10 sent back with notes",
+   "changed": [
+    "md-ho-003",
+    "md-ho-004",
+    "md-ho-008",
+    "md-ho-020",
+    "md-ho-022",
+    "md-ho-023",
+    "md-ho-026",
+    "md-ho-028",
+    "md-ho-030",
+    "md-ho-031"
+   ],
+   "themes": "requests that asked for something the gold cannot check (an expiry day, using a quantity up), a dish named ambiguously, budgets too loose to test pricing, an unrealistic budget, a duplicate failure mode, and an infeasibility that did not come from the stated request"
+  },
+  {
+   "round": 2,
+   "what": "owner reviewed the 10 revisions",
+   "outcome": "9 accepted, 1 sent back",
+   "changed": [
+    "md-ho-030"
+   ],
+   "themes": "an exclusion list that rested on translating 蒜苗 as leek, which is not a reliable synonym"
+  },
+  {
+   "round": 3,
+   "what": "the drafter named every excluded allium in the request itself",
+   "outcome": "accepted; the label stayed infeasible"
+  }
+ ],
+ "review_record": "review.json"
+}

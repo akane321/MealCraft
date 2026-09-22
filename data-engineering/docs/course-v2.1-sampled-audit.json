@@ -1,0 +1,448 @@
+{
+ "seed": 20260924,
+ "reviewer": "owner",
+ "release": "v2.1",
+ "sampled": 80,
+ "verdicts_recorded": 80,
+ "by_course": {
+  "main": {
+   "accepted": 10,
+   "corrected": 0
+  },
+  "side": {
+   "accepted": 10,
+   "corrected": 0
+  },
+  "salad": {
+   "accepted": 10,
+   "corrected": 0
+  },
+  "soup": {
+   "accepted": 10,
+   "corrected": 0
+  },
+  "breakfast": {
+   "accepted": 10,
+   "corrected": 0
+  },
+  "dessert": {
+   "accepted": 8,
+   "corrected": 2
+  },
+  "snack_appetizer": {
+   "accepted": 10,
+   "corrected": 0
+  },
+  "baked_good": {
+   "accepted": 10,
+   "corrected": 0
+  }
+ },
+ "corrections": {
+  "dessert->baked_good": 2
+ },
+ "verdicts": [
+  {
+   "recipe_id": "RCP2_04524E616082",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_04A9FE0BC317",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_04AD5152E63A",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_04C7E6883D53",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_052D6D58A7BF",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_06175FA62834",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_0BE20342EA37",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_0C5336546B3F",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_0C76854E5052",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_0DF4ED6B9136",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_0FE89B7CBC0F",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_123A772FE7E7",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_18A9AF6A6023",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_18F652C9E910",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_19CAEE526C6C",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_2366E592B711",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_237AFD513A28",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_23CB69E7B264",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_24014579DAAA",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_240EE0139C9A",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_258ECA71CBB3",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_25DA6BC27A9D",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_25F47ED81542",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_271F3CB9A002",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_27BB3AA9ADF6",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_29FD053B71F0",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_2A6B6C107F6E",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_2B1B9E7C82C2",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_2B83DAEDA8A8",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_2BAD888FB0D3",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_2C3763B662FD",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_3135911FFF3B",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_32D039C02758",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_34353C38FA03",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_356961FED919",
+   "verdict": "corrected",
+   "course": "baked_good",
+   "note": "Biscoitos are small baked ring cookies; baked_good is more consistent with the taxonomy."
+  },
+  {
+   "recipe_id": "RCP2_35DB33C857F4",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_36D2ACF7BA7B",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_3F4FC4059F03",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_40392CD5EA51",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_419A1DD17C1F",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_4267F07DE7D1",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_4406245E4E25",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_4461030BAD95",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_4687818093EE",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_493C78FA901D",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_4B43006697EA",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_52D518EE8CAF",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_57CCE636C4A8",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_5D77EC59057C",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_6065336127B6",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_6D9111AE477D",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_6F06E427304D",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_6FA82BA44199",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_6FC654F720F0",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_709732BE7814",
+   "verdict": "corrected",
+   "course": "baked_good",
+   "note": "These are spiced fruit-and-nut drop cookies, so baked_good is the more consistent category."
+  },
+  {
+   "recipe_id": "RCP2_7F3A71DC9BE6",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_80ED7A4E60E7",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_8154A597CEFC",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_8C37E7CE3998",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_8D66324CB698",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_93B634AD19C6",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_960E2F17E143",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_964650804A8F",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_A1321D917DFF",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_A6CAD3E9515D",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_AEDC023FACDD",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_B5ECAB625C4B",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_B6D491E12242",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_BC0BF5975B89",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_C2C81D7D56FC",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_C81AEF8EF1AC",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_D2AD57415DAC",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_D76FF71514DC",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_D8DBE9B39317",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_DF58595015F5",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_E167AF6C7303",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_E43CA93DEB4F",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_EAAD839F9258",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_F0697CF7CADD",
+   "verdict": "accepted",
+   "note": ""
+  },
+  {
+   "recipe_id": "RCP2_F1C9F9B8536F",
+   "verdict": "accepted",
+   "note": ""
+  }
+ ]
+}
