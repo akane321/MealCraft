@@ -51,3 +51,8 @@ class RecipeStepResponse(BaseModel):
 class RecipeDetailResponse(RecipeListItemResponse):
     ingredients: list[RecipeIngredientResponse]
     steps: list[RecipeStepResponse]
+    # Release recipes carry these; curated ones leave course and meal types empty.
+    course: str | None = None
+    meal_types: list[str] | None = None
+    prep_time_minutes: int | None = None
+    cook_time_minutes: int | None = None

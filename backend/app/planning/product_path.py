@@ -36,6 +36,8 @@ from app.schemas.product import GroceryLineEstimate
 from app.schemas.recipe import RecipeListItemResponse
 from app.services.recipe import RecipeService
 
+MEAL_TYPES = ("breakfast", "lunch", "dinner", "snack")
+
 
 def digest(value) -> str:
     return hashlib.sha256(
@@ -136,11 +138,10 @@ class ProductPlanningEngine:
             for ingredient in source.ingredients:
                 display_names[ingredient.normalized_name] = ingredient.name
                 ingredient.quantity, ingredient.unit = normalized(ingredient.quantity, ingredient.unit)
-            affinity = (
-                (source.meal_type,)
-                if source.meal_type in ("breakfast", "lunch", "dinner", "snack")
-                else ("lunch", "dinner")
-            )
+            # A release recipe states its meal types (ADR-0038); a curated one's
+            # meal_type may name one; otherwise it is a lunch or dinner dish.
+            stated = tuple(m for m in source.meal_types or () if m in MEAL_TYPES)
+            affinity = stated or ((source.meal_type,) if source.meal_type in MEAL_TYPES else ("lunch", "dinner"))
             converted = recipe_input(source, allowed_meal_types=affinity, nutrition_basis="per_serving")
             if converted.candidate is None:
                 diagnostics.extend(converted.issues)
