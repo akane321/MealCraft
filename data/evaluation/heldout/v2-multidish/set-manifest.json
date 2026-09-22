@@ -5,8 +5,8 @@
  "protocol_document": "docs/evaluation/protocol-v2-multidish.md",
  "status": "frozen",
  "frozen_at": "2026-09-22T18:07:15Z",
- "frozen_digest": "e4f898b022b128019957fba8f20092af00e6aadfc89c4947802ec1db3975d977",
- "_comment_digest": "sha256 over every episode file, in name order. Any edit to the set changes it, so a report can state which set it ran on.",
+ "frozen_digest": "9a0c3e90820235b8d58a6d8a9b0a12508abfb33e8f689bb8b0250f942c700448",
+ "_comment_digest": "sha256 over the episodes' canonical JSON, by episode id: one compact object per line. Canonical rather than raw bytes so the digest does not depend on line endings or formatting. Any change to an episode's content changes it, so a report can state which set it ran on.",
  "episodes": 40,
  "categories": {
   "combined_constraints": 8,

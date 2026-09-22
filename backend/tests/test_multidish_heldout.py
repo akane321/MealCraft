@@ -27,7 +27,12 @@ def episodes():
 def test_the_set_matches_its_frozen_digest():
     manifest = json.loads((SET / "set-manifest.json").read_text(encoding="utf-8"))
     files = sorted((SET / "episodes").glob("*.json"))
-    digest = hashlib.sha256(b"".join(path.read_bytes() for path in files)).hexdigest()
+    # Canonical JSON, so the digest does not depend on line endings or formatting.
+    canonical = "\n".join(
+        json.dumps(episode, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        for episode in sorted(episodes(), key=lambda e: e["episode_id"])
+    )
+    digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
     assert manifest["status"] == "frozen"
     assert digest == manifest["frozen_digest"], "the held-out set changed; a frozen set is not re-cut silently"
