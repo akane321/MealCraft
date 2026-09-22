@@ -145,3 +145,37 @@ def test_a_meal_repeats_no_dish_and_names_only_its_own_roles():
 
     assert "meal_duplicate_dish" in failed(repeated)
     assert "meal_role" in failed(unknown)
+
+
+def test_meal_beam_plans_a_composed_meal_the_validator_accepts():
+    from app.planning.meal_beam import MealBeamPlanner
+
+    solution = MealBeamPlanner().solve(problem())
+
+    assert solution.status == "feasible", solution.validation.checks
+    roles = {a.role_id: a.recipe_id for a in solution.assignments}
+    # The optional soup is filled because it fits the 120-minute meal.
+    assert roles == {"main": "chicken", "vegetable": "greens", "soup": "broth"}
+    assert "peanut-slaw" not in roles.values()
+    assert solution == MealBeamPlanner().solve(problem())
+
+
+def test_meal_beam_drops_an_optional_dish_the_meal_time_cannot_hold():
+    from app.planning.meal_beam import MealBeamPlanner
+
+    packet = problem()
+    packet.slots[0].max_time_minutes = 70  # main + vegetable is 70; adding the soup is 105
+    solution = MealBeamPlanner().solve(packet)
+
+    assert solution.status == "feasible", solution.validation.checks
+    assert {a.role_id for a in solution.assignments} == {"main", "vegetable"}
+
+
+def test_meal_beam_plans_one_dish_slots_like_before():
+    from app.planning.meal_beam import MealBeamPlanner
+    from tests.test_planning_v2 import load_problem
+
+    solution = MealBeamPlanner().solve(load_problem())
+
+    assert solution.status == "feasible", solution.validation.checks
+    assert all(a.role_id is None for a in solution.assignments)
