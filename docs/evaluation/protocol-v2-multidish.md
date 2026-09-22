@@ -27,17 +27,27 @@ An episode is a v2 held-out episode (`heldout-episode-v1`, see
   it, but never replaces it.
 - **The catalog is release v2.1**, not the 30 curated recipes. Recipes are
   priced through the FairPrice v2 mapping (`data/products/fairprice-v2-snapshot.json`)
-  at package grams. Only recipes whose every ingredient can be priced are
-  eligible.
+  at package grams (`backend/app/evaluation/release_catalog.py`). A recipe is
+  eligible only if all of these hold:
+  - every ingredient has an in-stock product;
+  - it serves 1 to 24;
+  - it cooks within 12 hours.
 - **`scenario.recipe_candidate_slugs` is drawn by a script, not by the
-  author.** A script samples a fixed number of eligible
-  recipes for every course the composition admits, from a seed per episode. The
+  author.** `python -m app.evaluation.multidish_pool` samples 12 eligible
+  recipes for every course the composition admits, from a seed derived from the
+  episode id. Its `--check` mode fails when a pool was edited. The
   pool deliberately contains dishes that break the episode's constraints, so
   that filtering is part of the task. An author who picks the pool knows the
   answer; a drawn pool does not.
 
 The gold label is unchanged: class, hard constraints, pantry ground truth,
-conflict reason. **No episode states a nutrition target.** Release recipes carry
+conflict reason.
+
+The label follows the pool. The situation is written first, and the class is
+derived from the pool's facts. `python -m app.evaluation.multidish_labels`
+checks every feasible episode for at least one valid meal (one eligible dish
+per required role, distinct, within the time limit), and every infeasible one
+for none. A budget label is not covered by that check. **No episode states a nutrition target.** Release recipes carry
 no computed nutrition (`not_computed`), so a target could not be scored. This
 is a limitation of the protocol and is reported as one.
 
@@ -99,6 +109,12 @@ timeouts, and the machine. CP-SAT runs under the ADR-0037 section 3 limits:
 - both: a deterministic-time limit calibrated to those on the reference
   machine, with 8 workers in deterministic interleaved search.
 
+CP-SAT is warm-started from the meal beam's validated plan. When it ends with a
+worse plan than that, the arm answers with the warm-start plan and records the
+fact. The report counts such answers, and counts proven optima separately.
+Measured before any episode existed: with a budget, CP-SAT can run out of time
+before it finds a plan the beam found in 0.3 s.
+
 Each CP-SAT result states whether optimality was proven. A timed-out episode is
 scored on what the arm returned, and as a failure if it returned nothing. It is
 never dropped.
@@ -116,3 +132,16 @@ With 40 episodes, a paired difference smaller than about 20 percentage points
 cannot be told from noise (v2 section 12). Results are reported per category as
 counts and failure mechanisms (ADR-0028), including every category a baseline
 wins.
+
+## 8. Changes made on the developer set
+
+These were found while building the developer set, before any held-out episode
+existed:
+- Eligibility now requires an in-stock product, 1 to 24 servings and at most 12
+  hours. Basil's only product was out of stock, so plans needing it could not be
+  bought.
+- The scorer fails a plan that leaves demand unbought. A line with no product
+  for demand the pantry does not cover used to pass silently.
+- The runner reports the exact pantry deduction. The planner's shopping line
+  rounds it to thousandths for display.
+- CP-SAT is warm-started from the meal beam (section 6).

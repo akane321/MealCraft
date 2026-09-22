@@ -4,7 +4,8 @@ The v2 scorer and packets read the curated catalog's row shape. This projects
 release recipes, their ingredients and the FairPrice v2 mapping into that
 shape. Quantities are the release's per-line grams; products are sold in
 package grams. Only a recipe whose every purchased ingredient has a product is
-eligible, as in the product.
+eligible, as in the product, and only one a planning candidate can hold (1-24
+servings, at most 12 hours).
 """
 
 from __future__ import annotations
@@ -47,7 +48,8 @@ def load_release_catalog(root: Path | None = None) -> ReleaseCatalog:
     for key, entry in sorted(snapshot.items()):
         if entry["status"] != "mapped":
             continue
-        for product in entry.get("products") or []:
+        # An out-of-stock product prices nothing: the product path never buys one.
+        for product in [p for p in entry.get("products") or [] if p.get("in_stock", True)]:
             # One product bought for two ingredients is a separate purchase for each.
             product_id = product["external_id"]
             if seen.setdefault(product_id, key) != key:
@@ -85,6 +87,9 @@ def load_release_catalog(root: Path | None = None) -> ReleaseCatalog:
             if ingredient_key(item["canonical_ingredient_id"]) not in NOT_PURCHASED
         ]
         if not lines or any(item["ingredient"] not in priced for item in lines):
+            continue
+        # A planning candidate serves 1-24 and cooks within 12 hours; batch bakes of 48 are not dinners.
+        if not 1 <= int(record["servings"]) <= 24 or record["prep_minutes"] + record["cook_minutes"] > 720:
             continue
         recipes.append(
             {

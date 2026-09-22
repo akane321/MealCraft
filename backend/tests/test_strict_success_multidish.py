@@ -171,3 +171,14 @@ def test_the_release_catalog_prices_every_recipe_it_keeps():
     assert len(catalog.recipes) > 5000
     assert all(line["ingredient"] in priced for r in catalog.recipes for line in r["ingredients"])
     assert {r["course"] for r in catalog.recipes} >= {"main", "side", "salad", "soup"}
+
+
+def test_demand_left_unbought_fails_the_package_check():
+    response = answer([("main", "chicken", 2.4), ("vegetable", "greens", 1.6), ("soup", "broth", 1.6)])
+    response.plan.shopping[0].product_id = None  # the chicken line buys nothing
+    response.plan.shopping[0].packages = 0
+    response.plan.shopping[0].line_cost_sgd = 0.0
+
+    score = scorer.score_episode(episode(limit=120), response, CATALOGS)
+
+    assert outcomes(score)["packages_cover_demand"] == "failed"

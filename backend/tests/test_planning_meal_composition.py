@@ -179,3 +179,26 @@ def test_meal_beam_plans_one_dish_slots_like_before():
 
     assert solution.status == "feasible", solution.validation.checks
     assert all(a.role_id is None for a in solution.assignments)
+
+
+def test_cp_sat_reaches_the_meal_beam_objective_and_proves_it():
+    from app.planning.meal_beam import MealBeamPlanner
+    from app.planning.meal_cp_sat import MealCpSatLimits, MealCpSatPlanner
+
+    for limit in (120, 70):
+        packet = problem()
+        packet.slots[0].max_time_minutes = limit
+        exact = MealCpSatPlanner(MealCpSatLimits(max_time_seconds=10, max_deterministic_time=10)).solve_exact(packet)
+        beam_loss = min(state.loss for state in MealBeamPlanner().search_candidates(packet).states)
+
+        assert exact.status == "optimal" and exact.solution.status == "feasible"
+        assert abs(exact.objective - beam_loss) < 0.005  # the same objective, in thousandths
+
+
+def test_cp_sat_proves_a_budget_no_plan_can_meet():
+    from app.planning.meal_cp_sat import MealCpSatLimits, MealCpSatPlanner
+
+    packet = problem(purchase_budget_sgd=1.0)  # the cheapest meal needs several S$1 packages
+    solution = MealCpSatPlanner(MealCpSatLimits(max_time_seconds=10, max_deterministic_time=10)).solve(packet)
+
+    assert solution.status == "infeasible" and not solution.assignments
