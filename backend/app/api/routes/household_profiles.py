@@ -9,6 +9,7 @@ from app.api.routes.auth import (
     CurrentHouseholdViewDependency,
 )
 from app.db.session import get_db_session
+from app.planning.capability import PlanningCapabilityError
 from app.planning.grocery_estimator import GroceryEstimator
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelectionError
@@ -77,6 +78,8 @@ def create_household_profile(
         return service.create(payload)
     except HouseholdProfileAlreadyExistsError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    except PlanningCapabilityError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
 
 
 @router.get("/current", response_model=HouseholdProfileResponse)
@@ -111,6 +114,8 @@ def update_household_profile(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
     except HouseholdProfileVersionConflictError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    except PlanningCapabilityError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
 
 
 @router.get("/{profile_id}/versions", response_model=HouseholdProfileVersionCollectionResponse)

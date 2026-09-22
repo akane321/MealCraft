@@ -4,6 +4,7 @@ from typing import Any
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.schemas.meal_plan import WeeklyMealPlanResponse
+from app.schemas.planning_v2 import MealComposition, PlanningMealRole
 from app.schemas.product import PricingMode
 from app.schemas.recommendation import (
     AvailableIngredientInput,
@@ -56,6 +57,8 @@ class HouseholdProfileWrite(BaseModel):
     max_sodium_mg_per_meal: float | None = Field(default=None, ge=100, le=5000)
     available_ingredients: list[AvailableIngredientInput] = Field(default_factory=list, max_length=100)
     pricing_mode: PricingMode = "fixture"
+    # Dish roles of every meal (ADR-0036); None is one dish a meal.
+    meal_composition: MealComposition | None = None
 
     @field_validator("name")
     @classmethod
@@ -88,6 +91,7 @@ class HouseholdProfileVersionResponse(BaseModel):
     max_sodium_mg_per_meal: float | None
     available_ingredients: list[AvailableIngredientInput]
     pricing_mode: PricingMode
+    meal_composition: list[PlanningMealRole] | None = None
     created_at: datetime
 
 
@@ -114,6 +118,7 @@ class HouseholdPlanningOverrides(BaseModel):
     max_sodium_mg_per_meal: float | None = Field(default=None, ge=100, le=5000)
     available_ingredients: list[AvailableIngredientInput] | None = Field(default=None, max_length=100)
     pricing_mode: PricingMode | None = None
+    meal_composition: MealComposition | None = None
 
 
 class HouseholdProfilePlanRequest(BaseModel):

@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     youtube_fixture_path: str = "data/fixtures/youtube-tutorials.json"
     youtube_api_key: SecretStr | None = None
     agent_parser_provider: Literal["fixture", "openai"] = "fixture"
+    # ADR-0036 section 6: "mvp" plans seven one-dish dinners and refuses anything
+    # else; "full" admits meal compositions. The Sprint 1 demonstration is mvp.
+    planning_capability: Literal["mvp", "full"] = "mvp"
     agent_max_history_messages: int = 20
     openai_api_key: SecretStr | None = None
     openai_model: str = "gpt-5.4-mini"
