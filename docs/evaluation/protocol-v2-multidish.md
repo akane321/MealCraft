@@ -35,7 +35,8 @@ An episode is a v2 held-out episode (`heldout-episode-v1`, see
 - **`scenario.recipe_candidate_slugs` is drawn by a script, not by the
   author.** `python -m app.evaluation.multidish_pool` samples 12 eligible
   recipes for every course the composition admits, from a seed derived from the
-  episode id. Its `--check` mode fails when a pool was edited. The
+  episode id, and adds any recipe the household asks for by name. Its `--check`
+  mode fails when a pool was edited. The
   pool deliberately contains dishes that break the episode's constraints, so
   that filtering is part of the task. An author who picks the pool knows the
   answer; a drawn pool does not.
@@ -44,12 +45,18 @@ The gold label is unchanged: class, hard constraints, pantry ground truth,
 conflict reason.
 
 The label follows the pool. The situation is written first, and the class is
-derived from the pool's facts. `python -m app.evaluation.multidish_labels`
-checks every feasible episode for at least one valid meal (one eligible dish
-per required role, distinct, within the time limit), and every infeasible one
-for none. A budget label is not covered by that check. **No episode states a nutrition target.** Release recipes carry
-no computed nutrition (`not_computed`), so a target could not be scored. This
-is a limitation of the protocol and is reported as one.
+proven from the pool's facts by `python -m app.evaluation.multidish_labels`,
+which runs no system under test:
+- **A feasible label needs a witness week.** That is seven valid meals meeting
+  every stated repetition request, bought whole-package within the budget.
+- **An infeasible label needs a proof.** One of:
+  - no valid meal exists;
+  - a requested dish is in no valid meal;
+  - no-repeats with too few dishes for a required role;
+  - a budget below a lower bound on any week's ingredient use, less the
+    pantry's worth.
+
+Anything else is unproven, and the episode is changed before it is accepted.
 
 ## 3. The answer
 
