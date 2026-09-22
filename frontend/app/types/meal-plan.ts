@@ -18,6 +18,10 @@ export interface WeeklyPlanDay {
   entry_id: number;
   day_index: number;
   planned_date: string;
+  /** One dish of one meal (ADR-0036); a one-dish plan is the dinner main at share 1. */
+  meal_type: string;
+  role_id: string;
+  portion_share: number;
   recipe: RecipeListItem;
   recommendation_score: number;
   nutrition_per_person: RecipeNutrition;

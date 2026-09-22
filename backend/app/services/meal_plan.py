@@ -223,6 +223,19 @@ class WeeklyMealPlanService:
         )
         return self._to_response(plan) if plan is not None else None
 
+    def update_meal_status(
+        self,
+        *,
+        plan_id: int,
+        day_index: int,
+        meal_type: str,
+        status: MealPlanEntryStatus,
+    ) -> WeeklyMealPlanResponse | None:
+        plan = self.repository.update_meal_status(
+            plan_id=plan_id, day_index=day_index, meal_type=meal_type, status=status
+        )
+        return self._to_response(plan) if plan is not None else None
+
     def dashboard(self, plan_id: int) -> WeeklyNutritionDashboardResponse | None:
         plan = self.repository.get(plan_id)
         if plan is None:

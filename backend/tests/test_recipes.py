@@ -480,6 +480,7 @@ def test_agent_confirms_replanning_and_updates_plan_revision(
     assert payload["session"]["replan_draft"] == {
         "event_type": None,
         "entry_id": None,
+        "day_index": None,
         "unavailable_ingredient": None,
         "reason": None,
     }

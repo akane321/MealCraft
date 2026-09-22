@@ -157,6 +157,33 @@ class MealPlanRepository:
 
         return self.get(plan_id)
 
+    def update_meal_status(
+        self,
+        *,
+        plan_id: int,
+        day_index: int,
+        meal_type: str,
+        status: MealPlanEntryStatus,
+    ) -> MealPlan | None:
+        """Mark every dish of one meal at once: the whole-meal shortcut of a per-dish check-in."""
+        if self.get(plan_id) is None:
+            return None
+        statement = select(MealPlanEntry).where(
+            MealPlanEntry.plan_id == plan_id,
+            MealPlanEntry.day_index == day_index,
+            MealPlanEntry.meal_type == meal_type,
+        )
+        entries = list(self.session.scalars(statement).all())
+        if not entries:
+            return None
+        now = datetime.now(UTC)
+        for entry in entries:
+            if entry.status != status:
+                entry.status = status
+                entry.consumed_at = now if status == "completed" else None
+        self.session.commit()
+        return self.get(plan_id)
+
     def create_replan_preview(
         self,
         *,

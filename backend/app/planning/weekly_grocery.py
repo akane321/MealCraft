@@ -32,8 +32,11 @@ class WeeklyGroceryAggregator:
         self,
         recipes: list[Recipe],
         constraints: WeeklyMealPlanRequest,
+        *,
+        shares: list[float] | None = None,
     ) -> WeeklyGroceryEstimateResponse:
-        ingredients = self._aggregate_ingredients(recipes, constraints.household_size)
+        """`shares` gives each recipe's portion share of its meal (ADR-0036); absent, every dish is a whole meal."""
+        ingredients = self._aggregate_ingredients(recipes, constraints.household_size, shares)
         # A copy that each deduction draws down, so an ingredient needed on two
         # lines (whole carrots and grams of carrot) cannot use the same pantry twice.
         pantry = {item.normalized_name: item.model_copy() for item in constraints.available_ingredients}
@@ -156,12 +159,15 @@ class WeeklyGroceryAggregator:
         )
 
     @staticmethod
-    def _aggregate_ingredients(recipes: list[Recipe], household_size: int) -> list[AggregatedIngredient]:
+    def _aggregate_ingredients(
+        recipes: list[Recipe], household_size: int, shares: list[float] | None = None
+    ) -> list[AggregatedIngredient]:
         # Keyed by ingredient and unit: lines whose units cannot be added (one whole
         # carrot and 64 g of carrot) stay separate lines rather than one unknown amount.
         aggregated: dict[tuple[str, str | None], AggregatedIngredient] = {}
-        for recipe in recipes:
-            scale = household_size / recipe.servings
+        for index, recipe in enumerate(recipes):
+            share = shares[index] if shares is not None else 1
+            scale = household_size / recipe.servings if share == 1 else household_size * share / recipe.servings
             for item in recipe.recipe_ingredients:
                 name = item.ingredient.normalized_name
                 quantity = float(item.quantity) * scale if item.quantity is not None else None

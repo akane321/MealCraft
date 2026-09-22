@@ -58,6 +58,7 @@ export interface AgentConstraintState {
 export interface AgentReplanDraft {
   event_type: MealPlanEventType | null;
   entry_id: number | null;
+  day_index: number | null;
   unavailable_ingredient: string | null;
   reason: string | null;
 }

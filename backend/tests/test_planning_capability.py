@@ -166,3 +166,64 @@ def test_full_capability_plans_and_stores_a_week_of_composed_dinners(composed_cl
     assert all(a != b for a, b in zip(mains, mains[1:], strict=False))  # two mains alternate
     salmon = next(d for d in days if d["recipe"]["slug"] == "salmon-bake")
     assert salmon["nutrition_per_person"]["calories_kcal"] == 300  # 500 kcal x 0.6
+
+
+def _composed_plan(client):
+    response = client.post(
+        "/api/plans/generate",
+        json={
+            "start_date": "2026-09-28",
+            "household_size": 4,
+            "max_cooking_time_minutes": 90,
+            "pricing_mode": "fixture",
+            "meal_composition": COMPOSITION,
+        },
+    )
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def test_a_whole_meal_is_checked_in_at_once_and_a_dish_on_its_own(composed_client):
+    plan = _composed_plan(composed_client)
+
+    whole = composed_client.patch(f"/api/plans/{plan['id']}/meals/1/dinner", json={"status": "completed"}).json()
+    day_one = [d for d in whole["days"] if d["day_index"] == 1]
+    assert len(day_one) == 3 and all(d["status"] == "completed" for d in day_one)
+
+    soup = next(d for d in whole["days"] if d["day_index"] == 2 and d["role_id"] == "soup")
+    single = composed_client.patch(f"/api/plans/{plan['id']}/entries/{soup['entry_id']}", json={"status": "skipped"})
+    day_two = {d["role_id"]: d["status"] for d in single.json()["days"] if d["day_index"] == 2}
+    assert day_two == {"main": "planned", "vegetable": "planned", "soup": "skipped"}
+
+
+def test_swapping_one_dish_keeps_its_role_share_and_the_rest_of_the_meal(composed_client):
+    plan = _composed_plan(composed_client)
+    vegetable = next(d for d in plan["days"] if d["day_index"] == 3 and d["role_id"] == "vegetable")
+
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/replan/preview",
+        json={"entry_id": vegetable["entry_id"], "event_type": "REPLACE_MEAL"},
+    )
+
+    assert preview.status_code == 201, preview.text
+    after = preview.json()["after_entry"]
+    assert after["role_id"] == "vegetable" and after["portion_share"] == 0.4
+    assert after["recipe_slug"] in {"broccoli-stirfry", "spinach-saute", "zucchini-salad"}
+    assert after["recipe_slug"] != vegetable["recipe"]["slug"]
+
+
+def test_the_agent_asks_which_dish_when_a_day_has_several(composed_client):
+    from app.agent.replanning import AgentReplanInterpreter
+    from app.schemas.agent import AgentReplanDraft
+    from app.schemas.meal_plan import WeeklyMealPlanResponse
+
+    plan = WeeklyMealPlanResponse.model_validate(_composed_plan(composed_client))
+    interpreter = AgentReplanInterpreter()
+
+    draft, questions = interpreter.parse("Replace day 2", plan=plan, current=AgentReplanDraft())
+    assert draft.entry_id is None and draft.day_index == 2
+    assert "which one" in questions[0]
+
+    draft, questions = interpreter.parse("the soup", plan=plan, current=draft)
+    soup = next(d for d in plan.days if d.day_index == 2 and d.role_id == "soup")
+    assert draft.entry_id == soup.entry_id and not questions

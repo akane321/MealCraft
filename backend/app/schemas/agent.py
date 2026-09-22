@@ -81,6 +81,8 @@ class AgentConstraintState(BaseModel):
 class AgentReplanDraft(BaseModel):
     event_type: MealPlanEventType | None = None
     entry_id: int | None = Field(default=None, gt=0)
+    # The day named so far, kept when that day holds several dishes and the dish is still to be asked.
+    day_index: int | None = Field(default=None, ge=1, le=7)
     unavailable_ingredient: str | None = None
     reason: str | None = None
 
