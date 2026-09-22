@@ -1,12 +1,15 @@
 """Project recipe details with explicit meal eligibility and nutrition basis."""
 
 from dataclasses import dataclass
+from typing import get_args
 
 from pydantic import ValidationError
 
 from app.planning.input_audit import nonfinite_issues
-from app.schemas.planning_v2 import MealType, PlanningRecipeCandidate
+from app.schemas.planning_v2 import DishCourse, MealType, PlanningRecipeCandidate
 from app.schemas.recipe import RecipeDetailResponse
+
+KNOWN_COURSES = (*get_args(DishCourse), "sauce_condiment", "drink")
 
 
 @dataclass(frozen=True)
@@ -45,7 +48,16 @@ def recipe_input(
         ],
         nutrients_per_serving=source.nutrition.model_dump(),
         cuisine=source.cuisine,
+        course=source.course if source.course in KNOWN_COURSES else None,
     )
+    if (
+        source.prep_time_minutes is not None
+        and source.cook_time_minutes is not None
+        and source.prep_time_minutes + source.cook_time_minutes == source.total_time_minutes
+    ):
+        # The product's time is prep + cook; passive time (chilling, marinating) is
+        # not cooking time, so the split carries none.
+        data.update(prep_minutes=source.prep_time_minutes, cook_minutes=source.cook_time_minutes, passive_minutes=0)
     blank = []
     if not source.slug.strip():
         blank.append("blank_recipe_id")

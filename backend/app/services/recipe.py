@@ -48,4 +48,8 @@ class RecipeService:
             steps=[
                 RecipeStepResponse(step_number=step.step_number, instruction=step.instruction) for step in recipe.steps
             ],
+            course=recipe.course,
+            meal_types=list(recipe.meal_types) if recipe.meal_types is not None else None,
+            prep_time_minutes=recipe.prep_time_minutes,
+            cook_time_minutes=recipe.cook_time_minutes,
         )
