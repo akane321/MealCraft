@@ -7,6 +7,7 @@ from app.planning.constraint_compiler import compile_search_domains
 from app.planning.diversity import diversity_loss, permits_extension
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
+from app.planning.meal_composition import require_one_dish_slots
 from app.planning.search_bounds import SearchBounds
 from app.schemas.planning_v2 import FinalPlanningProblem, FinalPlanningSolution, PlanningAssignment, PlanningTrace
 
@@ -54,6 +55,7 @@ class BeamPlanner(FinalScopeReferencePlanner):
 
     def search_candidates(self, problem: FinalPlanningProblem) -> BeamSearchResult:
         """Return retained complete assignments before selecting a shopping policy."""
+        require_one_dish_slots(problem)
         compiled = compile_search_domains(problem)
         domains = {slot.slot_id: slot for slot in compiled.slots}
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}

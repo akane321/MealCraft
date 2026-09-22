@@ -18,6 +18,7 @@ from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.grocery_estimator import not_purchased
+from app.planning.meal_composition import dish_servings
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
 from app.planning.recommendation_engine import CANDIDATE_LIMIT
@@ -359,10 +360,12 @@ def per_meal_budget_checks(problem, assignments, budget):
     """
     recipes = {r.recipe_id: r for r in problem.recipes}
     slots = {s.slot_id: s for s in problem.slots}
-    checks = []
-    for assignment in assignments:
+    servings = dish_servings(problem, assignments)
+    # A meal's dishes share one ceiling, reported once per slot in first-dish order.
+    meals: dict[str, list[tuple[int, int] | None]] = {}
+    for index, assignment in enumerate(assignments):
         recipe, slot = recipes.get(assignment.recipe_id), slots.get(assignment.slot_id)
-        if recipe is None or slot is None:
+        if recipe is None or slot is None or index not in servings:
             continue  # The core validator reports the invalid assignment.
         total_cents, missing = 0, False
         for item in recipe.ingredients:
@@ -374,16 +377,21 @@ def per_meal_budget_checks(problem, assignments, budget):
             if item.quantity is None or not products:
                 missing = True
                 continue
-            demand = Fraction(str(item.quantity)) * slot.servings / recipe.servings
+            demand = Fraction(str(item.quantity)) * servings[index] / recipe.servings
             total_cents += min(
                 round(demand * Fraction(str(p.price_sgd)) * 100 / Fraction(str(p.package_quantity))) for p in products
             )
+        meals.setdefault(assignment.slot_id, []).append((total_cents, missing))
+    checks = []
+    for slot_id, dishes in meals.items():
+        missing = any(dish_missing for _, dish_missing in dishes)
+        total_cents = sum(cents for cents, _ in dishes)
         status = "indeterminate" if missing else "passed" if total_cents <= Fraction(str(budget)) * 100 else "failed"
         checks.append(
             PlanningConstraintCheck(
                 code="per_meal_budget",
                 status=status,
-                scope_id=assignment.slot_id,
+                scope_id=slot_id,
                 detail="Recomputed ingredient-use cost without pantry deduction.",
             )
         )
