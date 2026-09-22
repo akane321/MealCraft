@@ -14,6 +14,7 @@ from math import isfinite
 from app.data.allergens import checked_allergens
 from app.data.units import UNIT_BASE
 from app.planning.beam_planner import BeamLimits, BeamPlanner
+from app.planning.capability import PlanningCapabilityError, require_composition_enabled
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
@@ -100,6 +101,15 @@ class ProductPlanningEngine:
             "policy_version": "product-fixed-shopping-v1",
             "validation": None,
         }
+        composition = getattr(constraints, "meal_composition", None)
+        try:
+            require_composition_enabled(composition)
+        except PlanningCapabilityError as error:
+            raise ProductPlanningError("needs_clarification", str(error), trace) from error
+        if composition is not None:
+            raise ProductPlanningError(
+                "needs_data", "Meals of several dishes are not yet planned by the product path.", trace
+            )
         for budget in (constraints.weekly_budget_sgd, constraints.budget_per_meal_sgd):
             if budget is not None and (Fraction(str(budget)) * 100).denominator != 1:
                 raise ProductPlanningError("needs_clarification", "Enter a budget in whole cents and try again.", trace)

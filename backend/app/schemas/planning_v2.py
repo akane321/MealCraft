@@ -1,7 +1,7 @@
 from datetime import date
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
 MealType = Literal["breakfast", "lunch", "dinner", "snack"]
 NutrientMetric = Literal[
@@ -45,6 +45,21 @@ class PlanningMealRole(BaseModel):
     required: bool = True
 
 
+def _composition_roles(roles: list[PlanningMealRole]) -> list[PlanningMealRole]:
+    role_ids = [role.role_id for role in roles]
+    if len(role_ids) != len(set(role_ids)):
+        raise ValueError("meal role IDs must be unique within a composition")
+    if not any(role.required for role in roles):
+        raise ValueError("a meal composition needs at least one required role")
+    return roles
+
+
+# A household's dish roles for a meal, as a profile or a request states them.
+MealComposition = Annotated[
+    list[PlanningMealRole], Field(min_length=1, max_length=4), AfterValidator(_composition_roles)
+]
+
+
 class PlanningSlot(BaseModel):
     slot_id: str = Field(min_length=1, max_length=80)
     planned_date: date
@@ -62,11 +77,7 @@ class PlanningSlot(BaseModel):
     @model_validator(mode="after")
     def validate_composition(self) -> "PlanningSlot":
         if self.composition is not None:
-            role_ids = [role.role_id for role in self.composition]
-            if len(role_ids) != len(set(role_ids)):
-                raise ValueError("meal role IDs must be unique within a slot")
-            if not any(role.required for role in self.composition):
-                raise ValueError("a meal composition needs at least one required role")
+            _composition_roles(self.composition)
             if self.locked_recipe_id is not None:
                 raise ValueError("lock a dish role, not a multi-dish slot, once role locks exist")
         return self

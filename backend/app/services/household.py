@@ -1,4 +1,5 @@
 from app.models.household import HouseholdProfile, HouseholdProfileVersion
+from app.planning.capability import require_composition_enabled
 from app.repositories.household import HouseholdProfileRepository, HouseholdProfileVersionConflictError
 from app.repositories.meal_plan import MealPlanRepository
 from app.schemas.household import (
@@ -41,6 +42,7 @@ class HouseholdProfileService:
         self.meal_plan_service = meal_plan_service
 
     def create(self, payload: HouseholdProfileWrite) -> HouseholdProfileResponse:
+        require_composition_enabled(payload.meal_composition)
         if self.repository.get_current() is not None:
             raise HouseholdProfileAlreadyExistsError(
                 "The MVP supports one household profile; update the existing profile."
@@ -59,6 +61,7 @@ class HouseholdProfileService:
     def update(self, profile_id: int, payload: HouseholdProfileUpdate) -> HouseholdProfileResponse:
         profile = self._require_profile(profile_id)
         write_payload = HouseholdProfileWrite.model_validate(payload.model_dump(exclude={"expected_version"}))
+        require_composition_enabled(write_payload.meal_composition)
         try:
             updated = self.repository.update(
                 profile,
@@ -175,6 +178,7 @@ class HouseholdProfileService:
             ),
             available_ingredients=version.available_ingredients,
             pricing_mode=version.pricing_mode,
+            meal_composition=version.meal_composition,
             created_at=version.created_at,
         )
 
@@ -202,6 +206,7 @@ class HouseholdProfileService:
             ),
             "available_ingredients": version.available_ingredients,
             "pricing_mode": version.pricing_mode,
+            "meal_composition": version.meal_composition,
         }
         for field in request.overrides.model_fields_set:
             override = getattr(request.overrides, field)
@@ -223,6 +228,7 @@ class HouseholdProfileService:
             "max_sodium_mg_per_meal": "Sodium target",
             "available_ingredients": "Available ingredients",
             "pricing_mode": "Pricing source",
+            "meal_composition": "Dishes per meal",
         }
         return [
             ProfileConstraintChange(field=labels[key], before=before.get(key), after=after.get(key))

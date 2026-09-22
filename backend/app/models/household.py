@@ -101,6 +101,8 @@ class HouseholdProfileVersion(Base):
     max_sodium_mg_per_meal: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
     available_ingredients: Mapped[list[dict]] = mapped_column(JSON)
     pricing_mode: Mapped[str] = mapped_column(String(20))
+    # Dish roles of a meal (ADR-0036 section 1); NULL is one dish a meal.
+    meal_composition: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     profile: Mapped[HouseholdProfile] = relationship(back_populates="versions")

@@ -113,4 +113,9 @@ class HouseholdProfileRepository:
             ),
             available_ingredients=[item.model_dump(mode="json") for item in payload.available_ingredients],
             pricing_mode=payload.pricing_mode,
+            meal_composition=(
+                [role.model_dump(mode="json") for role in payload.meal_composition]
+                if payload.meal_composition is not None
+                else None
+            ),
         )

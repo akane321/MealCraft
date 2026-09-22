@@ -90,7 +90,8 @@ class MealPlan(Base):
     entries: Mapped[list["MealPlanEntry"]] = relationship(
         back_populates="plan",
         cascade="all, delete-orphan",
-        order_by="MealPlanEntry.day_index",
+        # Within a day, dishes keep the order they were planned in.
+        order_by="[MealPlanEntry.day_index, MealPlanEntry.id]",
     )
     grocery_items: Mapped[list["MealPlanGroceryItem"]] = relationship(
         back_populates="plan",
@@ -120,7 +121,11 @@ class MealPlanEntry(Base):
             "OR (status IN ('planned', 'skipped') AND consumed_at IS NULL)",
             name="meal_plan_entries_consumed_at_consistent",
         ),
-        UniqueConstraint("plan_id", "day_index", name="meal_plan_entries_plan_day_key"),
+        CheckConstraint(
+            "meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')", name="meal_plan_entries_meal_type_valid"
+        ),
+        CheckConstraint("portion_share > 0 AND portion_share <= 1", name="meal_plan_entries_portion_share_valid"),
+        UniqueConstraint("plan_id", "day_index", "meal_type", "role_id", name="meal_plan_entries_plan_dish_key"),
         Index("meal_plan_entries_plan_id_idx", "plan_id"),
         Index("meal_plan_entries_recipe_id_idx", "recipe_id"),
     )
@@ -130,6 +135,11 @@ class MealPlanEntry(Base):
     recipe_id: Mapped[int] = mapped_column(BIGINT_ID, ForeignKey("recipes.id", ondelete="RESTRICT"))
     day_index: Mapped[int] = mapped_column(Integer)
     planned_date: Mapped[date] = mapped_column(Date)
+    # One dish of one meal (ADR-0036). Nutrition and costs below are this dish as
+    # eaten: per person at its portion share, and the household's scaled amount.
+    meal_type: Mapped[str] = mapped_column(String(20), default="dinner", server_default="dinner")
+    role_id: Mapped[str] = mapped_column(String(40), default="main", server_default="main")
+    portion_share: Mapped[Decimal] = mapped_column(Numeric(4, 3), default=Decimal(1), server_default="1")
     recommendation_score: Mapped[Decimal] = mapped_column(Numeric(5, 1))
     consumed_cost_sgd: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     purchase_cost_sgd: Mapped[Decimal] = mapped_column(Numeric(10, 2))
