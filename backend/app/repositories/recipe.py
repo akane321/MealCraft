@@ -44,8 +44,11 @@ class RecipeRepository:
         )
         return list(self.session.scalars(statement).unique().all())
 
-    def list_for_planning(self) -> list[Recipe]:
-        """Meal candidates the planner can price: release recipes with an unmatchable ingredient are left out."""
+    def list_for_planning(self, *, courses: list[str] | None = None) -> list[Recipe]:
+        """Meal candidates the planner can price: release recipes with an unmatchable ingredient are left out.
+
+        `courses` widens the pool beyond mains and soups for a composed meal's roles (ADR-0036).
+        """
         unmatchable_line = (
             select(RecipeIngredient.id)
             .join(Ingredient)
@@ -56,7 +59,7 @@ class RecipeRepository:
         )
         statement = (
             self._with_ingredients()
-            .where(or_(Recipe.course.is_(None), Recipe.course.in_(MEAL_COURSES)))
+            .where(or_(Recipe.course.is_(None), Recipe.course.in_(courses or MEAL_COURSES)))
             .where(or_(Recipe.release_version.is_(None), ~exists(unmatchable_line)))
             .order_by(Recipe.id)
         )

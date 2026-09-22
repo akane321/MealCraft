@@ -1,4 +1,7 @@
+from dataclasses import dataclass
 from datetime import UTC, date, datetime
+from decimal import Decimal
+from fractions import Fraction
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -19,6 +22,18 @@ class MealPlanRevisionConflictError(RuntimeError):
     pass
 
 
+@dataclass(frozen=True)
+class ScheduledDish:
+    """One dish of one meal, cooked for the household at `portion_share` (ADR-0036)."""
+
+    planned_date: date
+    day_index: int
+    meal_type: str
+    role_id: str
+    portion_share: Fraction | int
+    recommendation: RecipeRecommendationResponse
+
+
 class MealPlanRepository:
     def __init__(self, session: Session, *, household_id: int) -> None:
         self.session = session
@@ -28,7 +43,7 @@ class MealPlanRepository:
         self,
         *,
         constraints: WeeklyMealPlanRequest,
-        scheduled: list[tuple[date, RecipeRecommendationResponse]],
+        scheduled: list["ScheduledDish"],
         grocery: WeeklyGroceryEstimateResponse,
         warnings: list[str],
         household_profile_id: int | None = None,
@@ -39,7 +54,7 @@ class MealPlanRepository:
         plan = MealPlan(
             household_id=self.household_id,
             start_date=constraints.start_date,
-            end_date=scheduled[-1][0],
+            end_date=max(dish.planned_date for dish in scheduled),
             day_count=constraints.day_count,
             household_size=constraints.household_size,
             pricing_mode=constraints.pricing_mode,
@@ -54,23 +69,33 @@ class MealPlanRepository:
             household_profile_version=household_profile_version,
             replaces_plan_id=replaces_plan_id,
         )
-        for day_index, (planned_date, recommendation) in enumerate(scheduled, start=1):
+        for dish in scheduled:
+            recommendation = dish.recommendation
             estimate = recommendation.grocery_estimate
             nutrition = recommendation.recipe.nutrition
+            share = dish.portion_share
+
+            def scaled(value, share=share):
+                # A whole-meal dish keeps the source value exactly.
+                return value if share == 1 else round(float(Fraction(str(value)) * share), 2)
+
             plan.entries.append(
                 MealPlanEntry(
                     recipe_id=recommendation.recipe.id,
-                    day_index=day_index,
-                    planned_date=planned_date,
+                    day_index=dish.day_index,
+                    planned_date=dish.planned_date,
+                    meal_type=dish.meal_type,
+                    role_id=dish.role_id,
+                    portion_share=Decimal(str(round(float(share), 3))),
                     recommendation_score=recommendation.total_score,
-                    consumed_cost_sgd=estimate.consumed_total_sgd if estimate else 0,
-                    purchase_cost_sgd=estimate.purchase_total_sgd if estimate else 0,
-                    calories_kcal=nutrition.calories_kcal,
-                    protein_g=nutrition.protein_g,
-                    carbohydrate_g=nutrition.carbohydrate_g,
-                    fat_g=nutrition.fat_g,
-                    sodium_mg=nutrition.sodium_mg,
-                    sugar_g=nutrition.sugar_g,
+                    consumed_cost_sgd=scaled(estimate.consumed_total_sgd) if estimate else 0,
+                    purchase_cost_sgd=scaled(estimate.purchase_total_sgd) if estimate else 0,
+                    calories_kcal=scaled(nutrition.calories_kcal),
+                    protein_g=scaled(nutrition.protein_g),
+                    carbohydrate_g=scaled(nutrition.carbohydrate_g),
+                    fat_g=scaled(nutrition.fat_g),
+                    sodium_mg=scaled(nutrition.sodium_mg),
+                    sugar_g=scaled(nutrition.sugar_g),
                 )
             )
 

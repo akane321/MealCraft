@@ -57,3 +57,112 @@ def test_a_composition_needs_unique_roles_and_one_required_dish(recipe_client: T
             "/api/plans/generate", json={"household_size": 2, "meal_composition": composition}
         )
         assert response.status_code == 422
+
+
+def _dish(slug, course, ingredient, grams, *, calories, prep=10, cook=15):
+    from decimal import Decimal
+
+    from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
+
+    return Recipe(
+        slug=slug,
+        title=slug.replace("-", " ").title(),
+        description="Synthetic",
+        cuisine="test",
+        meal_type=course,
+        course=course,
+        meal_types=["dinner"],
+        servings=4,
+        prep_time_minutes=prep,
+        cook_time_minutes=cook,
+        dietary_tags=[],
+        nutrition=RecipeNutrition(
+            calories_kcal=Decimal(calories),
+            protein_g=Decimal("10"),
+            carbohydrate_g=Decimal("10"),
+            fat_g=Decimal("5"),
+            sodium_mg=Decimal("300"),
+            sugar_g=Decimal("2"),
+        ),
+        recipe_ingredients=[
+            RecipeIngredient(
+                ingredient=Ingredient(normalized_name=ingredient, display_name=ingredient),
+                quantity=Decimal(grams),
+                unit="g",
+                sort_order=1,
+            )
+        ],
+        steps=[RecipeStep(step_number=1, instruction="Cook.")],
+    )
+
+
+@pytest.fixture
+def composed_client(monkeypatch):
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.pool import StaticPool
+
+    from app.db.base import Base
+    from app.db.session import get_db_session
+    from app.main import app
+
+    monkeypatch.setattr(get_settings(), "planning_capability", "full")
+    engine = create_engine("sqlite+pysqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    Base.metadata.create_all(engine)
+    with factory() as session:
+        session.add_all(
+            [
+                _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
+                _dish("chicken-roast", "main", "chicken_breast", 400, calories=450),
+                _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
+                _dish("spinach-saute", "side", "baby_spinach", 200, calories=80),
+                _dish("zucchini-salad", "salad", "zucchini", 300, calories=60),
+                _dish("tomato-soup", "soup", "tomato", 500, calories=150, cook=25),
+            ]
+        )
+        session.commit()
+
+    def database():
+        with factory() as session:
+            yield session
+
+    app.dependency_overrides[get_db_session] = database
+    with TestClient(app) as client:
+        registered = client.post(
+            "/api/auth/register",
+            json={"email": "cook@example.test", "password": "correct horse battery staple", "display_name": "Cook"},
+        )
+        client.headers.update({"X-CSRF-Token": registered.json()["csrf_token"]})
+        yield client
+    app.dependency_overrides.clear()
+    Base.metadata.drop_all(engine)
+
+
+def test_full_capability_plans_and_stores_a_week_of_composed_dinners(composed_client):
+    response = composed_client.post(
+        "/api/plans/generate",
+        json={
+            "start_date": "2026-09-28",
+            "household_size": 4,
+            "max_cooking_time_minutes": 90,
+            "pricing_mode": "fixture",
+            "meal_composition": COMPOSITION,
+        },
+    )
+
+    assert response.status_code == 201, response.text
+    days = response.json()["days"]
+    by_day: dict[int, dict[str, dict]] = {}
+    for dish in days:
+        by_day.setdefault(dish["day_index"], {})[dish["role_id"]] = dish
+    assert sorted(by_day) == list(range(1, 8))
+    for meal in by_day.values():
+        assert {"main", "vegetable", "soup"} == set(meal)  # the optional soup fits 90 minutes
+        # Three dishes: the main is 0.6 of a meal, the others 0.4 (ADR-0036 section 2).
+        assert meal["main"]["portion_share"] == 0.6 and meal["soup"]["portion_share"] == 0.4
+        assert meal["main"]["recipe"]["slug"] in {"salmon-bake", "chicken-roast"}
+    mains = [by_day[day]["main"]["recipe"]["slug"] for day in range(1, 8)]
+    assert all(a != b for a, b in zip(mains, mains[1:], strict=False))  # two mains alternate
+    salmon = next(d for d in days if d["recipe"]["slug"] == "salmon-bake")
+    assert salmon["nutrition_per_person"]["calories_kcal"] == 300  # 500 kcal x 0.6
