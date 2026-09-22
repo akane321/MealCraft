@@ -30,7 +30,7 @@ An episode is a v2 held-out episode (`heldout-episode-v1`, see
   at package grams. Only recipes whose every ingredient can be priced are
   eligible.
 - **`scenario.recipe_candidate_slugs` is drawn by a script, not by the
-  author.** `scripts/multidish_candidates.py` samples a fixed number of eligible
+  author.** A script samples a fixed number of eligible
   recipes for every course the composition admits, from a seed per episode. The
   pool deliberately contains dishes that break the episode's constraints, so
   that filtering is part of the task. An author who picks the pool knows the

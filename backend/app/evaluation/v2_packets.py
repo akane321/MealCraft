@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_serializer
 
 from app.core.paths import repository_root
 
@@ -31,8 +31,16 @@ class PacketHouseholdProfile(StrictModel):
     allergens: list[str] = Field(default_factory=list)
     excluded_ingredients: list[str] = Field(default_factory=list)
     dietary_preferences: list[str] = Field(default_factory=list)
-    # The dish roles of every meal (protocol v2-multidish); None is one dish a meal.
+    # The dish roles of every meal (protocol v2-multidish); None is one dish a meal,
+    # and is left out of the dump so one-dish packets keep their committed digests.
     meal_composition: list[dict] | None = None
+
+    @model_serializer(mode="wrap")
+    def _omit_absent_composition(self, handler):
+        data = handler(self)
+        if data.get("meal_composition") is None:
+            data.pop("meal_composition", None)
+        return data
 
 
 class PacketPantryItem(StrictModel):
