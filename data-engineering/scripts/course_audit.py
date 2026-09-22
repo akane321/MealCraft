@@ -51,7 +51,9 @@ def draw() -> None:
                     "course_evidence": record["enrichment"].get("evidence", {}).get("course"),
                     "course_confidence": record["enrichment"].get("confidence", {}).get("course"),
                     "ingredients": [line["original_text"] for line in record["ingredients"]],
-                    "instructions": [step["text"] if isinstance(step, dict) else step for step in record["instructions"]],
+                    "instructions": [
+                        step["text"] if isinstance(step, dict) else step for step in record["instructions"]
+                    ],
                 }
             )
     SAMPLE.parent.mkdir(parents=True, exist_ok=True)
