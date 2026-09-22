@@ -94,6 +94,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             per_role.append(options)
         by_id = {r.recipe_id: r for r in recipes}
         meals = []
+        spread: dict[tuple, int] = {}
         for combination in product(*per_role):
             dishes = tuple(dish for dish in combination if dish is not None)
             if not dishes or not meal_permitted(problem, slot, dishes, by_id):
@@ -104,7 +105,10 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 for role, recipe_id in dishes
             ) + EMPTY_OPTIONAL_ROLE_LOSS * combination.count(None)
             meals.append(MealOption(dishes, loss))
-        meals.sort(key=lambda meal: (meal.loss, meal.dishes))
+            # Each dish's rank within its role; their sum spreads tied meals across every role's
+            # choices, where ordering ties by id kept 64 meals sharing one main.
+            spread[dishes] = sum(options.index(dish) for options, dish in zip(per_role, combination, strict=True))
+        meals.sort(key=lambda meal: (meal.loss, spread[meal.dishes], meal.dishes))
         return meals[: self.limits.meal_options_per_slot]
 
     def _dish_loss(self, problem: FinalPlanningProblem, slot: PlanningSlot, recipe: PlanningRecipeCandidate) -> float:

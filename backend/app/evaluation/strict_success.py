@@ -610,9 +610,13 @@ def _check_shopping(
             for line in lines.get(name, [])
             if line.product_id is not None and line.product_id in catalogs.products
         ]
-        if not bought:
-            continue
         remaining = max(quantity - deducted(name), 0.0)
+        if not bought:
+            # Demand left after the pantry with nothing bought for it is a plan the
+            # household cannot cook. This used to pass silently.
+            if name in lines and remaining > tolerances.quantity_relative * max(quantity, 1.0):
+                short.append(f"{name}: nothing bought for {remaining:g} {unit} still needed")
+            continue
         amounts = [
             compatible(float(product["package_size"]) * line.packages, product["package_unit"], unit)
             for line, product in bought

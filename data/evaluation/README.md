@@ -7,6 +7,7 @@ generalisation performance.
 |---|---|---|---|
 | `dev/planning-v1.json` | v1 | May be inspected and used while developing | CI quality gate and regression detection |
 | `heldout/planning-v1.json` | v1 | Do not tune planner weights or thresholds against its results | Baseline comparison and category reporting |
+| `dev/v2-multidish/episodes/` | v2-multidish | May be inspected and used while developing | Ten multi-dish developer episodes ([protocol](../../docs/evaluation/protocol-v2-multidish.md)); pools drawn by `python -m app.evaluation.multidish_pool`, labels checked by `python -m app.evaluation.multidish_labels` |
 | `dev/planning-catalog-v2.1.json` | catalog-v2.1 | May be inspected and used while developing | The v1 developer scenarios relabelled for the larger catalog, plus 13 written for it (`dev/planning-catalog-v2.1-new.json`) |
 | `heldout/planning-catalog-v2.1.json` | catalog-v2.1 | Do not tune against its results | The v1 held-out scenarios relabelled for the larger catalog, plus 20 drafted in a sealed packet and owner-reviewed (`heldout/planning-catalog-v2.1-new.json`, with `.provenance.json` and `.review.json`) |
 | `agent/fixture-v1.json` | v1 | May be extended, but existing expected values are immutable | Offline constraint extraction and clarification benchmark |
