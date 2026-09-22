@@ -7,6 +7,7 @@ from app.planning.diversity import diversity_loss, permits_extension
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.input_audit import require_finite_problem
+from app.planning.meal_composition import dish_servings, require_one_dish_slots
 from app.schemas.planning_v2 import (
     FinalPlanningProblem,
     FinalPlanningSolution,
@@ -27,6 +28,7 @@ class FinalScopeReferencePlanner:
 
     def solve(self, problem: FinalPlanningProblem) -> FinalPlanningSolution:
         require_finite_problem(problem)
+        require_one_dish_slots(problem)
         assignments = self._assign(problem)
         shopping = self._build_shopping(problem, assignments)
         validation = self.validator.validate(problem, assignments, shopping)
@@ -116,10 +118,13 @@ class FinalScopeReferencePlanner:
         slots = {slot.slot_id: slot for slot in problem.slots}
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
         quantities: dict[tuple[str, str | None], float | None] = {}
-        for assignment in assignments:
+        servings = dish_servings(problem, assignments)
+        for index, assignment in enumerate(assignments):
             slot = slots[assignment.slot_id]
             recipe = recipes[assignment.recipe_id]
-            scale = slot.servings / recipe.servings
+            # A whole-meal dish keeps the exact float arithmetic of one dish per slot.
+            share = servings.get(index, slot.servings)
+            scale = slot.servings / recipe.servings if share == slot.servings else float(share) / recipe.servings
             for item in recipe.ingredients:
                 key = (item.ingredient_id, item.unit)
                 quantity = item.quantity * scale if item.quantity is not None else None

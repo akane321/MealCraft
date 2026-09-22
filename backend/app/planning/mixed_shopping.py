@@ -8,6 +8,7 @@ from math import isfinite
 from app.planning.diversity_validation import diversity_checks
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.input_audit import nonfinite_issues
+from app.planning.meal_composition import dish_servings
 from app.planning.package_optimizer import PackageResult, optimize_packages
 from app.planning.package_validator import validate_packages
 from app.schemas.planning_v2 import FinalPlanningProblem, PlanningAssignment
@@ -40,19 +41,21 @@ def assignment_issues(problem: FinalPlanningProblem, assignments: list[PlanningA
     validator = FinalPlanningValidator()
     slots = {s.slot_id: s for s in problem.slots}
     recipes = {r.recipe_id: r for r in problem.recipes}
-    selected = {}
     issues = set()
-    for a in assignments:
-        if a.slot_id not in slots or a.recipe_id not in recipes:
-            issues.add("unknown_assignment")
-            continue
-        if a.slot_id in selected:
-            issues.add("duplicate_assignment")
-        selected[a.slot_id] = a
-        issues.update(c.code for c in validator._slot_checks(problem, a.slot_id, a.recipe_id) if c.hard)
-    for s in problem.slots:
-        if (s.required or s.locked_recipe_id is not None) and s.slot_id not in selected:
-            issues.add("missing_assignment")
+    if any(a.slot_id not in slots or a.recipe_id not in recipes for a in assignments):
+        issues.add("unknown_assignment")
+    checks, selected = validator.assignment_checks(
+        problem, [a for a in assignments if a.slot_id in slots and a.recipe_id in recipes]
+    )
+    renamed = {"required_slot": "missing_assignment", "locked_slot": "missing_assignment"}
+    for check in checks:
+        if check.hard and check.status != "passed":
+            if check.status == "indeterminate":
+                issues.add(f"needs_data:{check.code}")
+            elif check.code == "locked_slot" and check.detail == "Locked assignment was changed.":
+                issues.add("locked_slot")
+            else:
+                issues.add(renamed.get(check.code, check.code))
     issues.update(c.code for c in validator._nutrition_checks(problem, selected) if c.hard and c.status != "passed")
     issues.update(
         f"needs_data:{c.code}" if c.status == "indeterminate" else c.code
@@ -77,14 +80,14 @@ def derive_mixed_demands(problem: FinalPlanningProblem, assignments: list[Planni
     if issues:
         return (), issues
     recipes = {r.recipe_id: r for r in problem.recipes}
-    slots = {s.slot_id: s for s in problem.slots}
+    servings = dish_servings(problem, assignments)
     amounts = defaultdict(Fraction)
-    for a in assignments:
-        recipe, slot = recipes[a.recipe_id], slots[a.slot_id]
+    for index, a in enumerate(assignments):
+        recipe = recipes[a.recipe_id]
         for item in recipe.ingredients:
             if item.quantity is None or not isfinite(item.quantity) or item.quantity <= 0 or not item.unit:
                 return (), ("demand_unknown",)
-            amounts[item.ingredient_id, item.unit] += Fraction(str(item.quantity)) * slot.servings / recipe.servings
+            amounts[item.ingredient_id, item.unit] += Fraction(str(item.quantity)) * servings[index] / recipe.servings
     demands = []
     for (ingredient, unit), required in sorted(amounts.items()):
         stocks = [p for p in problem.pantry if p.ingredient_id == ingredient]
@@ -168,15 +171,13 @@ def validate_mixed_shopping(
     if errors:
         return tuple(sorted(errors))
     expected = defaultdict(Fraction)
-    for slot in problem.slots:
-        selected = next((a for a in assignments if a.slot_id == slot.slot_id), None)
-        if selected is None:
-            continue
+    servings = dish_servings(problem, assignments)
+    for index, selected in enumerate(assignments):
         recipe = next(r for r in problem.recipes if r.recipe_id == selected.recipe_id)
         for item in recipe.ingredients:
             if item.quantity is None or not isfinite(item.quantity) or item.quantity <= 0 or not item.unit:
                 return ("demand_unknown",)
-            expected[item.ingredient_id, item.unit] += Fraction(str(item.quantity)) / recipe.servings * slot.servings
+            expected[item.ingredient_id, item.unit] += Fraction(str(item.quantity)) / recipe.servings * servings[index]
     submitted = defaultdict(list)
     for line in result.lines:
         submitted[line.ingredient_id, line.unit].append(line)

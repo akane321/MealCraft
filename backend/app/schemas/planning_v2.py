@@ -12,7 +12,11 @@ NutrientMetric = Literal[
     "sodium_mg",
     "sugar_g",
 ]
-NutritionScope = Literal["per_slot", "per_day", "horizon_average"]
+# per_slot is the whole meal a slot holds: the sum of its dishes, each at its
+# portion share (ADR-0036 section 4). per_dish is one dish's own serving.
+NutritionScope = Literal["per_dish", "per_slot", "per_day", "horizon_average"]
+# Released course labels a meal role may admit (ADR-0036 section 1).
+DishCourse = Literal["main", "side", "salad", "soup", "breakfast", "dessert", "snack_appetizer", "baked_good"]
 CheckStatus = Literal["passed", "failed", "indeterminate"]
 PlanningStatus = Literal[
     "feasible",
@@ -32,14 +36,40 @@ class PlanningNutrients(BaseModel):
     sugar_g: float = Field(ge=0)
 
 
+class PlanningMealRole(BaseModel):
+    """One dish position in a meal, filled by a recipe of one of its courses."""
+
+    model_config = ConfigDict(extra="forbid")
+    role_id: str = Field(min_length=1, max_length=40)
+    courses: list[DishCourse] = Field(min_length=1)
+    required: bool = True
+
+
 class PlanningSlot(BaseModel):
     slot_id: str = Field(min_length=1, max_length=80)
     planned_date: date
     meal_type: MealType
     servings: int = Field(ge=1, le=24)
+    # The whole meal's time; for several dishes, the estimate of ADR-0036 section 3.
     max_time_minutes: int | None = Field(default=None, ge=5, le=360)
+    # Only when the user says the limit applies to each dish.
+    max_dish_time_minutes: int | None = Field(default=None, ge=5, le=360)
     required: bool = True
     locked_recipe_id: str | None = Field(default=None, max_length=120)
+    # None is one dish per meal, as before. Role `main` takes the main share.
+    composition: list[PlanningMealRole] | None = Field(default=None, min_length=1, max_length=4)
+
+    @model_validator(mode="after")
+    def validate_composition(self) -> "PlanningSlot":
+        if self.composition is not None:
+            role_ids = [role.role_id for role in self.composition]
+            if len(role_ids) != len(set(role_ids)):
+                raise ValueError("meal role IDs must be unique within a slot")
+            if not any(role.required for role in self.composition):
+                raise ValueError("a meal composition needs at least one required role")
+            if self.locked_recipe_id is not None:
+                raise ValueError("lock a dish role, not a multi-dish slot, once role locks exist")
+        return self
 
 
 class PlanningIngredientRequirement(BaseModel):
@@ -67,6 +97,22 @@ class PlanningRecipeCandidate(BaseModel):
     ingredients: list[PlanningIngredientRequirement] = Field(min_length=1)
     nutrients_per_serving: PlanningNutrients
     cuisine: str | None = Field(default=None, max_length=120)
+    course: DishCourse | Literal["sauce_condiment", "drink"] | None = None
+    # The split of total_time_minutes a multi-dish meal estimate needs; absent,
+    # the whole time is treated as hands-on, the conservative reading.
+    prep_minutes: int | None = Field(default=None, ge=0, le=720)
+    cook_minutes: int | None = Field(default=None, ge=0, le=720)
+    passive_minutes: int | None = Field(default=None, ge=0, le=720)
+
+    @model_validator(mode="after")
+    def validate_time_split(self) -> "PlanningRecipeCandidate":
+        parts = (self.prep_minutes, self.cook_minutes, self.passive_minutes)
+        if any(part is not None for part in parts):
+            if any(part is None for part in parts):
+                raise ValueError("prep, cook and passive minutes are given together or not at all")
+            if sum(parts) != self.total_time_minutes:
+                raise ValueError("prep, cook and passive minutes must sum to total_time_minutes")
+        return self
 
 
 class PlanningPantryItem(BaseModel):
@@ -146,6 +192,35 @@ class PlanningDiversityPolicy(BaseModel):
     overlap_reward_weight: float = Field(default=0.15, ge=0, le=1, allow_inf_nan=False)
 
 
+class PlanningCompositionPolicy(BaseModel):
+    """Portion shares and the meal-time estimate of ADR-0036 sections 2 and 3.
+
+    Controlled parameters: recorded with the packet, tuned on developer data only.
+    Index i holds the share for a meal of i + 1 dishes.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    schema_version: Literal["planning-composition-v1"] = "planning-composition-v1"
+    main_shares: list[float] = Field(default=[1.0, 0.75, 0.6, 0.5], min_length=1, max_length=4)
+    other_shares: list[float | None] = Field(default=[None, 0.5, 0.4, 0.35], min_length=1, max_length=4)
+    hands_on_cook_fraction: float = Field(default=0.5, ge=0, le=1, allow_inf_nan=False)
+    switch_minutes: int = Field(default=5, ge=0, le=60)
+    round_to_minutes: int = Field(default=5, ge=1, le=15)
+
+    @model_validator(mode="after")
+    def validate_shares(self) -> "PlanningCompositionPolicy":
+        if len(self.main_shares) != len(self.other_shares):
+            raise ValueError("main and other shares cover the same meal sizes")
+        if self.main_shares[0] != 1.0 or self.other_shares[0] is not None:
+            raise ValueError("a one-dish meal is the whole meal")
+        for share in [*self.main_shares, *(s for s in self.other_shares[1:] if s is not None)]:
+            if not 0 < share <= 1:
+                raise ValueError("portion shares lie in (0, 1]")
+        if any(share is None for share in self.other_shares[1:]):
+            raise ValueError("every multi-dish size needs an other-dish share")
+        return self
+
+
 class FinalPlanningProblem(BaseModel):
     problem_id: str = Field(min_length=1, max_length=120)
     slots: list[PlanningSlot] = Field(min_length=1, max_length=84)
@@ -166,6 +241,7 @@ class FinalPlanningProblem(BaseModel):
     preference_weights: PlanningPreferenceWeights = Field(default_factory=PlanningPreferenceWeights)
     # None preserves legacy packets; it does not certify P3 diversity coverage.
     diversity_policy: PlanningDiversityPolicy | None = None
+    composition_policy: PlanningCompositionPolicy = Field(default_factory=PlanningCompositionPolicy)
     catalog_version: str
     product_snapshot_version: str
     policy_version: str
@@ -202,6 +278,8 @@ class FinalPlanningProblem(BaseModel):
 class PlanningAssignment(BaseModel):
     slot_id: str
     recipe_id: str
+    # The dish role in a composed slot; None in a one-dish slot.
+    role_id: str | None = None
 
 
 class PlanningShoppingSelection(BaseModel):
