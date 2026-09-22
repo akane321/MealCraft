@@ -2,6 +2,7 @@ from collections import Counter
 
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
 from app.models.recipe import Recipe
+from app.planning.meal_composition import meal_minutes
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError
 from app.repositories.recipe import RecipeRepository
@@ -16,9 +17,27 @@ from app.schemas.meal_plan import (
     WeeklyGroceryEstimateResponse,
     WeeklyMealPlanRequest,
 )
+from app.schemas.planning_v2 import PlanningCompositionPolicy
 from app.schemas.recommendation import RecipeRecommendationResponse
 from app.services.meal_plan import WeeklyMealPlanService
 from app.services.recommendation import RecipeRecommendationService
+
+
+def _at_share(value, share: float):
+    """A dish's value at its portion share; a whole-meal dish keeps the value exactly."""
+    return value if share == 1 else round(float(value) * share, 2)
+
+
+class TimedDish:
+    """The time fields `meal_minutes` reads, from a stored recipe (passive time is not cooking time)."""
+
+    def __init__(self, prep: int, cook: int):
+        self.prep_minutes, self.cook_minutes, self.passive_minutes = prep, cook, 0
+        self.total_time_minutes = prep + cook
+
+    @classmethod
+    def of(cls, recipe: Recipe) -> "TimedDish":
+        return cls(recipe.prep_time_minutes, recipe.cook_time_minutes)
 
 
 class MealPlanReplanNotFoundError(LookupError):
@@ -62,7 +81,8 @@ class MealPlanReplanningService:
         self._validate_target(entry, request)
 
         constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
-        recipes = self.recipe_repository.list_for_planning()
+        role = self._role(constraints, entry)
+        recipes = self.recipe_repository.list_for_planning(courses=list(role.courses) if role is not None else None)
         recipes_by_id = {recipe.id: recipe for recipe in recipes}
         # A planned recipe may sit outside today's candidate pool; fetch it directly.
         missing = [item.recipe_id for item in plan.entries if item.recipe_id not in recipes_by_id]
@@ -93,7 +113,9 @@ class MealPlanReplanningService:
                 proposed_recipe_id=recommendation.recipe.id if recommendation else None,
                 recipes_by_id=recipes_by_id,
             )
-            after_grocery = self.grocery_aggregator.estimate(future_recipes, constraints)
+            after_grocery = self.grocery_aggregator.estimate(
+                [recipe for recipe, _ in future_recipes], constraints, shares=[share for _, share in future_recipes]
+            )
             after_warnings = list(dict.fromkeys(after_grocery.warnings))
             if after_grocery.within_weekly_budget is False:
                 after_warnings.append(
@@ -196,17 +218,35 @@ class MealPlanReplanningService:
                     for ingredient in recipes_by_id[item.recipe.id].recipe_ingredients
                 }
             ]
+        role = self._role(constraints, entry)
+        if role is not None:
+            # One dish of a composed meal: it fills the same role, and the meal must still hold
+            # as a meal with the dishes that stay (ADR-0036; the owner chose to swap one dish).
+            candidates = [
+                item
+                for item in candidates
+                if (recipes_by_id[item.recipe.id].course or "main") in role.courses
+                and self._meal_still_holds(plan, entry, recipes_by_id[item.recipe.id], constraints)
+            ]
         if not candidates:
             raise MealPlanReplanValidationError("No alternative recipe satisfies the current hard constraints.")
 
-        ordered_entries = sorted(plan.entries, key=lambda item: item.day_index)
-        target_index = ordered_entries.index(entry)
-        previous_recipe_id = ordered_entries[target_index - 1].recipe_id if target_index > 0 else None
-        next_recipe_id = (
-            ordered_entries[target_index + 1].recipe_id if target_index + 1 < len(ordered_entries) else None
-        )
+        # The same dish position on the neighbouring days, so a swap does not repeat them.
+        def neighbour(offset: int) -> int | None:
+            return next(
+                (
+                    item.recipe_id
+                    for item in plan.entries
+                    if item.day_index == entry.day_index + offset
+                    and item.meal_type == entry.meal_type
+                    and item.role_id == entry.role_id
+                ),
+                None,
+            )
+
+        previous_recipe_id, next_recipe_id = neighbour(-1), neighbour(1)
         use_counts = Counter(
-            item.recipe_id for item in ordered_entries if item.id != entry.id and item.status != "skipped"
+            item.recipe_id for item in plan.entries if item.id != entry.id and item.status != "skipped"
         )
 
         def score(candidate: RecipeRecommendationResponse) -> tuple[float, int]:
@@ -219,6 +259,38 @@ class MealPlanReplanningService:
         return max(candidates, key=score)
 
     @staticmethod
+    def _role(constraints: WeeklyMealPlanRequest, entry: MealPlanEntry):
+        """The dish role an entry fills in a composed plan, or None for a one-dish plan."""
+        if constraints.meal_composition is None:
+            return None
+        return next((role for role in constraints.meal_composition if role.role_id == entry.role_id), None)
+
+    @staticmethod
+    def _meal_still_holds(plan: MealPlan, entry: MealPlanEntry, candidate: Recipe, constraints) -> bool:
+        """A replacement keeps its meal's distinct dishes, one-cook time and per-meal sodium ceiling."""
+        others = [
+            item
+            for item in plan.entries
+            if item.day_index == entry.day_index
+            and item.meal_type == entry.meal_type
+            and item.id != entry.id
+            and item.status != "skipped"
+        ]
+        if candidate.id in {item.recipe_id for item in others}:
+            return False
+        dishes = [TimedDish.of(item.recipe) for item in others] + [TimedDish.of(candidate)]
+        limit = constraints.max_cooking_time_minutes
+        if limit is not None and meal_minutes(dishes, PlanningCompositionPolicy()) > limit:
+            return False
+        ceiling = constraints.max_sodium_mg_per_meal
+        if ceiling is not None and candidate.nutrition is not None:
+            sodium = sum(float(item.sodium_mg) for item in others)
+            sodium += float(candidate.nutrition.sodium_mg) * float(entry.portion_share)
+            if sodium > ceiling + 1e-6:
+                return False
+        return True
+
+    @staticmethod
     def _recipes_after_event(
         *,
         plan: MealPlan,
@@ -226,8 +298,9 @@ class MealPlanReplanningService:
         event_type: str,
         proposed_recipe_id: int | None,
         recipes_by_id: dict[int, Recipe],
-    ) -> list[Recipe]:
-        recipes: list[Recipe] = []
+    ) -> list[tuple[Recipe, float]]:
+        """Each dish still eaten after the event, with its portion share."""
+        recipes: list[tuple[Recipe, float]] = []
         for entry in plan.entries:
             if entry.status == "skipped" or (entry.id == target.id and event_type == "CANCEL_MEAL"):
                 continue
@@ -237,7 +310,7 @@ class MealPlanReplanningService:
             recipe = recipes_by_id.get(recipe_id)
             if recipe is None:
                 raise MealPlanReplanNotFoundError("A recipe used by this plan no longer exists")
-            recipes.append(recipe)
+            recipes.append((recipe, float(entry.portion_share)))
         return recipes
 
     @staticmethod
@@ -245,6 +318,9 @@ class MealPlanReplanningService:
         nutrition = WeeklyMealPlanService._entry_nutrition(entry).model_dump(mode="json")
         return {
             "entry_id": entry.id,
+            "meal_type": entry.meal_type,
+            "role_id": entry.role_id,
+            "portion_share": float(entry.portion_share),
             "recipe_id": entry.recipe_id,
             "recipe_slug": entry.recipe.slug,
             "recipe_title": entry.recipe.title,
@@ -269,15 +345,20 @@ class MealPlanReplanningService:
             snapshot["status"] = "skipped"
         elif recommendation is not None:
             estimate = recommendation.grocery_estimate
+            share = float(entry.portion_share)
             snapshot.update(
                 {
                     "recipe_id": recommendation.recipe.id,
                     "recipe_slug": recommendation.recipe.slug,
                     "recipe_title": recommendation.recipe.title,
                     "recommendation_score": recommendation.total_score,
-                    "consumed_cost_sgd": estimate.consumed_total_sgd if estimate else 0,
-                    "purchase_cost_sgd": estimate.purchase_total_sgd if estimate else 0,
-                    "nutrition_per_person": recommendation.recipe.nutrition.model_dump(mode="json"),
+                    # The new dish is eaten at the replaced dish's share of the meal.
+                    "consumed_cost_sgd": _at_share(estimate.consumed_total_sgd, share) if estimate else 0,
+                    "purchase_cost_sgd": _at_share(estimate.purchase_total_sgd, share) if estimate else 0,
+                    "nutrition_per_person": {
+                        key: _at_share(value, share)
+                        for key, value in recommendation.recipe.nutrition.model_dump(mode="json").items()
+                    },
                 }
             )
         return snapshot
@@ -293,7 +374,10 @@ class MealPlanReplanningService:
         if request.event_type == "CANCEL_MEAL":
             after = {key: 0.0 for key in fields}
         elif recommendation is not None:
-            after = recommendation.recipe.nutrition.model_dump()
+            share = float(entry.portion_share)
+            after = {
+                key: _at_share(value, share) for key, value in recommendation.recipe.nutrition.model_dump().items()
+            }
         else:
             after = before.model_dump()
         return {key: round(float(after[key]) - float(getattr(before, key)), 2) for key in fields}

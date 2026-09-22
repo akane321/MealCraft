@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -186,6 +186,22 @@ def update_meal_status(
     )
     if plan is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Meal-plan entry not found")
+    return plan
+
+
+@router.patch("/{plan_id}/meals/{day_index}/{meal_type}", response_model=WeeklyMealPlanResponse)
+def update_whole_meal_status(
+    plan_id: int,
+    day_index: int,
+    meal_type: Literal["breakfast", "lunch", "dinner", "snack"],
+    update: MealPlanEntryStatusUpdate,
+    service: MealPlanServiceDependency,
+    _current: CurrentHouseholdCheckInCsrfDependency,
+) -> WeeklyMealPlanResponse:
+    """Check in every dish of one meal; each dish can still be marked on its own."""
+    plan = service.update_meal_status(plan_id=plan_id, day_index=day_index, meal_type=meal_type, status=update.status)
+    if plan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Meal not found in this plan")
     return plan
 
 

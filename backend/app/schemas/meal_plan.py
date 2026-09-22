@@ -165,6 +165,9 @@ class MealPlanReplanPreviewRequest(BaseModel):
 
 class MealPlanEntrySnapshot(BaseModel):
     entry_id: int
+    meal_type: str = "dinner"
+    role_id: str = "main"
+    portion_share: float = 1.0
     recipe_id: int
     recipe_slug: str
     recipe_title: str

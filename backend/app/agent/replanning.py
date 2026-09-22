@@ -27,6 +27,12 @@ class AgentReplanInterpreter:
         "番茄": "tomato",
         "西红柿": "tomato",
     }
+    # Words that name a dish role of a composed meal (ADR-0036).
+    _role_aliases = {
+        "main": ("main", "主菜", "荤菜"),
+        "vegetable": ("vegetable", "veg", "side", "salad", "蔬菜", "配菜", "素菜", "沙拉"),
+        "soup": ("soup", "汤"),
+    }
     _weekday_aliases = {
         0: ("monday", "mon", "周一", "星期一"),
         1: ("tuesday", "tue", "tues", "周二", "星期二"),
@@ -52,16 +58,19 @@ class AgentReplanInterpreter:
         if event_type is not None:
             draft.event_type = event_type
 
-        entry_id = self._entry_id(lower, plan)
-        if entry_id is not None:
-            draft.entry_id = entry_id
+        day_index = self._day_index(lower, plan)
+        if day_index is not None:
+            draft.day_index = day_index
+            draft.entry_id = None
+        if draft.entry_id is None and draft.day_index is not None:
+            draft.entry_id = self._dish_entry(lower, plan, draft.day_index)
 
         ingredient = self._ingredient(lower, plan)
         if ingredient is not None:
             draft.unavailable_ingredient = ingredient
 
         draft.reason = text
-        question = self._first_question(draft, chinese=bool(re.search(r"[\u4e00-\u9fff]", text)))
+        question = self._first_question(draft, chinese=bool(re.search(r"[\u4e00-\u9fff]", text)), plan=plan)
         return draft, [question] if question else []
 
     @staticmethod
@@ -85,26 +94,42 @@ class AgentReplanInterpreter:
             return "REPLACE_MEAL"
         return None
 
-    def _entry_id(self, text: str, plan: WeeklyMealPlanResponse) -> int | None:
+    def _day_index(self, text: str, plan: WeeklyMealPlanResponse) -> int | None:
         numbered = re.search(r"(?:day\s*|第\s*)([1-7一二三四五六七])(?:\s*天)?", text)
         if numbered:
             value = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7}.get(
                 numbered.group(1), int(numbered.group(1)) if numbered.group(1).isdigit() else 0
             )
-            return next((day.entry_id for day in plan.days if day.day_index == value), None)
+            return next((day.day_index for day in plan.days if day.day_index == value), None)
 
         iso_date = re.search(r"\b(\d{4}-\d{2}-\d{2})\b", text)
         if iso_date:
-            return next((day.entry_id for day in plan.days if day.planned_date.isoformat() == iso_date.group(1)), None)
+            return next((d.day_index for d in plan.days if d.planned_date.isoformat() == iso_date.group(1)), None)
 
         if any(token in text for token in ("today", "今天")):
             today = date.today()
-            return next((day.entry_id for day in plan.days if day.planned_date == today), None)
+            return next((day.day_index for day in plan.days if day.planned_date == today), None)
 
         for weekday, aliases in self._weekday_aliases.items():
             if any(re.search(rf"(?<![a-z]){re.escape(alias)}(?![a-z])", text) for alias in aliases):
-                return next((day.entry_id for day in plan.days if day.planned_date.weekday() == weekday), None)
+                return next((day.day_index for day in plan.days if day.planned_date.weekday() == weekday), None)
         return None
+
+    def _dish_entry(self, text: str, plan: WeeklyMealPlanResponse, day_index: int) -> int | None:
+        """The day's one dish, or the dish whose role or title the message names; None while ambiguous."""
+        dishes = [day for day in plan.days if day.day_index == day_index]
+        if len(dishes) == 1:
+            return dishes[0].entry_id
+        named = [
+            dish
+            for dish in dishes
+            if any(
+                re.search(rf"(?<![a-z]){re.escape(alias)}(?![a-z])", text)
+                for alias in self._role_aliases.get(dish.role_id, (dish.role_id,))
+            )
+            or dish.recipe.title.lower() in text
+        ]
+        return named[0].entry_id if len(named) == 1 else None
 
     def _ingredient(self, text: str, plan: WeeklyMealPlanResponse) -> str | None:
         for alias in sorted(self._ingredient_aliases, key=len, reverse=True):
@@ -117,12 +142,21 @@ class AgentReplanInterpreter:
         return None
 
     @staticmethod
-    def _first_question(draft: AgentReplanDraft, *, chinese: bool) -> str | None:
+    def _first_question(
+        draft: AgentReplanDraft, *, chinese: bool, plan: WeeklyMealPlanResponse | None = None
+    ) -> str | None:
         if draft.event_type is None:
             return (
                 "你希望替换、取消、锁定某餐，还是处理缺货食材？"
                 if chinese
                 else "Should I replace, cancel, lock a meal, or handle an unavailable ingredient?"
+            )
+        if draft.entry_id is None and draft.day_index is not None and plan is not None:
+            titles = [day.recipe.title for day in plan.days if day.day_index == draft.day_index]
+            return (
+                f"那天有 {len(titles)} 道菜（{'、'.join(titles)}），你想调整哪一道？"
+                if chinese
+                else f"That day has {len(titles)} dishes ({', '.join(titles)}); which one should I adjust?"
             )
         if draft.entry_id is None:
             return "你想调整哪一天的餐食？" if chinese else "Which day should I adjust?"
