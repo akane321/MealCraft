@@ -1,0 +1,68 @@
+{
+ "schema_version": "multidish-set-v1",
+ "set_id": "heldout-v2-multidish",
+ "protocol": "v2-multidish",
+ "protocol_document": "docs/evaluation/protocol-v2-multidish.md",
+ "status": "frozen",
+ "frozen_at": "2026-09-22T18:07:15Z",
+ "frozen_digest": "e4f898b022b128019957fba8f20092af00e6aadfc89c4947802ec1db3975d977",
+ "_comment_digest": "sha256 over every episode file, in name order. Any edit to the set changes it, so a report can state which set it ran on.",
+ "episodes": 40,
+ "categories": {
+  "combined_constraints": 8,
+  "safety_diet": 6,
+  "budget_time": 4,
+  "budget_package": 4,
+  "pantry_expiry": 4,
+  "infeasible_conflict": 7,
+  "clarification": 7
+ },
+ "classes": {
+  "feasible": 21,
+  "infeasible": 12,
+  "needs_clarification": 7
+ },
+ "languages": {
+  "en": 21,
+  "zh": 19
+ },
+ "catalog": {
+  "recipes": "data-engineering/data/release/v2.1/recipes.jsonl",
+  "ingredients": "data-engineering/data/release/v2.1/ingredients.jsonl",
+  "products": "data/products/fairprice-v2-snapshot.json",
+  "eligibility": "every ingredient has an in-stock product; 1-24 servings; at most 12 hours"
+ },
+ "candidate_pool": {
+  "tool": "python -m app.evaluation.multidish_pool",
+  "per_course": 12,
+  "version": "multidish-pool-v1"
+ },
+ "labels": {
+  "tool": "python -m app.evaluation.multidish_labels",
+  "rule": "every feasible label carries a witness week priced within its budget; every infeasible one a proof"
+ },
+ "tolerances": {
+  "cost_sgd_absolute": 0.01,
+  "quantity_relative": 1e-06,
+  "nutrition_relative": 0.02
+ },
+ "composition_policy": {
+  "main_shares": [
+   1.0,
+   0.75,
+   0.6,
+   0.5
+  ],
+  "other_shares": [
+   null,
+   0.5,
+   0.4,
+   0.35
+  ],
+  "hands_on_cook_fraction": 0.5,
+  "switch_minutes": 5,
+  "round_to_minutes": 5
+ },
+ "nutrition": "no episode states a nutrition target: release nutrition is not computed",
+ "review_policy": "drafted in a sealed packet, then reviewed by the owner and revised on their notes until accepted"
+}

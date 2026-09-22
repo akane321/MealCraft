@@ -1,0 +1,384 @@
+{
+ "schema_version": "multidish-review-v1",
+ "set_id": "heldout-v2-multidish",
+ "_comment": "The owner's verdicts, recorded from the review page and their written results. Round 1 covered all 40; round 2 covered the 10 revised ones. Every revision was made by the sealed drafting agent, never by the implementation agent.",
+ "rounds": [
+  {
+   "round": 1,
+   "reviewer": "owner",
+   "verdicts": [
+    {
+     "episode_id": "md-ho-001",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-002",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-003",
+     "verdict": "revise",
+     "note": "The request says to have Tarka Dhall \"on two nights\", but the ground truth encodes \"at least 2 times\" and the pool contains only one qualifying main, so a valid witness may serve Tarka Dhall on all seven nights. Either say \"at least two nights, and repeats are fine\" or encode exactly two nights.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-004",
+     "verdict": "revise",
+     "note": "The natural-language request says to use the 600 g tofu up, but the encoded requirement only checks that tofu appears in at least three dinners. Three appearances do not guarantee that all 600 g are consumed. Remove \"use it up\" or add a quantity/depletion requirement.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-005",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-006",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-007",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-008",
+     "verdict": "revise",
+     "note": "The request only says \"Hainanese chicken rice\", but the ground truth pins one specific catalog recipe even though multiple recipes share that name. Name the exact recipe in the request or define the repeat over any matching Hainanese chicken rice recipe. The rationale also refers to S$60 although the stated budget is S$75.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-009",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-010",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-011",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-012",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-013",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-014",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-015",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-016",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-017",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-018",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-019",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-020",
+     "verdict": "revise",
+     "note": "The S$150 budget is too loose to make this a useful budget held-out case: the witness week costs only S$63.43. The case is realistic, but the budget contributes little discrimination. Tighten the budget and recompute feasibility, or replace it with a more demanding budget scenario.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-021",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-022",
+     "verdict": "revise",
+     "note": "The S$100 budget is much looser than the S$30.53 witness cost, so this barely tests weekly package-aware budgeting. Tighten the budget and recompute feasibility so package sharing can actually affect success or failure.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-023",
+     "verdict": "revise",
+     "note": "The request says the chicken thighs expire on Wednesday and should be used early in the week, but the encoded ground truth only requires chicken_thigh in at least two dinners and does not constrain which days. Either encode the expiry/deadline or remove the Wednesday/early-week wording.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-024",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-025",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-026",
+     "verdict": "revise",
+     "note": "The request says the spinach expires the day after tomorrow, but the ground truth only requires spinach to appear in at least two dinners, with no early-week timing constraint. A plan could use it late in the week and still pass. Encode the expiry timing or remove that wording.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-027",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-028",
+     "verdict": "revise",
+     "note": "S$10 for seven dinners for six people is not a realistic household budget and makes the infeasibility almost trivial. Replace it with a plausible but genuinely infeasible budget written before checking the pool, then recompute the label.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-029",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-030",
+     "verdict": "revise",
+     "note": "This is structurally almost the same test as md-ho-015 (required main + vegetable + soup under a total meal-time limit), but with an even more extreme 15-minute ceiling. It adds little new coverage. Replace it with a different time-planning failure mode or a more realistic scenario.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-031",
+     "verdict": "revise",
+     "note": "The named Hainanese Chicken With Rice requirement is not what makes the scenario infeasible: the pool has no main + vegetable meal that fits 30 minutes at all. The repeat request is therefore irrelevant to the contradiction. Redesign the case so ordinary dinners are feasible but the requested repeated dish creates the conflict.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-032",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-033",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-034",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-035",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-036",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-037",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-038",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-039",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-040",
+     "verdict": "accepted",
+     "note": "",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    }
+   ],
+   "notes_for_revision": {
+    "md-ho-003": "The request says to have Tarka Dhall \"on two nights\", but the ground truth encodes \"at least 2 times\" and the pool contains only one qualifying main, so a valid witness may serve Tarka Dhall on all seven nights. Either say \"at least two nights, and repeats are fine\" or encode exactly two nights.",
+    "md-ho-004": "The natural-language request says to use the 600 g tofu up, but the encoded requirement only checks that tofu appears in at least three dinners. Three appearances do not guarantee that all 600 g are consumed. Remove \"use it up\" or add a quantity/depletion requirement.",
+    "md-ho-008": "The request only says \"Hainanese chicken rice\", but the ground truth pins one specific catalog recipe even though multiple recipes share that name. Name the exact recipe in the request or define the repeat over any matching Hainanese chicken rice recipe. The rationale also refers to S$60 although the stated budget is S$75.",
+    "md-ho-020": "The S$150 budget is too loose to make this a useful budget held-out case: the witness week costs only S$63.43. The case is realistic, but the budget contributes little discrimination. Tighten the budget and recompute feasibility, or replace it with a more demanding budget scenario.",
+    "md-ho-022": "The S$100 budget is much looser than the S$30.53 witness cost, so this barely tests weekly package-aware budgeting. Tighten the budget and recompute feasibility so package sharing can actually affect success or failure.",
+    "md-ho-023": "The request says the chicken thighs expire on Wednesday and should be used early in the week, but the encoded ground truth only requires chicken_thigh in at least two dinners and does not constrain which days. Either encode the expiry/deadline or remove the Wednesday/early-week wording.",
+    "md-ho-026": "The request says the spinach expires the day after tomorrow, but the ground truth only requires spinach to appear in at least two dinners, with no early-week timing constraint. A plan could use it late in the week and still pass. Encode the expiry timing or remove that wording.",
+    "md-ho-028": "S$10 for seven dinners for six people is not a realistic household budget and makes the infeasibility almost trivial. Replace it with a plausible but genuinely infeasible budget written before checking the pool, then recompute the label.",
+    "md-ho-030": "This is structurally almost the same test as md-ho-015 (required main + vegetable + soup under a total meal-time limit), but with an even more extreme 15-minute ceiling. It adds little new coverage. Replace it with a different time-planning failure mode or a more realistic scenario.",
+    "md-ho-031": "The named Hainanese Chicken With Rice requirement is not what makes the scenario infeasible: the pool has no main + vegetable meal that fits 30 minutes at all. The repeat request is therefore irrelevant to the contradiction. Redesign the case so ordinary dinners are feasible but the requested repeated dish creates the conflict."
+   }
+  },
+  {
+   "round": 2,
+   "reviewer": "owner",
+   "verdicts": [
+    {
+     "episode_id": "md-ho-003",
+     "verdict": "accepted",
+     "note": "Accept. The request now says at least two nights, repeats fine, which matches min_uses 2 exactly; the single qualifying main no longer creates a semantic conflict.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-004",
+     "verdict": "accepted",
+     "note": "Accept. With the use-it-up wording removed, the request matches tofu in at least three dinners.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-008",
+     "verdict": "accepted",
+     "note": "Accept. The exact recipe is named and the repeat is at least twice, more allowed; the rationale's budget is fixed.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-020",
+     "verdict": "accepted",
+     "note": "Accept. S$75 against a S$63.43 witness leaves about 18%: enough pressure to keep it as a budget case.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-022",
+     "verdict": "accepted",
+     "note": "Accept. S$36 against S$30.53 is about 18%, so package sharing can now decide success.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-023",
+     "verdict": "accepted",
+     "note": "Accept. With the expiry wording removed, the request is pantry plus chicken thigh in at least two dinners, matching the gold.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-026",
+     "verdict": "accepted",
+     "note": "Accept. Same: the spinach timing is gone and the words match spinach in at least two dinners.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-028",
+     "verdict": "accepted",
+     "note": "Accept. Realistic situation with clear constraints, and the infeasibility comes from pool capacity (only 3 gluten-free and dairy-free mains) rather than an absurd number. A reviewer-guided revision cannot claim to be blind; the report must say so, which it will.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-030",
+     "verdict": "revise",
+     "note": "The revised scenario is much better, but the mapping of 蒜苗 to leek is still ambiguous: leek is not a reliable synonym for garlic shoots/蒜苗. Because this held-out case depends on exact ingredient exclusions, the natural-language request should explicitly say 韭葱 (leek), or the leek exclusion should be removed unless the catalog ontology explicitly defines it that way. The chives → 韭菜 mapping is acceptable.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    },
+    {
+     "episode_id": "md-ho-031",
+     "verdict": "accepted",
+     "note": "Accept. 20 ordinary main+vegetable meals fit 50 minutes, and the named dish alone fills the limit, so the requested-dish conflict is what the case tests.",
+     "at": "2026-09-23T00:00:00Z",
+     "source": "owner, given in chat"
+    }
+   ],
+   "notes_for_revision": {
+    "md-ho-030": "The revised scenario is much better, but the mapping of 蒜苗 to leek is still ambiguous: leek is not a reliable synonym for garlic shoots/蒜苗. Because this held-out case depends on exact ingredient exclusions, the natural-language request should explicitly say 韭葱 (leek), or the leek exclusion should be removed unless the catalog ontology explicitly defines it that way. The chives → 韭菜 mapping is acceptable."
+   }
+  }
+ ]
+}
