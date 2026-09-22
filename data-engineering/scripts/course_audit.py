@@ -79,9 +79,7 @@ def record(path: Path) -> None:
     for verdict in verdicts:
         counts = by_course.setdefault(labelled[verdict["recipe_id"]], {"accepted": 0, "corrected": 0})
         counts[verdict["verdict"]] += 1
-    corrections = Counter(
-        f"{labelled[v['recipe_id']]}->{v['course']}" for v in verdicts if v["verdict"] == "corrected"
-    )
+    corrections = Counter(f"{labelled[v['recipe_id']]}->{v['course']}" for v in verdicts if v["verdict"] == "corrected")
     RESULT.write_text(
         json.dumps(
             {
