@@ -5,11 +5,11 @@ Machine: Intel64 Family 6 Model 198 Stepping 2, GenuineIntel (Windows).
 
 | Arm | Strict success | By class | Median s | p95 s | Distinct recipes | Adjacent repeats | Failure mechanisms |
 | --- | ---: | --- | ---: | ---: | ---: | ---: | --- |
-| O1 | 10/10 | feasible 8/8, infeasible 1/1, needs_clarification 1/1 | 0.207 | 0.356 | 13.38 | 0 | - |
-| O2 | 10/10 | feasible 8/8, infeasible 1/1, needs_clarification 1/1 | 1.609 | 3.521 | 16.12 | 0 | - |
-| C | 8/10 | feasible 6/8, infeasible 1/1, needs_clarification 1/1 | 0.175 | 0.273 | 13.38 | 0 | budget_truthful 1, no_excluded_ingredient 1 |
-| E | 8/10 | feasible 6/8, infeasible 1/1, needs_clarification 1/1 | 0.036 | 0.052 | 4.86 | 0 | budget_truthful 1, plan_present 1, status_matches_class 1 |
-| F | 9/10 | feasible 7/8, infeasible 1/1, needs_clarification 1/1 | 0.025 | 0.078 | 2.5 | 120 | budget_truthful 1 |
+| O1 | 10/10 | feasible 8/8, infeasible 1/1, needs_clarification 1/1 | 0.205 | 0.31 | 13.38 | 0 | - |
+| O2 | 10/10 | feasible 8/8, infeasible 1/1, needs_clarification 1/1 | 1.481 | 3.58 | 16.12 | 0 | - |
+| C | 8/10 | feasible 6/8, infeasible 1/1, needs_clarification 1/1 | 0.156 | 0.232 | 13.38 | 0 | budget_truthful 1, no_excluded_ingredient 1 |
+| E | 8/10 | feasible 6/8, infeasible 1/1, needs_clarification 1/1 | 0.037 | 0.093 | 16.12 | 0 | budget_truthful 1, no_excluded_ingredient 1 |
+| F | 9/10 | feasible 7/8, infeasible 1/1, needs_clarification 1/1 | 0.023 | 0.027 | 2.5 | 120 | budget_truthful 1 |
 
 O2: CP-SAT proved optimality on 8 episodes; 0 answers are the warm-start plan because CP-SAT ended worse.
 
@@ -20,14 +20,14 @@ Counts only, no per-category rates (ADR-0028).
 
 - `data-engineering/data/release/v2.1/ingredients.jsonl`: `499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25`
 - `data-engineering/data/release/v2.1/recipes.jsonl`: `df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-001.json`: `c6c970f91208805df04ebbe74ecf0f5b5debae14599d511673e33ceaf9d0cff3`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-002.json`: `1f7dbad8a0b70e9156dbfc019b95562fa97e68543032567d95f9cedf92964a0d`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-003.json`: `8b89c323c35266a194d64f7fb6fcc9c1a2edc97ad115110614ed3bef781d600e`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-004.json`: `84bb6d8ad6fb2d0b3ff3f6280b68da83d056def637046162a788ad31db7f578d`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-005.json`: `a99154d1c1df056d73c027d8e09994622d4863ac546f7536fd2ea84e7017e234`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-006.json`: `02f4f3cc6c3dec066b427726590e8866e69c407a835a6b3f92f4320bde43d148`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-007.json`: `3666872991322bd1bd15b44784cb07504504f5459f580d5aeab84205da516570`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-008.json`: `829601329bebbc62497afc2c6eb72dcf8a9e148b83aa62688cee6f0b84d2fdd8`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-009.json`: `f0b8da8b2a4061d2ce794996a3c3df7d5eea5b134d956c2c69c682fc11a85edb`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-010.json`: `77f337e69c12a9a20c88b56c9e49192a51537271764b8b1e3204d42dd834d14d`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-001.json`: `1ea9e14dba7ec9423b303e43416ced34f63d7bee97db542ec3910664ce173553`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-002.json`: `bbad8d848fcb82e983de0a7a855986ed4355ed95b6a1a7dd44e3854f8b5dfc73`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-003.json`: `5d2e6fb44974c1510ed7077dd8ea0d3e6b6e41dbe89558ec52bd304540421227`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-004.json`: `7958e268af707fd933b90bd126cf344e1a6b5f66e4b11f369fcffc6c513000dd`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-005.json`: `44bbac783529c65e2aebdc961394a6e4e85d675945fafdf868743b1db7b5dc14`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-006.json`: `0709c2a226378ac3a49a9267dad9e6e85f8a87e258caef64b1582d8aeb7733a2`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-007.json`: `c4dcdef0369a78ca4aa1b269ff1753db948b144259048f82ee64d8ecdc7b9afe`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-008.json`: `4352297568b43a048a3ac301404e7410ed137206619efc33b209dc8c695bb791`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-009.json`: `4d968bf802e89ebdb8665707c577f3a33e2ce55bdd9b62f52f5e66cca88b37ff`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-010.json`: `3d64d79c9af8f9e188712dea98a7f1f1a4993ebfe45a5aff3f04431aeb6628ac`
 - `data/products/fairprice-v2-snapshot.json`: `2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91`

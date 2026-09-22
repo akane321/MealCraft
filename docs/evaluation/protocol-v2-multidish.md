@@ -95,8 +95,8 @@ failure in itself. The owner decided this on 2026-09-22.
 | B. Agent + exact | agent (OpenAI parser) | CP-SAT | quality ceiling for the agent |
 | C. Rules + beam | rule parser | meal beam | isolates the agent's contribution |
 | D. Context-matched LLM-only | LLM | LLM | as v2 B2 |
-| E. Strong Rule-only | rule parser | rule selector per role | as v2 B1 |
-| F. Greedy | rule parser | best dish per role, every day | weak floor |
+| E. Strong Rule-only | rule parser | a careful rule selector: requested dishes first, least used, cheapest after the pantry, quickest; meal-time packing with a next-main fallback; a per-meal share of the remaining budget | as v2 B1, the main non-LLM baseline |
+| F. Greedy | rule parser | each role's quickest dish that fits the meal, every day | the weak floor, kept as a floor (owner, 2026-09-22) |
 | O1. Gold + beam | gold constraints | meal beam | diagnostic |
 | O2. Gold + exact | gold constraints | CP-SAT | upper bound |
 
@@ -153,3 +153,4 @@ existed:
 - The runner reports the exact pantry deduction. The planner's shopping line
   rounds it to thousandths for display.
 - CP-SAT is warm-started from the meal beam (section 6).
+- Strong Rule-only (E) was rewritten. The first version rotated among the two or three cheapest dishes (4.9 distinct recipes a week); the owner judged it too weak to compare against. F stays the floor.

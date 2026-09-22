@@ -40,7 +40,12 @@ from app.planning.meal_beam import MealBeamPlanner, dish_eligible
 from app.planning.meal_composition import dish_servings, meal_minutes
 from app.planning.meal_cp_sat import MealCpSatLimits, MealCpSatPlanner
 from app.schemas.agent import AgentConstraintState
-from app.schemas.planning_v2 import FinalPlanningProblem, FinalPlanningSolution, PlanningAssignment
+from app.schemas.planning_v2 import (
+    FinalPlanningProblem,
+    FinalPlanningSolution,
+    PlanningAssignment,
+    PlanningCompositionPolicy,
+)
 
 PROTOCOL = "v2-multidish"
 NUTRIENTS = ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
@@ -252,49 +257,18 @@ def _beam_loss(problem: FinalPlanningProblem) -> float:
     return min(state.loss for state in states) if states else float("inf")
 
 
-def _dish_cost(problem: FinalPlanningProblem, recipe, share: float, servings: int) -> float:
-    cheapest: dict[str, float] = {}
-    for p in problem.products:
-        per_gram = p.price_sgd / p.package_quantity
-        cheapest[p.ingredient_id] = min(cheapest.get(p.ingredient_id, per_gram), per_gram)
-    return sum(
-        i.quantity * servings * share / recipe.servings * cheapest.get(i.ingredient_id, 0.0) for i in recipe.ingredients
-    )
+def _share_guess(slot, role_id: str) -> float:
+    """The share a dish takes if every role is filled; rules plan before they know the meal's size."""
+    n = len(slot.composition or [None])
+    policy = PlanningCompositionPolicy()
+    if n == 1:
+        return 1.0
+    return policy.main_shares[n - 1] if role_id == "main" else policy.other_shares[n - 1]
 
 
-def rule_selector(problem: FinalPlanningProblem, *, greedy: bool) -> FinalPlanningSolution:
-    """E: per role, the cheapest then quickest eligible dish, not the previous day's, fitting the meal time.
-    F: per role, the same first dish every day."""
-    assignments: list[PlanningAssignment] = []
-    previous: dict[str, str] = {}
-    for slot in problem.slots:
-        chosen: list = []
-        for role in slot.composition or []:
-            options = [r for r in problem.recipes if r.course in role.courses and dish_eligible(problem, slot, r)]
-            share = 0.5 if role.role_id != "main" else 0.75
-            options.sort(
-                key=lambda r: (
-                    (r.total_time_minutes, r.recipe_id)
-                    if greedy
-                    else (round(_dish_cost(problem, r, share, slot.servings), 2), r.total_time_minutes, r.recipe_id)
-                )
-            )
-            for recipe in options:
-                if not greedy and previous.get(role.role_id) == recipe.recipe_id:
-                    continue
-                if recipe.recipe_id in {r.recipe_id for _, r in chosen}:
-                    continue
-                trial = [r for _, r in chosen] + [recipe]
-                if (
-                    slot.max_time_minutes is not None
-                    and meal_minutes(trial, problem.composition_policy) > slot.max_time_minutes
-                ):
-                    continue
-                chosen.append((role.role_id, recipe))
-                break
-        for role_id, recipe in chosen:
-            assignments.append(PlanningAssignment(slot_id=slot.slot_id, role_id=role_id, recipe_id=recipe.recipe_id))
-            previous[role_id] = recipe.recipe_id
+def _finish(
+    problem: FinalPlanningProblem, assignments: list[PlanningAssignment], version: str
+) -> FinalPlanningSolution:
     shopping = FinalScopeReferencePlanner()._build_shopping(problem, assignments)
     report = FinalScopeReferencePlanner().validator.validate(problem, assignments, shopping)
     return FinalPlanningSolution(
@@ -303,8 +277,154 @@ def rule_selector(problem: FinalPlanningProblem, *, greedy: bool) -> FinalPlanni
         assignments=assignments,
         shopping=shopping,
         validation=report,
-        trace={"algorithm": "rule-selector", "algorithm_version": "multidish-rules-v1", "deterministic": True},
+        trace={"algorithm": "rule-selector", "algorithm_version": version, "deterministic": True},
     )
+
+
+def greedy_selector(problem: FinalPlanningProblem) -> FinalPlanningSolution:
+    """F, the weak floor: every day, each role's quickest eligible dish that fits the meal."""
+    assignments: list[PlanningAssignment] = []
+    for slot in problem.slots:
+        chosen: list = []
+        for role in slot.composition or []:
+            options = sorted(
+                (r for r in problem.recipes if r.course in role.courses and dish_eligible(problem, slot, r)),
+                key=lambda r: (r.total_time_minutes, r.recipe_id),
+            )
+            for recipe in options:
+                trial = [r for _, r in chosen] + [recipe]
+                if recipe.recipe_id in {r.recipe_id for _, r in chosen} or (
+                    slot.max_time_minutes is not None
+                    and meal_minutes(trial, problem.composition_policy) > slot.max_time_minutes
+                ):
+                    continue
+                chosen.append((role.role_id, recipe))
+                break
+        assignments += [PlanningAssignment(slot_id=slot.slot_id, role_id=k, recipe_id=r.recipe_id) for k, r in chosen]
+    return _finish(problem, assignments, "multidish-greedy-v1")
+
+
+def strong_rule_selector(problem: FinalPlanningProblem) -> FinalPlanningSolution:
+    """E, Strong Rule-only: a careful heuristic without search (protocol section 5).
+
+    Meal by meal, role by role, it takes the first dish, in this order, that
+    fits the meal time, is not the same role's dish of the day before (unless the
+    role may repeat or the dish was asked for) and stays within the stated caps:
+    - dishes the household asked for, until each request is met;
+    - the least used so far, for variety;
+    - the cheapest after what the pantry already holds;
+    - the quickest, then by id.
+    With a budget, each meal is held to what is left divided by the meals left.
+    When no dish fits that, the cheapest one that does fit the meal is taken.
+    """
+    rules = problem.repetition_rules
+    free = set(rules.repeat_ok_roles) if rules else set()
+    recipes = {r.recipe_id: r for r in problem.recipes}
+    min_uses = {c.recipe_id: c.min_uses for c in (rules.recipe_counts if rules else []) if c.min_uses}
+    caps = {c.recipe_id: c.max_uses for c in (rules.recipe_counts if rules else []) if c.max_uses is not None}
+    wanted_ingredients = {w.ingredient_id: w.min_meals for w in (rules.ingredient_meals if rules else [])}
+    ingredient_meals: dict[str, int] = {}
+    per_gram: dict[str, float] = {}
+    for product in problem.products:
+        if product.available and product.package_quantity:
+            price = product.price_sgd / product.package_quantity
+            per_gram[product.ingredient_id] = min(per_gram.get(product.ingredient_id, price), price)
+    pantry = {p.ingredient_id: p.quantity for p in problem.pantry if p.quantity is not None}
+    uses: dict[str, int] = {}
+    previous: dict[str, str] = {}
+    spent = 0.0
+    assignments: list[PlanningAssignment] = []
+
+    def cost(recipe, slot, role_id) -> float:
+        total = 0.0
+        for item in recipe.ingredients:
+            need = (item.quantity or 0) * slot.servings * _share_guess(slot, role_id) / recipe.servings
+            need = max(0.0, need - pantry.get(item.ingredient_id, 0.0))
+            total += need * per_gram.get(item.ingredient_id, 0.0)
+        return total
+
+    def asked(recipe) -> bool:
+        if uses.get(recipe.recipe_id, 0) < min_uses.get(recipe.recipe_id, 0):
+            return True
+        names = {i.ingredient_id for i in recipe.ingredients}
+        return any(ingredient_meals.get(i, 0) < n for i, n in wanted_ingredients.items() if i in names)
+
+    for index, slot in enumerate(problem.slots):
+        left = len(problem.slots) - index
+        allowance = (problem.purchase_budget_sgd - spent) / left if problem.purchase_budget_sgd is not None else None
+        roles = slot.composition or []
+
+        def fill(skip: int, slot=slot, allowance=allowance, roles=roles):
+            chosen: list = []
+            meal_cost = 0.0
+            for role in slot.composition or []:
+                options = [r for r in problem.recipes if r.course in role.courses and dish_eligible(problem, slot, r)]
+                options.sort(
+                    key=lambda r: (
+                        not asked(r),
+                        uses.get(r.recipe_id, 0),
+                        round(cost(r, slot, role.role_id), 2),
+                        r.total_time_minutes,
+                        r.recipe_id,
+                    )
+                )
+                fitting = []
+                for recipe in options:
+                    trial = [r for _, r in chosen] + [recipe]
+                    if recipe.recipe_id in {r.recipe_id for _, r in chosen}:
+                        continue
+                    if (
+                        slot.max_time_minutes is not None
+                        and meal_minutes(trial, problem.composition_policy) > slot.max_time_minutes
+                    ):
+                        continue
+                    cap = caps.get(recipe.recipe_id, rules.max_uses_per_recipe if rules else None)
+                    if cap is not None and uses.get(recipe.recipe_id, 0) >= cap:
+                        continue
+                    if (
+                        role.role_id not in free
+                        and previous.get(role.role_id) == recipe.recipe_id
+                        and not asked(recipe)
+                    ):
+                        continue
+                    fitting.append(recipe)
+                within = [
+                    r
+                    for r in fitting
+                    if allowance is None or meal_cost + cost(r, slot, role.role_id) <= allowance + 1e-9
+                ]
+                if roles and role is roles[0]:
+                    within, fitting = within[skip:], fitting[skip:]
+                if within:
+                    pick = within[0]
+                elif fitting and role.required:
+                    pick = min(fitting, key=lambda r: (cost(r, slot, role.role_id), r.recipe_id))
+                else:
+                    continue  # an optional dish that does not fit the time or the allowance is left out
+                chosen.append((role.role_id, pick))
+                meal_cost += cost(pick, slot, role.role_id)
+            complete = {r.role_id for r in roles if r.required} <= {k for k, _ in chosen}
+            return chosen, meal_cost, complete
+
+        # When the first role's pick leaves a required dish no room in the meal, try its next option.
+        for skip in range(12):
+            chosen, meal_cost, complete = fill(skip)
+            if complete:
+                break
+        else:
+            chosen, meal_cost, _ = fill(0)
+        for role_id, recipe in chosen:
+            assignments.append(PlanningAssignment(slot_id=slot.slot_id, role_id=role_id, recipe_id=recipe.recipe_id))
+            previous[role_id] = recipe.recipe_id
+            uses[recipe.recipe_id] = uses.get(recipe.recipe_id, 0) + 1
+            for item in recipe.ingredients:
+                if item.ingredient_id in pantry:
+                    need = (item.quantity or 0) * slot.servings * _share_guess(slot, role_id) / recipe.servings
+                    pantry[item.ingredient_id] = max(0.0, pantry[item.ingredient_id] - need)
+        for name in {i.ingredient_id for _, r in chosen for i in recipes[r.recipe_id].ingredients}:
+            ingredient_meals[name] = ingredient_meals.get(name, 0) + 1
+        spent += meal_cost
+    return _finish(problem, assignments, "multidish-strong-rules-v2")
 
 
 ARMS = ("O1", "O2", "C", "E", "F")
@@ -321,7 +441,7 @@ def run_arm(arm: str, episode: dict) -> tuple[dict, dict]:
     if arm == "O2":
         solution, why, extra = run_exact(problem, O2_LIMITS)
         return respond(episode, arm, problem, solution, why=why), extra
-    solution = rule_selector(problem, greedy=arm == "F")
+    solution = greedy_selector(problem) if arm == "F" else strong_rule_selector(problem)
     complete = all(
         {a.role_id for a in solution.assignments if a.slot_id == slot.slot_id}
         >= {r.role_id for r in slot.composition if r.required}

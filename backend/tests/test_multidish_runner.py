@@ -49,3 +49,16 @@ def test_every_developer_label_agrees_with_its_pool():
         label = episode["gold"]["class"]
         assert not (label == "feasible" and not exists), path.name
         assert not (label == "infeasible" and exists), path.name
+
+
+def test_strong_rules_honour_a_request_and_vary_more_than_the_greedy_floor():
+    from app.evaluation.multidish_runner import greedy_selector, strong_rule_selector
+    from tests.test_planning_meal_composition import three_days
+
+    asked = three_days(repetition_rules={"recipe_counts": [{"recipe_id": "beef", "min_uses": 2}]})
+    strong = strong_rule_selector(asked)
+    assert sum(a.recipe_id == "beef" for a in strong.assignments) >= 2
+
+    plain = three_days()
+    distinct = lambda solution: len({a.recipe_id for a in solution.assignments})  # noqa: E731
+    assert distinct(strong_rule_selector(plain)) > distinct(greedy_selector(plain))
