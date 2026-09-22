@@ -140,6 +140,7 @@ def build_problem(episode: dict, understood: Constraints) -> FinalPlanningProble
                     "ingredients": [
                         {"ingredient_id": line["ingredient"], "quantity": line["quantity"], "unit": line["unit"]}
                         for line in r["ingredients"]
+                        if line["quantity"] > 0  # a zero-gram line buys nothing
                     ],
                     # Release nutrition is not computed; no episode states a target (protocol section 2).
                     "nutrients_per_serving": dict.fromkeys(NUTRIENTS, 0),

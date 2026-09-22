@@ -103,6 +103,8 @@ def load_release_catalog(root: Path | None = None) -> ReleaseCatalog:
                 "prep_time_minutes": int(record["prep_minutes"]),
                 "cook_time_minutes": int(record["cook_minutes"]),
                 "dietary_tags": list(record["dietary_tags"]),
+                # A zero-gram line ("1/8 teaspoon dill weed" rounded to 0 g) stays here: it
+                # counts for eligibility and for the pool's products, but buys nothing.
                 "ingredients": lines,
                 "nutrition": None,  # not computed in the release (protocol section 2)
             }
