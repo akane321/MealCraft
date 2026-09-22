@@ -525,7 +525,50 @@ def _check_hard_constraints(
         )
 
     checks.append(_check_nutrition(gold, recipes, tolerances.nutrition_relative))
+    checks.append(_check_repetition(gold, response, catalogs))
     return checks
+
+
+def _check_repetition(gold: dict, response: CommonEpisodeResponse, catalogs: Catalogs) -> Check:
+    """What the household said about repeating, and only that (protocol v2-multidish section 4).
+
+    Saying nothing makes repetition a quality measure, reported but never a failure:
+    a household may want a dish twice, a soup all week, or one ingredient used up.
+    """
+    rules = gold.get("repetition_requirements")
+    if not rules:
+        return Check("repetition_requests_met", "not_applicable", "the household said nothing about repeating")
+    assert response.plan is not None
+    uses: dict[str, int] = {}
+    for a in response.plan.assignments:
+        uses[a.recipe_id] = uses.get(a.recipe_id, 0) + 1
+    broken = []
+    cap = rules.get("max_uses_per_recipe")
+    if cap is not None:
+        broken += [f"{r} x{n} > {cap}" for r, n in sorted(uses.items()) if n > cap]
+    for count in rules.get("recipe_counts") or []:
+        n = uses.get(count["recipe_id"], 0)
+        if n < count.get("min_uses", 0):
+            broken.append(f"{count['recipe_id']} x{n} < {count['min_uses']}")
+        if count.get("max_uses") is not None and n > count["max_uses"]:
+            broken.append(f"{count['recipe_id']} x{n} > {count['max_uses']}")
+    for want in rules.get("ingredient_meals") or []:
+        meals = _meals(response)
+        n = sum(
+            any(
+                want["ingredient_id"] in {i["ingredient"] for i in catalogs.recipes[d.recipe_id]["ingredients"]}
+                for d in dishes
+                if d.recipe_id in catalogs.recipes
+            )
+            for dishes in meals.values()
+        )
+        if n < want["min_meals"]:
+            broken.append(f"{want['ingredient_id']} in {n} meals < {want['min_meals']}")
+    return Check(
+        "repetition_requests_met",
+        "failed" if broken else "passed",
+        "; ".join(broken) if broken else "every stated repetition request holds",
+    )
 
 
 def _check_shopping(

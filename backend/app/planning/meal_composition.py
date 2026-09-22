@@ -4,7 +4,7 @@ A slot without a composition is one dish at the whole meal, so every quantity
 and time computed here equals the one-recipe-per-slot arithmetic it replaces.
 """
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from fractions import Fraction
 from math import ceil
 
@@ -24,6 +24,36 @@ def role_key(slot: PlanningSlot, assignment: PlanningAssignment) -> str | None:
     if slot.composition is None:
         return MAIN_ROLE if assignment.role_id in (None, MAIN_ROLE) else None
     return assignment.role_id if assignment.role_id in {r.role_id for r in slot.composition} else None
+
+
+def repetition_shortfalls(problem: FinalPlanningProblem, meals: list[list[str]]) -> list[str]:
+    """Every stated repetition rule the meals break; `meals` lists each meal's recipe ids."""
+    rules = problem.repetition_rules
+    if rules is None:
+        return []
+    uses = Counter(recipe_id for meal in meals for recipe_id in meal)
+    recipes = {r.recipe_id: r for r in problem.recipes}
+    problems = []
+    if rules.max_uses_per_recipe is not None:
+        problems += [
+            f"{r} used {n} times, the household allows {rules.max_uses_per_recipe}"
+            for r, n in sorted(uses.items())
+            if n > rules.max_uses_per_recipe
+        ]
+    for count in rules.recipe_counts:
+        n = uses.get(count.recipe_id, 0)
+        if n < count.min_uses:
+            problems.append(f"{count.recipe_id} used {n} times, the household asked for at least {count.min_uses}")
+        if count.max_uses is not None and n > count.max_uses:
+            problems.append(f"{count.recipe_id} used {n} times, the household allows {count.max_uses}")
+    for wanted in rules.ingredient_meals:
+        n = sum(
+            any(wanted.ingredient_id in {i.ingredient_id for i in recipes[r].ingredients} for r in meal if r in recipes)
+            for meal in meals
+        )
+        if n < wanted.min_meals:
+            problems.append(f"{wanted.ingredient_id} in {n} meals, the household asked for at least {wanted.min_meals}")
+    return problems
 
 
 def require_one_dish_slots(problem: FinalPlanningProblem) -> None:

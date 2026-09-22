@@ -74,10 +74,18 @@ on every composition the set uses.
 | `meal_distinct_dishes` | No meal holds the same recipe twice. |
 | `servings_feed_household` | Each dish is cooked for at least `household_size × share`, and the shares of a meal reach one whole meal. Shares are the ADR-0036 defaults: 1.0; 0.75 / 0.5; 0.6 / 0.4; 0.5 / 0.35. The main takes the first number and every other dish the second. |
 | `cooking_time_respected` | The meal's one-cook estimate is at most the stated limit: the sum of `prep + 0.5 × cook`, plus the longest `0.5 × cook`, plus 5 minutes per extra dish, rounded up to 5. A one-dish meal is its own `prep + cook`. |
+| `repetition_requests_met` | Only what the household said about repeating, recorded in `gold.applicable_hard_constraints.repetition_requirements`: a recipe at least or at most N times, no recipe more than N times ("don't repeat" is 1), an ingredient in at least N meals, and roles the household lets repeat. A household that says nothing is not scored on repetition. |
 | Allergens, exclusions, diets | Checked for every dish, as in v2. |
 | Shopping, pantry, budget | As in v2. Demand is each dish's ingredients scaled to its stated servings. |
 
 These values are recorded in the set manifest, as the tolerances are.
+
+Repetition the household did not ask about is reported beside strict success, never inside it:
+- distinct recipes;
+- adjacent repeats of a dish in one role.
+
+A household may want a dish twice, a soup all week, or one ingredient used up, so repeating is not a
+failure in itself. The owner decided this on 2026-09-22.
 
 ## 5. Arms (decision ADR-0037)
 
