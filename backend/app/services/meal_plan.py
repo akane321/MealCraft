@@ -7,7 +7,7 @@ from app.planning.conflict_explanation import explain_infeasibility, product_exp
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
-from app.repositories.meal_plan import MealPlanRepository
+from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
 from app.repositories.recipe import RecipeRepository
 from app.schemas.meal_plan import (
     MealPlanEntryStatus,
@@ -56,7 +56,9 @@ class WeeklyMealPlanService:
         replaces_plan_id: int | None = None,
     ) -> WeeklyMealPlanResponse:
         started_at = datetime.now(UTC)
-        recipes = self.recipe_repository.list_for_planning()
+        composition = constraints.meal_composition
+        courses = sorted({c for role in composition for c in role.courses}) if composition is not None else None
+        recipes = self.recipe_repository.list_for_planning(courses=courses)
         recommendation_result = self.recommendation_service.recommend(
             constraints,
             deduct_pantry_from_cost=False,
@@ -133,9 +135,19 @@ class WeeklyMealPlanService:
                 f"The current eligible catalog contains {eligible_count} {recipe_label}; "
                 "recipes are rotated across the seven days."
             )
+        placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(selected))]
         scheduled = [
-            (constraints.start_date + timedelta(days=index), recommendation)
-            for index, recommendation in enumerate(selected)
+            ScheduledDish(
+                planned_date=constraints.start_date + timedelta(days=slot_index),
+                day_index=slot_index + 1,
+                meal_type=meal_type,
+                role_id=role_id,
+                portion_share=portion_share,
+                recommendation=recommendation,
+            )
+            for (slot_index, meal_type, role_id, portion_share), recommendation in zip(
+                placements, selected, strict=True
+            )
         ]
         plan = self.repository.create(
             constraints=constraints,

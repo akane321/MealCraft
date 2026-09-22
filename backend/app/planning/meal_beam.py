@@ -65,9 +65,11 @@ class MealBeamResult:
 
 
 class MealBeamPlanner(FinalScopeReferencePlanner):
-    def __init__(self, limits: MealBeamLimits | None = None):
+    def __init__(self, limits: MealBeamLimits | None = None, *, local_losses: dict[str, float] | None = None):
+        """`local_losses` replaces the reference dish loss, as the product's recommendation ranking does."""
         super().__init__()
         self.limits = limits or MealBeamLimits()
+        self.local_losses = dict(local_losses) if local_losses is not None else None
 
     def meal_options(self, problem: FinalPlanningProblem, slot: PlanningSlot) -> list[MealOption]:
         """The slot's best meals: dishes that pass on their own, combined into meals that pass as meals."""
@@ -105,11 +107,15 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         meals.sort(key=lambda meal: (meal.loss, meal.dishes))
         return meals[: self.limits.meal_options_per_slot]
 
-    @staticmethod
-    def _dish_loss(problem: FinalPlanningProblem, slot: PlanningSlot, recipe: PlanningRecipeCandidate) -> float:
-        return local_recipe_loss(
-            recipe, max_time_minutes=slot.max_time_minutes, health_preferences=problem.health_preferences
-        ) + meal_affinity_loss(recipe, slot.meal_type)
+    def _dish_loss(self, problem: FinalPlanningProblem, slot: PlanningSlot, recipe: PlanningRecipeCandidate) -> float:
+        local = (
+            self.local_losses[recipe.recipe_id]
+            if self.local_losses is not None
+            else local_recipe_loss(
+                recipe, max_time_minutes=slot.max_time_minutes, health_preferences=problem.health_preferences
+            )
+        )
+        return local + meal_affinity_loss(recipe, slot.meal_type)
 
     def search_candidates(self, problem: FinalPlanningProblem) -> MealBeamResult:
         require_finite_problem(problem)
@@ -131,9 +137,8 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                     if option is None:
                         next_states.append(state)
                     elif horizon_permitted(problem, state, option.dishes):
-                        next_states.append(
-                            MealState(state.choices + ((slot.slot_id, option.dishes),), state.loss + option.loss)
-                        )
+                        loss = state.loss + option.loss + repetition_loss(problem, state, option.dishes)
+                        next_states.append(MealState(state.choices + ((slot.slot_id, option.dishes),), loss))
                 if exhausted:
                     break
             if exhausted:
@@ -256,6 +261,20 @@ def meal_permitted(problem, slot, dishes, recipes) -> bool:
         if sum(len(group) for group in proteins) != len(set().union(*proteins)):
             return False
     return True
+
+
+def repetition_loss(problem, state: MealState, dishes) -> float:
+    """Without a diversity policy, the one-dish beam's legacy penalties, counted per dish.
+
+    Each earlier use of a recipe costs 0.10 and repeating the previous meal's
+    dish costs 0.35 more (`app/planning/diversity.py`). A recorded policy makes
+    repetition a hard rule instead (`horizon_permitted`).
+    """
+    if problem.diversity_policy is not None:
+        return 0.0
+    previous = [recipe_id for _, meal in state.choices for _, recipe_id in meal]
+    last = {recipe_id for _, recipe_id in state.choices[-1][1]} if state.choices else set()
+    return sum(previous.count(recipe_id) * 0.10 + (0.35 if recipe_id in last else 0.0) for _, recipe_id in dishes)
 
 
 def horizon_permitted(problem, state: MealState, dishes) -> bool:
