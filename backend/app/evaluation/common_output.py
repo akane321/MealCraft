@@ -46,6 +46,9 @@ class SlotAssignment(StrictModel):
     slot_id: str
     recipe_id: str
     servings: float = Field(gt=0)
+    # The dish role this fills when the household's meals have several dishes
+    # (protocol v2-multidish); None in a one-dish episode.
+    role_id: str | None = None
 
 
 class ShoppingLine(StrictModel):

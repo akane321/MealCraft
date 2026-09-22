@@ -31,6 +31,8 @@ class PacketHouseholdProfile(StrictModel):
     allergens: list[str] = Field(default_factory=list)
     excluded_ingredients: list[str] = Field(default_factory=list)
     dietary_preferences: list[str] = Field(default_factory=list)
+    # The dish roles of every meal (protocol v2-multidish); None is one dish a meal.
+    meal_composition: list[dict] | None = None
 
 
 class PacketPantryItem(StrictModel):
