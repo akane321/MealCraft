@@ -188,10 +188,46 @@ class MealCpSatPlanner(FinalScopeReferencePlanner):
                     [size_of[slot.slot_id, 1].Not(), size_of[slot.slot_id, 0].Not()]
                 )
 
-        # Legacy repetition penalties over dishes (no diversity policy).
+        rules = problem.repetition_rules
+        free = set(rules.repeat_ok_roles) if rules else set()
+        # Stated repetition rules are hard; a dish in a repeat-ok role pays no penalty.
         all_ids = sorted({rid for (_, _, rid) in x})
+        if rules is not None:
+            by_recipe = {r.recipe_id: r for r in recipes}
+            for r_id in all_ids:
+                used = sum(v for (_, _, rid), v in x.items() if rid == r_id)
+                cap = next((c.max_uses for c in rules.recipe_counts if c.recipe_id == r_id), None)
+                cap = cap if cap is not None else rules.max_uses_per_recipe
+                if cap is not None:
+                    model.Add(used <= cap)
+            for count in rules.recipe_counts:
+                used = sum((v for (_, _, rid), v in x.items() if rid == count.recipe_id), zero)
+                model.Add(used >= count.min_uses)
+            for want in rules.ingredient_meals:
+                hits = []
+                for slot in slots:
+                    has = [
+                        v
+                        for (s, _, rid), v in x.items()
+                        if s == slot.slot_id
+                        and want.ingredient_id in {i.ingredient_id for i in by_recipe[rid].ingredients}
+                    ]
+                    meal_has = model.NewBoolVar("")
+                    model.Add(sum(has, zero) >= 1).OnlyEnforceIf(meal_has)
+                    hits.append(meal_has)
+                model.Add(sum(hits, zero) >= want.min_meals)
+        penalised = {slot.slot_id: {} for slot in slots}
+        for (s, key, r_id), var in x.items():
+            if key not in free:
+                penalised[s].setdefault(r_id, []).append(var)
+        for s in penalised:
+            for r_id, vars_ in list(penalised[s].items()):
+                in_meal = model.NewBoolVar("")
+                model.Add(sum(vars_) == in_meal)
+                penalised[s][r_id] = in_meal
+        # Legacy repetition penalties over dishes (no diversity policy).
         for r_id in all_ids:
-            uses = [served[s.slot_id][r_id] for s in slots if r_id in served[s.slot_id]]
+            uses = [penalised[s.slot_id][r_id] for s in slots if r_id in penalised[s.slot_id]]
             if len(uses) > 1:
                 count = model.NewIntVar(0, len(uses), f"uses[{r_id}]")
                 model.Add(count == sum(uses))
@@ -200,7 +236,7 @@ class MealCpSatPlanner(FinalScopeReferencePlanner):
                 # sum over uses of earlier uses = n(n-1)/2
                 objective.append(round(REPEAT_LOSS * SCALE / 2) * (square - count))
             for previous, current in zip(slots, slots[1:], strict=False):
-                a, b = served[previous.slot_id].get(r_id), served[current.slot_id].get(r_id)
+                a, b = penalised[previous.slot_id].get(r_id), penalised[current.slot_id].get(r_id)
                 if a is not None and b is not None:
                     both = model.NewBoolVar("")
                     model.AddBoolAnd([a, b]).OnlyEnforceIf(both)

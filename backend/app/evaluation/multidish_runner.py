@@ -58,6 +58,7 @@ class Constraints:
     max_minutes: int | None
     budget_sgd: float | None
     clarify: list[str]
+    repetition: dict | None = None
 
 
 def gold_constraints(episode: dict) -> Constraints:
@@ -71,6 +72,7 @@ def gold_constraints(episode: dict) -> Constraints:
         max_minutes=hard["max_cooking_time_minutes"],
         budget_sgd=hard["budget_sgd"],
         clarify=list(gold["required_clarification_fields"]) if gold["class"] == "needs_clarification" else [],
+        repetition=hard.get("repetition_requirements"),
     )
 
 
@@ -161,6 +163,7 @@ def build_problem(episode: dict, understood: Constraints) -> FinalPlanningProble
             "excluded_ingredients": understood.excluded_ingredients,
             "dietary_requirements": understood.dietary_tags,
             "purchase_budget_sgd": understood.budget_sgd,
+            "repetition_rules": understood.repetition,
             "catalog_version": "release-v2.1",
             "product_snapshot_version": "fairprice-v2-snapshot",
             "policy_version": PROTOCOL,

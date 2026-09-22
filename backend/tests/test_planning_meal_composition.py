@@ -202,3 +202,76 @@ def test_cp_sat_proves_a_budget_no_plan_can_meet():
     solution = MealCpSatPlanner(MealCpSatLimits(max_time_seconds=10, max_deterministic_time=10)).solve(packet)
 
     assert solution.status == "infeasible" and not solution.assignments
+
+
+def three_days(**changes):
+    base = problem().model_dump(mode="json")
+    base["recipes"] += [
+        recipe("beef", "main", 10, 20, calories=520),
+        recipe("beans", "side", 5, 10, calories=120, ingredient="beans-base"),
+    ]
+    base["products"].append(
+        {
+            "ingredient_id": "beans-base",
+            "product_id": "p-beans",
+            "package_quantity": 100,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+        }
+    )
+    base["products"].append(
+        {
+            "ingredient_id": "beef-base",
+            "product_id": "p-beef",
+            "package_quantity": 100,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+        }
+    )
+    base["slots"] = [
+        {**base["slots"][0], "slot_id": f"d{i}", "planned_date": f"2026-09-{28 + i:02d}"} for i in range(3)
+    ]
+    base.update(changes)
+    return FinalPlanningProblem.model_validate(base)
+
+
+def planners():
+    from app.planning.meal_beam import MealBeamPlanner
+    from app.planning.meal_cp_sat import MealCpSatLimits, MealCpSatPlanner
+
+    return MealBeamPlanner(), MealCpSatPlanner(MealCpSatLimits(max_time_seconds=10, max_deterministic_time=10))
+
+
+def test_a_dish_the_household_asks_for_twice_is_planned_twice_by_both_planners():
+    packet = three_days(repetition_rules={"recipe_counts": [{"recipe_id": "beef", "min_uses": 2}]})
+
+    for planner in planners():
+        solution = planner.solve(packet)
+        assert solution.status == "feasible", (planner, solution.validation.checks)
+        assert sum(a.recipe_id == "beef" for a in solution.assignments) >= 2
+
+
+def test_an_ingredient_asked_for_in_every_meal_and_no_repeats_are_hard_rules():
+    wanted = three_days(repetition_rules={"ingredient_meals": [{"ingredient_id": "beans-base", "min_meals": 3}]})
+    for planner in planners():
+        solution = planner.solve(wanted)
+        assert solution.status == "feasible"
+        assert sum(a.recipe_id == "beans" for a in solution.assignments) == 3  # beans are the only dish with beans
+
+    # Two mains cannot fill three dinners without repeating one.
+    no_repeats = three_days(repetition_rules={"max_uses_per_recipe": 1})
+    beam, exact = planners()
+    assert beam.solve(no_repeats).status == "candidate_rejected"
+    assert exact.solve(no_repeats).status == "infeasible"
+
+
+def test_the_validator_reports_a_broken_repetition_rule():
+    packet = three_days(repetition_rules={"recipe_counts": [{"recipe_id": "beef", "min_uses": 2}]})
+    assignments = [
+        PlanningAssignment(slot_id=f"d{i}", role_id=role, recipe_id=recipe_id)
+        for i in range(3)
+        for role, recipe_id in (("main", "chicken"), ("vegetable", "greens"))
+    ]
+    report, _ = validate(packet, assignments)
+
+    assert "repetition_rule" in failed(report)

@@ -232,6 +232,39 @@ class PlanningCompositionPolicy(BaseModel):
         return self
 
 
+class PlanningRecipeCount(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    recipe_id: str = Field(min_length=1, max_length=120)
+    min_uses: int = Field(default=0, ge=0, le=84)
+    max_uses: int | None = Field(default=None, ge=0, le=84)
+
+    @model_validator(mode="after")
+    def validate_range(self) -> "PlanningRecipeCount":
+        if self.max_uses is not None and self.max_uses < self.min_uses:
+            raise ValueError("a recipe's max_uses cannot be below its min_uses")
+        return self
+
+
+class PlanningIngredientMeals(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    ingredient_id: str = Field(min_length=1, max_length=160)
+    min_meals: int = Field(ge=1, le=84)
+
+
+class PlanningRepetitionRules(BaseModel):
+    """What the household said about repeating (owner's choice, 2026-09-22).
+
+    Only what the user said is hard. Saying nothing leaves repetition a soft
+    penalty, which a role in `repeat_ok_roles` does not pay.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    max_uses_per_recipe: int | None = Field(default=None, ge=1, le=84)  # "don't repeat" is 1
+    recipe_counts: list[PlanningRecipeCount] = Field(default_factory=list)
+    ingredient_meals: list[PlanningIngredientMeals] = Field(default_factory=list)
+    repeat_ok_roles: list[str] = Field(default_factory=list)
+
+
 class FinalPlanningProblem(BaseModel):
     problem_id: str = Field(min_length=1, max_length=120)
     slots: list[PlanningSlot] = Field(min_length=1, max_length=84)
@@ -253,6 +286,7 @@ class FinalPlanningProblem(BaseModel):
     # None preserves legacy packets; it does not certify P3 diversity coverage.
     diversity_policy: PlanningDiversityPolicy | None = None
     composition_policy: PlanningCompositionPolicy = Field(default_factory=PlanningCompositionPolicy)
+    repetition_rules: PlanningRepetitionRules | None = None
     catalog_version: str
     product_snapshot_version: str
     policy_version: str

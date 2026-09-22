@@ -86,9 +86,10 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 eligible = [r for r in eligible if r.recipe_id == slot.locked_recipe_id]
             ranked = sorted(eligible, key=lambda r: (self._dish_loss(problem, slot, r), r.recipe_id))
             key = role.role_id if slot.composition is not None else None
-            options: list[tuple[str | None, str] | None] = [
-                (key, r.recipe_id) for r in ranked[: self.limits.candidates_per_role]
-            ]
+            kept = ranked[: self.limits.candidates_per_role]
+            # A dish the household asked for is always a candidate, however it ranks.
+            kept += [r for r in ranked[self.limits.candidates_per_role :] if wanted(problem, r)]
+            options: list[tuple[str | None, str] | None] = [(key, r.recipe_id) for r in kept]
             if not role.required:
                 options.append(None)
             per_role.append(options)
@@ -108,7 +109,14 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             # Each dish's rank within its role; their sum spreads tied meals across every role's
             # choices, where ordering ties by id kept 64 meals sharing one main.
             spread[dishes] = sum(options.index(dish) for options, dish in zip(per_role, combination, strict=True))
-        meals.sort(key=lambda meal: (meal.loss, spread[meal.dishes], meal.dishes))
+        meals.sort(
+            key=lambda meal: (
+                -sum(wanted(problem, by_id[r]) for _, r in meal.dishes),
+                meal.loss,
+                spread[meal.dishes],
+                meal.dishes,
+            )
+        )
         return meals[: self.limits.meal_options_per_slot]
 
     def _dish_loss(self, problem: FinalPlanningProblem, slot: PlanningSlot, recipe: PlanningRecipeCandidate) -> float:
@@ -148,7 +156,11 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             if exhausted:
                 states = []  # A partial horizon is never returned as a plan.
                 break
-            next_states.sort(key=lambda s: (s.loss, s.choices))
+            remaining = len(problem.slots) - len(next_states[0].choices) if next_states else 0
+            next_states = [s for s in next_states if requests_reachable(problem, s, remaining)]
+            # Progress towards what the household asked for orders states, but is never part
+            # of their loss, so the loss stays the objective CP-SAT minimises.
+            next_states.sort(key=lambda s: (s.loss - REQUEST_BONUS * request_progress(problem, s), s.choices))
             pruned = pruned or len(next_states) > self.limits.width
             states = next_states[: self.limits.width]
             if not states:
@@ -276,18 +288,75 @@ def repetition_loss(problem, state: MealState, dishes) -> float:
     """
     if problem.diversity_policy is not None:
         return 0.0
-    previous = [recipe_id for _, meal in state.choices for _, recipe_id in meal]
-    last = {recipe_id for _, recipe_id in state.choices[-1][1]} if state.choices else set()
-    return sum(previous.count(recipe_id) * 0.10 + (0.35 if recipe_id in last else 0.0) for _, recipe_id in dishes)
+    free = set(problem.repetition_rules.repeat_ok_roles) if problem.repetition_rules else set()
+    previous = [recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in free]
+    last = {recipe_id for role, recipe_id in state.choices[-1][1] if role not in free} if state.choices else set()
+    return sum(
+        previous.count(recipe_id) * 0.10 + (0.35 if recipe_id in last else 0.0)
+        for role, recipe_id in dishes
+        if role not in free
+    )
+
+
+# Orders beam states by progress towards stated requests; larger than any meal's loss.
+REQUEST_BONUS = 3.0
+
+
+def wanted(problem, recipe) -> bool:
+    """A dish that counts towards a stated minimum."""
+    rules = problem.repetition_rules
+    if rules is None:
+        return False
+    if any(c.recipe_id == recipe.recipe_id and c.min_uses for c in rules.recipe_counts):
+        return True
+    names = {i.ingredient_id for i in recipe.ingredients}
+    return any(w.ingredient_id in names for w in rules.ingredient_meals)
+
+
+def _deficits(problem, state: MealState) -> list[int]:
+    rules = problem.repetition_rules
+    if rules is None:
+        return []
+    recipes = {r.recipe_id: r for r in problem.recipes}
+    uses = [r for _, meal in state.choices for _, r in meal]
+    deficits = [max(0, c.min_uses - uses.count(c.recipe_id)) for c in rules.recipe_counts]
+    for w in rules.ingredient_meals:
+        met = sum(
+            any(w.ingredient_id in {i.ingredient_id for i in recipes[r].ingredients} for _, r in meal)
+            for _, meal in state.choices
+        )
+        deficits.append(max(0, w.min_meals - met))
+    return deficits
+
+
+def request_progress(problem, state: MealState) -> int:
+    rules = problem.repetition_rules
+    if rules is None:
+        return 0
+    wanted_total = sum(c.min_uses for c in rules.recipe_counts) + sum(w.min_meals for w in rules.ingredient_meals)
+    return wanted_total - sum(_deficits(problem, state))
+
+
+def requests_reachable(problem, state: MealState, remaining_slots: int) -> bool:
+    """Each stated minimum can still be met in the meals left (one use per meal at most)."""
+    return all(deficit <= remaining_slots for deficit in _deficits(problem, state))
 
 
 def horizon_permitted(problem, state: MealState, dishes) -> bool:
     """No recipe twice, no primary protein shared with the previous meal, core caps over dishes."""
+    previous = [recipe_id for _, meal in state.choices for _, recipe_id in meal]
+    ids = [recipe_id for _, recipe_id in dishes]
+    rules = problem.repetition_rules
+    if rules is not None:
+        caps = {c.recipe_id: c.max_uses for c in rules.recipe_counts if c.max_uses is not None}
+        for recipe_id in set(ids):
+            used = previous.count(recipe_id) + ids.count(recipe_id)
+            cap = caps.get(recipe_id, rules.max_uses_per_recipe)
+            if cap is not None and used > cap:
+                return False
     policy = problem.diversity_policy
     if policy is None:
         return True
-    previous = [recipe_id for _, meal in state.choices for _, recipe_id in meal]
-    ids = [recipe_id for _, recipe_id in dishes]
     if set(ids) & set(previous):
         return False
     if state.choices:

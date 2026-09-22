@@ -182,3 +182,17 @@ def test_demand_left_unbought_fails_the_package_check():
     score = scorer.score_episode(episode(limit=120), response, CATALOGS)
 
     assert outcomes(score)["packages_cover_demand"] == "failed"
+
+
+def test_only_a_stated_repetition_request_is_scored():
+    silent = scorer.score_episode(
+        episode(limit=120), answer([("main", "chicken", 2.4), ("vegetable", "greens", 1.6)]), CATALOGS
+    )
+    asked = episode(limit=120)
+    asked["gold"]["applicable_hard_constraints"]["repetition_requirements"] = {
+        "recipe_counts": [{"recipe_id": "broth", "min_uses": 1}]
+    }
+    missed = scorer.score_episode(asked, answer([("main", "chicken", 3.0), ("vegetable", "greens", 2.0)]), CATALOGS)
+
+    assert outcomes(silent)["repetition_requests_met"] == "not_applicable"
+    assert outcomes(missed)["repetition_requests_met"] == "failed"
