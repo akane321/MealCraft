@@ -35,6 +35,13 @@ def draw(episode: dict) -> tuple[list[str], list[str]]:
     for course in courses:
         eligible = sorted(r["slug"] for r in catalog.recipes if r["course"] == course)
         slugs += rng.sample(eligible, min(PER_COURSE, len(eligible)))
+    # A dish the household asks for by name is in the pool: the request is the fact, not a choice of pool.
+    rules = episode["gold"]["applicable_hard_constraints"].get("repetition_requirements") or {}
+    slugs += [
+        c["recipe_id"]
+        for c in rules.get("recipe_counts") or []
+        if c.get("min_uses") and c["recipe_id"] in catalog.by_slug and c["recipe_id"] not in slugs
+    ]
     ingredients = {line["ingredient"] for slug in slugs for line in catalog.by_slug[slug]["ingredients"]}
     products = sorted(p["external_id"] for p in catalog.products if p["ingredient_id"] in ingredients)
     return sorted(slugs), products

@@ -40,15 +40,12 @@ def test_the_committed_pools_are_the_drawn_ones():
         assert episode["scenario"]["fairprice_product_ids"] == products, path.name
 
 
-def test_every_developer_label_agrees_with_its_pool():
-    from app.evaluation.multidish_labels import valid_meal_exists
+def test_every_developer_label_is_proven_from_its_pool():
+    from app.evaluation.multidish_labels import check
 
     for path in sorted(EPISODES.glob("*.json")):
         episode = json.loads(path.read_text(encoding="utf-8"))
-        exists, _ = valid_meal_exists(episode)
-        label = episode["gold"]["class"]
-        assert not (label == "feasible" and not exists), path.name
-        assert not (label == "infeasible" and exists), path.name
+        assert check(episode) is None, (path.name, check(episode))
 
 
 def test_strong_rules_honour_a_request_and_vary_more_than_the_greedy_floor():
