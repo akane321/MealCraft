@@ -1,0 +1,10 @@
+{
+  "schema_version": "ingredient-hierarchy-v1",
+  "note": "Families no single ingredient id stands for. Add one only for a real household request, written in `serves`; where an ingredient id names the family (pork, beef, cheese), use the id.",
+  "groups": {
+    "group:alcohol": {
+      "description": "Every drink, cooking liquid or flavouring that contains alcohol as used.",
+      "serves": "No alcohol in the cooking at all."
+    }
+  }
+}
