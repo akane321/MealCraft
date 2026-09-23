@@ -321,6 +321,8 @@ def _plan_demand(response: CommonEpisodeResponse, catalogs: Catalogs) -> tuple[d
         for item in recipe["ingredients"]:
             name, unit = item["ingredient"], item["unit"]
             quantity = float(item["quantity"]) * scale
+            if quantity <= 0:
+                continue  # a line rounded to zero is not demand and needs no purchase
             if name in demand:
                 previous, previous_unit = demand[name]
                 converted = compatible(quantity, unit, previous_unit)

@@ -138,10 +138,15 @@ never dropped.
 
 - **Developer set.** Written by the implementation agent. It may be inspected
   and used to fix code and calibrate the deterministic-time limit.
-- **Held-out set.** 40 episodes, the owner's choice. They are drafted by an AI
-  agent from a sealed packet (the catalog facts, this protocol's episode shape
-  and the authoring rules, with no code and no results), then reviewed by the
-  owner and frozen before any arm runs on them. Nothing is tuned against them.
+- **Held-out set.** 40 episodes, the owner's choice: `data/evaluation/heldout/v2-multidish`.
+  Drafted by an AI agent from a sealed packet (the catalog facts, this
+  protocol's episode shape and the authoring rules, with no code and no
+  results), then reviewed by the owner in two rounds and revised by the same
+  agent on their notes. Frozen before any arm ran on it, at digest
+  `9a0c3e90820235b8…` over the episodes' canonical JSON. Nothing is tuned against it.
+  Its provenance records what independence it has and what it does not: the
+  drafter saw no system and no result, but the revisions were reviewer-guided,
+  so it is not independent scenario-first drafting.
 
 With 40 episodes, a paired difference smaller than about 20 percentage points
 cannot be told from noise (v2 section 12). Results are reported per category as
