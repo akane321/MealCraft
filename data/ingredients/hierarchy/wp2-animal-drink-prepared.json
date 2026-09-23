@@ -4,5 +4,8 @@
   "title": "Meat, fish, eggs, dairy, fats, drinks, condiments and prepared foods",
   "drafted_by": null,
   "accepted_by": null,
+  "notes": [
+    "Policy table (knowledge repository, operations/ingredient-hierarchy/README.md section 5) confirmed by the owner on 2026-09-24: every default stands."
+  ],
   "entries": {}
 }
