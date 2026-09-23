@@ -5,11 +5,14 @@ Machine: Intel64 Family 6 Model 198 Stepping 2, GenuineIntel (Windows).
 
 | Arm | Strict success | By class | Median s | p95 s | Distinct recipes | Adjacent repeats | Failure mechanisms |
 | --- | ---: | --- | ---: | ---: | ---: | ---: | --- |
-| O1 | 14/14 | feasible 12/12, infeasible 1/1, needs_clarification 1/1 | 0.267 | 0.927 | 10.08 | 39 | - |
-| O2 | 14/14 | feasible 12/12, infeasible 1/1, needs_clarification 1/1 | 2.026 | 95.608 | 11.92 | 30 | - |
-| C | 8/14 | feasible 6/12, infeasible 1/1, needs_clarification 1/1 | 0.245 | 0.301 | 13.58 | 0 | budget_respected 4, budget_truthful 5, no_excluded_ingredient 1 |
-| E | 8/14 | feasible 6/12, infeasible 1/1, needs_clarification 1/1 | 0.039 | 0.059 | 16.58 | 0 | budget_respected 4, budget_truthful 5, no_excluded_ingredient 1 |
-| F | 9/14 | feasible 7/12, infeasible 1/1, needs_clarification 1/1 | 0.022 | 0.029 | 2.5 | 180 | budget_respected 4, budget_truthful 5 |
+| O1 | 14/14 | feasible 12/12, infeasible 1/1, needs_clarification 1/1 | 0.264 | 1.028 | 10.08 | 39 | - |
+| O2 | 14/14 | feasible 12/12, infeasible 1/1, needs_clarification 1/1 | 2.021 | 95.343 | 11.92 | 30 | - |
+| A | 14/14 | feasible 12/12, infeasible 1/1, needs_clarification 1/1 | 1.673 | 2.763 | 10.08 | 39 | - |
+| B | 14/14 | feasible 12/12, infeasible 1/1, needs_clarification 1/1 | 2.04 | 12.985 | 11.92 | 39 | - |
+| C | 8/14 | feasible 6/12, infeasible 1/1, needs_clarification 1/1 | 0.254 | 0.289 | 13.58 | 0 | budget_respected 4, budget_truthful 5, no_excluded_ingredient 1 |
+| D | 6/14 | feasible 5/12, infeasible 1/1, needs_clarification 0/1 | 2.359 | 2.927 | 14.67 | 6 | budget_respected 4, cooking_time_respected 1, meal_role_courses 1, meal_roles_filled 1, no_unnecessary_clarification 1, required_clarification_asked 1, required_slots_assigned 1 |
+| E | 8/14 | feasible 6/12, infeasible 1/1, needs_clarification 1/1 | 0.041 | 0.063 | 16.58 | 0 | budget_respected 4, budget_truthful 5, no_excluded_ingredient 1 |
+| F | 9/14 | feasible 7/12, infeasible 1/1, needs_clarification 1/1 | 0.024 | 0.027 | 2.5 | 180 | budget_respected 4, budget_truthful 5 |
 
 O2: CP-SAT proved optimality on 9 episodes; 0 answers are the warm-start plan because CP-SAT ended worse.
 
@@ -30,8 +33,8 @@ Counts only, no per-category rates (ADR-0028).
 - `data/evaluation/dev/v2-multidish/episodes/md-dev-008.json`: `4352297568b43a048a3ac301404e7410ed137206619efc33b209dc8c695bb791`
 - `data/evaluation/dev/v2-multidish/episodes/md-dev-009.json`: `4d968bf802e89ebdb8665707c577f3a33e2ce55bdd9b62f52f5e66cca88b37ff`
 - `data/evaluation/dev/v2-multidish/episodes/md-dev-010.json`: `3d64d79c9af8f9e188712dea98a7f1f1a4993ebfe45a5aff3f04431aeb6628ac`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-011.json`: `27b57764e8a5d03393517eb0c3ba8daf7348ebd004726f23fd90cbe72c20515b`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-012.json`: `06c98a2d76f988bfd3f2feb756e66896156ad12b45a10f51724247db7941c8b5`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-013.json`: `4f0c41934915805347e0fe9d0f0b658ea2f1f4db816f7df9f3fbe0b09b022728`
-- `data/evaluation/dev/v2-multidish/episodes/md-dev-014.json`: `c47c7de02a90e32daee0d17e157ebd3e7ee39b30a473c74579645eeed6df56ac`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-011.json`: `d5a1c2eca52d40604269234c3092b8145436d0e3c4ba64d6cd18bd9bbcb40a43`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-012.json`: `37377c58f51b5d7484c25844aadf7e40e3685186c2f86dcb12be4ed2ef80f724`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-013.json`: `aafbef29809e9cce211762d669bcf8e24a1a8be1cdb59bcf4ec743bd67d9ac21`
+- `data/evaluation/dev/v2-multidish/episodes/md-dev-014.json`: `aa8ecf8d94f3abac7b6d1fa2396038ba98cfc8be8e558651777ecf23d64188bf`
 - `data/products/fairprice-v2-snapshot.json`: `2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91`
