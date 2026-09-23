@@ -14,6 +14,7 @@ from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_composition import MAIN_ROLE, meal_minutes, portion_shares
+from app.planning.nutrition_scope import nutrition_guard_loss
 from app.schemas.planning_v2 import (
     FinalPlanningProblem,
     FinalPlanningSolution,
@@ -127,7 +128,8 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 recipe, max_time_minutes=slot.max_time_minutes, health_preferences=problem.health_preferences
             )
         )
-        return local + meal_affinity_loss(recipe, slot.meal_type)
+        # A soft nutrition guard keeps a dish near a stated target (planning-nutrition-scope).
+        return local + meal_affinity_loss(recipe, slot.meal_type) + nutrition_guard_loss(problem, recipe)
 
     def search_candidates(self, problem: FinalPlanningProblem) -> MealBeamResult:
         require_finite_problem(problem)

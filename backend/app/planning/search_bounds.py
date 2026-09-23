@@ -56,6 +56,9 @@ class SearchBounds:
         for band in self.problem.nutrition_bands:
             if not band.hard or band.scope == "per_slot":
                 continue
+            slot_average = band.scope == "horizon_average" and band.average_basis == "selected_slots"
+            if slot_average and any(not self.domains[s.slot_id].must_assign for s in self.slots):
+                continue  # Selected-slot denominator is not known until optional choices are made.
             dates = {slot.planned_date for slot in self.slots}
             # The existing validator averages only dates with selected meals.
             # Avoid assuming a fixed denominator when a date can be skipped.
@@ -86,7 +89,7 @@ class SearchBounds:
                         return False
                     low += min(values)
                     high += max(values)
-                divisor = len(dates) if band.scope == "horizon_average" else 1
+                divisor = len(self.slots) if slot_average else len(dates) if band.scope == "horizon_average" else 1
                 low, high = low / divisor, high / divisor
                 if not isfinite(low) or not isfinite(high):
                     continue

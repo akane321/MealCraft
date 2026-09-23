@@ -1,0 +1,13 @@
+{
+  "fixture_version": "nutrition-scope-product-requests-v1",
+  "purpose": "Developer structured-request examples; not natural-language parser or held-out evidence",
+  "requests": [
+    {
+      "nutrition_constraints": [{"metric": "calories_kcal", "lower": 450, "upper": 550}],
+      "nutrition_guard_band": 0.25
+    },
+    {
+      "nutrition_constraints": [{"metric": "calories_kcal", "upper": 500, "scope": "per_serving"}]
+    }
+  ]
+}

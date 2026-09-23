@@ -427,6 +427,9 @@ class FinalPlanningValidator:
             return [
                 (slot_id, float(getattr(values, band.metric))) for slot_id, values in sorted(values_by_slot.items())
             ]
+        if band.scope == "horizon_average" and band.average_basis == "selected_slots":
+            values = [float(getattr(value, band.metric)) for value in values_by_slot.values()]
+            return [("horizon_average", sum(values) / len(values) if values else float("nan"))]
         daily = [
             (str(day), sum(float(getattr(values, band.metric)) for values in rows))
             for day, rows in sorted(values_by_day.items(), key=lambda item: item[0])

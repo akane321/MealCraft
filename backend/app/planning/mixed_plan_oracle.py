@@ -13,6 +13,7 @@ from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.input_audit import require_finite_problem
 from app.planning.mixed_shopping import MixedShoppingResult, build_mixed_shopping
+from app.planning.nutrition_scope import nutrition_guard_loss
 from app.schemas.planning_v2 import FinalPlanningProblem, PlanningAssignment
 
 
@@ -75,6 +76,7 @@ def exhaustive_mixed_plan(
                 max_time_minutes=slot.max_time_minutes,
                 health_preferences=problem.health_preferences,
             )
+            loss += nutrition_guard_loss(problem, recipes[recipe_id])
             loss += diversity_loss(problem, previous, recipe_id)
             if problem.diversity_policy is not None:
                 loss += meal_affinity_loss(recipes[recipe_id], slot.meal_type)

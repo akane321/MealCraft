@@ -4,6 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from app.schemas.planning_nutrition import ProductNutritionTarget
 from app.schemas.planning_v2 import MealComposition
 from app.schemas.product import GroceryLineEstimate, PricingMode
 from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
@@ -15,6 +16,8 @@ MealPlanEventStatus = Literal["previewed", "applied"]
 
 
 class WeeklyMealPlanRequest(RecipeRecommendationRequest):
+    nutrition_constraints: list[ProductNutritionTarget] = Field(default_factory=list, max_length=12)
+    nutrition_guard_band: float = Field(default=0.25, ge=0, le=1, allow_inf_nan=False)
     planner_strategy: Literal["beam", "greedy-baseline"] = "beam"
     start_date: date = Field(default_factory=date.today)
     day_count: int = Field(default=7, ge=7, le=7)

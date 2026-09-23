@@ -37,6 +37,7 @@ from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_lo
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_beam import ANY_COURSE, EMPTY_OPTIONAL_ROLE_LOSS, dish_eligible
 from app.planning.meal_composition import MAIN_ROLE, hands_on_and_waiting
+from app.planning.nutrition_scope import nutrition_guard_loss
 from app.schemas.planning_v2 import FinalPlanningProblem, FinalPlanningSolution, PlanningAssignment, PlanningTrace
 
 SCALE = 1000  # losses and quantities in thousandths
@@ -75,7 +76,8 @@ class MealCpSatPlanner(FinalScopeReferencePlanner):
                 recipe, max_time_minutes=slot.max_time_minutes, health_preferences=problem.health_preferences
             )
         )
-        return local + meal_affinity_loss(recipe, slot.meal_type)
+        # A soft nutrition guard keeps a dish near a stated target (planning-nutrition-scope).
+        return local + meal_affinity_loss(recipe, slot.meal_type) + nutrition_guard_loss(problem, recipe)
 
     def solve_exact(
         self, problem: FinalPlanningProblem, *, hint: list[PlanningAssignment] | None = None
