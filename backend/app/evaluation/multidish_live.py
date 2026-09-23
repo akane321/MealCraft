@@ -19,7 +19,10 @@ from dataclasses import dataclass, field
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
+from app.data.allergens import checked_allergens
 from app.planning.meal_composition import MAIN_ROLE
+
+DIETARY_TAGS = ("vegetarian", "vegan", "dairy-free", "gluten-free")
 
 CLARIFIABLE = ("household_size", "budget_sgd", "allergens", "excluded_ingredients", "planning_horizon")
 
@@ -126,6 +129,26 @@ def _menu(episode: dict, catalog) -> str:
     return "\n".join(lines)
 
 
+def _vocabulary(episode: dict, catalog) -> str:
+    """The words a constraint may be written in.
+
+    The model was naming constraints in its own words -- `cooking wine` for
+    `wine_cooking`, a religion for a dietary tag -- and the planner then filtered
+    on nothing (findings, held-out run 3). Only these ids mean anything.
+    """
+    ingredients = sorted({line["ingredient"] for recipe in _pool(episode, catalog) for line in recipe["ingredients"]})
+    roles = [role["role_id"] for role in episode["scenario"]["household_profile"].get("meal_composition") or []]
+    return f"""Allowed words. A constraint written in any other word matches nothing and is lost.
+- excluded_ingredients: only these ids, and every id that is the thing the household named
+  (told "no wine", exclude each wine id below):
+{", ".join(ingredients)}
+- allergens: only {", ".join(sorted(checked_allergens()))}
+- dietary_tags: only {", ".join(DIETARY_TAGS)}
+- repeat_ok_roles: only {", ".join(roles) or "(this household states no roles)"}
+- ingredient_meals and recipe_counts: an ingredient id from the list above, a recipe id from the
+  candidates below."""
+
+
 def _context(episode: dict, catalog) -> str:
     scenario = episode["scenario"]
     profile = scenario["household_profile"]
@@ -138,14 +161,25 @@ Earlier conversation:
 {history or "(none)"}
 Latest request: {scenario["user_request"]}
 
+{_vocabulary(episode, catalog)}
+
 Candidate dishes (id | course | title | total minutes | servings | ingredients):
 {_menu(episode, catalog)}"""
 
 
 UNDERSTAND = """You read a household's request for a week of dinners and state what it asks for.
 
-Return only what the household stated or the profile already carries. Rules:
+Return only what the household stated or the profile already carries, in the allowed words
+below. Rules:
 - Repeat back allergens and excluded ingredients from the profile and the request.
+- An allergy is an allergen, never a list of ingredients: a dairy allergy is `dairy` and nothing
+  more. Do not add ingredients, tags or limits the household did not state -- an invented
+  constraint can leave a week that has an answer with none.
+- A religion, a cuisine or a habit is not a dietary tag. Write what it forbids as excluded
+  ingredients instead.
+- excluded_ingredients is what the household refuses to eat. Wanting to finish something up
+  ("use up the mushrooms") is the opposite: that is an ingredient_meals entry, never an
+  exclusion.
 - budget_sgd is the whole week's grocery budget, in Singapore dollars, only if one is stated.
 - max_cooking_time_minutes is a per-meal limit, only if one is stated.
 - repetition: fill it only when the household said something about repeating -- "don't eat the
@@ -153,8 +187,10 @@ Return only what the household stated or the profile already carries. Rules:
   with the candidate's id; "use up the tofu" is an ingredient_meals entry; "soup can repeat" is
   repeat_ok_roles.
 - clarification_fields: name a field from {fields} ONLY when you cannot plan without it and
-  neither the profile nor the request gives it. Asking about something you were already told is
-  an error.
+  neither the profile nor the request gives it. A household that points at a limit without giving
+  its number ("our usual budget", "keep it to the normal time") has not given it: put that field
+  in clarification_fields and plan nothing. Do not treat it as "no limit".
+  Asking about something you were already told is an error.
 - conflict: one sentence if the request cannot be met as stated, otherwise null.
 - Leave `dishes` empty.
 
@@ -164,7 +200,8 @@ Return only what the household stated or the profile already carries. Rules:
 PLAN = """You read a household's request and write the week's dinners yourself, choosing from the
 candidate dishes below. Nothing else will choose for you.
 
-State what you understood, as in a normal extraction, and then fill `dishes`: one entry per dish,
+State what you understood, in the allowed words below and adding nothing the household did not
+state, and then fill `dishes`: one entry per dish,
 with the slot_id from the week, the role_id from the household's meal_composition (use null only
 when the profile states no composition), and the recipe_id of a candidate. Fill every required
 role of every slot. Respect what the household asked: allergens, excluded ingredients, diet, the
