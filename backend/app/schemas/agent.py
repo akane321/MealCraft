@@ -61,6 +61,9 @@ class AgentConstraintExtraction(BaseModel):
     pricing_mode: PricingMode | None = None
     medical_request_detected: bool = False
     assistant_summary: str | None = None
+    # Filled by the server, never by the model: words the household used that match no
+    # ingredient or allergen the planner can check. They are asked about, not dropped.
+    unmatched_terms: list[str] = Field(default_factory=list)
 
 
 class AgentConstraintState(BaseModel):

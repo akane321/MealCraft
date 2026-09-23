@@ -1,11 +1,13 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.agent.parser import (
     AgentConfigurationError,
     ConstraintParser,
+    ConstraintVocabulary,
     OpenAIConstraintParser,
     RuleBasedConstraintParser,
 )
@@ -13,6 +15,7 @@ from app.api.routes.auth import CurrentHouseholdCreatePlanCsrfDependency, Curren
 from app.api.routes.meal_plans import build_meal_plan_service, build_replanning_service
 from app.core.config import Settings, get_settings
 from app.db.session import get_db_session
+from app.models.recipe import Ingredient
 from app.orchestration.run_lifecycle import AgentRunLifecycleError, AgentRunNotFoundError
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.agent import AgentSessionRepository
@@ -40,16 +43,23 @@ from app.services.replanning import (
 router = APIRouter(prefix="/agent/sessions", tags=["planning agent"])
 
 
-def create_constraint_parser(settings: Settings) -> ConstraintParser:
+def create_constraint_parser(settings: Settings, database: Session | None = None) -> ConstraintParser:
     if settings.agent_parser_provider == "fixture":
         return RuleBasedConstraintParser()
     if settings.openai_api_key is None:
         raise AgentConfigurationError(
             "AGENT_PARSER_PROVIDER=openai requires OPENAI_API_KEY. Use fixture mode for a key-free demo."
         )
+    # The model writes constraints in the catalog's own ingredient ids, the only words the planner matches.
+    vocabulary = (
+        ConstraintVocabulary(ingredients=frozenset(database.scalars(select(Ingredient.normalized_name))))
+        if database is not None
+        else None
+    )
     return OpenAIConstraintParser(
         api_key=settings.openai_api_key.get_secret_value(),
         model=settings.openai_model,
+        vocabulary=vocabulary,
     )
 
 
@@ -59,7 +69,7 @@ def get_agent_service(
     current: CurrentHouseholdViewDependency,
 ) -> AgentSessionService:
     try:
-        parser = create_constraint_parser(settings)
+        parser = create_constraint_parser(settings, database)
     except AgentConfigurationError as error:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(error)) from error
     household_id = current.active_membership.household_id

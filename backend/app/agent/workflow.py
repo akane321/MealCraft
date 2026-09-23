@@ -76,6 +76,13 @@ class AgentConstraintWorkflow:
             missing.append("household_size")
             questions.append("How many people should this weekly plan serve?")
 
+        for term in extraction.unmatched_terms:
+            missing.append(f"unmatched.{term}")
+            questions.append(
+                f"I could not match “{term}” to an ingredient or allergen I can check, so it is not "
+                "applied yet. Which ingredient do you mean?"
+            )
+
         for item in merged.available_ingredients:
             if item.quantity is None and item.normalized_name not in acknowledged:
                 missing.append(f"available_ingredients.{item.normalized_name}.quantity")
