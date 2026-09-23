@@ -32,6 +32,7 @@ against a contract that already said something different.
 | Agent scope, tool authorization, grounding, runs | `docs/design/agent-orchestration.md` |
 | FairPrice, YouTube, external evidence or RAG | `docs/design/external-retrieval-rag.md` |
 | recipe or ingredient sourcing, cleaning, release | `docs/data/README.md`, `data-engineering/README.md` |
+| excluded ingredients, or what an ingredient belongs to (same food, variety, made from, groups) | `docs/design/ingredient-hierarchy.md` |
 | the user interface or any user-facing wording | `docs/evaluation/frontend-state-matrix.md` and the home-surface components in `frontend/app/components/home/` |
 
 When the private knowledge repository is available, its `AGENTS.md` section 2.1
