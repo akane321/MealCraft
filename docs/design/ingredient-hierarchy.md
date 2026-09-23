@@ -69,8 +69,9 @@ Some links are a matter of rule, not chemistry: is `red_wine_vinegar` alcohol,
 is `gelatin` pork? The hierarchy records **one** answer per link, the one a
 careful host would assume for a guest who stated the restriction, and the
 `reason` says what the answer rests on. Where it is genuinely split, use
-`may_contain`: the planner then errs toward excluding. The WP2 owner decides
-these and lists them in the package notes.
+`may_contain`: the planner then errs toward excluding. The owner of the package
+that decides the ingredient makes the call and records it in that file's
+top-level `notes` list: the question, the answer chosen, and why.
 
 ## 3. Files
 
@@ -93,6 +94,9 @@ name a WP2 id or a group declared in any file as its parent.
   "title": "Meat, fish, eggs, dairy, fats, drinks, condiments and prepared foods",
   "drafted_by": "the agent or person that wrote the entries, and the model if an agent",
   "accepted_by": "the package owner who read and accepted every entry",
+  "notes": [
+    "red_wine_vinegar: not alcohol. Fermentation has turned the alcohol into acid, and vinegar is commonly accepted by households avoiding alcohol."
+  ],
   "entries": {
     "bacon": {
       "parents": [{"id": "pork", "relation": "made_from"}],
