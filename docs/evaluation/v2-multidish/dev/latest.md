@@ -5,11 +5,11 @@ Machine: Intel64 Family 6 Model 198 Stepping 2, GenuineIntel (Windows).
 
 | Arm | Strict success | By class | Median s | p95 s | Distinct recipes | Adjacent repeats | Failure mechanisms |
 | --- | ---: | --- | ---: | ---: | ---: | ---: | --- |
-| O1 | 14/14 | feasible 12/12, infeasible 1/1, needs_clarification 1/1 | 0.274 | 0.919 | 10.08 | 39 | - |
-| O2 | 14/14 | feasible 12/12, infeasible 1/1, needs_clarification 1/1 | 2.001 | 95.303 | 11.92 | 30 | - |
-| C | 8/14 | feasible 6/12, infeasible 1/1, needs_clarification 1/1 | 0.24 | 0.375 | 13.58 | 0 | budget_respected 4, budget_truthful 5, no_excluded_ingredient 1 |
-| E | 8/14 | feasible 6/12, infeasible 1/1, needs_clarification 1/1 | 0.042 | 0.06 | 16.58 | 0 | budget_respected 4, budget_truthful 5, no_excluded_ingredient 1 |
-| F | 9/14 | feasible 7/12, infeasible 1/1, needs_clarification 1/1 | 0.022 | 0.031 | 2.5 | 180 | budget_respected 4, budget_truthful 5 |
+| O1 | 14/14 | feasible 12/12, infeasible 1/1, needs_clarification 1/1 | 0.267 | 0.927 | 10.08 | 39 | - |
+| O2 | 14/14 | feasible 12/12, infeasible 1/1, needs_clarification 1/1 | 2.026 | 95.608 | 11.92 | 30 | - |
+| C | 8/14 | feasible 6/12, infeasible 1/1, needs_clarification 1/1 | 0.245 | 0.301 | 13.58 | 0 | budget_respected 4, budget_truthful 5, no_excluded_ingredient 1 |
+| E | 8/14 | feasible 6/12, infeasible 1/1, needs_clarification 1/1 | 0.039 | 0.059 | 16.58 | 0 | budget_respected 4, budget_truthful 5, no_excluded_ingredient 1 |
+| F | 9/14 | feasible 7/12, infeasible 1/1, needs_clarification 1/1 | 0.022 | 0.029 | 2.5 | 180 | budget_respected 4, budget_truthful 5 |
 
 O2: CP-SAT proved optimality on 9 episodes; 0 answers are the warm-start plan because CP-SAT ended worse.
 
