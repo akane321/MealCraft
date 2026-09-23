@@ -1,9 +1,11 @@
 import re
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import Protocol
 
 from langchain_openai import ChatOpenAI
 
+from app.data.allergens import checked_allergens
 from app.schemas.agent import AgentConstraintExtraction, AgentConstraintState, AgentMessageResponse
 from app.schemas.recommendation import AvailableIngredientInput, NutritionTargets
 
@@ -256,10 +258,63 @@ class RuleBasedConstraintParser:
         return "I checked that message against the planning constraints."
 
 
+@dataclass(frozen=True)
+class ConstraintVocabulary:
+    """The words the planner can check a constraint against.
+
+    The planner matches an exclusion to a recipe's ingredient ids exactly, so an
+    exclusion written in any other word -- `cooking wine` for `wine_cooking` --
+    silently excludes nothing. Protocol v2-multidish found the model doing exactly
+    that until it was shown these words (held-out findings, run 4).
+    """
+
+    ingredients: frozenset[str]
+    allergens: frozenset[str] = frozenset(checked_allergens())
+
+    def prompt(self) -> str:
+        return f"""Allowed words. A constraint written in any other word matches nothing and is lost.
+- excluded_ingredients and available_ingredients: only these ingredient ids, and every id that is
+  the thing the user named (told "no wine", exclude each wine id):
+{", ".join(sorted(self.ingredients))}
+- allergens: only {", ".join(sorted(self.allergens))}"""
+
+
+def align_to_vocabulary(
+    extraction: AgentConstraintExtraction, vocabulary: ConstraintVocabulary
+) -> AgentConstraintExtraction:
+    """Keep only words the planner can check, and set the rest aside to be asked about.
+
+    Dropping an unmatched exclusion would tell the user it is excluded while it is
+    not; keeping it would do the same, because nothing matches it. So it is neither.
+    """
+    unmatched: list[str] = []
+
+    def known(values: list[str] | None, words: frozenset[str]) -> list[str] | None:
+        if values is None:
+            return None
+        unmatched.extend(value for value in values if value not in words)
+        return [value for value in values if value in words] or None
+
+    aligned = extraction.model_copy(deep=True)
+    aligned.excluded_ingredients = known(extraction.excluded_ingredients, vocabulary.ingredients)
+    aligned.allergens = known(extraction.allergens, vocabulary.allergens)
+    if extraction.available_ingredients is not None:
+        pantry = [item for item in extraction.available_ingredients if item.normalized_name in vocabulary.ingredients]
+        unmatched += [
+            item.normalized_name
+            for item in extraction.available_ingredients
+            if item.normalized_name not in vocabulary.ingredients
+        ]
+        aligned.available_ingredients = pantry or None
+    aligned.unmatched_terms = list(dict.fromkeys(unmatched))
+    return aligned
+
+
 class OpenAIConstraintParser:
     provider = "openai"
 
-    def __init__(self, *, api_key: str, model: str) -> None:
+    def __init__(self, *, api_key: str, model: str, vocabulary: ConstraintVocabulary | None = None) -> None:
+        self.vocabulary = vocabulary
         self.structured_model = ChatOpenAI(
             api_key=api_key,
             model=model,
@@ -280,6 +335,13 @@ Return only facts explicitly stated by the user. Use null for missing scalar fie
 General preferences such as low sodium or low sugar are allowed. Disease-specific requests must set
 medical_request_detected=true and must never be translated into medical treatment constraints.
 Available ingredients with no explicit quantity must keep quantity=null and unit=null.
+An allergy is an allergen and nothing more: a dairy allergy is `dairy`, not also a list of dairy
+ingredients. Do not add ingredients, preferences or limits the user did not state. A religion or a
+cuisine is not a dietary preference: write what it forbids as excluded ingredients. Wanting to use
+something up is the opposite of excluding it. Leave unmatched_terms empty.
+Return a field only when the latest message states it: never copy a value back from the current
+state below, not even a default.
+{self.vocabulary.prompt() if self.vocabulary else ""}
 
 Current state: {current.model_dump_json()}
 Already acknowledged unknown quantities: {acknowledged_unknowns}
@@ -288,5 +350,5 @@ Latest user message: {message}
 """
         result = self.structured_model.invoke(prompt)
         if not isinstance(result, AgentConstraintExtraction):
-            return AgentConstraintExtraction.model_validate(result)
-        return result
+            result = AgentConstraintExtraction.model_validate(result)
+        return align_to_vocabulary(result, self.vocabulary) if self.vocabulary else result
