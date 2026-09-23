@@ -2,7 +2,7 @@
 
 import json
 
-from app.data.ingredient_hierarchy import FILES, GROUPS_FILE, empty_groups, load
+from app.data.ingredient_hierarchy import FILES, GROUPS_FILE, empty_groups, load, read_links
 
 ALCOHOL = {"group:alcohol": {"description": "Drinks and cooking liquids with alcohol.", "serves": "No alcohol."}}
 
@@ -99,6 +99,17 @@ def test_excluding_a_food_excludes_all_that_belongs_to_it_and_never_climbs(tmp_p
     assert hierarchy.expand(["cherry_tomato"]) == {"cherry_tomato"}  # not every tomato
     assert hierarchy.expand(["group:alcohol"]) == {"group:alcohol", "sake"}
     assert "almond_milk" not in hierarchy.expand(["milk"])  # a look-alike, decided not to be milk
+
+
+def test_the_run_time_reader_sees_the_same_links_without_the_catalog(tmp_path):
+    root = catalog(tmp_path)
+    checked = valid(root)
+    (root / "data-engineering/data/release/v2.1/recipes.jsonl").unlink()  # the product never reads it
+
+    links = read_links(root)
+
+    for excluded in (["pork"], ["tofu"], ["group:alcohol"], ["milk"]):
+        assert links.expand(excluded) == checked.expand(excluded)
 
 
 def test_one_food_under_two_names_is_excluded_by_either(tmp_path):

@@ -153,7 +153,9 @@ group nothing belongs to.
 | Evaluation scorers | **nothing, for now.** A system that expands exclusions only becomes more conservative; letting the scorer expand them changes what a pass means and is a separate, disclosed decision | — |
 
 Loading goes through `backend/app/data/ingredient_hierarchy.py` only; nothing
-else parses these files.
+else parses these files. The product calls `expand_exclusions(ids)`, which reads
+the four hierarchy files and nothing else, so it works wherever `data/` is
+mounted. The full `load()` reads the catalog as well and is for the checker.
 
 ## 6. Tools for authors
 

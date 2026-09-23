@@ -20,6 +20,8 @@ from dataclasses import dataclass, field
 from functools import cache
 from pathlib import Path
 
+from app.core.paths import find_repository_root
+
 SCHEMA_VERSION = "ingredient-hierarchy-v1"
 RELATIONS = ("same", "variety", "made_from", "either_of", "may_contain")
 GROUP_PREFIX = "group:"
@@ -57,8 +59,9 @@ FILES = {
 
 
 def _root() -> Path:
-    # backend/app/data/ingredient_hierarchy.py -> repository root
-    return Path(__file__).resolve().parents[3]
+    # Found by the committed catalog, not by counting parents: the file sits at a
+    # different depth in a checkout and in the container.
+    return find_repository_root(Path(__file__).parent)
 
 
 @dataclass(frozen=True)
@@ -309,13 +312,40 @@ def _check_cycles(hierarchy: Hierarchy) -> None:
         visit(node, [])
 
 
+def read_links(root: Path | None = None) -> Hierarchy:
+    """Only the links, unchecked: what the product needs at run time.
+
+    It reads the four hierarchy files and nothing else, so it works wherever
+    `data/` is mounted. CI runs the full `load()` on every change, so the links it
+    reads have already passed every rule.
+    """
+    directory = (root or _root()) / "data/ingredients/hierarchy"
+    hierarchy = Hierarchy(ingredients={}, groups={}, entries={}, entry_package={})
+    groups_path = directory / GROUPS_FILE
+    if groups_path.exists():
+        hierarchy.groups = json.loads(groups_path.read_text(encoding="utf-8")).get("groups") or {}
+    for package, name in FILES.items():
+        path = directory / name
+        if not path.exists():
+            continue
+        for ingredient_id, entry in (json.loads(path.read_text(encoding="utf-8")).get("entries") or {}).items():
+            hierarchy.entries[ingredient_id] = entry
+            hierarchy.entry_package[ingredient_id] = package
+    return hierarchy
+
+
 @cache
-def default() -> Hierarchy:
-    return load()
+def runtime() -> Hierarchy:
+    return read_links()
+
+
+def expand_exclusions(excluded: Iterable[str]) -> list[str]:
+    """A household's exclusions with everything that belongs to them, for the planner to match exactly."""
+    return sorted(runtime().expand(excluded))
 
 
 if __name__ == "__main__":
-    loaded = load()
+    loaded = load()  # the full check; scripts/check_ingredient_hierarchy.py is the author-facing version
     print("\n".join(loaded.errors) or "ok")
     for name in FILES:
         print(f"{name}: {len(loaded.owned(name)) - len(loaded.undecided(name))}/{len(loaded.owned(name))} decided")
