@@ -311,3 +311,27 @@ def test_meal_beam_keeps_a_cheap_dish_in_reach_of_a_hard_budget():
 
     assert solution.status == "feasible", solution.validation.checks
     assert sum(line.purchase_cost_sgd for line in solution.shopping) <= 8.0
+
+
+def test_a_live_plan_keeps_only_dishes_that_exist_in_the_problem():
+    """Arm D's answer comes from a model: unknown slots, roles and recipes are dropped."""
+    from app.evaluation.multidish_live import LiveAnswer, LiveDish, dishes_in_problem
+
+    packet = problem()
+    answer = LiveAnswer(
+        dishes=[
+            LiveDish(slot_id="d1", role_id="main", recipe_id="chicken"),
+            LiveDish(slot_id="d1", role_id="main", recipe_id="broth"),  # the role is already taken
+            LiveDish(slot_id="d1", role_id="dessert", recipe_id="greens"),  # no such role
+            LiveDish(slot_id="d9", role_id="main", recipe_id="chicken"),  # no such slot
+            LiveDish(slot_id="d1", role_id="vegetable", recipe_id="invented-dish"),  # no such recipe
+            LiveDish(slot_id="d1", role_id="soup", recipe_id="broth"),
+        ]
+    )
+
+    kept = dishes_in_problem(answer, packet)
+
+    assert [(a.slot_id, a.role_id, a.recipe_id) for a in kept] == [
+        ("d1", "main", "chicken"),
+        ("d1", "soup", "broth"),
+    ]

@@ -1,12 +1,14 @@
 """Run the arms of protocol v2-multidish on a set of episodes and score them.
 
-Arms without a live model:
+Arms:
 - O1 (gold + meal beam) and O2 (gold + CP-SAT) read the gold constraints;
 - C (rules + meal beam), E (Strong Rule-only) and F (greedy) read the request
   through the rule parser.
 
-A, B and D call a live model and run only when the owner authorises them
-(protocol section 5).
+- A (live model + meal beam), B (live model + CP-SAT) and D (the live model plans
+  it itself) call OpenAI and run only when the owner authorises them and supplies
+  a key (protocol section 5). A and B share one understanding call per episode,
+  so they differ only in who solves.
 
 Every arm sees the same packet: the episode's drawn pool and its products,
 with the household profile as structured context. Answers are in the common
@@ -33,6 +35,7 @@ from app.agent.parser import RuleBasedConstraintParser
 from app.core.paths import repository_root
 from app.data.allergens import checked_allergens
 from app.evaluation.common_output import CommonEpisodeResponse
+from app.evaluation.multidish_live import LiveModel, dishes_in_problem, plan_directly, understand
 from app.evaluation.release_catalog import load_release_catalog
 from app.evaluation.strict_success import Catalogs, load_tag_implications, score_episode
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
@@ -429,9 +432,61 @@ def strong_rule_selector(problem: FinalPlanningProblem) -> FinalPlanningSolution
 
 
 ARMS = ("O1", "O2", "C", "E", "F")
+LIVE_ARMS = ("A", "B", "D")
+B_LIMITS = MealCpSatLimits(max_time_seconds=30.0, max_deterministic_time=30.0)
 
 
-def run_arm(arm: str, episode: dict) -> tuple[dict, dict]:
+def live_constraints(answer, episode: dict) -> Constraints:
+    """What the live model understood, on top of the structured profile it was given."""
+    profile = episode["scenario"]["household_profile"]
+    repetition = answer.repetition.model_dump(exclude_none=False) if answer.repetition else None
+    if repetition and not any(repetition.values()):
+        repetition = None
+    return Constraints(
+        household_size=answer.household_size or profile["household_size"],
+        allergens=sorted(set(profile["allergens"]) | set(answer.allergens)),
+        excluded_ingredients=sorted(set(profile["excluded_ingredients"]) | set(answer.excluded_ingredients)),
+        dietary_tags=sorted(set(profile["dietary_preferences"]) | set(answer.dietary_tags)),
+        max_minutes=answer.max_cooking_time_minutes,
+        budget_sgd=answer.budget_sgd,
+        clarify=list(answer.clarification_fields),
+        repetition=repetition,
+    )
+
+
+def run_live_arm(arm: str, episode: dict, live: LiveModel) -> tuple[dict, dict]:
+    """A (live + meal beam), B (live + CP-SAT) and D (the model plans it itself)."""
+    catalog = load_release_catalog()
+    started = time.perf_counter()
+    answer = plan_directly(episode, catalog, live) if arm == "D" else understand(episode, catalog, live)
+    # A and B share one understanding call. Whichever arm runs second is served from the
+    # cache, so its own clock would miss the model time its answer cost: add it back.
+    cached = max(0.0, live.last_seconds - (time.perf_counter() - started))
+    extra = {"live_model": live.model, "live_tokens": live.used_tokens, "cached_seconds": round(cached, 3)}
+    understood = live_constraints(answer, episode)
+    if understood.clarify:
+        return respond(episode, arm, None, None, why=",".join(understood.clarify)), extra
+    if understood.household_size is None:
+        return respond(episode, arm, None, None, why="household_size"), extra
+    problem = build_problem(episode, understood)
+    if arm == "A":
+        solution, why = run_beam(problem)
+        return respond(episode, arm, problem, solution, why=why), extra
+    if arm == "B":
+        solution, why, more = run_exact(problem, B_LIMITS)
+        return respond(episode, arm, problem, solution, why=why), {**extra, **more}
+    assignments = dishes_in_problem(answer, problem)
+    if not assignments:
+        why = answer.conflict or "the model returned no plan"
+        return respond(episode, arm, problem, None, why=why), extra
+    # D's own choices are reported as they are; the scorer recomputes everything about them.
+    return respond(episode, arm, problem, _finish(problem, assignments, "live-model"), why=""), extra
+
+
+def run_arm(arm: str, episode: dict, live: LiveModel | None = None) -> tuple[dict, dict]:
+    if arm in LIVE_ARMS:
+        assert live is not None, "a live arm needs a model"
+        return run_live_arm(arm, episode, live)
     understood = gold_constraints(episode) if arm in {"O1", "O2"} else rule_constraints(episode)
     if understood.clarify:
         return respond(episode, arm, None, None, why=",".join(understood.clarify)), {}
@@ -484,14 +539,14 @@ def scorer_catalogs() -> Catalogs:
     )
 
 
-def evaluate(episodes: list[dict], arms: tuple[str, ...] = ARMS) -> dict:
+def evaluate(episodes: list[dict], arms: tuple[str, ...] = ARMS, live: LiveModel | None = None) -> dict:
     catalogs = scorer_catalogs()
     rows = []
     for episode in episodes:
         for arm in arms:
             started = time.perf_counter()
-            answer, extra = run_arm(arm, episode)
-            seconds = time.perf_counter() - started
+            answer, extra = run_arm(arm, episode, live)
+            seconds = time.perf_counter() - started + extra.pop("cached_seconds", 0.0)
             score = score_episode(episode, CommonEpisodeResponse.model_validate(answer), catalogs)
             extra = {**extra, **_plan_shape(answer, episode)}
             rows.append(
@@ -545,7 +600,13 @@ def markdown(report: dict, inputs: dict) -> str:
     lines = [
         f"# Protocol {PROTOCOL}: {report.get('episode_set', 'developer set')}",
         "",
-        "Generated by `python -m app.evaluation.multidish_runner`. Live-model arms (A, B, D) did not run.",
+        "Generated by `python -m app.evaluation.multidish_runner`. "
+        + (
+            f"Live-model arms called {report['live']['model']} "
+            f"({report['live']['calls']} calls, {report['live']['tokens']} tokens)."
+            if report.get("live")
+            else "Live-model arms (A, B, D) did not run."
+        ),
         f"Machine: {report['machine']}.",
         "",
         "| Arm | Strict success | By class | Median s | p95 s | Distinct recipes | Adjacent repeats "
@@ -582,13 +643,23 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--episodes", type=Path, required=True)
     parser.add_argument("--arms", default=",".join(ARMS))
+    parser.add_argument(
+        "--max-live-tokens",
+        type=int,
+        default=2_000_000,
+        help="stop the run once the live arms have spent this many tokens (owner's cap)",
+    )
     parser.add_argument("--json-report", type=Path, required=True)
     parser.add_argument("--markdown-report", type=Path, required=True)
     args = parser.parse_args()
     root = repository_root()
     files = sorted(args.episodes.glob("*.json"))
     episodes = [json.loads(path.read_text(encoding="utf-8")) for path in files]
-    report = evaluate(episodes, tuple(args.arms.split(",")))
+    arms = tuple(args.arms.split(","))
+    live = LiveModel.from_environment(args.max_live_tokens) if set(arms) & set(LIVE_ARMS) else None
+    report = evaluate(episodes, arms, live)
+    if live is not None:
+        report["live"] = {"model": live.model, "calls": live.calls, "tokens": live.used_tokens}
     report["episode_set"] = "held-out set" if "heldout" in args.episodes.parts else "developer set"
     inputs = {
         str(path.resolve().relative_to(root)).replace("\\", "/"): hashlib.sha256(path.read_bytes()).hexdigest()
