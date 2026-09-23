@@ -275,3 +275,39 @@ def test_the_validator_reports_a_broken_repetition_rule():
     report, _ = validate(packet, assignments)
 
     assert "repetition_rule" in failed(report)
+
+
+def test_meal_beam_keeps_a_cheap_dish_in_reach_of_a_hard_budget():
+    """The beam ranks dishes by loss; under a budget the cheap ones must stay candidates."""
+    from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner
+
+    base = problem().model_dump(mode="json")
+    # Two mains the loss cannot tell apart, so the id decides: the dear one ranks first.
+    base["recipes"] += [
+        recipe("aaa-dear", "main", 15, 25, calories=500, ingredient="dear-base"),
+        recipe("zzz-cheap", "main", 15, 25, calories=500, ingredient="cheap-base"),
+    ]
+    base["products"] += [
+        {
+            "ingredient_id": "dear-base",
+            "product_id": "p-dear",
+            "package_quantity": 100,
+            "package_unit": "g",
+            "price_sgd": 20.0,
+        },
+        {
+            "ingredient_id": "cheap-base",
+            "product_id": "p-cheap",
+            "package_quantity": 100,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+        },
+    ]
+    base["purchase_budget_sgd"] = 8.0  # the dear main alone busts it; the cheap week does not
+    base["budget_is_hard"] = True
+    packet = FinalPlanningProblem.model_validate(base)
+
+    solution = MealBeamPlanner(MealBeamLimits(candidates_per_role=1)).solve(packet)
+
+    assert solution.status == "feasible", solution.validation.checks
+    assert sum(line.purchase_cost_sgd for line in solution.shopping) <= 8.0

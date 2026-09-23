@@ -8,6 +8,7 @@ beam, it proves neither optimality nor infeasibility.
 
 from dataclasses import asdict, dataclass
 from itertools import product
+from math import ceil
 
 from app.planning.dietary_tags import satisfies
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
@@ -48,12 +49,15 @@ class MealBeamLimits:
 class MealOption:
     dishes: tuple[tuple[str | None, str], ...]  # (role_id, recipe_id); role None in a one-dish slot
     loss: float
+    # What the meal's ingredients cost at the cheapest price per gram, before packages.
+    cost: float = 0.0
 
 
 @dataclass(frozen=True)
 class MealState:
     choices: tuple[tuple[str, tuple[tuple[str | None, str], ...]], ...] = ()
     loss: float = 0.0
+    cost: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -75,6 +79,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
     def meal_options(self, problem: FinalPlanningProblem, slot: PlanningSlot) -> list[MealOption]:
         """The slot's best meals: dishes that pass on their own, combined into meals that pass as meals."""
         recipes = sorted(problem.recipes, key=lambda r: r.recipe_id)
+        prices = cheapest_per_gram(problem) if problem.purchase_budget_sgd is not None else {}
         roles = slot.composition or [ANY_COURSE]
         per_role: list[list[tuple[str | None, str] | None]] = []
         for role in roles:
@@ -90,6 +95,14 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             kept = ranked[: self.limits.candidates_per_role]
             # A dish the household asked for is always a candidate, however it ranks.
             kept += [r for r in ranked[self.limits.candidates_per_role :] if wanted(problem, r)]
+            if prices:
+                # With a budget, the cheapest dishes are candidates too. Ranking by loss alone
+                # kept only dishes the search liked, and every plan it held was over budget.
+                cheapest = sorted(
+                    (r for r in ranked if r not in kept),
+                    key=lambda r: (dish_cost(problem, slot, r, role.role_id, prices), r.recipe_id),
+                )
+                kept += cheapest[: self.limits.candidates_per_role]
             options: list[tuple[str | None, str] | None] = [(key, r.recipe_id) for r in kept]
             if not role.required:
                 options.append(None)
@@ -106,7 +119,15 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 float(shares[role or MAIN_ROLE]) * self._dish_loss(problem, slot, by_id[recipe_id])
                 for role, recipe_id in dishes
             ) + EMPTY_OPTIONAL_ROLE_LOSS * combination.count(None)
-            meals.append(MealOption(dishes, loss))
+            cost = (
+                sum(
+                    dish_cost(problem, slot, by_id[recipe_id], role or MAIN_ROLE, prices, shares[role or MAIN_ROLE])
+                    for role, recipe_id in dishes
+                )
+                if prices
+                else 0.0
+            )
+            meals.append(MealOption(dishes, loss, cost))
             # Each dish's rank within its role; their sum spreads tied meals across every role's
             # choices, where ordering ties by id kept 64 meals sharing one main.
             spread[dishes] = sum(options.index(dish) for options, dish in zip(per_role, combination, strict=True))
@@ -118,7 +139,14 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 meal.dishes,
             )
         )
-        return meals[: self.limits.meal_options_per_slot]
+        limit = self.limits.meal_options_per_slot
+        if prices and len(meals) > limit:
+            # Under a budget, keep room for this slot's cheapest meals: kept by score alone,
+            # the cheap combinations were cut here before the search could ever hold one.
+            room = max(1, limit // 4)
+            cheapest = sorted(meals[limit - room :], key=lambda meal: (meal.cost, meal.dishes))
+            return meals[: limit - room] + cheapest[:room]
+        return meals[:limit]
 
     def _dish_loss(self, problem: FinalPlanningProblem, slot: PlanningSlot, recipe: PlanningRecipeCandidate) -> float:
         local = (
@@ -152,7 +180,9 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                         next_states.append(state)
                     elif horizon_permitted(problem, state, option.dishes):
                         loss = state.loss + option.loss + repetition_loss(problem, state, option.dishes)
-                        next_states.append(MealState(state.choices + ((slot.slot_id, option.dishes),), loss))
+                        next_states.append(
+                            MealState(state.choices + ((slot.slot_id, option.dishes),), loss, state.cost + option.cost)
+                        )
                 if exhausted:
                     break
             if exhausted:
@@ -160,11 +190,27 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 break
             remaining = len(problem.slots) - len(next_states[0].choices) if next_states else 0
             next_states = [s for s in next_states if requests_reachable(problem, s, remaining)]
-            # Progress towards what the household asked for orders states, but is never part
-            # of their loss, so the loss stays the objective CP-SAT minimises.
+            budget = problem.purchase_budget_sgd if problem.budget_is_hard else None
+            spend: dict[tuple, float] = {}
+            if budget is not None:
+                # Whole packages only ever add cost, so a partial plan already over the budget can
+                # never come back under it. Drop those instead of filling the beam with them.
+                packages = packages_by_ingredient(problem)
+                spend = {s.choices: packaged_cost(problem, s.choices, packages) for s in next_states}
+                next_states = [s for s in next_states if spend[s.choices] <= budget]
+            # Progress towards what the household asked for orders states; it is never part of a
+            # state's loss, so the loss stays the objective CP-SAT minimises.
             next_states.sort(key=lambda s: (s.loss - REQUEST_BONUS * request_progress(problem, s), s.choices))
             pruned = pruned or len(next_states) > self.limits.width
-            states = next_states[: self.limits.width]
+            if budget is not None and len(next_states) > self.limits.width:
+                # Keep room for the cheapest plans too: the best-scoring ones can all be the dear
+                # ones, and then every plan the beam holds fails the budget at the end of the week.
+                room = max(1, self.limits.width // 4)
+                best = next_states[: self.limits.width - room]
+                cheapest = sorted(next_states[self.limits.width - room :], key=lambda s: (spend[s.choices], s.choices))
+                states = best + cheapest[:room]
+            else:
+                states = next_states[: self.limits.width]
             if not states:
                 break
         return MealBeamResult(tuple(states), expansions, pruned, exhausted, tuple(empty))
@@ -279,6 +325,74 @@ def meal_permitted(problem, slot, dishes, recipes) -> bool:
         if sum(len(group) for group in proteins) != len(set().union(*proteins)):
             return False
     return True
+
+
+def cheapest_per_gram(problem) -> dict[str, float]:
+    """The lowest price per gram for every ingredient with an available product."""
+    prices: dict[str, float] = {}
+    for option in problem.products:
+        if option.available and option.package_quantity:
+            price = option.price_sgd / option.package_quantity
+            prices[option.ingredient_id] = min(prices.get(option.ingredient_id, price), price)
+    return prices
+
+
+def packages_by_ingredient(problem) -> dict[str, list[tuple[float, float]]]:
+    packages: dict[str, list[tuple[float, float]]] = {}
+    for option in problem.products:
+        if option.available and option.package_quantity:
+            packages.setdefault(option.ingredient_id, []).append((option.package_quantity, option.price_sgd))
+    return packages
+
+
+def planned_grams(problem, choices) -> dict[str, float]:
+    """What the plan so far needs of each ingredient, each dish at its share of its meal."""
+    slots = {slot.slot_id: slot for slot in problem.slots}
+    recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
+    grams: dict[str, float] = {}
+    for slot_id, dishes in choices:
+        slot = slots[slot_id]
+        shares = portion_shares(problem.composition_policy, [role or MAIN_ROLE for role, _ in dishes]) or {}
+        for role, recipe_id in dishes:
+            recipe = recipes[recipe_id]
+            scale = slot.servings * float(shares.get(role or MAIN_ROLE, 1)) / recipe.servings
+            for item in recipe.ingredients:
+                if item.quantity is not None:
+                    grams[item.ingredient_id] = grams.get(item.ingredient_id, 0.0) + item.quantity * scale
+    return grams
+
+
+def packaged_cost(problem, choices, packages: dict[str, list[tuple[float, float]]]) -> float:
+    """What the plan so far costs in whole packages, the cheapest product for each ingredient.
+
+    This is the shopping policy the validator prices, and adding dishes only ever adds
+    cost, so a partial plan's cost is a lower bound on the finished plan's.
+    """
+    pantry = {item.ingredient_id: item.quantity for item in problem.pantry if item.quantity is not None}
+    total = 0.0
+    for ingredient, grams in planned_grams(problem, choices).items():
+        remaining = max(0.0, grams - pantry.get(ingredient, 0.0))
+        options = packages.get(ingredient)
+        if remaining <= 0 or not options:
+            continue  # an unpriceable ingredient is the validator's to refuse
+        total += min(ceil(remaining / size - 1e-9) * price for size, price in options)
+    return total
+
+
+def dish_cost(
+    problem, slot, recipe, role_id: str | None, prices: dict[str, float], share: float | None = None
+) -> float:
+    """What one dish's ingredients cost at those prices, at the share it is cooked for.
+
+    Before the meal's size is known, the share of a full meal is used, which orders
+    dishes the same way for every size.
+    """
+    if share is None:
+        share = 1.0
+    return sum(
+        (item.quantity or 0) * slot.servings * float(share) / recipe.servings * prices.get(item.ingredient_id, 0.0)
+        for item in recipe.ingredients
+    )
 
 
 def repetition_loss(problem, state: MealState, dishes) -> float:
