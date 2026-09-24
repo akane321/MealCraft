@@ -46,6 +46,7 @@ from sqlalchemy.orm import Session
 
 from app.core.paths import repository_root
 from app.data.allergens import checked_allergens
+from app.data.alternatives import options as alternative_options
 from app.models.meal_plan import MealPlanEntry, MealPlanEvent
 from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 
@@ -55,7 +56,7 @@ RELEASE_FILES = ("release_manifest.json", "ingredients.jsonl", "recipes.jsonl")
 
 # Importer logic is part of the digest, so a change here re-imports an
 # already-recorded release instead of being skipped as unchanged.
-IMPORTER_VERSION = "3"  # 3: v2.1 carries the completeness and allergen corrections itself
+IMPORTER_VERSION = "4"  # 4: a combined "A or B" ingredient carries its options (alternatives.json)
 
 # Release allergen name -> runtime checked allergen, or None when the runtime has no name for it.
 ALLERGEN_MAP: dict[str, str | None] = {
@@ -85,6 +86,9 @@ def release_digest(directory: Path) -> str:
     for name in RELEASE_FILES:
         digest.update(name.encode())
         digest.update((directory / name).read_bytes())
+    # The options of combined ingredients are copied in at import, so a change to
+    # them must re-run the import like a change to the release itself.
+    digest.update((repository_root() / "data/ingredients/alternatives.json").read_bytes())
     return digest.hexdigest()
 
 
@@ -197,8 +201,28 @@ def _import_ingredients(session: Session, directory: Path, recipes: list[dict], 
     missing = sorted(set(line_allergens).difference(rows))
     if missing:
         raise ValueError(f"recipe lines reference ingredients absent from the release: {missing[:5]}")
+    _attach_alternatives({**existing, **{row.normalized_name: row for row in rows.values()}})
     session.flush()
     return {release_id: row.id for release_id, row in rows.items()}
+
+
+def _attach_alternatives(by_name: dict[str, Ingredient]) -> None:
+    """Copy each option's facts onto its combined ingredient, from the rows just imported."""
+    for combined, names in alternative_options().items():
+        row = by_name.get(combined)
+        if row is None:
+            continue
+        absent = [name for name in names if name not in by_name]
+        if absent:
+            raise ValueError(f"{combined} lists options absent from the catalog: {absent}")
+        row.alternatives = [
+            {
+                "normalized_name": name,
+                "display_name": by_name[name].display_name,
+                "allergens": sorted(by_name[name].allergens or []),
+            }
+            for name in names
+        ]
 
 
 def _import_recipes(

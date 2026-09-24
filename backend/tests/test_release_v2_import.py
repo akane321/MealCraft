@@ -116,3 +116,17 @@ def test_release_allergen_names_map_to_the_runtime_vocabulary() -> None:
     ]
     with pytest.raises(ValueError):
         map_allergens(["lupin"])
+
+
+def test_a_combined_ingredient_carries_its_options(session: Session, release: Path) -> None:
+    import_release_v2(session, release)
+
+    def row(name: str) -> Ingredient:
+        return session.scalars(select(Ingredient).where(Ingredient.normalized_name == name)).one()
+
+    beef_or_turkey = row("beef_or_turkey").alternatives
+    assert [option["normalized_name"] for option in beef_or_turkey] == ["ground_beef", "turkey"]
+    butter = row("butter_or_margarine").alternatives[0]
+    # Copied from the imported option row, so its allergens are in the runtime vocabulary.
+    assert butter == {"normalized_name": "butter", "display_name": row("butter").display_name, "allergens": ["dairy"]}
+    assert row("butter").alternatives is None

@@ -235,7 +235,9 @@ class GroceryEstimator:
         consumed_total = 0.0
         consumed_total_known = True
 
-        for recipe_item in recipe.recipe_ingredients:
+        from app.planning import alternatives  # alternatives imports this module
+
+        for recipe_item in alternatives.lines(recipe, constraints):
             ingredient = recipe_item.ingredient
             required = float(recipe_item.quantity) * household_scale if recipe_item.quantity is not None else None
             pantry_item = pantry.get(ingredient.normalized_name)
