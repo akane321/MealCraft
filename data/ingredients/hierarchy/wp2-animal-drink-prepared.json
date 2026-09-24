@@ -14,8 +14,8 @@
     "whipped_topping: may contain cream because catalog evidence mixes dairy whipped cream with non-dairy branded toppings.",
     "Compound foods: where a sauce, paste, dumpling or mix commonly contains an ingredient the catalog names, it is linked may_contain (or made_from when defining) rather than left with no parent. Missing a link serves a household the food it refused; an extra link only removes a dish.",
     "Parents may come from another package: chili_pepper, chipotle_pepper, sesame_seed, tapioca_flour, pomegranate_seeds, bonito_flakes, mustard_seed and cucumber_pickle are WP3 ids.",
-    "Oil policy (owner to confirm): olive, avocado, coconut, peanut, sunflower, grapeseed and sesame oils are not under their source. Allergies still reach them through the ingredient's own allergens. chili_oil stays under chili_pepper because the chilli is its purpose.",
-    "Gelatin (owner to confirm): may_contain beef as well as pork, because commercial gelatin is often bovine.",
+    "Oil policy (confirmed by the owner on 2026-09-24): olive, avocado, coconut, peanut, sunflower, grapeseed and sesame oils are not under their source. Allergies still reach them through the ingredient's own allergens. chili_oil stays under chili_pepper because the chilli is its purpose.",
+    "Gelatin (confirmed by the owner on 2026-09-24): may_contain beef as well as pork, because commercial gelatin is often bovine.",
     "accepted_by remains null until the owner reads and accepts every entry."
   ],
   "entries": {
