@@ -2,7 +2,3012 @@
   "schema_version": "ingredient-hierarchy-v1",
   "package": "WP3",
   "title": "Vegetables, fruit, grains, herbs, spices, sweeteners and other plant pantry items",
-  "drafted_by": null,
-  "accepted_by": null,
-  "entries": {}
+  "drafted_by": "OpenAI Codex, GPT-5",
+  "accepted_by": "akane321 (owner), 2026-09-24: accepted on the implementation agent's acceptance review (all 29 high-risk links read, 39/40 on a fixed-seed sample, two fixes applied); not read entry by entry",
+  "notes": [
+    "Confirmed WP3 policy: alternative flours do not inherit wheat flour; each follows its source ingredient because catalog flour denotes ordinary wheat flour and gluten safety is handled separately.",
+    "Confirmed WP3 policy: use group:allium for onion, garlic, shallot, leek, green onion and chive so one household exclusion can cover the allium family.",
+    "Confirmed WP3 policy: hot fresh chillies and chilli-based powders inherit chili_pepper; bell_pepper and black_pepper do not.",
+    "Confirmed WP3 policy: garlic_salt, onion_salt, celery_salt and seasoned_salt inherit salt because a household avoiding salt would avoid these blends.",
+    "Confirmed WP3 policy: individual berry varieties inherit berries.",
+    "Extract policy: almond, citrus, mint, coconut, rum, vanilla and other commercial flavour extracts may contain alcohol as a solvent; pandan extract evidence is a Southeast Asian grocery flavouring and is treated as non-alcoholic.",
+    "Packaged seasoning policy: use may_contain only where the catalog evidence or customary product directly supports meat or seafood; generic spice-only packets remain unlinked when composition is not evidenced.",
+    "accepted_by remains null until the package owner personally reads and accepts every drafted entry."
+  ],
+  "entries": {
+    "almond_extract": {
+      "parents": [
+        {
+          "id": "almond",
+          "relation": "made_from"
+        },
+        {
+          "id": "group:alcohol",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes use concentrated almond extract; natural versions derive almond flavour and commercial extracts may use alcohol solvent."
+    },
+    "asian_seasoning": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "The sole recipe gives only a generic Asian seasoning label, with no evidence of a particular meat, seafood or plant base."
+    },
+    "bonito_flakes": {
+      "parents": [
+        {
+          "id": "tuna",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dried bonito flakes are made from skipjack, a tuna species, and the catalog has tuna as the nearest fish family id."
+    },
+    "cheese_tortellini": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The recipe explicitly uses frozen cheese-filled tortellini, so a guest avoiding cheese would avoid this pasta."
+    },
+    "coconut_extract": {
+      "parents": [
+        {
+          "id": "coconut",
+          "relation": "made_from"
+        },
+        {
+          "id": "group:alcohol",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Measured coconut extract supplies concentrated coconut flavour and commercial versions may use an alcohol-based solvent."
+    },
+    "coconut_flavoring": {
+      "parents": [
+        {
+          "id": "coconut",
+          "relation": "may_contain"
+        },
+        {
+          "id": "group:alcohol",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The recipe names bottled coconut flavoring; it may use coconut-derived flavour and may carry an alcohol solvent."
+    },
+    "dashida": {
+      "parents": [
+        {
+          "id": "beef",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The recipe identifies Dashida as Korean beef-flavoured roasted salt, a beef seasoning avoided by guests excluding beef."
+    },
+    "egg_noodles": {
+      "parents": [
+        {
+          "id": "egg",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "This catalog id covers egg and Hokkien noodles; egg is a defining dough ingredient under the confirmed egg-food policy."
+    },
+    "jasmine_flavoring": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The recipe gives an unspecified commercial jasmine flavoring, which may use alcohol as the aromatic carrier."
+    },
+    "kimchi": {
+      "parents": [
+        {
+          "id": "fish_sauce",
+          "relation": "may_contain"
+        },
+        {
+          "id": "shrimp_paste",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Prepared cabbage kimchi commonly contains fish sauce or fermented shrimp, although explicitly vegan batches exist."
+    },
+    "lemon_extract": {
+      "parents": [
+        {
+          "id": "lemon",
+          "relation": "made_from"
+        },
+        {
+          "id": "group:alcohol",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes measure lemon extract as concentrated lemon flavour; commercial extracts commonly use alcohol as the carrier."
+    },
+    "marshmallow": {
+      "parents": [
+        {
+          "id": "gelatin",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Conventional large and miniature marshmallows commonly use gelatin, while vegetarian formulations also exist."
+    },
+    "milk_chocolate": {
+      "parents": [],
+      "not_parents": [
+        "milk"
+      ],
+      "reason": "Milk chocolate is a finished confection, not a form of milk; dairy safety remains the allergen and diet rules' responsibility."
+    },
+    "mint_extract": {
+      "parents": [
+        {
+          "id": "mint",
+          "relation": "made_from"
+        },
+        {
+          "id": "group:alcohol",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The recipe uses measured mint extract; it concentrates mint flavour and commercial extracts may contain alcohol solvent."
+    },
+    "nasi_goreng_spice_mix": {
+      "parents": [
+        {
+          "id": "shrimp_paste",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Packaged nasi goreng seasoning may include dried shrimp or shrimp paste, although brands and homemade spice mixes vary."
+    },
+    "orange_extract": {
+      "parents": [
+        {
+          "id": "orange",
+          "relation": "made_from"
+        },
+        {
+          "id": "group:alcohol",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipe evidence includes orange extract and orange oil; both concentrate orange flavour, while extract may use alcohol solvent."
+    },
+    "pandan_extract": {
+      "parents": [
+        {
+          "id": "pandan_juice",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The waffle recipes use Southeast Asian grocery pandan extract as concentrated pandan liquid, with no recipe evidence of alcohol."
+    },
+    "pho_spice": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "The recipe identifies a packet sized for broth but provides no evidence that the pho spice packet itself contains meat."
+    },
+    "rum_extract": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [
+        "rum"
+      ],
+      "reason": "Rum extract is concentrated rum flavour rather than rum itself, but commercial extracts may retain an alcohol carrier."
+    },
+    "stuffing_mix": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Evidence includes explicitly chicken-flavoured boxed stuffing alongside herb-seasoned mixes, so chicken is possible but not universal."
+    },
+    "vanilla": {
+      "parents": [
+        {
+          "id": "vanilla_bean",
+          "relation": "made_from"
+        },
+        {
+          "id": "group:alcohol",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Nearly all evidence writes vanilla extract; it derives flavour from vanilla beans and commercial extract commonly contains alcohol."
+    },
+    "vanilla_bean": {
+      "parents": [],
+      "not_parents": [
+        "vanilla"
+      ],
+      "reason": "Whole split vanilla pods are the raw spice, not the catalog's alcohol-prone vanilla extract; the extract instead inherits the bean."
+    },
+    "white_chocolate": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "White chocolate is a finished cocoa-butter confection with no chocolate family id and does not inherit milk under policy."
+    },
+    "adobo_seasoning": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Recipe evidence uses an all-purpose peppered adobo seasoning blend, not a food with one dependable ingredient parent."
+    },
+    "agave": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Agave nectar is a distinct plant syrup, and the catalog provides no broader syrup or agave plant parent id."
+    },
+    "allspice": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and ground allspice are forms of one standalone spice, not a mixture with a catalog parent."
+    },
+    "almond_flour": {
+      "parents": [
+        {
+          "id": "almond",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "flour"
+      ],
+      "reason": "The evidence alternates almond meal and almond flour; both are ground almond, not the catalog's ordinary wheat flour."
+    },
+    "almond_milk": {
+      "parents": [
+        {
+          "id": "almond",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "milk"
+      ],
+      "reason": "Unsweetened almond milk is a beverage made from almonds and is not dairy milk under the confirmed policy."
+    },
+    "anise": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Recipes use both star anise and anise seed under this broad spice id, with no narrower shared catalog parent."
+    },
+    "annatto": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Annatto seed and powder are forms of the same standalone colouring spice without another catalog family id."
+    },
+    "apple": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh sliced, diced and whole apples make this the family root for apple-derived catalog ingredients."
+    },
+    "apple_pie_spice": {
+      "parents": [],
+      "not_parents": [
+        "apple"
+      ],
+      "reason": "Apple pie spice is a dry cinnamon-led spice blend used to season apples; it does not contain apple itself."
+    },
+    "applesauce": {
+      "parents": [
+        {
+          "id": "apple",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Unsweetened and ordinary applesauce are cooked purées made principally from apples."
+    },
+    "apricot": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh and dried apricots are the same fruit family and have no broader catalog parent."
+    },
+    "arrowroot": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Arrowroot powder and starch are a standalone plant starch with no matching source-plant or starch family id."
+    },
+    "artichoke": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole artichokes and canned or marinated hearts form this vegetable family without another catalog parent."
+    },
+    "arugula": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh arugula leaves are a distinct leafy vegetable and no other catalog id represents its family."
+    },
+    "asian_pear": {
+      "parents": [
+        {
+          "id": "pear",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Asian and Korean pears in the recipe evidence are crisp cultivated varieties of pear."
+    },
+    "asparagus": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh trimmed asparagus spears are a distinct vegetable family with no suitable catalog parent."
+    },
+    "avocado": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole ripe avocados and their flesh make this the root id for avocado-derived products."
+    },
+    "baguette": {
+      "parents": [
+        {
+          "id": "bread",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "French baguettes and banh mi loaves in the evidence are long crusty varieties of bread."
+    },
+    "baking_chocolate": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Unsweetened, semisweet and German baking chocolates share this root, and no generic chocolate id exists."
+    },
+    "baking_powder": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Baking powder is a standalone chemical leavener rather than a form of another catalog ingredient."
+    },
+    "baking_soda": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Baking soda or soda is a distinct alkaline leavener with no suitable ingredient parent."
+    },
+    "bamboo_shoot": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh and canned sliced bamboo shoots form a distinct vegetable family in the catalog."
+    },
+    "banana": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, sliced and mashed bananas form the family root for edible banana-fruit preparations."
+    },
+    "banana_leaf": {
+      "parents": [],
+      "not_parents": [
+        "banana"
+      ],
+      "reason": "Banana leaves are cooking wrappers from the plant, not the edible banana fruit represented by the banana id."
+    },
+    "barley": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Pearl and cooked barley are forms of this standalone cereal grain without a broader catalog parent."
+    },
+    "basil": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh and dried basil leaves make this the root herb id for named basil varieties."
+    },
+    "bay_leaf": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and crumbled bay leaves are a distinct culinary herb with no other catalog family id."
+    },
+    "bean_sprouts": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Evidence includes generic and mung bean sprouts, so no single bean source is guaranteed by this id."
+    },
+    "beet": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, cooked and canned beetroot are forms of one root-vegetable family."
+    },
+    "bell_pepper": {
+      "parents": [],
+      "not_parents": [
+        "chili_pepper"
+      ],
+      "reason": "Green, red and other sweet capsicums are bell peppers, not the hot chili_pepper family under the confirmed policy."
+    },
+    "berbere": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Berbere is an Ethiopian red-pepper spice blend used in explicitly spicy dishes, so chili pepper is a defining base."
+    },
+    "berries": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Generic recipe lines explicitly allow raspberry, blackberry or blueberry, making berries the family root."
+    },
+    "bilimbi": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Bilimbi is a distinct sour tropical fruit used whole, with no suitable broader catalog parent."
+    },
+    "biscuit_dough": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Refrigerated canned biscuit dough is a prepared dough product without a biscuit or dependable flour parent id."
+    },
+    "biscuit_mix": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Bisquick and generic baking mix are compound prepared mixes with no single dependable catalog parent."
+    },
+    "bitter_melon": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Sliced ampalaya or bitter melon is its own gourd vegetable and has no generic melon parent id."
+    },
+    "black_pepper": {
+      "parents": [],
+      "not_parents": [
+        "chili_pepper"
+      ],
+      "reason": "Ground peppercorn is black pepper, botanically and culinarily distinct from hot Capsicum chilli peppers."
+    },
+    "blackberry": {
+      "parents": [
+        {
+          "id": "berries",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Frozen blackberries are a named berry variety under the confirmed berries policy."
+    },
+    "blueberry": {
+      "parents": [
+        {
+          "id": "berries",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh and frozen blueberries are a named variety within the catalog's generic berries family."
+    },
+    "bok_choy": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Baby and mature bok choy or pak choi form a distinct leafy vegetable family."
+    },
+    "bread": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Sliced white, wheat and French loaves make bread the catalog root for bread-derived foods."
+    },
+    "bread_flour": {
+      "parents": [
+        {
+          "id": "flour",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [
+        "bread"
+      ],
+      "reason": "Strong bread flour is a high-protein wheat flour used to make bread, not a product made from bread."
+    },
+    "bread_mix": {
+      "parents": [],
+      "not_parents": [
+        "bread"
+      ],
+      "reason": "White bread mix is a dry preparation used to make bread, rather than bread itself or a product made from it."
+    },
+    "breadcrumbs": {
+      "parents": [
+        {
+          "id": "bread",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh, soft, seasoned and dry bread crumbs are all produced from bread."
+    },
+    "broccoli": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Broccoli heads, florets and broccolini uses make this the root id for broccoli preparations."
+    },
+    "broccoli_slaw": {
+      "parents": [
+        {
+          "id": "broccoli",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Prepared broccoli slaw and broccoli coleslaw mixes are shredded predominantly from broccoli stems."
+    },
+    "brown_rice": {
+      "parents": [
+        {
+          "id": "rice",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Cooked and uncooked whole-grain brown rice are a direct variety of rice."
+    },
+    "brown_rice_flour": {
+      "parents": [
+        {
+          "id": "brown_rice",
+          "relation": "made_from"
+        },
+        {
+          "id": "rice_flour",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [
+        "flour"
+      ],
+      "reason": "Brown rice flour is ground whole-grain rice and a rice-flour variety, not ordinary wheat flour."
+    },
+    "brown_sugar": {
+      "parents": [
+        {
+          "id": "sugar",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Light and dark packed brown sugar are direct varieties of the generic sugar family."
+    },
+    "brussels_sprouts": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole, halved and shredded Brussels sprouts form their own brassica vegetable family."
+    },
+    "buckwheat": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole buckwheat used for blini is a distinct pseudocereal with no matching catalog parent."
+    },
+    "bulgur": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Recipe evidence identifies bulgur as cracked wheat, but the catalog has no wheat family id to record that ancestry."
+    },
+    "burdock_root": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole gobo or burdock root is a distinct root vegetable without another catalog family id."
+    },
+    "buttered_breadcrumbs": {
+      "parents": [
+        {
+          "id": "breadcrumbs",
+          "relation": "made_from"
+        },
+        {
+          "id": "butter",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Every use explicitly calls for bread crumbs prepared with butter, so both components are defining."
+    },
+    "butternut_squash": {
+      "parents": [
+        {
+          "id": "squash",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Whole and cubed butternut squash are a named winter-squash variety."
+    },
+    "butterscotch_chips": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Packaged butterscotch chips or morsels are a standalone confection with no butterscotch family id."
+    },
+    "cabbage": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Green, napa and generic shredded cabbage make this the root id for cabbage-derived foods."
+    },
+    "cajun_seasoning": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Cajun and Creole seasoning blends commonly include cayenne or paprika, though brand recipes vary."
+    },
+    "cake_flour": {
+      "parents": [
+        {
+          "id": "flour",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Sifted cake flour is a fine low-protein variety of ordinary wheat flour."
+    },
+    "calamansi": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole calamansi used for juice are a distinct small citrus fruit without a matching catalog parent."
+    },
+    "canned_tomatoes": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Canned diced, chopped and stewed tomatoes remain preserved forms of tomato."
+    },
+    "cantaloupe": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh cubed cantaloupe is a distinct melon fruit with no generic melon family id."
+    },
+    "caramel": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Caramel sauce and dulce de leche share this confection id, with no single dependable ingredient parent."
+    },
+    "caraway": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and ground caraway seed form a standalone spice family."
+    },
+    "cardamom": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole pods, crushed seeds and ground cardamom are forms of one independent spice."
+    },
+    "carrot": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole, sliced, grated and shredded carrots make this the root id for carrot products."
+    },
+    "cassava": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh cassava, manioc and yuca roots are the same standalone starchy vegetable."
+    },
+    "cauliflower": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole heads and florets form the cauliflower vegetable family without a broader catalog parent."
+    },
+    "cayenne": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Cayenne and crushed hot red-pepper flakes are dried forms of hot chili pepper."
+    },
+    "celeriac": {
+      "parents": [
+        {
+          "id": "celery",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The evidence calls celeriac celery root, a root-form variety of celery."
+    },
+    "celery": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh stalks and chopped celery make this the family root for celery forms."
+    },
+    "celery_salt": {
+      "parents": [
+        {
+          "id": "celery",
+          "relation": "made_from"
+        },
+        {
+          "id": "salt",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Celery salt is a seasoning made from salt and celery flavour; both exclusions should cover it."
+    },
+    "celery_seed": {
+      "parents": [
+        {
+          "id": "celery",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Whole celery seed comes from the celery plant and is covered when a household excludes celery."
+    },
+    "cellophane_noodles": {
+      "parents": [
+        {
+          "id": "mung_bean",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipe evidence repeatedly identifies cellophane noodles as mung-bean or bean-thread noodles."
+    },
+    "cereal_cornflake": {
+      "parents": [
+        {
+          "id": "corn",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Crushed and whole corn flakes are a breakfast cereal made principally from corn."
+    },
+    "cereal_rice": {
+      "parents": [
+        {
+          "id": "rice",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Rice Krispies and generic crisp rice cereal are prepared principally from rice."
+    },
+    "chayote": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Sliced chayote is a distinct squash-like vegetable without a generic gourd parent id."
+    },
+    "cherry": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, dried, candied and maraschino cherries form one fruit family in this catalog."
+    },
+    "chickpea_flour": {
+      "parents": [
+        {
+          "id": "chickpea",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "flour"
+      ],
+      "reason": "Chickpea flour is finely ground chickpea and is not the catalog's ordinary wheat flour."
+    },
+    "chili_pepper": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh red, Thai and long chillies make this the root family for hot Capsicum products."
+    },
+    "chili_powder": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Measured chilli powder is a dried ground chili-pepper seasoning under the confirmed hot-pepper policy."
+    },
+    "chinese_five_spice": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Chinese five-spice powder is a compound spice blend without one defining catalog parent."
+    },
+    "chipotle_pepper": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dried chipotle is a smoked ripe jalapeño and therefore a hot chili-pepper variety."
+    },
+    "chives": {
+      "parents": [
+        {
+          "id": "group:allium",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh chopped chives are an allium herb, so a household avoiding the onion and garlic family avoids them too."
+    },
+    "chocolate_chips": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Dark and semisweet chocolate chips are a standalone confection because no generic chocolate id exists."
+    },
+    "chocolate_syrup": {
+      "parents": [
+        {
+          "id": "syrup",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Bottled chocolate sauce is a flavoured syrup variety used as a sweet topping."
+    },
+    "chow_mein_noodles": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Chow mein, thin Chinese and pancit canton noodles share this prepared-noodle id, but no generic noodle parent exists."
+    },
+    "cilantro": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh cilantro and coriander leaves are the same standalone culinary herb."
+    },
+    "cinnamon": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Ground cinnamon is a distinct spice and the root for no narrower catalog hierarchy."
+    },
+    "cloves_spice": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and ground culinary cloves form one standalone spice id."
+    },
+    "cocoa": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Unsweetened cocoa powder is a distinct cocoa solid with no cacao or chocolate parent id."
+    },
+    "coconut": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh flesh, grated and flaked coconut make this the root id for coconut-derived foods."
+    },
+    "coconut_cream": {
+      "parents": [
+        {
+          "id": "coconut",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "cream"
+      ],
+      "reason": "Coconut cream and cream of coconut are concentrated coconut products, not dairy cream."
+    },
+    "coconut_flour": {
+      "parents": [
+        {
+          "id": "coconut",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "flour"
+      ],
+      "reason": "Coconut flour is ground dried coconut and is not ordinary wheat flour under the confirmed policy."
+    },
+    "coconut_milk": {
+      "parents": [
+        {
+          "id": "coconut",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "milk"
+      ],
+      "reason": "Canned coconut milk is extracted from coconut flesh and is not dairy milk."
+    },
+    "coconut_sugar": {
+      "parents": [
+        {
+          "id": "sugar",
+          "relation": "variety"
+        },
+        {
+          "id": "coconut",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Coconut or coco sugar is a sugar variety produced from coconut-palm sap."
+    },
+    "coleslaw": {
+      "parents": [
+        {
+          "id": "cabbage",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Prepared coleslaw is a shredded cabbage salad, so cabbage is its defining vegetable base."
+    },
+    "coleslaw_mix": {
+      "parents": [
+        {
+          "id": "cabbage",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "coleslaw"
+      ],
+      "reason": "Packaged coleslaw mix is raw shredded cabbage and vegetables used to make slaw, not prepared coleslaw itself."
+    },
+    "collard": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Collard, turnip and mustard greens share this broad leafy-greens id without a single narrower parent."
+    },
+    "coriander": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Recipe evidence mixes coriander seed, ground coriander and fresh leaves, so the id cannot safely inherit the leaf-only cilantro entry."
+    },
+    "corn": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh ears and canned or frozen kernels make corn the root id for corn-derived foods."
+    },
+    "corn_flour_masa": {
+      "parents": [
+        {
+          "id": "corn",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "flour"
+      ],
+      "reason": "Masa harina is treated corn flour used for pupusas and tamales, not the catalog's ordinary wheat flour."
+    },
+    "corn_syrup": {
+      "parents": [
+        {
+          "id": "corn",
+          "relation": "made_from"
+        },
+        {
+          "id": "syrup",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Light and dark corn syrups are syrup varieties produced from corn starch."
+    },
+    "cornmeal": {
+      "parents": [
+        {
+          "id": "corn",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Yellow and ordinary cornmeal are coarse meals milled from dried corn."
+    },
+    "cornstarch": {
+      "parents": [
+        {
+          "id": "corn",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Cornstarch is the purified starch produced from corn and would be avoided with a corn exclusion."
+    },
+    "couscous": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Plain couscous is a wheat pasta grain product, but the catalog has no wheat or generic pasta family id."
+    },
+    "cracker_crumbs": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Ritz, graham and generic cracker crumbs vary by cracker type, and no cracker family id exists."
+    },
+    "cranberry": {
+      "parents": [
+        {
+          "id": "berries",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh and dried cranberries are a named berry variety under the confirmed berries policy."
+    },
+    "cream_of_tartar": {
+      "parents": [],
+      "not_parents": [
+        "cream"
+      ],
+      "reason": "Cream of tartar is powdered potassium bitartrate used in baking, not dairy cream."
+    },
+    "creamed_corn": {
+      "parents": [
+        {
+          "id": "corn",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Cream-style and creamed corn are prepared predominantly from corn kernels and their pulp."
+    },
+    "croutons": {
+      "parents": [
+        {
+          "id": "bread",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Plain, toasted and seasoned croutons are cubes made from bread."
+    },
+    "crystallized_ginger": {
+      "parents": [
+        {
+          "id": "ginger",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Candied and crystallized ginger are pieces of ginger preserved with sugar."
+    },
+    "cucumber": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh English, pickling and ordinary cucumbers make this the root cucumber id."
+    },
+    "cucumber_pickle": {
+      "parents": [
+        {
+          "id": "cucumber",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dill, sweet and sliced pickles in the evidence are preserved cucumbers."
+    },
+    "cumin": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole, ground and powdered cumin make one standalone spice family."
+    },
+    "currant": {
+      "parents": [
+        {
+          "id": "berries",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dried currants are the preserved form of a named berry variety."
+    },
+    "curry_leaf": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh and dried curry leaves are a distinct aromatic herb, not curry powder."
+    },
+    "curry_powder": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Curry powder is a variable spice blend that often includes ground chilli but is not guaranteed to do so."
+    },
+    "daikon": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Daikon, Korean radish and muwoo share this root-vegetable id; no generic radish parent exists."
+    },
+    "dark_chocolate": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Chopped dark chocolate is a standalone confection because the catalog has no generic chocolate family id."
+    },
+    "date": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, Medjool and dried dates form their own fruit family rather than only the generic dried-fruit class."
+    },
+    "dill": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh and dried dill weed make this the root herb id for dill forms."
+    },
+    "dill_seed": {
+      "parents": [
+        {
+          "id": "dill",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dill seed is the culinary seed form of the dill plant and inherits a household dill exclusion."
+    },
+    "dinner_roll": {
+      "parents": [
+        {
+          "id": "bread",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dinner, hoagie, Kaiser and sweet rolls in the evidence are small bread varieties."
+    },
+    "dried_fruit": {
+      "parents": [
+        {
+          "id": "fruit",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Generic dried and mixed dried fruit is produced from unspecified fruits, so the broad fruit id is the safe parent."
+    },
+    "dried_mushroom": {
+      "parents": [
+        {
+          "id": "mushroom",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dried button and other mushrooms remain preserved forms of mushroom."
+    },
+    "dried_onion_flakes": {
+      "parents": [
+        {
+          "id": "onion",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dried minced onion and onion flakes are dehydrated forms made directly from onion."
+    },
+    "dried_shiitake": {
+      "parents": [
+        {
+          "id": "dried_mushroom",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dried shiitake and dried black mushrooms are named varieties within the dried-mushroom family."
+    },
+    "dry_mustard": {
+      "parents": [
+        {
+          "id": "mustard",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dry mustard and mustard powder are the powdered seed form of the mustard family."
+    },
+    "durian": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole durian is a distinct tropical fruit without a broader catalog family id."
+    },
+    "eggplant": {
+      "parents": [],
+      "not_parents": [
+        "egg"
+      ],
+      "reason": "Eggplant or aubergine is a nightshade vegetable and has no relation to egg despite its English name."
+    },
+    "english_muffin": {
+      "parents": [
+        {
+          "id": "bread",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Toasted English muffins are griddled bread rounds and inherit the bread family."
+    },
+    "fennel": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "The evidence mixes fennel bulbs and ground fennel under this family-level plant id."
+    },
+    "fennel_seed": {
+      "parents": [
+        {
+          "id": "fennel",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Whole and crushed fennel seeds are the culinary seed form of fennel."
+    },
+    "fenugreek": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and ground fenugreek seeds form the root id for this spice plant."
+    },
+    "fenugreek_leaf": {
+      "parents": [
+        {
+          "id": "fenugreek",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dried fenugreek leaves are the herb form of the same fenugreek plant."
+    },
+    "fig": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh and dried figs form a distinct fruit family with no suitable catalog parent."
+    },
+    "flour": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Plain and all-purpose flour in the evidence is ordinary wheat flour and is the root for its direct wheat-flour varieties."
+    },
+    "food_coloring": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Optional liquid food colours span several colours and formulations without a dependable food parent."
+    },
+    "french_fried_onions": {
+      "parents": [
+        {
+          "id": "onion",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fried onion flakes and fried onions are prepared directly from onion."
+    },
+    "frozen_bread_dough": {
+      "parents": [
+        {
+          "id": "bread",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Frozen Italian, French and pizza bread dough is the unbaked form of bread and is covered by a bread exclusion."
+    },
+    "fruit": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Generic fresh fruit lines explicitly allow several berries, making fruit the broad catalog family root."
+    },
+    "gai_lan": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Trimmed gai lan or Chinese broccoli is a distinct leafy vegetable with no exact catalog family parent."
+    },
+    "galangal": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh sliced galangal rhizome is a standalone aromatic seasoning distinct from the catalog ginger id."
+    },
+    "garam_masala": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Garam masala is a variable compound spice blend without one defining catalog ingredient parent."
+    },
+    "garlic": {
+      "parents": [
+        {
+          "id": "group:allium",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh cloves and crushed garlic are members of the confirmed allium household-exclusion family."
+    },
+    "garlic_powder": {
+      "parents": [
+        {
+          "id": "garlic",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Garlic powder is dehydrated, ground garlic and inherits garlic and allium exclusions."
+    },
+    "garlic_salt": {
+      "parents": [
+        {
+          "id": "garlic",
+          "relation": "made_from"
+        },
+        {
+          "id": "salt",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Garlic salt combines garlic and salt; the confirmed policy places it under both ingredients."
+    },
+    "ginger": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh gingerroot and ground ginger make this the family root for ginger preparations."
+    },
+    "glutinous_rice": {
+      "parents": [
+        {
+          "id": "rice",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Sticky, sweet and glutinous rice are named varieties of rice despite containing no gluten."
+    },
+    "gnocchi": {
+      "parents": [
+        {
+          "id": "potato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The evidence explicitly includes fresh potato gnocchi, a dumpling made principally with potato."
+    },
+    "gochugaru": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Korean red chilli powder and flakes are dried ground hot chili pepper."
+    },
+    "golden_syrup": {
+      "parents": [
+        {
+          "id": "syrup",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Golden syrup is a named sugar-cane syrup variety used interchangeably with corn syrup in one recipe."
+    },
+    "grape": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh red, green and seedless grapes form the root id for grape-fruit preparations."
+    },
+    "grape_leaves": {
+      "parents": [],
+      "not_parents": [
+        "grape"
+      ],
+      "reason": "Canned grape leaves are cooking wrappers from the vine, not the grape fruit represented by the grape id."
+    },
+    "grapefruit": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and ruby grapefruit segments form a distinct citrus fruit family without a generic citrus parent."
+    },
+    "green_beans": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Green, string and French-style beans share this vegetable id without a generic bean parent."
+    },
+    "green_chili": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh and canned green chillies are direct hot chili-pepper varieties."
+    },
+    "green_onion": {
+      "parents": [
+        {
+          "id": "onion",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Green onions, scallions and spring onions are young onion forms and inherit onion's allium ancestry."
+    },
+    "green_papaya": {
+      "parents": [
+        {
+          "id": "papaya",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Green papaya is the unripe vegetable-use form of papaya and remains covered by a papaya exclusion."
+    },
+    "grits": {
+      "parents": [
+        {
+          "id": "corn",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Grits are a coarse cooked cereal milled from corn."
+    },
+    "guava": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "The sole recipe uses guava leaves rather than fruit, and no broader leaf or guava-family parent exists."
+    },
+    "habanero_pepper": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Very hot fresh habaneros are a direct variety of hot chili pepper."
+    },
+    "hamburger_bun": {
+      "parents": [
+        {
+          "id": "bread",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [
+        "ham"
+      ],
+      "reason": "Hamburger and sandwich buns are bread rolls; the word hamburger does not make the bun a ham product."
+    },
+    "hash_brown": {
+      "parents": [
+        {
+          "id": "potato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Frozen shredded hash browns are a prepared potato product."
+    },
+    "herbes_de_provence": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Herbes de Provence is a multi-herb seasoning blend without one dependable catalog herb parent."
+    },
+    "hominy": {
+      "parents": [
+        {
+          "id": "corn",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Hominy is alkali-treated whole corn and remains a corn-derived grain product."
+    },
+    "honey": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Measured honey is a standalone bee-produced sweetener with no suitable ingredient parent."
+    },
+    "hot_dog_bun": {
+      "parents": [
+        {
+          "id": "bread",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [
+        "hot_dog"
+      ],
+      "reason": "Hot-dog buns are split bread rolls and do not contain or inherit the hot dog served inside."
+    },
+    "ice": {
+      "parents": [
+        {
+          "id": "water",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ice cubes and crushed ice are the frozen physical form of water."
+    },
+    "instant_mashed_potato": {
+      "parents": [
+        {
+          "id": "potato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Instant potato and mashed-potato flakes are dehydrated products made from potato."
+    },
+    "italian_seasoning": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Italian seasoning is a variable dried-herb blend without one defining catalog herb parent."
+    },
+    "jackfruit": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh sliced jackfruit is a distinct tropical fruit with no suitable catalog family parent."
+    },
+    "jaggery": {
+      "parents": [
+        {
+          "id": "sugar",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Jaggery is an unrefined cane or palm sugar and belongs to the generic sugar family."
+    },
+    "jalapeno": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh, minced and pickled jalapeños are a named hot chili-pepper variety."
+    },
+    "jerk_seasoning": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Jamaican jerk seasoning commonly contains Scotch bonnet or other hot chilli, though prepared blends vary."
+    },
+    "jicama": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Peeled and chopped jicama is a distinct root vegetable without another catalog family id."
+    },
+    "kabocha": {
+      "parents": [
+        {
+          "id": "squash",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Kabocha is a named winter-squash variety used in chunks, slices and soup."
+    },
+    "kaffir_lime_leaf": {
+      "parents": [],
+      "not_parents": [
+        "lime"
+      ],
+      "reason": "Kaffir lime leaves are an aromatic herb from the tree, not the lime fruit represented by the lime id."
+    },
+    "kale": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh chopped and torn kale leaves form their own leafy-vegetable family."
+    },
+    "kiwi": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh kiwi pulp, slices and diced fruit form a distinct fruit family."
+    },
+    "leek": {
+      "parents": [
+        {
+          "id": "group:allium",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh leek whites and stalks are a direct member of the confirmed allium household-exclusion group."
+    },
+    "lemon": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole lemons and wedges make this the root id for lemon juice, zest and extract."
+    },
+    "lemon_juice": {
+      "parents": [
+        {
+          "id": "lemon",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh and bottled lemon juice is pressed directly from lemons."
+    },
+    "lemon_pepper": {
+      "parents": [
+        {
+          "id": "lemon",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Lemon-pepper seasoning uses dried lemon peel or lemon flavour with pepper, so lemon is a defining component."
+    },
+    "lemon_zest": {
+      "parents": [
+        {
+          "id": "lemon",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Grated lemon peel, rind and zest are taken directly from lemon fruit."
+    },
+    "lemongrass": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh stalks and prepared lemongrass are a distinct aromatic herb unrelated to lemon fruit."
+    },
+    "lettuce": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Iceberg, leaf and generic salad lettuce make this broad leafy-vegetable id."
+    },
+    "lime": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole limes and wedges make this the root id for lime juice and zest."
+    },
+    "lime_juice": {
+      "parents": [
+        {
+          "id": "lime",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Freshly squeezed and measured lime juice is made directly from limes."
+    },
+    "lime_zest": {
+      "parents": [
+        {
+          "id": "lime",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Grated lime peel and zest are taken directly from lime fruit."
+    },
+    "long_grain_wild_rice_mix": {
+      "parents": [
+        {
+          "id": "rice",
+          "relation": "either_of"
+        },
+        {
+          "id": "wild_rice",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The packaged mix explicitly combines long-grain rice and wild rice, so both named grains are possible components."
+    },
+    "lychee": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Canned sliced lychees are a distinct tropical fruit without a broader catalog parent."
+    },
+    "lye_water": {
+      "parents": [],
+      "not_parents": [
+        "water"
+      ],
+      "reason": "Kansui is an alkaline cooking solution used to change noodle texture, not plain water for household exclusions."
+    },
+    "macaroni": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Cooked and dry elbow macaroni form a pasta family, but the catalog has no generic pasta parent id."
+    },
+    "mace": {
+      "parents": [
+        {
+          "id": "nutmeg",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ground mace is the culinary aril from the same fruit that yields nutmeg and follows that spice family."
+    },
+    "mango": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, diced, sliced and puréed mango make this the root mango-fruit id."
+    },
+    "maple_syrup": {
+      "parents": [
+        {
+          "id": "syrup",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pure and light maple syrup are named varieties of the generic syrup family."
+    },
+    "marjoram": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh and dried marjoram are forms of one standalone culinary herb."
+    },
+    "mashed_potatoes": {
+      "parents": [
+        {
+          "id": "potato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Prepared homemade and instant mashed potatoes are made principally from potato."
+    },
+    "meat_tenderizer": {
+      "parents": [],
+      "not_parents": [
+        "meat"
+      ],
+      "reason": "Unseasoned meat tenderizer is an enzyme or seasoning applied to meat and does not itself contain meat."
+    },
+    "millet_flour": {
+      "parents": [],
+      "not_parents": [
+        "flour"
+      ],
+      "reason": "Finely ground millet flour is a non-wheat grain meal, but the catalog has no millet parent id."
+    },
+    "mint": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh chopped mint leaves make this the root herb id for mint-derived flavourings."
+    },
+    "mixed_herbs": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Generic mixed herbs combine cilantro, mint, basil and other herbs, so no single parent is dependable."
+    },
+    "mixed_vegetables": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Frozen, fresh and stir-fry vegetable mixes vary across many vegetables and have no single safe parent."
+    },
+    "molasses": {
+      "parents": [
+        {
+          "id": "sugar",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dark and ordinary molasses are concentrated by-products of cane-sugar refining and follow a sugar exclusion."
+    },
+    "msg": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Monosodium glutamate and Accent are a standalone flavour enhancer with no suitable catalog parent."
+    },
+    "mung_bean_starch": {
+      "parents": [
+        {
+          "id": "mung_bean",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The sole recipe explicitly calls this mung-bean flour or starch, made from mung bean."
+    },
+    "mushroom": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh button, portobello and generic mushrooms make this the root mushroom id."
+    },
+    "mustard_seed": {
+      "parents": [
+        {
+          "id": "mustard",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Whole mustard seed is the seed form of the mustard plant and follows a mustard exclusion."
+    },
+    "nori": {
+      "parents": [
+        {
+          "id": "seaweed",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Toasted nori, kim and laver are explicitly dried seaweed varieties."
+    },
+    "nutmeg": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole grated and ground nutmeg make this the root id for the nutmeg spice fruit."
+    },
+    "oat_bran": {
+      "parents": [
+        {
+          "id": "oats",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Oat bran is the bran fraction milled from oats and follows an oats exclusion."
+    },
+    "oats": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Quick, rolled and steel-cut oats form the catalog's root oat-grain family."
+    },
+    "okra": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh whole and sliced okra pods form a distinct vegetable family."
+    },
+    "old_bay": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Old Bay is a compound seasoning that commonly includes paprika or red pepper, though the exact blend is proprietary."
+    },
+    "olive": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Green, black and ripe whole olives make this the root olive-fruit id."
+    },
+    "onion": {
+      "parents": [
+        {
+          "id": "group:allium",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh chopped and sliced onions are a core member of the confirmed allium household-exclusion group."
+    },
+    "onion_powder": {
+      "parents": [
+        {
+          "id": "onion",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Onion powder is dehydrated ground onion and inherits onion and allium exclusions."
+    },
+    "onion_salt": {
+      "parents": [
+        {
+          "id": "onion",
+          "relation": "made_from"
+        },
+        {
+          "id": "salt",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Onion salt combines onion flavour with salt and follows both confirmed parent policies."
+    },
+    "opo_squash": {
+      "parents": [
+        {
+          "id": "squash",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Opo or bottle squash is a named squash variety used sliced in soup."
+    },
+    "orange": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole navel, mandarin and ordinary oranges make this the root orange-fruit id."
+    },
+    "orange_blossom": {
+      "parents": [],
+      "not_parents": [
+        "orange"
+      ],
+      "reason": "Orange blossom water is distilled from citrus flowers and is not the orange fruit represented by the orange id."
+    },
+    "orange_juice": {
+      "parents": [
+        {
+          "id": "orange",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh and canned orange juice is pressed directly from oranges."
+    },
+    "orange_zest": {
+      "parents": [
+        {
+          "id": "orange",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Grated orange peel and zest are taken directly from orange fruit."
+    },
+    "oregano": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, dried, whole and ground oregano make one standalone herb family."
+    },
+    "orzo": {
+      "parents": [
+        {
+          "id": "pasta",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipe evidence repeatedly identifies orzo as a rice-shaped pasta variety."
+    },
+    "palm_sugar": {
+      "parents": [
+        {
+          "id": "sugar",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Palm sugar, gula melaka and gula jawa are unrefined sugar varieties from palm sap."
+    },
+    "palmyra_fruit": {
+      "parents": [
+        {
+          "id": "fruit",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Palmyra palm fruit is an explicitly named fruit variety under the catalog's broad fruit id."
+    },
+    "pancake_mix": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "The evidence is a prepared Belgian waffle mix with multiple ingredients and no dependable single parent."
+    },
+    "pancit_canton": {
+      "parents": [
+        {
+          "id": "pasta",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Packaged pancit canton is a wheat-noodle pasta form used in a sautéed noodle dish."
+    },
+    "pandan_juice": {
+      "parents": [
+        {
+          "id": "pandan_leaf",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pandan juice is extracted from screwpine or pandan leaves for flavour and colour."
+    },
+    "pandan_leaf": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh knotted pandan or screwpine leaves make the root id for pandan-derived flavourings."
+    },
+    "pandan_paste": {
+      "parents": [
+        {
+          "id": "pandan_leaf",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Commercial pandan paste may use pandan-leaf concentrate, while the evidence also treats it as optional colouring."
+    },
+    "papaya": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh ripe papaya is the root fruit id for ripe and green papaya forms."
+    },
+    "paprika": {
+      "parents": [],
+      "not_parents": [
+        "chili_pepper"
+      ],
+      "reason": "Paprika may be sweet or smoked powder from mild Capsicum and is not reliably a hot chili-pepper product."
+    },
+    "parsley": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, dried, flat-leaf and Italian parsley make one standalone herb family."
+    },
+    "parsnip": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh peeled and sliced parsnips form a distinct root-vegetable family."
+    },
+    "pasta": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Spaghetti, penne, rotini, lasagna and generic pasta make this the broad pasta family root."
+    },
+    "pea_shoots": {
+      "parents": [
+        {
+          "id": "peas",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pea shoots are the edible young growth of pea plants and follow a household pea exclusion."
+    },
+    "peach": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh and canned sliced peaches form a distinct fruit family."
+    },
+    "pear": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh pears and pear purée make this the family root for ordinary and Asian pear varieties."
+    },
+    "peas": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, frozen and canned green peas form the root pea-vegetable id."
+    },
+    "peppercorn": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "The evidence mixes black and Szechuan peppercorns, so the id cannot safely inherit only black_pepper."
+    },
+    "perilla": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh perilla or shiso leaves are a distinct culinary herb with no matching catalog parent."
+    },
+    "persimmon": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh ripe chopped persimmon is a distinct fruit without a broader catalog family id."
+    },
+    "phyllo": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Filo and phyllo pastry sheets form a prepared dough family without a generic pastry parent id."
+    },
+    "pickling_spice": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Pickling spice is a variable multi-spice blend wrapped or measured whole, with no single dependable parent."
+    },
+    "pie_crust": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Baked and unbaked pie shells are prepared pastry crusts without a generic pastry or dough parent id."
+    },
+    "pimento": {
+      "parents": [
+        {
+          "id": "bell_pepper",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Chopped pimento or pimiento is a mild sweet-pepper variety within the bell-pepper family."
+    },
+    "pineapple": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, canned, crushed and chunk pineapple make this the root pineapple-fruit id."
+    },
+    "pineapple_juice": {
+      "parents": [
+        {
+          "id": "pineapple",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Canned and unsweetened pineapple juice is pressed from pineapple."
+    },
+    "pita_bread": {
+      "parents": [
+        {
+          "id": "bread",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Whole and split pita breads are flatbread varieties under the bread family."
+    },
+    "pizza_crust": {
+      "parents": [
+        {
+          "id": "bread",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Prepared pizza crust and refrigerated pizza dough are baked or unbaked bread-dough forms."
+    },
+    "plantain": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Green and ripe cooking plantains form a distinct fruit family from the catalog's dessert banana id."
+    },
+    "plum": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh whole, halved and chopped plums form a distinct fruit family."
+    },
+    "pomegranate_seeds": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Pomegranate arils are a distinct fruit ingredient, but no whole-pomegranate parent id exists."
+    },
+    "poppadam": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Packaged plain poppadams may use lentil, chickpea or other flour, so no single source parent is guaranteed."
+    },
+    "poppy_seed": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and ground poppy seeds form a distinct culinary seed ingredient without a broader catalog parent."
+    },
+    "potato": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole, red, baking, cooked and sliced potatoes make this the root potato id."
+    },
+    "potato_chip": {
+      "parents": [
+        {
+          "id": "potato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Crushed and whole potato chips are fried prepared products made directly from potato."
+    },
+    "potato_starch": {
+      "parents": [
+        {
+          "id": "potato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Potato starch is the purified starch extracted from potato."
+    },
+    "poultry_seasoning": {
+      "parents": [],
+      "not_parents": [
+        "meat"
+      ],
+      "reason": "Poultry seasoning is a dry herb blend used on poultry and does not itself contain poultry meat."
+    },
+    "powdered_sugar": {
+      "parents": [
+        {
+          "id": "sugar",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Powdered, confectioners' and icing sugar are finely milled varieties of sugar."
+    },
+    "prod_tomatillo": {
+      "parents": [],
+      "not_parents": [
+        "tomato"
+      ],
+      "reason": "Tomatillo is a distinct husked fruit in the nightshade family, not a tomato variety."
+    },
+    "prune": {
+      "parents": [
+        {
+          "id": "plum",
+          "relation": "made_from"
+        },
+        {
+          "id": "dried_fruit",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Prunes are dried plums and also a named variety within generic dried fruit."
+    },
+    "puff_pastry": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Frozen and fresh puff-pastry sheets are a prepared laminated dough without a generic pastry parent id."
+    },
+    "pumpkin": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole, cubed and puréed pumpkin make this the root id for pumpkin-derived foods."
+    },
+    "pumpkin_pie_spice": {
+      "parents": [],
+      "not_parents": [
+        "pumpkin"
+      ],
+      "reason": "Pumpkin pie spice is a dry spice blend used with pumpkin and contains no pumpkin itself."
+    },
+    "quinoa": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Cooked and uncooked quinoa form a distinct pseudocereal family without a broader catalog parent."
+    },
+    "radish": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh sliced ordinary radishes make this the root id for radish forms."
+    },
+    "radish_sprouts": {
+      "parents": [
+        {
+          "id": "radish",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Radish sprouts are the edible young growth of radish plants and follow a radish exclusion."
+    },
+    "raisin": {
+      "parents": [
+        {
+          "id": "grape",
+          "relation": "made_from"
+        },
+        {
+          "id": "dried_fruit",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ordinary and golden raisins are dried grapes and a named dried-fruit variety."
+    },
+    "ramen": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Packaged ramen evidence includes chicken-flavoured packets as well as discarded or other flavours, so chicken is possible but not universal."
+    },
+    "raspberry": {
+      "parents": [
+        {
+          "id": "berries",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh and frozen raspberries are a named berry variety under the confirmed berries policy."
+    },
+    "red_cabbage": {
+      "parents": [
+        {
+          "id": "cabbage",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Red and purple cabbage are colour varieties of cabbage."
+    },
+    "red_onion": {
+      "parents": [
+        {
+          "id": "onion",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh red onion is a direct onion variety and inherits the confirmed allium ancestry."
+    },
+    "rhubarb": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh chopped rhubarb stalks form a distinct vegetable ingredient family."
+    },
+    "rice": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Cooked and uncooked white, long-grain and instant rice make this the root rice id."
+    },
+    "rice_cake": {
+      "parents": [
+        {
+          "id": "rice",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Korean tteok and garae-tteok rice cakes are prepared principally from rice."
+    },
+    "rice_flour": {
+      "parents": [
+        {
+          "id": "rice",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "flour"
+      ],
+      "reason": "Ordinary and glutinous rice flours are ground rice, not the catalog's ordinary wheat flour."
+    },
+    "rice_noodles": {
+      "parents": [
+        {
+          "id": "rice",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Rice vermicelli and fresh or dried rice noodles are prepared from rice."
+    },
+    "rice_paper": {
+      "parents": [
+        {
+          "id": "rice",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Spring-roll rice papers are rice-based, but the evidence also includes confectioners' wafer paper with variable starch."
+    },
+    "roasted_red_pepper": {
+      "parents": [
+        {
+          "id": "bell_pepper",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Prepared roasted red peppers are roasted forms of sweet red bell pepper."
+    },
+    "rose_water": {
+      "parents": [],
+      "not_parents": [
+        "water"
+      ],
+      "reason": "Rose water is a concentrated floral flavouring and not plain water for household exclusions."
+    },
+    "rosemary": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, dried and crushed rosemary form one standalone culinary herb family."
+    },
+    "rotel": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "made_from"
+        },
+        {
+          "id": "chili_pepper",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ro-Tel is explicitly canned diced tomatoes combined with green chillies, so both are defining ingredients."
+    },
+    "rutabaga": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh peeled, diced and grated rutabaga form a distinct root-vegetable family."
+    },
+    "rye_flour": {
+      "parents": [],
+      "not_parents": [
+        "flour"
+      ],
+      "reason": "Light or dark rye flour is ground rye rather than ordinary wheat flour, and no rye parent id exists."
+    },
+    "saffron": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole saffron threads and crushed saffron form a standalone spice ingredient."
+    },
+    "sage": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, dried, ground and rubbed sage make one standalone herb family."
+    },
+    "salt": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Table, kosher and ordinary salt make this the root id for salt-based seasoning blends."
+    },
+    "salt_and_pepper": {
+      "parents": [
+        {
+          "id": "salt",
+          "relation": "made_from"
+        },
+        {
+          "id": "black_pepper",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "This combined seasoning always includes salt and usually ground black pepper, while some evidence specifies white pepper."
+    },
+    "sauerkraut": {
+      "parents": [
+        {
+          "id": "cabbage",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Sauerkraut is fermented shredded cabbage and follows a cabbage exclusion."
+    },
+    "scotch_bonnet": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Scotch bonnet is a named very-hot chili-pepper variety."
+    },
+    "seasoned_salt": {
+      "parents": [
+        {
+          "id": "salt",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Seasoning salt and seasoned salt are salt-based blends under the confirmed salt policy."
+    },
+    "seaweed": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Wakame, kim and generic dried seaweed make this the root family for seaweed varieties."
+    },
+    "self_rising_flour": {
+      "parents": [
+        {
+          "id": "flour",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Self-rising and self-raising flour are ordinary wheat flour premixed with leavening."
+    },
+    "semolina_flour": {
+      "parents": [
+        {
+          "id": "flour",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Semolina is coarse durum-wheat flour and therefore a direct wheat-flour variety."
+    },
+    "sesame_seed": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole, toasted, crushed and ground sesame seeds form a standalone seed ingredient family."
+    },
+    "shallot": {
+      "parents": [
+        {
+          "id": "group:allium",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh peeled, sliced and minced shallots are direct members of the confirmed allium group."
+    },
+    "shirataki_noodles": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Shirataki are konjac noodles, but the catalog has neither a konjac nor generic noodle parent id."
+    },
+    "snow_peas": {
+      "parents": [
+        {
+          "id": "peas",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh and frozen snow peas are an edible-pod variety of peas."
+    },
+    "soba_noodles": {
+      "parents": [
+        {
+          "id": "buckwheat",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Soba commonly contains buckwheat, while commercial and yakisoba-style noodles may also be predominantly wheat."
+    },
+    "somyeon": {
+      "parents": [
+        {
+          "id": "pasta",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The evidence explicitly identifies somyeon as a thin wheat-flour noodle, a pasta variety."
+    },
+    "sorghum_flour": {
+      "parents": [],
+      "not_parents": [
+        "flour"
+      ],
+      "reason": "Sorghum flour is ground sorghum rather than ordinary wheat flour, and no sorghum parent id exists."
+    },
+    "spaghetti_squash": {
+      "parents": [
+        {
+          "id": "squash",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Whole halved spaghetti squash is a named winter-squash variety."
+    },
+    "spelt": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole spelt or wheat berries share this ancient-grain id, but no generic wheat parent exists."
+    },
+    "spinach": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, baby and chopped spinach make a distinct leafy-vegetable family."
+    },
+    "squash": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Acorn, winter and generic squash make this the root family for named squash varieties."
+    },
+    "star_fruit": {
+      "parents": [
+        {
+          "id": "fruit",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Star-fruit slices are an explicitly named variety under the broad fruit id."
+    },
+    "strawberry": {
+      "parents": [
+        {
+          "id": "berries",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh and frozen strawberries are a named berry variety under the confirmed berries policy."
+    },
+    "sugar": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Granulated white sugar is the root id for the catalog's direct sugar varieties."
+    },
+    "sugar_cane": {
+      "parents": [
+        {
+          "id": "sugar",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh sugar-cane stalks naturally contain abundant sucrose, so a household excluding sugar would avoid chewing or infusing them."
+    },
+    "sugar_snap_peas": {
+      "parents": [
+        {
+          "id": "peas",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [
+        "sugar"
+      ],
+      "reason": "Sugar snap peas are an edible-pod pea variety; their name does not make them processed sugar."
+    },
+    "sugar_substitute": {
+      "parents": [],
+      "not_parents": [
+        "sugar"
+      ],
+      "reason": "Splenda, stevia and other sugar substitutes are selected in place of sugar and must not inherit it."
+    },
+    "sumac": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Ground sumac is a standalone tart spice without another catalog family id."
+    },
+    "sun_dried_tomato": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Oil-packed and dry sun-dried tomatoes are dehydrated products made directly from tomato."
+    },
+    "sweet_potato": {
+      "parents": [],
+      "not_parents": [
+        "potato"
+      ],
+      "reason": "Sweet potato is a botanically distinct root vegetable and is not a variety of ordinary potato."
+    },
+    "sweet_potato_noodles": {
+      "parents": [
+        {
+          "id": "sweet_potato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "potato"
+      ],
+      "reason": "Korean glass noodles are made from sweet-potato starch and do not inherit ordinary potato."
+    },
+    "swiss_chard": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh chopped chard leaves form a distinct leafy-vegetable family."
+    },
+    "syrup": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Unqualified syrup is the family root for named liquid sweetener syrups in the catalog."
+    },
+    "szechwan_pepper": {
+      "parents": [],
+      "not_parents": [
+        "black_pepper",
+        "chili_pepper"
+      ],
+      "reason": "Szechwan pepper is a numbing spice from Zanthoxylum, neither black peppercorn nor hot Capsicum chilli."
+    },
+    "taco_seasoning": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Taco seasoning mixes commonly include chilli powder, although commercial and homemade blend formulas vary."
+    },
+    "taco_shell": {
+      "parents": [
+        {
+          "id": "corn",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "A crisp taco shell is a prepared corn tortilla product and follows a corn exclusion."
+    },
+    "tamarind": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Tamarind paste, pulp and powder share this standalone sour-fruit flavouring id."
+    },
+    "tapioca_flour": {
+      "parents": [
+        {
+          "id": "cassava",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "flour"
+      ],
+      "reason": "Tapioca flour or starch is extracted from cassava and is not ordinary wheat flour."
+    },
+    "taro": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh taro root is a distinct starchy vegetable without a broader catalog parent."
+    },
+    "tarragon": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, dried and crushed tarragon leaves form one standalone herb family."
+    },
+    "tater_tots": {
+      "parents": [
+        {
+          "id": "potato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Plain and onion-flavoured tater tots are formed products made principally from potato."
+    },
+    "teff_flour": {
+      "parents": [],
+      "not_parents": [
+        "flour"
+      ],
+      "reason": "Teff flour is ground teff rather than ordinary wheat flour, and no teff parent id exists."
+    },
+    "thai_basil": {
+      "parents": [
+        {
+          "id": "basil",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Thai, holy and sweet basil leaves in the evidence are named basil varieties."
+    },
+    "thyme": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, dried, whole and crushed thyme form one standalone culinary herb family."
+    },
+    "tomato": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh plum, cherry and ordinary tomatoes make this the root id for tomato-derived products."
+    },
+    "tomato_paste": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Concentrated tomato paste is made directly from cooked-down tomatoes."
+    },
+    "tomato_puree": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Tomato purée and mash are processed directly from tomatoes."
+    },
+    "tomato_sauce": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Canned and prepared tomato sauce is principally made from tomato."
+    },
+    "tortilla": {
+      "parents": [
+        {
+          "id": "corn",
+          "relation": "either_of"
+        },
+        {
+          "id": "flour",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The evidence explicitly alternates corn tortillas and wheat-flour tortillas, so either grain base is possible."
+    },
+    "tortilla_chips": {
+      "parents": [
+        {
+          "id": "tortilla",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Crushed and whole tortilla chips are fried or baked pieces made from tortillas."
+    },
+    "turmeric": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Ground and powdered turmeric form a standalone rhizome spice family."
+    },
+    "turnip": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh peeled, sliced and cubed turnips form a distinct root-vegetable family."
+    },
+    "ube": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Purple yam or ube is a distinct starchy tuber without a generic yam parent id."
+    },
+    "udon_noodles": {
+      "parents": [
+        {
+          "id": "pasta",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Packaged udon are thick wheat noodles and a direct pasta variety."
+    },
+    "vanilla_wafer": {
+      "parents": [],
+      "not_parents": [
+        "vanilla"
+      ],
+      "reason": "Vanilla wafers are baked cookies with minor flavouring, not vanilla extract and not an alcohol-containing ingredient for exclusion."
+    },
+    "water": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Plain measured water is the root liquid id for its frozen physical form."
+    },
+    "water_chestnut": {
+      "parents": [],
+      "not_parents": [
+        "water"
+      ],
+      "reason": "Water chestnut is a crisp aquatic vegetable and is not plain water despite its name."
+    },
+    "watercress": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh trimmed watercress leaves form a distinct leafy-vegetable family."
+    },
+    "watermelon": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh cubed, sliced and diced watermelon make this the root watermelon-fruit id."
+    },
+    "watermelon_rind": {
+      "parents": [
+        {
+          "id": "watermelon",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Watermelon rind is the edible white outer portion cut directly from watermelon."
+    },
+    "wheat_berries": {
+      "parents": [],
+      "not_parents": [
+        "berries"
+      ],
+      "reason": "Wheat berries are whole cereal kernels and are unrelated to the fruit family called berries."
+    },
+    "wheat_germ": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Wheat germ is the embryo fraction of wheat grain, but the catalog has no generic wheat parent id."
+    },
+    "whole_wheat_flour": {
+      "parents": [
+        {
+          "id": "flour",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Whole-wheat and whole-wheat pastry flour are direct varieties of ordinary wheat flour."
+    },
+    "wild_rice": {
+      "parents": [],
+      "not_parents": [
+        "rice"
+      ],
+      "reason": "Wild rice is the grain of aquatic Zizania grass rather than cultivated rice, so a rice exclusion does not automatically cover it."
+    },
+    "wonton_wrapper": {
+      "parents": [
+        {
+          "id": "egg",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Wonton, egg-roll, lumpia and spring-roll wrappers vary; some doughs contain egg while others are egg-free."
+    },
+    "yeast": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh, active dry, instant and rapid-rise yeast form one standalone leavening family."
+    },
+    "yellow_squash": {
+      "parents": [
+        {
+          "id": "squash",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Yellow and summer squash are direct varieties of the generic squash family."
+    },
+    "zaatar": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Za'atar is a compound Middle Eastern spice mix without one dependable catalog ingredient parent."
+    },
+    "zucchini": {
+      "parents": [
+        {
+          "id": "squash",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fresh zucchini or courgette is a summer-squash variety under the generic squash family."
+    }
+  }
 }
