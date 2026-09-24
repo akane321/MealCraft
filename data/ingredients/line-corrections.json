@@ -1,0 +1,18 @@
+{
+  "schema_version": "ingredient-line-corrections-v1",
+  "note": "Recipe lines the release mapped to the wrong ingredient, corrected at import until the next release fixes them upstream. Each correction names the release line exactly; if the release changes that line, the import fails so the correction can be removed.",
+  "corrections": [
+    {
+      "recipe_id": "RCP2_8559F3848205",
+      "original_text": "1 ounce pomelo juice",
+      "release_ingredient": "grapefruit_juice",
+      "ingredient": {
+        "normalized_name": "pomelo_juice",
+        "display_name": "pomelo juice",
+        "allergens": []
+      },
+      "reason": "Pomelo and grapefruit are different fruits; the release maps this pomelo juice line to grapefruit juice, and the grapefruit juice product would have been bought for it. Pomelo juice has no FairPrice mapping, so the recipe is left out of priced plans until it does.",
+      "upstream": "Fix the pomelo -> grapefruit mapping in the next data release, then delete this correction."
+    }
+  ]
+}

@@ -86,6 +86,21 @@ them, used 267 times.
 - **Not affected.** Recipe-level dietary tags stay as released, and evaluation
   runners read the release files directly, so evaluation results do not move.
 
+### A line the release mapped to the wrong ingredient
+
+`data/ingredients/line-corrections.json` corrects, at import, a recipe line that
+a release mapped to the wrong ingredient, until the next release fixes it
+upstream. Each correction names the release line exactly (recipe id, original
+text, release ingredient) and the ingredient it really is. If the release
+changes that line, the import fails, so the correction is reviewed and removed
+rather than silently doing nothing. The file is part of the import digest.
+Evaluation runners read the release files directly and are not affected.
+
+The one correction today: `1 ounce pomelo juice` in *Vietnamese Delight* was
+mapped to `grapefruit_juice`, whose product is a grapefruit juice. It is now
+`pomelo_juice`, which has no FairPrice mapping, so priced planning leaves the
+recipe out instead of buying grapefruit juice for it.
+
 ## Transformation pipeline
 
 ```text
