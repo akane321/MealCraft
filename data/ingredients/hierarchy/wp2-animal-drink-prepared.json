@@ -16,7 +16,9 @@
     "Parents may come from another package: chili_pepper, chipotle_pepper, sesame_seed, tapioca_flour, pomegranate_seeds, bonito_flakes, mustard_seed and cucumber_pickle are WP3 ids.",
     "Oil policy (confirmed by the owner on 2026-09-24): olive, avocado, coconut, peanut, sunflower, grapeseed and sesame oils are not under their source. Allergies still reach them through the ingredient's own allergens. chili_oil stays under chili_pepper because the chilli is its purpose.",
     "Gelatin (confirmed by the owner on 2026-09-24): may_contain beef as well as pork, because commercial gelatin is often bovine.",
-    "accepted_by remains null until the owner reads and accepts every entry."
+    "accepted_by remains null until the owner reads and accepts every entry.",
+    "grapefruit_juice: its only recipe line is pomelo juice. Pomelo and grapefruit are different fruits; the release's ingredient mapping conflates them. Not fixable in this table; recorded for the data owners.",
+    "either_of excludes the whole id, and must for now: the catalog prices a combined id as one product (beef_or_turkey buys minced beef, chicken_or_veg_broth buys chicken broth, milk_or_water buys milk). Keeping the recipe and choosing the other option needs the recipe and shopping path to resolve the choice first. 14 ids, 267 recipe uses; butter_or_margarine alone is 198."
   ],
   "entries": {
     "adzuki_bean": {
@@ -448,10 +450,14 @@
         {
           "id": "soup",
           "relation": "variety"
+        },
+        {
+          "id": "cream",
+          "relation": "may_contain"
         }
       ],
       "not_parents": [],
-      "reason": "Cream of celery soup is soup defined by celery."
+      "reason": "Condensed cream of celery soup: a celery soup thickened with milk or cream (the ingredient carries the milk allergen), so cream is may_contain."
     },
     "cheddar": {
       "parents": [
@@ -558,10 +564,14 @@
         {
           "id": "soup",
           "relation": "variety"
+        },
+        {
+          "id": "cream",
+          "relation": "may_contain"
         }
       ],
       "not_parents": [],
-      "reason": "Cream of chicken soup is soup made with chicken."
+      "reason": "Condensed cream of chicken soup: made with chicken and thickened with milk or cream, so chicken is made_from and cream may_contain."
     },
     "chicken_thigh": {
       "parents": [
@@ -1232,7 +1242,7 @@
         }
       ],
       "not_parents": [],
-      "reason": "Pomelo or grapefruit juice is made from the citrus fruit."
+      "reason": "The only evidence line is pomelo juice, which the release maps to grapefruit juice; the link to grapefruit stands, and the pomelo mapping is a catalog issue recorded in notes."
     },
     "grapeseed_oil": {
       "parents": [],
@@ -1808,10 +1818,14 @@
         {
           "id": "soup",
           "relation": "variety"
+        },
+        {
+          "id": "cream",
+          "relation": "may_contain"
         }
       ],
       "not_parents": [],
-      "reason": "Cream of mushroom soup is soup defined by mushroom."
+      "reason": "Condensed cream of mushroom soup: mushroom soup with milk or cream, per its milk allergen; cream is may_contain for a no-cream household."
     },
     "mussel": {
       "parents": [],
