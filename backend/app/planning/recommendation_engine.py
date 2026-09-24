@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from app.data import ingredient_hierarchy
 from app.data.allergens import allergen_conflicts, conflict_reasons
 from app.models.recipe import Recipe
+from app.planning import alternatives
 from app.planning.dietary_tags import expand_tags
 from app.schemas.recipe import RecipeListItemResponse
 from app.schemas.recommendation import (
@@ -64,8 +65,10 @@ class RecipeRecommendationEngine:
         self, recipe: Recipe, constraints: RecipeRecommendationRequest, excluded_ingredients: list[str]
     ) -> list[str]:
         reasons: list[str] = []
-        ingredient_names = {item.ingredient.normalized_name for item in recipe.recipe_ingredients}
-        recipe_allergens = {allergen for item in recipe.recipe_ingredients for allergen in item.ingredient.allergens}
+        # An "A or B" line counts as the option this household can eat, if there is one.
+        cooked = alternatives.lines(recipe, constraints)
+        ingredient_names = {item.ingredient.normalized_name for item in cooked}
+        recipe_allergens = {allergen for item in cooked for allergen in item.ingredient.allergens}
         reasons.extend(conflict_reasons(*allergen_conflicts(constraints.allergens, recipe_allergens)))
 
         excluded_matches = sorted(ingredient_names.intersection(excluded_ingredients))
@@ -238,7 +241,8 @@ class RecipeRecommendationEngine:
         coverage = 0.0
         matched_count = 0
 
-        for item in recipe.recipe_ingredients:
+        cooked = alternatives.lines(recipe, constraints)
+        for item in cooked:
             pantry_item = available.get(item.ingredient.normalized_name)
             if pantry_item is None:
                 continue
@@ -254,7 +258,5 @@ class RecipeRecommendationEngine:
             else:
                 coverage += 0.65
 
-        reasons.append(
-            f"Matches {matched_count} of {len(recipe.recipe_ingredients)} recipe ingredients already available at home."
-        )
-        return coverage / len(recipe.recipe_ingredients) * 100.0 if recipe.recipe_ingredients else 0.0
+        reasons.append(f"Matches {matched_count} of {len(cooked)} recipe ingredients already available at home.")
+        return coverage / len(cooked) * 100.0 if cooked else 0.0

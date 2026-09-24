@@ -1,0 +1,104 @@
+{
+  "schema_version": "ingredient-alternatives-v1",
+  "note": "A recipe line that allows either of two ingredients ('1 lb. ground beef or turkey') is one combined ingredient in release v2.1. Its options are listed here in the order most recipes write them; the planner uses the first one the household can eat and can buy. See docs/design/ingredient-hierarchy.md section 2.",
+  "alternatives": {
+    "beef_or_turkey": {
+      "options": [
+        "ground_beef",
+        "turkey"
+      ],
+      "written_as": "1 lb. ground beef or turkey"
+    },
+    "butter_or_margarine": {
+      "options": [
+        "butter",
+        "margarine"
+      ],
+      "written_as": "4 Tbsp. butter or margarine"
+    },
+    "butter_or_veg_oil": {
+      "options": [
+        "butter",
+        "vegetable_oil"
+      ],
+      "written_as": "2 Tbsp. butter or oil"
+    },
+    "buttermilk_or_sour_milk": {
+      "options": [
+        "buttermilk",
+        "sour_milk"
+      ],
+      "written_as": "2/3 c. buttermilk or sour milk"
+    },
+    "chicken_or_turkey": {
+      "options": [
+        "chicken",
+        "turkey"
+      ],
+      "written_as": "2 c. cooked, diced chicken or turkey"
+    },
+    "chicken_or_veg_broth": {
+      "options": [
+        "chicken_broth",
+        "vegetable_broth"
+      ],
+      "written_as": "1/4 cup reduced-sodium vegetable broth or 1/4 cup reduced-sodium chicken broth"
+    },
+    "mayo_or_dressing": {
+      "options": [
+        "mayo",
+        "salad_dressing"
+      ],
+      "written_as": "1/2 cup fat free mayonnaise or salad dressing"
+    },
+    "milk_or_cream": {
+      "options": [
+        "milk",
+        "cream"
+      ],
+      "written_as": "1/2 cup whole milk or cream"
+    },
+    "milk_or_water": {
+      "options": [
+        "milk",
+        "water"
+      ],
+      "written_as": "1 c. milk or water"
+    },
+    "parm_or_romano": {
+      "options": [
+        "parmesan",
+        "parmesan_romano"
+      ],
+      "written_as": "1 Tbsp. Parmesan or Romano cheese"
+    },
+    "pecan_or_walnut": {
+      "options": [
+        "pecan",
+        "walnut"
+      ],
+      "written_as": "1 c. pecans or walnuts, chopped"
+    },
+    "shortening_or_oil": {
+      "options": [
+        "shortening",
+        "vegetable_oil"
+      ],
+      "written_as": "1 Tbsp. shortening or vegetable oil"
+    },
+    "sour_cream_or_yogurt": {
+      "options": [
+        "sour_cream",
+        "yogurt"
+      ],
+      "written_as": "3/4 c. sour cream or plain yogurt"
+    },
+    "veg_or_olive_oil": {
+      "options": [
+        "vegetable_oil",
+        "olive_oil"
+      ],
+      "written_as": "1/2 tbsp vegetable or olive oil"
+    }
+  }
+}

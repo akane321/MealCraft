@@ -1,4 +1,5 @@
 from app.models.recipe import Recipe
+from app.planning import alternatives
 from app.repositories.recipe import RecipeRepository
 from app.schemas.recipe import (
     RecipeCollectionResponse,
@@ -31,7 +32,9 @@ class RecipeService:
         return self._to_detail(recipe)
 
     @staticmethod
-    def _to_detail(recipe: Recipe) -> RecipeDetailResponse:
+    def _to_detail(recipe: Recipe, household=None) -> RecipeDetailResponse:
+        """The recipe as stored, or, given a household, with each "A or B" line as the option it would cook."""
+        items = alternatives.lines(recipe, household) if household is not None else recipe.recipe_ingredients
         return RecipeDetailResponse(
             **RecipeListItemResponse.model_validate(recipe).model_dump(),
             ingredients=[
@@ -43,7 +46,7 @@ class RecipeService:
                     preparation=item.preparation,
                     allergens=list(item.ingredient.allergens),
                 )
-                for item in recipe.recipe_ingredients
+                for item in items
             ],
             steps=[
                 RecipeStepResponse(step_number=step.step_number, instruction=step.instruction) for step in recipe.steps

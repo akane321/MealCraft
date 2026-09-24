@@ -2,10 +2,3086 @@
   "schema_version": "ingredient-hierarchy-v1",
   "package": "WP2",
   "title": "Meat, fish, eggs, dairy, fats, drinks, condiments and prepared foods",
-  "drafted_by": null,
-  "accepted_by": null,
+  "drafted_by": "OpenAI Codex (GPT-5); revised by Claude Code (claude-opus-5-5) on the owner's behalf",
+  "accepted_by": "akane321 (owner), 2026-09-24: read all 320 entries in the Chinese review table; every point raised was resolved before acceptance",
   "notes": [
-    "Policy table (knowledge repository, operations/ingredient-hierarchy/README.md section 5) confirmed by the owner on 2026-09-24: every default stands."
+    "Policy table (knowledge repository, operations/ingredient-hierarchy/README.md section 5) confirmed by the owner on 2026-09-24: every default stands.",
+    "baked_beans: may_contain pork because four of six catalog recipes explicitly say pork and beans, while vegetarian versions exist.",
+    "broth and bouillon: generic forms may contain chicken or beef because recipe evidence names both meats plus vegetable and unspecified stocks.",
+    "pate and liver: pate may contain pork and is made from liver; catalog liver evidence is predominantly chicken liver.",
+    "eggnog, teriyaki and Worcestershire: conservative may_contain links cover common but non-guaranteed alcohol, egg or anchovy.",
+    "Name-component audit: ginger ale may contain real ginger, salt cod contains salt, and the vegetable-or-olive-oil option may contain olive; these are conservatively linked rather than rejected as look-alikes.",
+    "whipped_topping: may contain cream because catalog evidence mixes dairy whipped cream with non-dairy branded toppings.",
+    "Compound foods: where a sauce, paste, dumpling or mix commonly contains an ingredient the catalog names, it is linked may_contain (or made_from when defining) rather than left with no parent. Missing a link serves a household the food it refused; an extra link only removes a dish.",
+    "Parents may come from another package: chili_pepper, chipotle_pepper, sesame_seed, tapioca_flour, pomegranate_seeds, bonito_flakes, mustard_seed and cucumber_pickle are WP3 ids.",
+    "Oil policy (confirmed by the owner on 2026-09-24): olive, avocado, coconut, peanut, sunflower, grapeseed and sesame oils are not under their source. Allergies still reach them through the ingredient's own allergens. chili_oil stays under chili_pepper because the chilli is its purpose.",
+    "Gelatin (confirmed by the owner on 2026-09-24): may_contain beef as well as pork, because commercial gelatin is often bovine.",
+    "either_of: excluding one option reaches the combined id, which is right for the id itself (it is priced as one product). The planner first tries the line's options from data/ingredients/alternatives.json and keeps the recipe with the first option the household can eat and buy.",
+    "grapefruit_juice: its only release line (pomelo juice in Vietnamese Delight) is corrected at import to pomelo_juice by data/ingredients/line-corrections.json, which has no product, so it is never bought as grapefruit juice. The upstream mapping is to be fixed in the next data release."
   ],
-  "entries": {}
+  "entries": {
+    "adzuki_bean": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Recipes use dried adzuki beans as a distinct legume family."
+    },
+    "agar": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Agar strands are a plant gelling agent distinct from gelatin."
+    },
+    "almond": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole, sliced and ground almonds make this the family id."
+    },
+    "almond_butter": {
+      "parents": [
+        {
+          "id": "almond",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "butter"
+      ],
+      "reason": "Almond butter is ground almond, not dairy butter."
+    },
+    "almond_paste": {
+      "parents": [
+        {
+          "id": "almond",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The macaroon recipe uses paste made principally from almonds."
+    },
+    "amaretto": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Measured Amaretto liqueur is alcohol under the confirmed policy."
+    },
+    "american_cheese": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "American and processed cheese slices are varieties of cheese."
+    },
+    "anchovy": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Anchovy fillets and dried anchovies form a distinct fish family."
+    },
+    "apple_butter": {
+      "parents": [
+        {
+          "id": "apple",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "butter"
+      ],
+      "reason": "Apple butter is concentrated apple spread, not dairy butter."
+    },
+    "apple_juice": {
+      "parents": [
+        {
+          "id": "apple",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Apple juice and cider in recipes are pressed from apples."
+    },
+    "apricot_nectar": {
+      "parents": [
+        {
+          "id": "apricot",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Apricot nectar is a beverage made principally from apricots."
+    },
+    "au_jus_mix": {
+      "parents": [
+        {
+          "id": "beef",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Packaged au jus mix represents beef jus or beef gravy."
+    },
+    "avocado_oil": {
+      "parents": [],
+      "not_parents": [
+        "avocado"
+      ],
+      "reason": "Neutral cooking oil pressed from avocado flesh; not avoided by someone who dislikes avocados (oil policy)."
+    },
+    "bacon": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Unqualified bacon strips and slices are cured pork."
+    },
+    "bacon_grease": {
+      "parents": [
+        {
+          "id": "bacon",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Bacon grease is rendered from bacon and inherits pork."
+    },
+    "baked_beans": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Most evidence says pork and beans, but vegetarian versions exist."
+    },
+    "balsamic": {
+      "parents": [
+        {
+          "id": "vinegar",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Every recipe writes balsamic vinegar, a non-alcoholic vinegar variety."
+    },
+    "banana_ketchup": {
+      "parents": [
+        {
+          "id": "banana",
+          "relation": "made_from"
+        },
+        {
+          "id": "ketchup",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Filipino banana ketchup is ketchup made with banana."
+    },
+    "bbq_sauce": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "American barbecue sauce is ketchup or tomato based, but the evidence also uses Korean barbecue sauce without tomato, so tomato is may_contain."
+    },
+    "bean_sauce": {
+      "parents": [
+        {
+          "id": "soybean",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Black or ground bean sauce commonly uses soybeans, but varies."
+    },
+    "beef": {
+      "parents": [
+        {
+          "id": "meat",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Beef cuts and mince are a meat variety under policy."
+    },
+    "beef_broth": {
+      "parents": [
+        {
+          "id": "beef",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "broth"
+      ],
+      "reason": "Beef stock is made from beef; generic broth has mixed ancestry."
+    },
+    "beef_heart": {
+      "parents": [
+        {
+          "id": "beef",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The evidence explicitly uses beef heart, an organ cut of beef."
+    },
+    "beef_or_turkey": {
+      "parents": [
+        {
+          "id": "beef",
+          "relation": "either_of"
+        },
+        {
+          "id": "turkey",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "All recipes literally allow ground beef or turkey."
+    },
+    "beef_steak": {
+      "parents": [
+        {
+          "id": "beef",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Sirloin, flank and round steaks in evidence are beef cuts."
+    },
+    "beer": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Beer and ale are alcoholic drinks under the confirmed policy."
+    },
+    "black_beans": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Black beans are a distinct legume with no generic bean id."
+    },
+    "black_eyed_peas": {
+      "parents": [],
+      "not_parents": [
+        "peas"
+      ],
+      "reason": "Black-eyed peas are cowpeas, not the ordinary peas entry."
+    },
+    "black_vinegar": {
+      "parents": [
+        {
+          "id": "vinegar",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Chinkiang vinegar is directly a non-alcoholic vinegar variety."
+    },
+    "blue_cheese": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Blue cheese and Gorgonzola are cheese varieties."
+    },
+    "bouillon": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "may_contain"
+        },
+        {
+          "id": "beef",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Generic bouillon evidence alternates between chicken and beef."
+    },
+    "bourbon": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Bourbon and whiskey are alcoholic spirits under policy."
+    },
+    "brandy": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Brandy and cognac are measured alcoholic spirits in recipes."
+    },
+    "broth": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "may_contain"
+        },
+        {
+          "id": "beef",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Generic broth evidence includes chicken, beef and vegetable stocks."
+    },
+    "broth_tomato_juice": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "broth"
+      ],
+      "reason": "All 54 recipes write tomato juice; the legacy id is not broth."
+    },
+    "butter": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Dairy butter is kept outside milk by the confirmed policy."
+    },
+    "butter_or_margarine": {
+      "parents": [
+        {
+          "id": "butter",
+          "relation": "either_of"
+        },
+        {
+          "id": "margarine",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipe lines explicitly permit butter or margarine."
+    },
+    "butter_or_veg_oil": {
+      "parents": [
+        {
+          "id": "butter",
+          "relation": "either_of"
+        },
+        {
+          "id": "vegetable_oil",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes explicitly permit butter or a vegetable cooking oil."
+    },
+    "buttermilk": {
+      "parents": [
+        {
+          "id": "milk",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Buttermilk is a cultured milk form covered by policy."
+    },
+    "buttermilk_or_sour_milk": {
+      "parents": [
+        {
+          "id": "buttermilk",
+          "relation": "either_of"
+        },
+        {
+          "id": "sour_milk",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Both recipes allow buttermilk or sour milk."
+    },
+    "cannellini": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Cannellini and white beans lack a generic bean parent id."
+    },
+    "capers": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Capers are a distinct pickled flower-bud condiment."
+    },
+    "cashew": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and ground cashews make this the family-level id."
+    },
+    "catfish": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Catfish is a distinct fish species without a fish family id."
+    },
+    "celery_soup": {
+      "parents": [
+        {
+          "id": "celery",
+          "relation": "made_from"
+        },
+        {
+          "id": "soup",
+          "relation": "variety"
+        },
+        {
+          "id": "cream",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Condensed cream of celery soup: a celery soup thickened with milk or cream (the ingredient carries the milk allergen), so cream is may_contain."
+    },
+    "cheddar": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Grated and shredded Cheddar is a cheese variety."
+    },
+    "cheese": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Generic cheese is the family root for catalog cheese varieties."
+    },
+    "cheese_soup": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "made_from"
+        },
+        {
+          "id": "soup",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Cheddar or nacho cheese soup is soup made with cheese."
+    },
+    "chia": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Chia seed is its own seed ingredient without a family id."
+    },
+    "chicken": {
+      "parents": [
+        {
+          "id": "meat",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Chicken pieces and meat belong under meat by policy."
+    },
+    "chicken_breast": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Chicken breast is a specific cut of chicken."
+    },
+    "chicken_broth": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "broth"
+      ],
+      "reason": "Chicken stock is made from chicken; generic broth also implies beef."
+    },
+    "chicken_or_turkey": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "either_of"
+        },
+        {
+          "id": "turkey",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes repeatedly offer chicken or turkey."
+    },
+    "chicken_or_veg_broth": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "either_of"
+        },
+        {
+          "id": "vegetable_broth",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [
+        "broth"
+      ],
+      "reason": "Every use permits chicken broth or vegetable broth."
+    },
+    "chicken_soup": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "made_from"
+        },
+        {
+          "id": "soup",
+          "relation": "variety"
+        },
+        {
+          "id": "cream",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Condensed cream of chicken soup: made with chicken and thickened with milk or cream, so chicken is made_from and cream may_contain."
+    },
+    "chicken_thigh": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Chicken thigh is a specific cut of chicken."
+    },
+    "chicken_wings": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Whole wings and drumettes are chicken parts."
+    },
+    "chickpea": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Chickpea and garbanzo are this family-level legume id."
+    },
+    "chili_garlic_sauce": {
+      "parents": [
+        {
+          "id": "garlic",
+          "relation": "made_from"
+        },
+        {
+          "id": "chili_pepper",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Chilli garlic sauce is ground chillies and garlic in roughly equal measure; both are defining."
+    },
+    "chili_oil": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Oil infused with chilli flakes; unlike a plain oil, the chilli is what it is for, so it stays under chili_pepper."
+    },
+    "chili_paste": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ground fresh or Asian red chili paste is made from chilli peppers, whatever else is added."
+    },
+    "chili_sauce": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Hot chili and chile sauces in these recipes are chilli-based sauces, so a no-chilli household avoids them."
+    },
+    "chipotle_in_adobo": {
+      "parents": [
+        {
+          "id": "chipotle_pepper",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Canned smoked jalapenos (chipotles) in a tomato-vinegar adobo sauce; the chipotle is the defining ingredient."
+    },
+    "chipped_beef": {
+      "parents": [
+        {
+          "id": "beef",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Both recipes use sliced dried beef made from beef."
+    },
+    "chorizo": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Chorizo is commonly pork, while beef and chicken versions exist."
+    },
+    "chutney": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Mango, apple and generic fruit chutneys have no single parent."
+    },
+    "cider_vinegar": {
+      "parents": [
+        {
+          "id": "vinegar",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Apple cider vinegar is a non-alcoholic vinegar variety."
+    },
+    "clam": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh and canned clams form their own mollusc family."
+    },
+    "clam_juice": {
+      "parents": [
+        {
+          "id": "clam",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Bottled clam juice is liquid extracted from clams."
+    },
+    "club_soda": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Club soda is a non-alcoholic carbonated mixer."
+    },
+    "coconut_oil": {
+      "parents": [],
+      "not_parents": [
+        "coconut"
+      ],
+      "reason": "Fat pressed from coconut meat, used as a cooking fat; kept apart from coconut under the oil policy."
+    },
+    "coconut_water": {
+      "parents": [
+        {
+          "id": "coconut",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "water"
+      ],
+      "reason": "Coconut water comes from coconut and is not plain water."
+    },
+    "cod": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Cod fillets are a distinct fish without a fish family id."
+    },
+    "coffee": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Ground, instant, espresso and brewed coffee share this root."
+    },
+    "cola": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Coke and Pepsi are cola soft drinks without a food parent."
+    },
+    "condensed_milk": {
+      "parents": [
+        {
+          "id": "milk",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Sweetened condensed milk is a concentrated milk form."
+    },
+    "cooked_chicken": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Rotisserie and roasted chicken remain forms of chicken."
+    },
+    "cooking_spray": {
+      "parents": [
+        {
+          "id": "vegetable_oil",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Cooking spray commonly contains vegetable oil but can use other fats."
+    },
+    "corned_beef": {
+      "parents": [
+        {
+          "id": "beef",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Brisket and canned corned beef are cured beef products."
+    },
+    "cornish_hen": {
+      "parents": [
+        {
+          "id": "meat",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Whole Cornish game hens are directly meat under policy."
+    },
+    "cottage_cheese": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Cottage cheese is explicitly used as a cheese variety."
+    },
+    "crab": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh and canned crab form their own seafood family."
+    },
+    "cranberry_juice": {
+      "parents": [
+        {
+          "id": "cranberry",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Cranberry juice is a beverage made from cranberries."
+    },
+    "cream": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Heavy and whipping cream remain outside milk by policy."
+    },
+    "cream_cheese": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        },
+        {
+          "id": "cream",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Cream cheese is cheese made substantially from cream."
+    },
+    "cream_liqueur": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        },
+        {
+          "id": "cream",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Irish cream is an alcoholic liqueur made with dairy cream."
+    },
+    "creme_fraiche": {
+      "parents": [
+        {
+          "id": "cream",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Crème fraîche is cultured cream used in recipes."
+    },
+    "crepe": {
+      "parents": [
+        {
+          "id": "egg",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The evidence is Vietnamese crepes, a rice-flour batter that often has no egg, while French crepes are egg batter; may_contain egg."
+    },
+    "crickets": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Edible crickets are distinct protein outside the meat chain."
+    },
+    "curry_paste": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "may_contain"
+        },
+        {
+          "id": "shrimp_paste",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Mostly Thai red and yellow curry pastes, built on dried chillies and usually shrimp paste; green or vegetarian pastes differ, so both are may_contain."
+    },
+    "curry_sauce": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Prepared curry sauce lacks evidence for one defining parent."
+    },
+    "dashi": {
+      "parents": [
+        {
+          "id": "bonito_flakes",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Japanese stock usually made from bonito flakes and kelp; one recipe calls it powdered fish stock, while a kelp-only dashi exists, so bonito is may_contain."
+    },
+    "dijon": {
+      "parents": [
+        {
+          "id": "mustard",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dijon is consistently a prepared mustard variety."
+    },
+    "doenjang": {
+      "parents": [
+        {
+          "id": "soybean",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes explicitly describe doenjang as soybean paste."
+    },
+    "duck": {
+      "parents": [
+        {
+          "id": "meat",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Duck breasts and legs belong under meat by policy."
+    },
+    "edamame": {
+      "parents": [
+        {
+          "id": "soybean",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes repeatedly identify edamame as green soybeans."
+    },
+    "egg": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole egg is the family root for egg forms."
+    },
+    "egg_substitute": {
+      "parents": [],
+      "not_parents": [
+        "egg"
+      ],
+      "reason": "Egg substitute is chosen in place of egg and must not inherit it."
+    },
+    "egg_white": {
+      "parents": [
+        {
+          "id": "egg",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Separated egg whites are a component and form of egg."
+    },
+    "egg_yolk": {
+      "parents": [
+        {
+          "id": "egg",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Separated egg yolks are a component and form of egg."
+    },
+    "eggnog": {
+      "parents": [
+        {
+          "id": "egg",
+          "relation": "made_from"
+        },
+        {
+          "id": "group:alcohol",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Eggnog is egg-based and often, but not always, alcoholic."
+    },
+    "enchilada_sauce": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "made_from"
+        },
+        {
+          "id": "tomato",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Enchilada sauce is a red chile sauce by definition; many canned versions add tomato, which is may_contain."
+    },
+    "evaporated_milk": {
+      "parents": [
+        {
+          "id": "milk",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Evaporated milk is a concentrated milk form under policy."
+    },
+    "falafel": {
+      "parents": [
+        {
+          "id": "chickpea",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Falafel commonly uses chickpea, but fava versions also exist."
+    },
+    "fava_bean": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh and canned fava beans are their own legume family."
+    },
+    "fermented_soybeans": {
+      "parents": [
+        {
+          "id": "soybean",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Natto-style fermented soybeans remain a soybean form."
+    },
+    "feta": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Crumbled and sliced feta is a cheese variety."
+    },
+    "fish_broth": {
+      "parents": [],
+      "not_parents": [
+        "broth"
+      ],
+      "reason": "Fish stock lacks a fish family id; generic broth adds wrong meats."
+    },
+    "fish_cake": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Prepared fish cake lacks a generic fish parent id."
+    },
+    "fish_fillet": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "This entry spans several fish species without a fish root."
+    },
+    "fish_oil": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Unspecified fish oil has no species or generic fish parent."
+    },
+    "fish_sauce": {
+      "parents": [
+        {
+          "id": "anchovy",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Fish sauce commonly uses anchovy but may use other fish."
+    },
+    "flax": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Ground flaxseed is its own seed ingredient family."
+    },
+    "french_fries": {
+      "parents": [
+        {
+          "id": "potato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Frozen French fries are a prepared potato product."
+    },
+    "fruit_pie_filling": {
+      "parents": [
+        {
+          "id": "fruit",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Generic pie filling may be made from varying fruits."
+    },
+    "gelatin": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "may_contain"
+        },
+        {
+          "id": "beef",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Unflavoured gelatin is rendered from pig skin or cattle hide and bone (fish gelatin is rarer); may_contain both for halal and no-beef households."
+    },
+    "ghee": {
+      "parents": [
+        {
+          "id": "butter",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes explicitly describe ghee as clarified butter."
+    },
+    "ginger_ale": {
+      "parents": [
+        {
+          "id": "ginger",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ginger ale is non-alcoholic soda that may use real ginger or flavoring."
+    },
+    "ginger_cordial": {
+      "parents": [
+        {
+          "id": "ginger",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ginger cordial is a concentrated drink made from ginger."
+    },
+    "ginger_garlic": {
+      "parents": [
+        {
+          "id": "ginger",
+          "relation": "made_from"
+        },
+        {
+          "id": "garlic",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ginger-garlic paste is made from both named aromatics."
+    },
+    "ginkgo_nut": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Ginkgo nuts are their own seed-like ingredient family."
+    },
+    "goat": {
+      "parents": [
+        {
+          "id": "meat",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "All evidence says goat meat, placed under meat by policy."
+    },
+    "goat_cheese": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [
+        "goat"
+      ],
+      "reason": "Goat cheese is cheese from goat milk, not goat meat."
+    },
+    "gochujang": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "made_from"
+        },
+        {
+          "id": "soybean",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Korean fermented red pepper paste: gochugaru chilli is its base, and most brands ferment it with soybean."
+    },
+    "gochujang_sauce": {
+      "parents": [
+        {
+          "id": "gochujang",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Gochujang hot sauce is prepared from gochujang paste."
+    },
+    "grand_marnier": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Grand Marnier and Cointreau are alcoholic orange liqueurs."
+    },
+    "grape_juice": {
+      "parents": [
+        {
+          "id": "grape",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "White and ordinary grape juice are pressed from grapes."
+    },
+    "grapefruit_juice": {
+      "parents": [
+        {
+          "id": "grapefruit",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Grapefruit juice is pressed from grapefruit. Its only release line was pomelo juice, now corrected at import to pomelo_juice (data/ingredients/line-corrections.json)."
+    },
+    "grapeseed_oil": {
+      "parents": [],
+      "not_parents": [
+        "grape"
+      ],
+      "reason": "Neutral oil pressed from wine-grape seeds; nothing a grape-avoiding household would recognise as grape (oil policy)."
+    },
+    "gravy": {
+      "parents": [
+        {
+          "id": "beef",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The sole evidence explicitly identifies leftover beef gravy."
+    },
+    "gravy_mix": {
+      "parents": [
+        {
+          "id": "gravy",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Brown gravy mix is a dry prepared form of gravy."
+    },
+    "ground_beef": {
+      "parents": [
+        {
+          "id": "beef",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Hamburger and ground beef are minced forms of beef."
+    },
+    "ground_pork": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Both recipes explicitly use pork mince."
+    },
+    "gruyere": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Grated and diced Gruyère is a cheese variety."
+    },
+    "gyoza": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "may_contain"
+        },
+        {
+          "id": "beef",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dumplings whose usual fillings are pork or pork and beef (the evidence is Korean mandu soup); may_contain both so no-pork and no-beef households avoid them."
+    },
+    "hake": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Hake is a distinct fish without a generic fish id."
+    },
+    "half_and_half": {
+      "parents": [
+        {
+          "id": "cream",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Half-and-half is repeatedly treated as a light cream."
+    },
+    "halibut": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Halibut is a distinct fish without a generic fish id."
+    },
+    "halloumi": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Every recipe explicitly calls halloumi a cheese."
+    },
+    "ham": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Unqualified ham and ham steak are cured pork."
+    },
+    "harissa": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Harissa, here the dry spice blend, is ground dried chillies with caraway and garlic."
+    },
+    "hazelnut": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and ground hazelnuts make this the family id."
+    },
+    "hoisin": {
+      "parents": [
+        {
+          "id": "soybean",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Hoisin commonly uses fermented soybean, but formulas vary."
+    },
+    "horseradish": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Prepared horseradish is its own pungent condiment."
+    },
+    "hot_dog": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "may_contain"
+        },
+        {
+          "id": "beef",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Generic frankfurters may be pork, beef or mixed."
+    },
+    "hot_sauce": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Tabasco and similar hot sauces are fermented or vinegared chilli peppers."
+    },
+    "ice_cream": {
+      "parents": [
+        {
+          "id": "cream",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "ice"
+      ],
+      "reason": "Ice cream is cream-based and is not plain ice."
+    },
+    "imitation_crab": {
+      "parents": [],
+      "not_parents": [
+        "crab"
+      ],
+      "reason": "Imitation crab is fish surimi rather than crab."
+    },
+    "instant_coffee": {
+      "parents": [
+        {
+          "id": "coffee",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Instant granules are a soluble prepared form of coffee."
+    },
+    "italian_dressing": {
+      "parents": [
+        {
+          "id": "salad_dressing",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Italian dressing is a named salad-dressing variety."
+    },
+    "jam": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Marmalade, strawberry and generic jams have varied fruit."
+    },
+    "kahlua": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Kahlúa is explicitly measured as alcoholic coffee liqueur."
+    },
+    "kecap_manis": {
+      "parents": [
+        {
+          "id": "soy_sauce",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes gloss kecap manis as Indonesian sweet soy sauce."
+    },
+    "ketchup": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Catsup and ketchup are the familiar tomato condiment."
+    },
+    "kidney_beans": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Kidney beans are distinct legumes without a generic bean id."
+    },
+    "kirsch": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Kirsch is a measured alcoholic cherry spirit."
+    },
+    "kitchen_bouquet": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Browning sauces are not a form of one catalog food."
+    },
+    "laksa_paste": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "may_contain"
+        },
+        {
+          "id": "shrimp_paste",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Laksa paste is ground chilli with dried shrimp or belacan in most commercial jars; both may_contain because vegetarian laksa pastes exist."
+    },
+    "lamb": {
+      "parents": [
+        {
+          "id": "meat",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Lamb mince, shoulder and leg belong under meat by policy."
+    },
+    "lamb_chop": {
+      "parents": [
+        {
+          "id": "lamb",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Shoulder and loin lamb chops are cuts of lamb."
+    },
+    "lard": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Lard is rendered pork fat under the confirmed policy."
+    },
+    "lemon_lime_soda": {
+      "parents": [],
+      "not_parents": [
+        "lemon",
+        "lime"
+      ],
+      "reason": "Sprite and 7-Up are soda, not lemon or lime food."
+    },
+    "lemonade": {
+      "parents": [
+        {
+          "id": "lemon",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Lemonade and its concentrate are made from lemon."
+    },
+    "lentil": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Red, brown and green lentils share this family id."
+    },
+    "lima_beans": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Lima and butter beans lack a generic bean parent."
+    },
+    "liquid_smoke": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Liquid smoke is a standalone smoke-flavour condiment."
+    },
+    "liver": {
+      "parents": [
+        {
+          "id": "chicken",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Five of six evidence lines specify chicken liver."
+    },
+    "lobster": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Lobster tails and meat form their own seafood family."
+    },
+    "mac_and_cheese": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Prepared macaroni and cheese is substantially cheese-based."
+    },
+    "macadamia_nut": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and ground macadamias form their own family."
+    },
+    "margarine": {
+      "parents": [],
+      "not_parents": [
+        "butter"
+      ],
+      "reason": "Margarine and oleo are non-butter fat substitutes."
+    },
+    "marinara": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Marinara and spaghetti sauce are tomato-based sauces."
+    },
+    "mascarpone": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes explicitly identify mascarpone as cheese."
+    },
+    "matcha": {
+      "parents": [
+        {
+          "id": "tea",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Matcha powder is a powdered green tea variety."
+    },
+    "mayo": {
+      "parents": [
+        {
+          "id": "egg",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ordinary mayonnaise is an egg-based emulsion."
+    },
+    "mayo_or_dressing": {
+      "parents": [
+        {
+          "id": "mayo",
+          "relation": "either_of"
+        },
+        {
+          "id": "salad_dressing",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes explicitly allow mayonnaise or salad dressing."
+    },
+    "meat": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Generic meat is the family root for land-animal meats."
+    },
+    "milk": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Ordinary milk is the family root for direct milk forms."
+    },
+    "milk_or_cream": {
+      "parents": [
+        {
+          "id": "milk",
+          "relation": "either_of"
+        },
+        {
+          "id": "cream",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipe lines explicitly permit milk or cream."
+    },
+    "milk_or_water": {
+      "parents": [
+        {
+          "id": "milk",
+          "relation": "either_of"
+        },
+        {
+          "id": "water",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipe lines explicitly permit milk or water."
+    },
+    "milkfish": {
+      "parents": [],
+      "not_parents": [
+        "milk"
+      ],
+      "reason": "Bangus is a fish species unrelated to dairy milk."
+    },
+    "mincemeat": {
+      "parents": [
+        {
+          "id": "meat",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The Mutabbaq evidence uses mincemeat as ground meat."
+    },
+    "mirin": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Mirin is sweet Japanese cooking wine under policy."
+    },
+    "miso": {
+      "parents": [
+        {
+          "id": "soybean",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes describe miso as fermented soybean paste."
+    },
+    "mixed_nuts": {
+      "parents": [
+        {
+          "id": "almond",
+          "relation": "may_contain"
+        },
+        {
+          "id": "walnut",
+          "relation": "may_contain"
+        },
+        {
+          "id": "pecan",
+          "relation": "may_contain"
+        },
+        {
+          "id": "hazelnut",
+          "relation": "may_contain"
+        },
+        {
+          "id": "cashew",
+          "relation": "may_contain"
+        },
+        {
+          "id": "peanut",
+          "relation": "may_contain"
+        },
+        {
+          "id": "pistachio",
+          "relation": "may_contain"
+        },
+        {
+          "id": "macadamia_nut",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes write 'chopped nuts' and one names almonds; any common nut may be meant, so each is may_contain for a household that avoids one of them."
+    },
+    "monterey_jack": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Monterey Jack is repeatedly used as cheese."
+    },
+    "mozzarella": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Mozzarella is explicitly a shredded or sliced cheese."
+    },
+    "mung_bean": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Mung beans are distinct legumes without a bean root."
+    },
+    "mushroom_soup": {
+      "parents": [
+        {
+          "id": "mushroom",
+          "relation": "made_from"
+        },
+        {
+          "id": "soup",
+          "relation": "variety"
+        },
+        {
+          "id": "cream",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Condensed cream of mushroom soup: mushroom soup with milk or cream, per its milk allergen; cream is may_contain for a no-cream household."
+    },
+    "mussel": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Live mussels form their own mollusc family."
+    },
+    "mustard": {
+      "parents": [
+        {
+          "id": "mustard_seed",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Prepared, yellow and ground mustard are all made from mustard seed."
+    },
+    "nuoc_cham": {
+      "parents": [
+        {
+          "id": "fish_sauce",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Traditional nuoc cham commonly contains fish sauce."
+    },
+    "nutella": {
+      "parents": [
+        {
+          "id": "hazelnut",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Nutella is explicitly chocolate-hazelnut spread."
+    },
+    "octopus": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Baby octopus is its own cephalopod ingredient family."
+    },
+    "olive_oil": {
+      "parents": [],
+      "not_parents": [
+        "olive"
+      ],
+      "reason": "Pressed olive fat used in 1,353 recipes; a household avoiding olives still cooks with it, so it is not under olive (oil policy)."
+    },
+    "onion_soup_mix": {
+      "parents": [
+        {
+          "id": "onion",
+          "relation": "made_from"
+        },
+        {
+          "id": "soup",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dry onion soup mix is soup base defined by onion."
+    },
+    "orange_juice_conc": {
+      "parents": [
+        {
+          "id": "orange_juice",
+          "relation": "variety"
+        },
+        {
+          "id": "orange",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Orange juice concentrate is a concentrated juice form made from oranges."
+    },
+    "oyster": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh oysters form their own mollusc family."
+    },
+    "oyster_sauce": {
+      "parents": [
+        {
+          "id": "oyster",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ordinary oyster sauce is made with oyster extract."
+    },
+    "pancetta": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pancetta is cured pork belly under policy."
+    },
+    "parm_or_romano": {
+      "parents": [
+        {
+          "id": "parmesan",
+          "relation": "either_of"
+        },
+        {
+          "id": "parmesan_romano",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The recipe explicitly permits Parmesan or Romano."
+    },
+    "parmesan": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Grated Parmesan is consistently used as cheese."
+    },
+    "parmesan_romano": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [
+        "parmesan"
+      ],
+      "reason": "Legacy id evidence says Romano, distinct from Parmesan."
+    },
+    "pastrami": {
+      "parents": [
+        {
+          "id": "beef",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Country-style pastrami is a cured beef product."
+    },
+    "pate": {
+      "parents": [
+        {
+          "id": "liver",
+          "relation": "made_from"
+        },
+        {
+          "id": "pork",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pâté is liver-based and commonly, not always, contains pork."
+    },
+    "peanut": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and crushed peanuts make this the family id."
+    },
+    "peanut_butter": {
+      "parents": [
+        {
+          "id": "peanut",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "butter"
+      ],
+      "reason": "Peanut butter is ground peanut, not dairy butter."
+    },
+    "peanut_oil": {
+      "parents": [],
+      "not_parents": [
+        "peanut"
+      ],
+      "reason": "Refined frying oil from peanuts; the peanut allergen stays on the ingredient, but a peanut preference does not reach it (oil policy)."
+    },
+    "peanut_sauce": {
+      "parents": [
+        {
+          "id": "peanut",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Thai peanut and satay sauces are peanut-based."
+    },
+    "pear_juice": {
+      "parents": [
+        {
+          "id": "pear",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pear juice is a liquid preparation made from pear."
+    },
+    "pecan": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and chopped pecans make this the family id."
+    },
+    "pecan_or_walnut": {
+      "parents": [
+        {
+          "id": "pecan",
+          "relation": "either_of"
+        },
+        {
+          "id": "walnut",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "All recipe lines allow pecan or walnut."
+    },
+    "pepperoni": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pepperoni commonly contains pork, but alternatives exist."
+    },
+    "pesto": {
+      "parents": [
+        {
+          "id": "pine_nut",
+          "relation": "may_contain"
+        },
+        {
+          "id": "cheese",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pesto commonly contains pine nuts and cheese, but varies."
+    },
+    "pickled_ginger": {
+      "parents": [
+        {
+          "id": "ginger",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Beni shoga is ginger preserved by pickling."
+    },
+    "pine_nut": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Pine nuts form their own seed ingredient family."
+    },
+    "pinto_beans": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Pinto beans lack a generic bean parent id."
+    },
+    "pistachio": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Shelled and chopped pistachios form this family."
+    },
+    "pizza_sauce": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ordinary prepared pizza sauce is tomato-based."
+    },
+    "plum_sauce": {
+      "parents": [
+        {
+          "id": "plum",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Prepared plum sauce is made principally from plums."
+    },
+    "plum_wine": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        },
+        {
+          "id": "plum",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Plum wine is alcoholic wine made by fermenting or steeping plums."
+    },
+    "pomegranate_molasses": {
+      "parents": [
+        {
+          "id": "pomegranate_seeds",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "molasses"
+      ],
+      "reason": "Reduced pomegranate juice, not cane molasses; made from pomegranate, which the catalog holds as pomegranate_seeds."
+    },
+    "pork": {
+      "parents": [
+        {
+          "id": "meat",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pork cuts belong under meat by confirmed policy."
+    },
+    "pork_belly": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pork belly is explicitly a cut of pork."
+    },
+    "pork_chop": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Bone-in and boneless pork chops are pork cuts."
+    },
+    "pork_fatback": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pork fatback is the fatty back cut of pig."
+    },
+    "port": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Port is fortified alcoholic wine under policy."
+    },
+    "powdered_milk": {
+      "parents": [
+        {
+          "id": "milk",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dry milk powder is dehydrated milk under policy."
+    },
+    "preserved_lemon": {
+      "parents": [
+        {
+          "id": "lemon",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Preserved lemon is lemon cured in salt or brine."
+    },
+    "prosciutto": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Prosciutto is cured pork ham under policy."
+    },
+    "provolone": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Sliced and grated Provolone is cheese."
+    },
+    "pumpkin_seed": {
+      "parents": [
+        {
+          "id": "pumpkin",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pepitas and fresh pumpkin seeds come from pumpkin."
+    },
+    "quail_egg": {
+      "parents": [
+        {
+          "id": "egg",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Quail egg is a bird-egg variety under policy."
+    },
+    "queso_fresco": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Queso fresco and Cotija are Mexican cheeses."
+    },
+    "rabbit": {
+      "parents": [
+        {
+          "id": "meat",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Whole rabbit is animal meat under policy."
+    },
+    "ranch_dressing": {
+      "parents": [
+        {
+          "id": "salad_dressing",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ranch is a named salad-dressing variety."
+    },
+    "ranch_mix": {
+      "parents": [
+        {
+          "id": "ranch_dressing",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dry ranch mix is the base for ranch dressing."
+    },
+    "red_snapper": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Snapper is a distinct fish without a fish family id."
+    },
+    "red_wine": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Red wine is alcoholic wine under policy."
+    },
+    "red_wine_vinegar": {
+      "parents": [
+        {
+          "id": "vinegar",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [
+        "red_wine"
+      ],
+      "reason": "Acetified red wine is vinegar, not alcohol, under policy."
+    },
+    "refried_beans": {
+      "parents": [
+        {
+          "id": "pinto_beans",
+          "relation": "may_contain"
+        },
+        {
+          "id": "lard",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Mashed cooked beans, usually pinto; traditional and many canned versions are fried in lard, and the evidence also lists a vegetarian can, so both are may_contain."
+    },
+    "relish": {
+      "parents": [
+        {
+          "id": "cucumber_pickle",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Sweet pickle relish is chopped cucumber pickle in syrup, as every evidence line says."
+    },
+    "rice_vinegar": {
+      "parents": [
+        {
+          "id": "vinegar",
+          "relation": "variety"
+        },
+        {
+          "id": "rice",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Rice vinegar is vinegar produced by fermenting rice."
+    },
+    "rice_wine": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        },
+        {
+          "id": "rice",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Chinese rice wine is alcoholic cooking wine fermented from rice."
+    },
+    "ricotta": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes explicitly use ricotta as cheese."
+    },
+    "rum": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dark and light rum are alcoholic spirits."
+    },
+    "sake": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Sake is Japanese alcoholic rice wine under policy."
+    },
+    "salad_dressing": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Generic salad dressings vary and form this root."
+    },
+    "salmon": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh and canned salmon form their own fish family."
+    },
+    "salsa": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Generic salsa is usually tomato-based but can vary."
+    },
+    "salt_cod": {
+      "parents": [
+        {
+          "id": "cod",
+          "relation": "made_from"
+        },
+        {
+          "id": "salt",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Salt cod is cod preserved with salt, so salt is conservatively retained."
+    },
+    "sambal_oelek": {
+      "parents": [
+        {
+          "id": "chili_paste",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes gloss sambal oelek as ground chile paste."
+    },
+    "sardine": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Sardine is a distinct fish without a fish family id."
+    },
+    "sausage": {
+      "parents": [
+        {
+          "id": "pork",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Generic sausage is often pork but may be other meats."
+    },
+    "scallop": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Sea and bay scallops form their own mollusc family."
+    },
+    "seafood_mix": {
+      "parents": [
+        {
+          "id": "shrimp",
+          "relation": "may_contain"
+        },
+        {
+          "id": "squid",
+          "relation": "may_contain"
+        },
+        {
+          "id": "mussel",
+          "relation": "may_contain"
+        },
+        {
+          "id": "scallop",
+          "relation": "may_contain"
+        },
+        {
+          "id": "clam",
+          "relation": "may_contain"
+        },
+        {
+          "id": "octopus",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Frozen seafood mix is typically shrimp, squid rings, mussels, scallops, clams and baby octopus; each is may_contain."
+    },
+    "sesame_oil": {
+      "parents": [],
+      "not_parents": [
+        "sesame_seed"
+      ],
+      "reason": "Toasted sesame oil, a flavouring fat; the sesame allergen stays on the ingredient, and under the oil policy it is not under sesame_seed."
+    },
+    "sesame_tahini": {
+      "parents": [
+        {
+          "id": "sesame_seed",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Tahini is ground hulled sesame seed paste; sesame_seed exists in WP3, so it is the parent."
+    },
+    "sherry": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Sweet and medium sherry are alcoholic wines."
+    },
+    "sherry_vinegar": {
+      "parents": [
+        {
+          "id": "vinegar",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [
+        "sherry"
+      ],
+      "reason": "Sherry vinegar is acetified vinegar, not alcoholic sherry."
+    },
+    "shortening": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Crisco and shortening have unspecified plant or animal source."
+    },
+    "shortening_or_oil": {
+      "parents": [
+        {
+          "id": "shortening",
+          "relation": "either_of"
+        },
+        {
+          "id": "vegetable_oil",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes explicitly allow shortening or vegetable oil."
+    },
+    "shrimp": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Raw and cooked shrimp form their own crustacean family."
+    },
+    "shrimp_paste": {
+      "parents": [
+        {
+          "id": "shrimp",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Bagoong and belacan are fermented shrimp preparations."
+    },
+    "sinigang_mix": {
+      "parents": [
+        {
+          "id": "tamarind",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "The packet is explicitly tamarind soup mix."
+    },
+    "smoked_haddock": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Smoked haddock lacks a generic fish parent id."
+    },
+    "soup": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Generic packaged soup evidence has unspecified composition."
+    },
+    "sour_cream": {
+      "parents": [
+        {
+          "id": "cream",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Sour cream is a cultured cream variety."
+    },
+    "sour_cream_or_yogurt": {
+      "parents": [
+        {
+          "id": "sour_cream",
+          "relation": "either_of"
+        },
+        {
+          "id": "yogurt",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes explicitly allow sour cream or plain yogurt; sour cream inherits cream."
+    },
+    "sour_milk": {
+      "parents": [
+        {
+          "id": "milk",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Sour milk is naturally or deliberately acidified milk."
+    },
+    "soy_sauce": {
+      "parents": [
+        {
+          "id": "soybean",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ordinary soy sauce is fermented from soybeans."
+    },
+    "soybean": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Dried soybean is the family root for soy products."
+    },
+    "split_peas": {
+      "parents": [
+        {
+          "id": "peas",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Yellow split peas are dried split forms of peas."
+    },
+    "squid": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Fresh squid forms its own cephalopod family."
+    },
+    "squid_broth": {
+      "parents": [
+        {
+          "id": "squid",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "broth"
+      ],
+      "reason": "Reserved squid liquid is made from squid, not generic broth."
+    },
+    "sriracha": {
+      "parents": [
+        {
+          "id": "hot_sauce",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Recipes identify Sriracha as hot chile sauce."
+    },
+    "steak_sauce": {
+      "parents": [],
+      "not_parents": [
+        "beef_steak"
+      ],
+      "reason": "A.1. is condiment used beyond beef and is not steak."
+    },
+    "stir_fry_sauce": {
+      "parents": [
+        {
+          "id": "soy_sauce",
+          "relation": "may_contain"
+        },
+        {
+          "id": "oyster_sauce",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Bottled stir-fry sauce is typically a soy and oyster sauce blend; the single recipe gives no brand, so both are may_contain."
+    },
+    "sunflower_oil": {
+      "parents": [],
+      "not_parents": [
+        "sunflower_seed"
+      ],
+      "reason": "Light frying oil from sunflower seeds; not under sunflower_seed by the oil policy."
+    },
+    "sunflower_seed": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Raw and toasted sunflower seeds form this family."
+    },
+    "sweet_chili_sauce": {
+      "parents": [
+        {
+          "id": "chili_sauce",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Thai sweet chili sauce is a chili-sauce variety."
+    },
+    "sweet_sour_sauce": {
+      "parents": [
+        {
+          "id": "ketchup",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Western-style sweet and sour sauce is usually thickened ketchup with vinegar and sugar; Thai versions skip it, so ketchup is may_contain."
+    },
+    "swiss_cheese": {
+      "parents": [
+        {
+          "id": "cheese",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Grated and sliced Swiss cheese is a cheese variety."
+    },
+    "swordfish": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Swordfish is a distinct fish without a fish family id."
+    },
+    "taco_sauce": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "may_contain"
+        },
+        {
+          "id": "chili_pepper",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Bottled taco sauce is a thin tomato and chilli sauce; mild and green versions vary, so both are may_contain."
+    },
+    "tamari": {
+      "parents": [
+        {
+          "id": "soy_sauce",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Tamari is a Japanese soy-sauce variety."
+    },
+    "tamarind_soup_base": {
+      "parents": [
+        {
+          "id": "tamarind",
+          "relation": "made_from"
+        },
+        {
+          "id": "soup",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Packaged tamarind soup base is defined by tamarind."
+    },
+    "tandoori_paste": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Tandoori paste is a spiced chilli and garlic paste, coloured red; mild pastes exist, so chilli is may_contain."
+    },
+    "tapai": {
+      "parents": [
+        {
+          "id": "rice",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Tapai ketan is fermented sticky rice."
+    },
+    "tapioca_pearl": {
+      "parents": [
+        {
+          "id": "tapioca_flour",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Tapioca pearls are rolled and dried tapioca starch, which the catalog holds as tapioca_flour."
+    },
+    "tea": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Black, Ceylon and leaf tea share this family root."
+    },
+    "tempeh": {
+      "parents": [
+        {
+          "id": "soybean",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Tempeh is a fermented soybean cake."
+    },
+    "tempeh_starter": {
+      "parents": [],
+      "not_parents": [
+        "tempeh"
+      ],
+      "reason": "Starter culture makes tempeh but is not tempeh food."
+    },
+    "tequila": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Measured tequila is an alcoholic spirit."
+    },
+    "teriyaki": {
+      "parents": [
+        {
+          "id": "soy_sauce",
+          "relation": "made_from"
+        },
+        {
+          "id": "group:alcohol",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Teriyaki is soy-based and often contains mirin or sake."
+    },
+    "tofu": {
+      "parents": [
+        {
+          "id": "soybean",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Firm, medium and silken tofu are soybean products."
+    },
+    "tom_yum_paste": {
+      "parents": [
+        {
+          "id": "chili_pepper",
+          "relation": "may_contain"
+        },
+        {
+          "id": "shrimp_paste",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Tom yum paste (nam prik pao style) combines chilli with dried shrimp or shrimp paste in most brands; both may_contain."
+    },
+    "tomato_soup": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "made_from"
+        },
+        {
+          "id": "soup",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Condensed tomato soup is soup defined by tomato."
+    },
+    "toor_dal": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Toor dal is pigeon pea without a matching family id."
+    },
+    "trout": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Trout is a distinct fish without a fish family id."
+    },
+    "tuna": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Canned tuna and steaks form their own fish family."
+    },
+    "turkey": {
+      "parents": [
+        {
+          "id": "meat",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Whole and ground turkey belong under meat by policy."
+    },
+    "turkey_bacon": {
+      "parents": [
+        {
+          "id": "turkey",
+          "relation": "made_from"
+        }
+      ],
+      "not_parents": [
+        "bacon",
+        "pork"
+      ],
+      "reason": "Turkey bacon is a turkey-based substitute, not pork bacon."
+    },
+    "veg_or_olive_oil": {
+      "parents": [
+        {
+          "id": "vegetable_oil",
+          "relation": "either_of"
+        },
+        {
+          "id": "olive_oil",
+          "relation": "either_of"
+        }
+      ],
+      "not_parents": [
+        "olive"
+      ],
+      "reason": "Recipe lines allow vegetable or olive oil; neither oil is under its source, so olives are not reached."
+    },
+    "vegan_mayonnaise": {
+      "parents": [],
+      "not_parents": [
+        "egg",
+        "mayo"
+      ],
+      "reason": "Vegan mayonnaise is an egg-free mayo substitute."
+    },
+    "vegetable_broth": {
+      "parents": [],
+      "not_parents": [
+        "broth"
+      ],
+      "reason": "Vegetable stock is meat-free and avoids mixed broth ancestry."
+    },
+    "vegetable_oil": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Canola and generic vegetable oils have varied plant sources."
+    },
+    "vegetarian_ham": {
+      "parents": [],
+      "not_parents": [
+        "ham",
+        "pork"
+      ],
+      "reason": "Vegetarian ham is meat-free and not pork ham."
+    },
+    "vegetarian_sausage": {
+      "parents": [],
+      "not_parents": [
+        "sausage",
+        "pork"
+      ],
+      "reason": "Vegetarian sausage is meat-free and not pork sausage."
+    },
+    "venison": {
+      "parents": [
+        {
+          "id": "meat",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Venison loin and cubes belong under meat by policy."
+    },
+    "vinegar": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Generic vinegar is the non-alcoholic vinegar family root."
+    },
+    "vodka": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Measured vodka is an alcoholic spirit."
+    },
+    "walnut": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Whole and chopped walnuts form this nut family."
+    },
+    "wasabi": {
+      "parents": [
+        {
+          "id": "horseradish",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Wasabi powder and tube paste are mostly horseradish with mustard and colouring; true wasabi is rare, so horseradish is may_contain."
+    },
+    "whipped_topping": {
+      "parents": [
+        {
+          "id": "cream",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Evidence mixes whipped cream with non-dairy toppings."
+    },
+    "white_wine": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "White wine, Marsala and dry sherry are alcoholic."
+    },
+    "white_wine_vinegar": {
+      "parents": [
+        {
+          "id": "vinegar",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [
+        "white_wine"
+      ],
+      "reason": "White wine vinegar is vinegar, not alcoholic wine."
+    },
+    "wine_cooking": {
+      "parents": [
+        {
+          "id": "group:alcohol",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Cooking wine and cooking sherry remain alcoholic."
+    },
+    "worcestershire": {
+      "parents": [
+        {
+          "id": "anchovy",
+          "relation": "may_contain"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Traditional Worcestershire contains anchovy, but vegan versions exist."
+    },
+    "yogurt": {
+      "parents": [],
+      "not_parents": [],
+      "reason": "Yogurt remains outside milk under the confirmed policy."
+    }
+  }
 }

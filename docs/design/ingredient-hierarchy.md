@@ -52,6 +52,15 @@ never climbs: excluding `cherry_tomato` does not exclude `tomato`, because a
 household that dislikes cherry tomatoes has said nothing about tomatoes. The one
 exception is `same`, followed both ways, because it is one food under two ids.
 
+**`either_of` and the planner's choice.** Excluding `beef` reaches
+`beef_or_turkey` through its `either_of` link, as it must: the combined
+ingredient is priced as one product (minced beef). Before that exclusion
+applies, the planner tries the line's options (`data/ingredients/alternatives.json`,
+see `recipe-ingredient-data.md`) and cooks it with the first one the household
+can eat and can buy, so the recipe is kept whenever such an option exists. The
+hierarchy decides what an exclusion reaches; the options decide what is cooked
+instead.
+
 `not_parents` records a look-alike that was considered and rejected
 (`almond_milk`: `not_parents: ["milk"]`). It does nothing at run time; it is how
 a reviewer sees the question was asked.
@@ -157,7 +166,10 @@ group nothing belongs to.
 | Evaluation scorers | **nothing, for now.** A system that expands exclusions only becomes more conservative; letting the scorer expand them changes what a pass means and is a separate, disclosed decision | — |
 
 Loading goes through `backend/app/data/ingredient_hierarchy.py` only; nothing
-else parses these files. The product calls `expand_exclusions(ids)`, which reads
+else parses these files. **The hierarchy only ever widens an exclusion.** It never
+substitutes one ingredient for another, never changes quantities, and never
+drives purchasing: `beef_broth` being made from beef does not make it a
+replacement for beef. The product calls `expand_exclusions(ids)`, which reads
 the four hierarchy files and nothing else, so it works wherever `data/` is
 mounted. The full `load()` reads the catalog as well and is for the checker.
 

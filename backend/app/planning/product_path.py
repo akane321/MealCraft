@@ -166,7 +166,7 @@ class ProductPlanningEngine:
             if recommendation.recipe.id not in by_id:
                 diagnostics.append("recipe_snapshot_missing")
                 continue
-            source = RecipeService._to_detail(by_id[recommendation.recipe.id])
+            source = RecipeService._to_detail(by_id[recommendation.recipe.id], constraints)
             recipe_snapshots[source.slug] = RecipeListItemResponse.model_validate(source.model_dump())
             # Tap water and ice are never bought, so they are not shopping requirements.
             source.ingredients = [item for item in source.ingredients if not not_purchased(item.normalized_name)]

@@ -2,6 +2,7 @@ from collections import Counter
 
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
 from app.models.recipe import Recipe
+from app.planning import alternatives
 from app.planning.meal_composition import meal_minutes
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError
@@ -215,7 +216,7 @@ class MealPlanReplanningService:
                 if request.unavailable_ingredient
                 not in {
                     ingredient.ingredient.normalized_name
-                    for ingredient in recipes_by_id[item.recipe.id].recipe_ingredients
+                    for ingredient in alternatives.lines(recipes_by_id[item.recipe.id], constraints)
                 }
             ]
         role = self._role(constraints, entry)
