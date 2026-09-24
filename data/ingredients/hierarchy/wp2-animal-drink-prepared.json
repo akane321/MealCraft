@@ -3,7 +3,7 @@
   "package": "WP2",
   "title": "Meat, fish, eggs, dairy, fats, drinks, condiments and prepared foods",
   "drafted_by": "OpenAI Codex (GPT-5); revised by Claude Code (claude-opus-5-5) on the owner's behalf",
-  "accepted_by": null,
+  "accepted_by": "akane321 (owner), 2026-09-24: read all 320 entries in the Chinese review table; every point raised was resolved before acceptance",
   "notes": [
     "Policy table (knowledge repository, operations/ingredient-hierarchy/README.md section 5) confirmed by the owner on 2026-09-24: every default stands.",
     "baked_beans: may_contain pork because four of six catalog recipes explicitly say pork and beans, while vegetarian versions exist.",
@@ -16,7 +16,6 @@
     "Parents may come from another package: chili_pepper, chipotle_pepper, sesame_seed, tapioca_flour, pomegranate_seeds, bonito_flakes, mustard_seed and cucumber_pickle are WP3 ids.",
     "Oil policy (confirmed by the owner on 2026-09-24): olive, avocado, coconut, peanut, sunflower, grapeseed and sesame oils are not under their source. Allergies still reach them through the ingredient's own allergens. chili_oil stays under chili_pepper because the chilli is its purpose.",
     "Gelatin (confirmed by the owner on 2026-09-24): may_contain beef as well as pork, because commercial gelatin is often bovine.",
-    "accepted_by remains null until the owner reads and accepts every entry.",
     "either_of: excluding one option reaches the combined id, which is right for the id itself (it is priced as one product). The planner first tries the line's options from data/ingredients/alternatives.json and keeps the recipe with the first option the household can eat and buy.",
     "grapefruit_juice: its only release line (pomelo juice in Vietnamese Delight) is corrected at import to pomelo_juice by data/ingredients/line-corrections.json, which has no product, so it is never bought as grapefruit juice. The upstream mapping is to be fixed in the next data release."
   ],
