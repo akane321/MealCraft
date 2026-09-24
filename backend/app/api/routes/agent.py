@@ -10,6 +10,7 @@ from app.agent.parser import (
     ConstraintVocabulary,
     OpenAIConstraintParser,
     RuleBasedConstraintParser,
+    catalog_groups,
 )
 from app.api.routes.auth import CurrentHouseholdCreatePlanCsrfDependency, CurrentHouseholdViewDependency
 from app.api.routes.meal_plans import build_meal_plan_service, build_replanning_service
@@ -52,7 +53,9 @@ def create_constraint_parser(settings: Settings, database: Session | None = None
         )
     # The model writes constraints in the catalog's own ingredient ids, the only words the planner matches.
     vocabulary = (
-        ConstraintVocabulary(ingredients=frozenset(database.scalars(select(Ingredient.normalized_name))))
+        ConstraintVocabulary(
+            ingredients=frozenset(database.scalars(select(Ingredient.normalized_name))), groups=catalog_groups()
+        )
         if database is not None
         else None
     )

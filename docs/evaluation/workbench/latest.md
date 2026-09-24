@@ -29,7 +29,7 @@ Every number below was computed over exactly these files. A report whose inputs 
 | Metric | Greedy baseline | MealCraft planner | Delta |
 |---|---:|---:|---:|
 | Scenario expectation rate | 1.0 | 1.0 | 0.0 |
-| Mean distinct recipes | 1.0 | 6.1389 | 5.1389 |
+| Mean distinct recipes | 1.0 | 6.1111 | 5.1111 |
 | Consecutive repetitions | 216 | 0 | -216 |
 | Failure cases | 36 | 0 | -36 |
 
@@ -38,7 +38,7 @@ Every number below was computed over exactly these files. A report whose inputs 
 | Metric | Rule-only baseline | MealCraft planner | Delta |
 |---|---:|---:|---:|
 | Scenario expectation rate | 1.0 | 1.0 | 0.0 |
-| Mean distinct recipes | 2.0 | 6.1389 | 4.1389 |
+| Mean distinct recipes | 2.0 | 6.1111 | 4.1111 |
 | Consecutive repetitions | 0 | 0 | -0 |
 | Failure cases | 0 | 0 | -0 |
 

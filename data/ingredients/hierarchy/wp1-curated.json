@@ -2,7 +2,169 @@
   "schema_version": "ingredient-hierarchy-v1",
   "package": "WP1",
   "title": "Curated-catalog ids that release v2.1 names differently",
-  "drafted_by": null,
-  "accepted_by": null,
-  "entries": {}
+  "drafted_by": "Claude Code (claude-sonnet-5), for Du Jiayu",
+  "accepted_by": "akane321 (owner), 2026-09-24: accepted on the implementation agent's acceptance review (all 15 entries match the investigation that found them); not read entry by entry",
+  "notes": [
+    "canned_tomato: `same` as canned_tomatoes AND a `variety` of tomato. The checker requires the look-alike `tomato` to be decided, and canned_tomatoes belongs to WP3, which may not have merged yet; the direct link keeps 'no tomato' working either way and stays true after WP3 links canned_tomatoes to tomato.",
+    "ground_cumin: `same` as cumin. Release recipes write cumin as ground cumin or cumin powder far more often than seeds (see --show cumin), so the two ids are one food in practice. A household that avoids whole cumin seed is not modelled.",
+    "cherry_tomato: not the fruit `cherry`. It is a small tomato, so it is a variety of tomato only, and excluding tomato removes it but excluding it leaves ordinary tomatoes."
+  ],
+  "entries": {
+    "firm_tofu": {
+      "parents": [
+        {
+          "id": "tofu",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Pressed, dense tofu, used at 250-300 g in four curated stir-fry, soba and bowl recipes; release v2.1 writes firm tofu as plain tofu (92 recipes), but firm is one kind of it, so it is a variety and not the same id."
+    },
+    "soba_noodle": {
+      "parents": [
+        {
+          "id": "soba_noodles",
+          "relation": "same"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Buckwheat noodles, 160 g in the curated soba dishes; the singular id and release v2.1's soba_noodles are one food under two names, and release recipes write it exactly as soba noodles."
+    },
+    "black_bean": {
+      "parents": [
+        {
+          "id": "black_beans",
+          "relation": "same"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Black beans by weight in three curated bowls and stews; release v2.1's black_beans is the same beans, written as black beans in every recipe there, so the singular curated id is only an alias."
+    },
+    "canned_tomato": {
+      "parents": [
+        {
+          "id": "canned_tomatoes",
+          "relation": "same"
+        },
+        {
+          "id": "tomato",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "No-added-salt canned tomatoes, 200-800 g in ten curated stews and pastas; the same food as release v2.1's canned_tomatoes, and canned tomato is still tomato for a household that avoids tomatoes."
+    },
+    "vegetable_stock": {
+      "parents": [
+        {
+          "id": "vegetable_broth",
+          "relation": "same"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Low-sodium vegetable stock in three curated soups and oats; release v2.1 has vegetable_broth with recipes writing vegetable stock and vegetable broth interchangeably, so stock and broth are one food here."
+    },
+    "ground_cumin": {
+      "parents": [
+        {
+          "id": "cumin",
+          "relation": "same"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Ground cumin at 2 tsp in six curated curries and stews; release v2.1's cumin is mostly written as ground cumin or cumin powder, so the curated id is the same spice and cumin is the canonical id."
+    },
+    "salmon_fillet": {
+      "parents": [
+        {
+          "id": "salmon",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "A 300 g cut of salmon in three curated bowls and trays; a fillet is a part of the fish, so avoiding salmon avoids it, while excluding only salmon_fillet leaves other salmon cuts alone."
+    },
+    "canned_tuna": {
+      "parents": [
+        {
+          "id": "tuna",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "A 185 g tin of tuna in water, used in three curated pasta and rice dishes; it is tuna in tinned form, so a household avoiding tuna avoids it, and it is one form of tuna and not the whole of it."
+    },
+    "cherry_tomato": {
+      "parents": [
+        {
+          "id": "tomato",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [
+        "cherry"
+      ],
+      "reason": "Small sweet tomatoes at 150-160 g in six curated salads and bowls; a variety of tomato, and not the stone fruit cherry that the name also spells."
+    },
+    "baby_spinach": {
+      "parents": [
+        {
+          "id": "spinach",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Young spinach leaves, 100-150 g raw in nine curated dishes; the same plant as spinach at an earlier stage, so avoiding spinach avoids it, and avoiding baby spinach alone leaves mature spinach."
+    },
+    "yellow_onion": {
+      "parents": [
+        {
+          "id": "onion",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "One whole yellow onion in five curated stews and curries; the common cooking onion, a colour variety of onion, so anyone avoiding onion avoids it but excluding it leaves red or white onion."
+    },
+    "red_lentil": {
+      "parents": [
+        {
+          "id": "lentil",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Split red lentils at 180-240 g in three curated soups and curries; a kind of lentil, so avoiding lentils avoids them, while avoiding red lentils leaves brown and green ones."
+    },
+    "rolled_oats": {
+      "parents": [
+        {
+          "id": "oats",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Flattened whole oats, 100-140 g in three curated porridge and egg-cake recipes; a form of oats, and release v2.1 writes rolled oats and oats as one ingredient family, so it sits under oats."
+    },
+    "greek_yogurt": {
+      "parents": [
+        {
+          "id": "yogurt",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Plain strained yogurt, 400 g in the curated yogurt oat bowl; a kind of yogurt, so avoiding yogurt avoids it, while avoiding Greek yogurt alone leaves regular yogurt."
+    },
+    "wholewheat_pasta": {
+      "parents": [
+        {
+          "id": "pasta",
+          "relation": "variety"
+        }
+      ],
+      "not_parents": [],
+      "reason": "Dried wholewheat pasta, 180 g in four curated pasta dishes; a wheat-flour form of pasta, so avoiding pasta avoids it. Wheat as an allergen is handled by the allergen table, not here."
+    }
+  }
 }

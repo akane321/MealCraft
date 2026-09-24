@@ -4,6 +4,7 @@ import json
 
 from app.core.paths import repository_root
 from app.data.alternatives import options
+from app.data.ingredient_hierarchy import expand_exclusions
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition
 from app.planning import alternatives
 from app.planning.recommendation_engine import RecipeRecommendationEngine
@@ -72,7 +73,9 @@ def test_a_dairy_free_household_keeps_the_recipe_and_cooks_it_with_oil():
     request = household(allergens=["dairy"])
 
     cooked = alternatives.lines(recipe, request)
-    reasons = RecipeRecommendationEngine()._exclusion_reasons(recipe, request)
+    reasons = RecipeRecommendationEngine()._exclusion_reasons(
+        recipe, request, expand_exclusions(request.excluded_ingredients)
+    )
 
     assert cooked[0].ingredient.normalized_name == "vegetable_oil"
     assert cooked[0].chosen_from == "butter or vegetable oil"
@@ -82,7 +85,7 @@ def test_a_dairy_free_household_keeps_the_recipe_and_cooks_it_with_oil():
 
 def test_with_no_option_left_the_recipe_is_excluded_as_before():
     recipe = recipe_with(["dairy"], BUTTER_OR_MARGARINE)
-    reasons = RecipeRecommendationEngine()._exclusion_reasons(recipe, household(allergens=["dairy"]))
+    reasons = RecipeRecommendationEngine()._exclusion_reasons(recipe, household(allergens=["dairy"]), [])
 
     assert any("dairy" in reason for reason in reasons)
 

@@ -1,7 +1,11 @@
 # Ingredient Hierarchy
 
 > Status: **accepted target**, format and checker verified on `main`; the data is
-> being written in three work packages and nothing in the product reads it yet.
+> being written in three work packages. The product already reads it, at two entry
+> points: `RecipeRecommendationEngine.recommend` (`backend/app/planning/recommendation_engine.py`)
+> and the `FinalPlanningProblem` built in `ProductPlanningEngine.plan`
+> (`backend/app/planning/product_path.py`), both through `expand_exclusions`; and the
+> agent's constraint vocabulary offers the groups (`backend/app/agent/parser.py`).
 > Decision: `decisions/ADR-0039` in the knowledge repository.
 
 ## 1. Why it exists

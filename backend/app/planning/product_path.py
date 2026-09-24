@@ -12,6 +12,7 @@ from fractions import Fraction
 from math import isfinite
 
 from app.data.allergens import checked_allergens
+from app.data.ingredient_hierarchy import expand_exclusions
 from app.data.units import UNIT_BASE
 from app.planning.beam_planner import BeamLimits, BeamPlanner
 from app.planning.capability import PlanningCapabilityError, require_composition_enabled
@@ -245,7 +246,8 @@ class ProductPlanningEngine:
             products=[options[k] for k in sorted(options)],
             allergens=constraints.allergens,
             allergen_vocabulary=sorted(checked_allergens()),
-            excluded_ingredients=constraints.excluded_ingredients,
+            # "No pork" also removes bacon: the checks downstream match ids exactly, so they get the expanded list.
+            excluded_ingredients=expand_exclusions(constraints.excluded_ingredients),
             dietary_requirements=constraints.dietary_preferences,
             health_preferences=constraints.health_preferences,
             nutrition_bands=bands,
