@@ -17,7 +17,8 @@
     "Oil policy (confirmed by the owner on 2026-09-24): olive, avocado, coconut, peanut, sunflower, grapeseed and sesame oils are not under their source. Allergies still reach them through the ingredient's own allergens. chili_oil stays under chili_pepper because the chilli is its purpose.",
     "Gelatin (confirmed by the owner on 2026-09-24): may_contain beef as well as pork, because commercial gelatin is often bovine.",
     "either_of: excluding one option reaches the combined id, which is right for the id itself (it is priced as one product). The planner first tries the line's options from data/ingredients/alternatives.json and keeps the recipe with the first option the household can eat and buy.",
-    "grapefruit_juice: its only release line (pomelo juice in Vietnamese Delight) is corrected at import to pomelo_juice by data/ingredients/line-corrections.json, which has no product, so it is never bought as grapefruit juice. The upstream mapping is to be fixed in the next data release."
+    "grapefruit_juice: its only release line (pomelo juice in Vietnamese Delight) is corrected at import to pomelo_juice by data/ingredients/line-corrections.json, which has no product, so it is never bought as grapefruit juice. The upstream mapping is to be fixed in the next data release.",
+    "mustard: moved from made_from mustard_seed to the family root when WP3 placed mustard_seed and dry_mustard under mustard; the two directions together formed a cycle."
   ],
   "entries": {
     "adzuki_bean": {
@@ -1832,14 +1833,9 @@
       "reason": "Live mussels form their own mollusc family."
     },
     "mustard": {
-      "parents": [
-        {
-          "id": "mustard_seed",
-          "relation": "made_from"
-        }
-      ],
+      "parents": [],
       "not_parents": [],
-      "reason": "Prepared, yellow and ground mustard are all made from mustard seed."
+      "reason": "Prepared mustard is the mustard family root: dijon, dry mustard and mustard seed sit under it, so a no-mustard household avoids every form."
     },
     "nuoc_cham": {
       "parents": [
