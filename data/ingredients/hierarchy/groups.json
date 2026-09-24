@@ -5,6 +5,10 @@
     "group:alcohol": {
       "description": "Every drink, cooking liquid or flavouring that contains alcohol as used.",
       "serves": "No alcohol in the cooking at all."
+    },
+    "group:allium": {
+      "description": "Onion, garlic, leek, shallot, chive and related allium vegetables and herbs.",
+      "serves": "No onion or garlic family ingredients, including for a Jain household avoiding alliums."
     }
   }
 }
