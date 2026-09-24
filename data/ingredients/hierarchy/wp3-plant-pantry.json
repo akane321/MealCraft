@@ -374,6 +374,27 @@
     "tomato": {"parents": [], "not_parents": [], "reason": "Fresh plum, cherry and ordinary tomatoes make this the root id for tomato-derived products."},
     "tomato_paste": {"parents": [{"id": "tomato", "relation": "made_from"}], "not_parents": [], "reason": "Concentrated tomato paste is made directly from cooked-down tomatoes."},
     "tomato_puree": {"parents": [{"id": "tomato", "relation": "made_from"}], "not_parents": [], "reason": "Tomato purée and mash are processed directly from tomatoes."},
-    "tomato_sauce": {"parents": [{"id": "tomato", "relation": "made_from"}], "not_parents": [], "reason": "Canned and prepared tomato sauce is principally made from tomato."}
+    "tomato_sauce": {"parents": [{"id": "tomato", "relation": "made_from"}], "not_parents": [], "reason": "Canned and prepared tomato sauce is principally made from tomato."},
+    "tortilla": {"parents": [{"id": "corn", "relation": "either_of"}, {"id": "flour", "relation": "either_of"}], "not_parents": [], "reason": "The evidence explicitly alternates corn tortillas and wheat-flour tortillas, so either grain base is possible."},
+    "tortilla_chips": {"parents": [{"id": "tortilla", "relation": "made_from"}], "not_parents": [], "reason": "Crushed and whole tortilla chips are fried or baked pieces made from tortillas."},
+    "turmeric": {"parents": [], "not_parents": [], "reason": "Ground and powdered turmeric form a standalone rhizome spice family."},
+    "turnip": {"parents": [], "not_parents": [], "reason": "Fresh peeled, sliced and cubed turnips form a distinct root-vegetable family."},
+    "ube": {"parents": [], "not_parents": [], "reason": "Purple yam or ube is a distinct starchy tuber without a generic yam parent id."},
+    "udon_noodles": {"parents": [{"id": "pasta", "relation": "variety"}], "not_parents": [], "reason": "Packaged udon are thick wheat noodles and a direct pasta variety."},
+    "vanilla_wafer": {"parents": [], "not_parents": ["vanilla"], "reason": "Vanilla wafers are baked cookies with minor flavouring, not vanilla extract and not an alcohol-containing ingredient for exclusion."},
+    "water": {"parents": [], "not_parents": [], "reason": "Plain measured water is the root liquid id for its frozen physical form."},
+    "water_chestnut": {"parents": [], "not_parents": ["water"], "reason": "Water chestnut is a crisp aquatic vegetable and is not plain water despite its name."},
+    "watercress": {"parents": [], "not_parents": [], "reason": "Fresh trimmed watercress leaves form a distinct leafy-vegetable family."},
+    "watermelon": {"parents": [], "not_parents": [], "reason": "Fresh cubed, sliced and diced watermelon make this the root watermelon-fruit id."},
+    "watermelon_rind": {"parents": [{"id": "watermelon", "relation": "made_from"}], "not_parents": [], "reason": "Watermelon rind is the edible white outer portion cut directly from watermelon."},
+    "wheat_berries": {"parents": [], "not_parents": ["berries"], "reason": "Wheat berries are whole cereal kernels and are unrelated to the fruit family called berries."},
+    "wheat_germ": {"parents": [], "not_parents": [], "reason": "Wheat germ is the embryo fraction of wheat grain, but the catalog has no generic wheat parent id."},
+    "whole_wheat_flour": {"parents": [{"id": "flour", "relation": "variety"}], "not_parents": [], "reason": "Whole-wheat and whole-wheat pastry flour are direct varieties of ordinary wheat flour."},
+    "wild_rice": {"parents": [], "not_parents": ["rice"], "reason": "Wild rice is the grain of aquatic Zizania grass rather than cultivated rice, so a rice exclusion does not automatically cover it."},
+    "wonton_wrapper": {"parents": [{"id": "egg", "relation": "may_contain"}], "not_parents": [], "reason": "Wonton, egg-roll, lumpia and spring-roll wrappers vary; some doughs contain egg while others are egg-free."},
+    "yeast": {"parents": [], "not_parents": [], "reason": "Fresh, active dry, instant and rapid-rise yeast form one standalone leavening family."},
+    "yellow_squash": {"parents": [{"id": "squash", "relation": "variety"}], "not_parents": [], "reason": "Yellow and summer squash are direct varieties of the generic squash family."},
+    "zaatar": {"parents": [], "not_parents": [], "reason": "Za'atar is a compound Middle Eastern spice mix without one dependable catalog ingredient parent."},
+    "zucchini": {"parents": [{"id": "squash", "relation": "variety"}], "not_parents": [], "reason": "Fresh zucchini or courgette is a summer-squash variety under the generic squash family."}
   }
 }
