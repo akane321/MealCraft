@@ -119,6 +119,9 @@ class Ingredient(Base):
     display_name: Mapped[str] = mapped_column(String(160))
     # Checked allergens this ingredient contains; see app/data/allergens.py.
     allergens: Mapped[list[str]] = mapped_column(JSON, default=list)
+    # A combined ingredient ("beef or turkey") lists the options it allows, each as
+    # {normalized_name, display_name, allergens}; null for an ordinary ingredient.
+    alternatives: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
 
     recipe_ingredients: Mapped[list["RecipeIngredient"]] = relationship(back_populates="ingredient")
 
