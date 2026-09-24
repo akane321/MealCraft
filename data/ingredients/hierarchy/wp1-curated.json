@@ -3,7 +3,7 @@
   "package": "WP1",
   "title": "Curated-catalog ids that release v2.1 names differently",
   "drafted_by": "Claude Code (claude-sonnet-5), for Du Jiayu",
-  "accepted_by": null,
+  "accepted_by": "Du Jiayu",
   "notes": [
     "canned_tomato: `same` as canned_tomatoes AND a `variety` of tomato. The checker requires the look-alike `tomato` to be decided, and canned_tomatoes belongs to WP3, which may not have merged yet; the direct link keeps 'no tomato' working either way and stays true after WP3 links canned_tomatoes to tomato.",
     "ground_cumin: `same` as cumin. Release recipes write cumin as ground cumin or cumin powder far more often than seeds (see --show cumin), so the two ids are one food in practice. A household that avoids whole cumin seed is not modelled.",
