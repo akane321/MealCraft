@@ -48,13 +48,14 @@ never climbs: excluding `cherry_tomato` does not exclude `tomato`, because a
 household that dislikes cherry tomatoes has said nothing about tomatoes. The one
 exception is `same`, followed both ways, because it is one food under two ids.
 
-**`either_of` excludes the whole ingredient.** A household that avoids beef
-loses a recipe calling for `beef_or_turkey` even though turkey would do. That is
-deliberate for now: the catalog prices a combined id as one product
-(`beef_or_turkey` is bought as minced beef), so keeping the recipe would put beef
-on the shopping list. Keeping it and choosing the compliant option needs the
-recipe and shopping path to resolve the choice first; until then, excluding is
-the only safe answer.
+**`either_of` and the planner's choice.** Excluding `beef` reaches
+`beef_or_turkey` through its `either_of` link, as it must: the combined
+ingredient is priced as one product (minced beef). Before that exclusion
+applies, the planner tries the line's options (`data/ingredients/alternatives.json`,
+see `recipe-ingredient-data.md`) and cooks it with the first one the household
+can eat and can buy, so the recipe is kept whenever such an option exists. The
+hierarchy decides what an exclusion reaches; the options decide what is cooked
+instead.
 
 `not_parents` records a look-alike that was considered and rejected
 (`almond_milk`: `not_parents: ["milk"]`). It does nothing at run time; it is how

@@ -18,7 +18,7 @@
     "Gelatin (confirmed by the owner on 2026-09-24): may_contain beef as well as pork, because commercial gelatin is often bovine.",
     "accepted_by remains null until the owner reads and accepts every entry.",
     "grapefruit_juice: its only recipe line is pomelo juice. Pomelo and grapefruit are different fruits; the release's ingredient mapping conflates them. Not fixable in this table; recorded for the data owners.",
-    "either_of excludes the whole id, and must for now: the catalog prices a combined id as one product (beef_or_turkey buys minced beef, chicken_or_veg_broth buys chicken broth, milk_or_water buys milk). Keeping the recipe and choosing the other option needs the recipe and shopping path to resolve the choice first. 14 ids, 267 recipe uses; butter_or_margarine alone is 198."
+    "either_of: excluding one option reaches the combined id, which is right for the id itself (it is priced as one product). The planner first tries the line's options from data/ingredients/alternatives.json and keeps the recipe with the first option the household can eat and buy."
   ],
   "entries": {
     "adzuki_bean": {
