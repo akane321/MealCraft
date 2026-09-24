@@ -3,7 +3,7 @@
   "package": "WP3",
   "title": "Vegetables, fruit, grains, herbs, spices, sweeteners and other plant pantry items",
   "drafted_by": "OpenAI Codex, GPT-5",
-  "accepted_by": null,
+  "accepted_by": "akane321 (owner), 2026-09-24: accepted on the implementation agent's acceptance review (all 29 high-risk links read, 39/40 on a fixed-seed sample, two fixes applied); not read entry by entry",
   "notes": [
     "Confirmed WP3 policy: alternative flours do not inherit wheat flour; each follows its source ingredient because catalog flour denotes ordinary wheat flour and gluten safety is handled separately.",
     "Confirmed WP3 policy: use group:allium for onion, garlic, shallot, leek, green onion and chive so one household exclusion can cover the allium family.",
