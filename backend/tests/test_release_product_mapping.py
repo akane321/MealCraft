@@ -132,5 +132,7 @@ def test_a_week_keeps_lines_in_units_that_cannot_be_added() -> None:
             recipe_ingredients=[RecipeIngredient(ingredient=carrot, quantity=quantity, unit=unit, sort_order=1)],
         )
 
-    lines = WeeklyGroceryAggregator._aggregate_ingredients([dish(1, "whole"), dish(64, "g"), dish(36, "g")], 2)
+    lines = WeeklyGroceryAggregator._aggregate_ingredients(
+        [dish(1, "whole"), dish(64, "g"), dish(36, "g")], RecipeRecommendationRequest(household_size=2)
+    )
     assert [(line.unit, line.required_quantity) for line in lines] == [("g", 100.0), ("whole", 1.0)]

@@ -60,6 +60,32 @@ A target recipe record should include:
   completeness and uncertainty/missing flags;
 - ordered cooking instructions and optional media provenance.
 
+### A line that allows either of two ingredients
+
+Recipes often offer a choice: `1 lb. ground beef or turkey`, `4 Tbsp. butter or
+margarine`. Release v2.1 maps such a line to one **combined ingredient**
+(`beef_or_turkey`), because a line carries one ingredient id. There are 14 of
+them, used 267 times.
+
+- **Options.** `data/ingredients/alternatives.json` lists each combined
+  ingredient's options in the order most recipes write them. The release import
+  copies each option's name, display name and allergens (from the imported
+  option row, so in the runtime vocabulary) onto the combined ingredient's
+  `alternatives` column. A change to the file re-runs the import.
+- **Choice.** For each household, `app/planning/alternatives.py` cooks the line
+  with its first option that is neither excluded (after the ingredient
+  hierarchy's expansion) nor carrying an allergen the household avoids, and
+  that the planner can buy. Every consumer of recipe lines calls it:
+  eligibility and pantry matching in the recommendation engine, the cost
+  estimate, the MVP shopping list, replanning, and the product planning path.
+  So the dish that is kept is the dish that is bought.
+- **No option.** When no option qualifies the line stays combined, and the
+  ordinary checks exclude the recipe, as before. An option the planner cannot
+  buy (turkey has no FairPrice mapping) is never chosen, so a no-beef household
+  still loses `ground beef or turkey` recipes until turkey is priced.
+- **Not affected.** Recipe-level dietary tags stay as released, and evaluation
+  runners read the release files directly, so evaluation results do not move.
+
 ## Transformation pipeline
 
 ```text
