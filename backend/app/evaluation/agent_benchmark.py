@@ -13,6 +13,7 @@ from app.agent.parser import (
     ConstraintVocabulary,
     OpenAIConstraintParser,
     RuleBasedConstraintParser,
+    catalog_groups,
 )
 from app.agent.workflow import AgentConstraintWorkflow
 from app.core.paths import repository_root
@@ -97,7 +98,7 @@ def runtime_vocabulary() -> ConstraintVocabulary:
     release = (root / "data-engineering/data/release/v2.1/ingredients.jsonl").read_text(encoding="utf-8")
     names = {row["normalized_name"] for row in curated}
     names |= {normalized_name(json.loads(line)["ingredient_id"]) for line in release.splitlines() if line.strip()}
-    return ConstraintVocabulary(ingredients=frozenset(names))
+    return ConstraintVocabulary(ingredients=frozenset(names), groups=catalog_groups())
 
 
 def evaluate_agent(

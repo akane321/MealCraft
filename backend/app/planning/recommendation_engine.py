@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from app.data import ingredient_hierarchy
 from app.data.allergens import allergen_conflicts, conflict_reasons
 from app.models.recipe import Recipe
 from app.planning.dietary_tags import expand_tags
@@ -36,9 +37,11 @@ class RecipeRecommendationEngine:
     ) -> tuple[list[RecipeRecommendationResponse], list[ExcludedRecipeResponse]]:
         scored: list[ScoredRecipe] = []
         excluded: list[ExcludedRecipeResponse] = []
+        # Expanded once per call, not per recipe: "no pork" also removes bacon.
+        excluded_ingredients = ingredient_hierarchy.expand_exclusions(constraints.excluded_ingredients)
 
         for recipe in recipes:
-            exclusion_reasons = self._exclusion_reasons(recipe, constraints)
+            exclusion_reasons = self._exclusion_reasons(recipe, constraints, excluded_ingredients)
             if exclusion_reasons:
                 excluded.append(
                     ExcludedRecipeResponse(
@@ -57,15 +60,19 @@ class RecipeRecommendationEngine:
         excluded.sort(key=lambda item: item.id)
         return [item.response for item in scored], excluded
 
-    def _exclusion_reasons(self, recipe: Recipe, constraints: RecipeRecommendationRequest) -> list[str]:
+    def _exclusion_reasons(
+        self, recipe: Recipe, constraints: RecipeRecommendationRequest, excluded_ingredients: list[str]
+    ) -> list[str]:
         reasons: list[str] = []
         ingredient_names = {item.ingredient.normalized_name for item in recipe.recipe_ingredients}
         recipe_allergens = {allergen for item in recipe.recipe_ingredients for allergen in item.ingredient.allergens}
         reasons.extend(conflict_reasons(*allergen_conflicts(constraints.allergens, recipe_allergens)))
 
-        excluded_matches = sorted(ingredient_names.intersection(constraints.excluded_ingredients))
+        excluded_matches = sorted(ingredient_names.intersection(excluded_ingredients))
         if excluded_matches:
-            reasons.append(f"Contains excluded ingredient: {', '.join(excluded_matches)}.")
+            reasons.append(
+                f"Contains excluded ingredient: {', '.join(self._named_by_household(excluded_matches, constraints))}."
+            )
 
         if recipe.total_time_minutes > constraints.max_cooking_time_minutes:
             reasons.append(
@@ -96,6 +103,20 @@ class RecipeRecommendationEngine:
         and only one of them was updated. One definition, one place.
         """
         return preference in expand_tags(recipe_tags)
+
+    @staticmethod
+    def _named_by_household(matches: list[str], constraints: RecipeRecommendationRequest) -> list[str]:
+        """Say which of the household's own words removed each match: `bacon (excluded: pork)`.
+
+        A match the household named itself stays as it was. Without this a household
+        that said "no pork" is told the recipe "contains excluded ingredient: bacon".
+        """
+        named = set(constraints.excluded_ingredients)
+        labelled = []
+        for match in matches:
+            because = sorted(ingredient_hierarchy.runtime().ancestors(match) & named) if match not in named else []
+            labelled.append(f"{match} (excluded: {', '.join(because)})" if because else match)
+        return labelled
 
     def _score_recipe(
         self,

@@ -1,10 +1,11 @@
 import re
-from collections.abc import Sequence
-from dataclasses import dataclass
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from typing import Protocol
 
 from langchain_openai import ChatOpenAI
 
+from app.data import ingredient_hierarchy
 from app.data.allergens import checked_allergens
 from app.schemas.agent import AgentConstraintExtraction, AgentConstraintState, AgentMessageResponse
 from app.schemas.recommendation import AvailableIngredientInput, NutritionTargets
@@ -270,13 +271,28 @@ class ConstraintVocabulary:
 
     ingredients: frozenset[str]
     allergens: frozenset[str] = frozenset(checked_allergens())
+    # Families no ingredient id stands for, group id -> what it covers (ingredient hierarchy, ADR-0039).
+    groups: Mapping[str, str] = field(default_factory=dict)
 
     def prompt(self) -> str:
-        return f"""Allowed words. A constraint written in any other word matches nothing and is lost.
+        text = f"""Allowed words. A constraint written in any other word matches nothing and is lost.
 - excluded_ingredients and available_ingredients: only these ingredient ids, and every id that is
   the thing the user named (told "no wine", exclude each wine id):
 {", ".join(sorted(self.ingredients))}
 - allergens: only {", ".join(sorted(self.allergens))}"""
+        if not self.groups:
+            return text
+        members = "\n".join(f"  {group_id}: {description}" for group_id, description in sorted(self.groups.items()))
+        return f"""{text}
+- excluded_ingredients may also name a whole family by its group id, which removes every member
+  at once. Use the group id when the user names the family (told "no alcohol", write group:alcohol),
+  and do not list its members yourself. Groups are for excluded_ingredients only:
+{members}"""
+
+
+def catalog_groups() -> dict[str, str]:
+    """The ingredient hierarchy's groups as the agent's vocabulary wants them: id -> description."""
+    return {group_id: group["description"] for group_id, group in ingredient_hierarchy.runtime().groups.items()}
 
 
 def align_to_vocabulary(
@@ -296,7 +312,9 @@ def align_to_vocabulary(
         return [value for value in values if value in words] or None
 
     aligned = extraction.model_copy(deep=True)
-    aligned.excluded_ingredients = known(extraction.excluded_ingredients, vocabulary.ingredients)
+    aligned.excluded_ingredients = known(
+        extraction.excluded_ingredients, vocabulary.ingredients | frozenset(vocabulary.groups)
+    )
     aligned.allergens = known(extraction.allergens, vocabulary.allergens)
     if extraction.available_ingredients is not None:
         pantry = [item for item in extraction.available_ingredients if item.normalized_name in vocabulary.ingredients]
