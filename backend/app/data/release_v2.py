@@ -56,7 +56,7 @@ RELEASE_FILES = ("release_manifest.json", "ingredients.jsonl", "recipes.jsonl")
 
 # Importer logic is part of the digest, so a change here re-imports an
 # already-recorded release instead of being skipped as unchanged.
-IMPORTER_VERSION = "4"  # 4: a combined "A or B" ingredient carries its options (alternatives.json)
+IMPORTER_VERSION = "5"  # 5: recipe lines the release mapped wrongly are corrected (line-corrections.json)
 
 # Release allergen name -> runtime checked allergen, or None when the runtime has no name for it.
 ALLERGEN_MAP: dict[str, str | None] = {
@@ -89,6 +89,7 @@ def release_digest(directory: Path) -> str:
     # The options of combined ingredients are copied in at import, so a change to
     # them must re-run the import like a change to the release itself.
     digest.update((repository_root() / "data/ingredients/alternatives.json").read_bytes())
+    digest.update((repository_root() / LINE_CORRECTIONS).read_bytes())
     return digest.hexdigest()
 
 
@@ -162,7 +163,8 @@ def import_release_v2(session: Session, directory: Path | None = None, *, force:
 
     recipes = list(_jsonl(directory / "recipes.jsonl"))
     ingredient_ids = _import_ingredients(session, directory, recipes, report)
-    _import_recipes(session, recipes, ingredient_ids, report)
+    corrected = _line_corrections(session, recipes)
+    _import_recipes(session, recipes, ingredient_ids, report, corrected)
 
     # _import_recipes expunges the session between chunks, so fetch the row again.
     recorded = session.get(CatalogImport, RELEASE_VERSION)
@@ -225,9 +227,54 @@ def _attach_alternatives(by_name: dict[str, Ingredient]) -> None:
         ]
 
 
+LINE_CORRECTIONS = "data/ingredients/line-corrections.json"
+
+
+def _line_corrections(session: Session, recipes: list[dict]) -> dict[tuple[str, str], int]:
+    """(recipe id, original line) -> the ingredient the line really is, for lines the release mapped wrongly.
+
+    A correction names its release line exactly. When the recipe is in this import
+    but the line no longer matches, the release has changed under it: fail, so the
+    correction is reviewed and removed rather than silently doing nothing.
+    """
+    document = json.loads((repository_root() / LINE_CORRECTIONS).read_text(encoding="utf-8"))
+    by_recipe = {record["recipe_id"]: record for record in recipes}
+    corrected: dict[tuple[str, str], int] = {}
+    for correction in document["corrections"]:
+        record = by_recipe.get(correction["recipe_id"])
+        if record is None:
+            continue
+        release_id = "ING_" + correction["release_ingredient"].upper()
+        if not any(
+            line["original_text"] == correction["original_text"] and line["canonical_ingredient_id"] == release_id
+            for line in record["ingredients"]
+        ):
+            raise ValueError(
+                f"line correction for {correction['recipe_id']} no longer matches the release: "
+                f"{correction['original_text']!r} as {correction['release_ingredient']}"
+            )
+        target = correction["ingredient"]
+        row = session.scalars(select(Ingredient).where(Ingredient.normalized_name == target["normalized_name"])).first()
+        if row is None:
+            row = Ingredient(
+                normalized_name=target["normalized_name"],
+                display_name=target["display_name"],
+                allergens=map_allergens(target["allergens"]),
+            )
+            session.add(row)
+            session.flush()
+        corrected[(correction["recipe_id"], correction["original_text"])] = row.id
+    return corrected
+
+
 def _import_recipes(
-    session: Session, recipes: list[dict], ingredient_ids: dict[str, int], report: ImportReport
+    session: Session,
+    recipes: list[dict],
+    ingredient_ids: dict[str, int],
+    report: ImportReport,
+    corrected: dict[tuple[str, str], int] | None = None,
 ) -> None:
+    corrected = corrected or {}
     kept_ids: set[str] = set()
     existing_ids = dict(
         # Rows of any earlier release are upgraded in place: a recipe keeps its
@@ -252,7 +299,9 @@ def _import_recipes(
             _fill_recipe(recipe, record)
             recipe.recipe_ingredients = [
                 RecipeIngredient(
-                    ingredient_id=ingredient_ids[line["canonical_ingredient_id"]],
+                    ingredient_id=corrected.get(
+                        (record["recipe_id"], line["original_text"]), ingredient_ids[line["canonical_ingredient_id"]]
+                    ),
                     quantity=_grams(line),
                     unit="g" if _grams(line) else None,
                     grams=_grams(line),

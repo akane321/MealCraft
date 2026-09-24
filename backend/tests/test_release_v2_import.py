@@ -130,3 +130,44 @@ def test_a_combined_ingredient_carries_its_options(session: Session, release: Pa
     # Copied from the imported option row, so its allergens are in the runtime vocabulary.
     assert butter == {"normalized_name": "butter", "display_name": row("butter").display_name, "allergens": ["dairy"]}
     assert row("butter").alternatives is None
+
+
+def _release_with(tmp_path: Path, recipe_ids: set[str], edit=None) -> Path:
+    source = release_dir()
+    for name in ("release_manifest.json", "ingredients.jsonl"):
+        shutil.copy(source / name, tmp_path / name)
+    with (source / "recipes.jsonl").open(encoding="utf-8") as handle:
+        records = [record for record in map(json.loads, handle) if record["recipe_id"] in recipe_ids]
+    _write_recipes(tmp_path, [edit(record) if edit else record for record in records])
+    return tmp_path
+
+
+POMELO_RECIPE = "RCP2_8559F3848205"
+
+
+def test_a_line_the_release_mapped_wrongly_is_corrected(session: Session, tmp_path: Path) -> None:
+    import_release_v2(session, _release_with(tmp_path, {POMELO_RECIPE}))
+
+    line = session.scalars(
+        select(RecipeIngredient)
+        .join(Recipe)
+        .where(Recipe.external_id == POMELO_RECIPE, RecipeIngredient.original_text == "1 ounce pomelo juice")
+    ).one()
+    assert line.ingredient.normalized_name == "pomelo_juice"
+    assert line.ingredient.display_name == "pomelo juice"
+    # Pomelo juice has no FairPrice mapping, so priced planning leaves the recipe out
+    # instead of buying grapefruit juice for it.
+    from app.planning.grocery_estimator import priceable_ingredients
+
+    assert "pomelo_juice" not in priceable_ingredients()
+
+
+def test_a_correction_that_no_longer_matches_the_release_stops_the_import(session: Session, tmp_path: Path) -> None:
+    def reworded(record: dict) -> dict:
+        for line in record["ingredients"]:
+            if line["original_text"] == "1 ounce pomelo juice":
+                line["original_text"] = "30 ml pomelo juice"
+        return record
+
+    with pytest.raises(ValueError, match="no longer matches the release"):
+        import_release_v2(session, _release_with(tmp_path, {POMELO_RECIPE}, reworded))
