@@ -17,8 +17,8 @@
     "Oil policy (confirmed by the owner on 2026-09-24): olive, avocado, coconut, peanut, sunflower, grapeseed and sesame oils are not under their source. Allergies still reach them through the ingredient's own allergens. chili_oil stays under chili_pepper because the chilli is its purpose.",
     "Gelatin (confirmed by the owner on 2026-09-24): may_contain beef as well as pork, because commercial gelatin is often bovine.",
     "accepted_by remains null until the owner reads and accepts every entry.",
-    "grapefruit_juice: its only recipe line is pomelo juice. Pomelo and grapefruit are different fruits; the release's ingredient mapping conflates them. Not fixable in this table; recorded for the data owners.",
-    "either_of: excluding one option reaches the combined id, which is right for the id itself (it is priced as one product). The planner first tries the line's options from data/ingredients/alternatives.json and keeps the recipe with the first option the household can eat and buy."
+    "either_of: excluding one option reaches the combined id, which is right for the id itself (it is priced as one product). The planner first tries the line's options from data/ingredients/alternatives.json and keeps the recipe with the first option the household can eat and buy.",
+    "grapefruit_juice: its only release line (pomelo juice in Vietnamese Delight) is corrected at import to pomelo_juice by data/ingredients/line-corrections.json, which has no product, so it is never bought as grapefruit juice. The upstream mapping is to be fixed in the next data release."
   ],
   "entries": {
     "adzuki_bean": {
@@ -1242,7 +1242,7 @@
         }
       ],
       "not_parents": [],
-      "reason": "The only evidence line is pomelo juice, which the release maps to grapefruit juice; the link to grapefruit stands, and the pomelo mapping is a catalog issue recorded in notes."
+      "reason": "Grapefruit juice is pressed from grapefruit. Its only release line was pomelo juice, now corrected at import to pomelo_juice (data/ingredients/line-corrections.json)."
     },
     "grapeseed_oil": {
       "parents": [],
