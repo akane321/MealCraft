@@ -1,6 +1,9 @@
 """Does the swapped-in dish match what the household asked for? Developer requests, checked on catalog facts.
 
-    PYTHONPATH="backend;scripts" python scripts/evaluate_replan_requests.py
+    PYTHONPATH="backend;scripts" python scripts/evaluate_replan_requests.py [HELDOUT.json]
+
+With a file, its requests and catalog checks replace the developer requests below (held-out: frozen with
+scripts/check_embedding_heldout.py first, read once). Checks are judged by that script's `accepts`.
 
 For each request, 30 seeded trials draw 100 catalog mains as the candidate pool (they stand for the
 candidates that already passed the hard constraints) and each method picks one:
@@ -16,11 +19,13 @@ prefix plus words, words): a developer check, not evidence.
 
 import json
 import random
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
 from app.planning import recipe_similarity
 from app.planning.recipe_similarity import RecipeSimilarity, recipe_words, wanted, words
+from check_embedding_heldout import accepts
 from embed_ingredients import embedder
 
 RELEASE = Path("data-engineering/data/release/v2.1/recipes.jsonl")
@@ -104,7 +109,21 @@ def best(pool: list[int], score: dict[int, float]) -> int:
     return max(pool, key=lambda i: (score.get(i, -1.0), -pool.index(i)))
 
 
+def as_check(check: dict):
+    """A held-out case's catalog check, on a release recipe row."""
+
+    def judged(r: dict) -> bool:
+        ingredients = {i["canonical_ingredient_id"].removeprefix("ING_").lower() for i in r["ingredients"]}
+        return accepts(check, {**r, "ingredients": ingredients})
+
+    return judged
+
+
 def main() -> None:
+    requests = REQUESTS
+    if len(sys.argv) > 1:
+        cases = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))["cases"]
+        requests = [(case["request"], as_check(case["check"])) for case in cases]
     mains = [
         r for line in RELEASE.read_text(encoding="utf-8").splitlines() if (r := json.loads(line))["course"] == "main"
     ]
@@ -122,7 +141,7 @@ def main() -> None:
     rng = random.Random(20260925)
     totals, counted = dict.fromkeys(METHODS, 0), 0
     print(f"{'request':34} {'trials':>6} " + " ".join(f"{m:>9}" for m in METHODS))
-    for request, check in REQUESTS:
+    for request, check in requests:
         asked = words(wanted(request) or "")
         shipped = similarity.scores(request, recipes)
         weight, recipe_similarity.KEYWORD_WEIGHT = recipe_similarity.KEYWORD_WEIGHT, 0.0
