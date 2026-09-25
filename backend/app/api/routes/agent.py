@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.agent.ingredient_matcher import IngredientMatcher, catalog_aliases, catalog_embedder, catalog_vectors
 from app.agent.parser import (
     AgentConfigurationError,
     ConstraintParser,
@@ -51,16 +52,21 @@ def create_constraint_parser(settings: Settings, database: Session | None = None
         raise AgentConfigurationError(
             "AGENT_PARSER_PROVIDER=openai requires OPENAI_API_KEY. Use fixture mode for a key-free demo."
         )
-    # The model writes constraints in the catalog's own ingredient ids, the only words the planner matches.
-    vocabulary = (
-        ConstraintVocabulary(
-            ingredients=frozenset(database.scalars(select(Ingredient.normalized_name))), groups=catalog_groups()
+    api_key = settings.openai_api_key.get_secret_value()
+    # The model writes constraints in the catalog's own ingredient ids, the only words the planner matches;
+    # a word outside them is asked about, with the closest ids offered (ingredient_matcher).
+    vocabulary = None
+    if database is not None:
+        names = dict(database.execute(select(Ingredient.normalized_name, Ingredient.display_name)).tuples())
+        vocabulary = ConstraintVocabulary(
+            ingredients=frozenset(names),
+            groups=catalog_groups(),
+            matcher=IngredientMatcher(
+                names, vectors=catalog_vectors(), embed=catalog_embedder(api_key), aliases=catalog_aliases()
+            ),
         )
-        if database is not None
-        else None
-    )
     return OpenAIConstraintParser(
-        api_key=settings.openai_api_key.get_secret_value(),
+        api_key=api_key,
         model=settings.openai_model,
         vocabulary=vocabulary,
     )
