@@ -3,7 +3,11 @@ from pydantic import BaseModel, Field
 from app.agent.parser import ConstraintParser
 from app.agent.workflow import AgentConstraintWorkflow
 from app.orchestration.contracts import InteractionRequest, ScopeClass, ScopeDecision
-from app.orchestration.interactions import household_size_interaction, pantry_quantity_interaction
+from app.orchestration.interactions import (
+    household_size_interaction,
+    pantry_quantity_interaction,
+    unmatched_term_interaction,
+)
 from app.orchestration.scope_policy import ReferenceScopePolicy
 from app.schemas.agent import AgentConstraintState, AgentMessageResponse
 
@@ -81,6 +85,7 @@ class BoundedAgentOrchestrator:
             missing_fields,
             question=questions[0] if questions else None,
             context_version=next_context_version,
+            suggestions={item["term"]: item for item in result.get("extraction", {}).get("unmatched_suggestions", [])},
         )
         assistant_message = str(result["assistant_message"])
         if decision.scope_class is ScopeClass.PARTIALLY_SUPPORTED and decision.unsupported_segments:
@@ -107,6 +112,7 @@ class BoundedAgentOrchestrator:
         *,
         question: str | None,
         context_version: int,
+        suggestions: dict[str, dict] | None = None,
     ) -> InteractionRequest | None:
         if not missing_fields:
             return None
@@ -114,6 +120,16 @@ class BoundedAgentOrchestrator:
         question_id = f"context-{context_version}:{field_path}"
         if field_path == "household_size":
             return household_size_interaction(question_id=question_id, context_version=context_version)
+        suggestion = (suggestions or {}).get(field_path.removeprefix("unmatched."))
+        if field_path.startswith("unmatched.") and question and suggestion and suggestion.get("options"):
+            return unmatched_term_interaction(
+                term=suggestion["term"],
+                meant_for=suggestion["field"],
+                options=suggestion["options"],
+                prompt=question,
+                question_id=question_id,
+                context_version=context_version,
+            )
         prefix = "available_ingredients."
         suffix = ".quantity"
         if field_path.startswith(prefix) and field_path.endswith(suffix):

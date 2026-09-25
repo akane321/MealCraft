@@ -247,6 +247,12 @@ class AgentSessionService:
             return f"{int(value)} people"
         if request.field_path and request.field_path.endswith(".quantity"):
             return str(value)
+        if request.field_path and request.field_path.startswith("unmatched."):
+            meant_for, _, term = request.field_path.removeprefix("unmatched.").partition(".")
+            if meant_for == "excluded_ingredients":
+                return f"Exclude {value} (that is what I meant by “{term}”)."
+            if meant_for == "available_ingredients":
+                return f"I have {value} (that is what I meant by “{term}”)."
         raise AgentSessionNotReadyError("This interaction field is not supported by the current runtime.")
 
     def _reply_to_planned(

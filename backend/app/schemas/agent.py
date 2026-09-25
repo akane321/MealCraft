@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import Literal
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from app.orchestration.contracts import (
     AgentRunStatus,
@@ -45,6 +46,14 @@ class AgentMessageResponse(BaseModel):
     created_at: datetime
 
 
+class UnmatchedTermSuggestion(BaseModel):
+    """A word the planner cannot check, the field it was meant for, and catalog ids it might mean."""
+
+    term: str
+    field: Literal["excluded_ingredients", "available_ingredients", "allergens"]
+    options: list[str] = Field(default_factory=list)
+
+
 class AgentConstraintExtraction(BaseModel):
     household_size: int | None = Field(default=None, ge=1, le=12)
     max_cooking_time_minutes: int | None = Field(default=None, ge=5, le=240)
@@ -64,6 +73,8 @@ class AgentConstraintExtraction(BaseModel):
     # Filled by the server, never by the model: words the household used that match no
     # ingredient or allergen the planner can check. They are asked about, not dropped.
     unmatched_terms: list[str] = Field(default_factory=list)
+    # Server-only as well, and left out of the schema the model fills (SkipJsonSchema).
+    unmatched_suggestions: SkipJsonSchema[list[UnmatchedTermSuggestion]] = Field(default_factory=list)
 
 
 class AgentConstraintState(BaseModel):

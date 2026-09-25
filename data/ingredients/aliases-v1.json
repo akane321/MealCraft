@@ -1,0 +1,3011 @@
+{
+ "model": "gpt-5.4-mini",
+ "generated_at": "2026-09-25T10:47:56+00:00",
+ "note": "Model-generated, not reviewed. Used only in the embedding text for ingredient suggestions.",
+ "missing": [],
+ "aliases": {
+  "adobo_seasoning": [
+   "adobo"
+  ],
+  "adzuki_bean": [
+   "adzuki bean",
+   "red bean",
+   "azuki bean",
+   "red mung bean"
+  ],
+  "agar": [
+   "agar agar",
+   "agar-agar",
+   "china grass"
+  ],
+  "agave": [
+   "agave nectar",
+   "agave syrup"
+  ],
+  "allspice": [
+   "pimenta",
+   "allspice berry"
+  ],
+  "almond": [
+   "badam",
+   "almond nut"
+  ],
+  "almond_butter": [
+   "almond spread"
+  ],
+  "almond_extract": [
+   "almond essence"
+  ],
+  "almond_flour": [
+   "almond meal",
+   "ground almonds"
+  ],
+  "almond_milk": [
+   "almond drink"
+  ],
+  "almond_paste": [
+   "marzipan",
+   "almond marzipan"
+  ],
+  "amaretto": [
+   "amaretto liqueur"
+  ],
+  "american_cheese": [
+   "processed cheese",
+   "American processed cheese"
+  ],
+  "anchovy": [
+   "anchovies",
+   "ikan bilis"
+  ],
+  "anise": [
+   "aniseed",
+   "star anise"
+  ],
+  "annatto": [
+   "achiote",
+   "annatto seed"
+  ],
+  "apple": [
+   "pomme",
+   "malus"
+  ],
+  "apple_butter": [
+   "apple spread"
+  ],
+  "apple_juice": [
+   "apple juice drink"
+  ],
+  "apple_pie_spice": [
+   "apple pie spice mix",
+   "apple spice"
+  ],
+  "applesauce": [
+   "apple puree"
+  ],
+  "apricot": [
+   "apricots"
+  ],
+  "apricot_nectar": [
+   "apricot juice nectar"
+  ],
+  "arrowroot": [
+   "arrowroot flour",
+   "arrowroot starch"
+  ],
+  "artichoke": [
+   "artichoke heart",
+   "globe artichoke"
+  ],
+  "arugula": [
+   "rocket",
+   "rocket salad"
+  ],
+  "asian_pear": [
+   "nashi pear",
+   "pear apple"
+  ],
+  "asian_seasoning": [
+   "Asian spice blend"
+  ],
+  "asparagus": [
+   "asparagus spears"
+  ],
+  "au_jus_mix": [
+   "jus mix",
+   "gravy mix"
+  ],
+  "avocado": [
+   "alligator pear",
+   "avocado pear"
+  ],
+  "avocado_oil": [
+   "avocado oil"
+  ],
+  "baby_spinach": [
+   "young spinach"
+  ],
+  "bacon": [
+   "streaky bacon",
+   "side bacon"
+  ],
+  "bacon_grease": [
+   "bacon drippings",
+   "bacon fat"
+  ],
+  "baguette": [
+   "French loaf",
+   "French bread"
+  ],
+  "baked_beans": [
+   "beans in sauce"
+  ],
+  "baking_chocolate": [
+   "unsweetened chocolate",
+   "bitter chocolate"
+  ],
+  "baking_powder": [
+   "bicarb powder"
+  ],
+  "baking_soda": [
+   "bicarbonate of soda",
+   "baking soda"
+  ],
+  "balsamic": [
+   "balsamic vinegar",
+   "aceto balsamico"
+  ],
+  "bamboo_shoot": [
+   "bamboo shoots"
+  ],
+  "banana": [
+   "bananas"
+  ],
+  "banana_ketchup": [
+   "banana sauce"
+  ],
+  "banana_leaf": [
+   "banana leaves"
+  ],
+  "barley": [
+   "pearl barley"
+  ],
+  "basil": [
+   "sweet basil",
+   "holy basil"
+  ],
+  "bay_leaf": [
+   "bay leaves"
+  ],
+  "bbq_sauce": [
+   "barbecue sauce",
+   "barbeque sauce"
+  ],
+  "bean_sauce": [
+   "fermented bean sauce"
+  ],
+  "bean_sprouts": [
+   "bean sprouts",
+   "mung bean sprouts"
+  ],
+  "beef": [
+   "beef meat"
+  ],
+  "beef_broth": [
+   "beef stock"
+  ],
+  "beef_heart": [
+   "ox heart"
+  ],
+  "beef_or_turkey": [
+   "beef or turkey"
+  ],
+  "beef_steak": [
+   "steak",
+   "beef steak"
+  ],
+  "beer": [
+   "ale",
+   "lager"
+  ],
+  "beet": [
+   "beetroot",
+   "red beet"
+  ],
+  "bell_pepper": [
+   "capsicum",
+   "sweet pepper"
+  ],
+  "berbere": [
+   "berbere spice",
+   "berberé"
+  ],
+  "berries": [
+   "mixed berries",
+   "soft fruit",
+   "berries and cream berries"
+  ],
+  "bilimbi": [
+   "bilimbi fruit",
+   "belimbing buluh",
+   "sour bilimbi"
+  ],
+  "biscuit_dough": [
+   "refrigerated biscuit dough",
+   "ready-made biscuit dough",
+   "biscuits dough"
+  ],
+  "biscuit_mix": [
+   "baking mix",
+   "all-purpose baking mix",
+   "biscuit baking mix"
+  ],
+  "bitter_melon": [
+   "bitter gourd",
+   "bitter squash",
+   "bitter cucumber",
+   "ampalaya",
+   "fu kwa"
+  ],
+  "black_bean": [
+   "black turtle beans",
+   "frijoles negros",
+   "douchi",
+   "黑豆"
+  ],
+  "black_beans": [
+   "black turtle beans",
+   "frijoles negros",
+   "douchi",
+   "黑豆"
+  ],
+  "black_eyed_peas": [
+   "cowpeas",
+   "black-eyed beans",
+   "lobia",
+   "chau dou"
+  ],
+  "black_pepper": [
+   "pepper",
+   "ground black pepper",
+   "black peppercorns",
+   "胡椒粉"
+  ],
+  "black_vinegar": [
+   "chinkiang vinegar",
+   "Chinese black rice vinegar",
+   "镇江香醋"
+  ],
+  "blackberry": [
+   "bramble",
+   "blackberries",
+   "blackberries fruit"
+  ],
+  "blue_cheese": [
+   "blue cheese",
+   "blue mold cheese",
+   "Roquefort",
+   "Stilton"
+  ],
+  "blueberry": [
+   "blueberries",
+   "bilberry",
+   "blueberry fruit"
+  ],
+  "bok_choy": [
+   "pak choy",
+   "pok choi",
+   "Chinese cabbage",
+   "小白菜"
+  ],
+  "bonito_flakes": [
+   "katsuobushi",
+   "dried bonito flakes",
+   "bonito shavings",
+   "柴鱼片"
+  ],
+  "bouillon": [
+   "stock cube",
+   "bouillon cube",
+   "stock tablet",
+   "汤块"
+  ],
+  "bourbon": [
+   "whiskey",
+   "whisky",
+   "Bourbon whiskey"
+  ],
+  "brandy": [
+   "cognac",
+   "fruit brandy",
+   "wine spirit"
+  ],
+  "bread": [
+   "loaf bread",
+   "white bread",
+   "bread loaf",
+   "pane"
+  ],
+  "bread_flour": [
+   "strong flour",
+   "high-gluten flour",
+   "breadmaking flour"
+  ],
+  "bread_mix": [
+   "bread flour mix",
+   "breadmaker mix",
+   "bread baking mix"
+  ],
+  "breadcrumbs": [
+   "bread crumbs",
+   "crumbs",
+   "panko",
+   "grated bread"
+  ],
+  "broccoli": [
+   "broccoli florets",
+   "calabrese",
+   "broccoli crown"
+  ],
+  "broccoli_slaw": [
+   "broccoli slaw mix",
+   "broccoli salad mix",
+   "shredded broccoli stems and carrots"
+  ],
+  "broth": [
+   "stock",
+   "soup stock",
+   "bouillon",
+   "broth stock"
+  ],
+  "broth_tomato_juice": [
+   "tomato juice",
+   "tomato juice drink"
+  ],
+  "brown_rice": [
+   "wholegrain rice",
+   "unpolished rice",
+   "red rice",
+   "玄米"
+  ],
+  "brown_rice_flour": [
+   "brown rice powder",
+   "wholegrain rice flour",
+   "玄米粉"
+  ],
+  "brown_sugar": [
+   "soft brown sugar",
+   "dark brown sugar",
+   "light brown sugar",
+   "demerara sugar"
+  ],
+  "brussels_sprouts": [
+   "Brussels sprouts",
+   "mini cabbages",
+   "芽甘蓝"
+  ],
+  "buckwheat": [
+   "soba flour",
+   "kasha",
+   "buckwheat groats",
+   "荞麦"
+  ],
+  "bulgur": [
+   "burghul",
+   "bulghur",
+   "cracked wheat",
+   "bulgur wheat"
+  ],
+  "burdock_root": [
+   "gobo",
+   "burdock",
+   "burdock carrot",
+   "牛蒡"
+  ],
+  "butter": [
+   "unsalted butter",
+   "salted butter",
+   "sweet butter",
+   "牛油"
+  ],
+  "butter_or_margarine": [
+   "butter or margarine spread",
+   "butter/margarine",
+   "butter or margarine"
+  ],
+  "butter_or_veg_oil": [
+   "butter or vegetable oil",
+   "butter or oil",
+   "油脂"
+  ],
+  "buttered_breadcrumbs": [
+   "buttered bread crumbs",
+   "fried breadcrumbs",
+   "buttered crumbs"
+  ],
+  "buttermilk": [
+   "cultured buttermilk",
+   "churned milk",
+   "酪乳"
+  ],
+  "buttermilk_or_sour_milk": [
+   "buttermilk or sour milk",
+   "soured milk",
+   "酸牛奶"
+  ],
+  "butternut_squash": [
+   "butternut pumpkin",
+   "butternut gourd",
+   "gramma",
+   "胡桃南瓜"
+  ],
+  "butterscotch_chips": [
+   "butterscotch morsels",
+   "butterscotch baking chips",
+   "butterscotch bits"
+  ],
+  "cabbage": [
+   "head cabbage",
+   "Chinese cabbage",
+   "绿甘蓝"
+  ],
+  "cajun_seasoning": [
+   "Cajun spice",
+   "Cajun rub",
+   "Cajun seasoning blend"
+  ],
+  "cake_flour": [
+   "soft wheat flour",
+   "fine flour",
+   "低筋面粉"
+  ],
+  "calamansi": [
+   "calamondin",
+   "Philippine lime",
+   "limau kasturi",
+   "四季桔"
+  ],
+  "canned_tomato": [
+   "no-salt-added canned tomatoes",
+   "tinned tomatoes no salt added",
+   "canned whole tomatoes"
+  ],
+  "canned_tomatoes": [
+   "tinned tomatoes",
+   "canned whole tomatoes",
+   "canned chopped tomatoes"
+  ],
+  "canned_tuna": [
+   "tuna in water",
+   "canned tuna in water",
+   "tuna chunks in water"
+  ],
+  "cannellini": [
+   "white kidney beans",
+   "cannellini beans",
+   "faseoli cannellini"
+  ],
+  "cantaloupe": [
+   "rockmelon",
+   "muskmelon",
+   "哈密瓜"
+  ],
+  "capers": [
+   "caper berries",
+   "pickled caper buds",
+   "caper buds"
+  ],
+  "caramel": [
+   "caramel sauce",
+   "toffee",
+   "caramel syrup"
+  ],
+  "caraway": [
+   "caraway seed",
+   "caraway seeds",
+   "kummel"
+  ],
+  "cardamom": [
+   "green cardamom",
+   "cardamom pods",
+   "elaichi",
+   "豆蔻"
+  ],
+  "carrot": [
+   "carrots",
+   "carotte",
+   "红萝卜"
+  ],
+  "cashew": [
+   "cashew nuts",
+   "cashews",
+   "cashew nut"
+  ],
+  "cassava": [
+   "manioc",
+   "yuca",
+   "tapioca root",
+   "木薯"
+  ],
+  "catfish": [
+   "catfish fillet",
+   "freshwater catfish",
+   "鲶鱼"
+  ],
+  "cauliflower": [
+   "cauli",
+   "flowering cabbage",
+   "花椰菜"
+  ],
+  "cayenne": [
+   "cayenne pepper",
+   "red pepper",
+   "capsicum pepper",
+   "辣椒粉"
+  ],
+  "celeriac": [
+   "celery root",
+   "knob celery"
+  ],
+  "celery": [
+   "stalk celery",
+   "celery stalk"
+  ],
+  "celery_salt": [
+   "celery seasoning"
+  ],
+  "celery_seed": [
+   "celery seeds"
+  ],
+  "celery_soup": [
+   "cream of celery soup"
+  ],
+  "cellophane_noodles": [
+   "glass noodles",
+   "bean thread noodles",
+   "mung bean vermicelli",
+   "fensi",
+   "粉丝"
+  ],
+  "cereal_cornflake": [
+   "corn flakes",
+   "cornflake cereal"
+  ],
+  "cereal_rice": [
+   "rice crispies",
+   "crispy rice cereal",
+   "puffed rice cereal"
+  ],
+  "chayote": [
+   "sayote",
+   "mirliton",
+   "vegetable pear",
+   "choko",
+   "佛手瓜"
+  ],
+  "cheddar": [
+   "cheddar cheese"
+  ],
+  "cheese": [
+   "cheese",
+   "natural cheese"
+  ],
+  "cheese_soup": [
+   "cheddar cheese soup"
+  ],
+  "cheese_tortellini": [
+   "cheese tortellonis",
+   "cheese-filled tortellini"
+  ],
+  "cherry": [
+   "sweet cherry",
+   "sakura cherry",
+   "樱桃"
+  ],
+  "cherry_tomato": [
+   "cherry tomatoes",
+   "grape tomatoes"
+  ],
+  "chia": [
+   "chia seeds"
+  ],
+  "chicken": [
+   "poultry",
+   "hen"
+  ],
+  "chicken_breast": [
+   "chicken breasts",
+   "breast of chicken"
+  ],
+  "chicken_broth": [
+   "chicken stock",
+   "chicken bouillon"
+  ],
+  "chicken_or_turkey": [
+   "chicken or turkey meat"
+  ],
+  "chicken_or_veg_broth": [
+   "chicken or vegetable broth",
+   "chicken or veg stock"
+  ],
+  "chicken_soup": [
+   "cream of chicken soup"
+  ],
+  "chicken_thigh": [
+   "chicken thighs"
+  ],
+  "chicken_wings": [
+   "chicken wing sections",
+   "wings"
+  ],
+  "chickpea": [
+   "garbanzo bean",
+   "garbanzo",
+   "Bengal gram",
+   "chana",
+   "鹰嘴豆"
+  ],
+  "chickpea_flour": [
+   "gram flour",
+   "garbanzo bean flour",
+   "besan",
+   "chickpea meal",
+   "鹰嘴豆粉"
+  ],
+  "chili_garlic_sauce": [
+   "chilli garlic sauce",
+   "chili garlic paste"
+  ],
+  "chili_oil": [
+   "chilli oil",
+   "hot chili oil"
+  ],
+  "chili_paste": [
+   "chilli paste",
+   "hot chili paste"
+  ],
+  "chili_pepper": [
+   "chilli pepper",
+   "hot pepper",
+   "chile pepper",
+   "辣椒"
+  ],
+  "chili_powder": [
+   "chilli powder",
+   "chile powder"
+  ],
+  "chili_sauce": [
+   "chilli sauce",
+   "hot chili sauce"
+  ],
+  "chinese_five_spice": [
+   "five-spice powder",
+   "五香粉"
+  ],
+  "chipotle_in_adobo": [
+   "chipotles in adobo sauce",
+   "chipotle peppers in adobo"
+  ],
+  "chipotle_pepper": [
+   "chipotle chile",
+   "smoked jalapeño",
+   "smoked jalapeno"
+  ],
+  "chipped_beef": [
+   "dried beef",
+   "sliced dried beef"
+  ],
+  "chives": [
+   "spring onion greens",
+   "green onion tops",
+   "韭菜"
+  ],
+  "chocolate_chips": [
+   "chocolate chips",
+   "choc chips"
+  ],
+  "chocolate_syrup": [
+   "chocolate sauce",
+   "chocolate topping"
+  ],
+  "chorizo": [
+   "Spanish sausage",
+   "chouriço",
+   "longganisa"
+  ],
+  "chow_mein_noodles": [
+   "chow mein",
+   "fried chow mein noodles"
+  ],
+  "chutney": [
+   "pickle relish",
+   "Indian relish"
+  ],
+  "cider_vinegar": [
+   "apple cider vinegar",
+   "cider vinegar"
+  ],
+  "cilantro": [
+   "coriander leaves",
+   "fresh coriander",
+   "coriander",
+   "香菜"
+  ],
+  "cinnamon": [
+   "cinnamon bark",
+   "桂皮"
+  ],
+  "clam": [
+   "shell clam",
+   "sea clam"
+  ],
+  "clam_juice": [
+   "clam liquor",
+   "clam broth"
+  ],
+  "cloves_spice": [
+   "clove",
+   "whole cloves",
+   "丁香"
+  ],
+  "club_soda": [
+   "soda water",
+   "carbonated water"
+  ],
+  "cocoa": [
+   "cocoa powder",
+   "unsweetened cocoa"
+  ],
+  "coconut": [
+   "coco nut",
+   "椰子"
+  ],
+  "coconut_cream": [
+   "cream of coconut",
+   "coconut cream concentrate"
+  ],
+  "coconut_extract": [
+   "coconut essence"
+  ],
+  "coconut_flavoring": [
+   "coconut essence",
+   "coconut flavouring"
+  ],
+  "coconut_flour": [
+   "desiccated coconut flour"
+  ],
+  "coconut_milk": [
+   "coconut cream diluted",
+   "椰浆"
+  ],
+  "coconut_oil": [
+   "coconut butter",
+   "copra oil"
+  ],
+  "coconut_sugar": [
+   "palm sugar",
+   "coconut palm sugar"
+  ],
+  "coconut_water": [
+   "coconut juice",
+   "椰水"
+  ],
+  "cod": [
+   "codfish",
+   "Atlantic cod"
+  ],
+  "coffee": [
+   "kopi",
+   "coffee powder",
+   "ground coffee",
+   "instant coffee",
+   "brewed coffee"
+  ],
+  "cola": [
+   "coke",
+   "soft drink",
+   "soda",
+   "carbonated drink"
+  ],
+  "coleslaw": [
+   "slaw",
+   "cole slaw",
+   "cabbage slaw"
+  ],
+  "coleslaw_mix": [
+   "slaw mix",
+   "cabbage slaw mix"
+  ],
+  "collard": [
+   "collard greens",
+   "collards"
+  ],
+  "condensed_milk": [
+   "sweetened condensed milk",
+   "condensed milk",
+   "milkmaid milk"
+  ],
+  "cooked_chicken": [
+   "cooked chicken",
+   "cooked chicken meat",
+   "shredded chicken",
+   "rotisserie chicken"
+  ],
+  "cooking_spray": [
+   "non-stick spray",
+   "cooking oil spray"
+  ],
+  "coriander": [
+   "cilantro",
+   "Chinese parsley",
+   "fresh coriander",
+   "dhania"
+  ],
+  "corn": [
+   "sweet corn",
+   "maize",
+   "jagung",
+   "玉米"
+  ],
+  "corn_flour_masa": [
+   "masa harina",
+   "masa flour",
+   "corn masa flour"
+  ],
+  "corn_syrup": [
+   "glucose syrup",
+   "corn glucose",
+   "maize syrup"
+  ],
+  "corned_beef": [
+   "salt beef",
+   "corn beef"
+  ],
+  "cornish_hen": [
+   "rock cornish hen",
+   "Cornish game hen"
+  ],
+  "cornmeal": [
+   "maize meal",
+   "corn flour",
+   "polenta"
+  ],
+  "cornstarch": [
+   "corn flour",
+   "maize starch"
+  ],
+  "cottage_cheese": [
+   "curd cheese",
+   "paneer"
+  ],
+  "couscous": [
+   "cous cous"
+  ],
+  "crab": [
+   "crab meat",
+   "kani",
+   "kepiting",
+   "螃蟹"
+  ],
+  "cracker_crumbs": [
+   "cracker crumbs",
+   "crushed crackers",
+   "cracker meal"
+  ],
+  "cranberry": [
+   "cranberries"
+  ],
+  "cranberry_juice": [
+   "cranberry juice drink",
+   "cranberry drink"
+  ],
+  "cream": [
+   "fresh cream",
+   "single cream",
+   "whipping cream",
+   "light cream"
+  ],
+  "cream_cheese": [
+   "Philadelphia cream cheese",
+   "cheese spread"
+  ],
+  "cream_liqueur": [
+   "Irish cream",
+   "cream liqueur"
+  ],
+  "cream_of_tartar": [
+   "cream of tartar",
+   "potassium bitartrate",
+   "cream of tartare"
+  ],
+  "creamed_corn": [
+   "cream-style corn",
+   "cream style sweet corn"
+  ],
+  "creme_fraiche": [
+   "crème fraîche",
+   "creme fraiche",
+   "soured cream"
+  ],
+  "crepe": [
+   "crêpe",
+   "pancake"
+  ],
+  "crickets": [
+   "edible crickets",
+   "field crickets"
+  ],
+  "croutons": [
+   "bread croutons",
+   "crouton cubes"
+  ],
+  "crystallized_ginger": [
+   "candied ginger",
+   "ginger candy",
+   "glacé ginger"
+  ],
+  "cucumber": [
+   "cucumbers",
+   "Japanese cucumber",
+   "timun",
+   "黄瓜"
+  ],
+  "cucumber_pickle": [
+   "pickle",
+   "pickled cucumber",
+   "gherkin"
+  ],
+  "cumin": [
+   "cumin seed",
+   "jeera",
+   "jintan putih"
+  ],
+  "currant": [
+   "currants",
+   "black currant",
+   "red currant"
+  ],
+  "curry_leaf": [
+   "kari leaves",
+   "curry leaves",
+   "daun kari"
+  ],
+  "curry_paste": [
+   "curry paste",
+   "kari paste"
+  ],
+  "curry_powder": [
+   "curry powder",
+   "kari powder"
+  ],
+  "curry_sauce": [
+   "curry gravy",
+   "kari sauce"
+  ],
+  "daikon": [
+   "mooli",
+   "lobak putih",
+   "白萝卜"
+  ],
+  "dark_chocolate": [
+   "bittersweet chocolate",
+   "dark cooking chocolate"
+  ],
+  "dashi": [
+   "dashi stock",
+   "fish stock"
+  ],
+  "dashida": [
+   "Dashida"
+  ],
+  "date": [
+   "dates",
+   "date fruit",
+   "kurma",
+   "椰枣"
+  ],
+  "dijon": [
+   "Dijon mustard",
+   "mustard"
+  ],
+  "dill": [
+   "dill weed",
+   "dill leaves"
+  ],
+  "dill_seed": [
+   "dill seeds"
+  ],
+  "dinner_roll": [
+   "bread roll",
+   "roll bun",
+   "dinner bun"
+  ],
+  "doenjang": [
+   "soybean paste",
+   "fermented soybean paste"
+  ],
+  "dried_fruit": [
+   "mixed dried fruit",
+   "assorted dried fruit"
+  ],
+  "dried_mushroom": [
+   "dried mushrooms",
+   "dehydrated mushrooms"
+  ],
+  "dried_onion_flakes": [
+   "onion flakes",
+   "dehydrated onion flakes"
+  ],
+  "dried_shiitake": [
+   "dried shiitake mushroom",
+   "dried shiitakes",
+   "xiang gu"
+  ],
+  "dry_mustard": [
+   "mustard powder",
+   "mustard flour"
+  ],
+  "duck": [
+   "duck meat",
+   "ducking"
+  ],
+  "durian": [
+   "durian fruit",
+   "tempoyak"
+  ],
+  "edamame": [
+   "soybeans in pods",
+   "edamame beans"
+  ],
+  "egg": [
+   "hen egg",
+   "chicken egg",
+   "eggs",
+   "telur",
+   "蛋"
+  ],
+  "egg_noodles": [
+   "egg noodles",
+   "chow mein noodles",
+   "mee telur"
+  ],
+  "egg_substitute": [
+   "egg replacer",
+   "egg replacement",
+   "egg alternative"
+  ],
+  "egg_white": [
+   "egg albumen",
+   "albumen"
+  ],
+  "egg_yolk": [
+   "egg yolk",
+   "yolk",
+   "egg yellow"
+  ],
+  "eggnog": [
+   "egg nog",
+   "eggnog drink"
+  ],
+  "eggplant": [
+   "aubergine",
+   "brinjal",
+   "terong"
+  ],
+  "enchilada_sauce": [],
+  "english_muffin": [],
+  "evaporated_milk": [
+   "unsweetened condensed milk"
+  ],
+  "falafel": [],
+  "fava_bean": [
+   "fava bean",
+   "broad bean",
+   "faba bean",
+   "petai Belanda"
+  ],
+  "fennel": [
+   "fennel bulb",
+   "sweet fennel",
+   "shui qin"
+  ],
+  "fennel_seed": [
+   "anise seed",
+   "saunf",
+   "hui xiang"
+  ],
+  "fenugreek": [
+   "methi",
+   "fenugreek seed",
+   "kelabat"
+  ],
+  "fenugreek_leaf": [
+   "methi leaves",
+   "fenugreek leaves",
+   "daun kari?"
+  ],
+  "fermented_soybeans": [
+   "fermented soybeans",
+   "fermented soybean",
+   "douchi",
+   "tauchu"
+  ],
+  "feta": [
+   "feta cheese"
+  ],
+  "fig": [
+   "common fig",
+   "edible fig"
+  ],
+  "firm_tofu": [
+   "firm tofu",
+   "hard tofu",
+   "tau kwa",
+   "tauhu keras",
+   "dou fu"
+  ],
+  "fish_broth": [
+   "fish stock",
+   "fish soup stock"
+  ],
+  "fish_cake": [
+   "fish paste cake",
+   "fish ball cake"
+  ],
+  "fish_fillet": [
+   "fish filet",
+   "filleted fish"
+  ],
+  "fish_oil": [
+   "fish liver oil"
+  ],
+  "fish_sauce": [
+   "fish sauce",
+   "fish sauce seasoning",
+   "nam pla",
+   "nuoc mam"
+  ],
+  "flax": [
+   "flaxseed",
+   "linseed"
+  ],
+  "flour": [
+   "plain flour",
+   "all purpose flour"
+  ],
+  "food_coloring": [
+   "food colouring",
+   "food dye",
+   "coloring"
+  ],
+  "french_fried_onions": [
+   "fried onion flakes",
+   "crispy fried onions"
+  ],
+  "french_fries": [
+   "chips",
+   "fries"
+  ],
+  "frozen_bread_dough": [
+   "bread dough",
+   "frozen dough"
+  ],
+  "fruit": [
+   "fresh fruit"
+  ],
+  "fruit_pie_filling": [
+   "pie filling",
+   "fruit filling"
+  ],
+  "gai_lan": [
+   "Chinese broccoli",
+   "kailan",
+   "kai lan"
+  ],
+  "galangal": [
+   "blue ginger",
+   "lengkuas",
+   "laos"
+  ],
+  "garam_masala": [
+   "garam masala spice mix"
+  ],
+  "garlic": [
+   "allium sativum"
+  ],
+  "garlic_powder": [
+   "garlic granules"
+  ],
+  "garlic_salt": [
+   "garlic seasoning salt"
+  ],
+  "gelatin": [
+   "gelatine",
+   "jelly powder"
+  ],
+  "ghee": [
+   "clarified butter",
+   "ghi"
+  ],
+  "ginger": [
+   "fresh ginger",
+   "ginger root",
+   "halia"
+  ],
+  "ginger_ale": [
+   "ginger soda"
+  ],
+  "ginger_cordial": [
+   "ginger cordial drink"
+  ],
+  "ginger_garlic": [
+   "ginger garlic paste",
+   "ginger-garlic paste"
+  ],
+  "ginkgo_nut": [
+   "ginkgo nut",
+   "ginkgo seed",
+   "yin xing"
+  ],
+  "glutinous_rice": [
+   "sticky rice",
+   "sweet rice",
+   "pulut"
+  ],
+  "gnocchi": [],
+  "goat": [
+   "goat meat",
+   "chevon",
+   "mutton"
+  ],
+  "goat_cheese": [
+   "chèvre",
+   "chevre"
+  ],
+  "gochugaru": [
+   "Korean chili flakes",
+   "korean red pepper flakes"
+  ],
+  "gochujang": [
+   "Korean chili paste",
+   "korean red pepper paste"
+  ],
+  "gochujang_sauce": [
+   "gochujang sauce",
+   "korean chili sauce"
+  ],
+  "golden_syrup": [
+   "light treacle",
+   "invert syrup"
+  ],
+  "grand_marnier": [
+   "orange liqueur"
+  ],
+  "grape": [
+   "table grape"
+  ],
+  "grape_juice": [
+   "grape juice"
+  ],
+  "grape_leaves": [
+   "grape leaf",
+   "vine leaf"
+  ],
+  "grapefruit": [
+   "pomelo grapefruit",
+   "shaddock"
+  ],
+  "grapefruit_juice": [
+   "grapefruit juice"
+  ],
+  "grapeseed_oil": [
+   "grape seed oil"
+  ],
+  "gravy": [],
+  "gravy_mix": [
+   "brown gravy powder",
+   "gravy powder",
+   "gravy granules"
+  ],
+  "greek_yogurt": [
+   "Greek-style yogurt",
+   "strained yogurt",
+   "yoghurt cheese"
+  ],
+  "green_beans": [
+   "string beans",
+   "snap beans",
+   "French beans",
+   "haricots verts"
+  ],
+  "green_chili": [
+   "green chile",
+   "green chilli",
+   "chili pepper",
+   "chilli pepper"
+  ],
+  "green_onion": [
+   "spring onion",
+   "scallion",
+   "shallot",
+   "daun bawang",
+   "葱"
+  ],
+  "green_papaya": [
+   "raw papaya",
+   "unripe papaya",
+   "青木瓜"
+  ],
+  "grits": [
+   "corn grits",
+   "hominy grits"
+  ],
+  "ground_beef": [
+   "minced beef",
+   "beef mince",
+   "minced meat",
+   "hamburger meat"
+  ],
+  "ground_cumin": [
+   "cumin powder",
+   "cumin"
+  ],
+  "ground_pork": [
+   "minced pork",
+   "pork mince"
+  ],
+  "gruyere": [
+   "Gruyère",
+   "Gruyere cheese"
+  ],
+  "guava": [
+   "guayava",
+   "芭乐",
+   "番石榴"
+  ],
+  "gyoza": [
+   "pot sticker",
+   "potsticker",
+   "jiaozi",
+   "dumpling"
+  ],
+  "habanero_pepper": [
+   "habanero",
+   "habanero chili",
+   "habanero chilli"
+  ],
+  "hake": [
+   "merluza"
+  ],
+  "half_and_half": [
+   "coffee cream",
+   "light cream",
+   "single cream"
+  ],
+  "halibut": [
+   "Pacific halibut",
+   "Atlantic halibut"
+  ],
+  "halloumi": [
+   "haloumi",
+   "hallumi"
+  ],
+  "ham": [
+   "cooked ham",
+   "cured ham",
+   "ham leg"
+  ],
+  "hamburger_bun": [
+   "burger bun",
+   "hamburger roll"
+  ],
+  "harissa": [
+   "harissa paste",
+   "harissa sauce"
+  ],
+  "hash_brown": [
+   "hash browns",
+   "hash brown potatoes",
+   "hashed brown potatoes"
+  ],
+  "hazelnut": [
+   "filbert",
+   "cobnut"
+  ],
+  "herbes_de_provence": [
+   "Herb de Provence",
+   "Provence herbs"
+  ],
+  "hoisin": [
+   "hoisin sauce",
+   "seafood sauce"
+  ],
+  "hominy": [
+   "corn hominy",
+   "white hominy"
+  ],
+  "honey": [
+   "bee honey"
+  ],
+  "horseradish": [
+   "horseradish root",
+   "prepared horseradish",
+   "wasabi"
+  ],
+  "hot_dog": [
+   "frankfurter",
+   "wiener",
+   "sausage"
+  ],
+  "hot_dog_bun": [
+   "frankfurter bun",
+   "sausage bun",
+   "hot dog roll"
+  ],
+  "hot_sauce": [
+   "chili sauce",
+   "chilli sauce",
+   "pepper sauce"
+  ],
+  "ice": [
+   "ice cubes"
+  ],
+  "ice_cream": [
+   "vanilla icecream",
+   "vanilla gelato"
+  ],
+  "imitation_crab": [
+   "crab sticks",
+   "surimi",
+   "kanikama"
+  ],
+  "instant_coffee": [
+   "soluble coffee",
+   "freeze-dried coffee",
+   "coffee powder"
+  ],
+  "instant_mashed_potato": [
+   "instant mashed potatoes",
+   "mashed potato flakes",
+   "potato flakes"
+  ],
+  "italian_dressing": [
+   "Italian salad dressing"
+  ],
+  "italian_seasoning": [
+   "Italian herbs",
+   "mixed Italian herbs"
+  ],
+  "jackfruit": [
+   "jakfruit",
+   "nangka"
+  ],
+  "jaggery": [
+   "gur",
+   "gula melaka",
+   "gula jawa"
+  ],
+  "jalapeno": [
+   "jalapeño",
+   "jalapeño pepper"
+  ],
+  "jam": [
+   "fruit spread",
+   "preserve"
+  ],
+  "jasmine_flavoring": [
+   "jasmine essence",
+   "jasmine extract"
+  ],
+  "jerk_seasoning": [
+   "jerk spice",
+   "jerk rub"
+  ],
+  "jicama": [
+   "yam bean",
+   "turnip yam",
+   "mexican turnip"
+  ],
+  "kabocha": [
+   "Japanese pumpkin",
+   "kabocha squash",
+   "kabocha pumpkin"
+  ],
+  "kaffir_lime_leaf": [
+   "makrut lime leaf",
+   "lime leaf",
+   "lemon leaf"
+  ],
+  "kahlua": [
+   "Kahlúa",
+   "coffee liqueur"
+  ],
+  "kale": [
+   "curly kale",
+   "Tuscan kale",
+   "cavolo nero"
+  ],
+  "kecap_manis": [
+   "ketjap manis",
+   "sweet soy sauce",
+   "kicap manis"
+  ],
+  "ketchup": [
+   "tomato ketchup",
+   "catsup"
+  ],
+  "kidney_beans": [
+   "red kidney beans"
+  ],
+  "kimchi": [
+   "kimchee"
+  ],
+  "kirsch": [
+   "kirschwasser",
+   "cherry brandy"
+  ],
+  "kitchen_bouquet": [
+   "browning sauce",
+   "brown sauce"
+  ],
+  "kiwi": [
+   "kiwifruit",
+   "Chinese gooseberry"
+  ],
+  "laksa_paste": [
+   "laksa curry paste",
+   "laksa chili paste"
+  ],
+  "lamb": [
+   "mutton"
+  ],
+  "lamb_chop": [
+   "lamb chop steak"
+  ],
+  "lard": [
+   "pork fat",
+   "rendered pork fat",
+   "pig fat"
+  ],
+  "leek": [
+   "spring onion",
+   "scallion",
+   "green onion",
+   "daffodil onion",
+   "porro"
+  ],
+  "lemon": [
+   "citron"
+  ],
+  "lemon_extract": [],
+  "lemon_juice": [
+   "lemon juice concentrate"
+  ],
+  "lemon_lime_soda": [
+   "lemon-lime soft drink",
+   "lime-lemon soda",
+   "citrus soda"
+  ],
+  "lemon_pepper": [
+   "lemon pepper seasoning",
+   "lemon and black pepper seasoning"
+  ],
+  "lemon_zest": [
+   "lemon rind",
+   "lemon peel",
+   "lemon skin"
+  ],
+  "lemonade": [
+   "lemon squash",
+   "lemon cordial",
+   "lemonade concentrate"
+  ],
+  "lemongrass": [
+   "sereh",
+   "serai",
+   "tanglad",
+   "citronella grass"
+  ],
+  "lentil": [
+   "lentils",
+   "masoor",
+   "masoor dal"
+  ],
+  "lettuce": [
+   "salad greens",
+   "leaf lettuce"
+  ],
+  "lima_beans": [
+   "butter beans",
+   "butter bean",
+   "sie va dau",
+   "four-season beans"
+  ],
+  "lime": [
+   "calamansi",
+   "calamondin",
+   "limau nipis",
+   "suan mei",
+   "green lemon"
+  ],
+  "lime_juice": [
+   "lime juice concentrate"
+  ],
+  "lime_zest": [
+   "lime rind",
+   "lime peel",
+   "lime skin"
+  ],
+  "liquid_smoke": [],
+  "liver": [
+   "beef liver",
+   "pork liver",
+   "chicken liver"
+  ],
+  "lobster": [
+   "crayfish"
+  ],
+  "long_grain_wild_rice_mix": [
+   "wild rice mix"
+  ],
+  "lychee": [
+   "litchi",
+   "lichee",
+   "laici",
+   "leechee"
+  ],
+  "lye_water": [
+   "alkaline water",
+   "kansui",
+   "lye solution"
+  ],
+  "mac_and_cheese": [
+   "macaroni and cheese",
+   "mac n cheese"
+  ],
+  "macadamia_nut": [
+   "macadamia"
+  ],
+  "macaroni": [
+   "macaroni pasta"
+  ],
+  "mace": [
+   "mace blade"
+  ],
+  "mango": [
+   "mangga"
+  ],
+  "maple_syrup": [
+   "maple sugar syrup"
+  ],
+  "margarine": [
+   "spread"
+  ],
+  "marinara": [
+   "marinara sauce",
+   "tomato sauce"
+  ],
+  "marjoram": [
+   "sweet marjoram"
+  ],
+  "marshmallow": [
+   "marshmallows"
+  ],
+  "mascarpone": [
+   "mascarpone cheese"
+  ],
+  "mashed_potatoes": [
+   "mash potatoes",
+   "potato mash"
+  ],
+  "matcha": [
+   "green tea powder"
+  ],
+  "mayo": [
+   "mayonnaise",
+   "mayo"
+  ],
+  "mayo_or_dressing": [
+   "mayonnaise",
+   "salad cream"
+  ],
+  "meat": [
+   "red meat",
+   "fresh meat"
+  ],
+  "meat_tenderizer": [
+   "meat tenderiser"
+  ],
+  "milk": [
+   "dairy milk"
+  ],
+  "milk_chocolate": [
+   "milk chocolate bar"
+  ],
+  "milk_or_cream": [
+   "milk",
+   "cream"
+  ],
+  "milk_or_water": [
+   "milk",
+   "water"
+  ],
+  "milkfish": [
+   "bangus",
+   "ikan bolu"
+  ],
+  "millet_flour": [
+   "foxtail millet flour"
+  ],
+  "mincemeat": [
+   "mincemeat filling"
+  ],
+  "mint": [
+   "spearmint"
+  ],
+  "mint_extract": [],
+  "mirin": [
+   "sweet rice wine"
+  ],
+  "miso": [
+   "soybean paste"
+  ],
+  "mixed_herbs": [
+   "mixed herbs seasoning",
+   "herb mix"
+  ],
+  "mixed_nuts": [
+   "nut mix",
+   "assorted nuts"
+  ],
+  "mixed_vegetables": [
+   "mixed veg",
+   "assorted vegetables"
+  ],
+  "molasses": [
+   "black treacle"
+  ],
+  "monterey_jack": [
+   "Monterey Jack cheese"
+  ],
+  "mozzarella": [
+   "mozzarella cheese"
+  ],
+  "msg": [
+   "monosodium glutamate",
+   "monosodium L-glutamate",
+   "vetsin"
+  ],
+  "mung_bean": [
+   "green gram",
+   "moong",
+   "moong bean"
+  ],
+  "mung_bean_starch": [
+   "mung bean flour",
+   "green gram starch"
+  ],
+  "mushroom": [
+   "mushrooms"
+  ],
+  "mushroom_soup": [
+   "cream of mushroom soup"
+  ],
+  "mussel": [
+   "mușchel",
+   "moules",
+   "mussel meat",
+   "淡菜",
+   "青口",
+   "贻贝"
+  ],
+  "mustard": [
+   "prepared mustard",
+   "table mustard",
+   "mustard sauce",
+   "芥末酱"
+  ],
+  "mustard_seed": [
+   "mustard seeds",
+   "芥菜籽",
+   "芥末籽"
+  ],
+  "nasi_goreng_spice_mix": [
+   "nasi goreng seasoning",
+   "fried rice spice mix",
+   "nasi goreng seasoning mix"
+  ],
+  "nori": [
+   "dried seaweed",
+   "laver",
+   "海苔",
+   "紫菜"
+  ],
+  "nuoc_cham": [
+   "nước chấm",
+   "Vietnamese dipping sauce",
+   "越南鱼露蘸酱"
+  ],
+  "nutella": [
+   "chocolate hazelnut spread",
+   "hazelnut cocoa spread"
+  ],
+  "nutmeg": [
+   "nutmeg spice",
+   "肉豆蔻",
+   "肉豆蔻果"
+  ],
+  "oat_bran": [
+   "oat bran flakes",
+   "oat bran meal",
+   "麸皮燕麦"
+  ],
+  "oats": [
+   "rolled oats",
+   "porridge oats",
+   "燕麦片",
+   "燕麦"
+  ],
+  "octopus": [
+   "squid",
+   "章鱼",
+   "八爪鱼"
+  ],
+  "okra": [
+   "lady's fingers",
+   "bhindi",
+   "羊角豆",
+   "秋葵"
+  ],
+  "old_bay": [
+   "Old Bay seasoning",
+   "seafood seasoning"
+  ],
+  "olive": [
+   "table olive",
+   "black olive",
+   "green olive",
+   "橄榄"
+  ],
+  "olive_oil": [
+   "extra virgin olive oil",
+   "virgin olive oil",
+   "橄榄油"
+  ],
+  "onion": [
+   "bulb onion",
+   "brown onion",
+   "洋葱"
+  ],
+  "onion_powder": [
+   "ground onion",
+   "onion granules"
+  ],
+  "onion_salt": [
+   "seasoned salt",
+   "salt and onion seasoning"
+  ],
+  "onion_soup_mix": [
+   "dry onion soup mix",
+   "onion soup powder"
+  ],
+  "opo_squash": [
+   "bottle gourd",
+   "calabash",
+   "蒲瓜",
+   "瓠瓜"
+  ],
+  "orange": [
+   "sweet orange",
+   "navel orange",
+   "橙子",
+   "橙"
+  ],
+  "orange_blossom": [
+   "orange flower water",
+   "orange blossom water"
+  ],
+  "orange_extract": [
+   "orange flavouring",
+   "orange flavoring"
+  ],
+  "orange_juice": [
+   "fresh orange juice",
+   "orange juice"
+  ],
+  "orange_juice_conc": [
+   "orange juice concentrate",
+   "concentrated orange juice"
+  ],
+  "orange_zest": [
+   "orange rind",
+   "grated orange peel",
+   "orange peel zest"
+  ],
+  "oregano": [
+   "oregano herb",
+   "野马郁兰"
+  ],
+  "orzo": [
+   "risoni",
+   "rice-shaped pasta"
+  ],
+  "oyster": [
+   "生蚝",
+   "蚝",
+   "牡蛎"
+  ],
+  "oyster_sauce": [
+   "蚝油",
+   "oyster-flavoured sauce"
+  ],
+  "palm_sugar": [
+   "gula melaka",
+   "gula jawa",
+   "棕榈糖",
+   "椰糖"
+  ],
+  "palmyra_fruit": [
+   "ice apple",
+   "toddy palm fruit",
+   "海底椰"
+  ],
+  "pancake_mix": [
+   "pancake batter mix",
+   "pancake flour mix"
+  ],
+  "pancetta": [
+   "Italian bacon",
+   "cured pork belly"
+  ],
+  "pancit_canton": [
+   "pancit canton noodles",
+   "egg noodles",
+   "炒面面条"
+  ],
+  "pandan_extract": [
+   "pandan flavouring",
+   "pandan flavoring"
+  ],
+  "pandan_juice": [
+   "pandan water",
+   "pandan extract juice"
+  ],
+  "pandan_leaf": [
+   "screwpine leaf",
+   "daun pandan",
+   "香兰叶"
+  ],
+  "pandan_paste": [
+   "pandan paste",
+   "pandan puree"
+  ],
+  "papaya": [
+   "pawpaw",
+   "木瓜"
+  ],
+  "paprika": [
+   "paprika powder",
+   "红椒粉"
+  ],
+  "parm_or_romano": [
+   "parmesan or romano cheese",
+   "grated hard cheese"
+  ],
+  "parmesan": [
+   "Parmigiano-Reggiano",
+   "parmesan cheese",
+   "帕玛森芝士"
+  ],
+  "parmesan_romano": [
+   "romano cheese",
+   "Pecorino Romano",
+   "罗马诺芝士"
+  ],
+  "parsley": [
+   "flat-leaf parsley",
+   "curly parsley",
+   "香芹"
+  ],
+  "parsnip": [
+   "white carrot",
+   "pastinake"
+  ],
+  "pasta": [
+   "noodles",
+   "Italian pasta",
+   "意大利面"
+  ],
+  "pastrami": [
+   "smoked beef brisket",
+   "cured beef"
+  ],
+  "pate": [
+   "pâté",
+   "meat spread",
+   "肝酱"
+  ],
+  "pea_shoots": [
+   "pea tendrils",
+   "pea sprouts",
+   "豆苗"
+  ],
+  "peach": [
+   "桃",
+   "水蜜桃"
+  ],
+  "peanut": [
+   "groundnut",
+   "monkey nut",
+   "花生"
+  ],
+  "peanut_butter": [
+   "groundnut butter",
+   "peanut spread",
+   "花生酱"
+  ],
+  "peanut_oil": [
+   "groundnut oil",
+   "peanut cooking oil",
+   "花生油"
+  ],
+  "peanut_sauce": [
+   "satay sauce",
+   "peanut dipping sauce",
+   "花生酱汁"
+  ],
+  "pear": [
+   "nashi pear",
+   "Asian pear",
+   "梨",
+   "雪梨"
+  ],
+  "pear_juice": [
+   "pear juice drink",
+   "梨汁"
+  ],
+  "peas": [
+   "green peas",
+   "garden peas",
+   "豌豆"
+  ],
+  "pecan": [
+   "pecan nuts",
+   "碧根果"
+  ],
+  "pecan_or_walnut": [
+   "pecan or walnut",
+   "mixed nuts"
+  ],
+  "peppercorn": [
+   "pepper",
+   "pepper berry",
+   "胡椒粒"
+  ],
+  "pepperoni": [],
+  "perilla": [
+   "shiso",
+   "Japanese basil",
+   "苏子叶",
+   "紫苏叶"
+  ],
+  "persimmon": [
+   "kaki",
+   "sharon fruit",
+   "柿子"
+  ],
+  "pesto": [],
+  "pho_spice": [
+   "phở spice",
+   "pho seasoning"
+  ],
+  "phyllo": [
+   "filo pastry",
+   "filo dough",
+   "fillo dough"
+  ],
+  "pickled_ginger": [
+   "gari",
+   "寿司姜",
+   "寿司姜片"
+  ],
+  "pickling_spice": [],
+  "pie_crust": [
+   "pastry crust"
+  ],
+  "pimento": [
+   "pimiento",
+   "red cherry pepper",
+   "red pepper"
+  ],
+  "pine_nut": [
+   "pignoli",
+   "pinoli",
+   "松子"
+  ],
+  "pineapple": [
+   "ananas",
+   "凤梨",
+   "黄梨"
+  ],
+  "pineapple_juice": [
+   "ananas juice",
+   "凤梨汁",
+   "黄梨汁"
+  ],
+  "pinto_beans": [
+   "pinto bean",
+   "speckled beans"
+  ],
+  "pistachio": [
+   "pistachio nut",
+   "开心果"
+  ],
+  "pita_bread": [
+   "pitta bread",
+   "pita"
+  ],
+  "pizza_crust": [
+   "pizza base",
+   "pizza dough"
+  ],
+  "pizza_sauce": [],
+  "plantain": [
+   "cooking banana",
+   "platano",
+   "大蕉"
+  ],
+  "plum": [
+   "ume",
+   "Japanese plum",
+   "李子"
+  ],
+  "plum_sauce": [
+   "Chinese plum sauce",
+   "sweet plum sauce"
+  ],
+  "plum_wine": [
+   "umeshu",
+   "Japanese plum wine"
+  ],
+  "pomegranate_molasses": [
+   "grenadine molasses"
+  ],
+  "pomegranate_seeds": [
+   "pomegranate arils",
+   "arils",
+   "石榴籽"
+  ],
+  "poppadam": [
+   "poppadom",
+   "papad",
+   "papadum"
+  ],
+  "poppy_seed": [
+   "poppy seeds",
+   "khashkhash",
+   "罂粟籽"
+  ],
+  "pork": [
+   "pig meat",
+   "豬肉",
+   "猪肉"
+  ],
+  "pork_belly": [
+   "belly pork",
+   "side pork",
+   "五花肉",
+   "三层肉"
+  ],
+  "pork_chop": [
+   "cutlet",
+   "pork cutlet",
+   "猪排",
+   "豬排"
+  ],
+  "pork_fatback": [
+   "fatback",
+   "salt pork fat",
+   "板油"
+  ],
+  "port": [
+   "port wine",
+   "Port"
+  ],
+  "potato": [
+   "spud",
+   "tuber",
+   "马铃薯",
+   "土豆"
+  ],
+  "potato_chip": [
+   "chips",
+   "crisps",
+   "potato crisps"
+  ],
+  "potato_starch": [
+   "potato flour",
+   "片粉",
+   "太白粉"
+  ],
+  "poultry_seasoning": [],
+  "powdered_milk": [
+   "milk powder",
+   "奶粉"
+  ],
+  "powdered_sugar": [
+   "icing sugar",
+   "confectioners' sugar",
+   "powdered icing sugar",
+   "糖粉"
+  ],
+  "preserved_lemon": [
+   "salted lemon",
+   "salt-preserved lemon"
+  ],
+  "prod_tomatillo": [
+   "tomatillo",
+   "green tomato"
+  ],
+  "prosciutto": [],
+  "provolone": [
+   "provolone cheese"
+  ],
+  "prune": [
+   "dried plum",
+   "prune plum",
+   "西梅"
+  ],
+  "puff_pastry": [
+   "puff pastry sheets",
+   "puff pastry dough"
+  ],
+  "pumpkin": [
+   "winter squash",
+   "kabocha",
+   "南瓜"
+  ],
+  "pumpkin_pie_spice": [],
+  "pumpkin_seed": [
+   "pepitas",
+   "pumpkin seeds",
+   "南瓜籽"
+  ],
+  "quail_egg": [
+   "quails' egg",
+   "鹌鹑蛋",
+   "鵪鶉蛋"
+  ],
+  "queso_fresco": [],
+  "quinoa": [],
+  "rabbit": [
+   "hare",
+   "兔肉"
+  ],
+  "radish": [
+   "daikon",
+   "mooli",
+   "白萝卜"
+  ],
+  "radish_sprouts": [
+   "daikon sprouts",
+   "mooli sprouts",
+   "萝卜苗"
+  ],
+  "raisin": [
+   "sultana",
+   "currant",
+   "葡萄干"
+  ],
+  "ramen": [
+   "ramen noodles",
+   "拉面",
+   "拉麵"
+  ],
+  "ranch_dressing": [],
+  "ranch_mix": [
+   "ranch seasoning",
+   "ranch dressing seasoning"
+  ],
+  "raspberry": [
+   "raspberries",
+   "red raspberry",
+   "树莓"
+  ],
+  "red_cabbage": [
+   "purple cabbage",
+   "紫甘蓝",
+   "紅椰菜"
+  ],
+  "red_lentil": [
+   "red lentils",
+   "masoor dal",
+   "红扁豆"
+  ],
+  "red_onion": [
+   "purple onion",
+   "red-skinned onion",
+   "red onions"
+  ],
+  "red_snapper": [
+   "snapper fish",
+   "red snapper fish",
+   "plain snapper"
+  ],
+  "red_wine": [
+   "table wine",
+   "red table wine",
+   "vino rosso"
+  ],
+  "red_wine_vinegar": [
+   "wine vinegar",
+   "red vinegar"
+  ],
+  "refried_beans": [
+   "frijoles refritos",
+   "refried pinto beans"
+  ],
+  "relish": [
+   "pickle relish",
+   "sweet pickle relish"
+  ],
+  "rhubarb": [
+   "forced rhubarb"
+  ],
+  "rice": [
+   "white rice",
+   "cooked rice",
+   "uncooked rice"
+  ],
+  "rice_cake": [
+   "tteok",
+   "rice cakes"
+  ],
+  "rice_flour": [
+   "rice powder",
+   "ground rice"
+  ],
+  "rice_noodles": [
+   "rice vermicelli",
+   "rice stick noodles",
+   "bee hoon",
+   "mee hoon"
+  ],
+  "rice_paper": [
+   "spring roll wrappers",
+   "rice paper wrappers"
+  ],
+  "rice_vinegar": [
+   "rice wine vinegar",
+   "rice wine vinegar seasoning"
+  ],
+  "rice_wine": [
+   "Chinese cooking wine",
+   "Shaoxing wine",
+   "Shao hsing wine",
+   "huangjiu",
+   "yellow rice wine"
+  ],
+  "ricotta": [
+   "ricotta cheese",
+   "Italian whey cheese"
+  ],
+  "roasted_red_pepper": [
+   "roasted peppers",
+   "charred red peppers"
+  ],
+  "rolled_oats": [
+   "old-fashioned oats",
+   "rolled oats cereal"
+  ],
+  "rose_water": [
+   "rosewater"
+  ],
+  "rosemary": [
+   "garden rosemary"
+  ],
+  "rotel": [
+   "diced tomatoes with green chilies"
+  ],
+  "rum": [
+   "white rum",
+   "dark rum",
+   "cane spirit"
+  ],
+  "rum_extract": [
+   "rum flavoring"
+  ],
+  "rutabaga": [
+   "swede",
+   "yellow turnip",
+   "neep"
+  ],
+  "rye_flour": [
+   "rye meal",
+   "ground rye"
+  ],
+  "saffron": [
+   "saffron threads"
+  ],
+  "sage": [
+   "common sage",
+   "garden sage"
+  ],
+  "sake": [
+   "Japanese rice wine",
+   "nihonshu"
+  ],
+  "salad_dressing": [
+   "vinaigrette",
+   "salad sauce"
+  ],
+  "salmon": [
+   "salmon fish"
+  ],
+  "salmon_fillet": [
+   "salmon filet",
+   "salmon steak"
+  ],
+  "salsa": [
+   "salsa sauce",
+   "pico de gallo"
+  ],
+  "salt": [
+   "table salt",
+   "sea salt"
+  ],
+  "salt_and_pepper": [
+   "salt-and-pepper seasoning"
+  ],
+  "salt_cod": [
+   "salted cod",
+   "bacalhau"
+  ],
+  "sambal_oelek": [
+   "sambal ulek",
+   "chili paste"
+  ],
+  "sardine": [
+   "sardines"
+  ],
+  "sauerkraut": [
+   "sour cabbage",
+   "fermented cabbage"
+  ],
+  "sausage": [
+   "link sausage",
+   "sausages"
+  ],
+  "scallop": [
+   "scallops"
+  ],
+  "scotch_bonnet": [
+   "Scotch bonnet chili",
+   "Scotch bonnet pepper"
+  ],
+  "seafood_mix": [
+   "mixed seafood",
+   "seafood medley"
+  ],
+  "seasoned_salt": [
+   "seasoning salt"
+  ],
+  "seaweed": [
+   "edible seaweed",
+   "laver",
+   "nori"
+  ],
+  "self_rising_flour": [
+   "self-raising flour",
+   "self-rising flour"
+  ],
+  "semolina_flour": [
+   "semolina semolina flour",
+   "semolina"
+  ],
+  "sesame_oil": [
+   "toasted sesame oil",
+   "gingelly oil"
+  ],
+  "sesame_seed": [
+   "sesame seeds",
+   "benne seed"
+  ],
+  "sesame_tahini": [
+   "tahini paste",
+   "sesame paste"
+  ],
+  "shallot": [
+   "eschallot",
+   "French shallot"
+  ],
+  "sherry": [
+   "dry sherry",
+   "sweet sherry"
+  ],
+  "sherry_vinegar": [
+   "sherry wine vinegar"
+  ],
+  "shirataki_noodles": [
+   "konjac noodles",
+   "yam noodles"
+  ],
+  "shortening": [
+   "vegetable shortening",
+   "Crisco"
+  ],
+  "shortening_or_oil": [
+   "shortening or vegetable oil",
+   "vegetable oil or shortening"
+  ],
+  "shrimp": [
+   "prawns",
+   "shrimp prawns"
+  ],
+  "shrimp_paste": [
+   "shrimp sauce",
+   "belacan",
+   "hae ko"
+  ],
+  "sinigang_mix": [
+   "sinigang soup base",
+   "tamarind soup mix"
+  ],
+  "smoked_haddock": [
+   "finnan haddie",
+   "smoked haddock fish"
+  ],
+  "snow_peas": [
+   "mangetout",
+   "pea pods"
+  ],
+  "soba_noodle": [
+   "buckwheat noodles",
+   "soba"
+  ],
+  "soba_noodles": [
+   "buckwheat noodles"
+  ],
+  "somyeon": [
+   "somen",
+   "somyeon noodles"
+  ],
+  "sorghum_flour": [
+   "jowar flour",
+   "great millet flour"
+  ],
+  "soup": [],
+  "sour_cream": [
+   "soured cream"
+  ],
+  "sour_cream_or_yogurt": [
+   "sour cream",
+   "yogurt",
+   "plain yogurt",
+   "natural yogurt"
+  ],
+  "sour_milk": [
+   "soured milk"
+  ],
+  "soy_sauce": [
+   "soya sauce",
+   "shoyu",
+   "soy sauce"
+  ],
+  "soybean": [
+   "soya bean",
+   "soy bean",
+   "edamame"
+  ],
+  "spaghetti_squash": [],
+  "spelt": [
+   "spelt wheat"
+  ],
+  "spinach": [],
+  "split_peas": [
+   "split green peas",
+   "split yellow peas"
+  ],
+  "squash": [
+   "courgette",
+   "zucchini",
+   "pumpkin"
+  ],
+  "squid": [
+   "calamari"
+  ],
+  "squid_broth": [],
+  "sriracha": [
+   "sriracha sauce"
+  ],
+  "star_fruit": [
+   "carambola"
+  ],
+  "steak_sauce": [],
+  "stir_fry_sauce": [
+   "stir fry sauce"
+  ],
+  "strawberry": [
+   "strawberries"
+  ],
+  "stuffing_mix": [
+   "stuffing mix powder"
+  ],
+  "sugar": [
+   "white sugar",
+   "caster sugar",
+   "granulated white sugar"
+  ],
+  "sugar_cane": [
+   "sugarcane"
+  ],
+  "sugar_snap_peas": [
+   "mangetout"
+  ],
+  "sugar_substitute": [
+   "sweetener",
+   "sugar replacement"
+  ],
+  "sumac": [
+   "sumac spice"
+  ],
+  "sun_dried_tomato": [
+   "sun-dried tomatoes",
+   "semi-dried tomato"
+  ],
+  "sunflower_oil": [
+   "sunflower seed oil"
+  ],
+  "sunflower_seed": [
+   "sunflower seeds"
+  ],
+  "sweet_chili_sauce": [
+   "sweet chilli sauce",
+   "thai sweet chili sauce"
+  ],
+  "sweet_potato": [
+   "yam",
+   "sweet yam"
+  ],
+  "sweet_potato_noodles": [
+   "glass noodles",
+   "dangmyeon"
+  ],
+  "sweet_sour_sauce": [
+   "sweet and sour sauce"
+  ],
+  "swiss_chard": [
+   "chard",
+   "silverbeet"
+  ],
+  "swiss_cheese": [
+   "Emmental",
+   "Emmentaler"
+  ],
+  "swordfish": [],
+  "syrup": [
+   "table syrup"
+  ],
+  "szechwan_pepper": [
+   "Sichuan pepper",
+   "Szechuan peppercorn"
+  ],
+  "taco_sauce": [],
+  "taco_seasoning": [
+   "taco seasoning mix"
+  ],
+  "taco_shell": [
+   "taco shells"
+  ],
+  "tamari": [
+   "tamari soy sauce"
+  ],
+  "tamarind": [
+   "tamarind paste"
+  ],
+  "tamarind_soup_base": [
+   "asam paste",
+   "tamarind paste"
+  ],
+  "tandoori_paste": [
+   "tandoori marinade"
+  ],
+  "tapai": [
+   "tapay",
+   "tapai ubi"
+  ],
+  "tapioca_flour": [
+   "tapioca starch",
+   "cassava starch"
+  ],
+  "tapioca_pearl": [
+   "sago pearls"
+  ],
+  "taro": [
+   "yam"
+  ],
+  "tarragon": [
+   "estragon"
+  ],
+  "tater_tots": [
+   "potato tots"
+  ],
+  "tea": [],
+  "teff_flour": [],
+  "tempeh": [],
+  "tempeh_starter": [],
+  "tequila": [],
+  "teriyaki": [
+   "teriyaki sauce"
+  ],
+  "thai_basil": [
+   "Thai holy basil"
+  ],
+  "thyme": [],
+  "tofu": [
+   "bean curd",
+   "tauhu",
+   "tau kwa",
+   "doufu",
+   "dòufu"
+  ],
+  "tom_yum_paste": [
+   "tomyam paste",
+   "nam prik pao"
+  ],
+  "tomato": [
+   "tomato fruit",
+   "love apple",
+   "番茄",
+   "西红柿"
+  ],
+  "tomato_paste": [
+   "tomato concentrate",
+   "tomato purée",
+   "番茄膏"
+  ],
+  "tomato_puree": [
+   "tomato purée",
+   "passata",
+   "番茄泥"
+  ],
+  "tomato_sauce": [
+   "pasta sauce",
+   "spaghetti sauce",
+   "番茄酱"
+  ],
+  "tomato_soup": [
+   "cream of tomato soup",
+   "condensed tomato soup",
+   "番茄浓汤"
+  ],
+  "toor_dal": [
+   "arhar dal",
+   "split pigeon peas",
+   "tuvar dal",
+   "toor dhal"
+  ],
+  "tortilla": [
+   "corn tortilla",
+   "flour tortilla",
+   "玉米饼",
+   "薄饼"
+  ],
+  "tortilla_chips": [
+   "corn chips",
+   "tortilla crisps",
+   "玉米片"
+  ],
+  "trout": [
+   "trout fish",
+   "鳟鱼"
+  ],
+  "tuna": [
+   "tunny",
+   "鮪魚",
+   "金枪鱼"
+  ],
+  "turkey": [
+   "turkey bird",
+   "火鸡"
+  ],
+  "turkey_bacon": [
+   "turkey rashers",
+   "turkey strips",
+   "火鸡培根"
+  ],
+  "turmeric": [
+   "haldi",
+   "kunyit",
+   "黄姜"
+  ],
+  "turnip": [
+   "white turnip",
+   "swede",
+   "芜菁",
+   "萝卜"
+  ],
+  "ube": [
+   "ube yam",
+   "purple yam",
+   "紫薯"
+  ],
+  "udon_noodles": [
+   "udon",
+   "wheat noodles",
+   "乌冬面"
+  ],
+  "vanilla": [
+   "vanilla extract",
+   "vanilla essence",
+   "香草精"
+  ],
+  "vanilla_bean": [
+   "vanilla pod",
+   "vanilla bean pod",
+   "香草荚"
+  ],
+  "vanilla_wafer": [
+   "vanilla cookie",
+   "vanilla biscuit",
+   "香草威化饼"
+  ],
+  "veg_or_olive_oil": [
+   "cooking oil",
+   "salad oil",
+   "食用油"
+  ],
+  "vegan_mayonnaise": [
+   "egg-free mayonnaise",
+   "plant-based mayonnaise"
+  ],
+  "vegetable_broth": [
+   "veg broth",
+   "vegetable stock",
+   "菜汤"
+  ],
+  "vegetable_oil": [
+   "cooking oil",
+   "salad oil",
+   "食用油"
+  ],
+  "vegetable_stock": [
+   "vegetable broth",
+   "veg stock",
+   "low sodium vegetable stock"
+  ],
+  "vegetarian_ham": [
+   "veggie ham",
+   "mock ham"
+  ],
+  "vegetarian_sausage": [
+   "veggie sausage",
+   "meat-free sausage"
+  ],
+  "venison": [
+   "deer meat",
+   "venison meat",
+   "鹿肉"
+  ],
+  "vinegar": [
+   "acetic acid",
+   "酸醋",
+   "醋"
+  ],
+  "vodka": [
+   "vodka spirit",
+   "伏特加"
+  ],
+  "walnut": [
+   "walnuts",
+   "胡桃",
+   "核桃"
+  ],
+  "wasabi": [
+   "Japanese horseradish",
+   "山葵"
+  ],
+  "water": [
+   "drinking water",
+   "H2O",
+   "清水"
+  ],
+  "water_chestnut": [
+   "singhara",
+   "water nut",
+   "荸荠"
+  ],
+  "watercress": [
+   "cress",
+   "西洋菜"
+  ],
+  "watermelon": [
+   "melon",
+   "西瓜"
+  ],
+  "watermelon_rind": [
+   "watermelon peel",
+   "watermelon skin"
+  ],
+  "wheat_berries": [
+   "wheat kernels",
+   "whole wheat berries"
+  ],
+  "wheat_germ": [
+   "wheat embryo",
+   "wheat germ flakes"
+  ],
+  "whipped_topping": [
+   "whipped cream topping",
+   "whipped dessert topping"
+  ],
+  "white_chocolate": [
+   "blanc chocolate",
+   "white choc"
+  ],
+  "white_wine": [
+   "table wine",
+   "白葡萄酒"
+  ],
+  "white_wine_vinegar": [
+   "white wine vinegar",
+   "wine vinegar"
+  ],
+  "whole_wheat_flour": [
+   "wholemeal flour",
+   "whole grain flour",
+   "全麦面粉"
+  ],
+  "wholewheat_pasta": [
+   "whole wheat pasta",
+   "wholemeal pasta"
+  ],
+  "wild_rice": [
+   "Canada rice",
+   "manoomin"
+  ],
+  "wine_cooking": [
+   "cooking wine",
+   "shaoxing wine",
+   "料酒"
+  ],
+  "wonton_wrapper": [
+   "wonton skin",
+   "wonton pastry",
+   "云吞皮"
+  ],
+  "worcestershire": [
+   "Worcestershire sauce",
+   "wooster sauce"
+  ],
+  "yeast": [
+   "baker's yeast",
+   "ferment",
+   "酵母"
+  ],
+  "yellow_onion": [
+   "brown onion",
+   "Spanish onion",
+   "洋葱"
+  ],
+  "yellow_squash": [
+   "summer squash",
+   "crookneck squash"
+  ],
+  "yogurt": [
+   "yoghurt",
+   "curd",
+   "酸奶"
+  ],
+  "zaatar": [
+   "za'atar spice",
+   "zaatar seasoning",
+   "middle eastern herb mix"
+  ],
+  "zucchini": [
+   "courgette",
+   "green squash",
+   "节瓜"
+  ]
+ }
+}
