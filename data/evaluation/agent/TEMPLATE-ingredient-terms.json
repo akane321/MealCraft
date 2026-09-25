@@ -1,0 +1,9 @@
+{
+  "version": "ingredient-matching-heldout-v1",
+  "split": "heldout",
+  "authored_by": "<name, and what help was used>",
+  "cases": [
+    {"term": "<what a household types>", "context": "<the sentence it appears in>", "accept": ["<catalog id>"], "kind": "regional"},
+    {"term": "<a word the catalog has no ingredient for>", "context": "<the sentence>", "accept": [], "kind": "none"}
+  ]
+}

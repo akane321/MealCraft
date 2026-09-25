@@ -1,0 +1,12 @@
+{
+  "version": "replan-requests-heldout-v1",
+  "split": "heldout",
+  "authored_by": "<name, and what help was used>",
+  "cases": [
+    {
+      "request": "<what a household says when swapping a meal, with what they want instead>",
+      "check": {"type": "any_ingredient", "values": ["<catalog ingredient id>"]},
+      "note": "<why this catalog fact means the swap did what was asked>"
+    }
+  ]
+}
