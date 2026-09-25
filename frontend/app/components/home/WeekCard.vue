@@ -1,0 +1,86 @@
+<script setup lang="ts">
+import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
+import { budgetLine, countWord, formatSgd, perDinner, plateStyle } from "~/lib/home-surface";
+import type { NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
+
+const props = defineProps<{ days: NutritionDashboardDay[]; estimate: WeeklyGroceryEstimate; rangeLabel: string }>();
+const emit = defineEmits<{ open: [tab: "groceries" | "nutrition"]; openRecipe: [slug: string] }>();
+
+const today = todayIsoDate();
+const avgCook = computed(() => Math.round(props.days.reduce((sum, day) => sum + day.recipe.total_time_minutes, 0) / (props.days.length || 1)));
+const perPlate = computed(() => Math.round(perDinner(props.days)?.calories_kcal ?? 0));
+const budget = computed(() => budgetLine(props.estimate));
+</script>
+
+<template>
+  <section class="week-card" aria-label="Your week">
+    <div class="head">
+      <div class="title">
+        <span class="mc-eyebrow">{{ rangeLabel }}</span>
+        <h3 class="mc-serif">{{ countWord(days.length) }} dinners, <em>one shop.</em></h3>
+      </div>
+      <div class="figures">
+        <div class="fig"><span class="k">Groceries</span><span class="v mc-serif mc-num">{{ formatSgd(estimate.purchase_total_sgd) }}</span></div>
+        <div class="fig"><span class="k">Avg. cook</span><span class="v mc-serif mc-num">{{ avgCook }}<small>min</small></span></div>
+        <div class="fig"><span class="k">Per plate</span><span class="v mc-serif mc-num">{{ perPlate }}<small>kcal</small></span></div>
+      </div>
+    </div>
+    <div class="strip">
+      <button
+        v-for="day in days"
+        :key="day.entry_id"
+        type="button"
+        class="tile"
+        :class="{ today: day.planned_date === today, skipped: day.status === 'skipped' }"
+        :aria-label="`${formatPlanDate(day.planned_date, { weekday: 'long' })}: ${day.recipe.title}`"
+        @click="emit('openRecipe', day.recipe.slug)"
+      >
+        <span class="d">{{ formatPlanDate(day.planned_date, { weekday: "short" }) }}</span>
+        <span class="plate" :style="plateStyle(day.recipe.slug)" />
+        <span class="n mc-serif">{{ day.recipe.title }}</span>
+      </button>
+    </div>
+    <div class="foot">
+      <button type="button" class="mc-primary" @click="emit('open', 'groceries')">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2 11h11l2-8H6.5" /><circle cx="9" cy="19" r="1.3" /><circle cx="17" cy="19" r="1.3" /></svg>Shopping list
+      </button>
+      <button type="button" class="mc-pill" @click="emit('open', 'nutrition')">Nutrition</button>
+      <span v-if="budget" class="note" :class="{ over: estimate.within_weekly_budget === false }"><span class="dot" />{{ budget }}</span>
+    </div>
+  </section>
+</template>
+
+<style scoped>
+.week-card { border-radius: 20px; background: var(--s1); border: 1px solid var(--line); overflow: hidden; }
+.head { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 28px; padding: 22px 24px 18px; }
+.title { display: grid; gap: 4px; }
+h3 { margin: 0; font-size: 26px; line-height: 1.1; }
+h3 em { color: var(--accent); }
+.figures { margin-left: auto; display: flex; flex-wrap: wrap; gap: 12px 26px; }
+.fig { display: grid; gap: 2px; }
+.k { font-size: 11px; color: var(--t3); letter-spacing: 0.04em; }
+.v { font-size: 24px; line-height: 1; }
+.v small { margin-left: 3px; font: 400 12px var(--sans); color: var(--t3); }
+.strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.tile { display: grid; justify-items: center; align-content: start; gap: 9px; padding: 16px 6px 14px; border: 0; border-right: 1px solid var(--line); background: transparent; text-align: center; transition: background 200ms; }
+.tile:last-child { border-right: 0; }
+.tile:hover { background: rgba(242, 237, 228, 0.03); }
+.tile.skipped { opacity: 0.45; }
+.d { font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
+.today .d { color: var(--accent); }
+.n { font-size: 12.5px; font-weight: 400; line-height: 1.25; color: var(--t2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.tile .plate { --size: 52px; transition: transform 500ms var(--ease); }
+.tile:hover .plate { transform: rotate(-14deg) scale(1.05); }
+.foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px 24px; border-top: 1px solid var(--line); background: rgba(242, 237, 228, 0.015); }
+.note { margin-left: auto; font-size: 12px; color: var(--sage); display: inline-flex; align-items: center; gap: 6px; }
+.note.over { color: var(--warn); }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+@media (max-width: 760px) {
+  .figures { margin-left: 0; }
+  .strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .tile:nth-child(4) { border-right: 0; }
+  .tile:nth-child(-n+4) { border-bottom: 1px solid var(--line); }
+  .tile .plate { --size: 44px; }
+}
+</style>
