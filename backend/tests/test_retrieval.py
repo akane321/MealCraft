@@ -178,3 +178,149 @@ def test_live_tutorial_failure_is_explicit_and_falls_back_to_fixture() -> None:
     assert result.retrieval.status == "degraded"
     assert result.retrieval.provider_used == "fixture"
     assert "simulated YouTube outage" in result.warning
+
+
+# --- live YouTube Data API provider -------------------------------------------------
+
+import io  # noqa: E402
+import json  # noqa: E402
+from urllib.error import HTTPError  # noqa: E402
+
+import pytest  # noqa: E402
+
+from app.retrieval import tutorials  # noqa: E402
+from app.retrieval.tutorials import YouTubeDataApiProvider, parse_iso_duration  # noqa: E402
+from app.services import tutorial as tutorial_service  # noqa: E402
+
+SECRET = "test-key-that-must-not-leak"
+
+
+class FakeResponse(io.BytesIO):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args) -> None:
+        self.close()
+
+
+def fake_youtube(monkeypatch, seen: list) -> None:
+    search = {"items": [{"id": {"videoId": vid}} for vid in ("live-now", "gone", "good", "blocked")]}
+    videos = {
+        "items": [
+            {
+                "id": "live-now",
+                "snippet": {"title": "Lemon Chicken LIVE", "channelTitle": "C", "liveBroadcastContent": "live"},
+                "contentDetails": {"duration": "P0D"},
+                "status": {"embeddable": True},
+            },
+            {
+                "id": "good",
+                "snippet": {
+                    "title": "Lemon Chicken &amp; Rice Recipe",
+                    "channelTitle": "Chef&#39;s Table",
+                    "defaultAudioLanguage": "en-GB",
+                    "liveBroadcastContent": "none",
+                    "thumbnails": {"medium": {"url": "https://i.ytimg.com/good.jpg"}},
+                },
+                "contentDetails": {"duration": "PT12M5S"},
+                "status": {"embeddable": True},
+            },
+            {
+                "id": "blocked",
+                "snippet": {"title": "Lemon Chicken", "channelTitle": "B", "liveBroadcastContent": "none"},
+                "contentDetails": {"duration": "PT3M"},
+                "status": {"embeddable": False},
+            },
+        ]
+    }
+
+    def opener(request, timeout):
+        seen.append(request)
+        return FakeResponse(json.dumps(search if "/search?" in request.full_url else videos).encode())
+
+    monkeypatch.setattr(tutorials, "urlopen", opener)
+
+
+def test_iso_durations_parse_and_a_live_stream_has_none() -> None:
+    assert parse_iso_duration("PT12M5S") == 725
+    assert parse_iso_duration("PT1H") == 3600
+    assert parse_iso_duration("P1DT2S") == 86402
+    assert parse_iso_duration("P0D") is None
+    assert parse_iso_duration("garbage") is None
+
+
+def test_live_provider_normalises_results_and_keeps_the_key_out_of_urls(monkeypatch) -> None:
+    seen: list = []
+    fake_youtube(monkeypatch, seen)
+
+    candidates = YouTubeDataApiProvider(api_key=SECRET, timeout_seconds=3).search("lemon chicken", limit=10)
+
+    # The live broadcast and the video that vanished between calls are dropped; YouTube's order is kept.
+    assert [c.video_id for c in candidates] == ["good", "blocked"]
+    good = candidates[0]
+    assert (good.title, good.channel_title) == ("Lemon Chicken & Rice Recipe", "Chef's Table")
+    assert (good.duration_seconds, good.language_hint, good.source) == (725, "en", "youtube")
+    assert good.thumbnail_url == "https://i.ytimg.com/good.jpg"
+    assert candidates[1].embeddable is False  # filtering is the ranker's job, not the provider's
+    assert all(SECRET not in r.full_url and r.get_header("X-goog-api-key") == SECRET for r in seen)
+
+
+def test_quota_exhaustion_is_named_and_never_carries_the_key(monkeypatch) -> None:
+    body = json.dumps({"error": {"errors": [{"reason": "quotaExceeded"}]}}).encode()
+
+    def opener(request, timeout):
+        raise HTTPError(request.full_url, 403, "Forbidden", {}, io.BytesIO(body))
+
+    monkeypatch.setattr(tutorials, "urlopen", opener)
+    with pytest.raises(TutorialProviderError) as raised:
+        YouTubeDataApiProvider(api_key=SECRET, timeout_seconds=3).search("lemon chicken", limit=5)
+    assert "quota" in str(raised.value)
+    assert SECRET not in str(raised.value)
+
+
+def test_service_goes_live_when_a_key_exists_and_serves_repeats_from_cache(monkeypatch) -> None:
+    seen: list = []
+    fake_youtube(monkeypatch, seen)
+    monkeypatch.setattr(tutorial_service, "_live_cache", {})
+    service = TutorialRecommendationService(
+        recipe_service=RecipeServiceStub(),
+        fixture_provider=FixtureTutorialProvider(str(FIXTURE_PATH)),
+        live_provider=YouTubeDataApiProvider(api_key=SECRET, timeout_seconds=3),
+        live_by_default=True,
+    )
+
+    first = service.recommend("lemon-chicken", live=None, language="en")
+    second = service.recommend("lemon-chicken", live=None, language="en")
+
+    assert first.retrieval.mode == "live" and first.retrieval.provider_used == "youtube"
+    assert first.selected_video.video_id == "good"
+    assert second.retrieval.mode == "cache" and second.selected_video.video_id == "good"
+    assert second.retrieval.fetched_at == first.retrieval.fetched_at  # the observation's age, not the read's
+    assert len(seen) == 2  # one search + one videos call, both for the first request only
+
+
+def test_a_failed_live_lookup_is_not_cached(monkeypatch) -> None:
+    monkeypatch.setattr(tutorial_service, "_live_cache", {})
+    service = TutorialRecommendationService(
+        recipe_service=RecipeServiceStub(),
+        fixture_provider=FixtureTutorialProvider(str(FIXTURE_PATH)),
+        live_provider=FailingLiveTutorialProvider(),
+        live_by_default=True,
+    )
+    service.recommend("lemon-chicken", live=None, language="en")
+    assert tutorial_service._live_cache == {}
+
+
+def test_a_source_with_nothing_for_the_dish_is_no_match_not_an_outage() -> None:
+    class EmptyProvider:
+        def search(self, query: str, *, limit: int):
+            return []
+
+    service = TutorialRecommendationService(
+        recipe_service=RecipeServiceStub(),
+        fixture_provider=EmptyProvider(),
+        live_provider=FailingLiveTutorialProvider(),
+    )
+    result = service.recommend("lemon-chicken", live=False, language="en")
+    assert result.selected_video is None
+    assert result.retrieval.status == "no_match"
