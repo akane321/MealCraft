@@ -49,7 +49,9 @@ class Products:
 
     def search(self, name: str, *, live: bool, limit: int) -> SimpleNamespace:
         self.searched.append((name, live))
-        return SimpleNamespace(warning=None, items=self.items)
+        # The fields a real ProductSearchResponse carries that the estimator reads.
+        retrieval = SimpleNamespace(mode="live" if live else "fixture", query=name, parser_version="stub-v1")
+        return SimpleNamespace(warning=None, items=self.items, retrieval=retrieval)
 
 
 @pytest.fixture(autouse=True)

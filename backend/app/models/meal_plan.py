@@ -200,6 +200,8 @@ class MealPlanGroceryItem(Base):
     consumed_cost_sgd: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     excess_quantity: Mapped[Decimal | None] = mapped_column(Numeric(12, 3), nullable=True)
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Where the shown price came from (PriceEvidence); null for lines priced before it was recorded.
+    price_evidence: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     plan: Mapped[MealPlan] = relationship(back_populates="grocery_items")
 

@@ -8,7 +8,7 @@ from functools import lru_cache
 from app.core.paths import data_root
 from app.data.units import UNIT_BASE
 from app.models.recipe import Recipe
-from app.schemas.product import GroceryEstimateResponse, GroceryLineEstimate, ProductResponse
+from app.schemas.product import GroceryEstimateResponse, GroceryLineEstimate, PriceEvidence, ProductResponse
 from app.schemas.recommendation import AvailableIngredientInput, RecipeRecommendationRequest
 from app.services.product import ProductSearchService
 
@@ -67,6 +67,20 @@ class ProductChoice:
     product: ProductResponse | None = None
     match_score: float | None = None
     warnings: list[str] = field(default_factory=list)
+    evidence: PriceEvidence | None = None
+
+
+def price_evidence(
+    product: ProductResponse, *, mode: str, query: str | None, parser_version: str | None, source: str | None = None
+) -> PriceEvidence:
+    return PriceEvidence(
+        fact_id=f"{product.external_id}@{product.fetched_at.isoformat()}",
+        source=source or product.source,
+        mode=mode,
+        query=query,
+        parser_version=parser_version,
+        fetched_at=product.fetched_at,
+    )
 
 
 def choose_product(
@@ -94,6 +108,11 @@ def choose_product(
         choice.product, choice.match_score = matcher.choose(
             ingredient_name, ingredient_display_name, unit, search.items
         )
+        if choice.product is not None:
+            trace = search.retrieval
+            choice.evidence = price_evidence(
+                choice.product, mode=trace.mode, query=trace.query, parser_version=trace.parser_version
+            )
         compatible = choice.product is not None and convert_quantity(1.0, unit, choice.product.package_unit)
         if compatible or ingredient_name not in release_products():
             return choice
@@ -101,8 +120,10 @@ def choose_product(
     if entry is None or entry["status"] != "mapped" or convert_quantity(1.0, unit, "g") is None:
         return choice
     products = [_release_product(item) for item in entry["products"]]
+    query, trace = entry["products"][0]["query"], None
     if live:
-        search = product_service.search(entry["products"][0]["query"], live=True, limit=20)
+        search = product_service.search(query, live=True, limit=20)
+        trace = search.retrieval
         if search.warning:
             choice.warnings.append(search.warning)
         current = {item.external_id: item for item in search.items}
@@ -131,6 +152,15 @@ def choose_product(
     in_stock = [product for product in products if product.in_stock]
     choice.product = min(in_stock, key=cost) if in_stock else None
     choice.match_score = None
+    if choice.product is not None:
+        choice.evidence = (
+            price_evidence(choice.product, mode=trace.mode, query=trace.query, parser_version=trace.parser_version)
+            if trace is not None
+            # The reviewed mapping's stored prices: observed on the snapshot date, not now.
+            else price_evidence(
+                choice.product, mode="snapshot", query=query, parser_version=None, source="release_snapshot"
+            )
+        )
     return choice
 
 
@@ -311,6 +341,7 @@ class GroceryEstimator:
                 remaining,
                 product,
                 match_score,
+                choice.evidence,
             )
             purchase_total += line.purchase_cost_sgd
             if line.consumed_cost_sgd is None:
@@ -359,6 +390,7 @@ class GroceryEstimator:
         remaining: float | None,
         product: ProductResponse,
         match_score: float | None,
+        evidence: PriceEvidence | None = None,
     ) -> GroceryLineEstimate:
         converted_remaining = convert_quantity(remaining, unit, product.package_unit) if remaining is not None else None
         if converted_remaining is not None and product.package_size:
@@ -388,4 +420,5 @@ class GroceryEstimator:
             consumed_cost_sgd=round(consumed_cost, 2) if consumed_cost is not None else None,
             excess_quantity=round(excess, 3) if excess is not None else None,
             note=note,
+            evidence=evidence,
         )

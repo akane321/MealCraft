@@ -132,6 +132,7 @@ class WeeklyGroceryAggregator:
                 remaining,
                 product,
                 match_score,
+                choice.evidence,
             )
             purchase_total += line.purchase_cost_sgd
             if line.consumed_cost_sgd is None:
