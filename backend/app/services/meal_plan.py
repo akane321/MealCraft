@@ -23,7 +23,7 @@ from app.schemas.meal_plan import (
     WeeklyNutritionSummaryResponse,
     WeeklyPlanDayResponse,
 )
-from app.schemas.product import GroceryLineEstimate, ProductResponse
+from app.schemas.product import GroceryLineEstimate, PriceEvidence, ProductResponse
 from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
 from app.services.recommendation import RecipeRecommendationService
 
@@ -393,6 +393,7 @@ class WeeklyMealPlanService:
             consumed_cost_sgd=(float(item.consumed_cost_sgd) if item.consumed_cost_sgd is not None else None),
             excess_quantity=(float(item.excess_quantity) if item.excess_quantity is not None else None),
             note=item.note,
+            evidence=PriceEvidence.model_validate(item.price_evidence) if item.price_evidence else None,
         )
 
     @staticmethod
