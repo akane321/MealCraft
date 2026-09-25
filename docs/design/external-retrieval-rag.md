@@ -94,9 +94,9 @@ server process and reported as mode `cache` with the original `fetched_at`;
 a failed lookup is never cached. The cache does not survive a restart — the
 `retrieval_*` tables below replace it once their fields are reviewed.
 
-Still open: a persistent cache, reviewed query–video labels and Top-1
-measurement, and ranking improvements measured against them (shorts, channel
-quality, regional dish names, ties). Broad FairPrice package handling and
+Still open: a persistent cache; a person's review of the query–video labels
+and the one held-out Top-1 measurement (ranking v2 below is measured on
+developer dishes only); channel quality and regional dish names. Broad FairPrice package handling and
 production RAG orchestration are unchanged.
 
 ## One external-evidence architecture
@@ -224,10 +224,13 @@ MealCraft ingredients, safety labels, nutrition, quantities or written steps.
 
 ### Query contract
 
-The initial deterministic query contains recipe title, cuisine, up to three
-primary ingredients, requested language, and `cooking tutorial`. The live
-adapter should normalize video ID, title, channel, thumbnail, duration,
-embeddability, language hint and fetch time for a bounded candidate set.
+The query is the dish's name followed by `recipe`, as a person would search.
+The first contract (name, cuisine, three ingredients, language and
+`cooking tutorial`) was measured against it on the labelled candidates below:
+the long query found no video at all for three of 39 dishes and gave half as
+many right Top-1s on the developer dishes. The live adapter normalizes video
+ID, title, channel, thumbnail, duration, embeddability, language hint and
+fetch time for a bounded candidate set.
 
 ### Hard filtering and deterministic Top-1
 
@@ -242,8 +245,34 @@ practical duration (two to thirty minutes) at +2, and a language match at +1,
 with hard filters for embeddability, a protein-word mismatch, and a minimum
 title overlap. Every score component and the reasons behind it are retained.
 
-Those weights are a starting point that has never been measured, and improving
-them is the substance of work package B. The direction to go, roughly in order
+**Ranking policy v2** (2026-09-25) keeps those weights and changes what they
+count: titles are compared after folding accents and plurals (`Chả lụa` is
+`cha lua`, `kebabs` is `kebab`); words that do not name the dish (`easy`,
+`best`, `style`) cannot qualify a video; pantry staples (oil, salt, sauce,
+flour) earn no ingredient points; a video under 90 seconds loses 8; and equal
+scores keep YouTube's own relevance order instead of the video ID.
+
+It was developed on labelled, frozen candidates
+(`data/evaluation/tutorials/`: 39 catalog mains sampled across 22 cuisines,
+628 candidates from both query forms, half the dishes developer and half
+held-out). The labels are one independent AI reviewer's (Codex, assisted by
+the owner: every row scored from dish, ingredients, title and duration; some
+recipe steps checked; 10 videos opened), not a fully watched human gold
+standard. On the 20 developer dishes (a right video, label 2, exists for 15):
+
+| Query and ranking | right (2) | weak (1) | wrong (0) | none, correctly | none, missed |
+| --- | --- | --- | --- | --- | --- |
+| long query, v1 ranking (shipped before) | 5 | 7 | 1 | 2 | 5 |
+| name + recipe, v1 ranking | 10 | 8 | 0 | 1 | 1 |
+| name + recipe, v2 ranking (shipped) | 12 | 6 | 0 | 2 | 0 |
+
+Four of the six weak picks are dishes with no right video among the
+candidates. The held-out dishes have not been scored; they are read once,
+after the labels are reviewed by a person, with
+`scripts/evaluate_tutorial_ranking.py --heldout`.
+
+The v1 weights started as an unmeasured baseline; the directions below are
+what remains of work package B. The direction to go, roughly in order
 of expected value:
 
 1. **Channel quality signals** — a channel that reliably publishes cooking
