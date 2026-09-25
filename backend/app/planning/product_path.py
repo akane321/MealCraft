@@ -160,6 +160,7 @@ class ProductPlanningEngine:
             )
         by_id = {r.id: r for r in recipes}
         candidates, options, observations, display_names = [], {}, {}, {}
+        provenance = {}  # product id -> the PriceEvidence of the observation the planner prices with
         recipe_snapshots = {}
         diagnostics = []
         for recommendation in sorted(recommendations, key=lambda r: r.recipe.slug):
@@ -210,6 +211,7 @@ class ProductPlanningEngine:
                     diagnostics.append("conflicting_product_observation")
                 options[option.product_id] = option
                 observations[option.product_id] = projected.observation
+                provenance[option.product_id] = line.evidence
         trace["input_issues"] = sorted(set(diagnostics))
         trace["observed_sources"] = sorted({p.source for p in observations.values()})
         if not candidates or "conflicting_product_observation" in diagnostics:
@@ -380,6 +382,7 @@ class ProductPlanningEngine:
                     consumed_cost_sgd=round(consumed, 2),
                     excess_quantity=row.surplus_quantity,
                     note=row.note,
+                    evidence=provenance.get(row.selected_product_id),
                 )
             )
         grocery = WeeklyGroceryEstimateResponse(

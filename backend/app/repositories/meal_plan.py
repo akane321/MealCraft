@@ -329,5 +329,6 @@ class MealPlanRepository:
                     consumed_cost_sgd=line.consumed_cost_sgd,
                     excess_quantity=line.excess_quantity,
                     note=line.note,
+                    price_evidence=line.evidence.model_dump(mode="json") if line.evidence else None,
                 )
             )

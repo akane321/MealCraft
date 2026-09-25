@@ -25,6 +25,7 @@ from app.orchestration.scope_policy import ReferenceScopePolicy
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
+from app.retrieval.evidence import grocery_packet, packet_digest, verify_grocery_totals
 from app.schemas.agent import (
     AgentConfirmationResponse,
     AgentConstraintState,
@@ -238,6 +239,22 @@ class AgentSessionService:
         return self.reply(session_id, message, idempotency_key=idempotency_key)
 
     @staticmethod
+    def _grocery_evidence(estimate) -> dict:
+        """What the saved plan's prices rest on: the packet's digest, how each was obtained, and whether
+        every shown line cost and the total recompute from the observations alone."""
+        packet = grocery_packet(estimate)
+        report = verify_grocery_totals(estimate, packet)
+        return {
+            "kind": "retrieval_packet",
+            "purpose": packet.purpose,
+            "digest": packet_digest(packet),
+            "items": len(packet.items),
+            "modes": sorted({str(item.facts["mode"]) for item in packet.items}),
+            "unsupported_claims": report.unsupported_claim_ids,
+            "warnings": packet.warnings,
+        }
+
+    @staticmethod
     def _interaction_value_as_message(request: InteractionRequest, value: object) -> str:
         if request.field_path == "household_size":
             if isinstance(value, bool) or not isinstance(value, (int, float, str)):
@@ -436,7 +453,10 @@ class AgentSessionService:
             stage="plan_committed",
             status="succeeded",
             state_payload={"plan_id": plan.id, "plan_revision": plan.revision},
-            evidence_references=[{"kind": "meal_plan", "reference": f"meal-plan:{plan.id}:revision:{plan.revision}"}],
+            evidence_references=[
+                {"kind": "meal_plan", "reference": f"meal-plan:{plan.id}:revision:{plan.revision}"},
+                self._grocery_evidence(plan.grocery_estimate),
+            ],
         )
         self.run_lifecycle.transition(run, AgentRunStatus.COMMITTED, termination_reason_code="PLAN_SAVED")
         return AgentConfirmationResponse(session=self.get(session_id) or self._to_response(updated), plan=plan)
@@ -517,7 +537,10 @@ class AgentSessionService:
                 "base_revision": base_revision,
                 "applied_revision": result.plan.revision,
             },
-            evidence_references=[{"kind": "meal_plan_event", "reference": f"meal-plan-event:{event_id}"}],
+            evidence_references=[
+                {"kind": "meal_plan_event", "reference": f"meal-plan-event:{event_id}"},
+                self._grocery_evidence(result.plan.grocery_estimate),
+            ],
         )
         self.run_lifecycle.transition(run, AgentRunStatus.COMMITTED, termination_reason_code="REPLAN_APPLIED")
         return AgentReplanConfirmationResponse(

@@ -34,6 +34,22 @@ class ProductSearchResponse(BaseModel):
     retrieval: RetrievalTrace
 
 
+class PriceEvidence(BaseModel):
+    """Where one shown price came from, so it can be traced and replayed (external-retrieval-rag.md).
+
+    `mode` is how the observation was obtained now: a live FairPrice request, the 15-minute cache, the
+    reviewed release snapshot, or the offline fixture. `fetched_at` is when the price was observed,
+    not when it was read.
+    """
+
+    fact_id: str
+    source: Literal["fairprice", "fixture", "release_snapshot"]
+    mode: Literal["live", "cache", "snapshot", "fixture"]
+    query: str | None
+    parser_version: str | None
+    fetched_at: datetime
+
+
 class GroceryLineEstimate(BaseModel):
     ingredient_name: str
     ingredient_display_name: str
@@ -48,6 +64,7 @@ class GroceryLineEstimate(BaseModel):
     consumed_cost_sgd: float | None
     excess_quantity: float | None
     note: str | None
+    evidence: PriceEvidence | None = None
 
 
 class GroceryEstimateResponse(BaseModel):
