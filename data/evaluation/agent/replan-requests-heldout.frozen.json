@@ -1,0 +1,7 @@
+{
+ "file": "replan-requests-heldout.json",
+ "sha256": "9c88f7eb6025c39ec6ae3241f72f6c7fca5485b46529b30a4a5a9e0970300c4a",
+ "cases": 21,
+ "frozen_at": "2026-09-25T16:54:21.366843+00:00",
+ "scoring_rule": "Registered before the run: every case, scored as submitted; no request shares its wording with the developer set."
+}

@@ -1,0 +1,28 @@
+{
+ "file": "ingredient-matching-heldout.json",
+ "sha256": "9599cb2519fe0fc7189121d1318a3962774a321e8ce1025a4c67539f69e84d92",
+ "cases": 43,
+ "frozen_at": "2026-09-25T16:54:20.897645+00:00",
+ "seen_in_developer_set": [
+  "aubergine",
+  "beancurd",
+  "brinjal",
+  "brocoli",
+  "capsicum",
+  "caster sugar",
+  "coriander leaves",
+  "cornflour",
+  "courgette",
+  "garbanzo beans",
+  "icing sugar",
+  "ikan bilis",
+  "minced beef",
+  "prawns",
+  "rocket",
+  "spring onion",
+  "taugeh",
+  "料酒",
+  "香菜"
+ ],
+ "scoring_rule": "Registered before the run: the primary result counts only the terms not in the developer set (24 of 43); the full set is reported second. The file is scored as submitted; no label is changed by the tuning session."
+}

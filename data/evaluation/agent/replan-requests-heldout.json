@@ -1,0 +1,28 @@
+{
+  "version": "replan-requests-heldout-v1",
+  "split": "heldout",
+  "authored_by": "Zhang Naiqian, with ChatGPT AI assistance for drafting and sealed-catalog validation; no MealCraft implementation or developer-set access used",
+  "cases": [
+    {"request":"周三那顿换一下吧，今天想吃鱼。","check":{"type":"any_ingredient","values":["salmon","cod","catfish","fish_fillet","milkfish","swordfish","salt_cod"]},"note":"用户明确想吃鱼，因此替换后的主菜含任一种目录中的鱼类食材即可算满足。"},
+    {"request":"Can we swap Friday dinner for something with beef?","check":{"type":"any_ingredient","values":["beef"]},"note":"The request explicitly asks for beef, so a replacement containing catalog beef satisfies it."},
+    {"request":"今晚这顿换成鸡肉的吧。","check":{"type":"any_ingredient","values":["chicken","chicken_breast","chicken_thigh","chicken_or_turkey"]},"note":"用户要求鸡肉，目录中这些鸡肉食材都能直接体现该要求。"},
+    {"request":"Could you change Tuesday's meal to something with shrimp?","check":{"type":"any_ingredient","values":["shrimp"]},"note":"The user specifically asks for shrimp, so the replacement should contain shrimp."},
+    {"request":"周末那顿我想吃豆腐，帮我换一道。","check":{"type":"any_ingredient","values":["tofu","firm_tofu"]},"note":"用户明确要求豆腐，普通 tofu 或 firm tofu 都是合理的目录事实判定。"},
+    {"request":"Swap tomorrow's dinner for something with pork, please.","check":{"type":"any_ingredient","values":["pork"]},"note":"The requested protein is pork, so a main containing pork meets the request."},
+    {"request":"明晚换个有蛋的菜，我今天就想吃鸡蛋。","check":{"type":"any_ingredient","values":["egg"]},"note":"用户点明鸡蛋，因此含 egg 的主菜符合换菜要求。"},
+    {"request":"Can we make Wednesday dinner a rice dish instead?","check":{"type":"any_ingredient","values":["rice"]},"note":"The request asks for a rice-based replacement, and the catalog rice ingredient is a direct criterion."},
+    {"request":"周四别吃原来那道了，换个面食吧。","check":{"type":"any_ingredient","values":["cellophane_noodles","chow_mein_noodles","egg_noodles","pancit_canton","ramen","rice_noodles","shirataki_noodles","soba_noodle","soba_noodles","sweet_potato_noodles","udon_noodles"]},"note":"用户想吃面，目录中的这些 noodle 类主食都与该要求一致。"},
+    {"request":"I'd like something spicy for Friday instead.","check":{"type":"title_word","values":["spicy"]},"note":"The user asks for a spicy dish; a main explicitly described as spicy in its title is a conservative catalog-grounded match."},
+    {"request":"这顿换成咖喱吧，突然很想吃 curry。","check":{"type":"title_word","values":["curry"]},"note":"用户直接要求 curry，因此菜名明确含 curry 是与原话一致且可验证的标准。"},
+    {"request":"Can you replace Saturday's meal with a Japanese dish?","check":{"type":"cuisine","values":["japanese"]},"note":"The user explicitly requests Japanese cuisine, so the catalog cuisine field provides the direct judgment."},
+    {"request":"周二换成中餐吧，想吃点 Chinese food。","check":{"type":"cuisine","values":["chinese"]},"note":"用户明确指定中餐，因此 cuisine=chinese 即满足要求。"},
+    {"request":"Could Thursday be an Indian dish instead?","check":{"type":"cuisine","values":["indian"]},"note":"The request names Indian cuisine directly, so cuisine=indian is the appropriate criterion."},
+    {"request":"明天那顿换成泰国菜吧。","check":{"type":"cuisine","values":["thai"]},"note":"用户指定泰国菜，因此以目录 cuisine=thai 判断最直接。"},
+    {"request":"For Sunday, can we switch to something Korean?","check":{"type":"cuisine","values":["korean"]},"note":"The user asks for Korean food, so a Korean-cuisine main is a direct match."},
+    {"request":"这顿帮我换成素食的，不要肉。","check":{"type":"dietary_tag","values":["vegetarian","vegan"]},"note":"用户要求素食；目录中的 vegetarian 或更严格的 vegan 标签都符合不吃肉的意图。"},
+    {"request":"Can we swap tonight's dinner for something vegan?","check":{"type":"dietary_tag","values":["vegan"]},"note":"The user explicitly requests vegan food, so the vegan dietary tag is the direct standard."},
+    {"request":"周五想换个有蘑菇的菜。","check":{"type":"any_ingredient","values":["mushroom"]},"note":"用户明确想吃蘑菇，因此含 mushroom 的主菜满足要求。"},
+    {"request":"Please change Tuesday dinner to something lemony, with lemon in the dish.","check":{"type":"any_ingredient","values":["lemon"]},"note":"The request explicitly requires lemon in the dish, so the lemon ingredient is the direct criterion."},
+    {"request":"今晚换一道带芝士的吧，我想吃 cheesy 的。","check":{"type":"any_ingredient","values":["cheddar","cheese","feta","mozzarella","parmesan","cream_cheese","goat_cheese","monterey_jack","swiss_cheese","ricotta","provolone","blue_cheese","gruyere","parm_or_romano","parmesan_romano"]},"note":"用户明确要求芝士类食材，因此任一种目录奶酪食材都能体现该偏好。"}
+  ]
+}
