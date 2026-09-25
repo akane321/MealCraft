@@ -205,17 +205,34 @@ class FakeResponse(io.BytesIO):
 
 def fake_youtube(monkeypatch, seen: list) -> None:
     search = {"items": [{"id": {"videoId": vid}} for vid in ("live-now", "gone", "good", "blocked")]}
-    videos = {"items": [
-        {"id": "live-now", "snippet": {"title": "Lemon Chicken LIVE", "channelTitle": "C",
-                                       "liveBroadcastContent": "live"},
-         "contentDetails": {"duration": "P0D"}, "status": {"embeddable": True}},
-        {"id": "good", "snippet": {"title": "Lemon Chicken &amp; Rice Recipe", "channelTitle": "Chef&#39;s Table",
-                                   "defaultAudioLanguage": "en-GB", "liveBroadcastContent": "none",
-                                   "thumbnails": {"medium": {"url": "https://i.ytimg.com/good.jpg"}}},
-         "contentDetails": {"duration": "PT12M5S"}, "status": {"embeddable": True}},
-        {"id": "blocked", "snippet": {"title": "Lemon Chicken", "channelTitle": "B", "liveBroadcastContent": "none"},
-         "contentDetails": {"duration": "PT3M"}, "status": {"embeddable": False}},
-    ]}
+    videos = {
+        "items": [
+            {
+                "id": "live-now",
+                "snippet": {"title": "Lemon Chicken LIVE", "channelTitle": "C", "liveBroadcastContent": "live"},
+                "contentDetails": {"duration": "P0D"},
+                "status": {"embeddable": True},
+            },
+            {
+                "id": "good",
+                "snippet": {
+                    "title": "Lemon Chicken &amp; Rice Recipe",
+                    "channelTitle": "Chef&#39;s Table",
+                    "defaultAudioLanguage": "en-GB",
+                    "liveBroadcastContent": "none",
+                    "thumbnails": {"medium": {"url": "https://i.ytimg.com/good.jpg"}},
+                },
+                "contentDetails": {"duration": "PT12M5S"},
+                "status": {"embeddable": True},
+            },
+            {
+                "id": "blocked",
+                "snippet": {"title": "Lemon Chicken", "channelTitle": "B", "liveBroadcastContent": "none"},
+                "contentDetails": {"duration": "PT3M"},
+                "status": {"embeddable": False},
+            },
+        ]
+    }
 
     def opener(request, timeout):
         seen.append(request)

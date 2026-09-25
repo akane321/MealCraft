@@ -149,8 +149,14 @@ class YouTubeDataApiProvider:
             raise TutorialProviderError("YOUTUBE_API_KEY is not configured")
         found = self._get(
             "search",
-            {"part": "snippet", "type": "video", "q": query, "maxResults": max(1, min(limit, 50)),
-             "videoEmbeddable": "true", "safeSearch": "strict"},
+            {
+                "part": "snippet",
+                "type": "video",
+                "q": query,
+                "maxResults": max(1, min(limit, 50)),
+                "videoEmbeddable": "true",
+                "safeSearch": "strict",
+            },
         )
         try:
             ids = [item["id"]["videoId"] for item in found.get("items", [])]
