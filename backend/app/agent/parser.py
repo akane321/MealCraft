@@ -5,9 +5,15 @@ from typing import Protocol
 
 from langchain_openai import ChatOpenAI
 
+from app.agent.ingredient_matcher import IngredientMatcher
 from app.data import ingredient_hierarchy
 from app.data.allergens import checked_allergens
-from app.schemas.agent import AgentConstraintExtraction, AgentConstraintState, AgentMessageResponse
+from app.schemas.agent import (
+    AgentConstraintExtraction,
+    AgentConstraintState,
+    AgentMessageResponse,
+    UnmatchedTermSuggestion,
+)
 from app.schemas.recommendation import AvailableIngredientInput, NutritionTargets
 
 
@@ -273,6 +279,8 @@ class ConstraintVocabulary:
     allergens: frozenset[str] = frozenset(checked_allergens())
     # Families no ingredient id stands for, group id -> what it covers (ingredient hierarchy, ADR-0039).
     groups: Mapping[str, str] = field(default_factory=dict)
+    # Proposes catalog ids for a word outside the vocabulary; the household picks one or none.
+    matcher: IngredientMatcher | None = field(default=None, compare=False)
 
     def prompt(self) -> str:
         text = f"""Allowed words. A constraint written in any other word matches nothing and is lost.
@@ -303,28 +311,39 @@ def align_to_vocabulary(
     Dropping an unmatched exclusion would tell the user it is excluded while it is
     not; keeping it would do the same, because nothing matches it. So it is neither.
     """
-    unmatched: list[str] = []
+    unmatched: dict[str, str] = {}  # term -> the field it was written into
 
-    def known(values: list[str] | None, words: frozenset[str]) -> list[str] | None:
+    def known(values: list[str] | None, words: frozenset[str], field_name: str) -> list[str] | None:
         if values is None:
             return None
-        unmatched.extend(value for value in values if value not in words)
+        for value in values:
+            if value not in words:
+                unmatched.setdefault(value, field_name)
         return [value for value in values if value in words] or None
 
     aligned = extraction.model_copy(deep=True)
     aligned.excluded_ingredients = known(
-        extraction.excluded_ingredients, vocabulary.ingredients | frozenset(vocabulary.groups)
+        extraction.excluded_ingredients, vocabulary.ingredients | frozenset(vocabulary.groups), "excluded_ingredients"
     )
-    aligned.allergens = known(extraction.allergens, vocabulary.allergens)
+    aligned.allergens = known(extraction.allergens, vocabulary.allergens, "allergens")
     if extraction.available_ingredients is not None:
         pantry = [item for item in extraction.available_ingredients if item.normalized_name in vocabulary.ingredients]
-        unmatched += [
-            item.normalized_name
-            for item in extraction.available_ingredients
-            if item.normalized_name not in vocabulary.ingredients
-        ]
+        for item in extraction.available_ingredients:
+            if item.normalized_name not in vocabulary.ingredients:
+                unmatched.setdefault(item.normalized_name, "available_ingredients")
         aligned.available_ingredients = pantry or None
-    aligned.unmatched_terms = list(dict.fromkeys(unmatched))
+    aligned.unmatched_terms = list(unmatched)
+    aligned.unmatched_suggestions = [
+        UnmatchedTermSuggestion(
+            term=term,
+            field=field_name,
+            # Allergens are a closed list of nine the household reads in full; ingredients get proposals.
+            options=vocabulary.matcher.suggest(term.replace("_", " "))
+            if vocabulary.matcher and field_name != "allergens"
+            else [],
+        )
+        for term, field_name in unmatched.items()
+    ]
     return aligned
 
 

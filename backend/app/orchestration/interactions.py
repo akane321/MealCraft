@@ -52,6 +52,31 @@ def pantry_quantity_interaction(
     )
 
 
+def unmatched_term_interaction(
+    *,
+    term: str,
+    meant_for: str,
+    options: list[str],
+    prompt: str,
+    question_id: str,
+    context_version: int,
+) -> InteractionRequest:
+    """Offer the catalog ingredients a word might mean. The field it was written into travels in the
+    field path, so the answer lands as an exclusion or a pantry item without asking the model again."""
+    return InteractionRequest(
+        type=InteractionType.SINGLE_SELECT,
+        prompt=prompt,
+        field_path=f"unmatched.{meant_for}.{term}",
+        question_id=question_id,
+        options=[
+            InteractionOption(id=f"ingredient_{option}", label=option.replace("_", " "), value=option)
+            for option in options
+        ],
+        allow_free_text=True,
+        context_version=context_version,
+    )
+
+
 def validate_interaction_answer(
     request: InteractionRequest,
     answer: InteractionAnswer,
