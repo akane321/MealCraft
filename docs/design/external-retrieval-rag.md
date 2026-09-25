@@ -273,9 +273,31 @@ standard. On the 20 developer dishes (a right video, label 2, exists for 15):
 | name + recipe, v2 ranking (shipped) | 12 | 6 | 0 | 2 | 0 |
 
 Four of the six weak picks are dishes with no right video among the
-candidates. The held-out dishes have not been scored; they are read once,
-after the labels are reviewed by a person, with
-`scripts/evaluate_tutorial_ranking.py --heldout`.
+candidates.
+
+**Held-out, read once (2026-09-25).** The 19 held-out dishes were scored on a
+separate review sheet (`heldout-review-v1.md`): every video any compared
+policy picks, plus up to three the first review scored 2 where no pick was,
+36 videos, blind to earlier scores and to which policy chose what. The
+returned file (`labels-v1/heldout-review-sheet.md`, parsed into
+`heldout-review.json`) had been converted to Pandoc tables and lost its
+header; the owner confirmed that they reviewed it and watched the videos, and
+that confirmation is recorded in the label file. A right video exists for 11
+of the 19:
+
+| Query and ranking | right (2) | weak (1) | wrong (0) | none, correctly | none, missed |
+| --- | --- | --- | --- | --- | --- |
+| long query, v1 ranking (shipped before) | 6 | 9 | 0 | 2 | 2 |
+| name + recipe, v1 ranking | 8 | 11 | 0 | 0 | 0 |
+| name + recipe, v2 ranking (shipped) | 8 | 11 | 0 | 0 | 0 |
+
+The new query carries over: more right picks (6 to 8 of a possible 11) and
+no dish left without a video that had a right one. Ranking v2 adds nothing on
+the held-out dishes; its two extra developer picks did not transfer, so it is
+kept for its safer behaviour (no Shorts, no staple-word matches) but not
+claimed as a ranking improvement. The query change also trades two correct
+"no video" answers for weak (label 1) videos. The set has now been read and
+is spent: a further change is measured on new dishes.
 
 The v1 weights started as an unmeasured baseline; the directions below are
 what remains of work package B. The direction to go, roughly in order

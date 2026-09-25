@@ -1,0 +1,80 @@
+{
+ "reviewer": "owner",
+ "labels": {
+  "RCP2_F3A68B743FB0": {
+   "LROplcFbP3g": 1,
+   "yrm4g02FnGE": 1,
+   "XUWIVK58Em4": 1,
+   "eX9sSgrQOSI": 1,
+   "3n1enkE1le8": 1
+  },
+  "RCP2_507DF62CE3F3": {
+   "3igDHMlKRM4": 1,
+   "0utKA0F33RM": 2,
+   "Q4ScNb8sD40": 2
+  },
+  "RCP2_76242A5D4715": {
+   "nMW3K6UWp-0": 1,
+   "cujEel6TKgI": 1,
+   "dZYFO2y9BrM": 1
+  },
+  "RCP2_2A35617F7BC0": {
+   "gWKk55tY7kI": 1
+  },
+  "RCP2_86B33FED7722": {
+   "A4yY7rkzATI": 1
+  },
+  "RCP2_A476DFC95700": {
+   "tn0YTv4S9vI": 1,
+   "PyJLVEpKIIs": 2
+  },
+  "RCP2_B4F13C665693": {
+   "HJ6lsXzBbnw": 2,
+   "HUGaVdnz3mo": 1
+  },
+  "RCP2_1DCFB428037A": {
+   "Rwu0nM8F_sE": 2
+  },
+  "RCP2_01FECEF74FBA": {
+   "8sbjbwMy59g": 2,
+   "la0zGo2Lbpg": 2
+  },
+  "RCP2_E7E13D178074": {
+   "1kUohV5bvxM": 1,
+   "MmU1sXsnp3s": 1
+  },
+  "RCP2_9762039A26A6": {
+   "1TJ9UbPmzrY": 1,
+   "KDN50lqu6qc": 1
+  },
+  "RCP2_1E896DFEE97C": {
+   "G5zt60EsgL0": 2
+  },
+  "RCP2_C5C31FE530C6": {
+   "D5pF5RR4zgw": 2
+  },
+  "RCP2_F891F212BB10": {
+   "fXsiiFY9w94": 1,
+   "r0euZMKWcCs": 1
+  },
+  "RCP2_F304E04D145E": {
+   "VjLJLKPLI98": 2
+  },
+  "RCP2_3350EE7713F0": {
+   "KrrmJLtwAQg": 2
+  },
+  "RCP2_BB0F35256684": {
+   "ZxQ62t_VBbc": 1,
+   "L2Jea9IiCKA": 2
+  },
+  "RCP2_CF8A7BBCA135": {
+   "irHKAb2rqDE": 1,
+   "XmQ8mZFqczw": 1
+  },
+  "RCP2_FA1DB5A46433": {
+   "EEeLWvoMnGY": 2,
+   "4a4AL04mQEk": 1
+  }
+ },
+ "note": "Reviewed by the project owner, who confirmed on 2026-09-25 that they watched the videos. The returned sheet had been converted to Pandoc tables and lost its header; identity recorded from that confirmation."
+}
