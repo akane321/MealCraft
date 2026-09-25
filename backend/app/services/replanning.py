@@ -4,6 +4,7 @@ from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
 from app.models.recipe import Recipe
 from app.planning import alternatives
 from app.planning.meal_composition import meal_minutes
+from app.planning.recipe_similarity import RecipeSimilarity
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError
 from app.repositories.recipe import RecipeRepository
@@ -61,11 +62,14 @@ class MealPlanReplanningService:
         recipe_repository: RecipeRepository,
         recommendation_service: RecipeRecommendationService,
         grocery_aggregator: WeeklyGroceryAggregator,
+        request_similarity: RecipeSimilarity | None = None,
     ) -> None:
         self.repository = repository
         self.recipe_repository = recipe_repository
         self.recommendation_service = recommendation_service
         self.grocery_aggregator = grocery_aggregator
+        # Orders the candidates a swap may choose by what the household said they want instead.
+        self.request_similarity = request_similarity
 
     def preview(
         self,
@@ -250,11 +254,26 @@ class MealPlanReplanningService:
             item.recipe_id for item in plan.entries if item.id != entry.id and item.status != "skipped"
         )
 
+        # "Can Wednesday be fish instead?": among the candidates that already hold every hard constraint,
+        # what was asked for leads and the recommendation score only breaks near-ties. Nothing described,
+        # no vectors or no key: the swap orders by score, as before.
+        asked = (
+            self.request_similarity.scores(request.reason, [recipes_by_id[c.recipe.id] for c in candidates])
+            if self.request_similarity is not None and request.event_type == "REPLACE_MEAL"
+            else {}
+        )
+
         def score(candidate: RecipeRecommendationResponse) -> tuple[float, int]:
             neighbor_penalty = 20.0 * (
                 int(candidate.recipe.id == previous_recipe_id) + int(candidate.recipe.id == next_recipe_id)
             )
-            value = candidate.total_score - use_counts[candidate.recipe.id] * 8.0 - neighbor_penalty
+            # A recipe with no stored vector (added after the vectors were made) competes on its score alone.
+            fit = (
+                100.0 * asked.get(candidate.recipe.id, 0.0) + 0.05 * candidate.total_score
+                if asked
+                else candidate.total_score
+            )
+            value = fit - use_counts[candidate.recipe.id] * 8.0 - neighbor_penalty
             return value, -candidate.recipe.id
 
         return max(candidates, key=score)

@@ -8,8 +8,10 @@ from app.api.routes.auth import (
     CurrentHouseholdCreatePlanCsrfDependency,
     CurrentHouseholdViewDependency,
 )
+from app.core import config
 from app.db.session import get_db_session
 from app.planning.grocery_estimator import GroceryEstimator
+from app.planning.recipe_similarity import RecipeSimilarity, catalog_embedder
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.meal_plan import MealPlanRepository
@@ -76,11 +78,15 @@ def build_replanning_service(database: Session, household_id: int) -> MealPlanRe
         recipe_repository,
         grocery_estimator=GroceryEstimator(product_service),
     )
+    settings = config.get_settings()
+    # Only where the live model is configured: fixture deployments and tests never call an embedding API.
+    key = settings.openai_api_key if settings.agent_parser_provider == "openai" else None
     return MealPlanReplanningService(
         repository=MealPlanRepository(database, household_id=household_id),
         recipe_repository=recipe_repository,
         recommendation_service=recommendation_service,
         grocery_aggregator=WeeklyGroceryAggregator(product_service),
+        request_similarity=RecipeSimilarity(catalog_embedder(key.get_secret_value())) if key else None,
     )
 
 
