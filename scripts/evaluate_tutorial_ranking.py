@@ -7,6 +7,7 @@ after the policy is frozen, and never tune on what it prints.
 
 A policy returns one video or none. For each dish: good (label 2), weak (1), wrong (0), or none.
 None is right when the pool holds no 2 (an unavailable state beats an irrelevant video), a miss otherwise.
+With a partial label file (the held-out person review) a pick nobody scored is counted as unlabelled.
 """
 
 import json
@@ -16,6 +17,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from app.retrieval.tutorials import TutorialCandidate, rank_tutorial_candidates
+from tutorial_ranking_v1 import rank_v1
 
 ROOT = Path("data/evaluation/tutorials")
 Policy = Callable[[dict], str | None]
@@ -35,9 +37,9 @@ def pool(dish: dict, form: str) -> list[TutorialCandidate]:
     ]
 
 
-def shipped(form: str) -> Policy:
+def policy(form: str, ranker=rank_tutorial_candidates) -> Policy:
     def choose(dish: dict) -> str | None:
-        ranked = rank_tutorial_candidates(
+        ranked = ranker(
             recipe_title=dish["title"],
             cuisine=dish["cuisine"],
             ingredient_names=dish["ingredients"],
@@ -49,12 +51,10 @@ def shipped(form: str) -> Policy:
     return choose
 
 
-# Measured before ranking v2 replaced the ranker, on the developer dishes with Codex's labels:
-#   v1 query + v1 ranking (shipped until v2)   good 5  weak 7  wrong 1  none ok 2  missed 5
-#   title query + v1 ranking                   good 10 weak 8  wrong 0  none ok 1  missed 1
 POLICIES: dict[str, Policy] = {
-    "v1 query + v2 ranking": shipped("v1"),
-    "title query + v2 ranking (shipped)": shipped("title"),
+    "v1 query + v1 ranking (shipped before)": policy("v1", rank_v1),
+    "name + recipe, v1 ranking": policy("title", rank_v1),
+    "name + recipe, v2 ranking (shipped)": policy("title"),
 }
 
 
@@ -70,17 +70,20 @@ def main() -> None:
     ]
     has_good = sum(1 for d in dishes if 2 in labels.get(d["recipe_id"], {}).values())
     print(f"{split}: {len(dishes)} dishes, labels by {reviewer}; a 2 exists in the pool for {has_good}\n")
-    print(f"{'policy':38} {'good':>5} {'weak':>5} {'wrong':>6} {'none ok':>8} {'missed':>7}")
-    for name, policy in POLICIES.items():
-        tally = {"good": 0, "weak": 0, "wrong": 0, "none ok": 0, "missed": 0}
+    columns = ("good", "weak", "wrong", "none ok", "missed", "unlabelled")
+    print(f"{'policy':40} " + " ".join(f"{c:>10}" for c in columns))
+    for name, choose in POLICIES.items():
+        tally = dict.fromkeys(columns, 0)
         for dish in dishes:
             dish_labels = labels.get(dish["recipe_id"], {})
-            chosen = policy(dish)
+            chosen = choose(dish)
             if chosen is None:
                 tally["missed" if 2 in dish_labels.values() else "none ok"] += 1
+            elif chosen not in dish_labels:
+                tally["unlabelled"] += 1
             else:
                 tally[{2: "good", 1: "weak", 0: "wrong"}[dish_labels[chosen]]] += 1
-        print(f"{name:38} " + " ".join(f"{tally[k]:>{w}}" for k, w in zip(tally, (5, 5, 6, 8, 7), strict=True)))
+        print(f"{name:40} " + " ".join(f"{tally[c]:>10}" for c in columns))
 
 
 if __name__ == "__main__":
