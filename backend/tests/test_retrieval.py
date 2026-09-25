@@ -68,15 +68,58 @@ class FailingLiveTutorialProvider:
         raise TutorialProviderError("simulated YouTube outage")
 
 
-def test_query_builder_keeps_recipe_context_and_execution_intent() -> None:
-    query = build_tutorial_query(
-        recipe_title="Lemon Chicken",
-        cuisine="Mediterranean",
-        ingredient_names=["Chicken breast", "Lemon"],
-        language="en",
+def test_query_is_the_dish_name_as_a_person_would_search() -> None:
+    assert build_tutorial_query(recipe_title=" Lemon Chicken ") == "Lemon Chicken recipe"
+
+
+def test_titles_match_across_plurals_and_accents() -> None:
+    from app.retrieval.tutorials import tokenize
+
+    assert tokenize("Shish Kebabs") == tokenize("shish kebab")
+    assert tokenize("Chả lụa") == {"cha", "lua"}
+    assert tokenize("Croquettes") == tokenize("croquette")
+
+
+def _candidate(video_id: str, title: str, seconds: int) -> TutorialCandidate:
+    return TutorialCandidate(
+        video_id=video_id,
+        title=title,
+        channel_title="C",
+        duration_seconds=seconds,
+        embeddable=True,
+        language_hint="en",
+        source="fixture",
+        fetched_at=datetime(2026, 9, 25, tzinfo=UTC),
     )
 
-    assert query == "Lemon Chicken Mediterranean Chicken breast Lemon en cooking tutorial"
+
+def test_ranking_v2_sinks_shorts_ignores_staples_and_keeps_youtubes_order_on_ties() -> None:
+    ranked = rank_tutorial_candidates(
+        recipe_title="Stir-Fry Chicken",
+        cuisine="chinese",
+        ingredient_names=["vegetable oil", "soy sauce", "chicken breast"],
+        language="en",
+        candidates=[
+            _candidate("short", "Chicken Stir Fry Recipe #shorts", 45),
+            _candidate("sauce", "Chicken Stir Fry in Oyster Sauce Recipe", 300),
+            _candidate("first", "Chicken Stir Fry Recipe", 300),
+            _candidate("second", "Chicken Stir Fry Recipe", 300),
+        ],
+    )
+    # "sauce" is a staple, so sharing it with the recipe earns nothing; equal scores keep YouTube's order.
+    assert [item[2].video_id for item in ranked] == ["sauce", "first", "second", "short"]
+    assert "too short to follow" in ranked[-1][1]
+
+
+def test_generic_words_in_a_dish_name_cannot_qualify_a_video() -> None:
+    ranked = rank_tutorial_candidates(
+        recipe_title="Easy Thai Chicken",
+        cuisine="thai",
+        ingredient_names=["chicken"],
+        language="en",
+        candidates=[_candidate("curry", "Easy Thai Curry Recipe", 300)],
+    )
+    assert ranked == []  # only "thai" is the dish; "easy" says nothing
 
 
 def test_ranker_filters_non_embeddable_candidates_and_prefers_recipe_overlap() -> None:
