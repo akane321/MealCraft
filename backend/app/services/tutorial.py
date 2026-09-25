@@ -65,12 +65,7 @@ class TutorialRecommendationService:
             return None
 
         ingredient_names = [item.name for item in recipe.ingredients]
-        query = build_tutorial_query(
-            recipe_title=recipe.title,
-            cuisine=recipe.cuisine,
-            ingredient_names=ingredient_names,
-            language=language,
-        )
+        query = build_tutorial_query(recipe_title=recipe.title)
 
         warning: str | None = None
         provider_used = "youtube" if live else "fixture"
