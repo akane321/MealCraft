@@ -1,6 +1,7 @@
 import html
 import json
 import re
+import unicodedata
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Protocol
@@ -42,22 +43,27 @@ class TutorialSearchProvider(Protocol):
     def search(self, query: str, *, limit: int) -> list[TutorialCandidate]: ...
 
 
+def singular(token: str) -> str:
+    """Kebabs and kebab, croquettes and croquette are one word to a title match."""
+    if len(token) > 4 and token.endswith("ies"):
+        return token[:-3] + "y"
+    if len(token) > 4 and token.endswith(("ches", "shes", "xes", "sses")):
+        return token[:-2]
+    if len(token) > 3 and token.endswith("s") and not token.endswith("ss"):
+        return token[:-1]
+    return token
+
+
 def tokenize(value: str) -> set[str]:
-    return set(TOKEN_PATTERN.findall(value.casefold()))
+    folded = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode().casefold()  # Chả lụa: cha lua
+    return {singular(token) for token in TOKEN_PATTERN.findall(folded)}
 
 
-def build_tutorial_query(
-    *,
-    recipe_title: str,
-    cuisine: str,
-    ingredient_names: list[str],
-    language: str,
-) -> str:
-    parts = [recipe_title.strip(), cuisine.strip(), *[name.strip() for name in ingredient_names[:3]]]
-    if language.strip():
-        parts.append(language.strip())
-    parts.append("cooking tutorial")
-    return " ".join(part for part in parts if part)
+def build_tutorial_query(*, recipe_title: str) -> str:
+    """The dish's name and "recipe", as a person would search. On the labelled developer dishes the longer
+    query (cuisine, three ingredients, language, "cooking tutorial") found no video at all for three
+    dishes and half as many right Top-1s (docs/design/external-retrieval-rag.md, ranking v2)."""
+    return f"{recipe_title.strip()} recipe"
 
 
 class FixtureTutorialProvider:
@@ -222,6 +228,20 @@ PROTEIN_WORDS = frozenset(
 )
 
 
+# Words in a recipe's name that say nothing about which dish it is, so they cannot qualify a video.
+DISH_NOISE = frozenset(
+    tokenize("easy best quick simple style homemade classic perfect recipe the and with of in a my ww point")
+)
+# Pantry staples: sharing one with a video title says nothing about the dish either.
+STAPLES = frozenset(
+    tokenize(
+        "oil vegetable olive salt pepper black white sugar granulated brown water sauce powder flour all purpose "
+        "butter vinegar ground fresh dried garlic onion cornstarch stock broth"
+    )
+)
+SHORT_SECONDS = 90  # a Short cannot be cooked along to; the reviewers score it "too short to follow"
+
+
 def rank_tutorial_candidates(
     *,
     recipe_title: str,
@@ -230,14 +250,15 @@ def rank_tutorial_candidates(
     language: str,
     candidates: list[TutorialCandidate],
 ) -> list[tuple[float, list[str], TutorialCandidate]]:
-    recipe_tokens = tokenize(recipe_title)
+    """Ranking policy v2. Candidates arrive in YouTube's relevance order, which breaks ties."""
+    recipe_tokens = tokenize(recipe_title) - DISH_NOISE
     cuisine_tokens = tokenize(cuisine)
-    ingredient_tokens = set().union(*(tokenize(name) for name in ingredient_names[:3])) if ingredient_names else set()
     all_ingredient_tokens = set().union(*(tokenize(name) for name in ingredient_names)) if ingredient_names else set()
+    ingredient_tokens = all_ingredient_tokens - STAPLES - recipe_tokens
     language_token = language.casefold().strip()
 
-    ranked: list[tuple[float, list[str], TutorialCandidate]] = []
-    for candidate in candidates:
+    ranked: list[tuple[float, int, list[str], TutorialCandidate]] = []
+    for position, candidate in enumerate(candidates):
         if not candidate.embeddable:
             continue
 
@@ -269,6 +290,9 @@ def rank_tutorial_candidates(
         if candidate.duration_seconds is not None and 120 <= candidate.duration_seconds <= 1800:
             score += 2.0
             reasons.append("practical duration")
+        elif candidate.duration_seconds is not None and candidate.duration_seconds < SHORT_SECONDS:
+            score -= 8.0
+            reasons.append("too short to follow")
 
         if language_token and candidate.language_hint == language_token:
             score += 1.0
@@ -280,7 +304,7 @@ def rank_tutorial_candidates(
         # dish's name (all of them for a one-word name).
         if title_matches < min(2, len(recipe_tokens)):
             continue
-        ranked.append((score, reasons, candidate))
+        ranked.append((score, position, reasons, candidate))
 
-    ranked.sort(key=lambda item: (-item[0], item[2].video_id))
-    return ranked
+    ranked.sort(key=lambda item: (-item[0], item[1]))
+    return [(score, reasons, candidate) for score, _, reasons, candidate in ranked]
