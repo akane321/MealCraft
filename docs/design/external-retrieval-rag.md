@@ -74,11 +74,30 @@ behaviour is a typed `unknown package` warning rather than a guess.
 - an offline fixture proving that only one selected tutorial is returned.
 
 The home surface already embeds the selected video for tonight's dinner and
-labels a sample one as such. `YouTubeDataApiProvider.search` in
-`backend/app/retrieval/tutorials.py` currently raises — the live request,
-advanced relevance features, persistent video cache, broad FairPrice package
-handling and production RAG orchestration remain teammate-owned. A scaffold is
-not a complete live feature.
+labels a sample one as such.
+
+### Live YouTube (work package B, first slice)
+
+`YouTubeDataApiProvider` now calls the YouTube Data API v3: one `search` call
+(100 quota units, embeddable videos only, strict safe search) and one `videos`
+call (1 unit) for duration, embeddability and audio language. Live broadcasts
+and videos that disappear between the two calls are dropped; YouTube's own order
+is kept and the unchanged ranking policy picks the Top-1. The key is read from
+the server environment and sent in the `X-Goog-Api-Key` header, so it never
+appears in a URL, error, trace or log. Quota exhaustion, a refused key and an
+unreachable service are named errors that fall back to the fixture as
+`degraded`; a source that answers with nothing for the dish is `no_match`.
+
+With a key configured the tutorial endpoint goes live by default (`live` may
+still be forced either way). Results are cached per query for 24 hours in the
+server process and reported as mode `cache` with the original `fetched_at`;
+a failed lookup is never cached. The cache does not survive a restart — the
+`retrieval_*` tables below replace it once their fields are reviewed.
+
+Still open: a persistent cache, reviewed query–video labels and Top-1
+measurement, and ranking improvements measured against them (shorts, channel
+quality, regional dish names, ties). Broad FairPrice package handling and
+production RAG orchestration are unchanged.
 
 ## One external-evidence architecture
 
