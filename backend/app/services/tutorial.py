@@ -1,3 +1,4 @@
+import time
 from datetime import UTC, datetime
 
 from app.repositories.recipe import RecipeRepository
@@ -12,6 +13,12 @@ from app.retrieval.tutorials import (
 from app.schemas.retrieval import RetrievalTrace, TutorialRecommendationResponse, TutorialVideoResponse
 from app.services.recipe import RecipeService
 
+# A search costs 100 of the 10,000 daily quota units, so repeated opens of the same dish must not search again.
+# ponytail: per-process cache, lost on restart; a retrieval_observations table when ADR review settles its fields.
+LIVE_CACHE_SECONDS = 24 * 3600
+LIVE_CACHE_SIZE = 512
+_live_cache: dict[str, tuple[float, list]] = {}
+
 
 def create_tutorial_service(repository: RecipeRepository) -> "TutorialRecommendationService":
     from app.core.config import get_settings
@@ -25,6 +32,7 @@ def create_tutorial_service(repository: RecipeRepository) -> "TutorialRecommenda
             api_key=api_key,
             timeout_seconds=settings.youtube_timeout_seconds,
         ),
+        live_by_default=api_key is not None,
     )
 
 
@@ -35,19 +43,23 @@ class TutorialRecommendationService:
         recipe_service: RecipeService,
         fixture_provider: TutorialSearchProvider,
         live_provider: TutorialSearchProvider,
+        live_by_default: bool = False,
     ) -> None:
         self.recipe_service = recipe_service
         self.fixture_provider = fixture_provider
         self.live_provider = live_provider
+        self.live_by_default = live_by_default
 
     def recommend(
         self,
         recipe_slug: str,
         *,
-        live: bool,
+        live: bool | None,
         language: str,
-        candidate_limit: int = 5,
+        candidate_limit: int = 10,
     ) -> TutorialRecommendationResponse | None:
+        if live is None:
+            live = self.live_by_default
         recipe = self.recipe_service.get_recipe(recipe_slug)
         if recipe is None:
             return None
@@ -64,9 +76,17 @@ class TutorialRecommendationService:
         provider_used = "youtube" if live else "fixture"
         mode = "live" if live else "fixture"
         status = "success"
+        cached = _live_cache.get(query) if live else None
         try:
-            provider = self.live_provider if live else self.fixture_provider
-            candidates = provider.search(query, limit=candidate_limit)
+            if cached and time.monotonic() - cached[0] < LIVE_CACHE_SECONDS:
+                candidates, mode = cached[1], "cache"  # fetched_at stays the original observation's
+            elif live:
+                candidates = self.live_provider.search(query, limit=candidate_limit)
+                if len(_live_cache) >= LIVE_CACHE_SIZE:
+                    del _live_cache[min(_live_cache, key=lambda key: _live_cache[key][0])]
+                _live_cache[query] = (time.monotonic(), candidates)
+            else:
+                candidates = self.fixture_provider.search(query, limit=candidate_limit)
         except TutorialProviderError as error:
             warning = f"Live YouTube lookup was unavailable; tutorial fixtures were used. ({error})"
             candidates = self.fixture_provider.search(query, limit=candidate_limit)
@@ -101,7 +121,7 @@ class TutorialRecommendationService:
                 match_reasons=reasons,
             )
         elif status == "success":
-            status = "unavailable"
+            status = "no_match"  # the source answered; nothing in it is this dish (ADR-0022 section 3)
             warning = "No embeddable tutorial candidate passed the current ranking policy."
 
         trace = RetrievalTrace(

@@ -1,6 +1,7 @@
 from collections.abc import Generator
 from datetime import date
 from decimal import Decimal
+from urllib.error import URLError
 
 import pytest
 from fastapi.testclient import TestClient
@@ -16,6 +17,7 @@ from app.db.session import get_db_session
 from app.main import app
 from app.models.platform import HouseholdMembership
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
+from app.retrieval import tutorials
 
 
 @pytest.fixture
@@ -153,7 +155,12 @@ def test_get_recipe_returns_not_found(recipe_client: TestClient) -> None:
     assert response.json() == {"detail": "Recipe not found"}
 
 
-def test_get_recipe_tutorial_returns_one_ranked_video(recipe_client: TestClient) -> None:
+def test_get_recipe_tutorial_returns_one_ranked_video(
+    recipe_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Without a key the default is the fixture; a developer's own `.env` key must not turn this into a live call.
+    settings = get_settings().model_copy(update={"youtube_api_key": None})
+    monkeypatch.setattr(config, "get_settings", lambda: settings)
     response = recipe_client.get("/api/recipes/lemon-chicken/tutorial")
 
     assert response.status_code == 200
@@ -169,11 +176,11 @@ def test_get_recipe_tutorial_returns_one_ranked_video(recipe_client: TestClient)
     "api_key,expected_warning",
     [
         (None, "not configured"),
-        ("a-key-that-is-present-but-unused", "not implemented"),
+        ("a-key-for-an-unreachable-youtube", "could not be reached"),
     ],
-    ids=["no-key", "key-configured"],
+    ids=["no-key", "youtube-unreachable"],
 )
-def test_get_recipe_tutorial_live_scaffold_degrades_visibly(
+def test_get_recipe_tutorial_live_failure_degrades_visibly(
     recipe_client: TestClient, monkeypatch: pytest.MonkeyPatch, api_key: str | None, expected_warning: str
 ) -> None:
     """Both branches, with the key set explicitly rather than inherited.
@@ -188,6 +195,11 @@ def test_get_recipe_tutorial_live_scaffold_degrades_visibly(
     # `create_tutorial_service` reads configuration directly rather than through a
     # FastAPI dependency, so a dependency override would not reach it.
     monkeypatch.setattr(config, "get_settings", lambda: settings)
+
+    def unreachable(request, timeout):
+        raise URLError("no network in tests")
+
+    monkeypatch.setattr(tutorials, "urlopen", unreachable)  # a test never calls the real YouTube
 
     response = recipe_client.get("/api/recipes/lemon-chicken/tutorial", params={"live": True})
 

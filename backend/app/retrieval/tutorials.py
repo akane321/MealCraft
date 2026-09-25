@@ -1,8 +1,12 @@
+import html
 import json
 import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Protocol
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 from pydantic import BaseModel, Field
 
@@ -91,22 +95,107 @@ class FixtureTutorialProvider:
         return candidates[:limit]
 
 
-class YouTubeDataApiProvider:
-    """Extension point for the teammate-owned live YouTube Data API adapter.
+YOUTUBE_API = "https://www.googleapis.com/youtube/v3"
+ISO_DURATION = re.compile(r"P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?")
 
-    The fixture-backed contract, ranking policy, API response, and fallback are
-    deliberately runnable now. The live request, pagination, quota handling,
-    and response normalization remain the Retrieval work package.
+
+def parse_iso_duration(value: str | None) -> int | None:
+    """Seconds in a YouTube ISO-8601 duration; None for a live stream's P0D or anything unparsable."""
+    match = ISO_DURATION.fullmatch(value or "")
+    if not match:
+        return None
+    days, hours, minutes, seconds = (int(part or 0) for part in match.groups())
+    total = ((days * 24 + hours) * 60 + minutes) * 60 + seconds
+    return total or None
+
+
+class YouTubeDataApiProvider:
+    """Live YouTube Data API v3: one search call, then one videos call for duration and embeddability.
+
+    A search costs 100 quota units and the videos call 1, so a default daily quota of 10,000 allows about
+    99 searches; the service caches results for that reason. The key travels in a header, never in a URL,
+    so no error message, log line or trace can carry it.
     """
 
     def __init__(self, *, api_key: str | None, timeout_seconds: float) -> None:
         self.api_key = api_key
         self.timeout_seconds = timeout_seconds
 
+    def _get(self, endpoint: str, params: dict[str, str | int]) -> dict:
+        request = Request(
+            f"{YOUTUBE_API}/{endpoint}?{urlencode(params)}",
+            headers={"X-Goog-Api-Key": self.api_key or "", "Accept": "application/json"},
+        )
+        try:
+            with urlopen(request, timeout=self.timeout_seconds) as response:  # noqa: S310
+                return json.loads(response.read().decode("utf-8"))
+        except HTTPError as error:
+            try:
+                reasons = {item.get("reason") for item in json.loads(error.read()).get("error", {}).get("errors", [])}
+            except (ValueError, AttributeError):
+                reasons = set()
+            if reasons & {"quotaExceeded", "dailyLimitExceeded", "rateLimitExceeded"}:
+                raise TutorialProviderError("YouTube quota for today is used up") from None
+            if reasons & {"keyInvalid", "keyExpired"} or error.code in (400, 401, 403):
+                raise TutorialProviderError(f"YouTube refused the request (HTTP {error.code})") from None
+            raise TutorialProviderError(f"YouTube request failed (HTTP {error.code})") from None
+        except (URLError, TimeoutError, OSError) as error:
+            raise TutorialProviderError(f"YouTube could not be reached: {type(error).__name__}") from None
+        except ValueError:
+            raise TutorialProviderError("YouTube answered with something that is not JSON") from None
+
     def search(self, query: str, *, limit: int) -> list[TutorialCandidate]:
         if not self.api_key:
             raise TutorialProviderError("YOUTUBE_API_KEY is not configured")
-        raise TutorialProviderError("Live YouTube Data API retrieval is a scaffold hand-off and is not implemented")
+        found = self._get(
+            "search",
+            {
+                "part": "snippet",
+                "type": "video",
+                "q": query,
+                "maxResults": max(1, min(limit, 50)),
+                "videoEmbeddable": "true",
+                "safeSearch": "strict",
+            },
+        )
+        try:
+            ids = [item["id"]["videoId"] for item in found.get("items", [])]
+        except (KeyError, TypeError):
+            raise TutorialProviderError("YouTube search results were not in the expected shape") from None
+        if not ids:
+            return []
+        details = self._get("videos", {"part": "snippet,contentDetails,status", "id": ",".join(ids)})
+        fetched_at = datetime.now(UTC)
+        by_id = {item.get("id"): item for item in details.get("items", [])}
+        candidates: list[TutorialCandidate] = []
+        for video_id in ids:  # keep YouTube's own relevance order
+            item = by_id.get(video_id)
+            if item is None:  # removed or private between the two calls
+                continue
+            snippet = item.get("snippet", {})
+            if snippet.get("liveBroadcastContent", "none") != "none":
+                continue
+            language = snippet.get("defaultAudioLanguage") or snippet.get("defaultLanguage")
+            thumbnails = snippet.get("thumbnails", {})
+            sizes = [size for size in ("medium", "high", "default") if size in thumbnails]
+            thumbnail = thumbnails[sizes[0]].get("url") if sizes else None
+            try:
+                candidates.append(
+                    TutorialCandidate(
+                        video_id=video_id,
+                        title=html.unescape(snippet.get("title", ""))[:300],
+                        channel_title=html.unescape(snippet.get("channelTitle", ""))[:200],
+                        thumbnail_url=thumbnail,
+                        duration_seconds=parse_iso_duration(item.get("contentDetails", {}).get("duration")),
+                        embeddable=bool(item.get("status", {}).get("embeddable", False)),
+                        language_hint=language.split("-")[0].casefold() if language else None,
+                        source="youtube",
+                        fetched_at=fetched_at,
+                    )
+                )
+            except ValueError:  # an empty title or channel: not a candidate we can show
+                continue
+        return candidates
 
 
 # A video that names one of these but the recipe doesn't is for a different dish:

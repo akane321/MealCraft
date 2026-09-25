@@ -56,7 +56,7 @@ def get_recipe(
 def get_recipe_tutorial(
     service: TutorialServiceDependency,
     slug: Annotated[str, Path(min_length=1, max_length=160)],
-    live: bool = False,
+    live: bool | None = None,  # None: live when the server has a YouTube key
     language: Annotated[str, Query(min_length=2, max_length=20)] = "en",
 ) -> TutorialRecommendationResponse:
     recommendation = service.recommend(slug, live=live, language=language)
