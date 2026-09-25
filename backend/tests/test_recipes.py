@@ -1344,3 +1344,38 @@ def test_authorized_write_still_requires_csrf(recipe_client: TestClient) -> None
 
     assert response.status_code == 403
     assert response.json() == {"detail": "CSRF validation failed"}
+
+
+def test_a_swap_hands_what_was_asked_for_to_the_matcher_and_survives_recipes_without_vectors(
+    recipe_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from pydantic import SecretStr
+
+    from app.api.routes import meal_plans as meal_plan_routes
+
+    asked: list[list[str]] = []
+
+    def fake_embedder(api_key: str):
+        def embed(texts: list[str]) -> list[list[float]]:
+            asked.append(texts)
+            return [[0.1] * 256 for _ in texts]
+
+        return embed
+
+    # The live model is configured, so the swap may match the request; no real embedding API is called.
+    settings = get_settings().model_copy(
+        update={"agent_parser_provider": "openai", "openai_api_key": SecretStr("test-key")}
+    )
+    monkeypatch.setattr(config, "get_settings", lambda: settings)
+    monkeypatch.setattr(meal_plan_routes, "catalog_embedder", fake_embedder)
+
+    plan = _generate_replanning_fixture(recipe_client, "2026-09-22")
+    target = plan["days"][0]
+    preview = recipe_client.post(
+        f"/api/plans/{plan['id']}/replan/preview",
+        json={"event_type": "REPLACE_MEAL", "entry_id": target["entry_id"], "reason": "Can Monday be tofu instead?"},
+    )
+
+    assert preview.status_code == 201  # these test recipes have no stored vectors: the score alone decides
+    assert preview.json()["after_entry"]["recipe_slug"] != target["recipe"]["slug"]
+    assert asked == [["tofu"]]  # only the described part, one call
