@@ -1,5 +1,5 @@
 {
- "reviewer": "heldout-review-v1 (identity not stated in the returned file)",
+ "reviewer": "owner",
  "labels": {
   "RCP2_F3A68B743FB0": {
    "LROplcFbP3g": 1,
@@ -75,5 +75,6 @@
    "EEeLWvoMnGY": 2,
    "4a4AL04mQEk": 1
   }
- }
+ },
+ "note": "Reviewed by the project owner, who confirmed on 2026-09-25 that they watched the videos. The returned sheet had been converted to Pandoc tables and lost its header; identity recorded from that confirmation."
 }

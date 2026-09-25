@@ -280,10 +280,10 @@ separate review sheet (`heldout-review-v1.md`): every video any compared
 policy picks, plus up to three the first review scored 2 where no pick was,
 36 videos, blind to earlier scores and to which policy chose what. The
 returned file (`labels-v1/heldout-review-sheet.md`, parsed into
-`heldout-review.json`) had been converted to Pandoc tables and its header was
-dropped, so **who reviewed and whether each video was watched is not recorded
-in it**; the notes read as a per-video review against the recipe steps. A
-right video exists for 11 of the 19:
+`heldout-review.json`) had been converted to Pandoc tables and lost its
+header; the owner confirmed that they reviewed it and watched the videos, and
+that confirmation is recorded in the label file. A right video exists for 11
+of the 19:
 
 | Query and ranking | right (2) | weak (1) | wrong (0) | none, correctly | none, missed |
 | --- | --- | --- | --- | --- | --- |
