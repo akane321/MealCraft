@@ -269,7 +269,7 @@ the next incomplete control. It is a navigation aid, not a second status source.
 | --- | --- | --- |
 | Account and session security | Alembic revisions `20260906_0010` and `20260908_0012`; authentication service and routes; password, session and CSRF tests | Out of scope by the owner's decision (2026-09-26, no deployment): email verification, password reset/change, rate limiting and account lifecycle are not planned |
 | Household tenancy | Alembic revision `20260916_0014`; current-household route dependency; household-scoped repositories; private-route authentication and cross-household integration tests | Broaden the endpoint-by-endpoint isolation matrix as private resources are added |
-| Household authorization | `backend/app/auth/authorization.py`; action dependencies on the Profile, Plan, Check-in and Agent routes; owner/editor/member/viewer and CSRF-ordering tests in `backend/tests/test_backend_platform.py` | Member-management routes (`MANAGE_MEMBERS`) |
+| Household authorization | `backend/app/auth/authorization.py`; action dependencies on the Profile, Plan, Check-in and Agent routes; owner/editor/member/viewer and CSRF-ordering tests in `backend/tests/test_backend_platform.py` | Member-management routes (`MANAGE_MEMBERS`) are out of scope by the owner's decision |
 | Operations and Console | `OperationRun` and `AuditEvent` persistence; `/api/ops/*` routes and services; migrations `20260927_0023` (runtime settings) and `20260928_0025` (catalog edits); `backend/tests/test_operations_*.py`; the `/ops` pages | Durable worker |
 
 ## Current Priorities
@@ -289,8 +289,8 @@ the next incomplete control. It is a navigation aid, not a second status source.
    authorized, budget-capped live-model comparison.
 7. Expand dynamic-replanning stress cases and measure unnecessary disruption.
 8. Increase browser coverage and prepare a repeatable demonstration path.
-9. Add member-management routes and expand the cross-household isolation matrix
-   as private resources grow.
+9. Expand the cross-household isolation matrix as private resources grow
+   (member management is out of scope by the owner's decision).
 10. Raise the discriminating power of the held-out evaluation before the final
    comparison. Parameters may be tuned on developer data only, never on
    held-out episodes (decision ADR-0020 as amended by ADR-0029). On the current v1 set the strong Rule-only reference
