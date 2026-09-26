@@ -139,6 +139,7 @@ class AgentRunResponse(BaseModel):
     context_version: int
     plan_revision: int | None
     scope_decision: dict | None
+    run_config: dict | None = Field(default=None, validation_alias="model_config")
     checkpoint_version: int
     max_llm_calls: int
     used_llm_calls: int

@@ -441,6 +441,7 @@ class OpenAIConstraintParser:
 
     def __init__(self, *, api_key: str, model: str, vocabulary: ConstraintVocabulary | None = None) -> None:
         self.vocabulary = vocabulary
+        self.model = model
         self.structured_model = ChatOpenAI(
             api_key=api_key,
             model=model,

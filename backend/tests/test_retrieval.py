@@ -367,3 +367,24 @@ def test_a_source_with_nothing_for_the_dish_is_no_match_not_an_outage() -> None:
     result = service.recommend("lemon-chicken", live=False, language="en")
     assert result.selected_video is None
     assert result.retrieval.status == "no_match"
+
+
+def test_the_shown_tutorial_carries_a_digest_of_its_evidence() -> None:
+    from app.retrieval.evidence import packet_digest, tutorial_packet
+
+    service = TutorialRecommendationService(
+        recipe_service=RecipeServiceStub(),
+        fixture_provider=FixtureTutorialProvider(str(FIXTURE_PATH)),
+        live_provider=FailingLiveTutorialProvider(),
+    )
+    first = service.recommend("lemon-chicken", live=False, language="en")
+    second = service.recommend("lemon-chicken", live=False, language="en")
+
+    packet = tutorial_packet(first.selected_video, first.retrieval, recipe_slug="lemon-chicken")
+    assert first.evidence_digest == packet_digest(packet)
+    assert [item.external_id for item in packet.items] == ["fixture-lemon-chicken-best"]
+    assert packet.items[0].facts["mode"] == first.retrieval.mode
+    # The digest is over the evidence, not when it was assembled, so the same video gives the same digest.
+    assert packet_digest(tutorial_packet(second.selected_video, first.retrieval, recipe_slug="lemon-chicken")) == (
+        first.evidence_digest
+    )

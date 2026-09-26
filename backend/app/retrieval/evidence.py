@@ -13,7 +13,12 @@ from app.orchestration.contracts import EvidenceFact, GroundingReport, ResponseC
 from app.orchestration.grounding import verify_structured_claims
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse
 from app.schemas.product import GroceryEstimateResponse
-from app.schemas.retrieval import RetrievalEvidenceItem, RetrievalEvidencePacket
+from app.schemas.retrieval import (
+    RetrievalEvidenceItem,
+    RetrievalEvidencePacket,
+    RetrievalTrace,
+    TutorialVideoResponse,
+)
 
 Estimate = WeeklyGroceryEstimateResponse | GroceryEstimateResponse
 
@@ -49,6 +54,41 @@ def grocery_packet(estimate: Estimate, *, generated_at: datetime | None = None) 
         generated_at=generated_at or datetime.now(UTC),
         items=items,
         warnings=[f"No provenance recorded for {name}." for name in unsourced],
+    )
+
+
+def tutorial_packet(
+    video: TutorialVideoResponse | None, trace: RetrievalTrace, *, recipe_slug: str
+) -> RetrievalEvidencePacket:
+    """The one video shown for a dish, with where and how it was found; a title is data, never read as a
+    rule (its words only score it)."""
+    items = []
+    if video is not None:
+        items.append(
+            RetrievalEvidenceItem(
+                source="youtube",
+                external_id=video.video_id,
+                title=video.title,
+                url=video.watch_url,
+                fetched_at=trace.fetched_at,
+                facts={
+                    "recipe": recipe_slug,
+                    "channel": video.channel_title,
+                    "provider": trace.provider_used,
+                    "mode": trace.mode,
+                    "query": trace.query,
+                    "parser_version": trace.parser_version,
+                    "relevance_score": video.relevance_score,
+                    "candidates": trace.candidate_count,
+                },
+            )
+        )
+    return RetrievalEvidencePacket(
+        purpose="cooking_support",
+        query=trace.query,
+        generated_at=trace.fetched_at,
+        items=items,
+        warnings=list(trace.warnings),
     )
 
 
