@@ -59,7 +59,7 @@ def create_constraint_parser(settings: Settings, database: Session | None = None
     # a word outside them is asked about, with the closest ids offered (ingredient_matcher).
     vocabulary = None
     if database is not None:
-        names = dict(database.execute(select(Ingredient.normalized_name, Ingredient.display_name)).tuples())
+        names = dict(database.execute(select(Ingredient.normalized_name, Ingredient.display_name)).tuples().all())
         vocabulary = ConstraintVocabulary(
             ingredients=frozenset(names),
             groups=catalog_groups(),

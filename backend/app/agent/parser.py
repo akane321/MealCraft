@@ -383,7 +383,8 @@ class ConstraintVocabulary:
         return f"""{text}
 - excluded_ingredients may also name a whole family by its group id, which removes every member
   at once. Use the group id when the user names the family (told "no alcohol", write group:alcohol),
-  and do not list its members yourself. Groups are for excluded_ingredients only:
+  and do not list its members yourself. A single member the user names is that id, not its family:
+  "no cooking wine" or 不要料酒 is wine_cooking, not group:alcohol. Groups are for excluded_ingredients only:
 {members}"""
 
 
@@ -480,4 +481,7 @@ Latest user message: {message}
         result = self.structured_model.invoke(prompt)
         if not isinstance(result, AgentConstraintExtraction):
             result = AgentConstraintExtraction.model_validate(result)
-        return align_to_vocabulary(result, self.vocabulary) if self.vocabulary else result
+        aligned = align_to_vocabulary(result, self.vocabulary) if self.vocabulary else result
+        # The reply is a template over what was understood, never the model's own sentence.
+        aligned.assistant_summary = RuleBasedConstraintParser._summary(aligned)
+        return aligned
