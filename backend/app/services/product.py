@@ -26,6 +26,13 @@ def create_product_search_service(repository: ProductSnapshotRepository) -> "Pro
     )
 
 
+# One planning request can price hundreds of ingredients. Live FairPrice gets at most this many lookups
+# per request, and none after this many failures in a row: the rest use the cache or sample prices, and
+# say so, rather than keeping the household waiting 12 s per ingredient.
+LIVE_LOOKUP_BUDGET = 60
+LIVE_FAILURE_LIMIT = 3
+
+
 class ProductSearchService:
     def __init__(
         self,
@@ -39,6 +46,8 @@ class ProductSearchService:
         self.live_provider = live_provider
         self.repository = repository
         self.cache_ttl_minutes = cache_ttl_minutes
+        self.live_lookups = 0
+        self.live_failures_in_a_row = 0
 
     def search(
         self,
@@ -95,7 +104,19 @@ class ProductSearchService:
                 )
 
         try:
-            items = self.live_provider.search(normalized_query, limit=limit)
+            if self.live_failures_in_a_row >= LIVE_FAILURE_LIMIT:
+                raise ProductProviderError(
+                    f"FairPrice failed {self.live_failures_in_a_row} times in a row; not asked again this time"
+                )
+            if self.live_lookups >= LIVE_LOOKUP_BUDGET:
+                raise ProductProviderError(f"more than {LIVE_LOOKUP_BUDGET} live lookups in one request")
+            self.live_lookups += 1
+            try:
+                items = self.live_provider.search(normalized_query, limit=limit)
+            except ProductProviderError:
+                self.live_failures_in_a_row += 1
+                raise
+            self.live_failures_in_a_row = 0
             if not items:
                 # FairPrice answered and stocks nothing for this: a data gap, so the
                 # line stays unpriced rather than borrowing sample prices.

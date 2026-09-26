@@ -461,3 +461,16 @@ test("opening the app shows the newest plan, and says when that week has ended",
   await expect(week.getByText("Old Tofu Brown Rice Stir-fry").first()).toBeVisible();
   await expect(page.getByText(/This plan ended on .* plan a new one\./)).toBeVisible();
 });
+
+test("a session that expires mid-sentence keeps the draft and comes back to it", async ({ page }) => {
+  await planWeek(page);
+  await page.route("**/api/agent/sessions/51/messages", route => route.fulfill({ status: 401, contentType: "application/json", body: "{}" }));
+  await page.getByLabel("Message MealCraft").fill("Can Friday be vegetarian?");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.waitForURL(url => url.pathname === "/login" && url.searchParams.get("next") === "/");
+  await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
+  // Signing in again (the stubbed session is valid again) returns to the home page with the draft.
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open my week" }).click();
+  await expect(page.getByLabel("Message MealCraft")).toHaveValue("Can Friday be vegetarian?");
+});

@@ -89,7 +89,9 @@ def catalog_embedder(api_key: str) -> Embed | None:
     from langchain_openai import OpenAIEmbeddings
 
     meta = catalog[0]
-    return OpenAIEmbeddings(model=meta["model"], dimensions=meta["dimensions"], api_key=api_key).embed_documents
+    return OpenAIEmbeddings(
+        model=meta["model"], dimensions=meta["dimensions"], api_key=api_key, timeout=10, max_retries=1
+    ).embed_documents
 
 
 # Ingredients that flavour a dish rather than make it: "fish sauce" is not a fish dinner.

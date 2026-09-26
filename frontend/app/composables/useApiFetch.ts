@@ -1,5 +1,7 @@
 export function useApiFetch() {
   const csrfToken = useCookie<string | null>("mealcraft_csrf");
+  const route = useRoute();
+  const actor = useState("mealcraft-actor");
 
   return $fetch.create({
     credentials: "include",
@@ -17,7 +19,10 @@ export function useApiFetch() {
         && response.status === 401
         && !String(request).includes("/api/auth/")
       ) {
-        void navigateTo("/login");
+        // The session is over: forget who was signed in (or the login page would send them straight
+        // back), and return to where they were afterwards; the home page keeps the typed draft.
+        actor.value = null;
+        void navigateTo({ path: "/login", query: { next: route.fullPath } });
       }
     },
   });

@@ -440,13 +440,22 @@ def align_to_vocabulary(
 class OpenAIConstraintParser:
     provider = "openai"
 
-    def __init__(self, *, api_key: str, model: str, vocabulary: ConstraintVocabulary | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        api_key: str,
+        model: str,
+        vocabulary: ConstraintVocabulary | None = None,
+        timeout_seconds: float = 15.0,
+    ) -> None:
         self.vocabulary = vocabulary
         self.model = model
         self.structured_model = ChatOpenAI(
             api_key=api_key,
             model=model,
             temperature=0,
+            timeout=timeout_seconds,
+            max_retries=1,
         ).with_structured_output(AgentConstraintExtraction, method="json_schema")
 
     def parse(
@@ -485,3 +494,32 @@ Latest user message: {message}
         # The reply is a template over what was understood, never the model's own sentence.
         aligned.assistant_summary = RuleBasedConstraintParser._summary(aligned)
         return aligned
+
+
+class FallbackConstraintParser:
+    """The live parser, with the rule parser behind it: a model that is slow, down or out of quota costs the
+    household some understanding, never the turn. The reply says when the rules answered."""
+
+    OFFLINE_NOTE = " (The assistant's model didn't answer in time, so I read this with simple rules.)"
+
+    def __init__(self, primary: "OpenAIConstraintParser", fallback: RuleBasedConstraintParser | None = None) -> None:
+        self.primary = primary
+        self.fallback = fallback or RuleBasedConstraintParser()
+        self.provider = primary.provider
+        self.model = primary.model
+        self.vocabulary = primary.vocabulary
+        self.fell_back = False
+
+    def parse(self, message, *, current, acknowledged_unknowns, history) -> AgentConstraintExtraction:
+        try:
+            self.fell_back = False
+            return self.primary.parse(
+                message, current=current, acknowledged_unknowns=acknowledged_unknowns, history=history
+            )
+        except Exception:  # noqa: BLE001 - any model failure falls back; the rules never call out
+            self.fell_back = True
+            result = self.fallback.parse(
+                message, current=current, acknowledged_unknowns=acknowledged_unknowns, history=history
+            )
+            result.assistant_summary = (result.assistant_summary or "Noted.") + self.OFFLINE_NOTE
+            return result

@@ -126,3 +126,21 @@ def test_the_live_parser_reply_is_a_template_not_the_models_sentence() -> None:
     parser.structured_model = SimpleNamespace(invoke=lambda prompt: written)
     out = parser.parse("dinners for two, no pork", current=AgentConstraintState(), acknowledged_unknowns=[], history=[])
     assert out.assistant_summary == "Got it: 2 people, no pork."
+
+
+def test_a_model_that_fails_costs_understanding_not_the_turn() -> None:
+    from types import SimpleNamespace
+
+    from app.agent.parser import FallbackConstraintParser, OpenAIConstraintParser
+
+    def down(prompt):
+        raise TimeoutError("model took too long")
+
+    live = OpenAIConstraintParser.__new__(OpenAIConstraintParser)
+    live.vocabulary, live.model = None, "gpt-5.4-mini"
+    live.structured_model = SimpleNamespace(invoke=down)
+    parser = FallbackConstraintParser(live)
+    out = parser.parse("Dinners for two, no pork", current=AgentConstraintState(), acknowledged_unknowns=[], history=[])
+    assert parser.fell_back and parser.provider == "openai"
+    assert out.household_size == 2 and out.excluded_ingredients == ["pork"]
+    assert out.assistant_summary.endswith(FallbackConstraintParser.OFFLINE_NOTE)

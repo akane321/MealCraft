@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     agent_max_history_messages: int = 20
     openai_api_key: SecretStr | None = None
     openai_model: str = "gpt-5.4-mini"
+    # A slow model must not hang the chat: past this the turn is read with the rule parser instead.
+    openai_timeout_seconds: float = 15.0
     auth_cookie_name: str = Field(default="mealcraft_session", min_length=1, max_length=80)
     auth_csrf_cookie_name: str = Field(default="mealcraft_csrf", min_length=1, max_length=80)
     auth_cookie_secure: bool | None = None

@@ -269,6 +269,12 @@ watch(() => [messages.value.length, isLoading.value, session.value?.pending_repl
 
 useDialog(preview, () => { previewOpen.value = false; }, previewOpen);
 
+// Kept as it is typed, so a session that expires mid-sentence loses nothing (restored on mount).
+watch(draft, (value) => {
+  try { sessionStorage.setItem(DRAFT_KEY, value); }
+  catch { /* storage may be blocked; the draft is only a convenience */ }
+});
+
 onMounted(() => {
   window.addEventListener("keydown", onKey);
   try {
