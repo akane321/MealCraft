@@ -25,6 +25,7 @@ from app.planning.meal_composition import dish_servings
 from app.planning.nutrition_scope import compile_nutrition_targets
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
+from app.planning.recipe_quality import dish_family, dish_kind
 from app.planning.recommendation_engine import CANDIDATE_LIMIT
 from app.planning.weekly_planner import WeeklyPlanSelectionError, WeeklyPlanSelector
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse
@@ -162,13 +163,14 @@ class ProductPlanningEngine:
             )
         # Recommendations arrive best first; keep as many as the search can visit.
         if composition is None:
-            # Two recipes with one name read as the same dinner twice; keep the better-ranked one.
+            # "Chinese Fried Rice" and "Basic Fried Rice" read as the same dinner twice; keep the
+            # better-ranked one of each dish family.
             seen: set[str] = set()
             ranked = []
             for recommendation in recommendations:
-                name = " ".join(recommendation.recipe.title.lower().split())
-                if name not in seen:
-                    seen.add(name)
+                family = dish_family(recommendation.recipe.title)
+                if family not in seen:
+                    seen.add(family)
                     ranked.append(recommendation)
             limit = self._packet_limit(constraints.day_count)
             # A dinner slot takes dinner dishes whenever there are enough for the week;
@@ -334,7 +336,20 @@ class ProductPlanningEngine:
             trace["ranking"] = {"policy": "recommendation-score-v1", "digest": digest(losses)}
             if composition is None:
                 search = BeamPlanner(self.limits, local_losses=losses).search_candidates(problem.model_copy(deep=True))
-                choices = [state.choices for state in sorted(search.states, key=lambda s: (s.loss, s.choices))]
+                titles = {r.recipe.slug: r.recipe.title for r in recommendations}
+
+                def sameness(picked) -> tuple[int, int]:
+                    """Repeated dishes, then dishes of one kind ("fried rice"), in a week."""
+                    dishes = [recipe for _, recipe in picked]
+                    kinds = [dish_kind(titles[recipe]) for recipe in dishes]
+                    return len(dishes) - len(set(dishes)), len(kinds) - len(set(kinds))
+
+                # Among the weeks the search kept, the most varied is tried first; a search loss
+                # term for "same kind" would prune the cheap weeks a budget needs instead.
+                choices = [
+                    state.choices
+                    for state in sorted(search.states, key=lambda s: (sameness(s.choices), s.loss, s.choices))
+                ]
                 budget = constraints.weekly_budget_sgd
                 if budget is not None:
                     # The ranking never sees prices, so a tight budget can fail on every
@@ -344,17 +359,22 @@ class ProductPlanningEngine:
                     cost = {r.recipe.slug: dish_cost(r) / per_slot for r in recommendations}
 
                     def cost_fallback() -> list[list[PlanningAssignment]]:
-                        extra: list = []
+                        found_states: list = []
                         for weight in COST_WEIGHTS:
                             blended = {slug: loss + weight * cost[slug] for slug, loss in losses.items()}
                             found = BeamPlanner(self.limits, local_losses=blended).search_candidates(
                                 problem.model_copy(deep=True)
                             )
-                            extra += [
-                                state.choices
-                                for state in sorted(found.states, key=lambda s: (s.loss, s.choices))
-                                if state.choices not in choices and state.choices not in extra
+                            found_states += [
+                                (weight, state)
+                                for state in found.states
+                                if state.choices not in choices
+                                and all(state.choices != seen.choices for _, seen in found_states)
                             ]
+                        # A strongly cost-led search happily repeats a cheap dish; its weeks are tried
+                        # only after every week without repeats, then with fewest dishes of one kind.
+                        found_states.sort(key=lambda item: (sameness(item[1].choices), item[0], item[1].loss))
+                        extra = [state.choices for _, state in found_states]
                         trace["cost_fallback"] = {"weights": list(COST_WEIGHTS), "candidates": len(extra)}
                         return [[PlanningAssignment(slot_id=s, recipe_id=r) for s, r in picked] for picked in extra]
 

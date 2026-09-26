@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from app.core.paths import repository_root
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient
 from app.planning.grocery_estimator import priceable_ingredients
+from app.planning.recipe_quality import incomplete
 
 # Release recipes carry a course; only these can fill a meal. Curated recipes
 # have no course and are always candidates. Sides, sauces, drinks and desserts
@@ -75,7 +76,8 @@ class RecipeRepository:
             .where(Recipe.slug.not_in(withdrawn_slugs()))
             .order_by(Recipe.id)
         )
-        return list(self.session.scalars(statement).unique().all())
+        # A release recipe that lost a line still lists, but never becomes a planned dinner.
+        return [recipe for recipe in self.session.scalars(statement).unique().all() if incomplete(recipe) is None]
 
     def list_by_ids(self, ids: list[int]) -> list[Recipe]:
         if not ids:
