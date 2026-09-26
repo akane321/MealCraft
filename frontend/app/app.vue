@@ -14,7 +14,8 @@ onMounted(load);
 
 <template>
   <div class="app-shell">
-    <header v-if="route.path !== '/'" class="app-header">
+    <!-- The home surface and the console (/ops) draw their own navigation. -->
+    <header v-if="route.path !== '/' && !route.path.startsWith('/ops')" class="app-header">
       <div class="page-width header-content">
         <NuxtLink class="brand-name" to="/">
           <svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true"><circle cx="16" cy="18" r="10.5" fill="none" stroke="currentColor" stroke-width="1.6" /><path d="M16 7.5c1.4-3.2 4.6-4.2 7-3.3-.9 2.8-3.7 4.4-7 3.3z" fill="#c2553a" /></svg>MealCraft

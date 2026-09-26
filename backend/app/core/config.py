@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     auth_last_seen_interval_seconds: int = Field(default=300, ge=0, le=3600)
     auth_login_max_failures: int = Field(default=5, ge=1, le=20)
     auth_login_lock_minutes: int = Field(default=15, ge=1, le=1440)
+    # ADR-0047: fixed console accounts, "email:password:Display Name;..." created or updated at start-up.
+    admin_accounts: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -13,10 +13,13 @@ from app.api.routes.auth import get_password_adapter
 from app.auth.authorization import SystemRole
 from app.auth.passwords import Argon2PasswordAdapter, Argon2PasswordPolicy
 from app.core.config import Settings, get_settings
+from app.data.admin_accounts import ensure_admin_accounts, parse_admin_accounts
 from app.db.base import Base
 from app.db.session import get_db_session
 from app.main import app
+from app.models.agent import AgentMessage, AgentRun, AgentRunCheckpoint, AgentSession
 from app.models.platform import AuditEvent, HouseholdMembership, OperationRun, User
+from app.products.provider import FairPriceProductProvider, ProductProviderError
 
 
 @pytest.fixture
@@ -292,3 +295,229 @@ def test_runs_reject_invalid_status_and_unbounded_limit(operations_client) -> No
 
     assert client.get("/api/ops/runs", params={"status": "invented"}).status_code == 422
     assert client.get("/api/ops/runs", params={"limit": 201}).status_code == 422
+
+
+# --- Console endpoints (ADR-0047) ---
+
+
+def _add_agent_run(database_factory: sessionmaker, *, created_at: datetime, status: str, parser: str) -> int:
+    with database_factory() as database:
+        household_id = database.scalars(select(HouseholdMembership.household_id)).first()
+        session = AgentSession(household_id=household_id, parser_provider=parser, constraints={"household_size": 2})
+        database.add(session)
+        database.flush()
+        database.add(AgentMessage(session_id=session.id, role="user", content="Dinners for two, S$90"))
+        run = AgentRun(
+            agent_session_id=session.id,
+            idempotency_key=f"key-{session.id}",
+            intent="plan_week",
+            status=status,
+            input_digest="b" * 64,
+            context_version=1,
+            model_config={"parser": parser, "parser_model": "gpt-test", "api_key": "sk-must-not-leak"},
+            deadline_at=created_at + timedelta(minutes=2),
+            created_at=created_at,
+            started_at=created_at,
+            completed_at=created_at + timedelta(seconds=3),
+        )
+        database.add(run)
+        database.flush()
+        database.add(
+            AgentRunCheckpoint(agent_run_id=run.id, sequence=1, stage="parse", status="done", state_digest="c" * 64)
+        )
+        database.commit()
+        return run.id
+
+
+def _planning_trace(**values) -> list[dict]:
+    trace = {
+        "status": "optimal",
+        "algorithm": "beam",
+        "requested_pricing_mode": "fixture",
+        "validation": {"passed": True, "checks": ["budget"]},
+        "shopping_digest": "d" * 64,
+        "evidence": "complete",
+    }
+    trace.update(values)
+    return [{"kind": "planning_trace", "data": trace}]
+
+
+def test_series_buckets_fourteen_days_with_planning_latency(operations_client) -> None:
+    client, database_factory = operations_client
+    _set_system_role(database_factory, SystemRole.ADMIN)
+    now = datetime.now(UTC)
+    _add_agent_run(database_factory, created_at=now, status="committed", parser="fixture")
+    for index, seconds in enumerate((1, 2, 10)):
+        _add_run(
+            database_factory,
+            trace_id=f"planning-{index}",
+            run_type="planning",
+            status="succeeded",
+            provider_mode="fairprice,fixture",
+            created_at=now,
+            started_at=now,
+            finished_at=now + timedelta(seconds=seconds),
+        )
+    _add_run(database_factory, trace_id="planning-old", run_type="planning", created_at=now - timedelta(days=20))
+
+    response = client.get("/api/ops/overview/series")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert len(payload["days"]) == 14
+    today = payload["days"][-1]
+    assert today["day"] == now.date().isoformat()
+    assert today["agent_sessions"] == 1
+    assert today["agent_runs"] == {"committed": 1}
+    assert today["planning_runs"] == {"succeeded": 3}
+    assert today["planning_median_seconds"] == 2.0
+    assert today["planning_p90_seconds"] == 10.0
+    assert payload["provider_modes"] == {"fairprice": 3, "fixture": 3}
+
+
+def test_tasks_merge_both_kinds_and_page(operations_client) -> None:
+    client, database_factory = operations_client
+    _set_system_role(database_factory, SystemRole.ADMIN)
+    now = datetime.now(UTC)
+    _add_agent_run(database_factory, created_at=now - timedelta(minutes=2), status="failed", parser="openai")
+    _add_run(database_factory, trace_id="planning-a", run_type="planning", created_at=now - timedelta(minutes=1))
+    _add_run(database_factory, trace_id="eval-a", run_type="evaluation", created_at=now)
+
+    everything = client.get("/api/ops/tasks").json()
+    assert everything["total"] == 2
+    assert [item["kind"] for item in everything["items"]] == ["planning", "agent"]
+
+    second = client.get("/api/ops/tasks", params={"offset": 1, "limit": 1}).json()
+    assert [item["kind"] for item in second["items"]] == ["agent"]
+
+    failed = client.get("/api/ops/tasks", params={"type": "agent", "status": "failed"}).json()
+    assert failed["total"] == 1
+    assert failed["items"][0]["provider_mode"] == "openai"
+    assert client.get("/api/ops/tasks", params={"type": "invented"}).status_code == 422
+
+
+def test_task_detail_returns_stored_run_without_keys(operations_client) -> None:
+    client, database_factory = operations_client
+    _set_system_role(database_factory, SystemRole.ADMIN)
+    now = datetime.now(UTC)
+    run_id = _add_agent_run(database_factory, created_at=now, status="committed", parser="openai")
+    _add_run(
+        database_factory,
+        trace_id="planning-detail",
+        run_type="planning",
+        status="failed",
+        error_code="infeasible",
+        error_detail="No week fits the budget.",
+        artifact_references=_planning_trace(settings={"width": 4}, openai_api_key="sk-must-not-leak"),
+        created_at=now,
+    )
+    with database_factory() as database:
+        planning_id = database.scalar(select(OperationRun.id).where(OperationRun.trace_id == "planning-detail"))
+
+    agent = client.get(f"/api/ops/tasks/agent/{run_id}")
+    assert agent.status_code == 200
+    agent_payload = agent.json()
+    assert agent_payload["inputs"]["conversation"][0]["content"] == "Dinners for two, S$90"
+    assert agent_payload["inputs"]["understood_constraints"] == {"household_size": 2}
+    assert agent_payload["model_configuration"] == {"parser": "openai", "parser_model": "gpt-test"}
+    assert agent_payload["trace"]["checkpoints"][0]["stage"] == "parse"
+    assert agent_payload["timings"]["duration_seconds"] == 3.0
+
+    planning = client.get(f"/api/ops/tasks/planning/{planning_id}")
+    assert planning.status_code == 200
+    planning_payload = planning.json()
+    assert planning_payload["validation"] == {"passed": True, "checks": ["budget"]}
+    assert planning_payload["evidence"]["shopping_digest"] == "d" * 64
+    assert planning_payload["model_configuration"]["settings"] == {"width": 4}
+    assert planning_payload["error_detail"] == "No week fits the budget."
+    assert "digest remains" in planning_payload["inputs"]["note"]
+
+    assert "must-not-leak" not in agent.text + planning.text
+    assert client.get("/api/ops/tasks/planning/999999").status_code == 404
+
+
+def test_services_report_configuration_and_recent_fallbacks(operations_client) -> None:
+    client, database_factory = operations_client
+    _set_system_role(database_factory, SystemRole.ADMIN)
+    now = datetime.now(UTC)
+    _add_agent_run(database_factory, created_at=now, status="degraded", parser="openai")
+    _add_agent_run(database_factory, created_at=now, status="committed", parser="fixture")
+    _add_run(
+        database_factory,
+        trace_id="planning-live",
+        run_type="planning",
+        provider_mode="fixture",
+        artifact_references=_planning_trace(requested_pricing_mode="live"),
+        created_at=now,
+    )
+
+    response = client.get("/api/ops/services")
+
+    assert response.status_code == 200
+    services = {item["name"]: item for item in response.json()["items"]}
+    assert services["openai"]["configured"] is False
+    assert services["openai"]["recent"] == {"window_days": 7, "calls": 1, "failures": 0, "fallbacks": 1}
+    assert services["fairprice"]["recent"] == {"window_days": 7, "calls": 1, "failures": 0, "fallbacks": 1}
+    assert services["youtube"]["recent"] is None
+
+
+def test_live_checks_report_missing_keys_without_calling_out(operations_client) -> None:
+    client, database_factory = operations_client
+    _set_system_role(database_factory, SystemRole.ADMIN)
+
+    for name in ("openai", "youtube"):
+        payload = client.post(f"/api/ops/services/{name}/check").json()
+        assert payload["ok"] is False
+        assert payload["error_kind"] == "not_configured"
+    assert client.post("/api/ops/services/invented/check").status_code == 422
+
+
+def test_fairprice_live_check_uses_the_provider(operations_client, monkeypatch) -> None:
+    client, database_factory = operations_client
+    _set_system_role(database_factory, SystemRole.ADMIN)
+    calls = []
+
+    def fake_search(self, query, *, limit):
+        calls.append((query, limit, self.timeout_seconds))
+        raise ProductProviderError("FairPrice request failed: timed out")
+
+    monkeypatch.setattr(FairPriceProductProvider, "search", fake_search)
+
+    payload = client.post("/api/ops/services/fairprice/check").json()
+
+    assert calls == [("rice", 1, 10.0)]
+    assert payload["ok"] is False
+    assert payload["error_kind"] == "unavailable"
+    assert "timed out" in payload["detail"]
+
+
+def test_ordinary_user_cannot_reach_console_endpoints(operations_client) -> None:
+    client, _ = operations_client
+    for path in ("/api/ops/overview/series", "/api/ops/tasks", "/api/ops/services"):
+        assert client.get(path).status_code == 404
+    assert client.post("/api/ops/services/openai/check").status_code == 404
+
+
+def test_admin_accounts_are_created_updated_and_can_sign_in(operations_client) -> None:
+    client, database_factory = operations_client
+    passwords = app.dependency_overrides[get_password_adapter]()
+    accounts = parse_admin_accounts("ops@example.test:first-password-123:Ops One; second@example.test:pw-two-long-1")
+    assert [account.display_name for account in accounts] == ["Ops One", "second@example.test"]
+
+    with database_factory() as database:
+        assert ensure_admin_accounts(database, accounts, passwords) == 2
+    renamed = parse_admin_accounts("ops@example.test:changed-password-123:Ops Renamed")
+    with database_factory() as database:
+        ensure_admin_accounts(database, renamed, passwords)
+        users = {user.normalized_email: user for user in database.scalars(select(User))}
+    assert users["ops@example.test"].system_role == "admin"
+    assert users["ops@example.test"].display_name == "Ops Renamed"
+    assert users["second@example.test"].system_role == "admin"
+
+    with TestClient(app) as admin:
+        login = admin.post("/api/auth/login", json={"email": "ops@example.test", "password": "changed-password-123"})
+        assert login.status_code == 200
+        assert admin.get("/api/auth/me").json()["user"]["system_role"] == "admin"
+        assert admin.get("/api/ops/tasks").status_code == 200
+    with pytest.raises(ValueError):
+        parse_admin_accounts("no-password@example.test")
