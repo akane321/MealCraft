@@ -1501,3 +1501,29 @@ def test_a_new_conversation_starts_from_the_saved_household(recipe_client: TestC
     assert constraints["allergens"] == ["peanut"]
     assert set(constraints["excluded_ingredients"]) == {"pork", "mushroom"}
     assert "household_size" not in session["missing_fields"]
+
+
+def test_an_agent_run_stores_the_parser_configuration(recipe_client: TestClient) -> None:
+    session = recipe_client.post("/api/agent/sessions", json={"message": "Plan for 2 people"}).json()
+    runs = recipe_client.get(f"/api/agent/sessions/{session['id']}/runs").json()
+    items = runs["items"] if isinstance(runs, dict) else runs
+    assert items and items[0]["run_config"] == {"parser": "fixture", "parser_model": None}
+
+
+def test_the_live_parser_can_be_built_against_the_catalog(recipe_client: TestClient, monkeypatch) -> None:
+    """Every other test runs the rule parser; this one builds the live one's vocabulary from the database
+    (no model is called), which a result-object dict() once broke."""
+    from pydantic import SecretStr
+
+    from app.api.routes.agent import create_constraint_parser
+    from app.core.config import get_settings
+    from app.db.session import get_db_session
+    from app.main import app
+
+    settings = get_settings().model_copy(
+        update={"agent_parser_provider": "openai", "openai_api_key": SecretStr("sk-test-not-used")}
+    )
+    session = next(app.dependency_overrides[get_db_session]())
+    parser = create_constraint_parser(settings, session)
+    assert parser.provider == "openai"
+    assert "chicken_breast" in parser.vocabulary.ingredients

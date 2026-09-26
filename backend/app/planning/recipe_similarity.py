@@ -45,6 +45,18 @@ def wanted(reason: str | None) -> str | None:
 
 KEYWORD_WEIGHT = 0.05
 
+ZH_ALIASES = "data/ingredients/aliases-zh-v1.json"
+# Words a Chinese request uses for a cuisine or a kind of dish; ingredient names come from ZH_ALIASES.
+ZH_WORDS = {
+    "韩国": "korean", "韩式": "korean", "泰国": "thai", "泰式": "thai", "印度": "indian", "墨西哥": "mexican",
+    "日本": "japanese", "日式": "japanese", "中式": "chinese", "中餐": "chinese", "中国": "chinese",
+    "意大利面": "pasta", "意面": "pasta", "意大利": "italian", "越南": "vietnamese", "马来": "malaysian",
+    "法国": "french", "希腊": "greek", "西班牙": "spanish", "面条": "noodles", "面": "noodles",
+    "炒饭": "fried rice", "米饭": "rice", "饭": "rice", "汤": "soup", "咖喱": "curry", "沙拉": "salad",
+    "素食": "vegetarian", "素": "vegetarian", "辣": "spicy chili", "鱼": "fish", "鸡肉": "chicken", "鸡": "chicken",
+    "牛肉": "beef", "猪肉": "pork", "羊肉": "lamb", "虾": "shrimp", "海鲜": "seafood",
+}  # fmt: skip
+
 
 def words(text: str) -> set[str]:
     return set(re.findall(r"[a-z]{3,}|[一-鿿]", text.lower().replace("_", " ")))
@@ -103,6 +115,32 @@ def shared_words(text: str, recipes: list[Recipe]) -> dict[int, float]:
     return result if any(result.values()) else {}
 
 
+@lru_cache(maxsize=1)
+def _chinese_words() -> dict[str, str]:
+    """Chinese word -> English words, longest first: the cuisine and dish words, then every catalog
+    ingredient's Chinese names (model-generated, `aliases-zh-v1.json`) as its English name."""
+    words = dict(ZH_WORDS)
+    path = find_repository_root(Path(__file__).parent) / ZH_ALIASES
+    if path.exists():
+        for key, names in json.loads(path.read_text(encoding="utf-8"))["aliases"].items():
+            for name in names:
+                words.setdefault(name, key.replace("_", " "))
+    return dict(sorted(words.items(), key=lambda item: -len(item[0])))
+
+
+def in_english(text: str) -> str:
+    """A request with its Chinese food, cuisine and dish words followed by their English: "换成牛肉的" ->
+    "牛肉 beef". Short Chinese words embed poorly against English recipe text and share no words with it."""
+    if not re.search(r"[一-鿿]", text):
+        return text
+    found, rest = [], text
+    for word, english in _chinese_words().items():
+        if word in rest:
+            found.append(english)
+            rest = rest.replace(word, " ")
+    return " ".join([text, *found])
+
+
 class RecipeSimilarity:
     def __init__(self, embed: Embed | None) -> None:
         self.embed = embed
@@ -112,6 +150,7 @@ class RecipeSimilarity:
         text, catalog = wanted(reason), _catalog()
         if text is None:
             return {}
+        text = in_english(text)
         if catalog is None or self.embed is None:
             return shared_words(text, recipes)
         meta, index, rows = catalog

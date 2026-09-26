@@ -24,6 +24,7 @@ from app.core.paths import find_repository_root
 
 VECTORS = "data/ingredients/embeddings-v1.json"
 ALIASES = "data/ingredients/aliases-v1.json"  # model-generated other names, suggestions only
+ZH_ALIASES = "data/ingredients/aliases-zh-v1.json"  # model-generated Chinese names, suggestions only
 Embed = Callable[[list[str]], list[list[float]]]
 
 
@@ -120,5 +121,13 @@ def catalog_embedder(api_key: str) -> Embed | None:
 
 @lru_cache(maxsize=1)
 def catalog_aliases() -> dict[str, list[str]]:
-    path = find_repository_root(Path(__file__).parent) / ALIASES
-    return json.loads(path.read_text(encoding="utf-8"))["aliases"] if path.exists() else {}
+    """Other names per catalog id: aliases-v1.json, plus the Chinese names (a short Chinese word such as
+    茄子 embeds poorly, so an exact name is what finds it)."""
+    root = find_repository_root(Path(__file__).parent)
+    merged: dict[str, list[str]] = {}
+    for name in (ALIASES, ZH_ALIASES):
+        path = root / name
+        if path.exists():
+            for key, values in json.loads(path.read_text(encoding="utf-8"))["aliases"].items():
+                merged[key] = list(dict.fromkeys([*merged.get(key, []), *values]))
+    return merged

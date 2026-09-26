@@ -1,3 +1,4 @@
+import re
 from datetime import date
 from uuid import uuid4
 
@@ -71,6 +72,25 @@ def profile_constraints(version) -> AgentConstraintState:
             "pricing_mode": version.pricing_mode,
         }
     )
+
+
+def _vector_meta(relative: str) -> str | None:
+    """The model and size of a stored vector file (`model@dimensions`), or None when it is absent."""
+    import json
+
+    from app.core.paths import repository_root
+
+    path = repository_root() / relative
+    if not path.exists():
+        return None
+    with path.open(encoding="utf-8") as handle:
+        head = handle.read(4096)
+    model = re.search(r'"model"\s*:\s*"([^"]+)"', head)
+    dimensions = re.search(r'"dimensions"\s*:\s*(\d+)', head)
+    if model is None:
+        meta = json.loads(path.read_text(encoding="utf-8"))
+        return f"{meta.get('model')}@{meta.get('dimensions')}"
+    return f"{model.group(1)}@{dimensions.group(1) if dimensions else '?'}"
 
 
 class AgentSessionService:
@@ -661,9 +681,21 @@ class AgentSessionService:
             context_version=max(context_version, 1),
             plan_revision=plan_revision,
             scope_decision=scope_decision.model_dump(mode="json") if scope_decision is not None else None,
+            model_config=self.model_config(),
             actor_user_id=self.actor_user_id,
             household_id=self.household_id,
         )
+
+    def model_config(self) -> dict:
+        """The parser and models behind this service's runs; never a key or a prompt."""
+        config = {"parser": self.parser.provider, "parser_model": getattr(self.parser, "model", None)}
+        if self.parser.provider == "openai":
+            vectors = {
+                "ingredient_vectors": _vector_meta("data/ingredients/embeddings-v1.json"),
+                "recipe_vectors": _vector_meta("data/recipes/embeddings-v1.json"),
+            }
+            config.update({key: value for key, value in vectors.items() if value})
+        return config
 
     def _finish_turn_run(
         self,

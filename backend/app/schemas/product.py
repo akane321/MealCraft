@@ -22,6 +22,12 @@ class ProductResponse(BaseModel):
     in_stock: bool
     source: ProductSource
     fetched_at: datetime
+    # What the page said, kept beside what was parsed from it, so a wrong basket can be traced to its text.
+    package_text: str | None = None
+    # The shelf price when the effective price_sgd is a promotion.
+    regular_price_sgd: float | None = Field(default=None, ge=0)
+    # Typed doubt instead of a guessed quantity: sold by count, or no size could be read at all.
+    package_warning: Literal["count_package", "unknown_package"] | None = None
 
 
 class ProductSearchResponse(BaseModel):

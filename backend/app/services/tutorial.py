@@ -2,6 +2,7 @@ import time
 from datetime import UTC, datetime
 
 from app.repositories.recipe import RecipeRepository
+from app.retrieval.evidence import packet_digest, tutorial_packet
 from app.retrieval.tutorials import (
     FixtureTutorialProvider,
     TutorialProviderError,
@@ -138,4 +139,5 @@ class TutorialRecommendationService:
             selected_video=selected_video,
             retrieval=trace,
             warning=warning,
+            evidence_digest=packet_digest(tutorial_packet(selected_video, trace, recipe_slug=recipe.slug)),
         )
