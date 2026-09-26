@@ -150,7 +150,8 @@ async function stubApi(page: Page) {
     active_household_id: 1,
     household_role: "owner",
   })));
-  await page.route("**/api/agent/sessions?limit=1", route => route.fulfill(json({ items: [] })));
+  await page.route("**/api/agent/sessions?limit=8", route => route.fulfill(json({ items: [] })));
+  await page.route("**/api/household-profiles/current", route => route.fulfill({ status: 404, contentType: "application/json", body: "{}" }));
   await page.route("**/api/agent/sessions", route => route.fulfill({ ...json(session(false)), status: 201 }));
   await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: session(true), plan })));
   await page.route("**/api/plans/9001", route => route.fulfill(json(plan)));
@@ -165,7 +166,7 @@ async function stubApi(page: Page) {
   })));
 }
 
-test("sending from the film entry opens the chat, and edge panels move it aside", async ({ page }) => {
+test("sending from the film entry opens the workspace with the week beside the chat", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await stubApi(page);
   await page.goto("/");
@@ -177,42 +178,42 @@ test("sending from the film entry opens the chat, and edge panels move it aside"
 
   await expect(page.getByText("Ready when you are.")).toBeVisible();
   await expect(page.getByRole("heading", { name: /Plan the week/ })).toBeHidden();
+  const week = page.getByRole("complementary", { name: "This week" });
+  await expect(week.getByText("Your week shows up here once it's planned", { exact: false })).toBeVisible();
   await page.getByRole("button", { name: "Plan my week" }).click();
   await expect(page.getByText("Seven dinners for S$82.60")).toBeVisible();
+
+  // The week sits in its own column: nothing overlaps the conversation.
+  await expect(week.getByText("Tofu Brown Rice Stir-fry").first()).toBeVisible();
+  const chat = await page.getByRole("region", { name: "Conversation" }).boundingBox();
+  const panel = await week.boundingBox();
+  expect(chat!.x + chat!.width).toBeLessThanOrEqual(panel!.x + 1);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await expect(page.getByRole("region", { name: "Your week" }).getByText("Seven dinners,")).toBeVisible();
   await page.waitForTimeout(1200);
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/2-chat.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/2-workspace.png` });
 
-  const chat = page.getByRole("region", { name: "Conversation" });
-  const centred = await chat.boundingBox();
-  await page.mouse.move(12, 450);
-  await expect(page.getByRole("complementary", { name: "This week" }).getByText("Tofu Brown Rice Stir-fry").first()).toBeVisible();
-  await page.waitForTimeout(800);
-  const shifted = await chat.boundingBox();
-  expect(shifted!.x).toBeGreaterThan(centred!.x);
-  expect(shifted!.x).toBeGreaterThanOrEqual(424);
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/3-week.png` });
+  await expect(week.getByText("S$82.60")).toBeVisible();
+  await expect(week.getByText("S$7.40 under your S$90.00")).toBeVisible();
+  await week.getByRole("tab", { name: /Groceries/ }).click();
+  await expect(week.getByText("Salmon fillet")).toBeVisible();
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/3-groceries.png` });
 
-  await page.mouse.move(720, 450);
-  await page.mouse.move(1430, 450);
-  const kitchen = page.getByRole("complementary", { name: "Nutrition and groceries" });
-  await expect(kitchen.getByText("S$82.60")).toBeVisible();
-  await expect(kitchen.getByText("S$7.40 under your S$90.00")).toBeVisible();
-  await page.waitForTimeout(800);
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/4-kitchen.png` });
-
-  await kitchen.getByRole("button", { name: "Preview list" }).click();
+  await week.getByRole("button", { name: "Preview list" }).click();
   const sheet = page.getByRole("dialog", { name: "Shopping list preview" });
   await expect(sheet.getByText("Estimated total")).toBeVisible();
   await expect(sheet.getByText("Sample prices", { exact: false })).toBeVisible();
   await page.waitForTimeout(600);
   if (SHOTS) {
-    await page.screenshot({ path: `${SHOTS}/5-preview.png` });
-    await page.pdf({ path: `${SHOTS}/6-list.pdf`, format: "A4" });
-    await page.setViewportSize({ width: 1280, height: 720 });
-    await page.getByRole("button", { name: "Back" }).click();
-    await page.getByRole("button", { name: "See the week" }).click();
-    await page.waitForTimeout(900);
-    await page.screenshot({ path: `${SHOTS}/7-min-size.png` });
+    await page.screenshot({ path: `${SHOTS}/4-preview.png` });
+    await page.pdf({ path: `${SHOTS}/5-list.pdf`, format: "A4" });
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    for (const [width, height, name] of [[1280, 720, "6-min-size"], [900, 900, "7-tablet"], [390, 844, "8-phone"]] as const) {
+      await page.setViewportSize({ width, height });
+      await page.waitForTimeout(500);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      await page.screenshot({ path: `${SHOTS}/${name}.png` });
+    }
   }
 });
 
@@ -281,14 +282,15 @@ test("nutrition details show all six nutrients and let a dinner be skipped", asy
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(plan) });
   });
 
-  await page.getByRole("button", { name: /Groceries & nutrition/ }).click();
+  await page.getByRole("tab", { name: "Nutrition" }).click();
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/9-nutrition-tab.png` });
   await page.getByRole("button", { name: "All six nutrients & daily detail" }).click();
   const details = page.getByRole("dialog", { name: "Nutrition details" });
   for (const label of ["Calories", "Protein", "Carbohydrate", "Fat", "Sodium", "Sugar"]) {
     await expect(details.getByRole("button", { name: new RegExp(`^${label}`) })).toBeVisible();
   }
   await expect(details.getByText("Actual").first()).toBeVisible();
-  if (SHOTS) await page.waitForTimeout(500).then(() => page.screenshot({ path: `${SHOTS}/8-nutrition.png` }));
+  if (SHOTS) await page.waitForTimeout(500).then(() => page.screenshot({ path: `${SHOTS}/10-nutrition.png` }));
   await details.getByRole("row", { name: /Mushroom Spinach Pasta/ }).getByRole("button", { name: "Skip" }).click();
   await expect.poll(() => patched).toEqual({ status: "skipped" });
 });
@@ -308,13 +310,12 @@ test("a dinner opens its recipe with steps on the same surface", async ({ page }
     }),
   }));
 
-  await page.getByRole("button", { name: /See the week/ }).click();
   await page.getByRole("button", { name: "Recipe & steps" }).click();
   const recipe = page.getByRole("dialog", { name: "Tofu Brown Rice Stir-fry" });
   await expect(recipe.getByText("Stir-fry the tofu.")).toBeVisible();
   await expect(recipe.getByText("Contains soy")).toBeVisible();
   await expect(recipe.getByText(/Allergens come from ingredient data/)).toBeVisible();
-  if (SHOTS) await page.waitForTimeout(500).then(() => page.screenshot({ path: `${SHOTS}/9-recipe.png` }));
+  if (SHOTS) await page.waitForTimeout(500).then(() => page.screenshot({ path: `${SHOTS}/11-recipe.png` }));
 });
 
 test("a failed request says so in the conversation", async ({ page }) => {
@@ -367,12 +368,9 @@ test("a week still loading shows a skeleton rather than the empty message", asyn
   await page.getByRole("button", { name: "Plan my week" }).click();
 
   const week = page.getByRole("complementary", { name: "This week" });
-  // The panel opens on edge hover; its own handle sits behind it once open.
-  await page.mouse.move(12, 450);
   await expect(week.locator("[aria-busy='true']")).toBeVisible();
-  await expect(week.getByText("Your week shows up here once it's planned.")).toBeHidden();
-  // The drawer slides in; wait for it before capturing.
-  if (SHOTS) await page.waitForTimeout(700).then(() => page.screenshot({ path: `${SHOTS}/11-loading.png` }));
+  await expect(week.getByText("Your week shows up here once it's planned", { exact: false })).toBeHidden();
+  if (SHOTS) await page.waitForTimeout(700).then(() => page.screenshot({ path: `${SHOTS}/12-loading.png` }));
 
   release();
   await expect(week.getByText("Tofu Brown Rice Stir-fry").first()).toBeVisible();
@@ -393,7 +391,6 @@ test("a week that failed to load offers a retry that works", async ({ page }) =>
   await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
   await page.getByRole("button", { name: "Send" }).click();
   await page.getByRole("button", { name: "Plan my week" }).click();
-  await page.mouse.move(12, 450);
 
   const week = page.getByRole("complementary", { name: "This week" });
   await expect(week.getByText("Your week couldn't be loaded.")).toBeVisible();
@@ -404,7 +401,7 @@ test("a week that failed to load offers a retry that works", async ({ page }) =>
 
 test("Escape closes a sheet from anywhere and focus goes back to what opened it", async ({ page }) => {
   await planWeek(page);
-  await page.getByRole("button", { name: /Groceries & nutrition/ }).click();
+  await page.getByRole("tab", { name: "Nutrition" }).click();
   const opener = page.getByRole("button", { name: "All six nutrients & daily detail" });
   await opener.click();
 
@@ -430,7 +427,6 @@ test("applied changes are listed in the week panel", async ({ page }) => {
   await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
   await page.getByRole("button", { name: "Send" }).click();
   await page.getByRole("button", { name: "Plan my week" }).click();
-  await page.mouse.move(12, 450);
 
   const week = page.getByRole("complementary", { name: "This week" });
   const summary = week.getByText("Changes this week");
@@ -441,5 +437,5 @@ test("applied changes are listed in the week panel", async ({ page }) => {
   await expect(week.getByText("Salmon was out of stock")).toBeVisible();
   // A pending suggestion is not history: only the applied event is listed.
   await expect(week.getByText("Miso Tofu Bowl")).toHaveCount(1);
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/10-changes.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/13-changes.png` });
 });

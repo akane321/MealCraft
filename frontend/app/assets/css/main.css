@@ -1,15 +1,26 @@
 :root {
-  color-scheme: light;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #17191c;
-  background: #ffffff;
+  color-scheme: dark;
+  --ink: #0e0c0a;
+  --s1: #151210;
+  --s2: #1c1815;
+  --s3: #24201c;
+  --ivory: #f2ede4;
+  --t2: #cbc2b4;
+  --t3: #948b7e;
+  --accent: #e8906f;
+  --sage: #a9b79a;
+  --serif: Fraunces, Georgia, "Noto Serif SC", serif;
+  --border: rgba(242, 237, 228, 0.14);
+  --muted: var(--t3);
+  --success: var(--sage);
+  --danger: #ec7a5a;
+  --link: var(--accent);
+  font-family: Figtree, system-ui, -apple-system, "Segoe UI", "Noto Sans SC", sans-serif;
+  color: var(--ivory);
+  background: var(--ink);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --border: #d8dde2;
-  --muted: #687078;
-  --success: #168a4b;
-  --danger: #b33a3a;
-  --link: #0969da;
+  -webkit-font-smoothing: antialiased;
 }
 
 * {
@@ -22,12 +33,21 @@ html, body, #__nuxt {
 }
 
 body {
-  min-width: 1280px;
-  background: #ffffff;
+  background: var(--ink);
 }
 
-button, a {
+button, a, input, select {
   font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+h1, h2 {
+  font-family: var(--serif);
+  font-weight: 300;
 }
 
 .app-shell {
@@ -35,7 +55,7 @@ button, a {
 }
 
 .page-width {
-  width: min(100% - 48px, 1312px);
+  width: min(100% - 32px, 1312px);
   margin-inline: auto;
 }
 
@@ -46,48 +66,53 @@ button, a {
 .app-header .page-width {
   display: flex;
   align-items: center;
-  min-height: 80px;
+  min-height: 72px;
 }
 
 .brand-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   margin: 0;
   color: inherit;
-  font-size: 24px;
-  font-weight: 650;
-  letter-spacing: -0.025em;
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
   text-decoration: none;
 }
 
 .header-content {
   justify-content: space-between;
-  gap: 32px;
+  gap: 24px;
 }
 
 .primary-nav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 26px;
+  gap: 8px 22px;
 }
 
 .primary-nav a {
   padding-block: 9px;
-  color: var(--muted);
-  font-size: 15px;
-  font-weight: 600;
+  color: var(--t3);
+  font-size: 14px;
+  font-weight: 500;
   text-decoration: none;
 }
 
-.primary-nav a:hover {
-  color: #17191c;
+.primary-nav a:hover, .nav-auth:hover {
+  color: var(--ivory);
 }
 
 .nav-auth {
   padding: 9px 0;
   border: 0;
-  color: var(--muted);
+  color: var(--t3);
   background: transparent;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -118,7 +143,8 @@ button, a {
 .status-panel {
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 16px;
+  background: var(--s1);
 }
 
 .status-table {
@@ -228,7 +254,7 @@ button, a {
 }
 
 .technical-links a:focus-visible, .technical-links button:focus-visible {
-  outline: 3px solid rgb(9 105 218 / 24%);
+  outline: 2px solid var(--accent);
   outline-offset: 4px;
   border-radius: 2px;
 }
@@ -246,7 +272,7 @@ button, a {
 
 .eyebrow {
   margin: 0;
-  color: #167449;
+  color: var(--accent);
   font-size: 13px;
   font-weight: 750;
   letter-spacing: 0.09em;
@@ -256,6 +282,7 @@ button, a {
 .notice-panel {
   padding: 28px;
   border: 1px solid var(--border);
+  border-radius: 14px;
   color: var(--muted);
 }
 
@@ -314,9 +341,9 @@ button, a {
 }
 
 .success-notice {
-  border-color: #b9d8c6;
-  color: #175f3a;
-  background: #f2f8f4;
+  border-color: rgba(169, 183, 154, 0.35);
+  color: var(--sage);
+  background: rgba(169, 183, 154, 0.08);
 }
 
 .profile-layout {
@@ -351,8 +378,9 @@ button, a {
 
 .version-badge {
   padding: 6px 9px;
-  color: #175f3a;
-  background: #e8f5ec;
+  border-radius: 999px;
+  color: var(--sage);
+  background: rgba(169, 183, 154, 0.12);
   font-size: 11px;
   font-weight: 720;
 }
@@ -363,7 +391,7 @@ button, a {
 }
 
 .profile-main label > span, .profile-planning-card label > span {
-  color: #34383c;
+  color: var(--t2);
   font-size: 12px;
   font-weight: 650;
 }
@@ -372,16 +400,16 @@ button, a {
   width: 100%;
   min-height: 42px;
   padding: 9px 11px;
-  border: 1px solid #c7cdd2;
-  border-radius: 3px;
-  color: #17191c;
-  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--ivory);
+  background: var(--s2);
   outline: none;
 }
 
 .profile-main input:focus, .profile-main select:focus, .profile-planning-card input:focus {
   border-color: var(--link);
-  box-shadow: 0 0 0 3px rgb(9 105 218 / 12%);
+  box-shadow: 0 0 0 3px rgba(232, 144, 111, 0.15);
 }
 
 .profile-name-field {
@@ -404,7 +432,8 @@ button, a {
   display: grid;
   padding: 20px;
   border: 1px solid var(--border);
-  background: #fbfcfb;
+  border-radius: 14px;
+  background: var(--s2);
   gap: 18px;
 }
 
@@ -450,7 +479,7 @@ button, a {
 
 .member-constraint-group > p {
   margin: 0;
-  color: #34383c;
+  color: var(--t2);
   font-size: 12px;
   font-weight: 650;
 }
@@ -485,7 +514,7 @@ button, a {
 
 .profile-sidebar > section {
   padding: 24px;
-  background: #fbfcfb;
+  background: var(--s1);
 }
 
 .profile-sidebar > section + section {
@@ -535,14 +564,14 @@ button, a {
 .profile-change-card ul {
   margin: 14px 0;
   padding-left: 18px;
-  color: #51575c;
+  color: var(--t2);
   font-size: 11px;
   line-height: 1.7;
 }
 
 .form-kicker {
   margin: 0 0 7px;
-  color: #167449;
+  color: var(--accent);
   font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.08em;
@@ -568,22 +597,23 @@ button, a {
   align-items: center;
   min-height: 36px;
   padding: 7px 10px;
-  border: 1px solid #c7cdd2;
+  border: 1px solid var(--border);
+  border-radius: 999px;
   cursor: pointer;
   gap: 7px !important;
 }
 
 .choice-card:has(input:checked) {
-  border-color: #65a480;
-  color: #175f3a;
-  background: #f2f8f4;
+  border-color: rgba(169, 183, 154, 0.5);
+  color: var(--ivory);
+  background: rgba(169, 183, 154, 0.12);
 }
 
 .choice-card input {
   width: 15px;
   height: 15px;
   margin: 0;
-  accent-color: #167449;
+  accent-color: var(--sage);
 }
 
 .choice-card > span {
@@ -593,10 +623,10 @@ button, a {
 }
 
 .secondary-button, .primary-button, .remove-button {
-  border: 1px solid #aeb6bc;
-  border-radius: 3px;
-  color: #303438;
-  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--ivory);
+  background: var(--s2);
   font-weight: 650;
   cursor: pointer;
 }
@@ -618,17 +648,43 @@ button, a {
   width: 100%;
   min-height: 48px;
   margin-top: 30px;
-  border-color: #176e45;
-  color: #ffffff;
-  background: #176e45;
+  border-color: var(--ivory);
+  color: var(--ink);
+  background: var(--ivory);
   font-size: 14px;
 }
 
 .primary-button:hover:not(:disabled) {
-  background: #115c39;
+  background: #fffaf1;
 }
 
 .primary-button:disabled {
   cursor: wait;
   opacity: 0.65;
+}
+
+.error-notice button {
+  border-radius: 999px;
+}
+
+@media (max-width: 900px) {
+  .profile-hero, .profile-layout, .technical-details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .profile-sidebar {
+    position: static;
+  }
+  .profile-field-grid, .member-core-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .technical-links {
+    min-width: 0;
+  }
+  .weekly-pantry-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.5fr);
+  }
+  .status-row {
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: 14px;
+  }
 }

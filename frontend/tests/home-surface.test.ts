@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetLine, groceryGroups, packageLabel, priceSourceLabel, tonightEntry } from "../app/lib/home-surface";
+import { budgetLine, groceryGroups, packageLabel, perDinner, plateStyle, priceSourceLabel, tonightEntry } from "../app/lib/home-surface";
 import type { NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate } from "../app/types/recommendation";
 
@@ -70,5 +70,20 @@ describe("grocery helpers", () => {
   it("labels packages from the matched product", () => {
     expect(packageLabel(line("Broccoli", 5.8, "Vegetables", 2))).toBe("2 × 500 g");
     expect(packageLabel(line("Loose", 1, null))).toBe("300 g");
+  });
+});
+
+describe("plates and averages", () => {
+  it("gives a dish the same plate every time and different dishes different plates", () => {
+    expect(plateStyle("tofu-stir-fry")).toEqual(plateStyle("tofu-stir-fry"));
+    const plates = new Set(["a", "b", "c", "d", "e", "f"].map(slug => JSON.stringify(plateStyle(slug))));
+    expect(plates.size).toBeGreaterThan(3);
+  });
+
+  it("averages only the dinners that still count", () => {
+    const eat = (kcal: number, status: NutritionDashboardDay["status"]) =>
+      ({ status, nutrition_per_person: { calories_kcal: kcal, protein_g: 10 } }) as unknown as NutritionDashboardDay;
+    expect(perDinner([eat(400, "completed"), eat(600, "planned"), eat(2000, "skipped")])).toEqual({ calories_kcal: 500, protein_g: 10 });
+    expect(perDinner([eat(2000, "skipped")])).toBeNull();
   });
 });

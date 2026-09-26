@@ -13,6 +13,7 @@ export function useMealCraftAgent() {
   const generatedPlan = ref<AgentConfirmation["plan"] | null>(null);
   const errorMessage = ref<string | null>(null);
   const isLoading = ref(false);
+  const recent = ref<AgentSession[]>([]);
 
   async function run<T>(request: () => Promise<T>): Promise<T | null> {
     isLoading.value = true;
@@ -94,8 +95,9 @@ export function useMealCraftAgent() {
   async function restoreLatest() {
     const result = await run(() => apiFetch<AgentSessionCollection>(
       `${config.public.apiBase}/api/agent/sessions`,
-      { query: { limit: 1 } },
+      { query: { limit: 8 } },
     ));
+    if (result) recent.value = result.items;
     if (result?.items[0]) session.value = result.items[0];
   }
 
@@ -114,6 +116,7 @@ export function useMealCraftAgent() {
     errorMessage,
     generatedPlan,
     isLoading,
+    recent,
     reply,
     reset,
     restoreLatest,
