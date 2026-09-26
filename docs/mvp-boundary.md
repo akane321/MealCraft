@@ -57,8 +57,10 @@ remaining design gaps.
   checkout cost and excess quantity remain visible as separate estimates.
 - Known pantry quantities are deducted from purchase demand; unknown quantities
   affect recipe ranking only and are never silently deducted.
-- The current weekly baseline plans one main meal per day for seven days. It avoids
-  consecutive repetition whenever at least two eligible recipes exist.
+- The minimum baseline was one main meal per day for seven days, and that remains
+  the floor. The product now plans the meals each household chose, each of one or
+  several dishes (decision ADR-0046), and avoids repeating a dish anywhere in the
+  week unless the candidates cannot fill it.
 - Weekly nutrition is reported per person and contains only planned MealCraft
   recipes; unplanned food is not inferred or recorded.
 - Each planned dish has one of three execution states: `planned`, `completed`,

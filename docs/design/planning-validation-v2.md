@@ -71,8 +71,8 @@ cheaper thing" — so the stupid thing becomes a hard cap the validator checks,
 and the preference becomes a bounded weight inside it. If a weight can ever
 produce a capped-out plan, the cap is not a cap.
 
-**Why slots rather than "the week".** The MVP shows seven dinners, and it will
-keep showing seven dinners. But hard-coding seven is how a prototype becomes a
+**Why slots rather than "the week".** The MVP showed seven dinners; since
+ADR-0046 the product plans the meals each household chose. Hard-coding seven is how a prototype becomes a
 rewrite: every horizon, cap and purchase optimisation written against "the week"
 has to be reopened the day the product plans lunches. Writing against the slot
 set costs nothing now and saves the rewrite. `ADR-0014` already chose this;
