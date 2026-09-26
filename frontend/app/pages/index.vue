@@ -370,6 +370,12 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           <button type="button" class="nav" @click="openTab('nutrition')">
             <svg class="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7" /></svg>Nutrition
           </button>
+          <NuxtLink to="/browse" class="nav">
+            <svg class="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="m20 20-4.5-4.5" /></svg>Recipes and groceries
+          </NuxtLink>
+          <NuxtLink to="/history" class="nav">
+            <svg class="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6L4 8.7" /><path d="M4 4v4.7h4.7M12 8v4l3 2" /></svg>Past weeks
+          </NuxtLink>
           <NuxtLink to="/profile" class="nav">
             <svg class="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v9H4Z" /><path d="M10 20v-5h4v5" /></svg>Household
           </NuxtLink>
@@ -392,6 +398,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           </div>
           <div class="home-links">
             <NuxtLink to="/profile">Edit household</NuxtLink>
+            <NuxtLink to="/system">System status</NuxtLink>
             <button type="button" @click="logout">Sign out</button>
           </div>
         </div>
@@ -549,7 +556,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <button id="tab-nutrition" type="button" role="tab" class="tab" :aria-selected="tab === 'nutrition'" aria-controls="panel-body" @click="tab = 'nutrition'">Nutrition</button>
           </div>
           <div id="panel-body" class="panel-body" role="tabpanel" :aria-labelledby="`tab-${tab}`">
-            <HomeMealList v-if="tab === 'dinners'" :days="days" :plan-id="plan.id" @open-recipe="recipeSlug = $event" />
+            <HomeMealList v-if="tab === 'dinners'" :days="days" :plan-id="plan.id" @open-recipe="recipeSlug = $event" @ask="suggest" />
             <HomeGroceryList v-else-if="tab === 'groceries'" :estimate="plan.grocery_estimate" />
             <HomeNutritionSummary
               v-else-if="nutrition.dashboard.value"

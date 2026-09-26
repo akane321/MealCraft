@@ -14,8 +14,10 @@ class RecipeService:
     def __init__(self, repository: RecipeRepository) -> None:
         self.repository = repository
 
-    def list_recipes(self, *, after_id: int | None, limit: int) -> RecipeCollectionResponse:
-        recipes = self.repository.list_after(after_id=after_id, limit=limit)
+    def list_recipes(
+        self, *, after_id: int | None, limit: int, query: str | None = None, course: str | None = None
+    ) -> RecipeCollectionResponse:
+        recipes = self.repository.list_after(after_id=after_id, limit=limit, query=query, course=course)
         has_more = len(recipes) > limit
         visible_recipes = recipes[:limit]
         next_cursor = visible_recipes[-1].id if has_more and visible_recipes else None
@@ -51,7 +53,6 @@ class RecipeService:
             steps=[
                 RecipeStepResponse(step_number=step.step_number, instruction=step.instruction) for step in recipe.steps
             ],
-            course=recipe.course,
             meal_types=list(recipe.meal_types) if recipe.meal_types is not None else None,
             prep_time_minutes=recipe.prep_time_minutes,
             cook_time_minutes=recipe.cook_time_minutes,

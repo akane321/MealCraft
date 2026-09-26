@@ -18,6 +18,7 @@ export interface RecipeListItem {
   total_time_minutes: number;
   dietary_tags: string[];
   nutrition: RecipeNutrition;
+  course?: string | null;
 }
 
 export interface RecipeCollection {

@@ -38,12 +38,19 @@ class RecipeRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
-    def list_after(self, *, after_id: int | None, limit: int) -> list[Recipe]:
+    def list_after(
+        self, *, after_id: int | None, limit: int, query: str | None = None, course: str | None = None
+    ) -> list[Recipe]:
         statement: Select[tuple[Recipe]] = (
             select(Recipe).options(joinedload(Recipe.nutrition)).order_by(Recipe.id).limit(limit + 1)
         )
         if after_id is not None:
             statement = statement.where(Recipe.id > after_id)
+        # Every word of the query appears in the title (browsing, not ranking).
+        for word in (query or "").split():
+            statement = statement.where(Recipe.title.ilike(f"%{word}%"))
+        if course is not None:
+            statement = statement.where(Recipe.course == course)
 
         return list(self.session.scalars(statement).unique().all())
 

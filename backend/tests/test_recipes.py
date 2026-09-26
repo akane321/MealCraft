@@ -131,6 +131,13 @@ def test_list_recipes_returns_cursor_collection(recipe_client: TestClient) -> No
     assert payload["items"][0]["nutrition"]["sodium_mg"] == 590.0
 
 
+def test_recipes_can_be_searched_by_title_words(recipe_client: TestClient) -> None:
+    found = recipe_client.get("/api/recipes", params={"q": "soba TOFU"}).json()["items"]
+    assert [item["slug"] for item in found] == ["tofu-soba"]
+    assert recipe_client.get("/api/recipes", params={"q": "pizza"}).json()["items"] == []
+    assert recipe_client.get("/api/recipes", params={"course": "nonsense"}).status_code == 422
+
+
 def test_get_recipe_returns_ingredients_and_steps(recipe_client: TestClient) -> None:
     response = recipe_client.get("/api/recipes/lemon-chicken")
 

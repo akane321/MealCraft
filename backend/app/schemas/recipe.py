@@ -25,6 +25,7 @@ class RecipeListItemResponse(BaseModel):
     total_time_minutes: int
     dietary_tags: list[str]
     nutrition: RecipeNutritionResponse
+    course: str | None = None
 
 
 class RecipeCollectionResponse(BaseModel):
@@ -51,8 +52,7 @@ class RecipeStepResponse(BaseModel):
 class RecipeDetailResponse(RecipeListItemResponse):
     ingredients: list[RecipeIngredientResponse]
     steps: list[RecipeStepResponse]
-    # Release recipes carry these; curated ones leave course and meal types empty.
-    course: str | None = None
+    # Release recipes carry meal types (and a course); curated ones leave both empty.
     meal_types: list[str] | None = None
     prep_time_minutes: int | None = None
     cook_time_minutes: int | None = None
