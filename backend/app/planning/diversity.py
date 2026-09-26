@@ -32,7 +32,9 @@ def permits_extension(problem, previous, recipe_id):
 def diversity_loss(problem, previous, recipe_id):
     policy = problem.diversity_policy
     if policy is None:
-        return previous.count(recipe_id) * 0.10 + (0.35 if previous and previous[-1] == recipe_id else 0.0)
+        # A repeat costs more than any ranking difference (local losses are 0..1), so a
+        # dish comes back only when the packet cannot fill the week otherwise.
+        return previous.count(recipe_id) * 1.0 + (0.35 if previous and previous[-1] == recipe_id else 0.0)
     roles = policy.classifications.get(recipe_id)
     if roles is None:
         return 0.0

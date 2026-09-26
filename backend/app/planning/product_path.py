@@ -212,6 +212,13 @@ class ProductPlanningEngine:
                 options[option.product_id] = option
                 observations[option.product_id] = projected.observation
                 provenance[option.product_id] = line.evidence
+        if composition is None:
+            # A dinner slot takes dinner dishes whenever the packet holds enough for the
+            # week; meal affinity stays only a soft score when it would otherwise run short.
+            dinners = [c for c in candidates if "dinner" in c.allowed_meal_types]
+            if constraints.day_count <= len(dinners) < len(candidates):
+                trace["meal_type_filtered"] = len(candidates) - len(dinners)
+                candidates = dinners
         trace["input_issues"] = sorted(set(diagnostics))
         trace["observed_sources"] = sorted({p.source for p in observations.values()})
         if not candidates or "conflicting_product_observation" in diagnostics:

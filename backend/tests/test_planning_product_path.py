@@ -206,6 +206,24 @@ def test_default_request_with_repository_catalog(recipe_client):
     assert trace["validation"]["status"] == "passed"
 
 
+def test_a_full_catalog_week_has_seven_different_dinners(recipe_client):
+    from app.core.paths import repository_root
+    from app.data.catalog import import_catalog, load_catalog
+
+    root = repository_root()
+    catalog = load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
+    with database() as session:
+        import_catalog(session, catalog)
+    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "weekly_budget_sgd": None})
+    assert response.status_code == 201, response.text
+    days = response.json()["days"]
+    assert len({day["recipe"]["slug"] for day in days}) == 7
+    # The catalog's breakfast bowl never fills a dinner while dinners are available.
+    assert all(day["recipe"]["meal_type"] != "breakfast" for day in days)
+    _, trace = latest_trace()
+    assert trace.get("meal_type_filtered", 0) >= 1
+
+
 def test_trace_contains_no_plaintext_health_profile(recipe_client):
     response = recipe_client.post(
         "/api/plans/generate", json={**REQUEST, "allergens": ["soy"], "max_sodium_mg_per_meal": 619}

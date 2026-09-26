@@ -16,6 +16,21 @@ from app.schemas.agent import (
 )
 from app.schemas.recommendation import AvailableIngredientInput, NutritionTargets
 
+NUMBER_WORDS = {
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+}
+
 
 class AgentConfigurationError(RuntimeError):
     pass
@@ -102,6 +117,14 @@ class RuleBasedConstraintParser:
             lower,
             [r"(?:for|serving)\s*(\d+)\s*(?:people|persons?)?", r"(\d+)\s*(?:people|persons?|人|个人)"],
         )
+        if people is None:
+            # "Dinners for two", "a family of four", "three people".
+            words = "|".join(NUMBER_WORDS)
+            match = re.search(rf"\b(?:for|serving|family of)\s+({words})\b", lower) or re.search(
+                rf"\b({words})\s+(?:people|persons?|adults?)\b", lower
+            )
+            if match:
+                people = NUMBER_WORDS[match.group(1)]
         if people is None and re.search(r"(?:两|二)\s*(?:人|个人)", text):
             people = 2
         extraction.household_size = int(people) if people is not None else None
@@ -119,6 +142,8 @@ class RuleBasedConstraintParser:
             lower,
             [
                 r"(?:weekly|per\s*week)\s*(?:budget)?[^\d]{0,8}(\d+(?:\.\d+)?)",
+                # "this week, around S$90": a dollar amount in a sentence about the week.
+                r"\bweek\b[^\d$]{0,24}(?:s\$|\$)\s*(\d+(?:\.\d+)?)(?!\s*(?:per|each|a)\s*meal)",
                 r"(?:每周|一周)(?:预算|不超过|最多|大约|约)?\s*(?:s\$|\$|新币)?\s*(\d+(?:\.\d+)?)",
             ],
         )
@@ -369,6 +394,8 @@ class OpenAIConstraintParser:
         recent_history = "\n".join(f"{item.role}: {item.content}" for item in history[-8:])
         prompt = f"""You extract constraints for a non-medical weekly meal planner.
 Return only facts explicitly stated by the user. Use null for missing scalar fields.
+household_size is how many people eat: "dinners for two" or "for 2" means 2. A dollar amount for
+the week ("this week, around S$90") is weekly_budget_sgd.
 General preferences such as low sodium or low sugar are allowed. Disease-specific requests must set
 medical_request_detected=true and must never be translated into medical treatment constraints.
 Available ingredients with no explicit quantity must keep quantity=null and unit=null.

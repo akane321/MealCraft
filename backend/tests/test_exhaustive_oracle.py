@@ -40,7 +40,8 @@ def test_oracle_enumerates_all_four_combinations_and_finds_only_budget_valid_pai
     assert result.checked_combinations == result.total_combinations == 4
     assert result.feasible_combinations == 1
     assert result.best_choices == (("0", "b"), ("1", "b"))
-    assert result.best_loss == pytest.approx(1.45)
+    # 1.45 before a repeated dish cost a full point instead of 0.10.
+    assert result.best_loss == pytest.approx(2.35)
 
 
 def test_oracle_identifies_a_narrow_beam_miss():
