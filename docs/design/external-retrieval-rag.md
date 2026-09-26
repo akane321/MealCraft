@@ -358,6 +358,29 @@ stable; do not fold it into the tutorial provider.
 Do not add these tables until fields and retention needs are reviewed. The
 current `ProductSnapshot` remains the runtime baseline.
 
+### Proposed for review (2026-09-26), not built
+
+What already records provenance, so the tables would not duplicate it:
+`PriceEvidence` on every saved shopping line, the grocery and tutorial packet
+digests, `agent_runs.model_config`, and the planning trace in `operation_runs`.
+The gap is the *candidates that lost*: today only the chosen product or video
+is kept, so "why not that one" cannot be answered later.
+
+| Table | Fields proposed | Retention proposed |
+| --- | --- | --- |
+| `retrieval_requests` | id, purpose (`grocery`/`tutorial`), query, source, mode, household id, plan or recipe id, requested_at, parser_version, status, error kind | 90 days, then only rows a saved plan points at |
+| `retrieval_candidates` | request id, rank, external id, title, package text, price, eligible, rejection reason, score | same as its request |
+| `retrieval_selections` | request id, external id, policy version, reason | kept with the plan that used it |
+
+Left out on purpose: raw pages (`external_observations`) and `provider_runs`
+latency tables. A page can hold personal data from the site's session and is
+large, and the latency lives in the trace already. `retrieval_snapshots` is
+what the evidence packets and their digests already are.
+
+Decisions for the owner: the retention periods; whether household-linked
+queries (they reveal what a household eats) need a shorter one; whether the
+tutorial side is worth storing at all, since only one video is ever shown.
+
 ## Start here
 
 ```bash
