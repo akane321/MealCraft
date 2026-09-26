@@ -473,7 +473,9 @@ class AgentSessionService:
         change = preview.shape_change
         parts = [f"{summary}."]
         if change and change.added:
-            parts.append(f"New: {', '.join(dish.recipe_title for dish in change.added)}.")
+            titles = list(dict.fromkeys(dish.recipe_title for dish in change.added))
+            more = f" and {len(titles) - 4} more" if len(titles) > 4 else ""
+            parts.append(f"New: {', '.join(titles[:4])}{more}.")
         if change and change.removed:
             count = len(change.removed)
             parts.append(f"{count} {'dish comes' if count == 1 else 'dishes come'} off the week.")

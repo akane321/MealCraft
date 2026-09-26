@@ -372,3 +372,16 @@ def test_taking_the_vegetable_away_keeps_the_main_as_the_whole_meal(composed_cli
     assert tuesday[0]["nutrition_per_person"]["calories_kcal"] == round(
         main["nutrition_per_person"]["calories_kcal"] / 0.75, 2
     )
+
+
+def test_adding_a_soup_to_one_dinner_keeps_its_main_and_vegetable(composed_client):
+    plan = _week_ahead(composed_client, COMPOSITION[:2])
+    for day in (3, 4):
+        before = {d["role_id"]: d["recipe"]["slug"] for d in plan["days"] if d["day_index"] == day}
+        preview = composed_client.post(
+            f"/api/plans/{plan['id']}/shape/preview",
+            json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [day]},
+        ).json()
+        after = {d["role_id"]: d["recipe_slug"] for d in preview["shape_change"]["added"]}
+        assert {role: after[role] for role in before} == before
+        assert after["soup"] == "tomato-soup"

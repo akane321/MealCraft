@@ -198,7 +198,7 @@ class MealPlanReplanningService:
         if staying is not None:
             added = staying
         elif request.roles:
-            added = self._plan_meal(constraints, meal, request.roles, days, kept)
+            added = self._plan_meal(constraints, meal, request.roles, days, kept, removed)
         else:
             added = []
         stays = {values["recipe_id"] for values, _ in added} if staying is not None else set()
@@ -305,7 +305,18 @@ class MealPlanReplanningService:
             **{field: round(float(getattr(item, field)) * ratio, 2) for field in scaled},
         }
 
-    def _plan_meal(self, constraints, meal, roles, days, kept) -> list[tuple[dict, MealPlanEntrySnapshot]]:
+    @staticmethod
+    def _dishes_kept_when_adding(roles, present: list[MealPlanEntry]) -> tuple[set[int], set[str]] | None:
+        """Adding a dish to one meal keeps what it has: the present recipes, and the courses only they
+        may fill. None when the change is not purely an addition."""
+        present_roles = {item.role_id for item in present if item.status != "skipped"}
+        if not present_roles or not present_roles < {role.role_id for role in roles}:
+            return None
+        held = {course for role in roles if role.role_id in present_roles for course in role.courses}
+        new = {course for role in roles if role.role_id not in present_roles for course in role.courses}
+        return {item.recipe_id for item in present}, held - new
+
+    def _plan_meal(self, constraints, meal, roles, days, kept, removed) -> list[tuple[dict, MealPlanEntrySnapshot]]:
         """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves."""
         if self.meal_plan_service is None:
             raise MealPlanReplanValidationError("Changing meals is not available here.")
@@ -330,6 +341,7 @@ class MealPlanReplanningService:
                 first_day=first,
                 day_count=last - first + 1,
                 avoid_recipe_ids={item.recipe_id for item in kept},
+                keep=self._dishes_kept_when_adding(roles, [item for item in removed if len(days) == 1]),
             )
         except ProductPlanningError as error:
             raise MealPlanReplanValidationError(f"I could not plan that: {error}") from error

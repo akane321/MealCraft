@@ -167,12 +167,19 @@ class WeeklyMealPlanService:
         return self._to_response(plan)
 
     def plan_dishes(
-        self, constraints: WeeklyMealPlanRequest, *, first_day: int, day_count: int, avoid_recipe_ids: set[int]
+        self,
+        constraints: WeeklyMealPlanRequest,
+        *,
+        first_day: int,
+        day_count: int,
+        avoid_recipe_ids: set[int],
+        keep: tuple[set[int], set[str]] | None = None,
     ) -> list[ScheduledDish]:
         """Dishes for `day_count` days from day `first_day` of a saved week, nothing saved (ADR-0046 section 2).
 
         `constraints` carries the shape to plan and the budget left; dishes already in the week are
-        avoided while enough others remain.
+        avoided while enough others remain. `keep` (recipe ids, their courses) holds a meal's present
+        dishes while a new one is added: of those courses only those recipes are offered.
         """
         start = constraints.start_date + timedelta(days=first_day - 1)
         # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
@@ -183,11 +190,19 @@ class WeeklyMealPlanService:
         recommendations = self.recommendation_service.recommend(
             partial, deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
         ).recommendations
-        fresh = [item for item in recommendations if item.recipe.id not in avoid_recipe_ids]
+        keep_ids, keep_courses = keep if keep is not None else (set(), set())
+        course = {recipe.id: recipe.course for recipe in recipes}
+        fresh = [
+            item
+            for item in recommendations
+            if item.recipe.id in keep_ids
+            or (item.recipe.id not in avoid_recipe_ids and course.get(item.recipe.id) not in keep_courses)
+        ]
         try:
             result = self.planning_engine.plan(partial, fresh, recipes, selector=self.selector)
         except ProductPlanningError:
-            # Too few dishes the week does not already have: repeat one rather than fail.
+            # Too few dishes the week does not already have, or the kept dishes no longer fit:
+            # plan the meal from every candidate rather than fail.
             result = self.planning_engine.plan(partial, recommendations, recipes, selector=self.selector)
         placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(result.selected))]
         return [
