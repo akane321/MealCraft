@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -14,6 +14,8 @@ from app.core.runtime_config import REGISTRY
 from app.db.session import get_db_session
 from app.repositories.operations import OperationsRepository
 from app.schemas.operations import (
+    DataCourse,
+    DataMealType,
     ExperimentCollection,
     ExperimentRequest,
     ExperimentRun,
@@ -27,6 +29,16 @@ from app.schemas.operations import (
     OperationsTaskCollectionResponse,
     OperationsTaskDetail,
     OpsDeleted,
+    OpsIngredient,
+    OpsIngredientCollection,
+    OpsIngredientUpdate,
+    OpsProductMapping,
+    OpsProductMappingChange,
+    OpsProductMappingCollection,
+    OpsRecipeCollection,
+    OpsRecipeDetail,
+    OpsRecipeUpdate,
+    OpsRecipeWithdrawal,
     OpsUserCollection,
     OpsUserDetail,
     OpsUserUpdate,
@@ -40,6 +52,7 @@ from app.schemas.operations import (
 )
 from app.schemas.platform import OperationStatus
 from app.services.operations import OperationsService
+from app.services.ops_data import DataService, OpsDataConflictError, OpsDataNotFoundError
 from app.services.ops_replay import ReplayNotFoundError, ReplayService, ReplayUnavailableError
 from app.services.ops_settings import SettingsService
 from app.services.ops_users import OpsUserConflictError, OpsUserNotFoundError, UsersService
@@ -327,3 +340,136 @@ def delete_user(user_id: int, current: CurrentOperationsViewDependency, database
     except OpsUserConflictError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
     return OpsDeleted(deleted=1)
+
+
+# --- Data: recipes, ingredients and product mappings ---
+
+
+def _data(current, database: Session) -> DataService:
+    return DataService(database, actor_user_id=current.user.id)
+
+
+@router.get("/data/recipes", response_model=OpsRecipeCollection)
+def list_recipes(
+    current: CurrentOperationsViewDependency,
+    database: DatabaseDependency,
+    q: Annotated[str | None, Query(max_length=120)] = None,
+    course: Annotated[DataCourse | None, Query()] = None,
+    meal_type: Annotated[DataMealType | None, Query()] = None,
+    origin: Annotated[Literal["release", "curated"] | None, Query()] = None,
+    withdrawn: Annotated[bool | None, Query()] = None,
+    offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+) -> OpsRecipeCollection:
+    return _data(current, database).recipes(
+        query=q, course=course, meal_type=meal_type, origin=origin, withdrawn=withdrawn, offset=offset, limit=limit
+    )
+
+
+@router.get("/data/recipes/{recipe_id}", response_model=OpsRecipeDetail)
+def get_recipe(
+    recipe_id: int, current: CurrentOperationsViewDependency, database: DatabaseDependency
+) -> OpsRecipeDetail:
+    try:
+        return _data(current, database).recipe(recipe_id)
+    except OpsDataNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recipe not found") from error
+
+
+@router.patch("/data/recipes/{recipe_id}", response_model=OpsRecipeDetail)
+def update_recipe(
+    recipe_id: int, change: OpsRecipeUpdate, current: CurrentOperationsViewDependency, database: DatabaseDependency
+) -> OpsRecipeDetail:
+    try:
+        return _data(current, database).update_recipe(recipe_id, change)
+    except OpsDataNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recipe not found") from error
+
+
+@router.post("/data/recipes/{recipe_id}/withdraw", response_model=OpsRecipeDetail)
+def withdraw_recipe(
+    recipe_id: int,
+    withdrawal: OpsRecipeWithdrawal,
+    current: CurrentOperationsViewDependency,
+    database: DatabaseDependency,
+) -> OpsRecipeDetail:
+    try:
+        return _data(current, database).withdraw_recipe(recipe_id, withdrawal.reason)
+    except OpsDataNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recipe not found") from error
+    except OpsDataConflictError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+
+
+@router.post("/data/recipes/{recipe_id}/restore", response_model=OpsRecipeDetail)
+def restore_recipe(
+    recipe_id: int, current: CurrentOperationsViewDependency, database: DatabaseDependency
+) -> OpsRecipeDetail:
+    try:
+        return _data(current, database).restore_recipe(recipe_id)
+    except OpsDataNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recipe not found") from error
+    except OpsDataConflictError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+
+
+@router.get("/data/ingredients", response_model=OpsIngredientCollection)
+def list_ingredients(
+    current: CurrentOperationsViewDependency,
+    database: DatabaseDependency,
+    q: Annotated[str | None, Query(max_length=120)] = None,
+    offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+) -> OpsIngredientCollection:
+    return _data(current, database).ingredients(query=q, offset=offset, limit=limit)
+
+
+@router.patch("/data/ingredients/{ingredient_id}", response_model=OpsIngredient)
+def update_ingredient(
+    ingredient_id: int,
+    change: OpsIngredientUpdate,
+    current: CurrentOperationsViewDependency,
+    database: DatabaseDependency,
+) -> OpsIngredient:
+    try:
+        return _data(current, database).update_ingredient(ingredient_id, change)
+    except OpsDataNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingredient not found") from error
+
+
+@router.get("/data/mappings", response_model=OpsProductMappingCollection)
+def list_product_mappings(
+    current: CurrentOperationsViewDependency,
+    database: DatabaseDependency,
+    q: Annotated[str | None, Query(max_length=120)] = None,
+    # A mapping status, or "console" for the ones changed or removed here.
+    mapping_status: Annotated[
+        Literal["mapped", "not_purchased", "removed", "console"] | None, Query(alias="status")
+    ] = None,
+    offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+) -> OpsProductMappingCollection:
+    return _data(current, database).mappings(query=q, status=mapping_status, offset=offset, limit=limit)
+
+
+@router.put("/data/mappings/{ingredient}", response_model=OpsProductMapping)
+def change_product_mapping(
+    ingredient: str,
+    change: OpsProductMappingChange,
+    current: CurrentOperationsViewDependency,
+    database: DatabaseDependency,
+) -> OpsProductMapping:
+    try:
+        return _data(current, database).change_mapping(ingredient, change.product)
+    except OpsDataNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingredient not found") from error
+
+
+@router.delete("/data/mappings/{ingredient}", response_model=OpsProductMapping)
+def remove_product_mapping(
+    ingredient: str, current: CurrentOperationsViewDependency, database: DatabaseDependency
+) -> OpsProductMapping:
+    try:
+        return _data(current, database).remove_mapping(ingredient)
+    except OpsDataNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No mapping for this ingredient") from error

@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import get_settings
+from app.data.overrides import ensure_loaded
 
 settings = get_settings()
 
@@ -17,4 +18,5 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False
 
 def get_db_session() -> Generator[Session, None, None]:
     with SessionLocal() as session:
+        ensure_loaded(session)
         yield session

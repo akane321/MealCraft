@@ -16,6 +16,7 @@ from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
 
+from app.agent.ingredient_matcher import names_of
 from app.core.paths import find_repository_root
 from app.models.recipe import Recipe
 
@@ -45,8 +46,7 @@ def wanted(reason: str | None) -> str | None:
 
 KEYWORD_WEIGHT = 0.05
 
-ZH_ALIASES = "data/ingredients/aliases-zh-v1.json"
-# Words a Chinese request uses for a cuisine or a kind of dish; ingredient names come from ZH_ALIASES.
+# Words a Chinese request uses for a cuisine or a kind of dish; ingredient names come from aliases-zh-v1.json.
 ZH_WORDS = {
     "韩国": "korean", "韩式": "korean", "泰国": "thai", "泰式": "thai", "印度": "indian", "墨西哥": "mexican",
     "日本": "japanese", "日式": "japanese", "中式": "chinese", "中餐": "chinese", "中国": "chinese",
@@ -118,15 +118,14 @@ def shared_words(text: str, recipes: list[Recipe]) -> dict[int, float]:
 
 
 @lru_cache(maxsize=1)
-def _chinese_words() -> dict[str, str]:
+def chinese_words() -> dict[str, str]:
     """Chinese word -> English words, longest first: the cuisine and dish words, then every catalog
-    ingredient's Chinese names (model-generated, `aliases-zh-v1.json`) as its English name."""
+    ingredient's Chinese names (model-generated, `aliases-zh-v1.json`, with the console's edits) as its
+    English name."""
     words = dict(ZH_WORDS)
-    path = find_repository_root(Path(__file__).parent) / ZH_ALIASES
-    if path.exists():
-        for key, names in json.loads(path.read_text(encoding="utf-8"))["aliases"].items():
-            for name in names:
-                words.setdefault(name, key.replace("_", " "))
+    for key, names in names_of("zh_names").items():
+        for name in names:
+            words.setdefault(name, key.replace("_", " "))
     return dict(sorted(words.items(), key=lambda item: -len(item[0])))
 
 
@@ -136,7 +135,7 @@ def in_english(text: str) -> str:
     if not re.search(r"[一-鿿]", text):
         return text
     found, rest = [], text
-    for word, english in _chinese_words().items():
+    for word, english in chinese_words().items():
         if word in rest:
             found.append(english)
             rest = rest.replace(word, " ")

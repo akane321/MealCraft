@@ -148,7 +148,7 @@ test("an administrator signs in, reads the overview, opens a task and runs a liv
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/ops-3-services.png` });
 
   await nav.getByRole("link", { name: /^Data/ }).click();
-  await expect(page.getByRole("heading", { name: "Data is coming in the next slice" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Recipes, ingredients and product mappings" })).toBeVisible();
 });
 
 test("a household account is told plainly it is not an administrator and kept out of /ops", async ({ page }) => {
