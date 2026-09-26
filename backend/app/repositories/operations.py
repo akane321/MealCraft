@@ -4,8 +4,10 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
+from app.models.agent import AgentRun, AgentSession
+from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
 
 
@@ -93,3 +95,51 @@ class OperationsRepository:
             .limit(1)
         )
         return self.session.scalar(statement)
+
+    # --- Console reads (ADR-0047): tasks, series and service history. ---
+
+    def created_rows(self, model, *columns, since: datetime, where=()) -> list[tuple]:
+        """Raw rows for bucketing in Python, which keeps day grouping identical on SQLite and Postgres."""
+
+        statement = select(model.created_at, *columns).where(model.created_at >= since, *where)
+        return [tuple(row) for row in self.session.execute(statement).all()]
+
+    def task_page(
+        self,
+        model,
+        *,
+        where: list,
+        status: str | None,
+        since: datetime | None,
+        until: datetime | None,
+        fetch: int,
+    ) -> tuple[list, int]:
+        filters = list(where)
+        if status is not None:
+            filters.append(model.status == status)
+        if since is not None:
+            filters.append(model.created_at >= since)
+        if until is not None:
+            filters.append(model.created_at < until)
+        total = self.session.scalar(select(func.count()).select_from(model).where(*filters)) or 0
+        statement = select(model).where(*filters).order_by(model.created_at.desc(), model.id.desc()).limit(fetch)
+        return list(self.session.scalars(statement)), total
+
+    def agent_run(self, run_id: int) -> AgentRun | None:
+        return self.session.scalars(
+            select(AgentRun)
+            .where(AgentRun.id == run_id)
+            .options(
+                selectinload(AgentRun.session).selectinload(AgentSession.messages),
+                selectinload(AgentRun.checkpoints),
+                selectinload(AgentRun.tool_executions),
+            )
+        ).one_or_none()
+
+    def planning_run(self, run_id: int) -> OperationRun | None:
+        return self.session.scalars(
+            select(OperationRun).where(OperationRun.id == run_id, OperationRun.run_type == "planning")
+        ).one_or_none()
+
+    def plan_constraints(self, plan_id: int) -> dict | None:
+        return self.session.scalar(select(MealPlan.constraints).where(MealPlan.id == plan_id))
