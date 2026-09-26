@@ -144,3 +144,26 @@ def test_a_model_that_fails_costs_understanding_not_the_turn() -> None:
     assert parser.fell_back and parser.provider == "openai"
     assert out.household_size == 2 and out.excluded_ingredients == ["pork"]
     assert out.assistant_summary.endswith(FallbackConstraintParser.OFFLINE_NOTE)
+
+
+def test_asking_for_a_food_swaps_the_main_dish_of_the_meal() -> None:
+    from types import SimpleNamespace
+
+    from app.agent.replanning import AgentReplanInterpreter
+
+    def dish(entry_id, meal, role, title):
+        return SimpleNamespace(
+            entry_id=entry_id, day_index=2, meal_type=meal, role_id=role, recipe=SimpleNamespace(title=title)
+        )
+
+    plan = SimpleNamespace(
+        days=[
+            dish(1, "lunch", "main", "Chicken Rice"),
+            dish(2, "dinner", "main", "Beef Stew"),
+            dish(3, "dinner", "vegetable", "Garlic Spinach"),
+        ]
+    )
+    interpreter = AgentReplanInterpreter()
+    assert interpreter._dish_entry("can tomorrow be fish instead?", plan, 2) == 2  # dinner's main
+    assert interpreter._dish_entry("tomorrow's lunch, something with fish", plan, 2) == 1
+    assert interpreter._dish_entry("change tomorrow", plan, 2) is None  # nothing asked for: still ask

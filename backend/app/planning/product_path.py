@@ -20,7 +20,7 @@ from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.grocery_estimator import not_purchased
-from app.planning.meal_beam import MealBeamPlanner, assignments_of
+from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner, assignments_of
 from app.planning.meal_composition import dish_servings
 from app.planning.nutrition_scope import compile_nutrition_targets
 from app.planning.product_input import product_input
@@ -60,6 +60,18 @@ def normalized(quantity, unit):
 # Fallback searches for a stated budget: how strongly a dish's cost, relative to the
 # budget for one dinner, is added to its rank loss (which lies in 0..1).
 COST_WEIGHTS = (1.0, 4.0, 16.0)
+
+
+def meals_of_the_day(constraints) -> list[tuple[str, list]] | None:
+    """(meal type, dish roles) for each planned meal of a day, in day order; None for the one-dish dinner MVP.
+
+    A plan shape (ADR-0046) names the meals; an older dinner composition (ADR-0036) is a dinner-only shape.
+    """
+    shape = getattr(constraints, "plan_shape", None)
+    if shape is not None:
+        return shape.ordered()
+    composition = getattr(constraints, "meal_composition", None)
+    return [("dinner", composition)] if composition is not None else None
 
 
 def meal_affinity(recipe) -> tuple[str, ...]:
@@ -136,9 +148,12 @@ class ProductPlanningEngine:
             ),
             "validation": None,
         }
-        composition = getattr(constraints, "meal_composition", None)
+        # The meals of each day and their dish roles (ADR-0046). None is the MVP: one dish a dinner.
+        shape = meals_of_the_day(constraints)
+        composition = shape  # kept as the name for "planned with the meal beam" below
         try:
-            require_composition_enabled(composition)
+            for _, roles in shape or []:
+                require_composition_enabled(roles)
         except PlanningCapabilityError as error:
             raise ProductPlanningError("needs_clarification", str(error), trace) from error
         if composition is not None and constraints.planner_strategy != "beam":
@@ -189,18 +204,25 @@ class ProductPlanningEngine:
                 ranked = best + cheapest
             recommendations = ranked[:limit]
         else:
-            # The meal beam ranks each role's dishes itself; keep the best of every course it may fill.
-            courses = {course for role in composition for course in role.courses}
+            # The meal beam ranks each role's dishes itself; keep the best of every course it may fill,
+            # enough of each for every slot that uses it to get a different dish (a lunch-and-dinner
+            # week needs fourteen mains, not the 24 a dinner week kept).
+            uses: dict[str, int] = {}
+            for _, roles in composition:
+                for role in roles:
+                    for course in role.courses:
+                        uses[course] = uses.get(course, 0) + constraints.day_count
+            limits = {course: max(COMPOSED_CANDIDATES_PER_COURSE, 3 * count) for course, count in uses.items()}
             by_id = {r.id: r for r in recipes}
             kept: dict[str, int] = {}
             packet = []
             for recommendation in recommendations:
                 course = getattr(by_id.get(recommendation.recipe.id), "course", None) or "main"
-                if course in courses and kept.get(course, 0) < COMPOSED_CANDIDATES_PER_COURSE:
+                if course in limits and kept.get(course, 0) < limits[course]:
                     kept[course] = kept.get(course, 0) + 1
                     packet.append(recommendation)
             recommendations = packet
-            trace["candidate_limit"] = COMPOSED_CANDIDATES_PER_COURSE
+            trace["candidate_limit"] = limits
         if not recommendations:
             trace.update(status="candidate_rejected", evidence="bounded_search_exhausted")
             raise ProductPlanningError(
@@ -264,15 +286,19 @@ class ProductPlanningEngine:
             )
         slots = [
             PlanningSlot(
-                slot_id=f"slot-{i}",
+                slot_id=f"slot-{i}" if meal == "dinner" else f"slot-{i}-{meal}",
                 planned_date=constraints.start_date + timedelta(days=i),
-                meal_type="dinner",
+                meal_type=meal,
                 servings=constraints.household_size,
                 max_time_minutes=constraints.max_cooking_time_minutes,
-                composition=composition,
+                composition=roles,
             )
             for i in range(constraints.day_count)
+            for meal, roles in (composition or [("dinner", None)])
         ]
+        slot_day = {
+            slot.slot_id: (index // len(composition or [0]), slot.meal_type) for index, slot in enumerate(slots)
+        }
         pantry = []
         for item in constraints.available_ingredients:
             quantity, unit = normalized(item.quantity, item.unit)
@@ -383,7 +409,22 @@ class ProductPlanningEngine:
                     [PlanningAssignment(slot_id=s, recipe_id=r) for s, r in picked] for picked in choices
                 ]
             else:
-                meal_beam = MealBeamPlanner(local_losses=losses)
+                # The search budget grows with the slots, so a three-meal week is searched as
+                # fully as a dinner week (ADR-0046 section 3).
+                meal_beam = MealBeamPlanner(
+                    MealBeamLimits(
+                        # 256 meals a slot keep the rotated dishes a 64-meal cut dropped; the budget
+                        # covers the beam's 32 states times those meals, slot by slot.
+                        meal_options_per_slot=256,
+                        max_expansions=max(MealBeamLimits().max_expansions, 32 * 256 * len(slots) + 256),
+                        repeat_cost=1.0,
+                        flat_repeat=True,
+                        max_meal_combinations=16384,
+                        distinct_kinds=True,
+                        rotate_candidates=True,
+                    ),
+                    local_losses=losses,
+                )
                 search = meal_beam.search_candidates(problem.model_copy(deep=True))
                 trace["settings"] = asdict(meal_beam.limits)
                 trace["dominance_rule"] = None
@@ -512,9 +553,8 @@ class ProductPlanningEngine:
             for a in assignments
         ]
         servings = dish_servings(problem, assignments)
-        slot_index = {slot.slot_id: index for index, slot in enumerate(slots)}
         placements = [
-            (slot_index[a.slot_id], "dinner", a.role_id or "main", servings[i] / constraints.household_size)
+            (*slot_day[a.slot_id], a.role_id or "main", servings[i] / constraints.household_size)
             for i, a in enumerate(assignments)
         ]
         return ProductPlan(selected, grocery, trace, placements)

@@ -1,15 +1,37 @@
 <script setup lang="ts">
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
-import { plateStyle, tonightEntry } from "~/lib/home-surface";
+import { MEAL_LABEL, nextMeal, plateStyle, type PlannedMeal } from "~/lib/home-surface";
 import type { NutritionDashboardDay } from "~/types/meal-plan";
 import type { TutorialRecommendation } from "~/types/recipe";
 
 const props = defineProps<{ days: NutritionDashboardDay[]; updatingEntryId: number | null }>();
-const emit = defineEmits<{ markCooked: [entryId: number]; openRecipe: [slug: string]; swap: [day: NutritionDashboardDay] }>();
+const emit = defineEmits<{
+  markCooked: [entryId: number];
+  markMeal: [meal: PlannedMeal];
+  openRecipe: [slug: string];
+  swap: [day: NutritionDashboardDay];
+}>();
 
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
-const tonight = computed(() => tonightEntry(props.days, todayIsoDate()));
+// The next meal to cook (ADR-0046): its main dish leads, the others are listed beside it.
+const next = computed(() => nextMeal(props.days, todayIsoDate()));
+const tonight = computed(() => (next.value ? { day: next.value.meal.dishes[0]!, isToday: next.value.isToday } : null));
+const others = computed(() => next.value?.meal.dishes.slice(1) ?? []);
+const mealKcal = computed(() => Math.round(next.value?.meal.dishes.reduce((sum, dish) => sum + dish.nutrition_per_person.calories_kcal, 0) ?? 0));
+const eyebrow = computed(() => {
+  if (!next.value) return "";
+  const label = MEAL_LABEL[next.value.meal.mealType];
+  if (!next.value.isToday) return `Next up · ${label}`;
+  return next.value.meal.mealType === "dinner" ? "Tonight" : `Today's ${label.toLowerCase()}`;
+});
+
+function markCooked() {
+  const meal = next.value?.meal;
+  if (!meal) return;
+  if (meal.dishes.length > 1) emit("markMeal", meal);
+  else emit("markCooked", meal.dishes[0]!.entry_id);
+}
 const tutorial = ref<TutorialRecommendation | null>(null);
 const playing = ref(false);
 const video = computed(() => tutorial.value?.selected_video ?? null);
@@ -28,22 +50,28 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
 </script>
 
 <template>
-  <section v-if="tonight" class="tonight" aria-label="Tonight's dinner">
-    <span class="mc-eyebrow">{{ tonight.isToday ? "Tonight" : "Next up" }} · {{ formatPlanDate(tonight.day.planned_date, { weekday: "short", day: "numeric", month: "short" }) }}</span>
+  <section v-if="tonight" class="tonight" aria-label="Next meal">
+    <span class="mc-eyebrow">{{ eyebrow }} · {{ formatPlanDate(tonight.day.planned_date, { weekday: "short", day: "numeric", month: "short" }) }}</span>
     <h2 class="mc-serif">{{ tonight.day.recipe.title }}</h2>
+    <p v-if="others.length" class="with">
+      with
+      <template v-for="(dish, index) in others" :key="dish.entry_id">
+        <button type="button" class="dish-link" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button><span v-if="index < others.length - 1">, </span>
+      </template>
+    </p>
     <p class="meta">
       <span>{{ tonight.day.recipe.total_time_minutes }} min</span>
-      <span>{{ Math.round(tonight.day.nutrition_per_person.calories_kcal) }} kcal each</span>
-      <span v-if="tonight.day.status === 'completed'" class="done">Cooked</span>
+      <span>{{ mealKcal }} kcal each</span>
+      <span v-if="next?.meal.status === 'completed'" class="done">Cooked</span>
     </p>
     <div class="acts">
       <button type="button" class="mc-primary" @click="emit('openRecipe', tonight.day.recipe.slug)">Recipe &amp; steps</button>
       <button
-        v-if="tonight.day.status === 'planned'"
+        v-if="next && next.meal.status !== 'completed' && next.meal.status !== 'skipped'"
         type="button"
         class="mc-pill"
         :disabled="updatingEntryId === tonight.day.entry_id"
-        @click="emit('markCooked', tonight.day.entry_id)"
+        @click="markCooked"
       >
         {{ updatingEntryId === tonight.day.entry_id ? "Saving…" : "Mark as cooked" }}
       </button>
@@ -79,9 +107,9 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
       <p v-else class="no-video">No how-to video for this dish yet.</p>
     </div>
   </section>
-  <section v-else-if="days.length" class="tonight quiet" aria-label="Tonight's dinner">
+  <section v-else-if="days.length" class="tonight quiet" aria-label="Next meal">
     <span class="mc-eyebrow">This week</span>
-    <h2 class="mc-serif">Every dinner is done.</h2>
+    <h2 class="mc-serif">Every meal this week is done.</h2>
     <p class="meta">Ask for next week whenever you're ready.</p>
   </section>
 </template>
@@ -102,6 +130,9 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
 }
 .tonight > .mc-eyebrow, .acts, .video { grid-column: 1 / -1; }
 h2 { margin: 6px 0 0; font-size: 28px; line-height: 1.08; letter-spacing: -0.01em; text-wrap: balance; }
+.with { margin: 6px 0 0; font-size: 13px; color: var(--t2); line-height: 1.5; }
+.dish-link { padding: 0; border: 0; background: none; color: var(--ivory); font: inherit; text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; }
+.dish-link:hover { text-decoration-color: var(--accent); }
 .meta { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 12px; color: var(--t2); font-size: 12.5px; }
 .meta .done { color: var(--sage); }
 .acts { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }

@@ -103,6 +103,8 @@ class HouseholdProfileVersion(Base):
     pricing_mode: Mapped[str] = mapped_column(String(20))
     # Dish roles of a meal (ADR-0036 section 1); NULL is one dish a meal.
     meal_composition: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
+    # Which meals are planned and each one's dish roles (ADR-0046); NULL reads meal_composition.
+    plan_shape: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     profile: Mapped[HouseholdProfile] = relationship(back_populates="versions")

@@ -118,4 +118,5 @@ class HouseholdProfileRepository:
                 if payload.meal_composition is not None
                 else None
             ),
+            plan_shape=payload.plan_shape.model_dump(mode="json") if payload.plan_shape is not None else None,
         )

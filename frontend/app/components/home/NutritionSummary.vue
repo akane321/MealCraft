@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { perDinner } from "~/lib/home-surface";
+import { perMealAndDay } from "~/lib/home-surface";
 import type { WeeklyNutritionDashboard } from "~/types/meal-plan";
 import type { RecipeNutrition } from "~/types/recipe";
 
 const props = defineProps<{ dashboard: WeeklyNutritionDashboard; sodiumLimit: number | null }>();
 const emit = defineEmits<{ details: [] }>();
 
-const average = computed(() => perDinner(props.dashboard.days));
+// Targets are per meal, so the bars compare an average meal; a day's total is shown when a day has several.
+const averages = computed(() => perMealAndDay(props.dashboard.days));
+const average = computed(() => averages.value?.meal ?? null);
 const cooked = computed(() => props.dashboard.status_counts.completed);
 const kcalTarget = computed(() => props.dashboard.nutrition_targets.calories_kcal);
 
@@ -42,19 +44,19 @@ const rows = computed(() => {
   <div class="nutri">
     <div class="big">
       <b class="mc-serif mc-num">{{ Math.round(average?.calories_kcal ?? 0) }}</b>
-      <span>kcal per person, per dinner<template v-if="kcalTarget"> · target {{ Math.round(kcalTarget) }}</template></span>
+      <span>kcal per person, per meal<template v-if="kcalTarget"> · target {{ Math.round(kcalTarget) }}</template><template v-if="averages && averages.mealsPerDay > 1"> · {{ Math.round(averages.day.calories_kcal).toLocaleString("en-SG") }} kcal a day</template></span>
     </div>
     <div v-for="row in rows" :key="row.key" class="bar-row" :class="{ over: row.over }">
       <div class="top"><span>{{ row.label }}</span><span v-if="row.target" class="t">{{ row.target }}</span><span class="v mc-num">{{ row.value }}</span></div>
       <div class="bar"><i :style="{ width: row.width }" /><span v-if="row.tick" class="tick" :style="{ left: row.tick }" /></div>
     </div>
     <p class="eaten">
-      Eaten so far: {{ cooked }} {{ cooked === 1 ? "dinner" : "dinners" }},
+      Eaten so far: {{ cooked }} {{ cooked === 1 ? "dish" : "dishes" }},
       {{ Math.round(dashboard.completed_nutrition_per_person.calories_kcal).toLocaleString("en-SG") }} kcal and
       {{ Math.round(dashboard.completed_nutrition_per_person.protein_g) }} g protein per person.
     </p>
     <button type="button" class="mc-pill" @click="emit('details')">All six nutrients &amp; daily detail</button>
-    <p class="lead">Averaged over this week's dinners. General guidance, not medical advice.</p>
+    <p class="lead">Averaged over this week's meals. General guidance, not medical advice.</p>
   </div>
 </template>
 

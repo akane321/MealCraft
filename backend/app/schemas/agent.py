@@ -16,6 +16,7 @@ from app.orchestration.contracts import (
 from app.schemas.meal_plan import (
     MealPlanEventType,
     MealPlanReplanEventResponse,
+    MealPlanShape,
     WeeklyMealPlanResponse,
 )
 from app.schemas.product import PricingMode
@@ -90,6 +91,8 @@ class AgentConstraintState(BaseModel):
     max_sodium_mg_per_meal: float | None = None
     available_ingredients: list[AvailableIngredientInput] = Field(default_factory=list)
     pricing_mode: PricingMode = "fixture"
+    # Which meals and dishes this week plans (ADR-0046); None is the household default.
+    plan_shape: MealPlanShape | None = None
 
 
 class AgentReplanDraft(BaseModel):

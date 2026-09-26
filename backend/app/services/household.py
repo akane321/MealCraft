@@ -14,7 +14,7 @@ from app.schemas.household import (
     HouseholdProfileWrite,
     ProfileConstraintChange,
 )
-from app.schemas.meal_plan import WeeklyMealPlanRequest
+from app.schemas.meal_plan import WeeklyMealPlanRequest, default_plan_shape
 from app.schemas.recommendation import NutritionTargets
 from app.services.meal_plan import WeeklyMealPlanService
 
@@ -45,6 +45,8 @@ class HouseholdProfileService:
 
     def create(self, payload: HouseholdProfileWrite) -> HouseholdProfileResponse:
         require_composition_enabled(payload.meal_composition)
+        for roles in payload.plan_shape.meals.values() if payload.plan_shape else []:
+            require_composition_enabled(roles)
         if self.repository.get_current() is not None:
             raise HouseholdProfileAlreadyExistsError(
                 "The MVP supports one household profile; update the existing profile."
@@ -64,6 +66,8 @@ class HouseholdProfileService:
         profile = self._require_profile(profile_id)
         write_payload = HouseholdProfileWrite.model_validate(payload.model_dump(exclude={"expected_version"}))
         require_composition_enabled(write_payload.meal_composition)
+        for roles in write_payload.plan_shape.meals.values() if write_payload.plan_shape else []:
+            require_composition_enabled(roles)
         try:
             updated = self.repository.update(
                 profile,
@@ -184,6 +188,7 @@ class HouseholdProfileService:
             available_ingredients=version.available_ingredients,
             pricing_mode=version.pricing_mode,
             meal_composition=version.meal_composition,
+            plan_shape=version.plan_shape,
             created_at=version.created_at,
         )
 
@@ -211,7 +216,10 @@ class HouseholdProfileService:
             ),
             "available_ingredients": version.available_ingredients,
             "pricing_mode": version.pricing_mode,
-            "meal_composition": version.meal_composition,
+            "meal_composition": version.meal_composition if version.plan_shape is None else None,
+            # A household that set neither plans the default week: dinner, one main and one vegetable.
+            "plan_shape": version.plan_shape
+            or (default_plan_shape().model_dump(mode="json") if version.meal_composition is None else None),
         }
         for field in request.overrides.model_fields_set:
             override = getattr(request.overrides, field)
@@ -234,6 +242,7 @@ class HouseholdProfileService:
             "available_ingredients": "Available ingredients",
             "pricing_mode": "Pricing source",
             "meal_composition": "Dishes per meal",
+            "plan_shape": "Meals and dishes",
         }
         return [
             ProfileConstraintChange(field=labels[key], before=before.get(key), after=after.get(key))

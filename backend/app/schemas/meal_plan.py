@@ -15,6 +15,49 @@ MealPlanEventType = Literal["REPLACE_MEAL", "CANCEL_MEAL", "LOCK_MEAL", "ITEM_UN
 MealPlanEventStatus = Literal["previewed", "applied"]
 
 
+PlannedMeal = Literal["breakfast", "lunch", "dinner"]
+MEAL_ORDER: tuple[PlannedMeal, ...] = ("breakfast", "lunch", "dinner")
+
+
+def _role(role_id: str, *courses: str, required: bool = True) -> dict:
+    return {"role_id": role_id, "courses": list(courses), "required": required}
+
+
+# The presets of ADR-0046 section 1; the first of each meal is its default.
+MEAL_PRESETS: dict[PlannedMeal, dict[str, list[dict]]] = {
+    "breakfast": {"one dish": [_role("main", "breakfast", "baked_good")]},
+    "lunch": {
+        "one dish": [_role("main", "main", "salad", "soup")],
+        "main and side": [_role("main", "main"), _role("vegetable", "side", "salad")],
+    },
+    "dinner": {
+        # The vegetable is optional: always filled when one fits (an empty optional role costs more
+        # than any dish), but a diet or catalog without one still gets a week rather than an error.
+        "main and vegetable": [_role("main", "main"), _role("vegetable", "side", "salad", required=False)],
+        "one main": [_role("main", "main")],
+        "main, vegetable and soup": [
+            _role("main", "main"),
+            _role("vegetable", "side", "salad"),
+            _role("soup", "soup"),
+        ],
+    },
+}
+
+
+class MealPlanShape(BaseModel):
+    """Which meals of each day are planned, and the dish roles of each (ADR-0046)."""
+
+    meals: dict[PlannedMeal, MealComposition] = Field(min_length=1)
+
+    def ordered(self) -> list[tuple[PlannedMeal, list]]:
+        return [(meal, self.meals[meal]) for meal in MEAL_ORDER if meal in self.meals]
+
+
+def default_plan_shape() -> MealPlanShape:
+    """Dinner only, one main and one vegetable: the household default (owner, 2026-09-26)."""
+    return MealPlanShape.model_validate({"meals": {"dinner": MEAL_PRESETS["dinner"]["main and vegetable"]}})
+
+
 class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     nutrition_constraints: list[ProductNutritionTarget] = Field(default_factory=list, max_length=12)
     nutrition_guard_band: float = Field(default=0.25, ge=0, le=1, allow_inf_nan=False)
@@ -24,6 +67,14 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     weekly_budget_sgd: float | None = Field(default=None, gt=0, le=7000)
     # Dish roles of every dinner (ADR-0036); None is one dish, the MVP.
     meal_composition: MealComposition | None = None
+    # Which meals of each day are planned and each one's dish roles (ADR-0046); replaces meal_composition.
+    plan_shape: MealPlanShape | None = None
+
+    @model_validator(mode="after")
+    def one_way_to_say_the_shape(self) -> "WeeklyMealPlanRequest":
+        if self.plan_shape is not None and self.meal_composition is not None:
+            raise ValueError("Give the plan shape or a dinner composition, not both")
+        return self
 
     @model_validator(mode="after")
     def finite_pantry_quantities(self) -> "WeeklyMealPlanRequest":
@@ -125,6 +176,10 @@ class NutritionDashboardDayResponse(BaseModel):
     is_locked: bool
     consumed_at: datetime | None
     nutrition_per_person: RecipeNutritionResponse
+    # Which meal and dish position this is, and its share of the meal (ADR-0046).
+    meal_type: str = "dinner"
+    role_id: str = "main"
+    portion_share: float = 1.0
 
 
 class WeeklyNutritionDashboardResponse(BaseModel):

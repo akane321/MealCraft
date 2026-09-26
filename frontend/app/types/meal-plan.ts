@@ -97,6 +97,10 @@ export interface NutritionDashboardDay {
   is_locked: boolean;
   consumed_at: string | null;
   nutrition_per_person: RecipeNutrition;
+  // Which meal and dish position this is, and its share of the meal (ADR-0046); absent means one dinner dish.
+  meal_type?: "breakfast" | "lunch" | "dinner" | "snack";
+  role_id?: string;
+  portion_share?: number;
 }
 
 export interface WeeklyNutritionDashboard {

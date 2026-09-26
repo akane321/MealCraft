@@ -1077,6 +1077,9 @@ def _household_profile_payload() -> dict:
         "max_cooking_time_minutes": 60,
         "budget_per_meal_sgd": 20,
         "weekly_budget_sgd": 60,
+        # The two-recipe test catalog has no side dishes; the default main-and-vegetable dinner is
+        # tested on the repository catalog (test_planning_product_path).
+        "plan_shape": {"meals": {"dinner": [{"role_id": "main", "courses": ["main"]}]}},
         "health_preferences": ["low-sodium"],
         "nutrition_targets": {"calories_kcal": 500, "protein_g": 35},
         "max_sodium_mg_per_meal": None,

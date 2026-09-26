@@ -18,7 +18,8 @@ def full_capability(monkeypatch):
     monkeypatch.setattr(get_settings(), "planning_capability", "full")
 
 
-def test_mvp_refuses_a_profile_with_a_meal_composition(recipe_client: TestClient):  # noqa: F811
+def test_mvp_refuses_a_profile_with_a_meal_composition(recipe_client: TestClient, monkeypatch):  # noqa: F811
+    monkeypatch.setattr(get_settings(), "planning_capability", "mvp")
     response = recipe_client.post(
         "/api/household-profiles", json={**_household_profile_payload(), "meal_composition": COMPOSITION}
     )
@@ -41,7 +42,8 @@ def test_full_capability_stores_the_composition_on_the_profile_version(
     assert stored[2]["required"] is False
 
 
-def test_mvp_refuses_a_plan_request_with_a_meal_composition(recipe_client: TestClient):  # noqa: F811
+def test_mvp_refuses_a_plan_request_with_a_meal_composition(recipe_client: TestClient, monkeypatch):  # noqa: F811
+    monkeypatch.setattr(get_settings(), "planning_capability", "mvp")
     response = recipe_client.post("/api/plans/generate", json={"household_size": 2, "meal_composition": COMPOSITION})
 
     assert response.status_code == 422

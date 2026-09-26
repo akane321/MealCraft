@@ -3,7 +3,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from app.schemas.meal_plan import WeeklyMealPlanResponse
+from app.schemas.meal_plan import MealPlanShape, WeeklyMealPlanResponse
 from app.schemas.planning_v2 import MealComposition, PlanningMealRole
 from app.schemas.product import PricingMode
 from app.schemas.recommendation import (
@@ -59,6 +59,9 @@ class HouseholdProfileWrite(BaseModel):
     pricing_mode: PricingMode = "fixture"
     # Dish roles of every meal (ADR-0036); None is one dish a meal.
     meal_composition: MealComposition | None = None
+    plan_shape: MealPlanShape | None = None
+    # Which meals are planned and each one's dishes (ADR-0046); None is the default shape.
+    plan_shape: MealPlanShape | None = None
 
     @field_validator("name")
     @classmethod
@@ -92,6 +95,7 @@ class HouseholdProfileVersionResponse(BaseModel):
     available_ingredients: list[AvailableIngredientInput]
     pricing_mode: PricingMode
     meal_composition: list[PlanningMealRole] | None = None
+    plan_shape: MealPlanShape | None = None
     created_at: datetime
 
 

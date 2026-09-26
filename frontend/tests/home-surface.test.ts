@@ -87,3 +87,23 @@ describe("plates and averages", () => {
     expect(perDinner([eat(2000, "skipped")])).toBeNull();
   });
 });
+
+describe("meals by day", () => {
+  const dish = (day: number, meal: "lunch" | "dinner", role: string, kcal: number, status: NutritionDashboardDay["status"] = "planned") =>
+    ({ entry_id: day * 10 + (meal === "lunch" ? 0 : 5) + (role === "main" ? 0 : 1), day_index: day, planned_date: `2026-09-2${day}`, meal_type: meal, role_id: role, status, nutrition_per_person: { calories_kcal: kcal } }) as unknown as NutritionDashboardDay;
+
+  it("groups dishes into days of meals, lunch before dinner, main first", async () => {
+    const { mealsByDay } = await import("../app/lib/home-surface");
+    const week = mealsByDay([dish(1, "dinner", "vegetable", 100), dish(1, "dinner", "main", 400), dish(1, "lunch", "main", 300)]);
+    expect(week).toHaveLength(1);
+    expect(week[0]!.meals.map(m => m.mealType)).toEqual(["lunch", "dinner"]);
+    expect(week[0]!.meals[1]!.dishes.map(d => d.role_id)).toEqual(["main", "vegetable"]);
+  });
+
+  it("finds the next meal still to cook and averages per meal and per day", async () => {
+    const { nextMeal, perMealAndDay } = await import("../app/lib/home-surface");
+    const days = [dish(1, "lunch", "main", 300, "completed"), dish(1, "dinner", "main", 400), dish(1, "dinner", "vegetable", 100)];
+    expect(nextMeal(days, "2026-09-21")).toMatchObject({ isToday: true, meal: { mealType: "dinner" } });
+    expect(perMealAndDay(days)).toMatchObject({ meal: { calories_kcal: 400 }, day: { calories_kcal: 800 }, mealsPerDay: 2 });
+  });
+});

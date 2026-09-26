@@ -56,7 +56,8 @@ def _composition_roles(roles: list[PlanningMealRole]) -> list[PlanningMealRole]:
 
 # A household's dish roles for a meal, as a profile or a request states them.
 MealComposition = Annotated[
-    list[PlanningMealRole], Field(min_length=1, max_length=4), AfterValidator(_composition_roles)
+    # Up to six dishes: several meat and vegetable dishes and a soup (ADR-0046 raised ADR-0036's four).
+    list[PlanningMealRole], Field(min_length=1, max_length=6), AfterValidator(_composition_roles)
 ]
 
 
@@ -72,7 +73,7 @@ class PlanningSlot(BaseModel):
     required: bool = True
     locked_recipe_id: str | None = Field(default=None, max_length=120)
     # None is one dish per meal, as before. Role `main` takes the main share.
-    composition: list[PlanningMealRole] | None = Field(default=None, min_length=1, max_length=4)
+    composition: list[PlanningMealRole] | None = Field(default=None, min_length=1, max_length=6)
 
     @model_validator(mode="after")
     def validate_composition(self) -> "PlanningSlot":
@@ -218,8 +219,8 @@ class PlanningCompositionPolicy(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
     schema_version: Literal["planning-composition-v1"] = "planning-composition-v1"
-    main_shares: list[float] = Field(default=[1.0, 0.75, 0.6, 0.5], min_length=1, max_length=4)
-    other_shares: list[float | None] = Field(default=[None, 0.5, 0.4, 0.35], min_length=1, max_length=4)
+    main_shares: list[float] = Field(default=[1.0, 0.75, 0.6, 0.5, 0.45, 0.4], min_length=1, max_length=6)
+    other_shares: list[float | None] = Field(default=[None, 0.5, 0.4, 0.35, 0.3, 0.28], min_length=1, max_length=6)
     hands_on_cook_fraction: float = Field(default=0.5, ge=0, le=1, allow_inf_nan=False)
     switch_minutes: int = Field(default=5, ge=0, le=60)
     round_to_minutes: int = Field(default=5, ge=1, le=15)

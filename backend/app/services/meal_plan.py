@@ -5,7 +5,7 @@ from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
 from app.planning.conflict_explanation import explain_infeasibility, product_explanation
 from app.planning.nutrition_scope import nutrition_scope_notes
-from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
+from app.planning.product_path import ProductPlanningEngine, ProductPlanningError, meals_of_the_day
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
 from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
@@ -57,8 +57,9 @@ class WeeklyMealPlanService:
         replaces_plan_id: int | None = None,
     ) -> WeeklyMealPlanResponse:
         started_at = datetime.now(UTC)
-        composition = constraints.meal_composition
-        courses = sorted({c for role in composition for c in role.courses}) if composition is not None else None
+        # Every course a planned meal's roles may take enters the pool (ADR-0046), not only dinner's.
+        meals = meals_of_the_day(constraints)
+        courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
         recipes = self.recipe_repository.list_for_planning(courses=courses)
         recommendation_result = self.recommendation_service.recommend(
             constraints,
@@ -267,6 +268,9 @@ class WeeklyMealPlanService:
                     is_locked=entry.is_locked,
                     consumed_at=self._as_utc(entry.consumed_at),
                     nutrition_per_person=nutrition,
+                    meal_type=entry.meal_type,
+                    role_id=entry.role_id,
+                    portion_share=float(entry.portion_share),
                 )
             )
 

@@ -38,7 +38,7 @@ from app.schemas.agent import (
     AgentSessionCollectionResponse,
     AgentSessionResponse,
 )
-from app.schemas.meal_plan import MealPlanReplanPreviewRequest, WeeklyMealPlanRequest
+from app.schemas.meal_plan import MealPlanReplanPreviewRequest, WeeklyMealPlanRequest, default_plan_shape
 from app.services.meal_plan import WeeklyMealPlanService
 from app.services.replanning import (
     MealPlanReplanningService,
@@ -70,6 +70,8 @@ def profile_constraints(version) -> AgentConstraintState:
             "max_sodium_mg_per_meal": version.max_sodium_mg_per_meal,
             "available_ingredients": version.available_ingredients,
             "pricing_mode": version.pricing_mode,
+            "plan_shape": version.plan_shape
+            or ({"meals": {"dinner": version.meal_composition}} if version.meal_composition else None),
         }
     )
 
@@ -454,6 +456,7 @@ class AgentSessionService:
             max_sodium_mg_per_meal=constraints.max_sodium_mg_per_meal,
             available_ingredients=constraints.available_ingredients,
             pricing_mode=constraints.pricing_mode,
+            plan_shape=constraints.plan_shape or default_plan_shape(),
         )
         try:
             plan = self.meal_plan_service.generate(request)

@@ -390,7 +390,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           <div class="col">
             <div v-if="!messages.length && !isLoading" class="bot mc-rise">
               <div class="bot-name"><svg aria-hidden="true"><use href="#mc-logo" /></svg>MealCraft</div>
-              <p>Tell me who's eating, what you can spend and anything to avoid. I'll plan seven dinners and one shopping list.</p>
+              <p>Tell me who's eating, what you can spend and anything to avoid. I'll plan the week's meals and one shopping list.</p>
               <div class="options">
                 <button v-for="starter in starters" :key="starter" type="button" class="mc-pill" @click="send(starter)">{{ starter }}</button>
               </div>
@@ -416,7 +416,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               </div>
               <p>Ready to plan your week with these details.</p>
               <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirm()">
-                {{ isLoading ? "Planning seven dinners…" : "Plan my week" }}
+                {{ isLoading ? "Planning your week…" : "Plan my week" }}
               </button>
             </div>
 
@@ -446,7 +446,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <small>
                   {{ session.pending_replan.nutrition_delta.calories_kcal >= 0 ? "+" : "" }}{{ Math.round(session.pending_replan.nutrition_delta.calories_kcal) }} kcal ·
                   groceries {{ session.pending_replan.purchase_total_delta_sgd >= 0 ? "+" : "−" }}S${{ Math.abs(session.pending_replan.purchase_total_delta_sgd).toFixed(2) }} ·
-                  the other dinners stay the same
+                  the rest of the week stays the same
                 </small>
                 <small v-if="swapOverBudget" class="over-budget">This puts the week {{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}.</small>
               </div>
@@ -494,18 +494,19 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             :days="days"
             :updating-entry-id="nutrition.updatingEntryId.value"
             @mark-cooked="setStatus($event, 'completed')"
+            @mark-meal="nutrition.updateMeal($event.dayIndex, $event.mealType, 'completed', $event.dishes[0]?.entry_id ?? 0)"
             @open-recipe="recipeSlug = $event"
             @swap="swap"
           />
           <div class="tabs" role="tablist" aria-label="Plan details">
-            <button id="tab-dinners" type="button" role="tab" class="tab" :aria-selected="tab === 'dinners'" aria-controls="panel-body" @click="tab = 'dinners'">Dinners</button>
+            <button id="tab-dinners" type="button" role="tab" class="tab" :aria-selected="tab === 'dinners'" aria-controls="panel-body" @click="tab = 'dinners'">Meals</button>
             <button id="tab-groceries" type="button" role="tab" class="tab" :aria-selected="tab === 'groceries'" aria-controls="panel-body" @click="tab = 'groceries'">
               Groceries<span class="c">{{ groceryCount }}</span>
             </button>
             <button id="tab-nutrition" type="button" role="tab" class="tab" :aria-selected="tab === 'nutrition'" aria-controls="panel-body" @click="tab = 'nutrition'">Nutrition</button>
           </div>
           <div id="panel-body" class="panel-body" role="tabpanel" :aria-labelledby="`tab-${tab}`">
-            <HomeDinnerList v-if="tab === 'dinners'" :days="days" :plan-id="plan.id" @open-recipe="recipeSlug = $event" />
+            <HomeMealList v-if="tab === 'dinners'" :days="days" :plan-id="plan.id" @open-recipe="recipeSlug = $event" />
             <HomeGroceryList v-else-if="tab === 'groceries'" :estimate="plan.grocery_estimate" />
             <HomeNutritionSummary
               v-else-if="nutrition.dashboard.value"
@@ -535,7 +536,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           v-else
           :state="planState === 'ready' ? 'empty' : planState"
           title="This week"
-          empty-text="Your week shows up here once it's planned: tonight's dinner, the shopping list and nutrition."
+          empty-text="Your week shows up here once it's planned: your next meal, the shopping list and nutrition."
           error-text="Your week couldn't be loaded."
           :rows="6"
           @retry="retryPlan"
