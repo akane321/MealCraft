@@ -7,7 +7,8 @@ import {
   parseExcludedIngredients,
   toOptionalNumber,
 } from "~/lib/recommendation-form";
-import type { HouseholdMemberInput, HouseholdProfileInput } from "~/types/household";
+import { DEFAULT_SHAPE, describeShape } from "~/lib/plan-shape";
+import type { HouseholdMemberInput, HouseholdProfileInput, PlanShape } from "~/types/household";
 import type {
   AvailableIngredientInput,
   DietaryPreference,
@@ -65,6 +66,8 @@ const pantryItems = ref<AvailableIngredientInput[]>([
   { normalized_name: "", quantity: null, unit: null },
 ]);
 const saveNotice = ref<string | null>(null);
+// Which meals each day plans and each one's dishes (ADR-0046).
+const planShape = ref<PlanShape>(structuredClone(DEFAULT_SHAPE));
 
 const {
   current,
@@ -105,6 +108,8 @@ function hydrateFromCurrent() {
     excludedIngredients: member.excluded_ingredients.join(", "),
     dietaryPreferences: [...member.dietary_preferences],
   }));
+  planShape.value = version.plan_shape
+    ?? (version.meal_composition ? { meals: { dinner: version.meal_composition } } : structuredClone(DEFAULT_SHAPE));
   pantryItems.value = version.available_ingredients.length
     ? version.available_ingredients.map(item => ({ ...item }))
     : [{ normalized_name: "", quantity: null, unit: null }];
@@ -159,6 +164,7 @@ function buildPayload(): HouseholdProfileInput {
     max_sodium_mg_per_meal: toOptionalNumber(form.maxSodiumMgPerMeal),
     available_ingredients: cleanAvailableIngredients(pantryItems.value),
     pricing_mode: form.pricingMode,
+    plan_shape: planShape.value,
   };
 }
 
@@ -260,6 +266,13 @@ onMounted(async () => {
             </label>
           </article>
         </div>
+
+        <section class="profile-form-section">
+          <p class="form-kicker">Meals and dishes</p>
+          <h2>What each day plans</h2>
+          <p class="field-help">{{ describeShape(planShape) }}. You can also change this in the chat for one week, e.g. "also plan lunch" or "add a soup on Friday".</p>
+          <ProfileMealsEditor v-model="planShape" />
+        </section>
 
         <section class="profile-form-section">
           <p class="form-kicker">Every week</p>
