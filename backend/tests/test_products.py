@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from app.core.paths import repository_root
 from app.products.provider import FixtureProductProvider, ProductProviderError, parse_package_size
 from app.services.product import ProductSearchService
 
@@ -139,7 +140,7 @@ def test_a_search_page_without_a_product_key_parses_as_no_results(monkeypatch) -
     assert live.search("dragonfruit jam", limit=5) == []
 
 
-PAGES = Path(__file__).resolve().parents[2] / "data/fixtures/fairprice-pages"
+PAGES = repository_root() / "data/fixtures/fairprice-pages"
 
 
 @pytest.mark.parametrize(
