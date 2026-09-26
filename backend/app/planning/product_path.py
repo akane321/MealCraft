@@ -303,7 +303,9 @@ class ProductPlanningEngine:
         for item in constraints.available_ingredients:
             quantity, unit = normalized(item.quantity, item.unit)
             pantry.append(PlanningPantryItem(ingredient_id=item.normalized_name, quantity=quantity, unit=unit))
-        bands = compile_nutrition_targets(constraints.nutrition_constraints, constraints.nutrition_guard_band)
+        bands = compile_nutrition_targets(
+            constraints.nutrition_constraints, constraints.nutrition_guard_band, meals_per_day=len(composition or [0])
+        )
         trace["nutrition_scope"] = [b.model_dump(exclude={"lower", "upper"}) for b in bands]
         trace["settings"]["nutrition_guard_band"] = constraints.nutrition_guard_band
         if constraints.max_sodium_mg_per_meal is not None:

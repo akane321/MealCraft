@@ -3,9 +3,26 @@
 from app.schemas.planning_v2 import PlanningNutritionBand
 
 
-def compile_nutrition_targets(targets, guard_band):
+def compile_nutrition_targets(targets, guard_band, meals_per_day=1):
     bands = []
     for target in targets:
+        if target.scope == "per_day":
+            bands.append(
+                PlanningNutritionBand(metric=target.metric, scope="per_day", lower=target.lower, upper=target.upper)
+            )
+            # A day's band, shared evenly by its meals, steers the search meal by meal.
+            share = 1 / meals_per_day
+            bands.append(
+                PlanningNutritionBand(
+                    metric=target.metric,
+                    scope="per_slot",
+                    hard=False,
+                    purpose="guard",
+                    lower=target.lower * share * (1 - guard_band) if target.lower is not None else None,
+                    upper=target.upper * share * (1 + guard_band) if target.upper is not None else None,
+                )
+            )
+            continue
         if target.scope == "per_serving":
             bands.append(
                 PlanningNutritionBand(
@@ -56,7 +73,9 @@ def nutrition_scope_notes(targets):
             bounds = f"at least {target.lower:g}"
         else:
             bounds = f"at most {target.upper:g}"
-        scope = "each planned meal" if target.scope == "per_serving" else "the average across planned meals"
+        scope = {"per_serving": "each planned meal", "per_day": "each day"}.get(
+            target.scope, "the average across planned meals"
+        )
         notes.append(f"{label}: {bounds} {unit} per person for {scope}.")
     return notes
 

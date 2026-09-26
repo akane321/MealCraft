@@ -1,0 +1,402 @@
+{
+  "protocol": "v3-meal-day-week",
+  "system": "P",
+  "parameters": {
+    "system": "product path: WeeklyMealPlanService.generate, then read_shape_change, preview_shape and confirm",
+    "pricing_mode": "fixture",
+    "max_cooking_time_minutes_when_unstated": 240,
+    "shape_change_today": "the week's first day, so every day is still ahead",
+    "per_day_nutrition": "sent as the product's per_day target",
+    "nutrition_tolerance_relative": 0.02
+  },
+  "summary": {
+    "strict_success": "15/16",
+    "by_category": {
+      "meals_per_day": {
+        "strict_success": "3/3",
+        "failure_mechanisms": {}
+      },
+      "composition": {
+        "strict_success": "2/2",
+        "failure_mechanisms": {}
+      },
+      "nutrition_per_day": {
+        "strict_success": "2/2",
+        "failure_mechanisms": {}
+      },
+      "budget": {
+        "strict_success": "1/2",
+        "failure_mechanisms": {
+          "plan_present": 1,
+          "status_matches_class": 1
+        }
+      },
+      "safety_diet": {
+        "strict_success": "2/2",
+        "failure_mechanisms": {}
+      },
+      "variety": {
+        "strict_success": "1/1",
+        "failure_mechanisms": {}
+      },
+      "shape_change": {
+        "strict_success": "4/4",
+        "failure_mechanisms": {}
+      }
+    }
+  },
+  "episodes": [
+    {
+      "episode_id": "mdw-dev-001",
+      "category": "meals_per_day",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 21,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 286.64
+    },
+    {
+      "episode_id": "mdw-dev-002",
+      "category": "meals_per_day",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 28,
+      "distinct_recipes": 28,
+      "meal_fit": "28/28",
+      "total_cost_sgd": 437.28
+    },
+    {
+      "episode_id": "mdw-dev-003",
+      "category": "meals_per_day",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 20,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 410.21
+    },
+    {
+      "episode_id": "mdw-dev-004",
+      "category": "composition",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 28,
+      "distinct_recipes": 28,
+      "meal_fit": "28/28",
+      "total_cost_sgd": 506.55
+    },
+    {
+      "episode_id": "mdw-dev-005",
+      "category": "composition",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 28,
+      "distinct_recipes": 28,
+      "meal_fit": "28/28",
+      "total_cost_sgd": 444.03
+    },
+    {
+      "episode_id": "mdw-dev-006",
+      "category": "nutrition_per_day",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 18,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 318.03
+    },
+    {
+      "episode_id": "mdw-dev-007",
+      "category": "nutrition_per_day",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 28,
+      "distinct_recipes": 25,
+      "meal_fit": "28/28",
+      "total_cost_sgd": 386.46
+    },
+    {
+      "episode_id": "mdw-dev-008",
+      "category": "budget",
+      "language": "en",
+      "class": "feasible",
+      "answered": "infeasible",
+      "strict_success": false,
+      "failed": [
+        "status_matches_class",
+        "plan_present"
+      ],
+      "indeterminate": [],
+      "details": {
+        "status_matches_class": "expected plan, answered infeasible",
+        "plan_present": "a feasible episode requires a plan"
+      },
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-dev-009",
+      "category": "budget",
+      "language": "en",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-dev-010",
+      "category": "safety_diet",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 28,
+      "distinct_recipes": 28,
+      "meal_fit": "26/28",
+      "total_cost_sgd": 407.66
+    },
+    {
+      "episode_id": "mdw-dev-011",
+      "category": "safety_diet",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 14,
+      "distinct_recipes": 14,
+      "meal_fit": "14/14",
+      "total_cost_sgd": 293.58
+    },
+    {
+      "episode_id": "mdw-dev-012",
+      "category": "variety",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 28,
+      "distinct_recipes": 28,
+      "meal_fit": "28/28",
+      "total_cost_sgd": 395.12
+    },
+    {
+      "episode_id": "mdw-dev-013",
+      "category": "shape_change",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "understood": {
+        "meal_type": "lunch",
+        "roles": [
+          {
+            "role_id": "main",
+            "courses": [
+              "main",
+              "salad",
+              "soup"
+            ],
+            "required": true
+          }
+        ],
+        "day_indexes": null
+      },
+      "dishes": 21,
+      "distinct_recipes": 21,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 327.49
+    },
+    {
+      "episode_id": "mdw-dev-014",
+      "category": "shape_change",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "understood": {
+        "meal_type": "breakfast",
+        "roles": null,
+        "day_indexes": null
+      },
+      "dishes": 14,
+      "distinct_recipes": 14,
+      "meal_fit": "14/14",
+      "total_cost_sgd": 322.97
+    },
+    {
+      "episode_id": "mdw-dev-015",
+      "category": "shape_change",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "understood": {
+        "meal_type": "dinner",
+        "roles": [
+          {
+            "role_id": "main",
+            "courses": [
+              "main"
+            ],
+            "required": true
+          },
+          {
+            "role_id": "vegetable",
+            "courses": [
+              "side",
+              "salad"
+            ],
+            "required": false
+          },
+          {
+            "role_id": "soup",
+            "courses": [
+              "soup"
+            ],
+            "required": true
+          }
+        ],
+        "day_indexes": [
+          5
+        ]
+      },
+      "dishes": 15,
+      "distinct_recipes": 15,
+      "meal_fit": "15/15",
+      "total_cost_sgd": 387.62
+    },
+    {
+      "episode_id": "mdw-dev-016",
+      "category": "shape_change",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "understood": {
+        "meal_type": "dinner",
+        "roles": [
+          {
+            "role_id": "main",
+            "courses": [
+              "main"
+            ],
+            "required": true
+          },
+          {
+            "role_id": "soup",
+            "courses": [
+              "soup"
+            ],
+            "required": true
+          }
+        ],
+        "day_indexes": [
+          3
+        ]
+      },
+      "dishes": 20,
+      "distinct_recipes": 20,
+      "meal_fit": "20/20",
+      "total_cost_sgd": 326.36
+    }
+  ],
+  "episode_set": "developer set",
+  "code_revision": "fdbc0be0944da641c65cd8c48b98b915ca35b650+dirty",
+  "inputs": {
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-003.json": "f2f5814e8434306b51fb182174db305a0e960c7626a1618983e998518ce887cc",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-004.json": "766f531afcbd66b813373abbc159ef3ef03c2f730a301624d52ca8be1ac5ca28",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-005.json": "f97b7aa618bfca9543955e8c8ab631e54bb1b3d0483a92e1db8640971e019fff",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-006.json": "c59bb0883629c378cb6e597fd7cf7534ae1f01406abca787d87582b1344639c6",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-007.json": "59dc9953c66c2f177a02daa5351c93a3d055695ee7751f3b35bcb530c64eff49",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-008.json": "083ebb3fff203b3f9a96e05195f21f865908cd72c9c24490f424bee2336b6f49",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-009.json": "5f9dd0a151aec38e01f3af59995ce4a364fe05f7bc376b683ac45b2d8f05e516",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-010.json": "31489206f6bbf65f3d8b614076d80fd64c6cda896a96dfd212a076ce004511c8",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-011.json": "17653d67b060e05281beed67a8ee264e6a72d559b050b755d26f6fd3b8f64054",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-012.json": "def8479acf2c766df34534c7dd38aefafc1008ffed002a6fc656f443beaabfba",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-013.json": "c43c8b2be4644c656b8f5487c3821cfb5f6a3ccad9ae2d5897233feb5bc1b85b",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-014.json": "947bfed62ea228e6f86e3d13083e05a91e5b675db18436540a0968f51a38545a",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-015.json": "a2848d1e85d215cda3fe5d54204676a8889daac5825e84cf3a70e5adb7aefc11",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-016.json": "04292110b02381738805803523ab53bbe30bbc430f16fef50f901cdb5b57bbe5",
+    "data-engineering/data/release/v2.1/recipes.jsonl": "df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db",
+    "data-engineering/data/release/v2.1/ingredients.jsonl": "499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25",
+    "data/products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91",
+    "data/fixtures/fairprice-products.json": "19e760bd53e438fac44c77569724460cf6a69269690c302f3d1a59edb7a0323c"
+  }
+}
