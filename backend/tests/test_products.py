@@ -174,3 +174,51 @@ def test_every_fairprice_page_mode_has_a_named_outcome(page, expected) -> None:
     (product,) = products
     for field, value in expected.items():
         assert getattr(product, field) == value, field
+
+
+class CountingLiveProvider:
+    def __init__(self, fail: bool) -> None:
+        self.calls = 0
+        self.fail = fail
+
+    def search(self, query: str, *, limit: int):
+        self.calls += 1
+        if self.fail:
+            raise ProductProviderError("simulated network failure")
+        return FixtureProductProvider(str(FIXTURE_PATH)).search("brown rice", limit=1)
+
+
+class ForgetfulRepository(EmptyProductRepository):
+    def replace_query_results(self, **kwargs):
+        pass
+
+
+def test_a_request_stops_asking_fairprice_after_three_failures_in_a_row() -> None:
+    from app.services.product import LIVE_FAILURE_LIMIT
+
+    live = CountingLiveProvider(fail=True)
+    service = ProductSearchService(
+        fixture_provider=FixtureProductProvider(str(FIXTURE_PATH)),
+        live_provider=live,
+        repository=EmptyProductRepository(),
+        cache_ttl_minutes=15,
+    )
+    responses = [service.search(f"brown rice {n}", live=True) for n in range(8)]
+    assert live.calls == LIVE_FAILURE_LIMIT
+    assert all(response.provider_used == "fixture" for response in responses)
+    assert "not asked again" in responses[-1].warning
+
+
+def test_a_request_makes_at_most_its_budget_of_live_lookups() -> None:
+    from app.services.product import LIVE_LOOKUP_BUDGET
+
+    live = CountingLiveProvider(fail=False)
+    service = ProductSearchService(
+        fixture_provider=FixtureProductProvider(str(FIXTURE_PATH)),
+        live_provider=live,
+        repository=ForgetfulRepository(),
+        cache_ttl_minutes=15,
+    )
+    for n in range(LIVE_LOOKUP_BUDGET + 5):
+        service.search(f"brown rice {n}", live=True)
+    assert live.calls == LIVE_LOOKUP_BUDGET

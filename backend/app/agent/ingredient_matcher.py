@@ -115,7 +115,9 @@ def catalog_embedder(api_key: str) -> Embed | None:
         return None
     from langchain_openai import OpenAIEmbeddings
 
-    client = OpenAIEmbeddings(model=meta["model"], dimensions=meta["dimensions"], api_key=api_key)
+    client = OpenAIEmbeddings(
+        model=meta["model"], dimensions=meta["dimensions"], api_key=api_key, timeout=10, max_retries=1
+    )
     return client.embed_documents
 
 

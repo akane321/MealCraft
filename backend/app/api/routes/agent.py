@@ -9,6 +9,7 @@ from app.agent.parser import (
     AgentConfigurationError,
     ConstraintParser,
     ConstraintVocabulary,
+    FallbackConstraintParser,
     OpenAIConstraintParser,
     RuleBasedConstraintParser,
     catalog_groups,
@@ -67,10 +68,13 @@ def create_constraint_parser(settings: Settings, database: Session | None = None
                 names, vectors=catalog_vectors(), embed=catalog_embedder(api_key), aliases=catalog_aliases()
             ),
         )
-    return OpenAIConstraintParser(
-        api_key=api_key,
-        model=settings.openai_model,
-        vocabulary=vocabulary,
+    return FallbackConstraintParser(
+        OpenAIConstraintParser(
+            api_key=api_key,
+            model=settings.openai_model,
+            vocabulary=vocabulary,
+            timeout_seconds=settings.openai_timeout_seconds,
+        )
     )
 
 
