@@ -15,7 +15,7 @@ import type {
   PricingMode,
 } from "~/types/recommendation";
 
-useHead({ title: "Household profile · MealCraft" });
+useHead({ title: "Household · MealCraft" });
 
 interface MemberForm {
   name: string;
@@ -54,7 +54,7 @@ const form = reactive({
 });
 const members = ref<MemberForm[]>([
   {
-    name: "Member 1",
+    name: "Person 1",
     servingsPerMeal: 1,
     allergens: [],
     excludedIngredients: "",
@@ -112,7 +112,7 @@ function hydrateFromCurrent() {
 
 function addMember() {
   members.value.push({
-    name: `Member ${members.value.length + 1}`,
+    name: `Person ${members.value.length + 1}`,
     servingsPerMeal: 1,
     allergens: [],
     excludedIngredients: "",
@@ -166,7 +166,7 @@ async function saveProfile() {
   saveNotice.value = null;
   const saved = await save(buildPayload());
   if (saved) {
-    saveNotice.value = `Version ${saved.current_version} saved. Future plans can now use this profile.`;
+    saveNotice.value = "Saved. New weeks will follow these details.";
     hydrateFromCurrent();
   }
 }
@@ -174,13 +174,13 @@ async function saveProfile() {
 async function generateFromProfile() {
   saveNotice.value = null;
   const generated = await generatePlan({ start_date: form.planningStartDate });
-  if (generated) saveNotice.value = `Plan #${generated.plan.id} was generated from profile version ${generated.profile_version}; it is now your week on the home page.`;
+  if (generated) saveNotice.value = "Your new week is ready. It's on the home page now.";
 }
 
 async function rebuildLatestPlan() {
   saveNotice.value = null;
   const rebuilt = await replanLatest({ start_date: form.planningStartDate });
-  if (rebuilt) saveNotice.value = `Plan #${rebuilt.plan.id} now replaces plan #${rebuilt.replaces_plan_id}.`;
+  if (rebuilt) saveNotice.value = "Your week was replanned with these details. The home page shows the new one.";
 }
 
 onMounted(async () => {
@@ -193,15 +193,15 @@ onMounted(async () => {
   <main class="page-width profile-page">
     <section class="profile-hero">
       <div>
-        <p class="eyebrow">Persistent planning context</p>
-        <h1>Define the household once. Keep every plan traceable.</h1>
+        <p class="eyebrow">Your household</p>
+        <h1>Tell us once who's eating. Every week follows it.</h1>
       </div>
       <p>
-        Member safety constraints are merged into one shared meal plan. Nutrition targets remain user-entered, non-medical planning inputs.
+        Everyone shares the same dinners, so one person's allergy or dislike keeps it off the whole table. Targets are only the ones you set here; this isn't medical advice.
       </p>
     </section>
 
-    <div v-if="isLoading" class="notice-panel">Loading the current household profile…</div>
+    <div v-if="isLoading" class="notice-panel">Loading your household…</div>
     <div v-if="errorMessage" class="notice-panel error-notice">{{ errorMessage }}</div>
     <div v-if="saveNotice" class="notice-panel success-notice">{{ saveNotice }}</div>
 
@@ -209,23 +209,23 @@ onMounted(async () => {
       <section class="profile-main">
         <div class="profile-section-heading">
           <div>
-            <p class="form-kicker">Household identity</p>
-            <h2>{{ current ? `Editing version ${current.current_version}` : "Create the household profile" }}</h2>
+            <p class="form-kicker">Household</p>
+            <h2>{{ current ? current.name : "Set up your household" }}</h2>
           </div>
-          <span v-if="current" class="version-badge">Profile #{{ current.id }} · v{{ current.current_version }}</span>
+          <span v-if="current" class="version-badge">Saved</span>
         </div>
 
         <label class="profile-name-field">
-          <span>Profile name</span>
+          <span>Household name</span>
           <input v-model="form.name" type="text" maxlength="120" required>
         </label>
 
         <div class="profile-section-heading member-heading">
           <div>
-            <p class="form-kicker">Members and hard constraints</p>
-            <h2>{{ totalServings }} planned serving{{ totalServings === 1 ? "" : "s" }} per meal</h2>
+            <p class="form-kicker">Who's eating</p>
+            <h2>{{ members.length }} {{ members.length === 1 ? "person" : "people" }}, {{ totalServings }} {{ totalServings === 1 ? "portion" : "portions" }} a dinner</h2>
           </div>
-          <button class="secondary-button" type="button" :disabled="members.length >= 12" @click="addMember">+ Add member</button>
+          <button class="secondary-button" type="button" :disabled="members.length >= 12" @click="addMember">+ Add person</button>
         </div>
 
         <div class="member-list">
@@ -236,7 +236,7 @@ onMounted(async () => {
             </div>
             <div class="member-core-fields">
               <label><span>Name</span><input v-model="member.name" type="text" maxlength="80" required></label>
-              <label><span>Servings per meal</span><input v-model.number="member.servingsPerMeal" type="number" min="1" max="3" required></label>
+              <label><span>Portions they eat</span><input v-model.number="member.servingsPerMeal" type="number" min="1" max="3" required></label>
             </div>
             <div class="member-constraint-group">
               <p>Allergens</p>
@@ -247,7 +247,7 @@ onMounted(async () => {
               </div>
             </div>
             <div class="member-constraint-group">
-              <p>Dietary requirements</p>
+              <p>Diet</p>
               <div class="choice-grid">
                 <label v-for="option in dietaryOptions" :key="option.value" class="choice-card">
                   <input v-model="member.dietaryPreferences" type="checkbox" :value="option.value"><span>{{ option.label }}</span>
@@ -255,35 +255,35 @@ onMounted(async () => {
               </div>
             </div>
             <label>
-              <span>Prohibited ingredient IDs <small>comma-separated</small></span>
-              <input v-model="member.excludedIngredients" type="text" placeholder="mushroom, yellow_onion">
+              <span>Won't eat <small>separate with commas</small></span>
+              <input v-model="member.excludedIngredients" type="text" placeholder="mushroom, onion">
             </label>
           </article>
         </div>
 
         <section class="profile-form-section">
-          <p class="form-kicker">Shared planning defaults</p>
-          <h2>Budget, time and user-entered targets</h2>
+          <p class="form-kicker">Every week</p>
+          <h2>Budget, cooking time and goals</h2>
           <div class="profile-field-grid">
-            <label><span>Maximum cooking time</span><input v-model.number="form.maxCookingTimeMinutes" type="number" min="5" max="240" required></label>
-            <label><span>Per-meal budget</span><input v-model.number="form.budgetPerMealSgd" type="number" min="0.01" step="0.01" placeholder="Optional S$"></label>
-            <label><span>Weekly budget</span><input v-model.number="form.weeklyBudgetSgd" type="number" min="0.01" step="0.01" placeholder="Optional S$"></label>
+            <label><span>Longest cooking time (min)</span><input v-model.number="form.maxCookingTimeMinutes" type="number" min="5" max="240" required></label>
+            <label><span>Budget per dinner</span><input v-model.number="form.budgetPerMealSgd" type="number" min="0.01" step="0.01" placeholder="Optional S$"></label>
+            <label><span>Budget per week</span><input v-model.number="form.weeklyBudgetSgd" type="number" min="0.01" step="0.01" placeholder="Optional S$"></label>
             <label>
-              <span>Pricing source</span>
+              <span>Prices</span>
               <select v-model="form.pricingMode">
-                <option value="fixture">Fixture · reproducible</option>
-                <option value="live">Live · FairPrice</option>
+                <option value="fixture">Sample prices (stay the same)</option>
+                <option value="live">Today's FairPrice prices</option>
               </select>
             </label>
-            <label><span>Calories per meal</span><input v-model.number="form.calorieTarget" type="number" min="100" max="2500" placeholder="kcal"></label>
-            <label><span>Protein per meal</span><input v-model.number="form.proteinTarget" type="number" min="0" max="300" placeholder="g"></label>
-            <label><span>Carbohydrate per meal</span><input v-model.number="form.carbohydrateTarget" type="number" min="0" max="500" placeholder="g"></label>
-            <label><span>Fat per meal</span><input v-model.number="form.fatTarget" type="number" min="0" max="200" placeholder="g"></label>
-            <label><span>Sodium target per meal</span><input v-model.number="form.maxSodiumMgPerMeal" type="number" min="100" max="5000" placeholder="Optional mg"></label>
+            <label><span>Calories per dinner</span><input v-model.number="form.calorieTarget" type="number" min="100" max="2500" placeholder="kcal"></label>
+            <label><span>Protein per dinner</span><input v-model.number="form.proteinTarget" type="number" min="0" max="300" placeholder="g"></label>
+            <label><span>Carbs per dinner</span><input v-model.number="form.carbohydrateTarget" type="number" min="0" max="500" placeholder="g"></label>
+            <label><span>Fat per dinner</span><input v-model.number="form.fatTarget" type="number" min="0" max="200" placeholder="g"></label>
+            <label><span>Most sodium per dinner</span><input v-model.number="form.maxSodiumMgPerMeal" type="number" min="100" max="5000" placeholder="Optional mg"></label>
           </div>
-          <p class="field-help">MealCraft applies only targets entered here. It does not calculate BMR/TDEE or prescribe medical diets.</p>
+          <p class="field-help">Leave these empty if you have no goal. MealCraft only uses what you enter; it doesn't work out needs or give medical diets.</p>
           <div class="member-constraint-group">
-            <p>General health preferences</p>
+            <p>Lean towards</p>
             <div class="choice-grid">
               <label v-for="option in healthOptions" :key="option.value" class="choice-card">
                 <input v-model="form.healthPreferences" type="checkbox" :value="option.value"><span>{{ option.label }}</span>
@@ -294,64 +294,64 @@ onMounted(async () => {
 
         <section class="profile-form-section">
           <div class="profile-section-heading compact-heading">
-            <div><p class="form-kicker">Available ingredients</p><h2>Optional pantry preference</h2></div>
+            <div><p class="form-kicker">Pantry</p><h2>Already at home</h2></div>
             <button class="secondary-button" type="button" @click="addPantryItem">+ Add ingredient</button>
           </div>
-          <p class="field-help">Known quantities reduce the shopping requirement. Unknown quantities only improve recipe ranking.</p>
+          <p class="field-help">With an amount, it comes off the shopping list. Without one, dishes that use it are just more likely.</p>
           <div class="weekly-pantry-list">
             <div v-for="(item, index) in pantryItems" :key="index" class="weekly-pantry-row">
-              <input v-model="item.normalized_name" type="text" aria-label="Standard ingredient ID" placeholder="brown_rice">
-              <input v-model.number="item.quantity" type="number" min="0.01" step="0.01" aria-label="Available quantity" placeholder="Unknown">
-              <input v-model="item.unit" type="text" :required="item.quantity !== null" aria-label="Available unit" placeholder="g">
+              <input v-model="item.normalized_name" type="text" aria-label="Ingredient" placeholder="brown rice">
+              <input v-model.number="item.quantity" type="number" min="0.01" step="0.01" aria-label="Amount" placeholder="Amount">
+              <input v-model="item.unit" type="text" :required="item.quantity !== null" aria-label="Unit" placeholder="g">
               <button type="button" class="remove-button" :aria-label="`Remove pantry item ${index + 1}`" @click="removePantryItem(index)">×</button>
             </div>
           </div>
         </section>
 
         <button class="primary-button profile-save-button" type="submit" :disabled="isSaving || totalServings > 12">
-          {{ isSaving ? "Saving a new version…" : current ? "Save as new version" : "Create household profile" }}
+          {{ isSaving ? "Saving…" : current ? "Save changes" : "Save household" }}
         </button>
-        <p v-if="totalServings > 12" class="inline-error">The deterministic planner currently supports at most 12 servings.</p>
+        <p v-if="totalServings > 12" class="inline-error">MealCraft can plan for up to 12 portions a dinner.</p>
       </section>
 
       <aside class="profile-sidebar">
         <section class="profile-summary-card">
-          <p class="form-kicker">Effective shared constraints</p>
-          <h2>{{ current ? `${current.current.planning_household_size} servings` : `${totalServings} servings` }}</h2>
-          <p>Any member allergen, prohibited ingredient or dietary requirement applies to the complete shared plan.</p>
+          <p class="form-kicker">At the table</p>
+          <h2>{{ current ? current.current.planning_household_size : totalServings }} {{ (current ? current.current.planning_household_size : totalServings) === 1 ? "portion" : "portions" }} a dinner</h2>
+          <p>What anyone avoids is left out for everyone.</p>
           <dl v-if="current" class="profile-summary-list">
             <div><dt>Allergens</dt><dd>{{ current.current.allergens.join(", ") || "None" }}</dd></div>
-            <div><dt>Excluded</dt><dd>{{ current.current.excluded_ingredients.join(", ") || "None" }}</dd></div>
-            <div><dt>Dietary</dt><dd>{{ current.current.dietary_preferences.join(", ") || "None" }}</dd></div>
-            <div><dt>Latest plan</dt><dd>{{ current.latest_plan_id ? `#${current.latest_plan_id}` : "Not generated" }}</dd></div>
+            <div><dt>Won't eat</dt><dd>{{ current.current.excluded_ingredients.join(", ") || "None" }}</dd></div>
+            <div><dt>Diet</dt><dd>{{ current.current.dietary_preferences.join(", ") || "None" }}</dd></div>
+            <div><dt>This week</dt><dd>{{ current.latest_plan_id ? "Planned" : "Not planned yet" }}</dd></div>
           </dl>
           <dl v-else class="profile-summary-list">
             <div><dt>Allergens</dt><dd>{{ draftSummary.allergens.join(", ") || "None" }}</dd></div>
-            <div><dt>Excluded</dt><dd>{{ draftSummary.excludedIngredients.join(", ") || "None" }}</dd></div>
-            <div><dt>Dietary</dt><dd>{{ draftSummary.dietaryPreferences.join(", ") || "None" }}</dd></div>
+            <div><dt>Won't eat</dt><dd>{{ draftSummary.excludedIngredients.join(", ") || "None" }}</dd></div>
+            <div><dt>Diet</dt><dd>{{ draftSummary.dietaryPreferences.join(", ") || "None" }}</dd></div>
           </dl>
         </section>
 
         <section class="profile-planning-card">
-          <p class="form-kicker">Plan from saved version</p>
+          <p class="form-kicker">Plan a week</p>
           <label><span>Week starts</span><input v-model="form.planningStartDate" type="date" required></label>
           <button class="primary-button" type="button" :disabled="!current || isPlanning" @click="generateFromProfile">
-            {{ isPlanning ? "Planning…" : "Generate new week" }}
+            {{ isPlanning ? "Planning…" : "Plan this week" }}
           </button>
           <button v-if="hasCurrentPlan" class="secondary-button profile-replan-button" type="button" :disabled="isPlanning" @click="rebuildLatestPlan">
-            Rebuild latest plan with current version
+            Replan my week with these details
           </button>
-          <p class="field-help">Rebuilding keeps the old plan immutable, creates a replacement and records every changed constraint.</p>
+          <p class="field-help">Replanning keeps the old week in your history and notes what changed. Save your changes first.</p>
         </section>
 
         <section v-if="planResult" class="profile-change-card">
-          <p class="form-kicker">Planning result</p>
-          <h2>Plan #{{ planResult.plan.id }}</h2>
-          <p>Profile v{{ planResult.profile_version }} · {{ planResult.constraint_changes.length }} changed constraint groups</p>
+          <p class="form-kicker">Done</p>
+          <h2>Your week is ready</h2>
+          <p v-if="planResult.constraint_changes.length">What changed since the last week:</p>
           <ul v-if="planResult.constraint_changes.length">
-            <li v-for="change in planResult.constraint_changes" :key="change.field">{{ change.field }}</li>
+            <li v-for="change in planResult.constraint_changes" :key="change.field">{{ change.field.replaceAll("_", " ") }}</li>
           </ul>
-          <NuxtLink class="secondary-button" :to="{ path: '/dashboard', query: { plan: planResult.plan.id } }">Open dashboard</NuxtLink>
+          <NuxtLink class="secondary-button" to="/">See the week</NuxtLink>
         </section>
       </aside>
     </form>

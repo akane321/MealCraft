@@ -194,3 +194,14 @@ def test_mixed_shopping_obeys_same_caps_and_objective():
     assignments[-1].recipe_id = "d-fish"
     assert build_mixed_shopping(problem, assignments).status == "needs_data"
     assert exhaustive_mixed_plan(problem).status == "incomplete_evidence"
+
+
+def test_without_a_policy_a_dish_repeats_only_when_it_must():
+    # Even a much better-ranked dish does not come back while others can fill the week.
+    problem = packet()
+    problem.diversity_policy = None
+    losses = {r.recipe_id: 0.9 for r in problem.recipes} | {"a-chicken": 0.0}
+    result = BeamPlanner(BeamLimits(width=256), local_losses=losses).solve(problem)
+    chosen = [a.recipe_id for a in result.assignments]
+    assert len(set(chosen)) == len(chosen)
+    assert diversity_loss(problem, ["a-chicken", "c-tofu"], "a-chicken") >= 1.0

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { allergenLabel } from "~/lib/allergens";
 import { budgetLine, formatSgd, groceryGroups, plateStyle } from "~/lib/home-surface";
-import { formatPlanDate } from "~/lib/meal-plan-format";
+import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
 import type { AgentMessage, AgentSession } from "~/types/agent";
 import type { MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection } from "~/types/meal-plan";
 
@@ -73,6 +73,7 @@ const budgetShare = computed(() => {
   const budget = estimate.value?.weekly_budget_sgd;
   return budget ? Math.min(100, estimate.value!.purchase_total_sgd / budget * 100) : null;
 });
+const weekEnded = computed(() => Boolean(plan.value && plan.value.end_date < todayIsoDate()));
 const showWeek = computed(() => Boolean(plan.value && days.value.length && !session.value?.can_confirm && !session.value?.pending_replan));
 const initials = computed(() => (actor.value?.user.display_name ?? "?")
   .split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]!.toUpperCase()).join(""));
@@ -113,8 +114,9 @@ async function enter() {
   if (!(await requireAccount())) return;
   view.value = "app";
   if (!session.value) await agent.restoreLatest();
-  // A plan made on the profile page has no conversation; show the latest one.
-  if (!session.value?.plan_id && !plan.value) await loadLatestPlan();
+  // The newest plan wins, even over the one the last conversation made: a week
+  // rebuilt on the profile page has no conversation of its own.
+  await loadLatestPlan();
 }
 
 async function loadLatestPlan() {
@@ -164,12 +166,15 @@ async function loadPlan(planId: number) {
   lastPlanId.value = planId;
   planState.value = "loading";
   try {
-    plan.value = await apiFetch<WeeklyMealPlan>(`${config.public.apiBase}/api/plans/${planId}`);
+    const loaded = await apiFetch<WeeklyMealPlan>(`${config.public.apiBase}/api/plans/${planId}`);
+    // A newer request replaced this one while it was in flight; its answer is stale.
+    if (lastPlanId.value !== planId) return;
+    plan.value = loaded;
     await nutrition.loadDashboard(planId);
-    planState.value = "ready";
+    if (lastPlanId.value === planId) planState.value = "ready";
   }
   catch {
-    planState.value = "error";
+    if (lastPlanId.value === planId) planState.value = "error";
   }
 }
 
@@ -405,6 +410,10 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               @open="openTab"
               @open-recipe="recipeSlug = $event"
             />
+
+            <div v-if="weekEnded && plan && !isLoading" class="card mc-rise">
+              <p>This plan ended on {{ formatPlanDate(plan.end_date, { weekday: "long", day: "numeric", month: "short" }) }}. Tell me about this week and I'll plan a new one.</p>
+            </div>
 
             <div v-if="session?.pending_replan" class="swap-card mc-rise">
               <div class="plates">

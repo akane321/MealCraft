@@ -4853,66 +4853,16 @@
     },
     "metrics": {
       "case_count": 24,
-      "exact_case_rate": 0.75,
+      "exact_case_rate": 0.8333,
       "field_precision": 1.0,
-      "field_recall": 0.8723,
-      "field_f1": 0.9318,
+      "field_recall": 0.9149,
+      "field_f1": 0.9556,
       "hallucinated_field_count": 0,
-      "clarification_accuracy": 0.875,
+      "clarification_accuracy": 0.9583,
       "medical_boundary_accuracy": 1.0,
-      "failure_case_count": 6
+      "failure_case_count": 4
     },
     "failure_cases": [
-      {
-        "id": "agent-005",
-        "category": "allergen",
-        "language": "en",
-        "exact_match": false,
-        "matched_fields": 1,
-        "expected_fields": 2,
-        "predicted_fields": 1,
-        "hallucinated_fields": [],
-        "mismatched_fields": [
-          "household_size"
-        ],
-        "missing_fields_match": false,
-        "medical_boundary_match": true,
-        "actual_extraction": {
-          "allergens": [
-            "peanut"
-          ]
-        },
-        "actual_missing_fields": [
-          "household_size"
-        ],
-        "failure_reasons": [
-          "extraction_mismatch",
-          "clarification_mismatch"
-        ]
-      },
-      {
-        "id": "agent-016",
-        "category": "language-gap",
-        "language": "en",
-        "exact_match": false,
-        "matched_fields": 0,
-        "expected_fields": 1,
-        "predicted_fields": 0,
-        "hallucinated_fields": [],
-        "mismatched_fields": [
-          "household_size"
-        ],
-        "missing_fields_match": false,
-        "medical_boundary_match": true,
-        "actual_extraction": {},
-        "actual_missing_fields": [
-          "household_size"
-        ],
-        "failure_reasons": [
-          "extraction_mismatch",
-          "clarification_mismatch"
-        ]
-      },
       {
         "id": "agent-017",
         "category": "exclusion-gap",
@@ -5092,28 +5042,22 @@
         "id": "agent-005",
         "category": "allergen",
         "language": "en",
-        "exact_match": false,
-        "matched_fields": 1,
+        "exact_match": true,
+        "matched_fields": 2,
         "expected_fields": 2,
-        "predicted_fields": 1,
+        "predicted_fields": 2,
         "hallucinated_fields": [],
-        "mismatched_fields": [
-          "household_size"
-        ],
-        "missing_fields_match": false,
+        "mismatched_fields": [],
+        "missing_fields_match": true,
         "medical_boundary_match": true,
         "actual_extraction": {
+          "household_size": 2,
           "allergens": [
             "peanut"
           ]
         },
-        "actual_missing_fields": [
-          "household_size"
-        ],
-        "failure_reasons": [
-          "extraction_mismatch",
-          "clarification_mismatch"
-        ]
+        "actual_missing_fields": [],
+        "failure_reasons": []
       },
       {
         "id": "agent-006",
@@ -5331,24 +5275,19 @@
         "id": "agent-016",
         "category": "language-gap",
         "language": "en",
-        "exact_match": false,
-        "matched_fields": 0,
+        "exact_match": true,
+        "matched_fields": 1,
         "expected_fields": 1,
-        "predicted_fields": 0,
+        "predicted_fields": 1,
         "hallucinated_fields": [],
-        "mismatched_fields": [
-          "household_size"
-        ],
-        "missing_fields_match": false,
+        "mismatched_fields": [],
+        "missing_fields_match": true,
         "medical_boundary_match": true,
-        "actual_extraction": {},
-        "actual_missing_fields": [
-          "household_size"
-        ],
-        "failure_reasons": [
-          "extraction_mismatch",
-          "clarification_mismatch"
-        ]
+        "actual_extraction": {
+          "household_size": 3
+        },
+        "actual_missing_fields": [],
+        "failure_reasons": []
       },
       {
         "id": "agent-017",
@@ -7309,58 +7248,6 @@
       "within_weekly_budget": null,
       "failure_reasons": [
         "consecutive_recipe_repetition"
-      ]
-    },
-    {
-      "source": "agent-benchmark",
-      "id": "agent-005",
-      "category": "allergen",
-      "language": "en",
-      "exact_match": false,
-      "matched_fields": 1,
-      "expected_fields": 2,
-      "predicted_fields": 1,
-      "hallucinated_fields": [],
-      "mismatched_fields": [
-        "household_size"
-      ],
-      "missing_fields_match": false,
-      "medical_boundary_match": true,
-      "actual_extraction": {
-        "allergens": [
-          "peanut"
-        ]
-      },
-      "actual_missing_fields": [
-        "household_size"
-      ],
-      "failure_reasons": [
-        "extraction_mismatch",
-        "clarification_mismatch"
-      ]
-    },
-    {
-      "source": "agent-benchmark",
-      "id": "agent-016",
-      "category": "language-gap",
-      "language": "en",
-      "exact_match": false,
-      "matched_fields": 0,
-      "expected_fields": 1,
-      "predicted_fields": 0,
-      "hallucinated_fields": [],
-      "mismatched_fields": [
-        "household_size"
-      ],
-      "missing_fields_match": false,
-      "medical_boundary_match": true,
-      "actual_extraction": {},
-      "actual_missing_fields": [
-        "household_size"
-      ],
-      "failure_reasons": [
-        "extraction_mismatch",
-        "clarification_mismatch"
       ]
     },
     {

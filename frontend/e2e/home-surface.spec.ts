@@ -439,3 +439,25 @@ test("applied changes are listed in the week panel", async ({ page }) => {
   await expect(week.getByText("Miso Tofu Bowl")).toHaveCount(1);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/13-changes.png` });
 });
+
+test("opening the app shows the newest plan, and says when that week has ended", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await stubApi(page);
+  // The last conversation made plan 9001; a newer week, 9002, was planned on the household page and has ended.
+  const ended = { ...plan, id: 9002, start_date: isoDay(-10), end_date: isoDay(-4), days: days.map(day => ({ ...day, recipe: { ...day.recipe, title: `Old ${day.recipe.title}` } })) };
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  await page.route("**/api/agent/sessions?limit=8", route => route.fulfill(json({ items: [session(true)] })));
+  await page.route("**/api/plans", route => route.fulfill(json({ items: [{ ...ended, purchase_total_sgd: 80, consumed_total_sgd: null, within_weekly_budget: true }, { ...plan, purchase_total_sgd: 82.6, consumed_total_sgd: null, within_weekly_budget: true }] })));
+  await page.route("**/api/plans/9002", route => route.fulfill(json(ended)));
+  await page.route("**/api/plans/9002/dashboard", route => route.fulfill(json({ ...dashboard, plan_id: 9002, start_date: ended.start_date, end_date: ended.end_date, days: ended.days })));
+  await page.route("**/api/plans/9002/events", route => route.fulfill(json({ items: [] })));
+
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByRole("button", { name: "Open my week" }).click();
+  const week = page.getByRole("complementary", { name: "This week" });
+  await expect(week.getByText("Old Tofu Brown Rice Stir-fry").first()).toBeVisible();
+  await page.waitForTimeout(600);
+  await expect(week.getByText("Old Tofu Brown Rice Stir-fry").first()).toBeVisible();
+  await expect(page.getByText(/This plan ended on .* plan a new one\./)).toBeVisible();
+});
