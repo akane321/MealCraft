@@ -132,9 +132,9 @@ def test_the_meal_time_limit_applies_to_the_one_cook_estimate():
 
 def test_scorer_and_planner_agree_on_shares_and_meal_time():
     policy = PlanningCompositionPolicy()
-    roles = ["main", "vegetable", "soup", "dessert"]
-    for size in range(1, 5):
-        for chosen in (roles[:size], roles[1 : size + 1] if size < 4 else roles):
+    roles = ["main", "vegetable", "soup", "dessert", "main-2", "salad"]  # up to six dishes (ADR-0046)
+    for size in range(1, 7):
+        for chosen in (roles[:size], roles[1 : size + 1] if size < 6 else roles):
             planner = {k: float(v) for k, v in portion_shares(policy, chosen).items()}
             assert scorer.dish_shares(chosen) == planner
     times = [(0, 5), (15, 25), (10, 22), (15, 30), (5, 0), (20, 45)]

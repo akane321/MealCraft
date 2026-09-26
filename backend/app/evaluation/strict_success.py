@@ -108,7 +108,8 @@ def nutrition_band_problem(band: object) -> str | None:
 # scorer's own copy of ADR-0036's shares and meal-time estimate, independent of
 # app.planning.meal_composition for the reason the module docstring gives; a test
 # holds the two equal.
-PORTION_SHARES = {1: (1.0, None), 2: (0.75, 0.5), 3: (0.6, 0.4), 4: (0.5, 0.35)}
+# Five and six dishes extend the same way (ADR-0046 section 1).
+PORTION_SHARES = {1: (1.0, None), 2: (0.75, 0.5), 3: (0.6, 0.4), 4: (0.5, 0.35), 5: (0.45, 0.3), 6: (0.4, 0.28)}
 HANDS_ON_COOK_FRACTION = 0.5
 SWITCH_MINUTES = 5
 ROUND_TO_MINUTES = 5
@@ -137,7 +138,16 @@ def meal_minutes(recipes: list[dict]) -> int:
 
 
 def _composition(episode: dict) -> list[dict] | None:
+    """The dish roles of every meal; a v3-meal-day-week scoring view gives them per slot (`slot_roles`)."""
+    by_slot = episode["scenario"].get("slot_roles")
+    if by_slot is not None:
+        return [role for roles in by_slot.values() for role in roles]
     return (episode["scenario"].get("household_profile") or {}).get("meal_composition")
+
+
+def _slot_roles(episode: dict, slot: str) -> list[dict]:
+    by_slot = episode["scenario"].get("slot_roles")
+    return by_slot.get(slot, []) if by_slot is not None else _composition(episode) or []
 
 
 def _meals(response: CommonEpisodeResponse) -> dict[str, list]:
@@ -150,9 +160,9 @@ def _meals(response: CommonEpisodeResponse) -> dict[str, list]:
 
 def _check_meal_composition(episode: dict, response: CommonEpisodeResponse, catalogs: Catalogs) -> list[Check]:
     """Roles filled, each by a course it admits, with no dish twice in a meal."""
-    roles = {role["role_id"]: role for role in _composition(episode) or []}
     unfilled, wrong_course, unknown_course, repeated = [], [], [], []
     for slot, dishes in sorted(_meals(response).items()):
+        roles = {role["role_id"]: role for role in _slot_roles(episode, slot)}
         by_role: dict[str | None, int] = {}
         for dish in dishes:
             by_role[dish.role_id] = by_role.get(dish.role_id, 0) + 1

@@ -20,7 +20,10 @@ from app.data.release_v2 import map_allergens
 
 RELEASE = Path("data-engineering/data/release/v2.1")
 SNAPSHOT = Path("data/products/fairprice-v2-snapshot.json")
+FIXTURE = Path("data/fixtures/fairprice-products.json")
+CURATED = Path("data/ingredients/ingredients.json")
 NOT_PURCHASED = {"water", "ice"}
+NUTRIENTS = ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
 
 
 def ingredient_key(canonical_ingredient_id: str) -> str:
@@ -107,6 +110,40 @@ def load_release_catalog(root: Path | None = None) -> ReleaseCatalog:
                 # counts for eligibility and for the pool's products, but buys nothing.
                 "ingredients": lines,
                 "nutrition": None,  # not computed in the release (protocol section 2)
+                # Per serving, as the product imports it; read only by protocol v3-meal-day-week.
+                "nutrients": {
+                    "calories_kcal": float(record["nutrition"]["energy_kcal"]),
+                    **{k: float(record["nutrition"][k]) for k in NUTRIENTS if k != "calories_kcal"},
+                },
             }
         )
     return ReleaseCatalog(recipes, products, ingredients)
+
+
+@lru_cache(maxsize=1)
+def fixture_products(root: Path | None = None) -> list[dict]:
+    """The curated fixture file's gram packages, for the curated ingredients the product matches by name.
+
+    In fixture mode the product prices a curated ingredient (garlic, chicken breast) from
+    `data/fixtures/fairprice-products.json` before the release mapping
+    (`app.planning.grocery_estimator.choose_product`). Protocol v3-meal-day-week plans through
+    the product, so these are frozen prices too. Ids carry a `fixture:` prefix and the
+    ingredient, so they never collide with a snapshot id.
+    """
+    root = root or repository_root()
+    curated = {row["normalized_name"] for row in json.loads((root / CURATED).read_text(encoding="utf-8"))}
+    return [
+        {
+            "external_id": f"fixture:{record['external_id']}@{key}",
+            "ingredient_id": key,
+            "name": record["name"],
+            "package_size": float(record["package_size"]),
+            "package_unit": "g",
+            "price_sgd": float(record["price_sgd"]),
+            "in_stock": bool(record.get("in_stock", True)),
+        }
+        for record in json.loads((root / FIXTURE).read_text(encoding="utf-8"))
+        if record.get("package_unit") == "g" and record.get("in_stock", True)
+        for key in record["ingredient_keys"]
+        if key in curated
+    ]
