@@ -34,10 +34,15 @@ export function useNutritionDashboard() {
     }
   }
 
+  let requested: number | null = null;
+
   async function loadDashboard(planId: number) {
-    dashboard.value = await apiFetch<WeeklyNutritionDashboard>(
+    requested = planId;
+    const loaded = await apiFetch<WeeklyNutritionDashboard>(
       `${config.public.apiBase}/api/plans/${planId}/dashboard`,
     );
+    // Switching weeks quickly must not let the slower, older answer win.
+    if (requested === planId) dashboard.value = loaded;
   }
 
   async function updateStatus(entryId: number, status: MealPlanEntryStatus) {

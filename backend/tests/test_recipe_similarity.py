@@ -56,12 +56,41 @@ def test_the_committed_vectors_rank_the_described_dish_first_and_shared_words_ad
     assert scores[1] == pytest.approx(1.0 + recipe_similarity.KEYWORD_WEIGHT)  # itself, plus the word "tofu"
 
 
-def test_nothing_described_or_a_failed_call_leaves_the_swap_to_its_usual_order():
+def test_nothing_described_leaves_the_swap_to_its_usual_order():
     recipe = _recipe(1, "slug:tofu-vegetable-soba", "Tofu Soba", [])
+
+    assert RecipeSimilarity(lambda texts: [_row("slug:tofu-vegetable-soba")]).scores("Day 3.", [recipe]) == {}
+    assert RecipeSimilarity(None).scores("fish please", [recipe]) == {}  # no recipe shares a word
+
+
+def test_without_the_model_or_after_a_failed_call_shared_words_still_follow_the_request():
+    tofu = _recipe(1, "slug:tofu-vegetable-soba", "Tofu Soba", [])
+    other = _recipe(2, "slug:lemon-chicken", "Lemon Chicken", [])
 
     def broken(texts):
         raise RuntimeError("no network")
 
-    assert RecipeSimilarity(lambda texts: [_row("slug:tofu-vegetable-soba")]).scores("Day 3.", [recipe]) == {}
-    assert RecipeSimilarity(broken).scores("tofu please", [recipe]) == {}
-    assert RecipeSimilarity(None).scores("tofu please", [recipe]) == {}
+    assert RecipeSimilarity(broken).scores("tofu please", [tofu, other]) == {1: 2.0, 2: 0.0}
+    assert RecipeSimilarity(None).scores("tofu please", [tofu, other]) == {1: 2.0, 2: 0.0}
+
+
+def test_a_condiment_does_not_make_a_dish_what_was_asked_for():
+    omelet = _recipe(1, "slug:omelet", "Thai Omelet", ["egg", "fish sauce"])
+    salmon = _recipe(2, "slug:salmon-rice", "Rice Bowl", ["salmon fish fillet", "rice"])
+    scores = RecipeSimilarity(None).scores("Can Wednesday be fish instead?", [omelet, salmon])
+    assert scores == {1: 0.0, 2: 1.0}
+
+
+def test_a_chinese_request_is_scored_in_english_too():
+    from app.planning.recipe_similarity import in_english
+
+    assert in_english("牛肉").endswith("beef")
+    assert "korean" in in_english("韩国菜")
+    assert "noodles" in in_english("面条") and "pasta" in in_english("意大利面")
+    assert in_english("fish") == "fish"  # nothing to translate
+
+
+def test_without_the_model_a_chinese_request_still_finds_its_dish():
+    beef = _recipe(1, "slug:beef-stew", "Beef Stew", ["beef", "carrot"])
+    tofu = _recipe(2, "slug:tofu-soba", "Tofu Soba", ["tofu"])
+    assert RecipeSimilarity(None).scores("换成牛肉的", [beef, tofu]) == {1: 3.0, 2: 0.0}

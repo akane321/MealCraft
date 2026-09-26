@@ -161,7 +161,7 @@ class ProductSearchService:
                         status="degraded",
                         items=stale,
                         parser_version="fairprice-next-data-v1",
-                        warning=str(error),
+                        warning=f"{error.kind}: {error}",
                     ),
                 )
             fallback_items = self.fixture_provider.search(normalized_query, limit=limit)
@@ -179,7 +179,7 @@ class ProductSearchService:
                     status="degraded",
                     items=fallback_items,
                     parser_version="fairprice-fixture-v1",
-                    warning=str(error),
+                    warning=f"{error.kind}: {error}",
                 ),
             )
 

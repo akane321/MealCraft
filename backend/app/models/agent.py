@@ -181,6 +181,8 @@ class AgentRun(Base):
     context_version: Mapped[int] = mapped_column(Integer)
     plan_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)
     scope_decision: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Which parser and models produced this run, so a result can be traced to its configuration.
+    model_config: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     checkpoint_version: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     max_llm_calls: Mapped[int] = mapped_column(Integer, default=2, server_default="2")
     used_llm_calls: Mapped[int] = mapped_column(Integer, default=0, server_default="0")

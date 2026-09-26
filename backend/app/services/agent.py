@@ -1,3 +1,4 @@
+import re
 from datetime import date
 from uuid import uuid4
 
@@ -53,6 +54,45 @@ class AgentSessionNotReadyError(ValueError):
     pass
 
 
+def profile_constraints(version) -> AgentConstraintState:
+    """The saved household version as the starting point of a conversation."""
+    return AgentConstraintState.model_validate(
+        {
+            "household_size": version.planning_household_size,
+            "max_cooking_time_minutes": version.max_cooking_time_minutes,
+            "budget_per_meal_sgd": version.budget_per_meal_sgd,
+            "weekly_budget_sgd": version.weekly_budget_sgd,
+            "allergens": version.allergens,
+            "excluded_ingredients": version.excluded_ingredients,
+            "dietary_preferences": version.dietary_preferences,
+            "health_preferences": version.health_preferences,
+            "nutrition_targets": version.nutrition_targets,
+            "max_sodium_mg_per_meal": version.max_sodium_mg_per_meal,
+            "available_ingredients": version.available_ingredients,
+            "pricing_mode": version.pricing_mode,
+        }
+    )
+
+
+def _vector_meta(relative: str) -> str | None:
+    """The model and size of a stored vector file (`model@dimensions`), or None when it is absent."""
+    import json
+
+    from app.core.paths import repository_root
+
+    path = repository_root() / relative
+    if not path.exists():
+        return None
+    with path.open(encoding="utf-8") as handle:
+        head = handle.read(4096)
+    model = re.search(r'"model"\s*:\s*"([^"]+)"', head)
+    dimensions = re.search(r'"dimensions"\s*:\s*(\d+)', head)
+    if model is None:
+        meta = json.loads(path.read_text(encoding="utf-8"))
+        return f"{meta.get('model')}@{meta.get('dimensions')}"
+    return f"{model.group(1)}@{dimensions.group(1) if dimensions else '?'}"
+
+
 class AgentSessionService:
     def __init__(
         self,
@@ -65,7 +105,11 @@ class AgentSessionService:
         actor_user_id: int,
         household_id: int,
         max_history_messages: int = 20,
+        starting_constraints: AgentConstraintState | None = None,
     ) -> None:
+        # A new conversation starts from the saved household, so it does not ask what the
+        # profile already says; anything the message states is merged over it.
+        self.starting_constraints = starting_constraints
         self.repository = repository
         self.parser = parser
         self.orchestrator = BoundedAgentOrchestrator(parser)
@@ -79,7 +123,7 @@ class AgentSessionService:
         self.max_history_messages = max_history_messages
 
     def create(self, message: str, *, idempotency_key: str | None = None) -> AgentSessionResponse:
-        current = AgentConstraintState()
+        current = (self.starting_constraints or AgentConstraintState()).model_copy(deep=True)
         result = self.orchestrator.process(
             message,
             current=current,
@@ -346,9 +390,8 @@ class AgentSessionService:
                     session_id,
                     user_message=message,
                     assistant_message=(
-                        f"I prepared a preview: {preview.before_entry.recipe_title} → "
-                        f"{preview.after_entry.recipe_title}. Review the nutrition and Shopping List deltas "
-                        "before confirming."
+                        f"How about {preview.after_entry.recipe_title} instead of "
+                        f"{preview.before_entry.recipe_title}? Nothing changes until you confirm."
                     ),
                     draft=draft,
                     clarification_questions=[],
@@ -519,10 +562,7 @@ class AgentSessionService:
         )
         updated = self.repository.finish_replan(
             session_id,
-            assistant_message=(
-                f"I applied the change to plan #{plan_id}. The plan is now revision "
-                f"{result.plan.revision}, and the Dashboard and Shopping List are updated."
-            ),
+            assistant_message=("Done. Your week and shopping list are updated."),
         )
         if updated is None:
             self._fail_run(run, AgentSessionNotFoundError())
@@ -641,9 +681,21 @@ class AgentSessionService:
             context_version=max(context_version, 1),
             plan_revision=plan_revision,
             scope_decision=scope_decision.model_dump(mode="json") if scope_decision is not None else None,
+            model_config=self.model_config(),
             actor_user_id=self.actor_user_id,
             household_id=self.household_id,
         )
+
+    def model_config(self) -> dict:
+        """The parser and models behind this service's runs; never a key or a prompt."""
+        config = {"parser": self.parser.provider, "parser_model": getattr(self.parser, "model", None)}
+        if self.parser.provider == "openai":
+            vectors = {
+                "ingredient_vectors": _vector_meta("data/ingredients/embeddings-v1.json"),
+                "recipe_vectors": _vector_meta("data/recipes/embeddings-v1.json"),
+            }
+            config.update({key: value for key, value in vectors.items() if value})
+        return config
 
     def _finish_turn_run(
         self,

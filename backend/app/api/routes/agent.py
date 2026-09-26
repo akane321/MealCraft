@@ -22,6 +22,7 @@ from app.orchestration.run_lifecycle import AgentRunLifecycleError, AgentRunNotF
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
+from app.repositories.household import HouseholdProfileRepository
 from app.schemas.agent import (
     AgentConfirmationResponse,
     AgentInteractionInput,
@@ -36,6 +37,7 @@ from app.services.agent import (
     AgentSessionNotFoundError,
     AgentSessionNotReadyError,
     AgentSessionService,
+    profile_constraints,
 )
 from app.services.replanning import (
     MealPlanReplanConflictError,
@@ -57,7 +59,7 @@ def create_constraint_parser(settings: Settings, database: Session | None = None
     # a word outside them is asked about, with the closest ids offered (ingredient_matcher).
     vocabulary = None
     if database is not None:
-        names = dict(database.execute(select(Ingredient.normalized_name, Ingredient.display_name)).tuples())
+        names = dict(database.execute(select(Ingredient.normalized_name, Ingredient.display_name)).tuples().all())
         vocabulary = ConstraintVocabulary(
             ingredients=frozenset(names),
             groups=catalog_groups(),
@@ -82,6 +84,7 @@ def get_agent_service(
     except AgentConfigurationError as error:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(error)) from error
     household_id = current.active_membership.household_id
+    profile = HouseholdProfileRepository(database, household_id=household_id).get_current()
     return AgentSessionService(
         repository=AgentSessionRepository(database, household_id=household_id),
         run_repository=AgentRunRepository(database, household_id=household_id),
@@ -91,6 +94,9 @@ def get_agent_service(
         actor_user_id=current.user.id,
         household_id=household_id,
         max_history_messages=settings.agent_max_history_messages,
+        starting_constraints=(
+            profile_constraints(HouseholdProfileRepository.current_version(profile)) if profile else None
+        ),
     )
 
 

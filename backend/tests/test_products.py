@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import pytest
+
+from app.core.paths import repository_root
 from app.products.provider import FixtureProductProvider, ProductProviderError, parse_package_size
 from app.services.product import ProductSearchService
 
@@ -135,3 +138,39 @@ def test_a_search_page_without_a_product_key_parses_as_no_results(monkeypatch) -
     live = provider_module.FairPriceProductProvider(base_url="https://example.invalid", timeout_seconds=1)
 
     assert live.search("dragonfruit jam", limit=5) == []
+
+
+PAGES = repository_root() / "data/fixtures/fairprice-pages"
+
+
+@pytest.mark.parametrize(
+    ("page", "expected"),
+    [
+        ("ordinary", {"package_size": 500.0, "package_unit": "g", "package_warning": None, "in_stock": True}),
+        ("promotion", {"price_sgd": 8.9, "regular_price_sgd": 11.5}),
+        ("multipack", {"package_size": 800.0, "package_unit": "ml", "package_text": "4 x 200 ml"}),
+        ("count-package", {"package_size": 10.0, "package_unit": "whole", "package_warning": "count_package"}),
+        ("unavailable", {"in_stock": False}),
+        ("missing-package", {"package_size": None, "package_warning": "unknown_package"}),
+        ("empty-search", None),
+        ("schema-drift-fields", "schema_drift"),
+        ("schema-drift-no-data", "schema_drift"),
+    ],
+)
+def test_every_fairprice_page_mode_has_a_named_outcome(page, expected) -> None:
+    from app.products.provider import FairPriceProductProvider, ProductSchemaDriftError
+
+    provider = FairPriceProductProvider(base_url="https://www.fairprice.com.sg", timeout_seconds=1)
+    html = (PAGES / f"{page}.html").read_text(encoding="utf-8")
+    if expected == "schema_drift":
+        with pytest.raises(ProductSchemaDriftError) as raised:
+            provider.parse_page(html, limit=5)
+        assert raised.value.kind == "schema_drift"
+        return
+    products = provider.parse_page(html, limit=5)
+    if expected is None:
+        assert products == []  # FairPrice answered and has nothing: a data gap, not a failure
+        return
+    (product,) = products
+    for field, value in expected.items():
+        assert getattr(product, field) == value, field

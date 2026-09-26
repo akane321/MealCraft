@@ -11,7 +11,7 @@ type Tab = "dinners" | "groceries" | "nutrition";
 
 const DRAFT_KEY = "mealcraft-draft";
 const starters = ["Dinners for two this week, around S$90", "A high-protein week", "Vegetarian, under S$60"];
-const followUps = ["Make one night vegetarian", "Make it S$10 cheaper", "I have eggs and spinach to use up"];
+const followUps = ["Swap tomorrow's dinner", "Skip Friday", "Don't change Sunday"];
 
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
@@ -74,6 +74,14 @@ const budgetShare = computed(() => {
   return budget ? Math.min(100, estimate.value!.purchase_total_sgd / budget * 100) : null;
 });
 const weekEnded = computed(() => Boolean(plan.value && plan.value.end_date < todayIsoDate()));
+// What the suggested swap would do to the budget, said before the household confirms it.
+const swapOverBudget = computed(() => {
+  const change = session.value?.pending_replan;
+  const current = estimate.value;
+  if (!change || !current?.weekly_budget_sgd) return null;
+  const after = current.purchase_total_sgd + change.purchase_total_delta_sgd;
+  return after > current.weekly_budget_sgd ? formatSgd(after - current.weekly_budget_sgd) : null;
+});
 const showWeek = computed(() => Boolean(plan.value && days.value.length && !session.value?.can_confirm && !session.value?.pending_replan));
 const initials = computed(() => (actor.value?.user.display_name ?? "?")
   .split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]!.toUpperCase()).join(""));
@@ -213,6 +221,11 @@ function toggleFilm() {
 }
 
 function newChat() {
+  // Keep the conversation being left in the recent list.
+  const leaving = session.value;
+  if (leaving?.messages.length && !agent.recent.value.some(item => item.id === leaving.id)) {
+    agent.recent.value = [leaving, ...agent.recent.value];
+  }
   agent.reset();
   plan.value = null;
   planState.value = "empty";
@@ -429,6 +442,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                   groceries {{ session.pending_replan.purchase_total_delta_sgd >= 0 ? "+" : "−" }}S${{ Math.abs(session.pending_replan.purchase_total_delta_sgd).toFixed(2) }} ·
                   the other dinners stay the same
                 </small>
+                <small v-if="swapOverBudget" class="over-budget">This puts the week {{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}.</small>
               </div>
               <div class="acts">
                 <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirmReplan()">Confirm change</button>
@@ -637,6 +651,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .swap-card s { color: var(--t4); font-size: 12.5px; }
 .to { font-size: 18px; line-height: 1.2; font-weight: 400; }
 .swap-card small { display: block; margin-top: 3px; color: var(--t3); font-size: 12px; }
+.swap-card .over-budget { color: var(--warn); }
 .swap-card .acts { grid-column: 1 / -1; display: flex; gap: 8px; }
 .typing { display: flex; gap: 5px; padding: 8px 0; }
 .typing span { width: 7px; height: 7px; border-radius: 999px; background: var(--t3); animation: mc-dot 1.2s ease-in-out infinite; }

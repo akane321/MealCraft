@@ -79,14 +79,16 @@ def build_replanning_service(database: Session, household_id: int) -> MealPlanRe
         grocery_estimator=GroceryEstimator(product_service),
     )
     settings = config.get_settings()
-    # Only where the live model is configured: fixture deployments and tests never call an embedding API.
+    # The embedding API is called only where the live model is configured; fixture deployments and tests
+    # never call it.
     key = settings.openai_api_key if settings.agent_parser_provider == "openai" else None
     return MealPlanReplanningService(
         repository=MealPlanRepository(database, household_id=household_id),
         recipe_repository=recipe_repository,
         recommendation_service=recommendation_service,
         grocery_aggregator=WeeklyGroceryAggregator(product_service),
-        request_similarity=RecipeSimilarity(catalog_embedder(key.get_secret_value())) if key else None,
+        # Without the live model the swap still follows the request, by shared words.
+        request_similarity=RecipeSimilarity(catalog_embedder(key.get_secret_value()) if key else None),
     )
 
 

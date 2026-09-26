@@ -4853,112 +4853,16 @@
     },
     "metrics": {
       "case_count": 24,
-      "exact_case_rate": 0.8333,
+      "exact_case_rate": 1.0,
       "field_precision": 1.0,
-      "field_recall": 0.9149,
-      "field_f1": 0.9556,
+      "field_recall": 1.0,
+      "field_f1": 1.0,
       "hallucinated_field_count": 0,
-      "clarification_accuracy": 0.9583,
+      "clarification_accuracy": 1.0,
       "medical_boundary_accuracy": 1.0,
-      "failure_case_count": 4
+      "failure_case_count": 0
     },
-    "failure_cases": [
-      {
-        "id": "agent-017",
-        "category": "exclusion-gap",
-        "language": "en",
-        "exact_match": false,
-        "matched_fields": 1,
-        "expected_fields": 2,
-        "predicted_fields": 1,
-        "hallucinated_fields": [],
-        "mismatched_fields": [
-          "excluded_ingredients"
-        ],
-        "missing_fields_match": true,
-        "medical_boundary_match": true,
-        "actual_extraction": {
-          "household_size": 2
-        },
-        "actual_missing_fields": [],
-        "failure_reasons": [
-          "extraction_mismatch"
-        ]
-      },
-      {
-        "id": "agent-018",
-        "category": "time-gap",
-        "language": "en",
-        "exact_match": false,
-        "matched_fields": 1,
-        "expected_fields": 2,
-        "predicted_fields": 1,
-        "hallucinated_fields": [],
-        "mismatched_fields": [
-          "max_cooking_time_minutes"
-        ],
-        "missing_fields_match": true,
-        "medical_boundary_match": true,
-        "actual_extraction": {
-          "household_size": 2
-        },
-        "actual_missing_fields": [],
-        "failure_reasons": [
-          "extraction_mismatch"
-        ]
-      },
-      {
-        "id": "agent-019",
-        "category": "budget-gap",
-        "language": "en",
-        "exact_match": false,
-        "matched_fields": 1,
-        "expected_fields": 2,
-        "predicted_fields": 1,
-        "hallucinated_fields": [],
-        "mismatched_fields": [
-          "budget_per_meal_sgd"
-        ],
-        "missing_fields_match": true,
-        "medical_boundary_match": true,
-        "actual_extraction": {
-          "household_size": 2
-        },
-        "actual_missing_fields": [],
-        "failure_reasons": [
-          "extraction_mismatch"
-        ]
-      },
-      {
-        "id": "agent-024",
-        "category": "combined-gap",
-        "language": "mixed",
-        "exact_match": false,
-        "matched_fields": 3,
-        "expected_fields": 4,
-        "predicted_fields": 3,
-        "hallucinated_fields": [],
-        "mismatched_fields": [
-          "household_size"
-        ],
-        "missing_fields_match": false,
-        "medical_boundary_match": true,
-        "actual_extraction": {
-          "max_cooking_time_minutes": 25,
-          "weekly_budget_sgd": 70.0,
-          "dietary_preferences": [
-            "vegan"
-          ]
-        },
-        "actual_missing_fields": [
-          "household_size"
-        ],
-        "failure_reasons": [
-          "extraction_mismatch",
-          "clarification_mismatch"
-        ]
-      }
-    ],
+    "failure_cases": [],
     "cases": [
       {
         "id": "agent-001",
@@ -5293,67 +5197,60 @@
         "id": "agent-017",
         "category": "exclusion-gap",
         "language": "en",
-        "exact_match": false,
-        "matched_fields": 1,
+        "exact_match": true,
+        "matched_fields": 2,
         "expected_fields": 2,
-        "predicted_fields": 1,
+        "predicted_fields": 2,
         "hallucinated_fields": [],
-        "mismatched_fields": [
-          "excluded_ingredients"
-        ],
+        "mismatched_fields": [],
         "missing_fields_match": true,
         "medical_boundary_match": true,
         "actual_extraction": {
-          "household_size": 2
+          "household_size": 2,
+          "excluded_ingredients": [
+            "mushroom"
+          ]
         },
         "actual_missing_fields": [],
-        "failure_reasons": [
-          "extraction_mismatch"
-        ]
+        "failure_reasons": []
       },
       {
         "id": "agent-018",
         "category": "time-gap",
         "language": "en",
-        "exact_match": false,
-        "matched_fields": 1,
+        "exact_match": true,
+        "matched_fields": 2,
         "expected_fields": 2,
-        "predicted_fields": 1,
+        "predicted_fields": 2,
         "hallucinated_fields": [],
-        "mismatched_fields": [
-          "max_cooking_time_minutes"
-        ],
+        "mismatched_fields": [],
         "missing_fields_match": true,
         "medical_boundary_match": true,
         "actual_extraction": {
-          "household_size": 2
+          "household_size": 2,
+          "max_cooking_time_minutes": 30
         },
         "actual_missing_fields": [],
-        "failure_reasons": [
-          "extraction_mismatch"
-        ]
+        "failure_reasons": []
       },
       {
         "id": "agent-019",
         "category": "budget-gap",
         "language": "en",
-        "exact_match": false,
-        "matched_fields": 1,
+        "exact_match": true,
+        "matched_fields": 2,
         "expected_fields": 2,
-        "predicted_fields": 1,
+        "predicted_fields": 2,
         "hallucinated_fields": [],
-        "mismatched_fields": [
-          "budget_per_meal_sgd"
-        ],
+        "mismatched_fields": [],
         "missing_fields_match": true,
         "medical_boundary_match": true,
         "actual_extraction": {
-          "household_size": 2
+          "household_size": 2,
+          "budget_per_meal_sgd": 12.0
         },
         "actual_missing_fields": [],
-        "failure_reasons": [
-          "extraction_mismatch"
-        ]
+        "failure_reasons": []
       },
       {
         "id": "agent-020",
@@ -5448,30 +5345,24 @@
         "id": "agent-024",
         "category": "combined-gap",
         "language": "mixed",
-        "exact_match": false,
-        "matched_fields": 3,
+        "exact_match": true,
+        "matched_fields": 4,
         "expected_fields": 4,
-        "predicted_fields": 3,
+        "predicted_fields": 4,
         "hallucinated_fields": [],
-        "mismatched_fields": [
-          "household_size"
-        ],
-        "missing_fields_match": false,
+        "mismatched_fields": [],
+        "missing_fields_match": true,
         "medical_boundary_match": true,
         "actual_extraction": {
+          "household_size": 3,
           "max_cooking_time_minutes": 25,
           "weekly_budget_sgd": 70.0,
           "dietary_preferences": [
             "vegan"
           ]
         },
-        "actual_missing_fields": [
-          "household_size"
-        ],
-        "failure_reasons": [
-          "extraction_mismatch",
-          "clarification_mismatch"
-        ]
+        "actual_missing_fields": [],
+        "failure_reasons": []
       }
     ]
   },
@@ -7248,105 +7139,6 @@
       "within_weekly_budget": null,
       "failure_reasons": [
         "consecutive_recipe_repetition"
-      ]
-    },
-    {
-      "source": "agent-benchmark",
-      "id": "agent-017",
-      "category": "exclusion-gap",
-      "language": "en",
-      "exact_match": false,
-      "matched_fields": 1,
-      "expected_fields": 2,
-      "predicted_fields": 1,
-      "hallucinated_fields": [],
-      "mismatched_fields": [
-        "excluded_ingredients"
-      ],
-      "missing_fields_match": true,
-      "medical_boundary_match": true,
-      "actual_extraction": {
-        "household_size": 2
-      },
-      "actual_missing_fields": [],
-      "failure_reasons": [
-        "extraction_mismatch"
-      ]
-    },
-    {
-      "source": "agent-benchmark",
-      "id": "agent-018",
-      "category": "time-gap",
-      "language": "en",
-      "exact_match": false,
-      "matched_fields": 1,
-      "expected_fields": 2,
-      "predicted_fields": 1,
-      "hallucinated_fields": [],
-      "mismatched_fields": [
-        "max_cooking_time_minutes"
-      ],
-      "missing_fields_match": true,
-      "medical_boundary_match": true,
-      "actual_extraction": {
-        "household_size": 2
-      },
-      "actual_missing_fields": [],
-      "failure_reasons": [
-        "extraction_mismatch"
-      ]
-    },
-    {
-      "source": "agent-benchmark",
-      "id": "agent-019",
-      "category": "budget-gap",
-      "language": "en",
-      "exact_match": false,
-      "matched_fields": 1,
-      "expected_fields": 2,
-      "predicted_fields": 1,
-      "hallucinated_fields": [],
-      "mismatched_fields": [
-        "budget_per_meal_sgd"
-      ],
-      "missing_fields_match": true,
-      "medical_boundary_match": true,
-      "actual_extraction": {
-        "household_size": 2
-      },
-      "actual_missing_fields": [],
-      "failure_reasons": [
-        "extraction_mismatch"
-      ]
-    },
-    {
-      "source": "agent-benchmark",
-      "id": "agent-024",
-      "category": "combined-gap",
-      "language": "mixed",
-      "exact_match": false,
-      "matched_fields": 3,
-      "expected_fields": 4,
-      "predicted_fields": 3,
-      "hallucinated_fields": [],
-      "mismatched_fields": [
-        "household_size"
-      ],
-      "missing_fields_match": false,
-      "medical_boundary_match": true,
-      "actual_extraction": {
-        "max_cooking_time_minutes": 25,
-        "weekly_budget_sgd": 70.0,
-        "dietary_preferences": [
-          "vegan"
-        ]
-      },
-      "actual_missing_fields": [
-        "household_size"
-      ],
-      "failure_reasons": [
-        "extraction_mismatch",
-        "clarification_mismatch"
       ]
     }
   ]

@@ -28,6 +28,11 @@ class ReferenceScopePolicy:
         "replan",
         "replace",
         "swap",
+        "instead",
+        "skip",
+        "don't change",
+        "vegetarian",
+        "vegan",
         "unavailable",
         "食谱",
         "菜谱",
@@ -49,6 +54,8 @@ class ReferenceScopePolicy:
         "换掉",
         "换餐",
         "缺货",
+        "换成",
+        "改成",
     )
     _off_topic_tokens = (
         "movie",

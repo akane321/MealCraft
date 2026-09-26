@@ -25,6 +25,7 @@ from app.planning.meal_composition import dish_servings
 from app.planning.nutrition_scope import compile_nutrition_targets
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
+from app.planning.recipe_quality import dish_family, dish_kind
 from app.planning.recommendation_engine import CANDIDATE_LIMIT
 from app.planning.weekly_planner import WeeklyPlanSelectionError, WeeklyPlanSelector
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse
@@ -54,6 +55,29 @@ def normalized(quantity, unit):
     if quantity is not None and not isfinite(quantity):
         return quantity, base
     return (float(Fraction(str(quantity)) * Fraction(str(multiplier))) if quantity is not None else None), base
+
+
+# Fallback searches for a stated budget: how strongly a dish's cost, relative to the
+# budget for one dinner, is added to its rank loss (which lies in 0..1).
+COST_WEIGHTS = (1.0, 4.0, 16.0)
+
+
+def meal_affinity(recipe) -> tuple[str, ...]:
+    """A release recipe states its meal types (ADR-0038); a curated one's meal_type
+    may name one; otherwise it is a lunch or dinner dish."""
+    stated = tuple(m for m in getattr(recipe, "meal_types", None) or () if m in MEAL_TYPES)
+    meal_type = getattr(recipe, "meal_type", None)
+    return stated or ((meal_type,) if meal_type in MEAL_TYPES else ("lunch", "dinner"))
+
+
+def dish_cost(recommendation) -> float:
+    """What the dish's ingredients cost as used, or as bought when that is all we know."""
+    estimate = recommendation.grocery_estimate
+    if estimate is None:
+        return 0.0
+    if estimate.consumed_total_sgd is not None:
+        return estimate.consumed_total_sgd
+    return estimate.purchase_total_sgd
 
 
 class ProductPlanningError(WeeklyPlanSelectionError):
@@ -139,7 +163,31 @@ class ProductPlanningEngine:
             )
         # Recommendations arrive best first; keep as many as the search can visit.
         if composition is None:
-            recommendations = list(recommendations)[: self._packet_limit(constraints.day_count)]
+            # "Chinese Fried Rice" and "Basic Fried Rice" read as the same dinner twice; keep the
+            # better-ranked one of each dish family.
+            seen: set[str] = set()
+            ranked = []
+            for recommendation in recommendations:
+                family = dish_family(recommendation.recipe.title)
+                if family not in seen:
+                    seen.add(family)
+                    ranked.append(recommendation)
+            limit = self._packet_limit(constraints.day_count)
+            # A dinner slot takes dinner dishes whenever there are enough for the week;
+            # meal affinity stays only a soft score when it would otherwise run short.
+            meal_types = {r.id: meal_affinity(r) for r in recipes}
+            dinners = [r for r in ranked if "dinner" in meal_types.get(r.recipe.id, ("dinner",))]
+            if constraints.day_count <= len(dinners) < len(ranked):
+                trace["meal_type_filtered"] = len(ranked) - len(dinners)
+                ranked = dinners
+            if constraints.weekly_budget_sgd is not None and len(ranked) > limit:
+                # The best-ranked dishes are rarely the cheap ones; with a budget, half
+                # the packet is the cheapest of the rest so a week within it can exist.
+                best = ranked[: limit // 2]
+                cheapest = sorted(ranked[limit // 2 :], key=dish_cost)[: limit - len(best)]
+                trace["budget_packet"] = {"ranked": len(best), "cheapest": len(cheapest)}
+                ranked = best + cheapest
+            recommendations = ranked[:limit]
         else:
             # The meal beam ranks each role's dishes itself; keep the best of every course it may fill.
             courses = {course for role in composition for course in role.courses}
@@ -174,11 +222,7 @@ class ProductPlanningEngine:
             for ingredient in source.ingredients:
                 display_names[ingredient.normalized_name] = ingredient.name
                 ingredient.quantity, ingredient.unit = normalized(ingredient.quantity, ingredient.unit)
-            # A release recipe states its meal types (ADR-0038); a curated one's
-            # meal_type may name one; otherwise it is a lunch or dinner dish.
-            stated = tuple(m for m in source.meal_types or () if m in MEAL_TYPES)
-            affinity = stated or ((source.meal_type,) if source.meal_type in MEAL_TYPES else ("lunch", "dinner"))
-            converted = recipe_input(source, allowed_meal_types=affinity, nutrition_basis="per_serving")
+            converted = recipe_input(source, allowed_meal_types=meal_affinity(source), nutrition_basis="per_serving")
             if converted.candidate is None:
                 diagnostics.extend(converted.issues)
                 continue
@@ -212,13 +256,6 @@ class ProductPlanningEngine:
                 options[option.product_id] = option
                 observations[option.product_id] = projected.observation
                 provenance[option.product_id] = line.evidence
-        if composition is None:
-            # A dinner slot takes dinner dishes whenever the packet holds enough for the
-            # week; meal affinity stays only a soft score when it would otherwise run short.
-            dinners = [c for c in candidates if "dinner" in c.allowed_meal_types]
-            if constraints.day_count <= len(dinners) < len(candidates):
-                trace["meal_type_filtered"] = len(candidates) - len(dinners)
-                candidates = dinners
         trace["input_issues"] = sorted(set(diagnostics))
         trace["observed_sources"] = sorted({p.source for p in observations.values()})
         if not candidates or "conflicting_product_observation" in diagnostics:
@@ -276,6 +313,7 @@ class ProductPlanningEngine:
         trace["proof_scope"] = "supplied_candidate_packet_only"
         trace["validation_attempts"] = []
         builder = FinalScopeReferencePlanner()
+        fallback = None  # cost-led searches, run only when every ranked week fails (see below)
         if constraints.planner_strategy == "greedy-baseline":
             try:
                 chosen, _ = (selector or WeeklyPlanSelector()).select(recommendations, constraints)
@@ -298,9 +336,51 @@ class ProductPlanningEngine:
             trace["ranking"] = {"policy": "recommendation-score-v1", "digest": digest(losses)}
             if composition is None:
                 search = BeamPlanner(self.limits, local_losses=losses).search_candidates(problem.model_copy(deep=True))
+                titles = {r.recipe.slug: r.recipe.title for r in recommendations}
+
+                def sameness(picked) -> tuple[int, int]:
+                    """Repeated dishes, then dishes of one kind ("fried rice"), in a week."""
+                    dishes = [recipe for _, recipe in picked]
+                    kinds = [dish_kind(titles[recipe]) for recipe in dishes]
+                    return len(dishes) - len(set(dishes)), len(kinds) - len(set(kinds))
+
+                # Among the weeks the search kept, the most varied is tried first; a search loss
+                # term for "same kind" would prune the cheap weeks a budget needs instead.
+                choices = [
+                    state.choices
+                    for state in sorted(search.states, key=lambda s: (sameness(s.choices), s.loss, s.choices))
+                ]
+                budget = constraints.weekly_budget_sgd
+                if budget is not None:
+                    # The ranking never sees prices, so a tight budget can fail on every
+                    # retained week. Only then do fallback searches blend each dish's
+                    # grocery cost into its rank, from lightly to strongly.
+                    per_slot = budget / constraints.day_count
+                    cost = {r.recipe.slug: dish_cost(r) / per_slot for r in recommendations}
+
+                    def cost_fallback() -> list[list[PlanningAssignment]]:
+                        found_states: list = []
+                        for weight in COST_WEIGHTS:
+                            blended = {slug: loss + weight * cost[slug] for slug, loss in losses.items()}
+                            found = BeamPlanner(self.limits, local_losses=blended).search_candidates(
+                                problem.model_copy(deep=True)
+                            )
+                            found_states += [
+                                (weight, state)
+                                for state in found.states
+                                if state.choices not in choices
+                                and all(state.choices != seen.choices for _, seen in found_states)
+                            ]
+                        # A strongly cost-led search happily repeats a cheap dish; its weeks are tried
+                        # only after every week without repeats, then with fewest dishes of one kind.
+                        found_states.sort(key=lambda item: (sameness(item[1].choices), item[0], item[1].loss))
+                        extra = [state.choices for _, state in found_states]
+                        trace["cost_fallback"] = {"weights": list(COST_WEIGHTS), "candidates": len(extra)}
+                        return [[PlanningAssignment(slot_id=s, recipe_id=r) for s, r in picked] for picked in extra]
+
+                    fallback = cost_fallback
                 assignments_list = [
-                    [PlanningAssignment(slot_id=s, recipe_id=r) for s, r in state.choices]
-                    for state in sorted(search.states, key=lambda s: (s.loss, s.choices))
+                    [PlanningAssignment(slot_id=s, recipe_id=r) for s, r in picked] for picked in choices
                 ]
             else:
                 meal_beam = MealBeamPlanner(local_losses=losses)
@@ -315,7 +395,16 @@ class ProductPlanningEngine:
         result = None
         uncertain = bool(diagnostics)
         only_budget_failures = bool(assignments_list)
-        for assignments in assignments_list:
+        index = 0
+        while True:
+            if index == len(assignments_list):
+                if fallback is None:
+                    break
+                assignments_list.extend(fallback())
+                fallback = None
+                continue
+            assignments = assignments_list[index]
+            index += 1
             shopping = builder._build_shopping(
                 problem.model_copy(deep=True), [a.model_copy(deep=True) for a in assignments]
             )
@@ -363,11 +452,19 @@ class ProductPlanningEngine:
                 else:
                     evidence, status = "exactly_infeasible", "infeasible"
             trace.update(status=status, evidence=evidence)
-            message = (
-                "Some required details are missing; refresh the recipe and price data before trying again."
-                if status == "needs_data"
-                else "No validated plan was found in this search; try another candidate selection."
-            )
+            totals = [attempt["purchase_total_sgd"] for attempt in trace["validation_attempts"]]
+            if status == "needs_data":
+                message = "Some recipe or price details are missing. Try again in a moment."
+            elif only_budget_failures and totals and constraints.weekly_budget_sgd is not None:
+                message = (
+                    f"I couldn't fit seven dinners into S${constraints.weekly_budget_sgd:.2f}. The cheapest week "
+                    f"I found costs S${min(totals):.2f}. Try a higher budget or fewer limits."
+                )
+            elif trace.get("search", {}).get("exhausted"):
+                # A search that ran out of steps proves nothing about the limits themselves.
+                message = "Planning took longer than it should this time. Please try again."
+            else:
+                message = "I couldn't find a week that meets every limit. Try relaxing one of them."
             raise ProductPlanningError(status, message, trace, problem=problem.model_copy(deep=True))
         assignments, shopping, report = result
         lines = []

@@ -65,3 +65,5 @@ class TutorialRecommendationResponse(BaseModel):
     selected_video: TutorialVideoResponse | None
     retrieval: RetrievalTrace
     warning: str | None = None
+    # Digest of the frozen evidence behind the shown video (app/retrieval/evidence.py tutorial_packet).
+    evidence_digest: str | None = None

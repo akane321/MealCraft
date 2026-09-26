@@ -1,0 +1,2542 @@
+{
+  "aliases": {
+    "adzuki_bean": [
+      "红豆",
+      "赤小豆"
+    ],
+    "agar": [
+      "燕菜",
+      "燕菜粉",
+      "大菜",
+      "琼脂"
+    ],
+    "agave": [
+      "龙舌兰糖浆"
+    ],
+    "allspice": [
+      "多香果",
+      "牙买加胡椒"
+    ],
+    "almond": [
+      "杏仁",
+      "巴旦木",
+      "扁桃仁"
+    ],
+    "almond_butter": [
+      "杏仁酱"
+    ],
+    "almond_extract": [
+      "杏仁精",
+      "杏仁香精"
+    ],
+    "almond_flour": [
+      "杏仁粉"
+    ],
+    "almond_milk": [
+      "杏仁奶"
+    ],
+    "almond_paste": [
+      "杏仁膏",
+      "杏仁糖膏"
+    ],
+    "amaretto": [
+      "杏仁利口酒",
+      "杏仁酒"
+    ],
+    "american_cheese": [
+      "美式芝士片"
+    ],
+    "anchovy": [
+      "江鱼仔",
+      "鳀鱼",
+      "凤尾鱼"
+    ],
+    "anise": [
+      "八角",
+      "大茴香",
+      "洋茴香"
+    ],
+    "annatto": [
+      "胭脂树籽",
+      "红木籽"
+    ],
+    "apple": [
+      "苹果"
+    ],
+    "apple_juice": [
+      "苹果汁"
+    ],
+    "apple_pie_spice": [
+      "苹果派香料"
+    ],
+    "applesauce": [
+      "苹果泥",
+      "苹果酱"
+    ],
+    "apricot": [
+      "杏",
+      "杏子"
+    ],
+    "apricot_nectar": [
+      "杏汁"
+    ],
+    "arrowroot": [
+      "葛粉",
+      "竹芋粉"
+    ],
+    "artichoke": [
+      "洋蓟",
+      "朝鲜蓟",
+      "洋蓟心"
+    ],
+    "arugula": [
+      "芝麻菜"
+    ],
+    "asian_pear": [
+      "雪梨",
+      "水晶梨",
+      "韩国梨",
+      "亚洲梨"
+    ],
+    "asparagus": [
+      "芦笋",
+      "露笋"
+    ],
+    "avocado": [
+      "牛油果",
+      "鳄梨"
+    ],
+    "avocado_oil": [
+      "牛油果油"
+    ],
+    "baby_spinach": [
+      "嫩菠菜",
+      "菠菜苗"
+    ],
+    "bacon": [
+      "培根",
+      "烟肉"
+    ],
+    "bacon_grease": [
+      "培根油"
+    ],
+    "baguette": [
+      "法棍",
+      "法式长棍面包"
+    ],
+    "baked_beans": [
+      "焗豆",
+      "茄汁焗豆"
+    ],
+    "baking_chocolate": [
+      "无糖巧克力",
+      "烘焙巧克力"
+    ],
+    "baking_powder": [
+      "泡打粉",
+      "发粉"
+    ],
+    "baking_soda": [
+      "小苏打",
+      "苏打粉"
+    ],
+    "balsamic": [
+      "意大利黑醋",
+      "巴萨米克醋",
+      "香脂醋"
+    ],
+    "bamboo_shoot": [
+      "竹笋",
+      "笋"
+    ],
+    "banana": [
+      "香蕉"
+    ],
+    "banana_leaf": [
+      "香蕉叶",
+      "蕉叶"
+    ],
+    "barley": [
+      "大麦",
+      "珍珠麦",
+      "洋薏米"
+    ],
+    "basil": [
+      "罗勒",
+      "甜罗勒"
+    ],
+    "bay_leaf": [
+      "香叶",
+      "月桂叶"
+    ],
+    "bbq_sauce": [
+      "烧烤酱",
+      "烤肉酱"
+    ],
+    "bean_sauce": [
+      "豆酱",
+      "黄豆酱",
+      "豆瓣酱"
+    ],
+    "bean_sprouts": [
+      "豆芽",
+      "绿豆芽",
+      "豆芽菜"
+    ],
+    "beef": [
+      "牛肉"
+    ],
+    "beef_broth": [
+      "牛肉高汤",
+      "牛肉汤"
+    ],
+    "beef_heart": [
+      "牛心"
+    ],
+    "beef_steak": [
+      "牛排"
+    ],
+    "beer": [
+      "啤酒"
+    ],
+    "beet": [
+      "甜菜根",
+      "红菜头"
+    ],
+    "bell_pepper": [
+      "灯笼椒",
+      "甜椒",
+      "彩椒"
+    ],
+    "berries": [
+      "莓果",
+      "什锦莓果",
+      "浆果"
+    ],
+    "bilimbi": [
+      "木胡瓜"
+    ],
+    "bitter_melon": [
+      "苦瓜",
+      "凉瓜"
+    ],
+    "black_beans": [
+      "黑豆",
+      "黑龟豆"
+    ],
+    "black_eyed_peas": [
+      "眉豆",
+      "黑眼豆"
+    ],
+    "black_pepper": [
+      "黑胡椒",
+      "黑胡椒粉",
+      "胡椒",
+      "胡椒粉"
+    ],
+    "black_vinegar": [
+      "黑醋",
+      "镇江香醋",
+      "香醋"
+    ],
+    "blackberry": [
+      "黑莓"
+    ],
+    "blue_cheese": [
+      "蓝纹奶酪",
+      "蓝纹芝士"
+    ],
+    "blueberry": [
+      "蓝莓"
+    ],
+    "bok_choy": [
+      "小白菜",
+      "白菜仔",
+      "上海青"
+    ],
+    "bonito_flakes": [
+      "柴鱼片",
+      "木鱼花"
+    ],
+    "bouillon": [
+      "高汤块",
+      "汤块",
+      "浓汤宝"
+    ],
+    "bourbon": [
+      "波本威士忌",
+      "波本"
+    ],
+    "brandy": [
+      "白兰地"
+    ],
+    "bread": [
+      "面包",
+      "白面包",
+      "吐司"
+    ],
+    "bread_flour": [
+      "高筋面粉",
+      "高筋粉"
+    ],
+    "bread_mix": [
+      "面包预拌粉"
+    ],
+    "breadcrumbs": [
+      "面包糠",
+      "面包屑"
+    ],
+    "broccoli": [
+      "西兰花",
+      "西蓝花",
+      "青花菜"
+    ],
+    "broth": [
+      "高汤",
+      "清汤",
+      "汤底"
+    ],
+    "broth_tomato_juice": [
+      "番茄汁",
+      "西红柿汁"
+    ],
+    "brown_rice": [
+      "糙米"
+    ],
+    "brown_rice_flour": [
+      "糙米粉"
+    ],
+    "brown_sugar": [
+      "红糖",
+      "黄糖",
+      "赤砂糖"
+    ],
+    "brussels_sprouts": [
+      "抱子甘蓝",
+      "球芽甘蓝"
+    ],
+    "buckwheat": [
+      "荞麦"
+    ],
+    "bulgur": [
+      "碎小麦",
+      "布格麦"
+    ],
+    "burdock_root": [
+      "牛蒡"
+    ],
+    "butter": [
+      "黄油",
+      "牛油"
+    ],
+    "buttered_breadcrumbs": [
+      "黄油面包糠"
+    ],
+    "buttermilk": [
+      "酪乳",
+      "白脱牛奶"
+    ],
+    "butternut_squash": [
+      "胡桃南瓜",
+      "奶油南瓜"
+    ],
+    "cabbage": [
+      "包菜",
+      "椰菜",
+      "卷心菜",
+      "高丽菜"
+    ],
+    "cajun_seasoning": [
+      "卡真香料",
+      "卡津粉"
+    ],
+    "cake_flour": [
+      "低筋面粉",
+      "低筋粉",
+      "蛋糕粉"
+    ],
+    "calamansi": [
+      "酸柑",
+      "四季桔",
+      "四季橘"
+    ],
+    "canned_tomato": [
+      "无盐罐头番茄"
+    ],
+    "canned_tomatoes": [
+      "罐头番茄",
+      "番茄罐头"
+    ],
+    "canned_tuna": [
+      "金枪鱼罐头",
+      "吞拿鱼罐头",
+      "罐头金枪鱼"
+    ],
+    "cannellini": [
+      "白腰豆",
+      "白芸豆"
+    ],
+    "cantaloupe": [
+      "哈密瓜",
+      "罗马甜瓜"
+    ],
+    "capers": [
+      "酸豆",
+      "水瓜柳",
+      "刺山柑"
+    ],
+    "caramel": [
+      "焦糖",
+      "焦糖酱"
+    ],
+    "caraway": [
+      "葛缕子",
+      "藏茴香"
+    ],
+    "cardamom": [
+      "小豆蔻",
+      "绿豆蔻"
+    ],
+    "carrot": [
+      "胡萝卜",
+      "红萝卜"
+    ],
+    "cashew": [
+      "腰果"
+    ],
+    "cassava": [
+      "木薯"
+    ],
+    "catfish": [
+      "鲶鱼",
+      "塘虱"
+    ],
+    "cauliflower": [
+      "花菜",
+      "花椰菜",
+      "菜花"
+    ],
+    "cayenne": [
+      "卡宴辣椒粉",
+      "卡宴辣椒"
+    ],
+    "celeriac": [
+      "块根芹",
+      "根芹菜"
+    ],
+    "celery": [
+      "芹菜",
+      "西芹"
+    ],
+    "celery_salt": [
+      "芹菜盐"
+    ],
+    "celery_seed": [
+      "芹菜籽"
+    ],
+    "celery_soup": [
+      "西芹浓汤",
+      "忌廉西芹汤"
+    ],
+    "cellophane_noodles": [
+      "粉丝",
+      "冬粉",
+      "绿豆粉丝"
+    ],
+    "cereal_cornflake": [
+      "玉米片",
+      "玉米脆片"
+    ],
+    "cereal_rice": [
+      "米脆片"
+    ],
+    "chayote": [
+      "佛手瓜",
+      "合掌瓜"
+    ],
+    "cheddar": [
+      "切达奶酪",
+      "切达芝士",
+      "车打芝士"
+    ],
+    "cheese": [
+      "芝士",
+      "奶酪",
+      "起司"
+    ],
+    "cheese_soup": [
+      "芝士浓汤"
+    ],
+    "cheese_tortellini": [
+      "芝士意式饺子"
+    ],
+    "cherry": [
+      "樱桃",
+      "车厘子"
+    ],
+    "cherry_tomato": [
+      "小番茄",
+      "圣女果",
+      "樱桃番茄"
+    ],
+    "chia": [
+      "奇亚籽"
+    ],
+    "chicken": [
+      "鸡肉",
+      "鸡"
+    ],
+    "chicken_breast": [
+      "鸡胸肉",
+      "鸡胸"
+    ],
+    "chicken_broth": [
+      "鸡高汤",
+      "鸡汤"
+    ],
+    "chicken_soup": [
+      "鸡肉浓汤",
+      "忌廉鸡汤"
+    ],
+    "chicken_thigh": [
+      "鸡腿肉",
+      "鸡大腿",
+      "鸡腿"
+    ],
+    "chicken_wings": [
+      "鸡翅",
+      "鸡翼"
+    ],
+    "chickpea": [
+      "鹰嘴豆"
+    ],
+    "chickpea_flour": [
+      "鹰嘴豆粉"
+    ],
+    "chili_garlic_sauce": [
+      "蒜蓉辣椒酱"
+    ],
+    "chili_oil": [
+      "辣椒油",
+      "红油",
+      "辣油"
+    ],
+    "chili_paste": [
+      "辣椒膏",
+      "辣椒糊"
+    ],
+    "chili_pepper": [
+      "辣椒",
+      "红辣椒"
+    ],
+    "chili_powder": [
+      "辣椒粉"
+    ],
+    "chili_sauce": [
+      "辣椒酱",
+      "辣椒醬"
+    ],
+    "chinese_five_spice": [
+      "五香粉"
+    ],
+    "chipotle_pepper": [
+      "烟熏辣椒"
+    ],
+    "chives": [
+      "细香葱",
+      "韭菜"
+    ],
+    "chocolate_chips": [
+      "巧克力豆",
+      "巧克力碎"
+    ],
+    "chocolate_syrup": [
+      "巧克力酱",
+      "巧克力糖浆"
+    ],
+    "chorizo": [
+      "西班牙辣香肠",
+      "西班牙香肠"
+    ],
+    "chow_mein_noodles": [
+      "炒面",
+      "炒面面条"
+    ],
+    "chutney": [
+      "印度酸辣酱"
+    ],
+    "cider_vinegar": [
+      "苹果醋"
+    ],
+    "cilantro": [
+      "香菜",
+      "芫荽",
+      "芫茜"
+    ],
+    "cinnamon": [
+      "肉桂",
+      "桂皮",
+      "肉桂粉"
+    ],
+    "clam": [
+      "蛤蜊",
+      "啦啦",
+      "花甲"
+    ],
+    "clam_juice": [
+      "蛤蜊汁"
+    ],
+    "cloves_spice": [
+      "丁香"
+    ],
+    "club_soda": [
+      "苏打水",
+      "气泡水"
+    ],
+    "cocoa": [
+      "可可粉"
+    ],
+    "coconut": [
+      "椰子",
+      "椰肉"
+    ],
+    "coconut_cream": [
+      "椰子奶油"
+    ],
+    "coconut_extract": [
+      "椰子香精"
+    ],
+    "coconut_flour": [
+      "椰子粉"
+    ],
+    "coconut_milk": [
+      "椰浆",
+      "椰奶"
+    ],
+    "coconut_oil": [
+      "椰子油",
+      "椰油"
+    ],
+    "coconut_sugar": [
+      "椰子花糖",
+      "椰花糖"
+    ],
+    "coconut_water": [
+      "椰子水",
+      "椰水"
+    ],
+    "cod": [
+      "鳕鱼"
+    ],
+    "coffee": [
+      "咖啡"
+    ],
+    "cola": [
+      "可乐"
+    ],
+    "coleslaw": [
+      "凉拌卷心菜",
+      "卷心菜沙拉"
+    ],
+    "collard": [
+      "宽叶羽衣甘蓝"
+    ],
+    "condensed_milk": [
+      "炼奶",
+      "炼乳"
+    ],
+    "cooked_chicken": [
+      "熟鸡肉"
+    ],
+    "cooking_spray": [
+      "喷雾油"
+    ],
+    "corn": [
+      "玉米",
+      "甜玉米",
+      "玉米粒"
+    ],
+    "corn_flour_masa": [
+      "墨西哥玉米粉"
+    ],
+    "corn_syrup": [
+      "玉米糖浆"
+    ],
+    "corned_beef": [
+      "咸牛肉",
+      "罐头咸牛肉"
+    ],
+    "cornish_hen": [
+      "春鸡",
+      "童子鸡"
+    ],
+    "cornmeal": [
+      "玉米粉",
+      "玉米面"
+    ],
+    "cornstarch": [
+      "玉米淀粉",
+      "生粉",
+      "粟粉"
+    ],
+    "cottage_cheese": [
+      "茅屋芝士",
+      "松软干酪"
+    ],
+    "couscous": [
+      "古斯米",
+      "蒸粗麦粉"
+    ],
+    "crab": [
+      "螃蟹",
+      "蟹",
+      "蟹肉"
+    ],
+    "cracker_crumbs": [
+      "饼干屑",
+      "苏打饼干屑"
+    ],
+    "cranberry": [
+      "蔓越莓"
+    ],
+    "cranberry_juice": [
+      "蔓越莓汁"
+    ],
+    "cream": [
+      "淡奶油",
+      "鲜奶油",
+      "忌廉"
+    ],
+    "cream_cheese": [
+      "奶油奶酪",
+      "奶油芝士",
+      "忌廉芝士"
+    ],
+    "cream_liqueur": [
+      "奶油利口酒",
+      "百利甜"
+    ],
+    "cream_of_tartar": [
+      "塔塔粉"
+    ],
+    "creamed_corn": [
+      "奶油玉米",
+      "玉米酱"
+    ],
+    "creme_fraiche": [
+      "法式酸奶油"
+    ],
+    "crepe": [
+      "可丽饼",
+      "法式薄饼"
+    ],
+    "crickets": [
+      "蟋蟀"
+    ],
+    "croutons": [
+      "面包丁",
+      "烤面包丁"
+    ],
+    "crystallized_ginger": [
+      "糖姜",
+      "糖渍姜"
+    ],
+    "cucumber": [
+      "黄瓜",
+      "青瓜"
+    ],
+    "cucumber_pickle": [
+      "酸黄瓜",
+      "腌黄瓜"
+    ],
+    "cumin": [
+      "孜然",
+      "孜然籽"
+    ],
+    "currant": [
+      "醋栗",
+      "加仑子"
+    ],
+    "curry_leaf": [
+      "咖喱叶"
+    ],
+    "curry_paste": [
+      "咖喱酱",
+      "咖喱膏"
+    ],
+    "curry_powder": [
+      "咖喱粉"
+    ],
+    "curry_sauce": [
+      "咖喱汁"
+    ],
+    "daikon": [
+      "白萝卜",
+      "萝卜",
+      "菜头"
+    ],
+    "dark_chocolate": [
+      "黑巧克力"
+    ],
+    "dashi": [
+      "日式高汤",
+      "鲣鱼高汤"
+    ],
+    "dashida": [
+      "韩式牛肉粉",
+      "大喜大"
+    ],
+    "date": [
+      "椰枣"
+    ],
+    "dijon": [
+      "第戎芥末",
+      "法式芥末"
+    ],
+    "dill": [
+      "莳萝",
+      "刁草"
+    ],
+    "dill_seed": [
+      "莳萝籽"
+    ],
+    "dinner_roll": [
+      "餐包",
+      "小面包"
+    ],
+    "doenjang": [
+      "韩式大酱",
+      "大酱"
+    ],
+    "dried_fruit": [
+      "果干",
+      "什锦果干"
+    ],
+    "dried_mushroom": [
+      "干蘑菇",
+      "干菇"
+    ],
+    "dried_onion_flakes": [
+      "洋葱干片",
+      "脱水洋葱"
+    ],
+    "dried_shiitake": [
+      "香菇",
+      "冬菇",
+      "干香菇"
+    ],
+    "dry_mustard": [
+      "黄芥末粉",
+      "芥末粉"
+    ],
+    "duck": [
+      "鸭肉",
+      "鸭"
+    ],
+    "durian": [
+      "榴莲"
+    ],
+    "edamame": [
+      "毛豆"
+    ],
+    "egg": [
+      "鸡蛋",
+      "蛋"
+    ],
+    "egg_noodles": [
+      "蛋面",
+      "鸡蛋面"
+    ],
+    "egg_substitute": [
+      "代蛋",
+      "鸡蛋替代品"
+    ],
+    "egg_white": [
+      "蛋白",
+      "蛋清"
+    ],
+    "egg_yolk": [
+      "蛋黄"
+    ],
+    "eggnog": [
+      "蛋酒",
+      "蛋奶酒"
+    ],
+    "eggplant": [
+      "茄子",
+      "矮瓜"
+    ],
+    "english_muffin": [
+      "英式松饼",
+      "英式玛芬"
+    ],
+    "evaporated_milk": [
+      "淡奶",
+      "花奶"
+    ],
+    "falafel": [
+      "鹰嘴豆丸子",
+      "炸豆丸子"
+    ],
+    "fava_bean": [
+      "蚕豆"
+    ],
+    "fennel": [
+      "茴香头",
+      "球茎茴香"
+    ],
+    "fennel_seed": [
+      "小茴香",
+      "茴香籽"
+    ],
+    "fenugreek": [
+      "葫芦巴",
+      "葫芦巴籽"
+    ],
+    "fenugreek_leaf": [
+      "葫芦巴叶"
+    ],
+    "fermented_soybeans": [
+      "豆豉"
+    ],
+    "feta": [
+      "菲达奶酪",
+      "菲达芝士"
+    ],
+    "fig": [
+      "无花果"
+    ],
+    "firm_tofu": [
+      "豆干",
+      "老豆腐",
+      "硬豆腐"
+    ],
+    "fish_broth": [
+      "鱼高汤",
+      "鱼汤"
+    ],
+    "fish_cake": [
+      "鱼饼",
+      "鱼糕"
+    ],
+    "fish_fillet": [
+      "鱼片",
+      "鱼柳"
+    ],
+    "fish_oil": [
+      "鱼油"
+    ],
+    "fish_sauce": [
+      "鱼露"
+    ],
+    "flax": [
+      "亚麻籽"
+    ],
+    "flour": [
+      "面粉",
+      "中筋面粉",
+      "普通面粉"
+    ],
+    "food_coloring": [
+      "食用色素"
+    ],
+    "french_fried_onions": [
+      "炸洋葱",
+      "洋葱酥"
+    ],
+    "french_fries": [
+      "薯条"
+    ],
+    "frozen_bread_dough": [
+      "冷冻面团"
+    ],
+    "fruit": [
+      "水果"
+    ],
+    "fruit_pie_filling": [
+      "水果派馅"
+    ],
+    "gai_lan": [
+      "芥兰",
+      "芥蓝"
+    ],
+    "galangal": [
+      "南姜",
+      "蓝姜",
+      "高良姜"
+    ],
+    "garam_masala": [
+      "印度综合香料",
+      "葛拉姆马萨拉"
+    ],
+    "garlic": [
+      "大蒜",
+      "蒜",
+      "蒜头",
+      "蒜米"
+    ],
+    "garlic_powder": [
+      "蒜粉",
+      "大蒜粉"
+    ],
+    "garlic_salt": [
+      "蒜盐"
+    ],
+    "gelatin": [
+      "吉利丁",
+      "明胶",
+      "鱼胶粉"
+    ],
+    "ghee": [
+      "酥油",
+      "印度酥油"
+    ],
+    "ginger": [
+      "姜",
+      "生姜",
+      "老姜"
+    ],
+    "ginger_ale": [
+      "姜汁汽水"
+    ],
+    "ginger_garlic": [
+      "姜蒜泥",
+      "姜蒜酱"
+    ],
+    "ginkgo_nut": [
+      "白果",
+      "银杏"
+    ],
+    "glutinous_rice": [
+      "糯米"
+    ],
+    "gnocchi": [
+      "意式土豆团子",
+      "意大利面疙瘩"
+    ],
+    "goat": [
+      "山羊肉"
+    ],
+    "goat_cheese": [
+      "山羊奶酪",
+      "山羊芝士"
+    ],
+    "gochugaru": [
+      "韩国辣椒粉",
+      "韩式辣椒粉"
+    ],
+    "gochujang": [
+      "韩式辣椒酱",
+      "韩国辣椒酱"
+    ],
+    "gochujang_sauce": [
+      "韩式辣椒酱汁",
+      "拌饭酱"
+    ],
+    "golden_syrup": [
+      "金黄糖浆"
+    ],
+    "grand_marnier": [
+      "橙味利口酒",
+      "柑曼怡"
+    ],
+    "grape": [
+      "葡萄",
+      "提子"
+    ],
+    "grape_juice": [
+      "葡萄汁"
+    ],
+    "grape_leaves": [
+      "葡萄叶"
+    ],
+    "grapefruit": [
+      "西柚",
+      "葡萄柚"
+    ],
+    "grapefruit_juice": [
+      "西柚汁"
+    ],
+    "grapeseed_oil": [
+      "葡萄籽油"
+    ],
+    "gravy": [
+      "肉汁",
+      "肉汁酱"
+    ],
+    "gravy_mix": [
+      "肉汁粉"
+    ],
+    "greek_yogurt": [
+      "希腊酸奶",
+      "希腊优格"
+    ],
+    "green_beans": [
+      "四季豆",
+      "菜豆"
+    ],
+    "green_chili": [
+      "青辣椒",
+      "青辣"
+    ],
+    "green_onion": [
+      "葱",
+      "青葱",
+      "葱花",
+      "小葱"
+    ],
+    "green_papaya": [
+      "青木瓜"
+    ],
+    "grits": [
+      "玉米糁"
+    ],
+    "ground_beef": [
+      "牛肉末",
+      "牛绞肉",
+      "碎牛肉"
+    ],
+    "ground_cumin": [
+      "孜然粉"
+    ],
+    "ground_pork": [
+      "猪肉碎",
+      "猪绞肉",
+      "猪肉末",
+      "肉末"
+    ],
+    "gruyere": [
+      "格鲁耶尔奶酪"
+    ],
+    "guava": [
+      "番石榴",
+      "芭乐"
+    ],
+    "gyoza": [
+      "锅贴",
+      "煎饺"
+    ],
+    "habanero_pepper": [
+      "哈瓦那辣椒"
+    ],
+    "hake": [
+      "无须鳕"
+    ],
+    "halibut": [
+      "比目鱼",
+      "大比目鱼"
+    ],
+    "halloumi": [
+      "哈罗米奶酪"
+    ],
+    "ham": [
+      "火腿"
+    ],
+    "hamburger_bun": [
+      "汉堡面包",
+      "汉堡包"
+    ],
+    "harissa": [
+      "哈里萨辣酱"
+    ],
+    "hash_brown": [
+      "薯饼"
+    ],
+    "hazelnut": [
+      "榛子",
+      "榛果"
+    ],
+    "herbes_de_provence": [
+      "普罗旺斯香草"
+    ],
+    "hoisin": [
+      "海鲜酱"
+    ],
+    "hominy": [
+      "碱化玉米粒"
+    ],
+    "honey": [
+      "蜂蜜",
+      "蜜糖"
+    ],
+    "horseradish": [
+      "辣根"
+    ],
+    "hot_dog": [
+      "热狗",
+      "热狗肠"
+    ],
+    "hot_dog_bun": [
+      "热狗面包"
+    ],
+    "hot_sauce": [
+      "辣汁",
+      "辣椒汁"
+    ],
+    "ice": [
+      "冰块",
+      "冰"
+    ],
+    "ice_cream": [
+      "香草冰淇淋",
+      "云尼拿雪糕"
+    ],
+    "imitation_crab": [
+      "蟹柳",
+      "蟹棒"
+    ],
+    "instant_coffee": [
+      "速溶咖啡",
+      "即溶咖啡"
+    ],
+    "instant_mashed_potato": [
+      "速食土豆泥"
+    ],
+    "italian_dressing": [
+      "意式沙拉酱",
+      "意大利油醋汁"
+    ],
+    "italian_seasoning": [
+      "意大利香料",
+      "意式香草"
+    ],
+    "jackfruit": [
+      "菠萝蜜",
+      "波罗蜜",
+      "木菠萝"
+    ],
+    "jaggery": [
+      "印度粗糖"
+    ],
+    "jalapeno": [
+      "墨西哥辣椒",
+      "哈拉皮纽辣椒"
+    ],
+    "jam": [
+      "果酱"
+    ],
+    "jasmine_flavoring": [
+      "茉莉花香精"
+    ],
+    "jerk_seasoning": [
+      "牙买加烤肉香料"
+    ],
+    "jicama": [
+      "沙葛",
+      "豆薯",
+      "凉薯"
+    ],
+    "kabocha": [
+      "日本南瓜",
+      "板栗南瓜"
+    ],
+    "kaffir_lime_leaf": [
+      "青柠叶",
+      "酸柑叶",
+      "泰国青柠叶"
+    ],
+    "kahlua": [
+      "咖啡利口酒",
+      "甘露咖啡酒"
+    ],
+    "kale": [
+      "羽衣甘蓝"
+    ],
+    "kecap_manis": [
+      "甜酱油",
+      "印尼甜酱油"
+    ],
+    "ketchup": [
+      "番茄酱",
+      "茄汁",
+      "番茄沙司"
+    ],
+    "kidney_beans": [
+      "红腰豆"
+    ],
+    "kimchi": [
+      "泡菜",
+      "韩国泡菜"
+    ],
+    "kirsch": [
+      "樱桃白兰地",
+      "樱桃酒"
+    ],
+    "kiwi": [
+      "猕猴桃",
+      "奇异果"
+    ],
+    "laksa_paste": [
+      "叻沙酱",
+      "喇沙酱"
+    ],
+    "lamb": [
+      "羊肉",
+      "羔羊肉"
+    ],
+    "lamb_chop": [
+      "羊排",
+      "羊扒"
+    ],
+    "lard": [
+      "猪油"
+    ],
+    "leek": [
+      "韭葱",
+      "蒜苗"
+    ],
+    "lemon": [
+      "柠檬",
+      "黄柠檬"
+    ],
+    "lemon_extract": [
+      "柠檬香精"
+    ],
+    "lemon_juice": [
+      "柠檬汁"
+    ],
+    "lemon_lime_soda": [
+      "柠檬汽水"
+    ],
+    "lemon_pepper": [
+      "柠檬胡椒粉"
+    ],
+    "lemon_zest": [
+      "柠檬皮",
+      "柠檬皮屑"
+    ],
+    "lemonade": [
+      "浓缩柠檬水"
+    ],
+    "lemongrass": [
+      "香茅"
+    ],
+    "lentil": [
+      "小扁豆",
+      "兵豆"
+    ],
+    "lettuce": [
+      "生菜",
+      "莴苣"
+    ],
+    "lima_beans": [
+      "利马豆",
+      "皇帝豆",
+      "棉豆"
+    ],
+    "lime": [
+      "青柠",
+      "青柠檬",
+      "绿柠檬"
+    ],
+    "lime_juice": [
+      "青柠汁"
+    ],
+    "lime_zest": [
+      "青柠皮"
+    ],
+    "liquid_smoke": [
+      "液体烟熏"
+    ],
+    "liver": [
+      "肝"
+    ],
+    "lobster": [
+      "龙虾"
+    ],
+    "lychee": [
+      "荔枝"
+    ],
+    "lye_water": [
+      "碱水",
+      "枧水"
+    ],
+    "mac_and_cheese": [
+      "芝士通心粉",
+      "奶酪通心粉"
+    ],
+    "macadamia_nut": [
+      "夏威夷果",
+      "澳洲坚果"
+    ],
+    "macaroni": [
+      "通心粉",
+      "通心面"
+    ],
+    "mace": [
+      "肉豆蔻皮",
+      "豆蔻皮"
+    ],
+    "mango": [
+      "芒果"
+    ],
+    "maple_syrup": [
+      "枫糖浆"
+    ],
+    "margarine": [
+      "人造黄油",
+      "植物牛油",
+      "麦淇淋"
+    ],
+    "marinara": [
+      "意式番茄酱",
+      "马力纳拉酱"
+    ],
+    "marjoram": [
+      "马郁兰",
+      "墨角兰"
+    ],
+    "marshmallow": [
+      "棉花糖"
+    ],
+    "mascarpone": [
+      "马斯卡彭奶酪",
+      "马斯卡彭"
+    ],
+    "mashed_potatoes": [
+      "土豆泥",
+      "马铃薯泥"
+    ],
+    "matcha": [
+      "抹茶",
+      "抹茶粉"
+    ],
+    "mayo": [
+      "蛋黄酱",
+      "美乃滋"
+    ],
+    "meat": [
+      "肉"
+    ],
+    "meat_tenderizer": [
+      "嫩肉粉"
+    ],
+    "milk": [
+      "牛奶",
+      "鲜奶"
+    ],
+    "milk_chocolate": [
+      "牛奶巧克力"
+    ],
+    "milkfish": [
+      "虱目鱼"
+    ],
+    "millet_flour": [
+      "小米粉"
+    ],
+    "mincemeat": [
+      "百果馅"
+    ],
+    "mint": [
+      "薄荷",
+      "薄荷叶"
+    ],
+    "mint_extract": [
+      "薄荷香精"
+    ],
+    "mirin": [
+      "味醂",
+      "味淋"
+    ],
+    "miso": [
+      "味噌",
+      "味增"
+    ],
+    "mixed_herbs": [
+      "混合香草",
+      "综合香草"
+    ],
+    "mixed_nuts": [
+      "坚果",
+      "综合坚果",
+      "什锦坚果"
+    ],
+    "mixed_vegetables": [
+      "什锦蔬菜",
+      "杂菜"
+    ],
+    "molasses": [
+      "糖蜜",
+      "黑糖蜜"
+    ],
+    "monterey_jack": [
+      "蒙特利杰克奶酪"
+    ],
+    "mozzarella": [
+      "马苏里拉芝士",
+      "马苏里拉奶酪",
+      "莫扎瑞拉"
+    ],
+    "msg": [
+      "味精"
+    ],
+    "mung_bean": [
+      "绿豆"
+    ],
+    "mung_bean_starch": [
+      "绿豆淀粉",
+      "绿豆粉"
+    ],
+    "mushroom": [
+      "蘑菇",
+      "菇"
+    ],
+    "mushroom_soup": [
+      "蘑菇浓汤",
+      "忌廉蘑菇汤"
+    ],
+    "mussel": [
+      "青口",
+      "贻贝",
+      "淡菜"
+    ],
+    "mustard": [
+      "黄芥末",
+      "芥末酱"
+    ],
+    "mustard_seed": [
+      "芥菜籽",
+      "芥末籽"
+    ],
+    "nasi_goreng_spice_mix": [
+      "印尼炒饭调料"
+    ],
+    "nori": [
+      "紫菜",
+      "海苔"
+    ],
+    "nuoc_cham": [
+      "越南蘸酱",
+      "越式鱼露蘸汁"
+    ],
+    "nutella": [
+      "榛子巧克力酱",
+      "能多益"
+    ],
+    "nutmeg": [
+      "肉豆蔻"
+    ],
+    "oat_bran": [
+      "燕麦麸"
+    ],
+    "oats": [
+      "燕麦"
+    ],
+    "octopus": [
+      "章鱼",
+      "八爪鱼"
+    ],
+    "okra": [
+      "羊角豆",
+      "秋葵"
+    ],
+    "old_bay": [
+      "老湾调味料"
+    ],
+    "olive": [
+      "橄榄"
+    ],
+    "olive_oil": [
+      "橄榄油"
+    ],
+    "onion": [
+      "洋葱"
+    ],
+    "onion_powder": [
+      "洋葱粉"
+    ],
+    "onion_salt": [
+      "洋葱盐"
+    ],
+    "onion_soup_mix": [
+      "洋葱汤粉"
+    ],
+    "opo_squash": [
+      "葫芦瓜",
+      "蒲瓜",
+      "瓠瓜"
+    ],
+    "orange": [
+      "橙子",
+      "橙",
+      "甜橙",
+      "柳橙"
+    ],
+    "orange_blossom": [
+      "橙花水"
+    ],
+    "orange_extract": [
+      "橙子香精"
+    ],
+    "orange_juice": [
+      "橙汁"
+    ],
+    "orange_juice_conc": [
+      "浓缩橙汁"
+    ],
+    "orange_zest": [
+      "橙皮",
+      "橙皮屑"
+    ],
+    "oregano": [
+      "牛至",
+      "奥勒冈"
+    ],
+    "orzo": [
+      "米型意面",
+      "米粒面"
+    ],
+    "oyster": [
+      "生蚝",
+      "蚝",
+      "牡蛎"
+    ],
+    "oyster_sauce": [
+      "蚝油"
+    ],
+    "palm_sugar": [
+      "椰糖",
+      "马六甲椰糖",
+      "棕榈糖"
+    ],
+    "palmyra_fruit": [
+      "海底椰"
+    ],
+    "pancake_mix": [
+      "松饼粉",
+      "煎饼粉"
+    ],
+    "pancetta": [
+      "意大利培根",
+      "意式咸肉"
+    ],
+    "pancit_canton": [
+      "菲式炒面面条"
+    ],
+    "pandan_extract": [
+      "班兰香精",
+      "香兰精"
+    ],
+    "pandan_juice": [
+      "班兰汁",
+      "香兰汁"
+    ],
+    "pandan_leaf": [
+      "香兰叶",
+      "班兰叶",
+      "斑兰叶"
+    ],
+    "pandan_paste": [
+      "班兰膏",
+      "香兰膏"
+    ],
+    "papaya": [
+      "木瓜"
+    ],
+    "paprika": [
+      "红椒粉",
+      "甜椒粉"
+    ],
+    "parmesan": [
+      "帕玛森芝士",
+      "帕尔马干酪",
+      "巴马臣芝士"
+    ],
+    "parmesan_romano": [
+      "罗马诺芝士",
+      "罗马诺奶酪"
+    ],
+    "parsley": [
+      "欧芹",
+      "香芹",
+      "巴西里",
+      "洋香菜"
+    ],
+    "parsnip": [
+      "欧洲防风",
+      "防风草"
+    ],
+    "pasta": [
+      "意大利面",
+      "意面"
+    ],
+    "pastrami": [
+      "五香熏牛肉"
+    ],
+    "pate": [
+      "肝酱"
+    ],
+    "pea_shoots": [
+      "豆苗",
+      "豌豆苗"
+    ],
+    "peach": [
+      "桃子",
+      "水蜜桃",
+      "桃"
+    ],
+    "peanut": [
+      "花生",
+      "花生米"
+    ],
+    "peanut_butter": [
+      "花生酱"
+    ],
+    "peanut_oil": [
+      "花生油"
+    ],
+    "peanut_sauce": [
+      "沙爹酱",
+      "花生酱汁"
+    ],
+    "pear": [
+      "梨",
+      "西洋梨"
+    ],
+    "pear_juice": [
+      "梨汁"
+    ],
+    "peas": [
+      "豌豆",
+      "青豆"
+    ],
+    "pecan": [
+      "碧根果",
+      "美国山核桃"
+    ],
+    "peppercorn": [
+      "胡椒粒",
+      "黑胡椒粒"
+    ],
+    "pepperoni": [
+      "意大利辣香肠"
+    ],
+    "perilla": [
+      "紫苏叶",
+      "苏子叶",
+      "紫苏"
+    ],
+    "persimmon": [
+      "柿子"
+    ],
+    "pesto": [
+      "青酱",
+      "罗勒青酱"
+    ],
+    "pho_spice": [
+      "越南河粉香料"
+    ],
+    "phyllo": [
+      "菲洛酥皮",
+      "薄酥皮"
+    ],
+    "pickled_ginger": [
+      "寿司姜",
+      "腌姜",
+      "酸姜"
+    ],
+    "pickling_spice": [
+      "腌渍香料"
+    ],
+    "pie_crust": [
+      "派皮",
+      "挞皮"
+    ],
+    "pine_nut": [
+      "松子",
+      "松仁"
+    ],
+    "pineapple": [
+      "菠萝",
+      "黄梨",
+      "凤梨"
+    ],
+    "pineapple_juice": [
+      "菠萝汁",
+      "黄梨汁",
+      "凤梨汁"
+    ],
+    "pinto_beans": [
+      "斑豆",
+      "花豆"
+    ],
+    "pistachio": [
+      "开心果"
+    ],
+    "pita_bread": [
+      "皮塔饼",
+      "口袋饼"
+    ],
+    "pizza_crust": [
+      "披萨饼底",
+      "比萨饼皮"
+    ],
+    "pizza_sauce": [
+      "披萨酱",
+      "比萨酱"
+    ],
+    "plantain": [
+      "大蕉"
+    ],
+    "plum": [
+      "李子",
+      "布林"
+    ],
+    "plum_sauce": [
+      "酸梅酱",
+      "梅子酱"
+    ],
+    "plum_wine": [
+      "梅酒",
+      "梅子酒"
+    ],
+    "pomegranate_molasses": [
+      "石榴糖浆"
+    ],
+    "pomegranate_seeds": [
+      "石榴籽"
+    ],
+    "poppadam": [
+      "印度脆饼",
+      "帕帕德"
+    ],
+    "poppy_seed": [
+      "罂粟籽"
+    ],
+    "pork": [
+      "猪肉"
+    ],
+    "pork_belly": [
+      "五花肉",
+      "三层肉",
+      "猪腩"
+    ],
+    "pork_chop": [
+      "猪排"
+    ],
+    "pork_fatback": [
+      "猪背膘",
+      "肥膘"
+    ],
+    "port": [
+      "波特酒"
+    ],
+    "potato": [
+      "土豆",
+      "马铃薯",
+      "薯仔"
+    ],
+    "potato_chip": [
+      "薯片"
+    ],
+    "potato_starch": [
+      "马铃薯淀粉",
+      "土豆淀粉",
+      "太白粉"
+    ],
+    "poultry_seasoning": [
+      "禽肉调味料"
+    ],
+    "powdered_milk": [
+      "奶粉"
+    ],
+    "powdered_sugar": [
+      "糖粉"
+    ],
+    "preserved_lemon": [
+      "咸柠檬",
+      "腌柠檬"
+    ],
+    "prod_tomatillo": [
+      "墨西哥绿番茄"
+    ],
+    "prosciutto": [
+      "帕尔马火腿",
+      "意大利生火腿"
+    ],
+    "provolone": [
+      "波萝伏洛奶酪"
+    ],
+    "prune": [
+      "西梅干",
+      "西梅"
+    ],
+    "puff_pastry": [
+      "酥皮",
+      "千层酥皮"
+    ],
+    "pumpkin": [
+      "南瓜",
+      "金瓜"
+    ],
+    "pumpkin_pie_spice": [
+      "南瓜派香料"
+    ],
+    "pumpkin_seed": [
+      "南瓜籽",
+      "南瓜子"
+    ],
+    "quail_egg": [
+      "鹌鹑蛋"
+    ],
+    "queso_fresco": [
+      "墨西哥鲜奶酪"
+    ],
+    "quinoa": [
+      "藜麦"
+    ],
+    "rabbit": [
+      "兔肉"
+    ],
+    "radish": [
+      "小红萝卜",
+      "樱桃萝卜"
+    ],
+    "radish_sprouts": [
+      "萝卜苗",
+      "萝卜芽"
+    ],
+    "raisin": [
+      "葡萄干",
+      "提子干"
+    ],
+    "ramen": [
+      "拉面",
+      "日式拉面"
+    ],
+    "ranch_dressing": [
+      "田园沙拉酱",
+      "牧场沙拉酱"
+    ],
+    "ranch_mix": [
+      "田园酱调料粉"
+    ],
+    "raspberry": [
+      "覆盆子",
+      "树莓"
+    ],
+    "red_cabbage": [
+      "紫甘蓝",
+      "紫椰菜",
+      "红椰菜"
+    ],
+    "red_lentil": [
+      "红扁豆",
+      "红小扁豆"
+    ],
+    "red_onion": [
+      "红洋葱",
+      "紫洋葱"
+    ],
+    "red_snapper": [
+      "红鲷鱼"
+    ],
+    "red_wine": [
+      "红酒",
+      "红葡萄酒"
+    ],
+    "red_wine_vinegar": [
+      "红酒醋"
+    ],
+    "refried_beans": [
+      "墨西哥豆泥"
+    ],
+    "relish": [
+      "酸黄瓜酱"
+    ],
+    "rhubarb": [
+      "大黄"
+    ],
+    "rice": [
+      "米",
+      "大米",
+      "白米",
+      "白饭"
+    ],
+    "rice_cake": [
+      "韩国年糕",
+      "韩式年糕"
+    ],
+    "rice_flour": [
+      "粘米粉",
+      "在来米粉",
+      "大米粉"
+    ],
+    "rice_noodles": [
+      "米粉",
+      "米线",
+      "粿条",
+      "河粉"
+    ],
+    "rice_paper": [
+      "越南米纸",
+      "米纸"
+    ],
+    "rice_vinegar": [
+      "米醋"
+    ],
+    "rice_wine": [
+      "绍兴酒",
+      "花雕酒",
+      "黄酒"
+    ],
+    "ricotta": [
+      "瑞可塔奶酪",
+      "意大利乳清奶酪"
+    ],
+    "roasted_red_pepper": [
+      "烤红椒"
+    ],
+    "rolled_oats": [
+      "燕麦片",
+      "大燕麦片"
+    ],
+    "rose_water": [
+      "玫瑰水"
+    ],
+    "rosemary": [
+      "迷迭香"
+    ],
+    "rum": [
+      "朗姆酒",
+      "冧酒"
+    ],
+    "rum_extract": [
+      "朗姆香精"
+    ],
+    "rutabaga": [
+      "芜菁甘蓝"
+    ],
+    "rye_flour": [
+      "黑麦粉",
+      "裸麦粉"
+    ],
+    "saffron": [
+      "藏红花",
+      "番红花"
+    ],
+    "sage": [
+      "鼠尾草"
+    ],
+    "sake": [
+      "清酒"
+    ],
+    "salad_dressing": [
+      "沙拉酱",
+      "沙律酱"
+    ],
+    "salmon": [
+      "三文鱼",
+      "鲑鱼"
+    ],
+    "salmon_fillet": [
+      "三文鱼柳",
+      "三文鱼扒"
+    ],
+    "salsa": [
+      "莎莎酱",
+      "墨西哥莎莎酱"
+    ],
+    "salt": [
+      "盐",
+      "食盐"
+    ],
+    "salt_and_pepper": [
+      "椒盐",
+      "盐和胡椒"
+    ],
+    "salt_cod": [
+      "咸鳕鱼"
+    ],
+    "sambal_oelek": [
+      "叁巴",
+      "参巴",
+      "叁巴辣椒酱"
+    ],
+    "sardine": [
+      "沙丁鱼"
+    ],
+    "sauerkraut": [
+      "德国酸菜"
+    ],
+    "sausage": [
+      "香肠"
+    ],
+    "scallop": [
+      "扇贝",
+      "带子"
+    ],
+    "scotch_bonnet": [
+      "苏格兰帽辣椒"
+    ],
+    "seafood_mix": [
+      "什锦海鲜",
+      "海鲜"
+    ],
+    "seasoned_salt": [
+      "调味盐"
+    ],
+    "seaweed": [
+      "海藻"
+    ],
+    "self_rising_flour": [
+      "自发粉",
+      "自发面粉"
+    ],
+    "semolina_flour": [
+      "粗粒小麦粉",
+      "杜兰小麦粉"
+    ],
+    "sesame_oil": [
+      "麻油",
+      "芝麻油",
+      "香油"
+    ],
+    "sesame_seed": [
+      "芝麻"
+    ],
+    "sesame_tahini": [
+      "芝麻酱",
+      "中东芝麻酱"
+    ],
+    "shallot": [
+      "红葱头",
+      "小红葱",
+      "干葱头"
+    ],
+    "sherry": [
+      "雪莉酒"
+    ],
+    "sherry_vinegar": [
+      "雪莉酒醋"
+    ],
+    "shirataki_noodles": [
+      "魔芋丝",
+      "蒟蒻丝",
+      "魔芋面"
+    ],
+    "shortening": [
+      "起酥油",
+      "白油"
+    ],
+    "shrimp": [
+      "虾",
+      "虾仁",
+      "明虾"
+    ],
+    "shrimp_paste": [
+      "虾酱",
+      "峇拉煎",
+      "马来盏"
+    ],
+    "sinigang_mix": [
+      "菲律宾酸汤料"
+    ],
+    "smoked_haddock": [
+      "烟熏黑线鳕"
+    ],
+    "snow_peas": [
+      "荷兰豆",
+      "雪豆"
+    ],
+    "soba_noodles": [
+      "荞麦面"
+    ],
+    "somyeon": [
+      "韩式素面",
+      "素面"
+    ],
+    "sorghum_flour": [
+      "高粱粉"
+    ],
+    "soup": [
+      "汤"
+    ],
+    "sour_cream": [
+      "酸奶油"
+    ],
+    "soy_sauce": [
+      "酱油",
+      "生抽",
+      "豉油"
+    ],
+    "soybean": [
+      "黄豆",
+      "大豆"
+    ],
+    "spaghetti_squash": [
+      "金丝瓜"
+    ],
+    "spelt": [
+      "斯佩尔特小麦"
+    ],
+    "spinach": [
+      "菠菜"
+    ],
+    "split_peas": [
+      "豌豆瓣"
+    ],
+    "squid": [
+      "鱿鱼",
+      "苏东"
+    ],
+    "sriracha": [
+      "是拉差辣椒酱",
+      "是拉差"
+    ],
+    "star_fruit": [
+      "杨桃"
+    ],
+    "steak_sauce": [
+      "牛排酱"
+    ],
+    "strawberry": [
+      "草莓"
+    ],
+    "sugar": [
+      "白糖",
+      "砂糖",
+      "白砂糖",
+      "糖"
+    ],
+    "sugar_cane": [
+      "甘蔗"
+    ],
+    "sugar_snap_peas": [
+      "甜豆",
+      "蜜豆"
+    ],
+    "sugar_substitute": [
+      "代糖",
+      "甜味剂"
+    ],
+    "sumac": [
+      "漆树粉"
+    ],
+    "sun_dried_tomato": [
+      "番茄干"
+    ],
+    "sunflower_oil": [
+      "葵花籽油",
+      "葵花油"
+    ],
+    "sunflower_seed": [
+      "葵花籽"
+    ],
+    "sweet_chili_sauce": [
+      "泰式甜辣酱",
+      "甜辣酱"
+    ],
+    "sweet_potato": [
+      "番薯",
+      "红薯",
+      "地瓜"
+    ],
+    "sweet_potato_noodles": [
+      "红薯粉丝",
+      "韩式粉丝",
+      "韩国粉条",
+      "红薯粉条"
+    ],
+    "sweet_sour_sauce": [
+      "酸甜酱",
+      "糖醋酱"
+    ],
+    "swiss_chard": [
+      "瑞士甜菜",
+      "莙荙菜",
+      "牛皮菜"
+    ],
+    "swiss_cheese": [
+      "瑞士奶酪",
+      "埃门塔尔奶酪"
+    ],
+    "swordfish": [
+      "剑鱼",
+      "旗鱼"
+    ],
+    "syrup": [
+      "糖浆"
+    ],
+    "szechwan_pepper": [
+      "花椒",
+      "麻椒"
+    ],
+    "taco_sauce": [
+      "塔可酱"
+    ],
+    "taco_seasoning": [
+      "塔可调味粉"
+    ],
+    "taco_shell": [
+      "塔可壳"
+    ],
+    "tamari": [
+      "日式溜酱油",
+      "溜酱油"
+    ],
+    "tamarind": [
+      "罗望子",
+      "亚参",
+      "酸子",
+      "亚参膏"
+    ],
+    "tandoori_paste": [
+      "坦都里酱"
+    ],
+    "tapioca_flour": [
+      "木薯粉",
+      "木薯淀粉",
+      "薯粉"
+    ],
+    "tapioca_pearl": [
+      "西米",
+      "西谷米"
+    ],
+    "taro": [
+      "芋头",
+      "芋"
+    ],
+    "tarragon": [
+      "龙蒿",
+      "他拉贡"
+    ],
+    "tea": [
+      "茶",
+      "茶叶"
+    ],
+    "teff_flour": [
+      "苔麸粉"
+    ],
+    "tempeh": [
+      "天贝",
+      "丹贝"
+    ],
+    "tempeh_starter": [
+      "天贝菌"
+    ],
+    "tequila": [
+      "龙舌兰酒"
+    ],
+    "teriyaki": [
+      "照烧酱",
+      "照烧汁"
+    ],
+    "thai_basil": [
+      "九层塔",
+      "金不换",
+      "泰国罗勒"
+    ],
+    "thyme": [
+      "百里香"
+    ],
+    "tofu": [
+      "豆腐"
+    ],
+    "tom_yum_paste": [
+      "冬阴功酱",
+      "冬炎酱"
+    ],
+    "tomato": [
+      "番茄",
+      "西红柿"
+    ],
+    "tomato_paste": [
+      "番茄膏"
+    ],
+    "tomato_puree": [
+      "番茄泥",
+      "番茄糊"
+    ],
+    "tomato_sauce": [
+      "番茄意面酱",
+      "番茄酱汁"
+    ],
+    "tomato_soup": [
+      "番茄浓汤"
+    ],
+    "toor_dal": [
+      "木豆瓣",
+      "木豆"
+    ],
+    "tortilla": [
+      "墨西哥薄饼",
+      "墨西哥卷饼皮"
+    ],
+    "tortilla_chips": [
+      "墨西哥玉米片",
+      "玉米饼片"
+    ],
+    "trout": [
+      "鳟鱼"
+    ],
+    "tuna": [
+      "金枪鱼",
+      "吞拿鱼",
+      "鲔鱼"
+    ],
+    "turkey": [
+      "火鸡"
+    ],
+    "turkey_bacon": [
+      "火鸡培根"
+    ],
+    "turmeric": [
+      "黄姜",
+      "姜黄",
+      "姜黄粉"
+    ],
+    "turnip": [
+      "芜菁"
+    ],
+    "ube": [
+      "紫山药",
+      "大薯"
+    ],
+    "udon_noodles": [
+      "乌冬面",
+      "乌冬"
+    ],
+    "vanilla": [
+      "香草精",
+      "香草香精",
+      "云尼拿"
+    ],
+    "vanilla_bean": [
+      "香草荚",
+      "香草豆"
+    ],
+    "vanilla_wafer": [
+      "香草饼干",
+      "香草威化饼"
+    ],
+    "vegan_mayonnaise": [
+      "纯素蛋黄酱",
+      "素蛋黄酱"
+    ],
+    "vegetable_broth": [
+      "蔬菜高汤",
+      "蔬菜汤"
+    ],
+    "vegetable_oil": [
+      "植物油",
+      "食用油"
+    ],
+    "vegetable_stock": [
+      "低钠蔬菜高汤"
+    ],
+    "vegetarian_ham": [
+      "素火腿"
+    ],
+    "vegetarian_sausage": [
+      "素香肠"
+    ],
+    "venison": [
+      "鹿肉"
+    ],
+    "vinegar": [
+      "醋",
+      "白醋"
+    ],
+    "vodka": [
+      "伏特加"
+    ],
+    "walnut": [
+      "核桃",
+      "胡桃",
+      "核桃仁"
+    ],
+    "wasabi": [
+      "山葵",
+      "日式芥末",
+      "芥末"
+    ],
+    "water": [
+      "水",
+      "清水"
+    ],
+    "water_chestnut": [
+      "马蹄",
+      "荸荠"
+    ],
+    "watercress": [
+      "西洋菜",
+      "豆瓣菜"
+    ],
+    "watermelon": [
+      "西瓜"
+    ],
+    "watermelon_rind": [
+      "西瓜皮"
+    ],
+    "wheat_berries": [
+      "小麦粒",
+      "麦仁"
+    ],
+    "wheat_germ": [
+      "小麦胚芽"
+    ],
+    "whipped_topping": [
+      "植脂奶油"
+    ],
+    "white_chocolate": [
+      "白巧克力"
+    ],
+    "white_wine": [
+      "白葡萄酒"
+    ],
+    "white_wine_vinegar": [
+      "白酒醋"
+    ],
+    "whole_wheat_flour": [
+      "全麦面粉",
+      "全麦粉"
+    ],
+    "wholewheat_pasta": [
+      "全麦意面",
+      "全麦意大利面"
+    ],
+    "wild_rice": [
+      "菰米",
+      "野米"
+    ],
+    "wine_cooking": [
+      "料酒"
+    ],
+    "wonton_wrapper": [
+      "云吞皮",
+      "馄饨皮"
+    ],
+    "worcestershire": [
+      "喼汁",
+      "伍斯特酱",
+      "辣酱油"
+    ],
+    "yeast": [
+      "酵母",
+      "酵母粉"
+    ],
+    "yellow_onion": [
+      "黄洋葱"
+    ],
+    "yellow_squash": [
+      "黄西葫芦"
+    ],
+    "yogurt": [
+      "酸奶",
+      "优格"
+    ],
+    "zaatar": [
+      "扎塔香料"
+    ],
+    "zucchini": [
+      "西葫芦",
+      "翠玉瓜",
+      "意大利瓜"
+    ]
+  },
+  "generated_at": "2026-09-26",
+  "model": "claude-opus-5-5",
+  "note": "Model-generated Chinese names for catalog ingredients: suggestions only, like aliases-v1.json. A household always chooses; nothing here is applied without them. After the developer check, 鸡腿, 粿条/河粉 and 肉末/猪肉末 were added by hand.",
+  "schema_version": "ingredient-aliases-zh-v1"
+}
