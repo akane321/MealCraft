@@ -7,6 +7,7 @@ from app.models.platform import (
     Household,
     HouseholdMembership,
     OperationRun,
+    RuntimeSetting,
     User,
     UserCredential,
 )
@@ -37,6 +38,7 @@ __all__ = [
     "RecipeIngredient",
     "RecipeNutrition",
     "RecipeStep",
+    "RuntimeSetting",
     "User",
     "UserCredential",
 ]

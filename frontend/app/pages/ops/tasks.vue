@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatSeconds, formatWhen, humanKey, parseTaskKey, statusColor } from "~/lib/ops";
-import type { OpsTaskCollection, OpsTaskDetail, OpsTaskSummary } from "~/types/ops";
+import type { OpsReplay, OpsTaskCollection, OpsTaskDetail, OpsTaskSummary } from "~/types/ops";
 
 const PAGE = 25;
 const STATUSES = ["succeeded", "committed", "failed", "degraded", "needs_clarification", "preview_ready", "running", "queued", "cancelled"];
@@ -60,6 +60,27 @@ function close() {
   const { task: _task, ...rest } = route.query;
   router.push({ query: rest });
 }
+// Replay the open task through the current code and show the two results side by side.
+const replaying = ref(false);
+const replayError = ref("");
+watch(selected, () => (replayError.value = ""));
+async function replay() {
+  if (!selected.value) return;
+  replaying.value = true;
+  replayError.value = "";
+  try {
+    const result = await apiFetch<OpsReplay>(`${config.public.apiBase}/api/ops/replay/${selected.value.kind}/${selected.value.id}`, { method: "POST", body: {} });
+    await navigateTo({ path: "/ops/debugging", query: { replay: result.id } });
+  }
+  catch (error) {
+    const detail = (error as { data?: { detail?: unknown } }).data?.detail;
+    replayError.value = typeof detail === "string" ? detail : "The replay couldn't be run.";
+  }
+  finally {
+    replaying.value = false;
+  }
+}
+
 function onKey(event: KeyboardEvent) {
   if (event.key === "Escape" && selected.value) close();
 }
@@ -143,8 +164,12 @@ const validation = computed(() => {
             <p class="mc-eyebrow">{{ selected.kind === "agent" ? "Assistant turn" : "Planning run" }} #{{ selected.id }}</p>
             <h2 id="task-title" class="mc-serif">{{ detail?.summary.label ?? "Loading…" }}</h2>
           </div>
-          <button type="button" class="mc-pill" @click="close">Close</button>
+          <div class="drawer-actions">
+            <button type="button" class="mc-primary" :disabled="replaying || !detail" @click="replay">{{ replaying ? "Replaying…" : "Replay" }}</button>
+            <button type="button" class="mc-pill" @click="close">Close</button>
+          </div>
         </header>
+        <p v-if="replayError" class="ops-error" role="alert">{{ replayError }}</p>
 
         <p v-if="detailFailed" class="ops-error" role="alert">This task couldn't be loaded. It may have been removed.</p>
         <template v-else-if="detail">
@@ -226,6 +251,7 @@ tr.current td { background: var(--s2); }
 .drawer-scrim { position: fixed; inset: 0; z-index: 30; display: flex; justify-content: flex-end; background: rgba(14, 12, 10, 0.6); }
 .drawer { width: min(720px, 100%); height: 100%; overflow-y: auto; padding: 24px; border-left: 1px solid var(--line-2); background: var(--s1); animation: mc-rise 320ms var(--ease) both; }
 .drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.drawer-actions { display: flex; gap: 8px; }
 .drawer-head h2 { margin: 6px 0 0; font-size: 24px; font-weight: 300; }
 .drawer section { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
 .drawer h3 { margin: 0 0 12px; color: var(--t2); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }

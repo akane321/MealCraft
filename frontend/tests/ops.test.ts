@@ -1,6 +1,44 @@
 import { describe, expect, it } from "vitest";
 
-import { formatSeconds, isConsoleAccount, linePath, niceMax, parseTaskKey, statusesIn } from "../app/lib/ops";
+import { compareMetrics, diffFields, dishRows, formatSeconds, formatValue, isConsoleAccount, linePath, niceMax, parseTaskKey, statusesIn } from "../app/lib/ops";
+
+describe("ops console slice 2 helpers", () => {
+  it("lists changed fields first and compares values, not references", () => {
+    const rows = diffFields({ household_size: 2, allergens: ["peanut"], budget: 90 }, { household_size: 2, allergens: ["peanut"], budget: 120 });
+    expect(rows.map(row => [row.key, row.changed])).toEqual([["budget", true], ["allergens", false], ["household_size", false]]);
+    expect(diffFields(null, { a: 1 })).toEqual([{ key: "a", before: undefined, after: 1, changed: true }]);
+  });
+
+  it("matches dishes by day, meal and role and marks the swaps", () => {
+    const rows = dishRows(
+      [{ day: 2, meal: "dinner", role: "main", recipe: "Tofu Soba" }, { day: 1, meal: "dinner", role: "main", recipe: "Lemon Chicken" }],
+      [{ day: 1, meal: "dinner", role: "main", recipe: "Lemon Chicken" }, { day: 2, meal: "dinner", role: "main", recipe: "Lemon Chicken" }, { day: 2, meal: "dinner", role: "side", recipe: "Rice" }],
+    );
+    expect(rows.map(row => [row.slot, row.before, row.after, row.changed])).toEqual([
+      ["Day 1 dinner", "Lemon Chicken", "Lemon Chicken", false],
+      ["Day 2 dinner", "Tofu Soba", "Lemon Chicken", true],
+      ["Day 2 dinner (side)", null, "Rice", true],
+    ]);
+    expect(dishRows()).toEqual([]);
+  });
+
+  it("subtracts A from B only where both are numbers", () => {
+    expect(compareMetrics({ rate: 0.95, count: 3, provider: "fixture" }, { rate: 1, count: 3, extra: 2 })).toEqual([
+      { metric: "count", a: 3, b: 3, delta: 0 },
+      { metric: "extra", a: undefined, b: 2, delta: null },
+      { metric: "provider", a: "fixture", b: undefined, delta: null },
+      { metric: "rate", a: 0.95, b: 1, delta: 0.05 },
+    ]);
+  });
+
+  it("formats stored values as plain text", () => {
+    expect(formatValue(null)).toBe("—");
+    expect(formatValue([])).toBe("none");
+    expect(formatValue(["a", 2])).toBe("a, 2");
+    expect(formatValue(true)).toBe("yes");
+    expect(formatValue({ width: 4 })).toBe('{"width":4}');
+  });
+});
 
 describe("ops console helpers", () => {
   it("lets every console role in and keeps households out", () => {

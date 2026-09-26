@@ -17,6 +17,7 @@ from app.agent.parser import (
 from app.api.routes.auth import CurrentHouseholdCreatePlanCsrfDependency, CurrentHouseholdViewDependency
 from app.api.routes.meal_plans import build_meal_plan_service, build_replanning_service
 from app.core.config import Settings, get_settings
+from app.core.runtime_config import runtime_value
 from app.db.session import get_db_session
 from app.models.recipe import Ingredient
 from app.orchestration.run_lifecycle import AgentRunLifecycleError, AgentRunNotFoundError
@@ -48,8 +49,12 @@ from app.services.replanning import (
 router = APIRouter(prefix="/agent/sessions", tags=["planning agent"])
 
 
-def create_constraint_parser(settings: Settings, database: Session | None = None) -> ConstraintParser:
-    if settings.agent_parser_provider == "fixture":
+def create_constraint_parser(
+    settings: Settings, database: Session | None = None, *, provider: str | None = None
+) -> ConstraintParser:
+    # The console's runtime setting (ADR-0047) overrides the environment; a replay may name its own parser.
+    provider = provider or runtime_value("agent_parser_provider", settings, database)
+    if provider == "fixture":
         return RuleBasedConstraintParser()
     if settings.openai_api_key is None:
         raise AgentConfigurationError(
@@ -73,7 +78,7 @@ def create_constraint_parser(settings: Settings, database: Session | None = None
             api_key=api_key,
             model=settings.openai_model,
             vocabulary=vocabulary,
-            timeout_seconds=settings.openai_timeout_seconds,
+            timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
         )
     )
 

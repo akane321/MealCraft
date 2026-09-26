@@ -3,6 +3,8 @@ from collections.abc import Callable
 from datetime import date
 from uuid import uuid4
 
+from pydantic_core import to_jsonable_python
+
 from app.agent.parser import ConstraintParser
 from app.agent.replanning import AgentReplanInterpreter
 from app.agent.shape_change import read_shape_change
@@ -25,7 +27,7 @@ from app.orchestration.run_lifecycle import (
     AgentRunNotFoundError,
     StartedRun,
 )
-from app.orchestration.runtime import BoundedAgentOrchestrator
+from app.orchestration.runtime import AgentTurnOutcome, BoundedAgentOrchestrator
 from app.orchestration.scope_policy import ReferenceScopePolicy
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.agent import AgentSessionRepository
@@ -107,6 +109,24 @@ def _vector_meta(relative: str) -> str | None:
     return f"{model.group(1)}@{dimensions.group(1) if dimensions else '?'}"
 
 
+def _replay_input(message: str, **turn) -> dict:
+    """A turn's full input, taken before the turn runs, so the console can re-run it (ADR-0047)."""
+    return {"message": message, **to_jsonable_python(turn)}
+
+
+def _replay_record(turn_input: dict, outcome: AgentTurnOutcome | None) -> dict:
+    return {
+        "input": turn_input,
+        "outcome": (
+            None
+            if outcome is None
+            else to_jsonable_python(
+                outcome.model_dump(include={"constraints", "assistant_message", "status", "missing_fields"})
+            )
+        ),
+    }
+
+
 class AgentSessionService:
     def __init__(
         self,
@@ -141,6 +161,16 @@ class AgentSessionService:
 
     def create(self, message: str, *, idempotency_key: str | None = None) -> AgentSessionResponse:
         current = (self.starting_constraints or AgentConstraintState()).model_copy(deep=True)
+        turn_input = _replay_input(
+            message,
+            current=current,
+            acknowledged_unknowns=[],
+            history=[],
+            current_status="collecting",
+            current_missing_fields=[],
+            current_questions=[],
+            context_version=0,
+        )
         result = self.orchestrator.process(
             message,
             current=current,
@@ -173,7 +203,12 @@ class AgentSessionService:
             scope_decision=result.scope_decision,
         )
         run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
-        self._finish_turn_run(run, result_status=result.status, scope_decision=result.scope_decision)
+        self._finish_turn_run(
+            run,
+            result_status=result.status,
+            scope_decision=result.scope_decision,
+            replay=_replay_record(turn_input, result),
+        )
         return self._to_response(self.repository.get(agent_session.id) or agent_session)
 
     def get(self, session_id: int) -> AgentSessionResponse | None:
@@ -225,20 +260,21 @@ class AgentSessionService:
         acknowledged = list(agent_session.acknowledged_unknown_quantities)
         self.repository.end_read_transaction()
 
+        turn = {
+            "current": snapshot.constraints,
+            "acknowledged_unknowns": acknowledged,
+            "history": snapshot.messages[-self.max_history_messages :],
+            "current_status": snapshot.status,
+            "current_missing_fields": snapshot.missing_fields,
+            "current_questions": snapshot.clarification_questions,
+            "context_version": snapshot.context_version,
+            "pending_interaction": snapshot.pending_interaction,
+        }
+        turn_input = _replay_input(message, **turn)
         try:
-            result = self.orchestrator.process(
-                message,
-                current=snapshot.constraints,
-                acknowledged_unknowns=acknowledged,
-                history=snapshot.messages[-self.max_history_messages :],
-                current_status=snapshot.status,
-                current_missing_fields=snapshot.missing_fields,
-                current_questions=snapshot.clarification_questions,
-                context_version=snapshot.context_version,
-                pending_interaction=snapshot.pending_interaction,
-            )
+            result = self.orchestrator.process(message, **turn)
         except Exception as error:
-            self._fail_run(run, error)
+            self._fail_run(run, error, replay=_replay_record(turn_input, None))
             raise
         if not result.state_mutated:
             updated = self.repository.append_bounded_exchange(
@@ -249,7 +285,12 @@ class AgentSessionService:
             )
             if updated is None:
                 raise AgentSessionNotFoundError
-            self._finish_turn_run(run, result_status=result.status, scope_decision=result.scope_decision)
+            self._finish_turn_run(
+                run,
+                result_status=result.status,
+                scope_decision=result.scope_decision,
+                replay=_replay_record(turn_input, result),
+            )
             return self._to_response(updated)
         updated = self.repository.append_exchange(
             session_id,
@@ -266,7 +307,12 @@ class AgentSessionService:
         )
         if updated is None:
             raise AgentSessionNotFoundError
-        self._finish_turn_run(run, result_status=result.status, scope_decision=result.scope_decision)
+        self._finish_turn_run(
+            run,
+            result_status=result.status,
+            scope_decision=result.scope_decision,
+            replay=_replay_record(turn_input, result),
+        )
         return self._to_response(updated)
 
     def answer_interaction(
@@ -834,6 +880,7 @@ class AgentSessionService:
         result_status: str,
         scope_decision: ScopeDecision | None,
         has_preview: bool = False,
+        replay: dict | None = None,
     ) -> AgentRun:
         scope_payload = scope_decision.model_dump(mode="json") if scope_decision is not None else None
         run.scope_decision = scope_payload
@@ -848,6 +895,8 @@ class AgentSessionService:
                 "result_status": result_status,
                 "scope_reason_code": scope_decision.reason_code if scope_decision is not None else None,
                 "has_preview": has_preview,
+                # What the console needs to re-run this turn (ADR-0047); read only by /api/ops/replay.
+                **({"replay": replay} if replay is not None else {}),
             },
         )
         if scope_decision is not None and not scope_decision.should_mutate_state:
@@ -868,7 +917,7 @@ class AgentSessionService:
             )
         return self.run_lifecycle.transition(run, AgentRunStatus.COMMITTED, termination_reason_code="TURN_COMPLETED")
 
-    def _fail_run(self, run: AgentRun, error: Exception) -> AgentRun:
+    def _fail_run(self, run: AgentRun, error: Exception, *, replay: dict | None = None) -> AgentRun:
         current = self.run_lifecycle.repository.get(run.id) or run
         if AgentRunStatus(current.status) in {
             AgentRunStatus.NEEDS_CLARIFICATION,
@@ -880,6 +929,10 @@ class AgentSessionService:
             AgentRunStatus.CANCELLED,
         }:
             return current
+        if replay is not None:
+            current = self.run_lifecycle.checkpoint(
+                current, stage="turn_failed", status="failed", state_payload={"replay": replay}
+            )
         return self.run_lifecycle.transition(
             current,
             AgentRunStatus.FAILED,

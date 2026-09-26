@@ -230,7 +230,10 @@ def test_trace_contains_no_plaintext_health_profile(recipe_client):
     )
     assert response.status_code == 201
     _, trace = latest_trace()
-    encoded = json.dumps(trace)
+    # ADR-0047: the full request is kept on purpose under "request" so the console can replay the run
+    # (a saved plan already keeps it in meal_plans.constraints); the rest of the trace stays verdicts only.
+    assert trace["request"]["allergens"] == ["soy"]
+    encoded = json.dumps({key: value for key, value in trace.items() if key != "request"})
     assert '"soy"' not in encoded
     assert '"allergens"' not in encoded
     assert '"nutrition_targets"' not in encoded
