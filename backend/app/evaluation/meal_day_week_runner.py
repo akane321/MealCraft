@@ -58,7 +58,7 @@ PARAMETERS = {
     "pricing_mode": "fixture",
     "max_cooking_time_minutes_when_unstated": NO_TIME_LIMIT,
     "shape_change_today": "the week's first day, so every day is still ahead",
-    "per_day_nutrition": "sent as the product's horizon_average target, the day's bounds divided by its meals",
+    "per_day_nutrition": "sent as the product's per_day target",
     "nutrition_tolerance_relative": Tolerances().nutrition_relative,
 }
 
@@ -92,16 +92,11 @@ def plan_request(episode: dict) -> WeeklyMealPlanRequest:
     scenario = episode["scenario"]
     profile = scenario["household_profile"]
     hard = episode["gold"]["applicable_hard_constraints"]
-    meals_a_day = len(profile["plan_shape"]["meals"])
     targets = [
         {
             "metric": band["metric"],
-            "scope": "horizon_average",
-            **{
-                k: band[key] / meals_a_day
-                for k, key in (("lower", "min"), ("upper", "max"))
-                if band.get(key) is not None
-            },
+            "scope": "per_day",
+            **{k: band[key] for k, key in (("lower", "min"), ("upper", "max")) if band.get(key) is not None},
         }
         for band in hard["nutrition_bands"]
     ]

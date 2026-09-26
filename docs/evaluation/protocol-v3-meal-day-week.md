@@ -78,9 +78,9 @@ price is a fixture price.
    by the product's release importer.
 2. **The week.** `WeeklyMealPlanService.generate` plans the profile's shape and
    limits. A stated time limit applies to each meal; none stated is sent as the
-   product's widest, 240 minutes. The product request has no per-day nutrition
-   scope, so a per-day band is sent as its `horizon_average` target, the day's
-   bounds divided by the meals a day. A cap on uses has no request field; the
+   product's widest, 240 minutes. A per-day band is sent as the product's
+   `per_day` nutrition target (added after the first run, which had to send it as a
+   weekly average and missed it on some days). A cap on uses has no request field; the
    product avoids repeats by itself.
 3. **The change.** In a shape-change episode the words are read as the
    conversation reads them: one-dish events first, then the day, then

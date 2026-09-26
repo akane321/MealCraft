@@ -6,32 +6,32 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 
 | Category | Strict success | Failure mechanisms |
 | --- | ---: | --- |
-| meals_per_day | 2/3 | plan_present 1, status_matches_class 1 |
+| meals_per_day | 3/3 | - |
 | composition | 2/2 | - |
-| nutrition_per_day | 0/2 | nutrition_per_day 2 |
+| nutrition_per_day | 2/2 | - |
 | budget | 1/2 | plan_present 1, status_matches_class 1 |
-| safety_diet | 1/2 | plan_present 1, status_matches_class 1 |
+| safety_diet | 2/2 | - |
 | variety | 1/1 | - |
 | shape_change | 4/4 | - |
-| **all** | **11/16** | |
+| **all** | **15/16** | |
 
 | Episode | Category | Lang | Class | Answered | Success | Failed checks | Dishes | Distinct | Meal fit | Cost |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: |
 | mdw-dev-001 | meals_per_day | en | feasible | plan | yes | - | 21 | 21 | 21/21 | 286.64 |
 | mdw-dev-002 | meals_per_day | zh | feasible | plan | yes | - | 28 | 28 | 28/28 | 437.28 |
-| mdw-dev-003 | meals_per_day | en | feasible | infeasible | no | status_matches_class, plan_present | - | - | - | - |
+| mdw-dev-003 | meals_per_day | en | feasible | plan | yes | - | 21 | 20 | 21/21 | 410.21 |
 | mdw-dev-004 | composition | en | feasible | plan | yes | - | 28 | 28 | 28/28 | 506.55 |
 | mdw-dev-005 | composition | zh | feasible | plan | yes | - | 28 | 28 | 28/28 | 444.03 |
-| mdw-dev-006 | nutrition_per_day | en | feasible | plan | no | nutrition_per_day | 21 | 21 | 21/21 | 353.82 |
-| mdw-dev-007 | nutrition_per_day | zh | feasible | plan | no | nutrition_per_day | 28 | 28 | 28/28 | 419.11 |
+| mdw-dev-006 | nutrition_per_day | en | feasible | plan | yes | - | 21 | 18 | 21/21 | 318.03 |
+| mdw-dev-007 | nutrition_per_day | zh | feasible | plan | yes | - | 28 | 25 | 28/28 | 386.46 |
 | mdw-dev-008 | budget | en | feasible | infeasible | no | status_matches_class, plan_present | - | - | - | - |
 | mdw-dev-009 | budget | en | infeasible | infeasible | yes | - | - | - | - | - |
 | mdw-dev-010 | safety_diet | en | feasible | plan | yes | - | 28 | 28 | 26/28 | 407.66 |
-| mdw-dev-011 | safety_diet | zh | feasible | infeasible | no | status_matches_class, plan_present | - | - | - | - |
+| mdw-dev-011 | safety_diet | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 293.58 |
 | mdw-dev-012 | variety | en | feasible | plan | yes | - | 28 | 28 | 28/28 | 395.12 |
 | mdw-dev-013 | shape_change | en | feasible | plan | yes | - | 21 | 21 | 21/21 | 327.49 |
 | mdw-dev-014 | shape_change | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 322.97 |
-| mdw-dev-015 | shape_change | en | feasible | plan | yes | - | 15 | 15 | 15/15 | 397.85 |
+| mdw-dev-015 | shape_change | en | feasible | plan | yes | - | 15 | 15 | 15/15 | 387.62 |
 | mdw-dev-016 | shape_change | zh | feasible | plan | yes | - | 20 | 20 | 20/20 | 326.36 |
 
 ## Parameters
@@ -40,7 +40,7 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 - pricing_mode: fixture
 - max_cooking_time_minutes_when_unstated: 240
 - shape_change_today: the week's first day, so every day is still ahead
-- per_day_nutrition: sent as the product's horizon_average target, the day's bounds divided by its meals
+- per_day_nutrition: sent as the product's per_day target
 - nutrition_tolerance_relative: 0.02
 
 Counts only, no rates (ADR-0028).

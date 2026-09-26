@@ -33,5 +33,5 @@ def test_product_explicit_scope_and_invalid_scope(recipe_client):
     response = recipe_client.post("/api/plans/generate", json=request)
     assert response.status_code == 201
     assert any("each planned meal" in note for note in response.json()["warnings"])
-    request["nutrition_constraints"][0]["scope"] = "per_day"
+    request["nutrition_constraints"][0]["scope"] = "per_week"
     assert recipe_client.post("/api/plans/generate", json=request).status_code == 422

@@ -114,7 +114,7 @@ def test_optional_slot_uses_selected_denominator_and_does_not_make_unsafe_bound(
         {"upper": float("inf")},
         {"upper": float("nan")},
         {"upper": -1},
-        {"upper": 500, "scope": "per_day"},
+        {"upper": 500, "scope": "per_week"},
     ],
 )
 def test_invalid_target_rejected(values):

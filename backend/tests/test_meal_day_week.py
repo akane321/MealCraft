@@ -56,3 +56,13 @@ def test_the_product_adds_a_soup_to_one_dinner_and_keeps_the_rest():
     moved["before"]["mon-dinner"] = {"main": "RCP2_NOT_THIS_ONE"}
     codes = {c.code: c.outcome for c in v3_checks(episode, response, moved, scorer_catalogs(episode))}
     assert codes == {"shape_request_understood": "passed", "unchanged_meals_identical": "failed"}
+
+
+def test_a_daily_target_is_a_hard_day_band_and_a_soft_meal_guide():
+    from app.planning.nutrition_scope import compile_nutrition_targets
+    from app.schemas.planning_nutrition import ProductNutritionTarget
+
+    target = ProductNutritionTarget(metric="calories_kcal", lower=900, upper=1500, scope="per_day")
+    day, meal = compile_nutrition_targets([target], 0.25, meals_per_day=3)
+    assert (day.scope, day.hard, day.lower, day.upper) == ("per_day", True, 900, 1500)
+    assert (meal.scope, meal.hard, meal.lower, meal.upper) == ("per_slot", False, 225, 625)

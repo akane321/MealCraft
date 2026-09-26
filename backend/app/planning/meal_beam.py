@@ -211,7 +211,13 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         require_finite_problem(problem)
         states = [MealState()]
         expansions, pruned, exhausted, empty = 0, False, False, []
-        for slot in sorted(problem.slots, key=self._slot_key):
+        ordered = sorted(problem.slots, key=self._slot_key)
+        day_closes = {
+            slot.slot_id
+            for slot, after in zip(ordered, [*ordered[1:], None], strict=True)
+            if after is None or after.planned_date != slot.planned_date
+        }
+        for slot in ordered:
             options = self.meal_options(problem, slot)
             must_assign = slot.required or slot.locked_recipe_id is not None
             if not options and must_assign:
@@ -244,6 +250,9 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 break
             remaining = len(problem.slots) - len(next_states[0].choices) if next_states else 0
             next_states = [s for s in next_states if requests_reachable(problem, s, remaining)]
+            # A day over a stated daily ceiling never comes back under it; one below its floor
+            # is final once its last meal is planned (ADR-0046 section 3).
+            next_states = [s for s in next_states if day_permitted(problem, s, slot, slot.slot_id in day_closes)]
             budget = problem.purchase_budget_sgd if problem.budget_is_hard else None
             spend: dict[tuple, float] = {}
             if budget is not None:
@@ -511,6 +520,29 @@ def request_progress(problem, state: MealState) -> int:
 def requests_reachable(problem, state: MealState, remaining_slots: int) -> bool:
     """Each stated minimum can still be met in the meals left (one use per meal at most)."""
     return all(deficit <= remaining_slots for deficit in _deficits(problem, state))
+
+
+def day_permitted(problem, state: MealState, slot, day_closed: bool) -> bool:
+    """The hard per-day nutrition bands on `slot`'s day so far: ceilings always, floors once it is closed."""
+    bands = [band for band in problem.nutrition_bands if band.hard and band.scope == "per_day"]
+    if not bands:
+        return True
+    slots = {item.slot_id: item for item in problem.slots}
+    recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
+    meals = [dishes for slot_id, dishes in state.choices if slots[slot_id].planned_date == slot.planned_date]
+    for band in bands:
+        total = 0.0
+        for dishes in meals:
+            shares = portion_shares(problem.composition_policy, [role or MAIN_ROLE for role, _ in dishes]) or {}
+            total += sum(
+                float(shares.get(role or MAIN_ROLE, 1)) * getattr(recipes[recipe_id].nutrients_per_serving, band.metric)
+                for role, recipe_id in dishes
+            )
+        if band.upper is not None and total - band.upper > 1e-6:
+            return False
+        if day_closed and band.lower is not None and band.lower - total > 1e-6:
+            return False
+    return True
 
 
 def horizon_permitted(problem, state: MealState, dishes) -> bool:
