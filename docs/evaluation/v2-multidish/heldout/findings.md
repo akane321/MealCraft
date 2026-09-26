@@ -90,8 +90,9 @@ on the held-out set.
 `temperature=0` does not make the model repeatable. Across four passes of the
 vocabulary prompt, `A` and `B` pass 35 episodes every time and 40 at least once;
 `D` passes 8 every time and 25 at least once. A gap of a few episodes between live
-arms is therefore not a difference. Paired statistics over repeated runs remain
-open work (`ADR-0028`).
+arms is therefore not a difference. Paired statistics over the recorded runs are in
+`paired.md` (`scripts/paired_multidish.py`): exact McNemar on run 4 for six comparisons
+fixed in advance, and per-episode pass shares over the four live passes.
 
 ## D, the model planning by itself
 
