@@ -18,10 +18,15 @@ MEAL_COURSES = ("main", "soup")
 
 
 @cache
-def withdrawn_slugs() -> tuple[str, ...]:
-    """Recipes kept in the catalog but never planned (data/recipes/withdrawn.json)."""
+def withdrawn_reasons() -> dict[str, str]:
+    """Recipes kept in the catalog but never planned (data/recipes/withdrawn.json), with the reason; the
+    console withdraws more with `Recipe.withdrawn_at`."""
     path = repository_root() / "data/recipes/withdrawn.json"
-    return tuple(item["slug"] for item in json.loads(path.read_text(encoding="utf-8"))["recipes"])
+    return {item["slug"]: item["reason"] for item in json.loads(path.read_text(encoding="utf-8"))["recipes"]}
+
+
+def withdrawn_slugs() -> tuple[str, ...]:
+    return tuple(withdrawn_reasons())
 
 
 # Planning candidates by (database, courses): loading ~5,000 recipes with their lines takes seconds,
@@ -108,7 +113,7 @@ class RecipeRepository:
             .options(selectinload(Recipe.steps))  # read when a plan is saved
             .where(or_(Recipe.course.is_(None), Recipe.course.in_(courses or MEAL_COURSES)))
             .where(or_(Recipe.release_version.is_(None), ~exists(unmatchable_line)))
-            .where(Recipe.slug.not_in(withdrawn_slugs()))
+            .where(Recipe.slug.not_in(withdrawn_slugs()), Recipe.withdrawn_at.is_(None))
             .order_by(Recipe.id)
         )
         # A release recipe that lost a line still lists, but never becomes a planned dinner.

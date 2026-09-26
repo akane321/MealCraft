@@ -167,3 +167,74 @@ export interface OpsServiceCheck {
   detail: string;
   checked_at: string;
 }
+
+// --- Slice 3: Data (recipes, ingredients, product mappings). ---
+
+export interface OpsRecipe {
+  id: number;
+  slug: string;
+  title: string;
+  course: string | null;
+  meal_types: string[] | null;
+  dietary_tags: string[];
+  release_version: string | null;
+  /** "file": data/recipes/withdrawn.json; "console": withdrawn here. */
+  withdrawn: "file" | "console" | null;
+  withdrawn_reason: string | null;
+}
+
+export interface OpsRecipeIngredient {
+  ingredient_id: number;
+  name: string;
+  normalized_name: string;
+  quantity: number | null;
+  unit: string | null;
+  preparation: string | null;
+  original_text: string | null;
+}
+
+export interface OpsRecipeDetail extends OpsRecipe {
+  description: string;
+  cuisine: string;
+  servings: number;
+  prep_time_minutes: number;
+  cook_time_minutes: number;
+  allergens: string[] | null;
+  nutrition: Record<string, number> | null;
+  ingredients: OpsRecipeIngredient[];
+  steps: string[];
+  withdrawn_at: string | null;
+}
+
+export interface OpsIngredient {
+  id: number;
+  normalized_name: string;
+  display_name: string;
+  zh_names: string[];
+  aliases: string[];
+  allergens: string[];
+  recipes: number;
+}
+
+export interface OpsMappedProduct {
+  external_id: string;
+  name: string;
+  brand: string | null;
+  category: string | null;
+  package_grams: number;
+  package_grams_basis: string | null;
+  price_sgd: number;
+  product_url: string;
+  in_stock: boolean;
+  query: string;
+  fetched_at: string;
+}
+
+export interface OpsProductMapping {
+  ingredient: string;
+  display_name: string | null;
+  status: "mapped" | "not_purchased" | "removed";
+  review_status: string | null;
+  products: OpsMappedProduct[];
+  source: "file" | "console";
+}

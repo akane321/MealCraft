@@ -281,3 +281,119 @@ class OpsUserUpdate(BaseModel):
 
 class OpsDeleted(BaseModel):
     deleted: int
+
+
+# --- Slice 3: Data (recipes, ingredients, product mappings) ---
+
+DataCourse = Literal[
+    "main",
+    "soup",
+    "side",
+    "salad",
+    "dessert",
+    "breakfast",
+    "sauce_condiment",
+    "baked_good",
+    "snack_appetizer",
+    "drink",
+]
+DataMealType = Literal["breakfast", "lunch", "dinner", "snack"]
+DataDietaryTag = Literal["vegetarian", "vegan", "dairy-free", "gluten-free", "high-protein", "high-fibre"]
+
+
+class OpsRecipeSummary(BaseModel):
+    id: int
+    slug: str
+    title: str
+    course: str | None
+    meal_types: list[str] | None
+    dietary_tags: list[str]
+    release_version: str | None
+    # "file" (data/recipes/withdrawn.json, restored there) or "console"; None while plannable.
+    withdrawn: Literal["file", "console"] | None
+    withdrawn_reason: str | None
+
+
+class OpsRecipeCollection(BaseModel):
+    items: list[OpsRecipeSummary]
+    total: int
+
+
+class OpsRecipeDetail(OpsRecipeSummary):
+    description: str
+    cuisine: str
+    servings: int
+    prep_time_minutes: int
+    cook_time_minutes: int
+    allergens: list[str] | None
+    nutrition: dict[str, float] | None
+    ingredients: list[dict[str, Any]]
+    steps: list[str]
+    withdrawn_at: datetime | None
+
+
+class OpsRecipeUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    dietary_tags: list[DataDietaryTag] | None = None
+    course: DataCourse | None = None
+    meal_types: list[DataMealType] | None = None
+
+
+class OpsRecipeWithdrawal(BaseModel):
+    reason: str = Field(min_length=1, max_length=500)
+
+
+class OpsIngredient(BaseModel):
+    id: int
+    normalized_name: str
+    display_name: str
+    zh_names: list[str]
+    aliases: list[str]
+    # Rule-derived (app/data/allergens.py); shown, never edited here.
+    allergens: list[str]
+    recipes: int
+
+
+class OpsIngredientCollection(BaseModel):
+    items: list[OpsIngredient]
+    total: int
+
+
+class OpsIngredientUpdate(BaseModel):
+    display_name: str | None = Field(default=None, min_length=1, max_length=160)
+    zh_names: list[str] | None = Field(default=None, max_length=30)
+    aliases: list[str] | None = Field(default=None, max_length=30)
+
+
+class OpsMappedProduct(BaseModel):
+    external_id: str = Field(min_length=1, max_length=60)
+    name: str = Field(min_length=1, max_length=300)
+    brand: str | None = Field(default=None, max_length=160)
+    category: str | None = Field(default=None, max_length=160)
+    # The package expressed in grams of the ingredient: the estimator prices by it.
+    package_grams: float = Field(gt=0, le=100_000)
+    package_grams_basis: str | None = Field(default=None, max_length=200)
+    price_sgd: float = Field(ge=0, le=10_000)
+    product_url: str = Field(min_length=1, max_length=500)
+    in_stock: bool = True
+    query: str = Field(min_length=1, max_length=100)
+    fetched_at: datetime
+
+
+class OpsProductMapping(BaseModel):
+    ingredient: str
+    display_name: str | None
+    status: Literal["mapped", "not_purchased", "removed"]
+    review_status: str | None
+    products: list[OpsMappedProduct]
+    # "file" (the reviewed snapshot) or "console" (changed or removed here).
+    source: Literal["file", "console"]
+
+
+class OpsProductMappingCollection(BaseModel):
+    items: list[OpsProductMapping]
+    total: int
+
+
+class OpsProductMappingChange(BaseModel):
+    product: OpsMappedProduct

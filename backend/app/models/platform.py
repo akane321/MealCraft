@@ -249,3 +249,23 @@ class RuntimeSetting(Base):
         nullable=True,
     )
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CatalogOverride(Base):
+    """A console edit over the file-based catalog knowledge (ADR-0047 Data); see app/data/overrides.py.
+
+    kind "aliases" or "zh_names": a list of names for one ingredient; kind "product_mapping": one
+    ingredient's FairPrice mapping entry, {"status": "removed"} when the console removed it.
+    """
+
+    __tablename__ = "catalog_overrides"
+
+    kind: Mapped[str] = mapped_column(String(40), primary_key=True)
+    key: Mapped[str] = mapped_column(String(160), primary_key=True)
+    value: Mapped[object] = mapped_column(JSON)
+    updated_by_user_id: Mapped[int | None] = mapped_column(
+        BIGINT_ID,
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

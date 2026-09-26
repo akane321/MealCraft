@@ -20,7 +20,7 @@ export const OPS_MODULES: OpsModule[] = [
   { slug: "tasks", label: "Tasks", path: "/ops/tasks", blurb: "Every conversation and planning run with what it stored.", ready: true },
   { slug: "debugging", label: "Debugging", path: "/ops/debugging", blurb: "Replay one task through the current code or other settings and compare the two results side by side.", ready: true },
   { slug: "services", label: "Services", path: "/ops/services", blurb: "OpenAI, FairPrice and YouTube: configuration, recent failures and a live check.", ready: true },
-  { slug: "data", label: "Data", path: "/ops/data", blurb: "Browse and edit recipes, ingredients and product mappings.", ready: false },
+  { slug: "data", label: "Data", path: "/ops/data", blurb: "Browse and edit recipes, ingredients and product mappings.", ready: true },
   { slug: "experiments", label: "Experiments & config", path: "/ops/experiments", blurb: "Runtime switches, evaluation runs and A/B comparisons of two configurations.", ready: true },
   { slug: "users", label: "Users", path: "/ops/users", blurb: "Accounts, households, profiles, conversations and plans.", ready: true },
 ];
@@ -153,4 +153,23 @@ export function compareMetrics(a: Record<string, unknown>, b: Record<string, unk
     const delta = typeof left === "number" && typeof right === "number" ? Math.round((right - left) * 10_000) / 10_000 : null;
     return { metric, a: left, b: right, delta };
   });
+}
+
+// --- Slice 3: Data. The same vocabularies the backend accepts (app/schemas/operations.py). ---
+
+export const DATA_COURSES = ["main", "soup", "side", "salad", "dessert", "breakfast", "sauce_condiment", "baked_good", "snack_appetizer", "drink"];
+export const DATA_MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"];
+export const DATA_TAGS = ["vegetarian", "vegan", "dairy-free", "gluten-free", "high-protein", "high-fibre"];
+
+/** Names typed one per line or separated by commas (English or Chinese), trimmed, blanks and repeats dropped. */
+export function splitNames(text: string) {
+  return [...new Set(text.split(/[\n,，、]/).map(name => name.trim()).filter(Boolean))];
+}
+
+const GRAMS: Record<string, number> = { g: 1, kg: 1000 };
+
+/** A search result's package in grams when its unit is a weight; otherwise null, for the reviewer to enter. */
+export function packageGrams(size: number | null, unit: string | null) {
+  const factor = GRAMS[(unit ?? "").toLowerCase()];
+  return size && factor ? Math.round(size * factor * 1000) / 1000 : null;
 }

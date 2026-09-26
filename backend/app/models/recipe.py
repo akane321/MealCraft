@@ -57,6 +57,10 @@ class Recipe(Base):
     allergens: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     source: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     video_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    # Withdrawn from the operations console: still browsable, never planned. The reviewed list in
+    # data/recipes/withdrawn.json is withdrawn as well (app/repositories/recipe.py).
+    withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    withdrawn_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

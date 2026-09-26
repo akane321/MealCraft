@@ -4,6 +4,7 @@ from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent, MealPla
 from app.models.platform import (
     AuditEvent,
     AuthSession,
+    CatalogOverride,
     Household,
     HouseholdMembership,
     OperationRun,
@@ -23,6 +24,7 @@ __all__ = [
     "AuditEvent",
     "AuthSession",
     "CatalogImport",
+    "CatalogOverride",
     "Household",
     "HouseholdProfile",
     "HouseholdProfileVersion",

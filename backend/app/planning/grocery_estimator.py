@@ -6,6 +6,7 @@ from difflib import SequenceMatcher
 from functools import lru_cache
 
 from app.core.paths import data_root
+from app.data.overrides import overrides
 from app.data.units import UNIT_BASE
 from app.models.recipe import Recipe
 from app.schemas.product import GroceryEstimateResponse, GroceryLineEstimate, PriceEvidence, ProductResponse
@@ -40,8 +41,8 @@ RELEASE_SNAPSHOT_FILE = "products/fairprice-v2-snapshot.json"
 
 
 @lru_cache
-def release_products() -> dict[str, dict]:
-    """The reviewed FairPrice mapping for release ingredients, by normalized name.
+def release_snapshot() -> dict[str, dict]:
+    """The reviewed FairPrice mapping for release ingredients as the file has it, by normalized name.
 
     Built by `data-engineering/scripts/fairprice_mapping.py export`. Each entry is
     `mapped` (products with their package expressed in grams of the ingredient) or
@@ -57,6 +58,13 @@ def release_products() -> dict[str, dict]:
         for product in entry.get("products", []):
             product["price_sgd"] = round(product["price_sgd"], 2)
     return ingredients
+
+
+@lru_cache
+def release_products() -> dict[str, dict]:
+    """The mapping in use: the file with the operations console's changes; a removed entry is left out."""
+    merged = {**release_snapshot(), **overrides("product_mapping")}
+    return {name: entry for name, entry in merged.items() if entry["status"] != "removed"}
 
 
 def priceable_ingredients() -> frozenset[str]:

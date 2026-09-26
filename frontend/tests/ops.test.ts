@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { compareMetrics, diffFields, dishRows, formatSeconds, formatValue, isConsoleAccount, linePath, niceMax, parseTaskKey, statusesIn } from "../app/lib/ops";
+import { compareMetrics, diffFields, dishRows, formatSeconds, formatValue, isConsoleAccount, linePath, niceMax, packageGrams, parseTaskKey, splitNames, statusesIn } from "../app/lib/ops";
 
 describe("ops console slice 2 helpers", () => {
   it("lists changed fields first and compares values, not references", () => {
@@ -73,5 +73,19 @@ describe("ops console helpers", () => {
     expect(formatSeconds(null)).toBe("—");
     expect(parseTaskKey("planning-12")).toEqual({ kind: "planning", id: 12 });
     expect(parseTaskKey("evil-1")).toBeNull();
+  });
+});
+
+describe("ops console slice 3 helpers", () => {
+  it("splits typed names on lines and commas, Chinese ones too", () => {
+    expect(splitNames("老豆腐、豆腐\n firm tofu ,beancurd，豆腐\n\n")).toEqual(["老豆腐", "豆腐", "firm tofu", "beancurd"]);
+    expect(splitNames("  ")).toEqual([]);
+  });
+
+  it("reads a package in grams only from a weight", () => {
+    expect(packageGrams(500, "g")).toBe(500);
+    expect(packageGrams(1.2, "KG")).toBe(1200);
+    expect(packageGrams(1, "l")).toBeNull();
+    expect(packageGrams(null, "g")).toBeNull();
   });
 });

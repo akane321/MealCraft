@@ -17,6 +17,7 @@ from app.models.meal_plan import MealPlan
 from app.models.platform import (
     AuditEvent,
     AuthSession,
+    CatalogOverride,
     OperationRun,
     RuntimeSetting,
     User,
@@ -149,6 +150,7 @@ class UsersService:
             (OperationRun, OperationRun.triggered_by_user_id),
             (AuditEvent, AuditEvent.actor_user_id),
             (RuntimeSetting, RuntimeSetting.updated_by_user_id),
+            (CatalogOverride, CatalogOverride.updated_by_user_id),
         ):
             self.database.execute(update(model).where(column == user.id).values({column.key: None}))
         self._audit(

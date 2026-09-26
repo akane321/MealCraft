@@ -21,6 +21,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from app.core.paths import find_repository_root
+from app.data.overrides import overrides
 
 VECTORS = "data/ingredients/embeddings-v1.json"
 ALIASES = "data/ingredients/aliases-v1.json"  # model-generated other names, suggestions only
@@ -121,15 +122,24 @@ def catalog_embedder(api_key: str) -> Embed | None:
     return client.embed_documents
 
 
+@lru_cache(maxsize=2)
+def alias_file(name: str) -> dict[str, list[str]]:
+    """One alias file as it is on disk: catalog id -> names."""
+    path = find_repository_root(Path(__file__).parent) / name
+    return json.loads(path.read_text(encoding="utf-8"))["aliases"] if path.exists() else {}
+
+
+def names_of(kind: str) -> dict[str, list[str]]:
+    """Other names ("aliases") or Chinese names ("zh_names") per catalog id, with the console's edits."""
+    return {**alias_file(ALIASES if kind == "aliases" else ZH_ALIASES), **overrides(kind)}
+
+
 @lru_cache(maxsize=1)
 def catalog_aliases() -> dict[str, list[str]]:
     """Other names per catalog id: aliases-v1.json, plus the Chinese names (a short Chinese word such as
     茄子 embeds poorly, so an exact name is what finds it)."""
-    root = find_repository_root(Path(__file__).parent)
     merged: dict[str, list[str]] = {}
-    for name in (ALIASES, ZH_ALIASES):
-        path = root / name
-        if path.exists():
-            for key, values in json.loads(path.read_text(encoding="utf-8"))["aliases"].items():
-                merged[key] = list(dict.fromkeys([*merged.get(key, []), *values]))
+    for kind in ("aliases", "zh_names"):
+        for key, values in names_of(kind).items():
+            merged[key] = list(dict.fromkeys([*merged.get(key, []), *values]))
     return merged
