@@ -542,3 +542,19 @@ test("asking for lunch too previews the new meals, then asks whether to keep it"
   await page.getByRole("button", { name: "Keep it as our usual" }).click();
   await expect.poll(() => answer?.option_ids).toEqual(["keep"]);
 });
+
+test("a dish's own buttons put the change into words for the assistant", async ({ page }) => {
+  await stubApi(page);
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+
+  const week = page.getByRole("complementary", { name: "This week" });
+  const actions = week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" });
+  await actions.getByRole("button", { name: "Keep" }).click();
+  await expect(page.getByLabel("Message MealCraft")).toHaveValue(/^Lock \w+day's Tofu Brown Rice Stir-fry$/);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/16-dish-actions.png` });
+  // A cooked dinner offers nothing to change.
+  await expect(week.getByRole("group", { name: "Change Lemon Herb Chicken Rice Bowl" })).toHaveCount(0);
+});

@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db_session
 from app.repositories.recipe import RecipeRepository
+from app.schemas.planning_v2 import DishCourse
 from app.schemas.recipe import RecipeCollectionResponse, RecipeDetailResponse
 from app.schemas.retrieval import TutorialRecommendationResponse
 from app.services.recipe import RecipeService
@@ -34,8 +35,10 @@ def list_recipes(
     service: RecipeServiceDependency,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     after_id: Annotated[int | None, Query(ge=0)] = None,
+    q: Annotated[str | None, Query(max_length=100)] = None,
+    course: Annotated[DishCourse | None, Query()] = None,
 ) -> RecipeCollectionResponse:
-    return service.list_recipes(after_id=after_id, limit=limit)
+    return service.list_recipes(after_id=after_id, limit=limit, query=q, course=course)
 
 
 @router.get("/{slug}", response_model=RecipeDetailResponse)
