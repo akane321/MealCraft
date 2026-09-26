@@ -58,6 +58,8 @@ function cooked(plan: WeeklyMealPlan) {
   return plan.days.filter(dish => dish.status === "completed").length;
 }
 
+// Several plans can cover the same week; when each was made tells them apart.
+const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 const range = (start: string, end: string) => `${formatPlanDate(start, { day: "numeric", month: "short" })} – ${formatPlanDate(end, { day: "numeric", month: "short" })}`;
 </script>
 
@@ -75,6 +77,7 @@ const range = (start: string, end: string) => `${formatPlanDate(start, { day: "n
         <button type="button" class="summary" :aria-expanded="open === week.id" @click="toggle(week.id)">
           <span class="when mc-serif">{{ range(week.start_date, week.end_date) }}</span>
           <span class="meta">
+            planned {{ plannedAt(week.created_at) }} ·
             {{ week.household_size }} {{ week.household_size === 1 ? "person" : "people" }} ·
             groceries {{ formatSgd(week.purchase_total_sgd) }}
             <template v-if="week.within_weekly_budget === false"> · over budget</template>
