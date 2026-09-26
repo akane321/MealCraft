@@ -49,16 +49,17 @@ Those operations remain deterministic and testable.
 
 | Capability | Current implementation |
 | --- | --- |
-| Home surface | One page for everything: a film entry that becomes a conversation, the week and tonight's Top-1 tutorial on one edge, cooked nutrition and the Shopping List on the other, recipe and six-nutrient detail overlays, and a printable Shopping List exported through the browser |
+| Home surface | A film entry that becomes a three-column workspace: navigation and recent conversations, the conversation, and the week by day and meal with the next meal's tutorial, the Shopping List and nutrition; recipe and six-nutrient overlays, per-dish change buttons, and a printable Shopping List. Recipe and grocery search (`/browse`) and past weeks (`/history`) have their own pages |
 | Household profile | One shared household profile with member servings, safety constraints, shared defaults, and immutable versions |
 | Accounts, sessions, and tenancy | Authentication, revocable browser sessions, CSRF, household-scoped private data and per-action household authorization. See [Current Status](docs/current-status.md) for what remains |
 | Planning assistant | Persistent English/Chinese conversations, bounded scope routing, structured constraints and clarification controls, confirmation, and tool delegation |
-| Weekly planning | Persisted seven-day main-meal plans with hard filtering, soft ranking, diversity control, and per-person nutrition |
+| Weekly planning | Seven days of the meals each household chose (breakfast, lunch, dinner; dinner only by default), each meal of one or several dishes, with hard filtering, soft ranking, variety across the week, per-meal and per-day nutrition, and changes to meals and dishes by asking |
 | Grocery grounding | FairPrice product lookup with normalized packages, PostgreSQL cache, and reproducible fixtures |
 | Shopping List | Consolidated ingredient demand, known-quantity pantry deduction, package rounding, and budget results |
 | Plan execution | `planned`, `completed`, and `skipped` check-in states |
 | Nutrition | Cumulative per-person actuals against the current plan for six nutrients, with labelled daily detail, counting cooked MealCraft dishes only |
-| Replanning | Revision-safe preview, confirmation or discard, local meal changes, Shopping List deltas, and event history |
+| Replanning | Revision-safe preview, confirmation or discard, single-dish changes and meal/dish shape changes that replan only the affected meals, Shopping List deltas, and event history |
+| Operations console | `/ops` for fixed admin accounts: overview charts, task records, service health, replay, runtime settings and experiments, users and catalog data, with an audit history |
 | Agent runs | Synchronous per-action `AgentRun` with input digests, explicit deadlines and budgets, durable checkpoints, ordered tool receipts, idempotent replay, and run list/detail/cancel APIs |
 | Evaluation | Versioned developer, held-out, Agent, scope and grounding fixtures; greedy and strong Rule-only references; matched-information v2 developer packets; a Strict End-to-End Task Success scorer and common output schema that recompute rather than trust claims (tested, not yet called by an evaluation runner); held-out episode authoring, compilation and freeze tooling; failure registry; frontend state and browser tests |
 

@@ -2,9 +2,11 @@
 
 ## What the Current Application Does
 
-The current application supports a complete local workflow from household
-preferences to a persisted seven-day plan, FairPrice-shaped Shopping List,
-MealCraft-only nutrition tracking, and previewed meal changes.
+The current application supports a complete local workflow: household
+preferences, a persisted week of the meals the household chose (several dishes a
+meal where wanted), a FairPrice-shaped Shopping List, MealCraft-only nutrition
+tracking, and previewed changes to single dishes or to the shape of the week.
+Administrators have a separate operations console.
 
 This guide describes the verified local application. Capabilities described as
 future design targets in [Project Guide](project-guide.md) may not yet appear in
@@ -18,19 +20,27 @@ then open <http://localhost:3000>. The health endpoint at
 
 ## Recommended Product Walkthrough
 
-Everything below happens on the home page at <http://localhost:3000>. Besides
-it there are only three pages: `/login`, `/profile` (the household settings
-behind the avatar) and `/system` (service status).
+The week happens on the home page at <http://localhost:3000>. The other pages
+are `/login`, `/profile` (the household), `/browse` (recipes and groceries),
+`/history` (past weeks), `/system` (service status) and, for administrators,
+`/ops`. The left rail and the header of every other page link to them.
 
 ### 1. Sign in and set up the household
 
 The home page asks you to sign in before the first message and brings you back
 afterwards; <http://localhost:3000/login> also registers a new account, and each
-new account receives its own household. The avatar opens the household profile.
+new account receives its own household. **Household** in the rail opens the
+profile.
 
 Record household members and servings, then configure shared defaults such as
 budget, maximum cooking time, general preferences, optional user-entered
 nutrition targets, and existing ingredients.
+
+Under **Meals and dishes**, tick the meals each day plans (breakfast, lunch,
+dinner; dinner only by default) and pick each meal's dishes: a preset (dinner
+defaults to one main and one vegetable) or your own mix of mains, vegetables and
+a soup, up to six dishes. A dish marked "if one fits" is left out when nothing
+suits it.
 
 Important semantics:
 
@@ -43,75 +53,95 @@ Important semantics:
 - only known, unit-compatible pantry quantities may reduce purchase demand;
 - an ingredient without a quantity influences ranking only.
 
-A week generated from the profile page shows up on the home page.
-
 ### 2. Plan the week in the conversation
 
-Type what the week should look like, in English or Chinese. The page turns into
-a conversation: the assistant extracts structured constraints and asks a focused
-question when something is missing. Household-size and pantry-quantity questions
-may appear as buttons; each answer is tied to the displayed conversation
-version, so a stale choice cannot overwrite newer constraints. When the details
-are complete, **Plan my week** generates seven dinners.
+Type what the week should look like, in English or Chinese. The assistant
+extracts structured constraints and asks a focused question when something is
+missing; some questions offer buttons. When the details are complete, **Plan my
+week** plans every chosen meal of the seven days.
 
 MealCraft handles meal planning, recipes, groceries, budgets and explicit
 dietary constraints. Social, unrelated, disease-treatment and
 instruction-bypassing requests receive a scope boundary and do not change
-planning state; for a mixed request only the supported segment is processed. The
-assistant does not calculate prices or decide allergen safety itself; it hands
-the confirmed request to deterministic services.
+planning state. The assistant does not calculate prices or decide allergen
+safety itself; it hands the confirmed request to deterministic services.
 
-The default fixture parser works without an API key. Model-based parsing is an
-explicit local configuration described in [Development](development.md).
+The fixture parser works without an API key. With the OpenAI parser configured
+(see [Development](development.md)), a model reads the message; if it does not
+answer in time, the reply says so and the rule parser reads it instead.
 
-### 3. The week, recipes and tutorials (left edge)
+### 3. The week, recipes and tutorials (right panel)
 
-Move the pointer to the left edge, or choose **See the week**. The panel lists
-the seven dinners with calories, time and status, and tonight's dinner with a
-how-to video when one matches the dish. Choosing a dish, or **Recipe & steps**,
-opens its ingredients, allergen labels and steps. **Mark as cooked** records the
-dinner. The conversation moves aside while a panel is open, and the pin button
-keeps it open.
+The right panel shows the next meal to cook ("Tonight", "Today's lunch" or
+"Next up"), then the **Meals** tab: every day and meal with its dishes, time and
+calories. Choosing a dish, or **Recipe & steps**, opens its ingredients,
+allergen labels, steps and a how-to video when a key for YouTube is configured.
+**Mark as cooked** records a whole meal.
 
-Tutorials currently come from a small sample set and are labelled as samples;
-most dishes say that no video is available yet.
+Each dish still to cook offers **Swap**, **Keep**, **Skip** and **Can't buy…**.
+Each fills the conversation with a sentence the assistant understands, so the
+change is previewed before anything happens.
 
-### 4. Nutrition and the shopping list (right edge)
+### 4. Nutrition and the shopping list
 
-Move the pointer to the right edge, or choose **Groceries & nutrition**.
+The **Groceries** tab shows the total against the weekly budget. The price label
+says where prices came from: FairPrice with the date they were fetched, prices
+saved earlier when FairPrice did not respond, or sample prices. An ingredient
+FairPrice does not stock is listed as not priced. **Preview list** shows the
+sheet as it will print; **Export PDF** opens the browser's print dialog.
 
-Nutrition leads with what has actually been eaten: only dinners marked cooked
-count as actuals. **All six nutrients & daily detail** opens the full view:
-calories, protein, carbohydrate, fat, sodium and sugar per person, a cumulative
-curve comparing cooked dinners with the current plan, and a daily table that
-labels each dinner as actual, planned or not counted. Each dinner can be marked
-cooked, skipped, or back to planned there. MealCraft does not know about food
-eaten elsewhere, so this is not complete dietary monitoring.
+The **Nutrition** tab leads with what has been eaten: only meals marked cooked
+count as actuals, shown per meal and per day. The full view has all six
+nutrients per person, a cumulative curve against the plan, and a daily table;
+each dish can be marked cooked, skipped or back to planned there. MealCraft does
+not know about food eaten elsewhere, so this is not complete dietary monitoring.
 
-The shopping list shows the total against the weekly budget and the costliest
-lines. The price label says where prices came from: FairPrice with the date they
-were fetched, prices saved earlier when FairPrice did not respond, or sample
-prices. An ingredient FairPrice does not stock is listed as not priced rather
-than given a made-up price. **Preview list** shows the sheet as it will print;
-**Export PDF** opens the browser's print dialog, where you can save it as a PDF.
+### 5. Change the week
 
-### 5. Change a dinner
+Ask in the conversation. Two kinds of change are understood:
 
-Ask in the conversation, for example to replace Friday's dinner. The change is
-first shown as a preview: the replacement recipe, the calorie and grocery
-differences, and that other dinners are unchanged. **Confirm change** applies
-it and updates the plan revision; **Keep as is** discards it. Completed and
-locked dinners are protected, and a stale preview is rejected after another
-confirmed change.
+- **One dish**: "replace Friday's dinner", "lock tomorrow's lunch", "skip
+  Sunday", "I can't buy salmon". If a meal has several dishes, the assistant
+  asks which one.
+- **The shape of the week**: "also plan lunch", "no breakfast", "dinners with a
+  soup", "add a soup on Friday", "今晚不要配菜". Only the meals affected are
+  planned again, with the budget the rest of the week leaves; adding a dish keeps
+  the meal's other dishes, and taking one away keeps the rest at a larger share.
+
+Every change is shown as a preview first, with the new dishes and the grocery
+difference. **Confirm change** applies it; **Keep as is** discards it. Cooked
+and locked meals never change, and a stale preview is rejected after another
+confirmed change. A week-wide shape change applies to this week only; the
+assistant then asks whether new weeks should plan the same way, and saves it to
+the profile only if you say so.
+
+### 6. Browse and look back
+
+`/browse` searches recipes by title and course, and FairPrice products from
+saved or live prices. `/history` lists every planned week; open one to see its
+days, meals and what was cooked.
+
+## The Operations Console
+
+Administrators are fixed accounts listed in the local `.env` as
+`ADMIN_ACCOUNTS=email:password:Name;email2:password2:Name2` and created or
+updated when the backend starts; all have the same level. Removing an entry does
+not remove the account's admin role: change it under **Users** in the console.
+On the login page choose **Administrator**; the console at `/ops` offers the
+overview, task records, service health, debugging replays, experiments and
+runtime settings, users, and catalog data. Every change is recorded in the audit
+history. The console cannot change allergen rules or mark a plan the validator
+refused as valid.
 
 ## Reading Nutrition Information
 
 - Nutrition is descriptive and non-medical.
-- User-entered calorie and macronutrient targets may affect planning.
+- User-entered calorie and macronutrient targets may affect planning; a target
+  may apply to each meal, to each day, or to the week's average.
 - Broad lower-sodium, lower-sugar, or lower-calorie preferences are soft ranking
   signals unless the user enters an explicit limit.
 - Missing nutrition data must not be interpreted as a successful validation.
-- Nutrition actuals cover dinners marked cooked in MealCraft only.
+- Nutrition actuals cover meals marked cooked in MealCraft only.
 
 ## Common Recovery Steps
 
@@ -146,9 +176,9 @@ being discarded.
 
 ## Current Limitations
 
-The current product supports one profile per authenticated household and one
-main meal per day for seven days. The validated recipe catalog and browser-test
-coverage remain smaller than the final design target. Live YouTube tutorial
-search, validated web-recipe supplementation, semantic retrieval, and broader
-dynamic stress cases are final-design gaps rather than verified current
-capabilities.
+The current product supports one profile per authenticated household. Shape
+changes in the conversation are read by rules, not by the model. With a tight
+budget and several dishes a day, dishes repeat more often. Validated web-recipe
+supplementation and broader dynamic stress cases are final-design gaps rather
+than verified current capabilities. Security and privacy hardening is out of
+scope for the course (no deployment).
