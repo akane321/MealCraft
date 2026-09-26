@@ -26,6 +26,16 @@ PACKAGE_PATTERN = re.compile(
 class ProductProviderError(RuntimeError):
     """Raised when a product provider cannot return a usable result."""
 
+    kind = "unavailable"
+
+
+class ProductSchemaDriftError(ProductProviderError):
+    """The page arrived but no longer has the shape the parser reads (ADR-0022 degradation modes).
+
+    Its own state, because a site change otherwise looks exactly like a product with no matches."""
+
+    kind = "schema_drift"
+
 
 class ProductProvider(Protocol):
     def search(self, query: str, *, limit: int) -> list[ProductResponse]: ...
@@ -144,26 +154,34 @@ class FairPriceProductProvider:
         except (OSError, TimeoutError) as error:
             raise ProductProviderError(f"FairPrice request failed: {error}") from error
 
+        return self.parse_page(html, limit=limit)
+
+    def parse_page(self, html: str, *, limit: int) -> list[ProductResponse]:
+        """The products on one FairPrice search page; a page of an unknown shape is schema drift."""
         match = NEXT_DATA_PATTERN.search(html)
         if match is None:
-            raise ProductProviderError("FairPrice page did not include __NEXT_DATA__ product data")
+            raise ProductSchemaDriftError("FairPrice page did not include __NEXT_DATA__ product data")
 
         try:
             payload = json.loads(match.group(1))
             data = payload["props"]["pageProps"]["data"]["data"]
         except (KeyError, TypeError, json.JSONDecodeError) as error:
-            raise ProductProviderError("FairPrice product data structure was not recognised") from error
+            raise ProductSchemaDriftError("FairPrice product data structure was not recognised") from error
         # A search with no results omits the product key: FairPrice answered and
         # has nothing, which is not a parse failure (ADR-0022 section 3).
         products = data.get("product") if isinstance(data, dict) else None
         if products is None and isinstance(data, dict):
             return []
         if not isinstance(products, list):
-            raise ProductProviderError("FairPrice product data structure was not recognised")
+            raise ProductSchemaDriftError("FairPrice product data structure was not recognised")
 
         fetched_at = datetime.now(UTC)
         parsed = [self._parse_product(product, fetched_at) for product in products[:limit]]
-        return [product for product in parsed if product is not None]
+        kept = [product for product in parsed if product is not None]
+        if products[:limit] and not kept:
+            # Products came back and not one could be read: the fields moved, not the shelf.
+            raise ProductSchemaDriftError("FairPrice products were listed but none had the fields the parser reads")
+        return kept
 
     def _parse_product(self, record: dict, fetched_at: datetime) -> ProductResponse | None:
         try:
@@ -175,9 +193,13 @@ class FairPriceProductProvider:
             return None
 
         metadata = record.get("metaData") or {}
-        package_size, package_unit = parse_package_size(
-            metadata.get("DisplayUnit") or metadata.get("Unit Of Weight") or name
-        )
+        package_text = metadata.get("DisplayUnit") or metadata.get("Unit Of Weight") or None
+        package_size, package_unit = parse_package_size(package_text or name)
+        regular = record.get("mrp") or record.get("price")
+        try:
+            regular_price = float(regular) if regular is not None and float(regular) > price else None
+        except (TypeError, ValueError):
+            regular_price = None
         brand_record = record.get("brand") or {}
         category_record = record.get("primaryCategory") or {}
         images = record.get("images") or []
@@ -198,4 +220,9 @@ class FairPriceProductProvider:
             in_stock=bool(record.get("has_stock", True)),
             source="fairprice",
             fetched_at=fetched_at,
+            package_text=package_text,
+            regular_price_sgd=regular_price,
+            package_warning=(
+                "unknown_package" if package_size is None else "count_package" if package_unit == "whole" else None
+            ),
         )
