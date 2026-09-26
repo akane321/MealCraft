@@ -3,12 +3,10 @@
 One row per registered key the console has changed; a key without a row uses the server default from
 the environment. Every change is also written to audit_events with its before and after values.
 
-RE-CHAIN AT MERGE: this revision is written against 20260926_0021 while another branch adds
-20260926_0022 in parallel. When both land, set down_revision to that 0022 revision so Alembic keeps
-a single head.
+It follows 20260927_0024 (meal-plan shape changes), which landed first.
 
 Revision ID: 20260927_0023
-Revises: 20260926_0021
+Revises: 20260927_0024
 Create Date: 2026-09-27
 """
 
@@ -19,7 +17,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "20260927_0023"
-down_revision: str | None = "20260926_0021"
+down_revision: str | None = "20260927_0024"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

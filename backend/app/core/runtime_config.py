@@ -64,6 +64,7 @@ REGISTRY: dict[str, RuntimeKey] = {
             lambda settings: settings.openai_timeout_seconds,
             minimum=1,
             maximum=300,
+            wired=True,
         ),
         RuntimeKey(
             "pricing_mode",
@@ -75,7 +76,8 @@ REGISTRY: dict[str, RuntimeKey] = {
         RuntimeKey(
             "planning_capability",
             "Planning capability",
-            "mvp plans one dish a meal; full also accepts meals of several dishes.",
+            "full plans the household's meals and dishes (ADR-0046); mvp plans seven one-dish dinners,"
+            " kept to reproduce the recorded evaluations.",
             lambda settings: settings.planning_capability,
             choices=("mvp", "full"),
         ),

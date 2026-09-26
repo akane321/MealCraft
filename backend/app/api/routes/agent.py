@@ -78,7 +78,7 @@ def create_constraint_parser(
             api_key=api_key,
             model=settings.openai_model,
             vocabulary=vocabulary,
-            timeout_seconds=settings.openai_timeout_seconds,
+            timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
         )
     )
 
