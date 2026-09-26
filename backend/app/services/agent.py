@@ -53,6 +53,26 @@ class AgentSessionNotReadyError(ValueError):
     pass
 
 
+def profile_constraints(version) -> AgentConstraintState:
+    """The saved household version as the starting point of a conversation."""
+    return AgentConstraintState.model_validate(
+        {
+            "household_size": version.planning_household_size,
+            "max_cooking_time_minutes": version.max_cooking_time_minutes,
+            "budget_per_meal_sgd": version.budget_per_meal_sgd,
+            "weekly_budget_sgd": version.weekly_budget_sgd,
+            "allergens": version.allergens,
+            "excluded_ingredients": version.excluded_ingredients,
+            "dietary_preferences": version.dietary_preferences,
+            "health_preferences": version.health_preferences,
+            "nutrition_targets": version.nutrition_targets,
+            "max_sodium_mg_per_meal": version.max_sodium_mg_per_meal,
+            "available_ingredients": version.available_ingredients,
+            "pricing_mode": version.pricing_mode,
+        }
+    )
+
+
 class AgentSessionService:
     def __init__(
         self,
@@ -65,7 +85,11 @@ class AgentSessionService:
         actor_user_id: int,
         household_id: int,
         max_history_messages: int = 20,
+        starting_constraints: AgentConstraintState | None = None,
     ) -> None:
+        # A new conversation starts from the saved household, so it does not ask what the
+        # profile already says; anything the message states is merged over it.
+        self.starting_constraints = starting_constraints
         self.repository = repository
         self.parser = parser
         self.orchestrator = BoundedAgentOrchestrator(parser)
@@ -79,7 +103,7 @@ class AgentSessionService:
         self.max_history_messages = max_history_messages
 
     def create(self, message: str, *, idempotency_key: str | None = None) -> AgentSessionResponse:
-        current = AgentConstraintState()
+        current = (self.starting_constraints or AgentConstraintState()).model_copy(deep=True)
         result = self.orchestrator.process(
             message,
             current=current,
@@ -346,9 +370,8 @@ class AgentSessionService:
                     session_id,
                     user_message=message,
                     assistant_message=(
-                        f"I prepared a preview: {preview.before_entry.recipe_title} → "
-                        f"{preview.after_entry.recipe_title}. Review the nutrition and Shopping List deltas "
-                        "before confirming."
+                        f"How about {preview.after_entry.recipe_title} instead of "
+                        f"{preview.before_entry.recipe_title}? Nothing changes until you confirm."
                     ),
                     draft=draft,
                     clarification_questions=[],
@@ -519,10 +542,7 @@ class AgentSessionService:
         )
         updated = self.repository.finish_replan(
             session_id,
-            assistant_message=(
-                f"I applied the change to plan #{plan_id}. The plan is now revision "
-                f"{result.plan.revision}, and the Dashboard and Shopping List are updated."
-            ),
+            assistant_message=("Done. Your week and shopping list are updated."),
         )
         if updated is None:
             self._fail_run(run, AgentSessionNotFoundError())

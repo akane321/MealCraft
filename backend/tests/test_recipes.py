@@ -378,7 +378,9 @@ def test_agent_confirmation_calls_weekly_planner_and_persists_plan_link(
     persisted = recipe_client.get(f"/api/agent/sessions/{created['id']}").json()
     assert persisted["status"] == "planned"
     assert persisted["plan_id"] == payload["plan"]["id"]
-    assert persisted["messages"][-1]["content"].endswith(f"plan #{payload['plan']['id']}.")
+    assert persisted["plan_id"] == payload["plan"]["id"]
+    # The reply speaks to the household; the plan's id stays in the data, not the copy.
+    assert "#" not in persisted["messages"][-1]["content"]
 
 
 def test_agent_runs_are_auditable_and_confirmation_is_idempotent(recipe_client: TestClient) -> None:
@@ -496,7 +498,7 @@ def test_agent_confirms_replanning_and_updates_plan_revision(
         "unavailable_ingredient": None,
         "reason": None,
     }
-    assert "Dashboard and Shopping List are updated" in payload["session"]["messages"][-1]["content"]
+    assert "shopping list are updated" in payload["session"]["messages"][-1]["content"]
 
 
 def test_agent_item_unavailable_clarifies_ingredient_and_can_discard_preview(
@@ -1471,3 +1473,31 @@ def test_instructions_inside_product_text_change_no_number_and_reach_no_model_in
     history = recipe_client.get(f"/api/agent/sessions/{created['id']}").json()["messages"]
     assert seen and not any(INJECTION in call for call in seen)
     assert not any(INJECTION in message["content"] for message in history)
+
+
+def test_a_new_conversation_starts_from_the_saved_household(recipe_client: TestClient) -> None:
+    saved = recipe_client.post(
+        "/api/household-profiles",
+        json={
+            "name": "Tan household",
+            "members": [
+                {"name": "A", "servings_per_meal": 1, "allergens": ["peanut"], "excluded_ingredients": ["pork"]},
+                {"name": "B", "servings_per_meal": 1},
+            ],
+            "max_cooking_time_minutes": 45,
+            "weekly_budget_sgd": 90,
+            "pricing_mode": "fixture",
+        },
+    )
+    assert saved.status_code == 201, saved.text
+
+    response = recipe_client.post("/api/agent/sessions", json={"message": "Plan my dinners. No mushrooms."})
+    assert response.status_code == 201
+    session = response.json()
+    constraints = session["constraints"]
+    # Nothing the profile already says is asked again; the message adds to it.
+    assert constraints["household_size"] == 2
+    assert constraints["weekly_budget_sgd"] == 90
+    assert constraints["allergens"] == ["peanut"]
+    assert set(constraints["excluded_ingredients"]) == {"pork", "mushroom"}
+    assert "household_size" not in session["missing_fields"]

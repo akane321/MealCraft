@@ -64,9 +64,10 @@ def test_fixture_agent_benchmark_is_offline_and_keeps_failures_visible() -> None
     assert report["provider"] == "fixture"
     assert report["live_api_used"] is False
     assert report["metrics"]["case_count"] == 24
-    # The rule-based parser still misses cases, and they must stay visible. The
-    # count is pinned so that a change is deliberate and matches the committed report.
-    assert report["metrics"]["failure_case_count"] == 4
+    # The count is pinned so that a change is deliberate and matches the committed report.
+    # It reached 0 on 2026-09-26 with the misses fixed in view: this developer set no
+    # longer separates parser versions, and a new parser claim needs new cases.
+    assert report["metrics"]["failure_case_count"] == 0
 
 
 def test_openai_benchmark_requires_explicit_live_api_opt_in() -> None:

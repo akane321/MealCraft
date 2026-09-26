@@ -99,3 +99,14 @@ def test_recommendations_keep_the_best_scored_up_to_the_candidate_limit(
     result = service.recommend(RecipeRecommendationRequest(household_size=2, max_cooking_time_minutes=60))
     scores = [item.total_score for item in result.recommendations]
     assert len(scores) == 3 and scores == sorted(scores, reverse=True)
+
+
+def test_every_withdrawn_recipe_says_why() -> None:
+    import json
+
+    from app.core.paths import repository_root
+    from app.repositories.recipe import withdrawn_slugs
+
+    items = json.loads((repository_root() / "data/recipes/withdrawn.json").read_text(encoding="utf-8"))["recipes"]
+    assert withdrawn_slugs() == tuple(item["slug"] for item in items)
+    assert all(item["reason"].strip() for item in items)

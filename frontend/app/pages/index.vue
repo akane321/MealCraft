@@ -11,7 +11,7 @@ type Tab = "dinners" | "groceries" | "nutrition";
 
 const DRAFT_KEY = "mealcraft-draft";
 const starters = ["Dinners for two this week, around S$90", "A high-protein week", "Vegetarian, under S$60"];
-const followUps = ["Make one night vegetarian", "Make it S$10 cheaper", "I have eggs and spinach to use up"];
+const followUps = ["Swap tomorrow's dinner", "Skip Friday", "Don't change Sunday"];
 
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
@@ -213,6 +213,11 @@ function toggleFilm() {
 }
 
 function newChat() {
+  // Keep the conversation being left in the recent list.
+  const leaving = session.value;
+  if (leaving?.messages.length && !agent.recent.value.some(item => item.id === leaving.id)) {
+    agent.recent.value = [leaving, ...agent.recent.value];
+  }
   agent.reset();
   plan.value = null;
   planState.value = "empty";

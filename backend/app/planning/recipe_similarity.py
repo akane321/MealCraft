@@ -80,6 +80,29 @@ def catalog_embedder(api_key: str) -> Embed | None:
     return OpenAIEmbeddings(model=meta["model"], dimensions=meta["dimensions"], api_key=api_key).embed_documents
 
 
+# Ingredients that flavour a dish rather than make it: "fish sauce" is not a fish dinner.
+CONDIMENT = re.compile(r"\b(?:sauce|paste|oil|stock|broth|powder|seasoning|extract|vinegar|bouillon|dressing)\b")
+
+
+def shared_words(text: str, recipes: list[Recipe]) -> dict[int, float]:
+    """Without the model: two points per word the request shares with a recipe's name or cuisine, one
+    per word shared with its main ingredients (condiments left out). On the developer requests
+    (`scripts/evaluate_replan_requests.py` pools) that picked what was asked for in 63% of trials,
+    against 55% for plain shared words and 10% for ignoring the request. Empty when no recipe shares a
+    word, so the swap orders by score as before."""
+    asked = words(text)
+    result = {}
+    for recipe in recipes:
+        named = words(f"{recipe.title} {recipe.cuisine}")
+        mains = " ".join(
+            item.ingredient.display_name
+            for item in recipe.recipe_ingredients
+            if not CONDIMENT.search(item.ingredient.display_name.lower())
+        )
+        result[recipe.id] = float(2 * len(asked & named) + len(asked & words(mains)))
+    return result if any(result.values()) else {}
+
+
 class RecipeSimilarity:
     def __init__(self, embed: Embed | None) -> None:
         self.embed = embed
@@ -87,13 +110,15 @@ class RecipeSimilarity:
     def scores(self, reason: str | None, recipes: list[Recipe]) -> dict[int, float]:
         """Cosine similarity per recipe id; empty when there is nothing described, no vectors, or no call."""
         text, catalog = wanted(reason), _catalog()
-        if text is None or catalog is None or self.embed is None:
+        if text is None:
             return {}
+        if catalog is None or self.embed is None:
+            return shared_words(text, recipes)
         meta, index, rows = catalog
         try:
             (query,) = self.embed([text])
-        except Exception:  # noqa: BLE001 - a failed call leaves the swap to the ordinary score
-            return {}
+        except Exception:  # noqa: BLE001 - a failed call falls back to the shared words
+            return shared_words(text, recipes)
         size = meta["dimensions"]
         norm = sum(x * x for x in query) ** 0.5 or 1.0
         asked = words(text)

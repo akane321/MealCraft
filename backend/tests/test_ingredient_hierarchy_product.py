@@ -102,7 +102,9 @@ def test_an_empty_table_still_lets_the_planner_serve_tofu_for_a_tofu_exclusion(r
     response = recipe_client.post("/api/plans/generate", json={**REQUEST, "excluded_ingredients": ["tofu"]})
 
     assert response.status_code == 201, response.text
-    assert {entry["recipe"]["slug"] for entry in response.json()["days"]} == {"lemon-chicken", "tofu-soba"}
+    # Without the table firm_tofu is not a kind of tofu, but "Tofu Soba" names tofu
+    # outright, and a recipe whose name states an avoided food is never served.
+    assert {entry["recipe"]["slug"] for entry in response.json()["days"]} == {"lemon-chicken"}
 
 
 # ----- 2. the planning path expands -----

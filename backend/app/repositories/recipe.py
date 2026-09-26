@@ -1,6 +1,10 @@
+import json
+from functools import cache
+
 from sqlalchemy import Select, exists, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from app.core.paths import repository_root
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient
 from app.planning.grocery_estimator import priceable_ingredients
 
@@ -8,6 +12,13 @@ from app.planning.grocery_estimator import priceable_ingredients
 # have no course and are always candidates. Sides, sauces, drinks and desserts
 # stay browsable but never become a planned meal or a meal recommendation.
 MEAL_COURSES = ("main", "soup")
+
+
+@cache
+def withdrawn_slugs() -> tuple[str, ...]:
+    """Recipes kept in the catalog but never planned (data/recipes/withdrawn.json)."""
+    path = repository_root() / "data/recipes/withdrawn.json"
+    return tuple(item["slug"] for item in json.loads(path.read_text(encoding="utf-8"))["recipes"])
 
 
 class RecipeRepository:
@@ -61,6 +72,7 @@ class RecipeRepository:
             self._with_ingredients()
             .where(or_(Recipe.course.is_(None), Recipe.course.in_(courses or MEAL_COURSES)))
             .where(or_(Recipe.release_version.is_(None), ~exists(unmatchable_line)))
+            .where(Recipe.slug.not_in(withdrawn_slugs()))
             .order_by(Recipe.id)
         )
         return list(self.session.scalars(statement).unique().all())
