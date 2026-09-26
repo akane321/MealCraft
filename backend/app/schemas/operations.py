@@ -132,3 +132,152 @@ class OperationsServiceCheckResponse(BaseModel):
     error_kind: str | None
     detail: str
     checked_at: datetime
+
+
+# --- Slice 2 (ADR-0047): debugging replays, runtime settings, experiments and users. ---
+
+
+class ReplayAgentOverrides(BaseModel):
+    parser: Literal["fixture", "openai"] | None = None
+
+
+class ReplayPlanningOverrides(BaseModel):
+    planner_strategy: Literal["beam", "greedy-baseline"] | None = None
+    beam_width: int | None = Field(default=None, ge=1, le=512)
+    max_expansions: int | None = Field(default=None, ge=1, le=1_000_000)
+    pricing_mode: Literal["fixture", "live"] | None = None
+    weekly_budget_sgd: float | None = Field(default=None, gt=0, le=7000)
+    planning_capability: Literal["mvp", "full"] | None = None
+
+
+class OperationsReplay(BaseModel):
+    id: int
+    kind: TaskKind
+    source_id: int
+    overrides: dict[str, Any]
+    # Agent: constraints, assistant_message, status, missing_fields, parser.
+    # Planning: status, evidence, message, dishes, total_cost_sgd, failed_checks, duration_seconds, settings.
+    original: dict[str, Any] | None
+    replay: dict[str, Any]
+    triggered_by_user_id: int | None
+    created_at: datetime
+
+
+class OperationsReplaySummary(BaseModel):
+    id: int
+    kind: TaskKind
+    source_id: int
+    overrides: dict[str, Any]
+    original_status: str | None
+    replay_status: str | None
+    created_at: datetime
+
+
+class OperationsReplayCollection(BaseModel):
+    items: list[OperationsReplaySummary]
+
+
+class RuntimeSettingView(BaseModel):
+    key: str
+    label: str
+    meaning: str
+    choices: list[str] | None
+    minimum: float | None
+    maximum: float | None
+    integer: bool
+    default: Any
+    value: Any
+    overridden: bool
+    wired: bool
+    updated_at: datetime | None
+
+
+class RuntimeSettingCollection(BaseModel):
+    items: list[RuntimeSettingView]
+
+
+class RuntimeSettingChange(BaseModel):
+    # None goes back to the server default.
+    value: Any = None
+
+
+class RuntimeSettingHistoryItem(BaseModel):
+    key: str
+    before: Any
+    after: Any
+    actor: str | None
+    created_at: datetime
+
+
+class RuntimeSettingHistory(BaseModel):
+    items: list[RuntimeSettingHistoryItem]
+
+
+ExperimentName = Literal["developer-planning", "agent-benchmark"]
+
+
+class ExperimentRequest(BaseModel):
+    evaluation: ExperimentName
+    label: str | None = Field(default=None, max_length=80)
+    # Registered runtime keys and evaluation options that differ from the current configuration.
+    overrides: dict[str, Any] = Field(default_factory=dict)
+
+
+class ExperimentRun(BaseModel):
+    id: int
+    evaluation: ExperimentName
+    label: str | None
+    status: str
+    configuration: dict[str, Any]
+    metrics: dict[str, Any]
+    passed: bool | None
+    conditions: dict[str, Any]
+    error: str | None
+    created_at: datetime
+    duration_seconds: float | None
+
+
+class ExperimentCollection(BaseModel):
+    items: list[ExperimentRun]
+    evaluations: list[dict[str, Any]]
+
+
+class OpsUserHousehold(BaseModel):
+    id: int
+    name: str
+    role: str
+    members: int
+    profile: dict[str, Any] | None
+
+
+class OpsUserSummary(BaseModel):
+    id: int
+    email: str
+    display_name: str
+    system_role: str
+    status: str
+    households: list[OpsUserHousehold]
+    conversations: int
+    plans: int
+    last_seen_at: datetime | None
+    created_at: datetime
+
+
+class OpsUserCollection(BaseModel):
+    items: list[OpsUserSummary]
+    total: int
+
+
+class OpsUserDetail(OpsUserSummary):
+    recent_conversations: list[dict[str, Any]]
+    recent_plans: list[dict[str, Any]]
+
+
+class OpsUserUpdate(BaseModel):
+    display_name: str | None = Field(default=None, min_length=1, max_length=120)
+    # ADR-0047: one console level; "ordinary_user" is "none".
+    system_role: Literal["admin", "ordinary_user"] | None = None
+
+
+class OpsDeleted(BaseModel):
+    deleted: int

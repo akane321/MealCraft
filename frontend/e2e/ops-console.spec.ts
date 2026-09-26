@@ -147,8 +147,8 @@ test("an administrator signs in, reads the overview, opens a task and runs a liv
   await expect(fairprice.getByRole("status")).toContainText("Answered in 420 ms.");
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/ops-3-services.png` });
 
-  await nav.getByRole("link", { name: /^Debugging/ }).click();
-  await expect(page.getByRole("heading", { name: "Debugging is coming in the next slice" })).toBeVisible();
+  await nav.getByRole("link", { name: /^Data/ }).click();
+  await expect(page.getByRole("heading", { name: "Data is coming in the next slice" })).toBeVisible();
 });
 
 test("a household account is told plainly it is not an administrator and kept out of /ops", async ({ page }) => {

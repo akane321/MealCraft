@@ -148,6 +148,7 @@ class ProductPlanningEngine:
             ),
             "validation": None,
         }
+        trace["request"] = constraints.model_dump(mode="json")
         # The meals of each day and their dish roles (ADR-0046). None is the MVP: one dish a dinner.
         shape = meals_of_the_day(constraints)
         composition = shape  # kept as the name for "planned with the meal beam" below

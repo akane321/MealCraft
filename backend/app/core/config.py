@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr | None = None
     openai_model: str = "gpt-5.4-mini"
     # A slow model must not hang the chat: past this the turn is read with the rule parser instead.
-    openai_timeout_seconds: float = 15.0
+    openai_timeout_seconds: float = Field(default=15.0, gt=0, le=300)
     # How long the planner reuses the recipes it loaded; 0 loads them for every plan (tests).
     planning_pool_cache_seconds: int = 300
     auth_cookie_name: str = Field(default="mealcraft_session", min_length=1, max_length=80)
