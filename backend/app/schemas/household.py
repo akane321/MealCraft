@@ -59,7 +59,6 @@ class HouseholdProfileWrite(BaseModel):
     pricing_mode: PricingMode = "fixture"
     # Dish roles of every meal (ADR-0036); None is one dish a meal.
     meal_composition: MealComposition | None = None
-    plan_shape: MealPlanShape | None = None
     # Which meals are planned and each one's dishes (ADR-0046); None is the default shape.
     plan_shape: MealPlanShape | None = None
 

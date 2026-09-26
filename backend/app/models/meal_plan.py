@@ -210,7 +210,7 @@ class MealPlanEvent(Base):
     __tablename__ = "meal_plan_events"
     __table_args__ = (
         CheckConstraint(
-            "event_type IN ('REPLACE_MEAL', 'CANCEL_MEAL', 'LOCK_MEAL', 'ITEM_UNAVAILABLE')",
+            "event_type IN ('REPLACE_MEAL', 'CANCEL_MEAL', 'LOCK_MEAL', 'ITEM_UNAVAILABLE', 'CHANGE_SHAPE')",
             name="meal_plan_events_type_valid",
         ),
         CheckConstraint(
@@ -228,7 +228,10 @@ class MealPlanEvent(Base):
 
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
     plan_id: Mapped[int] = mapped_column(BIGINT_ID, ForeignKey("meal_plans.id", ondelete="CASCADE"))
-    entry_id: Mapped[int] = mapped_column(BIGINT_ID, ForeignKey("meal_plan_entries.id", ondelete="CASCADE"))
+    # None for a shape change, which touches several dishes (ADR-0046).
+    entry_id: Mapped[int | None] = mapped_column(
+        BIGINT_ID, ForeignKey("meal_plan_entries.id", ondelete="CASCADE"), nullable=True
+    )
     proposed_recipe_id: Mapped[int | None] = mapped_column(
         BIGINT_ID,
         ForeignKey("recipes.id", ondelete="RESTRICT"),
@@ -247,9 +250,11 @@ class MealPlanEvent(Base):
     nutrition_delta: Mapped[dict] = mapped_column(JSON)
     grocery_delta: Mapped[list[dict]] = mapped_column(JSON, default=list)
     purchase_total_delta_sgd: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    # A shape change's proposal (MealPlanShapeChange plus the new dishes' stored values).
+    shape_change: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     applied_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     plan: Mapped[MealPlan] = relationship(back_populates="events")
-    entry: Mapped[MealPlanEntry] = relationship()
+    entry: Mapped[MealPlanEntry | None] = relationship()
     proposed_recipe: Mapped[Recipe | None] = relationship()

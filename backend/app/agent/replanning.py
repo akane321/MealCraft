@@ -65,7 +65,7 @@ class AgentReplanInterpreter:
         if event_type is not None:
             draft.event_type = event_type
 
-        day_index = self._day_index(lower, plan)
+        day_index = self.day_index(lower, plan)
         if day_index is not None:
             draft.day_index = day_index
             draft.entry_id = None
@@ -113,7 +113,7 @@ class AgentReplanInterpreter:
             return "REPLACE_MEAL"
         return None
 
-    def _day_index(self, text: str, plan: WeeklyMealPlanResponse) -> int | None:
+    def day_index(self, text: str, plan: WeeklyMealPlanResponse) -> int | None:
         numbered = re.search(r"(?:day\s*|第\s*)([1-7一二三四五六七])(?:\s*天)?", text)
         if numbered:
             value = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7}.get(

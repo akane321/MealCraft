@@ -1,4 +1,5 @@
 import type { RecipeListItem, RecipeNutrition } from "~/types/recipe";
+import type { MealRole, PlannedMealType, PlanShape } from "~/types/household";
 import type {
   GroceryLineEstimate,
   NutritionTargetsInput,
@@ -61,6 +62,7 @@ export interface WeeklyMealPlan {
   grocery_estimate: WeeklyGroceryEstimate;
   warnings: string[];
   created_at: string;
+  plan_shape?: PlanShape | null;
 }
 
 export interface WeeklyMealPlanListItem {
@@ -117,11 +119,12 @@ export interface WeeklyNutritionDashboard {
   days: NutritionDashboardDay[];
 }
 
-export type MealPlanEventType = "REPLACE_MEAL" | "CANCEL_MEAL" | "LOCK_MEAL" | "ITEM_UNAVAILABLE";
+export type MealPlanEventType = "REPLACE_MEAL" | "CANCEL_MEAL" | "LOCK_MEAL" | "ITEM_UNAVAILABLE" | "CHANGE_SHAPE";
 export type MealPlanEventStatus = "previewed" | "applied";
 
 export interface MealPlanEntrySnapshot {
   entry_id: number;
+  day_index?: number | null;
   recipe_id: number;
   recipe_slug: string;
   recipe_title: string;
@@ -158,6 +161,17 @@ export interface MealPlanReplanPreviewRequest {
   unavailable_ingredient: string | null;
 }
 
+/** A meal added, dropped or recomposed on some days (ADR-0046). */
+export interface MealPlanShapeChange {
+  meal_type: PlannedMealType;
+  scope: "week" | "meal";
+  day_indexes: number[];
+  roles: MealRole[] | null;
+  removed: MealPlanEntrySnapshot[];
+  added: MealPlanEntrySnapshot[];
+  plan_shape: PlanShape | null;
+}
+
 export interface MealPlanReplanEvent {
   id: number;
   plan_id: number;
@@ -167,8 +181,10 @@ export interface MealPlanReplanEvent {
   status: MealPlanEventStatus;
   reason: string | null;
   unavailable_ingredient: string | null;
-  before_entry: MealPlanEntrySnapshot;
-  after_entry: MealPlanEntrySnapshot;
+  // Null for a shape change, which moves several dishes (shape_change).
+  before_entry: MealPlanEntrySnapshot | null;
+  after_entry: MealPlanEntrySnapshot | null;
+  shape_change?: MealPlanShapeChange | null;
   nutrition_delta: MealPlanNutritionDelta;
   grocery_delta: MealPlanGroceryDeltaLine[];
   purchase_total_delta_sgd: number;

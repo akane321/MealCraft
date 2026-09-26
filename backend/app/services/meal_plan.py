@@ -22,6 +22,7 @@ from app.schemas.meal_plan import (
     WeeklyNutritionDashboardResponse,
     WeeklyNutritionSummaryResponse,
     WeeklyPlanDayResponse,
+    week_shape,
 )
 from app.schemas.product import GroceryLineEstimate, PriceEvidence, ProductResponse
 from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
@@ -164,6 +165,42 @@ class WeeklyMealPlanService:
             operation_run=self._operation_run(result.trace, started_at),
         )
         return self._to_response(plan)
+
+    def plan_dishes(
+        self, constraints: WeeklyMealPlanRequest, *, first_day: int, day_count: int, avoid_recipe_ids: set[int]
+    ) -> list[ScheduledDish]:
+        """Dishes for `day_count` days from day `first_day` of a saved week, nothing saved (ADR-0046 section 2).
+
+        `constraints` carries the shape to plan and the budget left; dishes already in the week are
+        avoided while enough others remain.
+        """
+        start = constraints.start_date + timedelta(days=first_day - 1)
+        # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
+        partial = constraints.model_copy(update={"start_date": start, "day_count": day_count})
+        meals = meals_of_the_day(partial)
+        courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
+        recipes = self.recipe_repository.list_for_planning(courses=courses)
+        recommendations = self.recommendation_service.recommend(
+            partial, deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
+        ).recommendations
+        fresh = [item for item in recommendations if item.recipe.id not in avoid_recipe_ids]
+        try:
+            result = self.planning_engine.plan(partial, fresh, recipes, selector=self.selector)
+        except ProductPlanningError:
+            # Too few dishes the week does not already have: repeat one rather than fail.
+            result = self.planning_engine.plan(partial, recommendations, recipes, selector=self.selector)
+        placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(result.selected))]
+        return [
+            ScheduledDish(
+                planned_date=start + timedelta(days=slot_index),
+                day_index=first_day + slot_index,
+                meal_type=meal_type,
+                role_id=role_id,
+                portion_share=share,
+                recommendation=recommendation,
+            )
+            for (slot_index, meal_type, role_id, share), recommendation in zip(placements, result.selected, strict=True)
+        ]
 
     def _operation_run(self, trace: dict, started_at: datetime, *, error: str | None = None) -> OperationRun:
         return OperationRun(
@@ -359,6 +396,7 @@ class WeeklyMealPlanService:
             grocery_estimate=grocery,
             warnings=plan.warnings,
             created_at=plan.created_at,
+            plan_shape=week_shape(plan.constraints),
         )
 
     @staticmethod

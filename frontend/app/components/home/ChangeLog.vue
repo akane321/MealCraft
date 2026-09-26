@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatPlanDate } from "~/lib/meal-plan-format";
+import { shapeChangeSummary } from "~/lib/plan-shape";
 import type { MealPlanReplanEvent, MealPlanReplanEventCollection } from "~/types/meal-plan";
 
 const props = defineProps<{ planId: number | null }>();
@@ -50,7 +51,10 @@ function money(event: MealPlanReplanEvent) {
     </summary>
     <ol>
       <li v-for="event in applied" :key="event.id">
-        <p class="swap">
+        <p v-if="event.shape_change" class="swap">
+          <strong>{{ shapeChangeSummary(event.shape_change, day => `day ${day}`) }}</strong>
+        </p>
+        <p v-else-if="event.before_entry && event.after_entry" class="swap">
           <s>{{ event.before_entry.recipe_title }}</s>
           <span aria-hidden="true">→</span>
           <strong>{{ event.after_entry.recipe_title }}</strong>

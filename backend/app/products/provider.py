@@ -1,6 +1,7 @@
 import json
 import re
 from datetime import UTC, datetime
+from functools import lru_cache
 from pathlib import Path
 from typing import Protocol
 from urllib.parse import urlencode
@@ -84,6 +85,15 @@ def _to_base_unit(size: float, unit: str) -> tuple[float, str]:
     return size * multiplier, base_unit
 
 
+@lru_cache(maxsize=4)
+def _fixture_records(path: str) -> list[dict]:
+    """The parsed fixture, read once: a plan searches it hundreds of times.
+
+    ponytail: a fixture rewritten while the server runs is seen after a restart.
+    """
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
 class FixtureProductProvider:
     def __init__(self, fixture_path: str) -> None:
         self.fixture_path = Path(fixture_path)
@@ -92,7 +102,7 @@ class FixtureProductProvider:
         normalized_query = normalize_search_text(query)
         query_key = normalized_query.replace(" ", "_")
         try:
-            records = json.loads(self.fixture_path.read_text(encoding="utf-8"))
+            records = _fixture_records(str(self.fixture_path))
         except (OSError, json.JSONDecodeError) as error:
             raise ProductProviderError(f"Fixture products could not be loaded: {error}") from error
 

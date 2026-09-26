@@ -229,3 +229,146 @@ def test_the_agent_asks_which_dish_when_a_day_has_several(composed_client):
     draft, questions = interpreter.parse("the soup", plan=plan, current=draft)
     soup = next(d for d in plan.days if d.day_index == 2 and d.role_id == "soup")
     assert draft.entry_id == soup.entry_id and not questions
+
+
+def _week_ahead(client, composition=COMPOSITION):
+    from datetime import date, timedelta
+
+    response = client.post(
+        "/api/plans/generate",
+        json={
+            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "household_size": 4,
+            "max_cooking_time_minutes": 90,
+            "pricing_mode": "fixture",
+            "plan_shape": {"meals": {"dinner": composition}},
+        },
+    )
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def test_adding_a_soup_to_one_dinner_replans_only_that_meal(composed_client):
+    two_dishes = COMPOSITION[:2]
+    plan = _week_ahead(composed_client, two_dishes)
+    before = {(d["day_index"], d["role_id"]): d["recipe"]["slug"] for d in plan["days"]}
+
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [5]},
+    )
+    assert preview.status_code == 201, preview.text
+    change = preview.json()["shape_change"]
+    assert change["scope"] == "meal" and change["plan_shape"] is None
+    assert {d["role_id"] for d in change["added"]} == {"main", "vegetable", "soup"}
+    assert len(change["removed"]) == 2
+
+    applied = composed_client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm")
+    assert applied.status_code == 200, applied.text
+    after = applied.json()["plan"]
+    friday = {d["role_id"] for d in after["days"] if d["day_index"] == 5}
+    assert friday == {"main", "vegetable", "soup"}
+    # Every other meal is exactly as it was.
+    others = {(d["day_index"], d["role_id"]): d["recipe"]["slug"] for d in after["days"] if d["day_index"] != 5}
+    assert others == {key: slug for key, slug in before.items() if key[0] != 5}
+    assert after["revision"] == plan["revision"] + 1
+
+
+def test_dropping_a_meal_for_the_week_changes_this_weeks_shape_only(composed_client):
+    plan = _week_ahead(composed_client)
+    lunch = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "lunch", "roles": [{"role_id": "main", "courses": ["main"]}]},
+    )
+    assert lunch.status_code == 201, lunch.text
+    assert set(lunch.json()["shape_change"]["plan_shape"]["meals"]) == {"lunch", "dinner"}
+    week = composed_client.post(f"/api/plans/{plan['id']}/replan/{lunch.json()['id']}/confirm").json()["plan"]
+    assert {d["meal_type"] for d in week["days"]} == {"lunch", "dinner"}
+
+    no_dinner = composed_client.post(f"/api/plans/{plan['id']}/shape/preview", json={"meal_type": "dinner"})
+    assert no_dinner.status_code == 201, no_dinner.text
+    assert no_dinner.json()["shape_change"]["added"] == []
+    week = composed_client.post(f"/api/plans/{plan['id']}/replan/{no_dinner.json()['id']}/confirm").json()["plan"]
+    assert {d["meal_type"] for d in week["days"]} == {"lunch"}
+
+    last = composed_client.post(f"/api/plans/{plan['id']}/shape/preview", json={"meal_type": "lunch"})
+    assert last.status_code == 422 and "at least one meal" in last.json()["detail"]
+
+
+def test_the_conversation_adds_a_meal_for_this_week_then_keeps_it_on_a_yes(composed_client):
+    profile = {
+        **_household_profile_payload(),
+        "max_cooking_time_minutes": 90,
+        "budget_per_meal_sgd": None,
+        "weekly_budget_sgd": None,
+        "health_preferences": [],
+        "available_ingredients": [],
+        "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
+    }
+    assert composed_client.post("/api/household-profiles", json=profile).status_code == 201
+    session = composed_client.post("/api/agent/sessions", json={"message": "Plan our week"}).json()
+    confirmed = composed_client.post(f"/api/agent/sessions/{session['id']}/confirm")
+    assert confirmed.status_code == 200, confirmed.text
+
+    asked = composed_client.post(
+        f"/api/agent/sessions/{session['id']}/messages", json={"message": "Also plan lunch"}
+    ).json()
+    assert asked["pending_replan"]["event_type"] == "CHANGE_SHAPE", asked["messages"][-1]["content"]
+    assert "Nothing changes until you confirm" in asked["messages"][-1]["content"]
+
+    applied = composed_client.post(f"/api/agent/sessions/{session['id']}/replan/confirm").json()
+    assert {d["meal_type"] for d in applied["plan"]["days"]} == {"lunch", "dinner"}
+    question = applied["session"]["pending_interaction"]
+    assert question["field_path"] == "plan_shape.keep"
+    # Nothing is saved to the household before they say so.
+    usual = composed_client.get("/api/household-profiles/current").json()["current"]["plan_shape"]["meals"]
+    assert set(usual) == {"dinner"}
+
+    composed_client.post(
+        f"/api/agent/sessions/{session['id']}/interactions",
+        json={
+            "question_id": question["question_id"],
+            "option_ids": ["keep"],
+            "context_version": question["context_version"],
+        },
+    )
+    usual = composed_client.get("/api/household-profiles/current").json()["current"]["plan_shape"]["meals"]
+    assert set(usual) == {"lunch", "dinner"}
+
+
+def test_a_second_plan_reuses_the_loaded_recipes(composed_client, monkeypatch):
+    from app.repositories.recipe import clear_planning_pool
+
+    monkeypatch.setattr(get_settings(), "planning_pool_cache_seconds", 300)
+    clear_planning_pool()
+    try:
+        first = _week_ahead(composed_client)
+        # The second plan reads recipes detached from the first request's session.
+        second = _week_ahead(composed_client)
+        assert [d["recipe"]["slug"] for d in second["days"]] == [d["recipe"]["slug"] for d in first["days"]]
+        change = composed_client.post(
+            f"/api/plans/{second['id']}/shape/preview", json={"meal_type": "dinner", "roles": COMPOSITION[:1]}
+        )
+        assert change.status_code == 201, change.text
+    finally:
+        clear_planning_pool()
+
+
+def test_taking_the_vegetable_away_keeps_the_main_as_the_whole_meal(composed_client):
+    plan = _week_ahead(composed_client, COMPOSITION[:2])
+    main = next(d for d in plan["days"] if d["day_index"] == 2 and d["role_id"] == "main")
+
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": COMPOSITION[:1], "day_indexes": [2]},
+    ).json()
+    assert [d["role_id"] for d in preview["shape_change"]["removed"]] == ["vegetable"]
+    assert preview["shape_change"]["added"] == []
+
+    week = composed_client.post(f"/api/plans/{plan['id']}/replan/{preview['id']}/confirm").json()["plan"]
+    tuesday = [d for d in week["days"] if d["day_index"] == 2]
+    assert [(d["recipe"]["slug"], d["portion_share"]) for d in tuesday] == [(main["recipe"]["slug"], 1.0)]
+    # 0.75 of the meal became all of it.
+    assert tuesday[0]["nutrition_per_person"]["calories_kcal"] == round(
+        main["nutrition_per_person"]["calories_kcal"] / 0.75, 2
+    )

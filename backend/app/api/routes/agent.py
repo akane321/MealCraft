@@ -88,19 +88,21 @@ def get_agent_service(
     except AgentConfigurationError as error:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(error)) from error
     household_id = current.active_membership.household_id
-    profile = HouseholdProfileRepository(database, household_id=household_id).get_current()
+    profiles = HouseholdProfileRepository(database, household_id=household_id)
+    profile = profiles.get_current()
     return AgentSessionService(
         repository=AgentSessionRepository(database, household_id=household_id),
         run_repository=AgentRunRepository(database, household_id=household_id),
         parser=parser,
         meal_plan_service=build_meal_plan_service(database, household_id, current.user.id),
-        replanning_service=build_replanning_service(database, household_id),
+        replanning_service=build_replanning_service(database, household_id, current.user.id),
         actor_user_id=current.user.id,
         household_id=household_id,
         max_history_messages=settings.agent_max_history_messages,
         starting_constraints=(
             profile_constraints(HouseholdProfileRepository.current_version(profile)) if profile else None
         ),
+        keep_plan_shape=(lambda shape: profiles.keep_plan_shape(shape.model_dump(mode="json"))) if profile else None,
     )
 
 

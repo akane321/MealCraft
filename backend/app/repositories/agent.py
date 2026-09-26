@@ -158,6 +158,8 @@ class AgentSessionRepository:
         agent_session.missing_fields = ["replan"] if clarification_questions else []
         agent_session.clarification_questions = clarification_questions[:1]
         agent_session.pending_event_id = pending_event_id
+        # A new request about the week answers, or moves past, any question still open.
+        agent_session.pending_interaction = None
         if scope_decision is not None:
             agent_session.last_scope_decision = scope_decision.model_dump(mode="json")
         agent_session.messages.extend(
@@ -169,7 +171,9 @@ class AgentSessionRepository:
         self.session.commit()
         return self.get(session_id)
 
-    def finish_replan(self, session_id: int, *, assistant_message: str) -> AgentSession | None:
+    def finish_replan(
+        self, session_id: int, *, assistant_message: str, pending_interaction: dict | None = None
+    ) -> AgentSession | None:
         agent_session = self.get(session_id)
         if agent_session is None:
             return None
@@ -177,7 +181,7 @@ class AgentSessionRepository:
         agent_session.pending_event_id = None
         agent_session.missing_fields = []
         agent_session.clarification_questions = []
-        agent_session.pending_interaction = None
+        agent_session.pending_interaction = pending_interaction
         agent_session.messages.append(AgentMessage(role="assistant", content=assistant_message))
         self.session.commit()
         return self.get(session_id)

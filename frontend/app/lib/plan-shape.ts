@@ -1,4 +1,5 @@
 import type { DishCourse, MealRole, PlannedMealType, PlanShape } from "~/types/household";
+import type { MealPlanShapeChange } from "~/types/meal-plan";
 
 export const PLANNED_MEALS: PlannedMealType[] = ["breakfast", "lunch", "dinner"];
 
@@ -55,4 +56,19 @@ export function describeShape(shape: PlanShape): string {
       return `${meal[0]!.toUpperCase()}${meal.slice(1)}: ${name === "Custom" ? `${shape.meals[meal]!.length} dishes` : name.toLowerCase()}`;
     })
     .join(" · ");
+}
+
+/** What a shape change does, in plain words: "Lunch added for the rest of the week", "Dinner on Fri: main, vegetable, soup". */
+export function shapeChangeSummary(change: MealPlanShapeChange, dayLabel: (dayIndex: number) => string): string {
+  const meal = `${change.meal_type[0]!.toUpperCase()}${change.meal_type.slice(1)}`;
+  const where = change.scope === "week" ? "for the rest of the week" : `on ${change.day_indexes.map(dayLabel).join(", ")}`;
+  if (change.roles === null) return `No ${change.meal_type} ${where}`;
+  if (!change.removed.length) return `${meal} added ${where}`;
+  const counts = new Map<string, number>();
+  for (const item of change.roles) {
+    const kind = item.role_id.replace(/-\d+$/, "");
+    counts.set(kind, (counts.get(kind) ?? 0) + 1);
+  }
+  const dishes = [...counts].map(([kind, count]) => (count > 1 ? `${count} ${kind}s` : kind)).join(", ");
+  return `${meal} ${where}: ${dishes}`;
 }

@@ -1,14 +1,18 @@
 import re
+from collections.abc import Callable
 from datetime import date
 from uuid import uuid4
 
 from app.agent.parser import ConstraintParser
 from app.agent.replanning import AgentReplanInterpreter
+from app.agent.shape_change import read_shape_change
 from app.models.agent import AgentRun, AgentSession
 from app.orchestration.contracts import (
     AgentRunStatus,
     InteractionAnswer,
+    InteractionOption,
     InteractionRequest,
+    InteractionType,
     ScopeClass,
     ScopeDecision,
     ToolEffect,
@@ -38,12 +42,20 @@ from app.schemas.agent import (
     AgentSessionCollectionResponse,
     AgentSessionResponse,
 )
-from app.schemas.meal_plan import MealPlanReplanPreviewRequest, WeeklyMealPlanRequest, default_plan_shape
+from app.schemas.meal_plan import (
+    MealPlanReplanEventResponse,
+    MealPlanReplanPreviewRequest,
+    MealPlanShape,
+    WeeklyMealPlanRequest,
+    default_plan_shape,
+)
 from app.services.meal_plan import WeeklyMealPlanService
 from app.services.replanning import (
     MealPlanReplanningService,
     MealPlanReplanValidationError,
 )
+
+KEEP_SHAPE_FIELD = "plan_shape.keep"
 
 
 class AgentSessionNotFoundError(LookupError):
@@ -108,6 +120,7 @@ class AgentSessionService:
         household_id: int,
         max_history_messages: int = 20,
         starting_constraints: AgentConstraintState | None = None,
+        keep_plan_shape: Callable[[MealPlanShape], None] | None = None,
     ) -> None:
         # A new conversation starts from the saved household, so it does not ask what the
         # profile already says; anything the message states is merged over it.
@@ -123,6 +136,8 @@ class AgentSessionService:
         self.actor_user_id = actor_user_id
         self.household_id = household_id
         self.max_history_messages = max_history_messages
+        # Saves a shape changed in the conversation as the household's usual one, on a yes (ADR-0046).
+        self.keep_plan_shape = keep_plan_shape
 
     def create(self, message: str, *, idempotency_key: str | None = None) -> AgentSessionResponse:
         current = (self.starting_constraints or AgentConstraintState()).model_copy(deep=True)
@@ -302,6 +317,8 @@ class AgentSessionService:
 
     @staticmethod
     def _interaction_value_as_message(request: InteractionRequest, value: object) -> str:
+        if request.field_path == KEEP_SHAPE_FIELD:
+            return "Keep it as our usual" if value == "keep" else "Just this week"
         if request.field_path == "household_size":
             if isinstance(value, bool) or not isinstance(value, (int, float, str)):
                 raise AgentSessionNotReadyError("Household size must be a number.")
@@ -326,6 +343,13 @@ class AgentSessionService:
     ) -> AgentSessionResponse:
         if snapshot.plan_id is None:
             raise AgentSessionNotReadyError("Generate a plan before requesting a replanning event.")
+        interaction = snapshot.pending_interaction
+        if interaction is not None and interaction.field_path == KEEP_SHAPE_FIELD:
+            return self._answer_keep_shape(session_id, snapshot, message)
+        if not snapshot.clarification_questions:
+            changed = self._change_shape(session_id, snapshot, message)
+            if changed is not None:
+                return changed
         scope_decision = self.scope_policy.classify(message)
         if scope_decision.scope_class is ScopeClass.AMBIGUOUS and snapshot.clarification_questions:
             scope_decision = ScopeDecision(
@@ -400,6 +424,86 @@ class AgentSessionService:
                     pending_event_id=preview.id,
                     scope_decision=scope_decision,
                 )
+        if updated is None:
+            raise AgentSessionNotFoundError
+        return self._to_response(updated)
+
+    def _change_shape(
+        self, session_id: int, snapshot: AgentSessionResponse, message: str
+    ) -> AgentSessionResponse | None:
+        """A request to add, drop or recompose a meal, previewed; None when the message asks for something else."""
+        plan = self.meal_plan_service.get(snapshot.plan_id)
+        if plan is None:
+            raise AgentSessionNotFoundError
+        if self.replan_interpreter._event_type(message.lower()) is not None:
+            return None  # swap, skip, lock or can't buy: one dish, not the meal's shape
+        day = self.replan_interpreter.day_index(message.lower(), plan)
+        intent = read_shape_change(message, plan=plan, day_index=day)
+        if intent is None:
+            return None
+        decision = ScopeDecision(
+            scope_class=ScopeClass.DOMAIN_ACTION,
+            detected_intents=["change_plan_shape"],
+            supported_segments=[message],
+            should_mutate_state=True,
+            reason_code="PLAN_SHAPE_CHANGE",
+        )
+        try:
+            preview = self.replanning_service.preview_shape(plan_id=plan.id, request=intent.request)
+        except (MealPlanReplanValidationError, WeeklyPlanSelectionError) as error:
+            reply, pending, draft = f"I could not make that change: {error}", None, AgentReplanDraft()
+        else:
+            reply, pending = self._describe_shape_preview(intent.summary, preview), preview.id
+            draft = AgentReplanDraft(event_type="CHANGE_SHAPE", reason=message.strip())
+        updated = self.repository.append_replan_exchange(
+            session_id,
+            user_message=message,
+            assistant_message=reply,
+            draft=draft,
+            clarification_questions=[],
+            pending_event_id=pending,
+            scope_decision=decision,
+        )
+        if updated is None:
+            raise AgentSessionNotFoundError
+        return self._to_response(updated)
+
+    @staticmethod
+    def _describe_shape_preview(summary: str, preview: MealPlanReplanEventResponse) -> str:
+        change = preview.shape_change
+        parts = [f"{summary}."]
+        if change and change.added:
+            parts.append(f"New: {', '.join(dish.recipe_title for dish in change.added)}.")
+        if change and change.removed:
+            count = len(change.removed)
+            parts.append(f"{count} {'dish comes' if count == 1 else 'dishes come'} off the week.")
+        delta = preview.purchase_total_delta_sgd
+        parts.append(f"Groceries {'+' if delta >= 0 else '−'}S${abs(delta):.2f}. Nothing changes until you confirm.")
+        return " ".join(parts)
+
+    def _answer_keep_shape(self, session_id: int, snapshot: AgentSessionResponse, message: str) -> AgentSessionResponse:
+        """After a week's shape changed: keep it as the household's usual one only on a clear yes."""
+        text = message.strip().lower()
+        just_this_week = any(word in text for word in ("just this week", "only this week", "no", "不", "只"))
+        keep = not just_this_week and any(
+            word in text for word in ("keep", "yes", "usual", "save", "好", "是", "保存", "存", "习惯")
+        )
+        plan = self.meal_plan_service.get(snapshot.plan_id) if keep else None
+        if keep and plan is not None and plan.plan_shape is not None and self.keep_plan_shape is not None:
+            self.keep_plan_shape(plan.plan_shape)
+            reply = "Saved. New weeks will plan these meals too; you can change them any time in your profile."
+        elif keep:
+            reply = "I couldn't save that to your household, so only this week changed."
+        else:
+            reply = "OK, only this week changes. Your usual meals stay as they are."
+        updated = self.repository.append_replan_exchange(
+            session_id,
+            user_message=message,
+            assistant_message=reply,
+            draft=AgentReplanDraft(),
+            clarification_questions=[],
+            pending_event_id=None,
+        )
         if updated is None:
             raise AgentSessionNotFoundError
         return self._to_response(updated)
@@ -563,9 +667,30 @@ class AgentSessionService:
             arguments={"plan_id": plan_id, "event_id": event_id, "base_revision": base_revision},
             result_reference=f"meal-plan:{plan_id}:revision:{result.plan.revision}",
         )
+        ask_keep = (
+            result.event.shape_change is not None
+            and result.event.shape_change.scope == "week"
+            and self.keep_plan_shape is not None
+        )
+        question = "Should new weeks plan meals this way too?"
         updated = self.repository.finish_replan(
             session_id,
-            assistant_message=("Done. Your week and shopping list are updated."),
+            assistant_message="Done. Your week and shopping list are updated." + (f" {question}" if ask_keep else ""),
+            pending_interaction=(
+                InteractionRequest(
+                    type=InteractionType.QUICK_REPLY,
+                    prompt=question,
+                    field_path=KEEP_SHAPE_FIELD,
+                    question_id=f"keep-shape-{event_id}",
+                    options=[
+                        InteractionOption(id="keep", label="Keep it as our usual", value="keep"),
+                        InteractionOption(id="week", label="Just this week", value="week"),
+                    ],
+                    context_version=snapshot.context_version,
+                ).model_dump(mode="json")
+                if ask_keep
+                else None
+            ),
         )
         if updated is None:
             self._fail_run(run, AgentSessionNotFoundError())
