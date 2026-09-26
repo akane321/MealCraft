@@ -93,7 +93,9 @@ def main() -> None:
         p = exact_two_sided(only_first, only_first + only_second)
         rows.append((first, second, isolates, sum(a.values()), sum(b.values()), only_first, only_second, p))
         pvalues.append(p)
-    for (first, second, isolates, sa, sb, only_first, only_second, p), adjusted in zip(rows, holm(pvalues), strict=True):
+    for (first, second, isolates, sa, sb, only_first, only_second, p), adjusted in zip(
+        rows, holm(pvalues), strict=True
+    ):
         lines.append(
             f"| {first} vs {second} | {isolates} | {sa}/{len(episodes)} | {sb}/{len(episodes)} "
             f"| {only_first} | {only_second} | {p:.3g} | {adjusted:.3g} |"
