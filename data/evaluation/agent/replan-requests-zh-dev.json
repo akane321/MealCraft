@@ -1,0 +1,253 @@
+{
+  "version": "replan-requests-zh-dev-v1",
+  "split": "developer",
+  "authored_by": "Claude Code (the session that builds the Chinese translation step); developer use only, never evidence",
+  "note": "Chinese swap requests with a catalog-checkable target, scored with scripts/check_embedding_heldout.py accepts.",
+  "cases": [
+    {
+      "request": "换成牛肉的",
+      "check": {
+        "type": "any_ingredient",
+        "values": [
+          "beef",
+          "ground_beef",
+          "beef_steak"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "想吃鱼",
+      "check": {
+        "type": "any_ingredient",
+        "values": [
+          "fish_fillet",
+          "cod",
+          "salmon",
+          "salmon_fillet",
+          "catfish",
+          "swordfish",
+          "milkfish",
+          "salt_cod"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "来点虾",
+      "check": {
+        "type": "any_ingredient",
+        "values": [
+          "shrimp"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "周三换成鸡肉",
+      "check": {
+        "type": "any_ingredient",
+        "values": [
+          "chicken",
+          "chicken_breast",
+          "chicken_thigh",
+          "chicken_wings",
+          "cooked_chicken"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "我想吃韩国菜",
+      "check": {
+        "type": "cuisine",
+        "values": [
+          "korean"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "换个泰国菜",
+      "check": {
+        "type": "cuisine",
+        "values": [
+          "thai"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "来个印度菜",
+      "check": {
+        "type": "cuisine",
+        "values": [
+          "indian"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "墨西哥菜吧",
+      "check": {
+        "type": "cuisine",
+        "values": [
+          "mexican",
+          "tex_mex"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "想吃意大利面",
+      "check": {
+        "type": "title_word",
+        "values": [
+          "pasta",
+          "spaghetti",
+          "linguine",
+          "penne",
+          "fettuccine",
+          "lasagna",
+          "macaroni"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "换成咖喱",
+      "check": {
+        "type": "title_word",
+        "values": [
+          "curry"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "来碗汤",
+      "check": {
+        "type": "course",
+        "values": [
+          "soup"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "换成素食的",
+      "check": {
+        "type": "dietary_tag",
+        "values": [
+          "vegetarian",
+          "vegan"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "想吃面条",
+      "check": {
+        "type": "title_word",
+        "values": [
+          "noodle",
+          "noodles",
+          "ramen",
+          "udon",
+          "soba",
+          "pho",
+          "lo mein",
+          "chow mein"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "有没有豆腐的菜",
+      "check": {
+        "type": "any_ingredient",
+        "values": [
+          "tofu",
+          "firm_tofu"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "想吃米饭",
+      "check": {
+        "type": "any_ingredient",
+        "values": [
+          "rice",
+          "brown_rice",
+          "glutinous_rice",
+          "wild_rice"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "换成猪肉",
+      "check": {
+        "type": "any_ingredient",
+        "values": [
+          "pork",
+          "pork_chop",
+          "pork_belly",
+          "ground_pork"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "来点蘑菇",
+      "check": {
+        "type": "any_ingredient",
+        "values": [
+          "mushroom",
+          "dried_shiitake",
+          "dried_mushroom"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "想吃日本料理",
+      "check": {
+        "type": "cuisine",
+        "values": [
+          "japanese"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "换成三文鱼",
+      "check": {
+        "type": "any_ingredient",
+        "values": [
+          "salmon",
+          "salmon_fillet"
+        ]
+      },
+      "note": "developer"
+    },
+    {
+      "request": "来点辣的",
+      "check": {
+        "type": "any_ingredient",
+        "values": [
+          "chili_pepper",
+          "chili_powder",
+          "chili_paste",
+          "chili_oil",
+          "sambal_oelek",
+          "green_chili",
+          "chili_garlic_sauce",
+          "chili_sauce"
+        ]
+      },
+      "note": "developer"
+    }
+  ]
+}

@@ -1,0 +1,490 @@
+{
+  "version": "ingredient-matching-zh-dev-v1",
+  "split": "developer",
+  "authored_by": "Claude Code (the session that builds the Chinese-name fix), written before reading the Chinese alias file; developer use only, never evidence",
+  "note": "Short Chinese words a household types, and every catalog id that is a correct reading. Six of these (茄子 西兰花 糯米 米粉 生抽 叁巴) were misses on the spent 2026-09-26 held-out set; nothing here is held-out evidence.",
+  "cases": [
+    {
+      "term": "茄子",
+      "context": "我家里有茄子",
+      "accept": [
+        "eggplant"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "西兰花",
+      "context": "我家里有西兰花",
+      "accept": [
+        "broccoli"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "糯米",
+      "context": "我家里有糯米",
+      "accept": [
+        "glutinous_rice"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "米粉",
+      "context": "我家里有米粉",
+      "accept": [
+        "rice_noodles"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "生抽",
+      "context": "我家里有生抽",
+      "accept": [
+        "soy_sauce"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "叁巴",
+      "context": "我家里有叁巴",
+      "accept": [
+        "sambal_oelek"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "香菜",
+      "context": "我家里有香菜",
+      "accept": [
+        "cilantro"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "葱",
+      "context": "我家里有葱",
+      "accept": [
+        "green_onion"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "小葱",
+      "context": "我家里有小葱",
+      "accept": [
+        "green_onion"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "姜",
+      "context": "我家里有姜",
+      "accept": [
+        "ginger"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "蒜",
+      "context": "我家里有蒜",
+      "accept": [
+        "garlic"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "辣椒",
+      "context": "我家里有辣椒",
+      "accept": [
+        "chili_pepper",
+        "green_chili"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "豆腐",
+      "context": "我家里有豆腐",
+      "accept": [
+        "tofu",
+        "firm_tofu"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "五花肉",
+      "context": "我家里有五花肉",
+      "accept": [
+        "pork_belly"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "肉末",
+      "context": "我家里有肉末",
+      "accept": [
+        "ground_pork",
+        "ground_beef"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "牛肉",
+      "context": "我家里有牛肉",
+      "accept": [
+        "beef",
+        "beef_steak"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "鸡翅",
+      "context": "我家里有鸡翅",
+      "accept": [
+        "chicken_wings"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "鸡腿",
+      "context": "我家里有鸡腿",
+      "accept": [
+        "chicken_thigh"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "虾",
+      "context": "我家里有虾",
+      "accept": [
+        "shrimp"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "鱿鱼",
+      "context": "我家里有鱿鱼",
+      "accept": [
+        "squid"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "鳕鱼",
+      "context": "我家里有鳕鱼",
+      "accept": [
+        "cod"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "三文鱼",
+      "context": "我家里有三文鱼",
+      "accept": [
+        "salmon",
+        "salmon_fillet"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "鸡蛋",
+      "context": "我家里有鸡蛋",
+      "accept": [
+        "egg"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "蚝油",
+      "context": "我家里有蚝油",
+      "accept": [
+        "oyster_sauce"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "麻油",
+      "context": "我家里有麻油",
+      "accept": [
+        "sesame_oil"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "豆芽",
+      "context": "我家里有豆芽",
+      "accept": [
+        "bean_sprouts"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "白菜",
+      "context": "我家里有白菜",
+      "accept": [
+        "bok_choy",
+        "cabbage"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "菠菜",
+      "context": "我家里有菠菜",
+      "accept": [
+        "spinach",
+        "baby_spinach"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "胡萝卜",
+      "context": "我家里有胡萝卜",
+      "accept": [
+        "carrot"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "土豆",
+      "context": "我家里有土豆",
+      "accept": [
+        "potato"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "香菇",
+      "context": "我家里有香菇",
+      "accept": [
+        "dried_shiitake",
+        "mushroom"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "苦瓜",
+      "context": "我家里有苦瓜",
+      "accept": [
+        "bitter_melon"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "南瓜",
+      "context": "我家里有南瓜",
+      "accept": [
+        "pumpkin"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "地瓜",
+      "context": "我家里有地瓜",
+      "accept": [
+        "sweet_potato"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "芋头",
+      "context": "我家里有芋头",
+      "accept": [
+        "taro"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "玉米",
+      "context": "我家里有玉米",
+      "accept": [
+        "corn"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "花生",
+      "context": "我家里有花生",
+      "accept": [
+        "peanut"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "椰浆",
+      "context": "我家里有椰浆",
+      "accept": [
+        "coconut_milk",
+        "coconut_cream"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "香茅",
+      "context": "我家里有香茅",
+      "accept": [
+        "lemongrass"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "南姜",
+      "context": "我家里有南姜",
+      "accept": [
+        "galangal"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "青柠",
+      "context": "我家里有青柠",
+      "accept": [
+        "lime"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "亚参",
+      "context": "我家里有亚参",
+      "accept": [
+        "tamarind"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "峇拉煎",
+      "context": "我家里有峇拉煎",
+      "accept": [
+        "shrimp_paste"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "鱼露",
+      "context": "我家里有鱼露",
+      "accept": [
+        "fish_sauce"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "海鲜酱",
+      "context": "我家里有海鲜酱",
+      "accept": [
+        "hoisin"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "辣椒油",
+      "context": "我家里有辣椒油",
+      "accept": [
+        "chili_oil"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "料酒",
+      "context": "我家里有料酒",
+      "accept": [
+        "wine_cooking",
+        "rice_wine"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "米醋",
+      "context": "我家里有米醋",
+      "accept": [
+        "rice_vinegar"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "黑醋",
+      "context": "我家里有黑醋",
+      "accept": [
+        "black_vinegar"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "五香粉",
+      "context": "我家里有五香粉",
+      "accept": [
+        "chinese_five_spice"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "生粉",
+      "context": "我家里有生粉",
+      "accept": [
+        "cornstarch",
+        "potato_starch"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "粿条",
+      "context": "我家里有粿条",
+      "accept": [
+        "rice_noodles"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "乌冬面",
+      "context": "我家里有乌冬面",
+      "accept": [
+        "udon_noodles"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "云吞皮",
+      "context": "我家里有云吞皮",
+      "accept": [
+        "wonton_wrapper"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "天贝",
+      "context": "我家里有天贝",
+      "accept": [
+        "tempeh"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "江鱼仔",
+      "context": "我家里有江鱼仔",
+      "accept": [
+        "anchovy"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "粉丝",
+      "context": "我家里有粉丝",
+      "accept": [
+        "cellophane_noodles",
+        "mung_bean_starch"
+      ],
+      "kind": "chinese"
+    },
+    {
+      "term": "腐乳",
+      "context": "不要腐乳",
+      "accept": [],
+      "kind": "none"
+    },
+    {
+      "term": "榴莲",
+      "context": "我家里有榴莲",
+      "accept": [
+        "durian"
+      ],
+      "kind": "chinese"
+    }
+  ]
+}

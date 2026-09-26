@@ -79,3 +79,18 @@ def test_a_condiment_does_not_make_a_dish_what_was_asked_for():
     salmon = _recipe(2, "slug:salmon-rice", "Rice Bowl", ["salmon fish fillet", "rice"])
     scores = RecipeSimilarity(None).scores("Can Wednesday be fish instead?", [omelet, salmon])
     assert scores == {1: 0.0, 2: 1.0}
+
+
+def test_a_chinese_request_is_scored_in_english_too():
+    from app.planning.recipe_similarity import in_english
+
+    assert in_english("牛肉").endswith("beef")
+    assert "korean" in in_english("韩国菜")
+    assert "noodles" in in_english("面条") and "pasta" in in_english("意大利面")
+    assert in_english("fish") == "fish"  # nothing to translate
+
+
+def test_without_the_model_a_chinese_request_still_finds_its_dish():
+    beef = _recipe(1, "slug:beef-stew", "Beef Stew", ["beef", "carrot"])
+    tofu = _recipe(2, "slug:tofu-soba", "Tofu Soba", ["tofu"])
+    assert RecipeSimilarity(None).scores("换成牛肉的", [beef, tofu]) == {1: 3.0, 2: 0.0}

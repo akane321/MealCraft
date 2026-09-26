@@ -1,6 +1,9 @@
 """Build the sealed authoring packet for the embedding held-out sets (tasks A and B).
 
-    python scripts/build_embedding_heldout_packet.py OUT_DIR
+    python scripts/build_embedding_heldout_packet.py OUT_DIR [PROMPT.md]
+
+PROMPT defaults to docs/evaluation/embedding-heldout-prompt.md; the Chinese set uses
+docs/evaluation/chinese-heldout-prompt.md.
 
 The packet holds the rules, the templates, the checker and catalog facts only: no implementation, no
 developer set, no model-generated aliases, so its authors cannot write to the system's known weaknesses.
@@ -23,7 +26,8 @@ def main() -> None:
     (out / "data").mkdir(parents=True, exist_ok=True)
     (out / "scripts").mkdir(exist_ok=True)
     (out / "out").mkdir(exist_ok=True)
-    shutil.copy(ROOT / "docs/evaluation/embedding-heldout-prompt.md", out / "PROMPT.md")
+    prompt = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "docs/evaluation/embedding-heldout-prompt.md"
+    shutil.copy(prompt, out / "PROMPT.md")
     shutil.copy(ROOT / "scripts/check_embedding_heldout.py", out / "scripts/check_embedding_heldout.py")
     shutil.copy(ROOT / "data/evaluation/agent/TEMPLATE-ingredient-terms.json", out / "out/ingredient-terms.json")
     shutil.copy(ROOT / "data/evaluation/agent/TEMPLATE-swap-requests.json", out / "out/swap-requests.json")
