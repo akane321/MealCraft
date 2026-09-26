@@ -5,8 +5,7 @@ planned, like the reviewed list in data/recipes/withdrawn.json. catalog_override
 file-based knowledge (ingredient aliases and Chinese names, the FairPrice product mapping), one row per
 edited ingredient and kind; the files stay the baseline. Every change is also written to audit_events.
 
-RE-CHAIN AT MERGE: written against 20260927_0023 while other branches add 20260926_0022 and 0024 in
-parallel. When they land, set down_revision to the latest of them so Alembic keeps a single head.
+It follows 20260927_0023 (runtime settings), the last revision on main when it landed.
 
 Revision ID: 20260928_0025
 Revises: 20260927_0023

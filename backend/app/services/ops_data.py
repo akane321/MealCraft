@@ -44,8 +44,8 @@ class OpsDataConflictError(ValueError):
 
 
 def _planning_changed() -> None:
-    # feat/meal-day-week caches the planning candidates; make this a direct call once both branches merge.
-    getattr(recipe_repo, "clear_planning_pool", lambda: None)()
+    # The planner keeps its candidates for a few minutes; an edit must reach the next plan.
+    recipe_repo.clear_planning_pool()
 
 
 def _names(values: list[str]) -> list[str]:
