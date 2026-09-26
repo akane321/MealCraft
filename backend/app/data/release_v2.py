@@ -267,6 +267,14 @@ def _line_corrections(session: Session, recipes: list[dict]) -> dict[tuple[str, 
     return corrected
 
 
+APOSTROPHE_CAPITAL = re.compile(r"(?<=[A-Za-z])'([A-Z])\b")
+
+
+def display_title(title: str) -> str:
+    """The release title-cased names, so "Polly's" arrived as "Polly'S"."""
+    return APOSTROPHE_CAPITAL.sub(lambda match: "'" + match.group(1).lower(), title)
+
+
 def _import_recipes(
     session: Session,
     recipes: list[dict],
@@ -348,7 +356,7 @@ def _fill_recipe(recipe: Recipe, record: dict) -> None:
     nutrition = record["nutrition"]
     source = record["source"]
     recipe.slug = recipe_slug(record["recipe_id"], record["title"])
-    recipe.title = record["title"][:200]
+    recipe.title = display_title(record["title"])[:200]
     recipe.description = (
         f"{record['cuisine'].replace('_', ' ').title()} {record['course'].replace('_', ' ')} from {source['dataset']}."
     )

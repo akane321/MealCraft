@@ -7,7 +7,7 @@
 - Developer gate: **PASS**
 - Agent provider: **fixture**
 - Live API used: **no**
-- Recorded failure cases: **40**
+- Recorded failure cases: **36**
 
 ## Inputs
 
@@ -47,14 +47,14 @@ Every number below was computed over exactly these files. A report whose inputs 
 | Metric | Result |
 |---|---:|
 | `case_count` | 24 |
-| `exact_case_rate` | 0.8333 |
+| `exact_case_rate` | 1.0 |
 | `field_precision` | 1.0 |
-| `field_recall` | 0.9149 |
-| `field_f1` | 0.9556 |
+| `field_recall` | 1.0 |
+| `field_f1` | 1.0 |
 | `hallucinated_field_count` | 0 |
-| `clarification_accuracy` | 0.9583 |
+| `clarification_accuracy` | 1.0 |
 | `medical_boundary_accuracy` | 1.0 |
-| `failure_case_count` | 4 |
+| `failure_case_count` | 0 |
 
 ## Agent scope developer set
 
@@ -130,7 +130,3 @@ Every number below was computed over exactly these files. A report whose inputs 
 | 34 | heldout-greedy-baseline | hold-034 | consecutive_recipe_repetition |
 | 35 | heldout-greedy-baseline | hold-035 | consecutive_recipe_repetition |
 | 36 | heldout-greedy-baseline | hold-036 | consecutive_recipe_repetition |
-| 37 | agent-benchmark | agent-017 | extraction_mismatch |
-| 38 | agent-benchmark | agent-018 | extraction_mismatch |
-| 39 | agent-benchmark | agent-019 | extraction_mismatch |
-| 40 | agent-benchmark | agent-024 | extraction_mismatch, clarification_mismatch |

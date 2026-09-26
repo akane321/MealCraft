@@ -273,3 +273,25 @@ def test_plan_and_trace_rollback_together_on_storage_error(recipe_client, monkey
     with database() as session:
         assert session.scalars(select(MealPlan)).all() == []
         assert session.scalars(select(OperationRun).where(OperationRun.run_type == "planning")).all() == []
+
+
+def test_a_budget_below_the_best_ranked_week_is_still_planned(recipe_client):
+    """The ranking never sees prices; with a budget the packet and a cost-led fallback search do."""
+    from app.core.paths import repository_root
+    from app.data.catalog import import_catalog, load_catalog
+
+    root = repository_root()
+    catalog = load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
+    with database() as session:
+        import_catalog(session, catalog)
+    free = recipe_client.post("/api/plans/generate", json=REQUEST).json()["grocery_estimate"]["purchase_total_sgd"]
+
+    budget = 60  # about two thirds of the best-ranked week (S$89.20 on this catalog)
+    assert free > budget
+    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "weekly_budget_sgd": budget})
+    assert response.status_code == 201, response.text
+    assert response.json()["grocery_estimate"]["purchase_total_sgd"] <= budget
+
+    too_low = recipe_client.post("/api/plans/generate", json={**REQUEST, "weekly_budget_sgd": 20})
+    assert too_low.status_code == 422
+    assert "couldn't fit seven dinners into S$20.00" in too_low.json()["detail"]

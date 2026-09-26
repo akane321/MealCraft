@@ -134,7 +134,7 @@ class AgentSessionRepository:
         agent_session.messages.append(
             AgentMessage(
                 role="assistant",
-                content=f"The seven-day plan is ready and saved as plan #{plan_id}.",
+                content="Here's your week. Tap a dinner for the recipe, or ask me to swap anything.",
             )
         )
         self.session.commit()

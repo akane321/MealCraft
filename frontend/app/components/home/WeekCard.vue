@@ -10,6 +10,8 @@ const today = todayIsoDate();
 const avgCook = computed(() => Math.round(props.days.reduce((sum, day) => sum + day.recipe.total_time_minutes, 0) / (props.days.length || 1)));
 const perPlate = computed(() => Math.round(perDinner(props.days)?.calories_kcal ?? 0));
 const budget = computed(() => budgetLine(props.estimate));
+// A tight budget or few eligible dishes can bring a dinner back; say so rather than let it look like a slip.
+const repeats = computed(() => new Set(props.days.map(day => day.recipe.slug)).size < props.days.length);
 </script>
 
 <template>
@@ -46,6 +48,7 @@ const budget = computed(() => budgetLine(props.estimate));
       </button>
       <button type="button" class="mc-pill" @click="emit('open', 'nutrition')">Nutrition</button>
       <span v-if="budget" class="note" :class="{ over: estimate.within_weekly_budget === false }"><span class="dot" />{{ budget }}</span>
+      <p v-if="repeats" class="repeat-note">Some dinners appear twice: not enough different dishes fit your limits this week.</p>
     </div>
   </section>
 </template>
@@ -74,6 +77,7 @@ h3 em { color: var(--accent); }
 .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px 24px; border-top: 1px solid var(--line); background: rgba(242, 237, 228, 0.015); }
 .note { margin-left: auto; font-size: 12px; color: var(--sage); display: inline-flex; align-items: center; gap: 6px; }
 .note.over { color: var(--warn); }
+.repeat-note { flex-basis: 100%; margin: 2px 0 0; font-size: 12px; color: var(--t3); }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
 @media (max-width: 760px) {

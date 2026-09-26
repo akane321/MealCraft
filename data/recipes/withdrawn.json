@@ -1,0 +1,10 @@
+{
+  "schema_version": "withdrawn-recipes-v1",
+  "note": "Release recipes that stay in the catalog but are never planned, each with the reason. Remove an entry once the next release drops or fixes the recipe.",
+  "recipes": [
+    {
+      "slug": "v2-bacon-and-chicken-stir-fry-for-your-cat-5a2bdb57937a",
+      "reason": "Pet food, not a dinner for people (seen in a planned week on 2026-09-26)."
+    }
+  ]
+}

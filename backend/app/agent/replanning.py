@@ -1,5 +1,5 @@
 import re
-from datetime import date
+from datetime import date, timedelta
 
 from app.schemas.agent import AgentReplanDraft
 from app.schemas.meal_plan import WeeklyMealPlanResponse
@@ -89,7 +89,19 @@ class AgentReplanInterpreter:
             return "CANCEL_MEAL"
         if any(
             token in text
-            for token in ("replace", "swap", "change meal", "different meal", "换掉", "替换", "换餐", "换一顿")
+            for token in (
+                "replace",
+                "swap",
+                "instead",
+                "change meal",
+                "different meal",
+                "换掉",
+                "替换",
+                "换餐",
+                "换一顿",
+                "换成",
+                "改成",
+            )
         ):
             return "REPLACE_MEAL"
         return None
@@ -106,9 +118,10 @@ class AgentReplanInterpreter:
         if iso_date:
             return next((d.day_index for d in plan.days if d.planned_date.isoformat() == iso_date.group(1)), None)
 
-        if any(token in text for token in ("today", "今天")):
-            today = date.today()
-            return next((day.day_index for day in plan.days if day.planned_date == today), None)
+        for tokens, offset in ((("today", "tonight", "今天", "今晚"), 0), (("tomorrow", "明天"), 1)):
+            if any(token in text for token in tokens):
+                wanted = date.today() + timedelta(days=offset)
+                return next((day.day_index for day in plan.days if day.planned_date == wanted), None)
 
         for weekday, aliases in self._weekday_aliases.items():
             if any(re.search(rf"(?<![a-z]){re.escape(alias)}(?![a-z])", text) for alias in aliases):

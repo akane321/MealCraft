@@ -30,6 +30,12 @@ NUMBER_WORDS = {
     "eleven": 11,
     "twelve": 12,
 }
+CHINESE_NUMBERS = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
+# "No pork", "we don't eat pork", "exclude mushrooms", "skip the onion".
+ENGLISH_EXCLUSION = (
+    r"\b(?:no|without|avoid|exclude|excluding|skip|(?:don't|do not|doesn't|does not|can't|cannot|won't|never)"
+    r"\s+(?:eat|have|like|want))\s+(?:any\s+|the\s+)?"
+)
 
 
 class AgentConfigurationError(RuntimeError):
@@ -72,6 +78,30 @@ class RuleBasedConstraintParser:
         "tomato": "tomato",
         "番茄": "tomato",
         "西红柿": "tomato",
+        # The exclusions households state most; the hierarchy widens each (pork -> bacon).
+        "pork": "pork",
+        "猪肉": "pork",
+        "beef": "beef",
+        "牛肉": "beef",
+        "lamb": "lamb",
+        "mutton": "lamb",
+        "羊肉": "lamb",
+        "chicken": "chicken",
+        "鸡肉": "chicken",
+        "mushroom": "mushroom",
+        "蘑菇": "mushroom",
+        "onion": "onion",
+        "洋葱": "onion",
+        "garlic": "garlic",
+        "大蒜": "garlic",
+        "cilantro": "cilantro",
+        "coriander": "cilantro",
+        "香菜": "cilantro",
+        # Cooking wine is one ingredient, not the whole alcohol family.
+        "cooking wine": "wine_cooking",
+        "shaoxing wine": "wine_cooking",
+        "料酒": "wine_cooking",
+        "alcohol": "group:alcohol",
     }
     _allergen_aliases = {
         "peanut": "peanut",
@@ -110,7 +140,7 @@ class RuleBasedConstraintParser:
     ) -> AgentConstraintExtraction:
         del acknowledged_unknowns, history
         text = message.strip()
-        lower = text.lower()
+        lower = text.lower().replace("’", "'")
         extraction = AgentConstraintExtraction()
 
         people = self._first_number(
@@ -125,14 +155,19 @@ class RuleBasedConstraintParser:
             )
             if match:
                 people = NUMBER_WORDS[match.group(1)]
-        if people is None and re.search(r"(?:两|二)\s*(?:人|个人)", text):
-            people = 2
+        if people is None:
+            # 两个人, 三口人, 四人.
+            match = re.search(r"([一二两三四五六七八九十])\s*(?:个人|口人|人)", text)
+            if match:
+                people = CHINESE_NUMBERS[match.group(1)]
         extraction.household_size = int(people) if people is not None else None
 
         per_meal = self._first_number(
             lower,
             [
                 r"(?:s\$|\$)?\s*(\d+(?:\.\d+)?)\s*(?:per\s*meal|each\s*meal)",
+                # "a S$12 budget for each dinner", "S$10 per dinner".
+                r"(?:s\$|\$)\s*(\d+(?:\.\d+)?)\s*(?:budget\s*)?(?:for\s*)?(?:per|each|a)\s*(?:meal|dinner)\b",
                 r"(?:每餐|一餐)(?:预算|不超过|最多|大约|约)?\s*(?:s\$|\$|新币)?\s*(\d+(?:\.\d+)?)",
                 r"(?:预算|budget)[^\d]{0,8}(\d+(?:\.\d+)?)[^\n]{0,12}(?:每餐|per\s*meal)",
             ],
@@ -155,6 +190,15 @@ class RuleBasedConstraintParser:
                 r"(?:cook|cooking|做饭|烹饪)[^\d]{0,8}(\d+)\s*(?:minutes?|mins?|分钟)",
             ],
         )
+        if cooking_time is None:
+            # "Under half an hour", "an hour", 半小时, 一小时.
+            for pattern, minutes in (
+                (r"half\s+an?\s+hour|半(?:个)?小时", 30),
+                (r"\b(?:an|one)\s+hour\b|一(?:个)?小时", 60),
+            ):
+                if re.search(pattern, lower):
+                    cooking_time = minutes
+                    break
         extraction.max_cooking_time_minutes = int(cooking_time) if cooking_time is not None else None
 
         if any(token in lower for token in ("low sodium", "lower sodium", "低盐", "少盐")):
@@ -185,11 +229,16 @@ class RuleBasedConstraintParser:
         ]
         extraction.allergens = sorted(set(allergens)) or None
         excluded: list[str] = []
-        for alias, normalized_name in {**self._ingredient_aliases, **self._allergen_aliases}.items():
-            english_exclusion = re.search(rf"\b(?:no|without|avoid)\s+{re.escape(alias)}s?\b", lower)
-            chinese_exclusion = re.search(rf"(?:不吃|不要|避免|禁用)\s*{re.escape(alias)}", lower)
-            if english_exclusion or chinese_exclusion:
-                excluded.append(normalized_name)
+        named: list[tuple[int, int]] = []
+        aliases = {**self._ingredient_aliases, **self._allergen_aliases}
+        # Longest first, so "no chicken breast" does not also exclude every chicken.
+        for alias in sorted(aliases, key=len, reverse=True):
+            english = re.search(rf"{ENGLISH_EXCLUSION}({re.escape(alias)})s?\b", lower)
+            chinese = re.search(rf"(?:不吃|不要|避免|禁用|不放|不加)\s*({re.escape(alias)})", lower)
+            for match in (english, chinese):
+                if match and not any(start <= match.start(1) < end for start, end in named):
+                    named.append(match.span(1))
+                    excluded.append(aliases[alias])
         extraction.excluded_ingredients = sorted(set(excluded)) or None
 
         targets = NutritionTargets(
@@ -224,9 +273,17 @@ class RuleBasedConstraintParser:
             )
             if pantry_context:
                 ingredients: list[AvailableIngredientInput] = []
-                for alias, normalized_name in self._ingredient_aliases.items():
-                    if alias not in lower:
+                held: list[tuple[int, int]] = []
+                refused = set(extraction.excluded_ingredients or ())
+                # Longest first: "chicken breast" at home is not also "chicken".
+                for alias in sorted(self._ingredient_aliases, key=len, reverse=True):
+                    normalized_name = self._ingredient_aliases[alias]
+                    if alias not in lower or normalized_name.startswith("group:") or normalized_name in refused:
                         continue
+                    at = lower.index(alias)
+                    if any(start <= at < end for start, end in held):
+                        continue
+                    held.append((at, at + len(alias)))
                     nearby = lower[max(0, lower.index(alias) - 16) : lower.index(alias) + len(alias) + 16]
                     quantity_match = re.search(r"(\d+(?:\.\d+)?)\s*(g|kg|ml|l|克|千克|毫升|升)", nearby)
                     ingredients.append(
@@ -269,25 +326,32 @@ class RuleBasedConstraintParser:
 
     @staticmethod
     def _summary(extraction: AgentConstraintExtraction) -> str:
+        def words(values) -> str:
+            return ", ".join(value.replace("group:", "").replace("_", " ").replace("-", " ") for value in values)
+
         details: list[str] = []
         if extraction.household_size:
-            details.append(f"{extraction.household_size} people")
+            size = extraction.household_size
+            details.append(f"{size} {'person' if size == 1 else 'people'}")
+        if extraction.weekly_budget_sgd:
+            details.append(f"S${extraction.weekly_budget_sgd:g} for the week")
         if extraction.budget_per_meal_sgd:
-            details.append(f"S${extraction.budget_per_meal_sgd:g} per meal")
+            details.append(f"S${extraction.budget_per_meal_sgd:g} a dinner")
+        if extraction.max_cooking_time_minutes:
+            details.append(f"up to {extraction.max_cooking_time_minutes} minutes of cooking")
+        if extraction.dietary_preferences:
+            details.append(words(extraction.dietary_preferences))
         if extraction.health_preferences:
-            details.extend(value.replace("-", " ") for value in extraction.health_preferences)
+            details.append(words(extraction.health_preferences))
         if extraction.allergens:
-            details.append("allergens: " + ", ".join(extraction.allergens))
+            details.append(f"nothing with {words(extraction.allergens)} (allergy)")
         if extraction.excluded_ingredients:
-            details.append("excluded: " + ", ".join(extraction.excluded_ingredients))
+            details.append(f"no {words(extraction.excluded_ingredients)}")
         if extraction.available_ingredients:
-            details.append(
-                "available: "
-                + ", ".join(item.normalized_name.replace("_", " ") for item in extraction.available_ingredients)
-            )
+            details.append(f"{words(item.normalized_name for item in extraction.available_ingredients)} at home")
         if details:
-            return "I captured " + "; ".join(details) + "."
-        return "I checked that message against the planning constraints."
+            return "Got it: " + ", ".join(details) + "."
+        return "Noted."
 
 
 @dataclass(frozen=True)

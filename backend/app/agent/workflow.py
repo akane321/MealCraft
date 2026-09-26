@@ -97,7 +97,7 @@ class AgentConstraintWorkflow:
                 )
 
         status = "ready" if not missing else "collecting"
-        parts = [extraction.assistant_summary or "I updated the planning constraints."]
+        parts = [extraction.assistant_summary or "Noted."]
         if extraction.medical_request_detected:
             parts.append(
                 "MealCraft does not provide disease-specific or medical dietary advice. "
@@ -107,10 +107,7 @@ class AgentConstraintWorkflow:
         if questions:
             parts.append(questions[0])
         else:
-            parts.append(
-                "I have enough information to generate the seven-day plan. "
-                "Review the constraints, then confirm when ready."
-            )
+            parts.append("That's everything I need. Check the details below and plan your week when you're ready.")
 
         return {
             "merged_constraints": merged.model_dump(mode="json"),

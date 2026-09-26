@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 
 from app.data import ingredient_hierarchy
@@ -22,6 +23,13 @@ LOWER_CALORIE_UPPER_RANGE_KCAL = 1000.0
 # The planner searches at most this many recommendations. They are the best
 # scored within budget across the whole catalog, not the first rows by id.
 CANDIDATE_LIMIT = 500
+
+
+def title_mentions(title: str, avoided: list[str]) -> list[str]:
+    """The household's avoided words that a recipe's name states outright (`pork` in "Pork Chops")."""
+    lowered = title.lower()
+    words = {item.replace("_", " ") for item in avoided if not item.startswith("group:")}
+    return sorted(word for word in words if re.search(rf"\b{re.escape(word)}(?:e?s)?\b", lowered))
 
 
 @dataclass(frozen=True)
@@ -76,6 +84,12 @@ class RecipeRecommendationEngine:
             reasons.append(
                 f"Contains excluded ingredient: {', '.join(self._named_by_household(excluded_matches, constraints))}."
             )
+
+        # A safety net for incomplete data: a release recipe can lose its main line
+        # ("Korean Pork Chops" with no pork listed), so its name is checked as well.
+        named = title_mentions(recipe.title, [*constraints.excluded_ingredients, *constraints.allergens])
+        if named and not excluded_matches:
+            reasons.append(f"Its name mentions {', '.join(named)}, which this household avoids.")
 
         if recipe.total_time_minutes > constraints.max_cooking_time_minutes:
             reasons.append(
