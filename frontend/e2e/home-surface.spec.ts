@@ -474,3 +474,71 @@ test("a session that expires mid-sentence keeps the draft and comes back to it",
   await page.getByRole("button", { name: "Open my week" }).click();
   await expect(page.getByLabel("Message MealCraft")).toHaveValue("Can Friday be vegetarian?");
 });
+
+test("asking for lunch too previews the new meals, then asks whether to keep it", async ({ page }) => {
+  await stubApi(page);
+  const dish = (day: number, title: string) => ({
+    entry_id: 0, day_index: day, meal_type: "lunch", role_id: "main", portion_share: 1, recipe_id: 100 + day,
+    recipe_slug: `lunch-${day}`, recipe_title: title, status: "planned", is_locked: false, recommendation_score: 80,
+  });
+  const change = {
+    ...replanEvent,
+    id: 12,
+    applied_revision: null,
+    status: "previewed",
+    event_type: "CHANGE_SHAPE",
+    before_entry: null,
+    after_entry: null,
+    purchase_total_delta_sgd: 21.4,
+    shape_change: {
+      meal_type: "lunch",
+      scope: "week",
+      day_indexes: [1, 2],
+      roles: [{ role_id: "main", courses: ["main", "salad", "soup"], required: true }],
+      removed: [],
+      added: [dish(1, "Chicken Soba Salad"), dish(2, "Lentil Soup")],
+      plan_shape: null,
+    },
+  };
+  const planned = session(true);
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  await page.route("**/api/agent/sessions/51/messages", route => route.fulfill(json({ ...planned, pending_replan: change })));
+  await page.route("**/api/agent/sessions/51/replan/confirm", route => route.fulfill(json({
+    session: {
+      ...planned,
+      pending_interaction: {
+        type: "quick_reply",
+        prompt: "Should new weeks plan meals this way too?",
+        field_path: "plan_shape.keep",
+        question_id: "keep-shape-12",
+        options: [{ id: "keep", label: "Keep it as our usual", value: "keep" }, { id: "week", label: "Just this week", value: "week" }],
+        allow_free_text: false,
+        context_version: 2,
+      },
+    },
+    event: { ...change, status: "applied" },
+    plan,
+  })));
+  let answer: { option_ids?: string[] } | null = null;
+  await page.route("**/api/agent/sessions/51/interactions", async (route) => {
+    answer = route.request().postDataJSON();
+    await route.fulfill(json(planned));
+  });
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+  await page.getByLabel("Message MealCraft").fill("Also plan lunch");
+  await page.getByRole("button", { name: "Send" }).click();
+
+  const card = page.getByLabel("Proposed change to your meals");
+  await expect(card.getByText("Lunch added for the rest of the week")).toBeVisible();
+  await expect(card.getByText("Chicken Soba Salad")).toBeVisible();
+  await expect(card.getByText("groceries +S$21.40")).toBeVisible();
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/15-shape-change.png` });
+
+  await card.getByRole("button", { name: "Confirm change" }).click();
+  await page.getByRole("button", { name: "Keep it as our usual" }).click();
+  await expect.poll(() => answer?.option_ids).toEqual(["keep"]);
+});

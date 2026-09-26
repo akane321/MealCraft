@@ -15,6 +15,21 @@ export interface HouseholdMemberInput {
   dietary_preferences: DietaryPreference[];
 }
 
+export type PlannedMealType = "breakfast" | "lunch" | "dinner";
+export type DishCourse = "main" | "side" | "salad" | "soup" | "breakfast" | "dessert" | "snack_appetizer" | "baked_good";
+
+/** One dish position in a meal (ADR-0036). */
+export interface MealRole {
+  role_id: string;
+  courses: DishCourse[];
+  required: boolean;
+}
+
+/** Which meals of each day are planned, and each one's dishes (ADR-0046). */
+export interface PlanShape {
+  meals: Partial<Record<PlannedMealType, MealRole[]>>;
+}
+
 export interface HouseholdProfileInput {
   name: string;
   members: HouseholdMemberInput[];
@@ -26,6 +41,7 @@ export interface HouseholdProfileInput {
   max_sodium_mg_per_meal: number | null;
   available_ingredients: AvailableIngredientInput[];
   pricing_mode: PricingMode;
+  plan_shape?: PlanShape | null;
 }
 
 export interface HouseholdProfileUpdate extends HouseholdProfileInput {
@@ -33,6 +49,7 @@ export interface HouseholdProfileUpdate extends HouseholdProfileInput {
 }
 
 export interface HouseholdProfileVersion extends Omit<HouseholdProfileInput, "name"> {
+  meal_composition?: MealRole[] | null;
   version: number;
   planning_household_size: number;
   allergens: string[];

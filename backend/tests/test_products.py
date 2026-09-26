@@ -222,3 +222,10 @@ def test_a_request_makes_at_most_its_budget_of_live_lookups() -> None:
     for n in range(LIVE_LOOKUP_BUDGET + 5):
         service.search(f"brown rice {n}", live=True)
     assert live.calls == LIVE_LOOKUP_BUDGET
+
+
+def test_release_prices_are_whole_cents():
+    from app.planning.grocery_estimator import release_products
+
+    prices = [product["price_sgd"] for entry in release_products().values() for product in entry.get("products", [])]
+    assert prices and all(round(price, 2) == price for price in prices)

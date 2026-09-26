@@ -34,6 +34,54 @@ class ScheduledDish:
     recommendation: RecipeRecommendationResponse
 
 
+def entry_values(dish: ScheduledDish) -> dict:
+    """The stored columns of one planned dish, its cost and nutrition at its portion share."""
+    recommendation = dish.recommendation
+    estimate = recommendation.grocery_estimate
+    nutrition = recommendation.recipe.nutrition
+    share = dish.portion_share
+
+    def scaled(value):
+        # A whole-meal dish keeps the source value exactly.
+        return float(value) if share == 1 else round(float(Fraction(str(value)) * share), 2)
+
+    return {
+        "recipe_id": recommendation.recipe.id,
+        "day_index": dish.day_index,
+        "planned_date": dish.planned_date.isoformat(),
+        "meal_type": dish.meal_type,
+        "role_id": dish.role_id,
+        "portion_share": round(float(share), 3),
+        "recommendation_score": float(recommendation.total_score),
+        "consumed_cost_sgd": scaled(estimate.consumed_total_sgd) if estimate else 0,
+        "purchase_cost_sgd": scaled(estimate.purchase_total_sgd) if estimate else 0,
+        **{
+            field: scaled(getattr(nutrition, field))
+            for field in ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
+        },
+    }
+
+
+NUMERIC_FIELDS = (
+    "portion_share",
+    "recommendation_score",
+    "consumed_cost_sgd",
+    "purchase_cost_sgd",
+    "calories_kcal",
+    "protein_g",
+    "carbohydrate_g",
+    "fat_g",
+    "sodium_mg",
+    "sugar_g",
+)
+
+
+def new_entry(values: dict) -> MealPlanEntry:
+    """A plan entry from `entry_values`, which a shape-change preview stores as JSON."""
+    numbers = {field: Decimal(str(values[field])) for field in NUMERIC_FIELDS}
+    return MealPlanEntry(**{**values, **numbers, "planned_date": date.fromisoformat(values["planned_date"])})
+
+
 class MealPlanRepository:
     def __init__(self, session: Session, *, household_id: int) -> None:
         self.session = session
@@ -70,34 +118,7 @@ class MealPlanRepository:
             replaces_plan_id=replaces_plan_id,
         )
         for dish in scheduled:
-            recommendation = dish.recommendation
-            estimate = recommendation.grocery_estimate
-            nutrition = recommendation.recipe.nutrition
-            share = dish.portion_share
-
-            def scaled(value, share=share):
-                # A whole-meal dish keeps the source value exactly.
-                return value if share == 1 else round(float(Fraction(str(value)) * share), 2)
-
-            plan.entries.append(
-                MealPlanEntry(
-                    recipe_id=recommendation.recipe.id,
-                    day_index=dish.day_index,
-                    planned_date=dish.planned_date,
-                    meal_type=dish.meal_type,
-                    role_id=dish.role_id,
-                    portion_share=Decimal(str(round(float(share), 3))),
-                    recommendation_score=recommendation.total_score,
-                    consumed_cost_sgd=scaled(estimate.consumed_total_sgd) if estimate else 0,
-                    purchase_cost_sgd=scaled(estimate.purchase_total_sgd) if estimate else 0,
-                    calories_kcal=scaled(nutrition.calories_kcal),
-                    protein_g=scaled(nutrition.protein_g),
-                    carbohydrate_g=scaled(nutrition.carbohydrate_g),
-                    fat_g=scaled(nutrition.fat_g),
-                    sodium_mg=scaled(nutrition.sodium_mg),
-                    sugar_g=scaled(nutrition.sugar_g),
-                )
-            )
+            plan.entries.append(new_entry(entry_values(dish)))
 
         self._replace_grocery_items(plan, grocery)
 
@@ -222,6 +243,38 @@ class MealPlanRepository:
         self.session.refresh(event)
         return event
 
+    def create_shape_preview(
+        self,
+        *,
+        plan: MealPlan,
+        reason: str | None,
+        shape_change: dict,
+        after_grocery: WeeklyGroceryEstimateResponse,
+        after_warnings: list[str],
+        nutrition_delta: dict,
+        grocery_delta: list[dict],
+        purchase_total_delta_sgd: float,
+    ) -> MealPlanEvent:
+        event = MealPlanEvent(
+            plan_id=plan.id,
+            entry_id=None,
+            event_type="CHANGE_SHAPE",
+            base_revision=plan.revision,
+            reason=reason,
+            before_entry={},
+            after_entry={},
+            shape_change=shape_change,
+            after_grocery=after_grocery.model_dump(mode="json"),
+            after_warnings=after_warnings,
+            nutrition_delta=nutrition_delta,
+            grocery_delta=grocery_delta,
+            purchase_total_delta_sgd=purchase_total_delta_sgd,
+        )
+        self.session.add(event)
+        self.session.commit()
+        self.session.refresh(event)
+        return event
+
     def get_event(self, *, plan_id: int, event_id: int) -> MealPlanEvent | None:
         if self.get(plan_id) is None:
             return None
@@ -253,12 +306,18 @@ class MealPlanRepository:
         if event.status != "previewed" or event.base_revision != plan.revision:
             raise MealPlanRevisionConflictError
 
-        entry = next((item for item in plan.entries if item.id == event.entry_id), None)
-        if entry is None:
-            raise LookupError
+        if event.event_type == "CHANGE_SHAPE":
+            self._apply_shape_change(plan, event.shape_change or {})
+            entry = None
+        else:
+            entry = next((item for item in plan.entries if item.id == event.entry_id), None)
+            if entry is None:
+                raise LookupError
 
         after = event.after_entry
-        if event.event_type in {"REPLACE_MEAL", "ITEM_UNAVAILABLE"}:
+        if entry is None:
+            pass
+        elif event.event_type in {"REPLACE_MEAL", "ITEM_UNAVAILABLE"}:
             if proposed_recipe is None:
                 raise LookupError
             entry.recipe = proposed_recipe
@@ -297,6 +356,17 @@ class MealPlanRepository:
         if refreshed_plan is None or refreshed_event is None:
             raise LookupError
         return refreshed_plan, refreshed_event
+
+    def _apply_shape_change(self, plan: MealPlan, change: dict) -> None:
+        removed = set(change.get("removed_entry_ids", []))
+        if any(item.status == "completed" or item.is_locked for item in plan.entries if item.id in removed):
+            raise MealPlanRevisionConflictError
+        plan.entries = [item for item in plan.entries if item.id not in removed]
+        self.session.flush()  # the replaced dishes go before new ones take their (day, meal, role)
+        plan.entries.extend(new_entry(values) for values in change.get("new_entries", []))
+        if change.get("plan_shape") is not None:
+            # This week's shape; the household's usual one changes only when they say so.
+            plan.constraints = {**plan.constraints, "plan_shape": change["plan_shape"], "meal_composition": None}
 
     def _replace_grocery_items(self, plan: MealPlan, grocery: WeeklyGroceryEstimateResponse) -> None:
         plan.grocery_items.clear()

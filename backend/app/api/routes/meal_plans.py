@@ -23,6 +23,7 @@ from app.schemas.meal_plan import (
     MealPlanReplanEventCollectionResponse,
     MealPlanReplanEventResponse,
     MealPlanReplanPreviewRequest,
+    MealPlanShapeChangeRequest,
     WeeklyMealPlanCollectionResponse,
     WeeklyMealPlanRequest,
     WeeklyMealPlanResponse,
@@ -71,7 +72,9 @@ def get_meal_plan_service(
 MealPlanServiceDependency = Annotated[WeeklyMealPlanService, Depends(get_meal_plan_service)]
 
 
-def build_replanning_service(database: Session, household_id: int) -> MealPlanReplanningService:
+def build_replanning_service(
+    database: Session, household_id: int, actor_user_id: int | None = None
+) -> MealPlanReplanningService:
     recipe_repository = RecipeRepository(database)
     product_service = create_product_search_service(ProductSnapshotRepository(database))
     recommendation_service = RecipeRecommendationService(
@@ -89,6 +92,7 @@ def build_replanning_service(database: Session, household_id: int) -> MealPlanRe
         grocery_aggregator=WeeklyGroceryAggregator(product_service),
         # Without the live model the swap still follows the request, by shared words.
         request_similarity=RecipeSimilarity(catalog_embedder(key.get_secret_value()) if key else None),
+        meal_plan_service=build_meal_plan_service(database, household_id, actor_user_id),
     )
 
 
@@ -96,7 +100,7 @@ def get_replanning_service(
     database: DatabaseDependency,
     current: CurrentHouseholdViewDependency,
 ) -> MealPlanReplanningService:
-    return build_replanning_service(database, current.active_membership.household_id)
+    return build_replanning_service(database, current.active_membership.household_id, current.user.id)
 
 
 ReplanningServiceDependency = Annotated[MealPlanReplanningService, Depends(get_replanning_service)]
@@ -138,6 +142,26 @@ def preview_meal_plan_change(
     except MealPlanReplanNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
     except (MealPlanReplanValidationError, WeeklyPlanSelectionError) as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
+
+
+@router.post(
+    "/{plan_id}/shape/preview",
+    response_model=MealPlanReplanEventResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def preview_meal_plan_shape_change(
+    plan_id: int,
+    request: MealPlanShapeChangeRequest,
+    service: ReplanningServiceDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
+) -> MealPlanReplanEventResponse:
+    """Add, drop or recompose a meal on the days ahead (ADR-0046); confirmed like any other change."""
+    try:
+        return service.preview_shape(plan_id=plan_id, request=request)
+    except MealPlanReplanNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+    except MealPlanReplanValidationError as error:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
 
 

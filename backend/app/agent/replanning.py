@@ -1,8 +1,15 @@
 import re
 from datetime import date, timedelta
 
+from app.planning.recipe_similarity import wanted
 from app.schemas.agent import AgentReplanDraft
 from app.schemas.meal_plan import WeeklyMealPlanResponse
+
+MEAL_WORDS = {
+    "breakfast": ("breakfast", "早饭", "早餐"),
+    "lunch": ("lunch", "午饭", "午餐", "中饭"),
+    "dinner": ("dinner", "supper", "tonight", "晚饭", "晚餐", "今晚"),
+}
 
 
 class AgentReplanInterpreter:
@@ -58,7 +65,7 @@ class AgentReplanInterpreter:
         if event_type is not None:
             draft.event_type = event_type
 
-        day_index = self._day_index(lower, plan)
+        day_index = self.day_index(lower, plan)
         if day_index is not None:
             draft.day_index = day_index
             draft.entry_id = None
@@ -106,7 +113,7 @@ class AgentReplanInterpreter:
             return "REPLACE_MEAL"
         return None
 
-    def _day_index(self, text: str, plan: WeeklyMealPlanResponse) -> int | None:
+    def day_index(self, text: str, plan: WeeklyMealPlanResponse) -> int | None:
         numbered = re.search(r"(?:day\s*|第\s*)([1-7一二三四五六七])(?:\s*天)?", text)
         if numbered:
             value = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7}.get(
@@ -131,6 +138,10 @@ class AgentReplanInterpreter:
     def _dish_entry(self, text: str, plan: WeeklyMealPlanResponse, day_index: int) -> int | None:
         """The day's one dish, or the dish whose role or title the message names; None while ambiguous."""
         dishes = [day for day in plan.days if day.day_index == day_index]
+        # "Tomorrow's lunch": a named meal narrows the day to that meal's dishes (ADR-0046).
+        meal = next((m for m, words in MEAL_WORDS.items() if any(word in text for word in words)), None)
+        if meal is not None:
+            dishes = [dish for dish in dishes if dish.meal_type == meal] or dishes
         if len(dishes) == 1:
             return dishes[0].entry_id
         named = [
@@ -142,7 +153,16 @@ class AgentReplanInterpreter:
             )
             or dish.recipe.title.lower() in text
         ]
-        return named[0].entry_id if len(named) == 1 else None
+        if len(named) == 1:
+            return named[0].entry_id
+        # "Can tomorrow be fish instead?": what someone asks for instead is a main dish, and with
+        # several meals in the day, dinner's unless another meal was named.
+        if wanted(text):
+            mains = [dish for dish in dishes if dish.role_id == "main"]
+            main = next((dish for dish in mains if dish.meal_type == (meal or "dinner")), None)
+            if main is not None:
+                return main.entry_id
+        return None
 
     def _ingredient(self, text: str, plan: WeeklyMealPlanResponse) -> str | None:
         for alias in sorted(self._ingredient_aliases, key=len, reverse=True):

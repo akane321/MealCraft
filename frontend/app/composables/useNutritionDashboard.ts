@@ -65,6 +65,27 @@ export function useNutritionDashboard() {
     }
   }
 
+  /** Marks every dish of one meal at once (the whole-meal check-in of ADR-0036). */
+  async function updateMeal(dayIndex: number, mealType: string, status: MealPlanEntryStatus, firstEntryId: number) {
+    if (!dashboard.value) return;
+    updatingEntryId.value = firstEntryId;
+    errorMessage.value = null;
+    try {
+      await apiFetch<WeeklyMealPlan>(
+        `${config.public.apiBase}/api/plans/${dashboard.value.plan_id}/meals/${dayIndex}/${mealType}`,
+        { method: "PATCH", body: { status } },
+      );
+      await loadDashboard(dashboard.value.plan_id);
+    }
+    catch (error) {
+      const detail = (error as { data?: { detail?: string } }).data?.detail;
+      errorMessage.value = detail || "The meal status could not be updated.";
+    }
+    finally {
+      updatingEntryId.value = null;
+    }
+  }
+
   return {
     dashboard,
     errorMessage,
@@ -72,6 +93,7 @@ export function useNutritionDashboard() {
     loadDashboard,
     loadPlans,
     plans,
+    updateMeal,
     updateStatus,
     updatingEntryId,
   };

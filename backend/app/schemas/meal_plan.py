@@ -11,8 +11,60 @@ from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
 from app.schemas.recommendation import NutritionTargets, RecipeRecommendationRequest
 
 MealPlanEntryStatus = Literal["planned", "completed", "skipped"]
-MealPlanEventType = Literal["REPLACE_MEAL", "CANCEL_MEAL", "LOCK_MEAL", "ITEM_UNAVAILABLE"]
+# CHANGE_SHAPE adds, drops or recomposes a meal over some days (ADR-0046 section 2).
+MealPlanEventType = Literal["REPLACE_MEAL", "CANCEL_MEAL", "LOCK_MEAL", "ITEM_UNAVAILABLE", "CHANGE_SHAPE"]
 MealPlanEventStatus = Literal["previewed", "applied"]
+
+
+PlannedMeal = Literal["breakfast", "lunch", "dinner"]
+MEAL_ORDER: tuple[PlannedMeal, ...] = ("breakfast", "lunch", "dinner")
+
+
+def _role(role_id: str, *courses: str, required: bool = True) -> dict:
+    return {"role_id": role_id, "courses": list(courses), "required": required}
+
+
+# The presets of ADR-0046 section 1; the first of each meal is its default.
+MEAL_PRESETS: dict[PlannedMeal, dict[str, list[dict]]] = {
+    "breakfast": {"one dish": [_role("main", "breakfast", "baked_good")]},
+    "lunch": {
+        "one dish": [_role("main", "main", "salad", "soup")],
+        "main and side": [_role("main", "main"), _role("vegetable", "side", "salad")],
+    },
+    "dinner": {
+        # The vegetable is optional: always filled when one fits (an empty optional role costs more
+        # than any dish), but a diet or catalog without one still gets a week rather than an error.
+        "main and vegetable": [_role("main", "main"), _role("vegetable", "side", "salad", required=False)],
+        "one main": [_role("main", "main")],
+        "main, vegetable and soup": [
+            _role("main", "main"),
+            _role("vegetable", "side", "salad"),
+            _role("soup", "soup"),
+        ],
+    },
+}
+
+
+class MealPlanShape(BaseModel):
+    """Which meals of each day are planned, and the dish roles of each (ADR-0046)."""
+
+    meals: dict[PlannedMeal, MealComposition] = Field(min_length=1)
+
+    def ordered(self) -> list[tuple[PlannedMeal, list]]:
+        return [(meal, self.meals[meal]) for meal in MEAL_ORDER if meal in self.meals]
+
+
+def default_plan_shape() -> MealPlanShape:
+    """Dinner only, one main and one vegetable: the household default (owner, 2026-09-26)."""
+    return MealPlanShape.model_validate({"meals": {"dinner": MEAL_PRESETS["dinner"]["main and vegetable"]}})
+
+
+def week_shape(constraints: dict) -> MealPlanShape:
+    """The shape a saved week was planned with; an older week is its dinner composition, or one dish."""
+    if constraints.get("plan_shape"):
+        return MealPlanShape.model_validate(constraints["plan_shape"])
+    roles = constraints.get("meal_composition") or [_role("main", "main")]
+    return MealPlanShape.model_validate({"meals": {"dinner": roles}})
 
 
 class WeeklyMealPlanRequest(RecipeRecommendationRequest):
@@ -24,6 +76,14 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     weekly_budget_sgd: float | None = Field(default=None, gt=0, le=7000)
     # Dish roles of every dinner (ADR-0036); None is one dish, the MVP.
     meal_composition: MealComposition | None = None
+    # Which meals of each day are planned and each one's dish roles (ADR-0046); replaces meal_composition.
+    plan_shape: MealPlanShape | None = None
+
+    @model_validator(mode="after")
+    def one_way_to_say_the_shape(self) -> "WeeklyMealPlanRequest":
+        if self.plan_shape is not None and self.meal_composition is not None:
+            raise ValueError("Give the plan shape or a dinner composition, not both")
+        return self
 
     @model_validator(mode="after")
     def finite_pantry_quantities(self) -> "WeeklyMealPlanRequest":
@@ -89,6 +149,8 @@ class WeeklyMealPlanResponse(BaseModel):
     grocery_estimate: WeeklyGroceryEstimateResponse
     warnings: list[str]
     created_at: datetime
+    # The meals and dishes this week plans, including changes made in the conversation (ADR-0046).
+    plan_shape: MealPlanShape | None = None
 
 
 class WeeklyMealPlanListItem(BaseModel):
@@ -125,6 +187,10 @@ class NutritionDashboardDayResponse(BaseModel):
     is_locked: bool
     consumed_at: datetime | None
     nutrition_per_person: RecipeNutritionResponse
+    # Which meal and dish position this is, and its share of the meal (ADR-0046).
+    meal_type: str = "dinner"
+    role_id: str = "main"
+    portion_share: float = 1.0
 
 
 class WeeklyNutritionDashboardResponse(BaseModel):
@@ -168,6 +234,7 @@ class MealPlanReplanPreviewRequest(BaseModel):
 
 class MealPlanEntrySnapshot(BaseModel):
     entry_id: int
+    day_index: int | None = None
     meal_type: str = "dinner"
     role_id: str = "main"
     portion_share: float = 1.0
@@ -177,6 +244,36 @@ class MealPlanEntrySnapshot(BaseModel):
     status: MealPlanEntryStatus
     is_locked: bool
     recommendation_score: float
+
+
+class MealPlanShapeChangeRequest(BaseModel):
+    """Plan one meal type with new dishes, or not at all, on some days of a saved week (ADR-0046)."""
+
+    meal_type: PlannedMeal
+    # None drops the meal on those days.
+    roles: MealComposition | None = None
+    # None is every day still ahead; otherwise one meal's exception on the named days.
+    day_indexes: list[int] | None = Field(default=None, min_length=1, max_length=7)
+    reason: str | None = Field(default=None, max_length=500)
+
+    @field_validator("day_indexes")
+    @classmethod
+    def valid_days(cls, value: list[int] | None) -> list[int] | None:
+        if value is not None and any(day < 1 or day > 7 for day in value):
+            raise ValueError("day indexes run from 1 to 7")
+        return sorted(set(value)) if value is not None else None
+
+
+class MealPlanShapeChange(BaseModel):
+    meal_type: PlannedMeal
+    # "week": the meal type changes for the rest of the week; "meal": an exception on named days.
+    scope: Literal["week", "meal"]
+    day_indexes: list[int]
+    roles: MealComposition | None
+    removed: list["MealPlanEntrySnapshot"]
+    added: list["MealPlanEntrySnapshot"]
+    # The week's shape after the change, for a week-scope change.
+    plan_shape: MealPlanShape | None = None
 
 
 class MealPlanNutritionDelta(BaseModel):
@@ -209,8 +306,10 @@ class MealPlanReplanEventResponse(BaseModel):
     status: MealPlanEventStatus
     reason: str | None
     unavailable_ingredient: str | None
-    before_entry: MealPlanEntrySnapshot
-    after_entry: MealPlanEntrySnapshot
+    # None for a shape change, which moves several dishes (see shape_change).
+    before_entry: MealPlanEntrySnapshot | None
+    after_entry: MealPlanEntrySnapshot | None
+    shape_change: MealPlanShapeChange | None = None
     nutrition_delta: MealPlanNutritionDelta
     grocery_delta: list[MealPlanGroceryDeltaLine]
     purchase_total_delta_sgd: float

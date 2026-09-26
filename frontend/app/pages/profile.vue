@@ -7,7 +7,8 @@ import {
   parseExcludedIngredients,
   toOptionalNumber,
 } from "~/lib/recommendation-form";
-import type { HouseholdMemberInput, HouseholdProfileInput } from "~/types/household";
+import { DEFAULT_SHAPE, describeShape } from "~/lib/plan-shape";
+import type { HouseholdMemberInput, HouseholdProfileInput, PlanShape } from "~/types/household";
 import type {
   AvailableIngredientInput,
   DietaryPreference,
@@ -65,6 +66,8 @@ const pantryItems = ref<AvailableIngredientInput[]>([
   { normalized_name: "", quantity: null, unit: null },
 ]);
 const saveNotice = ref<string | null>(null);
+// Which meals each day plans and each one's dishes (ADR-0046).
+const planShape = ref<PlanShape>(structuredClone(DEFAULT_SHAPE));
 
 const {
   current,
@@ -105,6 +108,8 @@ function hydrateFromCurrent() {
     excludedIngredients: member.excluded_ingredients.join(", "),
     dietaryPreferences: [...member.dietary_preferences],
   }));
+  planShape.value = version.plan_shape
+    ?? (version.meal_composition ? { meals: { dinner: version.meal_composition } } : structuredClone(DEFAULT_SHAPE));
   pantryItems.value = version.available_ingredients.length
     ? version.available_ingredients.map(item => ({ ...item }))
     : [{ normalized_name: "", quantity: null, unit: null }];
@@ -159,6 +164,7 @@ function buildPayload(): HouseholdProfileInput {
     max_sodium_mg_per_meal: toOptionalNumber(form.maxSodiumMgPerMeal),
     available_ingredients: cleanAvailableIngredients(pantryItems.value),
     pricing_mode: form.pricingMode,
+    plan_shape: planShape.value,
   };
 }
 
@@ -197,7 +203,7 @@ onMounted(async () => {
         <h1>Tell us once who's eating. Every week follows it.</h1>
       </div>
       <p>
-        Everyone shares the same dinners, so one person's allergy or dislike keeps it off the whole table. Targets are only the ones you set here; this isn't medical advice.
+        Everyone shares the same meals, so one person's allergy or dislike keeps it off the whole table. Targets are only the ones you set here; this isn't medical advice.
       </p>
     </section>
 
@@ -223,7 +229,7 @@ onMounted(async () => {
         <div class="profile-section-heading member-heading">
           <div>
             <p class="form-kicker">Who's eating</p>
-            <h2>{{ members.length }} {{ members.length === 1 ? "person" : "people" }}, {{ totalServings }} {{ totalServings === 1 ? "portion" : "portions" }} a dinner</h2>
+            <h2>{{ members.length }} {{ members.length === 1 ? "person" : "people" }}, {{ totalServings }} {{ totalServings === 1 ? "portion" : "portions" }} a meal</h2>
           </div>
           <button class="secondary-button" type="button" :disabled="members.length >= 12" @click="addMember">+ Add person</button>
         </div>
@@ -262,11 +268,18 @@ onMounted(async () => {
         </div>
 
         <section class="profile-form-section">
+          <p class="form-kicker">Meals and dishes</p>
+          <h2>What each day plans</h2>
+          <p class="field-help">{{ describeShape(planShape) }}. You can also change this in the chat for one week, e.g. "also plan lunch" or "add a soup on Friday".</p>
+          <ProfileMealsEditor v-model="planShape" />
+        </section>
+
+        <section class="profile-form-section">
           <p class="form-kicker">Every week</p>
           <h2>Budget, cooking time and goals</h2>
           <div class="profile-field-grid">
             <label><span>Longest cooking time (min)</span><input v-model.number="form.maxCookingTimeMinutes" type="number" min="5" max="240" required></label>
-            <label><span>Budget per dinner</span><input v-model.number="form.budgetPerMealSgd" type="number" min="0.01" step="0.01" placeholder="Optional S$"></label>
+            <label><span>Budget per meal</span><input v-model.number="form.budgetPerMealSgd" type="number" min="0.01" step="0.01" placeholder="Optional S$"></label>
             <label><span>Budget per week</span><input v-model.number="form.weeklyBudgetSgd" type="number" min="0.01" step="0.01" placeholder="Optional S$"></label>
             <label>
               <span>Prices</span>
@@ -275,11 +288,11 @@ onMounted(async () => {
                 <option value="live">Today's FairPrice prices</option>
               </select>
             </label>
-            <label><span>Calories per dinner</span><input v-model.number="form.calorieTarget" type="number" min="100" max="2500" placeholder="kcal"></label>
-            <label><span>Protein per dinner</span><input v-model.number="form.proteinTarget" type="number" min="0" max="300" placeholder="g"></label>
-            <label><span>Carbs per dinner</span><input v-model.number="form.carbohydrateTarget" type="number" min="0" max="500" placeholder="g"></label>
-            <label><span>Fat per dinner</span><input v-model.number="form.fatTarget" type="number" min="0" max="200" placeholder="g"></label>
-            <label><span>Most sodium per dinner</span><input v-model.number="form.maxSodiumMgPerMeal" type="number" min="100" max="5000" placeholder="Optional mg"></label>
+            <label><span>Calories per meal</span><input v-model.number="form.calorieTarget" type="number" min="100" max="2500" placeholder="kcal"></label>
+            <label><span>Protein per meal</span><input v-model.number="form.proteinTarget" type="number" min="0" max="300" placeholder="g"></label>
+            <label><span>Carbs per meal</span><input v-model.number="form.carbohydrateTarget" type="number" min="0" max="500" placeholder="g"></label>
+            <label><span>Fat per meal</span><input v-model.number="form.fatTarget" type="number" min="0" max="200" placeholder="g"></label>
+            <label><span>Most sodium per meal</span><input v-model.number="form.maxSodiumMgPerMeal" type="number" min="100" max="5000" placeholder="Optional mg"></label>
           </div>
           <p class="field-help">Leave these empty if you have no goal. MealCraft only uses what you enter; it doesn't work out needs or give medical diets.</p>
           <div class="member-constraint-group">
@@ -311,13 +324,13 @@ onMounted(async () => {
         <button class="primary-button profile-save-button" type="submit" :disabled="isSaving || totalServings > 12">
           {{ isSaving ? "Saving…" : current ? "Save changes" : "Save household" }}
         </button>
-        <p v-if="totalServings > 12" class="inline-error">MealCraft can plan for up to 12 portions a dinner.</p>
+        <p v-if="totalServings > 12" class="inline-error">MealCraft can plan for up to 12 portions a meal.</p>
       </section>
 
       <aside class="profile-sidebar">
         <section class="profile-summary-card">
           <p class="form-kicker">At the table</p>
-          <h2>{{ current ? current.current.planning_household_size : totalServings }} {{ (current ? current.current.planning_household_size : totalServings) === 1 ? "portion" : "portions" }} a dinner</h2>
+          <h2>{{ current ? current.current.planning_household_size : totalServings }} {{ (current ? current.current.planning_household_size : totalServings) === 1 ? "portion" : "portions" }} a meal</h2>
           <p>What anyone avoids is left out for everyone.</p>
           <dl v-if="current" class="profile-summary-list">
             <div><dt>Allergens</dt><dd>{{ current.current.allergens.join(", ") || "None" }}</dd></div>

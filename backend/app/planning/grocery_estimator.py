@@ -50,7 +50,13 @@ def release_products() -> dict[str, dict]:
     path = data_root() / RELEASE_SNAPSHOT_FILE
     if not path.exists():
         return {}
-    return json.loads(path.read_text(encoding="utf-8"))["ingredients"]
+    ingredients = json.loads(path.read_text(encoding="utf-8"))["ingredients"]
+    # The export carries float noise (2.680000000000001); a price is whole cents, and the
+    # planner refuses anything else, which silently left 17 ingredients unpriced.
+    for entry in ingredients.values():
+        for product in entry.get("products", []):
+            product["price_sgd"] = round(product["price_sgd"], 2)
+    return ingredients
 
 
 def priceable_ingredients() -> frozenset[str]:

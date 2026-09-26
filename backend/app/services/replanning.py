@@ -1,12 +1,14 @@
 from collections import Counter
+from datetime import date, timedelta
 
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
 from app.models.recipe import Recipe
 from app.planning import alternatives
-from app.planning.meal_composition import meal_minutes
+from app.planning.meal_composition import meal_minutes, portion_shares
+from app.planning.product_path import ProductPlanningError
 from app.planning.recipe_similarity import RecipeSimilarity
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
-from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError
+from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError, entry_values
 from app.repositories.recipe import RecipeRepository
 from app.schemas.meal_plan import (
     MealPlanEntrySnapshot,
@@ -16,8 +18,12 @@ from app.schemas.meal_plan import (
     MealPlanReplanEventCollectionResponse,
     MealPlanReplanEventResponse,
     MealPlanReplanPreviewRequest,
+    MealPlanShape,
+    MealPlanShapeChange,
+    MealPlanShapeChangeRequest,
     WeeklyGroceryEstimateResponse,
     WeeklyMealPlanRequest,
+    week_shape,
 )
 from app.schemas.planning_v2 import PlanningCompositionPolicy
 from app.schemas.recommendation import RecipeRecommendationResponse
@@ -63,6 +69,7 @@ class MealPlanReplanningService:
         recommendation_service: RecipeRecommendationService,
         grocery_aggregator: WeeklyGroceryAggregator,
         request_similarity: RecipeSimilarity | None = None,
+        meal_plan_service: WeeklyMealPlanService | None = None,
     ) -> None:
         self.repository = repository
         self.recipe_repository = recipe_repository
@@ -70,6 +77,8 @@ class MealPlanReplanningService:
         self.grocery_aggregator = grocery_aggregator
         # Orders the candidates a swap may choose by what the household said they want instead.
         self.request_similarity = request_similarity
+        # Plans the dishes of a shape change (ADR-0046 section 2).
+        self.meal_plan_service = meal_plan_service
 
     def preview(
         self,
@@ -147,6 +156,216 @@ class MealPlanReplanningService:
             purchase_total_delta_sgd=purchase_delta,
         )
         return self._event_response(event)
+
+    def preview_shape(
+        self, *, plan_id: int, request: MealPlanShapeChangeRequest, today: date | None = None
+    ) -> MealPlanReplanEventResponse:
+        """Add, drop or recompose one meal on the days still ahead; only those meals are planned again."""
+        plan = self.repository.get(plan_id)
+        if plan is None:
+            raise MealPlanReplanNotFoundError("Meal plan not found")
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
+        meal = request.meal_type
+        today = today or date.today()
+        ahead = [day for day in range(1, 8) if plan.start_date + timedelta(days=day - 1) >= today]
+        # A meal already cooked, or one the household locked, is left as it is.
+        held = {
+            item.day_index
+            for item in plan.entries
+            if item.meal_type == meal and (item.status == "completed" or item.is_locked)
+        }
+        days = [day for day in (request.day_indexes or ahead) if day in ahead and day not in held]
+        if not days:
+            raise MealPlanReplanValidationError(f"There is no {meal} left to change on those days.")
+        removed = [item for item in plan.entries if item.meal_type == meal and item.day_index in days]
+        if request.roles is None and not removed:
+            raise MealPlanReplanValidationError(f"{meal.capitalize()} is not planned on those days.")
+
+        new_shape = None
+        if request.day_indexes is None:
+            meals = dict(week_shape(plan.constraints).meals)
+            if request.roles is None:
+                meals.pop(meal, None)
+            else:
+                meals[meal] = request.roles
+            if not meals:
+                raise MealPlanReplanValidationError("A week plans at least one meal a day.")
+            new_shape = MealPlanShape(meals=meals)
+
+        kept = [item for item in plan.entries if item not in removed and item.status != "skipped"]
+        # Taking a dish away keeps the others (at their larger share); anything else plans the meal again.
+        staying = self._dishes_staying(removed, request.roles)
+        if staying is not None:
+            added = staying
+        elif request.roles:
+            added = self._plan_meal(constraints, meal, request.roles, days, kept, removed)
+        else:
+            added = []
+        stays = {values["recipe_id"] for values, _ in added} if staying is not None else set()
+
+        wanted_ids = {item.recipe_id for item in kept} | {values["recipe_id"] for values, _ in added}
+        recipes_by_id = {recipe.id: recipe for recipe in self.recipe_repository.list_by_ids(list(wanted_ids))}
+        eaten = [(recipes_by_id[item.recipe_id], float(item.portion_share)) for item in kept]
+        eaten += [(recipes_by_id[values["recipe_id"]], values["portion_share"]) for values, _ in added]
+        after_grocery = self.grocery_aggregator.estimate(
+            [recipe for recipe, _ in eaten], constraints, shares=[share for _, share in eaten]
+        )
+        after_warnings = list(dict.fromkeys(after_grocery.warnings))
+        if after_grocery.within_weekly_budget is False:
+            after_warnings.append(
+                f"The revised ingredient-use cost S${after_grocery.consumed_total_sgd:.2f} exceeds the "
+                f"S${constraints.weekly_budget_sgd:.2f} weekly budget."
+            )
+        before_grocery = self._current_grocery(plan)
+        fields = ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
+        eaten_before = [item for item in removed if item.status != "skipped"]
+        nutrition_delta = {
+            field: round(
+                sum(values[field] for values, _ in added) - sum(float(getattr(item, field)) for item in eaten_before),
+                2,
+            )
+            for field in fields
+        }
+        change = MealPlanShapeChange(
+            meal_type=meal,
+            scope="meal" if request.day_indexes else "week",
+            day_indexes=days,
+            roles=request.roles,
+            removed=[
+                MealPlanEntrySnapshot.model_validate(self._entry_snapshot(item))
+                for item in removed
+                if item.recipe_id not in stays
+            ],
+            added=[snapshot for _, snapshot in added if staying is None],
+            plan_shape=new_shape,
+        )
+        event = self.repository.create_shape_preview(
+            plan=plan,
+            reason=request.reason,
+            shape_change={
+                **change.model_dump(mode="json"),
+                "removed_entry_ids": [item.id for item in removed],
+                "new_entries": [values for values, _ in added],
+            },
+            after_grocery=after_grocery,
+            after_warnings=after_warnings,
+            nutrition_delta=nutrition_delta,
+            grocery_delta=self._grocery_delta(before_grocery, after_grocery),
+            purchase_total_delta_sgd=round(after_grocery.purchase_total_sgd - before_grocery.purchase_total_sgd, 2),
+        )
+        return self._event_response(event)
+
+    @staticmethod
+    def _dishes_staying(removed: list[MealPlanEntry], roles) -> list[tuple[dict, MealPlanEntrySnapshot]] | None:
+        """When a change only takes dishes away, the ones left at their new shares; None otherwise."""
+        if not roles or not removed:
+            return None
+        wanted = {role.role_id for role in roles}
+        by_day: dict[int, list[MealPlanEntry]] = {}
+        for item in removed:
+            by_day.setdefault(item.day_index, []).append(item)
+        if any(not wanted < {item.role_id for item in dishes} for dishes in by_day.values()):
+            return None
+        staying = []
+        policy = PlanningCompositionPolicy()
+        for dishes in by_day.values():
+            left = [item for item in dishes if item.role_id in wanted]
+            shares = portion_shares(policy, [item.role_id for item in left]) or {}
+            for item in left:
+                share = float(shares.get(item.role_id, 1))
+                values = MealPlanReplanningService._rescaled(item, share)
+                snapshot = MealPlanEntrySnapshot.model_validate(
+                    {**MealPlanReplanningService._entry_snapshot(item), "portion_share": share}
+                )
+                staying.append((values, snapshot))
+        return staying
+
+    @staticmethod
+    def _rescaled(item: MealPlanEntry, share: float) -> dict:
+        """A kept dish's stored values at a new portion share."""
+        ratio = share / float(item.portion_share)
+        scaled = (
+            "consumed_cost_sgd",
+            "purchase_cost_sgd",
+            "calories_kcal",
+            "protein_g",
+            "carbohydrate_g",
+            "fat_g",
+            "sodium_mg",
+            "sugar_g",
+        )
+        return {
+            "recipe_id": item.recipe_id,
+            "day_index": item.day_index,
+            "planned_date": item.planned_date.isoformat(),
+            "meal_type": item.meal_type,
+            "role_id": item.role_id,
+            "portion_share": round(share, 3),
+            "recommendation_score": float(item.recommendation_score),
+            **{field: round(float(getattr(item, field)) * ratio, 2) for field in scaled},
+        }
+
+    @staticmethod
+    def _dishes_kept_when_adding(roles, present: list[MealPlanEntry]) -> tuple[set[int], set[str]] | None:
+        """Adding a dish to one meal keeps what it has: the present recipes, and the courses only they
+        may fill. None when the change is not purely an addition."""
+        present_roles = {item.role_id for item in present if item.status != "skipped"}
+        if not present_roles or not present_roles < {role.role_id for role in roles}:
+            return None
+        held = {course for role in roles if role.role_id in present_roles for course in role.courses}
+        new = {course for role in roles if role.role_id not in present_roles for course in role.courses}
+        return {item.recipe_id for item in present}, held - new
+
+    def _plan_meal(self, constraints, meal, roles, days, kept, removed) -> list[tuple[dict, MealPlanEntrySnapshot]]:
+        """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves."""
+        if self.meal_plan_service is None:
+            raise MealPlanReplanValidationError("Changing meals is not available here.")
+        budget = constraints.weekly_budget_sgd
+        if budget is not None:
+            budget = round(budget - sum(float(item.consumed_cost_sgd) for item in kept), 2)
+            if budget <= 0:
+                raise MealPlanReplanValidationError(
+                    "The rest of the week already uses the whole weekly budget, so there is none left for this."
+                )
+        partial = constraints.model_copy(
+            update={
+                "plan_shape": MealPlanShape(meals={meal: roles}),
+                "meal_composition": None,
+                "weekly_budget_sgd": budget,
+            }
+        )
+        first, last = min(days), max(days)
+        try:
+            dishes = self.meal_plan_service.plan_dishes(
+                partial,
+                first_day=first,
+                day_count=last - first + 1,
+                avoid_recipe_ids={item.recipe_id for item in kept},
+                keep=self._dishes_kept_when_adding(roles, [item for item in removed if len(days) == 1]),
+            )
+        except ProductPlanningError as error:
+            raise MealPlanReplanValidationError(f"I could not plan that: {error}") from error
+        added = []
+        for dish in dishes:
+            if dish.day_index not in days:
+                continue
+            values = entry_values(dish)
+            recipe = dish.recommendation.recipe
+            snapshot = MealPlanEntrySnapshot(
+                entry_id=0,  # not saved yet
+                day_index=dish.day_index,
+                meal_type=dish.meal_type,
+                role_id=dish.role_id,
+                portion_share=values["portion_share"],
+                recipe_id=recipe.id,
+                recipe_slug=recipe.slug,
+                recipe_title=recipe.title,
+                status="planned",
+                is_locked=False,
+                recommendation_score=values["recommendation_score"],
+            )
+            added.append((values, snapshot))
+        return added
 
     def confirm(self, *, plan_id: int, event_id: int) -> MealPlanReplanConfirmationResponse:
         plan = self.repository.get(plan_id)
@@ -281,9 +500,12 @@ class MealPlanReplanningService:
     @staticmethod
     def _role(constraints: WeeklyMealPlanRequest, entry: MealPlanEntry):
         """The dish role an entry fills in a composed plan, or None for a one-dish plan."""
-        if constraints.meal_composition is None:
-            return None
-        return next((role for role in constraints.meal_composition if role.role_id == entry.role_id), None)
+        roles = (
+            constraints.plan_shape.meals.get(entry.meal_type)
+            if constraints.plan_shape is not None
+            else constraints.meal_composition
+        )
+        return next((role for role in roles or [] if role.role_id == entry.role_id), None)
 
     @staticmethod
     def _meal_still_holds(plan: MealPlan, entry: MealPlanEntry, candidate: Recipe, constraints) -> bool:
@@ -338,6 +560,7 @@ class MealPlanReplanningService:
         nutrition = WeeklyMealPlanService._entry_nutrition(entry).model_dump(mode="json")
         return {
             "entry_id": entry.id,
+            "day_index": entry.day_index,
             "meal_type": entry.meal_type,
             "role_id": entry.role_id,
             "portion_share": float(entry.portion_share),
@@ -476,8 +699,9 @@ class MealPlanReplanningService:
             status=event.status,
             reason=event.reason,
             unavailable_ingredient=event.unavailable_ingredient,
-            before_entry=MealPlanEntrySnapshot.model_validate(event.before_entry),
-            after_entry=MealPlanEntrySnapshot.model_validate(event.after_entry),
+            before_entry=MealPlanEntrySnapshot.model_validate(event.before_entry) if event.before_entry else None,
+            after_entry=MealPlanEntrySnapshot.model_validate(event.after_entry) if event.after_entry else None,
+            shape_change=MealPlanShapeChange.model_validate(event.shape_change) if event.shape_change else None,
             nutrition_delta=MealPlanNutritionDelta.model_validate(event.nutrition_delta),
             grocery_delta=[MealPlanGroceryDeltaLine.model_validate(item) for item in event.grocery_delta],
             purchase_total_delta_sgd=float(event.purchase_total_delta_sgd),

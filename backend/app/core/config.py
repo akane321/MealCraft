@@ -22,12 +22,16 @@ class Settings(BaseSettings):
     agent_parser_provider: Literal["fixture", "openai"] = "fixture"
     # ADR-0036 section 6: "mvp" plans seven one-dish dinners and refuses anything
     # else; "full" admits meal compositions. The Sprint 1 demonstration is mvp.
-    planning_capability: Literal["mvp", "full"] = "mvp"
+    # Meals of several dishes and several meals a day are the product (ADR-0046); `mvp` reproduces the
+    # recorded one-dish evaluations.
+    planning_capability: Literal["mvp", "full"] = "full"
     agent_max_history_messages: int = 20
     openai_api_key: SecretStr | None = None
     openai_model: str = "gpt-5.4-mini"
     # A slow model must not hang the chat: past this the turn is read with the rule parser instead.
     openai_timeout_seconds: float = 15.0
+    # How long the planner reuses the recipes it loaded; 0 loads them for every plan (tests).
+    planning_pool_cache_seconds: int = 300
     auth_cookie_name: str = Field(default="mealcraft_session", min_length=1, max_length=80)
     auth_csrf_cookie_name: str = Field(default="mealcraft_csrf", min_length=1, max_length=80)
     auth_cookie_secure: bool | None = None

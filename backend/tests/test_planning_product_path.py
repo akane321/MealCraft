@@ -295,3 +295,24 @@ def test_a_budget_below_the_best_ranked_week_is_still_planned(recipe_client):
     too_low = recipe_client.post("/api/plans/generate", json={**REQUEST, "weekly_budget_sgd": 20})
     assert too_low.status_code == 422
     assert "couldn't fit seven dinners into S$20.00" in too_low.json()["detail"]
+
+
+def test_the_default_household_week_is_dinner_with_a_main_and_a_vegetable(recipe_client):
+    """A profile that sets no shape plans ADR-0046's default; lunch added by shape plans lunches too."""
+    from app.core.paths import repository_root
+    from app.data.catalog import import_catalog, load_catalog
+    from app.schemas.meal_plan import MEAL_PRESETS, default_plan_shape
+
+    root = repository_root()
+    catalog = load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
+    with database() as session:
+        import_catalog(session, catalog)
+    shape = default_plan_shape().model_dump(mode="json")
+    assert list(shape["meals"]) == ["dinner"]
+    assert [role["role_id"] for role in shape["meals"]["dinner"]] == ["main", "vegetable"]
+
+    both = {"meals": {"lunch": MEAL_PRESETS["lunch"]["one dish"], "dinner": [{"role_id": "main", "courses": ["main"]}]}}
+    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "plan_shape": both})
+    assert response.status_code == 201, response.text
+    meals = {(d["day_index"], d["meal_type"]) for d in response.json()["days"]}
+    assert meals == {(day, meal) for day in range(1, 8) for meal in ("lunch", "dinner")}
