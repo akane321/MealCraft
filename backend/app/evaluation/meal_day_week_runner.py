@@ -219,7 +219,7 @@ def run_episode(episode: dict) -> tuple[dict, dict]:
         interpreter = AgentReplanInterpreter()
         intent = None
         if interpreter._event_type(text.lower()) is None:
-            intent = read_shape_change(text, plan=plan, day_index=interpreter.day_index(text.lower(), plan))
+            intent = read_shape_change(text, plan=plan, day_indexes=interpreter.day_indexes(text.lower(), plan))
         extra["understood"] = intent.request.model_dump(mode="json", exclude={"reason"}) if intent else None
         if intent is not None:
             changes = MealPlanReplanningService(

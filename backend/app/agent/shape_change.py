@@ -1,7 +1,8 @@
 """Read a request to change which meals a week plans or what a meal holds (ADR-0046 section 2).
 
 Rules only, like the rest of replanning: "also plan lunch", "no breakfast", "lunch just one dish",
-"dinners with a soup", "add a soup on Friday", "今晚不要配菜". Anything else is left to the
+"dinners with a soup", "add a soup on weekends", "take lunch off Monday to Friday", "今晚不要配菜",
+"汤都免了吧", "午饭也帮我们安排上", "周五晚饭只做一道主菜就行". Anything else is left to the
 one-dish events (swap, cancel, lock, can't buy).
 """
 
@@ -18,13 +19,51 @@ MEAL_NAMES: dict[PlannedMeal, tuple[str, ...]] = {
 DISHES = {
     "soup": (("soup", "汤"), ["soup"]),
     "vegetable": (("vegetable", "veg", "side", "salad", "蔬菜", "素菜", "配菜", "沙拉"), ["side", "salad"]),
-    "main": (("another main", "meat dish", "second main", "荤菜", "主菜", "肉菜"), ["main"]),
+    "main": (("main", "another main", "meat dish", "second main", "荤菜", "主菜", "肉菜"), ["main"]),
 }
-ADD = ("also plan", "add", "plan", "with", "plus", "加上", "加", "也要", "安排", "多")
-DROP = ("no", "drop", "without", "don't plan", "do not plan", "stop planning", "不要", "不用", "去掉", "别")
+# Chinese verbs also come after the thing: "汤加上", "早饭就不做了", "午饭也帮我们安排上".
+ADD_ZH = ("加上", "加", "也要", "安排", "排上", "排", "煮", "做", "多")
+DROP_ZH = ("不要", "不用", "不做", "不煮", "不排", "不加", "别做", "别煮", "别加", "别", "去掉", "免了", "免掉")
+ADD = ("also plan", "add", "plan", "with", "plus", *ADD_ZH)
+DROP = (
+    "no",
+    "drop",
+    "remove",
+    "leave out",
+    "without",
+    "don't plan",
+    "do not plan",
+    "stop planning",
+    "won't need",
+    "don't need",
+    "do not need",
+    "no need for",
+    *DROP_ZH,
+)
 # Between the verb and the thing: "add a soup", "without the side", "加个汤", "多一道素菜".
 FILLER = r"(?:\s*(?:a|an|the|another|one more|个|一个|一道|道|上)?\s*)?"
-ONE_DISH = ("one dish", "just one", "only one", "single dish", "一道菜", "一个菜", "只要一道", "只要一个")
+ONE_DISH = (
+    "one dish",
+    "just one",
+    "only one",
+    "single dish",
+    "一道菜",
+    "一个菜",
+    "只要一道",
+    "只要一个",
+    "只做一道",
+    "只煮一道",
+    "只排一道",
+    "一道就好",
+    "一道就行",
+    "一道就可以",
+    "一个就好",
+    "一个就行",
+    "一个就可以",
+)
+# "just a main", "只做一道主菜": one dish of that kind, not the meal's usual one-dish preset.
+ONLY = ("just", "only", "只做", "只煮", "只排", "只安排", "只要", "只有", "只")
+ONE = ("one", "a", "an", "single", "一道", "一个", "一")
 TONIGHT = ("tonight", "今晚")
 
 
@@ -44,10 +83,28 @@ def _has(text: str, words: tuple[str, ...]) -> bool:
     return re.search(rf"(?<![a-z])(?:{_alternatives(words)})s?(?![a-z])", text) is not None
 
 
-def _verb_then(text: str, verbs: tuple[str, ...], words: tuple[str, ...]) -> bool:
-    """A verb directly followed by the thing: "no breakfast", but not "no pork for dinner"."""
-    pattern = rf"(?<![a-z])(?:{_alternatives(verbs)}){FILLER}(?:{_alternatives(words)})s?(?![a-z])"
-    return re.search(pattern, text) is not None
+def _verb_near(text: str, verbs: tuple[str, ...], after: tuple[str, ...], words: tuple[str, ...]) -> bool:
+    """A verb right before the thing ("no breakfast", but not "no pork for dinner"), or a Chinese
+    verb a few words after it ("汤都免了吧", "午饭也帮我们安排上")."""
+    thing = rf"(?:{_alternatives(words)})s?(?![a-z])"
+    before = rf"(?<![a-z])(?:{_alternatives(verbs)}){FILLER}{thing}"
+    behind = rf"(?<![a-z]){thing}[^,，。.;；]{{0,6}}(?:{_alternatives(after)})"
+    return re.search(before, text) is not None or re.search(behind, text) is not None
+
+
+def _taken_off(text: str, words: tuple[str, ...]) -> bool:
+    """ "take lunch off", "leave the soup out", or "take it off" once the meal is named."""
+    thing = rf"{FILLER}(?:{_alternatives(words)})s?|\s+(?:it|them|that)"
+    return re.search(rf"(?<![a-z])(?:take|leave)(?:{thing})\s+(?:off|out|away)(?![a-z])", text) is not None
+
+
+def _only_one(text: str) -> str | None:
+    """The one dish a meal is cut to ("just a main", "只做一道主菜"), or None when no dish is counted."""
+    for role, (words, _) in DISHES.items():
+        counted = rf"(?:{_alternatives(ONLY)})\s*(?:{_alternatives(ONE)})?\s*(?:{_alternatives(words)})s?(?![a-z])"
+        if re.search(rf"(?<![a-z]){counted}", text):
+            return role
+    return None
 
 
 def _next_id(roles: list[dict], base: str) -> str:
@@ -55,10 +112,25 @@ def _next_id(roles: list[dict], base: str) -> str:
     return base if base not in taken else next(f"{base}-{n}" for n in range(2, 10) if f"{base}-{n}" not in taken)
 
 
-def read_shape_change(message: str, *, plan: WeeklyMealPlanResponse, day_index: int | None) -> ShapeChangeIntent | None:
+def _when(plan: WeeklyMealPlanResponse, days: list[int] | None) -> str:
+    """ "on Friday", "on Saturday and Sunday", "on weekdays"; the rest of the week when no day is named."""
+    if days is None:
+        return "for the rest of this week"
+    dates = sorted({day.planned_date for day in plan.days if day.day_index in days}, key=lambda day: day.weekday())
+    if not dates:
+        return "that day" if len(days) == 1 else "those days"
+    if [day.weekday() for day in dates] == [0, 1, 2, 3, 4]:
+        return "on weekdays"
+    names = [f"{day:%A}" for day in dates]
+    return "on " + (f"{', '.join(names[:-1])} and {names[-1]}" if len(names) > 1 else names[0])
+
+
+def read_shape_change(
+    message: str, *, plan: WeeklyMealPlanResponse, day_indexes: list[int] | None
+) -> ShapeChangeIntent | None:
     """The shape change a message asks for, or None when it asks for something else.
 
-    `day_index` is the day the message names, if any (read by the replan interpreter); tonight
+    `day_indexes` are the days the message names, if any (read by the replan interpreter); tonight
     names dinner as well as today.
     """
     text = f" {message.strip().lower()} "
@@ -67,17 +139,21 @@ def read_shape_change(message: str, *, plan: WeeklyMealPlanResponse, day_index: 
         meal = "dinner"
     dish = next((role for role, (words, _) in DISHES.items() if _has(text, words)), None)
     target = DISHES[dish][0] if dish else MEAL_NAMES.get(meal or "", ())
-    adds, drops = _verb_then(text, ADD, target), _verb_then(text, DROP, target)
-    if not (adds or drops or _has(text, ONE_DISH)) or (meal is None and dish is None):
+    adds = _verb_near(text, ADD, ADD_ZH, target)
+    drops = _verb_near(text, DROP, DROP_ZH, target) or _taken_off(text, target)
+    only = _only_one(text)
+    if not (adds or drops or only or _has(text, ONE_DISH)) or (meal is None and dish is None):
         return None
     meal = meal or "dinner"
     shape = plan.plan_shape.meals if plan.plan_shape is not None else {}
     current = [role.model_dump() for role in shape.get(meal, [])]
-    days = [day_index] if day_index is not None else None
-    date = next((day.planned_date for day in plan.days if day.day_index == day_index), None)
-    when = f"on {date:%A}" if date else "that day" if days else "for the rest of this week"
+    days = day_indexes or None
+    when = _when(plan, days)
 
-    if dish is None:
+    if only:
+        roles = [{"role_id": only, "courses": DISHES[only][1], "required": True}]
+        summary = f"{meal.capitalize()} as one {only} {when}"
+    elif dish is None:
         if _has(text, ONE_DISH):
             roles = list(MEAL_PRESETS[meal].values())[0] if meal != "dinner" else MEAL_PRESETS["dinner"]["one main"]
             summary = f"{meal.capitalize()} as one dish {when}"
