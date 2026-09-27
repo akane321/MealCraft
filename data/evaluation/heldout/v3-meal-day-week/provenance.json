@@ -1,0 +1,112 @@
+{
+ "schema_version": "meal-day-week-provenance-v1",
+ "set_id": "heldout-v3-meal-day-week",
+ "drafting": {
+  "who": "an AI agent (Claude, this project's implementation model family) running as a separate sealed agent",
+  "what_it_could_see": "only the sealed packet: catalog facts, the episode format, the authoring rules, a standalone check tool and, from round 1, the owner's review files. No repository, no planner code, no evaluation result.",
+  "packet_digests": {
+   "round0": {
+    "schema_version": "sealed-packet-digests-v1",
+    "packet": "sealed-v3 (v3-meal-day-week held-out drafting)",
+    "built_from_repo_revision": "e897b10",
+    "files": {
+     "README.md": {
+      "sha256": "f0b4d9bc68702f1bb8e67645917de6a9699f143a2a15ab88ae79974492834c19",
+      "bytes": 1427
+     },
+     "rules.md": {
+      "sha256": "aedc105c5fa62af044bb046fe0a866dec0a9465fc3e15b575c56233c127af6eb",
+      "bytes": 11172
+     },
+     "episode-format.md": {
+      "sha256": "f5fb7c6b5aad91d08c008eec7dd4757b9985b8d505daf45375b73fa2294c4970",
+      "bytes": 10175
+     },
+     "catalog.jsonl": {
+      "sha256": "49a52b192254aba45fcdc67e13524ac9a0b9167cbab2eb8c16c771c1cdf91576",
+      "bytes": 5317951
+     },
+     "products.jsonl": {
+      "sha256": "73cb484e5aef5c65a2ebe84ffed634aead2cf797178970f3a6df4528f8667c53",
+      "bytes": 255460
+     },
+     "ingredients.jsonl": {
+      "sha256": "8ab0074d936c01d7e00fdac87d83900a200d449f2dfc82e1976df0247111a28f",
+      "bytes": 47237
+     },
+     "facts.json": {
+      "sha256": "a514731553be463190be69579b090abe2d94210973245a9b89ce2c92c5c46e4a",
+      "bytes": 2892
+     },
+     "check.py": {
+      "sha256": "3587b762fd1e6c80b8f2375a2700209a7ef62ae389d2716b60a64a627eda8f7a",
+      "bytes": 34735
+     }
+    }
+   },
+   "round1": {
+    "round": 1,
+    "files": {
+     "README.md": "f0b4d9bc68702f1bb8e67645917de6a9699f143a2a15ab88ae79974492834c19",
+     "rules.md": "dc479cb9ab35a2555b7a9b2cea3bd26d9332269f676ff34a5af25f5c6872ddf6",
+     "episode-format.md": "f5fb7c6b5aad91d08c008eec7dd4757b9985b8d505daf45375b73fa2294c4970",
+     "catalog.jsonl": "49a52b192254aba45fcdc67e13524ac9a0b9167cbab2eb8c16c771c1cdf91576",
+     "products.jsonl": "73cb484e5aef5c65a2ebe84ffed634aead2cf797178970f3a6df4528f8667c53",
+     "ingredients.jsonl": "8ab0074d936c01d7e00fdac87d83900a200d449f2dfc82e1976df0247111a28f",
+     "facts.json": "a514731553be463190be69579b090abe2d94210973245a9b89ce2c92c5c46e4a",
+     "check.py": "dbe9705fc555c2953d7d37710bc40f595329ee86adede884b8cd31100ede9dc2"
+    }
+   },
+   "round2": {
+    "round": 2,
+    "files": {
+     "README.md": "f0b4d9bc68702f1bb8e67645917de6a9699f143a2a15ab88ae79974492834c19",
+     "rules.md": "0699dc7a55abc772043ea5e2014b227378f054b5a76433582cc6307e1be2f461",
+     "episode-format.md": "f5fb7c6b5aad91d08c008eec7dd4757b9985b8d505daf45375b73fa2294c4970",
+     "catalog.jsonl": "49a52b192254aba45fcdc67e13524ac9a0b9167cbab2eb8c16c771c1cdf91576",
+     "products.jsonl": "73cb484e5aef5c65a2ebe84ffed634aead2cf797178970f3a6df4528f8667c53",
+     "ingredients.jsonl": "8ab0074d936c01d7e00fdac87d83900a200d449f2dfc82e1976df0247111a28f",
+     "facts.json": "a514731553be463190be69579b090abe2d94210973245a9b89ce2c92c5c46e4a",
+     "check.py": "d1adf4872082df172fe327f418bb08350ddc62295fcaa601736bf2c6ae094f95",
+     "review-round1.md": "47eec1cf11044f637610dc3125fef6fb936d6d82e5aa8284c1d010ae639008b2",
+     "review-round2.md": "3383711a4dfacf0c8843bdef300e9bd59465cd473b5e4edce59d651350e0f85c"
+    }
+   }
+  },
+  "packet_built_by": "a separate agent that could read the repository, and drafted nothing; its check.py agreed with the repository's pool and label tools on the 16 developer episodes and 80 synthetic ones (0 mismatches)"
+ },
+ "independence": {
+  "held": "the drafting agent never saw the systems, their code or any result",
+  "not_held": [
+   "Round 0: where a label came out against the quota, the drafter rewrote the scenario under the same id and accepted the new label, which is iteration against the drawn pools.",
+   "Three review rounds guided revisions. The owner's notes concern wording, realism and design, never system behaviour.",
+   "Round 1: at the owner's request 5 accepted feasible episodes (013, 020, 030, 043, 048) were made infeasible, to keep about a quarter infeasible after the budget category became feasible-only."
+  ],
+  "incident": "Round 2: while backing up its own draft, the drafting agent wrote a copy of episodes.json to /tmp, outside its sealed output directory, and deleted it at once. It read nothing outside the packet; the packet digests were unchanged. The rule was restated for round 3, where it wrote only inside output/.",
+  "pools_and_labels": "candidate pools are drawn by a script from the episode, and every label is proven from catalog facts by tools that run no system under test; neither the drafter nor the reviewer chose them"
+ },
+ "budget_decision": "Proving that a realistic budget is impossible needs the exact cheapest week under whole packages. The exact CP-SAT meal solver could not prove it at realistic amounts (on a developer episode it proved S$25 impossible but settled nothing from S$40 to S$80), so the owner chose feasible, tight budgets (round 1), at least S$2.50 per person per planned meal (round 2). The set therefore has no infeasible budget episode, and its budget episodes are small households or few planned meals.",
+ "infeasible_mix": "13 infeasible, all by a slot with no valid meal; 7 of them (013, 020, 024, 027, 029, 030, 043) through a time limit. Attempts to make safety or meals-per-day scenarios infeasible by allergies alone came out feasible and were left feasible.",
+ "rounds": [
+  {
+   "round": 0,
+   "what": "60 episodes drafted from the sealed packet",
+   "outcome": "check.py OK"
+  },
+  {
+   "round": 1,
+   "what": "owner reviewed all 60",
+   "outcome": "36 accepted, 24 to revise; 58 changed (24 on notes, 5 converted, 29 by the new rules)"
+  },
+  {
+   "round": 2,
+   "what": "owner reviewed the 58 changed",
+   "outcome": "50 accepted, 8 to revise (6 budgets, 3 pork, with 036 in both)"
+  },
+  {
+   "round": 3,
+   "what": "owner reviewed the 8",
+   "outcome": "5 accepted; 018 reworded; 036 and 059 accepted on evidence about liver and gelatin"
+  }
+ ]
+}

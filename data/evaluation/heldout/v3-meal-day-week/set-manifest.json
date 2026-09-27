@@ -1,0 +1,74 @@
+{
+ "schema_version": "meal-day-week-set-v1",
+ "set_id": "heldout-v3-meal-day-week",
+ "protocol": "v3-meal-day-week",
+ "protocol_document": "docs/evaluation/protocol-v3-meal-day-week.md",
+ "status": "frozen",
+ "frozen_at": "2026-09-27T05:56:03Z",
+ "frozen_digest": "81faec54323e166b056410f80f8f6248527e9457acb4a63e3e3c8abf349715cb",
+ "_comment_digest": "sha256 over the episodes' canonical JSON, by episode id: one compact object per line (sort_keys, no spaces), so the digest does not depend on line endings or formatting.",
+ "episodes": 60,
+ "categories": {
+  "shape_change": 12,
+  "meals_per_day": 9,
+  "composition": 9,
+  "budget": 9,
+  "safety_diet": 9,
+  "nutrition_per_day": 7,
+  "variety": 5
+ },
+ "classes": {
+  "feasible": 47,
+  "infeasible": 13
+ },
+ "languages": {
+  "zh": 30,
+  "en": 30
+ },
+ "catalog": {
+  "recipes": "data-engineering/data/release/v2.1/recipes.jsonl",
+  "ingredients": "data-engineering/data/release/v2.1/ingredients.jsonl",
+  "products": "data/products/fairprice-v2-snapshot.json (prices rounded to cents) and data/fixtures/fairprice-products.json for curated ingredients"
+ },
+ "candidate_pool": {
+  "tool": "python -m app.evaluation.multidish_pool",
+  "version": "multidish-pool-v1 with the v3 per-course draw"
+ },
+ "labels": {
+  "rule": "every feasible label carries a witness week (whole packages) within its budget and all its bands; every infeasible one a slot with no valid meal",
+  "proofs": "the sealed packet's check.py in two views (the whole pool, and plannable recipes only) and the repository's python -m app.evaluation.multidish_labels; see verification.json"
+ },
+ "budgets": {
+  "feasible_margin": "budget / witness week between 1.15 and 1.40; the budget category between 1.15 and 1.25",
+  "per_person_per_planned_meal_min_sgd": 2.5,
+  "infeasible_budgets": "none: an impossible budget at a realistic amount cannot be proven with whole packages (owner, round 1)"
+ },
+ "tolerances": {
+  "cost_sgd_absolute": 0.01,
+  "quantity_relative": 1e-06,
+  "nutrition_relative": 0.02
+ },
+ "composition_policy": {
+  "main_shares": [
+   1.0,
+   0.75,
+   0.6,
+   0.5,
+   0.45,
+   0.4
+  ],
+  "other_shares": [
+   null,
+   0.5,
+   0.4,
+   0.35,
+   0.3,
+   0.28
+  ],
+  "hands_on_cook_fraction": 0.5,
+  "switch_minutes": 5,
+  "round_to_minutes": 5
+ },
+ "nutrition": "per-day bands only, over release per-serving nutrition",
+ "review_policy": "drafted in a sealed packet, then reviewed by the owner in three rounds and revised on their written notes until accepted"
+}

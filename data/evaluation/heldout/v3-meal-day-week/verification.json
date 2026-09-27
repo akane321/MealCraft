@@ -1,0 +1,339 @@
+{
+ "code_revision": "e897b10d3c28fa40ad76ab4bfb60e989e85543fe",
+ "set_digest": "81faec54323e166b056410f80f8f6248527e9457acb4a63e3e3c8abf349715cb",
+ "pools": {
+  "command": "PYTHONPATH=backend python -m app.evaluation.multidish_pool --check <each episode>",
+  "result": "60 episode pools checked"
+ },
+ "packet_check": {
+  "command": "python check.py output/episodes.json (sealed packet, both views)",
+  "check_py_sha256": "d1adf4872082df172fe327f418bb08350ddc62295fcaa601736bf2c6ae094f95",
+  "result": "OK"
+ },
+ "repository_labels": {
+  "command": "PYTHONPATH=backend timeout 900 python -m app.evaluation.multidish_labels <episode>",
+  "per_episode": [
+   {
+    "episode_id": "mdw-ho-001",
+    "seconds": 1,
+    "output": "mdw-ho-001: feasible; feasible_proven witness=52.3 bound=11.3"
+   },
+   {
+    "episode_id": "mdw-ho-002",
+    "seconds": 2,
+    "output": "mdw-ho-002: feasible; feasible_proven witness=33.92 bound=9.34"
+   },
+   {
+    "episode_id": "mdw-ho-003",
+    "seconds": 8,
+    "output": "mdw-ho-003: feasible; feasible_proven witness=106.38 bound=26.44"
+   },
+   {
+    "episode_id": "mdw-ho-004",
+    "seconds": 1,
+    "output": "mdw-ho-004: feasible; feasible_proven witness=36.36 bound=13.4"
+   },
+   {
+    "episode_id": "mdw-ho-005",
+    "seconds": 3,
+    "output": "mdw-ho-005: feasible; feasible_proven witness=79.31 bound=41.7"
+   },
+   {
+    "episode_id": "mdw-ho-006",
+    "seconds": 1,
+    "output": "mdw-ho-006: feasible; feasible_proven witness=55.34 bound=20.45"
+   },
+   {
+    "episode_id": "mdw-ho-007",
+    "seconds": 44,
+    "output": "mdw-ho-007: feasible; feasible_proven witness=120.32 bound=11.65"
+   },
+   {
+    "episode_id": "mdw-ho-008",
+    "seconds": 5,
+    "output": "mdw-ho-008: feasible; feasible_proven witness=34.34 bound=11.59"
+   },
+   {
+    "episode_id": "mdw-ho-009",
+    "seconds": 1,
+    "output": "mdw-ho-009: feasible; feasible_proven witness=60.68 bound=33.14"
+   },
+   {
+    "episode_id": "mdw-ho-010",
+    "seconds": 8,
+    "output": "mdw-ho-010: feasible; feasible_proven witness=55.53 bound=25.67"
+   },
+   {
+    "episode_id": "mdw-ho-011",
+    "seconds": 28,
+    "output": "mdw-ho-011: feasible; feasible_proven witness=126.88 bound=24.44"
+   },
+   {
+    "episode_id": "mdw-ho-012",
+    "seconds": 2,
+    "output": "mdw-ho-012: feasible; feasible_proven witness=61.74 bound=25.22"
+   },
+   {
+    "episode_id": "mdw-ho-013",
+    "seconds": 1,
+    "output": "mdw-ho-013: infeasible; infeasible_proven witness=None bound=None"
+   },
+   {
+    "episode_id": "mdw-ho-014",
+    "seconds": 1,
+    "output": "mdw-ho-014: feasible; feasible_proven witness=86.52 bound=22.31"
+   },
+   {
+    "episode_id": "mdw-ho-015",
+    "seconds": 1,
+    "output": "mdw-ho-015: infeasible; infeasible_proven witness=None bound=None"
+   },
+   {
+    "episode_id": "mdw-ho-016",
+    "seconds": 1,
+    "output": "mdw-ho-016: feasible; feasible_proven witness=73.53 bound=40.74"
+   },
+   {
+    "episode_id": "mdw-ho-017",
+    "seconds": 2,
+    "output": "mdw-ho-017: feasible; feasible_proven witness=182.9 bound=159.22"
+   },
+   {
+    "episode_id": "mdw-ho-018",
+    "seconds": 1,
+    "output": "mdw-ho-018: feasible; feasible_proven witness=72.1 bound=22.53"
+   },
+   {
+    "episode_id": "mdw-ho-019",
+    "seconds": 1,
+    "output": "mdw-ho-019: feasible; feasible_proven witness=86.86 bound=37.63"
+   },
+   {
+    "episode_id": "mdw-ho-020",
+    "seconds": 2,
+    "output": "mdw-ho-020: infeasible; infeasible_proven witness=None bound=None"
+   },
+   {
+    "episode_id": "mdw-ho-021",
+    "seconds": 1,
+    "output": "mdw-ho-021: infeasible; infeasible_proven witness=None bound=None"
+   },
+   {
+    "episode_id": "mdw-ho-022",
+    "seconds": 101,
+    "output": "mdw-ho-022: feasible; feasible_proven witness=110.17 bound=64.82"
+   },
+   {
+    "episode_id": "mdw-ho-023",
+    "seconds": 2,
+    "output": "mdw-ho-023: feasible; feasible_proven witness=112.07 bound=71.67"
+   },
+   {
+    "episode_id": "mdw-ho-024",
+    "seconds": 900,
+    "output": "no result within 900 s"
+   },
+   {
+    "episode_id": "mdw-ho-025",
+    "seconds": 1,
+    "output": "mdw-ho-025: feasible; feasible_proven witness=68.17 bound=31.6"
+   },
+   {
+    "episode_id": "mdw-ho-026",
+    "seconds": 1,
+    "output": "mdw-ho-026: feasible; feasible_proven witness=58.23 bound=27.78"
+   },
+   {
+    "episode_id": "mdw-ho-027",
+    "seconds": 2,
+    "output": "mdw-ho-027: infeasible; infeasible_proven witness=None bound=None"
+   },
+   {
+    "episode_id": "mdw-ho-028",
+    "seconds": 687,
+    "output": "mdw-ho-028: feasible; feasible_proven witness=124.31 bound=32.4"
+   },
+   {
+    "episode_id": "mdw-ho-029",
+    "seconds": 4,
+    "output": "mdw-ho-029: infeasible; infeasible_proven witness=None bound=None"
+   },
+   {
+    "episode_id": "mdw-ho-030",
+    "seconds": 1,
+    "output": "mdw-ho-030: infeasible; infeasible_proven witness=None bound=None"
+   },
+   {
+    "episode_id": "mdw-ho-031",
+    "seconds": 1,
+    "output": "mdw-ho-031: feasible; feasible_proven witness=68.27 bound=25.57"
+   },
+   {
+    "episode_id": "mdw-ho-032",
+    "seconds": 1,
+    "output": "mdw-ho-032: feasible; feasible_proven witness=45.45 bound=4.3"
+   },
+   {
+    "episode_id": "mdw-ho-033",
+    "seconds": 6,
+    "output": "mdw-ho-033: feasible; feasible_proven witness=84.46 bound=25.91"
+   },
+   {
+    "episode_id": "mdw-ho-034",
+    "seconds": 1,
+    "output": "mdw-ho-034: feasible; feasible_proven witness=55.85 bound=14.76"
+   },
+   {
+    "episode_id": "mdw-ho-035",
+    "seconds": 4,
+    "output": "mdw-ho-035: feasible; feasible_proven witness=61.78 bound=6.18"
+   },
+   {
+    "episode_id": "mdw-ho-036",
+    "seconds": 1,
+    "output": "mdw-ho-036: feasible; feasible_proven witness=38.64 bound=9.44"
+   },
+   {
+    "episode_id": "mdw-ho-037",
+    "seconds": 1,
+    "output": "mdw-ho-037: feasible; feasible_proven witness=57.11 bound=9.2"
+   },
+   {
+    "episode_id": "mdw-ho-038",
+    "seconds": 6,
+    "output": "mdw-ho-038: feasible; feasible_proven witness=50.79 bound=14.5"
+   },
+   {
+    "episode_id": "mdw-ho-039",
+    "seconds": 1,
+    "output": "mdw-ho-039: feasible; feasible_proven witness=125.77 bound=67.55"
+   },
+   {
+    "episode_id": "mdw-ho-040",
+    "seconds": 1,
+    "output": "mdw-ho-040: infeasible; infeasible_proven witness=None bound=None"
+   },
+   {
+    "episode_id": "mdw-ho-041",
+    "seconds": 1,
+    "output": "mdw-ho-041: infeasible; infeasible_proven witness=None bound=None"
+   },
+   {
+    "episode_id": "mdw-ho-042",
+    "seconds": 1,
+    "output": "mdw-ho-042: infeasible; infeasible_proven witness=None bound=None"
+   },
+   {
+    "episode_id": "mdw-ho-043",
+    "seconds": 1,
+    "output": "mdw-ho-043: infeasible; infeasible_proven witness=None bound=None"
+   },
+   {
+    "episode_id": "mdw-ho-044",
+    "seconds": 4,
+    "output": "mdw-ho-044: feasible; feasible_proven witness=61.03 bound=28.94"
+   },
+   {
+    "episode_id": "mdw-ho-045",
+    "seconds": 1,
+    "output": "mdw-ho-045: feasible; feasible_proven witness=62.46 bound=16.99"
+   },
+   {
+    "episode_id": "mdw-ho-046",
+    "seconds": 1,
+    "output": "mdw-ho-046: feasible; feasible_proven witness=134.65 bound=57.24"
+   },
+   {
+    "episode_id": "mdw-ho-047",
+    "seconds": 2,
+    "output": "mdw-ho-047: feasible; feasible_proven witness=110.61 bound=44.29"
+   },
+   {
+    "episode_id": "mdw-ho-048",
+    "seconds": 1,
+    "output": "mdw-ho-048: infeasible; infeasible_proven witness=None bound=None"
+   },
+   {
+    "episode_id": "mdw-ho-049",
+    "seconds": 3,
+    "output": "mdw-ho-049: feasible; feasible_proven witness=49.75 bound=7.41"
+   },
+   {
+    "episode_id": "mdw-ho-050",
+    "seconds": 1,
+    "output": "mdw-ho-050: feasible; feasible_proven witness=102.11 bound=19.04"
+   },
+   {
+    "episode_id": "mdw-ho-051",
+    "seconds": 1,
+    "output": "mdw-ho-051: feasible; feasible_proven witness=79.97 bound=20.64"
+   },
+   {
+    "episode_id": "mdw-ho-052",
+    "seconds": 5,
+    "output": "mdw-ho-052: feasible; feasible_proven witness=78.1 bound=20.91"
+   },
+   {
+    "episode_id": "mdw-ho-053",
+    "seconds": 1,
+    "output": "mdw-ho-053: feasible; feasible_proven witness=87.72 bound=42.46"
+   },
+   {
+    "episode_id": "mdw-ho-054",
+    "seconds": 1,
+    "output": "mdw-ho-054: feasible; feasible_proven witness=76.77 bound=29.7"
+   },
+   {
+    "episode_id": "mdw-ho-055",
+    "seconds": 6,
+    "output": "mdw-ho-055: feasible; feasible_proven witness=114.21 bound=38.72"
+   },
+   {
+    "episode_id": "mdw-ho-056",
+    "seconds": 4,
+    "output": "mdw-ho-056: feasible; feasible_proven witness=219.51 bound=15.11"
+   },
+   {
+    "episode_id": "mdw-ho-057",
+    "seconds": 1,
+    "output": "mdw-ho-057: feasible; feasible_proven witness=347.3 bound=15.75"
+   },
+   {
+    "episode_id": "mdw-ho-058",
+    "seconds": 1,
+    "output": "mdw-ho-058: feasible; feasible_proven witness=245.83 bound=12.63"
+   },
+   {
+    "episode_id": "mdw-ho-059",
+    "seconds": 1,
+    "output": "mdw-ho-059: feasible; feasible_proven witness=198.69 bound=12.89"
+   },
+   {
+    "episode_id": "mdw-ho-060",
+    "seconds": 2,
+    "output": "mdw-ho-060: feasible; feasible_proven witness=371.31 bound=50.58"
+   }
+  ]
+ },
+ "mdw-ho-024": "The repository tool enumerates every six-dish meal and does not finish. Independent check: a lower bound on the one-cook meal time, taking the fastest pool dish for each of the six required roles and ignoring every other constraint and distinctness, is 10+10+10+8+8+10 = 56 hands-on minutes (prep + half the cook time) + 0 longest waiting + 5 x 5 switch-over minutes = 81 minutes, above the 60-minute limit, so no valid dinner exists.",
+ "liver_gelatin": [
+  "RCP2_04F207178BFB | Spanish Cream | gelatin | 1 Tbsp. gelatin",
+  "RCP2_1A50E2C84176 | Persian Cream | gelatin | 1 tablespoon gelatin",
+  "RCP2_1B3090B85BA3 | Frozen Greek Vanilla Yogurt | gelatin | 1 teaspoon unflavored gelatin",
+  "RCP2_1C5C85F20F29 | Spanish Cream | gelatin | 2 Tbsp. gelatin",
+  "RCP2_1D509F302020 | Chicken Livers Indonesian | liver | 1 lb chicken liver",
+  "RCP2_342A5E365042 | Iced Rice | gelatin | 1/2 oz. gelatin (1 envelope)",
+  "RCP2_477495AFB733 | Portuguese Lemon Bavarois | gelatin | 2 teaspoons unflavored gelatin",
+  "RCP2_485581E767B4 | Spanish Cream | gelatin | 1 Tbsp. plain gelatin",
+  "RCP2_628A7F873ED3 | Mexican Higado Tacos | liver | 1/2 lb liver",
+  "RCP2_90380D601FB4 | Thai Stir-Fried Chicken Livers | liver | 1 lb chicken liver (drained and rinsed thoroughly)",
+  "RCP2_F2E650211264 | Chicken Liver Adobo | liver | 1 kilogram chicken liver"
+ ],
+ "liver_gelatin_note": "All 11 release recipes that use liver or gelatin, with their source lines. None is in the pool of mdw-ho-018, 036 or 059.",
+ "text_consistency": [
+  "60 episodes, 60 note lines; missing notes: none",
+  "1 flags",
+  "mdw-ho-024 | rationale | says 'one' people, household is 10"
+ ],
+ "text_consistency_note": "The one flag is a false positive: 024's rationale says 'for one cook', not a household size."
+}
