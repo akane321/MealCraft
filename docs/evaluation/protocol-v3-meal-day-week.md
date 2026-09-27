@@ -116,6 +116,14 @@ slot's meal) and cost. Results are counts per category (ADR-0028).
   results are never held-out evidence. Its report is
   `docs/evaluation/v3-meal-day-week/dev/latest.md`, with the dataset digests and
   the code revision.
-- **Held-out set:** none exists yet. It will be drafted from a sealed packet,
-  reviewed by the owner and frozen before any system runs on it, as
-  v2-multidish's was (section 7). No claim is made before then.
+- **Held-out set:** `data/evaluation/heldout/v3-meal-day-week/`, 60 episodes
+  (47 feasible, 13 infeasible; 30 English, 30 Chinese). Drafted by a sealed agent
+  from a packet of catalog facts, reviewed by the owner in three rounds and
+  revised only on their written notes, then frozen before any system ran on it.
+  `provenance.json` says what the drafter could see and where independence does
+  not hold; `review.json` holds every verdict; `verification.json` every check
+  run on the final set; `witnesses.json` each feasible episode's witness week and
+  shopping list. Two things differ from the developer set, by the owner's
+  decisions: budgets are feasible only (an impossible budget at a realistic
+  amount cannot be proven with whole packages), and a budget is at least S$2.50
+  per person per planned meal. Do not tune against its results.

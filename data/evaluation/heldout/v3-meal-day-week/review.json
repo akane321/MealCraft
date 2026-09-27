@@ -1,0 +1,671 @@
+{
+ "schema_version": "meal-day-week-review-v1",
+ "set_id": "heldout-v3-meal-day-week",
+ "_comment": "The owner's verdicts, from their written review results (Markdown files, which the owner made the record of each round). Every revision was made by the sealed drafting agent on those notes.",
+ "rounds": [
+  {
+   "round": 1,
+   "reviewer": "owner",
+   "source_sha256": "47eec1cf11044f637610dc3125fef6fb936d6d82e5aa8284c1d010ae639008b2",
+   "cross_cutting": [
+    "course words: main / side / salad / soup, never meat or greens words",
+    "no pork covers every pork source",
+    "infeasible budgets were too low to be credible",
+    "no illness or doctor in nutrition requests"
+   ],
+   "verdicts": [
+    {
+     "episode_id": "mdw-ho-001",
+     "verdict": "revise",
+     "note": "题面“一荤一素一汤”要求荤菜，但标准角色 `main` 并不保证含肉。若不增加肉类食材约束并重证，请改为“一个主菜、一个配菜、一个汤”；改餐次的测试意图可以保留。"
+    },
+    {
+     "episode_id": "mdw-ho-002",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-003",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-004",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-005",
+     "verdict": "revise",
+     "note": "原始午饭和晚饭均写“一荤一素”，但 `main` 类别可能是素主菜、`side/salad` 也未必是青菜。请改为“主菜＋配菜”或增加食材属性约束并重证。午饭简化为一道菜的考点可保留。"
+    },
+    {
+     "episode_id": "mdw-ho-006",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-007",
+     "verdict": "revise",
+     "note": "“再多加一个荤菜”被编码为 `main-2: main`，不能保证加的是荤菜。请改为“再加一道主菜”，或明确肉类条件并重新证明可行。"
+    },
+    {
+     "episode_id": "mdw-ho-008",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-009",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-010",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-011",
+     "verdict": "revise",
+     "note": "原始“两个荤菜”只编码成两个 `main`，无法保证两道含肉。请改为“两个主菜”，或补肉类约束并重证；周五只留一道主菜的改餐次考点不变。"
+    },
+    {
+     "episode_id": "mdw-ho-012",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-013",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-014",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-015",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-016",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-017",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-018",
+     "verdict": "revise",
+     "note": "“不吃猪肉”覆盖所有猪肉来源，但排除列表只含七种猪肉 ID，未覆盖可能含猪肉的 sausage / hot dog。请按实际食材属性扩展排除并重证；同时“午饭一荤一素”与 `main`/`side` 角色不严格等价，宜改为“主菜＋配菜”。"
+    },
+    {
+     "episode_id": "mdw-ho-019",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-020",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-021",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-022",
+     "verdict": "revise",
+     "note": "题面“两道肉菜”只映射到两个 `main`，其中可包含素主菜。请改成“两道不同主菜”，或为两道菜加入明确含肉条件并重证。"
+    },
+    {
+     "episode_id": "mdw-ho-023",
+     "verdict": "revise",
+     "note": "“两个荤菜”不等于两个 `main`。请改成“两个主菜”，或加入肉类食材约束并重证；可选汤不应挤掉必选菜的考点很好，可以保留。"
+    },
+    {
+     "episode_id": "mdw-ho-024",
+     "verdict": "revise",
+     "note": "“三道肉菜”只映射到三个 `main`，不保证含肉。请改成“三道主菜”或补肉类约束并重证；六道菜与一小时冲突的考点可保留。"
+    },
+    {
+     "episode_id": "mdw-ho-025",
+     "verdict": "revise",
+     "note": "“一荤一素”编码为 `main`＋`side/salad`，不能保证荤素属性。请改为“主菜＋配菜”；两种角色都必选的考点仍清楚。"
+    },
+    {
+     "episode_id": "mdw-ho-026",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-027",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-028",
+     "verdict": "revise",
+     "note": "“两荤两素”与两个 `main`＋两个 `side/salad` 不严格等价。请改为“两个主菜、两个配菜”，或用食材属性保证荤素并重证；可选汤的考点保留。"
+    },
+    {
+     "episode_id": "mdw-ho-029",
+     "verdict": "revise",
+     "note": "“两道肉菜”只编码成两个 `main`，不保证含肉。请改为“两道主菜”或增加含肉约束并重证。"
+    },
+    {
+     "episode_id": "mdw-ho-030",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-031",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-032",
+     "verdict": "revise",
+     "note": "九人每天午晚两餐、共三至五道菜，一周 S$45 过低，样本显得刻意；按用量的下界 S$52.38 还不是实际整包采购下界。请用整包成本重新建立下界、设置更可信的预算并重证；“一荤一素”也需与 `main`/`side` 对齐。"
+    },
+    {
+     "episode_id": "mdw-ho-033",
+     "verdict": "revise",
+     "note": "十人七顿三道菜晚餐一周 S$60（人均每晚不足 S$1）明显偏低，容易让模型不做规划就凭常识答“无解”。请用整包采购下界设置更贴近家庭预算的阈值，并重证。"
+    },
+    {
+     "episode_id": "mdw-ho-034",
+     "verdict": "revise",
+     "note": "五人三餐共 21 餐一周 S$50（每人每餐约 S$0.48）过于失真。请改用整包采购的严谨下界，设较可信但仍不可行的预算，并重新证明。"
+    },
+    {
+     "episode_id": "mdw-ho-035",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-036",
+     "verdict": "revise",
+     "note": "题面“不吃猪肉”比七个排除 ID 的覆盖面更广；可能含猪肉的香肠、热狗仍可能进入方案。请扩展排除范围并重新核验 S$55 预算可行性。"
+    },
+    {
+     "episode_id": "mdw-ho-037",
+     "verdict": "revise",
+     "note": "六人每晚五道菜、一周 S$26 极不真实，且“肉菜”未由 `main` 保证。请换成可信的预算场景，用整包采购下界重证无解；题面改成“主菜”或加含肉约束。"
+    },
+    {
+     "episode_id": "mdw-ho-038",
+     "verdict": "revise",
+     "note": "十二人每晚四道菜一周 S$50 不像真实采购预算，且“两荤”未由两个 `main` 保证。请重设贴近实际的预算、改用整包采购下界重证，并统一菜式措辞。"
+    },
+    {
+     "episode_id": "mdw-ho-039",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-040",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-041",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-042",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-043",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-044",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-045",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-046",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-047",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-048",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-049",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-050",
+     "verdict": "revise",
+     "note": "当前疾病和医生叙述可能把单纯的钠求和测试混入医疗边界判断。若只测营养计算，请改为家庭主动提出“每人晚餐钠不超过 900 mg”；同时把“一荤一素”改成与 `main`/`side` 一致的措辞。若保留医学语境，应另写清预期的安全回应。"
+    },
+    {
+     "episode_id": "mdw-ho-051",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-052",
+     "verdict": "revise",
+     "note": "“糖尿病前期，医生说……”容易让每日营养约束题同时考医疗边界。若本题目标是核对糖和钠的数值求和，请保留用户自设阈值、删除疾病与医生建议；若保留，则标准答案应明确系统只执行用户给定目标、不提供治疗建议。"
+    },
+    {
+     "episode_id": "mdw-ho-053",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-054",
+     "verdict": "revise",
+     "note": "“一荤一素一汤”只编码为 `main`＋`side/salad`＋`soup`，不能保证荤菜与青菜。请改成“一个主菜、一个配菜和一个汤”，或补食材属性约束并重证。45 g 碳水、1200 mg 钠的用户自设数值目标可保留。"
+    },
+    {
+     "episode_id": "mdw-ho-055",
+     "verdict": "revise",
+     "note": "“丈夫是糖尿病患者”可能让碳水／热量合计题混入医疗边界判断。若只测跨三餐核算，请改为家庭主动指定每日范围；若保留疾病语境，应把不自动制定目标、不提供治疗建议列入标准答案。"
+    },
+    {
+     "episode_id": "mdw-ho-056",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-057",
+     "verdict": "revise",
+     "note": "“一荤一素一汤”与 `main`＋`side/salad`＋`soup` 不严格等价。请改为“一个主菜、一个配菜和一个汤”或补属性约束；整周不重复的考点可保留。"
+    },
+    {
+     "episode_id": "mdw-ho-058",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-059",
+     "verdict": "revise",
+     "note": "“不吃猪肉”比现有七个 ID 更广，可能含猪肉的香肠／热狗没有排除。请扩展到实际猪肉来源并重证；整周不重复的测试意图可保留。"
+    },
+    {
+     "episode_id": "mdw-ho-060",
+     "verdict": "revise",
+     "note": "“两道肉菜”只编码成两个 `main`，不能保证含肉。请改成“两道不同主菜”或增加肉类食材条件并重证；90 分钟和全周不重复约束不变。"
+    }
+   ]
+  },
+  {
+   "round": 2,
+   "reviewer": "owner",
+   "source_sha256": "3383711a4dfacf0c8843bdef300e9bd59465cd473b5e4edce59d651350e0f85c",
+   "scope": "the 58 episodes changed after round 1; 002 and 021 unchanged and kept as accepted",
+   "verdicts": [
+    {
+     "episode_id": "mdw-ho-001",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-003",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-004",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-005",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-006",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-007",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-008",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-009",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-010",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-011",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-012",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-013",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-014",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-015",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-016",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-017",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-018",
+     "verdict": "revise",
+     "note": "“凡是含猪肉的都不要”与整类排除 `liver`、`gelatin`、`gyoza`、`baked_beans` 不完全等价，尤其 `liver` 会误排鸡肝。请按可证实的来源区分猪/非猪；若数据库无法区分，就在题面明确“来源不明的肝、明胶及可能含猪成分的加工食品也一律不吃”，并重证。香肠、热狗应继续纳入风险范围。"
+    },
+    {
+     "episode_id": "mdw-ho-019",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-020",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-022",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-023",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-024",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-025",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-026",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-027",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-028",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-029",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-030",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-031",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-032",
+     "verdict": "revise",
+     "note": "9 人、每天午晚餐、一周 S$95，平均每人每餐约 S$0.75。改成“可行”以及预算为见证的 1.22 倍，证明的是当前价目表下有解，并未解决原先的家庭预算真实性问题；而“出题者说明”还写旧午饭形态和 S$45。请缩小人数或覆盖餐数，或换更可信的预算/场景，并重新校验预算紧度与标签。"
+    },
+    {
+     "episode_id": "mdw-ho-033",
+     "verdict": "revise",
+     "note": "9 人每天午晚餐、一周 S$115，约 S$0.91/人/餐；旧说明仍是“10 人、三道晚饭、S$60”。题面虽与新结构相符，却仍不像真实整周家庭采购预算。请重设规模、餐数或预算，再证可行。"
+    },
+    {
+     "episode_id": "mdw-ho-034",
+     "verdict": "revise",
+     "note": "5 人每天三餐、一周 S$115，约 S$1.10/人/餐，仍明显低于该题要求呈现的日常采购直觉；说明还写 S$50。请调整场景，而不只是把 S$50 提高到当前见证的 1.24 倍。"
+    },
+    {
+     "episode_id": "mdw-ho-035",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-036",
+     "verdict": "revise",
+     "note": "两项问题叠加：6 人七顿晚餐的 S$52 仅约 S$1.24/人/餐；“不吃猪肉”却排除所有 `liver` 等不确定来源类别。请修订预算场景和猪源归属语义后重证；说明中的 S$55 也要更新为 S$52。"
+    },
+    {
+     "episode_id": "mdw-ho-037",
+     "verdict": "revise",
+     "note": "4 名学生每天午晚餐、一周公共伙食费 S$50，约 S$0.89/人/餐，合租场景仍难消除刻意感；说明更完全保留“6 人、每晚五道菜、S$26”的旧题。请重新构造贴近生活的紧预算场景并更新说明。"
+    },
+    {
+     "episode_id": "mdw-ho-038",
+     "verdict": "revise",
+     "note": "12 人每晚四道菜、一周 S$110，约 S$1.31/人/晚餐；对“帮佣、两主菜、配菜、汤”的设定仍偏失真。当前见证 S$89.26 只表明数据模型中的可行性，不等于场景可信；说明仍写 S$50。请调整规模或预算并重证。"
+    },
+    {
+     "episode_id": "mdw-ho-039",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-040",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-041",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-042",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-043",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-044",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-045",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-046",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-047",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-048",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-049",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-050",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-051",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-052",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-053",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-054",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-055",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-056",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-057",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-058",
+     "verdict": "accepted",
+     "note": ""
+    },
+    {
+     "episode_id": "mdw-ho-059",
+     "verdict": "revise",
+     "note": "与 018 相同，`liver` 会误排鸡肝，其他不确定来源的加工食品也未与“含猪肉”严格对齐。请明确“来源不明也不吃”的用户意图，或按来源精确区分；再核验全周不重复见证。"
+    },
+    {
+     "episode_id": "mdw-ho-060",
+     "verdict": "accepted",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "round": 3,
+   "reviewer": "owner",
+   "source_sha256": "bc0e408fa25b1a5a12e79cb8be1774f2ad68c093d2ff9e516588827b88504616",
+   "scope": "the 8 episodes revised after round 2",
+   "verdicts": [
+    {
+     "episode_id": "mdw-ho-018",
+     "decision": "需小修",
+     "note": "题面说“来源不明的肝和明胶也一律不吃”，标准答案却排除所有 `liver`、`gelatin`，仍可能误排来源已知的鸡肝等。若不做来源细分，把题面改成“不论来源，肝和明胶也一律不吃”即可与当前排除集严格对齐；此时不必因为纯措辞修改而更换见证，但须确认最终结构化请求不变。"
+    },
+    {
+     "episode_id": "mdw-ho-032",
+     "decision": "接受",
+     "note": "一人午晚两餐、S$56/周，即 S$4.00/人/餐；整包见证 S$45.45，预算约为其 1.23 倍。请求与一周总预算、可选配菜及标签一致。"
+    },
+    {
+     "episode_id": "mdw-ho-033",
+     "decision": "接受",
+     "note": "四人七顿晚餐、每晚两个不同主菜加配菜和汤、S$100/周，即约 S$3.57/人/餐；整包见证 S$84.46，预算约为其 1.18 倍。原先过低的九人预算问题已消除。"
+    },
+    {
+     "episode_id": "mdw-ho-034",
+     "decision": "接受",
+     "note": "三人七顿晚餐、S$66/周，即约 S$3.14/人/餐；整包见证 S$55.85，预算约为其 1.18 倍。与 035 的一人三餐题也不再是同一个场景。"
+    },
+    {
+     "episode_id": "mdw-ho-036",
+     "decision": "有条件接受",
+     "note": "两人七顿三道菜晚餐、S$47/周，即约 S$3.36/人/餐；整包见证 S$38.64，预算问题已解决。但“不吃猪肉”与不排除 `liver`、`gelatin` 是否相容，取决于这些通用 ID 的实际来源/过敏原映射。见下文冻结条件。"
+    },
+    {
+     "episode_id": "mdw-ho-037",
+     "decision": "接受",
+     "note": "三名室友只共做晚餐、共同预算 S$70/周，即约 S$3.33/人/餐；整包见证 S$57.11，预算约为其 1.23 倍。“每人各付 S$70”与“总共 S$70”的误读是有效考点。"
+    },
+    {
+     "episode_id": "mdw-ho-038",
+     "decision": "接受",
+     "note": "帮佣为三口之家每晚做四道菜、S$62/周，即约 S$2.95/人/餐；整包见证 S$50.79，预算约为其 1.22 倍。相较十二人 S$110，人数与采购规模协调得多。"
+    },
+    {
+     "episode_id": "mdw-ho-059",
+     "decision": "有条件接受",
+     "note": "去掉 `liver`、`gelatin` 避免了确定的过度排除；全周不重复见证仍被报告为可行。但如通用 ID 也可能代表猪肝/猪明胶，仅仅不排除它们又可能违反“不吃猪肉”。需要用数据证据关闭这一来源歧义。"
+    }
+   ],
+   "conditions_closed": {
+    "mdw-ho-018": "request reworded by the drafting agent to the owner's wording (肝和明胶不论来源都不吃); nothing else changed",
+    "mdw-ho-036/059": "no recipe in either pool uses liver or gelatin (verification.json, liver_gelatin), so no plan for these episodes can contain them; the owner's condition asks for this evidence",
+    "authoring notes": "a field-consistency check of every text field against the structured fields (verification.json, text_consistency), and the notes committed in authoring-notes.md"
+   }
+  }
+ ]
+}
