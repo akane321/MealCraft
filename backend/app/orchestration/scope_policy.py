@@ -34,6 +34,11 @@ class ReferenceScopePolicy:
         "vegetarian",
         "vegan",
         "unavailable",
+        # "No repeats" and "no dish twice" as a turn of their own.
+        "repeat",
+        "twice",
+        "重复",
+        "重样",
         "食谱",
         "菜谱",
         "做饭",

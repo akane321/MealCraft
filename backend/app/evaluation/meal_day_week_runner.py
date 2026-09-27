@@ -59,6 +59,7 @@ PARAMETERS = {
     "max_cooking_time_minutes_when_unstated": NO_TIME_LIMIT,
     "shape_change_today": "the week's first day, so every day is still ahead",
     "per_day_nutrition": "sent as the product's per_day target",
+    "max_uses_per_recipe": "a stated cap on uses is sent as the request's max_uses_per_recipe, a hard rule",
     "nutrition_tolerance_relative": Tolerances().nutrition_relative,
 }
 
@@ -112,6 +113,7 @@ def plan_request(episode: dict) -> WeeklyMealPlanRequest:
             "nutrition_constraints": targets,
             "plan_shape": profile["plan_shape"],
             "pricing_mode": "fixture",
+            "max_uses_per_recipe": (hard.get("repetition_requirements") or {}).get("max_uses_per_recipe"),
         }
     )
 

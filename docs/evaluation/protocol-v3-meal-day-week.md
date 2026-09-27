@@ -80,8 +80,10 @@ price is a fixture price.
    limits. A stated time limit applies to each meal; none stated is sent as the
    product's widest, 240 minutes. A per-day band is sent as the product's
    `per_day` nutrition target (added after the first run, which had to send it as a
-   weekly average and missed it on some days). A cap on uses has no request field; the
-   product avoids repeats by itself.
+   weekly average and missed it on some days). A stated cap on uses
+   (`repetition_requirements.max_uses_per_recipe`) is sent as the request's
+   `max_uses_per_recipe`, a hard rule (before it existed, the product only avoided
+   repeats by itself).
 3. **The change.** In a shape-change episode the words are read as the
    conversation reads them: one-dish events first, then the day, then
    `read_shape_change`. The change is previewed with `preview_shape`, with
