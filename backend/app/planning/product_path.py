@@ -35,6 +35,7 @@ from app.schemas.planning_v2 import (
     PlanningConstraintCheck,
     PlanningNutritionBand,
     PlanningPantryItem,
+    PlanningRepetitionRules,
     PlanningSlot,
 )
 from app.schemas.product import GroceryLineEstimate
@@ -327,6 +328,12 @@ class ProductPlanningEngine:
             health_preferences=constraints.health_preferences,
             nutrition_bands=bands,
             purchase_budget_sgd=constraints.weekly_budget_sgd,
+            # Only a stated cap is a rule; the search and the validator both hold it (ADR-0046 variety).
+            repetition_rules=(
+                PlanningRepetitionRules(max_uses_per_recipe=constraints.max_uses_per_recipe)
+                if constraints.max_uses_per_recipe is not None
+                else None
+            ),
             catalog_version=digest([r.model_dump(mode="json") for r in candidates]),
             product_snapshot_version=digest([observations[k].model_dump(mode="json") for k in sorted(options)]),
             policy_version=trace["policy_version"],

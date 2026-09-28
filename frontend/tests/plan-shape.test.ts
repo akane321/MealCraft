@@ -31,5 +31,7 @@ describe("shapeChangeSummary", () => {
     const roles = [{ role_id: "main", courses: ["main"] }, { role_id: "soup", courses: ["soup"] }, { role_id: "main-2", courses: ["main"] }] as MealRole[];
     const removed = [{ entry_id: 1 }] as MealPlanShapeChange["removed"];
     expect(shapeChangeSummary(change({ roles, removed }), day)).toBe("Dinner on Fri: 2 mains, soup");
+    const withVegetable = [{ role_id: "main", courses: ["main"], required: true }, { role_id: "vegetable", courses: ["side"], required: false }, { role_id: "soup", courses: ["soup"], required: true }] as MealRole[];
+    expect(shapeChangeSummary(change({ roles: withVegetable, removed }), day)).toBe("Dinner on Fri: main, vegetable if it fits, soup");
   });
 });

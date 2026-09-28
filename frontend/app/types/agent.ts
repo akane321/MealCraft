@@ -53,6 +53,8 @@ export interface AgentConstraintState {
   max_sodium_mg_per_meal: number | null;
   available_ingredients: AvailableIngredientInput[];
   pricing_mode: PricingMode;
+  // How often one dish may be served in the week; 1 is "no repeats", null leaves it to the planner.
+  max_uses_per_recipe: number | null;
 }
 
 export interface AgentReplanDraft {

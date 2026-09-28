@@ -243,7 +243,12 @@ def evaluate(
                     violations.extend(f"day_{day}:{item}" for item in _hard_violations(recipe, request))
                 grocery = aggregator.estimate(selected_recipes, request)
                 grocery_complete = grocery.complete
-                within_weekly_budget = grocery.within_weekly_budget
+                # Protocol v1 scores the budget on the value of ingredients used, not the checkout
+                # total the product's flag now uses, so its reports stay comparable.
+                budget, used = request.weekly_budget_sgd, grocery.consumed_total_sgd
+                within_weekly_budget = (
+                    round(used * 100) <= round(budget * 100) if budget is not None and used is not None else None
+                )
 
             failure_reasons = _failure_reasons(
                 expected_feasible=scenario.expected_feasible,

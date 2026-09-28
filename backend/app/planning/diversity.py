@@ -8,6 +8,13 @@ MAX_DIVERSITY_CONTRIBUTION = 0.10
 
 
 def permits_extension(problem, previous, recipe_id):
+    rules = problem.repetition_rules
+    if rules is not None:
+        # A stated cap on uses, as the meal beam's `horizon_permitted` holds it.
+        caps = {c.recipe_id: c.max_uses for c in rules.recipe_counts if c.max_uses is not None}
+        cap = caps.get(recipe_id, rules.max_uses_per_recipe)
+        if cap is not None and previous.count(recipe_id) >= cap:
+            return False
     policy = problem.diversity_policy
     if policy is None:
         return True

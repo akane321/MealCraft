@@ -1,0 +1,17 @@
+{
+  "dataset_version": "feedback-ranking-developer-v1",
+  "source": "synthetic",
+  "events": [
+    {"event_id": "prior-b", "scope_id": "synthetic-home", "recipe_id": "b", "outcome": "cooked", "available_at": "2026-01-01T10:00:00Z"},
+    {"event_id": "prior-a", "scope_id": "synthetic-home", "recipe_id": "a", "outcome": "skipped", "available_at": "2026-01-01T11:00:00Z"},
+    {"event_id": "other-a", "scope_id": "another-home", "recipe_id": "a", "outcome": "cooked", "available_at": "2026-01-01T11:00:00Z"},
+    {"event_id": "outcome-1", "scope_id": "synthetic-home", "recipe_id": "b", "outcome": "cooked", "available_at": "2026-01-03T11:00:00Z"},
+    {"event_id": "outcome-2", "scope_id": "synthetic-home", "recipe_id": "a", "outcome": "cooked", "available_at": "2026-01-03T12:00:00Z"},
+    {"event_id": "outcome-3", "scope_id": "cold-start-home", "recipe_id": "b", "outcome": "swapped", "available_at": "2026-01-03T13:00:00Z"}
+  ],
+  "decisions": [
+    {"decision_id": "d1", "scope_id": "synthetic-home", "decision_at": "2026-01-02T10:00:00Z", "eligible_candidates": ["a", "b"], "outcome_event_id": "outcome-1"},
+    {"decision_id": "d2", "scope_id": "synthetic-home", "decision_at": "2026-01-02T11:00:00Z", "eligible_candidates": ["a", "b"], "outcome_event_id": "outcome-2"},
+    {"decision_id": "d3", "scope_id": "cold-start-home", "decision_at": "2026-01-02T12:00:00Z", "eligible_candidates": ["b", "a"], "outcome_event_id": "outcome-3"}
+  ]
+}
