@@ -7,6 +7,7 @@ serves a sauce as a dinner and counts it as one. Curated recipes are exempt; the
 """
 
 import re
+from functools import cache
 
 # A main under this is a sauce, a marinade or a dish that lost its main line, not a dinner.
 MAIN_KCAL_FLOOR = 150
@@ -57,6 +58,7 @@ def dish_family(title: str) -> str:
     return " ".join(words) or title.lower()
 
 
+@cache
 def dish_kind(title: str) -> str:
     """The last two words of a dish's name once descriptions are gone: "Teriyaki Fried Rice" -> "fried rice"."""
     return " ".join(dish_family(title).split()[-2:])

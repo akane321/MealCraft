@@ -66,3 +66,47 @@ def test_a_daily_target_is_a_hard_day_band_and_a_soft_meal_guide():
     day, meal = compile_nutrition_targets([target], 0.25, meals_per_day=3)
     assert (day.scope, day.hard, day.lower, day.upper) == ("per_day", True, 900, 1500)
     assert (meal.scope, meal.hard, meal.lower, meal.upper) == ("per_slot", False, 225, 625)
+
+
+def synthetic(episode_id: str, meals: dict, *, budget=None, bands=()) -> dict:
+    """A developer episode of this shape and limit, its pool drawn and its label proven."""
+    episode = copy.deepcopy(load("mdw-dev-008"))
+    episode["episode_id"] = episode_id
+    episode["scenario"]["household_profile"]["plan_shape"] = {"meals": meals}
+    days = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+    order = ("breakfast", "lunch", "dinner")
+    episode["scenario"]["planning_horizon"]["slots"] = [f"{d}-{m}" for d in days for m in order if m in meals]
+    hard = episode["gold"]["applicable_hard_constraints"]
+    hard["budget_sgd"], hard["nutrition_bands"] = budget, list(bands)
+    episode["scenario"]["recipe_candidate_slugs"], episode["scenario"]["fairprice_product_ids"] = draw(episode)
+    assert check(episode) is None, check(episode)
+    return episode
+
+
+BREAKFAST = [{"role_id": "main", "courses": ["breakfast", "baked_good"], "required": True}]
+LUNCH = [{"role_id": "main", "courses": ["main", "salad", "soup"], "required": True}]
+DINNER = [
+    {"role_id": "main", "courses": ["main"], "required": True},
+    {"role_id": "vegetable", "courses": ["side", "salad"], "required": False},
+]
+DINNER_WITH_SOUP = [
+    {"role_id": "main", "courses": ["main"], "required": True},
+    {"role_id": "vegetable", "courses": ["side", "salad"], "required": True},
+    {"role_id": "soup", "courses": ["soup"], "required": True},
+]
+
+
+def test_a_budget_the_search_prunes_to_nothing_is_planned_by_a_cost_led_search():
+    """1.15 times the label's S$46.80 witness: the budget-pruned meal beam held no complete week."""
+    episode = synthetic("syn-budget-003", {"breakfast": BREAKFAST, "dinner": DINNER_WITH_SOUP}, budget=53.82)
+    row = evaluate([episode])["episodes"][0]
+    assert row["strict_success"], row
+    assert row["total_cost_sgd"] <= 53.82
+
+
+def test_a_day_ceiling_the_search_prunes_to_nothing_is_planned_by_a_band_led_search():
+    """At most 30 g of fat a day over three meals: every week the beam held broke a day's ceiling."""
+    fat = {"metric": "fat_g", "scope": "per_day", "max": 30}
+    episode = synthetic("syn-band-006", {"breakfast": BREAKFAST, "lunch": LUNCH, "dinner": DINNER}, bands=[fat])
+    row = evaluate([episode])["episodes"][0]
+    assert row["strict_success"], row
