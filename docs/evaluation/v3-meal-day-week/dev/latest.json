@@ -10,7 +10,7 @@
     "nutrition_tolerance_relative": 0.02
   },
   "summary": {
-    "strict_success": "15/16",
+    "strict_success": "16/16",
     "by_category": {
       "meals_per_day": {
         "strict_success": "3/3",
@@ -25,11 +25,8 @@
         "failure_mechanisms": {}
       },
       "budget": {
-        "strict_success": "1/2",
-        "failure_mechanisms": {
-          "plan_present": 1,
-          "status_matches_class": 1
-        }
+        "strict_success": "2/2",
+        "failure_mechanisms": {}
       },
       "safety_diet": {
         "strict_success": "2/2",
@@ -156,26 +153,15 @@
       "category": "budget",
       "language": "en",
       "class": "feasible",
-      "answered": "infeasible",
-      "strict_success": false,
-      "failed": [
-        "status_matches_class",
-        "plan_present"
-      ],
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
       "indeterminate": [],
-      "details": {
-        "status_matches_class": "expected plan, answered infeasible",
-        "plan_present": "a feasible episode requires a plan"
-      },
-      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
-      "refusal": {
-        "status": "candidate_rejected",
-        "evidence": "bounded_search_exhausted",
-        "weeks_tried": 0,
-        "unmet_checks": {},
-        "search_exhausted": false,
-        "input_issues": []
-      }
+      "details": {},
+      "dishes": 26,
+      "distinct_recipes": 7,
+      "meal_fit": "26/26",
+      "total_cost_sgd": 103.43
     },
     {
       "episode_id": "mdw-dev-009",
@@ -376,7 +362,7 @@
     }
   ],
   "episode_set": "developer set",
-  "code_revision": "fdbc0be0944da641c65cd8c48b98b915ca35b650+dirty",
+  "code_revision": "2d56671b1362befda432e4c5a2318053e651ca6e",
   "inputs": {
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",
@@ -385,7 +371,7 @@
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-005.json": "f97b7aa618bfca9543955e8c8ab631e54bb1b3d0483a92e1db8640971e019fff",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-006.json": "c59bb0883629c378cb6e597fd7cf7534ae1f01406abca787d87582b1344639c6",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-007.json": "59dc9953c66c2f177a02daa5351c93a3d055695ee7751f3b35bcb530c64eff49",
-    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-008.json": "083ebb3fff203b3f9a96e05195f21f865908cd72c9c24490f424bee2336b6f49",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-008.json": "e83b0f015f3a978a7276af48598993cce2eaff8f8b8259ef4301f9266fc25aaf",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-009.json": "5f9dd0a151aec38e01f3af59995ce4a364fe05f7bc376b683ac45b2d8f05e516",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-010.json": "31489206f6bbf65f3d8b614076d80fd64c6cda896a96dfd212a076ce004511c8",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-011.json": "17653d67b060e05281beed67a8ee264e6a72d559b050b755d26f6fd3b8f64054",
