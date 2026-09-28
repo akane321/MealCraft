@@ -131,6 +131,7 @@ class AgentConstraintWorkflow:
             "weekly_budget_sgd",
             "max_sodium_mg_per_meal",
             "pricing_mode",
+            "max_uses_per_recipe",
         ):
             value = getattr(extraction, field)
             if value is not None:

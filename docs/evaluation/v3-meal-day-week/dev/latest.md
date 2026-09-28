@@ -41,6 +41,7 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 - max_cooking_time_minutes_when_unstated: 240
 - shape_change_today: the week's first day, so every day is still ahead
 - per_day_nutrition: sent as the product's per_day target
+- max_uses_per_recipe: a stated cap on uses is sent as the request's max_uses_per_recipe, a hard rule
 - nutrition_tolerance_relative: 0.02
 
 Counts only, no rates (ADR-0028).
