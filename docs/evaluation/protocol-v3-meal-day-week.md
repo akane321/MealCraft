@@ -129,3 +129,5 @@ slot's meal) and cost. Results are counts per category (ADR-0028).
   decisions: budgets are feasible only (an impossible budget at a realistic
   amount cannot be proven with whole packages), and a budget is at least S$2.50
   per person per planned meal. Do not tune against its results.
+  Runs and findings are in `docs/evaluation/v3-meal-day-week/heldout/`: run 1, before
+  any product change, scored 44 of 60.
