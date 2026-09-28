@@ -124,6 +124,7 @@ function session(planned: boolean) {
       max_sodium_mg_per_meal: null,
       available_ingredients: [{ normalized_name: "brown_rice", quantity: 500, unit: "g" }],
       pricing_mode: "fixture",
+      max_uses_per_recipe: null,
     },
     missing_fields: [],
     clarification_questions: [],

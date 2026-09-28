@@ -78,6 +78,9 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     meal_composition: MealComposition | None = None
     # Which meals of each day are planned and each one's dish roles (ADR-0046); replaces meal_composition.
     plan_shape: MealPlanShape | None = None
+    # How often one dish may appear in the week, a hard rule when stated: 1 is "no dish twice".
+    # None leaves repeating a soft cost the planner avoids by itself.
+    max_uses_per_recipe: int | None = Field(default=None, ge=1, le=7)
 
     @model_validator(mode="after")
     def one_way_to_say_the_shape(self) -> "WeeklyMealPlanRequest":
