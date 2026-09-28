@@ -176,6 +176,25 @@ def test_a_model_that_fails_costs_understanding_not_the_turn() -> None:
     assert out.assistant_summary.endswith(FallbackConstraintParser.OFFLINE_NOTE)
 
 
+def test_a_one_dish_event_takes_one_day_and_a_shape_change_several() -> None:
+    from datetime import date, timedelta
+    from types import SimpleNamespace
+
+    from app.agent.replanning import AgentReplanInterpreter
+
+    monday = date(2026, 9, 28)
+    plan = SimpleNamespace(
+        days=[SimpleNamespace(day_index=n, planned_date=monday + timedelta(days=n - 1)) for n in range(1, 8)]
+    )
+    interpreter = AgentReplanInterpreter()
+    assert interpreter.day_index("swap wednesday and friday's dinner", plan) == 3
+    assert interpreter.day_index("skip dinner this weekend", plan) is None
+    assert interpreter.day_indexes("skip dinner this weekend", plan) == [6, 7]
+    assert interpreter.day_indexes("周六到周一", plan) == [1, 6, 7]
+    assert interpreter.day_indexes("no soup on day 3", plan) == [3]
+    assert interpreter.day_indexes("no soup", plan) is None
+
+
 def test_asking_for_a_food_swaps_the_main_dish_of_the_meal() -> None:
     from types import SimpleNamespace
 

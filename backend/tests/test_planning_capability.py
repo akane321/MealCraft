@@ -303,7 +303,8 @@ def test_dropping_a_meal_for_the_week_changes_this_weeks_shape_only(composed_cli
     assert last.status_code == 422 and "at least one meal" in last.json()["detail"]
 
 
-def test_the_conversation_adds_a_meal_for_this_week_then_keeps_it_on_a_yes(composed_client):
+def _conversation_week(client):
+    """A week of two-dish dinners planned and confirmed in the conversation: the session and the plan."""
     profile = {
         **_household_profile_payload(),
         "max_cooking_time_minutes": 90,
@@ -313,10 +314,36 @@ def test_the_conversation_adds_a_meal_for_this_week_then_keeps_it_on_a_yes(compo
         "available_ingredients": [],
         "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
     }
-    assert composed_client.post("/api/household-profiles", json=profile).status_code == 201
-    session = composed_client.post("/api/agent/sessions", json={"message": "Plan our week"}).json()
-    confirmed = composed_client.post(f"/api/agent/sessions/{session['id']}/confirm")
+    assert client.post("/api/household-profiles", json=profile).status_code == 201
+    session = client.post("/api/agent/sessions", json={"message": "Plan our week"}).json()
+    confirmed = client.post(f"/api/agent/sessions/{session['id']}/confirm")
     assert confirmed.status_code == 200, confirmed.text
+    return session, confirmed.json()["plan"]
+
+
+def test_a_weekend_soup_asked_for_in_the_conversation_replans_only_those_dinners(composed_client):
+    from datetime import date
+
+    session, plan = _conversation_week(composed_client)
+    weekend = {d["day_index"] for d in plan["days"] if date.fromisoformat(d["planned_date"]).weekday() >= 5}
+    before = {(d["day_index"], d["role_id"]): d["recipe"]["slug"] for d in plan["days"]}
+
+    asked = composed_client.post(
+        f"/api/agent/sessions/{session['id']}/messages", json={"message": "Add a soup on weekends"}
+    ).json()
+    assert asked["pending_replan"]["event_type"] == "CHANGE_SHAPE", asked["messages"][-1]["content"]
+    assert "Dinner with a soup on Saturday and Sunday." in asked["messages"][-1]["content"]
+    assert asked["pending_replan"]["shape_change"]["day_indexes"] == sorted(weekend)
+
+    after = composed_client.post(f"/api/agent/sessions/{session['id']}/replan/confirm").json()["plan"]["days"]
+    assert {d["day_index"] for d in after if d["role_id"] == "soup"} == weekend
+    # Every other meal is exactly as it was.
+    others = {(d["day_index"], d["role_id"]): d["recipe"]["slug"] for d in after if d["day_index"] not in weekend}
+    assert others == {key: slug for key, slug in before.items() if key[0] not in weekend}
+
+
+def test_the_conversation_adds_a_meal_for_this_week_then_keeps_it_on_a_yes(composed_client):
+    session, _ = _conversation_week(composed_client)
 
     asked = composed_client.post(
         f"/api/agent/sessions/{session['id']}/messages", json={"message": "Also plan lunch"}

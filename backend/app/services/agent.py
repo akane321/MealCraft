@@ -490,8 +490,8 @@ class AgentSessionService:
             raise AgentSessionNotFoundError
         if self.replan_interpreter._event_type(message.lower()) is not None:
             return None  # swap, skip, lock or can't buy: one dish, not the meal's shape
-        day = self.replan_interpreter.day_index(message.lower(), plan)
-        intent = read_shape_change(message, plan=plan, day_index=day)
+        days = self.replan_interpreter.day_indexes(message.lower(), plan)
+        intent = read_shape_change(message, plan=plan, day_indexes=days)
         if intent is None:
             return None
         decision = ScopeDecision(
