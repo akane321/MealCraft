@@ -74,7 +74,11 @@ def load_release_catalog(root: Path | None = None) -> ReleaseCatalog:
     for line in (root / RELEASE / "ingredients.jsonl").read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
         ingredients.append(
-            {"normalized_name": ingredient_key(row["ingredient_id"]), "allergens": map_allergens(row["allergens"])}
+            {
+                "normalized_name": ingredient_key(row["ingredient_id"]),
+                "display_name": row["canonical_name"],
+                "allergens": map_allergens(row["allergens"]),
+            }
         )
 
     recipes = []

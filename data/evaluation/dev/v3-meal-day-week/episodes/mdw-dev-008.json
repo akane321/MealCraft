@@ -8,7 +8,7 @@
   "reviewed_by": null,
   "review_notes": null,
   "scenario": {
-    "user_request": "Two of us, three meals a day, and this week's groceries must stay under S$49.",
+    "user_request": "Two of us, three meals a day, and this week's groceries must stay under S$105.",
     "conversation_history": [],
     "household_profile": {
       "household_size": 2,
@@ -878,7 +878,7 @@
       "excluded_ingredients_absent": [],
       "dietary_tags_required": [],
       "max_cooking_time_minutes": null,
-      "budget_sgd": 49.0,
+      "budget_sgd": 105.0,
       "nutrition_bands": []
     },
     "pantry_ground_truth": {

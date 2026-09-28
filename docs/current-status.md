@@ -275,8 +275,7 @@ the next incomplete control. It is a navigation aid, not a second status source.
 ## Current Priorities
 
 1. Run the product path once on the frozen meal + day + week held-out set and
-   report it (ADR-0046 section 5); look into the tight three-meal budget on
-   developer data only.
+   report it (ADR-0046 section 5).
 2. Prepare the Sprint 1 demonstration in OpenAI parser mode with rule fallback.
    Security and privacy hardening is out of scope (the course does not require
    deployment).

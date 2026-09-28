@@ -56,6 +56,17 @@ proof: a slot with no valid meal, or a budget below the sum of each slot's
 cheapest meal. A shape change is proven before and after it, and the gold's
 `changed_slots` must be exactly the slots the change touches.
 
+Since 2026-09-28 the witness keeps the product's own rules, so a label never
+needs a week the product cannot plan: a role takes only dishes for its meal
+when there are as many as the planner keeps per role (ADR-0044, ADR-0046
+"Meal fit"), and each ingredient is bought as the product buys it in fixture
+mode, one product in whole packages. Before, the witness could mix package
+sizes the product never buys and put a dinner-only dish at lunch. The same
+day, developer episode `mdw-dev-008` changed: its budget of S$49 (S$1.17 a
+person a planned meal) was below any week the product can buy and below the
+S$2.50 floor the held-out set uses, and is now S$105. Developer reports before
+that date are on the earlier episode.
+
 ## 3. Categories
 
 | Category | What it tests |
