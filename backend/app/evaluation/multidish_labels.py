@@ -17,7 +17,12 @@ A protocol v3-meal-day-week episode (a `plan_shape` of several meals) is proven
 the same way over every (day, meal) slot: its witness week is built day by day
 from each slot's cheapest valid meals, keeping any cap on uses and every per-day
 nutrition band; its lower bound is each slot's cheapest meal. A shape change is
-proven before and after the change (`week_evidence`).
+proven before and after the change (`week_evidence`). A v3 witness keeps the
+product's own rules, so a label never needs a week the product cannot plan:
+- a role takes only dishes for its meal (a recipe's meal types) whenever there
+  are as many as the planner keeps per role (`MealBeamLimits.candidates_per_role`);
+- each ingredient is bought as the product buys it in fixture mode
+  (`app.planning.grocery_estimator.choose_product`): one product, whole packages.
 
 Anything else is unproven, and the author must change the episode.
 
@@ -30,12 +35,17 @@ import argparse
 import json
 import math
 import sys
+from functools import lru_cache
 from itertools import product
 from pathlib import Path
 
 from app.core.paths import repository_root
 from app.evaluation.release_catalog import fixture_products, load_release_catalog
 from app.evaluation.strict_success import dish_shares, load_tag_implications, meal_minutes, satisfied_tags
+from app.planning.grocery_estimator import ProductMatcher, choose_product, convert_quantity
+from app.planning.meal_beam import MealBeamLimits
+from app.products.provider import FixtureProductProvider
+from app.services.product import ProductSearchService
 
 
 def _context(episode: dict):
@@ -65,12 +75,27 @@ def _context(episode: dict):
     return gold, pool, eligible, per_gram, packages
 
 
-def valid_meals(episode: dict, roles: list[dict] | None = None) -> list[tuple[tuple[str, dict], ...]]:
-    """Every valid meal the pool allows, as (role, recipe) pairs; `roles` defaults to the dinner composition."""
+def meal_types(recipe: dict) -> set[str]:
+    """The meals a recipe is for; one that names none is a lunch or dinner dish, as the product reads it."""
+    return set(recipe["meal_types"]) & {"breakfast", "lunch", "dinner", "snack"} or {"lunch", "dinner"}
+
+
+def valid_meals(
+    episode: dict, roles: list[dict] | None = None, meal: str | None = None
+) -> list[tuple[tuple[str, dict], ...]]:
+    """Every valid meal the pool allows, as (role, recipe) pairs; `roles` defaults to the dinner composition.
+
+    With a `meal`, a role keeps only that meal's dishes when there are enough of them, as the planner does.
+    """
     gold, pool, eligible, _, _ = _context(episode)
     roles = roles or episode["scenario"]["household_profile"]["meal_composition"]
-    per_role = {r["role_id"]: [x for x in pool if x["course"] in r["courses"] and eligible(x)] for r in roles}
     limit = gold["max_cooking_time_minutes"]
+    per_role = {}
+    for r in roles:
+        dishes = [x for x in pool if x["course"] in r["courses"] and eligible(x)]
+        fitting = [x for x in dishes if meal in meal_types(x)]
+        timed = [x for x in fitting if limit is None or x["prep_time_minutes"] + x["cook_time_minutes"] <= limit]
+        per_role[r["role_id"]] = fitting if meal and len(timed) >= MealBeamLimits().candidates_per_role else dishes
     required = [r for r in roles if r["required"]]
     optional = [r for r in roles if not r["required"]]
     meals = []
@@ -262,8 +287,34 @@ def meal_nutrients(meal, metric: str) -> float:
     return sum(recipe["nutrients"][metric] * shares[role] for role, recipe in meal)
 
 
+@lru_cache
+def _display_names() -> dict[str, str]:
+    names: dict[str, str] = {}
+    for row in load_release_catalog().ingredients:
+        names.setdefault(row["normalized_name"], row["display_name"])
+    return names
+
+
+@lru_cache
+def _pricing() -> tuple[ProductSearchService, ProductMatcher]:
+    fixture = FixtureProductProvider(str(repository_root() / "data/fixtures/fairprice-products.json"))
+    service = ProductSearchService(fixture_provider=fixture, live_provider=None, repository=None, cache_ttl_minutes=0)
+    return service, ProductMatcher()
+
+
+def bought(name: str, grams: float) -> float:
+    """What the product pays for a week's `grams` of an ingredient: its one product, in whole packages."""
+    service, matcher = _pricing()
+    choice = choose_product(service, matcher, name, _display_names().get(name, name), "g", live=False, quantity=grams)
+    item = choice.product
+    amount = convert_quantity(grams, "g", item.package_unit) if item else None
+    if item is None or amount is None or not item.package_size:
+        return math.inf
+    return max(1, math.ceil(amount / item.package_size)) * item.price_sgd
+
+
 def _week_witness(episode: dict, *, after_change: bool) -> dict:
-    gold, _, _, per_gram, packages = _context(episode)
+    gold, _, _, per_gram, _ = _context(episode)
     size = episode["scenario"]["household_profile"]["household_size"] or 1
     if episode["scenario"]["pantry"]:
         return {"verdict": "unproven", "why": "v3 labels do not deduct a pantry"}
@@ -276,10 +327,14 @@ def _week_witness(episode: dict, *, after_change: bool) -> dict:
         return {"verdict": "unproven", "why": "v3 labels prove only per_day nutrition bands"}
     slots = slot_roles(episode, after_change=after_change)
     by_roles: dict[str, list] = {}
+
+    def key_of(slot: str) -> str:
+        return json.dumps([slot.split("-")[1], slots[slot]], sort_keys=True)
+
     for slot, roles in slots.items():
-        key = json.dumps(roles, sort_keys=True)
+        key = key_of(slot)
         if key not in by_roles:
-            meals = valid_meals(episode, roles)
+            meals = valid_meals(episode, roles, slot.split("-")[1])
             if not meals:
                 return {"verdict": "infeasible_proven", "why": f"no valid meal for {slot} exists in the pool"}
             by_roles[key] = sorted(meals, key=lambda m: (_consumed(m, size, per_gram), [r["slug"] for _, r in m]))
@@ -289,11 +344,9 @@ def _week_witness(episode: dict, *, after_change: bool) -> dict:
     for day in DAYS:
         day_slots = [slot for slot in slots if slot.startswith(day)]
         options = [
-            [
-                m
-                for m in by_roles[json.dumps(slots[slot], sort_keys=True)]
-                if cap is None or all(uses.get(r["slug"], 0) < cap for _, r in m)
-            ][:WITNESS_OPTIONS]
+            [m for m in by_roles[key_of(slot)] if cap is None or all(uses.get(r["slug"], 0) < cap for _, r in m)][
+                :WITNESS_OPTIONS
+            ]
             for slot in day_slots
         ]
         best = None
@@ -328,13 +381,8 @@ def _week_witness(episode: dict, *, after_change: bool) -> dict:
             for line in recipe["ingredients"]:
                 grams = line["quantity"] * size * shares[role] / recipe["servings"]
                 demand[line["ingredient"]] = demand.get(line["ingredient"], 0.0) + grams
-    witness_cost = round(
-        sum(min(math.ceil(g / size_g - 1e-9) * price for size_g, price in packages[n]) for n, g in demand.items() if g),
-        2,
-    )
-    lower_bound = round(
-        sum(_consumed(by_roles[json.dumps(roles, sort_keys=True)][0], size, per_gram) for roles in slots.values()), 2
-    )
+    witness_cost = round(sum(bought(n, g) for n, g in demand.items() if g), 2)
+    lower_bound = round(sum(_consumed(by_roles[key_of(slot)][0], size, per_gram) for slot in slots), 2)
     out = {
         "witness_cost_sgd": witness_cost,
         "cost_lower_bound_sgd": lower_bound,

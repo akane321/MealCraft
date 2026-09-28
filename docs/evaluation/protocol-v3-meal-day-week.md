@@ -56,6 +56,17 @@ proof: a slot with no valid meal, or a budget below the sum of each slot's
 cheapest meal. A shape change is proven before and after it, and the gold's
 `changed_slots` must be exactly the slots the change touches.
 
+Since 2026-09-28 the witness keeps the product's own rules, so a label never
+needs a week the product cannot plan: a role takes only dishes for its meal
+when there are as many as the planner keeps per role (ADR-0044, ADR-0046
+"Meal fit"), and each ingredient is bought as the product buys it in fixture
+mode, one product in whole packages. Before, the witness could mix package
+sizes the product never buys and put a dinner-only dish at lunch. The same
+day, developer episode `mdw-dev-008` changed: its budget of S$49 (S$1.17 a
+person a planned meal) was below any week the product can buy and below the
+S$2.50 floor the held-out set uses, and is now S$105. Developer reports before
+that date are on the earlier episode.
+
 ## 3. Categories
 
 | Category | What it tests |
@@ -80,8 +91,10 @@ price is a fixture price.
    limits. A stated time limit applies to each meal; none stated is sent as the
    product's widest, 240 minutes. A per-day band is sent as the product's
    `per_day` nutrition target (added after the first run, which had to send it as a
-   weekly average and missed it on some days). A cap on uses has no request field; the
-   product avoids repeats by itself.
+   weekly average and missed it on some days). A stated cap on uses
+   (`repetition_requirements.max_uses_per_recipe`) is sent as the request's
+   `max_uses_per_recipe`, a hard rule (before it existed, the product only avoided
+   repeats by itself).
 3. **The change.** In a shape-change episode the words are read as the
    conversation reads them: one-dish events first, then the day, then
    `read_shape_change`. The change is previewed with `preview_shape`, with
@@ -127,3 +140,5 @@ slot's meal) and cost. Results are counts per category (ADR-0028).
   decisions: budgets are feasible only (an impossible budget at a realistic
   amount cannot be proven with whole packages), and a budget is at least S$2.50
   per person per planned meal. Do not tune against its results.
+  Runs and findings are in `docs/evaluation/v3-meal-day-week/heldout/`: run 1, before
+  any product change, scored 44 of 60.

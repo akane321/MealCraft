@@ -60,6 +60,36 @@ def test_time_budget_and_chinese_numbers(message, field, value) -> None:
     assert getattr(parse(message), field) == value
 
 
+@pytest.mark.parametrize(
+    ("message", "cap"),
+    [
+        ("Dinners for two, no repeats", 1),
+        ("Please don't repeat any dish this week", 1),
+        ("No dish twice", 1),
+        ("Two of us, three meals a day. Please don't serve any dish twice this week, not even at a different meal.", 1),
+        ("Each dish only once, and without repeating a meal", 1),
+        ("每道菜只做一次", 1),
+        ("不要重复", 1),
+        ("两个人，菜不要重复", 1),
+        ("一周不重样", 1),
+        ("Repeat the chicken on Sunday", None),
+        ("We don't eat pork twice a week", None),
+        ("Plan for 2 people.", None),
+    ],
+)
+def test_no_repeats_in_both_languages(message, cap) -> None:
+    assert parse(message).max_uses_per_recipe == cap
+
+
+def test_no_repeats_is_said_back_and_is_a_planning_turn_on_its_own() -> None:
+    from app.orchestration.contracts import ScopeClass
+    from app.orchestration.scope_policy import ReferenceScopePolicy
+
+    assert parse("Dinners for two, no repeats").assistant_summary == "Got it: 2 people, no dish twice."
+    for message in ("No repeats, please", "No dish twice", "菜不要重复", "一周不重样"):
+        assert ReferenceScopePolicy().classify(message).scope_class is ScopeClass.DOMAIN_ACTION, message
+
+
 def test_a_recipe_name_that_states_an_avoided_food_counts() -> None:
     from app.planning.recommendation_engine import title_mentions
 
@@ -144,6 +174,25 @@ def test_a_model_that_fails_costs_understanding_not_the_turn() -> None:
     assert parser.fell_back and parser.provider == "openai"
     assert out.household_size == 2 and out.excluded_ingredients == ["pork"]
     assert out.assistant_summary.endswith(FallbackConstraintParser.OFFLINE_NOTE)
+
+
+def test_a_one_dish_event_takes_one_day_and_a_shape_change_several() -> None:
+    from datetime import date, timedelta
+    from types import SimpleNamespace
+
+    from app.agent.replanning import AgentReplanInterpreter
+
+    monday = date(2026, 9, 28)
+    plan = SimpleNamespace(
+        days=[SimpleNamespace(day_index=n, planned_date=monday + timedelta(days=n - 1)) for n in range(1, 8)]
+    )
+    interpreter = AgentReplanInterpreter()
+    assert interpreter.day_index("swap wednesday and friday's dinner", plan) == 3
+    assert interpreter.day_index("skip dinner this weekend", plan) is None
+    assert interpreter.day_indexes("skip dinner this weekend", plan) == [6, 7]
+    assert interpreter.day_indexes("周六到周一", plan) == [1, 6, 7]
+    assert interpreter.day_indexes("no soup on day 3", plan) == [3]
+    assert interpreter.day_indexes("no soup", plan) is None
 
 
 def test_asking_for_a_food_swaps_the_main_dish_of_the_meal() -> None:
