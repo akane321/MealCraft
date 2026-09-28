@@ -217,6 +217,12 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             for slot, after in zip(ordered, [*ordered[1:], None], strict=True)
             if after is None or after.planned_date != slot.planned_date
         }
+        budget = problem.purchase_budget_sgd if problem.budget_is_hard else None
+        # What each kept partial plan needs of every ingredient, and each meal's lines, priced incrementally.
+        needs: dict[tuple, dict[str, float]] = {(): {}}
+        lines: dict[tuple, list[tuple[str, float]]] = {}
+        packages = packages_by_ingredient(problem) if budget is not None else {}
+        recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
         for slot in ordered:
             options = self.meal_options(problem, slot)
             must_assign = slot.required or slot.locked_recipe_id is not None
@@ -253,13 +259,20 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             # A day over a stated daily ceiling never comes back under it; one below its floor
             # is final once its last meal is planned (ADR-0046 section 3).
             next_states = [s for s in next_states if day_permitted(problem, s, slot, slot.slot_id in day_closes)]
-            budget = problem.purchase_budget_sgd if problem.budget_is_hard else None
             spend: dict[tuple, float] = {}
             if budget is not None:
                 # Whole packages only ever add cost, so a partial plan already over the budget can
                 # never come back under it. Drop those instead of filling the beam with them.
-                packages = packages_by_ingredient(problem)
-                spend = {s.choices: packaged_cost(problem, s.choices, packages) for s in next_states}
+                for s in next_states:
+                    if s.choices not in needs:  # a new meal: its parent's grams plus the meal's, line by line
+                        need = dict(needs[s.choices[:-1]])
+                        key = s.choices[-1]
+                        if key not in lines:
+                            lines[key] = meal_grams(problem, slot, key[1], recipes)
+                        for ingredient, grams in lines[key]:
+                            need[ingredient] = need.get(ingredient, 0.0) + grams
+                        needs[s.choices] = need
+                    spend[s.choices] = packaged_cost(problem, needs[s.choices], packages)
                 next_states = [s for s in next_states if spend[s.choices] <= budget]
             # Progress towards what the household asked for orders states; it is never part of a
             # state's loss, so the loss stays the objective CP-SAT minimises.
@@ -274,6 +287,8 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 states = best + cheapest[:room]
             else:
                 states = next_states[: self.limits.width]
+            if budget is not None:
+                needs = {s.choices: needs[s.choices] for s in states}
             if not states:
                 break
         return MealBeamResult(tuple(states), expansions, pruned, exhausted, tuple(empty))
@@ -408,32 +423,28 @@ def packages_by_ingredient(problem) -> dict[str, list[tuple[float, float]]]:
     return packages
 
 
-def planned_grams(problem, choices) -> dict[str, float]:
-    """What the plan so far needs of each ingredient, each dish at its share of its meal."""
-    slots = {slot.slot_id: slot for slot in problem.slots}
-    recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
-    grams: dict[str, float] = {}
-    for slot_id, dishes in choices:
-        slot = slots[slot_id]
-        shares = portion_shares(problem.composition_policy, [role or MAIN_ROLE for role, _ in dishes]) or {}
-        for role, recipe_id in dishes:
-            recipe = recipes[recipe_id]
-            scale = slot.servings * float(shares.get(role or MAIN_ROLE, 1)) / recipe.servings
-            for item in recipe.ingredients:
-                if item.quantity is not None:
-                    grams[item.ingredient_id] = grams.get(item.ingredient_id, 0.0) + item.quantity * scale
-    return grams
+def meal_grams(problem, slot, dishes, recipes) -> list[tuple[str, float]]:
+    """What one meal needs of each ingredient, line by line, each dish at its share of the meal."""
+    shares = portion_shares(problem.composition_policy, [role or MAIN_ROLE for role, _ in dishes]) or {}
+    lines = []
+    for role, recipe_id in dishes:
+        recipe = recipes[recipe_id]
+        scale = slot.servings * float(shares.get(role or MAIN_ROLE, 1)) / recipe.servings
+        lines += [
+            (item.ingredient_id, item.quantity * scale) for item in recipe.ingredients if item.quantity is not None
+        ]
+    return lines
 
 
-def packaged_cost(problem, choices, packages: dict[str, list[tuple[float, float]]]) -> float:
-    """What the plan so far costs in whole packages, the cheapest product for each ingredient.
+def packaged_cost(problem, needs: dict[str, float], packages: dict[str, list[tuple[float, float]]]) -> float:
+    """What a plan needing `needs` grams costs in whole packages, the cheapest product for each ingredient.
 
     This is the shopping policy the validator prices, and adding dishes only ever adds
     cost, so a partial plan's cost is a lower bound on the finished plan's.
     """
     pantry = {item.ingredient_id: item.quantity for item in problem.pantry if item.quantity is not None}
     total = 0.0
-    for ingredient, grams in planned_grams(problem, choices).items():
+    for ingredient, grams in needs.items():
         remaining = max(0.0, grams - pantry.get(ingredient, 0.0))
         options = packages.get(ingredient)
         if remaining <= 0 or not options:
