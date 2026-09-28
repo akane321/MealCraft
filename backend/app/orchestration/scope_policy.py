@@ -30,6 +30,10 @@ class ReferenceScopePolicy:
         "swap",
         "instead",
         "skip",
+        # The week's dish buttons: "Lock Sunday's …", "I can't buy an ingredient for Sunday's …".
+        "lock",
+        "can't buy",
+        "cannot buy",
         "don't change",
         "vegetarian",
         "vegan",
@@ -61,6 +65,10 @@ class ReferenceScopePolicy:
         "缺货",
         "换成",
         "改成",
+        "锁定",
+        "保留",
+        "跳过",
+        "买不到",
     )
     _off_topic_tokens = (
         "movie",

@@ -53,8 +53,9 @@ remaining design gaps.
   sodium ceiling removes a recipe.
 - Product pricing has an explicit reproducible fixture mode and a live FairPrice
   mode with cache and visible fallback.
-- Budget compares the prorated value of ingredients used by the meal. Package
-  checkout cost and excess quantity remain visible as separate estimates.
+- The weekly budget caps the checkout total in whole packages, as the plan is
+  bought. The value of ingredients used and the excess quantity remain visible
+  as separate estimates.
 - Known pantry quantities are deducted from purchase demand; unknown quantities
   affect recipe ranking only and are never silently deducted.
 - The minimum baseline was one main meal per day for seven days, and that remains
