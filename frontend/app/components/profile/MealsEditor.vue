@@ -141,8 +141,4 @@ function dishLabel(item: MealRole): string {
 .optional { display: flex; gap: 6px; align-items: center; font-size: 11px; color: var(--muted); white-space: nowrap; }
 .remove { width: 26px; height: 26px; border: 1px solid var(--border); border-radius: 50%; background: transparent; color: var(--danger); cursor: pointer; }
 .add { display: flex; gap: 8px; margin-top: 10px; }
-@media (max-width: 700px) {
-  .dish { grid-template-columns: minmax(0, 1fr) auto; }
-  .courses { grid-column: 1 / -1; }
-}
 </style>
