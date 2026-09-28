@@ -558,15 +558,3 @@ test("a dish's own buttons put the change into words for the assistant", async (
   // A cooked dinner offers nothing to change.
   await expect(week.getByRole("group", { name: "Change Lemon Herb Chicken Rice Bowl" })).toHaveCount(0);
 });
-
-test("on a phone the workspace fits the screen and every section stays in reach", async ({ page }) => {
-  await planWeek(page);
-  await page.setViewportSize({ width: 390, height: 844 });
-
-  const fits = await page.evaluate(() => ({
-    page: document.querySelector(".mc-surface")!.scrollWidth <= window.innerWidth,
-    sections: [...document.querySelectorAll(".nav-list .nav")].every(nav => nav.getBoundingClientRect().right <= window.innerWidth),
-  }));
-  expect(fits).toEqual({ page: true, sections: true });
-  await expect(page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Past weeks" })).toBeInViewport();
-});

@@ -622,12 +622,10 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 :deep(.leaf) { fill: var(--accent-fill); stroke: none; }
 
 /* Film entry */
-/* The video grows as it fades inside a clipped film, so a narrow page never scrolls sideways. */
-.film { position: absolute; inset: 0; overflow: hidden; transition: opacity 900ms var(--ease), filter 900ms var(--ease); }
-.film video { width: 100%; height: 100%; object-fit: cover; transition: transform 1200ms var(--ease); }
+.film { position: absolute; inset: 0; transition: opacity 900ms var(--ease), transform 1200ms var(--ease), filter 900ms var(--ease); }
+.film video { width: 100%; height: 100%; object-fit: cover; }
 .film::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14, 12, 10, 0.55) 0%, rgba(14, 12, 10, 0.1) 38%, rgba(14, 12, 10, 0.72) 78%, var(--ink) 100%); }
-[data-view="app"] .film { opacity: 0; filter: blur(20px); }
-[data-view="app"] .film video { transform: scale(1.06); }
+[data-view="app"] .film { opacity: 0; transform: scale(1.06); filter: blur(20px); }
 
 .landing { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; padding: 18px clamp(16px, 3vw, 32px) 26px; }
 .landing-leave-active { transition: opacity 500ms var(--ease), transform 700ms var(--ease); }
@@ -771,9 +769,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   .app, .app.no-panel { grid-template-columns: minmax(0, 1fr); }
   .rail { border-right: 0; border-bottom: 1px solid var(--line); }
   .recent, .rail-label, .home-card, .new kbd { display: none; }
-  /* Every section stays in reach on a phone: the row wraps rather than running off the screen. */
-  .nav-list { display: flex; flex-wrap: wrap; }
-  .nav { width: auto; }
+  .nav-list { grid-auto-flow: column; overflow-x: auto; }
   .chat { position: static; height: 80vh; }
   .chat-head, .thread, .composer-wrap { padding-inline: 16px; }
   .context { display: none; }
