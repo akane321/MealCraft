@@ -274,10 +274,11 @@ the next incomplete control. It is a navigation aid, not a second status source.
 
 ## Current Priorities
 
-1. Fix, on developer data only, the four mechanisms the first held-out run found
-   (shape requests naming several days; the verb after the meal; the composed-meal
-   search completing no week under a hard limit; no-repeat requests as a hard rule),
-   then run again and report both runs (ADR-0046 section 5).
+1. The fixes for the four mechanisms the first held-out run found were made after
+   reading its results, so the v3 held-out set is spent for them: later runs are
+   diagnostics under protocol v3.1, reported beside run 1 and never as a held-out
+   score; a score needs a fresh set. Bring the composed-meal search under the
+   10-second answer target by narrowing it per slot (ADR-0046 section 3).
 2. Prepare the Sprint 1 demonstration in OpenAI parser mode with rule fallback.
    Security and privacy hardening is out of scope (the course does not require
    deployment).
