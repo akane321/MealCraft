@@ -1,6 +1,6 @@
 # Evaluation protocol v3-meal-day-week
 
-Status: **draft, developer episodes only.** This protocol evaluates planning a
+Status: **in use; runs after held-out run 1 are [protocol v3.1](#protocol-v31).** This protocol evaluates planning a
 week of days, each holding the meals the household chose, each meal holding one
 or more dishes (decision ADR-0046 section 5). It follows the rules of
 [protocol v2-multidish](protocol-v2-multidish.md) wherever this page says
@@ -142,3 +142,20 @@ slot's meal) and cost. Results are counts per category (ADR-0028).
   per person per planned meal. Do not tune against its results.
   Runs and findings are in `docs/evaluation/v3-meal-day-week/heldout/`: run 1, before
   any product change, scored 44 of 60.
+
+## Protocol v3.1
+
+Since the first held-out run, the evaluated arm changed twice: the runner sends
+the gold cap on uses of a recipe as the request's `max_uses_per_recipe` (#194),
+and the product's rule reader reads shape changes that name several days
+(#188). Both changes were made after the run 1 results were seen, so runs from
+then on are **protocol v3.1** (ADR-0037 section 4, ADR-0049 section 2). The
+runner's reports say `v3.1-meal-day-week`; run 1 stays under v3 and is never
+re-labelled.
+
+The v3 held-out set is spent for the shape-change reader: run 1's findings
+quoted held-out wording, and #188 then added that wording to the rule reader.
+The other fixes were also chosen after reading run 1, so a v3.1 run on the held-out set
+is a **diagnostic** in every category, reported beside run 1 and never as a
+held-out score. A held-out score for this family needs a fresh set, drafted,
+reviewed and frozen before any system runs on it (ADR-0049 section 1).

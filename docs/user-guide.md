@@ -117,8 +117,10 @@ the profile only if you say so.
 
 ### 6. Browse and look back
 
-`/browse` searches recipes by title and course, and FairPrice products from
-saved or live prices. `/history` lists every planned week; open one to see its
+`/browse` searches recipes by title and course, and FairPrice products. Prices
+are samples unless you tick **Ask FairPrice now**; under the results the page
+says "Sample prices", "FairPrice prices from <date>" or "FairPrice prices now",
+and adds "FairPrice didn't respond" when it had to fall back. `/history` lists every planned week; open one to see its
 days, meals and what was cooked.
 
 ## The Operations Console

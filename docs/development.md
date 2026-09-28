@@ -119,11 +119,12 @@ a newly registered user.
 ## Planning Assistant Parser
 
 The default `.env.example` uses `AGENT_PARSER_PROVIDER=fixture`. This mode is
-deterministic, works offline, and is used in tests. It recognizes the supported
-current baseline constraints in common English and Chinese phrasing.
+deterministic, works offline, and is what the tests use. It recognizes the
+supported current baseline constraints in common English and Chinese phrasing.
 
-To experiment with model-based structured extraction, set these only in the
-local uncommitted `.env` file:
+The owner's demonstration runs in OpenAI parser mode with the rule parser as
+fallback: any model failure falls back to the same rules. To run that way, set
+these only in the local uncommitted `.env` file:
 
 ```bash
 AGENT_PARSER_PROVIDER=openai

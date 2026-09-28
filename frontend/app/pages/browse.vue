@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatSgd, plateStyle } from "~/lib/home-surface";
+import { formatSgd, plateStyle, productSourceLabel } from "~/lib/home-surface";
 import type { ProductSearchResponse } from "~/types/recommendation";
 import type { RecipeCollection, RecipeListItem } from "~/types/recipe";
 
@@ -125,11 +125,10 @@ function packLabel(size: number | null, unit: string | null) {
           <span class="visually-hidden">Search groceries</span>
           <input v-model="productQuery" type="search" placeholder="Search FairPrice, e.g. chicken breast" autocomplete="off" minlength="2">
         </label>
-        <label class="live"><input v-model="live" type="checkbox"> Live prices</label>
+        <label class="live"><input v-model="live" type="checkbox"> Ask FairPrice now</label>
         <button type="submit" class="secondary-button" :disabled="loadingProducts || productQuery.trim().length < 2">{{ loadingProducts ? "Searching…" : "Search" }}</button>
       </form>
       <p v-if="productError" class="notice" role="alert">{{ productError }}</p>
-      <p v-if="products?.warning" class="notice">{{ products.warning }}</p>
       <p v-if="products && !products.items.length" class="notice">FairPrice has nothing for “{{ products.query }}”.</p>
       <table v-if="products?.items.length" class="products">
         <thead><tr><th>Product</th><th>Pack</th><th class="num">Price</th><th /></tr></thead>
@@ -143,7 +142,7 @@ function packLabel(size: number | null, unit: string | null) {
         </tbody>
       </table>
       <p v-if="products?.items.length" class="source">
-        {{ products.provider_used === "fairprice" ? "Live FairPrice prices" : "Saved prices" }}{{ products.fallback_used ? " (live prices were unavailable)" : "" }}
+        {{ productSourceLabel(products) }}
       </p>
     </section>
 

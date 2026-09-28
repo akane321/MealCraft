@@ -48,7 +48,9 @@ from app.repositories.recipe import clear_planning_pool
 from app.schemas.meal_plan import WeeklyMealPlanRequest, WeeklyMealPlanResponse
 from app.services.replanning import MealPlanReplanningService, MealPlanReplanValidationError
 
-PROTOCOL = "v3-meal-day-week"
+# v3.1: since held-out run 1 the arm sends the gold cap on uses (#194) and reads shape changes naming several
+# days (#188), so new runs are v3.1 diagnostics (ADR-0049); run 1 stays v3.
+PROTOCOL = "v3.1-meal-day-week"
 SYSTEM = "P"  # the product path
 HOUSEHOLD = 1
 # A household that states no time limit: the widest the product request accepts.

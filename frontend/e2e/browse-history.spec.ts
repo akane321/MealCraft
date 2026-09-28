@@ -46,6 +46,7 @@ test("recipes can be searched and filtered, and groceries looked up", async ({ p
   await page.getByRole("button", { name: "Search" }).click();
   await expect(page.getByRole("cell", { name: /FairPrice Chicken Breast/ })).toBeVisible();
   await expect(page.getByRole("cell", { name: "S$6.95" })).toBeVisible();
+  await expect(page.getByText("Sample prices", { exact: true })).toBeVisible();
 });
 
 test("past weeks open to show what was eaten", async ({ page }) => {
