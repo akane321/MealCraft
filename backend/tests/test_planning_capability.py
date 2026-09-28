@@ -1,5 +1,7 @@
 """The planning capability switch of ADR-0036 section 6: mvp refuses meal compositions."""
 
+from contextlib import contextmanager
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -98,8 +100,9 @@ def _dish(slug, course, ingredient, grams, *, calories, prep=10, cook=15):
     )
 
 
-@pytest.fixture
-def composed_client(monkeypatch):
+@contextmanager
+def dish_client(monkeypatch, dishes):
+    """A signed-in client over an in-memory catalog of `dishes`, with composed meals switched on."""
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
     from sqlalchemy.pool import StaticPool
@@ -113,16 +116,7 @@ def composed_client(monkeypatch):
     factory = sessionmaker(bind=engine, expire_on_commit=False)
     Base.metadata.create_all(engine)
     with factory() as session:
-        session.add_all(
-            [
-                _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
-                _dish("chicken-roast", "main", "chicken_breast", 400, calories=450),
-                _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
-                _dish("spinach-saute", "side", "baby_spinach", 200, calories=80),
-                _dish("zucchini-salad", "salad", "zucchini", 300, calories=60),
-                _dish("tomato-soup", "soup", "tomato", 500, calories=150, cook=25),
-            ]
-        )
+        session.add_all(dishes)
         session.commit()
 
     def database():
@@ -139,6 +133,20 @@ def composed_client(monkeypatch):
         yield client
     app.dependency_overrides.clear()
     Base.metadata.drop_all(engine)
+
+
+@pytest.fixture
+def composed_client(monkeypatch):
+    dishes = [
+        _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
+        _dish("chicken-roast", "main", "chicken_breast", 400, calories=450),
+        _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
+        _dish("spinach-saute", "side", "baby_spinach", 200, calories=80),
+        _dish("zucchini-salad", "salad", "zucchini", 300, calories=60),
+        _dish("tomato-soup", "soup", "tomato", 500, calories=150, cook=25),
+    ]
+    with dish_client(monkeypatch, dishes) as client:
+        yield client
 
 
 def test_full_capability_plans_and_stores_a_week_of_composed_dinners(composed_client):

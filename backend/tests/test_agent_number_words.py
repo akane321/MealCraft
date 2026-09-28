@@ -60,6 +60,36 @@ def test_time_budget_and_chinese_numbers(message, field, value) -> None:
     assert getattr(parse(message), field) == value
 
 
+@pytest.mark.parametrize(
+    ("message", "cap"),
+    [
+        ("Dinners for two, no repeats", 1),
+        ("Please don't repeat any dish this week", 1),
+        ("No dish twice", 1),
+        ("Two of us, three meals a day. Please don't serve any dish twice this week, not even at a different meal.", 1),
+        ("Each dish only once, and without repeating a meal", 1),
+        ("每道菜只做一次", 1),
+        ("不要重复", 1),
+        ("两个人，菜不要重复", 1),
+        ("一周不重样", 1),
+        ("Repeat the chicken on Sunday", None),
+        ("We don't eat pork twice a week", None),
+        ("Plan for 2 people.", None),
+    ],
+)
+def test_no_repeats_in_both_languages(message, cap) -> None:
+    assert parse(message).max_uses_per_recipe == cap
+
+
+def test_no_repeats_is_said_back_and_is_a_planning_turn_on_its_own() -> None:
+    from app.orchestration.contracts import ScopeClass
+    from app.orchestration.scope_policy import ReferenceScopePolicy
+
+    assert parse("Dinners for two, no repeats").assistant_summary == "Got it: 2 people, no dish twice."
+    for message in ("No repeats, please", "No dish twice", "菜不要重复", "一周不重样"):
+        assert ReferenceScopePolicy().classify(message).scope_class is ScopeClass.DOMAIN_ACTION, message
+
+
 def test_a_recipe_name_that_states_an_avoided_food_counts() -> None:
     from app.planning.recommendation_engine import title_mentions
 

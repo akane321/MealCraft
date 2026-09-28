@@ -609,6 +609,7 @@ class AgentSessionService:
             available_ingredients=constraints.available_ingredients,
             pricing_mode=constraints.pricing_mode,
             plan_shape=constraints.plan_shape or default_plan_shape(),
+            max_uses_per_recipe=constraints.max_uses_per_recipe,
         )
         try:
             plan = self.meal_plan_service.generate(request)

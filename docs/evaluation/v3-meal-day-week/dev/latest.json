@@ -7,6 +7,7 @@
     "max_cooking_time_minutes_when_unstated": 240,
     "shape_change_today": "the week's first day, so every day is still ahead",
     "per_day_nutrition": "sent as the product's per_day target",
+    "max_uses_per_recipe": "a stated cap on uses is sent as the request's max_uses_per_recipe, a hard rule",
     "nutrition_tolerance_relative": 0.02
   },
   "summary": {
@@ -376,7 +377,7 @@
     }
   ],
   "episode_set": "developer set",
-  "code_revision": "fdbc0be0944da641c65cd8c48b98b915ca35b650+dirty",
+  "code_revision": "1657af7cb61e51623149b8bbc44e8674d9de315c",
   "inputs": {
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",
