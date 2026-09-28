@@ -49,6 +49,13 @@ class AgentReplanInterpreter:
         5: ("saturday", "sat", "周六", "星期六"),
         6: ("sunday", "sun", "周日", "周天", "星期日", "星期天"),
     }
+    _weekday_of = {alias: weekday for weekday, aliases in _weekday_aliases.items() for alias in aliases}
+    _weekday_pattern = re.compile(
+        "(?<![a-z])(?:" + "|".join(map(re.escape, sorted(_weekday_of, key=len, reverse=True))) + ")(?![a-z])"
+    )
+    # Several days in one word; "Monday to Friday" / "周一到周五" reads as a range of named days.
+    _several_days = {(5, 6): ("weekend", "周末"), (0, 1, 2, 3, 4): ("weekday", "工作日")}
+    _range_words = ("to", "through", "till", "until", "-", "–", "到", "至")
 
     def parse(
         self,
@@ -89,7 +96,16 @@ class AgentReplanInterpreter:
             return "ITEM_UNAVAILABLE"
         if any(
             token in text
-            for token in ("lock", "keep unchanged", "don't change", "do not change", "锁定", "不要改", "保持不变")
+            for token in (
+                "lock",
+                "keep unchanged",
+                "don't change",
+                "do not change",
+                "锁定",
+                "保留",
+                "不要改",
+                "保持不变",
+            )
         ):
             return "LOCK_MEAL"
         if any(token in text for token in ("cancel", "skip", "取消", "不吃这顿", "跳过")):
@@ -130,10 +146,33 @@ class AgentReplanInterpreter:
                 wanted = date.today() + timedelta(days=offset)
                 return next((day.day_index for day in plan.days if day.planned_date == wanted), None)
 
-        for weekday, aliases in self._weekday_aliases.items():
-            if any(re.search(rf"(?<![a-z]){re.escape(alias)}(?![a-z])", text) for alias in aliases):
-                return next((day.day_index for day in plan.days if day.planned_date.weekday() == weekday), None)
+        named = [self._weekday_of[match.group()] for match in self._weekday_pattern.finditer(text)]
+        if named:
+            return next((day.day_index for day in plan.days if day.planned_date.weekday() == min(named)), None)
         return None
+
+    def day_indexes(self, text: str, plan: WeeklyMealPlanResponse) -> list[int] | None:
+        """Every day the message names, in the week's order; None when it names none (the whole week).
+
+        "on weekends", "weekdays", "Monday to Friday", "Wednesday and Friday" and the same in Chinese.
+        A shape change reads its days here; a one-dish event still takes one day (`day_index`).
+        """
+        weekdays = {
+            weekday
+            for days, words in self._several_days.items()
+            if any(re.search(rf"(?<![a-z]){re.escape(word)}s?(?![a-z])", text) for word in words)
+            for weekday in days
+        }
+        named = list(self._weekday_pattern.finditer(text))
+        for first, second in zip(named, named[1:], strict=False):
+            if text[first.end() : second.start()].strip() in self._range_words:
+                start, end = self._weekday_of[first.group()], self._weekday_of[second.group()]
+                weekdays.update((start + n) % 7 for n in range((end - start) % 7 + 1))
+        weekdays.update(self._weekday_of[match.group()] for match in named)
+        if not weekdays:
+            day = self.day_index(text, plan)
+            return [day] if day is not None else None
+        return sorted({day.day_index for day in plan.days if day.planned_date.weekday() in weekdays}) or None
 
     def _dish_entry(self, text: str, plan: WeeklyMealPlanResponse, day_index: int) -> int | None:
         """The day's one dish, or the dish whose role or title the message names; None while ambiguous."""

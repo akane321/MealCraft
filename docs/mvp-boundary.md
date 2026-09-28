@@ -53,14 +53,16 @@ remaining design gaps.
   sodium ceiling removes a recipe.
 - Product pricing has an explicit reproducible fixture mode and a live FairPrice
   mode with cache and visible fallback.
-- Budget compares the prorated value of ingredients used by the meal. Package
-  checkout cost and excess quantity remain visible as separate estimates.
+- The weekly budget caps the checkout total in whole packages, as the plan is
+  bought. The value of ingredients used and the excess quantity remain visible
+  as separate estimates.
 - Known pantry quantities are deducted from purchase demand; unknown quantities
   affect recipe ranking only and are never silently deducted.
 - The minimum baseline was one main meal per day for seven days, and that remains
   the floor. The product now plans the meals each household chose, each of one or
   several dishes (decision ADR-0046), and avoids repeating a dish anywhere in the
-  week unless the candidates cannot fill it.
+  week unless the candidates cannot fill it; a household that asks for no repeats
+  gets that as a hard rule (`max_uses_per_recipe`), refused rather than bent.
 - Weekly nutrition is reported per person and contains only planned MealCraft
   recipes; unplanned food is not inferred or recorded.
 - Each planned dish has one of three execution states: `planned`, `completed`,

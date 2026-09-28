@@ -276,6 +276,9 @@ for bounds, compatibility, examples and the Agent handoff.
 - an optional `weekly_budget_sgd`
 - the existing optional per-meal budget and fixture/live pricing mode
 - `planner_strategy`: `beam` (default) or the explicit `greedy-baseline`
+- an optional `max_uses_per_recipe` (1–7): how often one dish may appear in the
+  week, a hard rule the search holds and the validator checks; 1 is no dish
+  twice. Unstated, repeating stays a soft cost the planner avoids by itself.
 
 The response contains seven persisted main-meal entries, per-person weekly
 nutrition totals, an aggregated shopping list, package checkout cost,
@@ -362,6 +365,9 @@ persisted `last_scope_decision` makes this routing visible to clients and tests.
 The assistant requires household size and resolves any unquantified available
 ingredient before confirmation. A user may answer `unknown`; the quantity then
 remains null, so the ingredient improves recipe ranking but is never deducted.
+Asking for no repeats ("no dish twice", 不要重复, 一周不重样) sets
+`max_uses_per_recipe` to 1 in the constraint state; confirmation passes it to
+the planner as the hard rule described under Weekly Meal Plans.
 
 When clarification can be represented structurally, the response includes a
 `pending_interaction` with a stable `question_id`, `field_path`, option IDs and

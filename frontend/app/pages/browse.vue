@@ -178,7 +178,4 @@ function packLabel(size: number | null, unit: string | null) {
 .products .out td { color: var(--t3); }
 .products a { color: var(--accent); }
 .source { margin-top: 10px; color: var(--muted); font-size: 12px; }
-@media (max-width: 640px) {
-  .products th:nth-child(2), .products td:nth-child(2) { display: none; }
-}
 </style>

@@ -69,6 +69,16 @@ class AgentConstraintExtraction(BaseModel):
     available_ingredients: list[AvailableIngredientInput] | None = None
     acknowledged_unknown_quantities: list[str] = Field(default_factory=list)
     pricing_mode: PricingMode | None = None
+    max_uses_per_recipe: int | None = Field(
+        default=None,
+        ge=1,
+        le=7,
+        description=(
+            "How many times one dish may be served in the week, only when the user says so: 1 when they ask "
+            "for no repeats (don't repeat any dish, no dish twice, 不要重复, 一周不重样); a larger number only "
+            "when they state it (at most twice is 2). Null when the message says nothing about repeating."
+        ),
+    )
     medical_request_detected: bool = False
     assistant_summary: str | None = None
     # Filled by the server, never by the model: words the household used that match no
@@ -93,6 +103,8 @@ class AgentConstraintState(BaseModel):
     pricing_mode: PricingMode = "fixture"
     # Which meals and dishes this week plans (ADR-0046); None is the household default.
     plan_shape: MealPlanShape | None = None
+    # How often one dish may be served in the week; 1 is "no repeats". None: repeats are avoided, not forbidden.
+    max_uses_per_recipe: int | None = None
 
 
 class AgentReplanDraft(BaseModel):

@@ -142,12 +142,15 @@ class WeeklyGroceryAggregator:
             lines.append(line)
 
         consumed_value = round(consumed_total, 2) if consumed_total_known else None
+        # The weekly budget caps the checkout total (whole packages), as when the week was planned;
+        # a total already over it is over even while a line is unpriced.
         weekly_budget = constraints.weekly_budget_sgd
-        within_budget = (
-            round(consumed_value * 100) <= round(weekly_budget * 100)
-            if weekly_budget is not None and consumed_value is not None
-            else None
-        )
+        if weekly_budget is None:
+            within_budget = None
+        elif round(purchase_total * 100) > round(weekly_budget * 100):
+            within_budget = False
+        else:
+            within_budget = True if consumed_total_known else None
         return WeeklyGroceryEstimateResponse(
             pricing_mode=constraints.pricing_mode,
             complete=not unmapped and consumed_total_known,
