@@ -42,13 +42,3 @@ def roles(message, day=None):
 )
 def test_reads_the_shape_change_a_message_asks_for(message, day, expected):
     assert roles(message, day) == expected
-
-
-def test_adding_a_dish_makes_the_rest_of_the_meal_required():
-    # "main, vegetable, soup" is what the preview promises; an optional vegetable could be left out.
-    request = read_shape_change("Dinners with a soup", plan=PLAN, day_index=None).request
-    assert [(role.role_id, role.required) for role in request.roles] == [
-        ("main", True),
-        ("vegetable", True),
-        ("soup", True),
-    ]

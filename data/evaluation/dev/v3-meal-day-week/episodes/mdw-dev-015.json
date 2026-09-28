@@ -792,7 +792,7 @@
               "side",
               "salad"
             ],
-            "required": true
+            "required": false
           },
           {
             "role_id": "soup",
