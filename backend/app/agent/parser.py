@@ -36,6 +36,14 @@ ENGLISH_EXCLUSION = (
     r"\b(?:no|without|avoid|exclude|excluding|skip|(?:don't|do not|doesn't|does not|can't|cannot|won't|never)"
     r"\s+(?:eat|have|like|want))\s+(?:any\s+|the\s+)?"
 )
+# "No repeats", "don't repeat any dish", "no dish twice", "don't serve any dish twice", "each dish only once".
+ENGLISH_NO_REPEATS = (
+    r"\b(?:no|without|avoid|never|don't|do not)\s+(?:any\s+)?repeat(?:s|ed|ing)?\b"
+    r"|\b(?:no|not|don't|do not|never)\b[^.,;!?]{0,24}\b(?:dish|meal|recipe)\s+twice\b"
+    r"|\b(?:each|every)\s+(?:dish|meal|recipe)\s+(?:only\s+)?once\b"
+)
+# 不要重复, 菜不要重复, 一周不重样, 别重复, 每道菜只做一次.
+CHINESE_NO_REPEATS = r"不(?:要|能|想|准|可以|会)?(?:重复|重样)|别(?:重复|重样)|每[道个种]?菜只(?:做|吃|上|出现)一次"
 
 
 class AgentConfigurationError(RuntimeError):
@@ -298,6 +306,8 @@ class RuleBasedConstraintParser:
         extraction.pricing_mode = (
             "live" if any(token in lower for token in ("live price", "实时价格", "fairprice")) else None
         )
+        if re.search(ENGLISH_NO_REPEATS, lower) or re.search(CHINESE_NO_REPEATS, text):
+            extraction.max_uses_per_recipe = 1
         extraction.medical_request_detected = any(
             token in lower for token in ("diabetes", "diabetic", "gout", "kidney disease", "糖尿病", "痛风", "肾病")
         )
@@ -349,6 +359,10 @@ class RuleBasedConstraintParser:
             details.append(f"no {words(extraction.excluded_ingredients)}")
         if extraction.available_ingredients:
             details.append(f"{words(item.normalized_name for item in extraction.available_ingredients)} at home")
+        if extraction.max_uses_per_recipe == 1:
+            details.append("no dish twice")
+        elif extraction.max_uses_per_recipe:
+            details.append(f"no dish more than {extraction.max_uses_per_recipe} times")
         if details:
             return "Got it: " + ", ".join(details) + "."
         return "Noted."

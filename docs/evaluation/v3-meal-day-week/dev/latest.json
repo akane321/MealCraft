@@ -7,10 +7,11 @@
     "max_cooking_time_minutes_when_unstated": 240,
     "shape_change_today": "the week's first day, so every day is still ahead",
     "per_day_nutrition": "sent as the product's per_day target",
+    "max_uses_per_recipe": "a stated cap on uses is sent as the request's max_uses_per_recipe, a hard rule",
     "nutrition_tolerance_relative": 0.02
   },
   "summary": {
-    "strict_success": "17/18",
+    "strict_success": "15/16",
     "by_category": {
       "meals_per_day": {
         "strict_success": "3/3",
@@ -40,7 +41,7 @@
         "failure_mechanisms": {}
       },
       "shape_change": {
-        "strict_success": "6/6",
+        "strict_success": "4/4",
         "failure_mechanisms": {}
       }
     }
@@ -373,82 +374,10 @@
       "distinct_recipes": 20,
       "meal_fit": "20/20",
       "total_cost_sgd": 326.36
-    },
-    {
-      "episode_id": "mdw-dev-017",
-      "category": "shape_change",
-      "language": "en",
-      "class": "feasible",
-      "answered": "plan",
-      "strict_success": true,
-      "failed": [],
-      "indeterminate": [],
-      "details": {},
-      "understood": {
-        "meal_type": "dinner",
-        "roles": [
-          {
-            "role_id": "main",
-            "courses": [
-              "main"
-            ],
-            "required": true
-          },
-          {
-            "role_id": "vegetable",
-            "courses": [
-              "side",
-              "salad"
-            ],
-            "required": false
-          },
-          {
-            "role_id": "soup",
-            "courses": [
-              "soup"
-            ],
-            "required": true
-          }
-        ],
-        "day_indexes": [
-          6,
-          7
-        ]
-      },
-      "dishes": 16,
-      "distinct_recipes": 16,
-      "meal_fit": "16/16",
-      "total_cost_sgd": 309.65
-    },
-    {
-      "episode_id": "mdw-dev-018",
-      "category": "shape_change",
-      "language": "zh",
-      "class": "feasible",
-      "answered": "plan",
-      "strict_success": true,
-      "failed": [],
-      "indeterminate": [],
-      "details": {},
-      "understood": {
-        "meal_type": "breakfast",
-        "roles": null,
-        "day_indexes": [
-          1,
-          2,
-          3,
-          4,
-          5
-        ]
-      },
-      "dishes": 16,
-      "distinct_recipes": 16,
-      "meal_fit": "16/16",
-      "total_cost_sgd": 261.17
     }
   ],
   "episode_set": "developer set",
-  "code_revision": "ca0b7776a21f20fe97139cf2e9ca40da43f0942a",
+  "code_revision": "1657af7cb61e51623149b8bbc44e8674d9de315c",
   "inputs": {
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",
@@ -466,8 +395,6 @@
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-014.json": "947bfed62ea228e6f86e3d13083e05a91e5b675db18436540a0968f51a38545a",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-015.json": "a2848d1e85d215cda3fe5d54204676a8889daac5825e84cf3a70e5adb7aefc11",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-016.json": "04292110b02381738805803523ab53bbe30bbc430f16fef50f901cdb5b57bbe5",
-    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-017.json": "efa6b4dfcd177d4e746fd936b1b136010ff372955ec61d3b2b510fc727347f94",
-    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-018.json": "c71413ff72d22fb863ffb27b7bca7769b0ed94f6d1d5b0cae1eb1db873078463",
     "data-engineering/data/release/v2.1/recipes.jsonl": "df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db",
     "data-engineering/data/release/v2.1/ingredients.jsonl": "499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25",
     "data/products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91",

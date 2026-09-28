@@ -58,7 +58,7 @@ export function describeShape(shape: PlanShape): string {
     .join(" · ");
 }
 
-/** What a shape change does, in plain words: "Lunch added for the rest of the week", "Dinner on Fri: main, vegetable, soup". */
+/** What a shape change does, in plain words: "Lunch added for the rest of the week", "Dinner on Fri: main, vegetable if it fits, soup". */
 export function shapeChangeSummary(change: MealPlanShapeChange, dayLabel: (dayIndex: number) => string): string {
   const meal = `${change.meal_type[0]!.toUpperCase()}${change.meal_type.slice(1)}`;
   const where = change.scope === "week" ? "for the rest of the week" : `on ${change.day_indexes.map(dayLabel).join(", ")}`;
@@ -66,9 +66,15 @@ export function shapeChangeSummary(change: MealPlanShapeChange, dayLabel: (dayIn
   if (!change.removed.length) return `${meal} added ${where}`;
   const counts = new Map<string, number>();
   for (const item of change.roles) {
-    const kind = item.role_id.replace(/-\d+$/, "");
+    // An optional dish is planned only when it fits the household's limits; say so rather than promise it.
+    const kind = `${item.role_id.replace(/-\d+$/, "")}${item.required === false ? "?" : ""}`;
     counts.set(kind, (counts.get(kind) ?? 0) + 1);
   }
-  const dishes = [...counts].map(([kind, count]) => (count > 1 ? `${count} ${kind}s` : kind)).join(", ");
+  const dishes = [...counts]
+    .map(([kind, count]) => {
+      const name = kind.replace(/\?$/, "");
+      return `${count > 1 ? `${count} ${name}s` : name}${kind.endsWith("?") ? " if it fits" : ""}`;
+    })
+    .join(", ");
   return `${meal} ${where}: ${dishes}`;
 }

@@ -96,7 +96,16 @@ class AgentReplanInterpreter:
             return "ITEM_UNAVAILABLE"
         if any(
             token in text
-            for token in ("lock", "keep unchanged", "don't change", "do not change", "锁定", "不要改", "保持不变")
+            for token in (
+                "lock",
+                "keep unchanged",
+                "don't change",
+                "do not change",
+                "锁定",
+                "保留",
+                "不要改",
+                "保持不变",
+            )
         ):
             return "LOCK_MEAL"
         if any(token in text for token in ("cancel", "skip", "取消", "不吃这顿", "跳过")):

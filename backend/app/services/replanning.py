@@ -6,6 +6,7 @@ from app.models.recipe import Recipe
 from app.planning import alternatives
 from app.planning.meal_composition import meal_minutes, portion_shares
 from app.planning.product_path import ProductPlanningError
+from app.planning.recipe_quality import dish_family
 from app.planning.recipe_similarity import RecipeSimilarity
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError, entry_values
@@ -133,7 +134,7 @@ class MealPlanReplanningService:
             after_warnings = list(dict.fromkeys(after_grocery.warnings))
             if after_grocery.within_weekly_budget is False:
                 after_warnings.append(
-                    f"The revised ingredient-use cost S${after_grocery.consumed_total_sgd:.2f} exceeds the "
+                    f"The revised grocery total S${after_grocery.purchase_total_sgd:.2f} exceeds the "
                     f"S${constraints.weekly_budget_sgd:.2f} weekly budget."
                 )
 
@@ -213,7 +214,7 @@ class MealPlanReplanningService:
         after_warnings = list(dict.fromkeys(after_grocery.warnings))
         if after_grocery.within_weekly_budget is False:
             after_warnings.append(
-                f"The revised ingredient-use cost S${after_grocery.consumed_total_sgd:.2f} exceeds the "
+                f"The revised grocery total S${after_grocery.purchase_total_sgd:.2f} exceeds the "
                 f"S${constraints.weekly_budget_sgd:.2f} weekly budget."
             )
         before_grocery = self._current_grocery(plan)
@@ -431,7 +432,18 @@ class MealPlanReplanningService:
         result = self.recommendation_service.recommend(
             constraints, deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
         )
-        candidates = [item for item in result.recommendations if item.recipe.id != entry.recipe_id]
+        # A swap offers another dish, never this one again nor one its meal already has: the catalog
+        # can hold one dish several times ("Singapore Noodles" is eleven recipes).
+        meal_dishes = {
+            dish_family(item.recipe.title)
+            for item in plan.entries
+            if item.day_index == entry.day_index and item.meal_type == entry.meal_type and item.status != "skipped"
+        } | {dish_family(entry.recipe.title)}
+        candidates = [
+            item
+            for item in result.recommendations
+            if item.recipe.id != entry.recipe_id and dish_family(item.recipe.title) not in meal_dishes
+        ]
         if request.unavailable_ingredient:
             candidates = [
                 item
@@ -453,7 +465,9 @@ class MealPlanReplanningService:
                 and self._meal_still_holds(plan, entry, recipes_by_id[item.recipe.id], constraints)
             ]
         if not candidates:
-            raise MealPlanReplanValidationError("No alternative recipe satisfies the current hard constraints.")
+            raise MealPlanReplanValidationError(
+                f"No dish other than {entry.recipe.title} satisfies the current hard constraints."
+            )
 
         # The same dish position on the neighbouring days, so a swap does not repeat them.
         def neighbour(offset: int) -> int | None:
@@ -650,12 +664,13 @@ class MealPlanReplanningService:
         before: WeeklyGroceryEstimateResponse,
         after: WeeklyGroceryEstimateResponse,
     ) -> list[dict]:
-        before_by_name = {item.ingredient_name: item for item in before.items}
-        after_by_name = {item.ingredient_name: item for item in after.items}
+        # One line per ingredient and unit, like the list itself: whole eggs and grams of egg.
+        before_by_line = {(item.ingredient_name, item.unit or ""): item for item in before.items}
+        after_by_line = {(item.ingredient_name, item.unit or ""): item for item in after.items}
         delta: list[dict] = []
-        for name in sorted(before_by_name.keys() | after_by_name.keys()):
-            old = before_by_name.get(name)
-            new = after_by_name.get(name)
+        for name, unit in sorted(before_by_line.keys() | after_by_line.keys()):
+            old = before_by_line.get((name, unit))
+            new = after_by_line.get((name, unit))
             if old is not None and new is not None:
                 unchanged = (
                     old.required_quantity == new.required_quantity

@@ -1,5 +1,7 @@
 """The planning capability switch of ADR-0036 section 6: mvp refuses meal compositions."""
 
+from contextlib import contextmanager
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -98,8 +100,9 @@ def _dish(slug, course, ingredient, grams, *, calories, prep=10, cook=15):
     )
 
 
-@pytest.fixture
-def composed_client(monkeypatch):
+@contextmanager
+def dish_client(monkeypatch, dishes):
+    """A signed-in client over an in-memory catalog of `dishes`, with composed meals switched on."""
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
     from sqlalchemy.pool import StaticPool
@@ -113,16 +116,7 @@ def composed_client(monkeypatch):
     factory = sessionmaker(bind=engine, expire_on_commit=False)
     Base.metadata.create_all(engine)
     with factory() as session:
-        session.add_all(
-            [
-                _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
-                _dish("chicken-roast", "main", "chicken_breast", 400, calories=450),
-                _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
-                _dish("spinach-saute", "side", "baby_spinach", 200, calories=80),
-                _dish("zucchini-salad", "salad", "zucchini", 300, calories=60),
-                _dish("tomato-soup", "soup", "tomato", 500, calories=150, cook=25),
-            ]
-        )
+        session.add_all(dishes)
         session.commit()
 
     def database():
@@ -139,6 +133,20 @@ def composed_client(monkeypatch):
         yield client
     app.dependency_overrides.clear()
     Base.metadata.drop_all(engine)
+
+
+@pytest.fixture
+def composed_client(monkeypatch):
+    dishes = [
+        _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
+        _dish("chicken-roast", "main", "chicken_breast", 400, calories=450),
+        _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
+        _dish("spinach-saute", "side", "baby_spinach", 200, calories=80),
+        _dish("zucchini-salad", "salad", "zucchini", 300, calories=60),
+        _dish("tomato-soup", "soup", "tomato", 500, calories=150, cook=25),
+    ]
+    with dish_client(monkeypatch, dishes) as client:
+        yield client
 
 
 def test_full_capability_plans_and_stores_a_week_of_composed_dinners(composed_client):
@@ -412,3 +420,95 @@ def test_adding_a_soup_to_one_dinner_keeps_its_main_and_vegetable(composed_clien
         after = {d["role_id"]: d["recipe_slug"] for d in preview["shape_change"]["added"]}
         assert {role: after[role] for role in before} == before
         assert after["soup"] == "tomato-soup"
+
+
+def _catalog_session():
+    from app.db.session import get_db_session
+    from app.main import app
+
+    return next(app.dependency_overrides[get_db_session]())
+
+
+def test_a_change_that_needs_one_ingredient_in_two_units_is_saved(composed_client):
+    # Friday's soup takes whole eggs, the week's mains grams of egg: two shopping lines for one ingredient.
+    from decimal import Decimal
+
+    from sqlalchemy import select
+
+    from app.models.recipe import Ingredient, Recipe, RecipeIngredient
+
+    session = _catalog_session()
+    egg = Ingredient(normalized_name="egg", display_name="egg")
+    for slug, quantity, unit in (("salmon-bake", 100, "g"), ("chicken-roast", 100, "g"), ("tomato-soup", 2, "whole")):
+        recipe = session.scalars(select(Recipe).where(Recipe.slug == slug)).one()
+        recipe.recipe_ingredients.append(
+            RecipeIngredient(ingredient=egg, quantity=Decimal(quantity), unit=unit, sort_order=2)
+        )
+    session.commit()
+    plan = _week_ahead(composed_client, COMPOSITION[:2])
+
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [5]},
+    )
+    assert preview.status_code == 201, preview.text
+    applied = composed_client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm")
+
+    assert applied.status_code == 200, applied.text
+    items = applied.json()["plan"]["grocery_estimate"]["items"]
+    assert sorted(item["unit"] for item in items if item["ingredient_name"] == "egg") == ["g", "whole"]
+
+
+def test_a_swap_never_offers_the_same_dish_again(composed_client):
+    # A catalog can hold one dish several times (eleven recipes are called "Singapore Noodles").
+    from sqlalchemy import select
+
+    from app.models.recipe import Ingredient
+
+    session = _catalog_session()
+    again = _dish("tomato-soup-again", "soup", "tomato", 450, calories=140, cook=25)
+    again.title = "Tomato Soup"
+    again.recipe_ingredients[0].ingredient = session.scalars(
+        select(Ingredient).where(Ingredient.normalized_name == "tomato")
+    ).one()
+    session.add(again)
+    session.commit()
+    plan = _composed_plan(composed_client)
+    soup = next(d for d in plan["days"] if d["day_index"] == 3 and d["role_id"] == "soup")
+
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/replan/preview",
+        json={"entry_id": soup["entry_id"], "event_type": "REPLACE_MEAL"},
+    )
+
+    assert preview.status_code == 422, preview.text
+    assert "Tomato Soup" in preview.json()["detail"]
+
+
+def test_a_change_that_goes_over_the_weekly_budget_is_saved_as_over_it(composed_client):
+    from datetime import date, timedelta
+
+    request = {
+        "start_date": (date.today() + timedelta(days=1)).isoformat(),
+        "household_size": 4,
+        "max_cooking_time_minutes": 90,
+        "pricing_mode": "fixture",
+        "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
+    }
+    unbudgeted = composed_client.post("/api/plans/generate", json=request).json()
+    budget = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
+    plan = composed_client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": budget}).json()
+    assert plan["grocery_estimate"]["within_weekly_budget"] is True
+
+    # A soup on the last day buys tomatoes the week did not need: the checkout total passes the budget.
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [7]},
+    )
+    assert preview.status_code == 201, preview.text
+    applied = composed_client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm").json()["plan"]
+
+    assert applied["grocery_estimate"]["purchase_total_sgd"] > budget
+    assert applied["grocery_estimate"]["within_weekly_budget"] is False
+    history = composed_client.get("/api/plans").json()["items"]
+    assert next(week for week in history if week["id"] == plan["id"])["within_weekly_budget"] is False

@@ -171,7 +171,8 @@ class MealPlanGroceryItem(Base):
         ),
         CheckConstraint("packages_required >= 0", name="meal_plan_grocery_packages_nonnegative"),
         CheckConstraint("purchase_cost_sgd >= 0", name="meal_plan_grocery_purchase_nonnegative"),
-        UniqueConstraint("plan_id", "ingredient_name", name="meal_plan_grocery_plan_ingredient_key"),
+        # One line per ingredient and unit: whole eggs and grams of egg cannot be added up.
+        UniqueConstraint("plan_id", "ingredient_name", "unit", name="meal_plan_grocery_plan_ingredient_unit_key"),
         Index("meal_plan_grocery_plan_id_idx", "plan_id"),
     )
 

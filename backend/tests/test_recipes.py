@@ -558,6 +558,51 @@ def test_agent_understands_bilingual_weekday_replanning_request(
     assert preview["before_entry"]["entry_id"] == wednesday["entry_id"]
 
 
+@pytest.mark.parametrize(
+    ("sentence", "event_type"),
+    [
+        # What the dish buttons of the week fill in (frontend MealList ACTIONS).
+        ("Swap {day}'s {title} for something else", "REPLACE_MEAL"),
+        ("Lock {day}'s {title}", "LOCK_MEAL"),
+        ("Skip {day}'s {title}", "CANCEL_MEAL"),
+        ("I can't buy an ingredient for {day}'s {title}: ", "ITEM_UNAVAILABLE"),
+        ("把周三的{title}换掉", "REPLACE_MEAL"),
+        ("锁定周三的{title}", "LOCK_MEAL"),
+        ("保留周三的{title}", "LOCK_MEAL"),
+        ("跳过周三的{title}", "CANCEL_MEAL"),
+        ("周三的{title}有食材买不到", "ITEM_UNAVAILABLE"),
+    ],
+)
+def test_every_dish_button_sentence_reaches_a_preview(
+    recipe_client: TestClient,
+    sentence: str,
+    event_type: str,
+) -> None:
+    created = recipe_client.post(
+        "/api/agent/sessions",
+        json={"message": "Build a weekly plan for 2 people with a S$20 per meal budget."},
+    ).json()
+    planned = recipe_client.post(f"/api/agent/sessions/{created['id']}/confirm").json()["plan"]
+    wednesday = next(day for day in planned["days"] if date.fromisoformat(day["planned_date"]).weekday() == 2)
+
+    reply = recipe_client.post(
+        f"/api/agent/sessions/{created['id']}/messages",
+        json={"message": sentence.format(day="Wednesday", title=wednesday["recipe"]["title"])},
+    ).json()
+
+    assert reply["replan_draft"]["event_type"] == event_type, reply["messages"][-1]["content"]
+    assert reply["replan_draft"]["entry_id"] == wednesday["entry_id"]
+    if reply["pending_replan"] is None:  # "I can't buy …: " still has to say which ingredient
+        assert event_type == "ITEM_UNAVAILABLE"
+        assert reply["clarification_questions"][0] in {"Which ingredient is unavailable?", "哪一种食材买不到？"}
+    else:
+        assert reply["pending_replan"]["event_type"] == event_type
+        assert reply["pending_replan"]["before_entry"]["entry_id"] == wednesday["entry_id"]
+        # Keeping or skipping a dish proposes no other dish.
+        if event_type in {"LOCK_MEAL", "CANCEL_MEAL"}:
+            assert "instead of" not in reply["messages"][-1]["content"]
+
+
 def test_agent_enforces_non_medical_boundary_without_inventing_constraints(
     recipe_client: TestClient,
 ) -> None:
