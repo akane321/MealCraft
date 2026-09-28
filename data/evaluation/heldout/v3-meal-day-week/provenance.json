@@ -80,7 +80,8 @@
   "not_held": [
    "Round 0: where a label came out against the quota, the drafter rewrote the scenario under the same id and accepted the new label, which is iteration against the drawn pools.",
    "Three review rounds guided revisions. The owner's notes concern wording, realism and design, never system behaviour.",
-   "Round 1: at the owner's request 5 accepted feasible episodes (013, 020, 030, 043, 048) were made infeasible, to keep about a quarter infeasible after the budget category became feasible-only."
+   "Round 1: at the owner's request 5 accepted feasible episodes (013, 020, 030, 043, 048) were made infeasible, to keep about a quarter infeasible after the budget category became feasible-only.",
+   "The implementation agent (the one that builds the product) read every episode's request and gold while building the owner's review pages and running the verification, so the set is not unseen by the implementer. No product change was made between the freeze and the first run. Any later product change that targets a request form this set contains (for example shape changes naming several days) must be disclosed in the report of every run made after it, and that run reported as 'after looking'."
   ],
   "incident": "Round 2: while backing up its own draft, the drafting agent wrote a copy of episodes.json to /tmp, outside its sealed output directory, and deleted it at once. It read nothing outside the packet; the packet digests were unchanged. The rule was restated for round 3, where it wrote only inside output/.",
   "pools_and_labels": "candidate pools are drawn by a script from the episode, and every label is proven from catalog facts by tools that run no system under test; neither the drafter nor the reviewer chose them"
