@@ -104,7 +104,10 @@ def read_shape_change(message: str, *, plan: WeeklyMealPlanResponse, day_index: 
             return None
         else:
             role_id = _next_id(current, base)
-            roles = [*current, {"role_id": role_id, "courses": courses, "required": True}]
+            # Asking for one more dish asks for the meal as the preview names it: an optional
+            # vegetable would otherwise be the first thing a tight budget leaves out.
+            kept = [{**role, "required": True} for role in current]
+            roles = [*kept, {"role_id": role_id, "courses": courses, "required": True}]
             summary = f"{meal.capitalize()} with {'another' if role_id != base else 'a'} {dish} {when}"
     return ShapeChangeIntent(
         request=MealPlanShapeChangeRequest.model_validate(
