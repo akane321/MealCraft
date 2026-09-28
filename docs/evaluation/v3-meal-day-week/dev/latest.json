@@ -7,10 +7,11 @@
     "max_cooking_time_minutes_when_unstated": 240,
     "shape_change_today": "the week's first day, so every day is still ahead",
     "per_day_nutrition": "sent as the product's per_day target",
+    "max_uses_per_recipe": "a stated cap on uses is sent as the request's max_uses_per_recipe, a hard rule",
     "nutrition_tolerance_relative": 0.02
   },
   "summary": {
-    "strict_success": "15/16",
+    "strict_success": "18/18",
     "by_category": {
       "meals_per_day": {
         "strict_success": "3/3",
@@ -25,11 +26,8 @@
         "failure_mechanisms": {}
       },
       "budget": {
-        "strict_success": "1/2",
-        "failure_mechanisms": {
-          "plan_present": 1,
-          "status_matches_class": 1
-        }
+        "strict_success": "2/2",
+        "failure_mechanisms": {}
       },
       "safety_diet": {
         "strict_success": "2/2",
@@ -40,7 +38,7 @@
         "failure_mechanisms": {}
       },
       "shape_change": {
-        "strict_success": "4/4",
+        "strict_success": "6/6",
         "failure_mechanisms": {}
       }
     }
@@ -156,26 +154,15 @@
       "category": "budget",
       "language": "en",
       "class": "feasible",
-      "answered": "infeasible",
-      "strict_success": false,
-      "failed": [
-        "status_matches_class",
-        "plan_present"
-      ],
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
       "indeterminate": [],
-      "details": {
-        "status_matches_class": "expected plan, answered infeasible",
-        "plan_present": "a feasible episode requires a plan"
-      },
-      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
-      "refusal": {
-        "status": "candidate_rejected",
-        "evidence": "bounded_search_exhausted",
-        "weeks_tried": 0,
-        "unmet_checks": {},
-        "search_exhausted": false,
-        "input_issues": []
-      }
+      "details": {},
+      "dishes": 26,
+      "distinct_recipes": 7,
+      "meal_fit": "26/26",
+      "total_cost_sgd": 103.43
     },
     {
       "episode_id": "mdw-dev-009",
@@ -373,10 +360,82 @@
       "distinct_recipes": 20,
       "meal_fit": "20/20",
       "total_cost_sgd": 326.36
+    },
+    {
+      "episode_id": "mdw-dev-017",
+      "category": "shape_change",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "understood": {
+        "meal_type": "dinner",
+        "roles": [
+          {
+            "role_id": "main",
+            "courses": [
+              "main"
+            ],
+            "required": true
+          },
+          {
+            "role_id": "vegetable",
+            "courses": [
+              "side",
+              "salad"
+            ],
+            "required": false
+          },
+          {
+            "role_id": "soup",
+            "courses": [
+              "soup"
+            ],
+            "required": true
+          }
+        ],
+        "day_indexes": [
+          6,
+          7
+        ]
+      },
+      "dishes": 16,
+      "distinct_recipes": 16,
+      "meal_fit": "16/16",
+      "total_cost_sgd": 309.65
+    },
+    {
+      "episode_id": "mdw-dev-018",
+      "category": "shape_change",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "understood": {
+        "meal_type": "breakfast",
+        "roles": null,
+        "day_indexes": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "dishes": 16,
+      "distinct_recipes": 16,
+      "meal_fit": "16/16",
+      "total_cost_sgd": 261.17
     }
   ],
   "episode_set": "developer set",
-  "code_revision": "fdbc0be0944da641c65cd8c48b98b915ca35b650+dirty",
+  "code_revision": "f6e432b60b67164aa34fde006a4486b37ddffe71",
   "inputs": {
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",
@@ -385,7 +444,7 @@
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-005.json": "f97b7aa618bfca9543955e8c8ab631e54bb1b3d0483a92e1db8640971e019fff",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-006.json": "c59bb0883629c378cb6e597fd7cf7534ae1f01406abca787d87582b1344639c6",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-007.json": "59dc9953c66c2f177a02daa5351c93a3d055695ee7751f3b35bcb530c64eff49",
-    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-008.json": "083ebb3fff203b3f9a96e05195f21f865908cd72c9c24490f424bee2336b6f49",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-008.json": "e83b0f015f3a978a7276af48598993cce2eaff8f8b8259ef4301f9266fc25aaf",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-009.json": "5f9dd0a151aec38e01f3af59995ce4a364fe05f7bc376b683ac45b2d8f05e516",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-010.json": "31489206f6bbf65f3d8b614076d80fd64c6cda896a96dfd212a076ce004511c8",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-011.json": "17653d67b060e05281beed67a8ee264e6a72d559b050b755d26f6fd3b8f64054",
@@ -394,6 +453,8 @@
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-014.json": "947bfed62ea228e6f86e3d13083e05a91e5b675db18436540a0968f51a38545a",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-015.json": "a2848d1e85d215cda3fe5d54204676a8889daac5825e84cf3a70e5adb7aefc11",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-016.json": "04292110b02381738805803523ab53bbe30bbc430f16fef50f901cdb5b57bbe5",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-017.json": "ac8eb17e0f46dfff2225227ea0450172d8352354268c3f538110f669321d1dc3",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-018.json": "b102d2bc148e70e132eb2488082bf56bdc88f3b10b35ba7ed7ff15637d6eebdc",
     "data-engineering/data/release/v2.1/recipes.jsonl": "df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db",
     "data-engineering/data/release/v2.1/ingredients.jsonl": "499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25",
     "data/products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91",

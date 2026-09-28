@@ -1,0 +1,1332 @@
+{
+  "protocol": "v3-meal-day-week",
+  "system": "P",
+  "parameters": {
+    "system": "product path: WeeklyMealPlanService.generate, then read_shape_change, preview_shape and confirm",
+    "pricing_mode": "fixture",
+    "max_cooking_time_minutes_when_unstated": 240,
+    "shape_change_today": "the week's first day, so every day is still ahead",
+    "per_day_nutrition": "sent as the product's per_day target",
+    "nutrition_tolerance_relative": 0.02
+  },
+  "summary": {
+    "strict_success": "44/60",
+    "by_category": {
+      "shape_change": {
+        "strict_success": "1/12",
+        "failure_mechanisms": {
+          "meal_roles_filled": 9,
+          "required_slots_assigned": 2,
+          "shape_request_understood": 11
+        }
+      },
+      "meals_per_day": {
+        "strict_success": "9/9",
+        "failure_mechanisms": {}
+      },
+      "composition": {
+        "strict_success": "9/9",
+        "failure_mechanisms": {}
+      },
+      "budget": {
+        "strict_success": "7/9",
+        "failure_mechanisms": {
+          "plan_present": 2,
+          "status_matches_class": 2
+        }
+      },
+      "safety_diet": {
+        "strict_success": "9/9",
+        "failure_mechanisms": {}
+      },
+      "nutrition_per_day": {
+        "strict_success": "5/7",
+        "failure_mechanisms": {
+          "plan_present": 2,
+          "status_matches_class": 2
+        }
+      },
+      "variety": {
+        "strict_success": "4/5",
+        "failure_mechanisms": {
+          "repetition_requests_met": 1
+        }
+      }
+    }
+  },
+  "episodes": [
+    {
+      "episode_id": "mdw-ho-001",
+      "category": "shape_change",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": false,
+      "failed": [
+        "meal_roles_filled",
+        "shape_request_understood"
+      ],
+      "indeterminate": [],
+      "details": {
+        "meal_roles_filled": "fri-dinner:soup (no such role); mon-dinner:soup (no such role); sat-dinner:soup (no such role); sun-dinner:soup (no such role); thu-dinner:soup (no such role); tue-dinner:soup (no such role); wed-dinner:soup (no such role)",
+        "shape_request_understood": "read None, wanted {'meal_type': 'dinner', 'roles': [{'role_id': 'main', 'courses': ['main'], 'required': True}, {'role_id': 'vegetable', 'courses': ['side', 'salad'], 'required': True}], 'day_indexes': None}"
+      },
+      "understood": null,
+      "dishes": 21,
+      "distinct_recipes": 21,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 348.6
+    },
+    {
+      "episode_id": "mdw-ho-002",
+      "category": "shape_change",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": false,
+      "failed": [
+        "required_slots_assigned",
+        "shape_request_understood"
+      ],
+      "indeterminate": [],
+      "details": {
+        "required_slots_assigned": "unassigned: sun-breakfast",
+        "shape_request_understood": "read {'meal_type': 'breakfast', 'roles': [{'role_id': 'main', 'courses': ['breakfast', 'baked_good'], 'required': True}], 'day_indexes': [6]}, wanted {'meal_type': 'breakfast', 'roles': [{'role_id': 'main', 'courses': ['breakfast', 'baked_good'], 'required': True}], 'day_indexes': [6, 7]}"
+      },
+      "understood": {
+        "meal_type": "breakfast",
+        "roles": [
+          {
+            "role_id": "main",
+            "courses": [
+              "breakfast",
+              "baked_good"
+            ],
+            "required": true
+          }
+        ],
+        "day_indexes": [
+          6
+        ]
+      },
+      "dishes": 15,
+      "distinct_recipes": 15,
+      "meal_fit": "15/15",
+      "total_cost_sgd": 425.74
+    },
+    {
+      "episode_id": "mdw-ho-003",
+      "category": "shape_change",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": false,
+      "failed": [
+        "meal_roles_filled",
+        "shape_request_understood"
+      ],
+      "indeterminate": [],
+      "details": {
+        "meal_roles_filled": "fri-lunch:main (no such role); mon-lunch:main (no such role); thu-lunch:main (no such role); tue-lunch:main (no such role); wed-lunch:main (no such role)",
+        "shape_request_understood": "read None, wanted {'meal_type': 'lunch', 'roles': None, 'day_indexes': [1, 2, 3, 4, 5]}"
+      },
+      "understood": null,
+      "dishes": 35,
+      "distinct_recipes": 35,
+      "meal_fit": "35/35",
+      "total_cost_sgd": 477.47
+    },
+    {
+      "episode_id": "mdw-ho-004",
+      "category": "shape_change",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": false,
+      "failed": [
+        "meal_roles_filled",
+        "shape_request_understood"
+      ],
+      "indeterminate": [],
+      "details": {
+        "meal_roles_filled": "fri-dinner:soup",
+        "shape_request_understood": "read {'meal_type': 'dinner', 'roles': [{'role_id': 'main', 'courses': ['main'], 'required': True}, {'role_id': 'vegetable', 'courses': ['side', 'salad'], 'required': False}, {'role_id': 'soup', 'courses': ['soup'], 'required': True}], 'day_indexes': [3]}, wanted {'meal_type': 'dinner', 'roles': [{'role_id': 'main', 'courses': ['main'], 'required': True}, {'role_id': 'vegetable', 'courses': ['side', 'salad'], 'required': False}, {'role_id': 'soup', 'courses': ['soup'], 'required': True}], 'day_indexes': [3, 5]}"
+      },
+      "understood": {
+        "meal_type": "dinner",
+        "roles": [
+          {
+            "role_id": "main",
+            "courses": [
+              "main"
+            ],
+            "required": true
+          },
+          {
+            "role_id": "vegetable",
+            "courses": [
+              "side",
+              "salad"
+            ],
+            "required": false
+          },
+          {
+            "role_id": "soup",
+            "courses": [
+              "soup"
+            ],
+            "required": true
+          }
+        ],
+        "day_indexes": [
+          3
+        ]
+      },
+      "dishes": 15,
+      "distinct_recipes": 15,
+      "meal_fit": "15/15",
+      "total_cost_sgd": 237.33
+    },
+    {
+      "episode_id": "mdw-ho-005",
+      "category": "shape_change",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": false,
+      "failed": [
+        "meal_roles_filled",
+        "shape_request_understood"
+      ],
+      "indeterminate": [],
+      "details": {
+        "meal_roles_filled": "fri-lunch:vegetable (no such role); mon-lunch:vegetable (no such role); sat-lunch:vegetable (no such role); sun-lunch:vegetable (no such role); thu-lunch:vegetable (no such role); tue-lunch:vegetable (no such role); wed-lunch:vegetable (no such role)",
+        "shape_request_understood": "read None, wanted {'meal_type': 'lunch', 'roles': [{'role_id': 'main', 'courses': ['main', 'salad', 'soup'], 'required': True}], 'day_indexes': None}"
+      },
+      "understood": null,
+      "dishes": 35,
+      "distinct_recipes": 32,
+      "meal_fit": "35/35",
+      "total_cost_sgd": 547.24
+    },
+    {
+      "episode_id": "mdw-ho-006",
+      "category": "shape_change",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "understood": {
+        "meal_type": "dinner",
+        "roles": [
+          {
+            "role_id": "main",
+            "courses": [
+              "main"
+            ],
+            "required": true
+          },
+          {
+            "role_id": "vegetable",
+            "courses": [
+              "side",
+              "salad"
+            ],
+            "required": true
+          }
+        ],
+        "day_indexes": null
+      },
+      "dishes": 14,
+      "distinct_recipes": 10,
+      "meal_fit": "14/14",
+      "total_cost_sgd": 250.85
+    },
+    {
+      "episode_id": "mdw-ho-007",
+      "category": "shape_change",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": false,
+      "failed": [
+        "meal_roles_filled",
+        "shape_request_understood"
+      ],
+      "indeterminate": [],
+      "details": {
+        "meal_roles_filled": "sun-dinner:main-2",
+        "shape_request_understood": "read {'meal_type': 'dinner', 'roles': [{'role_id': 'main', 'courses': ['main'], 'required': True}, {'role_id': 'vegetable', 'courses': ['side', 'salad'], 'required': True}, {'role_id': 'soup', 'courses': ['soup'], 'required': True}, {'role_id': 'main-2', 'courses': ['main'], 'required': True}], 'day_indexes': [6]}, wanted {'meal_type': 'dinner', 'roles': [{'role_id': 'main', 'courses': ['main'], 'required': True}, {'role_id': 'vegetable', 'courses': ['side', 'salad'], 'required': True}, {'role_id': 'soup', 'courses': ['soup'], 'required': True}, {'role_id': 'main-2', 'courses': ['main'], 'required': True}], 'day_indexes': [6, 7]}"
+      },
+      "understood": {
+        "meal_type": "dinner",
+        "roles": [
+          {
+            "role_id": "main",
+            "courses": [
+              "main"
+            ],
+            "required": true
+          },
+          {
+            "role_id": "vegetable",
+            "courses": [
+              "side",
+              "salad"
+            ],
+            "required": true
+          },
+          {
+            "role_id": "soup",
+            "courses": [
+              "soup"
+            ],
+            "required": true
+          },
+          {
+            "role_id": "main-2",
+            "courses": [
+              "main"
+            ],
+            "required": true
+          }
+        ],
+        "day_indexes": [
+          6
+        ]
+      },
+      "dishes": 22,
+      "distinct_recipes": 22,
+      "meal_fit": "22/22",
+      "total_cost_sgd": 419.5
+    },
+    {
+      "episode_id": "mdw-ho-008",
+      "category": "shape_change",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": false,
+      "failed": [
+        "required_slots_assigned",
+        "shape_request_understood"
+      ],
+      "indeterminate": [],
+      "details": {
+        "required_slots_assigned": "unassigned: mon-lunch, tue-lunch, wed-lunch, thu-lunch, fri-lunch, sat-lunch, sun-lunch",
+        "shape_request_understood": "read None, wanted {'meal_type': 'lunch', 'roles': [{'role_id': 'main', 'courses': ['main', 'salad', 'soup'], 'required': True}], 'day_indexes': None}"
+      },
+      "understood": null,
+      "dishes": 21,
+      "distinct_recipes": 21,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 367.51
+    },
+    {
+      "episode_id": "mdw-ho-009",
+      "category": "shape_change",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": false,
+      "failed": [
+        "meal_roles_filled",
+        "shape_request_understood"
+      ],
+      "indeterminate": [],
+      "details": {
+        "meal_roles_filled": "thu-lunch:vegetable (no such role)",
+        "shape_request_understood": "read {'meal_type': 'lunch', 'roles': [{'role_id': 'main', 'courses': ['main'], 'required': True}], 'day_indexes': [2]}, wanted {'meal_type': 'lunch', 'roles': [{'role_id': 'main', 'courses': ['main'], 'required': True}], 'day_indexes': [2, 4]}"
+      },
+      "understood": {
+        "meal_type": "lunch",
+        "roles": [
+          {
+            "role_id": "main",
+            "courses": [
+              "main"
+            ],
+            "required": true
+          }
+        ],
+        "day_indexes": [
+          2
+        ]
+      },
+      "dishes": 27,
+      "distinct_recipes": 19,
+      "meal_fit": "27/27",
+      "total_cost_sgd": 365.73
+    },
+    {
+      "episode_id": "mdw-ho-010",
+      "category": "shape_change",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": false,
+      "failed": [
+        "meal_roles_filled",
+        "shape_request_understood"
+      ],
+      "indeterminate": [],
+      "details": {
+        "meal_roles_filled": "sun-breakfast:main (no such role)",
+        "shape_request_understood": "read None, wanted {'meal_type': 'breakfast', 'roles': None, 'day_indexes': [7]}"
+      },
+      "understood": null,
+      "dishes": 28,
+      "distinct_recipes": 28,
+      "meal_fit": "28/28",
+      "total_cost_sgd": 450.77
+    },
+    {
+      "episode_id": "mdw-ho-011",
+      "category": "shape_change",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": false,
+      "failed": [
+        "meal_roles_filled",
+        "shape_request_understood"
+      ],
+      "indeterminate": [],
+      "details": {
+        "meal_roles_filled": "fri-dinner:main-2 (no such role); fri-dinner:vegetable (no such role); fri-dinner:soup (no such role)",
+        "shape_request_understood": "read None, wanted {'meal_type': 'dinner', 'roles': [{'role_id': 'main', 'courses': ['main'], 'required': True}], 'day_indexes': [5]}"
+      },
+      "understood": null,
+      "dishes": 28,
+      "distinct_recipes": 28,
+      "meal_fit": "28/28",
+      "total_cost_sgd": 595.92
+    },
+    {
+      "episode_id": "mdw-ho-012",
+      "category": "shape_change",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": false,
+      "failed": [
+        "meal_roles_filled",
+        "shape_request_understood"
+      ],
+      "indeterminate": [],
+      "details": {
+        "meal_roles_filled": "sat-dinner:main (no such role); sat-dinner:vegetable (no such role); sat-dinner:soup (no such role)",
+        "shape_request_understood": "read None, wanted {'meal_type': 'dinner', 'roles': None, 'day_indexes': [6]}"
+      },
+      "understood": null,
+      "dishes": 28,
+      "distinct_recipes": 28,
+      "meal_fit": "28/28",
+      "total_cost_sgd": 481.61
+    },
+    {
+      "episode_id": "mdw-ho-013",
+      "category": "meals_per_day",
+      "language": "en",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-014",
+      "category": "meals_per_day",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 21,
+      "meal_fit": "19/21",
+      "total_cost_sgd": 370.05
+    },
+    {
+      "episode_id": "mdw-ho-015",
+      "category": "meals_per_day",
+      "language": "en",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-016",
+      "category": "meals_per_day",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 14,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 340.22
+    },
+    {
+      "episode_id": "mdw-ho-017",
+      "category": "meals_per_day",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 35,
+      "distinct_recipes": 20,
+      "meal_fit": "35/35",
+      "total_cost_sgd": 435.22
+    },
+    {
+      "episode_id": "mdw-ho-018",
+      "category": "meals_per_day",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 16,
+      "meal_fit": "16/21",
+      "total_cost_sgd": 273.74
+    },
+    {
+      "episode_id": "mdw-ho-019",
+      "category": "meals_per_day",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 28,
+      "distinct_recipes": 25,
+      "meal_fit": "25/28",
+      "total_cost_sgd": 354.36
+    },
+    {
+      "episode_id": "mdw-ho-020",
+      "category": "meals_per_day",
+      "language": "zh",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-021",
+      "category": "meals_per_day",
+      "language": "en",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-022",
+      "category": "composition",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 35,
+      "distinct_recipes": 18,
+      "meal_fit": "35/35",
+      "total_cost_sgd": 456.72
+    },
+    {
+      "episode_id": "mdw-ho-023",
+      "category": "composition",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 9,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 480.33
+    },
+    {
+      "episode_id": "mdw-ho-024",
+      "category": "composition",
+      "language": "en",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-025",
+      "category": "composition",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 35,
+      "distinct_recipes": 35,
+      "meal_fit": "35/35",
+      "total_cost_sgd": 520.14
+    },
+    {
+      "episode_id": "mdw-ho-026",
+      "category": "composition",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 10,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 193.1
+    },
+    {
+      "episode_id": "mdw-ho-027",
+      "category": "composition",
+      "language": "en",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-028",
+      "category": "composition",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 40,
+      "distinct_recipes": 21,
+      "meal_fit": "40/40",
+      "total_cost_sgd": 477.21
+    },
+    {
+      "episode_id": "mdw-ho-029",
+      "category": "composition",
+      "language": "en",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-030",
+      "category": "composition",
+      "language": "zh",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-031",
+      "category": "budget",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 5,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 84.73
+    },
+    {
+      "episode_id": "mdw-ho-032",
+      "category": "budget",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 17,
+      "distinct_recipes": 3,
+      "meal_fit": "17/17",
+      "total_cost_sgd": 50.59
+    },
+    {
+      "episode_id": "mdw-ho-033",
+      "category": "budget",
+      "language": "en",
+      "class": "feasible",
+      "answered": "infeasible",
+      "strict_success": false,
+      "failed": [
+        "status_matches_class",
+        "plan_present"
+      ],
+      "indeterminate": [],
+      "details": {
+        "status_matches_class": "expected plan, answered infeasible",
+        "plan_present": "a feasible episode requires a plan"
+      },
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-034",
+      "category": "budget",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 14,
+      "distinct_recipes": 5,
+      "meal_fit": "14/14",
+      "total_cost_sgd": 65.67
+    },
+    {
+      "episode_id": "mdw-ho-035",
+      "category": "budget",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 5,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 74.79
+    },
+    {
+      "episode_id": "mdw-ho-036",
+      "category": "budget",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "infeasible",
+      "strict_success": false,
+      "failed": [
+        "status_matches_class",
+        "plan_present"
+      ],
+      "indeterminate": [],
+      "details": {
+        "status_matches_class": "expected plan, answered infeasible",
+        "plan_present": "a feasible episode requires a plan"
+      },
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-037",
+      "category": "budget",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 6,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 69.28
+    },
+    {
+      "episode_id": "mdw-ho-038",
+      "category": "budget",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 28,
+      "distinct_recipes": 6,
+      "meal_fit": "28/28",
+      "total_cost_sgd": 61.47
+    },
+    {
+      "episode_id": "mdw-ho-039",
+      "category": "budget",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 14,
+      "distinct_recipes": 5,
+      "meal_fit": "14/14",
+      "total_cost_sgd": 150.68
+    },
+    {
+      "episode_id": "mdw-ho-040",
+      "category": "safety_diet",
+      "language": "en",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-041",
+      "category": "safety_diet",
+      "language": "zh",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-042",
+      "category": "safety_diet",
+      "language": "en",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-043",
+      "category": "safety_diet",
+      "language": "zh",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-044",
+      "category": "safety_diet",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 28,
+      "distinct_recipes": 28,
+      "meal_fit": "28/28",
+      "total_cost_sgd": 429.77
+    },
+    {
+      "episode_id": "mdw-ho-045",
+      "category": "safety_diet",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 21,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 358.09
+    },
+    {
+      "episode_id": "mdw-ho-046",
+      "category": "safety_diet",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 35,
+      "distinct_recipes": 24,
+      "meal_fit": "34/35",
+      "total_cost_sgd": 427.22
+    },
+    {
+      "episode_id": "mdw-ho-047",
+      "category": "safety_diet",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 28,
+      "distinct_recipes": 25,
+      "meal_fit": "27/28",
+      "total_cost_sgd": 404.43
+    },
+    {
+      "episode_id": "mdw-ho-048",
+      "category": "safety_diet",
+      "language": "en",
+      "class": "infeasible",
+      "answered": "infeasible",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-049",
+      "category": "nutrition_per_day",
+      "language": "en",
+      "class": "feasible",
+      "answered": "infeasible",
+      "strict_success": false,
+      "failed": [
+        "status_matches_class",
+        "plan_present"
+      ],
+      "indeterminate": [],
+      "details": {
+        "status_matches_class": "expected plan, answered infeasible",
+        "plan_present": "a feasible episode requires a plan"
+      },
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-050",
+      "category": "nutrition_per_day",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 20,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 328.83
+    },
+    {
+      "episode_id": "mdw-ho-051",
+      "category": "nutrition_per_day",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 21,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 358.52
+    },
+    {
+      "episode_id": "mdw-ho-052",
+      "category": "nutrition_per_day",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 27,
+      "distinct_recipes": 25,
+      "meal_fit": "27/27",
+      "total_cost_sgd": 381.92
+    },
+    {
+      "episode_id": "mdw-ho-053",
+      "category": "nutrition_per_day",
+      "language": "en",
+      "class": "feasible",
+      "answered": "infeasible",
+      "strict_success": false,
+      "failed": [
+        "status_matches_class",
+        "plan_present"
+      ],
+      "indeterminate": [],
+      "details": {
+        "status_matches_class": "expected plan, answered infeasible",
+        "plan_present": "a feasible episode requires a plan"
+      },
+      "conflict": "I couldn't find a week that meets every limit. Try relaxing one of them.",
+      "refusal": {
+        "status": "candidate_rejected",
+        "evidence": "bounded_search_exhausted",
+        "weeks_tried": 0,
+        "unmet_checks": {},
+        "search_exhausted": false,
+        "input_issues": []
+      }
+    },
+    {
+      "episode_id": "mdw-ho-054",
+      "category": "nutrition_per_day",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 21,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 366.0
+    },
+    {
+      "episode_id": "mdw-ho-055",
+      "category": "nutrition_per_day",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 35,
+      "distinct_recipes": 34,
+      "meal_fit": "35/35",
+      "total_cost_sgd": 530.83
+    },
+    {
+      "episode_id": "mdw-ho-056",
+      "category": "variety",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 28,
+      "distinct_recipes": 28,
+      "meal_fit": "28/28",
+      "total_cost_sgd": 422.02
+    },
+    {
+      "episode_id": "mdw-ho-057",
+      "category": "variety",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 21,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 464.14
+    },
+    {
+      "episode_id": "mdw-ho-058",
+      "category": "variety",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 21,
+      "meal_fit": "19/21",
+      "total_cost_sgd": 398.92
+    },
+    {
+      "episode_id": "mdw-ho-059",
+      "category": "variety",
+      "language": "zh",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "dishes": 21,
+      "distinct_recipes": 21,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 416.79
+    },
+    {
+      "episode_id": "mdw-ho-060",
+      "category": "variety",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": false,
+      "failed": [
+        "repetition_requests_met"
+      ],
+      "indeterminate": [],
+      "details": {
+        "repetition_requests_met": "RCP2_BB5A1C9F5384 x2 > 1"
+      },
+      "dishes": 21,
+      "distinct_recipes": 20,
+      "meal_fit": "21/21",
+      "total_cost_sgd": 468.15
+    }
+  ],
+  "episode_set": "held-out set",
+  "code_revision": "1c01c1b7d101765cf54958c507a5e40c837ea37c",
+  "inputs": {
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-001.json": "1c1dda3f2712b448be4c59dccdaec30d03c5fcd03c0279eef9ec34b030b2186c",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-002.json": "88ad449985ee7fe20e33e8012f1b0c93596697ba9918f82a84bc477236ba0e0e",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-003.json": "388daa319b4c9525aa8078a6c70bba6cdd2c357a155ac8c95530fd1be6cef751",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-004.json": "cb537b965194c32499d9fdabd8d894051da5d32f838df9426cb48507a0e9dd80",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-005.json": "27792ff10fa9bba70245e8d8ffa9a8f24f6259550a28f836225d8fb1a073d534",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-006.json": "db11c7bb22fefc273e9ea27128da8ed8a01e3fefa575418cd1d156dfc68f8c7b",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-007.json": "8e4fff0327dc43116468ec6d40cce5f3a5a49a1f4a323f5f6087546c2cd7b4d5",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-008.json": "b64e8c308b3bafc7a77cca80ce4e89eace9f3ba9c49f9bf9aa4d3f2569bcb74c",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-009.json": "9f15bf36fb3fe8730ef3438ab126257e826026b994a7b99076e653443a65ae93",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-010.json": "98b0621815408cc9ff8c5703a1613a78061b7d9aad3c993ffea7788068a14bca",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-011.json": "fc156b47336bcce71f19e4fe78eb8abf88a1cb1e8d46775c57c03c1d609962c1",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-012.json": "1b048791424ce429ada060bfa1723e02d02c75ce79c18d0a493ba4da7919129b",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-013.json": "a0700b319431719f2398e1878c8359eb6953631a849035b54a66b612c140a88a",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-014.json": "b699db32737972c2dc6d8634264e4d78d70e1ec3549ee9c7b863c96b513472fc",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-015.json": "7016ea958176a336f9c81a70f1ca46b538931cac5dd678101b923b21d8bba3a5",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-016.json": "7c40ac3a06c1485ee1bc83147281b353bbd29085eb68efca4572c62e5dd3219d",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-017.json": "eeca0c4463320ca73a76037fb4133bba6f431bca963d26710a3a389d97908d7d",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-018.json": "f511290672d22f32a5308dddd06641f8be012199fbb0af5520438cb7b436902d",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-019.json": "12ce6dc97df89a60a38d738037758f04e79fa33670c6d4185c592a99f60626a2",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-020.json": "1f7bef20d9bcfc1a08d4dd50829e76befcd22ef9071ef1ffabaec07b5ece481e",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-021.json": "8b343941c504a6db83732538ba365eeba4d586afe5d358e63ba4888ebbd1e4ad",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-022.json": "48e2f31abf2c9d3d5ed416b816f54cffb98e41ffb7fb71074cd410c8b284bc4f",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-023.json": "804d8547642f0955e6e3f4222401b3816688c7b361b5345489df52315d8ff0d6",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-024.json": "ed5cfaf28f0a6ef9d181f74f3a5fef18b74ffa64ec12f4fe381e9ad9e7d9d707",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-025.json": "2f651055ad0842da5e367e73cf75b9564b0a1faeb43b102690bd3b7bc5ef6b49",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-026.json": "6d816cdda10f99110588ea5f85209d5c8aa1d4c66881aa1bfa36a0b2a91b6e1f",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-027.json": "6e4520d2017644e65643969d9071eb77b6947f88ef356df1788649b7a505fc13",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-028.json": "b7134ff2230fd4e0587087d116b55ccec7a446e6f41bbc24c1cfdc02835fde34",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-029.json": "39046aa86707d8f33008a0bda61ea8236ff474b03e4ccf187b9d1caece9cc628",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-030.json": "3f9e1b81cb4f6c33c88963ccee5e5a3db043f06d881351aa112c04211fe46b97",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-031.json": "c5e21c806eb2eab5798b8fbd9776c56de8e233624826b7bf43fd57b0be6bfa12",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-032.json": "133fbbce50ab38ab77de87992d7bf312e048208d8688fa21eae0433d2ef367ab",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-033.json": "295660faf0a6c6346dfc7655bbc92fdd27454e56228930a9b2308aacf6c5f2cf",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-034.json": "9bb09dfff1a9ab864f772eb5f14b64ddfbfcb3a4a2dfedd59aedb17bb7d32a6b",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-035.json": "808bd79f401adb04afd3e34a8473f3a457e3d155506e9bfa1bcea1bc643adc59",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-036.json": "ab676349150cd2ecec780db422ebdce30a9e6f86ebddc70f30394ef16e6bb08b",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-037.json": "081766df7b8eb2ad5028e06ab2801b2b1b08c2b3ce7fab2978cc37d23234578a",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-038.json": "01d468e56e444c7db53431bc056e2a487159a9f8e0800169d5073a325adad28b",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-039.json": "58b9a2ce3cd788861f05a943cea4abd9d21061d0cbf74b1fd107155a691af270",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-040.json": "9a7b37ed6a2ab97b7d6ebe52980a680788faa2960258a6464bf208671ce8d6ec",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-041.json": "c9306d71c80f12c7ec519756bdd8238e0d82420e3173d314c1dbbe24d3fc59c3",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-042.json": "c5855e5c4e385528d65f5fc237e0bcd3b8f6d987a03ac9fee9a2ccde8572d30b",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-043.json": "8c2160574ea03fd8436350f92929852306750650a5e0d94c3b21bd58a6f0d477",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-044.json": "a2867837ac698f79f30f6066878763abad4704be47eca4e04924c21e04669751",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-045.json": "4b1787fd2ceb1e970b4492fede223771b27f01b1000266f90688540f951e40d2",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-046.json": "eaaa41cd8d6ed10810eef4824600ee8813d2089b5d314cc4938df094bd8df172",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-047.json": "5da46b2c67f931378433d63b47503e41dac7addc12d25bf8e200543e84ed4243",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-048.json": "44b875423a67a7ab05c5d7dbac4be7484acb2ad0d6c43a0974a5613347e70790",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-049.json": "9530b75be42afea19e208891627d2d06120e02856b43335987b90d03b3543ddd",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-050.json": "7b0913842ee395c1c1269f6fb4e49dd8d4c9d6cf06326cc62e6b6ab9d6ad318c",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-051.json": "b249d8654092d3b69b92106ddd62b869e3b226aa205c3f948189a7739f1922be",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-052.json": "e66b9696c9467679eacbddd2f5b930ee2f256e011f0c29f71b60ca9cb6302b98",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-053.json": "e49aabe493905388f1f5b3d65ec39877cf0d8512e7bdb5a51407247636554dfb",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-054.json": "1b484df98e91234316b55a3e4067c8a4337d6c2742e131e7a9571bc9159b137e",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-055.json": "08825b81e5c6f6663b5a718a0dab71ba6a496e646e8d454b0918980969a16c8d",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-056.json": "f92267b742a271174e91849e7b9506c780e1e84d817d6ba9eaf9074ca772894a",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-057.json": "309231d578d2b555c78fd2cd53dfcd51a2990af7f860e95a540cde4e77e0d31b",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-058.json": "7f09245dff0ea1e37dc9d741200c15ce34902d81793727b2ee4dee12f105a7e2",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-059.json": "9fb4f4cd5ab8ffe2cb237311ae80f5b1a7842f03bd2c90fef16e93d3f27be289",
+    "data/evaluation/heldout/v3-meal-day-week/episodes/mdw-ho-060.json": "1a78d4b80b7467b85bb51cc5c4b6b41b3217febf322e56ddfa790d0ef0e7d33c",
+    "data-engineering/data/release/v2.1/recipes.jsonl": "df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db",
+    "data-engineering/data/release/v2.1/ingredients.jsonl": "499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25",
+    "data/products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91",
+    "data/fixtures/fairprice-products.json": "19e760bd53e438fac44c77569724460cf6a69269690c302f3d1a59edb7a0323c"
+  }
+}
