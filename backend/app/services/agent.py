@@ -462,8 +462,15 @@ class AgentSessionService:
                     session_id,
                     user_message=message,
                     assistant_message=(
-                        f"How about {preview.after_entry.recipe_title} instead of "
-                        f"{preview.before_entry.recipe_title}? Nothing changes until you confirm."
+                        {
+                            "LOCK_MEAL": f"Keep {preview.before_entry.recipe_title} as it is?",
+                            "CANCEL_MEAL": f"Skip {preview.before_entry.recipe_title}?",
+                        }.get(
+                            preview.event_type,
+                            f"How about {preview.after_entry.recipe_title} instead of "
+                            f"{preview.before_entry.recipe_title}?",
+                        )
+                        + " Nothing changes until you confirm."
                     ),
                     draft=draft,
                     clarification_questions=[],
@@ -483,8 +490,8 @@ class AgentSessionService:
             raise AgentSessionNotFoundError
         if self.replan_interpreter._event_type(message.lower()) is not None:
             return None  # swap, skip, lock or can't buy: one dish, not the meal's shape
-        day = self.replan_interpreter.day_index(message.lower(), plan)
-        intent = read_shape_change(message, plan=plan, day_index=day)
+        days = self.replan_interpreter.day_indexes(message.lower(), plan)
+        intent = read_shape_change(message, plan=plan, day_indexes=days)
         if intent is None:
             return None
         decision = ScopeDecision(
@@ -609,6 +616,7 @@ class AgentSessionService:
             available_ingredients=constraints.available_ingredients,
             pricing_mode=constraints.pricing_mode,
             plan_shape=constraints.plan_shape or default_plan_shape(),
+            max_uses_per_recipe=constraints.max_uses_per_recipe,
         )
         try:
             plan = self.meal_plan_service.generate(request)

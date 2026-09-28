@@ -43,6 +43,8 @@ const filmPlaying = ref(true);
 const messages = computed<AgentMessage[]>(() => session.value?.messages.filter(m => m.role !== "system") ?? []);
 const interaction = computed(() => session.value?.pending_interaction ?? null);
 const constraints = computed(() => session.value?.constraints ?? null);
+// A stated cap on how often a dish may come back; 1 is the usual ask.
+const repeatLabel = (cap: number | null | undefined) => (cap == null ? null : cap === 1 ? "No repeats" : `Each dish up to ${cap} times`);
 const contextLabel = computed(() => {
   const c = constraints.value;
   if (!c?.household_size) return null;
@@ -59,6 +61,7 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
     ...c.dietary_preferences.map(value => ({ text: "", value: value.replaceAll("_", " ") })),
     ...c.excluded_ingredients.map(value => ({ text: "No", value: value.replaceAll("_", " ") })),
     ...c.allergens.map(value => ({ text: "No", value: allergenLabel(value).toLowerCase(), alert: true })),
+    ...(repeatLabel(c.max_uses_per_recipe) ? [{ text: "", value: repeatLabel(c.max_uses_per_recipe)! }] : []),
   ];
 });
 const title = computed(() => messages.value.find(m => m.role === "user")?.content ?? "New plan");
@@ -118,6 +121,7 @@ const home = computed(() => {
       ...(p?.dietary_preferences ?? c?.dietary_preferences ?? []).map(value => ({ label: value.replaceAll("_", " "), alert: false })),
       ...(p?.excluded_ingredients ?? c?.excluded_ingredients ?? []).map(value => ({ label: `No ${value.replaceAll("_", " ")}`, alert: false })),
       ...(p?.allergens ?? c?.allergens ?? []).map(value => ({ label: `${allergenLabel(value)} allergy`, alert: true })),
+      ...(repeatLabel(c?.max_uses_per_recipe) ? [{ label: repeatLabel(c?.max_uses_per_recipe)!, alert: false }] : []),
     ],
   };
 });
