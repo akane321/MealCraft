@@ -9,7 +9,7 @@ dependencies = [
     "pydantic-settings==2.15.0",
     "psycopg[binary]>=3.2,<4",
     "sqlalchemy==2.1.0",
-    "uvicorn[standard]==0.52.4",
+    "uvicorn[standard]==0.53.0",
     "langgraph>=1.0,<2",
     "langchain-openai>=1.0,<2",
     "argon2-cffi==25.1.0",
@@ -17,7 +17,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "httpx2==2.13.0",
+    "httpx2==2.13.1",
     "ortools>=9.12,<10",
     "pytest==9.1.1",
     "ruff==0.16.6",

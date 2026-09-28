@@ -17,17 +17,17 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 
 | Episode | Category | Lang | Class | Answered | Success | Failed checks | Dishes | Distinct | Meal fit | Cost |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: |
-| mdw-dev-001 | meals_per_day | en | feasible | plan | yes | - | 21 | 21 | 21/21 | 286.64 |
+| mdw-dev-001 | meals_per_day | en | feasible | plan | yes | - | 21 | 21 | 21/21 | 288.72 |
 | mdw-dev-002 | meals_per_day | zh | feasible | plan | yes | - | 28 | 28 | 28/28 | 437.28 |
-| mdw-dev-003 | meals_per_day | en | feasible | plan | yes | - | 21 | 20 | 21/21 | 410.21 |
-| mdw-dev-004 | composition | en | feasible | plan | yes | - | 28 | 28 | 28/28 | 506.55 |
+| mdw-dev-003 | meals_per_day | en | feasible | plan | yes | - | 21 | 20 | 21/21 | 402.46 |
+| mdw-dev-004 | composition | en | feasible | plan | yes | - | 28 | 28 | 28/28 | 501.31 |
 | mdw-dev-005 | composition | zh | feasible | plan | yes | - | 28 | 28 | 28/28 | 444.03 |
 | mdw-dev-006 | nutrition_per_day | en | feasible | plan | yes | - | 21 | 18 | 21/21 | 318.03 |
 | mdw-dev-007 | nutrition_per_day | zh | feasible | plan | yes | - | 28 | 25 | 28/28 | 386.46 |
-| mdw-dev-008 | budget | en | feasible | plan | yes | - | 26 | 7 | 26/26 | 103.43 |
+| mdw-dev-008 | budget | en | feasible | plan | yes | - | 22 | 8 | 22/22 | 104.54 |
 | mdw-dev-009 | budget | en | infeasible | infeasible | yes | - | - | - | - | - |
-| mdw-dev-010 | safety_diet | en | feasible | plan | yes | - | 28 | 28 | 26/28 | 407.66 |
-| mdw-dev-011 | safety_diet | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 293.58 |
+| mdw-dev-010 | safety_diet | en | feasible | plan | yes | - | 28 | 28 | 26/28 | 416.11 |
+| mdw-dev-011 | safety_diet | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 301.27 |
 | mdw-dev-012 | variety | en | feasible | plan | yes | - | 28 | 28 | 28/28 | 395.12 |
 | mdw-dev-013 | shape_change | en | feasible | plan | yes | - | 21 | 21 | 21/21 | 327.49 |
 | mdw-dev-014 | shape_change | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 322.97 |

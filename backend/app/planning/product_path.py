@@ -6,7 +6,7 @@ prices after validation, and never promotes a bounded miss into a global proof.
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import timedelta
 from fractions import Fraction
 from math import isfinite
@@ -22,7 +22,7 @@ from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.grocery_estimator import not_purchased
 from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner, assignments_of
 from app.planning.meal_composition import dish_servings
-from app.planning.nutrition_scope import compile_nutrition_targets
+from app.planning.nutrition_scope import compile_nutrition_targets, nutrition_guard_loss
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
 from app.planning.recipe_quality import dish_family, dish_kind
@@ -370,21 +370,22 @@ class ProductPlanningEngine:
             # These scores only order candidates; the validator never reads them.
             losses = {r.recipe.slug: 1 - r.total_score / 100 for r in recommendations}
             trace["ranking"] = {"policy": "recommendation-score-v1", "digest": digest(losses)}
+            titles = {r.recipe.slug: r.recipe.title for r in recommendations}
+
+            def sameness(dishes) -> tuple[int, int]:
+                """Repeated dishes, then dishes of one kind ("fried rice"), in a week."""
+                kinds = [dish_kind(titles[recipe]) for recipe in dishes]
+                return len(dishes) - len(set(dishes)), len(kinds) - len(set(kinds))
+
             if composition is None:
                 search = BeamPlanner(self.limits, local_losses=losses).search_candidates(problem.model_copy(deep=True))
-                titles = {r.recipe.slug: r.recipe.title for r in recommendations}
-
-                def sameness(picked) -> tuple[int, int]:
-                    """Repeated dishes, then dishes of one kind ("fried rice"), in a week."""
-                    dishes = [recipe for _, recipe in picked]
-                    kinds = [dish_kind(titles[recipe]) for recipe in dishes]
-                    return len(dishes) - len(set(dishes)), len(kinds) - len(set(kinds))
-
                 # Among the weeks the search kept, the most varied is tried first; a search loss
                 # term for "same kind" would prune the cheap weeks a budget needs instead.
                 choices = [
                     state.choices
-                    for state in sorted(search.states, key=lambda s: (sameness(s.choices), s.loss, s.choices))
+                    for state in sorted(
+                        search.states, key=lambda s: (sameness([r for _, r in s.choices]), s.loss, s.choices)
+                    )
                 ]
                 budget = constraints.weekly_budget_sgd
                 if budget is not None:
@@ -409,7 +410,9 @@ class ProductPlanningEngine:
                             ]
                         # A strongly cost-led search happily repeats a cheap dish; its weeks are tried
                         # only after every week without repeats, then with fewest dishes of one kind.
-                        found_states.sort(key=lambda item: (sameness(item[1].choices), item[0], item[1].loss))
+                        found_states.sort(
+                            key=lambda item: (sameness([r for _, r in item[1].choices]), item[0], item[1].loss)
+                        )
                         extra = [state.choices for _, state in found_states]
                         trace["cost_fallback"] = {"weights": list(COST_WEIGHTS), "candidates": len(extra)}
                         return [[PlanningAssignment(slot_id=s, recipe_id=r) for s, r in picked] for picked in extra]
@@ -438,9 +441,63 @@ class ProductPlanningEngine:
                 search = meal_beam.search_candidates(problem.model_copy(deep=True))
                 trace["settings"] = asdict(meal_beam.limits)
                 trace["dominance_rule"] = None
-                assignments_list = [
-                    assignments_of(state) for state in sorted(search.states, key=lambda s: (s.loss, s.choices))
-                ]
+                budget = constraints.weekly_budget_sgd
+                banded = any(band.hard and band.scope == "per_day" for band in problem.nutrition_bands)
+
+                def variety(state) -> tuple[int, int]:
+                    """Sorts the most distinct dishes, then kinds, first.
+
+                    ADR-0045's fewest repeats would prefer leaving an optional vegetable empty to repeating
+                    one; the meal loss prices it the other way (EMPTY_OPTIONAL_ROLE_LOSS)."""
+                    dishes = [recipe for _, meal in state.choices for _, recipe in meal]
+                    repeats, same_kind = sameness(dishes)
+                    return repeats - len(dishes), same_kind - len(dishes)
+
+                def most_varied_first(found) -> list[list[PlanningAssignment]]:
+                    """The most varied week first (ADR-0045), then the lighter search, then loss."""
+                    found = sorted(found, key=lambda item: (variety(item[1]), item[0], item[1].loss, item[1].choices))
+                    return [assignments_of(state) for _, state in found]
+
+                def limit_led() -> list:
+                    """Searches that blend what binds into each dish's rank, from lightly to strongly.
+
+                    A hard budget or day band prunes the beam, and what survives is whatever squeezed
+                    in, or nothing. A dish's grocery cost (against the budget for one meal) and its
+                    distance from the day's per-meal guide steer these searches towards weeks that fit.
+                    """
+                    cost = (
+                        {r.recipe.slug: dish_cost(r) * len(slots) / budget for r in recommendations} if budget else {}
+                    )
+                    guard = {c.recipe_id: nutrition_guard_loss(problem, c) for c in candidates} if banded else {}
+                    seen = {state.choices for state in search.states}
+                    extra = []
+                    for weight in COST_WEIGHTS:
+                        blended = {
+                            slug: loss + weight * (cost.get(slug, 0.0) + guard.get(slug, 0.0))
+                            for slug, loss in losses.items()
+                        }
+                        # Under a budget a repeat stays dearer than the cost it saves (ADR-0044); a narrow
+                        # day band leaves few dishes that fit, and there repeats are what fits.
+                        repeat_cost = meal_beam.limits.repeat_cost + (0.0 if banded else weight)
+                        found = MealBeamPlanner(
+                            replace(meal_beam.limits, repeat_cost=repeat_cost), local_losses=blended
+                        ).search_candidates(problem.model_copy(deep=True))
+                        extra += [(weight, state) for state in found.states if state.choices not in seen]
+                        seen |= {state.choices for state in found.states}
+                    trace["limit_led"] = {"weights": list(COST_WEIGHTS), "candidates": len(extra)}
+                    return extra
+
+                found = [(0.0, state) for state in search.states]
+                repeat_free = any(
+                    sameness([r for _, meal in state.choices for _, r in meal]) == (0, 0) for state in search.states
+                )
+                if budget is not None and not repeat_free:
+                    # A budget-pruned search keeps the cheap repeats; the most varied week within the
+                    # budget may come from a cost-led search, so all are tried together.
+                    found += limit_led()
+                elif banded:
+                    fallback = lambda: most_varied_first(limit_led())  # noqa: E731
+                assignments_list = most_varied_first(found)
             trace["search"] = {k: v for k, v in asdict(search).items() if k != "states"}
             trace["search"]["completed_candidates"] = len(search.states)
         result = None
