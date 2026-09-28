@@ -208,7 +208,8 @@ test("sending from the film entry opens the workspace with the week beside the c
     await page.screenshot({ path: `${SHOTS}/4-preview.png` });
     await page.pdf({ path: `${SHOTS}/5-list.pdf`, format: "A4" });
     await page.getByRole("button", { name: "Back", exact: true }).click();
-    for (const [width, height, name] of [[1280, 720, "6-min-size"], [900, 900, "7-tablet"], [390, 844, "8-phone"]] as const) {
+    // Desktop only (ADR-0010): the supported minimum is 1280x720.
+    for (const [width, height, name] of [[1280, 720, "6-min-size"]] as const) {
       await page.setViewportSize({ width, height });
       await page.waitForTimeout(500);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
