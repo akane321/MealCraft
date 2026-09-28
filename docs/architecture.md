@@ -38,7 +38,7 @@ Shopping List correctness.
 | User | <--> | MealCraft Web Application  | <--> | FairPrice Web  |
 +------+      | Nuxt + FastAPI + Services  |      +----------------+
               +-------------+--------------+      +----------------+
-                            |              <----> | YouTube (target)|
+                            |              <----> | YouTube        |
                      +------v-------+              +----------------+
                      | PostgreSQL   |
                      +--------------+
@@ -51,11 +51,11 @@ must keep the core flow runnable without an API key or live retailer response.
 
 | Container | Technology | Responsibility |
 | --- | --- | --- |
-| Frontend | Nuxt 4, Vue 3, TypeScript | The one-surface home (conversation, week and kitchen edge panels, recipe, nutrition and Shopping List overlays) plus sign-in, household profile and service status pages |
+| Frontend | Nuxt 4, Vue 3, TypeScript | The one-surface home: film entry, then the kitchen-table workspace (rail, conversation and plan panel, decision ADR-0043 as amended by ADR-0048) with recipe, nutrition and Shopping List overlays; plus sign-in, household profile, recipe and grocery browsing (`/browse`), past weeks (`/history`), service status (`/system`) and the administrators' operations console (`/ops`) |
 | Backend | Python 3.12, FastAPI, Pydantic | HTTP contracts, orchestration, deterministic services, external adapters, and evaluation entry points |
 | Database | PostgreSQL | Profiles and versions, recipes, ingredients, products/cache, plans, entries, grocery items, events, check-ins, and Agent sessions |
 | External provider | FairPrice public catalogue | Current product, package, and observed-price information |
-| Tutorial provider | Sample tutorial fixture; YouTube Data API is a scaffold | Bounded tutorial candidates after recipe selection; only one deterministic Top-1 reaches the user, labelled as a sample while the fixture is used |
+| Tutorial provider | YouTube Data API when a key is configured; the sample tutorial set otherwise | Bounded tutorial candidates after recipe selection; only one deterministic Top-1 reaches the user, labelled as a sample while the fixture is used |
 | Optional model provider | OpenAI through structured parsing | Explicit field extraction when locally enabled; never the calculator or validator |
 
 Docker Compose provides the local integration boundary. The backend applies
@@ -251,7 +251,7 @@ Selected canonical recipe
  -> bounded YouTube candidates or fixture
  -> eligibility filter and scored ranking
  -> one Top-1 tutorial plus retrieval trace
- -> week panel on the home surface (tonight's dinner)
+ -> plan panel on the home surface ("Today": the next meal to cook)
 ```
 
 Candidate evidence and score components remain internal for evaluation. Video

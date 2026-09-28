@@ -1,5 +1,5 @@
 import type { NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
-import type { GroceryLineEstimate } from "~/types/recommendation";
+import type { GroceryLineEstimate, ProductSearchResponse } from "~/types/recommendation";
 import type { RecipeNutrition } from "~/types/recipe";
 
 /** Today's dinner if the plan covers today, otherwise the next one still planned. */
@@ -63,6 +63,20 @@ export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
   const fetched = products.map(product => product.fetched_at).sort()[0]!;
   const date = new Date(fetched).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
   return `FairPrice prices from ${date}`;
+}
+
+/**
+ * The same note for a /browse product search (ADR-0026 section 4): sample prices say so,
+ * saved FairPrice prices give their date, and a fallback is one plain clause, never the raw warning.
+ */
+export function productSourceLabel(result: ProductSearchResponse): string {
+  const missed = result.fallback_used ? ": FairPrice didn't respond" : "";
+  if (result.provider_used !== "fairprice") return `Sample prices${missed}`;
+  if (!result.cached) return "FairPrice prices now";
+  const fetched = result.items.map(item => item.fetched_at).sort()[0];
+  if (!fetched) return `Saved FairPrice prices${missed}`;
+  const date = new Date(fetched).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
+  return `FairPrice prices from ${date}${missed}`;
 }
 
 // Sauce, starch and garnish colours; a dish's plate picks one of each.

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetLine, groceryGroups, packageLabel, perDinner, plateStyle, priceSourceLabel, tonightEntry } from "../app/lib/home-surface";
+import { budgetLine, groceryGroups, packageLabel, perDinner, plateStyle, priceSourceLabel, productSourceLabel, tonightEntry } from "../app/lib/home-surface";
 import type { NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
-import type { GroceryLineEstimate } from "../app/types/recommendation";
+import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
 function day(date: string, status: NutritionDashboardDay["status"]): NutritionDashboardDay {
   return { planned_date: date, status } as NutritionDashboardDay;
@@ -54,6 +54,21 @@ describe("grocery helpers", () => {
     expect(priceSourceLabel(live("fairprice"))).toMatch(/^FairPrice prices from /);
     expect(priceSourceLabel(live("fixture"))).toBe("Sample prices: FairPrice didn't respond");
     expect(priceSourceLabel(live("fairprice", "fixture"))).toBe("Some prices are samples: FairPrice didn't respond");
+  });
+
+  it("says where /browse prices came from in plain words", () => {
+    const result = (provider_used: "fairprice" | "fixture", cached: boolean, fallback_used = false) => ({
+      query: "chicken", provider_used, cached, fallback_used, warning: "Live FairPrice lookup was unavailable (timeout)",
+      items: [{ fetched_at: "2026-09-26T12:00:00Z" }],
+    }) as ProductSearchResponse;
+    expect(productSourceLabel(result("fixture", false))).toBe("Sample prices");
+    expect(productSourceLabel(result("fixture", false, true))).toBe("Sample prices: FairPrice didn't respond");
+    expect(productSourceLabel(result("fairprice", false))).toBe("FairPrice prices now");
+    expect(productSourceLabel(result("fairprice", true))).toMatch(/^FairPrice prices from 26 Sep/);
+    expect(productSourceLabel(result("fairprice", true, true))).toMatch(/^FairPrice prices from .+: FairPrice didn't respond$/);
+    for (const label of [true, false].map(cached => productSourceLabel(result("fairprice", cached, true)))) {
+      expect(label).not.toMatch(/live|cache|fixture|degraded|parser|unavailable/i);
+    }
   });
 
   it("groups only lines that need buying, costliest first", () => {

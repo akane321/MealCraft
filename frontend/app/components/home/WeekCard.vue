@@ -90,12 +90,4 @@ h3 em { color: var(--accent); }
 .note.over { color: var(--warn); }
 .repeat-note { flex-basis: 100%; margin: 2px 0 0; font-size: 12px; color: var(--t3); }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
-@media (max-width: 760px) {
-  .figures { margin-left: 0; }
-  .strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .tile:nth-child(4) { border-right: 0; }
-  .tile:nth-child(-n+4) { border-bottom: 1px solid var(--line); }
-  .tile .plate { --size: 44px; }
-}
 </style>

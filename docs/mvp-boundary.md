@@ -76,8 +76,10 @@ remaining design gaps.
 - Dynamic replanning never changes completed or locked meals. A preview is tied
   to the current plan revision and is rejected as stale after another confirmed
   change.
-- Event-driven replanning changes one selected meal at a time. The deterministic planner chooses
-  an eligible alternative; the Agent may interpret intent but does not directly
+- Event-driven replanning changes one selected dish or meal; a shape change
+  (adding or dropping a meal, or changing a meal's dishes) replans every slot it
+  affects (decision ADR-0046 section 2). The deterministic planner chooses
+  eligible alternatives; the Agent may interpret intent but does not directly
   mutate a plan.
 - Member allergens, prohibited ingredients, and dietary requirements are merged
   into one shared-plan safety boundary. The current implementation does not generate a separate

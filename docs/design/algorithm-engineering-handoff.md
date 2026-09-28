@@ -4,7 +4,7 @@
 
 This document is the implementation handoff for the contributor completing
 MealCraft's planning and validation algorithm. It defines the **accepted final
-scope**, not only the current seven-main-meal runtime. The merged runtime remains
+scope**, not only the current days × meals runtime (decision ADR-0046). The merged runtime remains
 documented in [Current Status](../current-status.md); this handoff must not be
 quoted as evidence that the final optimizer is complete.
 

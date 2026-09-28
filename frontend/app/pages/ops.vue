@@ -64,16 +64,6 @@ function active(path: string) {
 .ops-account a:hover, .ops-account button:hover { color: var(--accent); }
 .ops-main { min-width: 0; overflow-y: auto; padding: clamp(20px, 4vw, 40px); }
 .ops-wait { color: var(--t3); }
-
-@media (max-width: 760px) {
-  .ops-shell { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-  .ops-nav { flex-direction: row; flex-wrap: wrap; align-items: center; border-right: 0; border-bottom: 1px solid var(--line); padding: 12px 16px; }
-  .ops-nav .mc-eyebrow { display: none; }
-  .ops-nav ul { display: flex; gap: 4px; overflow-x: auto; width: 100%; }
-  .ops-nav li a { white-space: nowrap; }
-  .ops-account { display: flex; gap: 12px; margin: 0; padding: 0; border: 0; width: 100%; }
-  .ops-main { padding: 20px 16px; }
-}
 </style>
 
 <style>

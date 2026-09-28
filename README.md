@@ -61,7 +61,7 @@ Those operations remain deterministic and testable.
 | Replanning | Revision-safe preview, confirmation or discard, single-dish changes and meal/dish shape changes that replan only the affected meals, Shopping List deltas, and event history |
 | Operations console | `/ops` for fixed admin accounts: overview charts, task records, service health, replay, runtime settings and experiments, users and catalog data, with an audit history |
 | Agent runs | Synchronous per-action `AgentRun` with input digests, explicit deadlines and budgets, durable checkpoints, ordered tool receipts, idempotent replay, and run list/detail/cancel APIs |
-| Evaluation | Versioned developer, held-out, Agent, scope and grounding fixtures; greedy and strong Rule-only references; matched-information v2 developer packets; a Strict End-to-End Task Success scorer and common output schema that recompute rather than trust claims (tested, not yet called by an evaluation runner); held-out episode authoring, compilation and freeze tooling; failure registry; frontend state and browser tests |
+| Evaluation | Versioned developer, held-out, Agent, scope and grounding fixtures; greedy and strong Rule-only references; matched-information v2 developer packets; a Strict End-to-End Task Success scorer and common output schema that recompute rather than trust claims (called by the v2-multidish and v3 meal-day-week runners); held-out episode authoring, compilation and freeze tooling; failure registry; frontend state and browser tests |
 
 This table reports capabilities verified on remote `main`, not every final
 design target. Read [Current Status](docs/current-status.md) for the evidence
@@ -205,7 +205,7 @@ Two further limits worth stating plainly:
 
 Strict End-to-End Task Success is the accepted primary endpoint, and the scorer
 for it recomputes every requirement from frozen facts rather than reading a
-system's claims; it is tested but no evaluation runner calls it yet. An
+system's claims; the v2-multidish and v3 meal-day-week runners score with it. An
 independent held-out set of roughly 80 episodes is being authored under
 cross-authoring rules - nobody writes episodes that test their own module - and
 nothing may ever be tuned against it (see the

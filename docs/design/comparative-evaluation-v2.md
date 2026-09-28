@@ -4,9 +4,9 @@
 
 **Accepted design target; partial developer infrastructure is executable.** The
 matched-information developer packet compiler and strong Rule-only reference
-are implemented, and the common output schema and strict-success scorer exist
-with tests but are not yet called by a runner; held-out labels, model runs,
-human study and statistical comparison are not complete. The existing
+are implemented, and the common output schema and strict-success scorer are
+called by the v2-multidish and v3 meal-day-week runners; held-out labels for
+this packet design, human study and statistical comparison are not complete. The existing
 [Protocol v1](../evaluation/protocol-v1.md) and its committed reports remain the
 reproducible record of what is currently implemented.
 

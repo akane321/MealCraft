@@ -7,7 +7,7 @@ experiments against it. Decision: private `ADR-0031`; platform boundaries:
 This document is the contract for building it, and the briefing for whoever
 picks it up. Where it and a decision record disagree, the decision record wins.
 
-> **Amended by private `ADR-0047` (2026-09-26), now built.** Fixed admin accounts of one
+> **Amended by private `ADR-0047`** (build status: [Current Status](../current-status.md)). Fixed admin accounts of one
 > level (`ADMIN_ACCOUNTS`) replace the role gating described below, and the console
 > edits as well as reads: replay, runtime settings, users and catalog data, each change
 > audited. Edits still never overrule deterministic code (the validator, allergen rules).

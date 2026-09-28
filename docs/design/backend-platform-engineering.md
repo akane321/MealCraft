@@ -7,6 +7,17 @@ the contributor completing it. It is a long-lived design contract, not a record
 of mutable implementation progress. Read [Current Status](../current-status.md)
 for the verified backend boundary, evidence and next gaps.
 
+> **Amended by private `ADR-0051`.** The owner decided
+> that the project does no security or privacy work: it is a course project that
+> runs locally and is not deployed. Basic sign-in, sessions, household separation
+> and the ordinary/admin split stay as built. Account lifecycle (verification,
+> reset, export, deletion), rate limiting, invitations and membership management,
+> the wider isolation matrix, security hardening, secret rotation, backup drills
+> and the threat model are **out of scope by owner decision**; they are marked
+> below and kept only as history, not as open work. There are two kinds of
+> account, ordinary users and administrators of one level (`ADR-0047`), not four
+> system roles.
+
 The platform foundation consists of:
 
 - account, credential and revocable authentication-session models;
@@ -34,7 +45,7 @@ Deliver a software backend that can:
 5. preserve plan, Agent, Shopping List and Dashboard history per household;
 6. execute durable imports, retrieval, planning and evaluation jobs;
 7. expose auditable traces through an authorized Operations Console;
-8. support account export, deletion and operational recovery;
+8. support account export, deletion and operational recovery; *(out of scope by owner decision, ADR-0051)*
 9. preserve deterministic safety, nutrition, package and cost authority.
 
 ## Identity concepts must remain separate
@@ -241,7 +252,7 @@ scheduling requirements justify another service.
 - all private repository queries are household-scoped;
 - household role and system role remain independent;
 - ordinary users cannot access `/api/ops`;
-- deletion/export is explicit, authenticated and audited;
+- deletion/export is explicit, authenticated and audited; *(out of scope by owner decision, ADR-0051)*
 - planning health fields are minimized and never used for medical claims;
 - deterministic services remain the authority for allergens, nutrition,
   packages, costs and validation.
@@ -253,16 +264,18 @@ scheduling requirements justify another service.
 2. **Authentication service and routes**: registration, login, logout, current
    actor, device sessions, secure-by-environment cookie policy, per-session CSRF,
    failed-login locking, origin-level rate limiting and proxy validation.
+   Rate limiting and proxy validation are out of scope by owner decision (ADR-0051).
 3. **Account lifecycle**: email verification, reset tokens, password change,
-   suspension, export and deletion.
+   suspension, export and deletion. *(out of scope by owner decision, ADR-0051)*
 4. **Tenant migration**: add/backfill household ownership across every private
    domain table and remove global-current assumptions.
 5. **Authorization layer**: reusable current-user/current-household
    dependencies plus route and repository enforcement.
 6. **Household collaboration**: invitations, membership roles and dietary
-   people optionally linked to accounts.
+   people optionally linked to accounts. *(out of scope by owner decision, ADR-0051)*
 7. **Isolation tests**: Alice/Bob adversarial API tests for every private
-   endpoint, including guessed IDs and Agent/plan history.
+   endpoint, including guessed IDs and Agent/plan history. Existing tests stay;
+   the wider matrix is out of scope by owner decision (ADR-0051).
 8. **Operations persistence**: repositories/services for OperationRun,
    AuditEvent and safe artifact references.
 9. **Durable jobs**: PostgreSQL worker, retry/idempotency policy, health and
@@ -273,8 +286,10 @@ scheduling requirements justify another service.
     secure cookie configuration, trusted hosts, rate limiting, secret rotation,
     backups and restore drill. Reverse-proxy or hosted-environment work is
     optional and must not displace core reliability or product depth.
+    *(out of scope by owner decision, ADR-0051)*
 12. **Documentation and evaluation**: threat model, OpenAPI, migrations,
-    failure states, usability tasks and reproducible evidence.
+    failure states, usability tasks and reproducible evidence. The threat model
+    is out of scope by owner decision (ADR-0051).
 
 ## Definition of done
 
@@ -290,7 +305,7 @@ scheduling requirements justify another service.
 - background work survives an API-process restart and has bounded retries;
 - Console actions are authorized, auditable and cannot override deterministic
   validation;
-- account export/deletion semantics are documented and tested;
+- account export/deletion semantics are documented and tested; *(out of scope by owner decision, ADR-0051)*
 - no real credential, token, cookie or personal health data exists in fixtures,
   logs or repository history;
 - the product is not called multi-user until complete route protection,

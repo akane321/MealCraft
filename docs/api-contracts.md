@@ -1,10 +1,9 @@
 # API Contracts
 
 > Backend platform boundary: authentication now protects household-owned
-> Profile, Plan, Agent, Shopping List and Dashboard data. The first read-only
-> `/api/ops` slice is defined below; the complete target remains in the
-> [Operations Console](design/operations-console.md) and
-> [Backend Platform Engineering Handoff](design/backend-platform-engineering.md).
+> Profile, Plan, Agent, Shopping List and Dashboard data. The `/api/ops` routes
+> behind the operations console at `/ops` are listed below; the console's design is
+> in the [Operations Console](design/operations-console.md) (decision ADR-0047).
 
 The system will define the following shared objects:
 
@@ -31,7 +30,37 @@ Available endpoints:
 - GET /api/auth/sessions
 - DELETE /api/auth/sessions/{session_id}
 - GET /api/ops/overview
+- GET /api/ops/overview/series
+- GET /api/ops/tasks
+- GET /api/ops/tasks/{kind}/{task_id}
+- GET /api/ops/services
+- POST /api/ops/services/{name}/check
 - GET /api/ops/runs?type={run_type}&status={status}&since={timestamp}&limit={limit}
+- POST /api/ops/replay/agent/{run_id}
+- POST /api/ops/replay/planning/{run_id}
+- GET /api/ops/replays
+- GET /api/ops/replays/{replay_id}
+- GET /api/ops/config
+- GET /api/ops/config/history
+- PUT /api/ops/config/{key}
+- GET /api/ops/experiments
+- POST /api/ops/experiments
+- GET /api/ops/users
+- GET /api/ops/users/{user_id}
+- PATCH /api/ops/users/{user_id}
+- DELETE /api/ops/users/{user_id}/conversations
+- DELETE /api/ops/users/{user_id}/plans
+- DELETE /api/ops/users/{user_id}
+- GET /api/ops/data/recipes
+- GET /api/ops/data/recipes/{recipe_id}
+- PATCH /api/ops/data/recipes/{recipe_id}
+- POST /api/ops/data/recipes/{recipe_id}/withdraw
+- POST /api/ops/data/recipes/{recipe_id}/restore
+- GET /api/ops/data/ingredients
+- PATCH /api/ops/data/ingredients/{ingredient_id}
+- GET /api/ops/data/mappings
+- PUT /api/ops/data/mappings/{ingredient}
+- DELETE /api/ops/data/mappings/{ingredient}
 - GET /api/recipes?limit=20&after_id={recipe_id}
 - GET /api/recipes/{slug}
 - GET /api/recipes/{slug}/tutorial?live={boolean}&language={language}
@@ -126,10 +155,12 @@ them; they are never attached to the first account that logs in.
 
 ## Operations reads
 
-`GET /api/ops/overview` and `GET /api/ops/runs` require an authenticated system
-role with `VIEW_RUNS`. `data_reviewer`, `operator` and `admin` have that action;
-`ordinary_user` does not. Household roles are independent, so household
-ownership grants no Operations access. A signed-in caller without the action
+Every `/api/ops` route requires a signed-in administrator. There are two kinds of
+account, ordinary users and administrators, and every administrator has the same,
+highest level (decisions ADR-0047 section 1 and ADR-0051); administrators are the
+fixed accounts in `ADMIN_ACCOUNTS`. The database still accepts the older
+`data_reviewer` and `operator` values, but no account is given them. Household
+roles are independent, so household ownership grants no Operations access. A signed-in caller without the action
 receives the same HTTP 404 body as an unknown route. Missing authentication
 continues to use the common HTTP 401 session response.
 
@@ -280,10 +311,16 @@ for bounds, compatibility, examples and the Agent handoff.
   week, a hard rule the search holds and the validator checks; 1 is no dish
   twice. Unstated, repeating stays a soft cost the planner avoids by itself.
 
-The response contains seven persisted main-meal entries, per-person weekly
-nutrition totals, an aggregated shopping list, package checkout cost,
-ingredient-use cost, weekly budget status, and explicit warnings. Known pantry
-quantities are deducted once after the seven recipe requirements are combined.
+- an optional `plan_shape` (decision ADR-0046): which meals of each day are
+  planned and each meal's dish roles; the older `meal_composition` (dinner only)
+  is still accepted, but not both.
+
+The response holds the week as days × meals: one persisted entry per dish, each
+with its `day_index`, `meal_type`, `role_id` and `portion_share`, plus the
+`plan_shape` it was planned with, per-person weekly nutrition totals, an
+aggregated shopping list, package checkout cost, ingredient-use cost, weekly
+budget status, and explicit warnings. Known pantry quantities are deducted once
+after every planned dish's requirements are combined.
 
 New plans must pass independent validation before storage. The weekly budget
 caps whole-package checkout cost; the legacy per-meal budget still caps

@@ -769,14 +769,4 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   .panel-body { overflow: visible; }
   .chat { height: 100vh; position: sticky; top: 0; }
 }
-@media (max-width: 760px) {
-  .app, .app.no-panel { grid-template-columns: minmax(0, 1fr); }
-  .rail { border-right: 0; border-bottom: 1px solid var(--line); }
-  .recent, .rail-label, .home-card, .new kbd { display: none; }
-  .nav-list { grid-auto-flow: column; overflow-x: auto; }
-  .chat { position: static; height: 80vh; }
-  .chat-head, .thread, .composer-wrap { padding-inline: 16px; }
-  .context { display: none; }
-  .landing { overflow: auto; }
-}
 </style>
