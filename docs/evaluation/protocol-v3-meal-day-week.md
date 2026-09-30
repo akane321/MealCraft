@@ -67,6 +67,24 @@ person a planned meal) was below any week the product can buy and below the
 S$2.50 floor the held-out set uses, and is now S$105. Developer reports before
 that date are on the earlier episode.
 
+Since 2026-10-01 the witness also keeps the product's time limit and candidate
+rules (ADR-0049). A household that states no time limit is planned by the
+runner with 240 minutes (`NO_TIME_LIMIT`), and the product holds every dish and
+every meal within it (`meal_beam.dish_eligible`, `meal_permitted`); the tool
+now does the same, where it had read no limit as none, so a witness could use a
+445-minute soup. A dish is also one the product can carry as a candidate. The
+tool mirrors the product's rules, not its ranking: the planning pool
+(`RecipeRepository.list_for_planning`, run over the episode's pool imported as
+the runner imports it) leaves out a recipe the release import skips (under two
+lines or no instruction), one with a line the product cannot price, a withdrawn
+one (`data/recipes/withdrawn.json`) and one whose own numbers say it lost a
+line (`recipe_quality.incomplete`, since #170); the recommendation step leaves
+out one whose name states an ingredient or allergen the household avoids
+(`title_mentions`). A dish that merely ranks low, or falls outside the packet
+the product keeps per course, stays eligible: a label proves that a week exists
+under the rules, not that the product's search finds it. Protocol v2 labels are
+unchanged.
+
 ## 3. Categories
 
 | Category | What it tests |

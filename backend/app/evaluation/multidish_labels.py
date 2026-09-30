@@ -22,7 +22,20 @@ product's own rules, so a label never needs a week the product cannot plan:
 - a role takes only dishes for its meal (a recipe's meal types) whenever there
   are as many as the planner keeps per role (`MealBeamLimits.candidates_per_role`);
 - each ingredient is bought as the product buys it in fixture mode
-  (`app.planning.grocery_estimator.choose_product`): one product, whole packages.
+  (`app.planning.grocery_estimator.choose_product`): one product, whole packages;
+- (2026-10-01) the time limit is the one the runner sends: a household that states
+  none gets `meal_day_week_runner.NO_TIME_LIMIT` (240 minutes). As the product
+  does (`meal_beam.dish_eligible`, `meal_permitted`), every dish is within it on
+  its own and every meal's cooking time is too;
+- (2026-10-01) a dish is one the product can carry as a candidate. Mirrored are
+  the product's rules, not its ranking (`product_candidates`): the planning pool
+  leaves out a recipe the release import skips, one with a line it cannot price,
+  a withdrawn one (`data/recipes/withdrawn.json`) and one that lost a line
+  (`recipe_quality.incomplete`, since #170); the recommendation step leaves out
+  one whose name states an ingredient or allergen the household avoids
+  (`recommendation_engine.title_mentions`). A dish that merely ranks low, or
+  falls outside the packet the product keeps per course, stays eligible: a label
+  proves a week exists under the rules, not that the product's search finds it.
 
 Anything else is unproven, and the author must change the episode.
 
@@ -44,11 +57,30 @@ from app.evaluation.release_catalog import fixture_products, load_release_catalo
 from app.evaluation.strict_success import dish_shares, load_tag_implications, meal_minutes, satisfied_tags
 from app.planning.grocery_estimator import ProductMatcher, choose_product, convert_quantity
 from app.planning.meal_beam import MealBeamLimits
+from app.planning.recommendation_engine import title_mentions
 from app.products.provider import FixtureProductProvider
 from app.services.product import ProductSearchService
 
 
-def _context(episode: dict):
+@lru_cache
+def product_candidates(pool: tuple[str, ...]) -> frozenset[str]:
+    """The pool's recipes the product can ever plan: `RecipeRepository.list_for_planning` over the pool,
+    imported as the protocol runner imports it (`meal_day_week_runner.product_database`).
+
+    That leaves out, as rules rather than ranking: a release recipe the import skips (under two lines or
+    no instruction), one with a line the product cannot price, one in `data/recipes/withdrawn.json`, and
+    one whose own numbers say it lost a line (`app.planning.recipe_quality.incomplete`, since #170).
+    """
+    from app.evaluation.meal_day_week_runner import product_database
+    from app.repositories.recipe import RecipeRepository
+
+    courses = sorted({load_release_catalog().by_slug[slug]["course"] for slug in pool})
+    with product_database({"scenario": {"recipe_candidate_slugs": list(pool)}}) as factory, factory() as session:
+        return frozenset(r.external_id for r in RecipeRepository(session).list_for_planning(courses=courses))
+
+
+def _context(episode: dict, *, product_rules: bool = False):
+    """The episode's facts; `product_rules` (protocol v3) also applies the product's candidate rules."""
     catalog = load_release_catalog()
     allergens = {row["normalized_name"]: set(row["allergens"]) for row in catalog.ingredients}
     implications = load_tag_implications(repository_root() / "data/recipes/dietary-tag-implications.json")
@@ -64,7 +96,13 @@ def _context(episode: dict):
         per_gram[name] = min(per_gram.get(name, math.inf), product_row["price_sgd"] / product_row["package_size"])
         packages.setdefault(name, []).append((product_row["package_size"], product_row["price_sgd"]))
 
+    profile = episode["scenario"]["household_profile"]
+    planned = product_candidates(tuple(episode["scenario"]["recipe_candidate_slugs"])) if product_rules else None
+    avoided = [*profile["excluded_ingredients"], *profile["allergens"]]
+
     def eligible(recipe: dict) -> bool:
+        if planned is not None and (recipe["slug"] not in planned or title_mentions(recipe["title"], avoided)):
+            return False
         names = {line["ingredient"] for line in recipe["ingredients"]}
         if any(set(gold["allergens_absent"]) & allergens.get(name, {"unchecked"}) for name in names):
             return False
@@ -87,15 +125,25 @@ def valid_meals(
 
     With a `meal`, a role keeps only that meal's dishes when there are enough of them, as the planner does.
     """
-    gold, pool, eligible, _, _ = _context(episode)
+    gold, pool, eligible, _, _ = _context(episode, product_rules=meal is not None)
     roles = roles or episode["scenario"]["household_profile"]["meal_composition"]
     limit = gold["max_cooking_time_minutes"]
+    if meal is not None and limit is None:
+        from app.evaluation.meal_day_week_runner import NO_TIME_LIMIT  # what the runner asks the product for
+
+        limit = NO_TIME_LIMIT
     per_role = {}
     for r in roles:
-        dishes = [x for x in pool if x["course"] in r["courses"] and eligible(x)]
+        # Each dish within the limit on its own, as `meal_beam.dish_eligible` checks; the meal too, below.
+        dishes = [
+            x
+            for x in pool
+            if x["course"] in r["courses"]
+            and eligible(x)
+            and (limit is None or x["prep_time_minutes"] + x["cook_time_minutes"] <= limit)
+        ]
         fitting = [x for x in dishes if meal in meal_types(x)]
-        timed = [x for x in fitting if limit is None or x["prep_time_minutes"] + x["cook_time_minutes"] <= limit]
-        per_role[r["role_id"]] = fitting if meal and len(timed) >= MealBeamLimits().candidates_per_role else dishes
+        per_role[r["role_id"]] = fitting if meal and len(fitting) >= MealBeamLimits().candidates_per_role else dishes
     required = [r for r in roles if r["required"]]
     optional = [r for r in roles if not r["required"]]
     meals = []
@@ -314,7 +362,7 @@ def bought(name: str, grams: float) -> float:
 
 
 def _week_witness(episode: dict, *, after_change: bool) -> dict:
-    gold, _, _, per_gram, _ = _context(episode)
+    gold, _, _, per_gram, _ = _context(episode, product_rules=True)
     size = episode["scenario"]["household_profile"]["household_size"] or 1
     if episode["scenario"]["pantry"]:
         return {"verdict": "unproven", "why": "v3 labels do not deduct a pantry"}
