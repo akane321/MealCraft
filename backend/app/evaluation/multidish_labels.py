@@ -15,8 +15,12 @@ A label is accepted only with evidence:
 
 A protocol v3-meal-day-week episode (a `plan_shape` of several meals) is proven
 the same way over every (day, meal) slot: its witness week is built day by day
-from each slot's cheapest valid meals, keeping any cap on uses and every per-day
-nutrition band; its lower bound is each slot's cheapest meal. A shape change is
+from each slot's valid meals, keeping any cap on uses and every per-day
+nutrition band; its lower bound is each slot's cheapest meal. Two independent
+searches build a week (2026-10-01): one takes each day's meals of least consumed
+cost, the other those adding least to the whole packages already bought (priced
+as if eaten every day left, so a package shared across days counts once). Each
+week is checked again whole, and the cheaper valid one is the witness. A shape change is
 proven before and after the change (`week_evidence`). A v3 witness keeps the
 product's own rules, so a label never needs a week the product cannot plan:
 - a role takes only dishes for its meal (a recipe's meal types) whenever there
@@ -307,6 +311,10 @@ DAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 MEALS = ("breakfast", "lunch", "dinner")
 # The cheapest valid meals of each slot a witness day is chosen from.
 WITNESS_OPTIONS = 40
+# The package-sharing witness: of each slot's PACKAGE_POOL cheapest meals, the PACKAGE_OPTIONS that add
+# least to the packages already bought are combined into a day.
+PACKAGE_POOL = 150
+PACKAGE_OPTIONS = 10
 
 
 def slot_roles(episode: dict, *, after_change: bool = False) -> dict[str, list[dict]]:
@@ -361,6 +369,9 @@ def bought(name: str, grams: float) -> float:
     return max(1, math.ceil(amount / item.package_size)) * item.price_sgd
 
 
+_bought = lru_cache(maxsize=None)(bought)
+
+
 def _week_witness(episode: dict, *, after_change: bool) -> dict:
     gold, _, _, per_gram, _ = _context(episode, product_rules=True)
     size = episode["scenario"]["household_profile"]["household_size"] or 1
@@ -387,49 +398,118 @@ def _week_witness(episode: dict, *, after_change: bool) -> dict:
                 return {"verdict": "infeasible_proven", "why": f"no valid meal for {slot} exists in the pool"}
             by_roles[key] = sorted(meals, key=lambda m: (_consumed(m, size, per_gram), [r["slug"] for _, r in m]))
 
-    uses: dict[str, int] = {}
-    week: list = []
-    for day in DAYS:
-        day_slots = [slot for slot in slots if slot.startswith(day)]
-        options = [
-            [m for m in by_roles[key_of(slot)] if cap is None or all(uses.get(r["slug"], 0) < cap for _, r in m)][
-                :WITNESS_OPTIONS
-            ]
-            for slot in day_slots
-        ]
-        best = None
-        for combo in product(*options):
-            slugs = [r["slug"] for meal in combo for _, r in meal]
-            if cap is not None and any(uses.get(s, 0) + slugs.count(s) > cap for s in slugs):
-                continue
-            ok = True
-            for band in bands:
-                total = sum(meal_nutrients(meal, band["metric"]) for meal in combo)
-                if (band.get("min") is not None and total < band["min"]) or (
-                    band.get("max") is not None and total > band["max"]
-                ):
-                    ok = False
-                    break
-            if not ok:
-                continue
-            cost = sum(_consumed(meal, size, per_gram) for meal in combo)
-            if best is None or cost < best[0]:
-                best = (cost, combo)
-        if best is None:
-            return {"verdict": "unproven", "why": f"no witness day for {day} among the cheapest meals"}
-        week += list(best[1])
-        for meal in best[1]:
-            for _, r in meal:
-                uses[r["slug"]] = uses.get(r["slug"], 0) + 1
+    grams_of: dict[tuple, dict[str, float]] = {}
 
-    demand: dict[str, float] = {}
-    for meal in week:
-        shares = dish_shares([role for role, _ in meal])
-        for role, recipe in meal:
-            for line in recipe["ingredients"]:
-                grams = line["quantity"] * size * shares[role] / recipe["servings"]
-                demand[line["ingredient"]] = demand.get(line["ingredient"], 0.0) + grams
-    witness_cost = round(sum(bought(n, g) for n, g in demand.items() if g), 2)
+    def meal_grams(meal) -> dict[str, float]:
+        """What one meal needs of each ingredient for the household."""
+        key = tuple((role, r["slug"]) for role, r in meal)
+        if key not in grams_of:
+            shares = dish_shares([role for role, _ in meal])
+            need: dict[str, float] = {}
+            for role, recipe in meal:
+                for line in recipe["ingredients"]:
+                    grams = line["quantity"] * size * shares[role] / recipe["servings"]
+                    need[line["ingredient"]] = need.get(line["ingredient"], 0.0) + grams
+            grams_of[key] = need
+        return grams_of[key]
+
+    def merged(meals) -> dict[str, float]:
+        total: dict[str, float] = {}
+        for meal in meals:
+            for name, grams in meal_grams(meal).items():
+                total[name] = total.get(name, 0.0) + grams
+        return total
+
+    def marginal(need: dict[str, float], held: dict[str, float]) -> float:
+        """What `need` adds to the whole packages already bought for `held`."""
+        extra = 0.0
+        for name, grams in need.items():
+            if not grams:
+                continue
+            after = _bought(name, held.get(name, 0.0) + grams)
+            if math.isinf(after):
+                return math.inf
+            extra += after - (_bought(name, held[name]) if held.get(name) else 0.0)
+        return extra
+
+    def day_ok(combo, uses: dict[str, int]) -> bool:
+        slugs = [r["slug"] for meal in combo for _, r in meal]
+        if cap is not None and any(uses.get(s, 0) + slugs.count(s) > cap for s in slugs):
+            return False
+        for band in bands:
+            total = sum(meal_nutrients(meal, band["metric"]) for meal in combo)
+            if (band.get("min") is not None and total < band["min"]) or (
+                band.get("max") is not None and total > band["max"]
+            ):
+                return False
+        return True
+
+    def build(by_packages: bool) -> list | str:
+        """A week built day by day: by each day's consumed cost, or by what it adds to the packages bought."""
+        uses: dict[str, int] = {}
+        held: dict[str, float] = {}
+        week: list = []
+        for index, day in enumerate(DAYS):
+            left = len(DAYS) - index  # a day's meals priced as if eaten every day left, so packages amortize
+            day_slots = [slot for slot in slots if slot.startswith(day)]
+            allowed = [
+                [m for m in by_roles[key_of(slot)] if cap is None or all(uses.get(r["slug"], 0) < cap for _, r in m)]
+                for slot in day_slots
+            ]
+            if by_packages:
+                options = [
+                    sorted(a[:PACKAGE_POOL], key=lambda m: marginal(merged([m] * left), held))[:PACKAGE_OPTIONS]
+                    for a in allowed
+                ]
+            else:
+                options = [a[:WITNESS_OPTIONS] for a in allowed]
+            best = None
+            for combo in product(*options):
+                if not day_ok(combo, uses):
+                    continue
+                consumed = sum(_consumed(meal, size, per_gram) for meal in combo)
+                cost = (marginal(merged(combo * left), held) / left, consumed) if by_packages else (consumed,)
+                if best is None or cost < best[0]:
+                    best = (cost, combo)
+            if best is None:
+                return f"no witness day for {day} among the cheapest meals"
+            week += list(best[1])
+            for name, grams in merged(best[1]).items():
+                held[name] = held.get(name, 0.0) + grams
+            for meal in best[1]:
+                for _, r in meal:
+                    uses[r["slug"]] = uses.get(r["slug"], 0) + 1
+        return week
+
+    def valid_week(week: list) -> bool:
+        """Checked again whole, apart from how it was built: every meal valid for its slot, caps, day bands."""
+        if len(week) != len(slots):
+            return False
+        allowed = {key: {tuple(r["slug"] for _, r in m) for m in meals} for key, meals in by_roles.items()}
+        if any(tuple(r["slug"] for _, r in m) not in allowed[key_of(s)] for s, m in zip(slots, week, strict=True)):
+            return False
+        uses: dict[str, int] = {}
+        for day in DAYS:
+            combo = [m for s, m in zip(slots, week, strict=True) if s.startswith(day)]
+            if not day_ok(combo, uses):
+                return False
+            for meal in combo:
+                for _, r in meal:
+                    uses[r["slug"]] = uses.get(r["slug"], 0) + 1
+        return True
+
+    weeks = []
+    failures = []
+    for by_packages in (False, True):
+        built = build(by_packages)
+        if isinstance(built, str):
+            failures.append(built)
+        elif valid_week(built):
+            cost = round(sum(bought(n, g) for n, g in merged(built).items() if g), 2)
+            weeks.append((cost, built))
+    if not weeks:
+        return {"verdict": "unproven", "why": failures[0] if failures else "no witness week passes the checks"}
+    witness_cost, week = min(weeks, key=lambda item: item[0])
     lower_bound = round(sum(_consumed(by_roles[key_of(slot)][0], size, per_gram) for slot in slots), 2)
     out = {
         "witness_cost_sgd": witness_cost,

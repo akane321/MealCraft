@@ -85,6 +85,16 @@ the product keeps per course, stays eligible: a label proves that a week exists
 under the rules, not that the product's search finds it. Protocol v2 labels are
 unchanged.
 
+The same day the witness gained a second, independent search, because
+choosing each day's meals by consumed cost ignores packages shared across days.
+The new search builds the week day by day from the meals that add least to the
+whole packages already bought (each day priced as if eaten every day left). It
+never runs the product planner. Both weeks are checked again whole (each meal
+valid for its slot, caps, per-day bands), and the cheaper one is the witness.
+Developer episode `mdw-dev-020` (budget S$52.50) needs it: its earlier witness
+used a lost-line recipe, and without that recipe the consumed-cost week costs
+S$63.43, while the package-sharing week costs S$45.95.
+
 ## 3. Categories
 
 | Category | What it tests |
