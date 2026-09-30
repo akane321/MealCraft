@@ -6,7 +6,7 @@
   "language": "en",
   "authored_by": "implementation-agent",
   "reviewed_by": null,
-  "review_notes": null,
+  "review_notes": "Written after held-out run 1's diagnostics (a shape change naming several days); request text is the developer's own.",
   "scenario": {
     "user_request": "Four of us. Dinners with a main and a vegetable.",
     "conversation_history": [],
