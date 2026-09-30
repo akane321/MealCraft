@@ -23,7 +23,24 @@ DISHES = {
 }
 # Chinese verbs also come after the thing: "汤加上", "早饭就不做了", "午饭也帮我们安排上".
 ADD_ZH = ("加上", "加", "也要", "安排", "排上", "排", "煮", "做", "多")
-DROP_ZH = ("不要", "不用", "不做", "不煮", "不排", "不加", "别做", "别煮", "别加", "别", "去掉", "免了", "免掉")
+DROP_ZH = (
+    "不要",
+    "不需要",
+    "不用",
+    "不必",
+    "不吃",
+    "不做",
+    "不煮",
+    "不排",
+    "不加",
+    "别做",
+    "别煮",
+    "别加",
+    "别",
+    "去掉",
+    "免了",
+    "免掉",
+)
 ADD = ("also plan", "add", "plan", "with", "plus", *ADD_ZH)
 DROP = (
     "no",
@@ -40,8 +57,16 @@ DROP = (
     "no need for",
     *DROP_ZH,
 )
-# Between the verb and the thing: "add a soup", "without the side", "加个汤", "多一道素菜".
-FILLER = r"(?:\s*(?:a|an|the|another|one more|个|一个|一道|道|上)?\s*)?"
+# Between the verb and the thing: "add a soup", "without the side", "加个汤", "多一道素菜",
+# "remove weekday lunches".
+FILLER = (
+    r"(?:\s*(?:a|an|the|another|one more|个|一个|一道|道|上)?\s*)?"
+    r"(?:(?:weekday|week day|weekend|weeknight|workday|work day|working day)s?\s+)?"
+)
+# "lunches", "dinners".
+PLURAL = "(?:es|s)?"
+# A Chinese cooking verb after the verb: "不用做午饭", "不需要再准备早餐".
+COOK_ZH = r"(?:再|也)?(?:做|煮|排|安排|准备)?"
 ONE_DISH = (
     "one dish",
     "just one",
@@ -79,29 +104,33 @@ def _alternatives(words: tuple[str, ...]) -> str:
 
 
 def _has(text: str, words: tuple[str, ...]) -> bool:
-    # A trailing "s" still names it: "dinners with a soup".
-    return re.search(rf"(?<![a-z])(?:{_alternatives(words)})s?(?![a-z])", text) is not None
+    # A plural still names it: "dinners with a soup", "weekday lunches off".
+    return re.search(rf"(?<![a-z])(?:{_alternatives(words)}){PLURAL}(?![a-z])", text) is not None
 
 
 def _verb_near(text: str, verbs: tuple[str, ...], after: tuple[str, ...], words: tuple[str, ...]) -> bool:
     """A verb right before the thing ("no breakfast", but not "no pork for dinner"), or a Chinese
     verb a few words after it ("汤都免了吧", "午饭也帮我们安排上")."""
-    thing = rf"(?:{_alternatives(words)})s?(?![a-z])"
-    before = rf"(?<![a-z])(?:{_alternatives(verbs)}){FILLER}{thing}"
+    thing = rf"(?:{_alternatives(words)}){PLURAL}(?![a-z])"
+    before = rf"(?<![a-z])(?:{_alternatives(verbs)}){COOK_ZH}{FILLER}{thing}"
     behind = rf"(?<![a-z]){thing}[^,，。.;；]{{0,6}}(?:{_alternatives(after)})"
     return re.search(before, text) is not None or re.search(behind, text) is not None
 
 
 def _taken_off(text: str, words: tuple[str, ...]) -> bool:
-    """ "take lunch off", "leave the soup out", or "take it off" once the meal is named."""
-    thing = rf"{FILLER}(?:{_alternatives(words)})s?|\s+(?:it|them|that)"
-    return re.search(rf"(?<![a-z])(?:take|leave)(?:{thing})\s+(?:off|out|away)(?![a-z])", text) is not None
+    """ "take lunch off", "leave the soup out", "take it off" once the meal is named, "weekday lunches off"."""
+    thing = rf"{FILLER}(?:{_alternatives(words)}){PLURAL}|\s+(?:it|them|that)"
+    taken = rf"(?<![a-z])(?:take|leave)(?:{thing})\s+(?:off|out|away)(?![a-z])"
+    off = rf"(?<![a-z])(?:{_alternatives(words)}){PLURAL}\s+(?:off|not needed)(?![a-z])"
+    return re.search(taken, text) is not None or re.search(off, text) is not None
 
 
 def _only_one(text: str) -> str | None:
     """The one dish a meal is cut to ("just a main", "只做一道主菜"), or None when no dish is counted."""
     for role, (words, _) in DISHES.items():
-        counted = rf"(?:{_alternatives(ONLY)})\s*(?:{_alternatives(ONE)})?\s*(?:{_alternatives(words)})s?(?![a-z])"
+        counted = (
+            rf"(?:{_alternatives(ONLY)})\s*(?:{_alternatives(ONE)})?\s*(?:{_alternatives(words)}){PLURAL}(?![a-z])"
+        )
         if re.search(rf"(?<![a-z]){counted}", text):
             return role
     return None
