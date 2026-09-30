@@ -1,6 +1,7 @@
 import re
 from datetime import date, timedelta
 
+from app.agent.shape_change import asks_for_shape
 from app.planning.recipe_similarity import wanted
 from app.schemas.agent import AgentReplanDraft
 from app.schemas.meal_plan import WeeklyMealPlanResponse
@@ -76,8 +77,8 @@ class AgentReplanInterpreter:
     # "..., weekends as usual", "周末照常": a clause naming the days that stay as they are.
     _clause_break = re.compile(r"[,，;；。.!！?？]|(?<![a-z])but(?![a-z])|但是|但|不过")
     _kept = re.compile(
-        r"(?<![a-z])(?:as usual|as normal|as before|as is|keep|kept|stays?|unchanged|the same|untouched)(?![a-z])"
-        r"|照常|照旧|照样|保留|不变|正常|保持|一样"
+        r"(?<![a-z])(?:as usual|as normal|as before|as is|keep|kept|stays?|unchanged|the same|untouched"
+        r"|don't change|do not change)(?![a-z])|照常|照旧|照样|保留|不变|正常|保持|一样|不要改|不改"
     )
     # "周一到五", "星期一至五": the range's end without its "周" / "星期".
     _short_range = re.compile(r"(周|星期|礼拜)([一二三四五六日天])(\s*(?:到|至|-|~|～)\s*)([一二三四五六日天])")
@@ -112,26 +113,32 @@ class AgentReplanInterpreter:
         question = self._first_question(draft, chinese=bool(re.search(r"[\u4e00-\u9fff]", text)), plan=plan)
         return draft, [question] if question else []
 
-    @staticmethod
-    def _event_type(text: str) -> str | None:
+    _lock_words = ("lock", "keep unchanged", "don't change", "do not change", "锁定", "保留", "不要改", "保持不变")
+    # "keep Tuesday's dinner", "keep the lunch as it is": keeping one named meal.
+    _keep_meal = re.compile(
+        r"(?<![a-z])keep\s+(?:the\s+|[a-z]+'s\s+|[a-z]+\s+)?(?:breakfast|lunch|dinner|supper)(?![a-z])"
+    )
+
+    @classmethod
+    def _locks(cls, text: str) -> bool:
+        return any(token in text for token in cls._lock_words) or cls._keep_meal.search(text) is not None
+
+    @classmethod
+    def _event_type(cls, text: str) -> str | None:
+        """The one-dish event a message asks for, or None (a shape change or nothing).
+
+        A clause that only says the rest stays ("工作日不要午饭，周末的午饭保留", "no lunch on weekdays,
+        keep the weekend lunches") is not a lock when another clause adds or drops a meal.
+        """
+        clauses = [clause for clause in cls._clause_break.split(text) if clause.strip()]
+        if any(asks_for_shape(clause) and not cls._locks(clause) for clause in clauses):
+            text = " ".join(clause for clause in clauses if not (cls._locks(clause) and cls._kept.search(clause)))
         if any(
             token in text
             for token in ("unavailable", "out of stock", "can't buy", "cannot buy", "买不到", "缺货", "没货")
         ):
             return "ITEM_UNAVAILABLE"
-        if any(
-            token in text
-            for token in (
-                "lock",
-                "keep unchanged",
-                "don't change",
-                "do not change",
-                "锁定",
-                "保留",
-                "不要改",
-                "保持不变",
-            )
-        ):
+        if cls._locks(text):
             return "LOCK_MEAL"
         if any(token in text for token in ("cancel", "skip", "取消", "不吃这顿", "跳过")):
             return "CANCEL_MEAL"

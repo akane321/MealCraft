@@ -154,14 +154,8 @@ def _when(plan: WeeklyMealPlanResponse, days: list[int] | None) -> str:
     return "on " + (f"{', '.join(names[:-1])} and {names[-1]}" if len(names) > 1 else names[0])
 
 
-def read_shape_change(
-    message: str, *, plan: WeeklyMealPlanResponse, day_indexes: list[int] | None
-) -> ShapeChangeIntent | None:
-    """The shape change a message asks for, or None when it asks for something else.
-
-    `day_indexes` are the days the message names, if any (read by the replan interpreter); tonight
-    names dinner as well as today.
-    """
+def _read(message: str) -> tuple[str, str | None, str | None, bool, bool, str | None] | None:
+    """The text, meal, dish, add, drop and only-one a message names; None when it changes no meal."""
     text = f" {message.strip().lower()} "
     meal = next((name for name, words in MEAL_NAMES.items() if _has(text, words)), None)
     if meal is None and _has(text, TONIGHT):
@@ -173,6 +167,26 @@ def read_shape_change(
     only = _only_one(text)
     if not (adds or drops or only or _has(text, ONE_DISH)) or (meal is None and dish is None):
         return None
+    return text, meal, dish, adds, drops, only
+
+
+def asks_for_shape(message: str) -> bool:
+    """Whether a message (or one clause of it) adds, drops or recomposes a meal."""
+    return _read(message) is not None
+
+
+def read_shape_change(
+    message: str, *, plan: WeeklyMealPlanResponse, day_indexes: list[int] | None
+) -> ShapeChangeIntent | None:
+    """The shape change a message asks for, or None when it asks for something else.
+
+    `day_indexes` are the days the message names, if any (read by the replan interpreter); tonight
+    names dinner as well as today.
+    """
+    read = _read(message)
+    if read is None:
+        return None
+    text, meal, dish, adds, drops, only = read
     meal = meal or "dinner"
     shape = plan.plan_shape.meals if plan.plan_shape is not None else {}
     current = [role.model_dump() for role in shape.get(meal, [])]

@@ -168,3 +168,38 @@ def test_says_what_it_understood_and_when(message, summary):
 )
 def test_weekday_requests_stay_on_weekdays(message, expected):
     assert roles(message) == expected
+
+
+# "The rest stays" is not a lock when another clause adds or drops a meal; a lock on its own still is.
+@pytest.mark.parametrize(
+    ("message", "expected"),
+    [
+        ("工作日不要午饭，周末的午饭保留", ("lunch", None, WEEKDAYS)),
+        ("工作日不用做午饭，周末保持不变", ("lunch", None, WEEKDAYS)),
+        ("周末不要改，工作日不要午饭", ("lunch", None, WEEKDAYS)),
+        ("no lunch on weekdays, keep the weekend lunches", ("lunch", None, WEEKDAYS)),
+        ("no lunch on weekdays, don't change the weekend", ("lunch", None, WEEKDAYS)),
+        ("add a soup to weekend dinners; weekdays keep unchanged", ("dinner", ["main", "vegetable", "soup"], [6, 7])),
+    ],
+)
+def test_the_rest_staying_is_not_a_lock(message, expected):
+    assert AgentReplanInterpreter._event_type(message.lower()) is None
+    assert roles(message) == expected
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "保留周三的晚饭",
+        "周三的晚饭保留，其他的换掉",
+        "锁定周五的午饭",
+        "keep Tuesday's dinner",
+        "keep the lunch on Friday as it is",
+        "don't change sunday",
+        "lock Monday to Friday",
+        # A lock of its own beside a shape change stays a lock.
+        "lock Wednesday's dinner, and add a soup on weekdays",
+    ],
+)
+def test_a_lock_is_still_a_lock(message):
+    assert AgentReplanInterpreter._event_type(message.lower()) == "LOCK_MEAL"
