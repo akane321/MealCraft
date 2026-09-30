@@ -1,6 +1,7 @@
 import re
 from datetime import date, timedelta
 
+from app.agent.shape_change import asks_for_shape
 from app.planning.recipe_similarity import wanted
 from app.schemas.agent import AgentReplanDraft
 from app.schemas.meal_plan import WeeklyMealPlanResponse
@@ -41,21 +42,46 @@ class AgentReplanInterpreter:
         "soup": ("soup", "汤"),
     }
     _weekday_aliases = {
-        0: ("monday", "mon", "周一", "星期一"),
-        1: ("tuesday", "tue", "tues", "周二", "星期二"),
-        2: ("wednesday", "wed", "周三", "星期三"),
-        3: ("thursday", "thu", "thur", "thurs", "周四", "星期四"),
-        4: ("friday", "fri", "周五", "星期五"),
-        5: ("saturday", "sat", "周六", "星期六"),
-        6: ("sunday", "sun", "周日", "周天", "星期日", "星期天"),
+        0: ("monday", "mon", "周一", "星期一", "礼拜一"),
+        1: ("tuesday", "tue", "tues", "周二", "星期二", "礼拜二"),
+        2: ("wednesday", "wed", "周三", "星期三", "礼拜三"),
+        3: ("thursday", "thu", "thur", "thurs", "周四", "星期四", "礼拜四"),
+        4: ("friday", "fri", "周五", "星期五", "礼拜五"),
+        5: ("saturday", "sat", "周六", "星期六", "礼拜六"),
+        6: ("sunday", "sun", "周日", "周天", "星期日", "星期天", "礼拜日", "礼拜天"),
     }
     _weekday_of = {alias: weekday for weekday, aliases in _weekday_aliases.items() for alias in aliases}
     _weekday_pattern = re.compile(
         "(?<![a-z])(?:" + "|".join(map(re.escape, sorted(_weekday_of, key=len, reverse=True))) + ")(?![a-z])"
     )
     # Several days in one word; "Monday to Friday" / "周一到周五" reads as a range of named days.
-    _several_days = {(5, 6): ("weekend", "周末"), (0, 1, 2, 3, 4): ("weekday", "工作日")}
-    _range_words = ("to", "through", "till", "until", "-", "–", "到", "至")
+    _several_days = {
+        (5, 6): ("weekend", "周末", "双休日"),
+        (0, 1, 2, 3, 4): (
+            "weekday",
+            "week day",
+            "weeknight",
+            "workday",
+            "work day",
+            "working day",
+            "during the week",
+            "工作日",
+            "平日",
+            "上班日",
+            "周中",
+        ),
+    }
+    _range_words = ("to", "through", "thru", "till", "until", "-", "–", "—", "~", "～", "到", "至")
+    # "except weekends", "除了周末": the days named are the ones left alone.
+    _except = re.compile(r"(?<![a-z])(?:except|other than)(?![a-z])|除了|除去")
+    # "..., weekends as usual", "周末照常": a clause naming the days that stay as they are.
+    _clause_break = re.compile(r"[,，;；。.!！?？]|(?<![a-z])but(?![a-z])|但是|但|不过")
+    _kept = re.compile(
+        r"(?<![a-z])(?:as usual|as normal|as before|as is|keep|kept|stays?|unchanged|the same|untouched"
+        r"|don't change|do not change)(?![a-z])|照常|照旧|照样|保留|不变|正常|保持|一样|不要改|不改"
+    )
+    # "周一到五", "星期一至五": the range's end without its "周" / "星期".
+    _short_range = re.compile(r"(周|星期|礼拜)([一二三四五六日天])(\s*(?:到|至|-|~|～)\s*)([一二三四五六日天])")
 
     def parse(
         self,
@@ -87,26 +113,32 @@ class AgentReplanInterpreter:
         question = self._first_question(draft, chinese=bool(re.search(r"[\u4e00-\u9fff]", text)), plan=plan)
         return draft, [question] if question else []
 
-    @staticmethod
-    def _event_type(text: str) -> str | None:
+    _lock_words = ("lock", "keep unchanged", "don't change", "do not change", "锁定", "保留", "不要改", "保持不变")
+    # "keep Tuesday's dinner", "keep the lunch as it is": keeping one named meal.
+    _keep_meal = re.compile(
+        r"(?<![a-z])keep\s+(?:the\s+|[a-z]+'s\s+|[a-z]+\s+)?(?:breakfast|lunch|dinner|supper)(?![a-z])"
+    )
+
+    @classmethod
+    def _locks(cls, text: str) -> bool:
+        return any(token in text for token in cls._lock_words) or cls._keep_meal.search(text) is not None
+
+    @classmethod
+    def _event_type(cls, text: str) -> str | None:
+        """The one-dish event a message asks for, or None (a shape change or nothing).
+
+        A clause that only says the rest stays ("工作日不要午饭，周末的午饭保留", "no lunch on weekdays,
+        keep the weekend lunches") is not a lock when another clause adds or drops a meal.
+        """
+        clauses = [clause for clause in cls._clause_break.split(text) if clause.strip()]
+        if any(asks_for_shape(clause) and not cls._locks(clause) for clause in clauses):
+            text = " ".join(clause for clause in clauses if not (cls._locks(clause) and cls._kept.search(clause)))
         if any(
             token in text
             for token in ("unavailable", "out of stock", "can't buy", "cannot buy", "买不到", "缺货", "没货")
         ):
             return "ITEM_UNAVAILABLE"
-        if any(
-            token in text
-            for token in (
-                "lock",
-                "keep unchanged",
-                "don't change",
-                "do not change",
-                "锁定",
-                "保留",
-                "不要改",
-                "保持不变",
-            )
-        ):
+        if cls._locks(text):
             return "LOCK_MEAL"
         if any(token in text for token in ("cancel", "skip", "取消", "不吃这顿", "跳过")):
             return "CANCEL_MEAL"
@@ -154,9 +186,23 @@ class AgentReplanInterpreter:
     def day_indexes(self, text: str, plan: WeeklyMealPlanResponse) -> list[int] | None:
         """Every day the message names, in the week's order; None when it names none (the whole week).
 
-        "on weekends", "weekdays", "Monday to Friday", "Wednesday and Friday" and the same in Chinese.
+        "on weekends", "weekdays", "during the week", "Monday to Friday", "Wednesday and Friday",
+        "except weekends" and the same in Chinese ("工作日", "平日", "周一到五", "除了周末").
         A shape change reads its days here; a one-dish event still takes one day (`day_index`).
+        Days named only in a clause that keeps them ("no lunch on weekdays, weekends as usual") are
+        not changed.
         """
+        text = self._short_range.sub(r"\1\2\3\1\4", text)
+        clauses = [(clause, self._named_days(clause)) for clause in self._clause_break.split(text)]
+        changed = [days for clause, days in clauses if days and not self._kept.search(clause)]
+        weekdays = set().union(*(changed or [days for _, days in clauses]))
+        if not weekdays:
+            day = self.day_index(text, plan)
+            return [day] if day is not None else None
+        return sorted({day.day_index for day in plan.days if day.planned_date.weekday() in weekdays}) or None
+
+    def _named_days(self, text: str) -> set[int]:
+        """The weekdays (0 = Monday) one clause names; "except weekends" names the other five."""
         weekdays = {
             weekday
             for days, words in self._several_days.items()
@@ -169,10 +215,9 @@ class AgentReplanInterpreter:
                 start, end = self._weekday_of[first.group()], self._weekday_of[second.group()]
                 weekdays.update((start + n) % 7 for n in range((end - start) % 7 + 1))
         weekdays.update(self._weekday_of[match.group()] for match in named)
-        if not weekdays:
-            day = self.day_index(text, plan)
-            return [day] if day is not None else None
-        return sorted({day.day_index for day in plan.days if day.planned_date.weekday() in weekdays}) or None
+        if weekdays and self._except.search(text):
+            weekdays = set(range(7)) - weekdays  # "no lunch except on weekends": the other days
+        return weekdays
 
     def _dish_entry(self, text: str, plan: WeeklyMealPlanResponse, day_index: int) -> int | None:
         """The day's one dish, or the dish whose role or title the message names; None while ambiguous."""

@@ -12,8 +12,8 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 | budget | 2/2 | - |
 | safety_diet | 2/2 | - |
 | variety | 1/1 | - |
-| shape_change | 6/6 | - |
-| **all** | **18/18** | |
+| shape_change | 7/7 | - |
+| **all** | **19/19** | |
 
 | Episode | Category | Lang | Class | Answered | Success | Failed checks | Dishes | Distinct | Meal fit | Cost |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: |
@@ -35,6 +35,7 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 | mdw-dev-016 | shape_change | zh | feasible | plan | yes | - | 20 | 20 | 20/20 | 326.36 |
 | mdw-dev-017 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16/16 | 309.65 |
 | mdw-dev-018 | shape_change | zh | feasible | plan | yes | - | 16 | 16 | 16/16 | 261.17 |
+| mdw-dev-019 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16/16 | 324.92 |
 
 ## Parameters
 
@@ -70,5 +71,6 @@ Counts only, no rates (ADR-0028).
 - `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-016.json`: `04292110b02381738805803523ab53bbe30bbc430f16fef50f901cdb5b57bbe5`
 - `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-017.json`: `ac8eb17e0f46dfff2225227ea0450172d8352354268c3f538110f669321d1dc3`
 - `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-018.json`: `b102d2bc148e70e132eb2488082bf56bdc88f3b10b35ba7ed7ff15637d6eebdc`
+- `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-019.json`: `3b2995814460fd431ef53ca86b3117010d8ae352a78ac68bace82f2f22fe2a05`
 - `data/fixtures/fairprice-products.json`: `19e760bd53e438fac44c77569724460cf6a69269690c302f3d1a59edb7a0323c`
 - `data/products/fairprice-v2-snapshot.json`: `2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91`

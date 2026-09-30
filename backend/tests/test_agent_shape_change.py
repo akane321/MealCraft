@@ -115,3 +115,91 @@ def test_just_one_main_is_one_main_not_the_meals_one_dish_preset():
 )
 def test_says_what_it_understood_and_when(message, summary):
     assert intent(message).summary == summary
+
+
+# Weekday-only requests stay on weekdays (held-out run 2's diagnostics): every way of naming
+# Monday to Friday, the meal before or after the days, adding or dropping.
+@pytest.mark.parametrize(
+    ("message", "expected"),
+    [
+        ("no lunch on weekdays", ("lunch", None, WEEKDAYS)),
+        ("lunch off during the week", ("lunch", None, WEEKDAYS)),
+        ("weekdays only: no lunch", ("lunch", None, WEEKDAYS)),
+        ("weekday lunches off", ("lunch", None, WEEKDAYS)),
+        ("remove weekday lunches", ("lunch", None, WEEKDAYS)),
+        ("Monday to Friday no lunch", ("lunch", None, WEEKDAYS)),
+        ("no lunch from Monday through Friday", ("lunch", None, WEEKDAYS)),
+        ("lunch not needed Mon-Fri", ("lunch", None, WEEKDAYS)),
+        ("no lunch on workdays", ("lunch", None, WEEKDAYS)),
+        ("no lunch on working days", ("lunch", None, WEEKDAYS)),
+        ("no dinner on weeknights", ("dinner", None, WEEKDAYS)),
+        ("no lunch except on weekends", ("lunch", None, WEEKDAYS)),
+        ("add lunch on weekdays", ("lunch", ["main"], WEEKDAYS)),
+        ("add soups to weekday dinners", ("dinner", ["main", "vegetable", "soup"], WEEKDAYS)),
+        ("工作日不用做午饭", ("lunch", None, WEEKDAYS)),
+        ("午饭工作日不用做", ("lunch", None, WEEKDAYS)),
+        ("平日不需要午饭", ("lunch", None, WEEKDAYS)),
+        ("上班日午饭免了", ("lunch", None, WEEKDAYS)),
+        ("周一至周五不要午饭", ("lunch", None, WEEKDAYS)),
+        ("星期一到星期五不要午餐", ("lunch", None, WEEKDAYS)),
+        ("周一到五不做午饭", ("lunch", None, WEEKDAYS)),
+        ("礼拜一至五午饭不要了", ("lunch", None, WEEKDAYS)),
+        ("除了周末都不要午饭", ("lunch", None, WEEKDAYS)),
+        ("工作日加上午饭", ("lunch", ["main"], WEEKDAYS)),
+        ("平日晚饭加个汤", ("dinner", ["main", "vegetable", "soup"], WEEKDAYS)),
+        # The weekend named only to say it stays as it is.
+        ("no lunch on weekdays, weekends as usual", ("lunch", None, WEEKDAYS)),
+        ("weekday lunches off; keep lunch on the weekend", ("lunch", None, WEEKDAYS)),
+        ("no lunch Monday to Friday but keep Saturday and Sunday", ("lunch", None, WEEKDAYS)),
+        (
+            "weekends stay the same, but add a soup to weekday dinners",
+            ("dinner", ["main", "vegetable", "soup"], WEEKDAYS),
+        ),
+        ("工作日不用做午饭，周末照常", ("lunch", None, WEEKDAYS)),
+        ("周末照旧，周一到周五午饭不用做", ("lunch", None, WEEKDAYS)),
+        # Weekends and single days still read as before.
+        ("no weekend breakfasts", ("breakfast", None, [6, 7])),
+        ("双休日不要早餐", ("breakfast", None, [6, 7])),
+        ("no lunch during the weekend", ("lunch", None, [6, 7])),
+        ("no dinner on Sunday", ("dinner", None, [7])),
+        ("周六到周日不要午饭", ("lunch", None, [6, 7])),
+        ("except Friday, add a soup to dinner", ("dinner", ["main", "vegetable", "soup"], [1, 2, 3, 4, 6, 7])),
+    ],
+)
+def test_weekday_requests_stay_on_weekdays(message, expected):
+    assert roles(message) == expected
+
+
+# "The rest stays" is not a lock when another clause adds or drops a meal; a lock on its own still is.
+@pytest.mark.parametrize(
+    ("message", "expected"),
+    [
+        ("工作日不要午饭，周末的午饭保留", ("lunch", None, WEEKDAYS)),
+        ("工作日不用做午饭，周末保持不变", ("lunch", None, WEEKDAYS)),
+        ("周末不要改，工作日不要午饭", ("lunch", None, WEEKDAYS)),
+        ("no lunch on weekdays, keep the weekend lunches", ("lunch", None, WEEKDAYS)),
+        ("no lunch on weekdays, don't change the weekend", ("lunch", None, WEEKDAYS)),
+        ("add a soup to weekend dinners; weekdays keep unchanged", ("dinner", ["main", "vegetable", "soup"], [6, 7])),
+    ],
+)
+def test_the_rest_staying_is_not_a_lock(message, expected):
+    assert AgentReplanInterpreter._event_type(message.lower()) is None
+    assert roles(message) == expected
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "保留周三的晚饭",
+        "周三的晚饭保留，其他的换掉",
+        "锁定周五的午饭",
+        "keep Tuesday's dinner",
+        "keep the lunch on Friday as it is",
+        "don't change sunday",
+        "lock Monday to Friday",
+        # A lock of its own beside a shape change stays a lock.
+        "lock Wednesday's dinner, and add a soup on weekdays",
+    ],
+)
+def test_a_lock_is_still_a_lock(message):
+    assert AgentReplanInterpreter._event_type(message.lower()) == "LOCK_MEAL"

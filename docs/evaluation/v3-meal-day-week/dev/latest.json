@@ -11,7 +11,7 @@
     "nutrition_tolerance_relative": 0.02
   },
   "summary": {
-    "strict_success": "18/18",
+    "strict_success": "19/19",
     "by_category": {
       "meals_per_day": {
         "strict_success": "3/3",
@@ -38,7 +38,7 @@
         "failure_mechanisms": {}
       },
       "shape_change": {
-        "strict_success": "6/6",
+        "strict_success": "7/7",
         "failure_mechanisms": {}
       }
     }
@@ -432,10 +432,36 @@
       "distinct_recipes": 16,
       "meal_fit": "16/16",
       "total_cost_sgd": 261.17
+    },
+    {
+      "episode_id": "mdw-dev-019",
+      "category": "shape_change",
+      "language": "en",
+      "class": "feasible",
+      "answered": "plan",
+      "strict_success": true,
+      "failed": [],
+      "indeterminate": [],
+      "details": {},
+      "understood": {
+        "meal_type": "lunch",
+        "roles": null,
+        "day_indexes": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "dishes": 16,
+      "distinct_recipes": 16,
+      "meal_fit": "16/16",
+      "total_cost_sgd": 324.92
     }
   ],
   "episode_set": "developer set",
-  "code_revision": "e33260f382ab6e7f5da9d7ea3d17685ab2446745",
+  "code_revision": "2c1219bd72cf740720c058fe6869582afe744546",
   "inputs": {
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",
@@ -455,6 +481,7 @@
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-016.json": "04292110b02381738805803523ab53bbe30bbc430f16fef50f901cdb5b57bbe5",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-017.json": "ac8eb17e0f46dfff2225227ea0450172d8352354268c3f538110f669321d1dc3",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-018.json": "b102d2bc148e70e132eb2488082bf56bdc88f3b10b35ba7ed7ff15637d6eebdc",
+    "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-019.json": "3b2995814460fd431ef53ca86b3117010d8ae352a78ac68bace82f2f22fe2a05",
     "data-engineering/data/release/v2.1/recipes.jsonl": "df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db",
     "data-engineering/data/release/v2.1/ingredients.jsonl": "499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25",
     "data/products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91",
