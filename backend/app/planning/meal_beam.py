@@ -242,6 +242,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         pantry = {item.ingredient_id: item.quantity for item in problem.pantry if item.quantity is not None}
         package_costs: dict[tuple[str, float], float] = {}
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
+        roles_of = {slot.slot_id: len(slot.composition or [ANY_COURSE]) for slot in problem.slots}
         for slot in ordered:
             options = self.meal_options(problem, slot)
             must_assign = slot.required or slot.locked_recipe_id is not None
@@ -314,13 +315,19 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 # A repeat buys nothing new, so by packages alone the room filled with repeats; once the
                 # dearer, varied plans ran over, the week left was the least varied one. Each repeat is
                 # charged one meal's share of the budget: a repeat stays dearer than the cost it saves
-                # (ADR-0044), and a new dish within that share keeps the week on pace.
+                # (ADR-0044), and a new dish within that share keeps the week on pace. An optional dish left
+                # out is charged as the meal loss charges it, above a repeat: with room the role is filled,
+                # by a new dish if one fits and else by a repeat, and left empty only when neither fits (ADR-0050).
                 room = max(1, self.limits.width // 4)
                 best = next_states[: self.limits.width - room]
                 share = budget / len(problem.slots)
                 rest = sorted(
                     next_states[self.limits.width - room :],
-                    key=lambda s: (spend[s.choices] + share * repeats(problem, s), s.choices),
+                    key=lambda s: (
+                        spend[s.choices]
+                        + share * (repeats(problem, s) + EMPTY_OPTIONAL_ROLE_LOSS * empty_roles(s, roles_of)),
+                        s.choices,
+                    ),
                 )
                 cheapest = rest[: room // 2]
                 rest = sorted(rest[room // 2 :], key=lambda s: (s.cost, spend[s.choices], s.choices))
@@ -567,6 +574,11 @@ def repeats(problem, state: MealState) -> int:
     free = set(problem.repetition_rules.repeat_ok_roles) if problem.repetition_rules else set()
     dishes = [recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in free]
     return len(dishes) - len(set(dishes))
+
+
+def empty_roles(state: MealState, roles_of: dict[str, int]) -> int:
+    """Optional roles left empty in the plan's meals, given each slot's number of roles."""
+    return sum(roles_of[slot_id] - len(dishes) for slot_id, dishes in state.choices)
 
 
 # Orders beam states by progress towards stated requests; larger than any meal's loss.

@@ -132,6 +132,18 @@ def test_a_tight_budget_week_spends_its_room_on_variety():
     assert row["distinct_recipes"] >= 14, row
 
 
+def test_a_tight_budget_week_fills_its_optional_dishes_when_they_fit():
+    """S$105 for two, the label's witness S$48.56: charged nothing for an empty optional role, the cheap
+    room preferred leaving twelve vegetables out to repeating one (ADR-0050: included if it fits)."""
+    lunch = [DINNER[0], DINNER[1]]
+    meals = {"breakfast": BREAKFAST, "lunch": lunch, "dinner": DINNER}
+    episode = synthetic("syn-var-021", meals, budget=105.0, size=2)
+    row = evaluate([episode])["episodes"][0]
+    assert row["strict_success"], row
+    assert row["total_cost_sgd"] <= 105.0
+    assert row["dishes"] == 35, row
+
+
 def test_a_no_repeats_week_keeps_enough_candidates_for_every_meal():
     """mdw-dev-021: eight candidates a role ran out before Sunday once no dish could come back."""
     row = evaluate([load("mdw-dev-021")])["episodes"][0]
