@@ -8,7 +8,7 @@ beam, it proves neither optimality nor infeasibility.
 
 from dataclasses import asdict, dataclass
 from itertools import product
-from math import ceil
+from math import ceil, prod
 
 from app.planning.dietary_tags import satisfies
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
@@ -100,9 +100,10 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         per_role_limit = self.limits.candidates_per_role
         if self.limits.max_meal_combinations is not None:
             per_role_limit = max(3, min(per_role_limit, int(self.limits.max_meal_combinations ** (1 / len(roles)))))
+        role_limits = capped_role_limits(problem, roles, per_role_limit, self.limits.max_meal_combinations)
         per_role: list[list[tuple[str | None, str] | None]] = []
         position = [s.slot_id for s in sorted(problem.slots, key=self._slot_key)].index(slot.slot_id)
-        for role_index, role in enumerate(roles):
+        for role_index, (role, role_limit) in enumerate(zip(roles, role_limits, strict=True)):
             turn = position + role_index * len(problem.slots)
             eligible = [
                 r
@@ -118,7 +119,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 eligible = fitting
             ranked = sorted(eligible, key=lambda r: (self._dish_loss(problem, slot, r), r.recipe_id))
             key = role.role_id if slot.composition is not None else None
-            best = per_role_limit if not (prices and self.limits.max_meal_combinations) else -(-per_role_limit // 2)
+            best = role_limit if not (prices and self.limits.max_meal_combinations) else -(-role_limit // 2)
             kept = self._pick(ranked, best, turn)
             # A dish the household asked for is always a candidate, however it ranks.
             kept += [r for r in ranked[best:] if wanted(problem, r)]
@@ -132,7 +133,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 # Under the combination cap the cheapest share the role's places instead of doubling them.
                 kept += self._pick(
                     cheapest,
-                    per_role_limit if self.limits.max_meal_combinations is None else per_role_limit - best,
+                    role_limit if self.limits.max_meal_combinations is None else role_limit - best,
                     turn,
                 )
             options: list[tuple[str | None, str] | None] = [(key, r.recipe_id) for r in kept]
@@ -189,7 +190,9 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         )
         limit = self.limits.meal_options_per_slot
         if self.limits.rotate_candidates and len(meals) > limit:
-            meals = spread_meals(meals, limit, per_role_limit)
+            # Each role's dishes share the meals by that role's candidate count (all equal without a cap).
+            keys = [role.role_id if slot.composition is not None else None for role in roles]
+            meals = spread_meals(meals, limit, dict(zip(keys, role_limits, strict=True)))
         if prices and len(meals) > limit:
             # Under a budget, keep room for this slot's cheapest meals: kept by score alone,
             # the cheap combinations were cut here before the search could ever hold one.
@@ -305,10 +308,15 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             if budget is not None and len(next_states) > self.limits.width:
                 # Keep room for the cheapest plans too: the best-scoring ones can all be the dear
                 # ones, and then every plan the beam holds fails the budget at the end of the week.
+                # Half of it by packages bought so far, half by what the meals use: packages alone count
+                # a pack later meals will eat from as spent, so a week built on one big bag of potatoes
+                # looked dear on Monday, was never kept, and every week the beam held ran over by Sunday.
                 room = max(1, self.limits.width // 4)
                 best = next_states[: self.limits.width - room]
-                cheapest = sorted(next_states[self.limits.width - room :], key=lambda s: (spend[s.choices], s.choices))
-                states = best + cheapest[:room]
+                rest = sorted(next_states[self.limits.width - room :], key=lambda s: (spend[s.choices], s.choices))
+                cheapest = rest[: room // 2]
+                rest = sorted(rest[room // 2 :], key=lambda s: (s.cost, spend[s.choices], s.choices))
+                states = best + cheapest + rest[: room - len(cheapest)]
             else:
                 states = next_states[: self.limits.width]
             if budget is not None:
@@ -394,6 +402,36 @@ def dish_eligible(problem: FinalPlanningProblem, slot: PlanningSlot, recipe: Pla
             if band.upper is not None and band.upper - actual < -1e-6:
                 return False
     return True
+
+
+def capped_role_limits(problem, roles, per_role_limit: int, max_combinations: int | None) -> list[int]:
+    """Candidates kept for each role: more under a cap on uses, so a week never runs out of them.
+
+    A role's candidates are shared by every dish of the week whose role admits one of its courses;
+    with each recipe used at most `cap` times, a slot keeping ceil(those dishes / cap) of them always
+    has one left. Kept at 8, a no-repeats lunch-and-dinner week used them up by Saturday. Other roles
+    narrow instead, so a slot's combinations stay within `max_combinations`.
+    """
+    rules = problem.repetition_rules
+    cap = rules.max_uses_per_recipe if rules is not None else None
+    if not cap:
+        return [per_role_limit] * len(roles)
+    needs = []
+    for role in roles:
+        dishes = sum(
+            other.composition is None or bool(set(r.courses) & set(role.courses))
+            for other in problem.slots
+            for r in other.composition or [ANY_COURSE]
+        )
+        needs.append(-(-dishes // cap))
+    limits = [max(per_role_limit, need) for need in needs]
+    while max_combinations is not None and prod(limits) > max_combinations:
+        # Narrow the role with the most to spare over its need, down to no fewer than three.
+        spare = max(range(len(limits)), key=lambda i: (limits[i] - needs[i], limits[i]))
+        if limits[spare] <= 3:
+            break
+        limits[spare] -= 1
+    return limits
 
 
 def meal_permitted(problem, slot, dishes, recipes, shares=None) -> bool:
@@ -617,20 +655,21 @@ def horizon_permitted(problem, state: MealState, dishes) -> bool:
     return all(count <= policy.max_slots_per_core_ingredient for count in counts.values())
 
 
-def spread_meals(meals: list[MealOption], limit: int, per_role_limit: int) -> list[MealOption]:
+def spread_meals(meals: list[MealOption], limit: int, role_limits: dict[str | None, int]) -> list[MealOption]:
     """The best meals, but no dish in more than its fair share of them, then the best of the rest.
 
     Kept by score alone, a slot's meals all shared the same top dishes and the search could only
     repeat them through the week; every candidate needs some meals of its own to be chosen at all.
+    A dish's share is the slot's meals over its role's candidates, so a role kept wider under a cap
+    on uses gets every candidate some meals, not only as many as the narrowest role's share allows.
     """
-    cap = max(4, limit // max(1, per_role_limit))
+    caps = {role: max(4, limit // max(1, count)) for role, count in role_limits.items()}
     counts: dict[str, int] = {}
     kept, deferred = [], []
     for meal in meals:
-        ids = [recipe_id for _, recipe_id in meal.dishes]
-        if all(counts.get(recipe_id, 0) < cap for recipe_id in ids):
+        if all(counts.get(recipe_id, 0) < caps[role] for role, recipe_id in meal.dishes):
             kept.append(meal)
-            for recipe_id in ids:
+            for _, recipe_id in meal.dishes:
                 counts[recipe_id] = counts.get(recipe_id, 0) + 1
         else:
             deferred.append(meal)

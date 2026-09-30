@@ -110,3 +110,17 @@ def test_a_day_ceiling_the_search_prunes_to_nothing_is_planned_by_a_band_led_sea
     episode = synthetic("syn-band-006", {"breakfast": BREAKFAST, "lunch": LUNCH, "dinner": DINNER}, bands=[fat])
     row = evaluate([episode])["episodes"][0]
     assert row["strict_success"], row
+
+
+def test_a_budget_week_whose_cheap_meals_share_packages_is_planned():
+    """mdw-dev-020: ranked by packages bought so far, a week built on shared packs looked dear on day one."""
+    row = evaluate([load("mdw-dev-020")])["episodes"][0]
+    assert row["strict_success"], row
+    assert row["total_cost_sgd"] <= load("mdw-dev-020")["gold"]["applicable_hard_constraints"]["budget_sgd"]
+
+
+def test_a_no_repeats_week_keeps_enough_candidates_for_every_meal():
+    """mdw-dev-021: eight candidates a role ran out before Sunday once no dish could come back."""
+    row = evaluate([load("mdw-dev-021")])["episodes"][0]
+    assert row["strict_success"], row
+    assert row["dishes"] == row["distinct_recipes"]
