@@ -9,11 +9,11 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 | meals_per_day | 3/3 | - |
 | composition | 2/2 | - |
 | nutrition_per_day | 2/2 | - |
-| budget | 2/2 | - |
+| budget | 3/3 | - |
 | safety_diet | 2/2 | - |
-| variety | 1/1 | - |
+| variety | 2/2 | - |
 | shape_change | 6/6 | - |
-| **all** | **18/18** | |
+| **all** | **20/20** | |
 
 | Episode | Category | Lang | Class | Answered | Success | Failed checks | Dishes | Distinct | Meal fit | Cost |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: |
@@ -28,13 +28,15 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 | mdw-dev-009 | budget | en | infeasible | infeasible | yes | - | - | - | - | - |
 | mdw-dev-010 | safety_diet | en | feasible | plan | yes | - | 28 | 28 | 26/28 | 416.11 |
 | mdw-dev-011 | safety_diet | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 301.27 |
-| mdw-dev-012 | variety | en | feasible | plan | yes | - | 28 | 28 | 28/28 | 395.12 |
+| mdw-dev-012 | variety | en | feasible | plan | yes | - | 28 | 28 | 28/28 | 443.25 |
 | mdw-dev-013 | shape_change | en | feasible | plan | yes | - | 21 | 21 | 21/21 | 327.49 |
 | mdw-dev-014 | shape_change | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 322.97 |
 | mdw-dev-015 | shape_change | en | feasible | plan | yes | - | 15 | 15 | 15/15 | 387.62 |
 | mdw-dev-016 | shape_change | zh | feasible | plan | yes | - | 20 | 20 | 20/20 | 326.36 |
 | mdw-dev-017 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16/16 | 309.65 |
 | mdw-dev-018 | shape_change | zh | feasible | plan | yes | - | 16 | 16 | 16/16 | 261.17 |
+| mdw-dev-020 | budget | en | feasible | plan | yes | - | 27 | 4 | 27/27 | 50.9 |
+| mdw-dev-021 | variety | en | feasible | plan | yes | - | 35 | 35 | 35/35 | 550.12 |
 
 ## Parameters
 
@@ -70,5 +72,7 @@ Counts only, no rates (ADR-0028).
 - `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-016.json`: `04292110b02381738805803523ab53bbe30bbc430f16fef50f901cdb5b57bbe5`
 - `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-017.json`: `ac8eb17e0f46dfff2225227ea0450172d8352354268c3f538110f669321d1dc3`
 - `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-018.json`: `b102d2bc148e70e132eb2488082bf56bdc88f3b10b35ba7ed7ff15637d6eebdc`
+- `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-020.json`: `47c05f11c845ec7bac85b9eed4a4012849bc7983aecdb114148396142f594b7a`
+- `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-021.json`: `efe5b019c41eaf2cb8c422ae45704fb082db122490d0f5009702c8f85aa83eb7`
 - `data/fixtures/fairprice-products.json`: `19e760bd53e438fac44c77569724460cf6a69269690c302f3d1a59edb7a0323c`
 - `data/products/fairprice-v2-snapshot.json`: `2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91`
