@@ -68,10 +68,12 @@ def test_a_daily_target_is_a_hard_day_band_and_a_soft_meal_guide():
     assert (meal.scope, meal.hard, meal.lower, meal.upper) == ("per_slot", False, 225, 625)
 
 
-def synthetic(episode_id: str, meals: dict, *, budget=None, bands=()) -> dict:
+def synthetic(episode_id: str, meals: dict, *, budget=None, bands=(), size=None) -> dict:
     """A developer episode of this shape and limit, its pool drawn and its label proven."""
     episode = copy.deepcopy(load("mdw-dev-008"))
     episode["episode_id"] = episode_id
+    if size is not None:
+        episode["scenario"]["household_profile"]["household_size"] = size
     episode["scenario"]["household_profile"]["plan_shape"] = {"meals": meals}
     days = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
     order = ("breakfast", "lunch", "dinner")
@@ -117,6 +119,17 @@ def test_a_budget_week_whose_cheap_meals_share_packages_is_planned():
     row = evaluate([load("mdw-dev-020")])["episodes"][0]
     assert row["strict_success"], row
     assert row["total_cost_sgd"] <= load("mdw-dev-020")["gold"]["applicable_hard_constraints"]["budget_sgd"]
+
+
+def test_a_tight_budget_week_spends_its_room_on_variety():
+    """S$2.50 a person a meal, the label's witness S$20.85: ranked by packages bought so far, the beam's
+    cheap room kept the repeats (they buy nothing new) and the week left was 8 dishes of 21."""
+    meals = {"breakfast": BREAKFAST, "lunch": LUNCH, "dinner": [DINNER[0]]}
+    episode = synthetic("syn-var-007", meals, budget=210.0, size=4)
+    row = evaluate([episode])["episodes"][0]
+    assert row["strict_success"], row
+    assert row["total_cost_sgd"] <= 210.0
+    assert row["distinct_recipes"] >= 14, row
 
 
 def test_a_no_repeats_week_keeps_enough_candidates_for_every_meal():

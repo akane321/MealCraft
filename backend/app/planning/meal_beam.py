@@ -311,9 +311,17 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 # Half of it by packages bought so far, half by what the meals use: packages alone count
                 # a pack later meals will eat from as spent, so a week built on one big bag of potatoes
                 # looked dear on Monday, was never kept, and every week the beam held ran over by Sunday.
+                # A repeat buys nothing new, so by packages alone the room filled with repeats; once the
+                # dearer, varied plans ran over, the week left was the least varied one. Each repeat is
+                # charged one meal's share of the budget: a repeat stays dearer than the cost it saves
+                # (ADR-0044), and a new dish within that share keeps the week on pace.
                 room = max(1, self.limits.width // 4)
                 best = next_states[: self.limits.width - room]
-                rest = sorted(next_states[self.limits.width - room :], key=lambda s: (spend[s.choices], s.choices))
+                share = budget / len(problem.slots)
+                rest = sorted(
+                    next_states[self.limits.width - room :],
+                    key=lambda s: (spend[s.choices] + share * repeats(problem, s), s.choices),
+                )
                 cheapest = rest[: room // 2]
                 rest = sorted(rest[room // 2 :], key=lambda s: (s.cost, spend[s.choices], s.choices))
                 states = best + cheapest + rest[: room - len(cheapest)]
@@ -552,6 +560,13 @@ def repetition_loss(problem, state: MealState, dishes, repeat_cost: float = 0.10
         for role, recipe_id in dishes
         if role not in free
     )
+
+
+def repeats(problem, state: MealState) -> int:
+    """Dishes that repeat an earlier one in the plan, outside the roles the household lets repeat."""
+    free = set(problem.repetition_rules.repeat_ok_roles) if problem.repetition_rules else set()
+    dishes = [recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in free]
+    return len(dishes) - len(set(dishes))
 
 
 # Orders beam states by progress towards stated requests; larger than any meal's loss.
