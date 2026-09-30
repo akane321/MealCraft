@@ -279,11 +279,13 @@ the next incomplete control. It is a navigation aid, not a second status source.
 
 ## Current Priorities
 
-1. The fixes for the four mechanisms the first held-out run found were made after
-   reading its results, so the v3 held-out set is spent for them: later runs are
-   diagnostics under protocol v3.1, reported beside run 1 and never as a held-out
-   score; a score needs a fresh set. Bring the composed-meal search under the
-   10-second answer target by narrowing it per slot (ADR-0046 section 3).
+1. The v3 held-out set is spent (ADR-0049): the second run, a protocol v3.1
+   diagnostic, found no regression on what run 1 passed
+   ([findings](evaluation/v3-meal-day-week/heldout/findings.md)). Three failures
+   remain, to be worked on developer episodes: a weekday-only shape request read as
+   every day, and a budget week and a no-repeat week refused although feasible. A
+   held-out score needs a fresh set. Composed-meal plans answer within the
+   10-second target (ADR-0046 section 3).
 2. Prepare the Sprint 1 demonstration in OpenAI parser mode with rule fallback.
    Security and privacy hardening is out of scope (the course does not require
    deployment).

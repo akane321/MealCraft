@@ -142,6 +142,7 @@ slot's meal) and cost. Results are counts per category (ADR-0028).
   per person per planned meal. Do not tune against its results.
   Runs and findings are in `docs/evaluation/v3-meal-day-week/heldout/`: run 1, before
   any product change, scored 44 of 60.
+  Run 2 (v3.1, a diagnostic) found no regression on the episodes run 1 passed.
 
 ## Protocol v3.1
 

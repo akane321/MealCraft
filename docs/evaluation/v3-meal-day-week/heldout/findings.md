@@ -9,6 +9,7 @@ fixture prices, no model calls. Each run's report is `run-N.{json,md}`; `latest.
 | Run | Code | Result | What had been seen before it |
 | --- | --- | ---: | --- |
 | 1 | `1c01c1b` (product code as merged in `62b30df`; only the report header changed) | **44/60** | Nothing: no product change was made between the freeze and this run. The implementation agent had read the episodes while preparing the owner's review pages (`provenance.json`). |
+| 2 | `4a09da8` (protocol v3.1) | 57/60, a diagnostic, not a held-out score | Run 1's failures and its findings, which quoted held-out requests; the shape-change reader gained exactly those words (#188), so the set is spent for it (ADR-0049). Other fixes since run 1: no-repeat as a hard rule (#194), the walkthrough fixes (#195), the composed-meal search under hard limits and its speed-up (#196), labels under the product's rules (#198). |
 
 Every run after a product change is made after looking at the previous run's failures, and
 is reported as such. Fixes are developed on developer episodes and synthetic cases only; the
@@ -62,6 +63,35 @@ The product avoids repeating a dish but the request has no field for "no dish tw
 household's explicit rule is not enforced; 060 (six people, two mains and a side every night,
 90 minutes) used one recipe twice. The planning schema already supports a hard cap
 (`repetition_rules.max_uses_per_recipe`).
+
+## Run 2: 57 of 60, a v3.1 diagnostic
+
+Run after the fixes above, so it is not a held-out score (ADR-0049): its purpose is to check
+that nothing run 1 passed broke, and whether the mechanism fixes hold beyond developer data.
+
+| Category | Run 1 | Run 2 |
+| --- | ---: | ---: |
+| shape_change | 1/12 | 11/12 |
+| meals_per_day | 9/9 | 9/9 |
+| composition | 9/9 | 9/9 |
+| budget | 7/9 | 8/9 |
+| safety_diet | 9/9 | 9/9 |
+| nutrition_per_day | 5/7 | 7/7 |
+| variety | 4/5 | 4/5 |
+
+- **No regression:** every episode run 1 passed still passes; 13 more pass.
+- **Shape changes 11/12 say little:** the reader's new words came from these episodes.
+- **Budget and per-day bands** (the other 3 gains: budget 1, per-day 2) come from search
+  fixes built and measured on developer and synthetic episodes.
+- **Still failing** (from the report, not investigated on the episodes):
+  - `mdw-ho-003` (shape change): a request limited to weekdays was read as every day, so the
+    weekend lunches changed too.
+  - `mdw-ho-036` (budget): the product refused a feasible week; the label's witness shows one
+    under the budget with the product's own packages and meal fit.
+  - `mdw-ho-060` (variety): with no repeats as a hard rule the product refused a feasible week,
+    where run 1 planned one that repeated a dish.
+
+  Any fix for these is developed on new developer episodes and is not measured on this set.
 
 ## What the numbers support
 
