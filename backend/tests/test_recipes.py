@@ -18,7 +18,7 @@ from app.main import app
 from app.models.platform import HouseholdMembership
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 from app.retrieval import tutorials
-from app.schemas.recommendation import NO_COOKING_TIME_LIMIT
+from app.schemas.recommendation import NO_COOKING_TIME_LIMIT, RecipeRecommendationRequest
 
 
 @pytest.fixture
@@ -1580,6 +1580,77 @@ def test_a_household_that_enters_no_limits_is_saved_and_planned_with_none(recipe
 def test_a_conversation_with_no_saved_household_starts_with_no_time_limit(recipe_client: TestClient) -> None:
     session = recipe_client.post("/api/agent/sessions", json={"message": "Dinners for two."}).json()
     assert session["constraints"]["max_cooking_time_minutes"] == NO_COOKING_TIME_LIMIT
+
+
+def test_a_planning_request_that_states_no_cooking_time_has_no_limit() -> None:
+    """The planning API reads an omitted time the way a profile and a conversation do: no limit."""
+    assert RecipeRecommendationRequest().max_cooking_time_minutes == NO_COOKING_TIME_LIMIT
+
+
+def _profile_week(recipe_client: TestClient, start_date: str = "2026-11-03") -> dict:
+    """A week planned on the profile page: no conversation planned it."""
+    profile = recipe_client.get("/api/household-profiles/current")
+    if profile.status_code == 404:
+        profile = recipe_client.post("/api/household-profiles", json=_household_profile_payload())
+    planned = recipe_client.post(
+        f"/api/household-profiles/{profile.json()['id']}/plans", json={"start_date": start_date}
+    )
+    assert planned.status_code == 201, planned.text
+    return planned.json()["plan"]
+
+
+def _tuesday(plan: dict) -> dict:
+    return next(day for day in plan["days"] if date.fromisoformat(day["planned_date"]).weekday() == 1)
+
+
+def test_a_week_no_conversation_planned_is_changed_from_a_new_one(recipe_client: TestClient) -> None:
+    """A dish's Swap on a week planned on the profile page, sent from the fresh conversation beside it,
+    changes that week (the walkthrough got a pantry question and a new week's planning instead)."""
+    plan = _profile_week(recipe_client)
+    tuesday = _tuesday(plan)
+    swap = f"Swap Tuesday's {tuesday['recipe']['title']} for something else"
+
+    created = recipe_client.post("/api/agent/sessions", json={"message": swap, "plan_id": plan["id"]})
+
+    assert created.status_code == 201, created.text
+    session = created.json()
+    assert session["plan_id"] == plan["id"] and session["status"] == "planned" and not session["can_confirm"]
+    assert session["pending_replan"]["event_type"] == "REPLACE_MEAL"
+    assert session["pending_replan"]["before_entry"]["entry_id"] == tuesday["entry_id"]
+    assert [message["content"] for message in session["messages"]][0] == swap
+    confirmed = recipe_client.post(f"/api/agent/sessions/{session['id']}/replan/confirm")
+    assert confirmed.status_code == 200, confirmed.text
+    assert confirmed.json()["plan"]["id"] == plan["id"]
+    assert confirmed.json()["plan"]["revision"] == plan["revision"] + 1
+
+
+def test_an_unrelated_conversation_takes_on_the_week_it_is_asked_to_change(recipe_client: TestClient) -> None:
+    plan = _profile_week(recipe_client)
+    tuesday = _tuesday(plan)
+    skip = f"Skip Tuesday's {tuesday['recipe']['title']}"
+    off_topic = recipe_client.post("/api/agent/sessions", json={"message": "something nice"}).json()
+    assert off_topic["plan_id"] is None
+
+    reply = recipe_client.post(
+        f"/api/agent/sessions/{off_topic['id']}/messages", json={"message": skip, "plan_id": plan["id"]}
+    )
+
+    assert reply.status_code == 200, reply.text
+    session = reply.json()
+    assert session["plan_id"] == plan["id"] and session["status"] == "planned"
+    assert session["clarification_questions"] == [] and session["pending_interaction"] is None
+    assert session["pending_replan"]["event_type"] == "CANCEL_MEAL"
+    assert session["pending_replan"]["before_entry"]["entry_id"] == tuesday["entry_id"]
+    assert [message["content"] for message in session["messages"]][0] == "something nice"
+    # One conversation changes one week: it is not moved to another, and a week must exist.
+    other = _profile_week(recipe_client, "2026-11-10")
+    moved = recipe_client.post(
+        f"/api/agent/sessions/{off_topic['id']}/messages", json={"message": skip, "plan_id": other["id"]}
+    )
+    assert moved.status_code == 409
+    missing = recipe_client.post("/api/agent/sessions", json={"message": skip, "plan_id": 987654})
+    assert missing.status_code == 404
+    assert recipe_client.get(f"/api/agent/sessions/{off_topic['id']}").json()["plan_id"] == plan["id"]
 
 
 def test_an_agent_run_stores_the_parser_configuration(recipe_client: TestClient) -> None:

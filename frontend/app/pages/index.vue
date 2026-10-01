@@ -25,6 +25,8 @@ const household = useHouseholdProfile();
 
 const view = ref<"landing" | "app">("landing");
 const draft = ref("");
+// The week a dish action in the draft changes, when the open conversation did not plan that week.
+const draftWeek = ref<number | null>(null);
 const plan = ref<WeeklyMealPlan | null>(null);
 // A request in flight, a failed one and "nothing planned yet" are three different states.
 const planState = ref<"empty" | "loading" | "error" | "ready">("empty");
@@ -101,9 +103,11 @@ const shapePreview = computed(() => {
   };
 });
 // The week shown in the panel belongs to this conversation only when the conversation planned it;
-// its card and follow-ups never appear inside another conversation.
+// its card never appears inside another conversation.
 const ownsPlan = computed(() => Boolean(plan.value && session.value?.plan_id === plan.value.id));
 const showWeek = computed(() => Boolean(ownsPlan.value && days.value.length && !session.value?.pending_replan));
+// A conversation that planned no week changes the one beside it by taking it on (see send).
+const canChangeWeek = computed(() => Boolean(plan.value && (ownsPlan.value || !session.value?.plan_id)));
 const initials = computed(() => (actor.value?.user.display_name ?? "?")
   .split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]!.toUpperCase()).join(""));
 const home = computed(() => {
@@ -160,9 +164,10 @@ async function currentPlanId(): Promise<number | null> {
   catch { return null; /* no plan yet is not an error */ }
 }
 
+/** The household's current week in the panel, unless the open conversation has (meanwhile) a week of its own. */
 async function loadLatestPlan() {
   const current = await currentPlanId();
-  if (current) await loadPlan(current);
+  if (current && !session.value?.plan_id) await loadPlan(current);
 }
 
 async function send(text = draft.value) {
@@ -172,7 +177,11 @@ async function send(text = draft.value) {
   if (!(await requireAccount())) return;
   view.value = "app";
   const pending = interaction.value;
-  if (pending?.allow_free_text) {
+  // A dish action on a week this conversation did not plan (one made on the profile page, or beside an
+  // unrelated question): the conversation takes that week on and changes it, never plans a new one.
+  const week = session.value?.plan_id ? null : draftWeek.value;
+  if (week) await (session.value ? agent.reply(message, week) : agent.create(message, week));
+  else if (pending?.allow_free_text) {
     await agent.answerInteraction({
       question_id: pending.question_id,
       option_ids: [],
@@ -232,6 +241,7 @@ function openTab(name: Tab) {
 
 function suggest(text: string) {
   draft.value = text;
+  draftWeek.value = ownsPlan.value ? null : plan.value?.id ?? null;
   ask.value?.focus();
 }
 
@@ -250,7 +260,7 @@ function toggleFilm() {
   else video.pause();
 }
 
-function newChat() {
+function startFresh() {
   // Keep the conversation being left in the recent list.
   const leaving = session.value;
   if (leaving?.messages.length && !agent.recent.value.some(item => item.id === leaving.id)) {
@@ -265,10 +275,17 @@ function newChat() {
   ask.value?.focus();
 }
 
+// A conversation that has planned nothing yet shows the household's current week, as on reopening.
+function newChat() {
+  startFresh();
+  void loadLatestPlan();
+}
+
 function openSession(item: AgentSession) {
   if (item.id === session.value?.id) return;
-  newChat();
+  startFresh();
   session.value = item;
+  if (!item.plan_id) void loadLatestPlan();
 }
 
 function onKey(event: KeyboardEvent) {
@@ -301,6 +318,7 @@ useDialog(preview, () => { previewOpen.value = false; }, previewOpen);
 
 // Kept as it is typed, so a session that expires mid-sentence loses nothing (restored on mount).
 watch(draft, (value) => {
+  if (!value) draftWeek.value = null;
   try { sessionStorage.setItem(DRAFT_KEY, value); }
   catch { /* storage may be blocked; the draft is only a convenience */ }
 });
@@ -544,7 +562,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             </button>
           </form>
           <div class="after">
-            <template v-if="ownsPlan">
+            <template v-if="canChangeWeek">
               <button v-for="text in followUps" :key="text" type="button" class="suggest" @click="suggest(text)">{{ text }}</button>
             </template>
             <span class="fine">Suggestions can be wrong. Check allergens on product labels.</span>

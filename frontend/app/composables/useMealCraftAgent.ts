@@ -32,20 +32,21 @@ export function useMealCraftAgent() {
     }
   }
 
-  async function create(message: string) {
+  // `planId`: the week the message changes, for a conversation that did not plan it (it takes the week on).
+  async function create(message: string, planId: number | null = null) {
     generatedPlan.value = null;
     const result = await run(() => apiFetch<AgentSession>(`${config.public.apiBase}/api/agent/sessions`, {
       method: "POST",
-      body: { message },
+      body: { message, plan_id: planId },
     }));
     if (result) session.value = result;
   }
 
-  async function reply(message: string) {
+  async function reply(message: string, planId: number | null = null) {
     if (!session.value) return;
     const result = await run(() => apiFetch<AgentSession>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/messages`,
-      { method: "POST", body: { message } },
+      { method: "POST", body: { message, plan_id: planId } },
     ));
     if (result) session.value = result;
   }
@@ -93,7 +94,7 @@ export function useMealCraftAgent() {
     if (result) session.value = result;
   }
 
-  /** Fills the recent list and reopens the conversation that planned `planId`; with none, a fresh one stays. */
+  /** Fills the recent list and reopens the conversation for the week `planId` (conversationForPlan); with none, a fresh one. */
   async function restore(planId: number | null) {
     const result = await run(() => apiFetch<AgentSessionCollection>(
       `${config.public.apiBase}/api/agent/sessions`,

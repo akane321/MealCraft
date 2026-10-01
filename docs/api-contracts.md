@@ -242,7 +242,9 @@ payloads are intentionally absent from this user-facing contract.
 
 `POST /api/recommendations/recipes` accepts a structured planning request with:
 
-- household size and maximum cooking time
+- household size and maximum cooking time (omitted: no limit, as for a profile
+  and a conversation; the planning evaluation scenarios keep the 60 minutes they
+  were written with, `SCENARIO_UNSTATED_TIME_LIMIT`)
 - allergens, excluded ingredient IDs, and dietary requirements
 - optional health preferences and user-entered nutrition targets
 - an optional explicit sodium ceiling
@@ -422,13 +424,26 @@ quantity input; other questions continue to work through the messages endpoint.
 `can_confirm=true`. It passes the validated state to the same deterministic
 weekly planner used by `/api/plans/generate`, returns the generated plan, and
 stores its ID on the agent session. `GET` endpoints let the frontend resume after
-a reload or container restart: the home page reopens the conversation whose
-`plan_id` is the household's current (newest) plan, the only conversation that
-can change it, and otherwise a fresh conversation beside that week.
+a reload or container restart: the home page reopens the newest conversation
+whose `plan_id` is the household's current (newest) plan, the one that planned it
+or last took it on (below); else the newest one
+still ready to plan (`can_confirm`), so an interrupted first plan resumes; else a
+fresh conversation beside that week. A conversation that has planned nothing
+shows the current week in the plan panel.
 
 The default parser is deterministic fixture mode. Optional OpenAI mode uses the
 same Pydantic extraction contract. Neither parser makes medical recommendations,
 decides allergen safety, or bypasses deterministic planning rules.
+
+A week no open conversation planned (one planned on the profile page, or shown
+beside an unrelated conversation) is changed the same way: the create and
+messages endpoints accept an optional `plan_id`, the household's week the message
+changes. A conversation with no plan of its own takes that week on (its
+`plan_id` is set, `status` becomes `planned`, and any planning question it was
+still asking is dropped), and the message goes to the replanning loop below. The
+home page sends it only with a dish's Swap, Keep, Skip or Can't buy, or a
+follow-up chip, on such a week. A conversation that already has another week
+returns HTTP 409, and a week outside the household HTTP 404.
 
 After a session has produced a plan, the messages endpoint switches to the
 replanning loop. It accepts one user-triggered meal event at a time, resolves a

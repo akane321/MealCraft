@@ -35,6 +35,9 @@ AgentParserProvider = Literal["fixture", "openai"]
 
 class AgentMessageInput(BaseModel):
     message: str = Field(min_length=1, max_length=4000)
+    # The household's week this message changes (a dish's Swap, Keep, Skip or Can't buy). A conversation
+    # that planned no week of its own takes that week on, and changes it from then on.
+    plan_id: int | None = Field(default=None, ge=1)
 
 
 class AgentInteractionInput(InteractionAnswer):

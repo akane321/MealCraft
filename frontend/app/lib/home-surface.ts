@@ -200,10 +200,12 @@ export function sameDishChange(event: Pick<MealPlanReplanEvent, "event_type" | "
 }
 
 /**
- * The conversation to reopen beside the household's current week: the one that planned it, which is
- * also the only one that can change it. None when no conversation made it (a week rebuilt on the
- * profile page), so the week shows beside a fresh conversation, never inside an unrelated one.
+ * The conversation to reopen beside the household's current week: the newest one that planned it or
+ * took it on to change it. Else the newest one ready to plan a week, so an interrupted first plan
+ * picks up where it stopped. Else none: a fresh conversation, never an unrelated one.
  */
-export function conversationForPlan<T extends { plan_id: number | null }>(conversations: T[], planId: number | null): T | null {
-  return planId === null ? null : conversations.find(item => item.plan_id === planId) ?? null;
+export function conversationForPlan<T extends { plan_id: number | null; can_confirm: boolean }>(conversations: T[], planId: number | null): T | null {
+  return (planId === null ? undefined : conversations.find(item => item.plan_id === planId))
+    ?? conversations.find(item => item.can_confirm)
+    ?? null;
 }
