@@ -1,0 +1,12 @@
+# A demonstration run: the frontend as a production build (no Nuxt DevTools badge over the page, no page
+# compiled on its first visit); everything else as in compose.yaml. See docs/development.md.
+#
+#   docker compose -f compose.yaml -f compose.demo.yaml up --build --detach
+#
+# `docker compose up --build --detach` goes back to the dev server.
+services:
+  frontend:
+    build:
+      target: demo
+    # The production server reads its own build, not the source: no bind mount, no dev volumes.
+    volumes: !reset []

@@ -72,10 +72,15 @@ services:
   frontend:
     build:
       context: ./frontend
+      # The dev server; compose.demo.yaml builds the `demo` stage (a production build) instead.
+      target: dev
     restart: unless-stopped
     environment:
       NUXT_API_BASE: http://backend:8000
       NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8000}
+      # Docker Desktop on Windows passes no file-change events through the bind mount below: poll for edits
+      # (frontend/nuxt.config.ts), or the dev server keeps serving the code it started with.
+      MEALCRAFT_WATCH_POLLING: "true"
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:
