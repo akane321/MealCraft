@@ -451,8 +451,10 @@ the page reopens it and sends the message there without `plan_id`, so normally
 one conversation holds a week. Only when none is at hand does the open
 conversation take the week on; one planning a new week of its own (ready to
 plan with **Plan my week**, or still asking a planning question) asks first. The
-question lasts only while the conversation is planning that new week: once it
-plans one or stops, the question and the dish's words go.
+question lasts only while the conversation is planning that new week and the
+composer still holds the dish's words: once it plans one or stops, the question
+and the dish's words go, and once other words replace them, the question goes.
+The dish's words keep the week they change across a reload or a new sign-in.
 
 After a session has produced a plan, the messages endpoint switches to the
 replanning loop. It accepts one user-triggered meal event at a time, resolves a

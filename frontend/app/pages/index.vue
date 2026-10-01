@@ -146,10 +146,15 @@ function sessionTitle(item: AgentSession) {
   return item.messages.find(m => m.role === "user")?.content ?? "New plan";
 }
 
+/** The draft, with the dish action its words came from, kept across sign-in and reloads (restored on mount). */
+function saveDraft() {
+  try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ text: draft.value, action: dishAction.value })); }
+  catch { /* storage may be blocked; the draft is only a convenience */ }
+}
+
 async function requireAccount(): Promise<boolean> {
   if (actor.value) return true;
-  try { sessionStorage.setItem(DRAFT_KEY, draft.value); }
-  catch { /* storage may be blocked; the draft is only a convenience */ }
+  saveDraft();
   await navigateTo({ path: "/login", query: { next: "/" } });
   return false;
 }
@@ -361,25 +366,29 @@ watch(planningNew, (planning) => {
   if (draft.value === takeOn.value.message) draft.value = "";
   takeOn.value = null;
 });
-watch(() => [messages.value.length, isLoading.value, session.value?.pending_replan?.id, showWeek.value], async () => {
+watch(() => [messages.value.length, isLoading.value, session.value?.pending_replan?.id, showWeek.value, takeOn.value], async () => {
   await nextTick();
   log.value?.scrollTo({ top: log.value.scrollHeight, behavior: "smooth" });
 });
 
 useDialog(preview, () => { previewOpen.value = false; }, previewOpen);
 
-// Kept as it is typed, so a session that expires mid-sentence loses nothing (restored on mount).
 watch(draft, (value) => {
   if (!value) dishAction.value = null;
-  try { sessionStorage.setItem(DRAFT_KEY, value); }
-  catch { /* storage may be blocked; the draft is only a convenience */ }
+  // The take-on question sends its own message: it goes once the composer says something else.
+  if (takeOn.value && value !== takeOn.value.message) takeOn.value = null;
 });
+// Kept as it is typed, so a session that expires mid-sentence loses nothing.
+watch([draft, dishAction], saveDraft);
 
 onMounted(() => {
   window.addEventListener("keydown", onKey);
   try {
-    const saved = sessionStorage.getItem(DRAFT_KEY);
-    if (saved) draft.value = saved;
+    const saved = JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? "null") as { text?: string; action?: typeof dishAction.value } | null;
+    if (saved?.text) {
+      draft.value = saved.text;
+      dishAction.value = saved.action ?? null;
+    }
     sessionStorage.removeItem(DRAFT_KEY);
   }
   catch { /* ignore */ }
