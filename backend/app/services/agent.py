@@ -26,7 +26,6 @@ from app.orchestration.run_lifecycle import (
     AgentRunLifecycle,
     AgentRunLifecycleError,
     AgentRunNotFoundError,
-    BudgetKind,
     StartedRun,
 )
 from app.orchestration.runtime import AgentTurnOutcome, BoundedAgentOrchestrator
@@ -897,11 +896,8 @@ class AgentSessionService:
     ) -> AgentRun:
         scope_payload = scope_decision.model_dump(mode="json") if scope_decision is not None else None
         run.scope_decision = scope_payload
-        if getattr(self.parser, "fell_back", False):
-            # The model did not answer and the rules read this turn: what the console counts as a fallback.
-            run.model_config = {**(run.model_config or {}), "fell_back_to_rules": True}
+        self._record_model_calls(run)
         self.run_lifecycle.repository.session.commit()
-        run = self._charge_model_calls(run)
         run = self.run_lifecycle.checkpoint(
             run,
             stage="turn_completed",
@@ -934,10 +930,20 @@ class AgentSessionService:
             )
         return self.run_lifecycle.transition(run, AgentRunStatus.COMMITTED, termination_reason_code="TURN_COMPLETED")
 
-    def _charge_model_calls(self, run: AgentRun) -> AgentRun:
-        """Records on the run every request this turn sent to the model API (model_client counts them)."""
-        used = model_client.take_count()
-        return self.run_lifecycle.consume_budget(run, BudgetKind.LLM_CALL, amount=used) if used else run
+    @staticmethod
+    def _record_model_calls(run: AgentRun) -> None:
+        """Puts on the run, for the caller's next commit, every request this turn sent to the model API and
+        whether the turn had to go on without the model (model_client counts both).
+
+        A record of work already done, so neither the deadline nor the limit is checked here: the turn is over,
+        and a budget stop now would fail a turn whose reply is already saved, or hide why it failed."""
+        taken = model_client.take()
+        # ponytail: the table holds used <= max, so a turn past its limit records the limit; a turn sends at most
+        # 4 (one chat and one embedding request, each retried once), so check before each request if that grows.
+        run.used_llm_calls = min(run.used_llm_calls + taken.requests, run.max_llm_calls)
+        if taken.fell_back:
+            # What the console counts as a fallback.
+            run.model_config = {**(run.model_config or {}), "model_fell_back": True}
 
     def _fail_run(self, run: AgentRun, error: Exception, *, replay: dict | None = None) -> AgentRun:
         current = self.run_lifecycle.repository.get(run.id) or run
@@ -951,7 +957,7 @@ class AgentSessionService:
             AgentRunStatus.CANCELLED,
         }:
             return current
-        current = self._charge_model_calls(current)
+        self._record_model_calls(current)
         if replay is not None:
             current = self.run_lifecycle.checkpoint(
                 current, stage="turn_failed", status="failed", state_payload={"replay": replay}

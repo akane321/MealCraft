@@ -20,6 +20,7 @@ from difflib import SequenceMatcher
 from functools import lru_cache
 from pathlib import Path
 
+from app.agent import model_client
 from app.core.paths import find_repository_root
 from app.data.overrides import overrides
 
@@ -86,6 +87,7 @@ class IngredientMatcher:
         try:
             queries = self.embed(terms)
         except Exception:  # noqa: BLE001 - a failed call only loses the suggestions, never the turn
+            model_client.note_fallback()
             return {}
         ranked = {}
         for term, query in zip(terms, queries, strict=True):
@@ -126,8 +128,6 @@ def catalog_embedder(api_key: str) -> Embed | None:
         return None
     from langchain_openai import OpenAIEmbeddings
 
-    from app.agent.model_client import http_client
-
     # A term is a few words: sent as text, so no tokenizer is loaded (or downloaded) to cut it to length.
     client = OpenAIEmbeddings(
         model=meta["model"],
@@ -135,7 +135,7 @@ def catalog_embedder(api_key: str) -> Embed | None:
         api_key=api_key,
         timeout=10,
         max_retries=1,
-        http_client=http_client(),
+        http_client=model_client.http_client(),
         check_embedding_ctx_length=False,
     )
     return client.embed_documents

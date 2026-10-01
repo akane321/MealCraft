@@ -5,8 +5,8 @@ from typing import Protocol
 
 from langchain_openai import ChatOpenAI
 
+from app.agent import model_client
 from app.agent.ingredient_matcher import IngredientMatcher
-from app.agent.model_client import http_client
 from app.data import ingredient_hierarchy
 from app.data.allergens import checked_allergens
 from app.schemas.agent import (
@@ -467,7 +467,7 @@ class OpenAIConstraintParser:
             temperature=0,
             timeout=timeout_seconds,
             max_retries=1,
-            http_client=http_client(),
+            http_client=model_client.http_client(),
         ).with_structured_output(AgentConstraintExtraction, method="json_schema")
 
     def parse(
@@ -530,6 +530,7 @@ class FallbackConstraintParser:
             )
         except Exception:  # noqa: BLE001 - any model failure falls back; the rules never call out
             self.fell_back = True
+            model_client.note_fallback()
             result = self.fallback.parse(
                 message, current=current, acknowledged_unknowns=acknowledged_unknowns, history=history
             )

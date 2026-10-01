@@ -16,6 +16,7 @@ from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
 
+from app.agent import model_client
 from app.agent.ingredient_matcher import names_of
 from app.core.paths import find_repository_root
 from app.models.recipe import Recipe
@@ -88,8 +89,6 @@ def catalog_embedder(api_key: str) -> Embed | None:
         return None
     from langchain_openai import OpenAIEmbeddings
 
-    from app.agent.model_client import http_client
-
     meta = catalog[0]
     # A request is a sentence: sent as text, so no tokenizer is loaded (or downloaded) to cut it to length.
     return OpenAIEmbeddings(
@@ -98,7 +97,7 @@ def catalog_embedder(api_key: str) -> Embed | None:
         api_key=api_key,
         timeout=10,
         max_retries=1,
-        http_client=http_client(),
+        http_client=model_client.http_client(),
         check_embedding_ctx_length=False,
     ).embed_documents
 
@@ -167,6 +166,7 @@ class RecipeSimilarity:
         try:
             (query,) = self.embed([text])
         except Exception:  # noqa: BLE001 - a failed call falls back to the shared words
+            model_client.note_fallback()
             return shared_words(text, recipes)
         size = meta["dimensions"]
         norm = sum(x * x for x in query) ** 0.5 or 1.0

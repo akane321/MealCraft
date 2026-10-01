@@ -9,6 +9,7 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.agent import model_client
 from app.api.routes.auth import get_password_adapter
 from app.auth.authorization import SystemRole
 from app.auth.passwords import Argon2PasswordAdapter, Argon2PasswordPolicy
@@ -326,7 +327,7 @@ def _add_agent_run(
                 "parser": parser,
                 "parser_model": "gpt-test",
                 "api_key": "sk-must-not-leak",
-                **({"fell_back_to_rules": True} if fell_back else {}),
+                **({"model_fell_back": True} if fell_back else {}),
             },
             used_llm_calls=used_llm_calls,
             deadline_at=created_at + timedelta(minutes=2),
@@ -451,8 +452,10 @@ def test_task_detail_returns_stored_run_without_keys(operations_client) -> None:
     assert client.get("/api/ops/tasks/planning/999999").status_code == 404
 
 
-def test_services_report_configuration_and_recent_fallbacks(operations_client) -> None:
+def test_services_report_configuration_and_recent_fallbacks(operations_client, monkeypatch) -> None:
     client, database_factory = operations_client
+    # Requests no run records (console replays, swap previews asked of the plan API) are counted by the process.
+    monkeypatch.setattr(model_client, "_unrecorded", model_client.Tally(requests=5))
     _set_system_role(database_factory, SystemRole.ADMIN)
     now = datetime.now(UTC)
     # Out of scope: the run is degraded, but the model answered, so it is no fallback.
@@ -490,6 +493,7 @@ def test_services_report_configuration_and_recent_fallbacks(operations_client) -
         "failures": 0,
         "fallbacks": 1,
     }
+    assert "5 model calls sent since the backend started that no run records" in services["openai"]["note"]
     assert services["youtube"]["recent"] is None
 
 

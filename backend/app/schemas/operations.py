@@ -107,8 +107,8 @@ ServiceName = Literal["openai", "fairprice", "youtube"]
 
 class OperationsServiceRecent(BaseModel):
     window_days: int
-    # Runs stored in the window that used the service: assistant turns for OpenAI, plans asking live prices
-    # for FairPrice. Not requests: one run can send several, or none.
+    # Runs stored in the window that used the service: assistant runs while the OpenAI parser was selected,
+    # plans asking live prices for FairPrice. Not requests: one run can send several, or none.
     runs: int = Field(ge=0)
     # OpenAI only: the requests those runs sent to the model API (agent_runs.used_llm_calls).
     model_calls: int | None = Field(default=None, ge=0)
