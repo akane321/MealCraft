@@ -1,4 +1,4 @@
-import type { NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
+import type { MealPlanReplanEvent, NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "~/types/recommendation";
 import type { RecipeNutrition } from "~/types/recipe";
 
@@ -189,3 +189,12 @@ export function perMealAndDay(days: NutritionDashboardDay[]): { meal: RecipeNutr
   return { meal: scale(meals.length), day: scale(planned.length), mealsPerDay: meals.length / planned.length };
 }
 
+
+/** A kept or skipped dish stays the same dish, so it reads as what happens to it, not as a swap to itself. */
+export function sameDishChange(event: Pick<MealPlanReplanEvent, "event_type" | "before_entry">): string | null {
+  const title = event.before_entry?.recipe_title;
+  if (!title) return null;
+  if (event.event_type === "LOCK_MEAL") return `Keep ${title} as it is`;
+  if (event.event_type === "CANCEL_MEAL") return `Skip ${title}`;
+  return null;
+}

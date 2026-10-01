@@ -3,7 +3,7 @@ import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
 import { MEAL_LABEL, mealsByDay, nextMeal, plateStyle } from "~/lib/home-surface";
 import type { NutritionDashboardDay } from "~/types/meal-plan";
 
-const props = defineProps<{ days: NutritionDashboardDay[]; planId: number | null }>();
+const props = defineProps<{ days: NutritionDashboardDay[]; planId: number | null; revision?: number }>();
 const emit = defineEmits<{ openRecipe: [slug: string]; ask: [text: string] }>();
 
 const week = computed(() => mealsByDay(props.days));
@@ -61,7 +61,7 @@ const ACTIONS = [
         </div>
       </li>
     </ol>
-    <div class="log"><HomeChangeLog :plan-id="planId" /></div>
+    <div class="log"><HomeChangeLog :plan-id="planId" :revision="revision" /></div>
   </div>
 </template>
 

@@ -560,3 +560,48 @@ test("a dish's own buttons put the change into words for the assistant", async (
   // A cooked dinner offers nothing to change.
   await expect(week.getByRole("group", { name: "Change Lemon Herb Chicken Rice Bowl" })).toHaveCount(0);
 });
+
+test("keeping a dish previews as keeping it, and the change log shows it once confirmed", async ({ page }) => {
+  await stubApi(page);
+  const tofu = { entry_id: 4, day_index: 4, planned_date: isoDay(0), recipe_id: 4, recipe_slug: "dinner-4", recipe_title: "Tofu Brown Rice Stir-fry" };
+  const lock = {
+    ...replanEvent,
+    id: 13,
+    applied_revision: null,
+    status: "previewed",
+    event_type: "LOCK_MEAL",
+    reason: null,
+    unavailable_ingredient: null,
+    before_entry: tofu,
+    after_entry: tofu,
+    nutrition_delta: { calories_kcal: 0, protein_g: 0, carbohydrate_g: 0, fat_g: 0, sodium_mg: 0, sugar_g: 0 },
+    purchase_total_delta_sgd: 0,
+  };
+  const planned = session(true);
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  let applied = false;
+  await page.route("**/api/plans/9001", route => route.fulfill(json(applied ? { ...plan, revision: 2 } : plan)));
+  await page.route("**/api/plans/9001/events", route => route.fulfill(json({ items: applied ? [{ ...lock, status: "applied", applied_revision: 2 }] : [] })));
+  await page.route("**/api/agent/sessions/51/messages", route => route.fulfill(json({ ...planned, pending_replan: lock })));
+  await page.route("**/api/agent/sessions/51/replan/confirm", (route) => {
+    applied = true;
+    return route.fulfill(json({ session: planned, event: { ...lock, status: "applied" }, plan: { ...plan, revision: 2 } }));
+  });
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+  const week = page.getByRole("complementary", { name: "This week" });
+  await expect(week.getByText("Changes this week")).toHaveCount(0);
+
+  await page.getByLabel("Message MealCraft").fill("Lock Thursday's Tofu Brown Rice Stir-fry");
+  await page.getByRole("button", { name: "Send" }).click();
+  // Not a swap from the dish to itself.
+  await expect(page.getByText("Keep Tofu Brown Rice Stir-fry as it is")).toBeVisible();
+  await expect(page.locator(".swap-card s")).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Confirm change" }).click();
+  await week.getByText("Changes this week").click();
+  await expect(week.getByText("Keep Tofu Brown Rice Stir-fry as it is")).toBeVisible();
+});

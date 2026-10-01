@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { formatPlanDate } from "~/lib/meal-plan-format";
+import { sameDishChange } from "~/lib/home-surface";
 import { shapeChangeSummary } from "~/lib/plan-shape";
 import type { MealPlanReplanEvent, MealPlanReplanEventCollection } from "~/types/meal-plan";
 
-const props = defineProps<{ planId: number | null }>();
+const props = defineProps<{ planId: number | null; revision?: number }>();
 
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
@@ -13,8 +14,10 @@ const events = ref<MealPlanReplanEvent[]>([]);
 // suggestion never happened.
 const applied = computed(() => events.value.filter(event => event.status === "applied"));
 
-watch(() => props.planId, async (planId) => {
-  events.value = [];
+// A confirmed change keeps the plan id and raises its revision; either one means new history.
+watch(() => [props.planId, props.revision] as const, async ([planId], previous) => {
+  // A new revision keeps what is shown (and an open list) until the fresh history arrives.
+  if (planId !== previous?.[0]) events.value = [];
   if (!planId) return;
   try {
     const collection = await apiFetch<MealPlanReplanEventCollection>(
@@ -53,6 +56,9 @@ function money(event: MealPlanReplanEvent) {
       <li v-for="event in applied" :key="event.id">
         <p v-if="event.shape_change" class="swap">
           <strong>{{ shapeChangeSummary(event.shape_change, day => `day ${day}`) }}</strong>
+        </p>
+        <p v-else-if="sameDishChange(event)" class="swap">
+          <strong>{{ sameDishChange(event) }}</strong>
         </p>
         <p v-else-if="event.before_entry && event.after_entry" class="swap">
           <s>{{ event.before_entry.recipe_title }}</s>

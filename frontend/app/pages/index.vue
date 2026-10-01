@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { allergenLabel } from "~/lib/allergens";
-import { budgetLine, formatSgd, groceryGroups, plateStyle } from "~/lib/home-surface";
+import { budgetLine, formatSgd, groceryGroups, plateStyle, sameDishChange } from "~/lib/home-surface";
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
 import { shapeChangeSummary } from "~/lib/plan-shape";
 import type { AgentMessage, AgentSession } from "~/types/agent";
@@ -491,12 +491,17 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <div v-else-if="session?.pending_replan?.before_entry && session.pending_replan.after_entry" class="swap-card mc-rise">
               <div class="plates">
                 <span class="plate" :style="plateStyle(session.pending_replan.before_entry.recipe_slug)" />
-                <svg class="mc-icon arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-                <span class="plate" :style="plateStyle(session.pending_replan.after_entry.recipe_slug)" />
+                <template v-if="!sameDishChange(session.pending_replan)">
+                  <svg class="mc-icon arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                  <span class="plate" :style="plateStyle(session.pending_replan.after_entry.recipe_slug)" />
+                </template>
               </div>
               <div>
-                <s>{{ session.pending_replan.before_entry.recipe_title }}</s>
-                <div class="to mc-serif">{{ session.pending_replan.after_entry.recipe_title }}</div>
+                <div v-if="sameDishChange(session.pending_replan)" class="to mc-serif">{{ sameDishChange(session.pending_replan) }}</div>
+                <template v-else>
+                  <s>{{ session.pending_replan.before_entry.recipe_title }}</s>
+                  <div class="to mc-serif">{{ session.pending_replan.after_entry.recipe_title }}</div>
+                </template>
                 <small>
                   {{ session.pending_replan.nutrition_delta.calories_kcal >= 0 ? "+" : "" }}{{ Math.round(session.pending_replan.nutrition_delta.calories_kcal) }} kcal ·
                   groceries {{ session.pending_replan.purchase_total_delta_sgd >= 0 ? "+" : "−" }}S${{ Math.abs(session.pending_replan.purchase_total_delta_sgd).toFixed(2) }} ·
@@ -560,7 +565,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <button id="tab-nutrition" type="button" role="tab" class="tab" :aria-selected="tab === 'nutrition'" aria-controls="panel-body" @click="tab = 'nutrition'">Nutrition</button>
           </div>
           <div id="panel-body" class="panel-body" role="tabpanel" :aria-labelledby="`tab-${tab}`">
-            <HomeMealList v-if="tab === 'dinners'" :days="days" :plan-id="plan.id" @open-recipe="recipeSlug = $event" @ask="suggest" />
+            <HomeMealList v-if="tab === 'dinners'" :days="days" :plan-id="plan.id" :revision="plan.revision" @open-recipe="recipeSlug = $event" @ask="suggest" />
             <HomeGroceryList v-else-if="tab === 'groceries'" :estimate="plan.grocery_estimate" />
             <HomeNutritionSummary
               v-else-if="nutrition.dashboard.value"

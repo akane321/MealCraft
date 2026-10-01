@@ -9,6 +9,7 @@ from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 from app.core.config import Settings
+from app.core.runtime_config import runtime_value
 from app.models.agent import AgentRun, AgentSession
 from app.models.platform import OperationRun
 from app.products.provider import FairPriceProductProvider, ProductProviderError
@@ -247,7 +248,8 @@ class OperationsService:
                     name="openai",
                     label="OpenAI",
                     configured=_secret(settings.openai_api_key) is not None,
-                    mode=f"{settings.agent_parser_provider} parser, model {settings.openai_model}",
+                    mode=f"{runtime_value('agent_parser_provider', settings, self.repository.session)} parser,"
+                    f" model {settings.openai_model}",
                     recent=OperationsServiceRecent(
                         window_days=SERVICE_WINDOW_DAYS,
                         calls=len(openai_runs),
