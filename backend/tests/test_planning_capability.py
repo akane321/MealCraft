@@ -485,6 +485,44 @@ def test_a_swap_never_offers_the_same_dish_again(composed_client):
     assert "Tomato Soup" in preview.json()["detail"]
 
 
+def _pasta_sides(count):
+    """Sides of pasta alone, one shared ingredient row: not vegetable dishes (owner, 2026-10-02)."""
+    sides = [_dish(f"buttered-pasta-{n:02d}", "side", "wholewheat_pasta", 200, calories=200) for n in range(count)]
+    for side in sides[1:]:
+        side.recipe_ingredients[0].ingredient = sides[0].recipe_ingredients[0].ingredient
+    return sides
+
+
+MAINS = [("salmon-bake", "salmon_fillet", 500), ("chicken-roast", "chicken_breast", 450)]
+
+
+def test_the_vegetable_role_keeps_vegetable_dishes_however_many_better_sides_there_are(monkeypatch):
+    """25 pasta sides rank before the one vegetable side; the candidates the planner keeps per course
+    held only them, and the vegetable role had nothing to take."""
+    mains = [_dish(slug, "main", ingredient, 400, calories=kcal) for slug, ingredient, kcal in MAINS]
+    broccoli = _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100)  # added last: ranks last
+    with dish_client(monkeypatch, [*mains, *_pasta_sides(25), broccoli]) as client:
+        plan = _week_ahead(client, COMPOSITION[:2])
+
+    assert {d["recipe"]["slug"] for d in plan["days"] if d["role_id"] == "vegetable"} == {"broccoli-stirfry"}
+
+
+def test_a_vegetable_swap_never_offers_a_side_not_led_by_vegetables(monkeypatch):
+    mains = [_dish(slug, "main", ingredient, 400, calories=kcal) for slug, ingredient, kcal in MAINS]
+    broccoli = _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100)
+    with dish_client(monkeypatch, [*mains, broccoli, *_pasta_sides(1)]) as client:
+        plan = _week_ahead(client, COMPOSITION[:2])
+        vegetable = next(d for d in plan["days"] if d["day_index"] == 3 and d["role_id"] == "vegetable")
+        preview = client.post(
+            f"/api/plans/{plan['id']}/replan/preview",
+            json={"entry_id": vegetable["entry_id"], "event_type": "REPLACE_MEAL"},
+        )
+
+    assert vegetable["recipe"]["slug"] == "broccoli-stirfry"
+    assert preview.status_code == 422, preview.text  # the pasta is no vegetable to swap in
+    assert "Broccoli Stirfry" in preview.json()["detail"]
+
+
 def test_a_change_that_goes_over_the_weekly_budget_is_saved_as_over_it(composed_client):
     from datetime import date, timedelta
 

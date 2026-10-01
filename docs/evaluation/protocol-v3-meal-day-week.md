@@ -95,6 +95,11 @@ Developer episode `mdw-dev-020` (budget S$52.50) needs it: its earlier witness
 used a lost-line recipe, and without that recipe the consumed-cost week costs
 S$63.43, while the package-sharing week costs S$45.95.
 
+Since 2026-10-02 a vegetable role (`vegetable`, `vegetable-2`) takes only a
+dish led by vegetables, as the product's does (owner decision 2026-10-02; the
+definition is `backend/app/planning/vegetable_led.py`). Every developer label
+stayed proven under it. Protocol v2 labels keep the old rule.
+
 ## 3. Categories
 
 | Category | What it tests |

@@ -186,3 +186,30 @@ def test_a_label_never_uses_a_recipe_the_product_never_plans():
     roles = [{"role_id": "main", "courses": ["main"], "required": True}]
     assert any(r["slug"] == lost_line for meal in valid_meals(episode, roles) for _, r in meal)
     assert all(r["slug"] != lost_line for meal in valid_meals(episode, roles, "lunch") for _, r in meal)
+
+
+def _led(recipe: dict) -> bool:
+    from app.planning.vegetable_led import vegetable_led
+
+    return vegetable_led((line["ingredient"], line["quantity"]) for line in recipe["ingredients"])
+
+
+def test_every_vegetable_the_product_plans_is_led_by_vegetables():
+    """Owner, 2026-10-02: the walkthrough's vegetables were "Fettuccine Noodles" and "Refried Beans"; five of
+    this week's seven were potato, chicken and rice salads and sides."""
+    from app.evaluation.release_catalog import load_release_catalog
+
+    response, _ = run_episode(load("mdw-dev-007"))
+    recipes = load_release_catalog().by_slug
+    vegetables = [a["recipe_id"] for a in response["plan"]["assignments"] if a["role_id"] == "vegetable"]
+    assert len(vegetables) == 7
+    assert all(_led(recipes[slug]) for slug in vegetables), [recipes[s]["title"] for s in vegetables]
+
+
+def test_a_label_fills_the_vegetable_role_only_with_a_vegetable_dish():
+    from app.evaluation.multidish_labels import valid_meals
+
+    episode = load("mdw-dev-007")
+    roles = [{"role_id": "vegetable", "courses": ["side", "salad"], "required": True}]
+    assert {_led(r) for meal in valid_meals(episode, roles) for _, r in meal} == {True, False}  # protocol v2
+    assert {_led(r) for meal in valid_meals(episode, roles, "dinner") for _, r in meal} == {True}

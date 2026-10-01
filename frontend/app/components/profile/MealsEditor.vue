@@ -62,7 +62,8 @@ function dishLabel(item: MealRole): string {
   if (item.courses.includes("main")) return item.role_id === "main" ? "Main dish" : "Another main";
   if (item.courses.includes("soup")) return "Soup";
   if (item.courses.includes("breakfast")) return "Breakfast dish";
-  return "Vegetable or side";
+  // The vegetable role takes only a side or salad led by vegetables (owner, 2026-10-02).
+  return "Vegetable side or salad";
 }
 </script>
 

@@ -104,7 +104,7 @@ def test_composed_meal_preserves_all_roles_shares_and_source_objects():
     assert result["assignments"] == [a.model_dump() for a in selected]
     assert {line["ingredient_id"]: line["required_quantity"] for line in result["shopping"]["lines"]} == {
         "chicken-base": 240,
-        "greens-base": 160,
+        "spinach": 160,
         "broth-base": 160,
     }
     assert problem.model_dump_json() == original
