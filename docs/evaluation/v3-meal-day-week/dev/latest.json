@@ -178,8 +178,10 @@
       "refusal": {
         "status": "candidate_rejected",
         "evidence": "bounded_search_exhausted",
-        "weeks_tried": 0,
-        "unmet_checks": {},
+        "weeks_tried": 1,
+        "unmet_checks": {
+          "purchase_budget failed": 1
+        },
         "search_exhausted": false,
         "input_issues": []
       }
@@ -491,7 +493,7 @@
     }
   ],
   "episode_set": "developer set",
-  "code_revision": "5692e36c535ca129ab7b04689ec1d2fe4522444f",
+  "code_revision": "f0ccd219a03bf576b696a8f196c8fb3b6d3063ee",
   "inputs": {
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",
