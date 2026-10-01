@@ -144,6 +144,17 @@ def test_a_tight_budget_week_fills_its_optional_dishes_when_they_fit():
     assert row["dishes"] == 35, row
 
 
+def test_a_filled_week_comes_before_a_more_varied_one_with_optional_dishes_left_out():
+    """S$105 for two: the beam held a filled week of 8 distinct dishes, but the most varied week first
+    picked 9 distinct with four vegetables left out (owner decision 2026-10-02, amending ADR-0045)."""
+    meals = {"breakfast": BREAKFAST, "lunch": [DINNER[0], DINNER[1]], "dinner": DINNER}
+    episode = synthetic("syn-var-057", meals, budget=105.0, size=2)
+    row = evaluate([episode])["episodes"][0]
+    assert row["strict_success"], row
+    assert row["total_cost_sgd"] <= 105.0
+    assert row["dishes"] == 35, row
+
+
 def test_a_no_repeats_week_keeps_enough_candidates_for_every_meal():
     """mdw-dev-021: eight candidates a role ran out before Sunday once no dish could come back."""
     row = evaluate([load("mdw-dev-021")])["episodes"][0]
