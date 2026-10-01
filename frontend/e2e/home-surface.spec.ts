@@ -423,7 +423,13 @@ test("applied changes are listed in the week panel", async ({ page }) => {
   await page.route("**/api/plans/9001/events", route => route.fulfill({
     status: 200,
     contentType: "application/json",
-    body: JSON.stringify({ items: [replanEvent, { ...replanEvent, id: 8, status: "pending", applied_at: null }] }),
+    body: JSON.stringify({ items: [
+      replanEvent,
+      { ...replanEvent, id: 8, status: "pending", applied_at: null },
+      { ...replanEvent, id: 9, event_type: "CHANGE_SHAPE", before_entry: null, after_entry: null, reason: null, shape_change: {
+        meal_type: "dinner", scope: "meal", day_indexes: [4], roles: null, removed: [], added: [], plan_shape: null,
+      } },
+    ] }),
   }));
   await page.goto("/");
   await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
@@ -439,6 +445,9 @@ test("applied changes are listed in the week panel", async ({ page }) => {
   await expect(week.getByText("Salmon was out of stock")).toBeVisible();
   // A pending suggestion is not history: only the applied event is listed.
   await expect(week.getByText("Miso Tofu Bowl")).toHaveCount(1);
+  // A meal change names the plan's own weekday, as its preview did, never "day 4".
+  const fourthDay = new Date(`${isoDay(0)}T00:00:00Z`).toLocaleDateString("en-SG", { weekday: "short", timeZone: "UTC" });
+  await expect(week.getByText(`No dinner on ${fourthDay}`)).toBeVisible();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/13-changes.png` });
 });
 
@@ -462,6 +471,49 @@ test("opening the app shows the newest plan, and says when that week has ended",
   await page.waitForTimeout(600);
   await expect(week.getByText("Old Tofu Brown Rice Stir-fry").first()).toBeVisible();
   await expect(page.getByText(/This plan ended on .* plan a new one\./)).toBeVisible();
+  // No conversation planned 9002, so a fresh one opens: conversation 51 stays in the recent list,
+  // and neither its messages nor a card of the week appear inside the conversation.
+  const conversation = page.getByRole("region", { name: "Conversation" });
+  await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
+  await expect(conversation.getByRole("region", { name: "Your week" })).toBeHidden();
+  await expect(page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /Dinners for two this week/ })).toBeVisible();
+});
+
+test("reopening the app opens the conversation that planned the week, not the newest one", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await stubApi(page);
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  // The newest conversation is off topic and planned nothing; conversation 51 planned the current week.
+  const offTopic = {
+    ...session(false),
+    id: 60,
+    status: "collecting",
+    can_confirm: false,
+    plan_id: null,
+    messages: [
+      { id: 10, role: "user", content: "something nice", created_at: "2026-09-15T08:00:00Z" },
+      { id: 11, role: "assistant", content: "I plan meals and shopping. Who's eating this week?", created_at: "2026-09-15T08:00:01Z" },
+    ],
+    updated_at: "2026-09-15T08:00:01Z",
+  };
+  await page.route("**/api/agent/sessions?limit=8", route => route.fulfill(json({ items: [offTopic, session(true)] })));
+  await page.route("**/api/plans", route => route.fulfill(json({ items: [{ ...plan, purchase_total_sgd: 82.6, consumed_total_sgd: null, within_weekly_budget: true }] })));
+
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByRole("button", { name: "Open my week" }).click();
+
+  const conversation = page.getByRole("region", { name: "Conversation" });
+  await expect(conversation.getByText("Seven dinners for S$82.60")).toBeVisible();
+  await expect(conversation.getByRole("region", { name: "Your week" })).toBeVisible();
+  await expect(conversation.getByText("something nice")).toBeHidden();
+  await expect(page.getByRole("complementary", { name: "This week" }).getByText("Tofu Brown Rice Stir-fry").first()).toBeVisible();
+
+  // The off-topic conversation, opened from the list, shows only itself: no card of another week.
+  await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: "something nice" }).click();
+  await expect(conversation.getByText("I plan meals and shopping.")).toBeVisible();
+  await expect(conversation.getByRole("region", { name: "Your week" })).toBeHidden();
+  await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
 });
 
 test("a session that expires mid-sentence keeps the draft and comes back to it", async ({ page }) => {

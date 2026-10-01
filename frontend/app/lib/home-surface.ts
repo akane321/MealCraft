@@ -198,3 +198,12 @@ export function sameDishChange(event: Pick<MealPlanReplanEvent, "event_type" | "
   if (event.event_type === "CANCEL_MEAL") return `Skip ${title}`;
   return null;
 }
+
+/**
+ * The conversation to reopen beside the household's current week: the one that planned it, which is
+ * also the only one that can change it. None when no conversation made it (a week rebuilt on the
+ * profile page), so the week shows beside a fresh conversation, never inside an unrelated one.
+ */
+export function conversationForPlan<T extends { plan_id: number | null }>(conversations: T[], planId: number | null): T | null {
+  return planId === null ? null : conversations.find(item => item.plan_id === planId) ?? null;
+}

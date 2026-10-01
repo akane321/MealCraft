@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetLine, groceryGroups, packageLabel, perDinner, plateStyle, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
+import { budgetLine, conversationForPlan, groceryGroups, packageLabel, perDinner, plateStyle, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
 import type { MealPlanEntrySnapshot, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
@@ -134,5 +134,21 @@ describe("sameDishChange", () => {
   it("leaves a swap to show both dishes", () => {
     expect(sameDishChange({ event_type: "REPLACE_MEAL", before_entry: before })).toBeNull();
     expect(sameDishChange({ event_type: "ITEM_UNAVAILABLE", before_entry: before })).toBeNull();
+  });
+});
+
+describe("conversationForPlan", () => {
+  // The newest conversation first, as the recent list comes back.
+  const offTopic = { id: 3, plan_id: null };
+  const planner = { id: 2, plan_id: 9001 };
+  const older = { id: 1, plan_id: 8000 };
+
+  it("reopens the conversation that planned the current week, not the newest one", () => {
+    expect(conversationForPlan([offTopic, planner, older], 9001)).toBe(planner);
+  });
+
+  it("opens a fresh conversation when no conversation planned the current week, or there is none", () => {
+    expect(conversationForPlan([offTopic, planner], 9002)).toBeNull();
+    expect(conversationForPlan([offTopic, planner], null)).toBeNull();
   });
 });

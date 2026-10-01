@@ -21,6 +21,7 @@ from app.schemas.meal_plan import (
 )
 from app.schemas.product import PricingMode
 from app.schemas.recommendation import (
+    NO_COOKING_TIME_LIMIT,
     AvailableIngredientInput,
     DietaryPreference,
     HealthPreference,
@@ -90,7 +91,8 @@ class AgentConstraintExtraction(BaseModel):
 
 class AgentConstraintState(BaseModel):
     household_size: int | None = None
-    max_cooking_time_minutes: int = 60
+    # A conversation with no saved household starts with no time limit, not one it never stated.
+    max_cooking_time_minutes: int = NO_COOKING_TIME_LIMIT
     budget_per_meal_sgd: float | None = None
     weekly_budget_sgd: float | None = None
     allergens: list[str] = Field(default_factory=list)

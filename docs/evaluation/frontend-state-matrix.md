@@ -7,13 +7,13 @@ critical browser path against an isolated test backend or the local stack.
 | Surface | Loading | Empty / first use | Success | Recoverable error | Constraint / safety state |
 |---|---|---|---|---|---|
 | Home: entry | film loading (poster shown) | starter prompts | chat opens on send | sign-in required, draft kept | none before sign-in |
-| Home: conversation | assistant thinking | "who's eating, what you can spend" prompt | structured clarification, **Plan my week**, reply | request failure shown in the conversation | clarification and non-medical boundary visible |
+| Home: conversation | assistant thinking | "who's eating, what you can spend" prompt; on reopening, the conversation that planned the current week, else a fresh one (never another conversation's week card) | structured clarification, **Plan my week**, reply | request failure shown in the conversation | clarification and non-medical boundary visible |
 | Home: week panel | plan loading | "shows up once planned" | 7 dinners with status, tonight, tutorial | tutorial unavailable says so | allergen note on the recipe view |
 | Home: kitchen panel | plan loading | "shows up once planned" | cooked nutrition, shopping list against budget | not-priced items listed | price source labelled (FairPrice with date, saved, sample) |
 | Home: nutrition details | — | no cooked dinners (actuals zero) | six nutrients, cumulative curve, daily detail | status update failure message | only cooked dinners counted as actual |
 | Home: shopping sheet | — | — | printable preview, Export PDF | — | sample prices and allergen caveat printed |
 | Replanning preview (in conversation) | previewing | no pending change | before/after with calorie and grocery deltas | invalid or stale change rejected | explicit confirm before persistence |
-| Household profile | current profile loading | editable default household | saved version and planning action | validation/API message | allergies limited to the checked list, separated from health preferences |
+| Household profile | current profile loading | editable new household with no limit, budget, target or health preference filled in | saved version and planning action | validation/API message | allergies limited to the checked list, separated from health preferences |
 
 ## Critical task flow
 

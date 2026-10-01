@@ -18,6 +18,7 @@ from app.main import app
 from app.models.platform import HouseholdMembership
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 from app.retrieval import tutorials
+from app.schemas.recommendation import NO_COOKING_TIME_LIMIT
 
 
 @pytest.fixture
@@ -1556,6 +1557,29 @@ def test_a_new_conversation_starts_from_the_saved_household(recipe_client: TestC
     assert constraints["allergens"] == ["peanut"]
     assert set(constraints["excluded_ingredients"]) == {"pork", "mushroom"}
     assert "household_size" not in session["missing_fields"]
+
+
+def test_a_household_that_enters_no_limits_is_saved_and_planned_with_none(recipe_client: TestClient) -> None:
+    """Only what the household enters is a constraint: a profile with just who is eating saves, and it
+    and the conversations started from it carry no time limit, budget, target or health preference."""
+    saved = recipe_client.post("/api/household-profiles", json={"name": "New household", "members": [{"name": "A"}]})
+    assert saved.status_code == 201, saved.text
+    current = saved.json()["current"]
+    assert current["max_cooking_time_minutes"] == NO_COOKING_TIME_LIMIT
+    assert current["budget_per_meal_sgd"] is None and current["weekly_budget_sgd"] is None
+    assert current["health_preferences"] == []
+    assert set(current["nutrition_targets"].values()) == {None}
+    assert current["max_sodium_mg_per_meal"] is None
+
+    constraints = recipe_client.post("/api/agent/sessions", json={"message": "Plan my dinners."}).json()["constraints"]
+    assert constraints["max_cooking_time_minutes"] == NO_COOKING_TIME_LIMIT
+    assert constraints["weekly_budget_sgd"] is None and constraints["health_preferences"] == []
+    assert set(constraints["nutrition_targets"].values()) == {None}
+
+
+def test_a_conversation_with_no_saved_household_starts_with_no_time_limit(recipe_client: TestClient) -> None:
+    session = recipe_client.post("/api/agent/sessions", json={"message": "Dinners for two."}).json()
+    assert session["constraints"]["max_cooking_time_minutes"] == NO_COOKING_TIME_LIMIT
 
 
 def test_an_agent_run_stores_the_parser_configuration(recipe_client: TestClient) -> None:

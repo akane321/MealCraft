@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { allergenLabel } from "~/lib/allergens";
 import { budgetLine, formatSgd, groceryGroups, plateStyle, sameDishChange } from "~/lib/home-surface";
+import { statedTimeLimit } from "~/lib/household-profile";
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
-import { shapeChangeSummary } from "~/lib/plan-shape";
+import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
 import type { AgentMessage, AgentSession } from "~/types/agent";
 import type { MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection } from "~/types/meal-plan";
 
@@ -57,7 +58,7 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
   return [
     ...(c.household_size ? [{ text: "For", value: String(c.household_size) }] : []),
     ...(c.weekly_budget_sgd ? [{ text: "Budget", value: `S$${c.weekly_budget_sgd}` }] : []),
-    ...(c.max_cooking_time_minutes ? [{ text: "Up to", value: `${c.max_cooking_time_minutes} min` }] : []),
+    ...(statedTimeLimit(c.max_cooking_time_minutes) ? [{ text: "Up to", value: `${c.max_cooking_time_minutes} min` }] : []),
     ...c.dietary_preferences.map(value => ({ text: "", value: value.replaceAll("_", " ") })),
     ...c.excluded_ingredients.map(value => ({ text: "No", value: value.replaceAll("_", " ") })),
     ...c.allergens.map(value => ({ text: "No", value: allergenLabel(value).toLowerCase(), alert: true })),
@@ -87,26 +88,22 @@ const swapOverBudget = computed(() => {
   return after > current.weekly_budget_sgd ? formatSgd(after - current.weekly_budget_sgd) : null;
 });
 // A meal added, dropped or recomposed (ADR-0046): the new dishes by day, before the household confirms.
-const planDay = (dayIndex: number) => {
-  const start = plan.value?.start_date;
-  if (!start) return `day ${dayIndex}`;
-  const date = new Date(`${start}T00:00:00Z`);
-  date.setUTCDate(date.getUTCDate() + dayIndex - 1);
-  return formatPlanDate(date.toISOString().slice(0, 10), { weekday: "short" });
-};
 const shapePreview = computed(() => {
   const change = session.value?.pending_replan?.shape_change;
   if (!change) return null;
   const byDay = new Map<number, string[]>();
   for (const dish of change.added) byDay.set(dish.day_index ?? 0, [...(byDay.get(dish.day_index ?? 0) ?? []), dish.recipe_title]);
   return {
-    title: shapeChangeSummary(change, planDay),
-    days: [...byDay.entries()].map(([day, titles]) => ({ day: planDay(day), titles })),
+    title: shapeChangeSummary(change, plan.value?.start_date),
+    days: [...byDay.entries()].map(([day, titles]) => ({ day: planDayLabel(plan.value?.start_date, day), titles })),
     slugs: change.added.slice(0, 3).map(dish => dish.recipe_slug),
     removed: change.removed.length,
   };
 });
-const showWeek = computed(() => Boolean(plan.value && days.value.length && !session.value?.can_confirm && !session.value?.pending_replan));
+// The week shown in the panel belongs to this conversation only when the conversation planned it;
+// its card and follow-ups never appear inside another conversation.
+const ownsPlan = computed(() => Boolean(plan.value && session.value?.plan_id === plan.value.id));
+const showWeek = computed(() => Boolean(ownsPlan.value && days.value.length && !session.value?.pending_replan));
 const initials = computed(() => (actor.value?.user.display_name ?? "?")
   .split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]!.toUpperCase()).join(""));
 const home = computed(() => {
@@ -146,18 +143,26 @@ async function requireAccount(): Promise<boolean> {
 async function enter() {
   if (!(await requireAccount())) return;
   view.value = "app";
-  if (!session.value) await agent.restoreLatest();
-  // The newest plan wins, even over the one the last conversation made: a week
-  // rebuilt on the profile page has no conversation of its own.
-  await loadLatestPlan();
+  // The household's current week is its newest plan. It reopens with the conversation that planned
+  // it; a week with no conversation (rebuilt on the profile page) opens beside a fresh one.
+  const current = await currentPlanId();
+  if (!session.value) await agent.restore(current);
+  // An open conversation keeps its own week; one that has not planned yet shows the current week.
+  const shown = session.value?.plan_id ?? current;
+  if (shown) await loadPlan(shown);
+}
+
+async function currentPlanId(): Promise<number | null> {
+  try {
+    const latest = await apiFetch<WeeklyMealPlanCollection>(`${config.public.apiBase}/api/plans`);
+    return latest.items[0]?.id ?? null;
+  }
+  catch { return null; /* no plan yet is not an error */ }
 }
 
 async function loadLatestPlan() {
-  try {
-    const latest = await apiFetch<WeeklyMealPlanCollection>(`${config.public.apiBase}/api/plans`);
-    if (latest.items[0]) await loadPlan(latest.items[0].id);
-  }
-  catch { /* no plan yet is not an error */ }
+  const current = await currentPlanId();
+  if (current) await loadPlan(current);
 }
 
 async function send(text = draft.value) {
@@ -532,14 +537,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               v-model="draft"
               type="text"
               autocomplete="off"
-              :placeholder="interaction?.prompt || (plan ? 'Swap a night, change the budget, use up what\'s in the fridge…' : 'Who\'s eating, what to spend, anything to avoid…')"
+              :placeholder="interaction?.prompt || (ownsPlan ? 'Swap a night, change the budget, use up what\'s in the fridge…' : 'Who\'s eating, what to spend, anything to avoid…')"
             >
             <button type="submit" class="send" aria-label="Send" :disabled="isLoading || !draft.trim()">
               <svg class="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
           </form>
           <div class="after">
-            <template v-if="plan">
+            <template v-if="ownsPlan">
               <button v-for="text in followUps" :key="text" type="button" class="suggest" @click="suggest(text)">{{ text }}</button>
             </template>
             <span class="fine">Suggestions can be wrong. Check allergens on product labels.</span>
@@ -565,7 +570,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <button id="tab-nutrition" type="button" role="tab" class="tab" :aria-selected="tab === 'nutrition'" aria-controls="panel-body" @click="tab = 'nutrition'">Nutrition</button>
           </div>
           <div id="panel-body" class="panel-body" role="tabpanel" :aria-labelledby="`tab-${tab}`">
-            <HomeMealList v-if="tab === 'dinners'" :days="days" :plan-id="plan.id" :revision="plan.revision" @open-recipe="recipeSlug = $event" @ask="suggest" />
+            <HomeMealList v-if="tab === 'dinners'" :days="days" :plan-id="plan.id" :revision="plan.revision" :start-date="plan.start_date" @open-recipe="recipeSlug = $event" @ask="suggest" />
             <HomeGroceryList v-else-if="tab === 'groceries'" :estimate="plan.grocery_estimate" />
             <HomeNutritionSummary
               v-else-if="nutrition.dashboard.value"

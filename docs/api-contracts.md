@@ -191,7 +191,11 @@ member's safety constraints into the shared-plan hard constraints.
 
 Shared defaults include cooking time, per-meal and weekly budgets, general
 health preferences, user-entered nutrition targets, an optional sodium target,
-available ingredients, and fixture/live pricing mode. Creating a profile writes
+available ingredients, and fixture/live pricing mode. Each is only what the
+household enters: an omitted budget, target, sodium ceiling or health preference
+is none, and an omitted cooking time is no limit, stored as the widest the
+planner accepts (240 minutes, `NO_COOKING_TIME_LIMIT`). A conversation with no
+saved profile starts from the same empty state. Creating a profile writes
 version 1. `PUT` requires `expected_version`; a successful edit appends an
 immutable version, while a stale edit returns HTTP 409.
 
@@ -417,8 +421,10 @@ quantity input; other questions continue to work through the messages endpoint.
 `POST /api/agent/sessions/{session_id}/confirm` is accepted only when
 `can_confirm=true`. It passes the validated state to the same deterministic
 weekly planner used by `/api/plans/generate`, returns the generated plan, and
-stores its ID on the agent session. `GET` endpoints allow the frontend to resume
-the latest conversation after a reload or container restart.
+stores its ID on the agent session. `GET` endpoints let the frontend resume after
+a reload or container restart: the home page reopens the conversation whose
+`plan_id` is the household's current (newest) plan, the only conversation that
+can change it, and otherwise a fresh conversation beside that week.
 
 The default parser is deterministic fixture mode. Optional OpenAI mode uses the
 same Pydantic extraction contract. Neither parser makes medical recommendations,

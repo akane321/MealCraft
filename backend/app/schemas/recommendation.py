@@ -7,6 +7,8 @@ from app.schemas.recipe import RecipeListItemResponse
 
 DietaryPreference = Literal["vegetarian", "vegan", "gluten-free", "dairy-free"]
 HealthPreference = Literal["low-sodium", "low-sugar", "lower-calorie"]
+# A household that states no cooking-time limit: the longest a planning request accepts.
+NO_COOKING_TIME_LIMIT = 240
 
 
 class NutritionTargets(BaseModel):

@@ -1,3 +1,4 @@
+import { conversationForPlan } from "~/lib/home-surface";
 import type {
   AgentConfirmation,
   AgentInteractionAnswer,
@@ -92,13 +93,15 @@ export function useMealCraftAgent() {
     if (result) session.value = result;
   }
 
-  async function restoreLatest() {
+  /** Fills the recent list and reopens the conversation that planned `planId`; with none, a fresh one stays. */
+  async function restore(planId: number | null) {
     const result = await run(() => apiFetch<AgentSessionCollection>(
       `${config.public.apiBase}/api/agent/sessions`,
       { query: { limit: 8 } },
     ));
-    if (result) recent.value = result.items;
-    if (result?.items[0]) session.value = result.items[0];
+    if (!result) return;
+    recent.value = result.items;
+    session.value = conversationForPlan(result.items, planId);
   }
 
   function reset() {
@@ -119,7 +122,7 @@ export function useMealCraftAgent() {
     recent,
     reply,
     reset,
-    restoreLatest,
+    restore,
     session,
   };
 }
