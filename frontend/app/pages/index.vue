@@ -25,8 +25,10 @@ const household = useHouseholdProfile();
 
 const view = ref<"landing" | "app">("landing");
 const draft = ref("");
-// The week a dish action in the draft changes, when the open conversation did not plan that week.
-const draftWeek = ref<number | null>(null);
+// A dish's button or a follow-up chip on a week the open conversation did not plan: its words and that week.
+const dishAction = ref<{ text: string; week: number } | null>(null);
+// Such an action that would set aside this conversation's "Plan my week", waiting for the household's answer.
+const takeOn = ref<{ message: string; week: number } | null>(null);
 const plan = ref<WeeklyMealPlan | null>(null);
 // A request in flight, a failed one and "nothing planned yet" are three different states.
 const planState = ref<"empty" | "loading" | "error" | "ready">("empty");
@@ -106,8 +108,9 @@ const shapePreview = computed(() => {
 // its card never appears inside another conversation.
 const ownsPlan = computed(() => Boolean(plan.value && session.value?.plan_id === plan.value.id));
 const showWeek = computed(() => Boolean(ownsPlan.value && days.value.length && !session.value?.pending_replan));
-// A conversation that planned no week changes the one beside it by taking it on (see send).
+// A conversation that planned no week changes the one beside it (see send).
 const canChangeWeek = computed(() => Boolean(plan.value && (ownsPlan.value || !session.value?.plan_id)));
+const readyToPlan = computed(() => Boolean(session.value?.can_confirm && session.value.status !== "planned"));
 const initials = computed(() => (actor.value?.user.display_name ?? "?")
   .split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]!.toUpperCase()).join(""));
 const home = computed(() => {
@@ -164,10 +167,20 @@ async function currentPlanId(): Promise<number | null> {
   catch { return null; /* no plan yet is not an error */ }
 }
 
-/** The household's current week in the panel, unless the open conversation has (meanwhile) a week of its own. */
-async function loadLatestPlan() {
-  const current = await currentPlanId();
-  if (current && !session.value?.plan_id) await loadPlan(current);
+/** The panel's week: the open conversation's own, else the household's current week. */
+async function loadShownPlan() {
+  planState.value = "loading";
+  const current = session.value?.plan_id ? null : await currentPlanId();
+  // The open conversation may have changed, or planned, while the current week was looked up.
+  const shown = session.value?.plan_id ?? current;
+  if (shown) await loadPlan(shown);
+  else planState.value = "empty";
+}
+
+/** The week a message changes for a conversation that did not plan it: while the draft still starts with a dish action's words. */
+function actionWeek(message: string): number | null {
+  const action = dishAction.value;
+  return !session.value?.plan_id && action && message.startsWith(action.text) ? action.week : null;
 }
 
 async function send(text = draft.value) {
@@ -176,12 +189,23 @@ async function send(text = draft.value) {
   draft.value = message;
   if (!(await requireAccount())) return;
   view.value = "app";
+  takeOn.value = null;
+  // A dish action on a week this conversation did not plan changes that week, never plans a new one. It goes
+  // to the conversation that planned the week when that one is in the recent list, so one conversation holds
+  // a week; else this conversation takes the week on, after asking if that sets aside its "Plan my week".
+  const week = actionWeek(message);
+  const planner = week ? agent.recent.value.find(item => item.plan_id === week) : undefined;
+  if (planner) {
+    openSession(planner);
+    draft.value = message;
+  }
+  else if (week) {
+    if (readyToPlan.value) takeOn.value = { message, week };
+    else await changeWeek(message, week);
+    return;
+  }
   const pending = interaction.value;
-  // A dish action on a week this conversation did not plan (one made on the profile page, or beside an
-  // unrelated question): the conversation takes that week on and changes it, never plans a new one.
-  const week = session.value?.plan_id ? null : draftWeek.value;
-  if (week) await (session.value ? agent.reply(message, week) : agent.create(message, week));
-  else if (pending?.allow_free_text) {
+  if (pending?.allow_free_text) {
     await agent.answerInteraction({
       question_id: pending.question_id,
       option_ids: [],
@@ -193,6 +217,18 @@ async function send(text = draft.value) {
   else if (session.value) await agent.reply(message);
   else await agent.create(message);
   if (!errorMessage.value) draft.value = "";
+}
+
+/** This conversation takes `week` on and changes it with `message`. */
+async function changeWeek(message: string, week: number) {
+  takeOn.value = null;
+  await (session.value ? agent.reply(message, week) : agent.create(message, week));
+  if (!errorMessage.value) draft.value = "";
+}
+
+function keepPlanning() {
+  takeOn.value = null;
+  draft.value = "";
 }
 
 async function choose(optionId: string) {
@@ -227,7 +263,7 @@ async function loadPlan(planId: number) {
 
 function retryPlan() {
   if (lastPlanId.value) void loadPlan(lastPlanId.value);
-  else void loadLatestPlan();
+  else void loadShownPlan();
 }
 
 async function setStatus(entryId: number, status: MealPlanEntryStatus) {
@@ -241,7 +277,7 @@ function openTab(name: Tab) {
 
 function suggest(text: string) {
   draft.value = text;
-  draftWeek.value = ownsPlan.value ? null : plan.value?.id ?? null;
+  dishAction.value = !ownsPlan.value && plan.value ? { text, week: plan.value.id } : null;
   ask.value?.focus();
 }
 
@@ -260,32 +296,34 @@ function toggleFilm() {
   else video.pause();
 }
 
-function startFresh() {
-  // Keep the conversation being left in the recent list.
+/**
+ * Shows `item` (null: a new conversation) with its own week in the panel, or the household's current
+ * week when it planned none. Every switch of conversation goes through here.
+ */
+function showConversation(item: AgentSession | null) {
+  // Keep the conversation being left in the recent list, as it is now (its listed copy may be older).
   const leaving = session.value;
-  if (leaving?.messages.length && !agent.recent.value.some(item => item.id === leaving.id)) {
-    agent.recent.value = [leaving, ...agent.recent.value];
+  if (leaving?.messages.length) {
+    agent.recent.value = [leaving, ...agent.recent.value.filter(other => other.id !== leaving.id)];
   }
   agent.reset();
+  session.value = item;
   plan.value = null;
-  planState.value = "empty";
   lastPlanId.value = null;
   nutrition.dashboard.value = null;
   draft.value = "";
+  dishAction.value = null;
+  takeOn.value = null;
   ask.value?.focus();
+  void loadShownPlan();
 }
 
-// A conversation that has planned nothing yet shows the household's current week, as on reopening.
 function newChat() {
-  startFresh();
-  void loadLatestPlan();
+  showConversation(null);
 }
 
 function openSession(item: AgentSession) {
-  if (item.id === session.value?.id) return;
-  startFresh();
-  session.value = item;
-  if (!item.plan_id) void loadLatestPlan();
+  if (item.id !== session.value?.id) showConversation(item);
 }
 
 function onKey(event: KeyboardEvent) {
@@ -318,7 +356,7 @@ useDialog(preview, () => { previewOpen.value = false; }, previewOpen);
 
 // Kept as it is typed, so a session that expires mid-sentence loses nothing (restored on mount).
 watch(draft, (value) => {
-  if (!value) draftWeek.value = null;
+  if (!value) dishAction.value = null;
   try { sessionStorage.setItem(DRAFT_KEY, value); }
   catch { /* storage may be blocked; the draft is only a convenience */ }
 });
@@ -465,7 +503,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               </button>
             </div>
 
-            <div v-if="session?.can_confirm && session.status !== 'planned'" class="card mc-rise">
+            <div v-if="readyToPlan" class="card mc-rise">
               <div v-if="heard.length" class="heard">
                 <span v-for="item in heard" :key="item.text + item.value" class="mc-chip" :class="{ alert: item.alert }">{{ item.text }} <b>{{ item.value }}</b></span>
               </div>
@@ -473,6 +511,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirm()">
                 {{ isLoading ? "Planning your week…" : "Plan my week" }}
               </button>
+            </div>
+
+            <div v-if="takeOn" class="card mc-rise" aria-label="Change the current week here?">
+              <p>This conversation is ready to plan a new week. Changing the current week here sets that aside.</p>
+              <div class="acts">
+                <button type="button" class="mc-primary" :disabled="isLoading" @click="changeWeek(takeOn.message, takeOn.week)">Change the current week</button>
+                <button type="button" class="mc-pill" :disabled="isLoading" @click="keepPlanning">Keep planning</button>
+              </div>
             </div>
 
             <HomeWeekCard
@@ -741,7 +787,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .to { font-size: 18px; line-height: 1.2; font-weight: 400; }
 .swap-card small { display: block; margin-top: 3px; color: var(--t3); font-size: 12px; }
 .swap-card .over-budget { color: var(--warn); }
-.swap-card .acts { grid-column: 1 / -1; display: flex; gap: 8px; }
+.swap-card .acts { grid-column: 1 / -1; }
+.swap-card .acts, .card .acts { display: flex; gap: 8px; }
 .shape-card .plates .plate { --size: 40px; opacity: 1; filter: none; }
 .shape-card .plates .plate + .plate { margin-left: -14px; }
 .shape-days { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; color: var(--t2); font-size: 12.5px; }

@@ -440,10 +440,17 @@ beside an unrelated conversation) is changed the same way: the create and
 messages endpoints accept an optional `plan_id`, the household's week the message
 changes. A conversation with no plan of its own takes that week on (its
 `plan_id` is set, `status` becomes `planned`, and any planning question it was
-still asking is dropped), and the message goes to the replanning loop below. The
-home page sends it only with a dish's Swap, Keep, Skip or Can't buy, or a
-follow-up chip, on such a week. A conversation that already has another week
-returns HTTP 409, and a week outside the household HTTP 404.
+still asking is dropped), and the message goes to the replanning loop below. A
+conversation that already has another week returns HTTP 409, and a week outside
+the household HTTP 404.
+
+The home page sends `plan_id` only for a dish's Swap, Keep, Skip or Can't buy,
+or a follow-up chip, on such a week, and only while the message still starts
+with that button's words. If a conversation in the recent list holds that week,
+the page reopens it and sends the message there without `plan_id`, so normally
+one conversation holds a week. Only when none is at hand does the open
+conversation take the week on; one ready to plan a new week (**Plan my week**)
+asks first.
 
 After a session has produced a plan, the messages endpoint switches to the
 replanning loop. It accepts one user-triggered meal event at a time, resolves a
