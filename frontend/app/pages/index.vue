@@ -111,6 +111,13 @@ const showWeek = computed(() => Boolean(ownsPlan.value && days.value.length && !
 // A conversation that planned no week changes the one beside it (see send).
 const canChangeWeek = computed(() => Boolean(plan.value && (ownsPlan.value || !session.value?.plan_id)));
 const readyToPlan = computed(() => Boolean(session.value?.can_confirm && session.value.status !== "planned"));
+// Still asking what it needs to plan a new week: taking the current week on would drop that question.
+const settingUp = computed(() => {
+  const s = session.value;
+  return Boolean(s && !s.plan_id && (s.pending_interaction || s.missing_fields.length || s.clarification_questions.length));
+});
+// A conversation planning a new week of its own asks before a dish's change takes the current week on (see send).
+const planningNew = computed(() => readyToPlan.value || settingUp.value);
 const initials = computed(() => (actor.value?.user.display_name ?? "?")
   .split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]!.toUpperCase()).join(""));
 const home = computed(() => {
@@ -192,7 +199,7 @@ async function send(text = draft.value) {
   takeOn.value = null;
   // A dish action on a week this conversation did not plan changes that week, never plans a new one. It goes
   // to the conversation that planned the week when that one is in the recent list, so one conversation holds
-  // a week; else this conversation takes the week on, after asking if that sets aside its "Plan my week".
+  // a week; else this conversation takes the week on, after asking if that sets aside the new week it is planning.
   const week = actionWeek(message);
   const planner = week ? agent.recent.value.find(item => item.plan_id === week) : undefined;
   if (planner) {
@@ -200,7 +207,7 @@ async function send(text = draft.value) {
     draft.value = message;
   }
   else if (week) {
-    if (readyToPlan.value) takeOn.value = { message, week };
+    if (planningNew.value) takeOn.value = { message, week };
     else await changeWeek(message, week);
     return;
   }
@@ -346,6 +353,13 @@ watch(generatedPlan, (value) => {
 });
 watch(() => session.value?.plan_id, (planId) => {
   if (planId && planId !== plan.value?.id) void loadPlan(planId);
+});
+// The take-on question stands only while this conversation plans a new week: once it plans one
+// ("Plan my week") or stops, the question goes, and so do the dish's words it held in the composer.
+watch(planningNew, (planning) => {
+  if (planning || !takeOn.value) return;
+  if (draft.value === takeOn.value.message) draft.value = "";
+  takeOn.value = null;
 });
 watch(() => [messages.value.length, isLoading.value, session.value?.pending_replan?.id, showWeek.value], async () => {
   await nextTick();
@@ -514,7 +528,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             </div>
 
             <div v-if="takeOn" class="card mc-rise" aria-label="Change the current week here?">
-              <p>This conversation is ready to plan a new week. Changing the current week here sets that aside.</p>
+              <p>This conversation is {{ readyToPlan ? "ready to plan" : "still setting up" }} a new week. Changing the current week here sets that aside.</p>
               <div class="acts">
                 <button type="button" class="mc-primary" :disabled="isLoading" @click="changeWeek(takeOn.message, takeOn.week)">Change the current week</button>
                 <button type="button" class="mc-pill" :disabled="isLoading" @click="keepPlanning">Keep planning</button>

@@ -229,31 +229,33 @@ async function planWeek(page: Page) {
   await expect(page.getByText("Seven dinners for S$82.60")).toBeVisible();
 }
 
+// A conversation still asking what it needs to plan a new week: who the plan serves.
+const asking = {
+  ...session(false),
+  status: "collecting",
+  can_confirm: false,
+  constraints: { ...session(false).constraints, household_size: null },
+  messages: [{ id: 1, role: "user", content: "Plan dinners under S$15 per meal.", created_at: "2026-09-14T08:00:00Z" }],
+  context_version: 1,
+  pending_interaction: {
+    type: "single_select",
+    prompt: "How many people should this plan serve?",
+    field_path: "household_size",
+    question_id: "context-1:household_size",
+    options: [
+      { id: "household_size_1", label: "1 person", value: 1 },
+      { id: "household_size_2", label: "2 people", value: 2 },
+    ],
+    allow_free_text: true,
+    context_version: 1,
+    plan_revision: null,
+    expires_at: null,
+  },
+};
+
 test("a clarification option sends a stable structured answer", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await stubApi(page);
-  const asking = {
-    ...session(false),
-    status: "collecting",
-    can_confirm: false,
-    constraints: { ...session(false).constraints, household_size: null },
-    messages: [{ id: 1, role: "user", content: "Plan dinners under S$15 per meal.", created_at: "2026-09-14T08:00:00Z" }],
-    context_version: 1,
-    pending_interaction: {
-      type: "single_select",
-      prompt: "How many people should this plan serve?",
-      field_path: "household_size",
-      question_id: "context-1:household_size",
-      options: [
-        { id: "household_size_1", label: "1 person", value: 1 },
-        { id: "household_size_2", label: "2 people", value: 2 },
-      ],
-      allow_free_text: true,
-      context_version: 1,
-      plan_revision: null,
-      expires_at: null,
-    },
-  };
   await page.route("**/api/agent/sessions", route => route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify(asking) }));
   let answer: unknown = null;
   await page.route("**/api/agent/sessions/51/interactions", async (route) => {
@@ -740,6 +742,71 @@ test("a conversation ready to plan asks before a dish's change takes the current
   // Said yes: the conversation takes the week on and previews the change.
   await dish.getByRole("button", { name: "Skip" }).click();
   await page.getByRole("button", { name: "Send" }).click();
+  await question.getByRole("button", { name: "Change the current week" }).click();
+  await expect(page.getByRole("button", { name: "Confirm change" })).toBeVisible();
+  expect(sent).toHaveLength(1);
+  expect(sent[0]!.body).toEqual({ message: expect.stringMatching(/^Skip \w+day's Tofu Brown Rice Stir-fry$/), plan_id: 9001 });
+});
+
+test("planning the new week instead of answering the take-on question takes the question and the dish's words away", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await stubApi(page);
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  // Week 9001 was planned on the profile page; conversation 51 is ready to plan a new week, which becomes 9002.
+  const next = { ...plan, id: 9002 };
+  await page.route("**/api/agent/sessions?limit=8", route => route.fulfill(json({ items: [session(false)] })));
+  await page.route("**/api/plans", route => route.fulfill(json(planList)));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: { ...session(true), plan_id: 9002 }, plan: next })));
+  await page.route("**/api/plans/9002", route => route.fulfill(json(next)));
+  await page.route("**/api/plans/9002/dashboard", route => route.fulfill(json({ ...dashboard, plan_id: 9002 })));
+  await page.route("**/api/plans/9002/events", route => route.fulfill(json({ items: [] })));
+
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByRole("button", { name: "Open my week" }).click();
+  const dish = page.getByRole("complementary", { name: "This week" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" });
+  const question = page.getByLabel("Change the current week here?");
+  await dish.getByRole("button", { name: "Skip" }).click();
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(question).toBeVisible();
+
+  // "Plan my week" instead: this conversation now holds 9002, so the question about taking 9001 on is gone.
+  await page.getByRole("button", { name: "Plan my week" }).click();
+  await expect(page.getByText("Seven dinners for S$82.60")).toBeVisible();
+  await expect(question).toBeHidden();
+  await expect(page.getByLabel("Message MealCraft")).toHaveValue("");
+});
+
+test("a conversation still asking about a new week asks before a dish's change takes the current week on", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await stubApi(page);
+  const json = (body: unknown, status = 200) => ({ status, contentType: "application/json", body: JSON.stringify(body) });
+  // Week 9001 was planned on the profile page; a new conversation asks who the new week is for.
+  await page.route("**/api/plans", route => route.fulfill(json(planList)));
+  await page.route("**/api/agent/sessions", route => route.fulfill(json(asking, 201)));
+  const sent: Sent = [];
+  await page.route("**/api/agent/sessions/51/messages", (route) => {
+    const body = route.request().postDataJSON();
+    sent.push({ url: route.request().url(), body });
+    return route.fulfill(json(changing(asking, body.message, "CANCEL_MEAL")));
+  });
+
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByRole("button", { name: "Open my week" }).click();
+  await expect(page.getByRole("region", { name: "Home" })).toBeHidden();
+  await page.getByLabel("Message MealCraft").fill("Plan dinners under S$15 per meal.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByRole("button", { name: "2 people" })).toBeVisible();
+
+  // The dish's Skip asks first, and the household's own question stays.
+  const question = page.getByLabel("Change the current week here?");
+  await page.getByRole("complementary", { name: "This week" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(question).toContainText("still setting up a new week");
+  await expect(page.getByRole("button", { name: "2 people" })).toBeVisible();
+  expect(sent).toHaveLength(0);
+
   await question.getByRole("button", { name: "Change the current week" }).click();
   await expect(page.getByRole("button", { name: "Confirm change" })).toBeVisible();
   expect(sent).toHaveLength(1);
