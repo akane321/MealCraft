@@ -71,7 +71,7 @@ const planningDetail = {
 
 const services = {
   items: [
-    { name: "openai", label: "OpenAI", configured: true, mode: "openai parser, model gpt-5.4-mini", recent: { window_days: 7, runs: 18, model_calls: 27, failures: 0, fallbacks: 1 }, note: null },
+    { name: "openai", label: "OpenAI", configured: true, mode: "openai parser, model gpt-5.4-mini", recent: { window_days: 7, runs: 18, model_calls: 27, failures: 0, fallbacks: 1 }, note: "Runs are assistant runs recorded while the OpenAI parser was selected: turns, plan confirmations and discards alike. Model calls are the requests those runs sent to OpenAI (chat and embeddings, retries included). A fallback is a run that went on without the model after a request failed: the rules read the message, or shared words stood in for embeddings. Not in these figures: 3 model calls sent since the backend started that no run records (console replays, swap previews asked of the plan API directly)." },
     { name: "fairprice", label: "FairPrice", configured: true, mode: "fixture prices unless a plan asks for live prices", recent: { window_days: 7, runs: 4, model_calls: null, failures: 1, fallbacks: 2 }, note: null },
     { name: "youtube", label: "YouTube", configured: false, mode: "fixture", recent: null, note: "Tutorial lookups are not stored yet, so there is no call history." },
   ],
@@ -145,6 +145,8 @@ test("an administrator signs in, reads the overview, opens a task and runs a liv
   const openai = page.getByRole("region", { name: "OpenAI" });
   await expect(openai.getByRole("term")).toHaveText(["Runs", "Model calls", "Failures", "Fallbacks"]);
   await expect(openai.getByRole("definition")).toHaveText(["18", "27", "0", "1"]);
+  // What the figures leave out is said: model calls no run records.
+  await expect(openai.getByText(/3 model calls sent since the backend started that no run records/)).toBeVisible();
   const fairprice = page.getByRole("region", { name: "FairPrice" });
   await expect(fairprice.getByRole("term")).toHaveText(["Runs", "Failures", "Fallbacks"]);
   await expect(fairprice.getByText("Configured")).toBeVisible();

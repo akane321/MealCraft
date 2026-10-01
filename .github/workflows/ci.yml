@@ -230,10 +230,12 @@ jobs:
           check '.services.frontend.environment.MEALCRAFT_WATCH_POLLING == "true"'
           check '.services.backend.environment.WATCHFILES_FORCE_POLLING == "true"'
           check '.services.backend.command | join(" ") | test("--reload --reload-dir app$")'
-          dev=$(docker compose config --images frontend)
-          demo=$(docker compose -f compose.yaml -f compose.demo.yaml config --images frontend)
-          echo "frontend image: dev $dev, demo $demo"
-          [ -n "$demo" ] && [ "$demo" != "$dev" ] || { echo "FAILED: the demo build shares the dev image"; failed=1; }
+          # `--images` lists every service's image; the demo changes only the frontend's.
+          docker compose config --images | sort > "$RUNNER_TEMP/dev-images"
+          docker compose -f compose.yaml -f compose.demo.yaml config --images | sort > "$RUNNER_TEMP/demo-images"
+          unused=$(comm -23 "$RUNNER_TEMP/dev-images" "$RUNNER_TEMP/demo-images")
+          echo "dev images the demo does not use: ${unused:-none}"
+          [ -n "$unused" ] || { echo "FAILED: the demo build is tagged as the dev frontend image"; failed=1; }
           exit $failed
 
       - name: Build and start the database and backend

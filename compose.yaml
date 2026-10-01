@@ -25,6 +25,10 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      # Docker Desktop on Windows passes no file-change events through the bind mounts below, so the reloader
+      # polls; `--reload-dir app` keeps it to the code, not the data and docs it also mounts.
+      WATCHFILES_FORCE_POLLING: "true"
     command:
       - sh
       - -c
@@ -33,7 +37,7 @@ services:
         uv run --no-sync python -m app.data.import_catalog &&
         uv run --no-sync python -m app.data.import_release_v2 &&
         uv run --no-sync python -m app.data.admin_accounts &&
-        uv run --no-sync uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+        uv run --no-sync uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir app
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
