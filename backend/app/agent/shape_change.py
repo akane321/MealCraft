@@ -154,6 +154,28 @@ def _when(plan: WeeklyMealPlanResponse, days: list[int] | None) -> str:
     return "on " + (f"{', '.join(names[:-1])} and {names[-1]}" if len(names) > 1 else names[0])
 
 
+def _day_roles(plan: WeeklyMealPlanResponse, meal: str, days: list[int] | None, planned: list[dict]) -> list[dict]:
+    """The dish roles the named days' meal has now: a one-day change ("add a soup on Friday") may have given
+    a day a dish the week's shape lacks. The week's shape when no day is named, or the days differ."""
+    by_day: dict[int, list[str]] = {}
+    for dish in plan.days if days else []:
+        if dish.day_index in days and dish.meal_type == meal and dish.status != "skipped":
+            by_day.setdefault(dish.day_index, []).append(dish.role_id)
+    if len({frozenset(ids) for ids in by_day.values()}) != 1:
+        return planned
+    known = {role["role_id"]: role for preset in MEAL_PRESETS[meal].values() for role in preset}
+    known |= {role["role_id"]: role for role in planned}
+    roles = []
+    for role_id in next(iter(by_day.values())):
+        # A dish added in the conversation is "soup", "soup-2", "main-2" (see _next_id).
+        base = DISHES.get(role_id.split("-")[0])
+        role = known.get(role_id) or (base and {"role_id": role_id, "courses": base[1], "required": True})
+        if not role:
+            return planned
+        roles.append(role)
+    return roles
+
+
 def _read(message: str) -> tuple[str, str | None, str | None, bool, bool, str | None] | None:
     """The text, meal, dish, add, drop and only-one a message names; None when it changes no meal."""
     text = f" {message.strip().lower()} "
@@ -189,8 +211,8 @@ def read_shape_change(
     text, meal, dish, adds, drops, only = read
     meal = meal or "dinner"
     shape = plan.plan_shape.meals if plan.plan_shape is not None else {}
-    current = [role.model_dump() for role in shape.get(meal, [])]
     days = day_indexes or None
+    current = _day_roles(plan, meal, days, [role.model_dump() for role in shape.get(meal, [])])
     when = _when(plan, days)
 
     if only:

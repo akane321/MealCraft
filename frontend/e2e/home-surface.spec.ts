@@ -548,6 +548,46 @@ test("asking for lunch too previews the new meals, then asks whether to keep it"
   await expect.poll(() => answer?.option_ids).toEqual(["keep"]);
 });
 
+test("a swap card says how far over the budget the backend found; a skip on a week already over does not", async ({ page }) => {
+  await stubApi(page);
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  // A week already S$5 over its S$90 budget.
+  const over = { ...plan, grocery_estimate: { ...plan.grocery_estimate, purchase_total_sgd: 95, within_weekly_budget: false } };
+  await page.route("**/api/plans/9001", route => route.fulfill(json(over)));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: session(true), plan: over })));
+  const tofu = { entry_id: 4, day_index: 4, planned_date: isoDay(0), recipe_id: 4, recipe_slug: "dinner-4", recipe_title: "Tofu Brown Rice Stir-fry" };
+  const swap = {
+    ...replanEvent,
+    id: 14,
+    applied_revision: null,
+    status: "previewed",
+    event_type: "REPLACE_MEAL",
+    before_entry: tofu,
+    after_entry: { ...tofu, recipe_id: 9, recipe_slug: "dinner-9", recipe_title: "Salmon Teriyaki" },
+    purchase_total_delta_sgd: 3.2,
+    over_budget_sgd: 8.2,
+  };
+  // Skipping saves S$2.40; the week stays over its budget, but the skip does not put it there.
+  const skip = { ...swap, id: 15, event_type: "CANCEL_MEAL", after_entry: tofu, purchase_total_delta_sgd: -2.4, over_budget_sgd: null };
+  let pending: unknown = swap;
+  await page.route("**/api/agent/sessions/51/messages", route => route.fulfill(json({ ...session(true), pending_replan: pending })));
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+  await page.getByLabel("Message MealCraft").fill("Swap Thursday's Tofu Brown Rice Stir-fry");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.locator(".swap-card .to")).toHaveText("Salmon Teriyaki");
+  await expect(page.getByText("This puts the week S$8.20 over your S$90.00 budget.")).toBeVisible();
+
+  pending = skip;
+  await page.getByLabel("Message MealCraft").fill("Skip Thursday's Tofu Brown Rice Stir-fry");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.locator(".swap-card .to")).toHaveText("Skip Tofu Brown Rice Stir-fry");
+  await expect(page.locator(".swap-card .over-budget")).toHaveCount(0);
+});
+
 test("a dish's own buttons put the change into words for the assistant", async ({ page }) => {
   await stubApi(page);
   await page.goto("/");

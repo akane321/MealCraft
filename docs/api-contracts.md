@@ -373,10 +373,15 @@ The preview does not modify the active plan. It persists the base revision,
 before/after meal snapshots, nutrition delta, package-level Shopping List delta,
 and checkout-cost delta. Completed and locked entries are rejected. Every preview,
 including a shape change (`POST /api/plans/{plan_id}/shape/preview`), returns
-`over_budget_sgd`: how far the week's checkout total would be over its weekly
-budget after the change, or null within it. A shape change that no plan within
-the remaining budget can hold is planned over it, as cheaply as every other rule
-allows, rather than refused; the household confirms or discards it.
+`over_budget_sgd`: how far a change that raises the checkout total takes the
+week over its weekly budget, or null within it and for a change that costs
+nothing or saves (keeping or skipping a dish). A shape change is planned within
+what the rest of the week leaves of the budget at the checkout (whole packages).
+When no plan fits that, it is planned over the budget rather than refused: the
+cheapest week the search finds, a repeated dish counted at one meal's share of
+the budget as within it, and of the weeks costing no more than that, the one
+with the fewest empty optional dishes, then the most distinct dishes. The
+household confirms or discards it.
 
 `POST /api/plans/{plan_id}/replan/{event_id}/confirm` applies a preview only when
 its base revision still matches the active plan. Confirmation updates the target

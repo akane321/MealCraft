@@ -182,7 +182,7 @@ class WeeklyMealPlanService:
         avoided while enough others remain. `keep` (recipe ids, their courses) holds a meal's present
         dishes while a new one is added: they stay in it, and of those courses only they are offered.
         `over_budget` plans the dishes over the budget when none fit it (none can when it is 0 or less), as
-        cheaply as every other rule allows, weighing costs against this amount (see the engine).
+        cheaply as the planner finds, weighing costs against this amount (see `over_budget_pick`).
         """
         start = constraints.start_date + timedelta(days=first_day - 1)
         # day_count is fixed at 7 for a whole week; a part of one is planned the same way.

@@ -320,14 +320,23 @@ class MealPlanReplanningService:
     def _plan_meal(self, constraints, meal, roles, days, kept, removed) -> list[tuple[dict, MealPlanEntrySnapshot]]:
         """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves.
 
-        When nothing fits what is left, the change is still planned, as cheaply as every other rule allows,
-        and its preview says how far over the budget it goes; the household confirms or discards it, as
-        with a swap (owner decision 2026-10-02). A new week keeps its budget as a hard limit.
+        When nothing fits what is left, the change is still planned, as cheaply as the planner finds (see
+        `over_budget_pick`), and its preview says how far over the budget it goes; the household confirms or
+        discards it, as with a swap (owner decision 2026-10-02). A new week keeps its budget as a hard limit.
         """
         if self.meal_plan_service is None:
             raise MealPlanReplanValidationError("Changing meals is not available here.")
         budget = constraints.weekly_budget_sgd
-        left = None if budget is None else round(budget - sum(float(item.consumed_cost_sgd) for item in kept), 2)
+        left = None
+        if budget is not None:
+            # What is left is what the rest of the week does not spend at the checkout, in whole packages:
+            # what its dishes use leaves room the week has already paid for, and a plan made to fit that
+            # room would go over the budget without trying the cheapest plans first.
+            recipes = {r.id: r for r in self.recipe_repository.list_by_ids(list({i.recipe_id for i in kept}))}
+            paid = self.grocery_aggregator.estimate(
+                [recipes[item.recipe_id] for item in kept], constraints, shares=[float(i.portion_share) for i in kept]
+            ).purchase_total_sgd
+            left = round(budget - paid, 2)
         partial = constraints.model_copy(
             update={
                 "plan_shape": MealPlanShape(meals={meal: roles}),
@@ -708,7 +717,7 @@ class MealPlanReplanningService:
 
     @staticmethod
     def _event_response(event: MealPlanEvent) -> MealPlanReplanEventResponse:
-        after = event.after_grocery
+        after, delta = event.after_grocery, float(event.purchase_total_delta_sgd)
         return MealPlanReplanEventResponse(
             id=event.id,
             plan_id=event.plan_id,
@@ -723,10 +732,12 @@ class MealPlanReplanningService:
             shape_change=MealPlanShapeChange.model_validate(event.shape_change) if event.shape_change else None,
             nutrition_delta=MealPlanNutritionDelta.model_validate(event.nutrition_delta),
             grocery_delta=[MealPlanGroceryDeltaLine.model_validate(item) for item in event.grocery_delta],
-            purchase_total_delta_sgd=float(event.purchase_total_delta_sgd),
+            purchase_total_delta_sgd=delta,
+            # Only a change that costs more puts the week over: a keep or a skip on a week already over
+            # its budget does not.
             over_budget_sgd=(
                 round(after["purchase_total_sgd"] - after["weekly_budget_sgd"], 2)
-                if after.get("within_weekly_budget") is False
+                if after.get("within_weekly_budget") is False and delta > 0
                 else None
             ),
             created_at=event.created_at,

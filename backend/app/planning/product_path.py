@@ -154,8 +154,7 @@ class ProductPlanningEngine:
         `required` are recipe slugs the week must use (a meal's present dishes while one is added to it).
         `budget_is_hard=False` plans a change the household may take over the budget (owner, 2026-10-02):
         every other rule holds, the budget is only reported, and of the weeks found (cost-led searches
-        among them) the one that costs least at the checkout is chosen, repeats and empty optional dishes
-        charged as the meal beam charges them under a budget.
+        among them) one costing least at the checkout is chosen (see `over_budget_pick`).
         """
         trace = {
             "trace_version": "planning-product-v1",
@@ -539,6 +538,10 @@ class ProductPlanningEngine:
         passed = []  # with the budget only reported: every week that holds the rest, to compare
         uncertain = bool(diagnostics)
         only_budget_failures = bool(assignments_list)
+        # The validator only reads the problem, so one copy serves every week it checks (over the budget it
+        # checks them all, and a copy each took about a second of a whole-week change); the builder it checks
+        # still gets its own each time, so a builder that changed the problem could not change the check.
+        checked = problem.model_copy(deep=True)
         index = 0
         while True:
             if index == len(assignments_list):
@@ -552,7 +555,7 @@ class ProductPlanningEngine:
             shopping = builder._build_shopping(
                 problem.model_copy(deep=True), [a.model_copy(deep=True) for a in assignments]
             )
-            report = self.validator.validate(problem.model_copy(deep=True), assignments, shopping)
+            report = self.validator.validate(checked, assignments, shopping)
             if constraints.budget_per_meal_sgd is not None:
                 extra = per_meal_budget_checks(problem, assignments, constraints.budget_per_meal_sgd)
                 report.checks.extend(extra)
@@ -581,19 +584,7 @@ class ProductPlanningEngine:
                     break
                 passed.append(result)
         if passed:
-            share = (constraints.weekly_budget_sgd or 0) / len(problem.slots)
-
-            def closest_to_budget(item) -> float:
-                """The checkout total, a repeat charged one meal's share of the budget and an empty optional
-                dish twice that, as the meal beam's cheap room charges them (ADR-0044, ADR-0050)."""
-                assignments, _, report = item
-                filled = Counter(a.slot_id for a in assignments)
-                dishes = [a.recipe_id for a in assignments]
-                empty = sum(len(slot.composition or [None]) - filled[slot.slot_id] for slot in problem.slots)
-                repeats = len(dishes) - len(set(dishes))
-                return report.purchase_total_sgd + share * (repeats + EMPTY_OPTIONAL_ROLE_LOSS * empty)
-
-            result = min(passed, key=closest_to_budget)
+            result = over_budget_pick(passed, problem.slots, constraints.weekly_budget_sgd)
         if result is None:
             evidence = "needs_data" if uncertain else "bounded_search_exhausted"
             status = "needs_data" if uncertain else "candidate_rejected"
@@ -679,6 +670,28 @@ class ProductPlanningEngine:
             for i, a in enumerate(assignments)
         ]
         return ProductPlan(selected, grocery, trace, placements)
+
+
+def over_budget_pick(passed, slots, budget):
+    """The week offered over the budget, of `passed` (weeks holding every other rule, in the order the
+    in-budget path tries them: fewest empty optional dishes, then most distinct dishes, first; ADR-0052).
+
+    The price is the cheapest week's, a repeat charged one meal's share of the budget and an empty optional
+    dish twice that, as the meal beam's cheap room charges them (ADR-0044, ADR-0050). The week is the one the
+    in-budget path would choose were its budget that price, so going over never offers a week emptier or
+    more repetitive than one that costs no more.
+    """
+    share = (budget or 0) / len(slots)
+
+    def charged(item) -> float:
+        assignments, _, report = item
+        filled = Counter(a.slot_id for a in assignments)
+        dishes = [a.recipe_id for a in assignments]
+        empty = sum(len(slot.composition or [None]) - filled[slot.slot_id] for slot in slots)
+        return report.purchase_total_sgd + share * (len(dishes) - len(set(dishes)) + EMPTY_OPTIONAL_ROLE_LOSS * empty)
+
+    price = min(passed, key=charged)[2].purchase_total_sgd
+    return next(item for item in passed if item[2].purchase_total_sgd <= price)
 
 
 def per_meal_budget_checks(problem, assignments, budget):
