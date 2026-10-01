@@ -67,6 +67,34 @@ person a planned meal) was below any week the product can buy and below the
 S$2.50 floor the held-out set uses, and is now S$105. Developer reports before
 that date are on the earlier episode.
 
+Since 2026-10-01 the witness also keeps the product's time limit and candidate
+rules (ADR-0049). A household that states no time limit is planned by the
+runner with 240 minutes (`NO_TIME_LIMIT`), and the product holds every dish and
+every meal within it (`meal_beam.dish_eligible`, `meal_permitted`); the tool
+now does the same, where it had read no limit as none, so a witness could use a
+445-minute soup. A dish is also one the product can carry as a candidate. The
+tool mirrors the product's rules, not its ranking: the planning pool
+(`RecipeRepository.list_for_planning`, run over the episode's pool imported as
+the runner imports it) leaves out a recipe the release import skips (under two
+lines or no instruction), one with a line the product cannot price, a withdrawn
+one (`data/recipes/withdrawn.json`) and one whose own numbers say it lost a
+line (`recipe_quality.incomplete`, since #170); the recommendation step leaves
+out one whose name states an ingredient or allergen the household avoids
+(`title_mentions`). A dish that merely ranks low, or falls outside the packet
+the product keeps per course, stays eligible: a label proves that a week exists
+under the rules, not that the product's search finds it. Protocol v2 labels are
+unchanged.
+
+The same day the witness gained a second, independent search, because
+choosing each day's meals by consumed cost ignores packages shared across days.
+The new search builds the week day by day from the meals that add least to the
+whole packages already bought (each day priced as if eaten every day left). It
+never runs the product planner. Both weeks are checked again whole (each meal
+valid for its slot, caps, per-day bands), and the cheaper one is the witness.
+Developer episode `mdw-dev-020` (budget S$52.50) needs it: its earlier witness
+used a lost-line recipe, and without that recipe the consumed-cost week costs
+S$63.43, while the package-sharing week costs S$45.95.
+
 ## 3. Categories
 
 | Category | What it tests |
