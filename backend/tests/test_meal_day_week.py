@@ -149,3 +149,29 @@ def test_a_no_repeats_week_keeps_enough_candidates_for_every_meal():
     row = evaluate([load("mdw-dev-021")])["episodes"][0]
     assert row["strict_success"], row
     assert row["dishes"] == row["distinct_recipes"]
+
+
+def test_a_label_holds_an_unstated_time_limit_to_the_one_the_runner_sends():
+    from app.evaluation.meal_day_week_runner import NO_TIME_LIMIT
+    from app.evaluation.multidish_labels import valid_meals
+
+    episode = load("mdw-dev-002")  # no stated limit; its pool holds a 360-minute noodle soup
+    assert episode["gold"]["applicable_hard_constraints"]["max_cooking_time_minutes"] is None
+    roles = [{"role_id": "main", "courses": ["soup"], "required": True}]
+
+    def longest(meals):
+        return max(r["prep_time_minutes"] + r["cook_time_minutes"] for meal in meals for _, r in meal)
+
+    assert longest(valid_meals(episode, roles)) > NO_TIME_LIMIT  # protocol v2 reads no limit as none
+    assert longest(valid_meals(episode, roles, "lunch")) <= NO_TIME_LIMIT
+
+
+def test_a_label_never_uses_a_recipe_the_product_never_plans():
+    from app.evaluation.multidish_labels import product_candidates, valid_meals
+
+    episode = load("mdw-dev-020")
+    lost_line = "RCP2_B12163C95EC7"  # "Tofu Stir Fry" with no tofu, 72 kcal: recipe_quality.incomplete
+    assert lost_line not in product_candidates(tuple(episode["scenario"]["recipe_candidate_slugs"]))
+    roles = [{"role_id": "main", "courses": ["main"], "required": True}]
+    assert any(r["slug"] == lost_line for meal in valid_meals(episode, roles) for _, r in meal)
+    assert all(r["slug"] != lost_line for meal in valid_meals(episode, roles, "lunch") for _, r in meal)

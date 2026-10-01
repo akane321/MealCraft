@@ -15,14 +15,31 @@ A label is accepted only with evidence:
 
 A protocol v3-meal-day-week episode (a `plan_shape` of several meals) is proven
 the same way over every (day, meal) slot: its witness week is built day by day
-from each slot's cheapest valid meals, keeping any cap on uses and every per-day
-nutrition band; its lower bound is each slot's cheapest meal. A shape change is
+from each slot's valid meals, keeping any cap on uses and every per-day
+nutrition band; its lower bound is each slot's cheapest meal. Two independent
+searches build a week (2026-10-01): one takes each day's meals of least consumed
+cost, the other those adding least to the whole packages already bought (priced
+as if eaten every day left, so a package shared across days counts once). Each
+week is checked again whole, and the cheaper valid one is the witness. A shape change is
 proven before and after the change (`week_evidence`). A v3 witness keeps the
 product's own rules, so a label never needs a week the product cannot plan:
 - a role takes only dishes for its meal (a recipe's meal types) whenever there
   are as many as the planner keeps per role (`MealBeamLimits.candidates_per_role`);
 - each ingredient is bought as the product buys it in fixture mode
-  (`app.planning.grocery_estimator.choose_product`): one product, whole packages.
+  (`app.planning.grocery_estimator.choose_product`): one product, whole packages;
+- (2026-10-01) the time limit is the one the runner sends: a household that states
+  none gets `meal_day_week_runner.NO_TIME_LIMIT` (240 minutes). As the product
+  does (`meal_beam.dish_eligible`, `meal_permitted`), every dish is within it on
+  its own and every meal's cooking time is too;
+- (2026-10-01) a dish is one the product can carry as a candidate. Mirrored are
+  the product's rules, not its ranking (`product_candidates`): the planning pool
+  leaves out a recipe the release import skips, one with a line it cannot price,
+  a withdrawn one (`data/recipes/withdrawn.json`) and one that lost a line
+  (`recipe_quality.incomplete`, since #170); the recommendation step leaves out
+  one whose name states an ingredient or allergen the household avoids
+  (`recommendation_engine.title_mentions`). A dish that merely ranks low, or
+  falls outside the packet the product keeps per course, stays eligible: a label
+  proves a week exists under the rules, not that the product's search finds it.
 
 Anything else is unproven, and the author must change the episode.
 
@@ -44,11 +61,30 @@ from app.evaluation.release_catalog import fixture_products, load_release_catalo
 from app.evaluation.strict_success import dish_shares, load_tag_implications, meal_minutes, satisfied_tags
 from app.planning.grocery_estimator import ProductMatcher, choose_product, convert_quantity
 from app.planning.meal_beam import MealBeamLimits
+from app.planning.recommendation_engine import title_mentions
 from app.products.provider import FixtureProductProvider
 from app.services.product import ProductSearchService
 
 
-def _context(episode: dict):
+@lru_cache
+def product_candidates(pool: tuple[str, ...]) -> frozenset[str]:
+    """The pool's recipes the product can ever plan: `RecipeRepository.list_for_planning` over the pool,
+    imported as the protocol runner imports it (`meal_day_week_runner.product_database`).
+
+    That leaves out, as rules rather than ranking: a release recipe the import skips (under two lines or
+    no instruction), one with a line the product cannot price, one in `data/recipes/withdrawn.json`, and
+    one whose own numbers say it lost a line (`app.planning.recipe_quality.incomplete`, since #170).
+    """
+    from app.evaluation.meal_day_week_runner import product_database
+    from app.repositories.recipe import RecipeRepository
+
+    courses = sorted({load_release_catalog().by_slug[slug]["course"] for slug in pool})
+    with product_database({"scenario": {"recipe_candidate_slugs": list(pool)}}) as factory, factory() as session:
+        return frozenset(r.external_id for r in RecipeRepository(session).list_for_planning(courses=courses))
+
+
+def _context(episode: dict, *, product_rules: bool = False):
+    """The episode's facts; `product_rules` (protocol v3) also applies the product's candidate rules."""
     catalog = load_release_catalog()
     allergens = {row["normalized_name"]: set(row["allergens"]) for row in catalog.ingredients}
     implications = load_tag_implications(repository_root() / "data/recipes/dietary-tag-implications.json")
@@ -64,7 +100,13 @@ def _context(episode: dict):
         per_gram[name] = min(per_gram.get(name, math.inf), product_row["price_sgd"] / product_row["package_size"])
         packages.setdefault(name, []).append((product_row["package_size"], product_row["price_sgd"]))
 
+    profile = episode["scenario"]["household_profile"]
+    planned = product_candidates(tuple(episode["scenario"]["recipe_candidate_slugs"])) if product_rules else None
+    avoided = [*profile["excluded_ingredients"], *profile["allergens"]]
+
     def eligible(recipe: dict) -> bool:
+        if planned is not None and (recipe["slug"] not in planned or title_mentions(recipe["title"], avoided)):
+            return False
         names = {line["ingredient"] for line in recipe["ingredients"]}
         if any(set(gold["allergens_absent"]) & allergens.get(name, {"unchecked"}) for name in names):
             return False
@@ -87,15 +129,25 @@ def valid_meals(
 
     With a `meal`, a role keeps only that meal's dishes when there are enough of them, as the planner does.
     """
-    gold, pool, eligible, _, _ = _context(episode)
+    gold, pool, eligible, _, _ = _context(episode, product_rules=meal is not None)
     roles = roles or episode["scenario"]["household_profile"]["meal_composition"]
     limit = gold["max_cooking_time_minutes"]
+    if meal is not None and limit is None:
+        from app.evaluation.meal_day_week_runner import NO_TIME_LIMIT  # what the runner asks the product for
+
+        limit = NO_TIME_LIMIT
     per_role = {}
     for r in roles:
-        dishes = [x for x in pool if x["course"] in r["courses"] and eligible(x)]
+        # Each dish within the limit on its own, as `meal_beam.dish_eligible` checks; the meal too, below.
+        dishes = [
+            x
+            for x in pool
+            if x["course"] in r["courses"]
+            and eligible(x)
+            and (limit is None or x["prep_time_minutes"] + x["cook_time_minutes"] <= limit)
+        ]
         fitting = [x for x in dishes if meal in meal_types(x)]
-        timed = [x for x in fitting if limit is None or x["prep_time_minutes"] + x["cook_time_minutes"] <= limit]
-        per_role[r["role_id"]] = fitting if meal and len(timed) >= MealBeamLimits().candidates_per_role else dishes
+        per_role[r["role_id"]] = fitting if meal and len(fitting) >= MealBeamLimits().candidates_per_role else dishes
     required = [r for r in roles if r["required"]]
     optional = [r for r in roles if not r["required"]]
     meals = []
@@ -259,6 +311,10 @@ DAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 MEALS = ("breakfast", "lunch", "dinner")
 # The cheapest valid meals of each slot a witness day is chosen from.
 WITNESS_OPTIONS = 40
+# The package-sharing witness: of each slot's PACKAGE_POOL cheapest meals, the PACKAGE_OPTIONS that add
+# least to the packages already bought are combined into a day.
+PACKAGE_POOL = 150
+PACKAGE_OPTIONS = 10
 
 
 def slot_roles(episode: dict, *, after_change: bool = False) -> dict[str, list[dict]]:
@@ -313,8 +369,11 @@ def bought(name: str, grams: float) -> float:
     return max(1, math.ceil(amount / item.package_size)) * item.price_sgd
 
 
+_bought = lru_cache(maxsize=None)(bought)
+
+
 def _week_witness(episode: dict, *, after_change: bool) -> dict:
-    gold, _, _, per_gram, _ = _context(episode)
+    gold, _, _, per_gram, _ = _context(episode, product_rules=True)
     size = episode["scenario"]["household_profile"]["household_size"] or 1
     if episode["scenario"]["pantry"]:
         return {"verdict": "unproven", "why": "v3 labels do not deduct a pantry"}
@@ -339,49 +398,118 @@ def _week_witness(episode: dict, *, after_change: bool) -> dict:
                 return {"verdict": "infeasible_proven", "why": f"no valid meal for {slot} exists in the pool"}
             by_roles[key] = sorted(meals, key=lambda m: (_consumed(m, size, per_gram), [r["slug"] for _, r in m]))
 
-    uses: dict[str, int] = {}
-    week: list = []
-    for day in DAYS:
-        day_slots = [slot for slot in slots if slot.startswith(day)]
-        options = [
-            [m for m in by_roles[key_of(slot)] if cap is None or all(uses.get(r["slug"], 0) < cap for _, r in m)][
-                :WITNESS_OPTIONS
-            ]
-            for slot in day_slots
-        ]
-        best = None
-        for combo in product(*options):
-            slugs = [r["slug"] for meal in combo for _, r in meal]
-            if cap is not None and any(uses.get(s, 0) + slugs.count(s) > cap for s in slugs):
-                continue
-            ok = True
-            for band in bands:
-                total = sum(meal_nutrients(meal, band["metric"]) for meal in combo)
-                if (band.get("min") is not None and total < band["min"]) or (
-                    band.get("max") is not None and total > band["max"]
-                ):
-                    ok = False
-                    break
-            if not ok:
-                continue
-            cost = sum(_consumed(meal, size, per_gram) for meal in combo)
-            if best is None or cost < best[0]:
-                best = (cost, combo)
-        if best is None:
-            return {"verdict": "unproven", "why": f"no witness day for {day} among the cheapest meals"}
-        week += list(best[1])
-        for meal in best[1]:
-            for _, r in meal:
-                uses[r["slug"]] = uses.get(r["slug"], 0) + 1
+    grams_of: dict[tuple, dict[str, float]] = {}
 
-    demand: dict[str, float] = {}
-    for meal in week:
-        shares = dish_shares([role for role, _ in meal])
-        for role, recipe in meal:
-            for line in recipe["ingredients"]:
-                grams = line["quantity"] * size * shares[role] / recipe["servings"]
-                demand[line["ingredient"]] = demand.get(line["ingredient"], 0.0) + grams
-    witness_cost = round(sum(bought(n, g) for n, g in demand.items() if g), 2)
+    def meal_grams(meal) -> dict[str, float]:
+        """What one meal needs of each ingredient for the household."""
+        key = tuple((role, r["slug"]) for role, r in meal)
+        if key not in grams_of:
+            shares = dish_shares([role for role, _ in meal])
+            need: dict[str, float] = {}
+            for role, recipe in meal:
+                for line in recipe["ingredients"]:
+                    grams = line["quantity"] * size * shares[role] / recipe["servings"]
+                    need[line["ingredient"]] = need.get(line["ingredient"], 0.0) + grams
+            grams_of[key] = need
+        return grams_of[key]
+
+    def merged(meals) -> dict[str, float]:
+        total: dict[str, float] = {}
+        for meal in meals:
+            for name, grams in meal_grams(meal).items():
+                total[name] = total.get(name, 0.0) + grams
+        return total
+
+    def marginal(need: dict[str, float], held: dict[str, float]) -> float:
+        """What `need` adds to the whole packages already bought for `held`."""
+        extra = 0.0
+        for name, grams in need.items():
+            if not grams:
+                continue
+            after = _bought(name, held.get(name, 0.0) + grams)
+            if math.isinf(after):
+                return math.inf
+            extra += after - (_bought(name, held[name]) if held.get(name) else 0.0)
+        return extra
+
+    def day_ok(combo, uses: dict[str, int]) -> bool:
+        slugs = [r["slug"] for meal in combo for _, r in meal]
+        if cap is not None and any(uses.get(s, 0) + slugs.count(s) > cap for s in slugs):
+            return False
+        for band in bands:
+            total = sum(meal_nutrients(meal, band["metric"]) for meal in combo)
+            if (band.get("min") is not None and total < band["min"]) or (
+                band.get("max") is not None and total > band["max"]
+            ):
+                return False
+        return True
+
+    def build(by_packages: bool) -> list | str:
+        """A week built day by day: by each day's consumed cost, or by what it adds to the packages bought."""
+        uses: dict[str, int] = {}
+        held: dict[str, float] = {}
+        week: list = []
+        for index, day in enumerate(DAYS):
+            left = len(DAYS) - index  # a day's meals priced as if eaten every day left, so packages amortize
+            day_slots = [slot for slot in slots if slot.startswith(day)]
+            allowed = [
+                [m for m in by_roles[key_of(slot)] if cap is None or all(uses.get(r["slug"], 0) < cap for _, r in m)]
+                for slot in day_slots
+            ]
+            if by_packages:
+                options = [
+                    sorted(a[:PACKAGE_POOL], key=lambda m: marginal(merged([m] * left), held))[:PACKAGE_OPTIONS]
+                    for a in allowed
+                ]
+            else:
+                options = [a[:WITNESS_OPTIONS] for a in allowed]
+            best = None
+            for combo in product(*options):
+                if not day_ok(combo, uses):
+                    continue
+                consumed = sum(_consumed(meal, size, per_gram) for meal in combo)
+                cost = (marginal(merged(combo * left), held) / left, consumed) if by_packages else (consumed,)
+                if best is None or cost < best[0]:
+                    best = (cost, combo)
+            if best is None:
+                return f"no witness day for {day} among the cheapest meals"
+            week += list(best[1])
+            for name, grams in merged(best[1]).items():
+                held[name] = held.get(name, 0.0) + grams
+            for meal in best[1]:
+                for _, r in meal:
+                    uses[r["slug"]] = uses.get(r["slug"], 0) + 1
+        return week
+
+    def valid_week(week: list) -> bool:
+        """Checked again whole, apart from how it was built: every meal valid for its slot, caps, day bands."""
+        if len(week) != len(slots):
+            return False
+        allowed = {key: {tuple(r["slug"] for _, r in m) for m in meals} for key, meals in by_roles.items()}
+        if any(tuple(r["slug"] for _, r in m) not in allowed[key_of(s)] for s, m in zip(slots, week, strict=True)):
+            return False
+        uses: dict[str, int] = {}
+        for day in DAYS:
+            combo = [m for s, m in zip(slots, week, strict=True) if s.startswith(day)]
+            if not day_ok(combo, uses):
+                return False
+            for meal in combo:
+                for _, r in meal:
+                    uses[r["slug"]] = uses.get(r["slug"], 0) + 1
+        return True
+
+    weeks = []
+    failures = []
+    for by_packages in (False, True):
+        built = build(by_packages)
+        if isinstance(built, str):
+            failures.append(built)
+        elif valid_week(built):
+            cost = round(sum(bought(n, g) for n, g in merged(built).items() if g), 2)
+            weeks.append((cost, built))
+    if not weeks:
+        return {"verdict": "unproven", "why": failures[0] if failures else "no witness week passes the checks"}
+    witness_cost, week = min(weeks, key=lambda item: item[0])
     lower_bound = round(sum(_consumed(by_roles[key_of(slot)][0], size, per_gram) for slot in slots), 2)
     out = {
         "witness_cost_sgd": witness_cost,
