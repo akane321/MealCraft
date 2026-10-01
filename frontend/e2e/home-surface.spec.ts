@@ -922,6 +922,90 @@ test("a dish's words kept over a reload still change the week", async ({ page })
   expect(sent[0]!.body).toEqual({ message: expect.stringMatching(/^Skip \w+day's Tofu Brown Rice Stir-fry$/), plan_id: 9001 });
 });
 
+for (const way of ["Open my week", "Enter in the landing box"]) test(`a dish's words kept over a navigation go once their week has been replanned (${way})`, async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await stubApi(page);
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  // Week 9001 was planned on the profile page; the only conversation is off topic.
+  await page.route("**/api/agent/sessions?limit=8", route => route.fulfill(json({ items: [offTopic] })));
+  await page.route("**/api/plans", route => route.fulfill(json(planList)));
+  const sent: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "POST" && request.url().includes("/api/agent/sessions")) sent.push(request.url());
+  });
+
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByRole("button", { name: "Open my week" }).click();
+  const week = page.getByRole("complementary", { name: "This week" });
+  const composer = page.getByLabel("Message MealCraft");
+  await week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
+  await expect(composer).toHaveValue(/^Skip /);
+
+  // On the household page the week is replanned: 9002 replaces 9001.
+  await page.getByRole("complementary", { name: "Navigation" }).getByRole("link", { name: "Household", exact: true }).click();
+  await page.waitForURL(url => url.pathname === "/profile");
+  const replanned = { ...plan, id: 9002, days: days.map(day => ({ ...day, recipe: { ...day.recipe, title: `New ${day.recipe.title}` } })) };
+  await page.route("**/api/plans", route => route.fulfill(json({ items: [{ ...planList.items[0], id: 9002 }, ...planList.items] })));
+  await page.route("**/api/plans/9002", route => route.fulfill(json(replanned)));
+  await page.route("**/api/plans/9002/dashboard", route => route.fulfill(json({ ...dashboard, plan_id: 9002, days: replanned.days })));
+  await page.route("**/api/plans/9002/events", route => route.fulfill(json({ items: [] })));
+  await page.goBack();
+
+  // Back home, the words of a dish in the replaced week go once the new week is shown: nothing sends them.
+  await expect(composer).toHaveValue(/^Skip /);
+  if (way === "Open my week") await page.getByRole("button", { name: "Open my week" }).click();
+  else await composer.press("Enter");
+  await expect(week.getByText("New Tofu Brown Rice Stir-fry").first()).toBeVisible();
+  await expect(composer).toHaveValue("");
+  await expect(page.getByRole("button", { name: "Send" })).toBeDisabled();
+  await page.waitForTimeout(300);
+  await expect(week.getByText("New Tofu Brown Rice Stir-fry").first()).toBeVisible();
+  expect(sent).toEqual([]);
+});
+
+test("a dish's words sent from the landing after a reload go to the conversation that planned the week", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await stubApi(page);
+  const json = (body: unknown, status = 200) => ({ status, contentType: "application/json", body: JSON.stringify(body) });
+  // Conversation 51 planned the current week.
+  await page.route("**/api/agent/sessions?limit=8", route => route.fulfill(json({ items: [session(true)] })));
+  await page.route("**/api/plans", route => route.fulfill(json(planList)));
+  const sent: Sent = [];
+  await page.route("**/api/agent/sessions", (route) => {
+    const body = route.request().postDataJSON();
+    sent.push({ url: route.request().url(), body });
+    return route.fulfill(json(changing({ ...session(false), id: 70, messages: [] }, body.message, "CANCEL_MEAL"), 201));
+  });
+  await page.route("**/api/agent/sessions/51/messages", (route) => {
+    const body = route.request().postDataJSON();
+    sent.push({ url: route.request().url(), body });
+    return route.fulfill(json(changing(session(true), body.message, "CANCEL_MEAL")));
+  });
+
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByRole("button", { name: "Open my week" }).click();
+  const conversation = page.getByRole("region", { name: "Conversation" });
+  await expect(conversation.getByText("Seven dinners for S$82.60")).toBeVisible();
+  await page.getByRole("button", { name: /New plan/ }).click();
+  await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
+  await page.getByRole("complementary", { name: "This week" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
+
+  // Enter in the landing box, which holds the dish's words: they go to conversation 51, as Open my week then Send would.
+  await page.reload();
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  const composer = page.getByLabel("Message MealCraft");
+  await expect(composer).toHaveValue(/^Skip \w+day's Tofu Brown Rice Stir-fry$/);
+  await composer.press("Enter");
+  await expect(conversation.getByText("How about Miso Tofu Bowl")).toBeVisible();
+  expect(sent).toHaveLength(1);
+  expect(sent[0]!.url).toMatch(/\/api\/agent\/sessions\/51\/messages$/);
+  expect(sent[0]!.body).toEqual({ message: expect.stringMatching(/^Skip \w+day's Tofu Brown Rice Stir-fry$/), plan_id: null });
+  await expect(conversation.getByText("Seven dinners for S$82.60")).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /^Skip / })).toHaveCount(0);
+});
+
 test("a session that expires mid-sentence keeps the draft and comes back to it", async ({ page }) => {
   await planWeek(page);
   await page.route("**/api/agent/sessions/51/messages", route => route.fulfill({ status: 401, contentType: "application/json", body: "{}" }));

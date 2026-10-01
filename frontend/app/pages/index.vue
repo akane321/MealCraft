@@ -168,6 +168,13 @@ async function enter() {
   if (!session.value) await agent.restore(current);
   // An open conversation keeps its own week; one that has not planned yet shows the current week.
   const shown = session.value?.plan_id ?? current;
+  // A dish's words kept over a reload or a navigation change only their own week: once another week
+  // is shown (it was replanned meanwhile), they go, with the words themselves if still unedited.
+  const action = dishAction.value;
+  if (action && action.week !== shown) {
+    if (draft.value === action.text) draft.value = "";
+    dishAction.value = null;
+  }
   if (shown) await loadPlan(shown);
 }
 
@@ -200,6 +207,13 @@ async function send(text = draft.value) {
   if (!message) return;
   draft.value = message;
   if (!(await requireAccount())) return;
+  // A dish's words sent from the landing (kept over a reload or a sign-in) first reopen the week and its
+  // conversations, as Open my week does, so they reach the conversation holding the week; if that week
+  // was replaced meanwhile, the words go and nothing is sent.
+  if (view.value === "landing" && actionWeek(message)) {
+    await enter();
+    if (!dishAction.value) return;
+  }
   view.value = "app";
   takeOn.value = null;
   // A dish action on a week this conversation did not plan changes that week, never plans a new one. It goes

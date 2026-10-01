@@ -454,7 +454,12 @@ plan with **Plan my week**, or still asking a planning question) asks first. The
 question lasts only while the conversation is planning that new week and the
 composer still holds the dish's words: once it plans one or stops, the question
 and the dish's words go, and once other words replace them, the question goes.
-The dish's words keep the week they change across a reload or a new sign-in.
+The dish's words keep the week they change across a reload, a new sign-in or a
+visit to another page, while that week is still the one shown: if it was
+replaced meanwhile (replanned on the profile page), the words go when the week
+opens. Sent from the landing box, they first reopen the week and its
+conversation, as **Open my week** does, so they reach the conversation holding
+the week.
 
 After a session has produced a plan, the messages endpoint switches to the
 replanning loop. It accepts one user-triggered meal event at a time, resolves a
