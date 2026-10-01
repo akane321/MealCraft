@@ -88,9 +88,18 @@ def catalog_embedder(api_key: str) -> Embed | None:
         return None
     from langchain_openai import OpenAIEmbeddings
 
+    from app.agent.model_client import http_client
+
     meta = catalog[0]
+    # A request is a sentence: sent as text, so no tokenizer is loaded (or downloaded) to cut it to length.
     return OpenAIEmbeddings(
-        model=meta["model"], dimensions=meta["dimensions"], api_key=api_key, timeout=10, max_retries=1
+        model=meta["model"],
+        dimensions=meta["dimensions"],
+        api_key=api_key,
+        timeout=10,
+        max_retries=1,
+        http_client=http_client(),
+        check_embedding_ctx_length=False,
     ).embed_documents
 
 

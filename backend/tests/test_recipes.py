@@ -1582,3 +1582,111 @@ def test_the_live_parser_can_be_built_against_the_catalog(recipe_client: TestCli
     parser = create_constraint_parser(settings, session)
     assert parser.provider == "openai"
     assert "chicken_breast" in parser.vocabulary.ingredients
+
+
+def _openai_answered_in_process(monkeypatch: pytest.MonkeyPatch, extraction: dict) -> list[dict]:
+    """OpenAI mode with the OpenAI API answered here: every request the shared model client sends is recorded
+    and answered (the parser's chat request with `extraction`, embeddings with constant vectors). Nothing
+    leaves the process; the base URL is unroutable in case anything bypassed the client."""
+    import json
+
+    import httpx2  # what the OpenAI SDK sends with
+
+    from app.agent import model_client
+
+    sent: list[dict] = []
+
+    def answer(request):
+        body = json.loads(request.content)
+        sent.append({"path": request.url.path, "body": body})
+        if request.url.path.endswith("/embeddings"):
+            vectors = [
+                {"object": "embedding", "index": i, "embedding": [0.1] * body["dimensions"]}
+                for i in range(len(body["input"]))
+            ]
+            usage = {"prompt_tokens": 1, "total_tokens": 1}
+            return httpx2.Response(
+                200, json={"object": "list", "data": vectors, "model": body["model"], "usage": usage}
+            )
+        message = {"role": "assistant", "content": json.dumps(extraction)}
+        return httpx2.Response(
+            200,
+            json={
+                "id": "chatcmpl-test",
+                "object": "chat.completion",
+                "created": 0,
+                "model": body["model"],
+                "choices": [{"index": 0, "finish_reason": "stop", "message": message}],
+                "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
+            },
+        )
+
+    client = model_client.http_client()
+    monkeypatch.setattr(client, "_transport", httpx2.MockTransport(answer))
+    monkeypatch.setattr(client, "_mounts", {})
+    monkeypatch.setenv("OPENAI_BASE_URL", "http://openai.invalid/v1")
+    monkeypatch.setattr(get_settings(), "agent_parser_provider", "openai")
+    monkeypatch.setattr(get_settings(), "openai_api_key", SecretStr("sk-test-not-used"))
+    return sent
+
+
+def _latest_run(recipe_client: TestClient, session_id: int) -> dict:
+    return recipe_client.get(f"/api/agent/sessions/{session_id}/runs").json()["items"][0]
+
+
+def test_a_turn_records_every_model_request_on_its_run(recipe_client: TestClient, monkeypatch) -> None:
+    """In OpenAI mode agent_runs.used_llm_calls stayed 0. A turn now records what it sent: the parser's chat
+    request, then one embedding request for every word it could not place (not one each), sent as text so no
+    tokenizer has to be downloaded."""
+    sent = _openai_answered_in_process(
+        monkeypatch, {"household_size": 2, "excluded_ingredients": ["taugeh", "belacan"]}
+    )
+
+    session = recipe_client.post(
+        "/api/agent/sessions", json={"message": "Plan dinners for two, no taugeh or belacan"}
+    ).json()
+
+    assert [item["path"] for item in sent] == ["/v1/chat/completions", "/v1/embeddings"]
+    assert sent[1]["body"]["input"] == ["taugeh", "belacan"]
+    run = _latest_run(recipe_client, session["id"])
+    assert run["used_llm_calls"] == 2
+    assert run["used_llm_calls"] <= run["max_llm_calls"]
+
+
+def test_a_retried_request_is_counted_and_a_fallback_is_recorded(recipe_client: TestClient, monkeypatch) -> None:
+    """A model that does not answer is asked twice (the SDK retries once), and both requests count; the rules
+    then read the turn, which the run records for the console's fallback figure."""
+    import httpx2
+
+    from app.agent import model_client
+    from app.agent.parser import FallbackConstraintParser
+
+    sent = _openai_answered_in_process(monkeypatch, {})
+
+    def unavailable(request):
+        sent.append({"path": request.url.path})
+        return httpx2.Response(503, json={"error": {"message": "overloaded"}})
+
+    monkeypatch.setattr(model_client.http_client(), "_transport", httpx2.MockTransport(unavailable))
+
+    session = recipe_client.post("/api/agent/sessions", json={"message": "Plan for 2 people"}).json()
+
+    assert [item["path"] for item in sent] == ["/v1/chat/completions"] * 2
+    run = _latest_run(recipe_client, session["id"])
+    assert run["used_llm_calls"] == 2
+    assert run["run_config"]["fell_back_to_rules"] is True
+    assert FallbackConstraintParser.OFFLINE_NOTE.strip() in session["messages"][-1]["content"]
+
+
+def test_a_swap_records_its_embedding_request_on_its_run(recipe_client: TestClient, monkeypatch) -> None:
+    sent = _openai_answered_in_process(monkeypatch, {"household_size": 2, "budget_per_meal_sgd": 20})
+    created, result = _plan_with_evidence(recipe_client)
+    assert result["run"]["used_llm_calls"] == 0  # saving the plan asks no model
+    sent.clear()
+
+    recipe_client.post(
+        f"/api/agent/sessions/{created['id']}/messages", json={"message": "Replace day 3 with something with tofu"}
+    )
+
+    assert [item["path"] for item in sent] == ["/v1/embeddings"]
+    assert _latest_run(recipe_client, created["id"])["used_llm_calls"] == 1

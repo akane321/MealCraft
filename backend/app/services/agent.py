@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from pydantic_core import to_jsonable_python
 
+from app.agent import model_client
 from app.agent.parser import ConstraintParser
 from app.agent.replanning import AgentReplanInterpreter
 from app.agent.shape_change import read_shape_change
@@ -25,6 +26,7 @@ from app.orchestration.run_lifecycle import (
     AgentRunLifecycle,
     AgentRunLifecycleError,
     AgentRunNotFoundError,
+    BudgetKind,
     StartedRun,
 )
 from app.orchestration.runtime import AgentTurnOutcome, BoundedAgentOrchestrator
@@ -159,6 +161,8 @@ class AgentSessionService:
         # Saves a shape changed in the conversation as the household's usual one, on a yes (ADR-0046).
         self.keep_plan_shape = keep_plan_shape
 
+    # A turn's model requests are counted from its start, before its run exists, and charged when it ends.
+    @model_client.counting()
     def create(self, message: str, *, idempotency_key: str | None = None) -> AgentSessionResponse:
         current = (self.starting_constraints or AgentConstraintState()).model_copy(deep=True)
         turn_input = _replay_input(
@@ -220,6 +224,7 @@ class AgentSessionService:
             items=[self._to_response(item) for item in self.repository.list_recent(limit=limit)]
         )
 
+    @model_client.counting()
     def reply(
         self,
         session_id: int,
@@ -892,7 +897,11 @@ class AgentSessionService:
     ) -> AgentRun:
         scope_payload = scope_decision.model_dump(mode="json") if scope_decision is not None else None
         run.scope_decision = scope_payload
+        if getattr(self.parser, "fell_back", False):
+            # The model did not answer and the rules read this turn: what the console counts as a fallback.
+            run.model_config = {**(run.model_config or {}), "fell_back_to_rules": True}
         self.run_lifecycle.repository.session.commit()
+        run = self._charge_model_calls(run)
         run = self.run_lifecycle.checkpoint(
             run,
             stage="turn_completed",
@@ -925,6 +934,11 @@ class AgentSessionService:
             )
         return self.run_lifecycle.transition(run, AgentRunStatus.COMMITTED, termination_reason_code="TURN_COMPLETED")
 
+    def _charge_model_calls(self, run: AgentRun) -> AgentRun:
+        """Records on the run every request this turn sent to the model API (model_client counts them)."""
+        used = model_client.take_count()
+        return self.run_lifecycle.consume_budget(run, BudgetKind.LLM_CALL, amount=used) if used else run
+
     def _fail_run(self, run: AgentRun, error: Exception, *, replay: dict | None = None) -> AgentRun:
         current = self.run_lifecycle.repository.get(run.id) or run
         if AgentRunStatus(current.status) in {
@@ -937,6 +951,7 @@ class AgentSessionService:
             AgentRunStatus.CANCELLED,
         }:
             return current
+        current = self._charge_model_calls(current)
         if replay is not None:
             current = self.run_lifecycle.checkpoint(
                 current, stage="turn_failed", status="failed", state_payload={"replay": replay}

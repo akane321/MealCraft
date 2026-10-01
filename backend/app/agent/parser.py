@@ -6,6 +6,7 @@ from typing import Protocol
 from langchain_openai import ChatOpenAI
 
 from app.agent.ingredient_matcher import IngredientMatcher
+from app.agent.model_client import http_client
 from app.data import ingredient_hierarchy
 from app.data.allergens import checked_allergens
 from app.schemas.agent import (
@@ -437,15 +438,11 @@ def align_to_vocabulary(
                 unmatched.setdefault(item.normalized_name, "available_ingredients")
         aligned.available_ingredients = pantry or None
     aligned.unmatched_terms = list(unmatched)
+    # Allergens are a closed list of nine the household reads in full; ingredients get proposals.
+    asked = {term: term.replace("_", " ") for term, field_name in unmatched.items() if field_name != "allergens"}
+    options = vocabulary.matcher.suggest_all(list(asked.values())) if vocabulary.matcher and asked else {}
     aligned.unmatched_suggestions = [
-        UnmatchedTermSuggestion(
-            term=term,
-            field=field_name,
-            # Allergens are a closed list of nine the household reads in full; ingredients get proposals.
-            options=vocabulary.matcher.suggest(term.replace("_", " "))
-            if vocabulary.matcher and field_name != "allergens"
-            else [],
-        )
+        UnmatchedTermSuggestion(term=term, field=field_name, options=options.get(asked.get(term), []))
         for term, field_name in unmatched.items()
     ]
     return aligned
@@ -470,6 +467,7 @@ class OpenAIConstraintParser:
             temperature=0,
             timeout=timeout_seconds,
             max_retries=1,
+            http_client=http_client(),
         ).with_structured_output(AgentConstraintExtraction, method="json_schema")
 
     def parse(

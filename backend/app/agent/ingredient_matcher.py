@@ -6,7 +6,7 @@ tap: it proposes the closest catalog ingredients. It never applies one — near 
 thing (peanut oil is not peanut), so the household always chooses.
 
 Embedding similarity needs the catalog's vectors (`scripts/embed_ingredients.py`) and one embedding call
-per term; spelling similarity needs nothing and is the fallback when either is missing or the call fails.
+for the turn's terms; spelling similarity needs nothing and is the fallback when either is missing or the call fails.
 On the developer terms embedding found an acceptable id in the four offered far more often than spelling,
 and fusing the two did worse than embedding alone (`scripts/evaluate_ingredient_matching.py`).
 """
@@ -79,24 +79,34 @@ class IngredientMatcher:
         }
         return sorted(scored, key=lambda ingredient: (-scored[ingredient], ingredient))
 
-    def _by_embedding(self, term: str) -> list[str] | None:
-        if not (self.embed and self.vectors):
-            return None
+    def _by_embedding(self, terms: list[str]) -> dict[str, list[str]]:
+        """Each term ranked by meaning, all from one embedding request; empty when that cannot run."""
+        if not (terms and self.embed and self.vectors):
+            return {}
         try:
-            (query,) = self.embed([term])
-        except Exception:  # noqa: BLE001 - a failed call only loses the suggestion, never the turn
-            return None
-        scored = {ingredient: cosine(query, vector) for ingredient, vector in self.vectors.items()}
-        return sorted(scored, key=lambda ingredient: (-scored[ingredient], ingredient))
+            queries = self.embed(terms)
+        except Exception:  # noqa: BLE001 - a failed call only loses the suggestions, never the turn
+            return {}
+        ranked = {}
+        for term, query in zip(terms, queries, strict=True):
+            scored = {ingredient: cosine(query, vector) for ingredient, vector in self.vectors.items()}
+            ranked[term] = sorted(scored, key=lambda ingredient: (-scored[ingredient], ingredient))
+        return ranked
+
+    def suggest_all(self, terms: list[str], *, limit: int = 4) -> dict[str, list[str]]:
+        """Suggestions for every term of a turn: one embedding request for all of them, not one each, so a turn
+        stays within its model-call budget however many words it could not place."""
+        by_meaning = {} if self.mode == "spelling" else self._by_embedding(list(dict.fromkeys(terms)))
+        suggestions = {}
+        for term in terms:
+            # No vectors, no key, or the call failed: spelling still helps.
+            ranked = by_meaning.get(term) or self._by_spelling(term)
+            exact = sorted(self.exact.get(fold(term), []))
+            suggestions[term] = list(dict.fromkeys([*exact, *ranked]))[:limit]
+        return suggestions
 
     def suggest(self, term: str, *, limit: int = 4) -> list[str]:
-        if self.mode == "spelling":
-            ranked = self._by_spelling(term)
-        else:
-            # No vectors, no key, or the call failed: spelling still helps.
-            ranked = self._by_embedding(term) or self._by_spelling(term)
-        exact = sorted(self.exact.get(fold(term), []))
-        return list(dict.fromkeys([*exact, *ranked]))[:limit]
+        return self.suggest_all([term], limit=limit)[term]
 
 
 @lru_cache(maxsize=1)
@@ -116,8 +126,17 @@ def catalog_embedder(api_key: str) -> Embed | None:
         return None
     from langchain_openai import OpenAIEmbeddings
 
+    from app.agent.model_client import http_client
+
+    # A term is a few words: sent as text, so no tokenizer is loaded (or downloaded) to cut it to length.
     client = OpenAIEmbeddings(
-        model=meta["model"], dimensions=meta["dimensions"], api_key=api_key, timeout=10, max_retries=1
+        model=meta["model"],
+        dimensions=meta["dimensions"],
+        api_key=api_key,
+        timeout=10,
+        max_retries=1,
+        http_client=http_client(),
+        check_embedding_ctx_length=False,
     )
     return client.embed_documents
 
