@@ -137,6 +137,16 @@ class AgentSessionRepository:
         self.session.commit()
         return self.get(session_id)
 
+    def reopen(self, session_id: int) -> None:
+        """A planned session collecting again for a new week: the saved week stays saved, the session lets go of it."""
+        agent_session = self.get(session_id)
+        if agent_session is None:
+            return
+        agent_session.plan_id = None
+        agent_session.pending_event_id = None
+        agent_session.replan_draft = {}
+        self.session.commit()
+
     def explain_unplanned(
         self,
         session_id: int,

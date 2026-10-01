@@ -12,13 +12,21 @@ from types import SimpleNamespace
 
 import pytest
 
+from app.agent import limits
 from app.agent.limits import planning_failure
-from app.agent.parser import FallbackConstraintParser, OpenAIConstraintParser, RuleBasedConstraintParser
+from app.agent.parser import (
+    FallbackConstraintParser,
+    OpenAIConstraintParser,
+    RuleBasedConstraintParser,
+)
 from app.agent.replies import language
-from app.planning.week_floor import _cheapest_meal
+from app.planning.product_path import ProductPlanningError
+from app.planning.week_floor import WeekFloor, _cheapest_meal
+from app.products.provider import ProductProviderError
 from app.schemas.agent import AgentConstraintExtraction, AgentConstraintState
 from app.schemas.planning_v2 import PlanningCompositionPolicy
-from tests.test_planning_capability import composed_client  # noqa: F401
+from app.services.meal_plan import WeeklyMealPlanService
+from tests.test_planning_capability import _dish, composed_client, dish_client  # noqa: F401
 
 
 def parse(message: str) -> AgentConstraintExtraction:
@@ -40,6 +48,19 @@ def parse(message: str) -> AgentConstraintExtraction:
         ("4个人，总共10块", 4, 10, None),
         ("四个人，总预算10新币", 4, 10, None),
         ("4个人，每餐不超过15新币", 4, None, 15),
+        # The walkthrough sentence without "total", and sums that are not who eats.
+        ("Plan a week for 4 for S$10", 4, 10, None),
+        ("4 people for 10 dollars total", 4, 10, None),
+        ("4 people, S$100 total for 7 dinners", 4, 100, None),
+        ("我们四个人，总共一百块", 4, 100, None),
+        # An amount for each person is one for the household.
+        ("Dinners for 4, S$3 per person per meal", 4, None, 12),
+        ("Dinners for 2, S$12 per person per meal", 2, None, 24),
+        ("4 people, 2 dollars per person per meal", 4, None, 8),
+        ("4 people, S$20 per person for the week", 4, 80, None),
+        ("4个人，每人每餐3块", 4, None, 12),
+        # ... and is left out while nobody has said how many eat.
+        ("S$3 per person per meal", None, None, None),
     ],
 )
 def test_a_budget_for_the_whole_week_is_read_however_it_is_said(message, size, weekly, per_meal):
@@ -68,27 +89,64 @@ def live_parser(extraction: AgentConstraintExtraction) -> FallbackConstraintPars
     return FallbackConstraintParser(live)
 
 
+# What the stubbed model hears; anything else is read as the rule parser reads it.
+HEARD = {
+    "Plan a week for 4 for S$10 total": AgentConstraintExtraction(household_size=4, weekly_budget_sgd=10),
+    "我们4个人，一周一共10新币": AgentConstraintExtraction(household_size=4, weekly_budget_sgd=10),
+}
+
+
+def stub_openai(monkeypatch):
+    import app.api.routes.agent as routes
+
+    def hear(prompt: str) -> AgentConstraintExtraction:
+        message = prompt.rsplit("Latest user message: ", 1)[1].strip()
+        if message in HEARD:
+            return HEARD[message]
+        read = RuleBasedConstraintParser().parse(
+            message, current=AgentConstraintState(), acknowledged_unknowns=[], history=[]
+        )
+        return read.model_copy(update={"assistant_summary": None})
+
+    def parser(settings, database=None, *, provider=None):
+        parsed = live_parser(AgentConstraintExtraction())
+        parsed.primary.structured_model = SimpleNamespace(invoke=hear)
+        return parsed
+
+    monkeypatch.setattr(routes, "create_constraint_parser", parser)
+
+
 @pytest.fixture(params=["fixture", "openai"])
 def client(request, composed_client, monkeypatch):  # noqa: F811
     """The synthetic week (two mains, three vegetables, a soup), in each parser mode."""
     if request.param == "openai":
-        import app.api.routes.agent as routes
-
-        heard = {
-            "Plan a week for 4 for S$10 total": AgentConstraintExtraction(household_size=4, weekly_budget_sgd=10),
-            "我们4个人，一周一共10新币": AgentConstraintExtraction(household_size=4, weekly_budget_sgd=10),
-            "Make the weekly budget S$36": AgentConstraintExtraction(weekly_budget_sgd=36),
-        }
-
-        def parser(settings, database=None, *, provider=None):
-            stub = SimpleNamespace(invoke=lambda prompt: heard[prompt.rsplit("Latest user message: ", 1)[1].strip()])
-            parsed = live_parser(AgentConstraintExtraction())
-            parsed.primary.structured_model = stub
-            return parsed
-
-        monkeypatch.setattr(routes, "create_constraint_parser", parser)
+        stub_openai(monkeypatch)
     composed_client.mode = request.param
     return composed_client
+
+
+# Eight mains, each a little of an ingredient sold in a whole package: what a week uses costs a few dollars,
+# what it buys costs several times that. The floor under the week's cost cannot tell S$10 from enough.
+PACKAGED = [
+    ("chickpea-stew", "chickpea"),
+    ("tofu-bowl", "firm_tofu"),
+    ("bean-chili", "black_bean"),
+    ("pasta-toss", "wholewheat_pasta"),
+    ("mushroom-rice", "mushroom"),
+    ("sweet-potato-bake", "sweet_potato"),
+    ("soba-salad", "soba_noodle"),
+    ("lentil-soup-main", "red_lentil"),
+]
+
+
+@pytest.fixture(params=["fixture", "openai"])
+def packaged(request, monkeypatch):
+    if request.param == "openai":
+        stub_openai(monkeypatch)
+    dishes = [_dish(slug, "main", ingredient, 40, calories=400) for slug, ingredient in PACKAGED]
+    with dish_client(monkeypatch, dishes) as client:
+        client.mode = request.param
+        yield client
 
 
 def tap(client, session: dict, label: str) -> dict:
@@ -106,37 +164,96 @@ def tap(client, session: dict, label: str) -> dict:
     return response.json()
 
 
-def test_an_impossible_budget_is_refused_up_front_and_a_failed_week_replaces_the_plan_card(client):
-    session = client.post("/api/agent/sessions", json={"message": "Plan a week for 4 for S$10 total"}).json()
-    assert session["parser_provider"] == client.mode
+def labels(session: dict) -> list[str]:
+    return [option["label"] for option in (session["pending_interaction"] or {}).get("options", [])]
 
-    # Refused before "That's everything I need", with the per-person number and the floor that proves it.
+
+def cheapest_quoted(reply: str) -> float:
+    return float(re.search(r"The cheapest week I could plan costs about S\$(\d+\.\d\d)", reply).group(1))
+
+
+def plans(client, session: dict) -> dict:
+    confirmed = client.post(f"/api/agent/sessions/{session['id']}/confirm")
+    assert confirmed.status_code == 200, confirmed.text
+    return confirmed.json()["plan"]
+
+
+def test_a_budget_whole_packages_overrun_is_refused_up_front_and_every_choice_plans(packaged, floors):
+    """The walkthrough's S$10 for 4: the floor allows it, the packages do not. Refused before "ready",
+    with the cheapest week the planner found, and each choice offered plans."""
+    first = "Plan a week for 4, S$10 total, no dish twice"
+    session = packaged.post("/api/agent/sessions", json={"message": first}).json()
+    assert session["parser_provider"] == packaged.mode
+
     reply = session["messages"][-1]["content"]
     assert session["status"] == "collecting" and not session["can_confirm"]
     assert "everything I need" not in reply
     assert "S$10 for 4 people is S$0.36 a person a meal over 7 meals" in reply
-    floor = float(re.search(r"cost at least S\$(\d+\.\d\d) for the week", reply).group(1))
-    assert floor > 10
-    labels = [option["label"] for option in session["pending_interaction"]["options"]]
-    assert labels[0] == f"Raise the weekly budget to S${math.ceil(floor)}"
+    assert "the cheapest my search found, not a proof that none is cheaper" in reply
+    cost = cheapest_quoted(reply)
+    assert cost > 10
+    # What a week uses is far less than what it buys: the floor alone would have said "ready".
+    assert floors[0] < 10 < cost
+    use, fewer = labels(session)
+    assert use == f"Use S${math.ceil(cost)} for the week"
+    assert fewer.startswith("2 people at S$") and fewer.endswith(" a week")
 
-    # A budget the floor allows is planned; this one is still under what whole packages cost, so the
-    # search finds no week, and the reply says which limit it ran into instead of a generic failure.
-    ready = tap(client, session, labels[0])
+    for label in (use, fewer):
+        again = packaged.post("/api/agent/sessions", json={"message": first}).json()
+        ready = tap(packaged, again, label)
+        assert ready["status"] == "ready" and ready["can_confirm"], ready["messages"][-1]["content"]
+        plan = plans(packaged, ready)
+        assert plan["grocery_estimate"]["purchase_total_sgd"] <= ready["constraints"]["weekly_budget_sgd"]
+
+
+@pytest.fixture
+def floors(monkeypatch):
+    """Records the floor each check computed, so a test can show what the floor alone would have said."""
+    seen = []
+    original = WeeklyMealPlanService.week_floor
+
+    def week_floor(self, constraints):
+        floor = original(self, constraints)
+        seen.append(floor.total_sgd)
+        return floor
+
+    monkeypatch.setattr(WeeklyMealPlanService, "week_floor", week_floor)
+    return seen
+
+
+def test_an_impossible_budget_is_refused_up_front_in_both_parser_modes(client):
+    session = client.post("/api/agent/sessions", json={"message": "Plan a week for 4 for S$10 total"}).json()
+    assert session["parser_provider"] == client.mode
+
+    reply = session["messages"][-1]["content"]
+    assert session["status"] == "collecting" and not session["can_confirm"]
+    assert "everything I need" not in reply
+    assert "S$10 for 4 people is S$0.36 a person a meal over 7 meals" in reply
+    cost = cheapest_quoted(reply)
+    ready = tap(client, session, f"Use S${math.ceil(cost)} for the week")
     assert ready["status"] == "ready" and ready["can_confirm"]
-    assert ready["constraints"]["weekly_budget_sgd"] == math.ceil(floor)
+    assert plans(client, ready)["grocery_estimate"]["purchase_total_sgd"] <= math.ceil(cost)
+
+
+def test_a_week_that_fails_at_plan_for_budget_offers_only_a_budget_a_real_week_backs(client, monkeypatch):
+    """No "Try S$X" ladder: the budget offered after a failed Plan is the cost of the cheapest week the
+    search found, and with it the week plans."""
+    monkeypatch.setattr(limits, "TIGHT_BUDGET_RATIO", 0)  # no check up front: the week fails at Plan
+    session = client.post("/api/agent/sessions", json={"message": "Plan a week for 4 for S$10 total"}).json()
+    assert session["can_confirm"]
+
     failed = client.post(f"/api/agent/sessions/{session['id']}/confirm")
     assert failed.status_code == 422
     why = failed.json()["detail"]
-    assert why.startswith(f"I couldn't plan this week: the search found no week that meets the S${math.ceil(floor)}.00")
-    assert "couldn't find a week that meets every limit" not in why
-
+    cost = cheapest_quoted(why)
     explained = client.get(f"/api/agent/sessions/{session['id']}").json()
     assert explained["messages"][-1]["content"] == why
     assert not explained["can_confirm"] and explained["status"] == "collecting"  # the Plan card gives way
-    assert [option["label"] for option in explained["pending_interaction"]["options"]] == [
-        f"Try S${math.ceil(math.ceil(floor) * 1.25)} for the week"
-    ]
+    use = f"Use S${math.ceil(cost)} for the week"
+    assert labels(explained)[0] == use
+    ready = tap(client, explained, use)
+    assert ready["can_confirm"]
+    assert plans(client, ready)["grocery_estimate"]["purchase_total_sgd"] <= math.ceil(cost)
 
 
 def test_a_chinese_household_is_refused_in_chinese_with_choices_in_chinese(client):
@@ -145,11 +262,144 @@ def test_a_chinese_household_is_refused_in_chinese_with_choices_in_chinese(clien
 
     reply = session["messages"][-1]["content"]
     assert session["status"] == "collecting" and not session["can_confirm"]
-    assert "4 个人一周 S$10，相当于每人每餐 S$0.36（共 7 餐）" in reply and "至少要" in reply
+    assert "4 个人一周 S$10，相当于每人每餐 S$0.36（共 7 餐）" in reply and "最便宜的一周大约要" in reply
     assert not re.search(r"[A-Za-z]{3,}", reply)
     options = session["pending_interaction"]["options"]
-    assert options[0]["label"].startswith("把每周预算提高到 S$")
+    assert options[0]["label"].startswith("一周用 S$")
     assert options[0]["value"].startswith("每周预算 ")
+
+
+@pytest.mark.parametrize(
+    ("answer", "lang"),
+    [("S$50", "en"), ("ok, 50 dollars then", "en"), ("50", "en"), ("那就50新币吧", "zh")],
+)
+def test_a_bare_amount_answers_the_budget_the_refusal_asked_about(client, answer, lang):
+    first = "Plan a week for 4 for S$10 total" if lang == "en" else "我们4个人，一周一共10新币"
+    session = client.post("/api/agent/sessions", json={"message": first}).json()
+    assert session["missing_fields"] == ["weekly_budget_sgd"]
+
+    answered = client.post(f"/api/agent/sessions/{session['id']}/messages", json={"message": answer}).json()
+    assert answered["constraints"]["weekly_budget_sgd"] == 50
+    assert answered["status"] == "ready" and answered["can_confirm"]
+    assert language(answered["messages"][-1]["content"]) == lang
+
+
+@pytest.mark.parametrize(
+    ("message", "size", "weekly", "per_meal"),
+    [
+        ("4个人，总共10块", 4, 10, None),
+        ("4 people, SGD 10 in total", 4, 10, None),
+        ("4 people, $10 per week", 4, 10, None),
+        ("4 people, 10 dollars for the week", 4, 10, None),
+        ("我们四个人，总共一百块", 4, 100, None),
+        ("4个人，每顿饭不超过15块", 4, None, 15),
+    ],
+)
+def test_a_budget_however_it_is_said_reaches_the_parser(client, message, size, weekly, per_meal):
+    """The scope gate runs before either parser: a sum of money is a planning message."""
+    session = client.post("/api/agent/sessions", json={"message": message}).json()
+
+    assert session["last_scope_decision"]["scope_class"] == "domain_action"
+    constraints = session["constraints"]
+    assert (constraints["household_size"], constraints["weekly_budget_sgd"], constraints["budget_per_meal_sgd"]) == (
+        size,
+        weekly,
+        per_meal,
+    )
+
+
+def test_a_failed_search_names_the_limit_it_ran_into_never_a_proof():
+    constraints = AgentConstraintState(household_size=4, weekly_budget_sgd=50)
+    over = {"purchase_total_sgd": 61.2, "checks": [{"code": "purchase_budget", "status": "failed", "hard": True}]}
+    cheapest = {**over, "purchase_total_sgd": 58.4, "cheapest_search": True}
+
+    def failure(trace, status="candidate_rejected", message="I couldn't find a week."):
+        return ProductPlanningError(status, message, trace)
+
+    told = planning_failure(failure({"validation_attempts": [over, cheapest]}), constraints, "en")
+    assert told.text == (
+        "S$50 for 4 people is S$1.79 a person a meal over 7 meals. The cheapest week I could plan costs about "
+        "S$58.40: the cheapest my search found, not a proof that none is cheaper."
+    )
+    # Only the cheapest-week search's own week backs an amount, never a ranked week or a guess.
+    assert told.options == (("Use S$59 for the week", "Make the weekly budget S$59"),)
+    unbacked = planning_failure(failure({"validation_attempts": [over]}), constraints, "en")
+    assert unbacked.options == () and "S$" not in unbacked.text.split("(")[0]
+    emptied = planning_failure(failure({"search": {"emptied_by": "repeats"}}), constraints, "zh")
+    assert emptied.text == "这周没排出来：搜索没有找到符合菜不重样的要求的一周。卡住它的就是这个限制。"
+    slow = planning_failure(failure({"search": {"exhausted": True}}), constraints, "en")
+    assert slow.retry  # nothing to change: the Plan card stays
+
+    # A guess at a per-meal budget or a cooking time is not offered: no week backs it.
+    limited = AgentConstraintState(household_size=4, budget_per_meal_sgd=5, max_cooking_time_minutes=20)
+    for code in ("per_meal_budget", "time_limit"):
+        failed = {"purchase_total_sgd": 40.0, "checks": [{"code": code, "status": "failed", "hard": True}]}
+        told = planning_failure(failure({"validation_attempts": [failed]}), limited, "en")
+        assert told.text.startswith("I couldn't plan this week: the search found no week that meets the ")
+        assert told.options == ()
+
+
+def test_a_per_meal_budget_is_offered_only_when_a_week_plans_with_it(monkeypatch):
+    """S$1 a meal fits no dish; the cheapest needs S$2, but with no dish twice two dishes are not a week."""
+    dishes = [_dish(slug, "main", ingredient, 400, calories=400) for slug, ingredient in PACKAGED]
+    with dish_client(monkeypatch, dishes) as client:
+        session = client.post(
+            "/api/agent/sessions", json={"message": "Dinners for 4, S$1 a meal, no dish twice"}
+        ).json()
+        assert session["status"] == "collecting" and "S$1 a meal" in session["messages"][-1]["content"]
+        assert not any("per-meal" in label for label in labels(session))
+
+        # Without the rule, S$2 a meal plans, and is offered.
+        session = client.post("/api/agent/sessions", json={"message": "Dinners for 4, S$1 a meal"}).json()
+        raise_to = next(label for label in labels(session) if "per-meal" in label)
+        ready = tap(client, session, raise_to)
+        assert ready["can_confirm"]
+        plans(client, ready)
+
+
+def test_a_search_that_ran_out_of_steps_up_front_leaves_the_week_to_plan():
+    floor = WeekFloor(days=7, meals=7, total_sgd=9.0, meal_sgd={}, empty_roles=[], roles={})
+    slow = ProductPlanningError("candidate_rejected", "Planning took longer.", {"search": {"exhausted": True}})
+    constraints = AgentConstraintState(household_size=4, weekly_budget_sgd=20)
+
+    told = limits.refusal(constraints, lambda **_: floor, "en", check=lambda **_: slow, cheapest=lambda **_: None)
+    assert told is None  # nothing to change: Plan may well find the week
+
+
+def test_a_request_the_planner_turned_down_before_searching_is_passed_on_as_it_said():
+    constraints = AgentConstraintState(household_size=4, weekly_budget_sgd=80.555)
+    cents = ProductPlanningError("needs_clarification", "Enter a budget in whole cents and try again.", {})
+    told = planning_failure(cents, constraints, "en")
+    assert told.text == "I couldn't plan this week: Enter a budget in whole cents and try again."
+    assert not told.retry
+    assert planning_failure(cents, constraints, "zh").text == "这周没排出来：预算请精确到分（最多两位小数）再试一次。"
+
+    allergen = "Recipe coverage for a requested allergen is missing; update the allergen data before planning."
+    missing = ProductPlanningError("needs_data", allergen, {"status": "needs_data"})
+    unchecked = AgentConstraintState(household_size=2, allergens=["lupin"])
+    assert not planning_failure(missing, unchecked, "en").retry  # retrying cannot add the data
+    gap = ProductPlanningError("needs_data", "Some recipe or price details are missing. Try again in a moment.", {})
+    assert planning_failure(gap, constraints, "en").retry
+
+
+def test_a_budget_in_fractions_of_a_cent_is_answered_with_the_planners_reason(client, monkeypatch):
+    monkeypatch.setattr(limits, "TIGHT_BUDGET_RATIO", 0)
+    session = client.post("/api/agent/sessions", json={"message": "Plan a week for 4 for S$80.555 total"}).json()
+    failed = client.post(f"/api/agent/sessions/{session['id']}/confirm")
+
+    assert failed.status_code == 422
+    assert failed.json()["detail"] == "I couldn't plan this week: Enter a budget in whole cents and try again."
+
+
+def test_prices_that_cannot_be_read_skip_the_check_instead_of_failing_the_turn(composed_client, monkeypatch):  # noqa: F811
+    def unavailable(self, constraints):
+        raise ProductProviderError("FairPrice request failed: timed out")
+
+    monkeypatch.setattr(WeeklyMealPlanService, "week_floor", unavailable)
+    session = composed_client.post("/api/agent/sessions", json={"message": "Plan a week for 4 for S$10 total"})
+
+    assert session.status_code == 201, session.text
+    assert session.json()["status"] == "ready"
 
 
 def test_no_dish_twice_with_too_few_dishes_is_refused_with_the_count(composed_client):  # noqa: F811
@@ -160,21 +410,6 @@ def test_no_dish_twice_with_too_few_dishes_is_refused_with_the_count(composed_cl
         "No dish twice needs 7 different main dishes for dinner this week, and only 2 fit"
         in (session["messages"][-1]["content"])
     )
-
-
-def test_a_failed_search_names_the_limit_it_ran_into_never_a_proof():
-    constraints = AgentConstraintState(household_size=4, weekly_budget_sgd=50)
-    over = {"purchase_total_sgd": 61.2, "checks": [{"code": "purchase_budget", "status": "failed", "hard": True}]}
-    told = planning_failure("candidate_rejected", {"validation_attempts": [over]}, constraints, "en")
-    assert told.text == (
-        "I couldn't plan this week: the search found no week that meets the S$50.00 weekly budget; the cheapest "
-        "week it finished costs S$61.20. That is the limit it kept running into."
-    )
-    assert told.options == (("Try S$62 for the week", "Make the weekly budget S$62"),)
-    emptied = planning_failure("candidate_rejected", {"search": {"emptied_by": "repeats"}}, constraints, "zh")
-    assert emptied.text == "这周没排出来：搜索没有找到符合菜不重样的要求的一周。卡住它的就是这个限制。"
-    slow = planning_failure("candidate_rejected", {"search": {"exhausted": True}}, constraints, "en")
-    assert slow.retry  # nothing to change: the Plan card stays
 
 
 def test_the_cheapest_meal_counts_each_dish_at_its_share():
@@ -193,6 +428,12 @@ def test_the_cheapest_meal_counts_each_dish_at_its_share():
         ("我想吃点好的", "好呀，我来帮你吃得好一点。", "规划一周的饭菜"),
         ("嗯……", "我不太确定这是不是饮食规划的请求。", "规划一周的饭菜"),
         ("Can you help me tomorrow?", "I am not sure whether this is a meal-planning request.", "Plan a week of meals"),
+        # A greeting and a question about a dish are not wishes for food.
+        ("good morning", "I am not sure whether this is a meal-planning request.", "Plan a week of meals"),
+        ("这个菜怎么做？", "我不太确定这是不是饮食规划的请求。", "规划一周的饭菜"),
+        # Boredom with the dishes is a wish for variety, in either language.
+        ("the dishes are boring", "Let's make it more varied.", "A week with no dish twice"),
+        ("菜很单调,不太好", "那就多换些花样。", "一周菜不重样"),
     ],
 )
 def test_an_unclear_message_gets_choices_in_its_language(composed_client, message, expected, first_option):  # noqa: F811
@@ -241,11 +482,8 @@ def test_a_chinese_week_is_planned_and_changed_in_chinese(composed_client):  # n
     assert session["messages"][-1]["content"] == "这是你这一周的安排。点一道菜看食谱，想换什么都可以告诉我。"
 
     wish = say(composed_client, session, "我想吃点好的")
-    assert wish["messages"][-1]["content"].startswith("想吃点好的？")
-    assert [option["label"] for option in wish["pending_interaction"]["options"]] == [
-        "把今晚的晚餐换成更好吃的",
-        "换别的日子的菜",
-    ]
+    assert wish["messages"][-1]["content"].startswith("想换换口味？")
+    assert labels(wish) == ["换掉今晚的晚餐", "换别的日子的菜"]
 
     every = say(composed_client, session, "所有菜都换掉")
     assert every["messages"][-1]["content"] == "我一次换一道菜，确认之前什么都不会改。先从哪一天开始？"
@@ -283,3 +521,65 @@ def test_a_limit_no_dish_meets_is_named_with_the_dish_that_comes_closest(compose
     assert reason in session["messages"][-1]["content"]
     eased = tap(composed_client, session, option)
     assert eased["status"] == "ready" and eased["can_confirm"]
+
+
+VARIED = [
+    "chicken_breast",
+    "brown_rice",
+    "cucumber",
+    "cherry_tomato",
+    "firm_tofu",
+    "soba_noodle",
+    "broccoli",
+    "red_lentil",
+    "rolled_oats",
+    "salmon_fillet",
+    "canned_tuna",
+    "chickpea",
+    "black_bean",
+    "quinoa",
+    "wholewheat_pasta",
+    "sweet_potato",
+]
+
+
+@pytest.fixture(params=["fixture", "openai"])
+def varied(request, monkeypatch):
+    """Sixteen mains: two weeks' worth with nothing in common."""
+    if request.param == "openai":
+        stub_openai(monkeypatch)
+    dishes = [_dish(f"{name.replace('_', '-')}-main", "main", name, 200, calories=450) for name in VARIED]
+    with dish_client(monkeypatch, dishes) as client:
+        yield client
+
+
+@pytest.mark.parametrize("complaint", ["菜很单调,不太好", "the dishes are boring", "too repetitive"])
+def test_a_week_found_monotonous_is_offered_a_new_week_with_different_dishes(varied, complaint):
+    session = planned(varied, "Dinners for 4 this week")
+    week = varied.get(f"/api/plans/{session['plan_id']}").json()
+    before = {dish["recipe"]["slug"] for dish in week["days"]}
+
+    offered = say(varied, session, complaint)
+    assert offered["messages"][-1]["content"].startswith(
+        "那就多换些花样。" if language(complaint) == "zh" else "Let's make it more varied."
+    )
+    again = labels(offered)[0]
+    assert again in {"Plan a new week with different dishes", "重新规划一周，换一批菜"}
+
+    ready = tap(varied, offered, again)
+    assert ready["can_confirm"] and ready["plan_id"] is None
+    assert ready["constraints"]["max_uses_per_recipe"] == 1
+    new = plans(varied, ready)
+    mains = [dish["recipe"]["slug"] for dish in new["days"]]
+    assert len(mains) == len(set(mains)) == 7  # none twice
+    assert not before & set(mains)  # and none of last week's
+
+
+def test_a_repeated_dish_is_offered_for_a_swap_when_the_week_repeats_one(composed_client):  # noqa: F811
+    session = planned(composed_client, "Dinners for 4 this week")  # two mains for seven dinners
+    offered = say(composed_client, session, "the dishes are boring")
+
+    swap = labels(offered)[1]
+    assert re.fullmatch(r"Swap the .+ on [A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}", swap)
+    previewed = tap(composed_client, offered, swap)
+    assert previewed["pending_replan"]["status"] == "previewed"

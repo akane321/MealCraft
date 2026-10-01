@@ -29,10 +29,31 @@ class AgentTurnOutcome(BaseModel):
     state_mutated: bool = False
 
 
-# "Something nice", "a treat", 我想吃点好的: a wish about food that is not yet a planning request.
+# "Something nice", "a treat", 我想吃点好的: a wish about food that is not yet a planning request. Not a
+# greeting ("good morning") and not a question about a dish (这个菜怎么做).
 FOOD_WISH = re.compile(
-    r"\b(?:eat|eating|food|hungry|craving|treat|tasty|yummy|delicious|nice|nicer|good)\b|吃|饿|馋|美食|菜"
+    r"\b(?:hungry|craving|treat|tasty|tastier|yummy|delicious|nicer)\b"
+    r"|\bsomething\s+(?:nice|good|special|different)\b|\b(?:eat|eating)\s+(?:well|better|something)\b"
+    r"|\b(?:good|nice|better)\s+(?:food|meals?|dinners?|dishes)\b"
+    r"|想吃|吃点|吃好|好吃的|饿|馋|美食"
 )
+# "The dishes are boring", "too repetitive", 菜很单调, 天天都一样: a wish for variety. Not "no repeats" or
+# 菜不重样, which state the rule itself.
+MONOTONY = re.compile(
+    r"\b(?:boring|bored|monotonous|repetitive|samey|same\s+(?:old|thing|dishes|food|every\s*day))\b"
+    r"|\b(?:more|no|not\s+(?:much|enough))\s+variety\b|\btoo\s+(?:much\s+)?(?:repetition|repeated)\b"
+    r"|单调|没新意|没有新意|吃腻|腻了|老一样|老是一样|总是一样|天天都?一样|都差不多|太重复|重复太多|没什么变化|换换口味|多点花样"
+)
+# "Plan a new week with different dishes", 重新规划一周，换一批菜: a new, more varied week asked of a planned one.
+VARIED_WEEK = re.compile(
+    r"\b(?:re-?plan(?:\s+the\s+week)?|plan\s+(?:a\s+new|another|the)\s+week(?:\s+again)?)\b"
+    r".*\b(?:different\s+dishes|no\s+(?:dish\s+twice|repeats?)|more\s+variety)\b"
+    r"|重新(?:规划|安排).*(?:换一批|不重样|不要?重复|多点花样)"
+)
+
+
+def wants_variety(message: str) -> bool:
+    return MONOTONY.search(message.lower()) is not None
 
 
 def wish_options(lang: str, *, planned: bool) -> list[tuple[str, str]]:
@@ -45,6 +66,14 @@ def wish_options(lang: str, *, planned: bool) -> list[tuple[str, str]]:
     return [
         (say("plan_week", lang), say("plan_week_say", lang)),
         (say("plan_varied", lang), say("plan_varied_say", lang)),
+    ]
+
+
+def variety_options(lang: str) -> list[tuple[str, str]]:
+    """Before a week exists, more variety is a week with no dish twice."""
+    return [
+        (say("plan_varied", lang), say("plan_varied_say", lang)),
+        (say("plan_week", lang), say("plan_week_say", lang)),
     ]
 
 
@@ -85,15 +114,28 @@ class BoundedAgentOrchestrator:
             )
 
         lang = language(message, history)
+        variety = wants_variety(message)
+        stated = re.search(r"\d", message) is not None  # "4 of us, the meals are boring": details to read
+        if variety and decision.scope_class is ScopeClass.DOMAIN_ACTION and not current_questions and not stated:
+            # "These dishes are always the same": a wish, not yet a request, whatever words it uses.
+            decision = ScopeDecision(
+                scope_class=ScopeClass.AMBIGUOUS,
+                unsupported_segments=[message],
+                requires_clarification=True,
+                reason_code="VARIETY_REQUEST",
+            )
         if not decision.should_mutate_state:
             reply = self.boundary_message(decision, lang)
             if decision.scope_class is ScopeClass.AMBIGUOUS:
                 # Not a dead end: say what can be done from here, as choices.
-                if FOOD_WISH.search(message.lower()):
+                options = wish_options(lang, planned=False)
+                if variety:
+                    reply, options = say("variety", lang), variety_options(lang)
+                elif FOOD_WISH.search(message.lower()):
                     reply = say("wish", lang)
                 pending_interaction = say_interaction(
                     prompt=reply,
-                    options=wish_options(lang, planned=False),
+                    options=options,
                     question_id=f"context-{max(context_version, 1)}:message:{len(history)}",
                     context_version=max(context_version, 1),
                 )
@@ -118,6 +160,7 @@ class BoundedAgentOrchestrator:
             current=current,
             acknowledged_unknowns=acknowledged_unknowns,
             history=history,
+            asked=current_missing_fields[0] if current_missing_fields else None,
         )
         next_context_version = max(context_version + 1, 1)
         missing_fields = list(result["missing_fields"])

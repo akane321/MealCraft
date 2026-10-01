@@ -81,6 +81,9 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     # How often one dish may appear in the week, a hard rule when stated: 1 is "no dish twice".
     # None leaves repeating a soft cost the planner avoids by itself.
     max_uses_per_recipe: int | None = Field(default=None, ge=1, le=7)
+    # Recipes a new week leaves out, each course only while a week's worth of its other dishes remain
+    # ("plan a new week with different dishes" after one found monotonous).
+    avoid_recipe_ids: list[int] = Field(default_factory=list, max_length=200)
 
     @model_validator(mode="after")
     def one_way_to_say_the_shape(self) -> "WeeklyMealPlanRequest":

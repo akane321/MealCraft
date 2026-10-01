@@ -5,7 +5,7 @@ from langgraph.graph import END, START, StateGraph
 
 from app.agent import replies
 from app.agent.limits import Refusal
-from app.agent.parser import ConstraintParser
+from app.agent.parser import ConstraintParser, bare_amount
 from app.agent.replies import language, say
 from app.schemas.agent import AgentConstraintExtraction, AgentConstraintState, AgentMessageResponse
 from app.schemas.recommendation import AvailableIngredientInput, NutritionTargets
@@ -25,8 +25,10 @@ class AgentWorkflowState(TypedDict, total=False):
     assistant_message: str
     language: str
     refusal: Refusal | None
+    asked: str | None
 
 
+BUDGET_FIELDS = {"weekly_budget_sgd", "budget_per_meal_sgd"}
 # Before the assistant says it has everything: a limit no week can meet, or None (agent/limits.py).
 FeasibilityCheck = Callable[[AgentConstraintState, str], Refusal | None]
 
@@ -50,7 +52,9 @@ class AgentConstraintWorkflow:
         current: AgentConstraintState,
         acknowledged_unknowns: list[str],
         history: list[AgentMessageResponse],
+        asked: str | None = None,
     ) -> AgentWorkflowState:
+        """`asked` is the field the assistant's last question was about, if any."""
         return self.graph.invoke(
             {
                 "message": message,
@@ -58,6 +62,7 @@ class AgentConstraintWorkflow:
                 "acknowledged_unknowns": acknowledged_unknowns,
                 "history": history,
                 "language": language(message, history),
+                "asked": asked,
             }
         )
 
@@ -75,6 +80,15 @@ class AgentConstraintWorkflow:
         lang = state["language"]
         current = AgentConstraintState.model_validate(state["current_constraints"])
         extraction = AgentConstraintExtraction.model_validate(state["extraction"])
+        asked = state.get("asked")
+        if asked in BUDGET_FIELDS and extraction.weekly_budget_sgd is None and extraction.budget_per_meal_sgd is None:
+            # Asked for a budget, "S$50" or 那就50新币吧 answers it, though it says neither meal nor week.
+            amount = bare_amount(state["message"])
+            if amount is not None:
+                setattr(extraction, asked, amount)
+                extraction.assistant_summary = say(
+                    "got_it", lang, details=replies.details(AgentConstraintExtraction(**{asked: amount}), lang)[0]
+                )
         merged = AgentConstraintWorkflow._merge_constraints(current, extraction)
         acknowledged = list(
             dict.fromkeys([*state["acknowledged_unknowns"], *extraction.acknowledged_unknown_quantities])

@@ -609,7 +609,7 @@ test("keeping a dish previews as keeping it, and the change log shows it once co
 test("a week that cannot be planned is explained in the chat in place of the Plan card", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await stubApi(page);
-  const why = "I couldn't plan this week: the search found no week within the S$10.00 weekly budget. That is the limit it kept running into.";
+  const why = "S$10 for 4 people is S$0.36 a person a meal over 7 meals. The cheapest week I could plan costs about S$38.16: the cheapest my search found, not a proof that none is cheaper.";
   const explained = {
     ...session(false),
     status: "collecting",
@@ -622,7 +622,7 @@ test("a week that cannot be planned is explained in the chat in place of the Pla
       prompt: why,
       field_path: "message",
       question_id: "context-2:unplanned",
-      options: [{ id: "say_0", label: "Try S$15 for the week", value: "Make the weekly budget S$15" }],
+      options: [{ id: "say_0", label: "Use S$39 for the week", value: "Make the weekly budget S$39" }],
       allow_free_text: true,
       context_version: 2,
       plan_revision: null,
@@ -639,6 +639,6 @@ test("a week that cannot be planned is explained in the chat in place of the Pla
 
   await expect(page.getByText(why).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Plan my week" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Try S$15 for the week" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Use S$39 for the week" })).toBeVisible();
   await expect(page.getByRole("alert")).toHaveCount(0);
 });

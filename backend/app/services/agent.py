@@ -8,7 +8,7 @@ from pydantic_core import to_jsonable_python
 from app.agent import limits
 from app.agent.parser import ConstraintParser
 from app.agent.replanning import AgentReplanInterpreter
-from app.agent.replies import language, say
+from app.agent.replies import language, say, weekday
 from app.agent.shape_change import read_shape_change
 from app.models.agent import AgentRun, AgentSession
 from app.orchestration.contracts import (
@@ -34,9 +34,17 @@ from app.orchestration.run_lifecycle import (
     AgentRunNotFoundError,
     StartedRun,
 )
-from app.orchestration.runtime import FOOD_WISH, AgentTurnOutcome, BoundedAgentOrchestrator, wish_options
+from app.orchestration.runtime import (
+    FOOD_WISH,
+    VARIED_WEEK,
+    AgentTurnOutcome,
+    BoundedAgentOrchestrator,
+    wants_variety,
+    wish_options,
+)
 from app.orchestration.scope_policy import ReferenceScopePolicy
 from app.planning.weekly_planner import WeeklyPlanSelectionError
+from app.products.provider import ProductProviderError
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
 from app.retrieval.evidence import grocery_packet, packet_digest, verify_grocery_totals
@@ -253,13 +261,23 @@ class AgentSessionService:
         if snapshot.plan_id is not None:
             self.repository.end_read_transaction()
             try:
-                response = self._reply_to_planned(session_id, snapshot, message)
+                response = (
+                    self._plan_again(session_id, snapshot, message)
+                    if VARIED_WEEK.search(message.lower())
+                    else self._reply_to_planned(session_id, snapshot, message)
+                )
             except Exception as error:
                 self._fail_run(run, error)
                 raise
             self._finish_turn_run(
                 run,
-                result_status=("planned" if response.pending_replan is not None else "collecting"),
+                result_status=(
+                    response.status
+                    if response.plan_id is None
+                    else "planned"
+                    if response.pending_replan is not None
+                    else "collecting"
+                ),
                 scope_decision=response.last_scope_decision,
                 has_preview=response.pending_replan is not None,
             )
@@ -412,19 +430,37 @@ class AgentSessionService:
             pricing_mode=constraints.pricing_mode,
             plan_shape=constraints.plan_shape or default_plan_shape(),
             max_uses_per_recipe=constraints.max_uses_per_recipe,
+            avoid_recipe_ids=constraints.avoid_recipe_ids,
         )
 
     def _refusal(self, constraints: AgentConstraintState, lang: str) -> limits.Refusal | None:
-        """A limit no week the planner could build meets, checked against the week's cost floor (no search)."""
+        """A limit no week the planner could build meets: the floor's proofs, and near it the planner's own answer."""
         try:
             request = self._plan_request(constraints)
         except ValueError:
             return None  # the request itself is refused when the week is planned, with its own reason
+        try:
+            return limits.refusal(
+                constraints,
+                lambda **changes: self.meal_plan_service.week_floor(request.model_copy(update=changes)),
+                lang,
+                check=lambda **changes: self.meal_plan_service.check(request.model_copy(update=changes)),
+                cheapest=self._cheapest(request),
+            )
+        except (ProductProviderError, WeeklyPlanSelectionError):
+            # Prices or recipes could not be read now: nothing is refused, and Plan answers for itself.
+            return None
 
-        def floor_of(**changes):
-            return self.meal_plan_service.week_floor(request.model_copy(update=changes))
+    def _cheapest(self, request: WeeklyMealPlanRequest) -> Callable[..., float | None]:
+        """What the cheapest week the planner's search finds for `request` with changes costs; None for none."""
 
-        return limits.refusal(constraints, floor_of, lang)
+        def cheapest(**changes) -> float | None:
+            try:
+                return self.meal_plan_service.cheapest_week(request.model_copy(update=changes))
+            except (ProductProviderError, WeeklyPlanSelectionError):
+                return None
+
+        return cheapest
 
     def _reply_to_planned(
         self,
@@ -438,6 +474,8 @@ class AgentSessionService:
         interaction = snapshot.pending_interaction
         if interaction is not None and interaction.field_path == KEEP_SHAPE_FIELD:
             return self._answer_keep_shape(session_id, snapshot, message, lang)
+        if wants_variety(message):
+            return self._offer_variety(session_id, snapshot, message, lang)
         if not snapshot.clarification_questions:
             changed = self._change_shape(session_id, snapshot, message, lang)
             if changed is not None:
@@ -540,6 +578,94 @@ class AgentSessionService:
                     pending_event_id=preview.id,
                     scope_decision=scope_decision,
                 )
+        if updated is None:
+            raise AgentSessionNotFoundError
+        return self._to_response(updated)
+
+    def _offer_variety(
+        self, session_id: int, snapshot: AgentSessionResponse, message: str, lang: str
+    ) -> AgentSessionResponse:
+        """A wish for variety ("the dishes are boring", 菜很单调): a new week of different dishes, or a swap."""
+        plan = self.meal_plan_service.get(snapshot.plan_id)
+        if plan is None:
+            raise AgentSessionNotFoundError
+        options = [(say("replan_varied", lang), say("replan_varied_say", lang))]
+        seen: set[int] = set()
+        for dish in sorted(plan.days, key=lambda item: (item.day_index, item.entry_id)):
+            if dish.recipe.id in seen:
+                values = {"title": dish.recipe.title, "day": weekday(dish.planned_date, lang), "index": dish.day_index}
+                options.append((say("swap_repeat", lang, **values), say("swap_repeat_say", lang, **values)))
+                break
+            seen.add(dish.recipe.id)
+        else:
+            options.append((say("swap_other", lang), say("swap_say", lang)))
+        reply = say("variety_planned", lang)
+        updated = self.repository.append_bounded_exchange(
+            session_id,
+            user_message=message,
+            assistant_message=reply,
+            scope_decision=ScopeDecision(
+                scope_class=ScopeClass.DOMAIN_ACTION,
+                detected_intents=["more_variety"],
+                supported_segments=[message],
+                should_mutate_state=True,  # a question with choices, as a replanning question is
+                reason_code="VARIETY_REQUEST",
+            ),
+            pending_interaction=self._choices(snapshot, reply, options),
+        )
+        if updated is None:
+            raise AgentSessionNotFoundError
+        return self._to_response(updated)
+
+    def _plan_again(self, session_id: int, snapshot: AgentSessionResponse, message: str) -> AgentSessionResponse:
+        """A new week with different dishes, none twice, for a household that found theirs monotonous: the same
+        details otherwise, and the Plan card again.
+
+        The saved week stays as it is until the new one is planned; if the new one cannot be, the reason is
+        said and the session keeps its week.
+        """
+        plan = self.meal_plan_service.get(snapshot.plan_id)
+        if plan is None:
+            raise AgentSessionNotFoundError
+        current = snapshot.constraints.model_copy(
+            update={
+                "avoid_recipe_ids": sorted({dish.recipe.id for dish in plan.days}),
+                "max_uses_per_recipe": snapshot.constraints.max_uses_per_recipe or 1,
+            }
+        )
+        turn = {
+            "current": current,
+            "acknowledged_unknowns": [],
+            "history": snapshot.messages[-self.max_history_messages :],
+            "current_status": "collecting",
+            "current_missing_fields": [],
+            "current_questions": [],
+            "context_version": snapshot.context_version,
+        }
+        result = self.orchestrator.process(message, **turn)
+        if result.status != "ready":
+            updated = self.repository.append_bounded_exchange(
+                session_id,
+                user_message=message,
+                assistant_message=result.assistant_message,
+                scope_decision=result.scope_decision,
+                pending_interaction=None,
+            )
+        else:
+            self.repository.reopen(session_id)
+            updated = self.repository.append_exchange(
+                session_id,
+                user_message=message,
+                assistant_message=result.assistant_message,
+                constraints=result.constraints,
+                status=result.status,
+                missing_fields=result.missing_fields,
+                clarification_questions=result.clarification_questions,
+                acknowledged_unknowns=result.acknowledged_unknowns,
+                context_version=result.context_version,
+                scope_decision=result.scope_decision,
+                pending_interaction=result.pending_interaction,
+            )
         if updated is None:
             raise AgentSessionNotFoundError
         return self._to_response(updated)
@@ -882,11 +1008,9 @@ class AgentSessionService:
         The Plan card gives way to the explanation (the session collects again), unless the same request
         may simply plan next time (slow search, missing data).
         """
-        trace = getattr(error, "trace", None)
-        if trace is None:
-            explained = limits.Refusal("plan", say("change_failed", lang, error=error))
-        else:
-            explained = limits.planning_failure(getattr(error, "status", None), trace, snapshot.constraints, lang)
+        explained = limits.planning_failure(
+            error, snapshot.constraints, lang, cheapest=self._cheapest(self._plan_request(snapshot.constraints))
+        )
         context_version = max(snapshot.context_version, 1)
         self.repository.explain_unplanned(
             snapshot.id,

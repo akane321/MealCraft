@@ -20,9 +20,7 @@ class ReferenceScopePolicy:
         "calorie",
         "protein",
         "budget",
-        # A sum for the week is a budget: "S$10 total", 一周一共10新币.
-        "s$",
-        "新币",
+        # The week itself (a sum of money counts too: see `classify`).
         "一周",
         "每周",
         "这周",
@@ -142,7 +140,10 @@ class ReferenceScopePolicy:
                     reason_code="SOCIAL_ENVELOPE",
                 )
 
-        has_domain = any(token in lower for token in self._domain_tokens)
+        from app.agent.parser import mentions_money  # the parser's own reading; it imports this package
+
+        # A sum of money is a budget, however it is said: "S$10 total", "$10 a week", 总共10块, 一百块.
+        has_domain = any(token in lower for token in self._domain_tokens) or mentions_money(lower)
         has_off_topic = any(token in lower for token in self._off_topic_tokens)
         has_medical = any(token in lower for token in self._medical_tokens)
         asks_for_treatment = any(token in lower for token in self._treatment_tokens)

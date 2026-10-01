@@ -1,3 +1,4 @@
+from collections import Counter
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -49,6 +50,7 @@ class WeeklyMealPlanService:
         self.selector = selector or WeeklyPlanSelector()
         self.planning_engine = planning_engine or ProductPlanningEngine()
         self.actor_user_id = actor_user_id
+        self._checked: dict[str, tuple] = {}
 
     def generate(
         self,
@@ -59,64 +61,15 @@ class WeeklyMealPlanService:
         replaces_plan_id: int | None = None,
     ) -> WeeklyMealPlanResponse:
         started_at = datetime.now(UTC)
-        recipes, recommendation_result = self._candidates(constraints)
-        broadened = not recommendation_result.recommendations
-        if broadened:
-            # Broaden only the diagnostic candidate pool; the original request
-            # still goes to the compiler and validator. Safety filters stay fixed.
-            recommendation_result = self.recommendation_service.recommend(
-                constraints.model_copy(update={"max_cooking_time_minutes": 240, "dietary_preferences": []}),
-                deduct_pantry_from_cost=False,
-                recipes=recipes,
-                priced_release_only=True,
+        try:
+            recommendation_result, result = self._search(
+                constraints, self._candidates(constraints), profile_version=household_profile_version
             )
-        prior_trace = None
-        for attempt in range(2):
-            try:
-                result = self.planning_engine.plan(
-                    constraints,
-                    recommendation_result.recommendations,
-                    recipes,
-                    selector=self.selector,
-                    profile_version=household_profile_version,
-                )
-                if prior_trace is not None:
-                    result.trace["prior_candidate_attempt"] = prior_trace
-                break
-            except ProductPlanningError as error:
-                if error.status == "infeasible" and not broadened and attempt == 0:
-                    # A time/diet-filtered pool cannot establish which of those
-                    # constraints conflicts with budget. Retain original quotes
-                    # and add diagnostic candidates, then establish evidence again.
-                    previous = {r.recipe.id: r for r in recommendation_result.recommendations}
-                    recommendation_result = self.recommendation_service.recommend(
-                        constraints.model_copy(update={"max_cooking_time_minutes": 240, "dietary_preferences": []}),
-                        deduct_pantry_from_cost=False,
-                        recipes=recipes,
-                        priced_release_only=True,
-                    )
-                    recommendation_result.recommendations = [
-                        previous.get(r.recipe.id, r) for r in recommendation_result.recommendations
-                    ]
-                    prior_trace = error.trace
-                    broadened = True
-                    continue
-                if prior_trace is not None:
-                    error.trace["prior_candidate_attempt"] = prior_trace
-                if error.problem is not None and error.status == "infeasible":
-                    explanation = explain_infeasibility(
-                        error.problem,
-                        evidence=error.trace["evidence"],
-                        per_meal_budget=constraints.budget_per_meal_sgd,
-                    )
-                    error.trace["explanation"] = explanation
-                    message = product_explanation(explanation)
-                    if message:
-                        error.args = (message,)
-                error.trace["profile_id"] = household_profile_id
-                self.repository.session.add(self._operation_run(error.trace, started_at, error=str(error)))
-                self.repository.session.commit()
-                raise
+        except ProductPlanningError as error:
+            error.trace["profile_id"] = household_profile_id
+            self.repository.session.add(self._operation_run(error.trace, started_at, error=str(error)))
+            self.repository.session.commit()
+            raise
         selected, grocery = result.selected, result.grocery
         result.trace["profile_id"] = household_profile_id
 
@@ -158,23 +111,125 @@ class WeeklyMealPlanService:
         )
         return self._to_response(plan)
 
+    def _search(self, constraints: WeeklyMealPlanRequest, candidates, *, profile_version: int | None = None):
+        """The week `generate` plans from these candidates (recipes, recommendations), nothing saved."""
+        recipes, recommendation_result = candidates
+        broadened = not recommendation_result.recommendations
+        if broadened:
+            # Broaden only the diagnostic candidate pool; the original request
+            # still goes to the compiler and validator. Safety filters stay fixed.
+            recommendation_result = self.recommendation_service.recommend(
+                constraints.model_copy(update={"max_cooking_time_minutes": 240, "dietary_preferences": []}),
+                deduct_pantry_from_cost=False,
+                recipes=recipes,
+                priced_release_only=True,
+            )
+        prior_trace = None
+        for attempt in range(2):
+            try:
+                result = self.planning_engine.plan(
+                    constraints,
+                    recommendation_result.recommendations,
+                    recipes,
+                    selector=self.selector,
+                    profile_version=profile_version,
+                )
+                if prior_trace is not None:
+                    result.trace["prior_candidate_attempt"] = prior_trace
+                return recommendation_result, result
+            except ProductPlanningError as error:
+                if error.status == "infeasible" and not broadened and attempt == 0:
+                    # A time/diet-filtered pool cannot establish which of those
+                    # constraints conflicts with budget. Retain original quotes
+                    # and add diagnostic candidates, then establish evidence again.
+                    previous = {r.recipe.id: r for r in recommendation_result.recommendations}
+                    recommendation_result = self.recommendation_service.recommend(
+                        constraints.model_copy(update={"max_cooking_time_minutes": 240, "dietary_preferences": []}),
+                        deduct_pantry_from_cost=False,
+                        recipes=recipes,
+                        priced_release_only=True,
+                    )
+                    recommendation_result.recommendations = [
+                        previous.get(r.recipe.id, r) for r in recommendation_result.recommendations
+                    ]
+                    prior_trace = error.trace
+                    broadened = True
+                    continue
+                if prior_trace is not None:
+                    error.trace["prior_candidate_attempt"] = prior_trace
+                if error.problem is not None and error.status == "infeasible":
+                    explanation = explain_infeasibility(
+                        error.problem,
+                        evidence=error.trace["evidence"],
+                        per_meal_budget=constraints.budget_per_meal_sgd,
+                    )
+                    error.trace["explanation"] = explanation
+                    message = product_explanation(explanation)
+                    if message:
+                        error.args = (message,)
+                raise
+        raise AssertionError("unreachable")
+
+    def check(self, constraints: WeeklyMealPlanRequest) -> ProductPlanningError | None:
+        """What `generate` would answer for these constraints, nothing saved: None for a week, else its error."""
+        try:
+            self._search(constraints, self._checked_candidates(constraints))
+        except ProductPlanningError as error:
+            return error
+        return None
+
     def _candidates(self, constraints: WeeklyMealPlanRequest):
         """The recipes a week may use and the recommendations `generate` plans from first."""
         # Every course a planned meal's roles may take enters the pool (ADR-0046), not only dinner's.
         meals = meals_of_the_day(constraints)
         courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
         recipes = self.recipe_repository.list_for_planning(courses=courses)
-        return recipes, self.recommendation_service.recommend(
+        result = self.recommendation_service.recommend(
             constraints,
             deduct_pantry_from_cost=False,
             recipes=recipes,
             priced_release_only=True,
         )
+        avoid = set(constraints.avoid_recipe_ids)
+        if avoid:
+            # Each course drops the avoided dishes only while a week's worth of its others remain.
+            course = {recipe.id: getattr(recipe, "course", None) or "main" for recipe in recipes}
+            kept = Counter(course.get(r.recipe.id) for r in result.recommendations if r.recipe.id not in avoid)
+            result.recommendations = [
+                r
+                for r in result.recommendations
+                if r.recipe.id not in avoid or kept[course.get(r.recipe.id)] < constraints.day_count
+            ]
+        return recipes, result
+
+    def _checked_candidates(self, constraints: WeeklyMealPlanRequest):
+        """`_candidates`, worked out once per request for the checks a chat turn makes before it answers.
+
+        The weekly budget is not a recommendation input, so the floor and the cheapest week share one pass.
+        """
+        key = constraints.model_dump_json(exclude={"weekly_budget_sgd"})
+        if key not in self._checked:
+            self._checked[key] = self._candidates(constraints)
+        return self._checked[key]
 
     def week_floor(self, constraints: WeeklyMealPlanRequest) -> WeekFloor:
         """What any week `generate` could plan for these constraints costs at least, without a search."""
-        recipes, candidates = self._candidates(constraints)
+        recipes, candidates = self._checked_candidates(constraints)
         return week_floor(constraints, candidates.recommendations, recipes)
+
+    def cheapest_week(self, constraints: WeeklyMealPlanRequest) -> float:
+        """What the cheapest week the planner's cost-led search finds costs at the checkout, nothing saved.
+
+        Every limit but the weekly budget holds. `generate` tries the same search's weeks last under a
+        budget, so any budget of at least this plans (with the same prices). Raises ProductPlanningError
+        when the search finds no week at all.
+        """
+        unbudgeted = constraints.model_copy(update={"weekly_budget_sgd": None})
+        recipes, candidates = self._checked_candidates(unbudgeted)
+        result = self.planning_engine.plan(
+            unbudgeted, candidates.recommendations, recipes, selector=self.selector, cheapest=True
+        )
+        return result.grocery.purchase_total_sgd
 
     def plan_dishes(
         self,

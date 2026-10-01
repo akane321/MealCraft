@@ -70,11 +70,42 @@ WEEKLY_AFTER = re.compile(
 WEEKLY_BEFORE = re.compile(
     r"(?:\b(?:total|altogether|overall|week|weekly)\b|一共|总共|合计|总计|总预算|一周|每周|这周|本周|整周|周预算)[^\d]{0,24}$"
 )
+# Who eats, said between the week and its sum ("a week for 4 for S$10", 一周4个人10新币): not a sum itself.
+EATERS = re.compile(r"\bfor\s+\d+(?:\s*(?:people|persons?|of us|adults?))?\b|\d+\s*(?:个人|口人|人)")
+# An amount for each person ("S$3 per person per meal", 每人每餐3块, 人均15): times the people eating.
+PER_PERSON_AFTER = re.compile(
+    r"^[^\d]{0,6}?\b(?:per|each|a|every)\s+(?:person|head|adult)\b|^\s*/\s*(?:person|head)\b"
+    r"|^[^\d]{0,4}(?:每人|每个人|一个人|人均)"
+)
+PER_PERSON_BEFORE = re.compile(r"(?:\b(?:per|each|every)\s+(?:person|head|adult)|每人|每个人|一个人|人均)[^\d]{0,10}$")
 CLAUSE_END = re.compile(r"[,，;；。!！?？]|\.(?:\s|$)")
+# 一百块, 五十新币, 八十五元: Chinese numerals before a currency word, read as digits.
+CHINESE_SUM = re.compile(r"([零一二两三四五六七八九十百千]+)(?=\s*(?:块|元|新币|新元))")
+DIGITS = {"零": 0, "一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
 
 
-def budgets(text: str) -> tuple[float | None, float | None]:
-    """(per-meal, weekly) budgets a lower-cased message states; an amount that says neither is left out."""
+def chinese_number(numeral: str) -> int:
+    """一百二十 -> 120, 十五 -> 15, 两千 -> 2000."""
+    total = digit = 0
+    for character in numeral:
+        if character in DIGITS:
+            digit = DIGITS[character]
+        else:
+            total += (digit or 1) * {"十": 10, "百": 100, "千": 1000}[character]
+            digit = 0
+    return total + digit
+
+
+def with_digits(text: str) -> str:
+    return CHINESE_SUM.sub(lambda match: str(chinese_number(match.group(1))), text)
+
+
+def budgets(text: str, people: int | None = None) -> tuple[float | None, float | None]:
+    """(per-meal, weekly) budgets a lower-cased message states; an amount that says neither is left out.
+
+    An amount for each person is one for the household of `people`; with no household size it is left out.
+    """
+    text = with_digits(text)
     per_meal = weekly = None
     for match in AMOUNT.finditer(text):
         group = next(index for index, value in enumerate(match.groups(), start=1) if value)
@@ -84,11 +115,33 @@ def budgets(text: str) -> tuple[float | None, float | None]:
         before = text[max(0, match.start(group) - 32) : match.start(group)]
         if value <= 0:
             continue
+        if PER_PERSON_AFTER.search(after) or PER_PERSON_BEFORE.search(before):
+            if people is None:
+                continue
+            value *= people
+            # "per person" said, what is left says meal or week: "S$3 per person per meal".
+            after = PER_PERSON_AFTER.sub("", after, count=1)
         if PER_MEAL_AFTER.search(after) or PER_MEAL_BEFORE.search(before):
             per_meal = per_meal if per_meal is not None else value
-        elif WEEKLY_AFTER.search(after) or WEEKLY_BEFORE.search(before):
+        elif WEEKLY_AFTER.search(after) or WEEKLY_BEFORE.search(EATERS.sub(" ", before)):
             weekly = weekly if weekly is not None else value
     return per_meal, weekly
+
+
+def mentions_money(text: str) -> bool:
+    """A sum of money, or a number said as a budget: "S$10", "10 dollars", 总共10块, 一百块, 预算70."""
+    return AMOUNT.search(with_digits(text.lower())) is not None
+
+
+def bare_amount(message: str) -> float | None:
+    """The sum a message gives, said per meal, per week or neither ("S$50", "ok, 50 dollars then", 那就50新币吧,
+    or just "50"): the answer to a question about a budget."""
+    text = with_digits(message.strip().lower())
+    match = AMOUNT.search(text) or re.fullmatch(r"\s*(\d+(?:\.\d+)?)\s*", text)
+    if match is None:
+        return None
+    value = float(next(value for value in match.groups() if value))
+    return value if value > 0 else None
 
 
 class AgentConfigurationError(RuntimeError):
@@ -198,7 +251,12 @@ class RuleBasedConstraintParser:
 
         people = self._first_number(
             lower,
-            [r"(?:for|serving)\s*(\d+)\s*(?:people|persons?)?", r"(\d+)\s*(?:people|persons?|人|个人)"],
+            [
+                r"(\d+)\s*(?:people|persons?|人|个人)",
+                r"(?:for|serving)\s*(\d+)(?![\d.])"
+                r"(?!\s*(?:dollars?|bucks|sgd|新币|新元|块|元|dinners?|meals?|days?|lunch|lunches|breakfasts?"
+                r"|minutes?|mins?|hours?|分钟|%))\s*(?:people|persons?)?",
+            ],
         )
         if people is None:
             # "Dinners for two", "a family of four", "three people".
@@ -215,7 +273,8 @@ class RuleBasedConstraintParser:
                 people = CHINESE_NUMBERS[match.group(1)]
         extraction.household_size = int(people) if people is not None else None
 
-        extraction.budget_per_meal_sgd, extraction.weekly_budget_sgd = budgets(lower)
+        eaters = extraction.household_size or current.household_size
+        extraction.budget_per_meal_sgd, extraction.weekly_budget_sgd = budgets(lower, eaters)
         cooking_time = self._first_number(
             lower,
             [
@@ -483,7 +542,10 @@ class OpenAIConstraintParser:
         prompt = f"""You extract constraints for a non-medical weekly meal planner.
 Return only facts explicitly stated by the user. Use null for missing scalar fields.
 household_size is how many people eat: "dinners for two" or "for 2" means 2. A dollar amount for
-the week ("this week, around S$90") is weekly_budget_sgd.
+the week ("this week, around S$90", "S$10 total") is weekly_budget_sgd. An amount for each person
+("S$3 per person per meal", 每人每餐3块) is for the whole household: multiply it by household_size from
+the message or the current state, and leave it null when the household size is unknown. A bare amount
+("S$50", 50新币) answering the assistant's question about a budget is that budget.
 General preferences such as low sodium or low sugar are allowed. Disease-specific requests must set
 medical_request_detected=true and must never be translated into medical treatment constraints.
 Available ingredients with no explicit quantity must keep quantity=null and unit=null.

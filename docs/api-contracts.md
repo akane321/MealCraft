@@ -310,6 +310,10 @@ for bounds, compatibility, examples and the Agent handoff.
 - an optional `max_uses_per_recipe` (1–7): how often one dish may appear in the
   week, a hard rule the search holds and the validator checks; 1 is no dish
   twice. Unstated, repeating stays a soft cost the planner avoids by itself.
+- an optional `avoid_recipe_ids` (up to 200): recipes a new week leaves out,
+  each course only while a week's worth of its other dishes remain; the
+  conversation sets it to last week's dishes when the household asks for a new,
+  more varied week.
 
 - an optional `plan_shape` (decision ADR-0046): which meals of each day are
   planned and each meal's dish roles; the older `meal_composition` (dinner only)
@@ -326,7 +330,14 @@ New plans must pass independent validation before storage. The weekly budget
 caps whole-package checkout cost; the legacy per-meal budget still caps
 ingredient-use cost without pantry deduction. Both comparisons use whole cents;
 sub-cent budgets require clarification. A missing price or unverified demand
-cannot produce a successfully validated plan.
+cannot produce a successfully validated plan. Under a weekly budget, when every
+ranked week fails, the planner tries last the weeks of its cost-led
+cheapest-week search: the strongest budget-led search, run under the least
+whole-dollar budget it still completes a week within (bisected to 5%). That
+search never reads the requested budget, so a week it finds at S$C is tried
+again under any budget of S$C or more; failed attempts of it are marked
+`cheapest_search` in the trace. It is the cheapest week a search found, not a
+proof that no cheaper week exists.
 
 Non-plans return HTTP 422 with one actionable `detail` sentence. Internal status
 and proof scope are recorded in `OperationRun`, not added to the product view.
@@ -396,9 +407,16 @@ Every message first passes through the deterministic reference scope gate.
 Supported meal-planning input may reach constraint parsing. Social, off-topic,
 disease-treatment and adversarial requests receive a bounded response without
 changing constraints, clarification state, pending interaction or context
-version. An unclear message ("something nice", 我想吃点好的) is not a dead end:
-its bounded reply offers choices as a `pending_interaction` (planning a week
-before a plan exists, changing a dish once one does). A mixed request sends only
+version. A sum of money ("S$10 total", "$10 a week", 总共10块, 一百块) makes a message a
+planning message, however it is phrased. An unclear message ("something nice",
+我想吃点好的) is not a dead end: its bounded reply offers choices as a
+`pending_interaction` (planning a week before a plan exists, changing a dish
+once one does). Boredom with the dishes ("the dishes are boring", "too
+repetitive", 菜很单调) is a wish for variety in either language: before a plan
+it offers a week with no dish twice; with a plan it offers a new week with
+different dishes (the session goes back to **Plan my week** with
+`avoid_recipe_ids` set to the week's dishes and no dish twice, while the saved
+week stays saved) or a swap of a dish that repeats. A mixed request sends only
 its supported segment to the parser. The persisted `last_scope_decision` makes
 this routing visible to clients and tests. Every templated reply is written in
 the language of the household's message, or, for a message with no words to
@@ -415,12 +433,23 @@ the planner as the hard rule described under Weekly Meal Plans.
 Before the session becomes ready, the stated limits are checked against a floor
 under the cost of any week the planner could build from its own candidates
 (`backend/app/planning/week_floor.py`: the cheapest price per unit of each
-ingredient, each dish at its smallest portion share, no search). A weekly or
-per-meal budget below the floor, a required dish no candidate fills, or no
-repeats with fewer different dishes than the week needs is refused with the
-number that shows it ("S$10 for 4 people is S$0.36 a person a meal; the cheapest
-dishes … cost at least S$35.21"); the session keeps collecting and offers the
-ways out as choices. Only what the floor proves is refused.
+ingredient, each dish at its smallest portion share, no search). A per-meal
+budget below the floor, a required dish no candidate fills, or no repeats with
+fewer different dishes than the week needs is refused with the number that shows
+it. The floor ignores whole packages, so it never refuses a realistic weekly
+budget: a weekly budget under ten times the floor (on the release catalog the
+cheapest week the planner finds costs 1.6 to 8.4 times it) is planned up front
+exactly as **Plan my week** would plan it, nothing saved, and what that refuses
+is refused now. A budget refusal names the amount a person a meal and the cheapest
+week the search found ("S$10 for 4 people is S$0.36 a person a meal over 7 meals.
+The cheapest week I could plan costs about S$38.16: the cheapest my search found,
+not a proof that none is cheaper."). The session keeps collecting and offers
+choices a real week backs: "Use S$39 for the week" (that week fits it, so it
+plans), and half the people at their own cheapest week ("2 people at S$26 a
+week", or "Plan for 2 people" when that fits the budget as it is). No amount is
+ever a guess. After a refusal, a bare amount ("S$50", 那就50新币吧) answers the
+budget it asked about. A per-meal amount is offered only when a week plans with
+it. When prices cannot be read, the check is skipped and Plan answers for itself.
 
 When clarification can be represented structurally, the response includes a
 `pending_interaction` with a stable `question_id`, `field_path`, option IDs and
@@ -430,7 +459,7 @@ expired, stale, forged, duplicate or mixed option/free-text answers with HTTP
 409. The first runtime slice supports household-size buttons and pantry
 quantity input; other questions continue to work through the messages endpoint.
 An interaction whose `field_path` is `message` offers sentences the household
-could have typed (raise the budget to S$36, Day 2, 第2天): the chosen option's
+could have typed (make the weekly budget S$39, Day 2, 第2天): the chosen option's
 value, or free text, is sent as their message. A replanning question (which
 kind of change, which day, which dish) comes with such choices.
 
@@ -439,10 +468,13 @@ kind of change, which day, which dish) comes with such choices.
 weekly planner used by `/api/plans/generate`, returns the generated plan, and
 stores its ID on the agent session. When the planner finds no week, the response
 is HTTP 422 and its detail names the limit the planner's trace shows the search
-ran into (never a claim that no week exists); the same sentence is added to the
-conversation and the session returns to collecting with choices, so the client
-replaces its Plan card with it. A slow search or missing data leaves the session
-ready to try again. `GET` endpoints allow the frontend to resume the latest
+ran into (never a claim that no week exists); a budget it ran into is answered
+as before planning, with the same backed choices. A request the planner turned
+down before searching (a budget in fractions of a cent, allergen data it lacks)
+is passed on in the planner's own words. The sentence is added to the
+conversation and the session returns to collecting, so the client replaces its
+Plan card with it. A slow search or missing data that may yet arrive leaves the
+session ready to try again. `GET` endpoints allow the frontend to resume the latest
 conversation after a reload or container restart.
 
 The default parser is deterministic fixture mode. Optional OpenAI mode uses the
