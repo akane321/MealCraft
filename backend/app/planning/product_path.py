@@ -20,7 +20,7 @@ from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.grocery_estimator import not_purchased
-from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner, assignments_of
+from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner, assignments_of, empty_roles
 from app.planning.meal_composition import dish_servings
 from app.planning.nutrition_scope import compile_nutrition_targets, nutrition_guard_loss
 from app.planning.product_input import product_input
@@ -444,17 +444,19 @@ class ProductPlanningEngine:
                 budget = constraints.weekly_budget_sgd
                 banded = any(band.hard and band.scope == "per_day" for band in problem.nutrition_bands)
 
-                def variety(state) -> tuple[int, int]:
-                    """Sorts the most distinct dishes, then kinds, first.
+                roles_of = {s.slot_id: len(s.composition or [None]) for s in problem.slots}
 
-                    ADR-0045's fewest repeats would prefer leaving an optional vegetable empty to repeating
-                    one; the meal loss prices it the other way (EMPTY_OPTIONAL_ROLE_LOSS)."""
+                def variety(state) -> tuple[int, int, int]:
+                    """Sorts the fewest empty optional dishes, then the most distinct dishes, then kinds, first.
+
+                    The owner's order (2026-10-02, amending ADR-0045 for composed weeks): a week with its
+                    optional dishes filled comes before one with a dish or two more of variety."""
                     dishes = [recipe for _, meal in state.choices for _, recipe in meal]
                     repeats, same_kind = sameness(dishes)
-                    return repeats - len(dishes), same_kind - len(dishes)
+                    return empty_roles(state, roles_of), repeats - len(dishes), same_kind - len(dishes)
 
                 def most_varied_first(found) -> list[list[PlanningAssignment]]:
-                    """The most varied week first (ADR-0045), then the lighter search, then loss."""
+                    """The fullest, then most varied week first (ADR-0045 as amended), then the lighter search, loss."""
                     found = sorted(found, key=lambda item: (variety(item[1]), item[0], item[1].loss, item[1].choices))
                     return [assignments_of(state) for _, state in found]
 
@@ -488,12 +490,13 @@ class ProductPlanningEngine:
                     return extra
 
                 found = [(0.0, state) for state in search.states]
-                repeat_free = any(
-                    sameness([r for _, meal in state.choices for _, r in meal]) == (0, 0) for state in search.states
+                full_and_repeat_free = any(
+                    variety(state)[0] == 0 and sameness([r for _, meal in state.choices for _, r in meal]) == (0, 0)
+                    for state in search.states
                 )
-                if budget is not None and not repeat_free:
-                    # A budget-pruned search keeps the cheap repeats; the most varied week within the
-                    # budget may come from a cost-led search, so all are tried together.
+                if budget is not None and not full_and_repeat_free:
+                    # A budget-pruned search keeps the cheap repeats or leaves optional dishes out; the first
+                    # week in that order within the budget may come from a cost-led search, so all are tried.
                     found += limit_led()
                 elif banded:
                     fallback = lambda: most_varied_first(limit_led())  # noqa: E731

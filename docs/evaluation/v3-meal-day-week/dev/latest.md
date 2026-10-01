@@ -24,7 +24,7 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 | mdw-dev-005 | composition | zh | feasible | plan | yes | - | 28 | 28 | 28/28 | 444.03 |
 | mdw-dev-006 | nutrition_per_day | en | feasible | plan | yes | - | 21 | 18 | 21/21 | 318.03 |
 | mdw-dev-007 | nutrition_per_day | zh | feasible | plan | yes | - | 28 | 25 | 28/28 | 386.46 |
-| mdw-dev-008 | budget | en | feasible | plan | yes | - | 27 | 10 | 27/27 | 100.54 |
+| mdw-dev-008 | budget | en | feasible | plan | yes | - | 28 | 10 | 28/28 | 100.54 |
 | mdw-dev-009 | budget | en | infeasible | infeasible | yes | - | - | - | - | - |
 | mdw-dev-010 | safety_diet | en | feasible | plan | yes | - | 28 | 28 | 26/28 | 416.11 |
 | mdw-dev-011 | safety_diet | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 301.27 |
@@ -36,7 +36,7 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 | mdw-dev-017 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16/16 | 309.65 |
 | mdw-dev-018 | shape_change | zh | feasible | plan | yes | - | 16 | 16 | 16/16 | 261.17 |
 | mdw-dev-019 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16/16 | 324.92 |
-| mdw-dev-020 | budget | en | feasible | plan | yes | - | 27 | 4 | 27/27 | 50.9 |
+| mdw-dev-020 | budget | en | feasible | plan | yes | - | 28 | 4 | 28/28 | 50.9 |
 | mdw-dev-021 | variety | en | feasible | plan | yes | - | 35 | 35 | 35/35 | 550.12 |
 
 ## Parameters
