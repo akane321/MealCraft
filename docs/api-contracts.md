@@ -449,8 +449,10 @@ or a follow-up chip, on such a week, and only while the message still starts
 with that button's words. If a conversation in the recent list holds that week,
 the page reopens it and sends the message there without `plan_id`, so normally
 one conversation holds a week. Only when none is at hand does the open
-conversation take the week on; one ready to plan a new week (**Plan my week**)
-asks first.
+conversation take the week on; one planning a new week of its own (ready to
+plan with **Plan my week**, or still asking a planning question) asks first. The
+question lasts only while the conversation is planning that new week: once it
+plans one or stops, the question and the dish's words go.
 
 After a session has produced a plan, the messages endpoint switches to the
 replanning loop. It accepts one user-triggered meal event at a time, resolves a
