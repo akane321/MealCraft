@@ -345,7 +345,7 @@ class MealPlanReplanningService:
                 keep=self._dishes_kept_when_adding(roles, [item for item in removed if len(days) == 1]),
             )
         except ProductPlanningError as error:
-            raise MealPlanReplanValidationError(f"I could not plan that: {error}") from error
+            raise MealPlanReplanValidationError(str(error)) from error
         added = []
         for dish in dishes:
             if dish.day_index not in days:

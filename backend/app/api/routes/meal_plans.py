@@ -9,6 +9,7 @@ from app.api.routes.auth import (
     CurrentHouseholdViewDependency,
 )
 from app.core import config
+from app.core.runtime_config import runtime_value
 from app.db.session import get_db_session
 from app.planning.grocery_estimator import GroceryEstimator
 from app.planning.recipe_similarity import RecipeSimilarity, catalog_embedder
@@ -84,7 +85,8 @@ def build_replanning_service(
     settings = config.get_settings()
     # The embedding API is called only where the live model is configured; fixture deployments and tests
     # never call it.
-    key = settings.openai_api_key if settings.agent_parser_provider == "openai" else None
+    # The console's parser setting (ADR-0047) decides, as it does for the parser itself.
+    key = settings.openai_api_key if runtime_value("agent_parser_provider", settings, database) == "openai" else None
     return MealPlanReplanningService(
         repository=MealPlanRepository(database, household_id=household_id),
         recipe_repository=recipe_repository,

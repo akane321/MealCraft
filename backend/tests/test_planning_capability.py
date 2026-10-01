@@ -512,3 +512,14 @@ def test_a_change_that_goes_over_the_weekly_budget_is_saved_as_over_it(composed_
     assert applied["grocery_estimate"]["within_weekly_budget"] is False
     history = composed_client.get("/api/plans").json()["items"]
     assert next(week for week in history if week["id"] == plan["id"])["within_weekly_budget"] is False
+
+
+def test_a_shape_change_nothing_fits_says_why_once(composed_client):
+    plan = _week_ahead(composed_client)
+    dessert = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "lunch", "roles": [{"role_id": "main", "courses": ["dessert"]}]},
+    )
+    assert dessert.status_code == 422, dessert.text
+    # The conversation adds its own "I could not make that change: ", so the planner's reason comes bare.
+    assert not dessert.json()["detail"].startswith("I could not"), dessert.json()["detail"]

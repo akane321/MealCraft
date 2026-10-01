@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetLine, groceryGroups, packageLabel, perDinner, plateStyle, priceSourceLabel, productSourceLabel, tonightEntry } from "../app/lib/home-surface";
-import type { NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
+import { budgetLine, groceryGroups, packageLabel, perDinner, plateStyle, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
+import type { MealPlanEntrySnapshot, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
 function day(date: string, status: NutritionDashboardDay["status"]): NutritionDashboardDay {
@@ -120,5 +120,19 @@ describe("meals by day", () => {
     const days = [dish(1, "lunch", "main", 300, "completed"), dish(1, "dinner", "main", 400), dish(1, "dinner", "vegetable", 100)];
     expect(nextMeal(days, "2026-09-21")).toMatchObject({ isToday: true, meal: { mealType: "dinner" } });
     expect(perMealAndDay(days)).toMatchObject({ meal: { calories_kcal: 400 }, day: { calories_kcal: 800 }, mealsPerDay: 2 });
+  });
+});
+
+describe("sameDishChange", () => {
+  const before = { recipe_title: "Refried Beans" } as MealPlanEntrySnapshot;
+
+  it("reads a kept or skipped dish as what happens to it, not a swap to itself", () => {
+    expect(sameDishChange({ event_type: "LOCK_MEAL", before_entry: before })).toBe("Keep Refried Beans as it is");
+    expect(sameDishChange({ event_type: "CANCEL_MEAL", before_entry: before })).toBe("Skip Refried Beans");
+  });
+
+  it("leaves a swap to show both dishes", () => {
+    expect(sameDishChange({ event_type: "REPLACE_MEAL", before_entry: before })).toBeNull();
+    expect(sameDishChange({ event_type: "ITEM_UNAVAILABLE", before_entry: before })).toBeNull();
   });
 });

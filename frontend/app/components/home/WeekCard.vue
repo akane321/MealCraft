@@ -58,7 +58,7 @@ const repeats = computed(() => new Set(props.days.map(day => day.recipe.slug)).s
       </button>
       <button type="button" class="mc-pill" @click="emit('open', 'nutrition')">Nutrition</button>
       <span v-if="budget" class="note" :class="{ over: estimate.within_weekly_budget === false }"><span class="dot" />{{ budget }}</span>
-      <p v-if="repeats" class="repeat-note">Some dishes appear twice: not enough different ones fit your limits this week.</p>
+      <p v-if="repeats" class="repeat-note">Some dishes appear more than once: not enough different ones fit your limits this week.</p>
     </div>
   </section>
 </template>

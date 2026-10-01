@@ -12,6 +12,8 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.api.routes import meal_plans as meal_plan_routes
+from app.api.routes.meal_plans import build_replanning_service
 from app.core.config import Settings, get_settings
 from app.db.base import Base
 from app.db.session import get_db_session
@@ -297,6 +299,32 @@ def test_runtime_settings_change_is_audited_and_reaches_the_assistant(console) -
     assert client.put("/api/ops/config/beam_width", json={"value": 2.5}).status_code == 422
     assert client.put("/api/ops/config/planning_capability", json={"value": "huge"}).status_code == 422
     assert client.put("/api/ops/config/invented", json={"value": 1}).status_code == 404
+
+
+def test_the_console_parser_setting_also_decides_the_services_page_and_swap_embeddings(console, monkeypatch) -> None:
+    client, factory = console
+
+    def mode() -> str:
+        services = client.get("/api/ops/services").json()["items"]
+        return next(item for item in services if item["name"] == "openai")["mode"]
+
+    assert mode().startswith("fixture parser")
+
+    # The server runs the live model; the console switches the assistant to the rule parser.
+    live = Settings(
+        environment="test", database_url="sqlite+pysqlite://", agent_parser_provider="openai", openai_api_key="sk-test"
+    )
+    monkeypatch.setattr(meal_plan_routes.config, "get_settings", lambda: live)
+    monkeypatch.setattr(meal_plan_routes, "catalog_embedder", lambda key: lambda texts: [[0.0] for _ in texts])
+    with factory() as database:
+        assert build_replanning_service(database, 1).request_similarity.embed is not None
+    assert client.put("/api/ops/config/agent_parser_provider", json={"value": "fixture"}).status_code == 200
+    with factory() as database:
+        # A swap then calls no embedding API either, as the rest of fixture mode does not.
+        assert build_replanning_service(database, 1).request_similarity.embed is None
+
+    assert client.put("/api/ops/config/agent_parser_provider", json={"value": "openai"}).status_code == 200
+    assert mode().startswith("openai parser")
 
 
 def test_experiments_run_developer_sets_under_a_recorded_configuration(console) -> None:
