@@ -507,6 +507,29 @@ def test_the_vegetable_role_keeps_vegetable_dishes_however_many_better_sides_the
     assert {d["recipe"]["slug"] for d in plan["days"] if d["role_id"] == "vegetable"} == {"broccoli-stirfry"}
 
 
+def test_a_whole_broccoli_the_release_weighed_as_a_floret_is_still_the_weeks_vegetable(monkeypatch):
+    """The catalog row says "1 Broccoli" at 20 g; the planner reads the wording through to its candidate."""
+    from decimal import Decimal
+
+    from app.models.recipe import Ingredient, RecipeIngredient
+
+    mains = [_dish(slug, "main", ingredient, 400, calories=kcal) for slug, ingredient, kcal in MAINS]
+    bake = _dish("broccoli-egg-bake", "side", "egg", 200, calories=100)
+    bake.recipe_ingredients.append(
+        RecipeIngredient(
+            ingredient=Ingredient(normalized_name="broccoli", display_name="broccoli"),
+            quantity=Decimal(20),
+            unit="g",
+            original_text="1 Broccoli",
+            sort_order=2,
+        )
+    )
+    with dish_client(monkeypatch, [*mains, *_pasta_sides(1), bake]) as client:
+        plan = _week_ahead(client, COMPOSITION[:2])
+
+    assert {d["recipe"]["slug"] for d in plan["days"] if d["role_id"] == "vegetable"} == {"broccoli-egg-bake"}
+
+
 def test_a_vegetable_swap_never_offers_a_side_not_led_by_vegetables(monkeypatch):
     mains = [_dish(slug, "main", ingredient, 400, calories=kcal) for slug, ingredient, kcal in MAINS]
     broccoli = _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100)

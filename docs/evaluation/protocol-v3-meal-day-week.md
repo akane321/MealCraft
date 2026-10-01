@@ -96,9 +96,11 @@ used a lost-line recipe, and without that recipe the consumed-cost week costs
 S$63.43, while the package-sharing week costs S$45.95.
 
 Since 2026-10-02 a vegetable role (`vegetable`, `vegetable-2`) takes only a
-dish led by vegetables, as the product's does (owner decision 2026-10-02; the
-definition is `backend/app/planning/vegetable_led.py`). Every developer label
-stayed proven under it. Protocol v2 labels keep the old rule.
+dish led by vegetables with no meat or fish, as the product's does (owner
+decisions 2026-10-02; the definition is `backend/app/planning/vegetable_led.py`,
+which also weighs a whole cabbage, cauliflower, lettuce or broccoli the release
+weighed as one leaf at a head's weight). Every developer label stayed proven
+under it. Protocol v2 labels keep the old rule.
 
 ## 3. Categories
 
@@ -141,7 +143,14 @@ Strict success over the final week, as in v2-multidish section 4. Roles,
 courses and meal time are checked per slot against that slot's roles after the
 change. Shares extend to five and six dishes (0.45 / 0.3 and 0.4 / 0.28). "A or
 B" lines are scored as the option the household can eat and buy, the rule the
-product states; the scorer holds its own copy of it. Added checks:
+product states; the scorer holds its own copy of it. Since 2026-10-02,
+`meal_role_courses` also fails a dish in a vegetable role (`vegetable`,
+`vegetable-2`) that is not a vegetable dish: led by vegetables with no meat or
+fish, by the product's own definition (`app.planning.vegetable_led`), the
+owner's rule rather than arithmetic the scorer should check independently. This
+applies to protocol v3.1 runs from that date, developer and held-out alike;
+the recorded held-out reports were scored before it and stay as recorded.
+Protocol v2-multidish scoring is unchanged. Added checks:
 
 | Check | Rule |
 | --- | --- |

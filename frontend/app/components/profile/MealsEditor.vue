@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { COURSE_LABEL, MEAL_PRESETS, PLANNED_MEALS, nextRoleId, presetName } from "~/lib/plan-shape";
+import { COURSE_LABEL, MEAL_PRESETS, PLANNED_MEALS, dishLabel, isVegetableRole, nextRoleId, presetName } from "~/lib/plan-shape";
 import type { DishCourse, MealRole, PlannedMealType, PlanShape } from "~/types/household";
 
 const shape = defineModel<PlanShape>({ required: true });
@@ -7,6 +7,8 @@ const shape = defineModel<PlanShape>({ required: true });
 const MEAL_TITLE: Record<PlannedMealType, string> = { breakfast: "Breakfast", lunch: "Lunch", dinner: "Dinner" };
 const COURSES: DishCourse[] = ["main", "side", "salad", "soup", "breakfast", "baked_good", "dessert", "snack_appetizer"];
 const MAX_DISHES = 6;
+// The planner's rule for the vegetable role, whatever courses it is given (owner, 2026-10-02).
+const VEGETABLE_HINT = "Only a dish made mostly of vegetables, with no meat or fish";
 // Plain copies: structuredClone throws on Vue's reactive proxies.
 const copy = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
@@ -57,14 +59,6 @@ function removeDish(meal: PlannedMealType, index: number) {
   if (!list.some(item => item.required) && list[0]) list[0].required = true;
   if (list.length) setMeals({ ...shape.value.meals, [meal]: list });
 }
-
-function dishLabel(item: MealRole): string {
-  if (item.courses.includes("main")) return item.role_id === "main" ? "Main dish" : "Another main";
-  if (item.courses.includes("soup")) return "Soup";
-  if (item.courses.includes("breakfast")) return "Breakfast dish";
-  // The vegetable role takes only a side or salad led by vegetables (owner, 2026-10-02).
-  return "Vegetable side or salad";
-}
 </script>
 
 <template>
@@ -95,7 +89,7 @@ function dishLabel(item: MealRole): string {
 
         <ol class="dishes">
           <li v-for="(item, index) in roles(meal)" :key="item.role_id" class="dish">
-            <span class="dish-name">{{ dishLabel(item) }}</span>
+            <span class="dish-name" :title="isVegetableRole(item.role_id) ? VEGETABLE_HINT : undefined">{{ dishLabel(item) }}</span>
             <span class="courses">
               <button
                 v-for="course in COURSES"

@@ -1,8 +1,9 @@
-"""The vegetable dish of a meal (素菜) is a side dish or salad led by vegetables (owner, 2026-10-02).
+"""The vegetable dish of a meal (素菜) is a side dish or salad of vegetables without meat (owner, 2026-10-02).
 
 The `vegetable` role admitted any side or salad, so the walkthrough's dinners got "Fettuccine Noodles"
-and "Refried Beans" as their vegetable. A dish may fill the role only when vegetables are at least half
-of what it is made of, by the grams of its ingredient lines and each ingredient's release food group:
+and "Refried Beans" as their vegetable. A dish may fill the role only when it holds no meat or fish and
+vegetables are at least half of what it is made of, by the grams of its ingredient lines and each
+ingredient's release food group:
 
 - vegetables: the release's `vegetable` and `herb` groups and edamame, less the starchy tubers
   (potatoes, cassava, taro);
@@ -17,16 +18,28 @@ raw weight, Spanish rice and Mexican rice were more tomato than rice. A curated 
 group of the release ingredient it is a kind of (`baby_spinach` is `spinach`); one with no group at all is
 counted as not a vegetable, so it never makes a dish vegetable-led.
 
+A whole cabbage, cauliflower, lettuce or broccoli written without a unit ("1 small head cabbage",
+"1/2 cauliflower") is weighed by release v2.1 as one leaf or floret: 100 g, 25 g, 10 g, 20 g. Such a
+line is recognised by its grams being exactly its count times that piece weight, and is counted at the
+release's own weight for a head of that vegetable (`WHOLE`). Only the share reads this; shopping keeps
+the release's grams.
+
 The threshold of one half is where release v2.1's sides and salads turn from mostly other dishes into
 mostly vegetable dishes. Their shares are bimodal, most under 0.1 or over 0.9; of the few in between,
 those under one half are mostly rice, couscous, potato, bean and meat dishes, those over it mostly
-vegetable dishes. Some meat salads, yogurt raitas and tomato-heavy rice dishes still reach it.
+vegetable dishes. Yogurt raitas and tomato-heavy rice dishes still reach it.
+
+素菜 has no meat (owner, 2026-10-02): a dish with a line of meat, poultry, fish or seafood never fills the
+role, however little of it there is. Meat or fish is an ingredient of animal flesh (the release's
+`dietary_origin`), except the seasonings, stocks and cooking fats made from it (`SEASONING_FROM_FLESH`):
+fish sauce and Worcestershire flavour a dish the way salt does. Eggs and dairy are not meat.
 
 The role is the one the profile editor and the shape change call `vegetable` (a second one is
 `vegetable-2`), as the main dish is the role called `main`; a household's other roles are unchanged.
 """
 
 import json
+import math
 import re
 from collections.abc import Iterable
 from functools import cache
@@ -143,11 +156,60 @@ COOKED_STAPLES = frozenset(
         "grits",
     }
 )
+# Animal-derived ingredients that season, moisten or cook a dish rather than being its meat or fish: every
+# other ingredient of release `dietary_origin` "flesh" is meat, poultry, fish or seafood.
+SEASONING_FROM_FLESH = frozenset(
+    {
+        # condiments made from anchovy, fish or shellfish (owner, 2026-10-02: seasoning, not fish)
+        "fish_sauce",
+        "worcestershire",
+        "oyster_sauce",
+        "shrimp_paste",
+        "nuoc_cham",
+        "steak_sauce",
+        "bonito_flakes",
+        # stocks, broths, soups and gravies
+        "broth",
+        "beef_broth",
+        "chicken_broth",
+        "chicken_or_veg_broth",
+        "fish_broth",
+        "squid_broth",
+        "clam_juice",
+        "bouillon",
+        "dashi",
+        "dashida",
+        "soup",
+        "chicken_soup",
+        "onion_soup_mix",
+        "gravy",
+        "gravy_mix",
+        "au_jus_mix",
+        # rendered fats and gelatin
+        "lard",
+        "bacon_grease",
+        "fish_oil",
+        "gelatin",
+        "marshmallow",
+    }
+)
+# A whole vegetable the release weighed as one piece: (the grams of that piece, the release's grams for a head).
+WHOLE = {
+    "cabbage": (100.0, 908.0),
+    "cauliflower": (25.0, 588.0),
+    "lettuce": (10.0, 539.0),
+    "broccoli": (20.0, 300.0),
+}
+# Lines that count parts of the vegetable, not whole ones ("14 leaves green cabbage", "20 broccoli florets").
+PARTS = re.compile(r"\b(?:leaf|leaves|florets?|spears?|hearts?|handfuls?|pieces?)(?![a-z])", re.IGNORECASE)
+# The count a line starts with: "1", "1/2", "1 1/2", "0.25".
+COUNT = re.compile(r"\s*(?:(\d+)\s+(?=\d+/))?(\d+(?:\.\d+)?)(?:/(\d+))?")
 
 
 @cache
-def food_groups() -> dict[str, tuple[str, str]]:
-    """Each ingredient's release id and food group, by the normalized name the catalog and the planner use.
+def food_groups() -> dict[str, tuple[str, str, str]]:
+    """Each ingredient's release id, food group and dietary origin, by the normalized name the catalog and the
+    planner use.
 
     An ingredient release v2.1 does not hold (the curated `baby_spinach`) takes the release ingredient it is
     the same as or a variety of in the ingredient hierarchy (`spinach`).
@@ -155,11 +217,13 @@ def food_groups() -> dict[str, tuple[str, str]]:
     path = repository_root() / "data-engineering/data/release/v2.1/ingredients.jsonl"
     rows = (json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip())
     groups = {
-        name: (name, row["food_group"]) for row in rows for name in [row["ingredient_id"].removeprefix("ING_").lower()]
+        name: (name, row["food_group"], row["dietary_origin"])
+        for row in rows
+        for name in [row["ingredient_id"].removeprefix("ING_").lower()]
     }
     entries = runtime().entries
 
-    def release(name: str, seen: frozenset[str] = frozenset()) -> tuple[str, str] | None:
+    def release(name: str, seen: frozenset[str] = frozenset()) -> tuple[str, str, str] | None:
         if name in groups:
             return groups[name]
         parents = [p["id"] for p in entries.get(name, {}).get("parents", []) if p["relation"] in ("same", "variety")]
@@ -168,12 +232,24 @@ def food_groups() -> dict[str, tuple[str, str]]:
     return groups | {name: found for name in entries if name not in groups and (found := release(name))}
 
 
-def vegetable_share(lines: Iterable[tuple[str, float | None]]) -> float | None:
-    """Vegetables' share of a dish's counted grams, from its (ingredient, grams) lines; None when nothing counts."""
+def whole_grams(name: str, grams, text: str | None):
+    """A line's grams; a whole vegetable the release weighed as one leaf or floret (`WHOLE`) at a head's weight."""
+    if name not in WHOLE or not grams or not text or PARTS.search(text) or not (found := COUNT.match(text)):
+        return grams
+    whole, numerator, denominator = found.groups()
+    count = int(whole or 0) + float(numerator) / int(denominator or 1)
+    piece, head = WHOLE[name]
+    return count * head if math.isclose(float(grams), count * piece, abs_tol=0.05) else grams
+
+
+def vegetable_share(lines: Iterable[tuple]) -> float | None:
+    """Vegetables' share of a dish's counted grams, from its (ingredient, grams[, original text]) lines; None when
+    nothing counts."""
     groups = food_groups()
     vegetables = total = 0.0
-    for name, grams in lines:
-        name, group = groups.get(name, (name, None))
+    for name, grams, *text in lines:
+        name, group, _ = groups.get(name, (name, None, None))
+        grams = whole_grams(name, grams, text[0] if text else None)
         if not grams or name in UNCOUNTED or group in UNCOUNTED_GROUPS:
             continue
         weight = float(grams) * (COOKED_YIELD if name in COOKED_STAPLES else 1.0)
@@ -183,9 +259,17 @@ def vegetable_share(lines: Iterable[tuple[str, float | None]]) -> float | None:
     return vegetables / total if total else None
 
 
-def vegetable_led(lines: Iterable[tuple[str, float | None]]) -> bool:
+def meat_or_fish(name: str) -> bool:
+    """Meat, poultry, fish or seafood: animal flesh that is not a seasoning, stock or fat made from it."""
+    release, _, origin = food_groups().get(name, (name, None, None))
+    return origin == "flesh" and release not in SEASONING_FROM_FLESH
+
+
+def vegetable_led(lines: Iterable[tuple]) -> bool:
+    """At least half vegetables (`vegetable_share`) and no line of meat or fish, weighed or not."""
+    lines = list(lines)
     share = vegetable_share(lines)
-    return share is not None and share >= VEGETABLE_LED_SHARE
+    return share is not None and share >= VEGETABLE_LED_SHARE and not any(meat_or_fish(line[0]) for line in lines)
 
 
 def vegetable_role(role_id: str) -> bool:
@@ -193,17 +277,28 @@ def vegetable_role(role_id: str) -> bool:
     return re.sub(r"-\d+$", "", role_id) == VEGETABLE_ROLE
 
 
-def weighed(lines: Iterable[tuple[str, float | None, str | None]]) -> list[tuple[str, float | None]]:
-    """(ingredient, quantity, unit) lines as (ingredient, grams): release lines are in grams; others are not weighed."""
-    return [(name, quantity if unit == "g" else None) for name, quantity, unit in lines]
+def weighed(lines: Iterable[tuple]) -> list[tuple]:
+    """(ingredient, quantity, unit, original text) lines as (ingredient, grams, original text): release lines are
+    in grams; others are not weighed."""
+    return [(name, quantity if unit == "g" else None, text) for name, quantity, unit, text in lines]
 
 
 def catalog_vegetable_led(recipe) -> bool:
     """`vegetable_led` for a catalog recipe (`app.models.recipe.Recipe`)."""
     lines = recipe.recipe_ingredients
-    return vegetable_led(weighed((line.ingredient.normalized_name, line.quantity, line.unit) for line in lines))
+    return vegetable_led(
+        weighed((line.ingredient.normalized_name, line.quantity, line.unit, line.original_text) for line in lines)
+    )
 
 
 def candidate_vegetable_led(recipe) -> bool:
     """`vegetable_led` for a planning candidate (`PlanningRecipeCandidate`)."""
-    return vegetable_led(weighed((line.ingredient_id, line.quantity, line.unit) for line in recipe.ingredients))
+    return vegetable_led(
+        weighed((line.ingredient_id, line.quantity, line.unit, line.original_text) for line in recipe.ingredients)
+    )
+
+
+def row_vegetable_led(recipe: dict) -> bool:
+    """`vegetable_led` for a release catalog row (`app.evaluation.release_catalog`): the label tool's and the
+    strict scorer's."""
+    return vegetable_led((line["ingredient"], line["quantity"], line.get("text")) for line in recipe["ingredients"])

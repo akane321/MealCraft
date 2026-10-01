@@ -196,3 +196,32 @@ def test_only_a_stated_repetition_request_is_scored():
 
     assert outcomes(silent)["repetition_requests_met"] == "not_applicable"
     assert outcomes(missed)["repetition_requests_met"] == "failed"
+
+
+def side_catalogs(*lines):
+    """CATALOGS with the side "greens" made of `lines` (ingredient, grams)."""
+    side = {**recipe("greens", "side", 10, 22, "greens"), "ingredients": []}
+    side["ingredients"] = [{"ingredient": name, "quantity": grams, "unit": "g"} for name, grams in lines]
+    return scorer.Catalogs.build(
+        [*(r for r in CATALOGS.recipes.values() if r["slug"] != "greens"), side],
+        CATALOGS.products.values(),
+        [{"normalized_name": name, "allergens": []} for name in ("chicken", "greens", "stock")],
+        tag_implications={},
+        checked_allergens=[],
+    )
+
+
+def test_protocol_v3_1_holds_the_vegetable_role_to_the_vegetable_rule_and_v2_does_not():
+    """Owner, 2026-10-02: a pasta side or a chicken slaw in the vegetable role passed the course check."""
+    dishes = answer([("main", "chicken", 3.0), ("vegetable", "greens", 2.0)])
+    pasta = side_catalogs(("egg_noodles", 340.0), ("parmesan", 14.0))
+    chicken_slaw = side_catalogs(("cabbage", 453.6), ("carrot", 122.0), ("chicken_breast", 344.0))
+    greens = side_catalogs(("spinach", 400.0), ("olive_oil", 15.0))
+
+    assert outcomes(scorer.score_episode(episode(), dishes, pasta))["meal_role_courses"] == "passed"  # v2
+    for side in (pasta, chicken_slaw):
+        score = scorer.score_episode(episode(), dishes, side, vegetable_rule=True)
+        assert outcomes(score)["meal_role_courses"] == "failed"
+        assert "not a vegetable dish" in next(c.detail for c in score.checks if c.code == "meal_role_courses")
+    score = scorer.score_episode(episode(), dishes, greens, vegetable_rule=True)
+    assert outcomes(score)["meal_role_courses"] == "passed"

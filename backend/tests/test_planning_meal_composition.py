@@ -211,6 +211,15 @@ def test_the_vegetable_role_takes_only_a_dish_led_by_vegetables(monkeypatch):
         assert roles["vegetable"] == "fettuccine", planner
 
 
+def test_the_v2_baselines_fill_the_vegetable_role_with_a_vegetable_dish():
+    """The greedy floor and the strong rule baseline take the quicker pasta side unless the role refuses it."""
+    from app.evaluation.multidish_runner import greedy_selector, strong_rule_selector
+
+    for selector in (greedy_selector, strong_rule_selector):
+        roles = {a.role_id: a.recipe_id for a in selector(with_a_pasta_side()).assignments}
+        assert roles["vegetable"] == "greens", selector.__name__
+
+
 def test_with_no_vegetable_dish_an_optional_vegetable_stays_empty_and_a_required_one_has_no_meal():
     packet = with_a_pasta_side()
     packet.recipes = [r for r in packet.recipes if r.recipe_id != "greens"]  # and the peanut slaw is unsafe

@@ -189,21 +189,34 @@ def test_a_label_never_uses_a_recipe_the_product_never_plans():
 
 
 def _led(recipe: dict) -> bool:
-    from app.planning.vegetable_led import vegetable_led
+    from app.planning.vegetable_led import row_vegetable_led
 
-    return vegetable_led((line["ingredient"], line["quantity"]) for line in recipe["ingredients"])
+    return row_vegetable_led(recipe)
 
 
-def test_every_vegetable_the_product_plans_is_led_by_vegetables():
+FETTUCCINE = "RCP2_FA8A67117762"  # "Fettuccine Noodles", a side of egg noodles
+
+
+def test_every_vegetable_the_product_plans_is_led_by_vegetables(monkeypatch):
     """Owner, 2026-10-02: the walkthrough's vegetables were "Fettuccine Noodles" and "Refried Beans"; five of
-    this week's seven were potato, chicken and rice salads and sides."""
+    this week's seven were potato, chicken and rice salads and sides, and then "Saigon Chicken Cole Slaw"."""
     from app.evaluation.release_catalog import load_release_catalog
+    from app.planning.vegetable_led import meat_or_fish
 
-    response, _ = run_episode(load("mdw-dev-007"))
+    episode = load("mdw-dev-007")
+    response, extra = run_episode(episode)
     recipes = load_release_catalog().by_slug
     vegetables = [a["recipe_id"] for a in response["plan"]["assignments"] if a["role_id"] == "vegetable"]
     assert len(vegetables) == 7
     assert all(_led(recipes[slug]) for slug in vegetables), [recipes[s]["title"] for s in vegetables]
+    assert not any(meat_or_fish(line["ingredient"]) for slug in vegetables for line in recipes[slug]["ingredients"])
+
+    # Protocol v3.1 scores the rule too: the same week with "Fettuccine Noodles" as one vegetable fails it.
+    pasta = copy.deepcopy(response)
+    next(a for a in pasta["plan"]["assignments"] if a["role_id"] == "vegetable")["recipe_id"] = FETTUCCINE
+    monkeypatch.setattr("app.evaluation.meal_day_week_runner.run_episode", lambda _: (pasta, extra))
+    row = evaluate([episode])["episodes"][0]
+    assert "meal_role_courses" in row["failed"] and "not a vegetable dish" in row["details"]["meal_role_courses"]
 
 
 def test_a_label_fills_the_vegetable_role_only_with_a_vegetable_dish():
@@ -213,3 +226,12 @@ def test_a_label_fills_the_vegetable_role_only_with_a_vegetable_dish():
     roles = [{"role_id": "vegetable", "courses": ["side", "salad"], "required": True}]
     assert {_led(r) for meal in valid_meals(episode, roles) for _, r in meal} == {True, False}  # protocol v2
     assert {_led(r) for meal in valid_meals(episode, roles, "dinner") for _, r in meal} == {True}
+
+
+def test_the_label_tool_and_the_scorer_read_each_release_lines_wording():
+    """Release v2.1 weighs "1 medium cabbage" in "Fried Cabbage" at 100 g; read with its wording it leads."""
+    from app.evaluation.release_catalog import load_release_catalog
+
+    fried_cabbage = load_release_catalog().by_slug["RCP2_22CC0636A82B"]
+    assert fried_cabbage["ingredients"][0]["text"] == "1 medium cabbage"
+    assert _led(fried_cabbage)
