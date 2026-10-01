@@ -174,12 +174,15 @@ class WeeklyMealPlanService:
         day_count: int,
         avoid_recipe_ids: set[int],
         keep: tuple[set[int], set[str]] | None = None,
+        over_budget: float | None = None,
     ) -> list[ScheduledDish]:
         """Dishes for `day_count` days from day `first_day` of a saved week, nothing saved (ADR-0046 section 2).
 
         `constraints` carries the shape to plan and the budget left; dishes already in the week are
         avoided while enough others remain. `keep` (recipe ids, their courses) holds a meal's present
-        dishes while a new one is added: of those courses only those recipes are offered.
+        dishes while a new one is added: they stay in it, and of those courses only they are offered.
+        `over_budget` plans the dishes over the budget when none fit it (none can when it is 0 or less), as
+        cheaply as every other rule allows, weighing costs against this amount (see the engine).
         """
         start = constraints.start_date + timedelta(days=first_day - 1)
         # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
@@ -198,12 +201,28 @@ class WeeklyMealPlanService:
             if item.recipe.id in keep_ids
             or (item.recipe.id not in avoid_recipe_ids and course.get(item.recipe.id) not in keep_courses)
         ]
-        try:
-            result = self.planning_engine.plan(partial, fresh, recipes, selector=self.selector)
-        except ProductPlanningError:
-            # Too few dishes the week does not already have, or the kept dishes no longer fit:
-            # plan the meal from every candidate rather than fail.
-            result = self.planning_engine.plan(partial, recommendations, recipes, selector=self.selector)
+        # Also when the new dish shares their course: "another soup" keeps the soup the meal has.
+        required = {recipe.slug for recipe in recipes if recipe.id in keep_ids}
+        budget = partial.weekly_budget_sgd
+        budgets = [(partial, True)] if budget is None or budget > 0 or over_budget is None else []
+        if over_budget is not None:
+            budgets.append((partial.model_copy(update={"weekly_budget_sgd": over_budget}), False))
+        # Dishes the week does not have yet, then any (too few are left); within the budget before over it.
+        pools = [(fresh, required)] + ([(recommendations, required)] if len(fresh) < len(recommendations) else [])
+        tries = [(pool, held, *limit) for limit in budgets for pool, held in pools]
+        if required:
+            # The kept dishes fit nothing at all: the meal from every candidate rather than fail.
+            tries += [(recommendations, set(), *limit) for limit in budgets]
+        for pool, held, request, hard in tries:
+            try:
+                result = self.planning_engine.plan(
+                    request, pool, recipes, selector=self.selector, budget_is_hard=hard, required=held
+                )
+                break
+            except ProductPlanningError as error:
+                failure = error
+        else:
+            raise failure
         placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(result.selected))]
         return [
             ScheduledDish(

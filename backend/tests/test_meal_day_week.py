@@ -58,6 +58,38 @@ def test_the_product_adds_a_soup_to_one_dinner_and_keeps_the_rest():
     assert codes == {"shape_request_understood": "passed", "unchanged_meals_identical": "failed"}
 
 
+def test_a_change_no_week_within_the_budget_can_hold_goes_over_it_by_as_little_as_it_can():
+    """Owner decision 2026-10-02: a soup every night on a week planned to S$50 for two fits no week, so it is
+    offered over the budget. Without a budget to prune by, the beam still keeps room for the cheapest plans
+    (in whole packages); weighed only by what each dish uses, every week it kept went S$200 over."""
+    from app.api.routes.meal_plans import build_meal_plan_service
+    from app.evaluation.meal_day_week_runner import HOUSEHOLD, plan_request, product_database
+    from app.schemas.meal_plan import MEAL_PRESETS, MealPlanShapeChangeRequest
+    from app.services.replanning import MealPlanReplanningService
+
+    episode = load("mdw-dev-015")
+    episode["scenario"]["household_profile"]["household_size"] = 2
+    episode["gold"]["applicable_hard_constraints"]["budget_sgd"] = 50.0
+    with product_database(episode) as factory, factory() as session:
+        plans = build_meal_plan_service(session, HOUSEHOLD)
+        plan = plans.generate(plan_request(episode))
+        changes = MealPlanReplanningService(
+            repository=plans.repository,
+            recipe_repository=plans.recipe_repository,
+            recommendation_service=plans.recommendation_service,
+            grocery_aggregator=plans.grocery_aggregator,
+            meal_plan_service=plans,
+        )
+        soup = MEAL_PRESETS["dinner"]["main, vegetable and soup"]
+        event = changes.preview_shape(
+            plan_id=plan.id,
+            request=MealPlanShapeChangeRequest.model_validate({"meal_type": "dinner", "roles": soup}),
+            today=plan.start_date,
+        )
+    assert event.over_budget_sgd is not None
+    assert event.over_budget_sgd < 50
+
+
 def test_a_daily_target_is_a_hard_day_band_and_a_soft_meal_guide():
     from app.planning.nutrition_scope import compile_nutrition_targets
     from app.schemas.planning_nutrition import ProductNutritionTarget

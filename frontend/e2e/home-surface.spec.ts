@@ -492,6 +492,8 @@ test("asking for lunch too previews the new meals, then asks whether to keep it"
     before_entry: null,
     after_entry: null,
     purchase_total_delta_sgd: 21.4,
+    // S$82.60 + S$21.40 against S$90: the backend says how far over, the card and the reply say the same.
+    over_budget_sgd: 14,
     shape_change: {
       meal_type: "lunch",
       scope: "week",
@@ -538,6 +540,7 @@ test("asking for lunch too previews the new meals, then asks whether to keep it"
   await expect(card.getByText("Lunch added for the rest of the week")).toBeVisible();
   await expect(card.getByText("Chicken Soba Salad")).toBeVisible();
   await expect(card.getByText("groceries +S$21.40")).toBeVisible();
+  await expect(card.getByText("This puts the week S$14.00 over your S$90.00 budget.")).toBeVisible();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/15-shape-change.png` });
 
   await card.getByRole("button", { name: "Confirm change" }).click();

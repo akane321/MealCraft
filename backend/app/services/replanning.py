@@ -318,21 +318,21 @@ class MealPlanReplanningService:
         return {item.recipe_id for item in present}, held - new
 
     def _plan_meal(self, constraints, meal, roles, days, kept, removed) -> list[tuple[dict, MealPlanEntrySnapshot]]:
-        """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves."""
+        """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves.
+
+        When nothing fits what is left, the change is still planned, as cheaply as every other rule allows,
+        and its preview says how far over the budget it goes; the household confirms or discards it, as
+        with a swap (owner decision 2026-10-02). A new week keeps its budget as a hard limit.
+        """
         if self.meal_plan_service is None:
             raise MealPlanReplanValidationError("Changing meals is not available here.")
         budget = constraints.weekly_budget_sgd
-        if budget is not None:
-            budget = round(budget - sum(float(item.consumed_cost_sgd) for item in kept), 2)
-            if budget <= 0:
-                raise MealPlanReplanValidationError(
-                    "The rest of the week already uses the whole weekly budget, so there is none left for this."
-                )
+        left = None if budget is None else round(budget - sum(float(item.consumed_cost_sgd) for item in kept), 2)
         partial = constraints.model_copy(
             update={
                 "plan_shape": MealPlanShape(meals={meal: roles}),
                 "meal_composition": None,
-                "weekly_budget_sgd": budget,
+                "weekly_budget_sgd": left,
             }
         )
         first, last = min(days), max(days)
@@ -343,6 +343,9 @@ class MealPlanReplanningService:
                 day_count=last - first + 1,
                 avoid_recipe_ids={item.recipe_id for item in kept},
                 keep=self._dishes_kept_when_adding(roles, [item for item in removed if len(days) == 1]),
+                # Over the budget, costs are weighed against what is left, or the week's budget for these days
+                # when that is more, so a repeat still costs more than a new dish at the household's usual price.
+                over_budget=None if budget is None else max(left, round(budget * len(days) / 7, 2)),
             )
         except ProductPlanningError as error:
             raise MealPlanReplanValidationError(str(error)) from error
@@ -705,6 +708,7 @@ class MealPlanReplanningService:
 
     @staticmethod
     def _event_response(event: MealPlanEvent) -> MealPlanReplanEventResponse:
+        after = event.after_grocery
         return MealPlanReplanEventResponse(
             id=event.id,
             plan_id=event.plan_id,
@@ -720,6 +724,11 @@ class MealPlanReplanningService:
             nutrition_delta=MealPlanNutritionDelta.model_validate(event.nutrition_delta),
             grocery_delta=[MealPlanGroceryDeltaLine.model_validate(item) for item in event.grocery_delta],
             purchase_total_delta_sgd=float(event.purchase_total_delta_sgd),
+            over_budget_sgd=(
+                round(after["purchase_total_sgd"] - after["weekly_budget_sgd"], 2)
+                if after.get("within_weekly_budget") is False
+                else None
+            ),
             created_at=event.created_at,
             applied_at=event.applied_at,
         )

@@ -316,6 +316,8 @@ class MealPlanReplanEventResponse(BaseModel):
     nutrition_delta: MealPlanNutritionDelta
     grocery_delta: list[MealPlanGroceryDeltaLine]
     purchase_total_delta_sgd: float
+    # How far the week's checkout total is over its weekly budget after the change; None within it.
+    over_budget_sgd: float | None = None
     created_at: datetime
     applied_at: datetime | None
 
