@@ -83,6 +83,9 @@ class MealBeamResult:
     pruned: bool
     exhausted: bool
     empty_slot_ids: tuple[str, ...]
+    # The check that dropped the last partial plans when the search kept none: "meal" (no meal fits a slot),
+    # "repeats", "requests", "day_limits" or "budget". A record for explanations; it changes no search.
+    emptied_by: str | None = None
 
 
 class MealBeamPlanner(FinalScopeReferencePlanner):
@@ -226,6 +229,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         require_finite_problem(problem)
         states = [MealState()]
         expansions, pruned, exhausted, empty = 0, False, False, []
+        emptied_by = None
         ordered = sorted(problem.slots, key=self._slot_key)
         day_closes = {
             slot.slot_id
@@ -274,11 +278,15 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             if exhausted:
                 states = []  # A partial horizon is never returned as a plan.
                 break
+            if states and not next_states:
+                emptied_by = "repeats" if options else "meal"
             remaining = len(problem.slots) - len(next_states[0].choices) if next_states else 0
-            next_states = [s for s in next_states if requests_reachable(problem, s, remaining)]
+            kept = [s for s in next_states if requests_reachable(problem, s, remaining)]
+            emptied_by = emptied_by or ("requests" if next_states and not kept else None)
             # A day over a stated daily ceiling never comes back under it; one below its floor
             # is final once its last meal is planned (ADR-0046 section 3).
-            next_states = [s for s in next_states if day_permitted(problem, s, slot, slot.slot_id in day_closes)]
+            next_states = [s for s in kept if day_permitted(problem, s, slot, slot.slot_id in day_closes)]
+            emptied_by = emptied_by or ("day_limits" if kept and not next_states else None)
             spend: dict[tuple, float] = {}
             if budget is not None:
                 # Whole packages only ever add cost, so a partial plan already over the budget can
@@ -301,7 +309,9 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                         priced[s.choices] = cost
                     # Summed in the needs' order, so the total is the same float however it was reached.
                     spend[s.choices] = sum(priced[s.choices].values(), 0.0)
-                next_states = [s for s in next_states if spend[s.choices] <= budget]
+                within = [s for s in next_states if spend[s.choices] <= budget]
+                emptied_by = emptied_by or ("budget" if next_states and not within else None)
+                next_states = within
             # Progress towards what the household asked for orders states; it is never part of a
             # state's loss, so the loss stays the objective CP-SAT minimises.
             next_states.sort(key=lambda s: (s.loss - REQUEST_BONUS * request_progress(problem, s), s.choices))
@@ -339,7 +349,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 priced = {s.choices: priced[s.choices] for s in states}
             if not states:
                 break
-        return MealBeamResult(tuple(states), expansions, pruned, exhausted, tuple(empty))
+        return MealBeamResult(tuple(states), expansions, pruned, exhausted, tuple(empty), emptied_by)
 
     def solve(self, problem: FinalPlanningProblem) -> FinalPlanningSolution:
         search = self.search_candidates(problem)

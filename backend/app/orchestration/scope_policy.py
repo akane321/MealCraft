@@ -20,6 +20,13 @@ class ReferenceScopePolicy:
         "calorie",
         "protein",
         "budget",
+        # A sum for the week is a budget: "S$10 total", 一周一共10新币.
+        "s$",
+        "新币",
+        "一周",
+        "每周",
+        "这周",
+        "本周",
         "fairprice",
         "grocery",
         "groceries",

@@ -7,7 +7,7 @@ critical browser path against an isolated test backend or the local stack.
 | Surface | Loading | Empty / first use | Success | Recoverable error | Constraint / safety state |
 |---|---|---|---|---|---|
 | Home: entry | film loading (poster shown) | starter prompts | chat opens on send | sign-in required, draft kept | none before sign-in |
-| Home: conversation | assistant thinking | "who's eating, what you can spend" prompt | structured clarification, **Plan my week**, reply | request failure shown in the conversation | clarification and non-medical boundary visible |
+| Home: conversation | assistant thinking | "who's eating, what you can spend" prompt | structured clarification, **Plan my week**, reply | request failure shown in the conversation | clarification and non-medical boundary visible; a limit no week meets refused with its number and choices; a week the planner could not find explained in the conversation in place of **Plan my week** |
 | Home: week panel | plan loading | "shows up once planned" | 7 dinners with status, tonight, tutorial | tutorial unavailable says so | allergen note on the recipe view |
 | Home: kitchen panel | plan loading | "shows up once planned" | cooked nutrition, shopping list against budget | not-priced items listed | price source labelled (FairPrice with date, saved, sample) |
 | Home: nutrition details | — | no cooked dinners (actuals zero) | six nutrients, cumulative curve, daily detail | status update failure message | only cooked dinners counted as actual |

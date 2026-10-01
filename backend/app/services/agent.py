@@ -5,8 +5,10 @@ from uuid import uuid4
 
 from pydantic_core import to_jsonable_python
 
+from app.agent import limits
 from app.agent.parser import ConstraintParser
 from app.agent.replanning import AgentReplanInterpreter
+from app.agent.replies import language, say
 from app.agent.shape_change import read_shape_change
 from app.models.agent import AgentRun, AgentSession
 from app.orchestration.contracts import (
@@ -20,14 +22,19 @@ from app.orchestration.contracts import (
     ToolEffect,
     ToolRunStatus,
 )
-from app.orchestration.interactions import InteractionAnswerError, validate_interaction_answer
+from app.orchestration.interactions import (
+    SAY_FIELD,
+    InteractionAnswerError,
+    say_interaction,
+    validate_interaction_answer,
+)
 from app.orchestration.run_lifecycle import (
     AgentRunLifecycle,
     AgentRunLifecycleError,
     AgentRunNotFoundError,
     StartedRun,
 )
-from app.orchestration.runtime import AgentTurnOutcome, BoundedAgentOrchestrator
+from app.orchestration.runtime import FOOD_WISH, AgentTurnOutcome, BoundedAgentOrchestrator, wish_options
 from app.orchestration.scope_policy import ReferenceScopePolicy
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.agent import AgentSessionRepository
@@ -147,7 +154,7 @@ class AgentSessionService:
         self.starting_constraints = starting_constraints
         self.repository = repository
         self.parser = parser
-        self.orchestrator = BoundedAgentOrchestrator(parser)
+        self.orchestrator = BoundedAgentOrchestrator(parser, check=self._refusal)
         self.scope_policy = ReferenceScopePolicy()
         self.meal_plan_service = meal_plan_service
         self.replanning_service = replanning_service
@@ -282,6 +289,7 @@ class AgentSessionService:
                 user_message=message,
                 assistant_message=result.assistant_message,
                 scope_decision=result.scope_decision,
+                pending_interaction=result.pending_interaction,
             )
             if updated is None:
                 raise AgentSessionNotFoundError
@@ -342,7 +350,9 @@ class AgentSessionService:
             raise AgentSessionNotReadyError(str(error)) from error
         if len(values) != 1:
             raise AgentSessionNotReadyError("This interaction requires exactly one answer.")
-        message = self._interaction_value_as_message(snapshot.pending_interaction, values[0])
+        message = self._interaction_value_as_message(
+            snapshot.pending_interaction, values[0], lang=language("", snapshot.messages)
+        )
         return self.reply(session_id, message, idempotency_key=idempotency_key)
 
     @staticmethod
@@ -362,24 +372,59 @@ class AgentSessionService:
         }
 
     @staticmethod
-    def _interaction_value_as_message(request: InteractionRequest, value: object) -> str:
+    def _interaction_value_as_message(request: InteractionRequest, value: object, *, lang: str = "en") -> str:
+        """What the household's choice says, in the conversation's language, so the reply stays in it."""
+        if request.field_path == SAY_FIELD:
+            return str(value).strip()
         if request.field_path == KEEP_SHAPE_FIELD:
-            return "Keep it as our usual" if value == "keep" else "Just this week"
+            return say("keep_usual_say" if value == "keep" else "just_this_week", lang)
         if request.field_path == "household_size":
             if isinstance(value, bool) or not isinstance(value, (int, float, str)):
                 raise AgentSessionNotReadyError("Household size must be a number.")
             if isinstance(value, str) and not value.strip().isdigit():
                 return value.strip()
-            return f"{int(value)} people"
+            return say("people_say", lang, count=int(value))
         if request.field_path and request.field_path.endswith(".quantity"):
             return str(value)
         if request.field_path and request.field_path.startswith("unmatched."):
             meant_for, _, term = request.field_path.removeprefix("unmatched.").partition(".")
             if meant_for == "excluded_ingredients":
-                return f"Exclude {value} (that is what I meant by “{term}”)."
+                return say("exclude_say", lang, value=value, term=term)
             if meant_for == "available_ingredients":
-                return f"I have {value} (that is what I meant by “{term}”)."
+                return say("have_say", lang, value=value, term=term)
         raise AgentSessionNotReadyError("This interaction field is not supported by the current runtime.")
+
+    def _plan_request(self, constraints: AgentConstraintState) -> WeeklyMealPlanRequest:
+        return WeeklyMealPlanRequest(
+            start_date=date.today(),
+            day_count=7,
+            household_size=constraints.household_size,
+            max_cooking_time_minutes=constraints.max_cooking_time_minutes,
+            budget_per_meal_sgd=constraints.budget_per_meal_sgd,
+            weekly_budget_sgd=constraints.weekly_budget_sgd,
+            allergens=constraints.allergens,
+            excluded_ingredients=constraints.excluded_ingredients,
+            dietary_preferences=constraints.dietary_preferences,
+            health_preferences=constraints.health_preferences,
+            nutrition_targets=constraints.nutrition_targets,
+            max_sodium_mg_per_meal=constraints.max_sodium_mg_per_meal,
+            available_ingredients=constraints.available_ingredients,
+            pricing_mode=constraints.pricing_mode,
+            plan_shape=constraints.plan_shape or default_plan_shape(),
+            max_uses_per_recipe=constraints.max_uses_per_recipe,
+        )
+
+    def _refusal(self, constraints: AgentConstraintState, lang: str) -> limits.Refusal | None:
+        """A limit no week the planner could build meets, checked against the week's cost floor (no search)."""
+        try:
+            request = self._plan_request(constraints)
+        except ValueError:
+            return None  # the request itself is refused when the week is planned, with its own reason
+
+        def floor_of(**changes):
+            return self.meal_plan_service.week_floor(request.model_copy(update=changes))
+
+        return limits.refusal(constraints, floor_of, lang)
 
     def _reply_to_planned(
         self,
@@ -389,11 +434,12 @@ class AgentSessionService:
     ) -> AgentSessionResponse:
         if snapshot.plan_id is None:
             raise AgentSessionNotReadyError("Generate a plan before requesting a replanning event.")
+        lang = language(message, snapshot.messages)
         interaction = snapshot.pending_interaction
         if interaction is not None and interaction.field_path == KEEP_SHAPE_FIELD:
-            return self._answer_keep_shape(session_id, snapshot, message)
+            return self._answer_keep_shape(session_id, snapshot, message, lang)
         if not snapshot.clarification_questions:
-            changed = self._change_shape(session_id, snapshot, message)
+            changed = self._change_shape(session_id, snapshot, message, lang)
             if changed is not None:
                 return changed
         scope_decision = self.scope_policy.classify(message)
@@ -406,11 +452,23 @@ class AgentSessionService:
                 reason_code="PENDING_REPLAN_CLARIFICATION_RESPONSE",
             )
         if not scope_decision.should_mutate_state:
+            reply, choices = self.orchestrator.boundary_message(scope_decision, lang), None
+            if scope_decision.scope_class is ScopeClass.AMBIGUOUS:
+                # Not a dead end: what can change in the week, as choices.
+                wish = FOOD_WISH.search(message.lower()) is not None
+                reply = say("wish_planned", lang) if wish else reply
+                options = (
+                    wish_options(lang, planned=True)
+                    if wish
+                    else self.replan_interpreter.choices(AgentReplanDraft(), None, lang)
+                )
+                choices = self._choices(snapshot, reply, options)
             updated = self.repository.append_bounded_exchange(
                 session_id,
                 user_message=message,
-                assistant_message=self.orchestrator.boundary_message(scope_decision),
+                assistant_message=reply,
                 scope_decision=scope_decision,
+                pending_interaction=choices if choices is not None else snapshot.pending_interaction,
             )
             if updated is None:
                 raise AgentSessionNotFoundError
@@ -423,6 +481,7 @@ class AgentSessionService:
             message,
             plan=plan,
             current=snapshot.replan_draft,
+            lang=lang,
         )
         if questions:
             updated = self.repository.append_replan_exchange(
@@ -433,6 +492,9 @@ class AgentSessionService:
                 clarification_questions=questions,
                 pending_event_id=None,
                 scope_decision=scope_decision,
+                pending_interaction=self._choices(
+                    snapshot, questions[0], self.replan_interpreter.choices(draft, plan, lang)
+                ),
             )
         else:
             try:
@@ -451,7 +513,7 @@ class AgentSessionService:
                 updated = self.repository.append_replan_exchange(
                     session_id,
                     user_message=message,
-                    assistant_message=f"I could not prepare that change: {error}",
+                    assistant_message=say("prepare_failed", lang, error=error),
                     draft=AgentReplanDraft(),
                     clarification_questions=[],
                     pending_event_id=None,
@@ -462,15 +524,16 @@ class AgentSessionService:
                     session_id,
                     user_message=message,
                     assistant_message=(
-                        {
-                            "LOCK_MEAL": f"Keep {preview.before_entry.recipe_title} as it is?",
-                            "CANCEL_MEAL": f"Skip {preview.before_entry.recipe_title}?",
-                        }.get(
-                            preview.event_type,
-                            f"How about {preview.after_entry.recipe_title} instead of "
-                            f"{preview.before_entry.recipe_title}?",
+                        say(
+                            {"LOCK_MEAL": "preview_lock", "CANCEL_MEAL": "preview_skip"}.get(
+                                preview.event_type, "preview_swap"
+                            ),
+                            lang,
+                            title=preview.before_entry.recipe_title,
+                            before=preview.before_entry.recipe_title,
+                            after=preview.after_entry.recipe_title if preview.after_entry else "",
                         )
-                        + " Nothing changes until you confirm."
+                        + say("until_confirm", lang)
                     ),
                     draft=draft,
                     clarification_questions=[],
@@ -481,8 +544,19 @@ class AgentSessionService:
             raise AgentSessionNotFoundError
         return self._to_response(updated)
 
+    def _choices(self, snapshot: AgentSessionResponse, prompt: str, options: list[tuple[str, str]]):
+        """Choices for the question just asked of a planned week; None when there is nothing to choose."""
+        if not options:
+            return None
+        return say_interaction(
+            prompt=prompt,
+            options=options,
+            question_id=f"replan-{snapshot.id}-{len(snapshot.messages)}",
+            context_version=max(snapshot.context_version, 1),
+        )
+
     def _change_shape(
-        self, session_id: int, snapshot: AgentSessionResponse, message: str
+        self, session_id: int, snapshot: AgentSessionResponse, message: str, lang: str = "en"
     ) -> AgentSessionResponse | None:
         """A request to add, drop or recompose a meal, previewed; None when the message asks for something else."""
         plan = self.meal_plan_service.get(snapshot.plan_id)
@@ -491,7 +565,7 @@ class AgentSessionService:
         if self.replan_interpreter._event_type(message.lower()) is not None:
             return None  # swap, skip, lock or can't buy: one dish, not the meal's shape
         days = self.replan_interpreter.day_indexes(message.lower(), plan)
-        intent = read_shape_change(message, plan=plan, day_indexes=days)
+        intent = read_shape_change(message, plan=plan, day_indexes=days, lang=lang)
         if intent is None:
             return None
         decision = ScopeDecision(
@@ -504,9 +578,9 @@ class AgentSessionService:
         try:
             preview = self.replanning_service.preview_shape(plan_id=plan.id, request=intent.request)
         except (MealPlanReplanValidationError, WeeklyPlanSelectionError) as error:
-            reply, pending, draft = f"I could not make that change: {error}", None, AgentReplanDraft()
+            reply, pending, draft = say("change_failed", lang, error=error), None, AgentReplanDraft()
         else:
-            reply, pending = self._describe_shape_preview(intent.summary, preview), preview.id
+            reply, pending = self._describe_shape_preview(intent.summary, preview, lang), preview.id
             draft = AgentReplanDraft(event_type="CHANGE_SHAPE", reason=message.strip())
         updated = self.repository.append_replan_exchange(
             session_id,
@@ -522,21 +596,23 @@ class AgentSessionService:
         return self._to_response(updated)
 
     @staticmethod
-    def _describe_shape_preview(summary: str, preview: MealPlanReplanEventResponse) -> str:
+    def _describe_shape_preview(summary: str, preview: MealPlanReplanEventResponse, lang: str = "en") -> str:
         change = preview.shape_change
-        parts = [f"{summary}."]
+        parts = [say("shape_summary", lang, summary=summary)]
         if change and change.added:
             titles = list(dict.fromkeys(dish.recipe_title for dish in change.added))
-            more = f" and {len(titles) - 4} more" if len(titles) > 4 else ""
-            parts.append(f"New: {', '.join(titles[:4])}{more}.")
+            more = say("shape_more", lang, count=len(titles) - 4) if len(titles) > 4 else ""
+            parts.append(say("shape_new", lang, titles=("、" if lang == "zh" else ", ").join(titles[:4]), more=more))
         if change and change.removed:
             count = len(change.removed)
-            parts.append(f"{count} {'dish comes' if count == 1 else 'dishes come'} off the week.")
+            parts.append(say("shape_removed_one" if count == 1 else "shape_removed", lang, count=count))
         delta = preview.purchase_total_delta_sgd
-        parts.append(f"Groceries {'+' if delta >= 0 else '−'}S${abs(delta):.2f}. Nothing changes until you confirm.")
-        return " ".join(parts)
+        parts.append(say("shape_groceries", lang, sign="+" if delta >= 0 else "−", amount=abs(delta)))
+        return ("" if lang == "zh" else " ").join(parts)
 
-    def _answer_keep_shape(self, session_id: int, snapshot: AgentSessionResponse, message: str) -> AgentSessionResponse:
+    def _answer_keep_shape(
+        self, session_id: int, snapshot: AgentSessionResponse, message: str, lang: str = "en"
+    ) -> AgentSessionResponse:
         """After a week's shape changed: keep it as the household's usual one only on a clear yes."""
         text = message.strip().lower()
         just_this_week = any(word in text for word in ("just this week", "only this week", "no", "不", "只"))
@@ -546,11 +622,11 @@ class AgentSessionService:
         plan = self.meal_plan_service.get(snapshot.plan_id) if keep else None
         if keep and plan is not None and plan.plan_shape is not None and self.keep_plan_shape is not None:
             self.keep_plan_shape(plan.plan_shape)
-            reply = "Saved. New weeks will plan these meals too; you can change them any time in your profile."
+            reply = say("kept", lang)
         elif keep:
-            reply = "I couldn't save that to your household, so only this week changed."
+            reply = say("keep_failed", lang)
         else:
-            reply = "OK, only this week changes. Your usual meals stay as they are."
+            reply = say("week_only", lang)
         updated = self.repository.append_replan_exchange(
             session_id,
             user_message=message,
@@ -599,25 +675,9 @@ class AgentSessionService:
             raise AgentSessionNotReadyError("Resolve the outstanding clarification before generating a plan.")
 
         constraints = snapshot.constraints
+        lang = language("", snapshot.messages)
         run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
-        request = WeeklyMealPlanRequest(
-            start_date=date.today(),
-            day_count=7,
-            household_size=constraints.household_size,
-            max_cooking_time_minutes=constraints.max_cooking_time_minutes,
-            budget_per_meal_sgd=constraints.budget_per_meal_sgd,
-            weekly_budget_sgd=constraints.weekly_budget_sgd,
-            allergens=constraints.allergens,
-            excluded_ingredients=constraints.excluded_ingredients,
-            dietary_preferences=constraints.dietary_preferences,
-            health_preferences=constraints.health_preferences,
-            nutrition_targets=constraints.nutrition_targets,
-            max_sodium_mg_per_meal=constraints.max_sodium_mg_per_meal,
-            available_ingredients=constraints.available_ingredients,
-            pricing_mode=constraints.pricing_mode,
-            plan_shape=constraints.plan_shape or default_plan_shape(),
-            max_uses_per_recipe=constraints.max_uses_per_recipe,
-        )
+        request = self._plan_request(constraints)
         try:
             plan = self.meal_plan_service.generate(request)
         except Exception as error:
@@ -631,6 +691,8 @@ class AgentSessionService:
                 error_code=type(error).__name__,
             )
             self._fail_run(run, error)
+            if isinstance(error, WeeklyPlanSelectionError):
+                raise WeeklyPlanSelectionError(self._explain_unplanned(snapshot, error, lang)) from error
             raise
         run = self.run_lifecycle.record_tool(
             run,
@@ -641,7 +703,7 @@ class AgentSessionService:
             result_reference=f"meal-plan:{plan.id}:revision:{plan.revision}",
             provider_mode=constraints.pricing_mode,
         )
-        updated = self.repository.mark_planned(session_id, plan_id=plan.id)
+        updated = self.repository.mark_planned(session_id, plan_id=plan.id, assistant_message=say("planned", lang))
         if updated is None:
             self._fail_run(run, AgentSessionNotFoundError())
             raise AgentSessionNotFoundError
@@ -728,10 +790,12 @@ class AgentSessionService:
             and result.event.shape_change.scope == "week"
             and self.keep_plan_shape is not None
         )
-        question = "Should new weeks plan meals this way too?"
+        lang = language("", snapshot.messages)
+        question = say("ask_keep", lang)
+        done = say("replanned", lang)
         updated = self.repository.finish_replan(
             session_id,
-            assistant_message="Done. Your week and shopping list are updated." + (f" {question}" if ask_keep else ""),
+            assistant_message=done + (("" if lang == "zh" else " ") + question if ask_keep else ""),
             pending_interaction=(
                 InteractionRequest(
                     type=InteractionType.QUICK_REPLY,
@@ -739,8 +803,8 @@ class AgentSessionService:
                     field_path=KEEP_SHAPE_FIELD,
                     question_id=f"keep-shape-{event_id}",
                     options=[
-                        InteractionOption(id="keep", label="Keep it as our usual", value="keep"),
-                        InteractionOption(id="week", label="Just this week", value="week"),
+                        InteractionOption(id="keep", label=say("keep_usual", lang), value="keep"),
+                        InteractionOption(id="week", label=say("just_this_week", lang), value="week"),
                     ],
                     context_version=snapshot.context_version,
                 ).model_dump(mode="json")
@@ -798,8 +862,7 @@ class AgentSessionService:
             return self.get(session_id) or snapshot
         run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
         updated = self.repository.finish_replan(
-            session_id,
-            assistant_message="I discarded that replanning request. The saved meal plan was not changed.",
+            session_id, assistant_message=say("discarded", language("", snapshot.messages))
         )
         if updated is None:
             self._fail_run(run, AgentSessionNotFoundError())
@@ -812,6 +875,35 @@ class AgentSessionService:
         )
         self.run_lifecycle.transition(run, AgentRunStatus.COMMITTED, termination_reason_code="REPLAN_DISCARDED")
         return self.get(session_id) or self._to_response(updated)
+
+    def _explain_unplanned(self, snapshot: AgentSessionResponse, error: Exception, lang: str) -> str:
+        """Say in the conversation why no week was planned, from the planner's trace, with what to change.
+
+        The Plan card gives way to the explanation (the session collects again), unless the same request
+        may simply plan next time (slow search, missing data).
+        """
+        trace = getattr(error, "trace", None)
+        if trace is None:
+            explained = limits.Refusal("plan", say("change_failed", lang, error=error))
+        else:
+            explained = limits.planning_failure(getattr(error, "status", None), trace, snapshot.constraints, lang)
+        context_version = max(snapshot.context_version, 1)
+        self.repository.explain_unplanned(
+            snapshot.id,
+            assistant_message=explained.text,
+            status="ready" if explained.retry else "collecting",
+            missing_fields=[] if explained.retry else [explained.field],
+            clarification_questions=[] if explained.retry else [explained.text],
+            pending_interaction=None
+            if explained.retry
+            else say_interaction(
+                prompt=explained.text,
+                options=list(explained.options),
+                question_id=f"context-{context_version}:unplanned",
+                context_version=context_version,
+            ),
+        )
+        return explained.text
 
     def list_runs(self, session_id: int, *, limit: int = 20) -> AgentRunCollectionResponse:
         if self.repository.get(session_id) is None:

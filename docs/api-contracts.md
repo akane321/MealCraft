@@ -396,8 +396,14 @@ Every message first passes through the deterministic reference scope gate.
 Supported meal-planning input may reach constraint parsing. Social, off-topic,
 disease-treatment and adversarial requests receive a bounded response without
 changing constraints, clarification state, pending interaction or context
-version. A mixed request sends only its supported segment to the parser. The
-persisted `last_scope_decision` makes this routing visible to clients and tests.
+version. An unclear message ("something nice", 我想吃点好的) is not a dead end:
+its bounded reply offers choices as a `pending_interaction` (planning a week
+before a plan exists, changing a dish once one does). A mixed request sends only
+its supported segment to the parser. The persisted `last_scope_decision` makes
+this routing visible to clients and tests. Every templated reply is written in
+the language of the household's message, or, for a message with no words to
+tell by (a number, "ok"), of their last one that had some
+(`backend/app/agent/replies.py`).
 
 The assistant requires household size and resolves any unquantified available
 ingredient before confirmation. A user may answer `unknown`; the quantity then
@@ -406,6 +412,16 @@ Asking for no repeats ("no dish twice", 不要重复, 一周不重样) sets
 `max_uses_per_recipe` to 1 in the constraint state; confirmation passes it to
 the planner as the hard rule described under Weekly Meal Plans.
 
+Before the session becomes ready, the stated limits are checked against a floor
+under the cost of any week the planner could build from its own candidates
+(`backend/app/planning/week_floor.py`: the cheapest price per unit of each
+ingredient, each dish at its smallest portion share, no search). A weekly or
+per-meal budget below the floor, a required dish no candidate fills, or no
+repeats with fewer different dishes than the week needs is refused with the
+number that shows it ("S$10 for 4 people is S$0.36 a person a meal; the cheapest
+dishes … cost at least S$35.21"); the session keeps collecting and offers the
+ways out as choices. Only what the floor proves is refused.
+
 When clarification can be represented structurally, the response includes a
 `pending_interaction` with a stable `question_id`, `field_path`, option IDs and
 `context_version`. `POST /api/agent/sessions/{session_id}/interactions` accepts
@@ -413,12 +429,21 @@ the matching IDs rather than localized button labels. The backend rejects
 expired, stale, forged, duplicate or mixed option/free-text answers with HTTP
 409. The first runtime slice supports household-size buttons and pantry
 quantity input; other questions continue to work through the messages endpoint.
+An interaction whose `field_path` is `message` offers sentences the household
+could have typed (raise the budget to S$36, Day 2, 第2天): the chosen option's
+value, or free text, is sent as their message. A replanning question (which
+kind of change, which day, which dish) comes with such choices.
 
 `POST /api/agent/sessions/{session_id}/confirm` is accepted only when
 `can_confirm=true`. It passes the validated state to the same deterministic
 weekly planner used by `/api/plans/generate`, returns the generated plan, and
-stores its ID on the agent session. `GET` endpoints allow the frontend to resume
-the latest conversation after a reload or container restart.
+stores its ID on the agent session. When the planner finds no week, the response
+is HTTP 422 and its detail names the limit the planner's trace shows the search
+ran into (never a claim that no week exists); the same sentence is added to the
+conversation and the session returns to collecting with choices, so the client
+replaces its Plan card with it. A slow search or missing data leaves the session
+ready to try again. `GET` endpoints allow the frontend to resume the latest
+conversation after a reload or container restart.
 
 The default parser is deterministic fixture mode. Optional OpenAI mode uses the
 same Pydantic extraction contract. Neither parser makes medical recommendations,

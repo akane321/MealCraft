@@ -605,3 +605,40 @@ test("keeping a dish previews as keeping it, and the change log shows it once co
   await week.getByText("Changes this week").click();
   await expect(week.getByText("Keep Tofu Brown Rice Stir-fry as it is")).toBeVisible();
 });
+
+test("a week that cannot be planned is explained in the chat in place of the Plan card", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await stubApi(page);
+  const why = "I couldn't plan this week: the search found no week within the S$10.00 weekly budget. That is the limit it kept running into.";
+  const explained = {
+    ...session(false),
+    status: "collecting",
+    can_confirm: false,
+    missing_fields: ["weekly_budget_sgd"],
+    clarification_questions: [why],
+    messages: [...session(false).messages, { id: 3, role: "assistant", content: why, created_at: "2026-09-14T08:00:02Z" }],
+    pending_interaction: {
+      type: "quick_reply",
+      prompt: why,
+      field_path: "message",
+      question_id: "context-2:unplanned",
+      options: [{ id: "say_0", label: "Try S$15 for the week", value: "Make the weekly budget S$15" }],
+      allow_free_text: true,
+      context_version: 2,
+      plan_revision: null,
+      expires_at: null,
+    },
+  };
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill({ status: 422, contentType: "application/json", body: JSON.stringify({ detail: why }) }));
+  await page.route("**/api/agent/sessions/51", route => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(explained) }));
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Plan a week for 4 for S$10 total");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+
+  await expect(page.getByText(why).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Plan my week" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Try S$15 for the week" })).toBeVisible();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+});

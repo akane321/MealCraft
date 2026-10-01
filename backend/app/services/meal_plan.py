@@ -6,6 +6,7 @@ from app.models.platform import OperationRun
 from app.planning.conflict_explanation import explain_infeasibility, product_explanation
 from app.planning.nutrition_scope import nutrition_scope_notes
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError, meals_of_the_day
+from app.planning.week_floor import WeekFloor, week_floor
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
 from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
@@ -58,16 +59,7 @@ class WeeklyMealPlanService:
         replaces_plan_id: int | None = None,
     ) -> WeeklyMealPlanResponse:
         started_at = datetime.now(UTC)
-        # Every course a planned meal's roles may take enters the pool (ADR-0046), not only dinner's.
-        meals = meals_of_the_day(constraints)
-        courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
-        recipes = self.recipe_repository.list_for_planning(courses=courses)
-        recommendation_result = self.recommendation_service.recommend(
-            constraints,
-            deduct_pantry_from_cost=False,
-            recipes=recipes,
-            priced_release_only=True,
-        )
+        recipes, recommendation_result = self._candidates(constraints)
         broadened = not recommendation_result.recommendations
         if broadened:
             # Broaden only the diagnostic candidate pool; the original request
@@ -165,6 +157,24 @@ class WeeklyMealPlanService:
             operation_run=self._operation_run(result.trace, started_at),
         )
         return self._to_response(plan)
+
+    def _candidates(self, constraints: WeeklyMealPlanRequest):
+        """The recipes a week may use and the recommendations `generate` plans from first."""
+        # Every course a planned meal's roles may take enters the pool (ADR-0046), not only dinner's.
+        meals = meals_of_the_day(constraints)
+        courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
+        recipes = self.recipe_repository.list_for_planning(courses=courses)
+        return recipes, self.recommendation_service.recommend(
+            constraints,
+            deduct_pantry_from_cost=False,
+            recipes=recipes,
+            priced_release_only=True,
+        )
+
+    def week_floor(self, constraints: WeeklyMealPlanRequest) -> WeekFloor:
+        """What any week `generate` could plan for these constraints costs at least, without a search."""
+        recipes, candidates = self._candidates(constraints)
+        return week_floor(constraints, candidates.recommendations, recipes)
 
     def plan_dishes(
         self,
