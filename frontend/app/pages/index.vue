@@ -29,6 +29,8 @@ const draft = ref("");
 const dishAction = ref<{ text: string; week: number } | null>(null);
 // Such an action that would set aside this conversation's "Plan my week", waiting for the household's answer.
 const takeOn = ref<{ message: string; week: number } | null>(null);
+// Open my week (enter) is reopening the week and its conversations.
+const entering = ref(false);
 const plan = ref<WeeklyMealPlan | null>(null);
 // A request in flight, a failed one and "nothing planned yet" are three different states.
 const planState = ref<"empty" | "loading" | "error" | "ready">("empty");
@@ -162,20 +164,17 @@ async function requireAccount(): Promise<boolean> {
 async function enter() {
   if (!(await requireAccount())) return;
   view.value = "app";
+  // Until the week and its conversations are back, a send could start a second conversation (see send).
+  // Nothing below throws: each request reports its own failure.
+  entering.value = true;
   // The household's current week is its newest plan. It reopens with the conversation that planned
   // it; a week with no conversation (rebuilt on the profile page) opens beside a fresh one.
   const current = await currentPlanId();
   if (!session.value) await agent.restore(current);
   // An open conversation keeps its own week; one that has not planned yet shows the current week.
   const shown = session.value?.plan_id ?? current;
-  // A dish's words kept over a reload or a navigation change only their own week: once another week
-  // is shown (it was replanned meanwhile), they go, with the words themselves if still unedited.
-  const action = dishAction.value;
-  if (action && action.week !== shown) {
-    if (draft.value === action.text) draft.value = "";
-    dishAction.value = null;
-  }
   if (shown) await loadPlan(shown);
+  entering.value = false;
 }
 
 async function currentPlanId(): Promise<number | null> {
@@ -204,7 +203,7 @@ function actionWeek(message: string): number | null {
 
 async function send(text = draft.value) {
   const message = text.trim();
-  if (!message) return;
+  if (!message || entering.value) return;
   draft.value = message;
   if (!(await requireAccount())) return;
   // A dish's words sent from the landing (kept over a reload or a sign-in) first reopen the week and its
@@ -380,6 +379,15 @@ watch(planningNew, (planning) => {
   if (draft.value === takeOn.value.message) draft.value = "";
   takeOn.value = null;
 });
+// A dish's words change only their own week. Once another week is shown or opening (planned with
+// "Plan my week", replanned on another page and reopened), they go, with the words themselves if
+// still unedited. Synchronous, so a send that just reopened the week sees it (see send).
+watch([() => plan.value?.id, lastPlanId], (weeks) => {
+  const action = dishAction.value;
+  if (!action || weeks.every(week => !week || week === action.week)) return;
+  if (draft.value === action.text) draft.value = "";
+  dishAction.value = null;
+}, { flush: "sync" });
 watch(() => [messages.value.length, isLoading.value, session.value?.pending_replan?.id, showWeek.value, takeOn.value], async () => {
   await nextTick();
   log.value?.scrollTo({ top: log.value.scrollHeight, behavior: "smooth" });
@@ -640,7 +648,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               autocomplete="off"
               :placeholder="interaction?.prompt || (ownsPlan ? 'Swap a night, change the budget, use up what\'s in the fridge…' : 'Who\'s eating, what to spend, anything to avoid…')"
             >
-            <button type="submit" class="send" aria-label="Send" :disabled="isLoading || !draft.trim()">
+            <button type="submit" class="send" aria-label="Send" :disabled="isLoading || entering || !draft.trim()">
               <svg class="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
           </form>

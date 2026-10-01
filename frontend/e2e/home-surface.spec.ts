@@ -964,6 +964,40 @@ for (const way of ["Open my week", "Enter in the landing box"]) test(`a dish's w
   expect(sent).toEqual([]);
 });
 
+test("a dish's words kept over a navigation go once their week has been replanned, even if the new week fails to load", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await stubApi(page);
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  // Week 9001 was planned on the profile page; the only conversation is off topic.
+  await page.route("**/api/agent/sessions?limit=8", route => route.fulfill(json({ items: [offTopic] })));
+  await page.route("**/api/plans", route => route.fulfill(json(planList)));
+  const sent: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "POST" && request.url().includes("/api/agent/sessions")) sent.push(request.url());
+  });
+
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByRole("button", { name: "Open my week" }).click();
+  const week = page.getByRole("complementary", { name: "This week" });
+  const composer = page.getByLabel("Message MealCraft");
+  await week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
+  await expect(composer).toHaveValue(/^Skip /);
+
+  // On the household page 9002 replaces 9001, and back home 9002 fails to load: the words still go.
+  await page.getByRole("complementary", { name: "Navigation" }).getByRole("link", { name: "Household", exact: true }).click();
+  await page.waitForURL(url => url.pathname === "/profile");
+  await page.route("**/api/plans", route => route.fulfill(json({ items: [{ ...planList.items[0], id: 9002 }, ...planList.items] })));
+  await page.route("**/api/plans/9002", route => route.fulfill({ status: 500, contentType: "application/json", body: "{}" }));
+  await page.goBack();
+  await expect(composer).toHaveValue(/^Skip /);
+  await composer.press("Enter");
+  await expect(week.getByText("Your week couldn't be loaded.")).toBeVisible();
+  await expect(composer).toHaveValue("");
+  await page.waitForTimeout(300);
+  expect(sent).toEqual([]);
+});
+
 test("a dish's words sent from the landing after a reload go to the conversation that planned the week", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await stubApi(page);
@@ -1004,6 +1038,93 @@ test("a dish's words sent from the landing after a reload go to the conversation
   expect(sent[0]!.body).toEqual({ message: expect.stringMatching(/^Skip \w+day's Tofu Brown Rice Stir-fry$/), plan_id: null });
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeVisible();
   await expect(page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /^Skip / })).toHaveCount(0);
+});
+
+test("planning a new week takes away a dish's words left unsent beside the old one", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await stubApi(page);
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  // Week 9001 was planned on the profile page; conversation 51 is ready to plan a new week, which becomes
+  // 9002 with Prawn Laksa on the tofu's night.
+  const next = { ...plan, id: 9002, days: days.map(day => (day.entry_id === 4 ? { ...day, recipe: { ...day.recipe, title: "Prawn Laksa" } } : day)) };
+  await page.route("**/api/agent/sessions?limit=8", route => route.fulfill(json({ items: [session(false)] })));
+  await page.route("**/api/plans", route => route.fulfill(json(planList)));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: { ...session(true), plan_id: 9002 }, plan: next })));
+  await page.route("**/api/plans/9002", route => route.fulfill(json(next)));
+  await page.route("**/api/plans/9002/dashboard", route => route.fulfill(json({ ...dashboard, plan_id: 9002, days: next.days })));
+  await page.route("**/api/plans/9002/events", route => route.fulfill(json({ items: [] })));
+
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByRole("button", { name: "Open my week" }).click();
+  const week = page.getByRole("complementary", { name: "This week" });
+  const composer = page.getByLabel("Message MealCraft");
+  await week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
+  await expect(composer).toHaveValue(/^Skip \w+day's Tofu Brown Rice Stir-fry$/);
+
+  // "Plan my week" with the words unsent: they named a dish of the old week, so they go, and Send has nothing to send.
+  await page.getByRole("button", { name: "Plan my week" }).click();
+  await expect(page.getByText("Seven dinners for S$82.60")).toBeVisible();
+  await expect(week.getByText("Prawn Laksa").first()).toBeVisible();
+  await expect(composer).toHaveValue("");
+  await expect(page.getByRole("button", { name: "Send" })).toBeDisabled();
+});
+
+for (const way of ["Open my week", "Enter in the landing box"]) test(`nothing sends while the week reopens, so a dish's words never start a second conversation (${way})`, async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await stubApi(page);
+  const json = (body: unknown, status = 200) => ({ status, contentType: "application/json", body: JSON.stringify(body) });
+  // Conversation 51 planned the current week.
+  await page.route("**/api/agent/sessions?limit=8", route => route.fulfill(json({ items: [session(true)] })));
+  await page.route("**/api/plans", route => route.fulfill(json(planList)));
+  const sent: Sent = [];
+  await page.route("**/api/agent/sessions", (route) => {
+    const body = route.request().postDataJSON();
+    sent.push({ url: route.request().url(), body });
+    return route.fulfill(json(changing({ ...session(false), id: 70, messages: [] }, body.message, "CANCEL_MEAL"), 201));
+  });
+  await page.route("**/api/agent/sessions/51/messages", (route) => {
+    const body = route.request().postDataJSON();
+    sent.push({ url: route.request().url(), body });
+    return route.fulfill(json(changing(session(true), body.message, "CANCEL_MEAL")));
+  });
+
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByRole("button", { name: "Open my week" }).click();
+  const conversation = page.getByRole("region", { name: "Conversation" });
+  await expect(conversation.getByText("Seven dinners for S$82.60")).toBeVisible();
+  await page.getByRole("button", { name: /New plan/ }).click();
+  await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
+  await page.getByRole("complementary", { name: "This week" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
+
+  // After a reload the current week is slow to come back; meanwhile the words are sent again and a starter is clicked.
+  let answered = false;
+  await page.route("**/api/plans", async (route) => {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    answered = true;
+    await route.fulfill(json(planList));
+  });
+  await page.reload();
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  if (way === "Open my week") await page.getByRole("button", { name: "Open my week" }).click();
+  else await page.getByRole("region", { name: "Home" }).getByLabel("Message MealCraft").press("Enter");
+  const workspace = page.getByRole("main");
+  const composer = workspace.getByLabel("Message MealCraft");
+  await expect(composer).toHaveValue(/^Skip \w+day's Tofu Brown Rice Stir-fry$/);
+  await expect(workspace.getByRole("button", { name: "Send" })).toBeDisabled();
+  await composer.press("Enter");
+  await conversation.getByRole("button", { name: "A high-protein week" }).click();
+  expect(answered).toBe(false);
+
+  // Once the week is back, the words reach conversation 51, once.
+  if (way === "Open my week") await workspace.getByRole("button", { name: "Send" }).click();
+  await expect(conversation.getByText("How about Miso Tofu Bowl")).toBeVisible();
+  await expect(conversation.getByText("Seven dinners for S$82.60")).toBeVisible();
+  await page.waitForTimeout(300);
+  expect(sent).toHaveLength(1);
+  expect(sent[0]!.url).toMatch(/\/api\/agent\/sessions\/51\/messages$/);
+  expect(sent[0]!.body).toEqual({ message: expect.stringMatching(/^Skip \w+day's Tofu Brown Rice Stir-fry$/), plan_id: null });
 });
 
 test("a session that expires mid-sentence keeps the draft and comes back to it", async ({ page }) => {
