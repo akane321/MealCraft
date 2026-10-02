@@ -42,7 +42,6 @@ from app.schemas.planning_v2 import (
     PlanningConstraintCheck,
     PlanningNutritionBand,
     PlanningPantryItem,
-    PlanningRecipeCount,
     PlanningRepetitionRules,
     PlanningSlot,
 )
@@ -147,15 +146,17 @@ class ProductPlanningEngine:
         selector=None,
         profile_version=None,
         budget_is_hard=True,
-        required=frozenset(),
+        locked=None,
     ):
         """A validated week, or ProductPlanningError saying why there is none.
 
-        `required` are recipe slugs the week must use (a meal's present dishes while one is added to it).
-        `budget_is_hard=False` plans a change the household may take over the budget (owner, 2026-10-02):
-        every other rule holds, the budget is only reported, and of the weeks found (cost-led searches
-        among them) one costing least at the checkout is chosen (see `over_budget_pick`).
+        `locked` keeps a meal's present dishes while one is added to it: (day offset, meal) -> {role id:
+        recipe slug}. `budget_is_hard=False` plans a change the household may take over the budget (owner,
+        2026-10-02): every other rule holds, the budget is only reported, and of the weeks found (cost-led
+        searches among them) one costing least at the checkout is chosen (see `over_budget_pick`).
         """
+        locked = locked or {}
+        kept_dishes = {slug for roles in locked.values() for slug in roles.values()}
         trace = {
             "trace_version": "planning-product-v1",
             "status": "needs_data",
@@ -246,7 +247,7 @@ class ProductPlanningEngine:
             for recommendation in recommendations:
                 course = getattr(by_id.get(recommendation.recipe.id), "course", None) or "main"
                 room = kept.get(course, 0) < limits.get(course, 0)
-                if course in limits and (room or recommendation.recipe.slug in required):
+                if course in limits and (room or recommendation.recipe.slug in kept_dishes):
                     kept[course] = kept.get(course, 0) + 1
                     packet.append(recommendation)
             recommendations = packet
@@ -320,6 +321,7 @@ class ProductPlanningEngine:
                 servings=constraints.household_size,
                 max_time_minutes=constraints.max_cooking_time_minutes,
                 composition=roles,
+                locked_roles=locked.get((i, meal)),
             )
             for i in range(constraints.day_count)
             for meal, roles in (composition or [("dinner", None)])
@@ -357,11 +359,8 @@ class ProductPlanningEngine:
             budget_is_hard=budget_is_hard,
             # Only a stated cap is a rule; the search and the validator both hold it (ADR-0046 variety).
             repetition_rules=(
-                PlanningRepetitionRules(
-                    max_uses_per_recipe=constraints.max_uses_per_recipe,
-                    recipe_counts=[PlanningRecipeCount(recipe_id=slug, min_uses=1) for slug in sorted(required)],
-                )
-                if constraints.max_uses_per_recipe is not None or required
+                PlanningRepetitionRules(max_uses_per_recipe=constraints.max_uses_per_recipe)
+                if constraints.max_uses_per_recipe is not None
                 else None
             ),
             catalog_version=digest([r.model_dump(mode="json") for r in candidates]),

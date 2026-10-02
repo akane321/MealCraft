@@ -377,8 +377,9 @@ including a shape change (`POST /api/plans/{plan_id}/shape/preview`), returns
 week over its weekly budget, or null within it and for a change that costs
 nothing or saves (keeping or skipping a dish). A shape change is planned within
 what the rest of the week leaves of the budget at the checkout (whole packages).
-When no plan fits that, it is planned over the budget rather than refused: the
-cheapest week the search finds, a repeated dish counted at one meal's share of
+When no plan fits that, it is planned over the budget rather than refused, from
+every candidate (dishes the week already has included): the cheapest week the
+search finds, a repeated dish counted at one meal's share of
 the budget as within it, and of the weeks costing no more than that, the one
 with the fewest empty optional dishes, then the most distinct dishes. The
 household confirms or discards it.

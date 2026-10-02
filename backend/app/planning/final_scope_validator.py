@@ -218,6 +218,9 @@ class FinalPlanningValidator:
         by_role = {dish.role_id: dish for dish in dishes}
         for role in slot.composition or []:
             dish = by_role.get(role.role_id)
+            locked = (slot.locked_roles or {}).get(role.role_id)
+            if locked is not None and (dish is None or dish.recipe_id != locked):
+                checks.append(self._failed("locked_slot", f"Locked role {role.role_id} was changed.", slot.slot_id))
             if dish is None:
                 if role.required:
                     checks.append(

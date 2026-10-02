@@ -173,16 +173,16 @@ class WeeklyMealPlanService:
         first_day: int,
         day_count: int,
         avoid_recipe_ids: set[int],
-        keep: tuple[set[int], set[str]] | None = None,
+        keep: dict[tuple[int, str], dict[str, int]] | None = None,
         over_budget: float | None = None,
     ) -> list[ScheduledDish]:
         """Dishes for `day_count` days from day `first_day` of a saved week, nothing saved (ADR-0046 section 2).
 
         `constraints` carries the shape to plan and the budget left; dishes already in the week are
-        avoided while enough others remain. `keep` (recipe ids, their courses) holds a meal's present
-        dishes while a new one is added: they stay in it, and of those courses only they are offered.
-        `over_budget` plans the dishes over the budget when none fit it (none can when it is 0 or less), as
-        cheaply as the planner finds, weighing costs against this amount (see `over_budget_pick`).
+        avoided while enough others remain. `keep` ((day index, meal) -> {role id: recipe id}) holds each
+        meal's present dishes in their roles while a new one is added. `over_budget` plans the dishes over the
+        budget when none fit it (none can when it is 0 or less), from every candidate, as cheaply as the planner
+        finds, weighing costs against this amount (see `over_budget_pick`).
         """
         start = constraints.start_date + timedelta(days=first_day - 1)
         # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
@@ -193,30 +193,37 @@ class WeeklyMealPlanService:
         recommendations = self.recommendation_service.recommend(
             partial, deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
         ).recommendations
-        keep_ids, keep_courses = keep if keep is not None else (set(), set())
-        course = {recipe.id: recipe.course for recipe in recipes}
+        slugs = {recipe.id: recipe.slug for recipe in recipes}
+        keep_ids = {recipe_id for roles in (keep or {}).values() for recipe_id in roles.values()}
+        # A kept dish the planner no longer offers cannot stay: the meal is planned from every candidate.
+        kept = {
+            (day - first_day, meal): {role: slugs[recipe_id] for role, recipe_id in roles.items()}
+            for (day, meal), roles in (keep or {}).items()
+            if keep_ids <= slugs.keys()
+        }
         fresh = [
-            item
-            for item in recommendations
-            if item.recipe.id in keep_ids
-            or (item.recipe.id not in avoid_recipe_ids and course.get(item.recipe.id) not in keep_courses)
+            item for item in recommendations if item.recipe.id in keep_ids or item.recipe.id not in avoid_recipe_ids
         ]
-        # Also when the new dish shares their course: "another soup" keeps the soup the meal has.
-        required = {recipe.slug for recipe in recipes if recipe.id in keep_ids}
         budget = partial.weekly_budget_sgd
         budgets = [(partial, True)] if budget is None or budget > 0 or over_budget is None else []
         if over_budget is not None:
             budgets.append((partial.model_copy(update={"weekly_budget_sgd": over_budget}), False))
-        # Dishes the week does not have yet, then any (too few are left); within the budget before over it.
-        pools = [(fresh, required)] + ([(recommendations, required)] if len(fresh) < len(recommendations) else [])
-        tries = [(pool, held, *limit) for limit in budgets for pool, held in pools]
-        if required:
+        # Within the budget, dishes the week does not have yet, then any (too few are left). Over it, any: a
+        # dish the week has may cost less than a new one, and `over_budget_pick` weighs the two.
+        pools = [fresh] + ([recommendations] if len(fresh) < len(recommendations) else [])
+        tries = [(pool, kept, *limit) for limit in budgets for pool in (pools if limit[1] else [recommendations])]
+        if kept:
             # The kept dishes fit nothing at all: the meal from every candidate rather than fail.
-            tries += [(recommendations, set(), *limit) for limit in budgets]
-        for pool, held, request, hard in tries:
+            tries += [(recommendations, None, *limit) for limit in budgets]
+        for pool, locked, request, hard in tries:
             try:
                 result = self.planning_engine.plan(
-                    request, pool, recipes, selector=self.selector, budget_is_hard=hard, required=held
+                    request,
+                    pool,
+                    recipes,
+                    selector=self.selector,
+                    budget_is_hard=hard,
+                    locked=locked,
                 )
                 break
             except ProductPlanningError as error:

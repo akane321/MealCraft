@@ -74,6 +74,8 @@ class PlanningSlot(BaseModel):
     locked_recipe_id: str | None = Field(default=None, max_length=120)
     # None is one dish per meal, as before. Role `main` takes the main share.
     composition: list[PlanningMealRole] | None = Field(default=None, min_length=1, max_length=6)
+    # A composed meal's dishes that stay while one is added to it: role id -> recipe id.
+    locked_roles: dict[str, str] | None = None
 
     @model_validator(mode="after")
     def validate_composition(self) -> "PlanningSlot":
@@ -81,6 +83,8 @@ class PlanningSlot(BaseModel):
             _composition_roles(self.composition)
             if self.locked_recipe_id is not None:
                 raise ValueError("lock a dish role, not a multi-dish slot, once role locks exist")
+        if self.locked_roles and set(self.locked_roles) - {role.role_id for role in self.composition or []}:
+            raise ValueError("a locked role must be a dish role of the slot")
         return self
 
 

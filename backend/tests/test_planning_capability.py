@@ -790,3 +790,66 @@ def test_a_change_on_a_week_of_two_meals_a_day_goes_over_by_the_cheapest_week(mo
     added = preview.json()["shape_change"]["added"]
     assert {d["recipe_slug"] for d in added if d["role_id"] == "soup"} == {"chickpea-soup"}
     assert preview.json()["over_budget_sgd"] == 1.85
+
+
+def test_dinners_with_a_soup_keep_each_days_main_and_vegetable(composed_client):
+    """A soup added to every dinner keeps each day's dishes, each in its place (the 2026-10-02 review of
+    mdw-dev-019): the dishes were kept only for a change on one day, and a change on several planned all their
+    dinners again."""
+    plan = _week_ahead(composed_client, COMPOSITION[:2])
+    # A swap makes Monday a dinner the planner would not choose, so planning the week again would change it.
+    monday = next(d for d in plan["days"] if d["day_index"] == 1 and d["role_id"] == "main")
+    swap = composed_client.post(
+        f"/api/plans/{plan['id']}/replan/preview", json={"entry_id": monday["entry_id"], "event_type": "REPLACE_MEAL"}
+    ).json()
+    week = composed_client.post(f"/api/plans/{plan['id']}/replan/{swap['id']}/confirm").json()["plan"]
+
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": [*COMPOSITION[:2], {**COMPOSITION[2], "required": True}]},
+    )
+
+    assert preview.status_code == 201, preview.text
+    after = composed_client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm").json()["plan"]
+    for day in range(1, 8):
+        assert _dishes(after, day) == {**_dishes(week, day), "soup": "tomato-soup"}, day
+
+
+def test_a_soup_added_day_by_day_over_the_budget_is_the_one_the_week_already_buys(monkeypatch):
+    """Over the budget, a dish the rest of the week has is weighed against new ones: Tuesday's soup is
+    Monday's, from the package the week already buys. Drawn first from dishes the week did not have, every day
+    bought a new soup (the 2026-10-02 review: S$96.82 over on mdw-dev-019 at S$40)."""
+    from datetime import date, timedelta
+
+    soups = ["chickpea", "black_bean", "cucumber", "canned_tomato"]
+    dishes = [
+        _dish("sweet-potato-bake", "main", "sweet_potato", 200, calories=400),
+        *[_dish(f"{name}-soup", "soup", name, 100, calories=150) for name in soups],
+    ]
+    main = {"role_id": "main", "courses": ["main"]}
+    soup = {"role_id": "soup", "courses": ["soup"], "required": True}
+    with dish_client(monkeypatch, dishes) as client:
+        request = {
+            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "household_size": 2,
+            "max_cooking_time_minutes": 240,
+            "pricing_mode": "fixture",
+            "plan_shape": {"meals": {"dinner": [main]}},
+        }
+        unbudgeted = client.post("/api/plans/generate", json=request).json()
+        budget = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
+        plan = client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": budget}).json()
+        previews = []
+        for day in (1, 2):
+            preview = client.post(
+                f"/api/plans/{plan['id']}/shape/preview",
+                json={"meal_type": "dinner", "roles": [main, soup], "day_indexes": [day]},
+            )
+            assert preview.status_code == 201, preview.text
+            previews.append(preview.json())
+            week = client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm").json()["plan"]
+
+    assert {_dishes(week, day)["soup"] for day in (1, 2)} == {"chickpea-soup"}
+    assert previews[0]["over_budget_sgd"] == 1.85
+    # Tuesday's soup comes from Monday's package: nothing more to buy.
+    assert previews[1]["purchase_total_delta_sgd"] == 0

@@ -112,6 +112,9 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             ]
             if slot.composition is None and slot.locked_recipe_id is not None:
                 eligible = [r for r in eligible if r.recipe_id == slot.locked_recipe_id]
+            locked = (slot.locked_roles or {}).get(role.role_id)
+            if locked is not None:
+                eligible = [r for r in eligible if r.recipe_id == locked]
             # A lunch takes lunch dishes whenever there are enough of them (ADR-0044, every meal since
             # ADR-0046); the soft affinity only matters when the catalog runs short.
             fitting = [r for r in eligible if slot.meal_type in r.allowed_meal_types]
@@ -137,7 +140,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                     turn,
                 )
             options: list[tuple[str | None, str] | None] = [(key, r.recipe_id) for r in kept]
-            if not role.required:
+            if not role.required and locked is None:
                 options.append(None)
             per_role.append(options)
         by_id = {r.recipe_id: r for r in recipes}

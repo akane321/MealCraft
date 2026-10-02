@@ -307,15 +307,19 @@ class MealPlanReplanningService:
         }
 
     @staticmethod
-    def _dishes_kept_when_adding(roles, present: list[MealPlanEntry]) -> tuple[set[int], set[str]] | None:
-        """Adding a dish to one meal keeps what it has: the present recipes, and the courses only they
-        may fill. None when the change is not purely an addition."""
-        present_roles = {item.role_id for item in present if item.status != "skipped"}
-        if not present_roles or not present_roles < {role.role_id for role in roles}:
+    def _dishes_kept_when_adding(roles, present: list[MealPlanEntry]) -> dict[tuple[int, str], dict[str, int]] | None:
+        """Adding a dish to a meal keeps what each day's meal has, each dish in its role: (day, meal) -> {role
+        id: recipe id}. None when the change is not purely an addition."""
+        wanted = {role.role_id for role in roles}
+        kept: dict[tuple[int, str], dict[str, int]] = {}
+        for item in present:
+            if item.status != "skipped":
+                kept.setdefault((item.day_index, item.meal_type), {})[item.role_id] = item.recipe_id
+        if not kept or not all(set(dishes) <= wanted for dishes in kept.values()):
             return None
-        held = {course for role in roles if role.role_id in present_roles for course in role.courses}
-        new = {course for role in roles if role.role_id not in present_roles for course in role.courses}
-        return {item.recipe_id for item in present}, held - new
+        if all(set(dishes) == wanted for dishes in kept.values()):
+            return None  # nothing is added
+        return kept
 
     def _plan_meal(self, constraints, meal, roles, days, kept, removed) -> list[tuple[dict, MealPlanEntrySnapshot]]:
         """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves.
@@ -360,7 +364,7 @@ class MealPlanReplanningService:
                 first_day=first,
                 day_count=last - first + 1,
                 avoid_recipe_ids={item.recipe_id for item in kept},
-                keep=self._dishes_kept_when_adding(roles, [item for item in removed if len(days) == 1]),
+                keep=self._dishes_kept_when_adding(roles, removed),
                 over_budget=over_budget,
             )
         except ProductPlanningError as error:

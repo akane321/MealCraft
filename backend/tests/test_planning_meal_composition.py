@@ -171,6 +171,30 @@ def test_meal_beam_drops_an_optional_dish_the_meal_time_cannot_hold():
     assert {a.role_id for a in solution.assignments} == {"main", "vegetable"}
 
 
+def test_a_locked_role_keeps_its_dish_in_the_meal_beam_and_the_validator():
+    """A dish added to a meal keeps the dishes it has, each in its role, on every day it is added to."""
+    from app.planning.meal_beam import MealBeamPlanner
+
+    packet = problem()
+    packet.recipes.append(packet.recipes[1].model_copy(update={"recipe_id": "beans", "title": "beans"}))
+    chosen = {a.role_id: a.recipe_id for a in MealBeamPlanner().solve(packet).assignments}["vegetable"]
+    other = ({"greens", "beans"} - {chosen}).pop()
+    packet.slots[0].locked_roles = {"vegetable": other, "soup": "broth"}
+
+    solution = MealBeamPlanner().solve(packet)
+
+    assert solution.status == "feasible", solution.validation.checks
+    assert {a.role_id: a.recipe_id for a in solution.assignments} == {
+        "main": "chicken",
+        "vegetable": other,
+        "soup": "broth",
+    }
+    # The validator holds it too: the other vegetable, or the optional soup left out, changes the meal.
+    for dishes in ((("vegetable", chosen), ("soup", "broth")), (("vegetable", other),)):
+        report, _ = validate(packet, meal(("main", "chicken"), *dishes))
+        assert "locked_slot" in failed(report), dishes
+
+
 def test_meal_beam_plans_one_dish_slots_like_before():
     from app.planning.meal_beam import MealBeamPlanner
     from tests.test_planning_v2 import load_problem
