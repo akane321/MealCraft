@@ -71,10 +71,10 @@ WEEKLY_BEFORE = re.compile(
     r"(?:\b(?:total|altogether|overall|week|weekly)\b|一共|总共|合计|总计|总预算|一周|每周|这周|本周|整周|周预算)[^\d]{0,24}$"
 )
 # Who eats, said between a sum and what it is for ("a week for 4 for S$10", "S$40 for four people for the
-# week", 10新币给4个人一周): not a sum itself.
+# week", "S$40 for the 4 of us for the week", 10新币给4个人一周): not a sum itself.
 EATERS = re.compile(
-    rf"\bfor\s+(?:\d+|{'|'.join(NUMBER_WORDS)})(?:\s*(?:people|persons?|of us|adults?))?\b"
-    rf"|\b(?:\d+|{'|'.join(NUMBER_WORDS)})\s*(?:people|persons?|adults?)\b"
+    rf"\bfor\s+(?:the\s+)?(?:\d+|{'|'.join(NUMBER_WORDS)})(?:\s*(?:people|persons?|of us|adults?))?\b"
+    rf"|\b(?:\d+|{'|'.join(NUMBER_WORDS)})\s*(?:people|persons?|adults?|of us)\b"
     r"|[\d一二两三四五六七八九十]+\s*(?:个人|口人|人)"
 )
 # An amount for each person ("S$3 per person per meal", 每人每餐3块, 人均15): times the people eating.
@@ -115,9 +115,11 @@ def budgets(text: str, people: int | None = None) -> tuple[float | None, float |
     for match in AMOUNT.finditer(text):
         group = next(index for index, value in enumerate(match.groups(), start=1) if value)
         value = float(match.group(group))
-        after = CLAUSE_END.split(text[match.end() : match.end() + 32], maxsplit=1)[0]
-        # Up to the number itself, so the words of the match count too ("每餐预算15", "weekly budget 120").
-        before = text[max(0, match.start(group) - 32) : match.start(group)]
+        # The rest of the clause, and everything up to the number itself so the words of the match count too
+        # ("每餐预算15", "weekly budget 120"). Each pattern bounds how far its words may be from the sum, measured
+        # once who eats is taken out: "S$10 per person for 4 people for the week" is a sum for the week.
+        after = CLAUSE_END.split(text[match.end() :], maxsplit=1)[0]
+        before = text[: match.start(group)]
         if value <= 0:
             continue
         if PER_PERSON_AFTER.search(after) or PER_PERSON_BEFORE.search(before):
@@ -264,17 +266,17 @@ class RuleBasedConstraintParser:
         people = self._first_number(
             lower,
             [
-                r"(\d+)\s*(?:people|persons?|人|个人)",
+                r"(\d+)\s*(?:people|persons?|人|个人|of us\b)",
                 r"(?:for|serving)\s*(\d+)(?![\d.])"
                 r"(?!\s*(?:dollars?|bucks|sgd|新币|新元|块|元|dinners?|meals?|days?|lunch|lunches|breakfasts?"
                 r"|minutes?|mins?|hours?|分钟|%))\s*(?:people|persons?)?",
             ],
         )
         if people is None:
-            # "Dinners for two", "a family of four", "three people".
+            # "Dinners for two", "a family of four", "three people", "the four of us".
             words = "|".join(NUMBER_WORDS)
             match = re.search(rf"\b(?:for|serving|family of)\s+({words})\b", lower) or re.search(
-                rf"\b({words})\s+(?:people|persons?|adults?)\b", lower
+                rf"\b({words})\s+(?:people|persons?|adults?|of us)\b", lower
             )
             if match:
                 people = NUMBER_WORDS[match.group(1)]

@@ -2,11 +2,11 @@
 
 Two moments. Before the assistant says it has everything, `refusal` compares the limits with the floor
 under any week's cost (planning/week_floor.py): a weekly budget under it is refused with what the cheapest
-week the search finds costs, and any other is planned with the planner itself, so whatever the planner
-would answer at Plan is answered now. For meals too big for the planner to search within a reply, only what
-the floor proves is refused, and Plan answers the rest. After the planner found no week,
-`planning_failure` names the limit its trace shows the search kept running into; a search that found
-nothing proves nothing about every week, so it never says no week exists.
+week the search finds costs (the floor itself when it finds none), and any other is planned with the planner
+itself, so whatever the planner would answer at Plan is answered now. For meals too big for the planner to
+search within a reply, only what the floor proves is refused, and Plan answers the rest. After the planner
+found no week, `planning_failure` names the limit its trace shows the search kept running into; a search that
+found nothing proves nothing about every week, so it never says no week exists.
 
 A budget is only ever offered when a real week backs it: the planner's cheapest-week search found that
 week, and it plans again under any budget of its cost or more (planning/product_path.py).
@@ -89,16 +89,14 @@ def refusal(
     weekly = constraints.weekly_budget_sgd
     if weekly is not None and weekly < floor.total_sgd - SLACK_SGD:
         # Under the floor no week fits: what remains to say is what the cheapest week the search finds costs.
-        if cheapest is None:  # not searched for: the floor, with no amount a week backs to offer
-            size, meals = constraints.household_size or 1, floor.meals
-            each, least = weekly / (size * meals), _cents_down(floor.total_sgd)
-            text = say(
-                "floor_week", lang, budget=weekly, people=people(size, lang), each=each, meals=meals, floor=least
-            )
-            return Refusal("weekly_budget_sgd", text)
-        cost = cheapest()
+        cost = cheapest() if cheapest is not None else None
         if cost is not None:
             return _budget_short(cost, constraints, lang, cheapest)
+        # Not searched for, or the search found no week: the floor, with no amount a week backs to offer.
+        size, meals = constraints.household_size or 1, floor.meals
+        each, least = weekly / (size * meals), _cents_down(floor.total_sgd)
+        text = say("floor_week", lang, budget=weekly, people=people(size, lang), each=each, meals=meals, floor=least)
+        return Refusal("weekly_budget_sgd", text)
     if check is not None and weekly is not None:
         # Over the floor, whole packages decide, by no ratio that holds: on the release catalog the cheapest week
         # costs 1.6 to 122 times the floor (122 for one person's breakfasts, no dish twice). Plan it as Plan would,
@@ -198,8 +196,14 @@ def planning_failure(error: Exception, constraints, lang: str, *, cheapest=None)
         ]
         if backed:
             return _budget_short(min(backed), constraints, lang, cheapest)
-        code = None  # the cheapest weeks fail something else too: the budget is not all that binds
-    if code == "per_meal_budget" and per_meal is not None:
+        # No week backs an amount. The budget is still what the search ran into when every week it ranked failed
+        # the budget alone (or none was ranked: the search emptied on the budget); else it is not all that binds.
+        ranked = [_failed(attempt) for attempt in attempts if not attempt.get("cheapest_search")]
+        if any(failed != {"purchase_budget"} for failed in ranked):
+            code = None
+    if code == "purchase_budget" and weekly is not None:
+        limit, field = say("weekly_limit", lang, amount=weekly), "weekly_budget_sgd"
+    elif code == "per_meal_budget" and per_meal is not None:
         limit, field = say("meal_limit", lang, amount=per_meal), "budget_per_meal_sgd"
     elif code in {"time_limit", "dish_time_limit"} and minutes is not None:
         limit, field = say("time_limit", lang, minutes=minutes), "max_cooking_time_minutes"

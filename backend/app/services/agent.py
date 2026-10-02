@@ -8,7 +8,7 @@ from pydantic_core import to_jsonable_python
 from app.agent import limits
 from app.agent.parser import ConstraintParser, says_no_repeats
 from app.agent.replanning import AgentReplanInterpreter
-from app.agent.replies import language, say, weekday
+from app.agent.replies import language, planner_message, say, weekday
 from app.agent.shape_change import read_shape_change
 from app.models.agent import AgentRun, AgentSession
 from app.orchestration.contracts import (
@@ -561,7 +561,7 @@ class AgentSessionService:
                 updated = self.repository.append_replan_exchange(
                     session_id,
                     user_message=message,
-                    assistant_message=say("prepare_failed", lang, error=error),
+                    assistant_message=say("prepare_failed", lang, error=planner_message(str(error), lang)),
                     draft=AgentReplanDraft(),
                     clarification_questions=[],
                     pending_event_id=None,
@@ -740,7 +740,11 @@ class AgentSessionService:
         try:
             preview = self.replanning_service.preview_shape(plan_id=plan.id, request=intent.request)
         except (MealPlanReplanValidationError, WeeklyPlanSelectionError) as error:
-            reply, pending, draft = say("change_failed", lang, error=error), None, AgentReplanDraft()
+            reply, pending, draft = (
+                say("change_failed", lang, error=planner_message(str(error), lang)),
+                None,
+                AgentReplanDraft(),
+            )
         else:
             reply, pending = self._describe_shape_preview(intent.summary, preview, lang), preview.id
             draft = AgentReplanDraft(event_type="CHANGE_SHAPE", reason=message.strip())

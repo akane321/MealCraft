@@ -87,7 +87,8 @@ def word(value: str, lang: str) -> str:
     return value.replace("group:", "").replace("_", " ").replace("-", " ")
 
 
-# What the planner says when it turns a request down before searching (planning/product_path.py), in Chinese.
+# What the planner (planning/product_path.py) and a change to a saved week (services/replanning.py) say when
+# they turn a request down, in Chinese.
 PLANNER_ZH = {
     "Enter a budget in whole cents and try again.": "预算请精确到分（最多两位小数）再试一次。",
     "Combine duplicate pantry entries before trying again.": "家里的食材有重复的条目，合并之后再试一次。",
@@ -99,12 +100,51 @@ PLANNER_ZH = {
         "有些食谱或价格信息没法核实，刷新之后再试一次。"
     ),
     "Some recipe or price details are missing. Try again in a moment.": "有些食谱或价格信息缺失，请稍后再试。",
+    "I couldn't find a week that meets every limit. Try relaxing one of them.": (
+        "我找不到满足所有限制的安排，放宽其中一个再试试。"
+    ),
+    "Planning took longer than it should this time. Please try again.": "这次规划花的时间太长了，请再试一次。",
+    "No candidate plan was found; try a different recipe selection.": "没有找到可行的安排，换一些菜再试试。",
+    "No recipes satisfy the supplied hard constraints.": "没有菜符合你的硬性限制。",
+    "A week plans at least one meal a day.": "一周每天至少要安排一顿饭。",
+    "Changing meals is not available here.": "这里不能调整饭菜的安排。",
+    "The rest of the week already uses the whole weekly budget, so there is none left for this.": (
+        "这周其余的饭菜已经用完了每周预算，没有余下的钱做这个调整。"
+    ),
+    "Completed meals are historical records and cannot be replanned.": "已经做过的饭菜是历史记录，不能再调整。",
+    "This meal is locked and cannot be replanned.": "这顿饭已经锁定，不能调整。",
+    "This meal is already cancelled.": "这顿饭已经取消了。",
 }
+# ... and those that carry a value: a meal is named in Chinese, a dish by its title.
+PLANNER_ZH_PATTERNS = (
+    (
+        r"I couldn't fit seven dinners into S\$(?P<budget>[\d.]+)\. The cheapest week I found costs "
+        r"S\$(?P<cost>[\d.]+)\. Try a higher budget or fewer limits\.",
+        "S${budget} 排不下这些饭菜：我找到的最便宜的一周要 S${cost}。可以提高预算，或者少一些限制。",
+    ),
+    (r"There is no (?P<meal>\w+) left to change on those days\.", "那几天已经没有可以调整的{meal}了。"),
+    (r"(?P<meal>\w+) is not planned on those days\.", "那几天没有安排{meal}。"),
+    (
+        r"No dish other than (?P<title>.+) satisfies the current hard constraints\.",
+        "除了{title}，没有别的菜符合现在的限制。",
+    ),
+)
 
 
 def planner_message(message: str, lang: str) -> str:
-    """The planner's own reason, in the conversation's language when it is one it gives."""
-    return PLANNER_ZH.get(message, message) if lang == "zh" else message
+    """The planner's own reason, in the conversation's language; one it has no Chinese for is said in general
+    terms rather than in English."""
+    if lang != "zh":
+        return message
+    if message in PLANNER_ZH:
+        return PLANNER_ZH[message]
+    for pattern, chinese in PLANNER_ZH_PATTERNS:
+        if found := re.fullmatch(pattern, message):
+            values = found.groupdict()
+            if "meal" in values:
+                values["meal"] = word(values["meal"].lower(), lang)
+            return chinese.format(**values)
+    return "有个限制这次满足不了。"
 
 
 def details(stated, lang: str) -> list[str]:
@@ -429,6 +469,7 @@ REPLIES: dict[str, tuple[str, str]] = {
         "Planning took longer than it should this time. Please try again.",
         "这次规划花的时间太长了，请再试一次。",
     ),
+    "weekly_limit": ("the S${amount:g} weekly budget", "每周 S${amount:g} 预算"),
     "meal_limit": ("the S${amount:.2f} a meal budget", "每餐 S${amount:.2f} 的预算"),
     "time_limit": ("the {minutes}-minute cooking limit", "{minutes} 分钟的做饭时间"),
     "repeat_limit": ("your rule of no dish twice", "菜不重样的要求"),

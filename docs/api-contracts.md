@@ -430,7 +430,9 @@ its supported segment to the parser. The persisted `last_scope_decision` makes
 this routing visible to clients and tests. Every templated reply is written in
 the language of the household's message, or, for a message with no words to
 tell by (a number, "ok"), of their last one that had some
-(`backend/app/agent/replies.py`).
+(`backend/app/agent/replies.py`). That includes the reason the planner or a
+change to a saved week gives for turning a request down; one with no Chinese
+wording yet is said in general terms rather than in English.
 
 The assistant requires household size and resolves any unquantified available
 ingredient before confirmation. A user may answer `unknown`; the quantity then
@@ -447,7 +449,8 @@ cheapest dishes each served at most `max_uses_per_recipe` times, no search). A
 per-meal budget below the floor, a required dish no candidate fills, or no
 repeats with fewer different dishes than the week needs is refused with the
 number that shows it. A weekly budget under the floor is refused with the cost
-of the cheapest week the search finds. The floor ignores whole packages, and no
+of the cheapest week the search finds, or, when the search finds none, with the
+floor itself and no amount offered. The floor ignores whole packages, and no
 multiple of it bounds them (on the release catalog the cheapest week the planner
 finds costs 1.6 to 122 times it, most for one person's breakfasts with no dish
 twice), so any other weekly budget is planned up front exactly as **Plan my
@@ -464,7 +467,9 @@ planner's searches 5 to 26 s on the release catalog, past the reply's time
 limit, so for such a shape nothing is searched before the session is ready:
 only what the floor proves is refused (a weekly budget under it names the floor,
 with no amount offered, since no week backs one yet), and **Plan my week**
-answers the rest with the same backed choices. No amount is
+answers the rest. Plan does not run the cheapest-week search for such a shape
+either, so a budget its search runs into is named ("the search found no week
+that meets the S$20 weekly budget") with no amount offered. No amount is
 ever a guess. After a refusal, a bare amount ("S$50", 那就50新币吧) answers the
 budget it asked about. A per-meal amount is offered only when a week plans with
 it. When prices cannot be read, the check is skipped and Plan answers for itself.
@@ -487,9 +492,13 @@ weekly planner used by `/api/plans/generate`, returns the generated plan, and
 stores its ID on the agent session. When the planner finds no week, the response
 is HTTP 422 and its detail names the limit the planner's trace shows the search
 ran into (never a claim that no week exists); a budget it ran into is answered
-as before planning, with the same backed choices. A request the planner turned
-down before searching (a budget in fractions of a cent, allergen data it lacks)
-is passed on in the planner's own words. The sentence is added to the
+as before planning, with the same backed choices when the cheapest-week search
+found a week only the budget turned down. When it found none, the budget is
+still named if every week the search ranked failed the budget alone, or the
+search ran out of weeks on the budget; no amount is offered. A request the
+planner turned down before searching (a budget in fractions of a cent, allergen
+data it lacks) is passed on in the planner's own words, in the household's
+language. The sentence is added to the
 conversation and the session returns to collecting, so the client replaces its
 Plan card with it. A slow search or missing data that may yet arrive leaves the
 session ready to try again. `GET` endpoints allow the frontend to resume the latest

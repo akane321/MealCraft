@@ -22,7 +22,7 @@ from app.agent.parser import (
     OpenAIConstraintParser,
     RuleBasedConstraintParser,
 )
-from app.agent.replies import language
+from app.agent.replies import language, planner_message
 from app.planning import meal_beam
 from app.planning.meal_composition import portion_shares
 from app.planning.product_path import CHEAPEST_MEAL_OPTIONS, ProductPlanningEngine, ProductPlanningError
@@ -68,7 +68,11 @@ def parse(message: str) -> AgentConstraintExtraction:
         ("10新币给4个人一周", 4, 10, None),
         ("40块钱4个人一周", 4, 40, None),
         ("每餐给4个人15块", 4, None, 15),
+        ("S$40 for the 4 of us for the week", 4, 40, None),
+        ("S$40 for the four of us for the week", 4, 40, None),
+        ("One week of dinners for four people, S$40", 4, 40, None),
         # An amount for each person is one for the household.
+        ("S$10 per person for 4 people for the week", 4, 40, None),
         ("Dinners for 4, S$3 per person per meal", 4, None, 12),
         ("Dinners for 2, S$12 per person per meal", 2, None, 24),
         ("4 people, 2 dollars per person per meal", 4, None, 8),
@@ -334,6 +338,8 @@ def test_a_budget_however_it_is_said_reaches_the_parser(client, message, size, w
         ("S$40 for the week for 4 people", 40),
         ("10新币给4个人一周", 10),
         ("一周10新币，给4个人", 10),
+        ("S$10 per person for 4 people for the week", 40),
+        ("S$40 for the 4 of us for the week", 40),
     ],
 )
 def test_a_weekly_sum_said_before_who_eats_is_the_weeks(client, message, weekly):
@@ -357,8 +363,23 @@ def test_a_failed_search_names_the_limit_it_ran_into_never_a_proof():
     )
     # Only the cheapest-week search's own week backs an amount, never a ranked week or a guess.
     assert told.options == (("Use S$59 for the week", "Make the weekly budget S$59"),)
-    unbacked = planning_failure(failure({"validation_attempts": [over]}), constraints, "en")
-    assert unbacked.options == () and "S$" not in unbacked.text.split("(")[0]
+    # With no such week, the budget the search ran into is still named, with no amount to offer: every week it
+    # ranked failed the budget alone, or the search emptied on the budget before it ranked one.
+    named = (
+        "I couldn't plan this week: the search found no week that meets the S$50 weekly budget. "
+        "That is the limit it kept running into."
+    )
+    for trace in ({"validation_attempts": [over]}, {"search": {"emptied_by": "budget"}}):
+        unbacked = planning_failure(failure(trace), constraints, "en")
+        assert (unbacked.field, unbacked.text, unbacked.options) == ("weekly_budget_sgd", named, ())
+    zh = planning_failure(failure({"search": {"emptied_by": "budget"}}), constraints, "zh")
+    assert zh.text == "这周没排出来：搜索没有找到符合每周 S$50 预算的一周。卡住它的就是这个限制。"
+    # A ranked week that fails something else too: the budget is not all that binds.
+    repeats = {"code": "repetition_rule", "status": "failed", "hard": True}
+    both = {**over, "checks": [*over["checks"], repeats]}
+    together = planning_failure(failure({"validation_attempts": [both, over]}), constraints, "en")
+    assert together.field == "plan" and together.text.startswith("I couldn't plan this week: the search found no week")
+    assert "every limit together" in together.text
     emptied = planning_failure(failure({"search": {"emptied_by": "repeats"}}), constraints, "zh")
     assert emptied.text == "这周没排出来：搜索没有找到符合菜不重样的要求的一周。卡住它的就是这个限制。"
     slow = planning_failure(failure({"search": {"exhausted": True}}), constraints, "en")
@@ -404,6 +425,20 @@ def unsearched(**changes):
     raise AssertionError("searched for a week within the reply")
 
 
+def test_a_budget_under_the_floor_is_refused_with_the_floor_when_the_search_finds_no_week():
+    """Three meals a day, no dish twice: the cheapest-week search finds nothing, and the floor still proves
+    S$50 is not enough. Planning the week as well would only end in "every limit together"."""
+    floor = WeekFloor(days=7, meals=21, total_sgd=61.53, meal_sgd={}, empty_roles=[], roles={})
+    constraints = AgentConstraintState(household_size=4, weekly_budget_sgd=50, max_uses_per_recipe=1)
+
+    told = limits.refusal(constraints, lambda **_: floor, "en", check=unsearched, cheapest=lambda **_: None)
+    assert (told.field, told.options) == ("weekly_budget_sgd", ())
+    assert told.text == (
+        "S$50 for 4 people is S$0.60 a person a meal over 21 meals: what this week's dishes use costs at least "
+        "S$61.53, before buying whole packages."
+    )
+
+
 @pytest.mark.parametrize("lang", ["en", "zh"])
 def test_a_meal_too_big_to_search_in_a_reply_is_refused_only_under_the_floor(lang):
     """Four dishes or more: the planner's searches take 5 to 26 s, so the reply refuses what the floor proves."""
@@ -430,6 +465,43 @@ def test_a_meal_too_big_to_search_in_a_reply_is_refused_only_under_the_floor(lan
     small = AgentConstraintState(household_size=4, weekly_budget_sgd=20, plan_shape={"meals": {"dinner": dinner}})
     with pytest.raises(AssertionError, match="searched"):
         limits.refusal(small, lambda **_: floor, lang, check=unsearched, cheapest=unsearched)
+
+
+@pytest.mark.parametrize(
+    ("message", "told"),
+    [
+        (
+            "Plan a week for 4 for S$10 total, no dish twice",
+            "I couldn't plan this week: the search found no week that meets the S$10 weekly budget. "
+            "That is the limit it kept running into.",
+        ),
+        (
+            "我们4个人，一周一共10新币，菜不要重复",
+            "这周没排出来：搜索没有找到符合每周 S$10 预算的一周。卡住它的就是这个限制。",
+        ),
+    ],
+)
+def test_a_meal_too_big_to_search_in_a_reply_is_told_at_plan_the_budget_it_ran_into(packaged, message, told):
+    """A main and three dishes "if one fits" (三菜一汤): the reply searches nothing, so S$10 with no dish twice is
+    ready over the floor. Plan, which skips the cheapest-week search for such a meal, then names the budget, with
+    no amount, since no week backs one."""
+    optional = [("vegetable", ["side", "salad"]), ("vegetable-2", ["side", "salad"]), ("soup", ["soup"])]
+    dinner = [{"role_id": "main", "courses": ["main"]}]
+    dinner += [{"role_id": role, "courses": courses, "required": False} for role, courses in optional]
+    member = {"servings_per_meal": 1, "allergens": [], "excluded_ingredients": [], "dietary_preferences": []}
+    profile = {
+        "members": [{**member, "name": f"Cook {n}"} for n in range(4)],
+        "max_cooking_time_minutes": 90,
+        "plan_shape": {"meals": {"dinner": dinner}},
+    }
+    assert packaged.post("/api/household-profiles", json=profile).status_code == 201
+    session = packaged.post("/api/agent/sessions", json={"message": message}).json()
+    assert session["can_confirm"]  # the trade for the reply's time limit
+
+    failed = packaged.post(f"/api/agent/sessions/{session['id']}/confirm")
+    assert failed.status_code == 422 and failed.json()["detail"] == told
+    explained = packaged.get(f"/api/agent/sessions/{session['id']}").json()
+    assert explained["missing_fields"] == ["weekly_budget_sgd"] and labels(explained) == []
 
 
 def test_a_request_the_planner_turned_down_before_searching_is_passed_on_as_it_said():
@@ -785,6 +857,36 @@ def test_a_chinese_week_is_planned_and_changed_in_chinese(composed_client):  # n
 
     off_topic = say(composed_client, session, "我明天看什么电影？")
     assert off_topic["messages"][-1]["content"].startswith("这个请求不在 MealCraft 的饮食规划范围内")
+
+
+def test_a_change_the_planner_turns_down_is_answered_wholly_in_chinese(composed_client):  # noqa: F811
+    session = planned(composed_client, "4个人，这周的晚餐，一周38新币")  # the week spends S$37.35 of it
+
+    changed = say(composed_client, session, "晚餐加一个汤")
+    assert changed["messages"][-1]["content"] == "我没法做这个调整：我找不到满足所有限制的安排，放宽其中一个再试试。"
+
+
+@pytest.mark.parametrize(
+    ("said", "chinese"),
+    [
+        (
+            "I couldn't fit seven dinners into S$38.00. The cheapest week I found costs S$41.20. "
+            "Try a higher budget or fewer limits.",
+            "S$38.00 排不下这些饭菜：我找到的最便宜的一周要 S$41.20。可以提高预算，或者少一些限制。",
+        ),
+        ("There is no dinner left to change on those days.", "那几天已经没有可以调整的晚餐了。"),
+        ("Lunch is not planned on those days.", "那几天没有安排午餐。"),
+        ("This meal is locked and cannot be replanned.", "这顿饭已经锁定，不能调整。"),
+        (
+            "No dish other than Tofu Bowl satisfies the current hard constraints.",
+            "除了Tofu Bowl，没有别的菜符合现在的限制。",
+        ),
+        ("A reason no one has written Chinese for yet.", "有个限制这次满足不了。"),
+    ],
+)
+def test_the_reason_a_change_or_a_week_is_turned_down_follows_the_households_language(said, chinese):
+    assert planner_message(said, "zh") == chinese
+    assert planner_message(said, "en") == said
 
 
 @pytest.mark.parametrize(
