@@ -202,7 +202,10 @@ class MealPlanReplanningService:
             added = self._plan_meal(constraints, meal, request.roles, days, kept, removed)
         else:
             added = []
-        stays = {values["recipe_id"] for values, _ in added} if staying is not None else set()
+        # A dish that stays on its day, when a dish is taken away or added, is neither taken off nor new.
+        planned = {(values["day_index"], values["recipe_id"]) for values, _ in added}
+        stays = [item for item in removed if item.status != "skipped" and (item.day_index, item.recipe_id) in planned]
+        kept_on = {(item.day_index, item.recipe_id) for item in stays}
 
         wanted_ids = {item.recipe_id for item in kept} | {values["recipe_id"] for values, _ in added}
         recipes_by_id = {recipe.id: recipe for recipe in self.recipe_repository.list_by_ids(list(wanted_ids))}
@@ -235,9 +238,10 @@ class MealPlanReplanningService:
             removed=[
                 MealPlanEntrySnapshot.model_validate(self._entry_snapshot(item))
                 for item in removed
-                if item.recipe_id not in stays
+                if item not in stays
             ],
-            added=[snapshot for _, snapshot in added if staying is None],
+            added=[snap for values, snap in added if (values["day_index"], values["recipe_id"]) not in kept_on],
+            kept=len(stays),
             plan_shape=new_shape,
         )
         event = self.repository.create_shape_preview(
@@ -324,21 +328,23 @@ class MealPlanReplanningService:
     def _plan_meal(self, constraints, meal, roles, days, kept, removed) -> list[tuple[dict, MealPlanEntrySnapshot]]:
         """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves.
 
-        When nothing fits what is left, the change is still planned, as cheaply as the planner finds (see
-        `over_budget_pick`), and its preview says how far over the budget it goes; the household confirms or
-        discards it, as with a swap (owner decision 2026-10-02). A new week keeps its budget as a hard limit.
+        When nothing fits what is left (with the meal's present dishes kept, when a dish is added), the change is
+        still planned, as cheaply as the planner finds (see `plan_dishes`), and its preview says how far over
+        the budget it goes; the household confirms or discards it, as with a swap (owner decision 2026-10-02).
+        A new week keeps its budget as a hard limit.
         """
         if self.meal_plan_service is None:
             raise MealPlanReplanValidationError("Changing meals is not available here.")
         budget = constraints.weekly_budget_sgd
+        recipes = {r.id: r for r in self.recipe_repository.list_by_ids(list({i.recipe_id for i in kept}))}
+        rest = [(recipes[item.recipe_id], float(item.portion_share)) for item in kept]
         left = None
         if budget is not None:
             # What is left is what the rest of the week does not spend at the checkout, in whole packages:
             # what its dishes use leaves room the week has already paid for, and a plan made to fit that
             # room would go over the budget without trying the cheapest plans first.
-            recipes = {r.id: r for r in self.recipe_repository.list_by_ids(list({i.recipe_id for i in kept}))}
             paid = self.grocery_aggregator.estimate(
-                [recipes[item.recipe_id] for item in kept], constraints, shares=[float(i.portion_share) for i in kept]
+                [recipe for recipe, _ in rest], constraints, shares=[share for _, share in rest]
             ).purchase_total_sgd
             left = round(budget - paid, 2)
         partial = constraints.model_copy(
@@ -363,7 +369,7 @@ class MealPlanReplanningService:
                 partial,
                 first_day=first,
                 day_count=last - first + 1,
-                avoid_recipe_ids={item.recipe_id for item in kept},
+                rest=rest,
                 keep=self._dishes_kept_when_adding(roles, removed),
                 over_budget=over_budget,
             )

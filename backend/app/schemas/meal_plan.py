@@ -275,6 +275,8 @@ class MealPlanShapeChange(BaseModel):
     roles: MealComposition | None
     removed: list["MealPlanEntrySnapshot"]
     added: list["MealPlanEntrySnapshot"]
+    # The dishes that stay on their day (at a new portion share) while one is added or taken away; in neither list.
+    kept: int = 0
     # The week's shape after the change, for a week-scope change.
     plan_shape: MealPlanShape | None = None
 

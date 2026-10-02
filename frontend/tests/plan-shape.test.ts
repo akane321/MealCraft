@@ -33,5 +33,7 @@ describe("shapeChangeSummary", () => {
     expect(shapeChangeSummary(change({ roles, removed }), day)).toBe("Dinner on Fri: 2 mains, soup");
     const withVegetable = [{ role_id: "main", courses: ["main"], required: true }, { role_id: "vegetable", courses: ["side"], required: false }, { role_id: "soup", courses: ["soup"], required: true }] as MealRole[];
     expect(shapeChangeSummary(change({ roles: withVegetable, removed }), day)).toBe("Dinner on Fri: main, vegetable if it fits, soup");
+    // A soup added to a dinner that keeps its main and vegetable: nothing comes off, but the meal was there.
+    expect(shapeChangeSummary(change({ roles: withVegetable, removed: [], kept: 2 }), day)).toBe("Dinner on Fri: main, vegetable if it fits, soup");
   });
 });

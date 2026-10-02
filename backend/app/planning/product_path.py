@@ -42,6 +42,7 @@ from app.schemas.planning_v2 import (
     PlanningConstraintCheck,
     PlanningNutritionBand,
     PlanningPantryItem,
+    PlanningRecipeCount,
     PlanningRepetitionRules,
     PlanningSlot,
 )
@@ -147,13 +148,16 @@ class ProductPlanningEngine:
         profile_version=None,
         budget_is_hard=True,
         locked=None,
+        used=None,
     ):
         """A validated week, or ProductPlanningError saying why there is none.
 
         `locked` keeps a meal's present dishes while one is added to it: (day offset, meal) -> {role id:
         recipe slug}. `budget_is_hard=False` plans a change the household may take over the budget (owner,
         2026-10-02): every other rule holds, the budget is only reported, and of the weeks found (cost-led
-        searches among them) one costing least at the checkout is chosen (see `over_budget_pick`).
+        searches among them) one costing least at the checkout is chosen (see `over_budget_pick`). `used` (recipe
+        slug -> uses) is what the rest of a week already serves when part of it is planned: those uses count
+        towards the household's cap on uses.
         """
         locked = locked or {}
         kept_dishes = {slug for roles in locked.values() for slug in roles.values()}
@@ -342,6 +346,7 @@ class ProductPlanningEngine:
             bands.append(
                 PlanningNutritionBand(metric="sodium_mg", scope="per_slot", upper=constraints.max_sodium_mg_per_meal)
             )
+        cap = constraints.max_uses_per_recipe
         problem = FinalPlanningProblem(
             problem_id="product-request",
             slots=slots,
@@ -357,10 +362,17 @@ class ProductPlanningEngine:
             nutrition_bands=bands,
             purchase_budget_sgd=constraints.weekly_budget_sgd,
             budget_is_hard=budget_is_hard,
-            # Only a stated cap is a rule; the search and the validator both hold it (ADR-0046 variety).
+            # Only a stated cap is a rule; the search and the validator both hold it (ADR-0046 variety), and a dish
+            # the rest of the week serves has only what its uses there leave of it.
             repetition_rules=(
-                PlanningRepetitionRules(max_uses_per_recipe=constraints.max_uses_per_recipe)
-                if constraints.max_uses_per_recipe is not None
+                PlanningRepetitionRules(
+                    max_uses_per_recipe=cap,
+                    recipe_counts=[
+                        PlanningRecipeCount(recipe_id=slug, max_uses=max(0, cap - count))
+                        for slug, count in sorted((used or {}).items())
+                    ],
+                )
+                if cap is not None
                 else None
             ),
             catalog_version=digest([r.model_dump(mode="json") for r in candidates]),

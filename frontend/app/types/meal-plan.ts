@@ -169,6 +169,8 @@ export interface MealPlanShapeChange {
   roles: MealRole[] | null;
   removed: MealPlanEntrySnapshot[];
   added: MealPlanEntrySnapshot[];
+  // The dishes that stay on their day while one is added or taken away; in neither list.
+  kept?: number;
   plan_shape: PlanShape | null;
 }
 
