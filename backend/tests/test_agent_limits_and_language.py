@@ -324,7 +324,15 @@ def test_a_budget_however_it_is_said_reaches_the_parser(client, message, size, w
     )
 
 
-@pytest.mark.parametrize(("message", "weekly"), [("S$40 for 4 people for the week", 40), ("10新币给4个人一周", 10)])
+@pytest.mark.parametrize(
+    ("message", "weekly"),
+    [
+        ("S$40 for 4 people for the week", 40),
+        ("S$40 for the week for 4 people", 40),
+        ("10新币给4个人一周", 10),
+        ("一周10新币，给4个人", 10),
+    ],
+)
 def test_a_weekly_sum_said_before_who_eats_is_the_weeks(client, message, weekly):
     session = client.post("/api/agent/sessions", json={"message": message}).json()
 
@@ -735,7 +743,8 @@ def test_a_household_with_a_weekly_budget_gets_a_new_week_within_it(varied):
     before = slugs(varied, session["plan_id"])
 
     new = plan_again(varied, session)
-    assert new["plan_id"] != session["plan_id"], new["messages"][-1]["content"]
+    assert new["plan_id"] not in {None, session["plan_id"]}, new["messages"][-1]["content"]
+    assert new["status"] == "planned" and new["messages"][-1]["content"].startswith("Here's a new week with ")
     week = varied.get(f"/api/plans/{new['plan_id']}").json()
     assert week["grocery_estimate"]["purchase_total_sgd"] <= 40  # the budget holds
     assert not set(before) & {dish["recipe"]["slug"] for dish in week["days"]}
