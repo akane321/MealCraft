@@ -160,9 +160,9 @@
       "indeterminate": [],
       "details": {},
       "dishes": 28,
-      "distinct_recipes": 10,
+      "distinct_recipes": 13,
       "meal_fit": "28/28",
-      "total_cost_sgd": 104.92
+      "total_cost_sgd": 102.65
     },
     {
       "episode_id": "mdw-dev-009",
@@ -491,7 +491,7 @@
     }
   ],
   "episode_set": "developer set",
-  "code_revision": "e688f5116891991f5b8c3f56c1607b7f7467a95b",
+  "code_revision": "3adcf7128282fc80243c8911d089971ac6bfc42c",
   "inputs": {
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",
