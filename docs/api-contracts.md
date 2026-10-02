@@ -59,6 +59,8 @@ Available endpoints:
 - GET /api/ops/data/ingredients
 - PATCH /api/ops/data/ingredients/{ingredient_id}
 - GET /api/ops/data/mappings
+- GET /api/ops/data-quality
+- GET /api/ops/data-quality/dropped?reason={reason}&offset={offset}&limit={limit}
 - PUT /api/ops/data/mappings/{ingredient}
 - DELETE /api/ops/data/mappings/{ingredient}
 - GET /api/recipes?limit=20&after_id={recipe_id}
@@ -180,6 +182,23 @@ digest, safe version and provider fields, error classification, timestamps and
 a derived duration when both start and finish are known. It deliberately omits
 `error_detail`, warnings and artifact references. Both endpoints are read-only
 and neither creates an `AuditEvent` nor changes an `OperationRun`.
+
+The data-quality summary reads the server-registered release artifact; callers
+cannot provide a filesystem path. It reports the release and schema versions,
+generation time, released counts, cuisine/course/source distributions, nutrition
+completeness, the separate estimated shares for servings, times and ingredient
+amounts, dropped-reason counts and pending allergen rules. Artifact metadata
+contains only registered filenames, SHA-256 digests, sizes and timestamps, never
+server absolute paths. A missing, malformed or contract-incompatible summary is
+returned as `degraded` with the affected metrics set to `null`, rather than as
+invented zeroes.
+
+The dropped-candidate endpoint accepts an exact reason filter and bounded
+pagination (`offset >= 0`, `1 <= limit <= 200`). Unknown reason strings remain
+valid data. Invalid JSONL rows or rows missing required fields are skipped and
+counted, making the page `degraded` without returning the raw line; a missing
+artifact has `total: null`, which is distinct from a valid empty file with
+`total: 0`.
 
 ## Household Profiles
 
