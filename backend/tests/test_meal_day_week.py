@@ -209,7 +209,9 @@ def test_every_vegetable_the_product_plans_is_led_by_vegetables(monkeypatch):
     vegetables = [a["recipe_id"] for a in response["plan"]["assignments"] if a["role_id"] == "vegetable"]
     assert len(vegetables) == 7
     assert all(_led(recipes[slug]) for slug in vegetables), [recipes[s]["title"] for s in vegetables]
-    assert not any(meat_or_fish(line["ingredient"]) for slug in vegetables for line in recipes[slug]["ingredients"])
+    assert not any(
+        meat_or_fish(line["ingredient"], line["text"]) for slug in vegetables for line in recipes[slug]["ingredients"]
+    )
 
     # Protocol v3.1 scores the rule too: the same week with "Fettuccine Noodles" as one vegetable fails it.
     pasta = copy.deepcopy(response)
