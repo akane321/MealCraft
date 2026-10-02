@@ -69,7 +69,8 @@ async function check(name: OpsServiceName) {
         <p class="ops-muted">Mode: {{ service.mode }}</p>
 
         <dl v-if="service.recent" class="recent">
-          <div><dt>Calls</dt><dd class="mc-num">{{ service.recent.calls }}</dd></div>
+          <div><dt>Runs</dt><dd class="mc-num">{{ service.recent.runs }}</dd></div>
+          <div v-if="service.recent.model_calls !== null"><dt>Model calls</dt><dd class="mc-num">{{ service.recent.model_calls }}</dd></div>
           <div><dt>Failures</dt><dd class="mc-num" :class="{ bad: service.recent.failures }">{{ service.recent.failures }}</dd></div>
           <div><dt>Fallbacks</dt><dd class="mc-num" :class="{ bad: service.recent.fallbacks }">{{ service.recent.fallbacks }}</dd></div>
         </dl>
@@ -99,8 +100,8 @@ async function check(name: OpsServiceName) {
 .service > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .service h2 { margin: 0; }
 .service p { margin: 0; font-size: 13px; line-height: 1.55; }
-.recent { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; }
-.recent div { padding: 10px 12px; border-radius: 10px; background: var(--s2); }
+.recent { display: grid; grid-auto-columns: 1fr; grid-auto-flow: column; gap: 8px; margin: 0; }
+.recent div { display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px; border-radius: 10px; background: var(--s2); }
 .recent dt { color: var(--t3); font-size: 12px; }
 .recent dd { margin: 2px 0 0; font-family: var(--serif); font-size: 24px; font-weight: 300; }
 .recent dd.bad { color: var(--warn); }

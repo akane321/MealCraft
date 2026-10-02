@@ -9,6 +9,7 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.agent import model_client
 from app.api.routes.auth import get_password_adapter
 from app.auth.authorization import SystemRole
 from app.auth.passwords import Argon2PasswordAdapter, Argon2PasswordPolicy
@@ -300,7 +301,15 @@ def test_runs_reject_invalid_status_and_unbounded_limit(operations_client) -> No
 # --- Console endpoints (ADR-0047) ---
 
 
-def _add_agent_run(database_factory: sessionmaker, *, created_at: datetime, status: str, parser: str) -> int:
+def _add_agent_run(
+    database_factory: sessionmaker,
+    *,
+    created_at: datetime,
+    status: str,
+    parser: str,
+    used_llm_calls: int = 0,
+    fell_back: bool = False,
+) -> int:
     with database_factory() as database:
         household_id = database.scalars(select(HouseholdMembership.household_id)).first()
         session = AgentSession(household_id=household_id, parser_provider=parser, constraints={"household_size": 2})
@@ -314,7 +323,13 @@ def _add_agent_run(database_factory: sessionmaker, *, created_at: datetime, stat
             status=status,
             input_digest="b" * 64,
             context_version=1,
-            model_config={"parser": parser, "parser_model": "gpt-test", "api_key": "sk-must-not-leak"},
+            model_config={
+                "parser": parser,
+                "parser_model": "gpt-test",
+                "api_key": "sk-must-not-leak",
+                **({"model_fell_back": True} if fell_back else {}),
+            },
+            used_llm_calls=used_llm_calls,
             deadline_at=created_at + timedelta(minutes=2),
             created_at=created_at,
             started_at=created_at,
@@ -422,6 +437,7 @@ def test_task_detail_returns_stored_run_without_keys(operations_client) -> None:
     assert agent_payload["model_configuration"] == {"parser": "openai", "parser_model": "gpt-test"}
     assert agent_payload["trace"]["checkpoints"][0]["stage"] == "parse"
     assert agent_payload["timings"]["duration_seconds"] == 3.0
+    assert agent_payload["timings"]["model_calls"] == "0 of 2"  # requests to the model API, not runs
 
     planning = client.get(f"/api/ops/tasks/planning/{planning_id}")
     assert planning.status_code == 200
@@ -436,11 +452,17 @@ def test_task_detail_returns_stored_run_without_keys(operations_client) -> None:
     assert client.get("/api/ops/tasks/planning/999999").status_code == 404
 
 
-def test_services_report_configuration_and_recent_fallbacks(operations_client) -> None:
+def test_services_report_configuration_and_recent_fallbacks(operations_client, monkeypatch) -> None:
     client, database_factory = operations_client
+    # Requests no run records (console replays, swap previews asked of the plan API) are counted by the process.
+    monkeypatch.setattr(model_client, "_unrecorded", model_client.Tally(requests=5))
     _set_system_role(database_factory, SystemRole.ADMIN)
     now = datetime.now(UTC)
-    _add_agent_run(database_factory, created_at=now, status="degraded", parser="openai")
+    # Out of scope: the run is degraded, but the model answered, so it is no fallback.
+    _add_agent_run(database_factory, created_at=now, status="degraded", parser="openai", used_llm_calls=1)
+    _add_agent_run(
+        database_factory, created_at=now, status="committed", parser="openai", used_llm_calls=2, fell_back=True
+    )
     _add_agent_run(database_factory, created_at=now, status="committed", parser="fixture")
     _add_run(
         database_factory,
@@ -456,8 +478,22 @@ def test_services_report_configuration_and_recent_fallbacks(operations_client) -
     assert response.status_code == 200
     services = {item["name"]: item for item in response.json()["items"]}
     assert services["openai"]["configured"] is False
-    assert services["openai"]["recent"] == {"window_days": 7, "calls": 1, "failures": 0, "fallbacks": 1}
-    assert services["fairprice"]["recent"] == {"window_days": 7, "calls": 1, "failures": 0, "fallbacks": 1}
+    # Runs and the model requests they sent are separate figures: two runs, three requests.
+    assert services["openai"]["recent"] == {
+        "window_days": 7,
+        "runs": 2,
+        "model_calls": 3,
+        "failures": 0,
+        "fallbacks": 1,
+    }
+    assert services["fairprice"]["recent"] == {
+        "window_days": 7,
+        "runs": 1,
+        "model_calls": None,
+        "failures": 0,
+        "fallbacks": 1,
+    }
+    assert "5 model calls sent since the backend started that no run records" in services["openai"]["note"]
     assert services["youtube"]["recent"] is None
 
 
