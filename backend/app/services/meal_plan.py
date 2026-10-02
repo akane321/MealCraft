@@ -59,10 +59,12 @@ class WeeklyMealPlanService:
         household_profile_id: int | None = None,
         household_profile_version: int | None = None,
         replaces_plan_id: int | None = None,
+        searched: tuple | None = None,
     ) -> WeeklyMealPlanResponse:
+        """Plan a week and save it; `searched` is a week `search` already found for these constraints."""
         started_at = datetime.now(UTC)
         try:
-            recommendation_result, result = self._search(
+            recommendation_result, result = searched or self._search(
                 constraints, self._candidates(constraints), profile_version=household_profile_version
             )
         except ProductPlanningError as error:
@@ -170,10 +172,16 @@ class WeeklyMealPlanService:
                 raise
         raise AssertionError("unreachable")
 
+    def search(self, constraints: WeeklyMealPlanRequest) -> tuple:
+        """The week `generate` would plan for these constraints, nothing saved; ProductPlanningError for none.
+
+        `generate(constraints, searched=...)` saves it."""
+        return self._search(constraints, self._checked_candidates(constraints))
+
     def check(self, constraints: WeeklyMealPlanRequest) -> ProductPlanningError | None:
         """What `generate` would answer for these constraints, nothing saved: None for a week, else its error."""
         try:
-            self._search(constraints, self._checked_candidates(constraints))
+            self.search(constraints)
         except ProductPlanningError as error:
             return error
         return None

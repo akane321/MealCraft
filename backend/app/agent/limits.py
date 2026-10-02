@@ -1,8 +1,9 @@
 """The limit a week cannot be planned within, said with the number that shows it, and what to change.
 
 Two moments. Before the assistant says it has everything, `refusal` compares the limits with the floor
-under any week's cost (planning/week_floor.py), and a weekly budget near that floor with the planner
-itself: whatever the planner would answer at Plan is answered now. After the planner found no week,
+under any week's cost (planning/week_floor.py): a weekly budget under it is refused with what the cheapest
+week the search finds costs, and one near it is planned with the planner itself, so whatever the planner
+would answer at Plan is answered now. After the planner found no week,
 `planning_failure` names the limit its trace shows the search kept running into; a search that found
 nothing proves nothing about every week, so it never says no week exists.
 
@@ -23,9 +24,10 @@ from app.schemas.meal_plan import default_plan_shape
 # The floor is a float sum of per-unit prices; the planner rounds each ingredient's cost to the cent.
 SLACK_SGD = 0.05
 # A weekly budget under this many times the floor is planned up front, before the assistant says it has
-# everything. On the release catalog the cheapest week the planner finds costs 1.6 to 8.4 times the floor
-# (1 to 6 people; dinner, dinner with soup, lunch and dinner): whole packages, not the floor, decide.
-TIGHT_BUDGET_RATIO = 10
+# everything. On the release catalog the cheapest week the planner finds costs 1.6 to 33 times the floor
+# (1 to 6 people; dinner, dinner with soup, lunch and dinner, three meals; any repeats, each dish at most
+# twice, no dish twice): whole packages, not the floor, decide, and most for one person with no dish twice.
+TIGHT_BUDGET_RATIO = 40
 # What emptied the search (planning/meal_beam.py), as the validator check it stands for.
 EMPTIED = {
     "budget": "purchase_budget",
@@ -86,6 +88,11 @@ def refusal(
             text = say("floor_meal", lang, budget=per_meal, meal=word(meal, lang), floor=_cents_down(cheapest_meal))
             return Refusal("budget_per_meal_sgd", text, _raise_meal(check, math.ceil(cheapest_meal), lang))
     weekly = constraints.weekly_budget_sgd
+    if weekly is not None and weekly < floor.total_sgd - SLACK_SGD:
+        # Under the floor no week fits: what remains to say is what the cheapest week the search finds costs.
+        cost = cheapest()
+        if cost is not None:
+            return _budget_short(cost, constraints, lang, cheapest)
     if weekly is not None and weekly < TIGHT_BUDGET_RATIO * floor.total_sgd:
         # Near the floor, whole packages decide: plan it as Plan would, and refuse what that refuses.
         error = check()
@@ -218,7 +225,10 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
     )
     options = [_option("use_weekly", lang, amount=math.ceil(cost))]
     fewer = size // 2
-    smaller = cheapest(household_size=fewer) if cheapest is not None and fewer >= 1 else None
+    # Half the household at its own cheapest week takes a second search: offered for one meal a day, where it is
+    # quick; for more meals a day it would take the reply past its time limit (ADR-0046 section 3).
+    quick = meals == 7 and cheapest is not None and fewer >= 1
+    smaller = cheapest(household_size=fewer) if quick else None
     if smaller is not None:
         # Fewer people buy less: the budget as it is when their cheapest week fits it, else that week's cost.
         if smaller <= weekly:

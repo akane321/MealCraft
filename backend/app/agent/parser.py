@@ -70,8 +70,13 @@ WEEKLY_AFTER = re.compile(
 WEEKLY_BEFORE = re.compile(
     r"(?:\b(?:total|altogether|overall|week|weekly)\b|一共|总共|合计|总计|总预算|一周|每周|这周|本周|整周|周预算)[^\d]{0,24}$"
 )
-# Who eats, said between the week and its sum ("a week for 4 for S$10", 一周4个人10新币): not a sum itself.
-EATERS = re.compile(r"\bfor\s+\d+(?:\s*(?:people|persons?|of us|adults?))?\b|\d+\s*(?:个人|口人|人)")
+# Who eats, said between a sum and what it is for ("a week for 4 for S$10", "S$40 for four people for the
+# week", 10新币给4个人一周): not a sum itself.
+EATERS = re.compile(
+    rf"\bfor\s+(?:\d+|{'|'.join(NUMBER_WORDS)})(?:\s*(?:people|persons?|of us|adults?))?\b"
+    rf"|\b(?:\d+|{'|'.join(NUMBER_WORDS)})\s*(?:people|persons?|adults?)\b"
+    r"|[\d一二两三四五六七八九十]+\s*(?:个人|口人|人)"
+)
 # An amount for each person ("S$3 per person per meal", 每人每餐3块, 人均15): times the people eating.
 PER_PERSON_AFTER = re.compile(
     r"^[^\d]{0,6}?\b(?:per|each|a|every)\s+(?:person|head|adult)\b|^\s*/\s*(?:person|head)\b"
@@ -121,11 +126,18 @@ def budgets(text: str, people: int | None = None) -> tuple[float | None, float |
             value *= people
             # "per person" said, what is left says meal or week: "S$3 per person per meal".
             after = PER_PERSON_AFTER.sub("", after, count=1)
+        # Who eats, on either side, says neither meal nor week: "S$40 for 4 people for the week".
+        after, before = EATERS.sub(" ", after), EATERS.sub(" ", before)
         if PER_MEAL_AFTER.search(after) or PER_MEAL_BEFORE.search(before):
             per_meal = per_meal if per_meal is not None else value
-        elif WEEKLY_AFTER.search(after) or WEEKLY_BEFORE.search(EATERS.sub(" ", before)):
+        elif WEEKLY_AFTER.search(after) or WEEKLY_BEFORE.search(before):
             weekly = weekly if weekly is not None else value
     return per_meal, weekly
+
+
+def says_no_repeats(text: str) -> bool:
+    """A lower-cased message that asks for no dish twice ("no repeats", 不重样, 菜不要重复)."""
+    return re.search(ENGLISH_NO_REPEATS, text) is not None or re.search(CHINESE_NO_REPEATS, text) is not None
 
 
 def mentions_money(text: str) -> bool:
@@ -390,7 +402,7 @@ class RuleBasedConstraintParser:
         extraction.pricing_mode = (
             "live" if any(token in lower for token in ("live price", "实时价格", "fairprice")) else None
         )
-        if re.search(ENGLISH_NO_REPEATS, lower) or re.search(CHINESE_NO_REPEATS, text):
+        if says_no_repeats(lower):
             extraction.max_uses_per_recipe = 1
         extraction.medical_request_detected = any(
             token in lower for token in ("diabetes", "diabetic", "gout", "kidney disease", "糖尿病", "痛风", "肾病")

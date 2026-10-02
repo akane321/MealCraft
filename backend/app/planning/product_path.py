@@ -9,7 +9,7 @@ import json
 from dataclasses import asdict, dataclass, replace
 from datetime import timedelta
 from fractions import Fraction
-from math import isfinite
+from math import ceil, isfinite
 
 from app.data.allergens import checked_allergens
 from app.data.ingredient_hierarchy import expand_exclusions
@@ -63,7 +63,10 @@ def normalized(quantity, unit):
 COST_WEIGHTS = (1.0, 4.0, 16.0)
 # The cheapest-week search (see `plan`): the first budget it tries, how close it bisects the least budget it
 # completes a week within (a share of that budget), and the beam it searches with. Lighter than the ranked
-# search's beam: on the release catalog it finds as cheap a week in a third of the time (PR #211).
+# search's beam: on the release catalog it finds as cheap a week in a third of the time (PR #211); 32 meals a
+# slot find no week at all for three meals with no dish twice. Bisecting under the cheapest week found so far
+# rather than under the budget it was found within takes 3 to 7 probes instead of 6 to 9 there (48 shapes,
+# sizes and caps on uses), and finds the same week in 35 of them and one within 5% in 44 (PR #211 round 1).
 CHEAPEST_START_SGD = 64
 CHEAPEST_PRECISION = 0.05
 CHEAPEST_MEAL_OPTIONS = 64
@@ -532,19 +535,32 @@ class ProductPlanningEngine:
                         bounded = problem.model_copy(deep=True, update={"purchase_budget_sgd": float(limit)})
                         return MealBeamPlanner(led, local_losses=blended).search_candidates(bounded).states
 
-                    # Up from a first guess until a week completes, then halve the gap to the last budget that
-                    # completed none: whole dollars, to within CHEAPEST_PRECISION of the budget.
-                    low, high = 0, CHEAPEST_START_SGD
-                    states = within(high)
-                    while not states and high < 7000:
-                        low, high = high, min(7000, high * 4)
-                        states = within(high)
-                    while states and high - low > max(1, high * CHEAPEST_PRECISION):
-                        middle = (low + high) // 2
-                        found = within(middle)
-                        low, high, states = (low, middle, found) if found else (middle, high, states)
-                    trace["cheapest_search"] = {"budget_sgd": high, "candidates": len(states)}
-                    return most_varied_first([(weight, state) for state in states])
+                    def bought(state) -> float:
+                        """What the week buys in whole packages, as the validator totals it."""
+                        return sum(
+                            row.purchase_cost_sgd for row in builder._build_shopping(problem, assignments_of(state))
+                        )
+
+                    # Up from a first guess until a week completes, then halve the gap between the last budget
+                    # that completed none and the cheapest week found so far: whole dollars, to within
+                    # CHEAPEST_PRECISION. Every week found is kept, so the cheapest of any probe is tried.
+                    kept: dict = {}
+                    low, limit = 0, CHEAPEST_START_SGD
+                    states = within(limit)
+                    while not states and limit < 7000:
+                        low, limit = limit, min(7000, limit * 4)
+                        states = within(limit)
+                    high = limit
+                    while states:
+                        kept.update((state.choices, state) for state in states)
+                        high = min(limit, ceil(min(map(bought, states))))
+                        states = ()
+                        while not states and high - low > max(1, high * CHEAPEST_PRECISION):
+                            limit = (low + high) // 2
+                            states = within(limit)
+                            low = low if states else limit
+                    trace["cheapest_search"] = {"budget_sgd": high, "candidates": len(kept)}
+                    return most_varied_first([(weight, state) for state in kept.values()])
 
                 found = [(0.0, state) for state in search.states]
                 full_and_repeat_free = any(

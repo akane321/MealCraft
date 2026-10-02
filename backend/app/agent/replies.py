@@ -194,10 +194,31 @@ REPLIES: dict[str, tuple[str, str]] = {
         "那就多换些花样。我可以规划一周、菜不重样。",
     ),
     "variety_planned": (
-        "Let's make it more varied. I can plan a new week with different dishes and none twice, or swap a dish. "
-        "Nothing changes until you confirm.",
-        "那就多换些花样。我可以重新规划一周，换一批菜、不重样，也可以换掉一道菜。确认之前什么都不会改。",
+        "Let's make it more varied. I can plan a new week with different dishes, or swap a dish.",
+        "那就多换些花样。我可以重新规划一周、换一批菜，也可以换掉一道菜。",
     ),
+    # A new week with different dishes (services/agent.py _plan_again).
+    "varied_planned": (
+        "Here's a new week with {count} different dishes (the last one had {before}){fresh}. "
+        "Tap a dish for the recipe, or ask me to swap anything.",
+        "新的一周排好了：{count} 道不同的菜（上一周是 {before} 道）{fresh}。点一道菜看食谱，想换什么都可以告诉我。",
+    ),
+    "varied_fresh": (", none of them from last week", "，没有一道是上一周的"),
+    "varied_back": (
+        ", {count} from last week because too few others fit",
+        "，其中 {count} 道是上一周的，因为别的菜不够",
+    ),
+    "varied_kept": (
+        "Your week stays as it is. For a new week with different dishes: {why}",
+        "这周保持不变。换一批菜的新一周：{why}",
+    ),
+    "varied_no_more": (
+        "Your week stays as it is: the most varied new week I could plan{within} has {count} different dishes, "
+        "{new} of them new, and this one has {before}. I can swap a dish instead.",
+        "这周保持不变：我能排出的最多样的新一周{within}有 {count} 道不同的菜，其中 {new} 道是新的，这周是 {before} 道。"
+        "可以换掉一道菜试试。",
+    ),
+    "varied_within": (" within S${budget:g}", "（S${budget:g} 以内）"),
     # Conversation (agent/workflow.py, agent/parser.py).
     "got_it": ("Got it: {details}.", "好的：{details}。"),
     "noted": ("Noted.", "好的。"),
@@ -251,7 +272,7 @@ REPLIES: dict[str, tuple[str, str]] = {
     "plan_varied_say": ("Plan a week with no dish twice", "帮我们规划一周，菜不要重复"),
     "swap_tonight": ("Swap tonight's dinner", "换掉今晚的晚餐"),
     "replan_varied": ("Plan a new week with different dishes", "重新规划一周，换一批菜"),
-    "replan_varied_say": ("Plan a new week with different dishes, no dish twice", "重新规划一周，换一批菜，不重样"),
+    "replan_varied_say": ("Plan a new week with different dishes", "重新规划一周，换一批菜"),
     "swap_repeat": ("Swap the {title} on {day}", "换掉{day}的{title}"),
     "swap_repeat_say": ("Swap the {title} on day {index}", "把第{index}天的{title}换掉"),
     "swap_other": ("Swap a dish on another day", "换别的日子的菜"),

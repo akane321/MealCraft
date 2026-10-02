@@ -330,12 +330,14 @@ New plans must pass independent validation before storage. The weekly budget
 caps whole-package checkout cost; the legacy per-meal budget still caps
 ingredient-use cost without pantry deduction. Both comparisons use whole cents;
 sub-cent budgets require clarification. A missing price or unverified demand
-cannot produce a successfully validated plan. Under a weekly budget, when every
-ranked week fails, the planner tries last the weeks of its cost-led
-cheapest-week search: the strongest budget-led search, run under the least
-whole-dollar budget it still completes a week within (bisected to 5%). That
-search never reads the requested budget, so a week it finds at S$C is tried
-again under any budget of S$C or more; failed attempts of it are marked
+cannot produce a successfully validated plan; a dish outside its usual meal
+types is reported as a soft check and leaves the week's cost known. Under a
+weekly budget, when every ranked week fails, the planner tries last the weeks of
+its cost-led cheapest-week search: the strongest budget-led search, run under
+the least whole-dollar budget it still completes a week within, bisected under
+the cheapest week found so far to 5%, every week it found kept. That search
+never reads the requested budget, so a week it finds at S$C is tried again
+under any budget of S$C or more; failed attempts of it are marked
 `cheapest_search` in the trace. It is the cheapest week a search found, not a
 proof that no cheaper week exists.
 
@@ -414,9 +416,14 @@ planning message, however it is phrased. An unclear message ("something nice",
 once one does). Boredom with the dishes ("the dishes are boring", "too
 repetitive", 菜很单调) is a wish for variety in either language: before a plan
 it offers a week with no dish twice; with a plan it offers a new week with
-different dishes (the session goes back to **Plan my week** with
-`avoid_recipe_ids` set to the week's dishes and no dish twice, while the saved
-week stays saved) or a swap of a dish that repeats. A mixed request sends only
+different dishes or a swap of a dish that repeats. The new week is planned in
+the turn with `avoid_recipe_ids` set to the week's dishes: no dish twice without
+a weekly budget (or when the household asks for that), else the most varied
+week the planner finds within the budget. It takes the session's week's place,
+which stays saved, only with more different dishes, or as many and some new;
+otherwise the week stays as it is and the reply says why (the budget with the
+cheapest such week found, too few dishes, or the count of different dishes),
+with a swap offered instead. A mixed request sends only
 its supported segment to the parser. The persisted `last_scope_decision` makes
 this routing visible to clients and tests. Every templated reply is written in
 the language of the household's message, or, for a message with no words to
@@ -433,20 +440,24 @@ the planner as the hard rule described under Weekly Meal Plans.
 Before the session becomes ready, the stated limits are checked against a floor
 under the cost of any week the planner could build from its own candidates
 (`backend/app/planning/week_floor.py`: the cheapest price per unit of each
-ingredient, each dish at its smallest portion share, no search). A per-meal
-budget below the floor, a required dish no candidate fills, or no repeats with
-fewer different dishes than the week needs is refused with the number that shows
-it. The floor ignores whole packages, so it never refuses a realistic weekly
-budget: a weekly budget under ten times the floor (on the release catalog the
-cheapest week the planner finds costs 1.6 to 8.4 times it) is planned up front
-exactly as **Plan my week** would plan it, nothing saved, and what that refuses
-is refused now. A budget refusal names the amount a person a meal and the cheapest
+ingredient, each dish at its smallest portion share, a role's days at its
+cheapest dishes each served at most `max_uses_per_recipe` times, no search). A
+per-meal budget below the floor, a required dish no candidate fills, or no
+repeats with fewer different dishes than the week needs is refused with the
+number that shows it. A weekly budget under the floor is refused with the cost
+of the cheapest week the search finds. The floor ignores whole packages, so a
+weekly budget under forty times it (on the release catalog the cheapest week the
+planner finds costs 1.6 to 33 times it, most for one person with no dish twice)
+is planned up front exactly as **Plan my week** would plan it, nothing saved,
+and what that refuses is refused now. A budget refusal names the amount a person a meal and the cheapest
 week the search found ("S$10 for 4 people is S$0.36 a person a meal over 7 meals.
 The cheapest week I could plan costs about S$38.16: the cheapest my search found,
 not a proof that none is cheaper."). The session keeps collecting and offers
 choices a real week backs: "Use S$39 for the week" (that week fits it, so it
-plans), and half the people at their own cheapest week ("2 people at S$26 a
-week", or "Plan for 2 people" when that fits the budget as it is). No amount is
+plans), and, for one meal a day, half the people at their own cheapest week
+("2 people at S$26 a week", or "Plan for 2 people" when that fits the budget as
+it is); for more meals a day that second search would take the reply past its
+time limit, so it is not offered. No amount is
 ever a guess. After a refusal, a bare amount ("S$50", 那就50新币吧) answers the
 budget it asked about. A per-meal amount is offered only when a week plans with
 it. When prices cannot be read, the check is skipped and Plan answers for itself.
