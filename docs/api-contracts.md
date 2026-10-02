@@ -339,7 +339,9 @@ the cheapest week found so far to 5%, every week it found kept. That search
 never reads the requested budget, so a week it finds at S$C is tried again
 under any budget of S$C or more; failed attempts of it are marked
 `cheapest_search` in the trace. It is the cheapest week a search found, not a
-proof that no cheaper week exists.
+proof that no cheaper week exists. A shape with a meal of four or more dishes
+does without it: there that search takes 5 to 16 s on the release catalog, and
+minutes with no dish twice, past a plan's 10 s (ADR-0046).
 
 Non-plans return HTTP 422 with one actionable `detail` sentence. Internal status
 and proof scope are recorded in `OperationRun`, not added to the product view.
@@ -445,11 +447,11 @@ cheapest dishes each served at most `max_uses_per_recipe` times, no search). A
 per-meal budget below the floor, a required dish no candidate fills, or no
 repeats with fewer different dishes than the week needs is refused with the
 number that shows it. A weekly budget under the floor is refused with the cost
-of the cheapest week the search finds. The floor ignores whole packages, so a
-weekly budget under forty times it (on the release catalog the cheapest week the
-planner finds costs 1.6 to 33 times it, most for one person with no dish twice)
-is planned up front exactly as **Plan my week** would plan it, nothing saved,
-and what that refuses is refused now. A budget refusal names the amount a person a meal and the cheapest
+of the cheapest week the search finds. The floor ignores whole packages, and no
+multiple of it bounds them (on the release catalog the cheapest week the planner
+finds costs 1.6 to 122 times it, most for one person's breakfasts with no dish
+twice), so any other weekly budget is planned up front exactly as **Plan my
+week** would plan it, nothing saved, and what that refuses is refused now. A budget refusal names the amount a person a meal and the cheapest
 week the search found ("S$10 for 4 people is S$0.36 a person a meal over 7 meals.
 The cheapest week I could plan costs about S$38.16: the cheapest my search found,
 not a proof that none is cheaper."). The session keeps collecting and offers
@@ -457,7 +459,12 @@ choices a real week backs: "Use S$39 for the week" (that week fits it, so it
 plans), and, for one meal a day, half the people at their own cheapest week
 ("2 people at S$26 a week", or "Plan for 2 people" when that fits the budget as
 it is); for more meals a day that second search would take the reply past its
-time limit, so it is not offered. No amount is
+time limit, so it is not offered. A meal of four or more dishes takes the
+planner's searches 5 to 26 s on the release catalog, past the reply's time
+limit, so for such a shape nothing is searched before the session is ready:
+only what the floor proves is refused (a weekly budget under it names the floor,
+with no amount offered, since no week backs one yet), and **Plan my week**
+answers the rest with the same backed choices. No amount is
 ever a guess. After a refusal, a bare amount ("S$50", 那就50新币吧) answers the
 budget it asked about. A per-meal amount is offered only when a week plans with
 it. When prices cannot be read, the check is skipped and Plan answers for itself.

@@ -390,6 +390,13 @@ REPLIES: dict[str, tuple[str, str]] = {
     ),
     "no_repeats_rule": ("No dish twice", "菜不重样"),
     "cap_rule": ("Each dish at most {count} times", "每道菜最多 {count} 次"),
+    # A budget under the floor, for meals too big to search for the cheapest week within a reply (agent/limits.py).
+    "floor_week": (
+        "S${budget:g} for {people} is S${each:.2f} a person a meal over {meals} meals: what this week's dishes "
+        "use costs at least S${floor:.2f}, before buying whole packages.",
+        "{people}一周 S${budget:g}，相当于每人每餐 S${each:.2f}（共 {meals} 餐）：这周的菜光是用到的食材就至少要 "
+        "S${floor:.2f}，还没算整包购买。",
+    ),
     # A budget under the cheapest week the planner's search found (agent/limits.py).
     "budget_short": (
         "S${budget:g} for {people} is S${each:.2f} a person a meal over {meals} meals. The cheapest week I could "

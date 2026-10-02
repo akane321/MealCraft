@@ -2,8 +2,9 @@
 
 Two moments. Before the assistant says it has everything, `refusal` compares the limits with the floor
 under any week's cost (planning/week_floor.py): a weekly budget under it is refused with what the cheapest
-week the search finds costs, and one near it is planned with the planner itself, so whatever the planner
-would answer at Plan is answered now. After the planner found no week,
+week the search finds costs, and any other is planned with the planner itself, so whatever the planner
+would answer at Plan is answered now. For meals too big for the planner to search within a reply, only what
+the floor proves is refused, and Plan answers the rest. After the planner found no week,
 `planning_failure` names the limit its trace shows the search kept running into; a search that found
 nothing proves nothing about every week, so it never says no week exists.
 
@@ -18,16 +19,12 @@ from dataclasses import dataclass
 
 from app.agent.replies import details, joined, people, planner_message, say, word
 from app.data.allergens import checked_allergens
+from app.planning.product_path import QUICK_MEAL_DISHES
 from app.planning.week_floor import WeekFloor
 from app.schemas.meal_plan import default_plan_shape
 
 # The floor is a float sum of per-unit prices; the planner rounds each ingredient's cost to the cent.
 SLACK_SGD = 0.05
-# A weekly budget under this many times the floor is planned up front, before the assistant says it has
-# everything. On the release catalog the cheapest week the planner finds costs 1.6 to 33 times the floor
-# (1 to 6 people; dinner, dinner with soup, lunch and dinner, three meals; any repeats, each dish at most
-# twice, no dish twice): whole packages, not the floor, decide, and most for one person with no dish twice.
-TIGHT_BUDGET_RATIO = 40
 # What emptied the search (planning/meal_beam.py), as the validator check it stands for.
 EMPTIED = {
     "budget": "purchase_budget",
@@ -62,6 +59,8 @@ def refusal(
     planner's cost-led search finds costs (None for no week), all without saving anything.
     """
     floor = floor_of()
+    if max(_dishes(constraints)) > QUICK_MEAL_DISHES:
+        check = cheapest = None  # no search within the reply: what the floor proves is refused, Plan answers the rest
     if floor.empty_roles:
         meal, role = floor.empty_roles[0]
         return _no_dish(constraints, floor_of, check, meal, role, lang)
@@ -90,11 +89,20 @@ def refusal(
     weekly = constraints.weekly_budget_sgd
     if weekly is not None and weekly < floor.total_sgd - SLACK_SGD:
         # Under the floor no week fits: what remains to say is what the cheapest week the search finds costs.
+        if cheapest is None:  # not searched for: the floor, with no amount a week backs to offer
+            size, meals = constraints.household_size or 1, floor.meals
+            each, least = weekly / (size * meals), _cents_down(floor.total_sgd)
+            text = say(
+                "floor_week", lang, budget=weekly, people=people(size, lang), each=each, meals=meals, floor=least
+            )
+            return Refusal("weekly_budget_sgd", text)
         cost = cheapest()
         if cost is not None:
             return _budget_short(cost, constraints, lang, cheapest)
-    if weekly is not None and weekly < TIGHT_BUDGET_RATIO * floor.total_sgd:
-        # Near the floor, whole packages decide: plan it as Plan would, and refuse what that refuses.
+    if check is not None and weekly is not None:
+        # Over the floor, whole packages decide, by no ratio that holds: on the release catalog the cheapest week
+        # costs 1.6 to 122 times the floor (122 for one person's breakfasts, no dish twice). Plan it as Plan would,
+        # and refuse what that refuses.
         error = check()
         failure = planning_failure(error, constraints, lang, cheapest=cheapest) if error is not None else None
         if failure is not None and not failure.retry:  # a slow search or late data may plan at Plan
@@ -103,8 +111,9 @@ def refusal(
 
 
 def _raise_meal(check, amount: int, lang: str) -> tuple[tuple[str, str], ...]:
-    """The per-meal budget to offer, only when a week plans with it."""
-    return (_option("raise_meal", lang, amount=amount),) if check(budget_per_meal_sgd=amount) is None else ()
+    """The per-meal budget to offer, only when a week plans with it (never when it cannot be checked)."""
+    backed = check is not None and check(budget_per_meal_sgd=amount) is None
+    return (_option("raise_meal", lang, amount=amount),) if backed else ()
 
 
 def _no_dish(constraints, floor_of, check, meal: str, role: str, lang: str) -> Refusal:
@@ -225,9 +234,10 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
     )
     options = [_option("use_weekly", lang, amount=math.ceil(cost))]
     fewer = size // 2
-    # Half the household at its own cheapest week takes a second search: offered for one meal a day, where it is
-    # quick; for more meals a day it would take the reply past its time limit (ADR-0046 section 3).
-    quick = meals == 7 and cheapest is not None and fewer >= 1
+    # Half the household at its own cheapest week takes a second search: offered for one meal a day of a quick
+    # size, where the two take at most 5 s; for more they would take the reply past its time limit (ADR-0046
+    # section 3).
+    quick = meals == 7 and max(_dishes(constraints)) <= QUICK_MEAL_DISHES and cheapest is not None and fewer >= 1
     smaller = cheapest(household_size=fewer) if quick else None
     if smaller is not None:
         # Fewer people buy less: the budget as it is when their cheapest week fits it, else that week's cost.
@@ -238,6 +248,11 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
                 _option("fewer_people_at", lang, count=fewer, people=people(fewer, lang), amount=math.ceil(smaller))
             )
     return Refusal("weekly_budget_sgd", text, tuple(options))
+
+
+def _dishes(constraints) -> list[int]:
+    """How many dishes each planned meal has."""
+    return [len(roles) for roles in (constraints.plan_shape or default_plan_shape()).meals.values()]
 
 
 def _option(key: str, lang: str, **values) -> tuple[str, str]:

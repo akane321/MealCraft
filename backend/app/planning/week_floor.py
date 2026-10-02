@@ -10,10 +10,10 @@ or plans: it bounds what a search could find.
 """
 
 from dataclasses import dataclass
-from itertools import combinations, combinations_with_replacement
+from itertools import accumulate, combinations
 from math import inf
 
-from app.planning.meal_composition import portion_shares
+from app.planning.meal_composition import MAIN_ROLE, portion_shares
 from app.planning.product_path import meals_of_the_day, normalized
 from app.schemas.planning_v2 import PlanningCompositionPolicy
 
@@ -116,18 +116,36 @@ def _cheapest_meal(roles: list[dict], cheapest: dict[str, float], policy) -> flo
 def _cheapest_days(roles: list[dict], prices: dict[str, list[float]], policy, days: int) -> float:
     """The cheapest `days` of a meal can be, when a role's dishes are `prices` (ascending, one per use allowed).
 
-    For each mix of ways the meal is served, a role's largest shares take its cheapest uses (the rearrangement
-    inequality), and a mix asking a role for more uses than it has is not a week. Every role is bounded on its
-    own (a dish's cap is shared across roles and meals in a real week), so this stays under any real week.
+    A share depends only on how many dishes the meal has, and the policy's shares shrink as a meal grows, so
+    with the days taken from the fewest dishes to the most, each role's cheapest uses meet its largest shares
+    (the rearrangement inequality). The optional dishes' uses are pooled: any optional role's use may fill
+    any optional dish of a day, at the smallest share an optional dish takes. That only lets a week be cheaper
+    than a real one, as does bounding every role on its own (a dish's cap is shared across roles and meals in
+    a real week), so this stays under any real week. One pass over the days, keeping the cheapest days so far
+    for each (optional dishes on the last day, pooled uses taken): days x sizes x uses steps, where trying
+    every mix of the 2^k ways to serve a meal with k optional dishes took 90 s for five.
     """
-    meals, best = _meals(roles, prices, policy), inf
-    for mix in combinations_with_replacement(range(len(meals)), days):
-        total = 0.0
-        for role, uses in prices.items():
-            shares = sorted((meals[i][role] for i in mix if role in meals[i]), reverse=True)
-            if len(shares) > len(uses):
-                break
-            total += sum(share * cost for share, cost in zip(shares, uses, strict=False))
-        else:
-            best = min(best, total)
-    return 0.0 if best == inf else best
+    required = [role["role_id"] for role in roles if role.get("required", True)]
+    optional = [role["role_id"] for role in roles if not role.get("required", True) and role["role_id"] in prices]
+    optional.sort(key=lambda role: role == MAIN_ROLE)  # a main takes a larger share: added last, so never the smallest
+    if any(len(prices[role]) < days for role in required):
+        return 0.0  # too few dishes for every day: no week, which the refusal says before the floor matters
+    pooled = list(accumulate(sorted(cost for role in optional for cost in prices[role]), initial=0.0))
+    ways = []  # (optional dishes, each required role's share, the smallest share an optional dish takes)
+    for extra in range(len(optional) + 1):
+        shares = portion_shares(policy, [*required, *optional[:extra]]) if required or extra else None
+        if shares is not None:
+            smallest = min((float(shares[role]) for role in optional[:extra]), default=0.0)
+            ways.append((extra, [float(shares[role]) for role in required], smallest))
+    best = {(0, 0): 0.0}  # (optional dishes on the last day, pooled uses taken) -> the cheapest days so far
+    for day in range(days):
+        reached: dict[tuple[int, int], float] = {}
+        for (fewest, taken), cost in best.items():
+            for extra, shares, smallest in ways:
+                if extra < fewest or taken + extra >= len(pooled):
+                    continue
+                today = sum(share * prices[role][day] for role, share in zip(required, shares, strict=True))
+                today += smallest * (pooled[taken + extra] - pooled[taken])
+                reached[extra, taken + extra] = min(reached.get((extra, taken + extra), inf), cost + today)
+        best = reached
+    return min(best.values(), default=0.0)

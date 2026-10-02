@@ -70,6 +70,12 @@ COST_WEIGHTS = (1.0, 4.0, 16.0)
 CHEAPEST_START_SGD = 64
 CHEAPEST_PRECISION = 0.05
 CHEAPEST_MEAL_OPTIONS = 64
+# Meals of at most this many dishes: the planner's searches answer within a chat reply. On the release catalog
+# a week of them is checked in at most 6.7 s and its cheapest week found in at most 4.5 s (1 or 4 people, up to
+# three meals a day, any cap on uses); for a meal of four to six dishes either takes 5 to 26 s, and the cheapest
+# week minutes with no dish twice (ADR-0046 section 3: a plan answers within 10 s). A plan of such meals that
+# no week fits under its budget ends without the cheapest-week search.
+QUICK_MEAL_DISHES = 3
 
 
 def meals_of_the_day(constraints) -> list[tuple[str, list]] | None:
@@ -576,7 +582,7 @@ class ProductPlanningEngine:
                 assignments_list = most_varied_first(found)
                 if cheapest:
                     assignments_list, fallback, last_resort = [], None, cheapest_weeks
-                elif budget is not None:
+                elif budget is not None and max(len(roles) for _, roles in composition) <= QUICK_MEAL_DISHES:
                     # Every week above failed: the cheapest week the search can find, if it is within budget.
                     last_resort = cheapest_weeks
             trace["search"] = {k: v for k, v in asdict(search).items() if k != "states"}
