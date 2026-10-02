@@ -155,16 +155,23 @@ def _when(plan: WeeklyMealPlanResponse, days: list[int] | None) -> str:
 
 
 def _day_roles(plan: WeeklyMealPlanResponse, meal: str, days: list[int] | None, planned: list[dict]) -> list[dict]:
-    """The dish roles the named days' meal has now: a one-day change ("add a soup on Friday") may have given
-    a day a dish the week's shape lacks. The week's shape when no day is named, or the days differ."""
+    """The dish roles the named days' meal has now, read from its dishes: a one-day change ("add a soup on
+    Friday", "plan lunch on Friday") may have given a day a dish or a meal the week's shape lacks. The week's
+    shape when no day is named, or the days differ."""
     by_day: dict[int, list[str]] = {}
+    courses: dict[str, set[str]] = {}
     for dish in plan.days if days else []:
         if dish.day_index in days and dish.meal_type == meal and dish.status != "skipped":
             by_day.setdefault(dish.day_index, []).append(dish.role_id)
+            courses.setdefault(dish.role_id, set()).add(dish.recipe.course or "main")
     if len({frozenset(ids) for ids in by_day.values()}) != 1:
         return planned
-    known = {role["role_id"]: role for preset in MEAL_PRESETS[meal].values() for role in preset}
-    known |= {role["role_id"]: role for role in planned}
+    # The week's roles, then the presets' in order: a meal the week lacks is added for a day with its first
+    # preset, so a lunch "main" added for Friday takes a main, a salad or a soup ("one dish").
+    known = {role["role_id"]: role for role in planned}
+    for preset in MEAL_PRESETS[meal].values():
+        for role in preset:
+            known.setdefault(role["role_id"], role)
     roles = []
     for role_id in next(iter(by_day.values())):
         # A dish added in the conversation is "soup", "soup-2", "main-2" (see _next_id).
@@ -172,7 +179,10 @@ def _day_roles(plan: WeeklyMealPlanResponse, meal: str, days: list[int] | None, 
         role = known.get(role_id) or (base and {"role_id": role_id, "courses": base[1], "required": True})
         if not role:
             return planned
-        roles.append(role)
+        # Each role takes the dish the day has: Friday's one-dish lunch may hold a salad as its main on a week
+        # whose lunches are a main and a side.
+        extra = sorted(courses[role_id] - set(role["courses"]))
+        roles.append({**role, "courses": [*role["courses"], *extra]} if extra else role)
     return roles
 
 

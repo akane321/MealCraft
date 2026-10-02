@@ -747,3 +747,46 @@ def test_only_a_change_that_costs_more_is_said_to_put_the_week_over_its_budget(c
         assert change["event_type"] == event_type and change["purchase_total_delta_sgd"] <= 0, reply
         assert change["over_budget_sgd"] is None
         assert "over your" not in reply, reply
+
+
+def test_a_change_on_a_week_of_two_meals_a_day_goes_over_by_the_cheapest_week(monkeypatch):
+    """Lunch and dinner every day, the budget just fits; then dinners with a soup. Seven soups, one package
+    each (S$1.85 to S$2.75): the cheapest change is one soup all week, S$1.85 over. A repeat is charged one
+    meal's share of the budget, as the week's own planning charges it; charged a day's share (twice as much
+    on two meals a day), seven different soups looked cheapest and the change went S$15.95 over."""
+    from datetime import date, timedelta
+
+    def only_for(meal, recipe):
+        recipe.meal_types = [meal]
+        return recipe
+
+    soups = ["chickpea", "black_bean", "cucumber", "canned_tomato", "ginger", "garlic", "canned_tuna"]
+    dishes = [
+        only_for("lunch", _dish("chicken-lunch", "main", "chicken_breast", 400, calories=450)),
+        only_for("lunch", _dish("tofu-lunch", "main", "firm_tofu", 300, calories=300)),
+        only_for("dinner", _dish("sweet-potato-bake", "main", "sweet_potato", 200, calories=400)),
+        *[only_for("dinner", _dish(f"{name}-soup", "soup", name, 100, calories=150)) for name in soups],
+    ]
+    main = {"role_id": "main", "courses": ["main"]}
+    with dish_client(monkeypatch, dishes) as client:
+        request = {
+            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "household_size": 2,
+            "max_cooking_time_minutes": 240,
+            "pricing_mode": "fixture",
+            "plan_shape": {"meals": {"lunch": [main], "dinner": [main]}},
+        }
+        unbudgeted = client.post("/api/plans/generate", json=request).json()
+        budget = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
+        plan = client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": budget}).json()
+        assert plan["grocery_estimate"]["within_weekly_budget"] is True
+
+        preview = client.post(
+            f"/api/plans/{plan['id']}/shape/preview",
+            json={"meal_type": "dinner", "roles": [main, {"role_id": "soup", "courses": ["soup"], "required": True}]},
+        )
+
+    assert preview.status_code == 201, preview.text
+    added = preview.json()["shape_change"]["added"]
+    assert {d["recipe_slug"] for d in added if d["role_id"] == "soup"} == {"chickpea-soup"}
+    assert preview.json()["over_budget_sgd"] == 1.85
