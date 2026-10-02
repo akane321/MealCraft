@@ -340,11 +340,51 @@ def test_a_budget_however_it_is_said_reaches_the_parser(client, message, size, w
         ("一周10新币，给4个人", 10),
         ("S$10 per person for 4 people for the week", 40),
         ("S$40 for the 4 of us for the week", 40),
+        # Who eats is not the sum: "budget for the 4", "for 7" dinners.
+        ("Weekly budget for the 4 of us is S$40", 40),
+        ("Weekly budget for 4 is S$40", 40),
+        ("S$50 for a family of 4 for the week", 50),
+        ("S$50 for my family of four this week", 50),
+        ("S$40 for 7 dinners for 4 people", 40),
     ],
 )
 def test_a_weekly_sum_said_before_who_eats_is_the_weeks(client, message, weekly):
     session = client.post("/api/agent/sessions", json={"message": message}).json()
 
+    assert (session["constraints"]["household_size"], session["constraints"]["weekly_budget_sgd"]) == (4, weekly)
+
+
+def profile_of_four(client, **profile) -> None:
+    member = {"servings_per_meal": 1, "allergens": [], "excluded_ingredients": [], "dietary_preferences": []}
+    created = client.post(
+        "/api/household-profiles",
+        json={
+            "name": "Four",
+            "members": [{"name": f"Member {n}", **member} for n in range(4)],
+            "max_cooking_time_minutes": 90,
+            "pricing_mode": "fixture",
+            **profile,
+        },
+    )
+    assert created.status_code == 201, created.text
+
+
+@pytest.mark.parametrize(
+    ("message", "weekly"),
+    [
+        ("Plan a week of dinners, S$60 total, one of us is vegetarian", 60),
+        ("Plan this week's dinners, one of us doesn't eat pork", None),
+        ("One of us works late, so plan quick dinners this week", None),
+        ("Plan a week for my family, two of us don't eat beef", None),
+        ("Plan dinners, the one of us who cooks is busy", None),
+        ("S$40 for seven dinners", 40),
+    ],
+)
+def test_part_of_the_household_leaves_the_profiles_size(client, message, weekly):
+    """ "One of us" or "two of us" is some of the household, not how many eat: the profile's four hold."""
+    profile_of_four(client)
+
+    session = client.post("/api/agent/sessions", json={"message": message}).json()
     assert (session["constraints"]["household_size"], session["constraints"]["weekly_budget_sgd"]) == (4, weekly)
 
 
@@ -860,10 +900,74 @@ def test_a_chinese_week_is_planned_and_changed_in_chinese(composed_client):  # n
 
 
 def test_a_change_the_planner_turns_down_is_answered_wholly_in_chinese(composed_client):  # noqa: F811
-    session = planned(composed_client, "4个人，这周的晚餐，一周38新币")  # the week spends S$37.35 of it
+    session = planned(composed_client, "4个人，这周的晚餐，做饭不超过30分钟")  # a soup takes 35 minutes
 
     changed = say(composed_client, session, "晚餐加一个汤")
     assert changed["messages"][-1]["content"] == "我没法做这个调整：我找不到满足所有限制的安排，放宽其中一个再试试。"
+
+
+VEGETABLE_ALWAYS = {
+    "plan_shape": {
+        "meals": {
+            "dinner": [{"role_id": "main", "courses": ["main"]}, {"role_id": "vegetable", "courses": ["side", "salad"]}]
+        }
+    }
+}
+
+
+@pytest.mark.parametrize(
+    ("message", "change", "over"),
+    [
+        (
+            "这周的晚餐，一周38新币",
+            "晚餐加一个汤",
+            r"这样这周要 S\$(\d+\.\d\d)，超出每周 S\$38 的预算 S\$(\d+\.\d\d)。确认之前什么都不会改。$",
+        ),
+        (
+            "This week's dinners, S$38 in total",
+            "dinners with a soup",
+            r"That makes the week S\$(\d+\.\d\d), S\$(\d+\.\d\d) over the S\$38 weekly budget\. "
+            r"Nothing changes until you confirm\.$",
+        ),
+    ],
+)
+def test_a_dish_the_budget_left_cannot_buy_is_offered_over_it_with_the_overage(client, message, change, over):
+    """Dinner is a main and a vegetable, and the week leaves too little of S$38 for a soup as well: the
+    cheapest week with one is offered with what it puts the week over, to confirm or discard as a swap is."""
+    profile_of_four(client, **VEGETABLE_ALWAYS)
+    session = planned(client, message)
+
+    changed = say(client, session, change)
+    assert changed["pending_replan"]["status"] == "previewed", changed["messages"][-1]["content"]
+    total, overage = map(float, re.search(over, changed["messages"][-1]["content"]).groups())
+    assert overage == round(total - 38, 2) > 0
+
+    applied = client.post(f"/api/agent/sessions/{session['id']}/replan/confirm")
+    assert applied.status_code == 200, applied.text
+    estimate = applied.json()["plan"]["grocery_estimate"]
+    assert (estimate["purchase_total_sgd"], estimate["within_weekly_budget"]) == (total, False)
+    assert {dish["role_id"] for dish in applied.json()["plan"]["days"]} == {"main", "vegetable", "soup"}
+
+
+def test_a_dish_added_over_the_budget_left_is_searched_for_once_within_it(composed_client, monkeypatch):  # noqa: F811
+    """Within the budget left, a change is searched for once, without the cheapest-week search Plan ends on:
+    the week is offered over the budget instead, and a chat turn stays within its time."""
+    session = planned(composed_client, "4个人，这周的晚餐，一周38新币")
+    failed: list[tuple[float | None, bool]] = []
+    plan = ProductPlanningEngine.plan
+
+    def spy(self, constraints, *args, **kwargs):
+        try:
+            return plan(self, constraints, *args, **kwargs)
+        except ProductPlanningError as error:
+            failed.append((constraints.weekly_budget_sgd, "cheapest_search" in error.trace))
+            raise
+
+    monkeypatch.setattr(ProductPlanningEngine, "plan", spy)
+    changed = say(composed_client, session, "晚餐加一个汤")
+
+    assert changed["pending_replan"]["status"] == "previewed"
+    assert failed == [(38.0, False)]  # every dinner is planned again: nothing kept, the whole S$38 left
 
 
 @pytest.mark.parametrize(

@@ -50,7 +50,9 @@ CHINESE_NO_REPEATS = r"不(?:要|能|想|准|可以|会)?(?:重复|重样)|别(?
 AMOUNT = re.compile(
     r"(?:s\$|sgd|\$)\s*(\d+(?:\.\d+)?)"
     r"|(\d+(?:\.\d+)?)\s*(?:sgd\b|dollars?\b|bucks\b|新币|新元|块|元)"
-    r"|(?:budget|预算)[^\d\n.,;，。；]{0,10}?(\d+(?:\.\d+)?)(?!\s*(?:people|persons?|人|个|min|分钟|g\b|kg\b|克|%))"
+    # Not who eats: "budget for 4 is S$40", "budget for the 4 of us".
+    r"|(?:budget|预算)[^\d\n.,;，。；]{0,10}?(?<!for )(?<!for the )(\d+(?:\.\d+)?)"
+    r"(?!\s*(?:people|persons?|人|个|min|分钟|g\b|kg\b|克|%|of us\b))"
     r"|(\d+(?:\.\d+)?)(?=\s*(?:per|each)\s*(?:meal|dinner)\b)"
     r"|(?:每餐|一餐|每顿|一顿|每周|一周)(?:预算|不超过|最多|大约|约|花)?\s*(\d+(?:\.\d+)?)(?!\s*(?:人|个|分钟|天|次|顿|餐|道))"
 )
@@ -65,16 +67,25 @@ PER_MEAL_BEFORE = re.compile(
 )
 WEEKLY_AFTER = re.compile(
     r"^[^\d]{0,16}?(?:\b(?:total|in total|altogether|overall|all in|week|weekly)\b|/\s*w(?:ee)?k\b"
-    r"|一周|每周|这周|本周|整周|总共|一共|合计|总计)"
+    r"|\b(?:7|seven)\s+(?:dinners|lunches|breakfasts)\b|一周|每周|这周|本周|整周|总共|一共|合计|总计)"
 )
 WEEKLY_BEFORE = re.compile(
     r"(?:\b(?:total|altogether|overall|week|weekly)\b|一共|总共|合计|总计|总预算|一周|每周|这周|本周|整周|周预算)[^\d]{0,24}$"
 )
+# A number after "for" that counts something other than who eats: "for 7 dinners", "for 10 dollars".
+NOT_EATERS = (
+    r"(?!\s*(?:dollars?|bucks|sgd|新币|新元|块|元|dinners?|meals?|days?|lunch|lunches|breakfasts?"
+    r"|minutes?|mins?|hours?|分钟|%))"
+)
+COUNT = rf"(?:\d+|{'|'.join(NUMBER_WORDS)})"
 # Who eats, said between a sum and what it is for ("a week for 4 for S$10", "S$40 for four people for the
-# week", "S$40 for the 4 of us for the week", 10新币给4个人一周): not a sum itself.
+# week", "S$40 for the 4 of us for the week", "S$50 for a family of 4 for the week", 10新币给4个人一周): not a
+# sum itself.
 EATERS = re.compile(
-    rf"\bfor\s+(?:the\s+)?(?:\d+|{'|'.join(NUMBER_WORDS)})(?:\s*(?:people|persons?|of us|adults?))?\b"
-    rf"|\b(?:\d+|{'|'.join(NUMBER_WORDS)})\s*(?:people|persons?|adults?|of us)\b"
+    rf"\bfor\s+{COUNT}(?:\s*(?:people|persons?|of us|adults?))?\b{NOT_EATERS}"
+    rf"|\b{COUNT}\s*(?:people|persons?|adults?)\b"
+    rf"|\b(?:for\s+)?the\s+{COUNT}\s+of us\b"
+    rf"|\b(?:for\s+)?(?:(?:a|my|our|the)\s+)?family\s+of\s+{COUNT}\b"
     r"|[\d一二两三四五六七八九十]+\s*(?:个人|口人|人)"
 )
 # An amount for each person ("S$3 per person per meal", 每人每餐3块, 人均15): times the people eating.
@@ -263,20 +274,23 @@ class RuleBasedConstraintParser:
         lower = text.lower().replace("’", "'")
         extraction = AgentConstraintExtraction()
 
+        # Who eats. "One of us" or "two of us" is part of the household, not its size: only "the 4 of us" is
+        # all of it, and "the one of us who cooks" is one of them.
         people = self._first_number(
             lower,
             [
-                r"(\d+)\s*(?:people|persons?|人|个人|of us\b)",
-                r"(?:for|serving)\s*(\d+)(?![\d.])"
-                r"(?!\s*(?:dollars?|bucks|sgd|新币|新元|块|元|dinners?|meals?|days?|lunch|lunches|breakfasts?"
-                r"|minutes?|mins?|hours?|分钟|%))\s*(?:people|persons?)?",
+                r"(\d+)\s*(?:people|persons?|人|个人)",
+                r"\bthe\s+(?!1\b)(\d+)\s+of us\b",
+                rf"(?:for|serving|family of)\s*(\d+)(?![\d.]){NOT_EATERS}\s*(?:people|persons?)?",
             ],
         )
         if people is None:
-            # "Dinners for two", "a family of four", "three people", "the four of us".
+            # "Dinners for two", "a family of four", "three people", "the four of us"; not "for seven dinners".
             words = "|".join(NUMBER_WORDS)
-            match = re.search(rf"\b(?:for|serving|family of)\s+({words})\b", lower) or re.search(
-                rf"\b({words})\s+(?:people|persons?|adults?|of us)\b", lower
+            match = (
+                re.search(rf"\b(?:for|serving|family of)\s+({words})\b{NOT_EATERS}", lower)
+                or re.search(rf"\b({words})\s+(?:people|persons?|adults?)\b", lower)
+                or re.search(rf"\bthe\s+(?!one\b)({words})\s+of us\b", lower)
             )
             if match:
                 people = NUMBER_WORDS[match.group(1)]

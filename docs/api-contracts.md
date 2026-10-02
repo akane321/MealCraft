@@ -513,7 +513,12 @@ replanning loop. It accepts one user-triggered meal event at a time, resolves a
 day or date and an unavailable ingredient when required, and asks one focused
 question when the request is incomplete. A complete request calls the existing
 deterministic replanning service and exposes the persisted preview as
-`pending_replan`; it does not mutate the plan.
+`pending_replan`; it does not mutate the plan. A change that adds a meal or a
+dish is planned within the budget the rest of the week leaves, without the
+cheapest-week search; when nothing fits it, the cheapest dishes that search
+finds with no budget are previewed instead, and the reply names the week's new
+total and how far over the weekly budget it is, for the household to confirm or
+discard.
 
 `POST /api/agent/sessions/{session_id}/replan/confirm` applies the linked preview
 with the same revision check as the plan API. `discard` clears the session link

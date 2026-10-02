@@ -145,11 +145,23 @@ class ProductPlanningEngine:
         """
         return min(CANDIDATE_LIMIT, max(1, self.limits.max_expansions // (self.limits.width * day_count)))
 
-    def plan(self, constraints, recommendations, recipes, *, selector=None, profile_version=None, cheapest=False):
+    def plan(
+        self,
+        constraints,
+        recommendations,
+        recipes,
+        *,
+        selector=None,
+        profile_version=None,
+        cheapest=False,
+        cheapest_last=True,
+    ):
         """A validated week from the candidates, or ProductPlanningError with the trace of what was tried.
 
         With `cheapest` (a composed week, no weekly budget) the week is the one of the cost-led search's
         that buys for the least: what a budget the household is offered rests on (agent/limits.py).
+        Without `cheapest_last`, a budget no ranked week fits fails without the cheapest-week search: a
+        change to a saved week, offered over the budget left instead (services/replanning.py).
         """
         trace = {
             "trace_version": "planning-product-v1",
@@ -582,7 +594,11 @@ class ProductPlanningEngine:
                 assignments_list = most_varied_first(found)
                 if cheapest:
                     assignments_list, fallback, last_resort = [], None, cheapest_weeks
-                elif budget is not None and max(len(roles) for _, roles in composition) <= QUICK_MEAL_DISHES:
+                elif (
+                    cheapest_last
+                    and budget is not None
+                    and max(len(roles) for _, roles in composition) <= QUICK_MEAL_DISHES
+                ):
                     # Every week above failed: the cheapest week the search can find, if it is within budget.
                     last_resort = cheapest_weeks
             trace["search"] = {k: v for k, v in asdict(search).items() if k != "states"}

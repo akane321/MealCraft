@@ -746,7 +746,7 @@ class AgentSessionService:
                 AgentReplanDraft(),
             )
         else:
-            reply, pending = self._describe_shape_preview(intent.summary, preview, lang), preview.id
+            reply, pending = self._describe_shape_preview(intent.summary, preview, plan, lang), preview.id
             draft = AgentReplanDraft(event_type="CHANGE_SHAPE", reason=message.strip())
         updated = self.repository.append_replan_exchange(
             session_id,
@@ -762,7 +762,10 @@ class AgentSessionService:
         return self._to_response(updated)
 
     @staticmethod
-    def _describe_shape_preview(summary: str, preview: MealPlanReplanEventResponse, lang: str = "en") -> str:
+    def _describe_shape_preview(
+        summary: str, preview: MealPlanReplanEventResponse, plan: WeeklyMealPlanResponse, lang: str = "en"
+    ) -> str:
+        """The change, its dishes and its groceries, and what it puts the week over its budget."""
         change = preview.shape_change
         parts = [say("shape_summary", lang, summary=summary)]
         if change and change.added:
@@ -773,7 +776,14 @@ class AgentSessionService:
             count = len(change.removed)
             parts.append(say("shape_removed_one" if count == 1 else "shape_removed", lang, count=count))
         delta = preview.purchase_total_delta_sgd
-        parts.append(say("shape_groceries", lang, sign="+" if delta >= 0 else "−", amount=abs(delta)))
+        budget = plan.grocery_estimate.weekly_budget_sgd
+        total = round(plan.grocery_estimate.purchase_total_sgd + delta, 2)
+        over = (
+            say("shape_over", lang, total=total, over=total - budget, budget=budget)
+            if budget is not None and total > budget
+            else ""
+        )
+        parts.append(say("shape_groceries", lang, sign="+" if delta >= 0 else "−", amount=abs(delta), over=over))
         return ("" if lang == "zh" else " ").join(parts)
 
     def _answer_keep_shape(

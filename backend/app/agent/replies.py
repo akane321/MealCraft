@@ -108,9 +108,6 @@ PLANNER_ZH = {
     "No recipes satisfy the supplied hard constraints.": "没有菜符合你的硬性限制。",
     "A week plans at least one meal a day.": "一周每天至少要安排一顿饭。",
     "Changing meals is not available here.": "这里不能调整饭菜的安排。",
-    "The rest of the week already uses the whole weekly budget, so there is none left for this.": (
-        "这周其余的饭菜已经用完了每周预算，没有余下的钱做这个调整。"
-    ),
     "Completed meals are historical records and cannot be replanned.": "已经做过的饭菜是历史记录，不能再调整。",
     "This meal is locked and cannot be replanned.": "这顿饭已经锁定，不能调整。",
     "This meal is already cancelled.": "这顿饭已经取消了。",
@@ -368,8 +365,12 @@ REPLIES: dict[str, tuple[str, str]] = {
     "shape_removed_one": ("1 dish comes off the week.", "这周少了 1 道菜。"),
     "shape_removed": ("{count} dishes come off the week.", "这周少了 {count} 道菜。"),
     "shape_groceries": (
-        "Groceries {sign}S${amount:.2f}. Nothing changes until you confirm.",
-        "买菜 {sign}S${amount:.2f}。确认之前什么都不会改。",
+        "Groceries {sign}S${amount:.2f}.{over} Nothing changes until you confirm.",
+        "买菜 {sign}S${amount:.2f}。{over}确认之前什么都不会改。",
+    ),
+    "shape_over": (
+        " That makes the week S${total:.2f}, S${over:.2f} over the S${budget:g} weekly budget.",
+        "这样这周要 S${total:.2f}，超出每周 S${budget:g} 的预算 S${over:.2f}。",
     ),
     "ask_keep": ("Should new weeks plan meals this way too?", "以后每周也这样安排吗？"),
     "kept": (

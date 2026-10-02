@@ -247,12 +247,15 @@ class WeeklyMealPlanService:
         day_count: int,
         avoid_recipe_ids: set[int],
         keep: tuple[set[int], set[str]] | None = None,
+        cheapest: bool = False,
     ) -> list[ScheduledDish]:
         """Dishes for `day_count` days from day `first_day` of a saved week, nothing saved (ADR-0046 section 2).
 
         `constraints` carries the shape to plan and the budget left; dishes already in the week are
         avoided while enough others remain. `keep` (recipe ids, their courses) holds a meal's present
-        dishes while a new one is added: of those courses only those recipes are offered.
+        dishes while a new one is added: of those courses only those recipes are offered. With `cheapest`
+        (no budget) they are the cheapest the cost-led search finds. A budget no ranked week fits fails
+        without that search: the change is offered over the budget instead (services/replanning.py).
         """
         start = constraints.start_date + timedelta(days=first_day - 1)
         # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
@@ -271,12 +274,20 @@ class WeeklyMealPlanService:
             if item.recipe.id in keep_ids
             or (item.recipe.id not in avoid_recipe_ids and course.get(item.recipe.id) not in keep_courses)
         ]
+
+        def planned(candidates):
+            return self.planning_engine.plan(
+                partial, candidates, recipes, selector=self.selector, cheapest=cheapest, cheapest_last=False
+            )
+
         try:
-            result = self.planning_engine.plan(partial, fresh, recipes, selector=self.selector)
+            result = planned(fresh)
         except ProductPlanningError:
+            if len(fresh) == len(recommendations):
+                raise  # every candidate was tried
             # Too few dishes the week does not already have, or the kept dishes no longer fit:
             # plan the meal from every candidate rather than fail.
-            result = self.planning_engine.plan(partial, recommendations, recipes, selector=self.selector)
+            result = planned(recommendations)
         placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(result.selected))]
         return [
             ScheduledDish(
