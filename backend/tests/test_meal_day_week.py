@@ -235,3 +235,18 @@ def test_the_label_tool_and_the_scorer_read_each_release_lines_wording():
     fried_cabbage = load_release_catalog().by_slug["RCP2_22CC0636A82B"]
     assert fried_cabbage["ingredients"][0]["text"] == "1 medium cabbage"
     assert _led(fried_cabbage)
+
+
+SWEET_AND_SOUR_CABBAGE = "RCP2_44AEC8FC9761"  # "1 medium cabbage, shredded", which release v2.1 weighs at 100 g
+
+
+def test_the_label_tool_weighs_a_whole_head_by_its_wording_as_the_product_does():
+    """Review of #210: the label tool reads each release line's wording (`row_vegetable_led`), so "Sweet And Sour
+    Cabbage", whose head of cabbage the release weighs as one leaf, is a vegetable dish for a label, as it is for the
+    product and the scorer; by its grams alone it is 0.38 vegetables."""
+    from app.evaluation.multidish_labels import valid_meals
+
+    episode = load("mdw-dev-010")
+    roles = [{"role_id": "vegetable", "courses": ["side", "salad"], "required": True}]
+    assert SWEET_AND_SOUR_CABBAGE in {r["slug"] for meal in valid_meals(episode, roles, "dinner") for _, r in meal}
+    assert _led(scorer_catalogs(episode).recipes[SWEET_AND_SOUR_CABBAGE])

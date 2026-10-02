@@ -96,7 +96,7 @@ def test_a_whole_head_the_release_weighed_as_one_leaf_counts_at_a_heads_weight()
     assert whole_grams("cabbage", 50.0, "1/2 large head cabbage") == 454
     assert whole_grams("cabbage", 33.3, "1/3 small head cabbage") == pytest.approx(908 / 3)  # the release rounds
     assert whole_grams("cabbage", 150.0, "1 1/2 small cabbages") == pytest.approx(1362)
-    assert whole_grams("cauliflower", 25.0, "1 medium head cauliflower (about 1 1/2 lb.), trimmed") == 588
+    assert whole_grams("cauliflower", 25.0, "1 large head cauliflower, washed and trimmed") == 588
     assert whole_grams("lettuce", 2.5, "1/4 iceberg lettuce") == pytest.approx(539 / 4)
     assert whole_grams("broccoli", 20.0, "1 Broccoli") == 300
     # Leaves, florets and pieces are parts; a weight the release took from the wording, a cup, a head the
@@ -109,3 +109,56 @@ def test_a_whole_head_the_release_weighed_as_one_leaf_counts_at_a_heads_weight()
     assert whole_grams("cabbage", 908.0, "1 head cabbage, cored and shredded") == 908
     assert whole_grams("cabbage", 100.0, None) == 100
     assert whole_grams("bok_choy", 85.0, "1 small head bok choy") == 85
+
+
+def test_a_whole_head_counts_at_the_weight_its_line_states():
+    # "Colcannon" (release lines, review of #210): "1 small head cabbage (about 1 lb.)" weighed at 100 g, one leaf.
+    # At a head's 908 g it was half cabbage and led; at the pound its line states it is a third, under 2 lb of potato.
+    colcannon = [
+        ("potato", 907.2, "2 lb. potatoes, scrubbed"),
+        ("cabbage", 100.0, "1 small head cabbage (about 1 lb.), cored and shredded"),
+        ("milk", 305.0, "1 to 1 1/2 c. milk"),
+        ("butter", 84.8, "1/2 to 1 stick unsalted butter"),
+    ]
+    assert vegetable_share(colcannon) == pytest.approx(453.592 / (453.592 + 907.2))
+    assert not vegetable_led(colcannon)
+    assert whole_grams("cauliflower", 25.0, "1 medium head cauliflower (about 1 1/2 lb.), trimmed") == pytest.approx(
+        680.388
+    )
+    assert whole_grams("cabbage", 100.0, "1 medium (about 1 1/2 lb.) head cabbage") == pytest.approx(680.388)
+    assert whole_grams("cabbage", 100.0, "1 cabbage (500 g), shredded") == 500
+    assert whole_grams("cabbage", 100.0, "1 green cabbage, 2 lb") == pytest.approx(907.184)
+    assert whole_grams("lettuce", 10.0, "1 salad greens 16 oz") == pytest.approx(453.592)
+    # A volume is not a weight: the head's weight stands.
+    assert whole_grams("cauliflower", 25.0, "1 medium cauliflower, separated (4 c.)") == 588
+
+
+def test_a_line_whose_wording_names_meat_or_fish_is_meat_whatever_the_release_mapped_it_to():
+    # "Mexican Chicken Salad In Tortilla Bowls" (release lines, review of #210): its chicken is in a line the
+    # release mapped to garlic alone, so by ingredients it was a vegetable dish at 0.511.
+    salad = [
+        ("monterey_jack", 84.8, "3/4 cup shredded reduced-fat monterey jack cheese"),
+        ("mayo", 41.2, "3 tablespoons low-fat mayonnaise"),
+        ("sour_cream", 43.1, "3 tablespoons nonfat sour cream"),
+        ("cilantro", 2.0, "2 tablespoons chopped cilantro"),
+        ("jalapeno", 5.6, "1 tablespoon chopped jalapeno"),
+        ("garlic", 3.0, "1 garlic cloves, minced or 4 ounces cooked chicken, cut up into bite size pieces"),
+        ("tortilla", 180.0, "4 large tortillas"),
+        ("lettuce", 188.0, "4 cups shredded lettuce"),
+        ("tomato", 123.0, "1 large tomatoes, cut into bite sized pieces"),
+    ]
+    assert vegetable_share(salad) > 0.5 and not vegetable_led(salad)
+    assert vegetable_led([line for line in salad if line[0] != "garlic"] + [("garlic", 3.0, "1 garlic clove")])
+    # Wording that names meat or fish only as a flavour, an egg, a mushroom, a stand-in or a part of a pepper is
+    # not meat (release lines of vegetable dishes).
+    for name, text in (
+        ("chicken_or_veg_broth", "1/4 cup chicken or vegetable broth"),
+        ("bouillon", "1 chicken stock cube"),
+        ("ramen", "flavor packet (envelope) of chicken Ramen noodles"),
+        ("sambal_oelek", "2/3 cup sambal or shrimp paste"),
+        ("egg", "12 eggs (duck eggs may be used)"),
+        ("jalapeno", "1 small jalapeno, ribs and seeds removed, minced (optional)"),
+        ("mushroom", "1/8 lb oyster mushroom"),
+        ("vegetarian_ham", "1/2 cup vegetarian ham, cubed"),
+    ):
+        assert not meat_or_fish(name, text), text

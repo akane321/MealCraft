@@ -21,6 +21,7 @@ counted as not a vegetable, so it never makes a dish vegetable-led.
 A whole cabbage, cauliflower, lettuce or broccoli written without a unit ("1 small head cabbage",
 "1/2 cauliflower") is weighed by release v2.1 as one leaf or floret: 100 g, 25 g, 10 g, 20 g. Such a
 line is recognised by its grams being exactly its count times that piece weight, and is counted at the
+weight the line states for itself ("1 small head cabbage (about 1 lb.)" is 454 g), or else at the
 release's own weight for a head of that vegetable (`WHOLE`). Only the share reads this; shopping keeps
 the release's grams.
 
@@ -32,7 +33,9 @@ vegetable dishes. Yogurt raitas and tomato-heavy rice dishes still reach it.
 素菜 has no meat (owner, 2026-10-02): a dish with a line of meat, poultry, fish or seafood never fills the
 role, however little of it there is. Meat or fish is an ingredient of animal flesh (the release's
 `dietary_origin`), except the seasonings, stocks and cooking fats made from it (`SEASONING_FROM_FLESH`):
-fish sauce and Worcestershire flavour a dish the way salt does. Eggs and dairy are not meat.
+fish sauce and Worcestershire flavour a dish the way salt does. Eggs and dairy are not meat. A line whose
+wording names a meat or fish the release mapped to something else is meat too: "1 garlic cloves, minced
+or 4 ounces cooked chicken" is mapped to garlic alone (`MEAT_WORDS`).
 
 The role is the one the profile editor and the shape change call `vegetable` (a second one is
 `vegetable-2`), as the main dish is the role called `main`; a household's other roles are unchanged.
@@ -202,8 +205,23 @@ WHOLE = {
 }
 # Lines that count parts of the vegetable, not whole ones ("14 leaves green cabbage", "20 broccoli florets").
 PARTS = re.compile(r"\b(?:leaf|leaves|florets?|spears?|hearts?|handfuls?|pieces?)(?![a-z])", re.IGNORECASE)
-# The count a line starts with: "1", "1/2", "1 1/2", "0.25".
-COUNT = re.compile(r"\s*(?:(\d+)\s+(?=\d+/))?(\d+(?:\.\d+)?)(?:/(\d+))?")
+# A number: "1", "1/2", "1 1/2", "0.25".
+NUMBER = r"(?:(\d+)\s+(?=\d+/))?(\d+(?:\.\d+)?)(?:/(\d+))?"
+# The count a line starts with.
+COUNT = re.compile(rf"\s*{NUMBER}")
+# A weight a line states for itself: "(about 1 lb.)", "(500 g)", "16 oz", "(2-pound)".
+WEIGHT = re.compile(rf"{NUMBER}[\s-]*(lb|pound|oz|ounce|kg|g|gram)s?\b", re.IGNORECASE)
+GRAMS_PER = {"lb": 453.592, "pound": 453.592, "oz": 28.3495, "ounce": 28.3495, "kg": 1000.0, "g": 1.0, "gram": 1.0}
+# Meat or fish named in a line's wording ("or 4 ounces cooked chicken"), not as what flavours a stock, a sauce, a
+# paste, instant ramen or eggs ("chicken broth", "shrimp paste", "chicken Ramen noodles", "duck eggs"), and not
+# a mushroom or a vegetarian stand-in ("oyster mushroom", "vegetarian ham").
+MEAT_WORDS = re.compile(
+    r"(?<!vegetarian )(?<!vegan )(?<!mock )\b(?:chicken|beef|pork|bacon|ham|turkey|lamb|mutton|veal|sausages?|salami"
+    r"|pepperoni|chorizo|prosciutto|pancetta|duck|fish|salmon|tuna|cod|shrimps?|prawns?|crabs?|crabmeat|lobsters?"
+    r"|clams?|mussels?|oysters?|scallops?|squid|octopus|anchov(?:y|ies)|sardines?)\b"
+    r"(?![\s-]*(?:stock|broth|bouillon|consomm|sauce|paste|flavou?r|ramen|eggs?|mushrooms?))",
+    re.IGNORECASE,
+)
 
 
 @cache
@@ -232,14 +250,23 @@ def food_groups() -> dict[str, tuple[str, str, str]]:
     return groups | {name: found for name in entries if name not in groups and (found := release(name))}
 
 
+def _number(whole: str | None, numerator: str, denominator: str | None) -> float:
+    return int(whole or 0) + float(numerator) / int(denominator or 1)
+
+
 def whole_grams(name: str, grams, text: str | None):
-    """A line's grams; a whole vegetable the release weighed as one leaf or floret (`WHOLE`) at a head's weight."""
+    """A line's grams; a whole vegetable the release weighed as one leaf or floret (`WHOLE`) at the weight the
+    line states, or else at a head's weight."""
     if name not in WHOLE or not grams or not text or PARTS.search(text) or not (found := COUNT.match(text)):
         return grams
-    whole, numerator, denominator = found.groups()
-    count = int(whole or 0) + float(numerator) / int(denominator or 1)
+    count = _number(*found.groups())
     piece, head = WHOLE[name]
-    return count * head if math.isclose(float(grams), count * piece, abs_tol=0.05) else grams
+    if not math.isclose(float(grams), count * piece, abs_tol=0.05):
+        return grams
+    if stated := WEIGHT.search(text):
+        *number, unit = stated.groups()
+        return _number(*number) * GRAMS_PER[unit.lower()]
+    return count * head
 
 
 def vegetable_share(lines: Iterable[tuple]) -> float | None:
@@ -259,17 +286,22 @@ def vegetable_share(lines: Iterable[tuple]) -> float | None:
     return vegetables / total if total else None
 
 
-def meat_or_fish(name: str) -> bool:
-    """Meat, poultry, fish or seafood: animal flesh that is not a seasoning, stock or fat made from it."""
+def meat_or_fish(name: str, text: str | None = None) -> bool:
+    """Meat, poultry, fish or seafood: animal flesh that is not a seasoning, stock or fat made from it, or a line
+    whose wording names one (`MEAT_WORDS`) that the release mapped to something else."""
     release, _, origin = food_groups().get(name, (name, None, None))
-    return origin == "flesh" and release not in SEASONING_FROM_FLESH
+    return release not in SEASONING_FROM_FLESH and (origin == "flesh" or bool(text and MEAT_WORDS.search(text)))
 
 
 def vegetable_led(lines: Iterable[tuple]) -> bool:
     """At least half vegetables (`vegetable_share`) and no line of meat or fish, weighed or not."""
     lines = list(lines)
     share = vegetable_share(lines)
-    return share is not None and share >= VEGETABLE_LED_SHARE and not any(meat_or_fish(line[0]) for line in lines)
+    return (
+        share is not None
+        and share >= VEGETABLE_LED_SHARE
+        and not any(meat_or_fish(name, *text) for name, _, *text in lines)
+    )
 
 
 def vegetable_role(role_id: str) -> bool:

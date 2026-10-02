@@ -99,7 +99,9 @@ Since 2026-10-02 a vegetable role (`vegetable`, `vegetable-2`) takes only a
 dish led by vegetables with no meat or fish, as the product's does (owner
 decisions 2026-10-02; the definition is `backend/app/planning/vegetable_led.py`,
 which also weighs a whole cabbage, cauliflower, lettuce or broccoli the release
-weighed as one leaf at a head's weight). Every developer label stayed proven
+weighed as one leaf at the weight its line states, or else at a head's weight,
+and counts a line whose wording names meat or fish as meat whatever the release
+mapped it to). Every developer label stayed proven
 under it. Protocol v2 labels keep the old rule.
 
 ## 3. Categories
