@@ -1780,6 +1780,38 @@ def test_a_turn_past_its_deadline_still_answers_and_records_its_requests(
     assert run["used_llm_calls"] == len(sent) > 0
 
 
+def test_a_turn_that_fails_past_its_deadline_keeps_its_own_error(recipe_client: TestClient, monkeypatch) -> None:
+    """A failed turn's requests are recorded as it fails. Applying the deadline then raised a budget error
+    in place of the turn's own (HTTP 409 "wall-time budget exceeded"), and the run recorded that instead."""
+    from app.orchestration.run_lifecycle import AgentRunLifecycle
+    from app.orchestration.runtime import BoundedAgentOrchestrator
+
+    sent = _openai_answered_in_process(monkeypatch, {"household_size": 2})
+    created = recipe_client.post("/api/agent/sessions", json={"message": "Dinners for two"}).json()
+    sent.clear()
+    monkeypatch.setattr(AgentRunLifecycle, "_is_expired", staticmethod(lambda run, moment: bool(sent)))
+    process = BoundedAgentOrchestrator.process
+
+    def fails_after_the_model_answered(self, *args, **kwargs):
+        process(self, *args, **kwargs)
+        raise RuntimeError("the turn's own failure")
+
+    monkeypatch.setattr(BoundedAgentOrchestrator, "process", fails_after_the_model_answered)
+
+    with pytest.raises(RuntimeError, match="the turn's own failure"):
+        recipe_client.post(
+            f"/api/agent/sessions/{created['id']}/messages", json={"message": "Plan the dinners for 3 people instead"}
+        )
+
+    run = _latest_run(recipe_client, created["id"])
+    assert (run["status"], run["termination_reason_code"], run["error_code"]) == (
+        "failed",
+        "UNHANDLED_ERROR",
+        "RuntimeError",
+    )
+    assert run["used_llm_calls"] == len(sent) > 0
+
+
 def test_a_swap_previewed_without_an_assistant_run_is_counted_for_the_console(
     recipe_client: TestClient, monkeypatch
 ) -> None:
