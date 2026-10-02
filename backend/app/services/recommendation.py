@@ -1,5 +1,8 @@
+from collections import Counter
+
 from app.models.recipe import Recipe
 from app.planning.grocery_estimator import GroceryEstimator
+from app.planning.product_path import meals_of_the_day
 from app.planning.recommendation_engine import CANDIDATE_LIMIT, RecipeRecommendationEngine
 from app.repositories.recipe import RecipeRepository
 from app.schemas.recommendation import (
@@ -28,7 +31,7 @@ class RecipeRecommendationService:
         recipes: list[Recipe] | None = None,
         priced_release_only: bool = False,
     ) -> RecipeRecommendationCollectionResponse:
-        """Rank the catalog and keep the best CANDIDATE_LIMIT within budget.
+        """Rank the catalog and keep the best CANDIDATE_LIMIT within budget, of each course for a composed meal.
 
         The planner cannot verify a plan containing an unpriced recipe. With
         `priced_release_only`, release recipes whose products are not all mapped are
@@ -41,11 +44,18 @@ class RecipeRecommendationService:
         warnings: list[str] = []
         recipes_by_id = {recipe.id: recipe for recipe in recipes}
         enriched = []
+        # A composed meal fills each role from its own courses. Kept as one list, the quickest mains crowded
+        # out the rest: the 2026-10-02 walkthrough's 500 held 12 of its 178 soups.
+        per_course = meals_of_the_day(constraints) is not None
+        kept: Counter = Counter()
 
         for recommendation in recommendations:
-            if len(enriched) == CANDIDATE_LIMIT:
-                break
             recipe = recipes_by_id[recommendation.recipe.id]
+            course = (recipe.course or "main") if per_course else None
+            if kept[course] == CANDIDATE_LIMIT:
+                if per_course:
+                    continue
+                break
             estimation_constraints = (
                 constraints if deduct_pantry_from_cost else constraints.model_copy(update={"available_ingredients": []})
             )
@@ -77,6 +87,7 @@ class RecipeRecommendationService:
                     f"Estimated ingredient-use cost is S${estimate.consumed_total_sgd:.2f}; "
                     f"buying the required packages costs S${estimate.purchase_total_sgd:.2f}."
                 )
+            kept[course] += 1
             enriched.append(
                 recommendation.model_copy(
                     update={

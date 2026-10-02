@@ -34,6 +34,9 @@ SHAPES = {
     "dinner with soup": {"dinner": DINNER["main, vegetable and soup"]},
 }
 BUDGETS = {"lunch + dinner": (None, 100.0, 200.0), "three meals": (None, 180.0), "dinner with soup": (None, 110.0)}
+# The 2026-10-02 walkthrough household (`tests/test_varied_weeks.py`): dinner with soup for S$100, a peanut
+# allergy, no pork and the profile's hour to cook.
+WALKTHROUGH = {"allergens": ["peanut"], "excluded_ingredients": ["pork"], "max_cooking_time_minutes": 60}
 
 
 def timed(plans, request: WeeklyMealPlanRequest, repeats: int) -> str:
@@ -79,20 +82,22 @@ def main() -> int:
         catalog = {"scenario": {"recipe_candidate_slugs": [json.loads(line)["recipe_id"] for line in lines]}}
         with product_database(catalog) as factory, factory() as session:
             plans = build_meal_plan_service(session, HOUSEHOLD)
-            for name, meals in SHAPES.items():
-                for budget in BUDGETS[name]:
-                    request = WeeklyMealPlanRequest.model_validate(
-                        {
-                            "start_date": "2026-09-28",
-                            "household_size": 2,
-                            "max_cooking_time_minutes": 240,
-                            "weekly_budget_sgd": budget,
-                            "plan_shape": {"meals": meals},
-                            "pricing_mode": "fixture",
-                        }
-                    )
-                    label = f"{name}, {'no budget' if budget is None else f'S${budget:.0f}'}"
-                    print(f"{label:28} {timed(plans, request, args.repeats)}", flush=True)
+            cases = [(name, meals, budget, {}) for name, meals in SHAPES.items() for budget in BUDGETS[name]]
+            cases.append(("walkthrough 2026-10-02", SHAPES["dinner with soup"], 100.0, WALKTHROUGH))
+            for name, meals, budget, household in cases:
+                request = WeeklyMealPlanRequest.model_validate(
+                    {
+                        "start_date": "2026-09-28",
+                        "household_size": 2,
+                        "max_cooking_time_minutes": 240,
+                        "weekly_budget_sgd": budget,
+                        "plan_shape": {"meals": meals},
+                        "pricing_mode": "fixture",
+                        **household,
+                    }
+                )
+                label = f"{name}, {'no budget' if budget is None else f'S${budget:.0f}'}"
+                print(f"{label:34} {timed(plans, request, args.repeats)}", flush=True)
     for path in args.episodes:
         episode = json.loads(path.read_text(encoding="utf-8"))
         with product_database(episode) as factory, factory() as session:
