@@ -44,6 +44,8 @@ Available endpoints:
 - GET /api/ops/config/history
 - PUT /api/ops/config/{key}
 - GET /api/ops/experiments
+- GET /api/ops/experiments/compare?ids={run_a},{run_b}
+- GET /api/ops/experiments/{run_id}
 - POST /api/ops/experiments
 - GET /api/ops/users
 - GET /api/ops/users/{user_id}
@@ -112,6 +114,24 @@ zero paid-model usage. A retry with the same idempotency key returns the same
 run; attempt fencing prevents an expired worker from replacing a completed
 artifact. Planning results are developer diagnostics and are not held-out
 claims.
+
+`GET /api/ops/experiments/{run_id}` is read-only and returns the stored
+case-level report plus a machine-derived reproducibility assessment. A record
+is complete only when the succeeded run contains its code and parameter
+digests, fixed dataset path plus file and semantic digests, runner/source,
+product snapshot, explicit seed, repeats, duration, paid-usage declaration and
+claim scope. Legacy rows remain inspectable but are labelled incomplete rather
+than silently treated as citable. The endpoint never reads an arbitrary path;
+it returns only the artifact already attached to the selected experiment row.
+
+`GET /api/ops/experiments/compare?ids={run_a},{run_b}` compares exactly two
+distinct experiment records. It reports evidence-context matches,
+configuration changes, metrics and failure-mechanism counts. Numeric metric
+deltas are emitted only when both runs succeeded and their complete dataset,
+runner, code, product-snapshot, seed, repeat and developer-claim scope fields
+match; otherwise `compatible=false` explains the mismatch and every delta is
+null. This is a developer diagnostic comparison, not the separate held-out
+final-comparison action.
 - PUT /api/household-profiles/{profile_id}
 - GET /api/household-profiles/{profile_id}/versions
 - POST /api/household-profiles/{profile_id}/plans

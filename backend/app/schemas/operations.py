@@ -272,6 +272,48 @@ class ExperimentRun(BaseModel):
     duration_seconds: float | None
 
 
+class ExperimentReproducibility(BaseModel):
+    complete: bool
+    citation_allowed: bool
+    claim_scope: str
+    missing: list[str]
+    warnings: list[str]
+
+
+class ExperimentDetail(ExperimentRun):
+    reproducibility: ExperimentReproducibility
+    report: dict[str, Any] | None
+
+
+class ExperimentComparisonRow(BaseModel):
+    key: str
+    a: Any = None
+    b: Any = None
+    delta: float | None = None
+    matches: bool | None = None
+
+
+class ExperimentCaseDifference(BaseModel):
+    case_id: str
+    condition: str
+    a_status: str | None
+    b_status: str | None
+    failures_gained: list[str]
+    failures_lost: list[str]
+
+
+class ExperimentComparison(BaseModel):
+    runs: list[ExperimentRun]
+    compatible: bool
+    reasons: list[str]
+    evidence: list[ExperimentComparisonRow]
+    configurations: list[ExperimentComparisonRow]
+    metrics: list[ExperimentComparisonRow]
+    failure_mechanisms: list[ExperimentComparisonRow]
+    case_differences: list[ExperimentCaseDifference]
+    claim_scope: str
+
+
 class ExperimentCollection(BaseModel):
     items: list[ExperimentRun]
     evaluations: list[dict[str, Any]]

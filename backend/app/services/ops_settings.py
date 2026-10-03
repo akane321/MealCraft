@@ -22,6 +22,8 @@ from app.models.platform import AuditEvent, OperationRun, RuntimeSetting, User
 from app.orchestration.run_lifecycle import stable_digest
 from app.schemas.operations import (
     ExperimentCollection,
+    ExperimentComparison,
+    ExperimentDetail,
     ExperimentRequest,
     ExperimentRun,
     RuntimeSettingCollection,
@@ -55,6 +57,10 @@ EVALUATIONS: dict[str, dict[str, Any]] = {
         "keys": ["agent_parser_provider"],
     },
 }
+
+
+class ExperimentNotFoundError(LookupError):
+    """The requested row is not an experiment visible through this module."""
 
 
 class SettingsService:
@@ -160,6 +166,18 @@ class SettingsService:
             ]
             + planning_experiment_descriptors(),
         )
+
+    def experiment(self, run_id: int) -> ExperimentDetail:
+        row = self.database.get(OperationRun, run_id)
+        if row is None or row.run_type not in (EXPERIMENT_RUN_TYPE, PLANNING_EXPERIMENT_RUN_TYPE):
+            raise ExperimentNotFoundError(run_id)
+        return experiment_detail(row)
+
+    def compare_experiments(self, run_ids: list[int]) -> ExperimentComparison:
+        if len(run_ids) != 2 or len(set(run_ids)) != 2 or any(run_id < 1 for run_id in run_ids):
+            raise ValueError("comparison requires two distinct positive experiment ids")
+        details = [self.experiment(run_id) for run_id in run_ids]
+        return experiment_comparison(details[0], details[1])
 
     def run_experiment(self, request: ExperimentRequest, *, actor_user_id: int) -> ExperimentRun:
         evaluation = EVALUATIONS[request.evaluation]
@@ -286,3 +304,197 @@ def experiment_view(row: OperationRun) -> ExperimentRun:
         created_at=row.created_at,
         duration_seconds=_duration(row.started_at, row.finished_at),
     )
+
+
+def experiment_detail(row: OperationRun) -> ExperimentDetail:
+    summary = experiment_view(row)
+    data = row.artifact_references[0]["data"]
+    conditions = summary.conditions
+    dataset = conditions.get("dataset") if isinstance(conditions.get("dataset"), dict) else {}
+    paid_model = conditions.get("paid_model") if isinstance(conditions.get("paid_model"), dict) else {}
+    required = {
+        "code_commit": conditions.get("code_commit"),
+        "parameter_digest": conditions.get("parameter_digest"),
+        "dataset.path": dataset.get("path"),
+        "dataset.file_sha256": dataset.get("file_sha256"),
+        "dataset.semantic_sha256": dataset.get("semantic_sha256"),
+        "runner": conditions.get("runner"),
+        "code_source": conditions.get("code_source"),
+        "product_snapshot_sha256": conditions.get("product_snapshot_sha256"),
+        "repeats": conditions.get("repeats"),
+        "duration_seconds": conditions.get("duration_seconds") or summary.duration_seconds,
+        "paid_model.used": paid_model.get("used") if "used" in paid_model else None,
+        "paid_model.budget_usd": paid_model.get("budget_usd"),
+        "paid_model.usage_usd": paid_model.get("usage_usd"),
+    }
+    missing = [name for name, value in required.items() if value is None]
+    if conditions.get("conditions_complete") is not True:
+        missing.append("conditions_complete")
+    if "seed" not in conditions:
+        missing.append("seed")
+    claim_scope = str(conditions.get("citation_scope") or "not_declared")
+    if claim_scope == "not_declared":
+        missing.append("citation_scope")
+    complete = row.status == "succeeded" and not missing
+    warnings = ["Developer diagnostics do not support held-out or production-performance claims."]
+    if row.run_type == EXPERIMENT_RUN_TYPE:
+        warnings.append("Legacy inline run: reproducibility fields may be incomplete.")
+    if row.status != "succeeded":
+        warnings.append("Only a succeeded run can be cited.")
+    return ExperimentDetail(
+        **summary.model_dump(),
+        reproducibility={
+            "complete": complete,
+            "citation_allowed": complete and claim_scope == "developer_diagnostic_only",
+            "claim_scope": claim_scope,
+            "missing": sorted(set(missing)),
+            "warnings": warnings,
+        },
+        report=data.get("report") if isinstance(data.get("report"), dict) else None,
+    )
+
+
+def experiment_comparison(a: ExperimentDetail, b: ExperimentDetail) -> ExperimentComparison:
+    reasons: list[str] = []
+    if a.status != "succeeded" or b.status != "succeeded":
+        reasons.append("Both runs must have succeeded.")
+    if a.evaluation != b.evaluation:
+        reasons.append("The runs use different evaluation registries.")
+    if not a.reproducibility.complete or not b.reproducibility.complete:
+        reasons.append("Both runs need complete recorded conditions.")
+    evidence_fields = [
+        ("dataset_digest", ("dataset", "semantic_sha256"), "Dataset digest differs or is missing."),
+        ("runner", ("runner",), "Runner protocol differs or is missing."),
+        ("code_commit", ("code_commit",), "Code revision differs or is missing."),
+        ("product_snapshot", ("product_snapshot_sha256",), "Product snapshot differs or is missing."),
+        ("seed", ("seed",), "Seed differs or is missing."),
+        ("repeats", ("repeats",), "Repeat count differs or is missing."),
+        ("claim_scope", ("citation_scope",), "Claim scope differs or is missing."),
+    ]
+    evidence = []
+    for key, path, message in evidence_fields:
+        left = _condition_value(a.conditions, path)
+        right = _condition_value(b.conditions, path)
+        present = (left is not None and right is not None) or (key == "seed" and left is None and right is None)
+        matches = present and left == right
+        evidence.append({"key": key, "a": left, "b": right, "matches": matches})
+        if not matches:
+            reasons.append(message)
+    if (
+        a.reproducibility.claim_scope != "developer_diagnostic_only"
+        or b.reproducibility.claim_scope != "developer_diagnostic_only"
+    ):
+        reasons.append("Only developer-diagnostic comparison is supported here.")
+    compatible = not reasons
+    return ExperimentComparison(
+        runs=[ExperimentRun.model_validate(a.model_dump()), ExperimentRun.model_validate(b.model_dump())],
+        compatible=compatible,
+        reasons=list(dict.fromkeys(reasons)),
+        evidence=evidence,
+        configurations=_comparison_rows(a.configuration, b.configuration),
+        metrics=_comparison_rows(a.metrics, b.metrics, deltas=compatible),
+        failure_mechanisms=_comparison_rows(
+            _mapping(a.conditions.get("failure_mechanisms")),
+            _mapping(b.conditions.get("failure_mechanisms")),
+        ),
+        case_differences=_case_differences(a.report, b.report),
+        claim_scope="developer_diagnostic_only" if compatible else "not_comparable",
+    )
+
+
+def _condition_value(conditions: dict[str, Any], path: tuple[str, ...]) -> Any:
+    value: Any = conditions
+    for key in path:
+        if not isinstance(value, dict):
+            return None
+        value = value.get(key)
+    return value
+
+
+def _mapping(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _comparison_rows(a: dict[str, Any], b: dict[str, Any], *, deltas: bool = False) -> list[dict[str, Any]]:
+    rows = []
+    for key in sorted(set(a) | set(b)):
+        left = a.get(key)
+        right = b.get(key)
+        delta = None
+        if (
+            deltas
+            and isinstance(left, (int, float))
+            and not isinstance(left, bool)
+            and isinstance(right, (int, float))
+            and not isinstance(right, bool)
+        ):
+            delta = round(float(right) - float(left), 4)
+        rows.append({"key": key, "a": left, "b": right, "delta": delta, "matches": left == right})
+    return rows
+
+
+def _case_differences(a: dict[str, Any] | None, b: dict[str, Any] | None) -> list[dict[str, Any]]:
+    left = _indexed_case_rows(a)
+    right = _indexed_case_rows(b)
+    differences = []
+    for key in sorted(set(left) | set(right)):
+        a_row = left.get(key, {})
+        b_row = right.get(key, {})
+        a_failures = _failure_codes(a_row)
+        b_failures = _failure_codes(b_row)
+        a_status = _case_status(a_row)
+        b_status = _case_status(b_row)
+        gained = sorted(b_failures - a_failures)
+        lost = sorted(a_failures - b_failures)
+        if gained or lost or a_status != b_status:
+            differences.append(
+                {
+                    "case_id": key[0],
+                    "condition": key[1],
+                    "a_status": a_status,
+                    "b_status": b_status,
+                    "failures_gained": gained,
+                    "failures_lost": lost,
+                }
+            )
+    return differences
+
+
+def _indexed_case_rows(report: dict[str, Any] | None) -> dict[tuple[str, str], dict[str, Any]]:
+    rows = report.get("runs", []) if isinstance(report, dict) else []
+    indexed = {}
+    for row in rows:
+        if not isinstance(row, dict) or not row.get("case_id"):
+            continue
+        condition = str(row.get("preset") or "paired_gate")
+        if row.get("repeat") is not None:
+            condition = f"{condition} repeat {row['repeat']}"
+        indexed[(str(row["case_id"]), condition)] = row
+    return indexed
+
+
+def _failure_codes(value: Any) -> set[str]:
+    codes: set[str] = set()
+    if isinstance(value, dict):
+        if value.get("code") and value.get("status") != "passed":
+            codes.add(str(value["code"]))
+        for nested in value.values():
+            codes.update(_failure_codes(nested))
+    elif isinstance(value, list):
+        for nested in value:
+            codes.update(_failure_codes(nested))
+    return codes
+
+
+def _case_status(row: dict[str, Any]) -> str | None:
+    if row.get("status") is not None:
+        return str(row["status"])
+    conditions = row.get("conditions")
+    if isinstance(conditions, dict):
+        selected = conditions.get("final_gate_on")
+        if isinstance(selected, dict):
+            audit = selected.get("audit")
+            if isinstance(audit, dict) and audit.get("status") is not None:
+                return str(audit["status"])
+            return "no_selection" if selected.get("candidate_index") is None else "selected"
+    return None
