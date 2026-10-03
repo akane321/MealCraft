@@ -36,6 +36,8 @@ Available endpoints:
 - GET /api/ops/services
 - POST /api/ops/services/{name}/check
 - GET /api/ops/runs?type={run_type}&status={status}&since={timestamp}&limit={limit}
+- POST /api/ops/jobs
+- POST /api/ops/jobs/{run_id}/cancel
 - POST /api/ops/replay/agent/{run_id}
 - POST /api/ops/replay/planning/{run_id}
 - GET /api/ops/replays
@@ -175,11 +177,28 @@ The run list accepts optional exact `type` and `status` filters, an inclusive
 Rows are ordered by creation time and ID, newest first. `total` is the complete
 number matching the filters before the limit is applied.
 
-Each list item contains the trace ID, type, status, triggering user ID, input
-digest, safe version and provider fields, error classification, timestamps and
-a derived duration when both start and finish are known. It deliberately omits
+Each list item contains the numeric run ID, trace ID, type, status, attempt
+count, triggering user ID, input digest, safe version and provider fields,
+error classification, timestamps and a derived duration when both start and
+finish are known. It deliberately omits
 `error_detail`, warnings and artifact references. Both endpoints are read-only
 and neither creates an `AuditEvent` nor changes an `OperationRun`.
+
+## Operations job actions
+
+`POST /api/ops/jobs` accepts only the registered `catalog_import` job, one of
+the fixed `reference` or `release_v2` sources, and `confirm: true`. It requires
+an `Idempotency-Key` header plus the session CSRF token. Replaying the same key
+and input returns the stored job without another audit event; reusing the key
+for different input returns HTTP 409. No command, SQL, module, URL or filesystem
+path is accepted.
+
+`POST /api/ops/jobs/{run_id}/cancel` also requires `confirm: true` and CSRF. It
+can cancel only a durable job that is still queued or running. A cancellation
+clears the live lease and appends a separate `job_cancellation` operation and
+audit event; it never deletes the target or rewrites a terminal run. Completed
+jobs return HTTP 409 and non-job identifiers return HTTP 404. The attempt count
+fences an older worker from completing a run after cancellation.
 
 ## Household Profiles
 

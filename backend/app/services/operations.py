@@ -100,9 +100,11 @@ class OperationsService:
         if run.started_at is not None and run.finished_at is not None:
             duration_seconds = max((run.finished_at - run.started_at).total_seconds(), 0.0)
         return OperationsRunSummary(
+            id=run.id,
             trace_id=run.trace_id,
             run_type=run.run_type,
             status=run.status,
+            attempt_count=run.attempt_count,
             triggered_by_user_id=run.triggered_by_user_id,
             input_digest=run.input_digest,
             code_commit=run.code_commit,

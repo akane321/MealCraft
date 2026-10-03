@@ -7,6 +7,18 @@ export function isConsoleAccount(actor: { user: { system_role: string } } | null
   return Boolean(actor && CONSOLE_ROLES.has(actor.user.system_role));
 }
 
+export function mayManageJobs(actor: { user: { system_role: string } } | null | undefined) {
+  return actor?.user.system_role === "operator" || actor?.user.system_role === "admin";
+}
+
+export function isJobCancellable(status: string) {
+  return status === "queued" || status === "running";
+}
+
+export function jobIdempotencyKey(timestamp: number, nonce: string) {
+  return `catalog-import-${timestamp}-${nonce}`;
+}
+
 export interface OpsModule {
   slug: string;
   label: string;

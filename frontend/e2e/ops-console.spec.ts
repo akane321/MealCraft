@@ -82,6 +82,7 @@ const path = (pathname: string) => (url: URL) => url.pathname === pathname;
 
 async function stubConsole(page: Page, role = "admin") {
   let signedIn = false;
+  let catalogJobs: Array<Record<string, unknown>> = [];
   await page.route(path("/api/auth/me"), route => route.fulfill(signedIn ? json(actor(role)) : json({ detail: "Authentication required" }, 401)));
   await page.route(path("/api/auth/login"), (route) => {
     signedIn = true;
@@ -91,6 +92,46 @@ async function stubConsole(page: Page, role = "admin") {
   await page.route(path("/api/ops/overview/series"), route => route.fulfill(json(series)));
   await page.route(path("/api/ops/tasks"), route => route.fulfill(json(tasks)));
   await page.route(path("/api/ops/tasks/planning/41"), route => route.fulfill(json(planningDetail)));
+  await page.route(path("/api/ops/runs"), route => route.fulfill(json({ items: catalogJobs, total: catalogJobs.length })));
+  await page.route(path("/api/ops/jobs"), (route: Route) => {
+    expect(route.request().method()).toBe("POST");
+    expect(route.request().headers()["x-csrf-token"]).toBe("csrf-test");
+    expect(route.request().headers()["idempotency-key"]).toMatch(/^catalog-import-[A-Za-z0-9-]+$/);
+    expect(route.request().postDataJSON()).toEqual({
+      name: "catalog_import",
+      arguments: { source: "reference" },
+      confirm: true,
+    });
+    const createdAt = "2026-10-03T08:00:00Z";
+    catalogJobs = [{
+      id: 301,
+      trace_id: "job-e2e-catalog-import",
+      run_type: "catalog_import",
+      status: "queued",
+      attempt_count: 0,
+      triggered_by_user_id: 7,
+      input_digest: "b".repeat(64),
+      code_commit: "42c1a60",
+      catalog_version: null,
+      product_snapshot_version: null,
+      policy_version: null,
+      algorithm_version: null,
+      provider_mode: null,
+      error_code: null,
+      created_at: createdAt,
+      started_at: null,
+      finished_at: null,
+      duration_seconds: null,
+    }];
+    return route.fulfill(json({ id: 301, trace_id: "job-e2e-catalog-import", name: "catalog_import", arguments: { source: "reference" }, status: "queued", attempt_count: 0, created: true, created_at: createdAt }, 201));
+  });
+  await page.route(path("/api/ops/jobs/301/cancel"), (route: Route) => {
+    expect(route.request().method()).toBe("POST");
+    expect(route.request().headers()["x-csrf-token"]).toBe("csrf-test");
+    expect(route.request().postDataJSON()).toEqual({ confirm: true });
+    catalogJobs = catalogJobs.map(job => ({ ...job, status: "cancelled", finished_at: "2026-10-03T08:01:00Z" }));
+    return route.fulfill(json({ id: 302, trace_id: "job-cancel-e2e", target_run_id: 301, previous_status: "queued", target_status: "cancelled", created_at: "2026-10-03T08:01:00Z" }, 201));
+  });
   await page.route(path("/api/ops/services"), route => route.fulfill(json(services)));
   await page.route(path("/api/ops/services/fairprice/check"), (route: Route) => {
     expect(route.request().method()).toBe("POST");
@@ -129,6 +170,21 @@ test("an administrator signs in, reads the overview, opens a task and runs a liv
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/ops-1-overview.png`, fullPage: true });
 
   await nav.getByRole("link", { name: "Tasks" }).click();
+  await expect(page.getByText("No catalog job has been recorded yet.")).toBeVisible();
+  await page.getByRole("button", { name: "Queue catalog import" }).click();
+  const queueConfirmation = page.getByRole("alertdialog");
+  await expect(queueConfirmation.getByRole("heading", { name: "Queue catalog import?" })).toBeVisible();
+  await queueConfirmation.getByRole("button", { name: "Queue job" }).click();
+  await expect(page.getByText("Catalog import #301 was queued.")).toBeVisible();
+  const catalogRow = page.getByRole("row").filter({ hasText: "Catalog import #301" });
+  await expect(catalogRow.getByText("queued", { exact: true })).toBeVisible();
+  await catalogRow.getByRole("button", { name: "Cancel job 301" }).click();
+  const cancelConfirmation = page.getByRole("alertdialog");
+  await expect(cancelConfirmation.getByRole("heading", { name: "Cancel job #301?" })).toBeVisible();
+  await cancelConfirmation.getByRole("button", { name: "Cancel job" }).click();
+  await expect(page.getByText("Cancellation recorded for job #301.")).toBeVisible();
+  await expect(catalogRow.getByText("cancelled", { exact: true })).toBeVisible();
+
   await page.getByRole("button", { name: "Planning run (beam-product-v1)" }).click();
   const drawer = page.getByRole("dialog");
   await expect(drawer.getByText("No week fits a S$40 budget.")).toBeVisible();
@@ -149,6 +205,15 @@ test("an administrator signs in, reads the overview, opens a task and runs a liv
 
   await nav.getByRole("link", { name: /^Data/ }).click();
   await expect(page.getByRole("heading", { name: "Recipes, ingredients and product mappings" })).toBeVisible();
+});
+
+test("a data reviewer can inspect the job queue but cannot operate it", async ({ page }) => {
+  await stubConsole(page, "data_reviewer");
+  await signIn(page);
+
+  await page.getByRole("navigation", { name: "Console" }).getByRole("link", { name: "Tasks" }).click();
+  await expect(page.getByText("Your console role can inspect jobs but cannot queue or cancel them.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Queue catalog import" })).toHaveCount(0);
 });
 
 test("a household account is told plainly it is not an administrator and kept out of /ops", async ({ page }) => {

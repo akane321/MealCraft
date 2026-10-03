@@ -170,6 +170,7 @@ def test_runs_are_filtered_ordered_bounded_and_redacted(operations_client) -> No
         catalog_version="catalog-v2",
         product_snapshot_version="products-v3",
         provider_mode="fixture",
+        attempt_count=2,
         error_code="SAFE_CLASSIFICATION",
         error_detail="token=must-not-leak",
         warnings=["internal warning is not a list-field contract"],
@@ -200,6 +201,8 @@ def test_runs_are_filtered_ordered_bounded_and_redacted(operations_client) -> No
     payload = response.json()
     assert payload["total"] == 1
     assert [item["trace_id"] for item in payload["items"]] == ["trace-newer"]
+    assert payload["items"][0]["id"] > 0
+    assert payload["items"][0]["attempt_count"] == 2
     assert payload["items"][0]["duration_seconds"] == 5.0
     assert payload["items"][0]["triggered_by_user_id"] == user_id
     serialized = response.text
