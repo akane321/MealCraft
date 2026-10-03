@@ -63,7 +63,7 @@ export function shapeChangeSummary(change: MealPlanShapeChange, dayLabel: (dayIn
   const meal = `${change.meal_type[0]!.toUpperCase()}${change.meal_type.slice(1)}`;
   const where = change.scope === "week" ? "for the rest of the week" : `on ${change.day_indexes.map(dayLabel).join(", ")}`;
   if (change.roles === null) return `No ${change.meal_type} ${where}`;
-  if (!change.removed.length) return `${meal} added ${where}`;
+  if (!change.removed.length && !change.kept) return `${meal} added ${where}`;
   const counts = new Map<string, number>();
   for (const item of change.roles) {
     // An optional dish is planned only when it fits the household's limits; say so rather than promise it.

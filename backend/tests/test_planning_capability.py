@@ -268,8 +268,9 @@ def test_adding_a_soup_to_one_dinner_replans_only_that_meal(composed_client):
     assert preview.status_code == 201, preview.text
     change = preview.json()["shape_change"]
     assert change["scope"] == "meal" and change["plan_shape"] is None
-    assert {d["role_id"] for d in change["added"]} == {"main", "vegetable", "soup"}
-    assert len(change["removed"]) == 2
+    # Friday's main and vegetable stay: only the soup is new, and nothing comes off.
+    assert [d["role_id"] for d in change["added"]] == ["soup"]
+    assert (change["removed"], change["kept"]) == ([], 2)
 
     applied = composed_client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm")
     assert applied.status_code == 200, applied.text
@@ -303,11 +304,11 @@ def test_dropping_a_meal_for_the_week_changes_this_weeks_shape_only(composed_cli
     assert last.status_code == 422 and "at least one meal" in last.json()["detail"]
 
 
-def _conversation_week(client):
+def _conversation_week(client, minutes=90):
     """A week of two-dish dinners planned and confirmed in the conversation: the session and the plan."""
     profile = {
         **_household_profile_payload(),
-        "max_cooking_time_minutes": 90,
+        "max_cooking_time_minutes": minutes,
         "budget_per_meal_sgd": None,
         "weekly_budget_sgd": None,
         "health_preferences": [],
@@ -412,14 +413,16 @@ def test_taking_the_vegetable_away_keeps_the_main_as_the_whole_meal(composed_cli
 def test_adding_a_soup_to_one_dinner_keeps_its_main_and_vegetable(composed_client):
     plan = _week_ahead(composed_client, COMPOSITION[:2])
     for day in (3, 4):
-        before = {d["role_id"]: d["recipe"]["slug"] for d in plan["days"] if d["day_index"] == day}
         preview = composed_client.post(
             f"/api/plans/{plan['id']}/shape/preview",
             json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [day]},
         ).json()
-        after = {d["role_id"]: d["recipe_slug"] for d in preview["shape_change"]["added"]}
-        assert {role: after[role] for role in before} == before
-        assert after["soup"] == "tomato-soup"
+        # The main and the vegetable stay where they are: only the soup is new.
+        change = preview["shape_change"]
+        assert [(d["role_id"], d["recipe_slug"]) for d in change["added"]] == [("soup", "tomato-soup")]
+        assert (change["removed"], change["kept"]) == ([], 2)
+    week = composed_client.post(f"/api/plans/{plan['id']}/replan/{preview['id']}/confirm").json()["plan"]
+    assert _dishes(week, 4) == {**_dishes(plan, 4), "soup": "tomato-soup"}
 
 
 def _catalog_session():
@@ -500,10 +503,12 @@ def test_a_change_that_goes_over_the_weekly_budget_is_saved_as_over_it(composed_
     plan = composed_client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": budget}).json()
     assert plan["grocery_estimate"]["within_weekly_budget"] is True
 
-    # A soup on the last day buys tomatoes the week did not need: the checkout total passes the budget.
+    # A soup on the last day buys tomatoes the week did not need: the checkout total passes the budget. (An
+    # optional soup is left out instead: the rest of the week leaves nothing of the budget at the checkout.)
+    soup = [*COMPOSITION[:2], {**COMPOSITION[2], "required": True}]
     preview = composed_client.post(
         f"/api/plans/{plan['id']}/shape/preview",
-        json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [7]},
+        json={"meal_type": "dinner", "roles": soup, "day_indexes": [7]},
     )
     assert preview.status_code == 201, preview.text
     applied = composed_client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm").json()["plan"]
@@ -523,3 +528,479 @@ def test_a_shape_change_nothing_fits_says_why_once(composed_client):
     assert dessert.status_code == 422, dessert.text
     # The conversation adds its own "I could not make that change: ", so the planner's reason comes bare.
     assert not dessert.json()["detail"].startswith("I could not"), dessert.json()["detail"]
+
+
+# A change the household asks for that goes over the weekly budget is still offered, with how far over it
+# goes, and the household confirms or discards it, as with a swap (owner decision 2026-10-02).
+THREE_DISHES = [COMPOSITION[0], COMPOSITION[1], {**COMPOSITION[2], "required": True}]
+
+
+def _budget_conversation_week(client, roles):
+    """A week of `roles` dinners planned in the conversation with a weekly budget it just fits."""
+    from datetime import date
+
+    profile = {
+        **_household_profile_payload(),
+        "max_cooking_time_minutes": 240,
+        "budget_per_meal_sgd": None,
+        "health_preferences": [],
+        "nutrition_targets": {},
+        "available_ingredients": [],
+        "plan_shape": {"meals": {"dinner": roles}},
+    }
+    request = {key: profile[key] for key in ("max_cooking_time_minutes", "pricing_mode", "plan_shape")}
+    unbudgeted = client.post(
+        "/api/plans/generate", json={**request, "start_date": date.today().isoformat(), "household_size": 2}
+    )
+    profile["weekly_budget_sgd"] = unbudgeted.json()["grocery_estimate"]["purchase_total_sgd"]
+    assert client.post("/api/household-profiles", json=profile).status_code == 201
+    session = client.post("/api/agent/sessions", json={"message": "Plan our week"}).json()
+    confirmed = client.post(f"/api/agent/sessions/{session['id']}/confirm")
+    assert confirmed.status_code == 200, confirmed.text
+    return session, confirmed.json()["plan"]
+
+
+def _spend_the_budget(client, plan, but_on_day):
+    """Swap the other days' chicken for salmon, which a swap may do over the budget: none of it is left."""
+    for dish in plan["days"]:
+        if dish["day_index"] != but_on_day and dish["recipe"]["slug"] == "chicken-roast":
+            preview = client.post(
+                f"/api/plans/{plan['id']}/replan/preview",
+                json={"entry_id": dish["entry_id"], "event_type": "REPLACE_MEAL"},
+            )
+            assert preview.status_code == 201, preview.text
+            client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm")
+    week = client.get(f"/api/plans/{plan['id']}").json()
+    assert week["grocery_estimate"]["within_weekly_budget"] is False
+    return week
+
+
+def _friday(plan) -> int:
+    from datetime import date
+
+    return next(d["day_index"] for d in plan["days"] if date.fromisoformat(d["planned_date"]).weekday() == 4)
+
+
+def _dishes(plan, day) -> dict[str, str]:
+    return {d["role_id"]: d["recipe"]["slug"] for d in plan["days"] if d["day_index"] == day}
+
+
+def test_a_shape_change_within_the_budget_is_offered_as_before(composed_client):
+    plan = _week_ahead(composed_client, COMPOSITION[:2])
+    roomy = composed_client.post(
+        "/api/plans/generate",
+        json={
+            **{key: plan[key] for key in ("start_date", "household_size")},
+            "max_cooking_time_minutes": 90,
+            "pricing_mode": "fixture",
+            "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
+            "weekly_budget_sgd": round(plan["grocery_estimate"]["purchase_total_sgd"] * 1.5, 2),
+        },
+    ).json()
+
+    preview = composed_client.post(
+        f"/api/plans/{roomy['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [5]},
+    ).json()
+
+    assert preview["over_budget_sgd"] is None
+    # The plan offered before over-budget changes existed (origin/main 407cd89): day 5's dishes and the soup.
+    added = {d["role_id"]: d["recipe_slug"] for d in preview["shape_change"]["added"]}
+    assert added == {"soup": "tomato-soup"}
+    assert preview["purchase_total_delta_sgd"] == 2.8
+    week = composed_client.post(f"/api/plans/{roomy['id']}/replan/{preview['id']}/confirm").json()["plan"]
+    assert _dishes(week, 5) == {**_dishes(roomy, 5), "soup": "tomato-soup"}
+    assert _dishes(week, 5) == {"main": "chicken-roast", "vegetable": "spinach-saute", "soup": "tomato-soup"}
+    assert week["grocery_estimate"]["within_weekly_budget"] is True
+
+
+def test_a_dish_the_budget_has_no_room_for_is_offered_with_how_far_over_it_goes(composed_client):
+    # A quick soup ranks before the tomato soup, but its quinoa costs more: over the budget, the cheaper comes.
+    database = _catalog_session()
+    database.add(_dish("quinoa-soup", "soup", "quinoa", 500, calories=150, prep=5, cook=5))
+    database.commit()
+    session, plan = _budget_conversation_week(composed_client, COMPOSITION[:2])
+    friday = _friday(plan)
+    week = _spend_the_budget(composed_client, plan, but_on_day=friday)
+    budget = week["grocery_estimate"]["weekly_budget_sgd"]
+
+    asked = composed_client.post(
+        f"/api/agent/sessions/{session['id']}/messages", json={"message": "Add a soup on Friday"}
+    ).json()
+    change = asked["pending_replan"]
+    assert change is not None and change["event_type"] == "CHANGE_SHAPE", asked["messages"][-1]["content"]
+    assert "tomato-soup" in {d["recipe_slug"] for d in change["shape_change"]["added"]}
+    over = change["over_budget_sgd"]
+    after = week["grocery_estimate"]["purchase_total_sgd"] + change["purchase_total_delta_sgd"]
+    assert over == round(after - budget, 2) > 0
+    # Said as the preview card says it, before anything changes.
+    assert f"This puts the week S${over:.2f} over your S${budget:.2f} budget." in asked["messages"][-1]["content"]
+
+    # Keep as is: the week stays exactly as it was.
+    composed_client.post(f"/api/agent/sessions/{session['id']}/replan/discard")
+    kept = composed_client.get(f"/api/plans/{plan['id']}").json()
+    assert (kept["revision"], kept["days"]) == (week["revision"], week["days"])
+
+    # Confirm: the soup is added and the week says it is over its budget.
+    composed_client.post(f"/api/agent/sessions/{session['id']}/messages", json={"message": "Add a soup on Friday"})
+    applied = composed_client.post(f"/api/agent/sessions/{session['id']}/replan/confirm").json()["plan"]
+    assert set(_dishes(applied, friday)) == {"main", "vegetable", "soup"}
+    assert applied["grocery_estimate"]["within_weekly_budget"] is False
+    assert applied["grocery_estimate"]["purchase_total_sgd"] == round(budget + over, 2)
+
+
+def test_another_soup_on_a_friday_that_has_one_keeps_its_dishes_over_the_budget(composed_client):
+    # The 2026-10-02 walkthrough: a household with a soup every night asked for one more on Friday. With no
+    # budget left it is still planned (over the budget), as another soup beside the dishes Friday has: a
+    # second soup re-opened the soup course, so Friday's main and vegetable used to be replaced as well.
+    from sqlalchemy import select
+
+    from app.models.recipe import Ingredient
+
+    database = _catalog_session()
+    soup = _dish("broccoli-soup", "soup", "broccoli", 250, calories=90, cook=20)
+    soup.recipe_ingredients[0].ingredient = database.scalars(
+        select(Ingredient).where(Ingredient.normalized_name == "broccoli")
+    ).one()
+    database.add(soup)
+    database.commit()
+    session, plan = _budget_conversation_week(composed_client, THREE_DISHES)
+    friday = _friday(plan)
+    week = _spend_the_budget(composed_client, plan, but_on_day=friday)
+    before = _dishes(week, friday)
+
+    asked = composed_client.post(
+        f"/api/agent/sessions/{session['id']}/messages", json={"message": "周五晚餐加一个汤"}
+    ).json()
+
+    reply = asked["messages"][-1]["content"]
+    change = asked["pending_replan"]
+    assert change is not None, reply
+    assert reply.startswith("Dinner with another soup on Friday."), reply
+    # The dishes Friday had stay; the new soup is the other one.
+    assert [d["recipe_slug"] for d in change["shape_change"]["added"]] == [
+        *({"tomato-soup", "broccoli-soup"} - {before["soup"]})
+    ]
+    assert (change["shape_change"]["removed"], change["shape_change"]["kept"]) == ([], 3)
+    # It needs no more than the broccoli the week buys: it costs nothing, so it is not said to put the
+    # week over its budget, though the week is still over it.
+    assert change["purchase_total_delta_sgd"] == 0
+    assert change["over_budget_sgd"] is None and "over your" not in reply
+
+
+def _broccoli_soup():
+    """A second soup in the catalog, on the broccoli the vegetables already buy."""
+    from sqlalchemy import select
+
+    from app.models.recipe import Ingredient
+
+    database = _catalog_session()
+    soup = _dish("broccoli-soup", "soup", "broccoli", 250, calories=90, cook=20)
+    soup.recipe_ingredients[0].ingredient = database.scalars(
+        select(Ingredient).where(Ingredient.normalized_name == "broccoli")
+    ).one()
+    database.add(soup)
+    database.commit()
+
+
+def test_another_soup_on_a_day_that_got_one_in_the_conversation_keeps_its_dishes(composed_client):
+    # The week plans main + vegetable; Friday got its soup from an earlier one-day change. "Another soup" is
+    # read from what Friday has, not from the week's shape, so Friday's three dishes stay and a second soup
+    # comes: read from the shape, it asked for main, vegetable and soup again and replanned all of Friday.
+    _broccoli_soup()
+    session, plan = _conversation_week(composed_client, minutes=240)  # four dishes take more than 90 minutes
+    friday = _friday(plan)
+    composed_client.post(f"/api/agent/sessions/{session['id']}/messages", json={"message": "Add a soup on Friday"})
+    week = composed_client.post(f"/api/agent/sessions/{session['id']}/replan/confirm").json()["plan"]
+    before = _dishes(week, friday)
+    assert set(before) == {"main", "vegetable", "soup"}
+
+    asked = composed_client.post(
+        f"/api/agent/sessions/{session['id']}/messages", json={"message": "周五晚餐加一个汤"}
+    ).json()
+
+    reply = asked["messages"][-1]["content"]
+    assert reply.startswith("Dinner with another soup on Friday."), reply
+    # Friday's dishes stay (either soup may take either soup's place) and the other soup comes.
+    other = {"tomato-soup", "broccoli-soup"} - {before["soup"]}
+    expected = sorted([*before.values(), *other])
+    assert [d["recipe_slug"] for d in asked["pending_replan"]["shape_change"]["added"]] == [*other]
+    after = composed_client.post(f"/api/agent/sessions/{session['id']}/replan/confirm").json()["plan"]
+    assert sorted(_dishes(after, friday).values()) == expected
+
+
+def test_only_a_change_that_costs_more_is_said_to_put_the_week_over_its_budget(composed_client):
+    from datetime import date
+
+    session, plan = _budget_conversation_week(composed_client, COMPOSITION[:2])
+    chicken = next(d for d in plan["days"] if d["recipe"]["slug"] == "chicken-roast")
+    day = f"{date.fromisoformat(chicken['planned_date']):%A}"
+    week = _spend_the_budget(composed_client, plan, but_on_day=chicken["day_index"])
+    budget = week["grocery_estimate"]["weekly_budget_sgd"]
+
+    def ask(message):
+        asked = composed_client.post(f"/api/agent/sessions/{session['id']}/messages", json={"message": message}).json()
+        composed_client.post(f"/api/agent/sessions/{session['id']}/replan/discard")
+        return asked["pending_replan"], asked["messages"][-1]["content"]
+
+    # A swap to a dearer dish: the reply says how far over, as the card does.
+    swap, reply = ask(f"Swap {day}'s main")
+    assert swap["event_type"] == "REPLACE_MEAL" and swap["purchase_total_delta_sgd"] > 0, reply
+    assert swap["over_budget_sgd"] > 0
+    assert f"This puts the week S${swap['over_budget_sgd']:.2f} over your S${budget:.2f} budget." in reply
+    # Keeping a dish costs nothing and skipping one saves: neither puts the week anywhere.
+    for message, event_type in ((f"Lock {day}'s vegetable", "LOCK_MEAL"), (f"Skip {day}'s main", "CANCEL_MEAL")):
+        change, reply = ask(message)
+        assert change["event_type"] == event_type and change["purchase_total_delta_sgd"] <= 0, reply
+        assert change["over_budget_sgd"] is None
+        assert "over your" not in reply, reply
+
+
+def test_a_change_on_a_week_of_two_meals_a_day_goes_over_by_the_cheapest_week(monkeypatch):
+    """Lunch and dinner every day, the budget just fits; then dinners with a soup. Seven soups, one package
+    each (S$1.85 to S$2.75): the cheapest change is one soup all week, S$1.85 over. A repeat is charged one
+    meal's share of the budget, as the week's own planning charges it; charged a day's share (twice as much
+    on two meals a day), seven different soups looked cheapest and the change went S$15.95 over."""
+    from datetime import date, timedelta
+
+    def only_for(meal, recipe):
+        recipe.meal_types = [meal]
+        return recipe
+
+    soups = ["chickpea", "black_bean", "cucumber", "canned_tomato", "ginger", "garlic", "canned_tuna"]
+    dishes = [
+        only_for("lunch", _dish("chicken-lunch", "main", "chicken_breast", 400, calories=450)),
+        only_for("lunch", _dish("tofu-lunch", "main", "firm_tofu", 300, calories=300)),
+        only_for("dinner", _dish("sweet-potato-bake", "main", "sweet_potato", 200, calories=400)),
+        *[only_for("dinner", _dish(f"{name}-soup", "soup", name, 100, calories=150)) for name in soups],
+    ]
+    main = {"role_id": "main", "courses": ["main"]}
+    with dish_client(monkeypatch, dishes) as client:
+        request = {
+            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "household_size": 2,
+            "max_cooking_time_minutes": 240,
+            "pricing_mode": "fixture",
+            "plan_shape": {"meals": {"lunch": [main], "dinner": [main]}},
+        }
+        unbudgeted = client.post("/api/plans/generate", json=request).json()
+        budget = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
+        plan = client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": budget}).json()
+        assert plan["grocery_estimate"]["within_weekly_budget"] is True
+
+        preview = client.post(
+            f"/api/plans/{plan['id']}/shape/preview",
+            json={"meal_type": "dinner", "roles": [main, {"role_id": "soup", "courses": ["soup"], "required": True}]},
+        )
+
+    assert preview.status_code == 201, preview.text
+    added = preview.json()["shape_change"]["added"]
+    assert {d["recipe_slug"] for d in added if d["role_id"] == "soup"} == {"chickpea-soup"}
+    assert preview.json()["over_budget_sgd"] == 1.85
+
+
+def test_a_change_with_cheap_lunches_left_still_charges_a_repeat_one_meals_share(monkeypatch):
+    """As above, but the lunches cost little and the dinners most of the budget (S$3.80 of S$25.60), so what the
+    rest of the week leaves (S$21.80) is more than the dinners' share of the budget (S$12.80). A repeat is still
+    charged one meal's share (S$1.83): one soup all week, S$1.85 over. Charged what is left per dinner instead
+    (S$3.11, nearly a day's share), seven different soups looked cheapest and the change went S$15.95 over."""
+    from datetime import date, timedelta
+
+    def only_for(meal, recipe):
+        recipe.meal_types = [meal]
+        return recipe
+
+    soups = ["chickpea", "black_bean", "cucumber", "canned_tomato", "ginger", "garlic", "canned_tuna"]
+    dishes = [
+        only_for("lunch", _dish("sweet-potato-lunch", "main", "sweet_potato", 200, calories=450)),
+        # 70 g of salmon a dinner: two packages a week whether the main is the whole meal or three quarters of it.
+        only_for("dinner", _dish("salmon-dinner", "main", "salmon_fillet", 140, calories=400)),
+        *[only_for("dinner", _dish(f"{name}-soup", "soup", name, 100, calories=150)) for name in soups],
+    ]
+    main = {"role_id": "main", "courses": ["main"]}
+    with dish_client(monkeypatch, dishes) as client:
+        request = {
+            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "household_size": 2,
+            "max_cooking_time_minutes": 240,
+            "pricing_mode": "fixture",
+            "plan_shape": {"meals": {"lunch": [main], "dinner": [main]}},
+            "weekly_budget_sgd": 25.6,
+        }
+        plan = client.post("/api/plans/generate", json=request).json()
+        assert plan["grocery_estimate"]["purchase_total_sgd"] == 25.6
+        assert {d["recipe"]["slug"] for d in plan["days"] if d["meal_type"] == "lunch"} == {"sweet-potato-lunch"}
+
+        preview = client.post(
+            f"/api/plans/{plan['id']}/shape/preview",
+            json={"meal_type": "dinner", "roles": [main, {"role_id": "soup", "courses": ["soup"], "required": True}]},
+        )
+
+    assert preview.status_code == 201, preview.text
+    added = preview.json()["shape_change"]["added"]
+    assert {d["recipe_slug"] for d in added if d["role_id"] == "soup"} == {"chickpea-soup"}
+    assert preview.json()["over_budget_sgd"] == 1.85
+
+
+def test_dinners_with_a_soup_keep_each_days_main_and_vegetable(composed_client):
+    """A soup added to every dinner keeps each day's dishes, each in its place (the 2026-10-02 review of
+    mdw-dev-019): the dishes were kept only for a change on one day, and a change on several planned all their
+    dinners again."""
+    plan = _week_ahead(composed_client, COMPOSITION[:2])
+    # A swap makes Monday a dinner the planner would not choose, so planning the week again would change it.
+    monday = next(d for d in plan["days"] if d["day_index"] == 1 and d["role_id"] == "main")
+    swap = composed_client.post(
+        f"/api/plans/{plan['id']}/replan/preview", json={"entry_id": monday["entry_id"], "event_type": "REPLACE_MEAL"}
+    ).json()
+    week = composed_client.post(f"/api/plans/{plan['id']}/replan/{swap['id']}/confirm").json()["plan"]
+
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": [*COMPOSITION[:2], {**COMPOSITION[2], "required": True}]},
+    )
+
+    assert preview.status_code == 201, preview.text
+    after = composed_client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm").json()["plan"]
+    for day in range(1, 8):
+        assert _dishes(after, day) == {**_dishes(week, day), "soup": "tomato-soup"}, day
+
+
+def test_a_soup_added_day_by_day_over_the_budget_is_the_one_the_week_already_buys(monkeypatch):
+    """Over the budget, a dish the rest of the week has is weighed against new ones: Tuesday's soup is
+    Monday's, from the package the week already buys. Drawn first from dishes the week did not have, every day
+    bought a new soup (the 2026-10-02 review: S$96.82 over on mdw-dev-019 at S$40)."""
+    from datetime import date, timedelta
+
+    soups = ["chickpea", "black_bean", "cucumber", "canned_tomato"]
+    dishes = [
+        _dish("sweet-potato-bake", "main", "sweet_potato", 200, calories=400),
+        *[_dish(f"{name}-soup", "soup", name, 100, calories=150) for name in soups],
+    ]
+    main = {"role_id": "main", "courses": ["main"]}
+    soup = {"role_id": "soup", "courses": ["soup"], "required": True}
+    with dish_client(monkeypatch, dishes) as client:
+        request = {
+            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "household_size": 2,
+            "max_cooking_time_minutes": 240,
+            "pricing_mode": "fixture",
+            "plan_shape": {"meals": {"dinner": [main]}},
+        }
+        unbudgeted = client.post("/api/plans/generate", json=request).json()
+        budget = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
+        plan = client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": budget}).json()
+        previews = []
+        for day in (1, 2):
+            preview = client.post(
+                f"/api/plans/{plan['id']}/shape/preview",
+                json={"meal_type": "dinner", "roles": [main, soup], "day_indexes": [day]},
+            )
+            assert preview.status_code == 201, preview.text
+            previews.append(preview.json())
+            week = client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm").json()["plan"]
+
+    assert {_dishes(week, day)["soup"] for day in (1, 2)} == {"chickpea-soup"}
+    assert previews[0]["over_budget_sgd"] == 1.85
+    # Tuesday's soup comes from Monday's package: nothing more to buy.
+    assert previews[1]["purchase_total_delta_sgd"] == 0
+
+
+def _lunch_and_dinner_dishes(lunch=None, grams=None):
+    """Seven cheap dishes for lunch or dinner and seven dearer ones for lunch only, each of one ingredient
+    (100 g, or `grams` of it)."""
+    both = ["chickpea", "firm_tofu", "black_bean", "cucumber", "canned_tomato", "ginger", "garlic"]
+    lunch = lunch or ["mushroom", "zucchini", "sweet_potato", "chicken_breast", "tomato", "soba_noodle", "brown_rice"]
+    dishes = []
+    for names, meals in ((both, ["lunch", "dinner"]), (lunch, ["lunch"])):
+        for name in names:
+            dish = _dish(f"{name}-plate", "main", name, (grams or {}).get(name, 100), calories=450)
+            dish.meal_types = meals
+            dishes.append(dish)
+    return dishes
+
+
+@pytest.mark.parametrize("cap", [1, 2])
+def test_a_meal_added_over_the_budget_keeps_the_households_cap_across_the_week(monkeypatch, cap):
+    """'No dish twice' (or 'at most twice') holds for the whole week when a meal is added over the budget: the
+    dinners' dishes are the cheapest lunches, and the planner held the cap only among the meals it planned
+    (the 2026-10-02 review: 'Also plan lunch' on mdw-dev-013 served five of its dinner salads again)."""
+    from collections import Counter
+    from datetime import date, timedelta
+
+    main = {"role_id": "main", "courses": ["main"]}
+    with dish_client(monkeypatch, _lunch_and_dinner_dishes()) as client:
+        request = {
+            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "household_size": 2,
+            "max_cooking_time_minutes": 240,
+            "pricing_mode": "fixture",
+            "plan_shape": {"meals": {"dinner": [main]}},
+            "max_uses_per_recipe": cap,
+        }
+        unbudgeted = client.post("/api/plans/generate", json=request).json()
+        budget = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
+        plan = client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": budget}).json()
+        assert max(Counter(d["recipe"]["slug"] for d in plan["days"]).values()) <= cap
+
+        preview = client.post(f"/api/plans/{plan['id']}/shape/preview", json={"meal_type": "lunch", "roles": [main]})
+        assert preview.status_code == 201, preview.text
+        week = client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm").json()["plan"]
+
+    assert {d["meal_type"] for d in week["days"]} == {"lunch", "dinner"} and len(week["days"]) == 14
+    uses = Counter(d["recipe"]["slug"] for d in week["days"])
+    assert max(uses.values()) <= cap, uses
+
+
+def test_a_dish_added_to_every_dinner_is_the_only_new_one_in_the_reply_and_on_the_card(composed_client):
+    """'Dinners with a soup' keeps every day's main and vegetable, so the reply and the card name only the soup
+    as new and nothing comes off (the 2026-10-02 review: the reply listed the kept dinners under 'New:' and said
+    '14 dishes come off the week')."""
+    session, plan = _conversation_week(composed_client)
+
+    asked = composed_client.post(
+        f"/api/agent/sessions/{session['id']}/messages", json={"message": "Dinners with a soup"}
+    ).json()
+
+    reply = asked["messages"][-1]["content"]
+    change = asked["pending_replan"]["shape_change"]
+    assert {d["recipe_slug"] for d in change["added"]} == {"tomato-soup"}, reply
+    assert (change["removed"], change["kept"]) == ([], len(plan["days"]))
+    assert "New: Tomato Soup." in reply and "come off" not in reply, reply
+
+
+def test_a_meal_added_over_the_budget_counts_repeats_with_the_rest_of_the_week(monkeypatch):
+    """Over the budget, a dish the rest of the week has costs a repeat (one meal's share of the budget, S$2.00
+    here), as a repeat among the meals planned does. Each meal here takes one whole package: the week's dinners
+    as lunches cost S$15.15 and seven repeats (S$14.00), seven new lunches S$24.55. Repeats with the rest of
+    the week went uncharged, and every lunch was one of the week's dinners (the 2026-10-02 review: 'Also plan
+    lunch' on mdw-dev-013 at S$180 served seven of its dinners again)."""
+    from collections import Counter
+    from datetime import date, timedelta
+
+    package = {"chickpea": 400, "firm_tofu": 300, "black_bean": 400, "cucumber": 500, "canned_tomato": 400}
+    package |= {"ginger": 300, "garlic": 300, "broccoli": 300, "wholewheat_pasta": 500, "baby_spinach": 200}
+    package |= {"mushroom": 300, "zucchini": 500, "chicken_breast": 300, "soba_noodle": 300}
+    lunch = ["broccoli", "wholewheat_pasta", "baby_spinach", "mushroom", "zucchini", "chicken_breast", "soba_noodle"]
+    # A recipe serves four, the household two: twice a package is one package a meal.
+    dishes = _lunch_and_dinner_dishes(lunch, grams={name: 2 * size for name, size in package.items()})
+    main = {"role_id": "main", "courses": ["main"]}
+    with dish_client(monkeypatch, dishes) as client:
+        request = {
+            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "household_size": 2,
+            "max_cooking_time_minutes": 240,
+            "pricing_mode": "fixture",
+            "plan_shape": {"meals": {"dinner": [main]}},
+            # S$12.85 left: seven lunches cost at least S$12.95 (chickpeas every day).
+            "weekly_budget_sgd": 28.0,
+        }
+        plan = client.post("/api/plans/generate", json=request).json()
+        assert plan["grocery_estimate"]["purchase_total_sgd"] == 15.15
+        assert max(Counter(d["recipe"]["slug"] for d in plan["days"]).values()) == 1
+
+        preview = client.post(f"/api/plans/{plan['id']}/shape/preview", json={"meal_type": "lunch", "roles": [main]})
+        assert preview.status_code == 201, preview.text
+        week = client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm").json()["plan"]
+
+    assert {d["recipe"]["slug"] for d in week["days"] if d["meal_type"] == "lunch"} == {f"{n}-plate" for n in lunch}
+    assert preview.json()["over_budget_sgd"] == round(15.15 + 24.55 - 28.0, 2)

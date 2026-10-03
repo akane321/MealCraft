@@ -49,6 +49,7 @@ from app.schemas.meal_plan import (
     MealPlanReplanPreviewRequest,
     MealPlanShape,
     WeeklyMealPlanRequest,
+    WeeklyMealPlanResponse,
     default_plan_shape,
 )
 from app.services.meal_plan import WeeklyMealPlanService
@@ -470,6 +471,7 @@ class AgentSessionService:
                             f"How about {preview.after_entry.recipe_title} instead of "
                             f"{preview.before_entry.recipe_title}?",
                         )
+                        + self._over_budget(preview, plan)
                         + " Nothing changes until you confirm."
                     ),
                     draft=draft,
@@ -506,7 +508,7 @@ class AgentSessionService:
         except (MealPlanReplanValidationError, WeeklyPlanSelectionError) as error:
             reply, pending, draft = f"I could not make that change: {error}", None, AgentReplanDraft()
         else:
-            reply, pending = self._describe_shape_preview(intent.summary, preview), preview.id
+            reply, pending = self._describe_shape_preview(intent.summary, preview, plan), preview.id
             draft = AgentReplanDraft(event_type="CHANGE_SHAPE", reason=message.strip())
         updated = self.repository.append_replan_exchange(
             session_id,
@@ -522,7 +524,15 @@ class AgentSessionService:
         return self._to_response(updated)
 
     @staticmethod
-    def _describe_shape_preview(summary: str, preview: MealPlanReplanEventResponse) -> str:
+    def _over_budget(preview: MealPlanReplanEventResponse, plan: WeeklyMealPlanResponse) -> str:
+        """How far a change takes the week over its budget, as the preview card says it; empty within it."""
+        over, budget = preview.over_budget_sgd, plan.grocery_estimate.weekly_budget_sgd
+        return f" This puts the week S${over:.2f} over your S${budget:.2f} budget." if over and budget else ""
+
+    @staticmethod
+    def _describe_shape_preview(
+        summary: str, preview: MealPlanReplanEventResponse, plan: WeeklyMealPlanResponse
+    ) -> str:
         change = preview.shape_change
         parts = [f"{summary}."]
         if change and change.added:
@@ -533,7 +543,11 @@ class AgentSessionService:
             count = len(change.removed)
             parts.append(f"{count} {'dish comes' if count == 1 else 'dishes come'} off the week.")
         delta = preview.purchase_total_delta_sgd
-        parts.append(f"Groceries {'+' if delta >= 0 else '−'}S${abs(delta):.2f}. Nothing changes until you confirm.")
+        parts.append(
+            f"Groceries {'+' if delta >= 0 else '−'}S${abs(delta):.2f}."
+            + AgentSessionService._over_budget(preview, plan)
+            + " Nothing changes until you confirm."
+        )
         return " ".join(parts)
 
     def _answer_keep_shape(self, session_id: int, snapshot: AgentSessionResponse, message: str) -> AgentSessionResponse:

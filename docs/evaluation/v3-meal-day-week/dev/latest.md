@@ -33,7 +33,7 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 | mdw-dev-014 | shape_change | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 322.97 |
 | mdw-dev-015 | shape_change | en | feasible | plan | yes | - | 15 | 15 | 15/15 | 387.62 |
 | mdw-dev-016 | shape_change | zh | feasible | plan | yes | - | 20 | 20 | 20/20 | 326.36 |
-| mdw-dev-017 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16/16 | 309.65 |
+| mdw-dev-017 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16/16 | 300.12 |
 | mdw-dev-018 | shape_change | zh | feasible | plan | yes | - | 16 | 16 | 16/16 | 261.17 |
 | mdw-dev-019 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16/16 | 324.92 |
 | mdw-dev-020 | budget | en | feasible | plan | yes | - | 28 | 4 | 28/28 | 50.9 |
