@@ -15,6 +15,7 @@ from app.planning.beam_planner import BeamLimits, BeamPlanner
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.input_audit import require_finite_problem
+from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner
 from app.planning.meal_composition import require_one_dish_slots
 from app.planning.snapshot_repair import RetrievalUnavailable, solve_with_repair, validate_product_snapshot
 from app.planning.workbench import FileSnapshots
@@ -60,6 +61,22 @@ class ExperimentDataset(BaseModel):
 class UnavailableProvider:
     def retrieve(self, demands):
         raise RetrievalUnavailable("Developer fixture provider unavailable")
+
+
+class MealExperimentCase(ExperimentCase):
+    @model_validator(mode="after")
+    def check_packet(self):
+        require_finite_problem(self.problem)
+        if self.provider_unavailable and self.snapshots:
+            raise ValueError("Unavailable provider cannot also supply snapshots")
+        provider = FileSnapshots(self.snapshots)
+        for _ in self.snapshots:
+            validate_product_snapshot(provider.retrieve(()))
+        return self
+
+
+class MealExperimentDataset(ExperimentDataset):
+    cases: list[MealExperimentCase] = Field(min_length=1)
 
 
 def digest(value):
@@ -111,11 +128,17 @@ def run_experiments(dataset, *, repeats=1, width=32, max_expansions=10000, repai
             rounds = 0 if preset == "repair_off" else repair_rounds
             for repeat in range(repeats):
                 provider = UnavailableProvider() if case.provider_unavailable else FileSnapshots(case.snapshots)
-                planner = (
-                    FinalScopeReferencePlanner()
-                    if preset == "greedy"
-                    else BeamPlanner(BeamLimits(width, max_expansions))
-                )
+                composed = any(s.composition is not None for s in problem.slots)
+                if composed:
+                    planner = MealBeamPlanner(
+                        MealBeamLimits(width=1 if preset == "greedy" else width, max_expansions=max_expansions)
+                    )
+                else:
+                    planner = (
+                        FinalScopeReferencePlanner()
+                        if preset == "greedy"
+                        else BeamPlanner(BeamLimits(width, max_expansions))
+                    )
                 started = perf_counter()
                 result = solve_with_repair(problem, provider, max_rounds=rounds, planner=planner)
                 solve_seconds = perf_counter() - started
@@ -150,8 +173,12 @@ def run_experiments(dataset, *, repeats=1, width=32, max_expansions=10000, repai
                         if problem.diversity_policy
                         else None,
                         "configuration": {
-                            "width": None if preset == "greedy" else width,
-                            "max_expansions": None if preset == "greedy" else max_expansions,
+                            "engine": ("width-one-meal-beam" if preset == "greedy" else "meal-beam")
+                            if composed
+                            else ("greedy-reference" if preset == "greedy" else "one-dish-beam"),
+                            "engine_limits": asdict(planner.limits) if hasattr(planner, "limits") else None,
+                            "width": (1 if composed else None) if preset == "greedy" else width,
+                            "max_expansions": None if preset == "greedy" and not composed else max_expansions,
                             "repair_rounds": rounds,
                             "ranking": "off",
                             "validation": "on",
@@ -178,14 +205,15 @@ def run_experiments(dataset, *, repeats=1, width=32, max_expansions=10000, repai
             if attempt["retrieval"] is not None:
                 attempt["retrieval"] = attempt["retrieval"].model_dump(mode="json")
     return {
-        "protocol": "planning-component-ablation-dev-v1",
+        "protocol": "planning-component-ablation-dev-v2",
         "evidence": "developer_diagnostic",
         "dataset_version": dataset.version,
         "dataset_sha256": digest(dataset.model_dump(mode="json")),
         "implementation": source_fingerprint(),
         "repeats": repeats,
         "presets": list(PRESETS),
-        "deferred": ["validation_off", "learned_ranking_off", "composed_meals", "console_integration"],
+        "separate_experiments": ["validation_gate_experiments", "feedback_ranking"],
+        "deferred": ["console_integration"],
         "category_counts": {
             category: sum(c.category == category for c in dataset.cases)
             for category in sorted({c.category for c in dataset.cases})
@@ -203,7 +231,7 @@ def main():
     parser.add_argument("--repair-rounds", type=int, default=1)
     args = parser.parse_args()
     raw = args.input.read_bytes()
-    dataset = ExperimentDataset.model_validate_json(raw)
+    dataset = MealExperimentDataset.model_validate_json(raw)
     result = run_experiments(
         dataset,
         repeats=args.repeats,

@@ -50,9 +50,10 @@ phase timings, not independent end-to-end latency measurements or a speedup clai
 Keep the code checkout and environment lockfile with the generated report.
 
 This module has no product route or console setting. It covers a narrow part of
-[P8](planning-validation-v2.md#p8--evidence); full validation-off experiments,
-learned ranking comparisons, composed-meal weight and repair ablations, and console
-integration still require separate work. Existing developer experiment protocol v1 remains
+[P8](planning-validation-v2.md#p8--evidence); the other component conditions and feedback replay are gathered by
+[the suite](planning-experiment-suite.md), while console integration remains a
+consumer task. The final-gate experiment removes the independent final selection
+gate; it deliberately retains constraint compilation and search guards. Existing developer experiment protocol v1 remains
 unchanged; this report uses `planning-final-gate-dev-v2`. Previously generated v1 reports
 remain v1; the engine configuration fields and composed support start in v2.
 
