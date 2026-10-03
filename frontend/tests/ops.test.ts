@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { compareMetrics, diffFields, dishRows, formatSeconds, formatValue, isConsoleAccount, linePath, niceMax, packageGrams, parseTaskKey, splitNames, statusesIn } from "../app/lib/ops";
+import { compareMetrics, diffFields, dishRows, formatSeconds, formatValue, isConsoleAccount, isJobCancellable, jobIdempotencyKey, linePath, mayManageJobs, niceMax, packageGrams, parseTaskKey, splitNames, statusesIn } from "../app/lib/ops";
 
 describe("ops console slice 2 helpers", () => {
   it("lists changed fields first and compares values, not references", () => {
@@ -46,6 +46,24 @@ describe("ops console helpers", () => {
     expect(isConsoleAccount({ user: { system_role: "operator" } })).toBe(true);
     expect(isConsoleAccount({ user: { system_role: "ordinary_user" } })).toBe(false);
     expect(isConsoleAccount(null)).toBe(false);
+  });
+
+  it("keeps job writes limited to operators and administrators", () => {
+    expect(mayManageJobs({ user: { system_role: "admin" } })).toBe(true);
+    expect(mayManageJobs({ user: { system_role: "operator" } })).toBe(true);
+    expect(mayManageJobs({ user: { system_role: "data_reviewer" } })).toBe(false);
+    expect(mayManageJobs({ user: { system_role: "ordinary_user" } })).toBe(false);
+    expect(mayManageJobs(null)).toBe(false);
+  });
+
+  it("only offers cancellation for live jobs and builds a constrained request key", () => {
+    expect(isJobCancellable("queued")).toBe(true);
+    expect(isJobCancellable("running")).toBe(true);
+    for (const status of ["succeeded", "failed", "degraded", "cancelled"]) {
+      expect(isJobCancellable(status)).toBe(false);
+    }
+    expect(jobIdempotencyKey(1_791_025_000_000, "1f48b850-29a1-4c76-b90c-96d23c5dd816"))
+      .toBe("catalog-import-1791025000000-1f48b850-29a1-4c76-b90c-96d23c5dd816");
   });
 
   it("rounds axis maxima up to 1, 2 or 5 times a power of ten", () => {
