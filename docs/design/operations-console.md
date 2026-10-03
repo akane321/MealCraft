@@ -244,6 +244,16 @@ The per-episode diff is where the value is. "Overall score moved by two points"
 is unactionable; "these four episodes started failing, all of them on package
 coverage" is a defect report.
 
+Before interpreting a delta, the comparison endpoint proves that both records
+are succeeded developer diagnostics with complete conditions and the same
+evaluation registry, dataset semantic digest, runner protocol, code revision,
+product snapshot, explicit seed, repeat count and claim scope. Parameters may
+differ because that is the treatment being compared. If any context field is
+missing or different, the console may show the two stored values but labels the
+comparison incompatible and suppresses numeric deltas. Opening a record shows
+its stored failure mechanisms and case-level report; it does not recompute or
+upgrade historical evidence.
+
 Integrity guards, enforced by the console rather than by discipline (decision
 ADR-0020 section 2 as amended by ADR-0029 section 1):
 

@@ -99,6 +99,49 @@ def _count(factory: sessionmaker[Session], model) -> int:
         return database.scalar(select(func.count()).select_from(model)) or 0
 
 
+def _complete_planning_experiment(
+    factory: sessionmaker[Session], run_id: int, *, passed_audit_count: int = 4, code_commit: str | None = None
+) -> None:
+    now = datetime.now(UTC)
+    with factory() as database:
+        run = database.get(OperationRun, run_id)
+        data = dict(run.artifact_references[0]["data"])
+        data["metrics"] = {"case_count": 5, "passed_audit_count": passed_audit_count}
+        data["conditions"] = {
+            **data["conditions"],
+            "dataset": {
+                **data["conditions"]["dataset"],
+                "file_sha256": "b" * 64,
+                "semantic_sha256": "c" * 64,
+            },
+            "code_source": {"sha256": "d" * 64},
+            "product_snapshot_sha256": "e" * 64,
+            "duration_seconds": 1.25,
+            "failure_mechanisms": {"purchase_budget": 1},
+            "conditions_complete": True,
+        }
+        failures = [] if passed_audit_count >= 4 else [{"code": "purchase_budget", "status": "failed"}]
+        data["report"] = {
+            "protocol": "planning-component-ablation-dev-v1",
+            "runs": [
+                {
+                    "case_id": "budget-edge",
+                    "preset": "beam",
+                    "repeat": 0,
+                    "status": "feasible" if not failures else "infeasible",
+                    "failures": failures,
+                }
+            ],
+        }
+        run.artifact_references = [{"kind": "planning_experiment", "data": data}]
+        if code_commit is not None:
+            run.code_commit = code_commit
+        run.status = "succeeded"
+        run.started_at = now - timedelta(seconds=2)
+        run.finished_at = now
+        database.commit()
+
+
 @pytest.mark.parametrize(
     ("role", "expected_status"),
     [
@@ -180,6 +223,137 @@ def test_planning_experiment_is_idempotent_and_records_reproducible_inputs(job_c
         audit = database.scalars(select(AuditEvent)).one()
         assert audit.action == "planning_experiment.queued"
         assert "path" not in audit.details
+
+
+@pytest.mark.parametrize(
+    ("role", "expected_status"),
+    [
+        (SystemRole.ORDINARY_USER, 404),
+        (SystemRole.DATA_REVIEWER, 200),
+        (SystemRole.OPERATOR, 200),
+        (SystemRole.ADMIN, 200),
+    ],
+)
+def test_every_role_is_checked_when_opening_experiment_evidence(
+    job_client, role: SystemRole, expected_status: int
+) -> None:
+    client, factory = job_client
+    _set_role(factory, SystemRole.ADMIN)
+    queued = client.post(
+        "/api/ops/experiments",
+        json=PLANNING_EXPERIMENT_REQUEST,
+        headers={"Idempotency-Key": f"detail-{role.value}"},
+    )
+    run_id = queued.json()["id"]
+    _complete_planning_experiment(factory, run_id)
+    _set_role(factory, role)
+
+    response = client.get(f"/api/ops/experiments/{run_id}")
+
+    assert response.status_code == expected_status
+    if expected_status == 404:
+        assert response.json() == {"detail": "Not Found"}
+    else:
+        detail = response.json()
+        assert detail["reproducibility"] == {
+            "complete": True,
+            "citation_allowed": True,
+            "claim_scope": "developer_diagnostic_only",
+            "missing": [],
+            "warnings": ["Developer diagnostics do not support held-out or production-performance claims."],
+        }
+        assert detail["report"]["protocol"] == "planning-component-ablation-dev-v1"
+        assert detail["conditions"]["failure_mechanisms"] == {"purchase_budget": 1}
+
+
+def test_experiment_detail_rejects_non_experiment_rows(job_client) -> None:
+    client, factory = job_client
+    actor_id = _set_role(factory, SystemRole.ADMIN)
+    job_id = _enqueue(factory, actor_id, suffix="not-an-experiment")
+
+    response = client.get(f"/api/ops/experiments/{job_id}")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Experiment not found"}
+
+
+@pytest.mark.parametrize(
+    ("role", "expected_status"),
+    [
+        (SystemRole.ORDINARY_USER, 404),
+        (SystemRole.DATA_REVIEWER, 200),
+        (SystemRole.OPERATOR, 200),
+        (SystemRole.ADMIN, 200),
+    ],
+)
+def test_every_role_is_checked_when_comparing_experiments(job_client, role: SystemRole, expected_status: int) -> None:
+    client, factory = job_client
+    _set_role(factory, SystemRole.ADMIN)
+    first = client.post(
+        "/api/ops/experiments",
+        json=PLANNING_EXPERIMENT_REQUEST,
+        headers={"Idempotency-Key": f"compare-a-{role.value}"},
+    ).json()
+    second_payload = {
+        **PLANNING_EXPERIMENT_REQUEST,
+        "label": "wider beam",
+        "parameters": {**PLANNING_EXPERIMENT_REQUEST["parameters"], "width": 32},
+    }
+    second = client.post(
+        "/api/ops/experiments",
+        json=second_payload,
+        headers={"Idempotency-Key": f"compare-b-{role.value}"},
+    ).json()
+    _complete_planning_experiment(factory, first["id"], passed_audit_count=3)
+    _complete_planning_experiment(factory, second["id"], passed_audit_count=4)
+    _set_role(factory, role)
+
+    response = client.get(f"/api/ops/experiments/compare?ids={first['id']},{second['id']}")
+
+    assert response.status_code == expected_status
+    if expected_status == 404:
+        assert response.json() == {"detail": "Not Found"}
+    else:
+        comparison = response.json()
+        assert comparison["compatible"] is True
+        assert comparison["reasons"] == []
+        assert next(row for row in comparison["metrics"] if row["key"] == "passed_audit_count")["delta"] == 1
+        assert next(row for row in comparison["configurations"] if row["key"] == "width")["matches"] is False
+        assert comparison["case_differences"] == [
+            {
+                "case_id": "budget-edge",
+                "condition": "beam repeat 0",
+                "a_status": "infeasible",
+                "b_status": "feasible",
+                "failures_gained": [],
+                "failures_lost": ["purchase_budget"],
+            }
+        ]
+        assert comparison["claim_scope"] == "developer_diagnostic_only"
+
+
+def test_experiment_comparison_suppresses_deltas_when_evidence_drifted(job_client) -> None:
+    client, factory = job_client
+    _set_role(factory, SystemRole.ADMIN)
+    run_ids = []
+    for suffix in ("drift-a", "drift-b"):
+        response = client.post(
+            "/api/ops/experiments",
+            json={**PLANNING_EXPERIMENT_REQUEST, "label": suffix},
+            headers={"Idempotency-Key": suffix},
+        )
+        run_ids.append(response.json()["id"])
+    _complete_planning_experiment(factory, run_ids[0], passed_audit_count=3, code_commit="a" * 40)
+    _complete_planning_experiment(factory, run_ids[1], passed_audit_count=4, code_commit="b" * 40)
+
+    response = client.get(f"/api/ops/experiments/compare?ids={run_ids[0]},{run_ids[1]}")
+
+    assert response.status_code == 200
+    comparison = response.json()
+    assert comparison["compatible"] is False
+    assert comparison["reasons"] == ["Code revision differs or is missing."]
+    assert all(row["delta"] is None for row in comparison["metrics"])
+    assert comparison["claim_scope"] == "not_comparable"
 
 
 @pytest.mark.parametrize(

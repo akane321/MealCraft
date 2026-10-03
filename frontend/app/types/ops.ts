@@ -151,6 +151,44 @@ export interface OpsExperiment {
   duration_seconds: number | null;
 }
 
+export interface OpsExperimentDetail extends OpsExperiment {
+  reproducibility: {
+    complete: boolean;
+    citation_allowed: boolean;
+    claim_scope: string;
+    missing: string[];
+    warnings: string[];
+  };
+  report: Record<string, unknown> | null;
+}
+
+export interface OpsExperimentComparisonRow {
+  key: string;
+  a: unknown;
+  b: unknown;
+  delta: number | null;
+  matches: boolean | null;
+}
+
+export interface OpsExperimentComparison {
+  runs: OpsExperiment[];
+  compatible: boolean;
+  reasons: string[];
+  evidence: OpsExperimentComparisonRow[];
+  configurations: OpsExperimentComparisonRow[];
+  metrics: OpsExperimentComparisonRow[];
+  failure_mechanisms: OpsExperimentComparisonRow[];
+  case_differences: Array<{
+    case_id: string;
+    condition: string;
+    a_status: string | null;
+    b_status: string | null;
+    failures_gained: string[];
+    failures_lost: string[];
+  }>;
+  claim_scope: string;
+}
+
 export interface OpsUserHousehold { id: number; name: string; role: string; members: number; profile: Record<string, unknown> | null }
 
 export interface OpsUser {
