@@ -1,0 +1,1507 @@
+{
+  "version": "composed-ablation-developer-v1",
+  "source": "synthetic",
+  "cases": [
+    {
+      "case_id": "composed-three-dishes",
+      "category": "composed-three-dishes",
+      "problem": {
+        "problem_id": "meal-composition",
+        "slots": [
+          {
+            "slot_id": "d1",
+            "planned_date": "2026-09-28",
+            "meal_type": "dinner",
+            "servings": 4,
+            "max_time_minutes": 120,
+            "max_dish_time_minutes": null,
+            "required": true,
+            "locked_recipe_id": null,
+            "composition": [
+              {
+                "role_id": "main",
+                "courses": [
+                  "main"
+                ],
+                "required": true
+              },
+              {
+                "role_id": "vegetable",
+                "courses": [
+                  "side",
+                  "salad"
+                ],
+                "required": true
+              },
+              {
+                "role_id": "soup",
+                "courses": [
+                  "soup"
+                ],
+                "required": false
+              }
+            ]
+          }
+        ],
+        "recipes": [
+          {
+            "recipe_id": "chicken",
+            "title": "chicken",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 40,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "chicken-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 500.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "main",
+            "prep_minutes": 15,
+            "cook_minutes": 25,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "greens",
+            "title": "greens",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 32,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "greens-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 100.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "side",
+            "prep_minutes": 10,
+            "cook_minutes": 22,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "broth",
+            "title": "broth",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 45,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "broth-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 200.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "soup",
+            "prep_minutes": 15,
+            "cook_minutes": 30,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "peanut-slaw",
+            "title": "peanut-slaw",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 10,
+            "dietary_tags": [],
+            "allergens": [
+              "peanut"
+            ],
+            "ingredients": [
+              {
+                "ingredient_id": "peanut-slaw-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 150.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "side",
+            "prep_minutes": 10,
+            "cook_minutes": 0,
+            "passive_minutes": 0
+          }
+        ],
+        "pantry": [],
+        "products": [
+          {
+            "ingredient_id": "chicken-base",
+            "product_id": "p-chicken",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "greens-base",
+            "product_id": "p-greens",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "broth-base",
+            "product_id": "p-broth",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "peanut-slaw-base",
+            "product_id": "p-peanut-slaw",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          }
+        ],
+        "allergens": [
+          "peanut"
+        ],
+        "allergen_vocabulary": [
+          "peanut"
+        ],
+        "excluded_ingredients": [],
+        "dietary_requirements": [],
+        "health_preferences": [],
+        "nutrition_bands": [],
+        "purchase_budget_sgd": null,
+        "budget_is_hard": true,
+        "preference_weights": {
+          "nutrition": 0.35,
+          "variety": 0.25,
+          "time": 0.15,
+          "pantry": 0.15,
+          "health": 0.1
+        },
+        "diversity_policy": null,
+        "composition_policy": {
+          "schema_version": "planning-composition-v1",
+          "main_shares": [
+            1.0,
+            0.75,
+            0.6,
+            0.5,
+            0.45,
+            0.4
+          ],
+          "other_shares": [
+            null,
+            0.5,
+            0.4,
+            0.35,
+            0.3,
+            0.28
+          ],
+          "hands_on_cook_fraction": 0.5,
+          "switch_minutes": 5,
+          "round_to_minutes": 5
+        },
+        "repetition_rules": null,
+        "catalog_version": "test",
+        "product_snapshot_version": "test",
+        "policy_version": "test"
+      }
+    },
+    {
+      "case_id": "composed-tight-budget",
+      "category": "composed-tight-budget",
+      "problem": {
+        "problem_id": "meal-composition",
+        "slots": [
+          {
+            "slot_id": "d1",
+            "planned_date": "2026-09-28",
+            "meal_type": "dinner",
+            "servings": 4,
+            "max_time_minutes": 120,
+            "max_dish_time_minutes": null,
+            "required": true,
+            "locked_recipe_id": null,
+            "composition": [
+              {
+                "role_id": "main",
+                "courses": [
+                  "main"
+                ],
+                "required": true
+              },
+              {
+                "role_id": "vegetable",
+                "courses": [
+                  "side",
+                  "salad"
+                ],
+                "required": true
+              },
+              {
+                "role_id": "soup",
+                "courses": [
+                  "soup"
+                ],
+                "required": false
+              }
+            ]
+          }
+        ],
+        "recipes": [
+          {
+            "recipe_id": "chicken",
+            "title": "chicken",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 40,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "chicken-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 500.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "main",
+            "prep_minutes": 15,
+            "cook_minutes": 25,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "greens",
+            "title": "greens",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 32,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "greens-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 100.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "side",
+            "prep_minutes": 10,
+            "cook_minutes": 22,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "broth",
+            "title": "broth",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 45,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "broth-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 200.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "soup",
+            "prep_minutes": 15,
+            "cook_minutes": 30,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "peanut-slaw",
+            "title": "peanut-slaw",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 10,
+            "dietary_tags": [],
+            "allergens": [
+              "peanut"
+            ],
+            "ingredients": [
+              {
+                "ingredient_id": "peanut-slaw-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 150.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "side",
+            "prep_minutes": 10,
+            "cook_minutes": 0,
+            "passive_minutes": 0
+          }
+        ],
+        "pantry": [],
+        "products": [
+          {
+            "ingredient_id": "chicken-base",
+            "product_id": "p-chicken",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "greens-base",
+            "product_id": "p-greens",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "broth-base",
+            "product_id": "p-broth",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "peanut-slaw-base",
+            "product_id": "p-peanut-slaw",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          }
+        ],
+        "allergens": [
+          "peanut"
+        ],
+        "allergen_vocabulary": [
+          "peanut"
+        ],
+        "excluded_ingredients": [],
+        "dietary_requirements": [],
+        "health_preferences": [],
+        "nutrition_bands": [],
+        "purchase_budget_sgd": 5.0,
+        "budget_is_hard": true,
+        "preference_weights": {
+          "nutrition": 0.35,
+          "variety": 0.25,
+          "time": 0.15,
+          "pantry": 0.15,
+          "health": 0.1
+        },
+        "diversity_policy": null,
+        "composition_policy": {
+          "schema_version": "planning-composition-v1",
+          "main_shares": [
+            1.0,
+            0.75,
+            0.6,
+            0.5,
+            0.45,
+            0.4
+          ],
+          "other_shares": [
+            null,
+            0.5,
+            0.4,
+            0.35,
+            0.3,
+            0.28
+          ],
+          "hands_on_cook_fraction": 0.5,
+          "switch_minutes": 5,
+          "round_to_minutes": 5
+        },
+        "repetition_rules": null,
+        "catalog_version": "test",
+        "product_snapshot_version": "test",
+        "policy_version": "test"
+      }
+    },
+    {
+      "case_id": "composed-missing-products",
+      "category": "composed-missing-products",
+      "problem": {
+        "problem_id": "meal-composition",
+        "slots": [
+          {
+            "slot_id": "d1",
+            "planned_date": "2026-09-28",
+            "meal_type": "dinner",
+            "servings": 4,
+            "max_time_minutes": 120,
+            "max_dish_time_minutes": null,
+            "required": true,
+            "locked_recipe_id": null,
+            "composition": [
+              {
+                "role_id": "main",
+                "courses": [
+                  "main"
+                ],
+                "required": true
+              },
+              {
+                "role_id": "vegetable",
+                "courses": [
+                  "side",
+                  "salad"
+                ],
+                "required": true
+              },
+              {
+                "role_id": "soup",
+                "courses": [
+                  "soup"
+                ],
+                "required": false
+              }
+            ]
+          }
+        ],
+        "recipes": [
+          {
+            "recipe_id": "chicken",
+            "title": "chicken",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 40,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "chicken-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 500.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "main",
+            "prep_minutes": 15,
+            "cook_minutes": 25,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "greens",
+            "title": "greens",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 32,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "greens-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 100.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "side",
+            "prep_minutes": 10,
+            "cook_minutes": 22,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "broth",
+            "title": "broth",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 45,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "broth-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 200.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "soup",
+            "prep_minutes": 15,
+            "cook_minutes": 30,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "peanut-slaw",
+            "title": "peanut-slaw",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 10,
+            "dietary_tags": [],
+            "allergens": [
+              "peanut"
+            ],
+            "ingredients": [
+              {
+                "ingredient_id": "peanut-slaw-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 150.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "side",
+            "prep_minutes": 10,
+            "cook_minutes": 0,
+            "passive_minutes": 0
+          }
+        ],
+        "pantry": [],
+        "products": [],
+        "allergens": [
+          "peanut"
+        ],
+        "allergen_vocabulary": [
+          "peanut"
+        ],
+        "excluded_ingredients": [],
+        "dietary_requirements": [],
+        "health_preferences": [],
+        "nutrition_bands": [],
+        "purchase_budget_sgd": null,
+        "budget_is_hard": true,
+        "preference_weights": {
+          "nutrition": 0.35,
+          "variety": 0.25,
+          "time": 0.15,
+          "pantry": 0.15,
+          "health": 0.1
+        },
+        "diversity_policy": null,
+        "composition_policy": {
+          "schema_version": "planning-composition-v1",
+          "main_shares": [
+            1.0,
+            0.75,
+            0.6,
+            0.5,
+            0.45,
+            0.4
+          ],
+          "other_shares": [
+            null,
+            0.5,
+            0.4,
+            0.35,
+            0.3,
+            0.28
+          ],
+          "hands_on_cook_fraction": 0.5,
+          "switch_minutes": 5,
+          "round_to_minutes": 5
+        },
+        "repetition_rules": null,
+        "catalog_version": "test",
+        "product_snapshot_version": "test",
+        "policy_version": "test"
+      }
+    },
+    {
+      "case_id": "composed-optional-missing",
+      "category": "composed-optional-missing",
+      "problem": {
+        "problem_id": "meal-composition",
+        "slots": [
+          {
+            "slot_id": "d1",
+            "planned_date": "2026-09-28",
+            "meal_type": "dinner",
+            "servings": 4,
+            "max_time_minutes": 120,
+            "max_dish_time_minutes": null,
+            "required": true,
+            "locked_recipe_id": null,
+            "composition": [
+              {
+                "role_id": "main",
+                "courses": [
+                  "main"
+                ],
+                "required": true
+              },
+              {
+                "role_id": "vegetable",
+                "courses": [
+                  "side",
+                  "salad"
+                ],
+                "required": false
+              },
+              {
+                "role_id": "soup",
+                "courses": [
+                  "soup"
+                ],
+                "required": false
+              }
+            ]
+          }
+        ],
+        "recipes": [
+          {
+            "recipe_id": "chicken",
+            "title": "chicken",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 40,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "chicken-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 500.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "main",
+            "prep_minutes": 15,
+            "cook_minutes": 25,
+            "passive_minutes": 0
+          }
+        ],
+        "pantry": [],
+        "products": [
+          {
+            "ingredient_id": "chicken-base",
+            "product_id": "p-chicken",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "greens-base",
+            "product_id": "p-greens",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "broth-base",
+            "product_id": "p-broth",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "peanut-slaw-base",
+            "product_id": "p-peanut-slaw",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          }
+        ],
+        "allergens": [
+          "peanut"
+        ],
+        "allergen_vocabulary": [
+          "peanut"
+        ],
+        "excluded_ingredients": [],
+        "dietary_requirements": [],
+        "health_preferences": [],
+        "nutrition_bands": [],
+        "purchase_budget_sgd": null,
+        "budget_is_hard": true,
+        "preference_weights": {
+          "nutrition": 0.35,
+          "variety": 0.25,
+          "time": 0.15,
+          "pantry": 0.15,
+          "health": 0.1
+        },
+        "diversity_policy": null,
+        "composition_policy": {
+          "schema_version": "planning-composition-v1",
+          "main_shares": [
+            1.0,
+            0.75,
+            0.6,
+            0.5,
+            0.45,
+            0.4
+          ],
+          "other_shares": [
+            null,
+            0.5,
+            0.4,
+            0.35,
+            0.3,
+            0.28
+          ],
+          "hands_on_cook_fraction": 0.5,
+          "switch_minutes": 5,
+          "round_to_minutes": 5
+        },
+        "repetition_rules": null,
+        "catalog_version": "test",
+        "product_snapshot_version": "test",
+        "policy_version": "test"
+      }
+    },
+    {
+      "case_id": "composed-overlap",
+      "category": "diversity",
+      "problem": {
+        "problem_id": "meal-composition",
+        "slots": [
+          {
+            "slot_id": "d1",
+            "planned_date": "2026-09-28",
+            "meal_type": "dinner",
+            "servings": 4,
+            "max_time_minutes": 120,
+            "max_dish_time_minutes": null,
+            "required": true,
+            "locked_recipe_id": null,
+            "composition": [
+              {
+                "role_id": "main",
+                "courses": [
+                  "main"
+                ],
+                "required": true
+              },
+              {
+                "role_id": "vegetable",
+                "courses": [
+                  "side",
+                  "salad"
+                ],
+                "required": true
+              },
+              {
+                "role_id": "soup",
+                "courses": [
+                  "soup"
+                ],
+                "required": false
+              }
+            ]
+          }
+        ],
+        "recipes": [
+          {
+            "recipe_id": "chicken",
+            "title": "chicken",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 40,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "chicken-base",
+                "quantity": 400.0,
+                "unit": "g"
+              },
+              {
+                "ingredient_id": "salt",
+                "quantity": 1,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 500.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "main",
+            "prep_minutes": 15,
+            "cook_minutes": 25,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "greens",
+            "title": "greens",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 32,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "greens-base",
+                "quantity": 400.0,
+                "unit": "g"
+              },
+              {
+                "ingredient_id": "salt",
+                "quantity": 1,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 100.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "side",
+            "prep_minutes": 10,
+            "cook_minutes": 22,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "broth",
+            "title": "broth",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 45,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "broth-base",
+                "quantity": 400.0,
+                "unit": "g"
+              },
+              {
+                "ingredient_id": "salt",
+                "quantity": 1,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 200.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "soup",
+            "prep_minutes": 15,
+            "cook_minutes": 30,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "peanut-slaw",
+            "title": "peanut-slaw",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 10,
+            "dietary_tags": [],
+            "allergens": [
+              "peanut"
+            ],
+            "ingredients": [
+              {
+                "ingredient_id": "peanut-slaw-base",
+                "quantity": 400.0,
+                "unit": "g"
+              },
+              {
+                "ingredient_id": "salt",
+                "quantity": 1,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 150.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "side",
+            "prep_minutes": 10,
+            "cook_minutes": 0,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "a-plain-greens",
+            "title": "greens",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 32,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "greens-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 100.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "side",
+            "prep_minutes": 10,
+            "cook_minutes": 22,
+            "passive_minutes": 0
+          }
+        ],
+        "pantry": [],
+        "products": [
+          {
+            "ingredient_id": "chicken-base",
+            "product_id": "p-chicken",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "greens-base",
+            "product_id": "p-greens",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "broth-base",
+            "product_id": "p-broth",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "peanut-slaw-base",
+            "product_id": "p-peanut-slaw",
+            "package_quantity": 100.0,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+            "available": true
+          },
+          {
+            "ingredient_id": "salt",
+            "product_id": "salt-pack",
+            "package_quantity": 100,
+            "package_unit": "g",
+            "price_sgd": 1
+          }
+        ],
+        "allergens": [
+          "peanut"
+        ],
+        "allergen_vocabulary": [
+          "peanut"
+        ],
+        "excluded_ingredients": [],
+        "dietary_requirements": [],
+        "health_preferences": [],
+        "nutrition_bands": [],
+        "purchase_budget_sgd": null,
+        "budget_is_hard": true,
+        "preference_weights": {
+          "nutrition": 0.35,
+          "variety": 0.25,
+          "time": 0.15,
+          "pantry": 0.15,
+          "health": 0.1
+        },
+        "diversity_policy": {
+          "classification_version": "synthetic-composed-v1",
+          "classification_rule": "Synthetic defining ingredient; no asserted protein groups",
+          "classifications": {
+            "chicken": {
+              "core_ingredient_ids": [
+                "chicken-base"
+              ],
+              "primary_proteins": {},
+              "source_reference": "synthetic:p8-composed-v1"
+            },
+            "greens": {
+              "core_ingredient_ids": [
+                "greens-base"
+              ],
+              "primary_proteins": {},
+              "source_reference": "synthetic:p8-composed-v1"
+            },
+            "broth": {
+              "core_ingredient_ids": [
+                "broth-base"
+              ],
+              "primary_proteins": {},
+              "source_reference": "synthetic:p8-composed-v1"
+            },
+            "peanut-slaw": {
+              "core_ingredient_ids": [
+                "peanut-slaw-base"
+              ],
+              "primary_proteins": {},
+              "source_reference": "synthetic:p8-composed-v1"
+            },
+            "a-plain-greens": {
+              "core_ingredient_ids": [
+                "greens-base"
+              ],
+              "primary_proteins": {},
+              "source_reference": "synthetic:p8-composed-v1"
+            }
+          },
+          "max_slots_per_core_ingredient": 2,
+          "diversity_penalty": 0.25,
+          "overlap_reward_weight": 1
+        },
+        "composition_policy": {
+          "schema_version": "planning-composition-v1",
+          "main_shares": [
+            1.0,
+            0.75,
+            0.6,
+            0.5,
+            0.45,
+            0.4
+          ],
+          "other_shares": [
+            null,
+            0.5,
+            0.4,
+            0.35,
+            0.3,
+            0.28
+          ],
+          "hands_on_cook_fraction": 0.5,
+          "switch_minutes": 5,
+          "round_to_minutes": 5
+        },
+        "repetition_rules": null,
+        "catalog_version": "test",
+        "product_snapshot_version": "test",
+        "policy_version": "test"
+      }
+    },
+    {
+      "case_id": "composed-repair",
+      "category": "repair",
+      "problem": {
+        "problem_id": "meal-composition",
+        "slots": [
+          {
+            "slot_id": "d1",
+            "planned_date": "2026-09-28",
+            "meal_type": "dinner",
+            "servings": 4,
+            "max_time_minutes": 120,
+            "max_dish_time_minutes": null,
+            "required": true,
+            "locked_recipe_id": null,
+            "composition": [
+              {
+                "role_id": "main",
+                "courses": [
+                  "main"
+                ],
+                "required": true
+              },
+              {
+                "role_id": "vegetable",
+                "courses": [
+                  "side",
+                  "salad"
+                ],
+                "required": true
+              },
+              {
+                "role_id": "soup",
+                "courses": [
+                  "soup"
+                ],
+                "required": false
+              }
+            ]
+          }
+        ],
+        "recipes": [
+          {
+            "recipe_id": "chicken",
+            "title": "chicken",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 40,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "chicken-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 500.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "main",
+            "prep_minutes": 15,
+            "cook_minutes": 25,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "greens",
+            "title": "greens",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 32,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "greens-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 100.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "side",
+            "prep_minutes": 10,
+            "cook_minutes": 22,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "broth",
+            "title": "broth",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 45,
+            "dietary_tags": [],
+            "allergens": [],
+            "ingredients": [
+              {
+                "ingredient_id": "broth-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 200.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "soup",
+            "prep_minutes": 15,
+            "cook_minutes": 30,
+            "passive_minutes": 0
+          },
+          {
+            "recipe_id": "peanut-slaw",
+            "title": "peanut-slaw",
+            "servings": 4,
+            "allowed_meal_types": [
+              "dinner"
+            ],
+            "total_time_minutes": 10,
+            "dietary_tags": [],
+            "allergens": [
+              "peanut"
+            ],
+            "ingredients": [
+              {
+                "ingredient_id": "peanut-slaw-base",
+                "quantity": 400.0,
+                "unit": "g"
+              }
+            ],
+            "nutrients_per_serving": {
+              "calories_kcal": 150.0,
+              "protein_g": 0.0,
+              "carbohydrate_g": 0.0,
+              "fat_g": 0.0,
+              "sodium_mg": 0.0,
+              "sugar_g": 0.0
+            },
+            "cuisine": null,
+            "course": "side",
+            "prep_minutes": 10,
+            "cook_minutes": 0,
+            "passive_minutes": 0
+          }
+        ],
+        "pantry": [],
+        "products": [],
+        "allergens": [
+          "peanut"
+        ],
+        "allergen_vocabulary": [
+          "peanut"
+        ],
+        "excluded_ingredients": [],
+        "dietary_requirements": [],
+        "health_preferences": [],
+        "nutrition_bands": [],
+        "purchase_budget_sgd": null,
+        "budget_is_hard": true,
+        "preference_weights": {
+          "nutrition": 0.35,
+          "variety": 0.25,
+          "time": 0.15,
+          "pantry": 0.15,
+          "health": 0.1
+        },
+        "diversity_policy": null,
+        "composition_policy": {
+          "schema_version": "planning-composition-v1",
+          "main_shares": [
+            1.0,
+            0.75,
+            0.6,
+            0.5,
+            0.45,
+            0.4
+          ],
+          "other_shares": [
+            null,
+            0.5,
+            0.4,
+            0.35,
+            0.3,
+            0.28
+          ],
+          "hands_on_cook_fraction": 0.5,
+          "switch_minutes": 5,
+          "round_to_minutes": 5
+        },
+        "repetition_rules": null,
+        "catalog_version": "test",
+        "product_snapshot_version": "test",
+        "policy_version": "test"
+      },
+      "snapshots": [
+        {
+          "version": "composed-repair-2",
+          "products": [
+            {
+              "ingredient_id": "chicken-base",
+              "product_id": "p-chicken",
+              "package_quantity": 100.0,
+              "package_unit": "g",
+              "price_sgd": 1.0,
+              "available": true
+            },
+            {
+              "ingredient_id": "greens-base",
+              "product_id": "p-greens",
+              "package_quantity": 100.0,
+              "package_unit": "g",
+              "price_sgd": 1.0,
+              "available": true
+            },
+            {
+              "ingredient_id": "broth-base",
+              "product_id": "p-broth",
+              "package_quantity": 100.0,
+              "package_unit": "g",
+              "price_sgd": 1.0,
+              "available": true
+            },
+            {
+              "ingredient_id": "peanut-slaw-base",
+              "product_id": "p-peanut-slaw",
+              "package_quantity": 100.0,
+              "package_unit": "g",
+              "price_sgd": 1.0,
+              "available": true
+            }
+          ],
+          "trace": {
+            "requested_source": "fairprice",
+            "provider_used": "fixture",
+            "mode": "fixture",
+            "status": "success",
+            "query": "synthetic meal",
+            "fetched_at": "2026-10-03T00:00:00Z",
+            "parser_version": "p8-v1",
+            "candidate_count": 4
+          }
+        }
+      ]
+    }
+  ]
+}

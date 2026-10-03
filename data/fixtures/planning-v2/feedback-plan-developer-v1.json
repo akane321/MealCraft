@@ -1,0 +1,110 @@
+{
+  "version": "feedback-plan-developer-v1",
+  "source": "synthetic",
+  "problem": {
+    "problem_id": "feedback-plan-developer-v1",
+    "slots": [
+      {
+        "slot_id": "dinner",
+        "planned_date": "2026-10-01",
+        "meal_type": "dinner",
+        "servings": 1,
+        "required": true
+      }
+    ],
+    "recipes": [
+      {
+        "recipe_id": "a-large",
+        "title": "Overnight oats with banana",
+        "servings": 1,
+        "allowed_meal_types": [
+          "dinner"
+        ],
+        "total_time_minutes": 5,
+        "dietary_tags": [
+          "vegetarian"
+        ],
+        "allergens": [],
+        "ingredients": [
+          {
+            "ingredient_id": "rice",
+            "quantity": 200,
+            "unit": "g"
+          }
+        ],
+        "nutrients_per_serving": {
+          "calories_kcal": 410,
+          "protein_g": 16,
+          "carbohydrate_g": 66,
+          "fat_g": 10,
+          "sodium_mg": 310,
+          "sugar_g": 18
+        },
+        "cuisine": "international"
+      },
+      {
+        "recipe_id": "b-small",
+        "title": "Overnight oats with banana",
+        "servings": 1,
+        "allowed_meal_types": [
+          "dinner"
+        ],
+        "total_time_minutes": 10,
+        "dietary_tags": [
+          "vegetarian"
+        ],
+        "allergens": [],
+        "ingredients": [
+          {
+            "ingredient_id": "rice",
+            "quantity": 100,
+            "unit": "g"
+          }
+        ],
+        "nutrients_per_serving": {
+          "calories_kcal": 410,
+          "protein_g": 16,
+          "carbohydrate_g": 66,
+          "fat_g": 10,
+          "sodium_mg": 310,
+          "sugar_g": 18
+        },
+        "cuisine": "international"
+      }
+    ],
+    "products": [
+      {
+        "ingredient_id": "rice",
+        "product_id": "rice-pack",
+        "package_quantity": 100,
+        "package_unit": "g",
+        "price_sgd": 1
+      }
+    ],
+    "allergen_vocabulary": [
+      "milk"
+    ],
+    "catalog_version": "synthetic-p8-v1",
+    "product_snapshot_version": "price-1",
+    "policy_version": "synthetic-p8-v1",
+    "purchase_budget_sgd": 3
+  },
+  "events": [
+    {
+      "event_id": "past-b",
+      "scope_id": "synthetic-household",
+      "recipe_id": "b-small",
+      "outcome": "cooked",
+      "available_at": "2026-10-01T00:00:00Z"
+    },
+    {
+      "event_id": "future-a",
+      "scope_id": "synthetic-household",
+      "recipe_id": "a-large",
+      "outcome": "cooked",
+      "available_at": "2026-10-04T00:00:00Z"
+    }
+  ],
+  "scope_id": "synthetic-household",
+  "decision_at": "2026-10-03T00:00:00Z"
+}
