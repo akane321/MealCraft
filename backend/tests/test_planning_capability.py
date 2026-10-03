@@ -799,6 +799,49 @@ def test_a_change_on_a_week_of_two_meals_a_day_goes_over_by_the_cheapest_week(mo
     assert preview.json()["over_budget_sgd"] == 1.85
 
 
+def test_a_change_with_cheap_lunches_left_still_charges_a_repeat_one_meals_share(monkeypatch):
+    """As above, but the lunches cost little and the dinners most of the budget (S$3.80 of S$25.60), so what the
+    rest of the week leaves (S$21.80) is more than the dinners' share of the budget (S$12.80). A repeat is still
+    charged one meal's share (S$1.83): one soup all week, S$1.85 over. Charged what is left per dinner instead
+    (S$3.11, nearly a day's share), seven different soups looked cheapest and the change went S$15.95 over."""
+    from datetime import date, timedelta
+
+    def only_for(meal, recipe):
+        recipe.meal_types = [meal]
+        return recipe
+
+    soups = ["chickpea", "black_bean", "cucumber", "canned_tomato", "ginger", "garlic", "canned_tuna"]
+    dishes = [
+        only_for("lunch", _dish("sweet-potato-lunch", "main", "sweet_potato", 200, calories=450)),
+        # 70 g of salmon a dinner: two packages a week whether the main is the whole meal or three quarters of it.
+        only_for("dinner", _dish("salmon-dinner", "main", "salmon_fillet", 140, calories=400)),
+        *[only_for("dinner", _dish(f"{name}-soup", "soup", name, 100, calories=150)) for name in soups],
+    ]
+    main = {"role_id": "main", "courses": ["main"]}
+    with dish_client(monkeypatch, dishes) as client:
+        request = {
+            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "household_size": 2,
+            "max_cooking_time_minutes": 240,
+            "pricing_mode": "fixture",
+            "plan_shape": {"meals": {"lunch": [main], "dinner": [main]}},
+            "weekly_budget_sgd": 25.6,
+        }
+        plan = client.post("/api/plans/generate", json=request).json()
+        assert plan["grocery_estimate"]["purchase_total_sgd"] == 25.6
+        assert {d["recipe"]["slug"] for d in plan["days"] if d["meal_type"] == "lunch"} == {"sweet-potato-lunch"}
+
+        preview = client.post(
+            f"/api/plans/{plan['id']}/shape/preview",
+            json={"meal_type": "dinner", "roles": [main, {"role_id": "soup", "courses": ["soup"], "required": True}]},
+        )
+
+    assert preview.status_code == 201, preview.text
+    added = preview.json()["shape_change"]["added"]
+    assert {d["recipe_slug"] for d in added if d["role_id"] == "soup"} == {"chickpea-soup"}
+    assert preview.json()["over_budget_sgd"] == 1.85
+
+
 def test_dinners_with_a_soup_keep_each_days_main_and_vegetable(composed_client):
     """A soup added to every dinner keeps each day's dishes, each in its place (the 2026-10-02 review of
     mdw-dev-019): the dishes were kept only for a change on one day, and a change on several planned all their
