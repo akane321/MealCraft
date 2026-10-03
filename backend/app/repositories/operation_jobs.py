@@ -20,6 +20,14 @@ class JobIdempotencyConflictError(ValueError):
     """The same actor, job type and key were reused for different input."""
 
 
+class OperationJobNotFoundError(LookupError):
+    """No durable job has the requested identifier."""
+
+
+class OperationJobNotCancellableError(ValueError):
+    """A terminal durable job cannot be cancelled."""
+
+
 @dataclass(frozen=True)
 class ClaimedOperationJob:
     run_id: int
@@ -28,6 +36,13 @@ class ClaimedOperationJob:
     payload: dict
     attempt_count: int
     lease_expires_at: datetime
+
+
+@dataclass(frozen=True)
+class CancelledOperationJob:
+    run_id: int
+    previous_status: Literal["queued", "running"]
+    attempt_count: int
 
 
 class OperationJobRepository:
@@ -161,6 +176,30 @@ class OperationJobRepository:
             .values(status=status, lease_expires_at=None, finished_at=now)
         )
         return result.rowcount == 1
+
+    def cancel(self, *, run_id: int, now: datetime) -> CancelledOperationJob:
+        run = self.session.scalars(
+            select(OperationRun)
+            .where(OperationRun.id == run_id, OperationRun.idempotency_key.is_not(None))
+            .with_for_update()
+        ).one_or_none()
+        if run is None:
+            raise OperationJobNotFoundError
+        if run.status not in ("queued", "running"):
+            raise OperationJobNotCancellableError("only queued or running jobs can be cancelled")
+
+        previous_status = run.status
+        run.status = "cancelled"
+        run.lease_expires_at = None
+        run.finished_at = now
+        run.error_code = None
+        run.error_detail = None
+        self.session.flush()
+        return CancelledOperationJob(
+            run_id=run.id,
+            previous_status=previous_status,
+            attempt_count=run.attempt_count,
+        )
 
     def fail_or_retry(
         self,

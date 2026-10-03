@@ -31,6 +31,7 @@ class OperationsAction(StrEnum):
     REVIEW_DATA = "review_data"
     RETRY_RETRIEVAL = "retry_retrieval"
     RUN_EVALUATION = "run_evaluation"
+    MANAGE_JOBS = "manage_jobs"
     MANAGE_SYSTEM_ROLES = "manage_system_roles"
 
 
@@ -63,6 +64,7 @@ OPERATIONS_PERMISSIONS: dict[SystemRole, frozenset[OperationsAction]] = {
             OperationsAction.REVIEW_DATA,
             OperationsAction.RETRY_RETRIEVAL,
             OperationsAction.RUN_EVALUATION,
+            OperationsAction.MANAGE_JOBS,
         }
     ),
     SystemRole.ADMIN: frozenset(OperationsAction),
