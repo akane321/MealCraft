@@ -1,10 +1,7 @@
 import type { OpsDayPoint, OpsReplayDish, OpsTaskKind } from "~/types/ops";
 
-// Every system role the backend lets into /api/ops; ADR-0047 gives them all the same console.
-const CONSOLE_ROLES = new Set(["admin", "operator", "data_reviewer"]);
-
 export function isConsoleAccount(actor: { user: { system_role: string } } | null | undefined) {
-  return Boolean(actor && CONSOLE_ROLES.has(actor.user.system_role));
+  return actor?.user.system_role === "admin";
 }
 
 export interface OpsModule {
