@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 
+from app.agent.replies import people, say, word
 from app.orchestration.contracts import (
     InteractionAnswer,
     InteractionOption,
@@ -12,19 +13,18 @@ class InteractionAnswerError(ValueError):
     pass
 
 
-def household_size_interaction(*, question_id: str, context_version: int) -> InteractionRequest:
+# The interaction whose options are things the household could have typed: an answer is sent as their message.
+SAY_FIELD = "message"
+
+
+def household_size_interaction(*, question_id: str, context_version: int, lang: str = "en") -> InteractionRequest:
     return InteractionRequest(
         type=InteractionType.SINGLE_SELECT,
-        prompt="How many people should this plan serve?",
+        prompt=say("ask_people_short", lang),
         field_path="household_size",
         question_id=question_id,
         options=[
-            InteractionOption(
-                id=f"household_size_{size}",
-                label=f"{size} {'person' if size == 1 else 'people'}",
-                value=size,
-            )
-            for size in range(1, 5)
+            InteractionOption(id=f"household_size_{size}", label=people(size, lang), value=size) for size in range(1, 5)
         ],
         allow_free_text=True,
         context_version=context_version,
@@ -36,17 +36,14 @@ def pantry_quantity_interaction(
     ingredient_name: str,
     question_id: str,
     context_version: int,
+    lang: str = "en",
 ) -> InteractionRequest:
-    display_name = ingredient_name.replace("_", " ")
     return InteractionRequest(
         type=InteractionType.QUANTITY_INPUT,
-        prompt=(
-            f"How much {display_name} do you already have? "
-            "Enter a quantity and unit, or choose unknown to use it only for ranking."
-        ),
+        prompt=say("ask_quantity_short", lang, name=word(ingredient_name, lang)),
         field_path=f"available_ingredients.{ingredient_name}.quantity",
         question_id=question_id,
-        options=[InteractionOption(id="quantity_unknown", label="I don't know", value="unknown")],
+        options=[InteractionOption(id="quantity_unknown", label=say("unknown_quantity", lang), value="unknown")],
         allow_free_text=True,
         context_version=context_version,
     )
@@ -60,6 +57,7 @@ def unmatched_term_interaction(
     prompt: str,
     question_id: str,
     context_version: int,
+    lang: str = "en",
 ) -> InteractionRequest:
     """Offer the catalog ingredients a word might mean. The field it was written into travels in the
     field path, so the answer lands as an exclusion or a pantry item without asking the model again."""
@@ -69,8 +67,24 @@ def unmatched_term_interaction(
         field_path=f"unmatched.{meant_for}.{term}",
         question_id=question_id,
         options=[
-            InteractionOption(id=f"ingredient_{option}", label=option.replace("_", " "), value=option)
-            for option in options
+            InteractionOption(id=f"ingredient_{option}", label=word(option, lang), value=option) for option in options
+        ],
+        allow_free_text=True,
+        context_version=context_version,
+    )
+
+
+def say_interaction(
+    *, prompt: str, options: list[tuple[str, str]], question_id: str, context_version: int
+) -> InteractionRequest:
+    """Choices the household can tap instead of typing: each sends its own sentence (`SAY_FIELD`)."""
+    return InteractionRequest(
+        type=InteractionType.QUICK_REPLY if options else InteractionType.FREE_TEXT,
+        prompt=prompt,
+        field_path=SAY_FIELD,
+        question_id=question_id,
+        options=[
+            InteractionOption(id=f"say_{index}", label=label, value=text) for index, (label, text) in enumerate(options)
         ],
         allow_free_text=True,
         context_version=context_version,

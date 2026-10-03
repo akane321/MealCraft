@@ -106,12 +106,59 @@ class AgentSessionRepository:
         user_message: str,
         assistant_message: str,
         scope_decision: ScopeDecision,
+        pending_interaction: InteractionRequest | None,
     ) -> AgentSession | None:
-        """Persist an out-of-scope exchange without changing planning state."""
+        """Persist an out-of-scope exchange without changing planning state; only the choices on offer change."""
 
         agent_session = self.get(session_id)
         if agent_session is None:
             return None
+        agent_session.last_scope_decision = scope_decision.model_dump(mode="json")
+        agent_session.pending_interaction = pending_interaction.model_dump(mode="json") if pending_interaction else None
+        agent_session.messages.extend(
+            [
+                AgentMessage(role="user", content=user_message),
+                AgentMessage(role="assistant", content=assistant_message),
+            ]
+        )
+        self.session.commit()
+        return self.get(session_id)
+
+    def mark_planned(self, session_id: int, *, plan_id: int, assistant_message: str) -> AgentSession | None:
+        agent_session = self.get(session_id)
+        if agent_session is None:
+            return None
+        agent_session.status = "planned"
+        agent_session.plan_id = plan_id
+        agent_session.clarification_questions = []
+        agent_session.missing_fields = []
+        agent_session.pending_interaction = None
+        agent_session.messages.append(AgentMessage(role="assistant", content=assistant_message))
+        self.session.commit()
+        return self.get(session_id)
+
+    def plan_again(
+        self,
+        session_id: int,
+        *,
+        plan_id: int,
+        constraints: AgentConstraintState,
+        user_message: str,
+        assistant_message: str,
+        scope_decision: ScopeDecision,
+    ) -> AgentSession | None:
+        """A new week planned in the conversation in place of the session's; the old week stays saved."""
+        agent_session = self.get(session_id)
+        if agent_session is None:
+            return None
+        agent_session.plan_id = plan_id
+        agent_session.constraints = constraints.model_dump(mode="json")
+        agent_session.status = "planned"
+        agent_session.pending_event_id = None
+        agent_session.replan_draft = {}
+        agent_session.missing_fields = []
+        agent_session.clarification_questions = []
+        agent_session.pending_interaction = None
         agent_session.last_scope_decision = scope_decision.model_dump(mode="json")
         agent_session.messages.extend(
             [
@@ -122,21 +169,25 @@ class AgentSessionRepository:
         self.session.commit()
         return self.get(session_id)
 
-    def mark_planned(self, session_id: int, *, plan_id: int) -> AgentSession | None:
+    def explain_unplanned(
+        self,
+        session_id: int,
+        *,
+        assistant_message: str,
+        status: str,
+        missing_fields: list[str],
+        clarification_questions: list[str],
+        pending_interaction: InteractionRequest | None,
+    ) -> AgentSession | None:
+        """A week the planner could not plan: why, in the conversation, and the session collecting again."""
         agent_session = self.get(session_id)
         if agent_session is None:
             return None
-        agent_session.status = "planned"
-        agent_session.plan_id = plan_id
-        agent_session.clarification_questions = []
-        agent_session.missing_fields = []
-        agent_session.pending_interaction = None
-        agent_session.messages.append(
-            AgentMessage(
-                role="assistant",
-                content="Here's your week. Tap a dinner for the recipe, or ask me to swap anything.",
-            )
-        )
+        agent_session.status = status
+        agent_session.missing_fields = missing_fields
+        agent_session.clarification_questions = clarification_questions
+        agent_session.pending_interaction = pending_interaction.model_dump(mode="json") if pending_interaction else None
+        agent_session.messages.append(AgentMessage(role="assistant", content=assistant_message))
         self.session.commit()
         return self.get(session_id)
 
@@ -150,6 +201,7 @@ class AgentSessionRepository:
         clarification_questions: list[str],
         pending_event_id: int | None,
         scope_decision: ScopeDecision | None = None,
+        pending_interaction: InteractionRequest | None = None,
     ) -> AgentSession | None:
         agent_session = self.get(session_id)
         if agent_session is None:
@@ -158,8 +210,9 @@ class AgentSessionRepository:
         agent_session.missing_fields = ["replan"] if clarification_questions else []
         agent_session.clarification_questions = clarification_questions[:1]
         agent_session.pending_event_id = pending_event_id
-        # A new request about the week answers, or moves past, any question still open.
-        agent_session.pending_interaction = None
+        # A new request about the week answers, or moves past, any question still open; the new
+        # question may come with its own choices.
+        agent_session.pending_interaction = pending_interaction.model_dump(mode="json") if pending_interaction else None
         if scope_decision is not None:
             agent_session.last_scope_decision = scope_decision.model_dump(mode="json")
         agent_session.messages.extend(
