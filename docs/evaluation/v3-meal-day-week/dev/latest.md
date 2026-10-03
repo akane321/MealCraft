@@ -17,27 +17,27 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 
 | Episode | Category | Lang | Class | Answered | Success | Failed checks | Dishes | Distinct | Meal fit | Cost |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: |
-| mdw-dev-001 | meals_per_day | en | feasible | plan | yes | - | 21 | 21 | 21/21 | 288.72 |
-| mdw-dev-002 | meals_per_day | zh | feasible | plan | yes | - | 28 | 28 | 28/28 | 437.28 |
-| mdw-dev-003 | meals_per_day | en | feasible | plan | yes | - | 21 | 20 | 21/21 | 402.46 |
-| mdw-dev-004 | composition | en | feasible | plan | yes | - | 28 | 28 | 28/28 | 501.31 |
-| mdw-dev-005 | composition | zh | feasible | plan | yes | - | 28 | 28 | 28/28 | 444.03 |
-| mdw-dev-006 | nutrition_per_day | en | feasible | plan | yes | - | 21 | 18 | 21/21 | 318.03 |
-| mdw-dev-007 | nutrition_per_day | zh | feasible | plan | yes | - | 28 | 25 | 28/28 | 386.46 |
-| mdw-dev-008 | budget | en | feasible | plan | yes | - | 28 | 10 | 28/28 | 100.54 |
+| mdw-dev-001 | meals_per_day | en | feasible | plan | yes | - | 21 | 21 | 21/21 | 293.7 |
+| mdw-dev-002 | meals_per_day | zh | feasible | plan | yes | - | 28 | 28 | 28/28 | 470.13 |
+| mdw-dev-003 | meals_per_day | en | feasible | plan | yes | - | 21 | 20 | 21/21 | 404.42 |
+| mdw-dev-004 | composition | en | feasible | plan | yes | - | 28 | 28 | 28/28 | 486.4 |
+| mdw-dev-005 | composition | zh | feasible | plan | yes | - | 28 | 28 | 28/28 | 463.29 |
+| mdw-dev-006 | nutrition_per_day | en | feasible | plan | yes | - | 21 | 20 | 21/21 | 380.9 |
+| mdw-dev-007 | nutrition_per_day | zh | feasible | plan | yes | - | 28 | 24 | 28/28 | 401.05 |
+| mdw-dev-008 | budget | en | feasible | plan | yes | - | 28 | 13 | 28/28 | 102.65 |
 | mdw-dev-009 | budget | en | infeasible | infeasible | yes | - | - | - | - | - |
-| mdw-dev-010 | safety_diet | en | feasible | plan | yes | - | 28 | 28 | 26/28 | 416.11 |
+| mdw-dev-010 | safety_diet | en | feasible | plan | yes | - | 28 | 28 | 26/28 | 387.35 |
 | mdw-dev-011 | safety_diet | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 301.27 |
-| mdw-dev-012 | variety | en | feasible | plan | yes | - | 28 | 28 | 28/28 | 443.25 |
-| mdw-dev-013 | shape_change | en | feasible | plan | yes | - | 21 | 21 | 21/21 | 327.49 |
-| mdw-dev-014 | shape_change | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 322.97 |
-| mdw-dev-015 | shape_change | en | feasible | plan | yes | - | 15 | 15 | 15/15 | 387.62 |
-| mdw-dev-016 | shape_change | zh | feasible | plan | yes | - | 20 | 20 | 20/20 | 326.36 |
-| mdw-dev-017 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16/16 | 309.65 |
-| mdw-dev-018 | shape_change | zh | feasible | plan | yes | - | 16 | 16 | 16/16 | 261.17 |
-| mdw-dev-019 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16/16 | 324.92 |
+| mdw-dev-012 | variety | en | feasible | plan | yes | - | 28 | 28 | 28/28 | 445.73 |
+| mdw-dev-013 | shape_change | en | feasible | plan | yes | - | 21 | 21 | 21/21 | 330.57 |
+| mdw-dev-014 | shape_change | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 266.69 |
+| mdw-dev-015 | shape_change | en | feasible | plan | yes | - | 15 | 15 | 15/15 | 393.27 |
+| mdw-dev-016 | shape_change | zh | feasible | plan | yes | - | 20 | 20 | 20/20 | 333.48 |
+| mdw-dev-017 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16/16 | 336.92 |
+| mdw-dev-018 | shape_change | zh | feasible | plan | yes | - | 16 | 16 | 16/16 | 249.11 |
+| mdw-dev-019 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16/16 | 303.93 |
 | mdw-dev-020 | budget | en | feasible | plan | yes | - | 28 | 4 | 28/28 | 50.9 |
-| mdw-dev-021 | variety | en | feasible | plan | yes | - | 35 | 35 | 35/35 | 550.12 |
+| mdw-dev-021 | variety | en | feasible | plan | yes | - | 35 | 35 | 35/35 | 544.25 |
 
 ## Parameters
 

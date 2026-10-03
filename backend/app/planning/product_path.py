@@ -6,6 +6,7 @@ prices after validation, and never promotes a bounded miss into a global proof.
 
 import hashlib
 import json
+from collections import Counter
 from dataclasses import asdict, dataclass, replace
 from datetime import timedelta
 from fractions import Fraction
@@ -27,6 +28,7 @@ from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
 from app.planning.recipe_quality import dish_family, dish_kind
 from app.planning.recommendation_engine import CANDIDATE_LIMIT
+from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
 from app.planning.weekly_planner import WeeklyPlanSelectionError, WeeklyPlanSelector
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse
 from app.schemas.planning_v2 import (
@@ -113,6 +115,62 @@ class ProductPlan:
 
 # Recommendations kept for each course a composed meal's roles admit.
 COMPOSED_CANDIDATES_PER_COURSE = 24
+# How many of the most varied weeks found, and of the cheapest, spend their room on variety.
+VARIED_STARTS = 8
+
+
+def families_first(recommendations, seen=()) -> list:
+    """The first of each dish family in order, then the rest: "Chinese Fried Rice" and "Basic Fried Rice" are
+    one dinner twice, so a packet holds as many different dishes as the catalog has before it holds both."""
+    seen = set(seen)
+    first, again = [], []
+    for recommendation in recommendations:
+        family = dish_family(recommendation.recipe.title)
+        (again if family in seen else first).append(recommendation)
+        seen.add(family)
+    return first + again
+
+
+def composed_packet(composition, day_count: int, budget, recommendations, recipes) -> tuple[list, dict[str, int]]:
+    """The recommendations a composed week is planned from, and how many each kind of dish keeps.
+
+    The meal beam ranks each role's dishes itself; keep the best of every course it may fill, enough of each
+    for every slot that uses it to get a different dish (a lunch-and-dinner week needs fourteen mains, not the
+    24 a dinner week kept).
+    """
+    uses: dict[str, int] = {}
+    for _, roles in composition:
+        for role in roles:
+            for course in role.courses:
+                # The vegetable role keeps the best vegetable-led dishes, which the best sides are not.
+                key = f"vegetable {course}" if vegetable_role(role.role_id) else course
+                uses[key] = uses.get(key, 0) + day_count
+    limits = {key: max(COMPOSED_CANDIDATES_PER_COURSE, 3 * count) for key, count in uses.items()}
+    by_id = {r.id: r for r in recipes}
+    ranked_by_key: dict[str, list] = {}
+    for recommendation in recommendations:
+        recipe = by_id.get(recommendation.recipe.id)
+        course = getattr(recipe, "course", None) or "main"
+        led = f"vegetable {course}"
+        for key in (course, led):
+            if key in limits and (key != led or (recipe is not None and catalog_vegetable_led(recipe))):
+                ranked_by_key.setdefault(key, []).append(recommendation)
+    chosen: set[int] = set()
+    for key, ranked in ranked_by_key.items():
+        best = ranked[: limits[key]]
+        if budget is not None:
+            # As the one-dish packet does: the best-ranked dishes are rarely the cheap ones, so with a budget
+            # half of each kind's places go to the cheapest of the rest. Kept by rank alone, the 2026-10-02
+            # walkthrough's soups cost S$12 to S$37 in whole packages each and one came five times in a week.
+            # The cheapest are often one dish many times ("Chinese Fried Rice", "Basic Fried Rice"): one of
+            # each family comes first. (Without a budget the packet stays as ranked: reordered by family, a
+            # week of per-day bands, mdw-dev-007, kept 17 distinct dishes of 28 instead of 24.)
+            ranked = families_first(ranked)
+            best = ranked[: limits[key] // 2]
+            kept = {dish_family(r.recipe.title) for r in best}
+            best += families_first(sorted(ranked[len(best) :], key=dish_cost), kept)[: limits[key] - len(best)]
+        chosen |= {r.recipe.id for r in best}
+    return [r for r in recommendations if r.recipe.id in chosen], limits
 
 
 class ProductPlanningEngine:
@@ -206,24 +264,9 @@ class ProductPlanningEngine:
                 ranked = best + cheapest
             recommendations = ranked[:limit]
         else:
-            # The meal beam ranks each role's dishes itself; keep the best of every course it may fill,
-            # enough of each for every slot that uses it to get a different dish (a lunch-and-dinner
-            # week needs fourteen mains, not the 24 a dinner week kept).
-            uses: dict[str, int] = {}
-            for _, roles in composition:
-                for role in roles:
-                    for course in role.courses:
-                        uses[course] = uses.get(course, 0) + constraints.day_count
-            limits = {course: max(COMPOSED_CANDIDATES_PER_COURSE, 3 * count) for course, count in uses.items()}
-            by_id = {r.id: r for r in recipes}
-            kept: dict[str, int] = {}
-            packet = []
-            for recommendation in recommendations:
-                course = getattr(by_id.get(recommendation.recipe.id), "course", None) or "main"
-                if course in limits and kept.get(course, 0) < limits[course]:
-                    kept[course] = kept.get(course, 0) + 1
-                    packet.append(recommendation)
-            recommendations = packet
+            recommendations, limits = composed_packet(
+                composition, constraints.day_count, constraints.weekly_budget_sgd, recommendations, recipes
+            )
             trace["candidate_limit"] = limits
         if not recommendations:
             trace.update(status="candidate_rejected", evidence="bounded_search_exhausted")
@@ -446,19 +489,24 @@ class ProductPlanningEngine:
 
                 roles_of = {s.slot_id: len(s.composition or [None]) for s in problem.slots}
 
-                def variety(state) -> tuple[int, int, int]:
-                    """Sorts the fewest empty optional dishes, then the most distinct dishes, then kinds, first.
+                def variety(state) -> tuple[int, int, int, int]:
+                    """Sorts the fewest empty optional dishes, then the most distinct dishes, then the fewest
+                    times one dish comes, then kinds, first.
 
                     The owner's order (2026-10-02, amending ADR-0045 for composed weeks): a week with its
-                    optional dishes filled comes before one with a dish or two more of variety."""
+                    optional dishes filled comes before one with a dish or two more of variety. Of two weeks
+                    as varied, one dish twice and another twice beats one dish three times ("菜很单调")."""
                     dishes = [recipe for _, meal in state.choices for _, recipe in meal]
                     repeats, same_kind = sameness(dishes)
-                    return empty_roles(state, roles_of), repeats - len(dishes), same_kind - len(dishes)
+                    most = max(Counter(dishes).values(), default=0)
+                    return empty_roles(state, roles_of), repeats - len(dishes), most, same_kind - len(dishes)
+
+                def order(item) -> tuple:
+                    """The fullest, then most varied week first (ADR-0045 as amended), then the lighter search, loss."""
+                    return variety(item[1]), item[0], item[1].loss, item[1].choices
 
                 def most_varied_first(found) -> list[list[PlanningAssignment]]:
-                    """The fullest, then most varied week first (ADR-0045 as amended), then the lighter search, loss."""
-                    found = sorted(found, key=lambda item: (variety(item[1]), item[0], item[1].loss, item[1].choices))
-                    return [assignments_of(state) for _, state in found]
+                    return [assignments_of(state) for _, state in sorted(found, key=order)]
 
                 def limit_led() -> list:
                     """Searches that blend what binds into each dish's rank, from lightly to strongly.
@@ -498,6 +546,19 @@ class ProductPlanningEngine:
                     # A budget-pruned search keeps the cheap repeats or leaves optional dishes out; the first
                     # week in that order within the budget may come from a cost-led search, so all are tried.
                     found += limit_led()
+                    # A search keeps partial weeks and cannot see the room a finished one leaves: unless a week
+                    # found is filled with no dish twice, the most varied weeks found and the cheapest spend theirs
+                    # on dishes not yet in the week.
+                    seen = {state.choices for _, state in found}
+                    cheapest = sorted(found, key=lambda item: (item[1].cost, item[1].choices))
+                    starts = sorted(found, key=order)[:VARIED_STARTS] + cheapest[:VARIED_STARTS]
+                    if any(variety(state)[0] == 0 and variety(state)[2] <= 1 for _, state in found):
+                        starts = []
+                    for weight, state in starts:
+                        varied = meal_beam.vary_within_budget(problem, state)
+                        if varied.choices not in seen:
+                            seen.add(varied.choices)
+                            found.append((weight, varied))
                 elif banded:
                     fallback = lambda: most_varied_first(limit_led())  # noqa: E731
                 assignments_list = most_varied_first(found)

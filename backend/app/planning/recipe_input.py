@@ -44,7 +44,8 @@ def recipe_input(
         dietary_tags=list(source.dietary_tags),
         allergens=sorted({allergen for i in source.ingredients for allergen in i.allergens}),
         ingredients=[
-            dict(ingredient_id=i.normalized_name, quantity=i.quantity, unit=i.unit) for i in source.ingredients
+            dict(ingredient_id=i.normalized_name, quantity=i.quantity, unit=i.unit, original_text=i.original_text)
+            for i in source.ingredients
         ],
         nutrients_per_serving=source.nutrition.model_dump(),
         cuisine=source.cuisine,

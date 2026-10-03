@@ -8,15 +8,22 @@ from collections import Counter, defaultdict
 from fractions import Fraction
 from math import ceil
 
+from app.planning.vegetable_led import candidate_vegetable_led, vegetable_role
 from app.schemas.planning_v2 import (
     FinalPlanningProblem,
     PlanningAssignment,
     PlanningCompositionPolicy,
+    PlanningMealRole,
     PlanningRecipeCandidate,
     PlanningSlot,
 )
 
 MAIN_ROLE = "main"
+
+
+def role_admits(role: PlanningMealRole, recipe: PlanningRecipeCandidate) -> bool:
+    """A role takes a recipe of one of its courses; the vegetable role only one led by vegetables."""
+    return recipe.course in role.courses and (not vegetable_role(role.role_id) or candidate_vegetable_led(recipe))
 
 
 def role_key(slot: PlanningSlot, assignment: PlanningAssignment) -> str | None:
