@@ -18,6 +18,7 @@ export const OPS_MODULES: OpsModule[] = [
   { slug: "debugging", label: "Debugging", path: "/ops/debugging", blurb: "Replay one task through the current code or other settings and compare the two results side by side.", ready: true },
   { slug: "services", label: "Services", path: "/ops/services", blurb: "OpenAI, FairPrice and YouTube: configuration, recent failures and a live check.", ready: true },
   { slug: "data", label: "Data", path: "/ops/data", blurb: "Browse and edit recipes, ingredients and product mappings.", ready: true },
+  { slug: "quality", label: "Data quality", path: "/ops/quality", blurb: "Release coverage, inferred values, dropped candidates and artifact evidence.", ready: true },
   { slug: "experiments", label: "Experiments & config", path: "/ops/experiments", blurb: "Runtime switches, evaluation runs and A/B comparisons of two configurations.", ready: true },
   { slug: "users", label: "Users", path: "/ops/users", blurb: "Accounts, households, profiles, conversations and plans.", ready: true },
 ];
