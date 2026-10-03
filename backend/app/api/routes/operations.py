@@ -65,8 +65,9 @@ from app.services.operation_jobs import (
 )
 from app.services.operations import OperationsService
 from app.services.ops_data import DataService, OpsDataConflictError, OpsDataNotFoundError
+from app.services.ops_planning_experiments import PLANNING_EXPERIMENTS, PlanningExperimentService
 from app.services.ops_replay import ReplayNotFoundError, ReplayService, ReplayUnavailableError
-from app.services.ops_settings import SettingsService
+from app.services.ops_settings import SettingsService, experiment_view
 from app.services.ops_users import OpsUserConflictError, OpsUserNotFoundError, UsersService
 
 router = APIRouter(prefix="/ops", tags=["operations"])
@@ -329,12 +330,39 @@ def list_experiments(
 @router.post("/experiments", response_model=ExperimentRun)
 def run_experiment(
     payload: ExperimentRequest,
-    current: CurrentOperationsViewDependency,
+    response: Response,
+    current: CurrentOperationsManageJobsCsrfDependency,
     database: DatabaseDependency,
     settings: SettingsDependency,
+    idempotency_key: Annotated[
+        str | None,
+        Header(
+            alias="Idempotency-Key",
+            max_length=120,
+            pattern=r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,119}$",
+        ),
+    ] = None,
 ) -> ExperimentRun:
     try:
+        if payload.evaluation in PLANNING_EXPERIMENTS:
+            if not idempotency_key:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail="Idempotency-Key is required for planning experiments",
+                )
+            result = PlanningExperimentService(database, actor_user_id=current.user.id).enqueue(
+                payload,
+                idempotency_key=idempotency_key,
+            )
+            if result.created:
+                response.status_code = status.HTTP_201_CREATED
+            return experiment_view(result.run)
         return SettingsService(database, settings).run_experiment(payload, actor_user_id=current.user.id)
+    except JobIdempotencyConflictError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Idempotency key was already used for different input",
+        ) from error
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
 

@@ -78,25 +78,79 @@ async function loadExperiments() {
     const listed = await apiFetch<{ items: OpsExperiment[]; evaluations: OpsEvaluation[] }>(api("/experiments"));
     experiments.value = listed.items;
     evaluations.value = listed.evaluations;
+    if (!evaluations.value.some(item => item.name === form.evaluation)) {
+      form.evaluation = evaluations.value[0]?.name ?? "planning-components";
+    }
+    schedulePoll();
   }
   catch {
     experimentsFailed.value = true;
   }
 }
-onMounted(() => Promise.all([loadSettings(), loadExperiments()]));
 
-const form = reactive({ evaluation: "developer-planning" as OpsEvaluationName, label: "", planner: "", parser: "" });
+let pollTimer: ReturnType<typeof setTimeout> | null = null;
+function schedulePoll() {
+  if (pollTimer) clearTimeout(pollTimer);
+  if (experiments.value?.some(item => item.status === "queued" || item.status === "running")) {
+    pollTimer = setTimeout(loadExperiments, 2000);
+  }
+}
+onMounted(() => Promise.all([loadSettings(), loadExperiments()]));
+onBeforeUnmount(() => {
+  if (pollTimer) clearTimeout(pollTimer);
+});
+
+const form = reactive({
+  evaluation: "planning-components" as OpsEvaluationName,
+  label: "",
+  planner: "",
+  parser: "",
+  repeats: 1,
+  width: 32,
+  maxExpansions: 10000,
+  repairRounds: 1,
+});
 const chosen = computed(() => evaluations.value.find(item => item.name === form.evaluation));
+const isPlanningExperiment = computed(() => chosen.value?.execution_mode === "durable_worker");
+const isComponentExperiment = computed(() => form.evaluation === "planning-components");
 const running = ref(false);
 const runError = ref("");
+const pendingExperiment = ref(false);
+const experimentMessage = computed(() => {
+  if (!chosen.value) return "";
+  return `Queue ${chosen.value.label} on ${chosen.value.dataset}. The run records its code, data hashes and parameters and cannot replace an earlier result.`;
+});
+function askExperiment() {
+  runError.value = "";
+  pendingExperiment.value = true;
+}
 async function runExperiment() {
+  pendingExperiment.value = false;
   running.value = true;
   runError.value = "";
   const overrides: Record<string, string> = {};
   if (form.evaluation === "developer-planning" && form.planner) overrides.planner = form.planner;
   if (form.evaluation === "agent-benchmark" && form.parser) overrides.agent_parser_provider = form.parser;
+  const body = isPlanningExperiment.value
+    ? {
+        evaluation: form.evaluation,
+        label: form.label || null,
+        parameters: {
+          repeats: isComponentExperiment.value ? form.repeats : 1,
+          width: form.width,
+          max_expansions: form.maxExpansions,
+          ...(isComponentExperiment.value ? { repair_rounds: form.repairRounds } : {}),
+        },
+        confirm: true,
+      }
+    : { evaluation: form.evaluation, label: form.label || null, overrides };
+  const idempotencyKey = `ops-experiment-${crypto.randomUUID()}`;
   try {
-    const result = await apiFetch<OpsExperiment>(api("/experiments"), { method: "POST", body: { evaluation: form.evaluation, label: form.label || null, overrides } });
+    const result = await apiFetch<OpsExperiment>(api("/experiments"), {
+      method: "POST",
+      headers: { "Idempotency-Key": idempotencyKey },
+      body,
+    });
     await loadExperiments();
     pickB.value = pickA.value === result.id ? null : result.id;
   }
@@ -117,9 +171,12 @@ const runB = computed(() => experiments.value?.find(item => item.id === pickB.va
 const metricRows = computed(() => (runA.value && runB.value ? compareMetrics(runA.value.metrics, runB.value.metrics) : []));
 const configRows = computed(() => (runA.value && runB.value ? diffFields(runA.value.configuration, runB.value.configuration).filter(row => row.changed) : []));
 const headline = (run: OpsExperiment) => {
-  const metric = run.evaluation === "developer-planning" ? "scenario_expectation_rate" : "exact_case_rate";
+  const preferred = run.evaluation === "developer-planning" ? "scenario_expectation_rate" : run.evaluation === "agent-benchmark" ? "exact_case_rate" : "case_count";
+  const metric = run.metrics[preferred] === undefined ? Object.keys(run.metrics)[0] : preferred;
+  if (!metric) return "—";
   return run.metrics[metric] === undefined ? "—" : `${humanKey(metric)} ${formatValue(run.metrics[metric])}`;
 };
+const recordedConditions = (run: OpsExperiment) => run.conditions.conditions_complete === true;
 // Whether higher is better differs by metric, so a change is only marked, not judged.
 const deltaClass = (delta: number | null) => (delta ? "moved" : "");
 </script>
@@ -179,15 +236,33 @@ const deltaClass = (delta: number | null) => (delta ? "moved" : "");
     </section>
 
     <div class="ops-grid">
-      <form class="ops-card run-form" aria-labelledby="run-title" @submit.prevent="runExperiment">
+      <form class="ops-card run-form" aria-labelledby="run-title" @submit.prevent="askExperiment">
         <h2 id="run-title">Run an evaluation</h2>
         <label>Evaluation
           <select v-model="form.evaluation">
             <option v-for="item in evaluations" :key="item.name" :value="item.name">{{ item.label }}</option>
           </select>
         </label>
-        <p v-if="chosen" class="ops-muted small">{{ chosen.description }} Dataset {{ chosen.dataset }}.</p>
-        <label v-if="form.evaluation === 'developer-planning'">Planner
+        <p v-if="chosen" class="ops-muted small">
+          {{ chosen.description }} Dataset {{ chosen.dataset }}.
+          <span class="mc-chip">{{ chosen.execution_mode === "durable_worker" ? "Durable worker" : "Legacy inline" }}</span>
+        </p>
+        <template v-if="isPlanningExperiment">
+          <label v-if="isComponentExperiment">Repeats
+            <input v-model.number="form.repeats" type="number" min="1" max="20">
+          </label>
+          <label>Beam width
+            <input v-model.number="form.width" type="number" min="1" max="1000">
+          </label>
+          <label>Maximum expansions
+            <input v-model.number="form.maxExpansions" type="number" min="1" max="1000000">
+          </label>
+          <label v-if="isComponentExperiment">Repair rounds
+            <input v-model.number="form.repairRounds" type="number" min="0" max="10">
+          </label>
+          <p class="ops-muted small">The fixed developer fixture is used. Held-out data and paid models are unavailable here.</p>
+        </template>
+        <label v-else-if="form.evaluation === 'developer-planning'">Planner
           <select v-model="form.planner">
             <option value="">MealCraft planner</option>
             <option value="greedy-baseline">Greedy baseline</option>
@@ -248,7 +323,7 @@ const deltaClass = (delta: number | null) => (delta ? "moved" : "");
             <td>#{{ run.id }} {{ evaluations.find(item => item.name === run.evaluation)?.label ?? run.evaluation }}<span v-if="run.label" class="ops-muted"> · {{ run.label }}</span></td>
             <td><span class="ops-badge" :style="{ '--dot': statusColor(run.status) }">{{ humanKey(run.status) }}</span><p v-if="run.error" class="ops-error small">{{ run.error }}</p></td>
             <td>{{ headline(run) }}</td>
-            <td>{{ run.passed === null ? "—" : run.passed ? "Passed" : "Not passed" }}</td>
+            <td>{{ recordedConditions(run) ? "Conditions recorded" : run.passed === null ? "—" : run.passed ? "Passed" : "Not passed" }}</td>
             <td class="mc-num">{{ formatSeconds(run.duration_seconds) }}</td>
             <td class="ops-muted">{{ formatWhen(run.created_at) }}</td>
           </tr>
@@ -264,6 +339,15 @@ const deltaClass = (delta: number | null) => (delta ? "moved" : "");
       :busy="saving"
       @confirm="confirmChange"
       @cancel="pending = null"
+    />
+    <OpsConfirm
+      v-if="pendingExperiment"
+      title="Queue this evaluation?"
+      :message="experimentMessage"
+      action="Queue evaluation"
+      :busy="running"
+      @confirm="runExperiment"
+      @cancel="pendingExperiment = false"
     />
   </div>
 </template>

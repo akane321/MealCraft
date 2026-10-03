@@ -12,7 +12,13 @@ from time import monotonic
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.repositories.operation_jobs import ClaimedOperationJob, OperationJobRepository
-from app.worker.handlers import InvalidJobPayloadError, JobHandlerRegistry, PreparedHandler, UnknownJobTypeError
+from app.worker.handlers import (
+    HandlerContext,
+    InvalidJobPayloadError,
+    JobHandlerRegistry,
+    PreparedHandler,
+    UnknownJobTypeError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +46,14 @@ class ChildResult:
     error_code: str | None = None
 
 
-def _execute_handler(connection: Connection, prepared: PreparedHandler, database_url: str) -> None:
+def _execute_handler(
+    connection: Connection,
+    prepared: PreparedHandler,
+    database_url: str,
+    context: HandlerContext,
+) -> None:
     try:
-        prepared.handler(prepared.payload, database_url)
+        prepared.handler(prepared.payload, database_url, context)
         connection.send(ChildResult(succeeded=True))
     except Exception:
         connection.send(ChildResult(succeeded=False, error_code="job_handler_failed"))
@@ -110,7 +121,12 @@ class OperationWorker:
         receive, send = self.process_context.Pipe(duplex=False)
         process = self.process_context.Process(
             target=_execute_handler,
-            args=(send, prepared, self.database_url),
+            args=(
+                send,
+                prepared,
+                self.database_url,
+                HandlerContext(run_id=claim.run_id, attempt_count=claim.attempt_count),
+            ),
             name=f"mealcraft-job-{claim.run_id}-{claim.attempt_count}",
         )
         process.start()

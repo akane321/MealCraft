@@ -121,9 +121,21 @@ export interface OpsRuntimeSetting {
 
 export interface OpsSettingChange { key: string; before: unknown; after: unknown; actor: string | null; created_at: string }
 
-export type OpsEvaluationName = "developer-planning" | "agent-benchmark";
+export type OpsEvaluationName =
+  | "developer-planning"
+  | "agent-benchmark"
+  | "planning-components"
+  | "planning-final-gate"
+  | "planning-final-gate-composed";
 
-export interface OpsEvaluation { name: OpsEvaluationName; label: string; description: string; dataset: string; options: Record<string, string[]> }
+export interface OpsEvaluation {
+  name: OpsEvaluationName;
+  label: string;
+  description: string;
+  dataset: string;
+  options: Record<string, string[]>;
+  execution_mode: "legacy_inline" | "durable_worker";
+}
 
 export interface OpsExperiment {
   id: number;

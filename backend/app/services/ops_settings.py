@@ -30,6 +30,10 @@ from app.schemas.operations import (
     RuntimeSettingView,
 )
 from app.services.operations import _duration
+from app.services.ops_planning_experiments import (
+    PLANNING_EXPERIMENT_RUN_TYPE,
+    planning_experiment_descriptors,
+)
 
 EXPERIMENT_RUN_TYPE = "experiment"
 PLANNERS = ("mealcraft-planner", "greedy-baseline", "rule-only-baseline")
@@ -140,15 +144,21 @@ class SettingsService:
     def experiments(self, limit: int) -> ExperimentCollection:
         rows = self.database.scalars(
             select(OperationRun)
-            .where(OperationRun.run_type == EXPERIMENT_RUN_TYPE)
+            .where(OperationRun.run_type.in_((EXPERIMENT_RUN_TYPE, PLANNING_EXPERIMENT_RUN_TYPE)))
             .order_by(OperationRun.created_at.desc(), OperationRun.id.desc())
             .limit(limit)
         )
         return ExperimentCollection(
-            items=[_experiment_view(row) for row in rows],
+            items=[experiment_view(row) for row in rows],
             evaluations=[
-                {"name": name, **{k: v for k, v in item.items() if k != "keys"}} for name, item in EVALUATIONS.items()
-            ],
+                {
+                    "name": name,
+                    **{k: v for k, v in item.items() if k != "keys"},
+                    "execution_mode": "legacy_inline",
+                }
+                for name, item in EVALUATIONS.items()
+            ]
+            + planning_experiment_descriptors(),
         )
 
     def run_experiment(self, request: ExperimentRequest, *, actor_user_id: int) -> ExperimentRun:
@@ -201,9 +211,9 @@ class SettingsService:
             # A live-model run makes one call per case and can take minutes; the list shows it running.
             factory = sessionmaker(bind=self.database.get_bind(), expire_on_commit=False)
             threading.Thread(target=_finish_in_background, args=(factory, row.id, self.settings), daemon=True).start()
-            return _experiment_view(row)
+            return experiment_view(row)
         _finish(self.database, row, self.settings)
-        return _experiment_view(row)
+        return experiment_view(row)
 
 
 def _finish_in_background(factory: sessionmaker, run_id: int, settings: Settings) -> None:
@@ -257,7 +267,7 @@ def _evaluate(name: str, configuration: dict, settings: Settings) -> tuple[dict,
     return result["metrics"], result["metrics"]["failure_case_count"] == 0, result["dataset"]
 
 
-def _experiment_view(row: OperationRun) -> ExperimentRun:
+def experiment_view(row: OperationRun) -> ExperimentRun:
     data = row.artifact_references[0]["data"]
     return ExperimentRun(
         id=row.id,
@@ -270,7 +280,7 @@ def _experiment_view(row: OperationRun) -> ExperimentRun:
         conditions={
             **data.get("conditions", {}),
             "code_commit": row.code_commit,
-            "parameter_digest": row.input_digest,
+            "parameter_digest": data.get("conditions", {}).get("parameter_digest") or row.input_digest,
         },
         error=row.error_detail,
         created_at=row.created_at,

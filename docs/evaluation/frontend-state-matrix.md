@@ -14,6 +14,7 @@ critical browser path against an isolated test backend or the local stack.
 | Home: shopping sheet | — | — | printable preview, Export PDF | — | sample prices and allergen caveat printed |
 | Replanning preview (in conversation) | previewing | no pending change | before/after with calorie and grocery deltas | invalid or stale change rejected | explicit confirm before persistence |
 | Household profile | current profile loading | editable default household | saved version and planning action | validation/API message | allergies limited to the checked list, separated from health preferences |
+| Operations experiments | evaluations and history loading | no recorded run | confirmed job moves queued → running → completed and exposes recorded conditions | queue or refresh error remains actionable | fixed developer registry only; held-out and paid providers unavailable; legacy inline entries labelled |
 
 ## Critical task flow
 

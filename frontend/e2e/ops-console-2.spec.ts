@@ -63,6 +63,7 @@ async function stubConsole(page: Page) {
   const replays = [] as Array<ReturnType<typeof replay>>;
   let current = settings.map(item => ({ ...item }));
   const history: unknown[] = [];
+  const experimentRuns: unknown[] = [];
   let user = { ...bobDetail };
 
   await page.route(path("/api/auth/me"), route => route.fulfill(signedIn ? json(admin) : json({ detail: "Authentication required" }, 401)));
@@ -92,7 +93,26 @@ async function stubConsole(page: Page) {
     current = current.map(item => (item.key === "agent_parser_provider" ? { ...item, value, overridden: true } : item));
     return route.fulfill(json({ items: current }));
   });
-  await page.route(path("/api/ops/experiments"), route => route.fulfill(json({ items: [], evaluations: [{ name: "developer-planning", label: "Developer planning set", description: "20 planning scenarios.", dataset: "data/evaluation/dev/planning-v1.json", options: { planner: ["mealcraft-planner"] } }] })));
+  await page.route(path("/api/ops/experiments"), (route: Route) => {
+    const evaluations = [
+      { name: "planning-components", label: "Planning component ablations", description: "Fixed developer component conditions.", dataset: "data/fixtures/planning-v2/ablation-developer-v1.json", options: {}, execution_mode: "durable_worker" },
+      { name: "developer-planning", label: "Developer planning set", description: "20 planning scenarios.", dataset: "data/evaluation/dev/planning-v1.json", options: { planner: ["mealcraft-planner"] }, execution_mode: "legacy_inline" },
+    ];
+    if (route.request().method() === "POST") {
+      expect(route.request().headers()["idempotency-key"]).toMatch(/^ops-experiment-/);
+      expect(route.request().headers()["x-csrf-token"]).toBe("csrf-test");
+      expect(route.request().postDataJSON()).toEqual({
+        evaluation: "planning-components",
+        label: "repair check",
+        parameters: { repeats: 2, width: 8, max_expansions: 250, repair_rounds: 0 },
+        confirm: true,
+      });
+      const run = { id: 81, evaluation: "planning-components", label: "repair check", status: "succeeded", configuration: { repeats: 2, width: 8, max_expansions: 250, repair_rounds: 0 }, metrics: { case_count: 5 }, passed: null, conditions: { conditions_complete: true }, error: null, created_at: "2026-09-26T08:30:00Z", duration_seconds: 1.2 };
+      experimentRuns.unshift(run);
+      return route.fulfill(json({ ...run, status: "queued", metrics: {}, conditions: { conditions_complete: false }, duration_seconds: null }, 201));
+    }
+    return route.fulfill(json({ items: experimentRuns, evaluations }));
+  });
   await page.route(path("/api/ops/users"), route => route.fulfill(json({ total: 1, items: [user] })));
   await page.route(path("/api/ops/users/12"), (route: Route) => {
     if (route.request().method() === "PATCH") {
@@ -152,6 +172,20 @@ test("an administrator replays a failed plan, switches the parser and edits an a
   await expect(page.getByRole("region", { name: "Change history" }).getByRole("row", { name: /Ops Lead Assistant parser fixture openai/ })).toBeVisible();
   await expect(page.getByText("Changed here")).toBeVisible();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/ops-5-config.png`, fullPage: true });
+
+  // Queue a fixed developer ablation and see its reproducibility conditions complete.
+  const evaluationForm = page.getByRole("form", { name: "Run an evaluation" });
+  await evaluationForm.getByRole("combobox").first().selectOption("planning-components");
+  await evaluationForm.getByLabel("Repeats").fill("2");
+  await evaluationForm.getByLabel("Beam width").fill("8");
+  await evaluationForm.getByLabel("Maximum expansions").fill("250");
+  await evaluationForm.getByLabel("Repair rounds").fill("0");
+  await evaluationForm.getByLabel("Name (optional)").fill("repair check");
+  await evaluationForm.getByRole("button", { name: "Run evaluation" }).click();
+  const experimentConfirm = page.getByRole("alertdialog");
+  await expect(experimentConfirm).toContainText("cannot replace an earlier result");
+  await experimentConfirm.getByRole("button", { name: "Queue evaluation" }).click();
+  await expect(page.getByRole("row", { name: /#81 Planning component ablations.*Conditions recorded/ })).toBeVisible();
 
   // Rename an account and give it console access.
   await nav.getByRole("link", { name: "Users" }).click();

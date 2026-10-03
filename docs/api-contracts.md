@@ -88,6 +88,30 @@ Available endpoints:
 - POST /api/household-profiles
 - GET /api/household-profiles/current
 - GET /api/household-profiles/{profile_id}
+
+## Operations planning experiments
+
+`GET /api/ops/experiments` lists historical runs and the fixed evaluation
+registry. `planning-components`, `planning-final-gate` and
+`planning-final-gate-composed` have `execution_mode=durable_worker`; the two
+older evaluation entries remain `legacy_inline` so their execution semantics
+are not mistaken for the durable path.
+
+`POST /api/ops/experiments` accepts only an authenticated operator or
+administrator with a valid CSRF token. A durable planning request also requires
+an `Idempotency-Key`, `confirm=true`, one registry name, and bounded `repeats`,
+`width`, `max_expansions` and (for component ablations) `repair_rounds`.
+Dataset paths and runner implementations cannot be supplied by the client.
+Held-out data, arbitrary SQL and paid-provider options are not accepted.
+
+The request creates an append-only `OperationRun` and queue audit event. The
+worker records the code revision, protocol and source digest, dataset registry
+key plus file and semantic SHA-256 digests, product snapshot digest, normalized
+parameters and digest, seed, repeats, duration, failure mechanisms and explicit
+zero paid-model usage. A retry with the same idempotency key returns the same
+run; attempt fencing prevents an expired worker from replacing a completed
+artifact. Planning results are developer diagnostics and are not held-out
+claims.
 - PUT /api/household-profiles/{profile_id}
 - GET /api/household-profiles/{profile_id}/versions
 - POST /api/household-profiles/{profile_id}/plans

@@ -20,6 +20,12 @@ from app.models.platform import AuditEvent, OperationRun, User
 from app.repositories.operation_jobs import OperationJobRepository
 
 JOB_REQUEST = {"name": "catalog_import", "arguments": {"source": "reference"}, "confirm": True}
+PLANNING_EXPERIMENT_REQUEST = {
+    "evaluation": "planning-components",
+    "label": "component sweep",
+    "parameters": {"repeats": 2, "width": 16, "max_expansions": 500, "repair_rounds": 1},
+    "confirm": True,
+}
 
 
 @pytest.fixture
@@ -113,6 +119,96 @@ def test_every_role_is_checked_when_enqueuing(job_client, role: SystemRole, expe
         assert response.json() == {"detail": "Not Found"}
         assert _count(factory, OperationRun) == 0
         assert _count(factory, AuditEvent) == 0
+
+
+@pytest.mark.parametrize(
+    ("role", "expected_status"),
+    [
+        (SystemRole.ORDINARY_USER, 404),
+        (SystemRole.DATA_REVIEWER, 404),
+        (SystemRole.OPERATOR, 201),
+        (SystemRole.ADMIN, 201),
+    ],
+)
+def test_every_role_is_checked_when_queueing_a_planning_experiment(
+    job_client, role: SystemRole, expected_status: int
+) -> None:
+    client, factory = job_client
+    _set_role(factory, role)
+
+    response = client.post(
+        "/api/ops/experiments",
+        json=PLANNING_EXPERIMENT_REQUEST,
+        headers={"Idempotency-Key": f"planning-role-{role.value}"},
+    )
+
+    assert response.status_code == expected_status
+    if expected_status == 404:
+        assert response.json() == {"detail": "Not Found"}
+        assert _count(factory, OperationRun) == 0
+        assert _count(factory, AuditEvent) == 0
+    else:
+        assert response.json()["status"] == "queued"
+
+
+def test_planning_experiment_is_idempotent_and_records_reproducible_inputs(job_client) -> None:
+    client, factory = job_client
+    actor_id = _set_role(factory, SystemRole.ADMIN)
+    headers = {"Idempotency-Key": "planning-repeat"}
+
+    missing_key = client.post("/api/ops/experiments", json=PLANNING_EXPERIMENT_REQUEST)
+    assert missing_key.status_code == 422
+    assert missing_key.json()["detail"] == "Idempotency-Key is required for planning experiments"
+
+    first = client.post("/api/ops/experiments", json=PLANNING_EXPERIMENT_REQUEST, headers=headers)
+    replay = client.post("/api/ops/experiments", json=PLANNING_EXPERIMENT_REQUEST, headers=headers)
+
+    assert (first.status_code, replay.status_code) == (201, 200)
+    assert first.json()["id"] == replay.json()["id"]
+    conditions = first.json()["conditions"]
+    assert conditions["dataset"]["registry_key"] == "planning-components"
+    assert conditions["seed"] is None
+    assert conditions["repeats"] == 2
+    assert conditions["paid_model"] == {"used": False, "budget_usd": 0, "usage_usd": 0}
+    assert conditions["conditions_complete"] is False
+    with factory() as database:
+        run = database.get(OperationRun, first.json()["id"])
+        assert run.triggered_by_user_id == actor_id
+        assert run.run_type == "planning_experiment"
+        assert run.provider_mode == "fixture"
+        assert len(run.input_digest) == 64
+        audit = database.scalars(select(AuditEvent)).one()
+        assert audit.action == "planning_experiment.queued"
+        assert "path" not in audit.details
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {**PLANNING_EXPERIMENT_REQUEST, "confirm": False},
+        {**PLANNING_EXPERIMENT_REQUEST, "evaluation": "heldout-planning"},
+        {**PLANNING_EXPERIMENT_REQUEST, "overrides": {"dataset": "private.json"}},
+        {**PLANNING_EXPERIMENT_REQUEST, "parameters": {"width": 0}},
+        {
+            **PLANNING_EXPERIMENT_REQUEST,
+            "evaluation": "planning-final-gate",
+            "parameters": {"repeats": 2},
+        },
+    ],
+)
+def test_planning_experiment_rejects_unregistered_or_unsafe_inputs(job_client, payload: dict) -> None:
+    client, factory = job_client
+    _set_role(factory, SystemRole.ADMIN)
+
+    response = client.post(
+        "/api/ops/experiments",
+        json=payload,
+        headers={"Idempotency-Key": "invalid-planning"},
+    )
+
+    assert response.status_code == 422
+    assert _count(factory, OperationRun) == 0
+    assert _count(factory, AuditEvent) == 0
 
 
 @pytest.mark.parametrize("role", [SystemRole.ORDINARY_USER, SystemRole.DATA_REVIEWER])
