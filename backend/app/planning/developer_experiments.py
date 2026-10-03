@@ -185,7 +185,7 @@ def run_experiments(dataset, *, repeats=1, width=32, max_expansions=10000, repai
         "implementation": source_fingerprint(),
         "repeats": repeats,
         "presets": list(PRESETS),
-        "deferred": ["validation_off", "learned_ranking_off", "composed_meals", "console_integration"],
+        "deferred": ["validation_off", "learned_ranking_off", "composed_meals"],
         "category_counts": {
             category: sum(c.category == category for c in dataset.cases)
             for category in sorted({c.category for c in dataset.cases})

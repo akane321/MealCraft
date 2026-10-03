@@ -49,12 +49,20 @@ per-condition `audit_seconds` measures the reporting audit. These are diagnostic
 phase timings, not independent end-to-end latency measurements or a speedup claim.
 Keep the code checkout and environment lockfile with the generated report.
 
-This module has no product route or console setting. It covers a narrow part of
+This module has no product route or runtime setting. The internal Operations
+Console exposes its two fixed developer fixtures as `planning-final-gate` and
+`planning-final-gate-composed`; both run through the durable worker with an
+explicit confirmation and bounded search parameters. The console records the
+unchanged report together with code, data, product-snapshot and parameter
+digests. It never offers a validation bypass for a product plan.
+
+The diagnostic covers a narrow part of
 [P8](planning-validation-v2.md#p8--evidence); full validation-off experiments,
-learned ranking comparisons, composed-meal weight and repair ablations, and console
-integration still require separate work. Existing developer experiment protocol v1 remains
-unchanged; this report uses `planning-final-gate-dev-v2`. Previously generated v1 reports
-remain v1; the engine configuration fields and composed support start in v2.
+learned ranking comparisons, and composed-meal weight and repair ablations still
+require separate work. Existing developer experiment protocol v1 remains
+unchanged; this report uses `planning-final-gate-dev-v2`. Previously generated
+v1 reports remain v1; the engine configuration fields and composed support start
+in v2.
 
 
 ## Composed fixture
