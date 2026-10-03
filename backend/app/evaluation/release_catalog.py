@@ -89,6 +89,8 @@ def load_release_catalog(root: Path | None = None) -> ReleaseCatalog:
                 "ingredient": ingredient_key(item["canonical_ingredient_id"]),
                 "quantity": float(item["grams"]),
                 "unit": "g",
+                # The source wording; only `app.planning.vegetable_led` reads it ("1 small head cabbage").
+                "text": item["original_text"],
             }
             for item in record["ingredients"]
             if ingredient_key(item["canonical_ingredient_id"]) not in NOT_PURCHASED

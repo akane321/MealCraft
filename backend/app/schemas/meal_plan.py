@@ -29,7 +29,7 @@ MEAL_PRESETS: dict[PlannedMeal, dict[str, list[dict]]] = {
     "breakfast": {"one dish": [_role("main", "breakfast", "baked_good")]},
     "lunch": {
         "one dish": [_role("main", "main", "salad", "soup")],
-        "main and side": [_role("main", "main"), _role("vegetable", "side", "salad")],
+        "main and vegetable": [_role("main", "main"), _role("vegetable", "side", "salad")],
     },
     "dinner": {
         # The vegetable is optional: always filled when one fits (an empty optional role costs more
