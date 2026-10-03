@@ -2,7 +2,20 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, Identity, Index, Integer, String, Text, func, text
+from sqlalchemy import (
+    JSON,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Identity,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -175,8 +188,22 @@ class OperationRun(Base):
             "status IN ('queued', 'running', 'succeeded', 'failed', 'cancelled', 'degraded')",
             name="operation_runs_status_valid",
         ),
+        CheckConstraint("attempt_count >= 0", name="operation_runs_attempt_count_nonnegative"),
+        UniqueConstraint(
+            "triggered_by_user_id",
+            "run_type",
+            "idempotency_key",
+            name="operation_runs_actor_type_idempotency_key",
+        ),
         Index("operation_runs_type_created_idx", "run_type", "created_at", "id"),
         Index("operation_runs_status_created_idx", "status", "created_at", "id"),
+        Index(
+            "operation_runs_claimable_idx",
+            "status",
+            "lease_expires_at",
+            "created_at",
+            "id",
+        ),
     )
 
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
@@ -200,6 +227,10 @@ class OperationRun(Base):
     policy_version: Mapped[str | None] = mapped_column(String(120), nullable=True)
     algorithm_version: Mapped[str | None] = mapped_column(String(120), nullable=True)
     provider_mode: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    job_payload: Mapped[dict] = mapped_column(JSON, default=dict, server_default=text("'{}'"))
+    idempotency_key: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     warnings: Mapped[list[str]] = mapped_column(JSON, default=list)
     artifact_references: Mapped[list[dict]] = mapped_column(JSON, default=list)
     error_code: Mapped[str | None] = mapped_column(String(120), nullable=True)
