@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 from threading import Event, Thread
 
@@ -199,17 +200,56 @@ def test_stopped_worker_leaves_job_for_lease_reclaim(worker_database) -> None:
         assert (run.status, run.attempt_count) == ("succeeded", 2)
 
 
+def test_cancelling_a_running_job_stops_the_worker_without_rewriting_history(worker_database) -> None:
+    database_url, factory = worker_database
+    run_id = _enqueue(factory, suffix="e-cancel", run_type="sleep", payload={"seconds": 2})
+    registry = JobHandlerRegistry({"sleep": HandlerSpec(payload_model=SleepPayload, handler=sleep_handler)})
+    worker = _worker(
+        database_url,
+        factory,
+        registry=registry,
+        timeout=5,
+        lease=0.3,
+        heartbeat=0.05,
+    )
+    thread = Thread(target=worker.run_once)
+    thread.start()
+
+    deadline = time.monotonic() + 3
+    observed_running = False
+    while time.monotonic() < deadline:
+        with factory() as session:
+            run = session.get(OperationRun, run_id)
+            if run is not None and run.status == "running":
+                observed_running = True
+                break
+        time.sleep(0.01)
+    assert observed_running
+
+    with factory() as session:
+        cancelled = OperationJobRepository(session).cancel(run_id=run_id, now=datetime.now(UTC))
+        session.commit()
+        assert (cancelled.previous_status, cancelled.attempt_count) == ("running", 1)
+
+    thread.join(timeout=3)
+    assert not thread.is_alive()
+    with factory() as session:
+        run = session.get(OperationRun, run_id)
+        assert run is not None
+        assert (run.status, run.attempt_count, run.lease_expires_at) == ("cancelled", 1, None)
+
+
 def test_reference_catalog_handler_is_idempotent_when_executed_twice(worker_database) -> None:
     database_url, factory = worker_database
     first_id = _enqueue(
         factory,
-        suffix="e-catalog",
+        suffix="f-catalog",
         run_type="catalog_import",
         payload={"source": "reference"},
     )
     second_id = _enqueue(
         factory,
-        suffix="f-catalog",
+        suffix="a-catalog-second",
         run_type="catalog_import",
         payload={"source": "reference"},
     )

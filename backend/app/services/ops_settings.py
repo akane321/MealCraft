@@ -6,8 +6,6 @@ developer sets already in the repository; held-out sets are never offered here (
 
 from __future__ import annotations
 
-import os
-import subprocess
 import threading
 from datetime import UTC, datetime
 from typing import Any
@@ -16,6 +14,7 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.core.code_version import code_commit
 from app.core.config import Settings
 from app.core.paths import repository_root
 from app.core.runtime_config import REGISTRY, runtime_value
@@ -176,7 +175,7 @@ class SettingsService:
             status="running",
             triggered_by_user_id=actor_user_id,
             input_digest=stable_digest({"evaluation": request.evaluation, "configuration": configuration}),
-            code_commit=_code_commit(),
+            code_commit=code_commit(),
             provider_mode="openai" if live else "fixture",
             algorithm_version=configuration.get("planner"),
             artifact_references=[
@@ -256,23 +255,6 @@ def _evaluate(name: str, configuration: dict, settings: Settings) -> tuple[dict,
         model=settings.openai_model,
     )
     return result["metrics"], result["metrics"]["failure_case_count"] == 0, result["dataset"]
-
-
-def _code_commit() -> str | None:
-    if commit := os.getenv("CODE_COMMIT"):
-        return commit[:64]
-    try:
-        found = subprocess.run(  # noqa: S603
-            ["git", "rev-parse", "HEAD"],  # noqa: S607
-            cwd=repository_root(),
-            capture_output=True,
-            text=True,
-            timeout=5,
-            check=True,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    return found.stdout.strip()[:64] or None
 
 
 def _experiment_view(row: OperationRun) -> ExperimentRun:

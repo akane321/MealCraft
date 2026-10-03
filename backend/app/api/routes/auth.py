@@ -200,9 +200,34 @@ def require_operations_action(action: OperationsAction) -> _OperationsActionDepe
     return _OperationsActionDependency(action)
 
 
+class _OperationsActionCsrfDependency:
+    def __init__(self, action: OperationsAction) -> None:
+        self.action = action
+
+    def __call__(
+        self,
+        current: CurrentAuthenticationDependency,
+        service: AuthenticationServiceDependency,
+        csrf_token: Annotated[str | None, Header(alias="X-CSRF-Token")] = None,
+    ) -> CurrentAuthentication:
+        _authorize_operations_action(current, self.action)
+        _require_csrf(service, current, csrf_token)
+        return current
+
+
+def require_operations_action_csrf(action: OperationsAction) -> _OperationsActionCsrfDependency:
+    """Authorize a console write before checking its CSRF token."""
+
+    return _OperationsActionCsrfDependency(action)
+
+
 CurrentOperationsViewDependency = Annotated[
     CurrentAuthentication,
     Depends(require_operations_action(OperationsAction.VIEW_RUNS)),
+]
+CurrentOperationsManageJobsCsrfDependency = Annotated[
+    CurrentAuthentication,
+    Depends(require_operations_action_csrf(OperationsAction.MANAGE_JOBS)),
 ]
 
 
