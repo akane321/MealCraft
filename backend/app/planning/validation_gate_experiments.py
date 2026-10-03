@@ -7,11 +7,27 @@ from dataclasses import asdict
 from pathlib import Path
 from time import perf_counter
 
+from pydantic import Field, model_validator
+
 from app.planning.beam_planner import BeamLimits, BeamPlanner
-from app.planning.developer_experiments import ExperimentDataset, digest, source_fingerprint
+from app.planning.developer_experiments import ExperimentCase, ExperimentDataset, digest, source_fingerprint
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.input_audit import require_finite_problem
+from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner, assignments_of
 from app.schemas.planning_v2 import PlanningAssignment
+
+
+class GateCase(ExperimentCase):
+    @model_validator(mode="after")
+    def check_packet(self):
+        require_finite_problem(self.problem)
+        if self.snapshots or self.provider_unavailable:
+            raise ValueError("Final-gate comparison requires fixed snapshots")
+        return self
+
+
+class GateDataset(ExperimentDataset):
+    cases: list[GateCase] = Field(min_length=1)
 
 
 def compare_validation_gate(problem, *, width=32, max_expansions=10000):
@@ -25,12 +41,20 @@ def compare_validation_gate(problem, *, width=32, max_expansions=10000):
             raise ValueError(f"{name} must be an integer in [1, {upper}]")
     packet = problem.model_copy(deep=True)
     require_finite_problem(packet)
-    planner = BeamPlanner(BeamLimits(width, max_expansions))
+    composed = any(slot.composition is not None for slot in packet.slots)
+    limits = (
+        MealBeamLimits(width=width, max_expansions=max_expansions) if composed else BeamLimits(width, max_expansions)
+    )
+    planner = MealBeamPlanner(limits) if composed else BeamPlanner(limits)
     started = perf_counter()
     search = planner.search_candidates(packet)
     candidates = []
     for state in sorted(search.states, key=lambda s: (s.loss, s.choices)):
-        assignments = [PlanningAssignment(slot_id=s, recipe_id=r) for s, r in state.choices]
+        assignments = (
+            assignments_of(state)
+            if composed
+            else [PlanningAssignment(slot_id=s, recipe_id=r) for s, r in state.choices]
+        )
         shopping = planner._build_shopping(packet, assignments)
         candidates.append({"loss": state.loss, "assignments": assignments, "shopping": shopping})
     generation_seconds = perf_counter() - started
@@ -63,6 +87,8 @@ def compare_validation_gate(problem, *, width=32, max_expansions=10000):
         "problem_id": packet.problem_id,
         "input_sha256": digest(packet.model_dump(mode="json")),
         "configuration": {
+            "engine": "meal-beam" if composed else "one-dish-beam",
+            "engine_limits": asdict(limits),
             "width": width,
             "max_expansions": max_expansions,
             "repair_rounds": 0,
@@ -83,7 +109,7 @@ def compare_validation_gate(problem, *, width=32, max_expansions=10000):
             }
             for i, r in enumerate(gate_reports)
         ],
-        "claim_scope": "effect of final selection gate on retained one-dish beam candidates only",
+        "claim_scope": "effect of final selection gate on retained component beam candidates only",
         "persistable": False,
     }
 
@@ -92,7 +118,7 @@ def run_gate_experiments(dataset, *, width=32, max_expansions=10000):
     if any(case.snapshots or case.provider_unavailable for case in dataset.cases):
         raise ValueError("Final-gate comparison requires fixed snapshots; repair fixtures are not supported")
     return {
-        "protocol": "planning-final-gate-dev-v1",
+        "protocol": "planning-final-gate-dev-v2",
         "evidence": "developer_diagnostic",
         "dataset_version": dataset.version,
         "dataset_sha256": digest(dataset.model_dump(mode="json")),
@@ -115,7 +141,7 @@ def main():
     parser.add_argument("--max-expansions", type=int, default=10000)
     args = parser.parse_args()
     raw = args.input.read_bytes()
-    dataset = ExperimentDataset.model_validate_json(raw)
+    dataset = GateDataset.model_validate_json(raw)
     report = run_gate_experiments(dataset, width=args.width, max_expansions=args.max_expansions)
     report["dataset_file_sha256"] = hashlib.sha256(raw).hexdigest()
     print(json.dumps(report, indent=2, allow_nan=False))
