@@ -1,10 +1,19 @@
 # MealCraft Current Status
 
-> Last verified public snapshot: 2026-10-02
+> Last verified public snapshot: 2026-10-03
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `c3fda09` (fix(planning): choose a composed week with its optional dishes filled before a more varied one (#205))
+> Verified remote `main`: `407cd89` (fix: repair walkthrough findings (#207))
+
+The latest main fixes profile-filtered plan history, meal-level status/action
+display and dated change history, plus skip-versus-lock handling in replanning.
+Its [CI run](https://github.com/akane321/MealCraft/actions/runs/36844250244) passed.
+This snapshot is not a claim that pending Operations job or experiment PRs have
+merged. The accepted admin-only Console boundary still has a main-code gap:
+legacy reviewer/operator values can pass the old view dependency and mutations
+use it too. The corrective branch adds admin-only read/write gates with existing
+session CSRF; that fix is not yet remote-main behavior.
 
 ## How to Read This Document
 
@@ -90,18 +99,22 @@ several hundred episodes. Per-category success rates are not reportable at eight
 to twelve episodes a category, so categories serve coverage and error analysis
 rather than per-category comparison.
 
-Nutrition targets in gold labels are scored against frozen per-serving catalog
-values. Each target must state whether it binds every planned dish or only the
-average over the planned slots; there is no default, and the authoring checker
-refuses a target that does not say. A daily-total scope is not yet supported,
-which does not affect episodes that plan one meal a day.
+The earlier v2 authoring format above required an explicit per-slot or average
+scope and did not support daily totals. This is historical, not the current
+product/scorer limit: v3 supports `per_day`, per-slot and horizon-average targets
+under its versioned protocol. Nutrition is always recomputed from frozen facts.
 
 Episodes may be drafted by an AI agent working from a sealed packet containing
 the catalogs, authoring rules and checker but no implementation of any system
 under test. Each draft is read and accepted by an eligible human contributor,
 whose role is what `authored_by` records.
 
-### Held-out planner comparison
+### Historical v1 planner comparison
+
+The following table is the earlier condition attested by `conditions-v1.json`,
+not a restatement of the newly generated workbench. For the current generated
+condition use [latest.md](evaluation/workbench/latest.md); its input digests and
+values may differ. Historical reports are not silently rewritten to match it.
 
 The greedy baseline and MealCraft used the same eligible recipe pool.
 
@@ -218,8 +231,9 @@ MealCraft, so it does not separate them; mean distinct recipes still does.
 
 **Read this comparison carefully.** Against the strong reference, MealCraft ties
 on scenario expectation rate (`1.0` each), hard-constraint violations (`0` each)
-and recorded failure cases (`0` each). The only separation is mean distinct
-recipes, `6.1389` against `2.0`. A primary metric that saturates for both systems
+and recorded failure cases (`0` each). In that historical condition, the only
+separation is mean distinct recipes. For exact current values use the linked
+generated report. A primary metric that saturates for both systems
 measures the difficulty of the evaluation set, not the strength of the planner,
 and it cannot by itself isolate Agent causality or support a superiority claim.
 Raising the discriminating power of the held-out set is the purpose of

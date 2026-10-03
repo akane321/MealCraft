@@ -1,11 +1,16 @@
 # Evaluation protocol v2-multidish
 
-Status: **draft, fixed before any system is run on it.** This protocol extends
+This is the versioned protocol used by recorded multi-dish comparisons, not an
+unexecuted draft. It extends
 [Comparative Evaluation v2](../design/comparative-evaluation-v2.md) to meals of
 several dishes (decision ADR-0036). It fixes the comparison arms and the
-solve-time metric of decision ADR-0037. Every rule below is stated before a
-result exists. A later change is a new protocol version with the change
-disclosed (ADR-0020 section 3), as protocol v1.1 was.
+solve-time metric of decision ADR-0037. Original experimental rules below are
+retained; this editorial correction does not retroactively change them. Later
+experimental changes require a new protocol version and disclosure (ADR-0020
+section 3), as protocol v1.1 did. Conditions and exposure history are in the
+[generated report](v2-multidish/heldout/latest.md) and
+[findings](v2-multidish/heldout/findings.md). Repeated runs after inspection and
+result-guided fixes are diagnostics, not new unseen held-out evidence.
 
 ## 1. What is evaluated
 

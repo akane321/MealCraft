@@ -135,27 +135,33 @@ graph, or natural-language hallucination control. See the
 - Provides structured fields used by retrieval, planning, nutrition,
   aggregation, display, and evaluation.
 
-Validated external recipe supplementation and semantic retrieval are final
-design targets, not verified current capabilities.
+Ingredient clarification already uses embedding-ranked suggestions, and swaps
+can rank hard-valid candidates by semantic similarity. Neither mechanism makes
+new facts authoritative. Validated external recipe supplementation and broader
+semantic retrieval remain targets; see [Current Status](current-status.md).
 
 ### Planner and validator
 
 - Compiles structured household and request constraints.
 - Rejects hard violations.
 - Scores eligible recipes using soft preferences.
-- Selects a seven-day main-meal plan and avoids consecutive repetition when
-  alternatives exist.
+- Selects a week of breakfast, lunch and dinner slots chosen by the household,
+  with up to six dish roles per meal and explicit required/optional roles.
+- Keeps completed and locked dishes unchanged. For composed valid weeks, fills
+  optional roles before maximizing distinct dishes, then reduces same-kind use.
 - Scales servings and aggregates per-person nutrition.
-- Reports infeasibility instead of manufacturing a valid-looking result.
+- Distinguishes proven infeasibility, missing decisive data and bounded-search
+  exhaustion rather than manufacturing a valid-looking result.
 
 Hard constraints, soft penalties, tolerance policies, and output explanations
 must remain explicit and testable.
 
-The accepted final-scope contract replaces a fixed seven-dinner assumption with
-explicit multi-day breakfast, lunch, dinner and optional snack slots. The new
-schemas, deterministic reference planner and independent validator are runnable
-design scaffolds; they are not yet wired into the current API or persistence
-model. The mathematical model and remaining implementation boundary are in the
+The product adapter connects constraint compilation, bounded Beam/MealBeam,
+independent validation and persistence. The legacy one-dish dinner mode remains
+for reproducing earlier evaluations, not as the product default. Snack slots
+are not part of the accepted product. Offline mixed-package optimization,
+repair and oracle tools must not be mistaken for integrated runtime features.
+The mathematical model and remaining implementation boundary are in the
 [Algorithm Engineering Handoff](design/algorithm-engineering-handoff.md).
 
 ### Grocery provider and Shopping engine
@@ -239,9 +245,11 @@ Normalized ingredient query
 The response must preserve source mode and freshness so fallback data is not
 presented as current live data.
 
-FairPrice live retrieval is demand-driven: it begins only after a validated
-plan or Shopping List identifies remaining canonical ingredient demand. It must
-not become a broad background catalog crawl.
+FairPrice live retrieval is demand-driven by canonical ingredient demand from
+planning candidates or a provisional plan. Prices and package availability are
+inputs to final validation, so retrieval need not wait for a validated plan.
+The final Shopping List is derived only after validation. This must not become
+a broad background catalog crawl.
 
 ### Recipe tutorial lookup
 
@@ -336,17 +344,17 @@ upstream schema, provenance, unknown semantics and validation evidence exist.
 The architecture should evolve toward the product baseline without mislabelling
 targets as current behaviour:
 
-- authentication, revocable device sessions, household membership and complete
-  private-resource isolation appropriate to deployment;
-- a larger high-dimensional recipe and nutrition catalog;
+- deepen the existing household-scoped product workflows without reopening
+  the security/privacy follow-up excluded by ADR-0051;
+- improve the released recipe and nutrition catalog's provenance and usefulness;
 - validated external recipe ingestion;
-- semantic retrieval followed by metadata filtering;
+- broader semantic retrieval beyond the existing clarification and swap rankers;
 - a unified recipe execution side panel with provenance and optional tutorial
   support;
 - source-aware elastic nutrition policy and deeper nutrition evaluation;
 - broader dynamic-event semantics and disruption metrics;
-- operations views for health, data quality, product mapping, plan trace, Agent
-  trace, and evaluation runs.
+- deepen the existing operations views with data-quality evidence, durable jobs
+  and reproducible developer experiments; integration status stays in Current Status.
 
 The implementation boundary, staged migration, security invariants, durable-job
 design and Console work packages are defined in the

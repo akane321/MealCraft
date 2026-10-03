@@ -262,18 +262,20 @@ Nutrition values are descriptive planning data. They are not medical advice.
 
 `GET /api/recipes/{slug}/tutorial` constructs a deterministic query from the
 canonical recipe and returns at most one selected tutorial. `live=false` uses
-the reproducible fixture provider. The current `live=true` adapter is an
-explicit extension point and degrades to fixtures with a warning; it is not a
-claim that live YouTube search is complete. Candidate lists and raw provider
-payloads are intentionally absent from this user-facing contract.
+the reproducible fixture provider. With a configured runtime key, `live=true`
+uses YouTube Data API search and video metadata, eligibility filters and a
+deterministic Top-1 ranker. Per-query results have a bounded 24-hour process
+cache. Missing configuration or named provider errors return visibly labelled
+fixture/degraded results; no invented candidate is substituted. Candidate lists
+and raw provider payloads are absent from this user-facing contract.
 
 ## Recipe Recommendations
 
 > Design boundary: `backend/app/schemas/planning_v2.py` is an internal
-> final-scope algorithm contract. It does not create or change an HTTP endpoint
-> in the current release. A production API and persistence migration must be
-> reviewed separately before the final-scope planner replaces current planning
-> behaviour.
+> algorithm contract, not an HTTP request model. The product adapter already
+> compiles public weekly-plan requests to it and independently validates results.
+> Component fields do not become public API fields merely because that internal
+> schema contains them; use the route's request model and generated OpenAPI.
 
 `POST /api/recommendations/recipes` accepts a structured planning request with:
 

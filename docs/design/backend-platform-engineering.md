@@ -160,8 +160,12 @@ accepted.
 
 ## Account and household API surface
 
-The platform contract includes the following endpoints. Their implementation
-status belongs in [Current Status](../current-status.md):
+The list below preserves the original platform proposal, not an implemented
+endpoint inventory or an active backlog. Password change/reset, account
+settings/export/deletion, household invitations and membership management are
+excluded by ADR-0051. Existing administrator account management under `/api/ops`
+is a different workflow accepted by ADR-0047. Use generated OpenAPI and
+[API Contracts](../api-contracts.md) for routes; Current Status records integration.
 
 ```text
 POST   /api/auth/register
@@ -211,8 +215,11 @@ not a replacement for identity or tenancy. Recommended modules are:
 6. **Evaluation Console**: frozen dataset/method selection, offline runs,
    comparative metrics and failure registry.
 
-Read-only inspection is the default. Retrying a job or approving a mapping
-creates a new OperationRun/AuditEvent; it never overwrites historical evidence.
+ADR-0047 replaces the read-only default: administrators can replay, change
+registered settings, and manage accepted account/catalog fields, with audit
+evidence. Replay/experiments create new runs and do not overwrite their source
+history. Durable job status/leases may transition in place; audit rows remain
+append-only. See [Operations Console](operations-console.md).
 The Console must not expose raw SQL, secrets, plaintext personal data, arbitrary
 filesystem access, or a button that changes a failed plan to `feasible`.
 

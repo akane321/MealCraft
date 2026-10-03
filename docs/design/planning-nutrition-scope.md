@@ -18,6 +18,9 @@ Each target contains `metric`, optional `lower`/`upper`, and `scope`:
   of per-serving nutrients across selected meal slots.
 - `per_serving` applies hard bounds to each selected meal, represented as
   `per_slot` in the internal Planning schema.
+- `per_day` sums the planned meals on each date per person and applies the
+  supplied hard bounds to that daily total. Composed meals sum cooked portion
+  shares, not one full serving of every dish.
 
 All six existing nutrient metrics are supported. Bounds must be finite and
 between zero and 1,000,000,000, with lower no greater than upper. The upper limit
@@ -29,7 +32,9 @@ The old `nutrition_targets` scalar fields keep their ranking-only meaning.
 A profile scalar does not specify an upper limit, lower limit or approximate
 range, so it is not silently converted to hard bounds. A caller wanting P4
 behavior must send `nutrition_constraints`. Natural-language and profile
-translation remain producer integration tasks.
+translation must preserve the explicit bounds and scope. Agent and profile
+consumers exist; this compiler still neither parses language nor infers medical
+targets. See Current Status for their remaining interpretation limits.
 
 Developer examples are in
 `data/fixtures/planning-v2/nutrition-scope-requests-v1.json`. The example range
@@ -53,6 +58,10 @@ Each average target also creates a soft per-slot guard. The controlled
 bound by `1 + guard_band`. Absent bounds stay absent. The hard average is
 unchanged. Zero creates an unexpanded soft guard; it does not disable scoring.
 
+A `per_day` target retains its hard daily band and creates a soft meal guard
+by dividing the supplied bounds by `meals_per_day` before expanding them. This
+steers search and never replaces independent daily validation.
+
 Guard loss is the distance outside the guard, divided by the larger guard
 bound or one, clipped at one and averaged across guards. Beam, the greedy
 reference and both exhaustive oracles add this nonnegative term to local loss.
@@ -62,9 +71,9 @@ target validator.
 
 ## Output and evidence
 
-Successful plan warnings state each bound and whether it applies to each meal
-or the average across planned meals. They are persisted and returned on later
-reads. No frontend component is changed.
+Successful plan warnings state each bound and whether it applies to each meal,
+each day or the average across planned meals. They are persisted and returned on
+later reads. UI presentation is a separate consumer, not this compiler's job.
 
 Operation traces record metric, compiled scope, average basis, hard/soft role
 and guard parameter, omitting the user's numeric bounds. The input digest
@@ -73,8 +82,9 @@ legacy requests keep their policy ID.
 
 Independent validation recomputes nutrients from selected recipes. Conflict
 suggestions preserve the hard bands. Bounded search failure is not a global
-infeasibility proof. This implementation covers new-plan generation; legacy
-replanning integration remains part of P6.
+infeasibility proof. Replanning must preserve the scoped request and revalidate
+the changed plan; supported edit paths and remaining gaps belong in Current
+Status rather than treating all replanning as unimplemented.
 
 Tests cover different scopes on the same catalog, multiple meals per date,
 optional slots, zero/invalid values, lower guard scores for even meals, HTTP
