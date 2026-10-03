@@ -69,6 +69,23 @@ services:
       # The first release v2 import runs before uvicorn starts and can take a minute.
       start_period: 180s
 
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: ["uv", "run", "--no-sync", "python", "-m", "app.worker"]
+    volumes:
+      - ./backend/app:/app/app
+      - ./data:/app/data:ro
+      - ./data-engineering/data/release/v2.1:/app/data-engineering/data/release/v2.1:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+    stop_grace_period: 10s
+
   frontend:
     build:
       context: ./frontend
