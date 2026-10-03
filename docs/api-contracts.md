@@ -211,7 +211,11 @@ member's safety constraints into the shared-plan hard constraints.
 
 Shared defaults include cooking time, per-meal and weekly budgets, general
 health preferences, user-entered nutrition targets, an optional sodium target,
-available ingredients, and fixture/live pricing mode. Creating a profile writes
+available ingredients, and fixture/live pricing mode. Each is only what the
+household enters: an omitted budget, target, sodium ceiling or health preference
+is none, and an omitted cooking time is no limit, stored as the widest the
+planner accepts (240 minutes, `NO_COOKING_TIME_LIMIT`). A conversation with no
+saved profile starts from the same empty state. Creating a profile writes
 version 1. `PUT` requires `expected_version`; a successful edit appends an
 immutable version, while a stale edit returns HTTP 409.
 
@@ -258,7 +262,9 @@ payloads are intentionally absent from this user-facing contract.
 
 `POST /api/recommendations/recipes` accepts a structured planning request with:
 
-- household size and maximum cooking time
+- household size and maximum cooking time (omitted: no limit, as for a profile
+  and a conversation; the planning evaluation scenarios keep the 60 minutes they
+  were written with, `SCENARIO_UNSTATED_TIME_LIMIT`)
 - allergens, excluded ingredient IDs, and dietary requirements
 - optional health preferences and user-entered nutrition targets
 - an optional explicit sodium ceiling
@@ -437,12 +443,45 @@ quantity input; other questions continue to work through the messages endpoint.
 `POST /api/agent/sessions/{session_id}/confirm` is accepted only when
 `can_confirm=true`. It passes the validated state to the same deterministic
 weekly planner used by `/api/plans/generate`, returns the generated plan, and
-stores its ID on the agent session. `GET` endpoints allow the frontend to resume
-the latest conversation after a reload or container restart.
+stores its ID on the agent session. `GET` endpoints let the frontend resume after
+a reload or container restart: the home page reopens the newest conversation
+whose `plan_id` is the household's current (newest) plan, the one that planned it
+or last took it on (below); else the newest one
+still ready to plan (`can_confirm`), so an interrupted first plan resumes; else a
+fresh conversation beside that week. A conversation that has planned nothing
+shows the current week in the plan panel.
 
 The default parser is deterministic fixture mode. Optional OpenAI mode uses the
 same Pydantic extraction contract. Neither parser makes medical recommendations,
 decides allergen safety, or bypasses deterministic planning rules.
+
+A week no open conversation planned (one planned on the profile page, or shown
+beside an unrelated conversation) is changed the same way: the create and
+messages endpoints accept an optional `plan_id`, the household's week the message
+changes. A conversation with no plan of its own takes that week on (its
+`plan_id` is set, `status` becomes `planned`, and any planning question it was
+still asking is dropped), and the message goes to the replanning loop below. A
+conversation that already has another week returns HTTP 409, and a week outside
+the household HTTP 404.
+
+The home page sends `plan_id` only for a dish's Swap, Keep, Skip or Can't buy,
+or a follow-up chip, on such a week, and only while the message still starts
+with that button's words. If a conversation in the recent list holds that week,
+the page reopens it and sends the message there without `plan_id`, so normally
+one conversation holds a week. Only when none is at hand does the open
+conversation take the week on; one planning a new week of its own (ready to
+plan with **Plan my week**, or still asking a planning question) asks first. The
+question lasts only while the conversation is planning that new week and the
+composer still holds the dish's words: once it plans one or stops, the question
+and the dish's words go, and once other words replace them, the question goes.
+The dish's words change only the week they came from, and keep it across a
+reload, a new sign-in or a visit to another page. Once another week is shown or
+opening (the conversation plans its own with **Plan my week**, or the week was
+replanned on the profile page meanwhile), the words go, even if that week fails
+to load, so they never reach a week that lacks the dish. Sent from the landing
+box, they first reopen the week and its conversation, as **Open my week** does,
+so they reach the conversation holding the week; nothing is sent until the week
+and its conversations are back.
 
 After a session has produced a plan, the messages endpoint switches to the
 replanning loop. It accepts one user-triggered meal event at a time, resolves a

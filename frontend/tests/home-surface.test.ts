@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetLine, groceryGroups, packageLabel, perDinner, plateStyle, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
+import { budgetLine, conversationForPlan, groceryGroups, packageLabel, perDinner, plateStyle, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
 import type { MealPlanEntrySnapshot, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
@@ -134,5 +134,29 @@ describe("sameDishChange", () => {
   it("leaves a swap to show both dishes", () => {
     expect(sameDishChange({ event_type: "REPLACE_MEAL", before_entry: before })).toBeNull();
     expect(sameDishChange({ event_type: "ITEM_UNAVAILABLE", before_entry: before })).toBeNull();
+  });
+});
+
+describe("conversationForPlan", () => {
+  // The newest conversation first, as the recent list comes back.
+  const offTopic = { id: 3, plan_id: null, can_confirm: false };
+  const planner = { id: 2, plan_id: 9001, can_confirm: false };
+  const older = { id: 1, plan_id: 8000, can_confirm: false };
+  const readyToPlan = { id: 4, plan_id: null, can_confirm: true };
+
+  it("reopens the conversation that planned the current week, not the newest one", () => {
+    expect(conversationForPlan([offTopic, planner, older], 9001)).toBe(planner);
+    expect(conversationForPlan([readyToPlan, offTopic, planner], 9001)).toBe(planner);
+  });
+
+  it("otherwise picks up a first plan interrupted before it was made", () => {
+    // A new household that signed in again mid-way: no week yet, its conversation ready to plan.
+    expect(conversationForPlan([offTopic, readyToPlan], null)).toBe(readyToPlan);
+    expect(conversationForPlan([readyToPlan, planner], 9002)).toBe(readyToPlan);
+  });
+
+  it("opens a fresh conversation when no conversation planned the current week or is ready to", () => {
+    expect(conversationForPlan([offTopic, planner], 9002)).toBeNull();
+    expect(conversationForPlan([offTopic, planner], null)).toBeNull();
   });
 });
