@@ -1103,6 +1103,22 @@ def test_a_new_week_the_budget_cannot_buy_keeps_the_week_and_says_why(varied):
     assert labels(kept)[0].startswith("Swap ")  # a swap instead, not a dead end
 
 
+def test_a_new_week_under_a_budget_is_searched_within_it_not_with_no_dish_twice(varied):
+    """S$22 buys the seven cheapest mains once each, and no seven others: asked only for variety, the new week
+    is the most varied the budget buys, repeats allowed, and is kept out only for being less varied."""
+    session = planned(varied, "Dinners for 4, S$22 total")
+
+    kept = plan_again(varied, session)
+    assert kept["plan_id"] == session["plan_id"] and kept["status"] == "planned"
+    reply = kept["messages"][-1]["content"]
+    found = re.fullmatch(
+        r"Your week stays as it is: the most varied new week I could plan within S\$22 has (\d) different dishes, "
+        r"\1 of them new, and this one has 7\. I can swap a dish instead\.",
+        reply,
+    )
+    assert found and int(found.group(1)) < 7, reply  # not "S$22 cannot buy a new week": it buys a less varied one
+
+
 def test_a_new_week_with_too_few_dishes_keeps_the_week_and_says_why(composed_client):  # noqa: F811
     session = planned(composed_client, "Dinners for 4 this week")  # two mains for seven dinners
 
