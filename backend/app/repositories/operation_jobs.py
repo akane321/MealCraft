@@ -216,7 +216,10 @@ class OperationJobRepository:
             raise ValueError("error_code must be a controlled lowercase identifier")
 
         run = self.session.scalars(
-            select(OperationRun).where(*self._active_attempt(run_id=run_id, attempt_count=attempt_count, now=now))
+            select(OperationRun)
+            .where(*self._active_attempt(run_id=run_id, attempt_count=attempt_count, now=now))
+            .with_for_update()
+            .execution_options(populate_existing=True)
         ).one_or_none()
         if run is None:
             return None

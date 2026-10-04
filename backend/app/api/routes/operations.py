@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.agent.parser import AgentConfigurationError
 from app.api.routes.agent import create_constraint_parser
-from app.api.routes.auth import CurrentOperationsManageJobsCsrfDependency, CurrentOperationsViewDependency
+from app.api.routes.auth import CurrentOperationsViewDependency, CurrentOperationsWriteDependency
 from app.core.config import Settings, get_settings
 from app.core.runtime_config import REGISTRY
 from app.db.session import get_db_session
@@ -147,7 +147,7 @@ def list_services(
 @router.post("/services/{name}/check", response_model=OperationsServiceCheckResponse)
 def check_service(
     name: ServiceName,
-    current: CurrentOperationsViewDependency,
+    current: CurrentOperationsWriteDependency,
     service: OperationsServiceDependency,
 ) -> OperationsServiceCheckResponse:
     del current
@@ -176,7 +176,7 @@ def list_operation_runs(
 def enqueue_operation_job(
     payload: OperationJobRequest,
     response: Response,
-    current: CurrentOperationsManageJobsCsrfDependency,
+    current: CurrentOperationsWriteDependency,
     database: DatabaseDependency,
     idempotency_key: Annotated[
         str,
@@ -211,7 +211,7 @@ def enqueue_operation_job(
 def cancel_operation_job(
     run_id: int,
     payload: OperationJobCancelRequest,
-    current: CurrentOperationsManageJobsCsrfDependency,
+    current: CurrentOperationsWriteDependency,
     database: DatabaseDependency,
 ) -> OperationJobCancellationView:
     del payload
@@ -229,7 +229,7 @@ def cancel_operation_job(
 @router.post("/replay/agent/{run_id}", response_model=OperationsReplay)
 def replay_agent_turn(
     run_id: int,
-    current: CurrentOperationsViewDependency,
+    current: CurrentOperationsWriteDependency,
     database: DatabaseDependency,
     settings: SettingsDependency,
     overrides: ReplayAgentOverrides | None = None,
@@ -247,7 +247,7 @@ def replay_agent_turn(
 @router.post("/replay/planning/{run_id}", response_model=OperationsReplay)
 def replay_planning_run(
     run_id: int,
-    current: CurrentOperationsViewDependency,
+    current: CurrentOperationsWriteDependency,
     database: DatabaseDependency,
     overrides: ReplayPlanningOverrides | None = None,
 ) -> OperationsReplay:
@@ -303,7 +303,7 @@ def runtime_setting_history(
 def change_runtime_setting(
     key: str,
     change: RuntimeSettingChange,
-    current: CurrentOperationsViewDependency,
+    current: CurrentOperationsWriteDependency,
     database: DatabaseDependency,
     settings: SettingsDependency,
 ) -> RuntimeSettingCollection:
@@ -329,7 +329,7 @@ def list_experiments(
 @router.post("/experiments", response_model=ExperimentRun)
 def run_experiment(
     payload: ExperimentRequest,
-    current: CurrentOperationsViewDependency,
+    current: CurrentOperationsWriteDependency,
     database: DatabaseDependency,
     settings: SettingsDependency,
 ) -> ExperimentRun:
@@ -364,7 +364,7 @@ def get_user(user_id: int, current: CurrentOperationsViewDependency, database: D
 
 @router.patch("/users/{user_id}", response_model=OpsUserDetail)
 def update_user(
-    user_id: int, change: OpsUserUpdate, current: CurrentOperationsViewDependency, database: DatabaseDependency
+    user_id: int, change: OpsUserUpdate, current: CurrentOperationsWriteDependency, database: DatabaseDependency
 ) -> OpsUserDetail:
     try:
         return _users(current, database).update(user_id, change)
@@ -376,7 +376,7 @@ def update_user(
 
 @router.delete("/users/{user_id}/conversations", response_model=OpsDeleted)
 def delete_user_conversations(
-    user_id: int, current: CurrentOperationsViewDependency, database: DatabaseDependency
+    user_id: int, current: CurrentOperationsWriteDependency, database: DatabaseDependency
 ) -> OpsDeleted:
     try:
         return OpsDeleted(deleted=_users(current, database).delete_conversations(user_id))
@@ -386,7 +386,7 @@ def delete_user_conversations(
 
 @router.delete("/users/{user_id}/plans", response_model=OpsDeleted)
 def delete_user_plans(
-    user_id: int, current: CurrentOperationsViewDependency, database: DatabaseDependency
+    user_id: int, current: CurrentOperationsWriteDependency, database: DatabaseDependency
 ) -> OpsDeleted:
     try:
         return OpsDeleted(deleted=_users(current, database).delete_plans(user_id))
@@ -395,7 +395,7 @@ def delete_user_plans(
 
 
 @router.delete("/users/{user_id}", response_model=OpsDeleted)
-def delete_user(user_id: int, current: CurrentOperationsViewDependency, database: DatabaseDependency) -> OpsDeleted:
+def delete_user(user_id: int, current: CurrentOperationsWriteDependency, database: DatabaseDependency) -> OpsDeleted:
     try:
         _users(current, database).delete(user_id)
     except OpsUserNotFoundError as error:
@@ -441,7 +441,7 @@ def get_recipe(
 
 @router.patch("/data/recipes/{recipe_id}", response_model=OpsRecipeDetail)
 def update_recipe(
-    recipe_id: int, change: OpsRecipeUpdate, current: CurrentOperationsViewDependency, database: DatabaseDependency
+    recipe_id: int, change: OpsRecipeUpdate, current: CurrentOperationsWriteDependency, database: DatabaseDependency
 ) -> OpsRecipeDetail:
     try:
         return _data(current, database).update_recipe(recipe_id, change)
@@ -453,7 +453,7 @@ def update_recipe(
 def withdraw_recipe(
     recipe_id: int,
     withdrawal: OpsRecipeWithdrawal,
-    current: CurrentOperationsViewDependency,
+    current: CurrentOperationsWriteDependency,
     database: DatabaseDependency,
 ) -> OpsRecipeDetail:
     try:
@@ -466,7 +466,7 @@ def withdraw_recipe(
 
 @router.post("/data/recipes/{recipe_id}/restore", response_model=OpsRecipeDetail)
 def restore_recipe(
-    recipe_id: int, current: CurrentOperationsViewDependency, database: DatabaseDependency
+    recipe_id: int, current: CurrentOperationsWriteDependency, database: DatabaseDependency
 ) -> OpsRecipeDetail:
     try:
         return _data(current, database).restore_recipe(recipe_id)
@@ -491,7 +491,7 @@ def list_ingredients(
 def update_ingredient(
     ingredient_id: int,
     change: OpsIngredientUpdate,
-    current: CurrentOperationsViewDependency,
+    current: CurrentOperationsWriteDependency,
     database: DatabaseDependency,
 ) -> OpsIngredient:
     try:
@@ -519,7 +519,7 @@ def list_product_mappings(
 def change_product_mapping(
     ingredient: str,
     change: OpsProductMappingChange,
-    current: CurrentOperationsViewDependency,
+    current: CurrentOperationsWriteDependency,
     database: DatabaseDependency,
 ) -> OpsProductMapping:
     try:
@@ -530,7 +530,7 @@ def change_product_mapping(
 
 @router.delete("/data/mappings/{ingredient}", response_model=OpsProductMapping)
 def remove_product_mapping(
-    ingredient: str, current: CurrentOperationsViewDependency, database: DatabaseDependency
+    ingredient: str, current: CurrentOperationsWriteDependency, database: DatabaseDependency
 ) -> OpsProductMapping:
     try:
         return _data(current, database).remove_mapping(ingredient)

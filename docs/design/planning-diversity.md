@@ -40,7 +40,7 @@ then slot ID; skipping an optional slot does not break adjacency.
 
 A core ingredient anywhere in the packet counts toward its cap wherever it
 appears in the selected plan, including another recipe's non-core row. Repeated
-ingredient rows count once per slot. This also excludes it from overlap reward.
+ingredient rows count once per dish (one dish equals one slot in the original packet). This also excludes it from overlap reward.
 
 The following names are the P3 controlled parameters. Their validated schema is
 the executable range/default registry; arbitrary additional keys are rejected.
@@ -49,7 +49,7 @@ the executable range/default registry; arbitrary additional keys are rejected.
 | --- | --- | --- | --- |
 | `diversity_penalty` | 0 to 1, finite | 0.25 | Weight of reused core roles |
 | `overlap_reward_weight` | 0 to 1, finite | 0.15 | Weight of shared non-core ingredients |
-| `max_slots_per_core_ingredient` | integer 1 to 84 | 2 | Maximum selected slots containing a core ingredient |
+| `max_slots_per_core_ingredient` | integer 1 to 84 | 2 | Maximum selected dishes containing a core ingredient (legacy field name) |
 
 For each added recipe, variety loss is the fraction of its core roles already
 used. Overlap is the fraction of its non-core ingredient IDs seen in earlier
@@ -74,3 +74,16 @@ The original packet is unchanged. Purchasing and nutrition arithmetic are
 unchanged; overlap is a preference signal, not evidence of a cheaper checkout.
 Console wiring and production catalog classification are separate integration
 steps. A caller must not describe an unclassified legacy result as P3 compliant.
+
+
+## Composed meal soft terms
+
+With an explicit policy, MealBeamPlanner computes the existing per-dish
+increment in role order, including earlier dishes of the same meal, and averages
+the increments within the meal. Across the explicit slot set, both reward and
+penalty therefore remain bounded by 0.10, independent of the number of roles.
+The trace identifies this consumer as `meal-beam-diversity-v2`; packets without
+an explicit policy retain their existing repetition policy. Hard caps still
+count dishes, and within-meal and adjacent-meal protein guards remain unchanged.
+Turning either soft weight to zero never disables those checks. CP-SAT does not
+model an explicit diversity policy, so it supplies no optimum for this condition.

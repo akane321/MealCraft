@@ -164,8 +164,8 @@ test("an administrator signs in, reads the overview, opens a task and runs a liv
   await expect(page.getByRole("img", { name: "Planning runs per day by status" })).toBeVisible();
   await expect(page.getByText("infeasible")).toBeVisible();
   const nav = page.getByRole("navigation", { name: "Console" });
-  for (const module of ["Overview", "Tasks", "Debugging", "Services", "Data", "Experiments & config", "Users"]) {
-    await expect(nav.getByRole("link", { name: new RegExp(`^${module}`) })).toBeVisible();
+  for (const module of ["Overview", "Tasks", "Debugging", "Services", "Data", "Data quality", "Experiments & config", "Users"]) {
+    await expect(nav.getByRole("link", { name: module, exact: true })).toBeVisible();
   }
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/ops-1-overview.png`, fullPage: true });
 
@@ -203,7 +203,7 @@ test("an administrator signs in, reads the overview, opens a task and runs a liv
   await expect(fairprice.getByRole("status")).toContainText("Answered in 420 ms.");
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/ops-3-services.png` });
 
-  await nav.getByRole("link", { name: /^Data/ }).click();
+  await nav.getByRole("link", { name: "Data", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Recipes, ingredients and product mappings" })).toBeVisible();
 });
 

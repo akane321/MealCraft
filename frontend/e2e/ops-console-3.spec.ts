@@ -104,7 +104,7 @@ test("an administrator edits and withdraws a recipe, renames an ingredient and r
   await page.setViewportSize({ width: 1440, height: 900 });
   await stubConsole(page);
   await signIn(page);
-  await page.getByRole("navigation", { name: "Console" }).getByRole("link", { name: /^Data/ }).click();
+  await page.getByRole("navigation", { name: "Console" }).getByRole("link", { name: "Data", exact: true }).click();
 
   // Recipes: the reviewed file's withdrawal shows, then edit and withdraw one.
   const recipes = page.getByRole("region", { name: "Recipes" });

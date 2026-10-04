@@ -41,16 +41,17 @@ describe("ops console slice 2 helpers", () => {
 });
 
 describe("ops console helpers", () => {
-  it("lets every console role in and keeps households out", () => {
+  it("lets only administrators into the console", () => {
     expect(isConsoleAccount({ user: { system_role: "admin" } })).toBe(true);
-    expect(isConsoleAccount({ user: { system_role: "operator" } })).toBe(true);
+    expect(isConsoleAccount({ user: { system_role: "operator" } })).toBe(false);
+    expect(isConsoleAccount({ user: { system_role: "data_reviewer" } })).toBe(false);
     expect(isConsoleAccount({ user: { system_role: "ordinary_user" } })).toBe(false);
     expect(isConsoleAccount(null)).toBe(false);
   });
 
-  it("keeps job writes limited to operators and administrators", () => {
+  it("keeps job writes limited to administrators", () => {
     expect(mayManageJobs({ user: { system_role: "admin" } })).toBe(true);
-    expect(mayManageJobs({ user: { system_role: "operator" } })).toBe(true);
+    expect(mayManageJobs({ user: { system_role: "operator" } })).toBe(false);
     expect(mayManageJobs({ user: { system_role: "data_reviewer" } })).toBe(false);
     expect(mayManageJobs({ user: { system_role: "ordinary_user" } })).toBe(false);
     expect(mayManageJobs(null)).toBe(false);

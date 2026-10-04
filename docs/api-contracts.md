@@ -61,6 +61,8 @@ Available endpoints:
 - GET /api/ops/data/ingredients
 - PATCH /api/ops/data/ingredients/{ingredient_id}
 - GET /api/ops/data/mappings
+- GET /api/ops/data-quality
+- GET /api/ops/data-quality/dropped?reason={reason}&offset={offset}&limit={limit}
 - PUT /api/ops/data/mappings/{ingredient}
 - DELETE /api/ops/data/mappings/{ingredient}
 - GET /api/recipes?limit=20&after_id={recipe_id}
@@ -155,16 +157,36 @@ reserved, suspended migration household with no login credential. Those rows
 remain inaccessible to normal users until an administrator explicitly reassigns
 them; they are never attached to the first account that logs in.
 
-## Operations reads
+## Operations Console
 
 Every `/api/ops` route requires a signed-in administrator. There are two kinds of
 account, ordinary users and administrators, and every administrator has the same,
 highest level (decisions ADR-0047 section 1 and ADR-0051); administrators are the
 fixed accounts in `ADMIN_ACCOUNTS`. The database still accepts the older
-`data_reviewer` and `operator` values, but no account is given them. Household
-roles are independent, so household ownership grants no Operations access. A signed-in caller without the action
-receives the same HTTP 404 body as an unknown route. Missing authentication
-continues to use the common HTTP 401 session response.
+`data_reviewer` and `operator` values, but neither role grants Console access.
+Household roles are independent, so household ownership grants no Operations
+access. A signed-in non-administrator receives the same HTTP 404 body as an
+unknown route. Missing authentication continues to use the common HTTP 401
+session response. Every non-GET Console request also requires the session's
+`X-CSRF-Token`; authorization is checked first so a rejected account still gets
+the non-disclosing 404 response.
+
+The route groups have these effects:
+
+| Group | Endpoints | Effect |
+| --- | --- | --- |
+| Overview and task evidence | `GET /overview`, `/overview/series`, `/runs`, `/tasks`, `/tasks/{kind}/{id}`, `/services` | Read-only summaries and stored evidence |
+| Debugging | `POST /services/{name}/check`, `POST /replay/*`, `GET /replays*` | Bounded provider probes or a replay recorded as a new run; no saved product plan or conversation |
+| Experiments and configuration | `GET /config*`, `PUT /config/{key}`, `GET/POST /experiments` | Registered settings only; setting changes are audited and experiments create recorded runs |
+| Accounts | `GET/PATCH /users*`, `DELETE /users/*` | The account workflows accepted by ADR-0047; mutations are confirmed in the UI and audited |
+| Catalog data | `GET/PATCH /data/recipes*`, recipe withdraw/restore, `GET/PATCH /data/ingredients*`, `GET/PUT/DELETE /data/mappings*` | Registered catalog fields and overrides only; mutations are audited and allergens remain read-only |
+
+Every Operations route is mechanically checked for the matching administrator
+dependency: GET routes use the read gate and all POST, PUT, PATCH and DELETE
+routes use the administrator-plus-CSRF gate. Response schemas are also checked
+against credential, token, cookie, API-key and plaintext-health-profile field
+names. Dynamic trace content still passes through the endpoint-specific
+minimization and key-redaction tests.
 
 The overview reports API and database availability, application version, queued
 and running counts, failures and provider modes recorded during the preceding
@@ -199,6 +221,24 @@ clears the live lease and appends a separate `job_cancellation` operation and
 audit event; it never deletes the target or rewrites a terminal run. Completed
 jobs return HTTP 409 and non-job identifiers return HTTP 404. The attempt count
 fences an older worker from completing a run after cancellation.
+## Release data-quality evidence
+
+The data-quality summary reads the server-registered release artifact; callers
+cannot provide a filesystem path. It reports the release and schema versions,
+generation time, released counts, cuisine/course/source distributions, nutrition
+completeness, the separate estimated shares for servings, times and ingredient
+amounts, dropped-reason counts and pending allergen rules. Artifact metadata
+contains only registered filenames, SHA-256 digests, sizes and timestamps, never
+server absolute paths. A missing, malformed or contract-incompatible summary is
+returned as `degraded` with the affected metrics set to `null`, rather than as
+invented zeroes.
+
+The dropped-candidate endpoint accepts an exact reason filter and bounded
+pagination (`offset >= 0`, `1 <= limit <= 200`). Unknown reason strings remain
+valid data. Invalid JSONL rows or rows missing required fields are skipped and
+counted, making the page `degraded` without returning the raw line; a missing
+artifact has `total: null`, which is distinct from a valid empty file with
+`total: 0`.
 
 ## Household Profiles
 
