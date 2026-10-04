@@ -24,7 +24,7 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 | mdw-dev-005 | composition | zh | feasible | plan | yes | - | 28 | 28 | 28/28 | 463.29 |
 | mdw-dev-006 | nutrition_per_day | en | feasible | plan | yes | - | 21 | 20 | 21/21 | 380.9 |
 | mdw-dev-007 | nutrition_per_day | zh | feasible | plan | yes | - | 28 | 24 | 28/28 | 401.05 |
-| mdw-dev-008 | budget | en | feasible | plan | yes | - | 28 | 10 | 28/28 | 104.92 |
+| mdw-dev-008 | budget | en | feasible | plan | yes | - | 28 | 13 | 28/28 | 102.65 |
 | mdw-dev-009 | budget | en | infeasible | infeasible | yes | - | - | - | - | - |
 | mdw-dev-010 | safety_diet | en | feasible | plan | yes | - | 28 | 28 | 26/28 | 387.35 |
 | mdw-dev-011 | safety_diet | zh | feasible | plan | yes | - | 14 | 14 | 14/14 | 301.27 |
