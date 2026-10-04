@@ -219,6 +219,25 @@ jobs:
       - name: Validate Docker Compose
         run: docker compose config --quiet
 
+      - name: Dev servers poll for edits; the demo build has its own image
+        # Docker Desktop on Windows passes no file events through a bind mount, so both dev servers poll; the
+        # backend polls its code only, not data/ or docs/. Were the demo build (compose.demo.yaml) tagged like
+        # the dev image, the next plain `docker compose up` would run it with the source mounted over it.
+        run: |
+          docker compose config --format json > "$RUNNER_TEMP/dev.json"
+          failed=0
+          check() { jq -e "$1" "$RUNNER_TEMP/dev.json" > /dev/null && echo "ok: $1" || { echo "FAILED: $1"; failed=1; }; }
+          check '.services.frontend.environment.MEALCRAFT_WATCH_POLLING == "true"'
+          check '.services.backend.environment.WATCHFILES_FORCE_POLLING == "true"'
+          check '.services.backend.command | join(" ") | test("--reload --reload-dir app$")'
+          # `--images` lists every service's image; the demo changes only the frontend's.
+          docker compose config --images | sort > "$RUNNER_TEMP/dev-images"
+          docker compose -f compose.yaml -f compose.demo.yaml config --images | sort > "$RUNNER_TEMP/demo-images"
+          unused=$(comm -23 "$RUNNER_TEMP/dev-images" "$RUNNER_TEMP/demo-images")
+          echo "dev images the demo does not use: ${unused:-none}"
+          [ -n "$unused" ] || { echo "FAILED: the demo build is tagged as the dev frontend image"; failed=1; }
+          exit $failed
+
       - name: Build and start the database and backend
         run: docker compose up -d --build --wait database backend
 
