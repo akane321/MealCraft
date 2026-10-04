@@ -127,3 +127,20 @@ def test_release_course_and_time_split_reach_the_candidate():
         0,
     )
     assert convert(recipe()).candidate.course is None
+
+
+def test_a_candidate_keeps_each_lines_wording_for_the_vegetable_rule():
+    """Release v2.1 weighs "1 medium cabbage" at 100 g, one leaf; the rule reads the wording to weigh a head."""
+    from app.planning.vegetable_led import candidate_vegetable_led
+    from app.schemas.recipe import RecipeIngredientResponse
+
+    source = recipe()
+    source.ingredients = [
+        RecipeIngredientResponse(name=n, normalized_name=n, quantity=grams, unit="g", preparation=None, allergens=[])
+        for n, grams in (("cabbage", 100), ("flour", 281.2))
+    ]
+    assert not candidate_vegetable_led(convert(source).candidate)
+    source.ingredients[0].original_text = "1 medium cabbage"
+    candidate = convert(source).candidate
+    assert candidate.ingredients[0].original_text == "1 medium cabbage"
+    assert candidate_vegetable_led(candidate)

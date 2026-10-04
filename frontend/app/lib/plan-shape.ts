@@ -1,3 +1,4 @@
+import { formatPlanDate } from "./meal-plan-format";
 import type { DishCourse, MealRole, PlannedMealType, PlanShape } from "~/types/household";
 import type { MealPlanShapeChange } from "~/types/meal-plan";
 
@@ -10,7 +11,7 @@ export const MEAL_PRESETS: Record<PlannedMealType, Record<string, MealRole[]>> =
   breakfast: { "One dish": [role("main", ["breakfast", "baked_good"])] },
   lunch: {
     "One dish": [role("main", ["main", "salad", "soup"])],
-    "Main and a side": [role("main", ["main"]), role("vegetable", ["side", "salad"])],
+    "Main and a veg": [role("main", ["main"]), role("vegetable", ["side", "salad"])],
   },
   dinner: {
     "One meat, one veg": [role("main", ["main"]), role("vegetable", ["side", "salad"], false)],
@@ -38,6 +39,20 @@ export function presetName(meal: PlannedMealType, roles: MealRole[]): string {
   return Object.entries(MEAL_PRESETS[meal]).find(([, preset]) => same(preset, roles))?.[0] ?? "Custom";
 }
 
+/** The vegetable role and its copies ("vegetable-2"): the planner gives them only vegetable dishes (backend `vegetable_role`). */
+export function isVegetableRole(roleId: string): boolean {
+  return roleId.replace(/-\d+$/, "") === "vegetable";
+}
+
+/** What a dish row is called, by what the planner does with it: the vegetable role by its id, any other by its courses. */
+export function dishLabel(item: MealRole): string {
+  if (isVegetableRole(item.role_id)) return "Vegetable dish";
+  if (item.courses.includes("main")) return item.role_id === "main" ? "Main dish" : "Another main";
+  if (item.courses.includes("soup")) return "Soup";
+  if (item.courses.includes("breakfast")) return "Breakfast dish";
+  return item.courses.every(course => course === "side" || course === "salad") ? "Side or salad" : "Another dish";
+}
+
 /** A fresh role id for a new dish: the first main is "main" (it gets the main dish's share). */
 export function nextRoleId(roles: MealRole[], courses: DishCourse[]): string {
   const base = courses.includes("main") ? "main" : courses.includes("soup") ? "soup" : "vegetable";
@@ -58,10 +73,20 @@ export function describeShape(shape: PlanShape): string {
     .join(" · ");
 }
 
+/** A plan day by its weekday ("Sun"), from the plan's own start date; "day 4" only while no date is known. */
+export function planDayLabel(startDate: string | null | undefined, dayIndex: number): string {
+  if (!startDate) return `day ${dayIndex}`;
+  const date = new Date(`${startDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + dayIndex - 1);
+  return formatPlanDate(date.toISOString().slice(0, 10), { weekday: "short" });
+}
+
 /** What a shape change does, in plain words: "Lunch added for the rest of the week", "Dinner on Fri: main, vegetable if it fits, soup". */
-export function shapeChangeSummary(change: MealPlanShapeChange, dayLabel: (dayIndex: number) => string): string {
+export function shapeChangeSummary(change: MealPlanShapeChange, startDate: string | null | undefined): string {
   const meal = `${change.meal_type[0]!.toUpperCase()}${change.meal_type.slice(1)}`;
-  const where = change.scope === "week" ? "for the rest of the week" : `on ${change.day_indexes.map(dayLabel).join(", ")}`;
+  const where = change.scope === "week"
+    ? "for the rest of the week"
+    : `on ${change.day_indexes.map(day => planDayLabel(startDate, day)).join(", ")}`;
   if (change.roles === null) return `No ${change.meal_type} ${where}`;
   if (!change.removed.length) return `${meal} added ${where}`;
   const counts = new Map<string, number>();

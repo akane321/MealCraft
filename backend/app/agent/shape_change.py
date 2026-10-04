@@ -9,6 +9,7 @@ one-dish events (swap, cancel, lock, can't buy).
 import re
 from dataclasses import dataclass
 
+from app.agent.replies import say, word
 from app.schemas.meal_plan import MEAL_PRESETS, MealPlanShapeChangeRequest, PlannedMeal, WeeklyMealPlanResponse
 
 MEAL_NAMES: dict[PlannedMeal, tuple[str, ...]] = {
@@ -141,15 +142,18 @@ def _next_id(roles: list[dict], base: str) -> str:
     return base if base not in taken else next(f"{base}-{n}" for n in range(2, 10) if f"{base}-{n}" not in taken)
 
 
-def _when(plan: WeeklyMealPlanResponse, days: list[int] | None) -> str:
+def _when(plan: WeeklyMealPlanResponse, days: list[int] | None, lang: str = "en") -> str:
     """ "on Friday", "on Saturday and Sunday", "on weekdays"; the rest of the week when no day is named."""
     if days is None:
-        return "for the rest of this week"
+        return say("when_rest", lang)
     dates = sorted({day.planned_date for day in plan.days if day.day_index in days}, key=lambda day: day.weekday())
     if not dates:
-        return "that day" if len(days) == 1 else "those days"
+        return say("when_day" if len(days) == 1 else "when_days", lang)
     if [day.weekday() for day in dates] == [0, 1, 2, 3, 4]:
-        return "on weekdays"
+        return say("when_weekdays", lang)
+    if lang == "zh":
+        names = [f"周{'一二三四五六日'[day.weekday()]}" for day in dates]
+        return f"{'、'.join(names[:-1])}和{names[-1]}" if len(names) > 1 else names[0]
     names = [f"{day:%A}" for day in dates]
     return "on " + (f"{', '.join(names[:-1])} and {names[-1]}" if len(names) > 1 else names[0])
 
@@ -176,7 +180,7 @@ def asks_for_shape(message: str) -> bool:
 
 
 def read_shape_change(
-    message: str, *, plan: WeeklyMealPlanResponse, day_indexes: list[int] | None
+    message: str, *, plan: WeeklyMealPlanResponse, day_indexes: list[int] | None, lang: str = "en"
 ) -> ShapeChangeIntent | None:
     """The shape change a message asks for, or None when it asks for something else.
 
@@ -191,19 +195,20 @@ def read_shape_change(
     shape = plan.plan_shape.meals if plan.plan_shape is not None else {}
     current = [role.model_dump() for role in shape.get(meal, [])]
     days = day_indexes or None
-    when = _when(plan, days)
+    # What the assistant says it understood, in the household's language (agent/replies.py).
+    named = {"when": _when(plan, days, lang), "meal": word(meal, lang), "Meal": word(meal, lang).capitalize()}
 
     if only:
         roles = [{"role_id": only, "courses": DISHES[only][1], "required": True}]
-        summary = f"{meal.capitalize()} as one {only} {when}"
+        summary = say("shape_only", lang, dish=word(only, lang) if lang == "zh" else only, **named)
     elif dish is None:
         if _has(text, ONE_DISH):
             roles = list(MEAL_PRESETS[meal].values())[0] if meal != "dinner" else MEAL_PRESETS["dinner"]["one main"]
-            summary = f"{meal.capitalize()} as one dish {when}"
+            summary = say("shape_one_dish", lang, **named)
         elif drops:
-            roles, summary = None, f"No {meal} {when}"
+            roles, summary = None, say("shape_no_meal", lang, **named)
         elif meal not in shape:
-            roles, summary = list(MEAL_PRESETS[meal].values())[0], f"{meal.capitalize()} added {when}"
+            roles, summary = list(MEAL_PRESETS[meal].values())[0], say("shape_add_meal", lang, **named)
         else:
             return None  # "plan dinner" when dinner is planned: nothing to change
     else:
@@ -218,13 +223,15 @@ def read_shape_change(
                 return None
             if not any(role.get("required", True) for role in kept):
                 kept[0] = {**kept[0], "required": True}
-            roles, summary = kept, f"{meal.capitalize()} without the {dish} {when}"
+            roles = kept
+            summary = say("shape_without", lang, dish=word(dish, lang) if lang == "zh" else dish, **named)
         elif len(current) >= 6:
             return None
         else:
             role_id = _next_id(current, base)
             roles = [*current, {"role_id": role_id, "courses": courses, "required": True}]
-            summary = f"{meal.capitalize()} with {'another' if role_id != base else 'a'} {dish} {when}"
+            key = "shape_with_another" if role_id != base else "shape_with"
+            summary = say(key, lang, dish=word(dish, lang) if lang == "zh" else dish, **named)
     return ShapeChangeIntent(
         request=MealPlanShapeChangeRequest.model_validate(
             {"meal_type": meal, "roles": roles, "day_indexes": days, "reason": message.strip()}

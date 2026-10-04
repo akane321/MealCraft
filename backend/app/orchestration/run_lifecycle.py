@@ -103,7 +103,9 @@ class AgentRunLifecycle:
         model_config: dict | None = None,
         actor_user_id: int | None = None,
         household_id: int | None = None,
-        max_llm_calls: int = 2,
+        # One turn sends at most one chat request (the parser) and one embedding request (the words it could
+        # not place, or what a swap asked for), each retried once by the SDK: four requests.
+        max_llm_calls: int = 4,
         max_tool_calls: int = 8,
         max_retrieval_retries: int = 2,
         max_planning_attempts: int = 3,

@@ -1,6 +1,7 @@
 import re
 from datetime import date, timedelta
 
+from app.agent.replies import language, say, weekday
 from app.agent.shape_change import asks_for_shape
 from app.planning.recipe_similarity import wanted
 from app.schemas.agent import AgentReplanDraft
@@ -89,6 +90,7 @@ class AgentReplanInterpreter:
         *,
         plan: WeeklyMealPlanResponse,
         current: AgentReplanDraft,
+        lang: str | None = None,
     ) -> tuple[AgentReplanDraft, list[str]]:
         text = message.strip()
         lower = text.lower()
@@ -110,8 +112,35 @@ class AgentReplanInterpreter:
             draft.unavailable_ingredient = ingredient
 
         draft.reason = text
-        question = self._first_question(draft, chinese=bool(re.search(r"[\u4e00-\u9fff]", text)), plan=plan)
+        lang = lang or language(text)
+        question = self._first_question(draft, lang=lang, plan=plan, every=self._every.search(lower) is not None)
         return draft, [question] if question else []
+
+    # "Swap every dish", "change all the meals", 所有菜都换: more than one dish, said at once.
+    _every = re.compile(
+        r"(?<![a-z])(?:every|all(?: the)?|each)\s+(?:dish|dishes|meal|meals|dinner|dinners)(?![a-z])"
+        r"|(?<![a-z])(?:whole|entire)\s+week(?![a-z])|(?<![a-z])everything(?![a-z])|所有|全部|每道菜|每一道|每顿|整周"
+    )
+
+    @staticmethod
+    def choices(draft: AgentReplanDraft, plan: WeeklyMealPlanResponse | None, lang: str) -> list[tuple[str, str]]:
+        """What the household can tap to answer the question `parse` asked: (label, what it says)."""
+        if draft.event_type is None:
+            return [
+                (say("swap_say", lang), say("swap_say", lang)),
+                (say("skip", lang), say("skip", lang)),
+                (say("lock", lang), say("lock_say", lang)),
+                (say("unavailable", lang), say("unavailable_say", lang)),
+            ]
+        if plan is None:
+            return []
+        if draft.entry_id is None and draft.day_index is None:
+            days = sorted({day.day_index: day.planned_date for day in plan.days}.items())
+            return [(weekday(date_, lang), say("day_say", lang, index=index)) for index, date_ in days]
+        if draft.entry_id is None:
+            titles = list(dict.fromkeys(day.recipe.title for day in plan.days if day.day_index == draft.day_index))
+            return [(title, say("dish_say", lang, title=title)) for title in titles]
+        return []
 
     _lock_words = ("lock", "keep unchanged", "don't change", "do not change", "锁定", "保留", "不要改", "保持不变")
     # "keep Tuesday's dinner", "keep the lunch as it is": keeping one named meal.
@@ -260,23 +289,16 @@ class AgentReplanInterpreter:
 
     @staticmethod
     def _first_question(
-        draft: AgentReplanDraft, *, chinese: bool, plan: WeeklyMealPlanResponse | None = None
+        draft: AgentReplanDraft, *, lang: str, plan: WeeklyMealPlanResponse | None = None, every: bool = False
     ) -> str | None:
         if draft.event_type is None:
-            return (
-                "你希望替换、取消、锁定某餐，还是处理缺货食材？"
-                if chinese
-                else "Should I replace, cancel, lock a meal, or handle an unavailable ingredient?"
-            )
+            return say("ask_event", lang)
         if draft.entry_id is None and draft.day_index is not None and plan is not None:
             titles = [day.recipe.title for day in plan.days if day.day_index == draft.day_index]
-            return (
-                f"那天有 {len(titles)} 道菜（{'、'.join(titles)}），你想调整哪一道？"
-                if chinese
-                else f"That day has {len(titles)} dishes ({', '.join(titles)}); which one should I adjust?"
-            )
+            return say("ask_dish", lang, count=len(titles), titles=("、" if lang == "zh" else ", ").join(titles))
         if draft.entry_id is None:
-            return "你想调整哪一天的餐食？" if chinese else "Which day should I adjust?"
+            # One dish changes at a time; "every dish" starts from a day.
+            return say("every_dish" if every else "ask_day", lang)
         if draft.event_type == "ITEM_UNAVAILABLE" and draft.unavailable_ingredient is None:
-            return "哪一种食材买不到？" if chinese else "Which ingredient is unavailable?"
+            return say("ask_ingredient", lang)
         return None

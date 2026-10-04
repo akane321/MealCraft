@@ -6,7 +6,7 @@ from math import isfinite
 from app.planning.dietary_tags import expand_tags
 from app.planning.diversity_validation import diversity_checks
 from app.planning.input_audit import nonfinite_issues
-from app.planning.meal_composition import meal_minutes, portion_shares, repetition_shortfalls, role_key
+from app.planning.meal_composition import meal_minutes, portion_shares, repetition_shortfalls, role_admits, role_key
 from app.schemas.planning_v2 import (
     CheckStatus,
     FinalPlanningProblem,
@@ -63,7 +63,9 @@ class FinalPlanningValidator:
                 policy_version=problem.policy_version,
             )
         checks, meals = self.assignment_checks(problem, assignments)
-        assignment_checks_passed = not checks
+        # Only a hard verdict leaves the dishes, and so the cost, in doubt; a soft one (a dish outside its usual
+        # meal types) is reported and the week priced all the same.
+        assignment_checks_passed = not any(check.hard for check in checks)
         checks.extend(diversity_checks(problem, meals))
         checks.extend(
             self._failed("repetition_rule", problem_text)
@@ -239,6 +241,14 @@ class FinalPlanningValidator:
                     self._failed(
                         "meal_role_course",
                         f"A {course} recipe cannot fill role {role.role_id}.",
+                        slot.slot_id,
+                    )
+                )
+            elif not role_admits(role, recipes[dish.recipe_id]):
+                checks.append(
+                    self._failed(
+                        "meal_role_course",
+                        f"A {course} not led by vegetables cannot fill role {role.role_id}.",
                         slot.slot_id,
                     )
                 )

@@ -39,8 +39,10 @@ nutrition targets, and existing ingredients.
 Under **Meals and dishes**, tick the meals each day plans (breakfast, lunch,
 dinner; dinner only by default) and pick each meal's dishes: a preset (dinner
 defaults to one main and one vegetable) or your own mix of mains, vegetables and
-a soup, up to six dishes. A dish marked "if one fits" is left out when nothing
-suits it.
+a soup, up to six dishes. A vegetable dish is a side dish or salad made mostly
+of vegetables, with no meat or fish (eggs, cheese and sauces such as fish sauce
+are fine); a pasta, rice or bean side does not count as one, and neither does a
+chicken salad. A dish marked "if one fits" is left out when nothing suits it.
 
 Important semantics:
 
@@ -107,6 +109,9 @@ Ask in the conversation. Two kinds of change are understood:
   soup", "add a soup on Friday", "今晚不要配菜". Only the meals affected are
   planned again, with the budget the rest of the week leaves; adding a dish keeps
   the meal's other dishes, and taking one away keeps the rest at a larger share.
+  When nothing fits what is left of the weekly budget, the cheapest dishes the
+  planner finds are offered anyway, and the reply says how far over the budget
+  they put the week.
 
 Every change is shown as a preview first, with the new dishes and the grocery
 difference. **Confirm change** applies it; **Keep as is** discards it. Cooked

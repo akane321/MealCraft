@@ -27,6 +27,10 @@ from app.services.product import ProductSearchService
 from app.services.recommendation import RecipeRecommendationService
 
 PlanningSystem = Literal["greedy-baseline", "rule-only-baseline", "mealcraft-planner"]
+# The planning scenario sets (v1 and their catalog relabelling) were written and labelled when a request
+# stating no cooking time meant 60 minutes; the runner keeps that meaning so the frozen sets, their labels
+# (scripts/derive_catalog_labels.py) and their recorded results stay comparable.
+SCENARIO_UNSTATED_TIME_LIMIT = 60
 
 
 class EvaluationScenario(BaseModel):
@@ -208,7 +212,9 @@ def evaluate(
         aggregator = WeeklyGroceryAggregator(product_service)
 
         for index, scenario in enumerate(scenarios, start=1):
-            request = WeeklyMealPlanRequest.model_validate(scenario.request)
+            request = WeeklyMealPlanRequest.model_validate(
+                {"max_cooking_time_minutes": SCENARIO_UNSTATED_TIME_LIMIT, **scenario.request}
+            )
             recommendation_result = recommendation_service.recommend(
                 request, deduct_pantry_from_cost=False, recipes=planning_recipes, priced_release_only=True
             )

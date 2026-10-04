@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from app.agent.parser import AgentConfigurationError
@@ -10,6 +12,7 @@ ROOT = repository_root()
 INGREDIENTS = ROOT / "data/ingredients/ingredients.json"
 RECIPES = ROOT / "data/recipes/recipes.json"
 HELDOUT = ROOT / "data/evaluation/heldout/planning-v1.json"
+DEVELOPER = ROOT / "data/evaluation/dev/planning-v1.json"
 AGENT_CASES = ROOT / "data/evaluation/agent/fixture-v1.json"
 FIXTURES = ROOT / "data/fixtures/fairprice-products.json"
 SCOPE_CASES = ROOT / "data/evaluation/agent-orchestration/scope-developer-v1.json"
@@ -39,6 +42,18 @@ def test_heldout_comparison_keeps_baseline_and_planner_on_same_dataset() -> None
     assert baseline["metrics"]["consecutive_repetition_count"] > 0
     assert planner["metrics"]["consecutive_repetition_count"] < baseline["metrics"]["consecutive_repetition_count"]
     assert planner["metrics"]["hard_constraint_violation_count"] == 0
+
+
+def test_the_recorded_developer_planning_report_still_reproduces() -> None:
+    """A request stating no cooking time is no limit now, but the planning scenarios were written when it
+    meant 60 minutes: the runner keeps their meaning, so every recorded week is chosen again."""
+    report = evaluate(ingredient_path=INGREDIENTS, recipe_path=RECIPES, scenario_path=DEVELOPER, fixture_path=FIXTURES)
+    recorded = json.loads((ROOT / "docs/evaluation/latest.json").read_text(encoding="utf-8"))
+
+    def weeks(rows: list[dict]) -> dict:
+        return {row["id"]: (row["actual_feasible"], row["selected_slugs"]) for row in rows}
+
+    assert weeks(report["scenarios"]) == weeks(recorded["scenarios"])
 
 
 def test_strong_rule_only_baseline_is_deterministic_and_not_a_repeat_strawman() -> None:

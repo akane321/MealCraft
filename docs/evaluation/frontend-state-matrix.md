@@ -6,17 +6,16 @@ critical browser path against an isolated test backend or the local stack.
 
 | Surface | Loading | Empty / first use | Success | Recoverable error | Constraint / safety state |
 |---|---|---|---|---|---|
-| Home: entry | film loading (poster shown) | starter prompts | chat opens on send | sign-in required, draft kept | none before sign-in |
-| Home: conversation | assistant thinking | "who's eating, what you can spend" prompt | structured clarification, **Plan my week**, reply | request failure shown in the conversation | clarification and non-medical boundary visible |
-| Home: week panel | plan loading | "shows up once planned" | 7 dinners with status, tonight, tutorial | tutorial unavailable says so | allergen note on the recipe view |
+| Home: entry | film loading (poster shown) | starter prompts | chat opens on send | sign-in required, draft kept (a dish's words with the week they change, until another week is shown or opening; sent from here they reopen its conversation first, and nothing sends until it is back) | none before sign-in |
+| Home: conversation | assistant thinking | "who's eating, what you can spend" prompt; on reopening, the conversation that planned the current week, else one ready to plan, else a fresh one (never another conversation's week card) | structured clarification, **Plan my week**, reply | request failure shown in the conversation | clarification and non-medical boundary visible; proven limits carry their number and backed choices; a bounded-search miss is explained without claiming global infeasibility |
+| Home: week panel | plan loading | "shows up once planned"; a conversation that planned nothing (new, off topic) shows the current week, and its dish actions change that week in the conversation holding it (reopened), else here (one ready to plan or still asking about a new week asks first, with the question scrolled into view; it goes once it plans one or the composer says something else; the dish's words go once another week is shown, as after **Plan my week**); switching conversations always reloads the panel | configured breakfast, lunch and dinner dishes with status, tonight, tutorial | tutorial unavailable says so | allergen note on the recipe view |
 | Home: kitchen panel | plan loading | "shows up once planned" | cooked nutrition, shopping list against budget | not-priced items listed | price source labelled (FairPrice with date, saved, sample) |
 | Home: nutrition details | — | no cooked dinners (actuals zero) | six nutrients, cumulative curve, daily detail | status update failure message | only cooked dinners counted as actual |
 | Home: shopping sheet | — | — | printable preview, Export PDF | — | sample prices and allergen caveat printed |
 | Replanning preview (in conversation) | previewing | no pending change | before/after with calorie and grocery deltas | invalid or stale change rejected | explicit confirm before persistence |
-| Household profile | current profile loading | editable default household | saved version and planning action | validation/API message | allergies limited to the checked list, separated from health preferences |
+| Household profile | current profile loading | editable new household with no limit, budget, target or health preference filled in | saved version and planning action | validation/API message | allergies limited to the checked list, separated from health preferences |
 | Operations experiments | evaluations, history or evidence drawer loading | no recorded run / no failed case | confirmed job moves queued → running → completed; evidence opens; comparable A/B runs expose parameters, metrics and failure mechanisms | queue, refresh or detail error remains actionable; incompatible runs explain why their delta is not interpreted | fixed developer registry only; held-out and paid providers unavailable; legacy inline entries labelled; developer diagnostics never presented as final claims |
 | Operations: catalog jobs | queue refreshing | no recorded catalog jobs | named source queued, live status and attempt count | last recorded state retained with retry | administrators confirm writes; legacy roles cannot enter; only queued/running jobs can be cancelled |
-
 
 ## Critical task flow
 

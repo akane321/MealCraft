@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { allergenLabel, CHECKED_ALLERGENS } from "~/lib/allergens";
 import { todayIsoDate } from "~/lib/meal-plan-format";
-import { summarizeHouseholdMembers } from "~/lib/household-profile";
+import { NO_TIME_LIMIT_MINUTES, noGoals, statedTimeLimit, summarizeHouseholdMembers } from "~/lib/household-profile";
 import {
   cleanAvailableIngredients,
   parseExcludedIngredients,
@@ -39,17 +39,10 @@ const healthOptions: { label: string; value: HealthPreference }[] = [
   { label: "Lower calorie", value: "lower-calorie" },
 ];
 
+// A new household starts with no limit or goal it did not enter (the help text promises as much).
 const form = reactive({
   name: "My household",
-  maxCookingTimeMinutes: 60,
-  budgetPerMealSgd: null as number | null,
-  weeklyBudgetSgd: 60 as number | null,
-  healthPreferences: ["low-sodium"] as HealthPreference[],
-  calorieTarget: 550 as number | null,
-  proteinTarget: 35 as number | null,
-  carbohydrateTarget: null as number | null,
-  fatTarget: null as number | null,
-  maxSodiumMgPerMeal: null as number | null,
+  ...noGoals(),
   pricingMode: "fixture" as PricingMode,
   planningStartDate: todayIsoDate(),
 });
@@ -91,7 +84,7 @@ function hydrateFromCurrent() {
   const profile = current.value;
   const version = profile.current;
   form.name = profile.name;
-  form.maxCookingTimeMinutes = version.max_cooking_time_minutes;
+  form.maxCookingTimeMinutes = statedTimeLimit(version.max_cooking_time_minutes);
   form.budgetPerMealSgd = version.budget_per_meal_sgd;
   form.weeklyBudgetSgd = version.weekly_budget_sgd;
   form.healthPreferences = [...version.health_preferences];
@@ -151,7 +144,7 @@ function buildPayload(): HouseholdProfileInput {
   return {
     name: form.name,
     members: members.value.map(memberPayload),
-    max_cooking_time_minutes: form.maxCookingTimeMinutes,
+    max_cooking_time_minutes: toOptionalNumber(form.maxCookingTimeMinutes) ?? NO_TIME_LIMIT_MINUTES,
     budget_per_meal_sgd: toOptionalNumber(form.budgetPerMealSgd),
     weekly_budget_sgd: toOptionalNumber(form.weeklyBudgetSgd),
     health_preferences: form.healthPreferences,
@@ -278,7 +271,7 @@ onMounted(async () => {
           <p class="form-kicker">Every week</p>
           <h2>Budget, cooking time and goals</h2>
           <div class="profile-field-grid">
-            <label><span>Longest cooking time (min)</span><input v-model.number="form.maxCookingTimeMinutes" type="number" min="5" max="240" required></label>
+            <label><span>Longest cooking time (min)</span><input v-model.number="form.maxCookingTimeMinutes" type="number" min="5" max="240" placeholder="No limit"></label>
             <label><span>Budget per meal</span><input v-model.number="form.budgetPerMealSgd" type="number" min="0.01" step="0.01" placeholder="Optional S$"></label>
             <label><span>Budget per week</span><input v-model.number="form.weeklyBudgetSgd" type="number" min="0.01" step="0.01" placeholder="Optional S$"></label>
             <label>

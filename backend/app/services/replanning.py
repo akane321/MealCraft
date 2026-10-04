@@ -1,4 +1,5 @@
 from collections import Counter
+from contextlib import suppress
 from datetime import date, timedelta
 
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
@@ -8,6 +9,7 @@ from app.planning.meal_composition import meal_minutes, portion_shares
 from app.planning.product_path import ProductPlanningError
 from app.planning.recipe_quality import dish_family
 from app.planning.recipe_similarity import RecipeSimilarity
+from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError, entry_values
 from app.repositories.recipe import RecipeRepository
@@ -318,32 +320,42 @@ class MealPlanReplanningService:
         return {item.recipe_id for item in present}, held - new
 
     def _plan_meal(self, constraints, meal, roles, days, kept, removed) -> list[tuple[dict, MealPlanEntrySnapshot]]:
-        """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves."""
+        """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves.
+
+        When none fit it, the cheapest the search finds, offered with what they put the week over its budget
+        for the household to confirm or discard, as a swap is.
+        """
         if self.meal_plan_service is None:
             raise MealPlanReplanValidationError("Changing meals is not available here.")
         budget = constraints.weekly_budget_sgd
-        if budget is not None:
-            budget = round(budget - sum(float(item.consumed_cost_sgd) for item in kept), 2)
-            if budget <= 0:
-                raise MealPlanReplanValidationError(
-                    "The rest of the week already uses the whole weekly budget, so there is none left for this."
-                )
-        partial = constraints.model_copy(
-            update={
-                "plan_shape": MealPlanShape(meals={meal: roles}),
-                "meal_composition": None,
-                "weekly_budget_sgd": budget,
-            }
-        )
+        left = round(budget - sum(float(item.consumed_cost_sgd) for item in kept), 2) if budget is not None else None
         first, last = min(days), max(days)
-        try:
-            dishes = self.meal_plan_service.plan_dishes(
+
+        def planned(weekly_budget: float | None, *, cheapest: bool = False):
+            partial = constraints.model_copy(
+                update={
+                    "plan_shape": MealPlanShape(meals={meal: roles}),
+                    "meal_composition": None,
+                    "weekly_budget_sgd": weekly_budget,
+                }
+            )
+            return self.meal_plan_service.plan_dishes(
                 partial,
                 first_day=first,
                 day_count=last - first + 1,
                 avoid_recipe_ids={item.recipe_id for item in kept},
                 keep=self._dishes_kept_when_adding(roles, [item for item in removed if len(days) == 1]),
+                cheapest=cheapest,
             )
+
+        dishes = None
+        try:
+            if left is not None and left > 0:
+                with suppress(ProductPlanningError):
+                    dishes = planned(left)
+            if dishes is None:
+                # No budget, or not enough of it left: the cheapest dishes over it.
+                dishes = planned(None, cheapest=left is not None)
         except ProductPlanningError as error:
             raise MealPlanReplanValidationError(str(error)) from error
         added = []
@@ -462,6 +474,7 @@ class MealPlanReplanningService:
                 item
                 for item in candidates
                 if (recipes_by_id[item.recipe.id].course or "main") in role.courses
+                and (not vegetable_role(role.role_id) or catalog_vegetable_led(recipes_by_id[item.recipe.id]))
                 and self._meal_still_holds(plan, entry, recipes_by_id[item.recipe.id], constraints)
             ]
         if not candidates:

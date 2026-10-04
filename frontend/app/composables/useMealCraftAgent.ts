@@ -1,3 +1,4 @@
+import { conversationForPlan } from "~/lib/home-surface";
 import type {
   AgentConfirmation,
   AgentInteractionAnswer,
@@ -31,20 +32,21 @@ export function useMealCraftAgent() {
     }
   }
 
-  async function create(message: string) {
+  // `planId`: the week the message changes, for a conversation that did not plan it (it takes the week on).
+  async function create(message: string, planId: number | null = null) {
     generatedPlan.value = null;
     const result = await run(() => apiFetch<AgentSession>(`${config.public.apiBase}/api/agent/sessions`, {
       method: "POST",
-      body: { message },
+      body: { message, plan_id: planId },
     }));
     if (result) session.value = result;
   }
 
-  async function reply(message: string) {
+  async function reply(message: string, planId: number | null = null) {
     if (!session.value) return;
     const result = await run(() => apiFetch<AgentSession>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/messages`,
-      { method: "POST", body: { message } },
+      { method: "POST", body: { message, plan_id: planId } },
     ));
     if (result) session.value = result;
   }
@@ -60,13 +62,21 @@ export function useMealCraftAgent() {
 
   async function confirm() {
     if (!session.value) return;
+    const id = session.value.id;
     const result = await run(() => apiFetch<AgentConfirmation>(
-      `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/confirm`,
+      `${config.public.apiBase}/api/agent/sessions/${id}/confirm`,
       { method: "POST" },
     ));
     if (result) {
       session.value = result.session;
       generatedPlan.value = result.plan;
+      return;
+    }
+    // A week that could not be planned is explained in the conversation, which replaces the Plan card.
+    const explained = await apiFetch<AgentSession>(`${config.public.apiBase}/api/agent/sessions/${id}`).catch(() => null);
+    if (explained && explained.messages.length > (session.value?.messages.length ?? 0)) {
+      session.value = explained;
+      errorMessage.value = null;
     }
   }
 
@@ -92,13 +102,15 @@ export function useMealCraftAgent() {
     if (result) session.value = result;
   }
 
-  async function restoreLatest() {
+  /** Fills the recent list and reopens the conversation for the week `planId` (conversationForPlan); with none, a fresh one. */
+  async function restore(planId: number | null) {
     const result = await run(() => apiFetch<AgentSessionCollection>(
       `${config.public.apiBase}/api/agent/sessions`,
       { query: { limit: 8 } },
     ));
-    if (result) recent.value = result.items;
-    if (result?.items[0]) session.value = result.items[0];
+    if (!result) return;
+    recent.value = result.items;
+    session.value = conversationForPlan(result.items, planId);
   }
 
   function reset() {
@@ -119,7 +131,7 @@ export function useMealCraftAgent() {
     recent,
     reply,
     reset,
-    restoreLatest,
+    restore,
     session,
   };
 }
