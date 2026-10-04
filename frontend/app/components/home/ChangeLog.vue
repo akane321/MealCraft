@@ -4,7 +4,7 @@ import { sameDishChange } from "~/lib/home-surface";
 import { shapeChangeSummary } from "~/lib/plan-shape";
 import type { MealPlanReplanEvent, MealPlanReplanEventCollection } from "~/types/meal-plan";
 
-const props = defineProps<{ planId: number | null; revision?: number }>();
+const props = defineProps<{ planId: number | null; revision?: number; startDate?: string | null }>();
 
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
@@ -55,7 +55,7 @@ function money(event: MealPlanReplanEvent) {
     <ol>
       <li v-for="event in applied" :key="event.id">
         <p v-if="event.shape_change" class="swap">
-          <strong>{{ shapeChangeSummary(event.shape_change, day => `day ${day}`) }}</strong>
+          <strong>{{ shapeChangeSummary(event.shape_change, startDate) }}</strong>
         </p>
         <p v-else-if="sameDishChange(event)" class="swap">
           <strong>{{ sameDishChange(event) }}</strong>

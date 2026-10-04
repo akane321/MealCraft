@@ -121,7 +121,8 @@ def planning_pool() -> list[dict]:
 
 def eligible(request: dict, pool: list[dict]) -> list[dict]:
     """Recipes meeting the request's recipe-level hard constraints."""
-    limit = request.get("max_cooking_time_minutes", 60)  # the request schema's default
+    # What the scenarios meant by no stated limit (app.evaluation.runner.SCENARIO_UNSTATED_TIME_LIMIT).
+    limit = request.get("max_cooking_time_minutes", 60)
     allergens = set(request.get("allergens") or [])
     excluded = set(request.get("excluded_ingredients") or [])
     diets = set(request.get("dietary_preferences") or [])

@@ -1,3 +1,4 @@
+import { formatPlanDate } from "./meal-plan-format";
 import type { DishCourse, MealRole, PlannedMealType, PlanShape } from "~/types/household";
 import type { MealPlanShapeChange } from "~/types/meal-plan";
 
@@ -58,10 +59,20 @@ export function describeShape(shape: PlanShape): string {
     .join(" · ");
 }
 
+/** A plan day by its weekday ("Sun"), from the plan's own start date; "day 4" only while no date is known. */
+export function planDayLabel(startDate: string | null | undefined, dayIndex: number): string {
+  if (!startDate) return `day ${dayIndex}`;
+  const date = new Date(`${startDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + dayIndex - 1);
+  return formatPlanDate(date.toISOString().slice(0, 10), { weekday: "short" });
+}
+
 /** What a shape change does, in plain words: "Lunch added for the rest of the week", "Dinner on Fri: main, vegetable if it fits, soup". */
-export function shapeChangeSummary(change: MealPlanShapeChange, dayLabel: (dayIndex: number) => string): string {
+export function shapeChangeSummary(change: MealPlanShapeChange, startDate: string | null | undefined): string {
   const meal = `${change.meal_type[0]!.toUpperCase()}${change.meal_type.slice(1)}`;
-  const where = change.scope === "week" ? "for the rest of the week" : `on ${change.day_indexes.map(dayLabel).join(", ")}`;
+  const where = change.scope === "week"
+    ? "for the rest of the week"
+    : `on ${change.day_indexes.map(day => planDayLabel(startDate, day)).join(", ")}`;
   if (change.roles === null) return `No ${change.meal_type} ${where}`;
   if (!change.removed.length) return `${meal} added ${where}`;
   const counts = new Map<string, number>();
