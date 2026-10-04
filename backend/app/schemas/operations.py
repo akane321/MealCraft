@@ -9,9 +9,11 @@ from app.schemas.platform import OperationStatus
 
 
 class OperationsRunSummary(BaseModel):
+    id: int
     trace_id: str
     run_type: str
     status: OperationStatus
+    attempt_count: int = Field(ge=0)
     triggered_by_user_id: int | None
     input_digest: str | None
     code_commit: str | None
