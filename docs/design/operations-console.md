@@ -56,7 +56,7 @@ needs-data are different outcomes. Retrieval views preserve mode, freshness,
 warnings and evidence. Replay stored inputs rather than silently re-querying
 to explain a historical result. Reuse trace minimization/redaction.
 
-## Durable jobs: separately integrated
+## Durable job contract
 
 Reuse PostgreSQL `operation_runs` with typed payload, lease expiry, attempt
 count and scoped idempotency key. No Redis/Celery without measured need.

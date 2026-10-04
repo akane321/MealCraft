@@ -105,7 +105,8 @@ interaction, and generated-plan link are persisted in `agent_sessions` and
 `agent_messages`. Replanning previews and confirmations are
 stored in `meal_plan_events`; `meal_plans.revision` provides optimistic
 concurrency and `meal_plan_entries.is_locked` protects selected meals. The
-current migration head is `20260916_0014`. Household profile identity and
+database revision can be inspected with `docker compose exec backend uv run --no-sync alembic current`;
+the version chain lives in `backend/alembic/versions/`. Household profile identity and
 immutable versions are stored in `household_profiles` and
 `household_profile_versions`; linked plans preserve the exact profile version
 and optional replaced-plan ID. Agent replanning drafts and pending

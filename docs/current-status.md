@@ -1,19 +1,18 @@
 # MealCraft Current Status
 
-> Last verified public snapshot: 2026-10-03
+> Last verified public snapshot: 2026-10-04
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `407cd89` (fix: repair walkthrough findings (#207))
+> Verified remote `main`: `3d3e251` (bilingual planning replies, #211)
 
-The latest main fixes profile-filtered plan history, meal-level status/action
-display and dated change history, plus skip-versus-lock handling in replanning.
-Its [CI run](https://github.com/akane321/MealCraft/actions/runs/36844250244) passed.
-This snapshot is not a claim that pending Operations job or experiment PRs have
-merged. The accepted admin-only Console boundary still has a main-code gap:
-legacy reviewer/operator values can pass the old view dependency and mutations
-use it too. The corrective branch adds admin-only read/write gates with existing
-session CSRF; that fix is not yet remote-main behavior.
+The merged snapshot includes developer planning diagnostics, release data-quality
+views, PostgreSQL durable catalog jobs and their console actions, administrator-only
+Console gates with session CSRF, plan-linked conversation recovery, hermetic model
+tests, vegetable-led dish roles and bilingual planning replies. Its
+[integration CI](https://github.com/akane321/MealCraft/actions/runs/37186942983)
+passed. Pending shape-change, variety and recorded-experiment comparisons are not
+claimed as merged in this snapshot.
 
 ## How to Read This Document
 
@@ -33,8 +32,8 @@ that fails or is indeterminate is not saved, and plan storage and a redacted
 `OperationRun` are atomic. `planner_strategy=greedy-baseline` selects the
 reference path under the same gate. A week is planned as days × meals (decision
 ADR-0046): the household's plan shape names the meals of a day (breakfast, lunch,
-dinner; default dinner only) and each meal's dishes (default one main and one
-vegetable), and `MealBeamPlanner` fills every (day, meal) slot. `PLANNING_CAPABILITY`
+dinner; default dinner only) and each meal's dishes (default one main and an
+optional vegetable dish), and `MealBeamPlanner` fills every (day, meal) slot. `PLANNING_CAPABILITY`
 defaults to `full`; `mvp` (one dinner dish a day) remains for reproducing the
 recorded evaluations. The candidate recipes are kept in memory for five minutes
 (`PLANNING_POOL_CACHE_SECONDS`), so a week on the real catalog takes about 7 s in
@@ -49,7 +48,12 @@ that the product path does not call: `purchasing_comparison.py` and
 basket handoff, #182), `fixed_menu_refresh.py` (P6, repricing a confirmed fixed
 menu against a new product snapshot and checking local replan invariants, #183),
 and `feedback_ranking.py` and `theme_parameters.py` (P7, default off, #184), all
-under `backend/app/planning/`. P8 ablations are not built.
+under `backend/app/planning/`. P8 developer diagnostics are executable: component
+ablations, independent-gate comparisons, purchasing, feedback and theme
+experiments, with a developer-suite runner. See
+[Planning developer experiments](design/planning-developer-experiments.md).
+These offline modules are not evidence that every component is on the product
+path, and they do not replace a fresh independent final comparison.
 
 ## Verified Product Baseline
 
@@ -80,7 +84,7 @@ under `backend/app/planning/`. P8 ablations are not built.
 - two fully covered, leakage-resistant matched-information Evaluation v2 developer packets;
 - 30 curated recipes and 34 normalized ingredients in the recorded catalog, plus 8,967 release v2.1 recipes imported beside them (slugs prefixed `v2-`).
 
-### Held-out v2 authoring progress
+### Archived held-out v2 authoring progress
 
 Fifty of the planned 80 episodes are authored: 12 `standard`, 12
 `clarification`, 10 `budget_package`, 8 `pantry_expiry` and 8
@@ -268,7 +272,7 @@ improved.
 | Validated web-recipe supplementation | Target | Specified in [External Recipe Intake](design/external-recipe-intake.md) (decision ADR-0032): parsing, duplicate check, ingredient mapping, the user-confirmed allergen question, source tiers and an admission gate equal to the release gate. Not built |
 | Semantic preference retrieval | Target | Combine semantic matching with strict metadata filtering and evaluate its incremental value |
 | Recipe execution side panel | Partial | The recipe sheet shows ingredients, allergen labels and steps, and the plan panel's "Today" view carries the Top-1 tutorial for the next meal (ADR-0048). Remaining: attributes, provenance and a tutorial per dish beyond the sample set |
-| Final-scope planning and validation | Partial | Constraint compilation, bounded Beam Search, conservative bounds, independent shopping/budget validation and a small exhaustive oracle are executable. The integration and its deepenings are specified as eight packets in [Planning and Validation v2](design/planning-validation-v2.md) (decision ADR-0033). The engine and the independent validator are wired into the product path (P1), as are conflict explanations (P2) and nutrition scope (P4). Remaining: explain infeasibility with a minimal conflicting set and a numeric relaxation, bound variety against ingredient overlap, compile nutrition scope, purchase across the whole slot set, replan with minimal perturbation, add a reorder-only learned ranking that ships off, and run the ablations |
+| Final-scope planning and validation | Partial | Constraint compilation, bounded Beam Search, conservative bounds, independent shopping/budget validation and a small exhaustive oracle are executable. The integration and its deepenings are specified as eight packets in [Planning and Validation v2](design/planning-validation-v2.md) (decision ADR-0033). The engine and the independent validator are wired into the product path (P1), as are conflict explanations (P2) and nutrition scope (P4). Remaining: explain infeasibility with a minimal conflicting set and a numeric relaxation, bound variety against ingredient overlap, compile nutrition scope, purchase across the whole slot set, replan with minimal perturbation, add a reorder-only learned ranking that ships off, and add integrated-product evidence to the existing developer ablations |
 | Nutrition elastic policy | Partial | Complete source-aware target deviation, lower-sodium/lower-sugar policy, tolerance, missing-data behaviour, and dedicated evaluation |
 | Grocery grounding robustness | Partial | Measure live/cache/fixture degradation, mapping quality, package parsing, and source freshness |
 | Dynamic replanning | Partial | Add broader event semantics, temporary versus persistent preference handling, disruption metrics, and Shopping List consistency stress tests |
@@ -277,7 +281,7 @@ improved.
 | Multiple baselines | Partial | Strong Rule-only is executable; run frozen Context-matched LLM-only, Plain LLM and Human Manual comparisons only after common outputs and held-out labels are ready |
 | Capability-centred Evaluation v2 | Partial | Packet compiler, coverage/leakage gates and visible developer packets are executable; the common output schema and strict-success scorer are called by the v2-multidish and v3 meal-day-week runners (`multidish_runner.py`, `meal_day_week_runner.py`); paired statistics over the recorded v2-multidish runs are reported ([paired](evaluation/v2-multidish/heldout/paired.md)), but that set was used for two fixes, so they are not pre-registered; an unseen held-out set and a human study remain open |
 | User-facing quality | Partial | Typed quick clarification, cumulative-plus-daily Dashboard and the one-surface home journey passed 1280×720 Browser and Playwright acceptance. The plan panel (ADR-0043) distinguishes loading (skeleton with `aria-busy`), failed (with a working retry) and empty, and the three overlays behave as dialogs: Escape from anywhere, focus moved in and restored, Tab trapped, background locked. Remaining: degraded-state coverage beyond price provenance, and a wider accessibility pass |
-| Operations and maintainability | Partial | The console at `/ops` (decision ADR-0047, amending ADR-0031): fixed admin accounts from `ADMIN_ACCOUNTS` sign in through the same login page; overview charts, task records, service health with live checks, debugging replays (agent and planning, with parser or planner overrides, compared side by side), experiments and runtime settings (a registry stored in the database, change history, developer evaluation runs and A/B), users, and catalog data (recipes, ingredient names and aliases, product mappings; allergens view only). Every change writes an audit row. Remaining: a durable worker, and runtime settings the product does not read yet (they are labelled "Stored only" in the console) |
+| Operations and maintainability | Partial | The console at `/ops` (decision ADR-0047, amending ADR-0031): fixed admin accounts from `ADMIN_ACCOUNTS` sign in through the same login page; overview charts, task records, service health with live checks, debugging replays (agent and planning, with parser or planner overrides, compared side by side), experiments and runtime settings (a registry stored in the database, change history, developer evaluation runs and A/B), users, and catalog data (recipes, ingredient names and aliases, product mappings; allergens view only). Every change writes an audit row. The PostgreSQL worker, fenced leases, bounded retries, idempotent enqueue and cancellation are integrated, with database race tests. Remaining: additional registered business handlers and runtime settings the product does not read yet (they are labelled "Stored only" in the console) |
 
 ## Backend Capability Traceability
 
@@ -289,7 +293,7 @@ the next incomplete control. It is a navigation aid, not a second status source.
 | Account and session security | Alembic revisions `20260906_0010` and `20260908_0012`; authentication service and routes; password, session and CSRF tests | Out of scope by the owner's decision (2026-09-26, no deployment): email verification, password reset/change, rate limiting and account lifecycle are not planned |
 | Household tenancy | Alembic revision `20260916_0014`; current-household route dependency; household-scoped repositories; private-route authentication and cross-household integration tests | A wider isolation matrix is out of scope by owner decision (ADR-0051); existing tests stay |
 | Household authorization | `backend/app/auth/authorization.py`; action dependencies on the Profile, Plan, Check-in and Agent routes; owner/editor/member/viewer and CSRF-ordering tests in `backend/tests/test_backend_platform.py` | Member-management routes (`MANAGE_MEMBERS`) are out of scope by the owner's decision |
-| Operations and Console | `OperationRun` and `AuditEvent` persistence; `/api/ops/*` routes and services; migrations `20260927_0023` (runtime settings) and `20260928_0025` (catalog edits); `backend/tests/test_operations_*.py`; the `/ops` pages | Durable worker |
+| Operations and Console | `OperationRun` and `AuditEvent` persistence; `/api/ops/*` routes and services; migrations `20260927_0023` (runtime settings) and `20260928_0025` (catalog edits); `backend/tests/test_operations_*.py`; the `/ops` pages | Registered handlers only; cancellation cannot roll back an already committed import |
 
 ## Current Priorities
 
@@ -307,8 +311,8 @@ the next incomplete control. It is a navigation aid, not a second status source.
 3. Complete nutrition-target and elastic-preference semantics and evidence.
 4. Test FairPrice live/cache/fixture degradation against real changes.
 5. Wire the remaining ADR-0033 packets (P3, and the offline P5-P7 modules) into
-   the product path and build P8, without overstating global optimality or
-   infeasibility.
+   the product path, then extend the implemented P8 developer diagnostics to
+   the integrated path without overstating global optimality or infeasibility.
 6. Extend the merged synchronous `AgentRun` into asynchronous pause/resume/retry
    with bounded external-tool adapters, then build an independent held-out
    orchestration set. The live-model arms have already run on the v2-multidish
