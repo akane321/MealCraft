@@ -207,14 +207,19 @@ test("an administrator signs in, reads the overview, opens a task and runs a liv
   await expect(page.getByRole("heading", { name: "Recipes, ingredients and product mappings" })).toBeVisible();
 });
 
-test("a data reviewer can inspect the job queue but cannot operate it", async ({ page }) => {
-  await stubConsole(page, "data_reviewer");
-  await signIn(page);
+for (const role of ["data_reviewer", "operator"]) {
+  test(`a legacy ${role} account cannot enter the administrator console`, async ({ page }) => {
+    await stubConsole(page, role);
+    await signIn(page);
+    await expect(page.getByRole("alert")).toContainText("this account is not an administrator");
+    await expect(page).toHaveURL(/\/login/);
 
-  await page.getByRole("navigation", { name: "Console" }).getByRole("link", { name: "Tasks" }).click();
-  await expect(page.getByText("Your console role can inspect jobs but cannot queue or cancel them.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Queue catalog import" })).toHaveCount(0);
-});
+    await page.goto("/ops/tasks");
+    await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);
+    await expect(page.getByRole("navigation", { name: "Console" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Queue catalog import" })).toHaveCount(0);
+  });
+}
 
 test("a household account is told plainly it is not an administrator and kept out of /ops", async ({ page }) => {
   await stubConsole(page, "ordinary_user");
