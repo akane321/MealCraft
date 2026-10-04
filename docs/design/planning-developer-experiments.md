@@ -68,10 +68,10 @@ policy, not mixed-package purchasing. See the [purchasing comparison](planning-p
 
 Final-gate and feedback on/off comparisons are separate experiments gathered by
 [the suite](planning-experiment-suite.md). Ranking remains off in the five
-component conditions. Console integration is a separate consumer task. No product route exposes a validation bypass. The
-console owner can later call `run_experiments` with a validated developer dataset
-and retain the returned conditions and artifacts; no console schema, runtime
-setting or database table changes in this slice.
+component conditions. The Operations worker calls the v2 runner for the fixed
+single-dish component fixture, retaining its conditions and complete report.
+The composed component fixture and feedback replay remain available through the
+CLI suite, not this Console registry. No product route exposes a validation bypass.
 
 The complete P8 target remains in [Planning and Validation](planning-validation-v2.md#p8--evidence).
 The reporting and split rules remain in [comparative evaluation](comparative-evaluation-v2.md).

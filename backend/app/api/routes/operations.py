@@ -23,6 +23,8 @@ from app.schemas.operations import (
     DataCourse,
     DataMealType,
     ExperimentCollection,
+    ExperimentComparison,
+    ExperimentDetail,
     ExperimentRequest,
     ExperimentRun,
     OperationsOverviewResponse,
@@ -65,8 +67,9 @@ from app.services.operation_jobs import (
 )
 from app.services.operations import OperationsService
 from app.services.ops_data import DataService, OpsDataConflictError, OpsDataNotFoundError
+from app.services.ops_planning_experiments import PLANNING_EXPERIMENTS, PlanningExperimentService
 from app.services.ops_replay import ReplayNotFoundError, ReplayService, ReplayUnavailableError
-from app.services.ops_settings import SettingsService
+from app.services.ops_settings import ExperimentNotFoundError, SettingsService, experiment_view
 from app.services.ops_users import OpsUserConflictError, OpsUserNotFoundError, UsersService
 
 router = APIRouter(prefix="/ops", tags=["operations"])
@@ -326,15 +329,73 @@ def list_experiments(
     return SettingsService(database, settings).experiments(limit)
 
 
+@router.get("/experiments/compare", response_model=ExperimentComparison)
+def compare_experiments(
+    ids: Annotated[str, Query(min_length=3, max_length=80)],
+    current: CurrentOperationsViewDependency,
+    database: DatabaseDependency,
+    settings: SettingsDependency,
+) -> ExperimentComparison:
+    del current
+    try:
+        run_ids = [int(item.strip()) for item in ids.split(",")]
+        return SettingsService(database, settings).compare_experiments(run_ids)
+    except (ValueError, ExperimentNotFoundError) as error:
+        if isinstance(error, ExperimentNotFoundError):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Experiment not found") from error
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
+
+
+@router.get("/experiments/{run_id}", response_model=ExperimentDetail)
+def get_experiment(
+    run_id: int,
+    current: CurrentOperationsViewDependency,
+    database: DatabaseDependency,
+    settings: SettingsDependency,
+) -> ExperimentDetail:
+    del current
+    try:
+        return SettingsService(database, settings).experiment(run_id)
+    except ExperimentNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Experiment not found") from error
+
+
 @router.post("/experiments", response_model=ExperimentRun)
 def run_experiment(
     payload: ExperimentRequest,
+    response: Response,
     current: CurrentOperationsWriteDependency,
     database: DatabaseDependency,
     settings: SettingsDependency,
+    idempotency_key: Annotated[
+        str | None,
+        Header(
+            alias="Idempotency-Key",
+            max_length=120,
+            pattern=r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,119}$",
+        ),
+    ] = None,
 ) -> ExperimentRun:
     try:
+        if payload.evaluation in PLANNING_EXPERIMENTS:
+            if not idempotency_key:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail="Idempotency-Key is required for planning experiments",
+                )
+            result = PlanningExperimentService(database, actor_user_id=current.user.id).enqueue(
+                payload,
+                idempotency_key=idempotency_key,
+            )
+            if result.created:
+                response.status_code = status.HTTP_201_CREATED
+            return experiment_view(result.run)
         return SettingsService(database, settings).run_experiment(payload, actor_user_id=current.user.id)
+    except JobIdempotencyConflictError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Idempotency key was already used for different input",
+        ) from error
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
 

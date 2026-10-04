@@ -11,8 +11,16 @@ from app.core.paths import repository_root
 from app.data.catalog import import_catalog, load_catalog
 from app.data.release_v2 import import_release_v2
 from app.schemas.operation_jobs import CatalogImportArguments
+from app.worker.planning_experiments import PlanningExperimentJobPayload, run_planning_experiment_handler
 
-Handler = Callable[[dict, str], None]
+
+@dataclass(frozen=True)
+class HandlerContext:
+    run_id: int
+    attempt_count: int
+
+
+Handler = Callable[[dict, str, HandlerContext], None]
 
 
 @dataclass(frozen=True)
@@ -50,7 +58,8 @@ class JobHandlerRegistry:
         return PreparedHandler(handler=spec.handler, payload=normalized)
 
 
-def import_catalog_handler(payload: dict, database_url: str) -> None:
+def import_catalog_handler(payload: dict, database_url: str, context: HandlerContext) -> None:
+    del context
     request = CatalogImportArguments.model_validate(payload)
     engine = create_engine(database_url, pool_pre_ping=True)
     try:
@@ -74,6 +83,10 @@ def production_registry() -> JobHandlerRegistry:
             "catalog_import": HandlerSpec(
                 payload_model=CatalogImportArguments,
                 handler=import_catalog_handler,
-            )
+            ),
+            "planning_experiment": HandlerSpec(
+                payload_model=PlanningExperimentJobPayload,
+                handler=run_planning_experiment_handler,
+            ),
         }
     )
