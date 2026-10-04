@@ -46,9 +46,15 @@
 
 Closes #
 
-## 共享记忆
+## 知识库记录（必填，最高优先级）
 
-- [ ] 本 PR 属于 L0，不需要记忆回写
-- [ ] 已运行 MealCraft-Knowledge preflight，并在完成后生成任务历史
-- [ ] 若改变 MVP、架构、数据口径或评价策略，已新增/更新 ADR
+<!-- 与本 PR 同时在 MealCraft-Knowledge 开配对 PR，在下一行写出它的完整链接。没有链接，CI 的 knowledge-record 检查会失败。只有 Dependabot 和原样回退豁免。 -->
+
+知识库 PR：
+
+- [ ] 配对的知识库 PR 与本 PR 同时开出，两边互相链接
+- [ ] 任务记录写了思路（Approach and reasoning）：做法、理由、没采用的其他做法
+- [ ] 任务记录写了方向核对（Direction check）：约束这次工作的 ADR、需求和 owner 决定，以及是否一致
+- [ ] 发现的冲突已交给 owner 或写进 `OPEN_QUESTIONS.md`；新的 owner 决定已在同一个知识库 PR 里写成 ADR
+- [ ] 评审改动了本 PR 的实质内容时，知识库 PR 已同步更新
 - [ ] 未把私有知识库内容、真实健康数据或课程原始文件复制到公开仓库

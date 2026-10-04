@@ -2,6 +2,25 @@
 
 This public repository contains source code. The private sibling repository `MealCraft-Knowledge` is the shared project-memory authority for accepted decisions, course requirements, current state, risks, and task history.
 
+## Highest-priority rule: every pull request opens with its knowledge record
+
+This applies to every agent, whichever model it runs (Codex/GPT, Claude, Gemini
+or any other), and to people working through one. Whenever you open a pull
+request here, open in the same task, before asking for review or merge, a pull
+request on the private `MealCraft-Knowledge` repository that adds this work's
+task record, and link the two: this pull request's body names the knowledge pull
+request, and the record's `project_pr` names this one. The record must state the
+approach and why (with the alternatives not taken) and a direction check against
+the accepted decisions, requirements and owner decisions that govern the work; a
+conflict is raised with the owner or recorded as an open question, never settled
+silently in code. Update the knowledge pull request when review changes this one
+materially. Only Dependabot updates and unchanged reverts are exempt.
+
+CI (`.github/workflows/knowledge-record.yml`) fails a pull request whose body
+does not link a `MealCraft-Knowledge` pull request. The full rule and its
+reasons are decision ADR-0053 and section 0 of the knowledge repository's
+`AGENTS.md`; this section does not restate more than you need to act.
+
 ## Required public reading order
 
 Before reasoning about a material change, read:
@@ -189,5 +208,5 @@ contracts, setup, final direction, or evaluation semantics change.
 1. Run verification proportional to risk.
 2. Run `<knowledge-root>\scripts\memory-finalize.ps1` to generate a task record.
 3. Update `CURRENT_STATE.md` only for verified behavior merged to remote `main`; create an ADR for L2/L3 decisions.
-4. Validate and submit knowledge changes through a separate `memory/*` branch and PR.
+4. Validate and submit knowledge changes through a separate `memory/*` branch and PR, opened together with the code pull request and linked both ways (see the highest-priority rule above), not after the merge.
 5. Do not automatically push, merge, or rewrite Git history unless the user explicitly authorizes it.

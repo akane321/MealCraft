@@ -255,6 +255,13 @@ Open a pull request into `main`, complete the template, link the Issue with
 `Closes #<number>`, describe verification and limitations, attach screenshots
 for visible changes, and request teammate review.
 
+At the same time, before requesting review, open the paired pull request on the
+private `MealCraft-Knowledge` repository with this work's task record (its
+approach and reasoning, and its direction check against accepted decisions), and
+put its link in this pull request's body. CI fails a pull request without that
+link; only Dependabot updates and unchanged reverts are exempt. See the
+highest-priority rule in [AGENTS.md](AGENTS.md).
+
 ## 11. Definition of Done
 
 A change is complete only when:
