@@ -63,7 +63,9 @@ class FinalPlanningValidator:
                 policy_version=problem.policy_version,
             )
         checks, meals = self.assignment_checks(problem, assignments)
-        assignment_checks_passed = not checks
+        # Only a hard verdict leaves the dishes, and so the cost, in doubt; a soft one (a dish outside its usual
+        # meal types) is reported and the week priced all the same.
+        assignment_checks_passed = not any(check.hard for check in checks)
         checks.extend(diversity_checks(problem, meals))
         checks.extend(
             self._failed("repetition_rule", problem_text)
