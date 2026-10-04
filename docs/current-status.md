@@ -36,8 +36,9 @@ dinner; default dinner only) and each meal's dishes (default one main and an
 optional vegetable dish), and `MealBeamPlanner` fills every (day, meal) slot. `PLANNING_CAPABILITY`
 defaults to `full`; `mvp` (one dinner dish a day) remains for reproducing the
 recorded evaluations. The candidate recipes are kept in memory for five minutes
-(`PLANNING_POOL_CACHE_SECONDS`), so a week on the real catalog takes about 7 s in
-the local Docker stack and a change to it 0.1–5 s.
+(`PLANNING_POOL_CACHE_SECONDS`). Earlier local Docker timings are historical;
+the integrated search changes need a new timed walkthrough on the intended
+machine before claiming current response times.
 
 Of ADR-0033's packets, P1 (product path), P2 ([conflict explanations](design/planning-conflict-explanation.md))
 and P4 ([nutrition scope](design/planning-nutrition-scope.md)) are wired into the product.
@@ -303,8 +304,9 @@ the next incomplete control. It is a navigation aid, not a second status source.
    remaining mechanisms (a weekday-only shape request read as every day; a budget
    week and a no-repeat week refused although feasible) were fixed on new developer
    episodes (#201, #202) and are not measured on that set. A held-out score needs a
-   fresh set. Composed-meal plans answer within the
-   10-second target (ADR-0046 section 3).
+   fresh set. Composed-meal plans retain the 10-second target (ADR-0046 section 3);
+   rerun the timed walkthrough after integrated search changes before asserting
+   that the current build meets it.
 2. Prepare the Sprint 1 demonstration in OpenAI parser mode with rule fallback.
    Security and privacy hardening is out of scope (the course does not require
    deployment).
