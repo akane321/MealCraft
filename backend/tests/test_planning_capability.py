@@ -818,8 +818,8 @@ def test_only_a_change_that_costs_more_is_said_to_put_the_week_over_its_budget(c
 
 
 def test_a_change_on_a_week_of_two_meals_a_day_goes_over_by_the_cheapest_week(monkeypatch):
-    """Lunch and dinner every day, the budget just fits; then dinners with a soup. Seven soups, one package
-    each (S$1.85 to S$2.75): the cheapest change is one soup all week, S$1.85 over. A repeat is charged one
+    """Lunch and dinner every day, a tight budget; then dinners with a soup. Seven soups, one package
+    each (S$1.85 to S$2.75): the cheapest change is one soup all week, costing S$1.85 more. A repeat is charged one
     meal's share of the budget, as the week's own planning charges it; charged a day's share (twice as much
     on two meals a day), seven different soups looked cheapest and the change went S$15.95 over."""
     from datetime import date, timedelta
@@ -857,7 +857,10 @@ def test_a_change_on_a_week_of_two_meals_a_day_goes_over_by_the_cheapest_week(mo
     assert preview.status_code == 201, preview.text
     added = preview.json()["shape_change"]["added"]
     assert {d["recipe_slug"] for d in added if d["role_id"] == "soup"} == {"chickpea-soup"}
-    assert preview.json()["over_budget_sgd"] == 1.85
+    assert preview.json()["purchase_total_delta_sgd"] == 1.85
+    # Budgeted planning can leave a little room compared with the unbudgeted week's price.
+    # The soup still costs one whole package; only the part beyond the stated budget is "over".
+    assert preview.json()["over_budget_sgd"] == round(plan["grocery_estimate"]["purchase_total_sgd"] + 1.85 - budget, 2)
 
 
 def test_a_change_with_cheap_lunches_left_still_charges_a_repeat_one_meals_share(monkeypatch):
