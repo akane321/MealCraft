@@ -164,7 +164,12 @@ def lunch_on_friday(shape: MealPlanShape, course: str) -> SimpleNamespace:
 
 
 MAIN_AND_SIDE_LUNCHES = MealPlanShape.model_validate(
-    {"meals": {"lunch": MEAL_PRESETS["lunch"]["main and vegetable"], "dinner": MEAL_PRESETS["dinner"]["main and vegetable"]}}
+    {
+        "meals": {
+            "lunch": MEAL_PRESETS["lunch"]["main and vegetable"],
+            "dinner": MEAL_PRESETS["dinner"]["main and vegetable"],
+        }
+    }
 )
 
 
