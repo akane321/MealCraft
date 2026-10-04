@@ -8,6 +8,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
+from app.agent import model_client
 from app.core.config import Settings
 from app.core.runtime_config import runtime_value
 from app.models.agent import AgentRun, AgentSession
@@ -220,11 +221,12 @@ class OperationsService:
         since = datetime.now(UTC) - timedelta(days=SERVICE_WINDOW_DAYS)
         settings = self.settings
 
-        # OpenAI: agent runs whose recorded parser was openai; a degraded run fell back.
+        # OpenAI: agent runs whose recorded parser was openai, the model requests each sent, and whether one
+        # failed and the run went on without the model.
         openai_runs = [
-            status
-            for _, status, config in self.repository.created_rows(
-                AgentRun, AgentRun.status, AgentRun.model_config, since=since
+            (status, used_llm_calls, bool((config or {}).get("model_fell_back")))
+            for _, status, config, used_llm_calls in self.repository.created_rows(
+                AgentRun, AgentRun.status, AgentRun.model_config, AgentRun.used_llm_calls, since=since
             )
             if (config or {}).get("parser") == "openai"
         ]
@@ -254,10 +256,18 @@ class OperationsService:
                     f" model {settings.openai_model}",
                     recent=OperationsServiceRecent(
                         window_days=SERVICE_WINDOW_DAYS,
-                        calls=len(openai_runs),
-                        failures=sum(status == "failed" for status in openai_runs),
-                        fallbacks=sum(status == "degraded" for status in openai_runs),
+                        runs=len(openai_runs),
+                        model_calls=sum(calls for _, calls, _ in openai_runs),
+                        failures=sum(status == "failed" for status, _, _ in openai_runs),
+                        fallbacks=sum(fell_back for _, _, fell_back in openai_runs),
                     ),
+                    note="Runs are assistant runs recorded while the OpenAI parser was selected: turns, plan"
+                    " confirmations and discards alike. Model calls are the requests those runs sent to OpenAI"
+                    " (chat and embeddings, retries included). A fallback is a run that went on without the model"
+                    " after a request failed: the rules read the message, or shared words stood in for embeddings."
+                    f" Not in these figures: {model_client.unrecorded_requests()} model calls sent since the"
+                    " backend started that no run records (console replays, swap previews asked of the plan API"
+                    " directly).",
                 ),
                 OperationsServiceStatus(
                     name="fairprice",
@@ -266,10 +276,11 @@ class OperationsService:
                     mode="fixture prices unless a plan asks for live prices",
                     recent=OperationsServiceRecent(
                         window_days=SERVICE_WINDOW_DAYS,
-                        calls=len(live_runs),
+                        runs=len(live_runs),
                         failures=sum(status == "failed" for status, _ in live_runs),
                         fallbacks=sum("fairprice" not in sources for _, sources in live_runs),
                     ),
+                    note="Runs are plans that asked for live prices; a fallback is one priced without FairPrice.",
                 ),
                 OperationsServiceStatus(
                     name="youtube",
@@ -435,7 +446,7 @@ def _agent_detail(run: AgentRun) -> OperationsTaskDetail:
             "deadline_at": run.deadline_at,
             "duration_seconds": _duration(run.started_at, run.completed_at),
             "termination_reason": run.termination_reason_code,
-            "llm_calls": f"{run.used_llm_calls} of {run.max_llm_calls}",
+            "model_calls": f"{run.used_llm_calls} of {run.max_llm_calls}",
             "tool_calls": f"{run.used_tool_calls} of {run.max_tool_calls}",
             "planning_attempts": f"{run.used_planning_attempts} of {run.max_planning_attempts}",
             "retrieval_retries": f"{run.used_retrieval_retries} of {run.max_retrieval_retries}",

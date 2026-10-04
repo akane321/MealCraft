@@ -1,0 +1,15 @@
+# A demonstration run: the frontend as a production build (no Nuxt DevTools badge over the page, no page
+# compiled on its first visit); everything else as in compose.yaml. See docs/development.md.
+#
+#   docker compose -f compose.yaml -f compose.demo.yaml up --build --detach
+#
+# `docker compose up --detach` goes back to the dev server.
+services:
+  frontend:
+    # Its own image: tagged like the dev one, the next plain `docker compose up` would run this build with the
+    # source mounted over it, and `docker compose run --rm frontend pnpm ...` would find no pnpm.
+    image: mealcraft-frontend-demo
+    build:
+      target: demo
+    # The production server reads its own build, not the source: no bind mount, no dev volumes.
+    volumes: !reset []
