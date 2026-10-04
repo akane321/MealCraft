@@ -29,7 +29,9 @@ PLANNING_EXPERIMENT_REQUEST = {
 
 
 @pytest.fixture
-def job_client() -> Generator[tuple[TestClient, sessionmaker], None, None]:
+def job_client(monkeypatch) -> Generator[tuple[TestClient, sessionmaker], None, None]:
+    # Synthetic evidence must not depend on whether this test runs in a Git checkout or a Docker image.
+    monkeypatch.setenv("CODE_COMMIT", "0123456789abcdef0123456789abcdef01234567")
     engine = create_engine(
         "sqlite+pysqlite://",
         connect_args={"check_same_thread": False},
