@@ -216,31 +216,6 @@ class AgentSessionRepository:
         self.session.commit()
         return self.get(session_id)
 
-    def create_for_plan(self, *, provider: str, constraints: AgentConstraintState, plan_id: int) -> AgentSession:
-        """An empty conversation that changes the household's week `plan_id`."""
-        agent_session = AgentSession(
-            household_id=self.household_id, parser_provider=provider, constraints=constraints.model_dump(mode="json")
-        )
-        self.session.add(agent_session)
-        self.session.flush()
-        return self.attach_plan(agent_session.id, plan_id=plan_id) or agent_session
-
-    def attach_plan(self, session_id: int, *, plan_id: int) -> AgentSession | None:
-        """The conversation becomes the one that changes `plan_id`, as if it had planned it; whatever it
-        was still asking to plan a week of its own is dropped."""
-        agent_session = self.get(session_id)
-        if agent_session is None:
-            return None
-        agent_session.status = "planned"
-        agent_session.plan_id = plan_id
-        agent_session.missing_fields = []
-        agent_session.clarification_questions = []
-        agent_session.pending_interaction = None
-        agent_session.replan_draft = {}
-        agent_session.pending_event_id = None
-        self.session.commit()
-        return self.get(session_id)
-
     def append_replan_exchange(
         self,
         session_id: int,
