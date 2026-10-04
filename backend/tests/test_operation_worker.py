@@ -138,24 +138,38 @@ def test_timeout_is_retried_only_to_the_attempt_limit(worker_database) -> None:
         assert (second.status, second.attempt_count, second.error_code) == ("failed", 2, "job_timeout")
 
 
-def test_heartbeat_keeps_a_slow_attempt_owned(worker_database) -> None:
+def test_heartbeat_keeps_a_slow_attempt_owned(worker_database, monkeypatch) -> None:
     database_url, factory = worker_database
-    run_id = _enqueue(factory, suffix="c-heartbeat", run_type="sleep", payload={"seconds": 0.5})
+    run_id = _enqueue(factory, suffix="c-heartbeat", run_type="sleep", payload={"seconds": 1.5})
     registry = JobHandlerRegistry({"sleep": HandlerSpec(payload_model=SleepPayload, handler=sleep_handler)})
 
-    assert _worker(
+    # Spawn imports share the timeout with the handler, so don't make this a three-second
+    # startup benchmark on a loaded CI container. The handler still exceeds the initial
+    # lease, and successful renewals are observed explicitly; timeout fencing has its own test.
+    worker = _worker(
         database_url,
         factory,
         registry=registry,
-        timeout=3,
-        lease=0.25,
-        heartbeat=0.05,
-    ).run_once()
+        timeout=30,
+        lease=1,
+        heartbeat=0.1,
+    )
+    renewals = []
+    renew = worker._renew
+
+    def observed_renewal(claim):
+        result = renew(claim)
+        renewals.append(result)
+        return result
+
+    monkeypatch.setattr(worker, "_renew", observed_renewal)
+    assert worker.run_once()
+    assert renewals and all(renewals)
 
     with factory() as session:
         run = session.get(OperationRun, run_id)
         assert run is not None
-        assert (run.status, run.attempt_count, run.lease_expires_at) == ("succeeded", 1, None)
+        assert (run.status, run.attempt_count, run.lease_expires_at) == ("succeeded", 1, None), run.error_code
 
 
 def test_stopped_worker_leaves_job_for_lease_reclaim(worker_database) -> None:
