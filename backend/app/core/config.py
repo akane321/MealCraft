@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -41,12 +41,23 @@ class Settings(BaseSettings):
     auth_login_lock_minutes: int = Field(default=15, ge=1, le=1440)
     # ADR-0047: fixed console accounts, "email:password:Display Name;..." created or updated at start-up.
     admin_accounts: str = ""
+    ops_worker_poll_seconds: float = Field(default=1.0, gt=0, le=60)
+    ops_worker_lease_seconds: float = Field(default=30.0, gt=0, le=3600)
+    ops_worker_heartbeat_seconds: float = Field(default=10.0, gt=0, le=1200)
+    ops_worker_job_timeout_seconds: float = Field(default=900.0, gt=0, le=21600)
+    ops_worker_max_attempts: int = Field(default=3, ge=1, le=20)
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+    @model_validator(mode="after")
+    def validate_worker_timing(self) -> "Settings":
+        if self.ops_worker_heartbeat_seconds >= self.ops_worker_lease_seconds:
+            raise ValueError("ops worker heartbeat must be shorter than its lease")
+        return self
 
     @property
     def effective_auth_cookie_secure(self) -> bool:
