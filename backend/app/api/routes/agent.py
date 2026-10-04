@@ -36,6 +36,7 @@ from app.schemas.agent import (
     AgentSessionResponse,
 )
 from app.services.agent import (
+    AgentPlanNotFoundError,
     AgentSessionNotFoundError,
     AgentSessionNotReadyError,
     AgentSessionService,
@@ -122,7 +123,11 @@ def create_agent_session(
     _current: CurrentHouseholdCreatePlanCsrfDependency,
 ) -> AgentSessionResponse:
     try:
-        return service.create(payload.message)
+        return service.create(payload.message, plan_id=payload.plan_id)
+    except AgentPlanNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Meal plan not found") from error
+    except AgentSessionNotReadyError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
     except AgentRunLifecycleError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
@@ -152,9 +157,11 @@ def reply_to_agent_session(
     idempotency_key: IdempotencyKey = None,
 ) -> AgentSessionResponse:
     try:
-        return service.reply(session_id, payload.message, idempotency_key=idempotency_key)
+        return service.reply(session_id, payload.message, idempotency_key=idempotency_key, plan_id=payload.plan_id)
     except AgentSessionNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
+    except AgentPlanNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Meal plan not found") from error
     except AgentSessionNotReadyError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
     except AgentRunLifecycleError as error:

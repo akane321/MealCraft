@@ -7,6 +7,7 @@ from app.schemas.meal_plan import MealPlanShape, WeeklyMealPlanResponse
 from app.schemas.planning_v2 import MealComposition, PlanningMealRole
 from app.schemas.product import PricingMode
 from app.schemas.recommendation import (
+    NO_COOKING_TIME_LIMIT,
     AvailableIngredientInput,
     DietaryPreference,
     HealthPreference,
@@ -49,7 +50,8 @@ class HouseholdMemberInput(BaseModel):
 class HouseholdProfileWrite(BaseModel):
     name: str = Field(default="My household", min_length=1, max_length=120)
     members: list[HouseholdMemberInput] = Field(min_length=1, max_length=12)
-    max_cooking_time_minutes: int = Field(default=60, ge=5, le=240)
+    # Only what the household states is a constraint: an unstated limit is no limit.
+    max_cooking_time_minutes: int = Field(default=NO_COOKING_TIME_LIMIT, ge=5, le=240)
     budget_per_meal_sgd: float | None = Field(default=None, gt=0, le=1000)
     weekly_budget_sgd: float | None = Field(default=None, gt=0, le=7000)
     health_preferences: list[HealthPreference] = Field(default_factory=list, max_length=3)
