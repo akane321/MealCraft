@@ -332,6 +332,7 @@ def test_experiments_run_developer_sets_under_a_recorded_configuration(console) 
     planning = client.post(
         "/api/ops/experiments",
         json={"evaluation": "developer-planning", "label": "greedy", "overrides": {"planner": "greedy-baseline"}},
+        headers={"Idempotency-Key": "legacy-planning"},
     )
     assert planning.status_code == 200
     planning = planning.json()
@@ -344,21 +345,44 @@ def test_experiments_run_developer_sets_under_a_recorded_configuration(console) 
     assert len(planning["conditions"]["parameter_digest"]) == 64
     assert (planning["conditions"]["seed"], planning["conditions"]["repeats"]) == (0, 1)
 
-    agent = client.post("/api/ops/experiments", json={"evaluation": "agent-benchmark"}).json()
+    agent = client.post(
+        "/api/ops/experiments",
+        json={"evaluation": "agent-benchmark"},
+        headers={"Idempotency-Key": "legacy-agent"},
+    ).json()
     assert agent["status"] == "succeeded"
     assert agent["metrics"]["case_count"] > 0
 
     listed = client.get("/api/ops/experiments").json()
     assert [item["id"] for item in listed["items"]] == [agent["id"], planning["id"]]
-    assert {item["name"] for item in listed["evaluations"]} == {"developer-planning", "agent-benchmark"}
+    assert {item["name"] for item in listed["evaluations"]} == {
+        "developer-planning",
+        "agent-benchmark",
+        "planning-components",
+        "planning-final-gate",
+        "planning-final-gate-composed",
+    }
+    assert {item["execution_mode"] for item in listed["evaluations"]} == {"legacy_inline", "durable_worker"}
     assert "heldout" not in str(listed["evaluations"])
 
-    assert client.post("/api/ops/experiments", json={"evaluation": "heldout-planning"}).status_code == 422
-    unknown = client.post("/api/ops/experiments", json={"evaluation": "agent-benchmark", "overrides": {"api_key": "x"}})
+    assert (
+        client.post(
+            "/api/ops/experiments",
+            json={"evaluation": "heldout-planning"},
+            headers={"Idempotency-Key": "heldout"},
+        ).status_code
+        == 422
+    )
+    unknown = client.post(
+        "/api/ops/experiments",
+        json={"evaluation": "agent-benchmark", "overrides": {"api_key": "x"}},
+        headers={"Idempotency-Key": "unknown-setting"},
+    )
     assert unknown.status_code == 422
     live = client.post(
         "/api/ops/experiments",
         json={"evaluation": "agent-benchmark", "overrides": {"agent_parser_provider": "openai"}},
+        headers={"Idempotency-Key": "paid-legacy"},
     )
     assert live.status_code == 422
     assert "OPENAI_API_KEY" in live.json()["detail"]

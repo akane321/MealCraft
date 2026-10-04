@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.schemas.platform import OperationStatus
 
@@ -219,14 +219,49 @@ class RuntimeSettingHistory(BaseModel):
     items: list[RuntimeSettingHistoryItem]
 
 
-ExperimentName = Literal["developer-planning", "agent-benchmark"]
+LegacyExperimentName = Literal["developer-planning", "agent-benchmark"]
+PlanningExperimentName = Literal[
+    "planning-components",
+    "planning-final-gate",
+    "planning-final-gate-composed",
+]
+ExperimentName = LegacyExperimentName | PlanningExperimentName
+
+
+class PlanningExperimentParameters(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    repeats: int = Field(default=1, ge=1, le=20)
+    width: int = Field(default=32, ge=1, le=1000)
+    max_expansions: int = Field(default=10_000, ge=1, le=1_000_000)
+    repair_rounds: int | None = Field(default=None, ge=0, le=10)
 
 
 class ExperimentRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     evaluation: ExperimentName
     label: str | None = Field(default=None, max_length=80)
-    # Registered runtime keys and evaluation options that differ from the current configuration.
     overrides: dict[str, Any] = Field(default_factory=dict)
+    parameters: PlanningExperimentParameters | None = None
+    confirm: bool | None = None
+
+    @model_validator(mode="after")
+    def validate_execution_mode(self):
+        if self.evaluation.startswith("planning-"):
+            if self.confirm is not True:
+                raise ValueError("planning experiments require explicit confirmation")
+            if self.overrides:
+                raise ValueError("planning experiments accept only registered parameters")
+            parameters = self.parameters or PlanningExperimentParameters()
+            if self.evaluation != "planning-components" and (
+                parameters.repeats != 1 or parameters.repair_rounds is not None
+            ):
+                raise ValueError("final-gate experiments use one repeat and no repair setting")
+            self.parameters = parameters
+        elif self.parameters is not None:
+            raise ValueError("legacy evaluations do not accept planning parameters")
+        return self
 
 
 class ExperimentRun(BaseModel):
@@ -241,6 +276,48 @@ class ExperimentRun(BaseModel):
     error: str | None
     created_at: datetime
     duration_seconds: float | None
+
+
+class ExperimentReproducibility(BaseModel):
+    complete: bool
+    citation_allowed: bool
+    claim_scope: str
+    missing: list[str]
+    warnings: list[str]
+
+
+class ExperimentDetail(ExperimentRun):
+    reproducibility: ExperimentReproducibility
+    report: dict[str, Any] | None
+
+
+class ExperimentComparisonRow(BaseModel):
+    key: str
+    a: Any = None
+    b: Any = None
+    delta: float | None = None
+    matches: bool | None = None
+
+
+class ExperimentCaseDifference(BaseModel):
+    case_id: str
+    condition: str
+    a_status: str | None
+    b_status: str | None
+    failures_gained: list[str]
+    failures_lost: list[str]
+
+
+class ExperimentComparison(BaseModel):
+    runs: list[ExperimentRun]
+    compatible: bool
+    reasons: list[str]
+    evidence: list[ExperimentComparisonRow]
+    configurations: list[ExperimentComparisonRow]
+    metrics: list[ExperimentComparisonRow]
+    failure_mechanisms: list[ExperimentComparisonRow]
+    case_differences: list[ExperimentCaseDifference]
+    claim_scope: str
 
 
 class ExperimentCollection(BaseModel):

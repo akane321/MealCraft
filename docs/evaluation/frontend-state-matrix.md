@@ -14,9 +14,9 @@ critical browser path against an isolated test backend or the local stack.
 | Home: shopping sheet | — | — | printable preview, Export PDF | — | sample prices and allergen caveat printed |
 | Replanning preview (in conversation) | previewing | no pending change | before/after with calorie and grocery deltas | invalid or stale change rejected | explicit confirm before persistence |
 | Household profile | current profile loading | editable new household with no limit, budget, target or health preference filled in | saved version and planning action | validation/API message | allergies limited to the checked list, separated from health preferences |
+| Operations experiments | evaluations, history or evidence drawer loading | no recorded run / no failed case | confirmed job moves queued → running → completed; evidence opens; comparable A/B runs expose parameters, metrics and failure mechanisms | queue, refresh or detail error remains actionable; incompatible runs explain why their delta is not interpreted | fixed developer registry only; held-out and paid providers unavailable; legacy inline entries labelled; developer diagnostics never presented as final claims |
 | Operations: catalog jobs | queue refreshing | no recorded catalog jobs | named source queued, live status and attempt count | last recorded state retained with retry | administrators confirm writes; legacy roles cannot enter; only queued/running jobs can be cancelled |
 | Operations: data quality | report loading | release evidence unavailable | release coverage, manifest and dropped-candidate evidence | missing or invalid artifact shown as degraded | separate released, imported and planner-eligible counts; field completeness is not independent truth verification |
-| Operations: recorded experiments | registry/history/detail loading | no completed evidence to compare | bounded developer job, stored conditions, compatible comparison | failed/cancelled job or unavailable artifact explained | administrator plus CSRF; no client dataset paths, paid providers or held-out tuning; mismatched conditions block numeric deltas |
 
 ## Critical task flow
 

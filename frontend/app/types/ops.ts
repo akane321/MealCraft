@@ -170,9 +170,21 @@ export interface OpsRuntimeSetting {
 
 export interface OpsSettingChange { key: string; before: unknown; after: unknown; actor: string | null; created_at: string }
 
-export type OpsEvaluationName = "developer-planning" | "agent-benchmark";
+export type OpsEvaluationName =
+  | "developer-planning"
+  | "agent-benchmark"
+  | "planning-components"
+  | "planning-final-gate"
+  | "planning-final-gate-composed";
 
-export interface OpsEvaluation { name: OpsEvaluationName; label: string; description: string; dataset: string; options: Record<string, string[]> }
+export interface OpsEvaluation {
+  name: OpsEvaluationName;
+  label: string;
+  description: string;
+  dataset: string;
+  options: Record<string, string[]>;
+  execution_mode: "legacy_inline" | "durable_worker";
+}
 
 export interface OpsExperiment {
   id: number;
@@ -186,6 +198,44 @@ export interface OpsExperiment {
   error: string | null;
   created_at: string;
   duration_seconds: number | null;
+}
+
+export interface OpsExperimentDetail extends OpsExperiment {
+  reproducibility: {
+    complete: boolean;
+    citation_allowed: boolean;
+    claim_scope: string;
+    missing: string[];
+    warnings: string[];
+  };
+  report: Record<string, unknown> | null;
+}
+
+export interface OpsExperimentComparisonRow {
+  key: string;
+  a: unknown;
+  b: unknown;
+  delta: number | null;
+  matches: boolean | null;
+}
+
+export interface OpsExperimentComparison {
+  runs: OpsExperiment[];
+  compatible: boolean;
+  reasons: string[];
+  evidence: OpsExperimentComparisonRow[];
+  configurations: OpsExperimentComparisonRow[];
+  metrics: OpsExperimentComparisonRow[];
+  failure_mechanisms: OpsExperimentComparisonRow[];
+  case_differences: Array<{
+    case_id: string;
+    condition: string;
+    a_status: string | null;
+    b_status: string | null;
+    failures_gained: string[];
+    failures_lost: string[];
+  }>;
+  claim_scope: string;
 }
 
 export interface OpsUserHousehold { id: number; name: string; role: string; members: number; profile: Record<string, unknown> | null }

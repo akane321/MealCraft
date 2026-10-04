@@ -63,6 +63,42 @@ async function stubConsole(page: Page) {
   const replays = [] as Array<ReturnType<typeof replay>>;
   let current = settings.map(item => ({ ...item }));
   const history: unknown[] = [];
+  const experimentContext = {
+    conditions_complete: true,
+    dataset: { path: "data/fixtures/planning-v2/ablation-developer-v1.json", file_sha256: "f".repeat(64), semantic_sha256: "d".repeat(64) },
+    runner: "planning-component-ablation-dev-v1",
+    code_commit: "50674b3",
+    product_snapshot_sha256: "p".repeat(64),
+    seed: null,
+    repeats: 2,
+    citation_scope: "developer_diagnostic_only",
+    paid_model: { used: false, budget_usd: 0, usage_usd: 0 },
+  };
+  const experimentRuns: Array<Record<string, unknown>> = [{
+    id: 80,
+    evaluation: "planning-components",
+    label: "repair on",
+    status: "succeeded",
+    configuration: { repeats: 2, width: 8, max_expansions: 250, repair_rounds: 1 },
+    metrics: { case_count: 5, passed_audit_count: 5 },
+    passed: null,
+    conditions: { ...experimentContext, failure_mechanisms: {} },
+    error: null,
+    created_at: "2026-09-26T08:25:00Z",
+    duration_seconds: 1.1,
+  }, {
+    id: 79,
+    evaluation: "planning-components",
+    label: "older code",
+    status: "succeeded",
+    configuration: { repeats: 2, width: 8, max_expansions: 250, repair_rounds: 1 },
+    metrics: { case_count: 5, passed_audit_count: 3 },
+    passed: null,
+    conditions: { ...experimentContext, code_commit: "older-commit", failure_mechanisms: { purchase_budget: 2 } },
+    error: null,
+    created_at: "2026-09-26T08:20:00Z",
+    duration_seconds: 1.3,
+  }];
   let user = { ...bobDetail };
 
   await page.route(path("/api/auth/me"), route => route.fulfill(signedIn ? json(admin) : json({ detail: "Authentication required" }, 401)));
@@ -92,7 +128,65 @@ async function stubConsole(page: Page) {
     current = current.map(item => (item.key === "agent_parser_provider" ? { ...item, value, overridden: true } : item));
     return route.fulfill(json({ items: current }));
   });
-  await page.route(path("/api/ops/experiments"), route => route.fulfill(json({ items: [], evaluations: [{ name: "developer-planning", label: "Developer planning set", description: "20 planning scenarios.", dataset: "data/evaluation/dev/planning-v1.json", options: { planner: ["mealcraft-planner"] } }] })));
+  await page.route(path("/api/ops/experiments"), (route: Route) => {
+    const evaluations = [
+      { name: "planning-components", label: "Planning component ablations", description: "Fixed developer component conditions.", dataset: "data/fixtures/planning-v2/ablation-developer-v1.json", options: {}, execution_mode: "durable_worker" },
+      { name: "developer-planning", label: "Developer planning set", description: "20 planning scenarios.", dataset: "data/evaluation/dev/planning-v1.json", options: { planner: ["mealcraft-planner"] }, execution_mode: "legacy_inline" },
+    ];
+    if (route.request().method() === "POST") {
+      expect(route.request().headers()["idempotency-key"]).toMatch(/^ops-experiment-/);
+      expect(route.request().headers()["x-csrf-token"]).toBe("csrf-test");
+      expect(route.request().postDataJSON()).toEqual({
+        evaluation: "planning-components",
+        label: "repair check",
+        parameters: { repeats: 2, width: 8, max_expansions: 250, repair_rounds: 0 },
+        confirm: true,
+      });
+      const run = { id: 81, evaluation: "planning-components", label: "repair check", status: "succeeded", configuration: { repeats: 2, width: 8, max_expansions: 250, repair_rounds: 0 }, metrics: { case_count: 5, passed_audit_count: 4 }, passed: null, conditions: { ...experimentContext, failure_mechanisms: { purchase_budget: 1 } }, error: null, created_at: "2026-09-26T08:30:00Z", duration_seconds: 1.2 };
+      experimentRuns.unshift(run);
+      return route.fulfill(json({ ...run, status: "queued", metrics: {}, conditions: { conditions_complete: false }, duration_seconds: null }, 201));
+    }
+    return route.fulfill(json({ items: experimentRuns, evaluations }));
+  });
+  await page.route(path("/api/ops/experiments/compare"), (route: Route) => {
+    const ids = new URL(route.request().url()).searchParams.get("ids");
+    expect(["79,81", "80,81"]).toContain(ids);
+    const compatible = ids === "80,81";
+    const a = experimentRuns.find(item => item.id === (compatible ? 80 : 79))!;
+    const b = experimentRuns.find(item => item.id === 81)!;
+    return route.fulfill(json({
+      runs: [a, b],
+      compatible,
+      reasons: compatible ? [] : ["Code revision differs or is missing."],
+      evidence: [
+        { key: "dataset_digest", a: "d".repeat(64), b: "d".repeat(64), delta: null, matches: true },
+        { key: "code_commit", a: compatible ? "50674b3" : "older-commit", b: "50674b3", delta: null, matches: compatible },
+      ],
+      configurations: [
+        { key: "repair_rounds", a: 1, b: 0, delta: null, matches: false },
+        { key: "width", a: 8, b: 8, delta: null, matches: true },
+      ],
+      metrics: [
+        { key: "case_count", a: 5, b: 5, delta: compatible ? 0 : null, matches: true },
+        { key: "passed_audit_count", a: compatible ? 5 : 3, b: 4, delta: compatible ? -1 : null, matches: false },
+      ],
+      failure_mechanisms: [{ key: "purchase_budget", a: null, b: 1, delta: null, matches: false }],
+      case_differences: compatible ? [{ case_id: "budget-edge", condition: "repair_off repeat 0", a_status: "feasible", b_status: "failed", failures_gained: ["purchase_budget"], failures_lost: [] }] : [],
+      claim_scope: compatible ? "developer_diagnostic_only" : "not_comparable",
+    }));
+  });
+  await page.route(/\/api\/ops\/experiments\/\d+$/, (route: Route) => {
+    const id = Number(new URL(route.request().url()).pathname.split("/").pop());
+    const run = experimentRuns.find(item => item.id === id);
+    return route.fulfill(json({
+      ...run,
+      reproducibility: { complete: true, citation_allowed: true, claim_scope: "developer_diagnostic_only", missing: [], warnings: ["Developer diagnostics do not support held-out or production-performance claims."] },
+      report: {
+        protocol: "planning-component-ablation-dev-v1",
+        runs: id === 81 ? [{ case_id: "budget-edge", preset: "repair_off", status: "failed", failures: [{ code: "purchase_budget" }] }] : [],
+      },
+    }));
+  });
   await page.route(path("/api/ops/users"), route => route.fulfill(json({ total: 1, items: [user] })));
   await page.route(path("/api/ops/users/12"), (route: Route) => {
     if (route.request().method() === "PATCH") {
@@ -152,6 +246,37 @@ test("an administrator replays a failed plan, switches the parser and edits an a
   await expect(page.getByRole("region", { name: "Change history" }).getByRole("row", { name: /Ops Lead Assistant parser fixture openai/ })).toBeVisible();
   await expect(page.getByText("Changed here")).toBeVisible();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/ops-5-config.png`, fullPage: true });
+
+  // Queue a fixed developer ablation and see its reproducibility conditions complete.
+  const evaluationForm = page.getByRole("form", { name: "Run an evaluation" });
+  await evaluationForm.getByRole("combobox").first().selectOption("planning-components");
+  await evaluationForm.getByLabel("Repeats").fill("2");
+  await evaluationForm.getByLabel("Beam width").fill("8");
+  await evaluationForm.getByLabel("Maximum expansions").fill("250");
+  await evaluationForm.getByLabel("Repair rounds").fill("0");
+  await evaluationForm.getByLabel("Name (optional)").fill("repair check");
+  await evaluationForm.getByRole("button", { name: "Run evaluation" }).click();
+  const experimentConfirm = page.getByRole("alertdialog");
+  await expect(experimentConfirm).toContainText("cannot replace an earlier result");
+  await experimentConfirm.getByRole("button", { name: "Queue evaluation" }).click();
+  await expect(page.getByRole("row", { name: /#81 Planning component ablations.*Conditions recorded/ })).toBeVisible();
+  await page.getByLabel("Use run 80 as A").check();
+  await page.getByLabel("Use run 81 as B").check();
+  const ab = page.getByRole("region", { name: "A/B comparison" });
+  await expect(ab.getByText("Comparable developer diagnostic.")).toBeVisible();
+  await expect(ab.getByRole("row", { name: /Passed audit count 5 4 -1/ })).toBeVisible();
+  await expect(ab.getByRole("row", { name: /Purchase budget.*1/ })).toBeVisible();
+  await expect(ab.getByRole("row", { name: /budget-edge.*repair_off repeat 0.*purchase_budget/ })).toBeVisible();
+  await page.getByLabel("Use run 79 as A").check();
+  await expect(ab.getByText("Do not interpret these deltas.")).toBeVisible();
+  await expect(ab.getByText("Code revision differs or is missing.")).toBeVisible();
+  await page.getByRole("row", { name: /#81 Planning component ablations/ }).getByRole("button", { name: "Open" }).click();
+  const evidence = page.getByRole("dialog", { name: "repair check" });
+  await expect(evidence.getByText("Reproducibility complete")).toBeVisible();
+  const failedCases = evidence.getByRole("region", { name: "Failed cases" });
+  await failedCases.getByText("budget-edge · repair_off", { exact: true }).click();
+  await expect(failedCases.getByText(/purchase_budget/)).toBeVisible();
+  await evidence.getByRole("button", { name: "Close" }).click();
 
   // Rename an account and give it console access.
   await nav.getByRole("link", { name: "Users" }).click();

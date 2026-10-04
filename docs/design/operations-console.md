@@ -86,6 +86,14 @@ Compare recorded conditions and case-level failures. Report category counts and
 mechanisms, not category success rates (ADR-0028). Width-one MealBeam is not the
 formal strong Rule-only baseline unless that comparison protocol defines it so.
 
+Before interpreting a delta, require two succeeded developer records with
+complete, matching registry, dataset digests, runner/source fingerprint, code
+revision, product snapshot, seed, repeat count and claim scope. Parameters may
+differ because they are the treatment. Missing or different evidence makes the
+comparison incompatible and suppresses numeric deltas. Detail views inspect
+stored artifacts; they do not recompute or upgrade historical results. The
+exact registered actions are in [API Contracts](../api-contracts.md#operations-planning-experiments).
+
 Integrity follows ADR-0020/0029/0049:
 
 - Tuning uses synthetic/developer inputs, never held-out episodes or gold.

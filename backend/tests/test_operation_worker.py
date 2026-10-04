@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from threading import Event, Thread
 
@@ -15,12 +15,14 @@ from app.models.platform import OperationRun, User
 from app.models.recipe import Ingredient, Recipe
 from app.repositories.operation_jobs import OperationJobRepository
 from app.worker.handlers import (
+    HandlerContext,
     HandlerSpec,
     InvalidJobPayloadError,
     JobHandlerRegistry,
     UnknownJobTypeError,
     production_registry,
 )
+from app.worker.planning_experiments import run_planning_experiment_handler
 from app.worker.runtime import OperationWorker, WorkerPolicy
 
 
@@ -30,11 +32,11 @@ class SleepPayload(BaseModel):
     seconds: float = Field(ge=0, le=5)
 
 
-def sleep_handler(payload: dict, _database_url: str) -> None:
+def sleep_handler(payload: dict, _database_url: str, _context: HandlerContext) -> None:
     time.sleep(SleepPayload.model_validate(payload).seconds)
 
 
-def immediate_handler(payload: dict, _database_url: str) -> None:
+def immediate_handler(payload: dict, _database_url: str, _context: HandlerContext) -> None:
     SleepPayload.model_validate(payload)
 
 
@@ -263,3 +265,44 @@ def test_reference_catalog_handler_is_idempotent_when_executed_twice(worker_data
         assert session.scalar(select(func.count()).select_from(Recipe)) == 30
         assert session.get(OperationRun, first_id).status == "succeeded"
         assert session.get(OperationRun, second_id).status == "succeeded"
+
+
+def test_planning_experiment_handler_records_complete_conditions_once(worker_database) -> None:
+    database_url, factory = worker_database
+    payload = {
+        "evaluation": "planning-components",
+        "label": "worker evidence",
+        "parameters": {"repeats": 1, "width": 8, "max_expansions": 100, "repair_rounds": 1},
+    }
+    run_id = _enqueue(factory, suffix="a-planning-experiment", run_type="planning_experiment", payload=payload)
+    now = datetime.now(UTC)
+    with factory() as session:
+        claim = OperationJobRepository(session).claim_next(
+            now=now,
+            lease_duration=timedelta(seconds=60),
+            max_attempts=3,
+        )
+        session.commit()
+        assert claim is not None
+    context = HandlerContext(run_id=run_id, attempt_count=claim.attempt_count)
+
+    run_planning_experiment_handler(payload, database_url, context)
+    with factory() as session:
+        first = session.get(OperationRun, run_id)
+        artifact = first.artifact_references[0]
+        conditions = artifact["data"]["conditions"]
+        assert conditions["conditions_complete"] is True
+        assert conditions["citation_scope"] == "developer_diagnostic_only"
+        assert conditions["paid_model"] == {"used": False, "budget_usd": 0, "usage_usd": 0}
+        assert len(conditions["dataset"]["file_sha256"]) == 64
+        assert len(conditions["dataset"]["semantic_sha256"]) == 64
+        assert len(conditions["product_snapshot_sha256"]) == 64
+        assert artifact["data"]["report"]["protocol"] == "planning-component-ablation-dev-v2"
+        before = first.artifact_references
+
+    run_planning_experiment_handler(payload, database_url, context)
+    with factory() as session:
+        second = session.get(OperationRun, run_id)
+        assert second.artifact_references == before
+        assert len(second.artifact_references) == 1
+        assert "api_key" not in str(second.artifact_references).lower()
