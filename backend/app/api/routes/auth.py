@@ -7,7 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
-from app.auth.authorization import HouseholdAction, OperationsAction, may_access_household, may_access_operations
+from app.auth.authorization import HouseholdAction, SystemRole, may_access_household
 from app.auth.passwords import Argon2PasswordAdapter
 from app.core.config import Settings, get_settings
 from app.db.session import get_db_session
@@ -177,57 +177,42 @@ CurrentHouseholdManageMembersCsrfDependency = Annotated[
 ]
 
 
-def _authorize_operations_action(
-    current: CurrentAuthentication,
-    action: OperationsAction,
-) -> CurrentAuthentication:
-    if not may_access_operations(current.user.system_role, action):
+def _authorize_operations_admin(current: CurrentAuthentication) -> CurrentAuthentication:
+    if current.user.system_role != SystemRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
     return current
 
 
-class _OperationsActionDependency:
-    def __init__(self, action: OperationsAction) -> None:
-        self.action = action
-
+class _OperationsAdminDependency:
     def __call__(self, current: CurrentAuthenticationDependency) -> CurrentAuthentication:
-        return _authorize_operations_action(current, self.action)
+        return _authorize_operations_admin(current)
 
 
-def require_operations_action(action: OperationsAction) -> _OperationsActionDependency:
-    """Build a fail-closed dependency without disclosing the internal surface."""
-
-    return _OperationsActionDependency(action)
+require_current_operations_admin = _OperationsAdminDependency()
 
 
-class _OperationsActionCsrfDependency:
-    def __init__(self, action: OperationsAction) -> None:
-        self.action = action
-
+class _OperationsAdminCsrfDependency:
     def __call__(
         self,
         current: CurrentAuthenticationDependency,
         service: AuthenticationServiceDependency,
         csrf_token: Annotated[str | None, Header(alias="X-CSRF-Token")] = None,
     ) -> CurrentAuthentication:
-        _authorize_operations_action(current, self.action)
+        _authorize_operations_admin(current)
         _require_csrf(service, current, csrf_token)
         return current
 
 
-def require_operations_action_csrf(action: OperationsAction) -> _OperationsActionCsrfDependency:
-    """Authorize a console write before checking its CSRF token."""
-
-    return _OperationsActionCsrfDependency(action)
+require_current_operations_admin_csrf = _OperationsAdminCsrfDependency()
 
 
 CurrentOperationsViewDependency = Annotated[
     CurrentAuthentication,
-    Depends(require_operations_action(OperationsAction.VIEW_RUNS)),
+    Depends(require_current_operations_admin),
 ]
-CurrentOperationsManageJobsCsrfDependency = Annotated[
+CurrentOperationsWriteDependency = Annotated[
     CurrentAuthentication,
-    Depends(require_operations_action_csrf(OperationsAction.MANAGE_JOBS)),
+    Depends(require_current_operations_admin_csrf),
 ]
 
 

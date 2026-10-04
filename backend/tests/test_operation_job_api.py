@@ -98,7 +98,7 @@ def _count(factory: sessionmaker[Session], model) -> int:
     [
         (SystemRole.ORDINARY_USER, 404),
         (SystemRole.DATA_REVIEWER, 404),
-        (SystemRole.OPERATOR, 201),
+        (SystemRole.OPERATOR, 404),
         (SystemRole.ADMIN, 201),
     ],
 )
@@ -115,7 +115,7 @@ def test_every_role_is_checked_when_enqueuing(job_client, role: SystemRole, expe
         assert _count(factory, AuditEvent) == 0
 
 
-@pytest.mark.parametrize("role", [SystemRole.ORDINARY_USER, SystemRole.DATA_REVIEWER])
+@pytest.mark.parametrize("role", [SystemRole.ORDINARY_USER, SystemRole.DATA_REVIEWER, SystemRole.OPERATOR])
 def test_denied_roles_always_receive_a_generic_not_found(job_client, role: SystemRole) -> None:
     client, factory = job_client
     actor_id = _set_role(factory, role)
@@ -239,7 +239,7 @@ def test_enqueue_rejects_key_reuse_and_arbitrary_execution_fields(job_client) ->
     [
         (SystemRole.ORDINARY_USER, 404),
         (SystemRole.DATA_REVIEWER, 404),
-        (SystemRole.OPERATOR, 201),
+        (SystemRole.OPERATOR, 404),
         (SystemRole.ADMIN, 201),
     ],
 )
