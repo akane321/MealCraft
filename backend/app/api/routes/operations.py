@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.agent.parser import AgentConfigurationError
@@ -13,6 +13,12 @@ from app.core.config import Settings, get_settings
 from app.core.runtime_config import REGISTRY
 from app.db.session import get_db_session
 from app.repositories.operations import OperationsRepository
+from app.schemas.operation_jobs import (
+    OperationJobCancellationView,
+    OperationJobCancelRequest,
+    OperationJobRequest,
+    OperationJobView,
+)
 from app.schemas.operations import (
     DataCourse,
     DataMealType,
@@ -51,6 +57,12 @@ from app.schemas.operations import (
     TaskKind,
 )
 from app.schemas.platform import OperationStatus
+from app.services.operation_jobs import (
+    JobIdempotencyConflictError,
+    OperationJobNotCancellableError,
+    OperationJobNotFoundError,
+    OperationJobsService,
+)
 from app.services.operations import OperationsService
 from app.services.ops_data import DataService, OpsDataConflictError, OpsDataNotFoundError
 from app.services.ops_replay import ReplayNotFoundError, ReplayService, ReplayUnavailableError
@@ -158,6 +170,57 @@ def list_operation_runs(
         since=since,
         limit=limit,
     )
+
+
+@router.post("/jobs", response_model=OperationJobView, status_code=status.HTTP_201_CREATED)
+def enqueue_operation_job(
+    payload: OperationJobRequest,
+    response: Response,
+    current: CurrentOperationsWriteDependency,
+    database: DatabaseDependency,
+    idempotency_key: Annotated[
+        str,
+        Header(
+            alias="Idempotency-Key",
+            min_length=1,
+            max_length=120,
+            pattern=r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,119}$",
+        ),
+    ],
+) -> OperationJobView:
+    try:
+        result = OperationJobsService(database, actor_user_id=current.user.id).enqueue(
+            payload,
+            idempotency_key=idempotency_key,
+        )
+    except JobIdempotencyConflictError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Idempotency key was already used for different input",
+        ) from error
+    if not result.created:
+        response.status_code = status.HTTP_200_OK
+    return result.view
+
+
+@router.post(
+    "/jobs/{run_id}/cancel",
+    response_model=OperationJobCancellationView,
+    status_code=status.HTTP_201_CREATED,
+)
+def cancel_operation_job(
+    run_id: int,
+    payload: OperationJobCancelRequest,
+    current: CurrentOperationsWriteDependency,
+    database: DatabaseDependency,
+) -> OperationJobCancellationView:
+    del payload
+    try:
+        return OperationJobsService(database, actor_user_id=current.user.id).cancel(run_id)
+    except OperationJobNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found") from error
+    except OperationJobNotCancellableError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
 
 # --- Slice 2 (ADR-0047): Debugging, Experiments & configuration, Users. ---

@@ -2,25 +2,17 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app.core.paths import repository_root
 from app.data.catalog import import_catalog, load_catalog
 from app.data.release_v2 import import_release_v2
+from app.schemas.operation_jobs import CatalogImportArguments
 
 Handler = Callable[[dict, str], None]
-
-
-class CatalogImportPayload(BaseModel):
-    """The catalog source is selected from a fixed registry, never a caller path."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    source: Literal["reference", "release_v2"]
 
 
 @dataclass(frozen=True)
@@ -59,7 +51,7 @@ class JobHandlerRegistry:
 
 
 def import_catalog_handler(payload: dict, database_url: str) -> None:
-    request = CatalogImportPayload.model_validate(payload)
+    request = CatalogImportArguments.model_validate(payload)
     engine = create_engine(database_url, pool_pre_ping=True)
     try:
         with Session(engine, expire_on_commit=False) as session:
@@ -80,7 +72,7 @@ def production_registry() -> JobHandlerRegistry:
     return JobHandlerRegistry(
         {
             "catalog_import": HandlerSpec(
-                payload_model=CatalogImportPayload,
+                payload_model=CatalogImportArguments,
                 handler=import_catalog_handler,
             )
         }
