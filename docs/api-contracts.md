@@ -437,7 +437,27 @@ this contract.
 
 The preview does not modify the active plan. It persists the base revision,
 before/after meal snapshots, nutrition delta, package-level Shopping List delta,
-and checkout-cost delta. Completed and locked entries are rejected.
+and checkout-cost delta. Completed and locked entries are rejected. Every preview,
+including a shape change (`POST /api/plans/{plan_id}/shape/preview`), returns
+`over_budget_sgd`: how far a change that raises the checkout total takes the
+week over its weekly budget, or null within it and for a change that costs
+nothing or saves (keeping or skipping a dish). A shape change is planned within
+what the rest of the week leaves of the budget at the checkout (whole packages).
+A dish added to a meal keeps the dishes the meal has on each day; when no plan
+that keeps them fits what is left, the change is planned over the budget with
+them kept, before any plan that replaces them is tried. A week is planned to
+use most of its budget, so an addition to a budgeted week usually goes over it.
+Over the budget the change is offered rather than refused. Two plans are found,
+one from dishes the week does not have and one from every candidate, each the
+cheapest week its search finds (a repeated dish counted at one meal's share of
+the budget, and of the weeks costing no more than that, the one with the fewest
+empty optional dishes, then the most distinct dishes). The one offered costs the
+week less at the checkout with the rest of the week (a package both use is
+bought once), each repeat of a dish anywhere in the week again counted at one
+meal's share. A household's cap on uses ("no dish twice") counts the uses in the
+rest of the week. The household confirms or discards the change. In the
+preview's `shape_change`, a dish that stays on its day is in neither `removed`
+nor `added`; `kept` counts them.
 
 `POST /api/plans/{plan_id}/replan/{event_id}/confirm` applies a preview only when
 its base revision still matches the active plan. Confirmation updates the target

@@ -116,6 +116,9 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             ]
             if slot.composition is None and slot.locked_recipe_id is not None:
                 eligible = [r for r in eligible if r.recipe_id == slot.locked_recipe_id]
+            locked = (slot.locked_roles or {}).get(role.role_id)
+            if locked is not None:
+                eligible = [r for r in eligible if r.recipe_id == locked]
             # A lunch takes lunch dishes whenever there are enough of them (ADR-0044, every meal since
             # ADR-0046); the soft affinity only matters when the catalog runs short.
             fitting = [r for r in eligible if slot.meal_type in r.allowed_meal_types]
@@ -141,7 +144,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                     turn,
                 )
             options: list[tuple[str | None, str] | None] = [(key, r.recipe_id) for r in kept]
-            if not role.required:
+            if not role.required and locked is None:
                 options.append(None)
             per_role.append(options)
         by_id = {r.recipe_id: r for r in recipes}
@@ -237,7 +240,9 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             for slot, after in zip(ordered, [*ordered[1:], None], strict=True)
             if after is None or after.planned_date != slot.planned_date
         }
-        budget = problem.purchase_budget_sgd if problem.budget_is_hard else None
+        # A soft budget (a change the household may take over it) prunes nothing, but the beam still keeps
+        # room for the cheapest plans, so the week chosen goes over it by as little as it can.
+        budget = problem.purchase_budget_sgd
         # What each kept partial plan needs of every ingredient, and each meal's lines, priced incrementally.
         needs: dict[tuple, dict[str, float]] = {(): {}}
         # ... and what each of those ingredients costs in whole packages, so only a new meal's are repriced.
@@ -310,9 +315,10 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                         priced[s.choices] = cost
                     # Summed in the needs' order, so the total is the same float however it was reached.
                     spend[s.choices] = sum(priced[s.choices].values(), 0.0)
-                within = [s for s in next_states if spend[s.choices] <= budget]
-                emptied_by = emptied_by or ("budget" if next_states and not within else None)
-                next_states = within
+                if problem.budget_is_hard:
+                    within = [s for s in next_states if spend[s.choices] <= budget]
+                    emptied_by = emptied_by or ("budget" if next_states and not within else None)
+                    next_states = within
             # Progress towards what the household asked for orders states; it is never part of a
             # state's loss, so the loss stays the objective CP-SAT minimises.
             next_states.sort(key=lambda s: (s.loss - REQUEST_BONUS * request_progress(problem, s), s.choices))

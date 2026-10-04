@@ -617,6 +617,7 @@ class AgentSessionService:
                             before=preview.before_entry.recipe_title,
                             after=preview.after_entry.recipe_title if preview.after_entry else "",
                         )
+                        + self._over_budget(preview, plan, lang)
                         + say("until_confirm", lang)
                     ),
                     draft=draft,
@@ -798,6 +799,12 @@ class AgentSessionService:
         return self._to_response(updated)
 
     @staticmethod
+    def _over_budget(preview: MealPlanReplanEventResponse, plan: WeeklyMealPlanResponse, lang: str = "en") -> str:
+        """How far a change takes the week over its budget, as the preview card says it; empty within it."""
+        over, budget = preview.over_budget_sgd, plan.grocery_estimate.weekly_budget_sgd
+        return say("shape_over", lang, total=budget + over, over=over, budget=budget) if over and budget else ""
+
+    @staticmethod
     def _describe_shape_preview(
         summary: str, preview: MealPlanReplanEventResponse, plan: WeeklyMealPlanResponse, lang: str = "en"
     ) -> str:
@@ -816,7 +823,7 @@ class AgentSessionService:
         total = round(plan.grocery_estimate.purchase_total_sgd + delta, 2)
         over = (
             say("shape_over", lang, total=total, over=total - budget, budget=budget)
-            if budget is not None and total > budget
+            if preview.over_budget_sgd is not None and budget is not None
             else ""
         )
         parts.append(say("shape_groceries", lang, sign="+" if delta >= 0 else "−", amount=abs(delta), over=over))

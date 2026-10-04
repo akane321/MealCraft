@@ -53,6 +53,7 @@ describe("shapeChangeSummary", () => {
     expect(shapeChangeSummary(change({ roles, removed }), start)).toBe("Dinner on Fri: 2 mains, soup");
     const withVegetable = [{ role_id: "main", courses: ["main"], required: true }, { role_id: "vegetable", courses: ["side"], required: false }, { role_id: "soup", courses: ["soup"], required: true }] as MealRole[];
     expect(shapeChangeSummary(change({ roles: withVegetable, removed }), start)).toBe("Dinner on Fri: main, vegetable if it fits, soup");
+    expect(shapeChangeSummary(change({ roles: withVegetable, removed: [], kept: 2 }), start)).toBe("Dinner on Fri: main, vegetable if it fits, soup");
   });
 
   it("names days by the plan's own dates, the same way wherever a change is shown", () => {
