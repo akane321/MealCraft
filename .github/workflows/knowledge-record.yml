@@ -1,0 +1,40 @@
+name: Knowledge record
+
+# Decision ADR-0053 (private knowledge repository): every pull request opens with a
+# paired MealCraft-Knowledge pull request that records its reasoning and direction
+# check. This job fails a pull request whose body does not link one. It re-runs when
+# the body is edited. Dependabot updates and unchanged reverts are exempt.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  # Keep the job's `name` stable: a branch ruleset matches on it.
+  knowledge-record:
+    name: knowledge-record
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: The body links the paired knowledge pull request
+        env:
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          TITLE: ${{ github.event.pull_request.title }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [ "$AUTHOR" = "dependabot[bot]" ]; then
+            echo "Dependabot update: exempt."; exit 0
+          fi
+          case "$TITLE" in
+            'Revert "'*) echo "Unchanged revert: exempt."; exit 0 ;;
+          esac
+          if printf '%s' "$BODY" | grep -Eq 'https://github\.com/akane321/MealCraft-Knowledge/pull/[0-9]+'; then
+            echo "Paired knowledge pull request linked."
+          else
+            echo "::error::Link the paired MealCraft-Knowledge pull request in this pull request's body (AGENTS.md, highest-priority rule; decision ADR-0053)."
+            exit 1
+          fi
