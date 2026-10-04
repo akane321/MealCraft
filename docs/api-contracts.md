@@ -94,6 +94,10 @@ Available endpoints:
 - POST /api/household-profiles
 - GET /api/household-profiles/current
 - GET /api/household-profiles/{profile_id}
+- PUT /api/household-profiles/{profile_id}
+- GET /api/household-profiles/{profile_id}/versions
+- POST /api/household-profiles/{profile_id}/plans
+- POST /api/household-profiles/{profile_id}/plans/{plan_id}/replan
 
 ## Operations planning experiments
 
@@ -136,10 +140,6 @@ runner, code, product-snapshot, seed, repeat and developer-claim scope fields
 match; otherwise `compatible=false` explains the mismatch and every delta is
 null. This is a developer diagnostic comparison, not the separate held-out
 final-comparison action.
-- PUT /api/household-profiles/{profile_id}
-- GET /api/household-profiles/{profile_id}/versions
-- POST /api/household-profiles/{profile_id}/plans
-- POST /api/household-profiles/{profile_id}/plans/{plan_id}/replan
 
 ## Authentication
 
