@@ -4,12 +4,18 @@ from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.api.routes.auth import get_password_adapter
+from app.api.routes.auth import (
+    get_password_adapter,
+    require_current_operations_admin,
+    require_current_operations_admin_csrf,
+)
+from app.api.routes.operations import router as operations_router
 from app.auth.authorization import SystemRole
 from app.auth.passwords import Argon2PasswordAdapter, Argon2PasswordPolicy
 from app.core.config import Settings, get_settings
@@ -70,6 +76,7 @@ def operations_client() -> Generator[tuple[TestClient, sessionmaker], None, None
             },
         )
         assert response.status_code == 201
+        client.headers.update({"X-CSRF-Token": response.json()["csrf_token"]})
         yield client, database_factory
     app.dependency_overrides.clear()
     engine.dispose()
@@ -96,13 +103,94 @@ def _add_run(database_factory: sessionmaker, **values) -> None:
         database.commit()
 
 
+def _dependency_calls(route: APIRoute) -> set[object]:
+    calls: set[object] = set()
+
+    def visit(dependant) -> None:
+        for dependency in dependant.dependencies:
+            if dependency.call is not None:
+                calls.add(dependency.call)
+            visit(dependency)
+
+    visit(route.dependant)
+    return calls
+
+
+OPERATIONS_ROUTES = [route for route in operations_router.routes if isinstance(route, APIRoute)]
+
+
+@pytest.mark.parametrize(
+    "route",
+    OPERATIONS_ROUTES,
+    ids=lambda route: f"{','.join(sorted(route.methods or []))} {route.path}",
+)
+def test_every_operations_route_uses_the_matching_admin_gate(route: APIRoute) -> None:
+    calls = _dependency_calls(route)
+    methods = route.methods or set()
+    if methods & {"POST", "PUT", "PATCH", "DELETE"}:
+        assert require_current_operations_admin_csrf in calls
+        assert require_current_operations_admin not in calls
+    else:
+        assert require_current_operations_admin in calls
+        assert require_current_operations_admin_csrf not in calls
+
+
+def test_operations_response_contracts_do_not_name_secret_fields() -> None:
+    openapi = app.openapi()
+    schemas = openapi["components"]["schemas"]
+    forbidden = {
+        "api_key",
+        "cookie",
+        "csrf_token",
+        "health_profile",
+        "password",
+        "password_hash",
+        "secret",
+        "token",
+        "token_hash",
+    }
+    found: set[str] = set()
+    visited: set[str] = set()
+
+    def visit(schema: dict) -> None:
+        reference = schema.get("$ref")
+        if reference:
+            name = reference.rsplit("/", 1)[-1]
+            if name in visited:
+                return
+            visited.add(name)
+            visit(schemas[name])
+            return
+        found.update(schema.get("properties", {}))
+        for key in ("items", "additionalProperties"):
+            nested = schema.get(key)
+            if isinstance(nested, dict):
+                visit(nested)
+        for key in ("allOf", "anyOf", "oneOf"):
+            for nested in schema.get(key, []):
+                visit(nested)
+
+    for path, operations in openapi["paths"].items():
+        if not path.startswith("/api/ops"):
+            continue
+        for operation in operations.values():
+            if not isinstance(operation, dict):
+                continue
+            for response in operation.get("responses", {}).values():
+                schema = response.get("content", {}).get("application/json", {}).get("schema")
+                if schema:
+                    visit(schema)
+
+    assert found.isdisjoint(forbidden), sorted(found & forbidden)
+
+
 @pytest.mark.parametrize("endpoint", ["/api/ops/overview", "/api/ops/runs"])
 @pytest.mark.parametrize(
     ("role", "expected_status"),
     [
         (SystemRole.ORDINARY_USER, 404),
-        (SystemRole.DATA_REVIEWER, 200),
-        (SystemRole.OPERATOR, 200),
+        (SystemRole.DATA_REVIEWER, 404),
+        (SystemRole.OPERATOR, 404),
         (SystemRole.ADMIN, 200),
     ],
 )
@@ -118,7 +206,7 @@ def test_each_operations_endpoint_enforces_every_system_role(
     response = client.get(endpoint)
 
     assert response.status_code == expected_status
-    if role is SystemRole.ORDINARY_USER:
+    if role is not SystemRole.ADMIN:
         assert response.json() == {"detail": "Not Found"}
 
 
@@ -131,6 +219,31 @@ def test_operations_endpoints_require_authentication(operations_client, endpoint
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Authentication required"}
+
+
+def test_operations_writes_require_the_session_csrf_token(operations_client) -> None:
+    client, database_factory = operations_client
+    _set_system_role(database_factory, SystemRole.ADMIN)
+    csrf_token = client.headers.pop("X-CSRF-Token")
+
+    response = client.post("/api/ops/services/openai/check")
+
+    client.headers.update({"X-CSRF-Token": csrf_token})
+    assert response.status_code == 403
+    assert response.json() == {"detail": "CSRF validation failed"}
+
+
+@pytest.mark.parametrize("role", [SystemRole.ORDINARY_USER, SystemRole.DATA_REVIEWER, SystemRole.OPERATOR])
+def test_operations_authorization_precedes_csrf_without_disclosing_the_console(operations_client, role) -> None:
+    client, database_factory = operations_client
+    _set_system_role(database_factory, role)
+    csrf_token = client.headers.pop("X-CSRF-Token")
+
+    response = client.post("/api/ops/services/openai/check")
+
+    client.headers.update({"X-CSRF-Token": csrf_token})
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Not Found"}
 
 
 def test_household_owner_has_no_implicit_operations_access(operations_client) -> None:
@@ -211,7 +324,7 @@ def test_runs_are_filtered_ordered_bounded_and_redacted(operations_client) -> No
 
 def test_overview_reports_recorded_evidence_without_guessing(operations_client) -> None:
     client, database_factory = operations_client
-    _set_system_role(database_factory, SystemRole.DATA_REVIEWER)
+    _set_system_role(database_factory, SystemRole.ADMIN)
     now = datetime.now(UTC)
     _add_run(
         database_factory,
@@ -274,7 +387,7 @@ def test_overview_reports_recorded_evidence_without_guessing(operations_client) 
 
 def test_operations_reads_do_not_add_or_change_evidence(operations_client) -> None:
     client, database_factory = operations_client
-    _set_system_role(database_factory, SystemRole.OPERATOR)
+    _set_system_role(database_factory, SystemRole.ADMIN)
     _add_run(database_factory, trace_id="trace-immutable")
 
     with database_factory() as database:
