@@ -33,6 +33,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from app.evaluation.common_output import CommonEpisodeResponse, ShoppingLine
+from app.planning.vegetable_led import row_vegetable_led, vegetable_role
 
 CheckOutcome = Literal["passed", "failed", "indeterminate", "not_applicable"]
 
@@ -158,8 +159,15 @@ def _meals(response: CommonEpisodeResponse) -> dict[str, list]:
     return meals
 
 
-def _check_meal_composition(episode: dict, response: CommonEpisodeResponse, catalogs: Catalogs) -> list[Check]:
-    """Roles filled, each by a course it admits, with no dish twice in a meal."""
+def _check_meal_composition(
+    episode: dict, response: CommonEpisodeResponse, catalogs: Catalogs, vegetable_rule: bool = False
+) -> list[Check]:
+    """Roles filled, each by a course it admits, with no dish twice in a meal.
+
+    With `vegetable_rule` (protocol v3.1 since 2026-10-02) a vegetable role (`vegetable`, `vegetable-2`) also
+    admits only a dish led by vegetables with no meat or fish. The rule is the owner's definition, so the scorer
+    reads the one in `app.planning.vegetable_led` rather than keeping a copy that could drift from it.
+    """
     unfilled, wrong_course, unknown_course, repeated = [], [], [], []
     for slot, dishes in sorted(_meals(response).items()):
         roles = {role["role_id"]: role for role in _slot_roles(episode, slot)}
@@ -178,6 +186,8 @@ def _check_meal_composition(episode: dict, response: CommonEpisodeResponse, cata
                 unknown_course.append(f"{slot}:{dish.recipe_id}")
             elif course not in roles[dish.role_id]["courses"]:
                 wrong_course.append(f"{slot}:{dish.role_id}={course}")
+            elif vegetable_rule and vegetable_role(dish.role_id) and not row_vegetable_led(recipe):
+                wrong_course.append(f"{slot}:{dish.role_id}={course} not a vegetable dish")
         ids = [dish.recipe_id for dish in dishes]
         if len(ids) != len(set(ids)):
             repeated.append(slot)
@@ -823,8 +833,10 @@ def score_episode(
     response: CommonEpisodeResponse,
     catalogs: Catalogs,
     tolerances: Tolerances | None = None,
+    *,
+    vegetable_rule: bool = False,
 ) -> EpisodeScore:
-    """Apply every requirement that applies to this episode's class."""
+    """Apply every requirement that applies to this episode's class; `vegetable_rule` as `_check_meal_composition`."""
     tolerances = tolerances or Tolerances()
     gold = episode["gold"]
     episode_class = gold["class"]
@@ -867,7 +879,7 @@ def score_episode(
         )
         score.checks.append(_check_servings(episode, response))
         if _composition(episode) is not None:
-            score.checks.extend(_check_meal_composition(episode, response, catalogs))
+            score.checks.extend(_check_meal_composition(episode, response, catalogs, vegetable_rule))
 
         constraint_checks = _check_hard_constraints(episode, response, catalogs, tolerances)
         score.checks.extend(constraint_checks)

@@ -374,7 +374,10 @@ def evaluate(episodes: list[dict]) -> dict:
     for episode in episodes:
         catalogs = scorer_catalogs(episode)
         response, extra = run_episode(episode)
-        score = score_episode(scoring_view(episode), CommonEpisodeResponse.model_validate(response), catalogs)
+        # Protocol v3.1 scores a vegetable role by the owner's vegetable rule (2026-10-02); held-out run 2 predates it.
+        score = score_episode(
+            scoring_view(episode), CommonEpisodeResponse.model_validate(response), catalogs, vegetable_rule=True
+        )
         if episode["gold"]["class"] == "feasible" and response["status"] == "plan":
             score.checks.extend(v3_checks(episode, response, extra, catalogs))
         rows.append(

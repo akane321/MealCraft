@@ -36,7 +36,7 @@ from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_beam import ANY_COURSE, EMPTY_OPTIONAL_ROLE_LOSS, dish_eligible
-from app.planning.meal_composition import MAIN_ROLE, hands_on_and_waiting
+from app.planning.meal_composition import MAIN_ROLE, hands_on_and_waiting, role_admits
 from app.planning.nutrition_scope import nutrition_guard_loss
 from app.schemas.planning_v2 import FinalPlanningProblem, FinalPlanningSolution, PlanningAssignment, PlanningTrace
 
@@ -118,7 +118,7 @@ class MealCpSatPlanner(FinalScopeReferencePlanner):
                     r
                     for r in recipes
                     if dish_eligible(problem, slot, r)
-                    and (not composed or r.course in role.courses)
+                    and (not composed or role_admits(role, r))
                     and (composed or slot.locked_recipe_id in (None, r.recipe_id))
                 ]
                 chosen = []

@@ -42,6 +42,8 @@ class RecipeIngredientResponse(BaseModel):
     unit: str | None
     preparation: str | None
     allergens: list[str]
+    # The source wording ("1 small head cabbage") for `app.planning.vegetable_led`; not part of the API response.
+    original_text: str | None = Field(default=None, exclude=True)
 
 
 class RecipeStepResponse(BaseModel):
