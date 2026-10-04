@@ -39,6 +39,54 @@ export interface OpsTaskCollection {
   total: number;
 }
 
+export interface OpsRunSummary {
+  id: number;
+  trace_id: string;
+  run_type: string;
+  status: string;
+  attempt_count: number;
+  triggered_by_user_id: number | null;
+  input_digest: string | null;
+  code_commit: string | null;
+  catalog_version: string | null;
+  product_snapshot_version: string | null;
+  policy_version: string | null;
+  algorithm_version: string | null;
+  provider_mode: string | null;
+  error_code: string | null;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  duration_seconds: number | null;
+}
+
+export interface OpsRunCollection {
+  items: OpsRunSummary[];
+  total: number;
+}
+
+export type OpsCatalogSource = "reference" | "release_v2";
+
+export interface OpsJob {
+  id: number;
+  trace_id: string;
+  name: "catalog_import";
+  arguments: { source: OpsCatalogSource };
+  status: string;
+  attempt_count: number;
+  created: boolean;
+  created_at: string;
+}
+
+export interface OpsJobCancellation {
+  id: number;
+  trace_id: string;
+  target_run_id: number;
+  previous_status: "queued" | "running";
+  target_status: "cancelled";
+  created_at: string;
+}
+
 export interface OpsTaskDetail {
   summary: OpsTaskSummary;
   inputs: Record<string, unknown> | null;
