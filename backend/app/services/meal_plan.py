@@ -1,11 +1,15 @@
+from collections import Counter
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
+from app.models.recipe import Recipe
 from app.planning.conflict_explanation import explain_infeasibility, product_explanation
+from app.planning.meal_beam import EMPTY_OPTIONAL_ROLE_LOSS
 from app.planning.nutrition_scope import nutrition_scope_notes
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError, meals_of_the_day
+from app.planning.week_floor import WeekFloor, week_floor
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
 from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
@@ -48,6 +52,7 @@ class WeeklyMealPlanService:
         self.selector = selector or WeeklyPlanSelector()
         self.planning_engine = planning_engine or ProductPlanningEngine()
         self.actor_user_id = actor_user_id
+        self._checked: dict[str, tuple] = {}
 
     def generate(
         self,
@@ -56,75 +61,19 @@ class WeeklyMealPlanService:
         household_profile_id: int | None = None,
         household_profile_version: int | None = None,
         replaces_plan_id: int | None = None,
+        searched: tuple | None = None,
     ) -> WeeklyMealPlanResponse:
+        """Plan a week and save it; `searched` is a week `search` already found for these constraints."""
         started_at = datetime.now(UTC)
-        # Every course a planned meal's roles may take enters the pool (ADR-0046), not only dinner's.
-        meals = meals_of_the_day(constraints)
-        courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
-        recipes = self.recipe_repository.list_for_planning(courses=courses)
-        recommendation_result = self.recommendation_service.recommend(
-            constraints,
-            deduct_pantry_from_cost=False,
-            recipes=recipes,
-            priced_release_only=True,
-        )
-        broadened = not recommendation_result.recommendations
-        if broadened:
-            # Broaden only the diagnostic candidate pool; the original request
-            # still goes to the compiler and validator. Safety filters stay fixed.
-            recommendation_result = self.recommendation_service.recommend(
-                constraints.model_copy(update={"max_cooking_time_minutes": 240, "dietary_preferences": []}),
-                deduct_pantry_from_cost=False,
-                recipes=recipes,
-                priced_release_only=True,
+        try:
+            recommendation_result, result = searched or self._search(
+                constraints, self._candidates(constraints), profile_version=household_profile_version
             )
-        prior_trace = None
-        for attempt in range(2):
-            try:
-                result = self.planning_engine.plan(
-                    constraints,
-                    recommendation_result.recommendations,
-                    recipes,
-                    selector=self.selector,
-                    profile_version=household_profile_version,
-                )
-                if prior_trace is not None:
-                    result.trace["prior_candidate_attempt"] = prior_trace
-                break
-            except ProductPlanningError as error:
-                if error.status == "infeasible" and not broadened and attempt == 0:
-                    # A time/diet-filtered pool cannot establish which of those
-                    # constraints conflicts with budget. Retain original quotes
-                    # and add diagnostic candidates, then establish evidence again.
-                    previous = {r.recipe.id: r for r in recommendation_result.recommendations}
-                    recommendation_result = self.recommendation_service.recommend(
-                        constraints.model_copy(update={"max_cooking_time_minutes": 240, "dietary_preferences": []}),
-                        deduct_pantry_from_cost=False,
-                        recipes=recipes,
-                        priced_release_only=True,
-                    )
-                    recommendation_result.recommendations = [
-                        previous.get(r.recipe.id, r) for r in recommendation_result.recommendations
-                    ]
-                    prior_trace = error.trace
-                    broadened = True
-                    continue
-                if prior_trace is not None:
-                    error.trace["prior_candidate_attempt"] = prior_trace
-                if error.problem is not None and error.status == "infeasible":
-                    explanation = explain_infeasibility(
-                        error.problem,
-                        evidence=error.trace["evidence"],
-                        per_meal_budget=constraints.budget_per_meal_sgd,
-                    )
-                    error.trace["explanation"] = explanation
-                    message = product_explanation(explanation)
-                    if message:
-                        error.args = (message,)
-                error.trace["profile_id"] = household_profile_id
-                self.repository.session.add(self._operation_run(error.trace, started_at, error=str(error)))
-                self.repository.session.commit()
-                raise
+        except ProductPlanningError as error:
+            error.trace["profile_id"] = household_profile_id
+            self.repository.session.add(self._operation_run(error.trace, started_at, error=str(error)))
+            self.repository.session.commit()
+            raise
         selected, grocery = result.selected, result.grocery
         result.trace["profile_id"] = household_profile_id
 
@@ -166,20 +115,150 @@ class WeeklyMealPlanService:
         )
         return self._to_response(plan)
 
+    def _search(self, constraints: WeeklyMealPlanRequest, candidates, *, profile_version: int | None = None):
+        """The week `generate` plans from these candidates (recipes, recommendations), nothing saved."""
+        recipes, recommendation_result = candidates
+        broadened = not recommendation_result.recommendations
+        if broadened:
+            # Broaden only the diagnostic candidate pool; the original request
+            # still goes to the compiler and validator. Safety filters stay fixed.
+            recommendation_result = self.recommendation_service.recommend(
+                constraints.model_copy(update={"max_cooking_time_minutes": 240, "dietary_preferences": []}),
+                deduct_pantry_from_cost=False,
+                recipes=recipes,
+                priced_release_only=True,
+            )
+        prior_trace = None
+        for attempt in range(2):
+            try:
+                result = self.planning_engine.plan(
+                    constraints,
+                    recommendation_result.recommendations,
+                    recipes,
+                    selector=self.selector,
+                    profile_version=profile_version,
+                )
+                if prior_trace is not None:
+                    result.trace["prior_candidate_attempt"] = prior_trace
+                return recommendation_result, result
+            except ProductPlanningError as error:
+                if error.status == "infeasible" and not broadened and attempt == 0:
+                    # A time/diet-filtered pool cannot establish which of those
+                    # constraints conflicts with budget. Retain original quotes
+                    # and add diagnostic candidates, then establish evidence again.
+                    previous = {r.recipe.id: r for r in recommendation_result.recommendations}
+                    recommendation_result = self.recommendation_service.recommend(
+                        constraints.model_copy(update={"max_cooking_time_minutes": 240, "dietary_preferences": []}),
+                        deduct_pantry_from_cost=False,
+                        recipes=recipes,
+                        priced_release_only=True,
+                    )
+                    recommendation_result.recommendations = [
+                        previous.get(r.recipe.id, r) for r in recommendation_result.recommendations
+                    ]
+                    prior_trace = error.trace
+                    broadened = True
+                    continue
+                if prior_trace is not None:
+                    error.trace["prior_candidate_attempt"] = prior_trace
+                if error.problem is not None and error.status == "infeasible":
+                    explanation = explain_infeasibility(
+                        error.problem,
+                        evidence=error.trace["evidence"],
+                        per_meal_budget=constraints.budget_per_meal_sgd,
+                    )
+                    error.trace["explanation"] = explanation
+                    message = product_explanation(explanation)
+                    if message:
+                        error.args = (message,)
+                raise
+        raise AssertionError("unreachable")
+
+    def search(self, constraints: WeeklyMealPlanRequest) -> tuple:
+        """The week `generate` would plan for these constraints, nothing saved; ProductPlanningError for none.
+
+        `generate(constraints, searched=...)` saves it."""
+        return self._search(constraints, self._checked_candidates(constraints))
+
+    def check(self, constraints: WeeklyMealPlanRequest) -> ProductPlanningError | None:
+        """What `generate` would answer for these constraints, nothing saved: None for a week, else its error."""
+        try:
+            self.search(constraints)
+        except ProductPlanningError as error:
+            return error
+        return None
+
+    def _candidates(self, constraints: WeeklyMealPlanRequest):
+        """The recipes a week may use and the recommendations `generate` plans from first."""
+        # Every course a planned meal's roles may take enters the pool (ADR-0046), not only dinner's.
+        meals = meals_of_the_day(constraints)
+        courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
+        recipes = self.recipe_repository.list_for_planning(courses=courses)
+        result = self.recommendation_service.recommend(
+            constraints,
+            deduct_pantry_from_cost=False,
+            recipes=recipes,
+            priced_release_only=True,
+        )
+        avoid = set(constraints.avoid_recipe_ids)
+        if avoid:
+            # Each course drops the avoided dishes only while a week's worth of its others remain.
+            course = {recipe.id: getattr(recipe, "course", None) or "main" for recipe in recipes}
+            kept = Counter(course.get(r.recipe.id) for r in result.recommendations if r.recipe.id not in avoid)
+            result.recommendations = [
+                r
+                for r in result.recommendations
+                if r.recipe.id not in avoid or kept[course.get(r.recipe.id)] < constraints.day_count
+            ]
+        return recipes, result
+
+    def _checked_candidates(self, constraints: WeeklyMealPlanRequest):
+        """`_candidates`, worked out once per request for the checks a chat turn makes before it answers.
+
+        The weekly budget is not a recommendation input, so the floor and the cheapest week share one pass.
+        """
+        key = constraints.model_dump_json(exclude={"weekly_budget_sgd"})
+        if key not in self._checked:
+            self._checked[key] = self._candidates(constraints)
+        return self._checked[key]
+
+    def week_floor(self, constraints: WeeklyMealPlanRequest) -> WeekFloor:
+        """What any week `generate` could plan for these constraints costs at least, without a search."""
+        recipes, candidates = self._checked_candidates(constraints)
+        return week_floor(constraints, candidates.recommendations, recipes)
+
+    def cheapest_week(self, constraints: WeeklyMealPlanRequest) -> float:
+        """What the cheapest week the planner's cost-led search finds costs at the checkout, nothing saved.
+
+        Every limit but the weekly budget holds. `generate` tries the same search's weeks last under a
+        budget, so any budget of at least this plans (with the same prices). Raises ProductPlanningError
+        when the search finds no week at all.
+        """
+        unbudgeted = constraints.model_copy(update={"weekly_budget_sgd": None})
+        recipes, candidates = self._checked_candidates(unbudgeted)
+        result = self.planning_engine.plan(
+            unbudgeted, candidates.recommendations, recipes, selector=self.selector, cheapest=True
+        )
+        return result.grocery.purchase_total_sgd
+
     def plan_dishes(
         self,
         constraints: WeeklyMealPlanRequest,
         *,
         first_day: int,
         day_count: int,
-        avoid_recipe_ids: set[int],
-        keep: tuple[set[int], set[str]] | None = None,
+        rest: list[tuple[Recipe, float]],
+        keep: dict[tuple[int, str], dict[str, int]] | None = None,
+        over_budget: float | None = None,
     ) -> list[ScheduledDish]:
         """Dishes for `day_count` days from day `first_day` of a saved week, nothing saved (ADR-0046 section 2).
 
-        `constraints` carries the shape to plan and the budget left; dishes already in the week are
-        avoided while enough others remain. `keep` (recipe ids, their courses) holds a meal's present
-        dishes while a new one is added: of those courses only those recipes are offered.
+        `constraints` carries the shape to plan and the budget left. `rest` is the rest of the week, each dish
+        with its portion share: its dishes are avoided while enough others remain, and in every attempt their
+        uses there count towards the household's cap on uses. `keep` ((day index, meal) -> {role id: recipe
+        id}) holds each meal's present dishes in their roles while a new one is added. `over_budget` plans the
+        dishes over the budget when none fit it (none can when it is 0 or less), as cheaply as the planner finds,
+        weighing costs against this amount (see `over_budget_pick` and `charge` below).
         """
         start = constraints.start_date + timedelta(days=first_day - 1)
         # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
@@ -190,20 +269,66 @@ class WeeklyMealPlanService:
         recommendations = self.recommendation_service.recommend(
             partial, deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
         ).recommendations
-        keep_ids, keep_courses = keep if keep is not None else (set(), set())
-        course = {recipe.id: recipe.course for recipe in recipes}
-        fresh = [
-            item
-            for item in recommendations
-            if item.recipe.id in keep_ids
-            or (item.recipe.id not in avoid_recipe_ids and course.get(item.recipe.id) not in keep_courses)
-        ]
-        try:
-            result = self.planning_engine.plan(partial, fresh, recipes, selector=self.selector)
-        except ProductPlanningError:
-            # Too few dishes the week does not already have, or the kept dishes no longer fit:
-            # plan the meal from every candidate rather than fail.
-            result = self.planning_engine.plan(partial, recommendations, recipes, selector=self.selector)
+        slugs = {recipe.id: recipe.slug for recipe in recipes}
+        keep_ids = {recipe_id for roles in (keep or {}).values() for recipe_id in roles.values()}
+        # A kept dish the planner no longer offers cannot stay: the meal is planned from every candidate.
+        kept = {
+            (day - first_day, meal): {role: slugs[recipe_id] for role, recipe_id in roles.items()}
+            for (day, meal), roles in (keep or {}).items()
+            if keep_ids <= slugs.keys()
+        }
+        used = Counter(recipe.id for recipe, _ in rest)
+        fresh = [item for item in recommendations if item.recipe.id in keep_ids or item.recipe.id not in used]
+        budget = partial.weekly_budget_sgd
+        within = budget is None or budget > 0 or over_budget is None
+        over = partial.model_copy(update={"weekly_budget_sgd": over_budget}) if over_budget is not None else None
+        pools = [fresh] + ([recommendations] if len(fresh) < len(recommendations) else [])
+        # Each step in turn; the first that finds a plan gives it. Within the budget, dishes the week does not
+        # have yet, then any (too few are left). Over it, both at once: a dish the week has may cost less than
+        # a new one, and `charge` weighs the two. When the kept dishes fit nothing at all, the meal is planned
+        # from every candidate rather than fail.
+        steps = []
+        for locked, choices in ((kept, pools), (None, [recommendations])) if kept else ((None, pools),):
+            steps += [[(pool, locked, partial, True)] for pool in choices] if within else []
+            steps += [[(pool, locked, over, False) for pool in pools]] if over is not None else []
+        by_id = {recipe.id: recipe for recipe in recipes}
+
+        def charge(planned) -> float:
+            """A plan over the budget as the week pays for it: the checkout with the rest of the week (a package
+            both use is bought once), and a repeat of any dish in the week at one meal's share of `over_budget`
+            and an empty optional dish at twice that, as `over_budget_pick` charges them among the meals it plans.
+            Within those meals alone, a dinner's salad served again at lunch was no repeat (the 2026-10-02
+            review: every lunch of mdw-dev-013 was one of its dinners)."""
+            week = [recipe for recipe, _ in rest] + [by_id[item.recipe.id] for item in planned.selected]
+            shares = [share for _, share in rest] + [float(place[3]) for place in planned.placements]
+            total = self.grocery_aggregator.estimate(week, partial, shares=shares).purchase_total_sgd
+            repeats = len(week) - len({recipe.id for recipe in week})
+            empty = day_count * sum(len(roles) for _, roles in meals) - len(planned.selected)
+            return total + over_budget / (day_count * len(meals)) * (repeats + EMPTY_OPTIONAL_ROLE_LOSS * empty)
+
+        for step in steps:
+            found = []
+            for pool, locked, request, hard in step:
+                try:
+                    found.append(
+                        self.planning_engine.plan(
+                            request,
+                            pool,
+                            recipes,
+                            selector=self.selector,
+                            cheapest_last=False,
+                            budget_is_hard=hard,
+                            locked=locked,
+                            used=Counter(recipe.slug for recipe, _ in rest),
+                        )
+                    )
+                except ProductPlanningError as error:
+                    failure = error
+            if found:
+                result = min(found, key=charge) if len(found) > 1 else found[0]
+                break
+        else:
+            raise failure
         placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(result.selected))]
         return [
             ScheduledDish(

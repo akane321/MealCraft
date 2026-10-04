@@ -58,6 +58,49 @@ def test_the_product_adds_a_soup_to_one_dinner_and_keeps_the_rest():
     assert codes == {"shape_request_understood": "passed", "unchanged_meals_identical": "failed"}
 
 
+def _shape_preview(episode: dict, budget: float, message: str):
+    """The preview of `message` on the episode's week planned for two to `budget`, every day still ahead."""
+    from app.agent.shape_change import read_shape_change
+    from app.api.routes.meal_plans import build_meal_plan_service
+    from app.evaluation.meal_day_week_runner import HOUSEHOLD, plan_request, product_database
+    from app.services.replanning import MealPlanReplanningService
+
+    episode["scenario"]["household_profile"]["household_size"] = 2
+    episode["gold"]["applicable_hard_constraints"]["budget_sgd"] = budget
+    with product_database(episode) as factory, factory() as session:
+        plans = build_meal_plan_service(session, HOUSEHOLD)
+        plan = plans.generate(plan_request(episode))
+        changes = MealPlanReplanningService(
+            repository=plans.repository,
+            recipe_repository=plans.recipe_repository,
+            recommendation_service=plans.recommendation_service,
+            grocery_aggregator=plans.grocery_aggregator,
+            meal_plan_service=plans,
+        )
+        intent = read_shape_change(message, plan=plan, day_indexes=None)
+        return plan, changes.preview_shape(plan_id=plan.id, request=intent.request, today=plan.start_date)
+
+
+def test_a_change_no_week_within_the_budget_can_hold_goes_over_it_by_as_little_as_it_can():
+    """Owner decision 2026-10-02: a soup every night on a week planned to S$50 for two fits no week, so it is
+    offered over the budget. Without a budget to prune by, the beam still keeps room for the cheapest plans
+    (in whole packages); weighed only by what each dish uses, every week it kept went S$200 over."""
+    _, event = _shape_preview(load("mdw-dev-015"), 50.0, "Dinners with a soup")
+    assert event.over_budget_sgd is not None
+    assert event.over_budget_sgd < 50
+
+
+def test_also_plan_lunch_is_planned_against_what_the_checkout_leaves_of_the_budget():
+    """The owner's own example: "also plan lunch" on dinners S$4 under their S$60 budget. The dinners use
+    less than they buy in whole packages; measured by use, about S$30 seemed left, and lunches planned to fit
+    that took the week S$24.00 over. Measured at the checkout nothing is left, so the lunches are planned over
+    the budget as cheaply as the planner finds: S$6.35 over."""
+    plan, event = _shape_preview(load("mdw-dev-015"), 60.0, "Also plan lunch")
+    assert plan.grocery_estimate.within_weekly_budget is True
+    assert event.over_budget_sgd is not None
+    assert event.over_budget_sgd < 10
+
+
 def test_a_daily_target_is_a_hard_day_band_and_a_soft_meal_guide():
     from app.planning.nutrition_scope import compile_nutrition_targets
     from app.schemas.planning_nutrition import ProductNutritionTarget

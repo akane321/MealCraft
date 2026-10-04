@@ -1155,6 +1155,8 @@ test("asking for lunch too previews the new meals, then asks whether to keep it"
     before_entry: null,
     after_entry: null,
     purchase_total_delta_sgd: 21.4,
+    // S$82.60 + S$21.40 against S$90: the backend says how far over, the card and the reply say the same.
+    over_budget_sgd: 14,
     shape_change: {
       meal_type: "lunch",
       scope: "week",
@@ -1201,11 +1203,52 @@ test("asking for lunch too previews the new meals, then asks whether to keep it"
   await expect(card.getByText("Lunch added for the rest of the week")).toBeVisible();
   await expect(card.getByText("Chicken Soba Salad")).toBeVisible();
   await expect(card.getByText("groceries +S$21.40")).toBeVisible();
+  await expect(card.getByText("This puts the week S$14.00 over your S$90.00 budget.")).toBeVisible();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/15-shape-change.png` });
 
   await card.getByRole("button", { name: "Confirm change" }).click();
   await page.getByRole("button", { name: "Keep it as our usual" }).click();
   await expect.poll(() => answer?.option_ids).toEqual(["keep"]);
+});
+
+test("a swap card says how far over the budget the backend found; a skip on a week already over does not", async ({ page }) => {
+  await stubApi(page);
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  // A week already S$5 over its S$90 budget.
+  const over = { ...plan, grocery_estimate: { ...plan.grocery_estimate, purchase_total_sgd: 95, within_weekly_budget: false } };
+  await page.route("**/api/plans/9001", route => route.fulfill(json(over)));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: session(true), plan: over })));
+  const tofu = { entry_id: 4, day_index: 4, planned_date: isoDay(0), recipe_id: 4, recipe_slug: "dinner-4", recipe_title: "Tofu Brown Rice Stir-fry" };
+  const swap = {
+    ...replanEvent,
+    id: 14,
+    applied_revision: null,
+    status: "previewed",
+    event_type: "REPLACE_MEAL",
+    before_entry: tofu,
+    after_entry: { ...tofu, recipe_id: 9, recipe_slug: "dinner-9", recipe_title: "Salmon Teriyaki" },
+    purchase_total_delta_sgd: 3.2,
+    over_budget_sgd: 8.2,
+  };
+  // Skipping saves S$2.40; the week stays over its budget, but the skip does not put it there.
+  const skip = { ...swap, id: 15, event_type: "CANCEL_MEAL", after_entry: tofu, purchase_total_delta_sgd: -2.4, over_budget_sgd: null };
+  let pending: unknown = swap;
+  await page.route("**/api/agent/sessions/51/messages", route => route.fulfill(json({ ...session(true), pending_replan: pending })));
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+  await page.getByLabel("Message MealCraft").fill("Swap Thursday's Tofu Brown Rice Stir-fry");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.locator(".swap-card .to")).toHaveText("Salmon Teriyaki");
+  await expect(page.getByText("This puts the week S$8.20 over your S$90.00 budget.")).toBeVisible();
+
+  pending = skip;
+  await page.getByLabel("Message MealCraft").fill("Skip Thursday's Tofu Brown Rice Stir-fry");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.locator(".swap-card .to")).toHaveText("Skip Tofu Brown Rice Stir-fry");
+  await expect(page.locator(".swap-card .over-budget")).toHaveCount(0);
 });
 
 test("a dish's own buttons put the change into words for the assistant", async ({ page }) => {
@@ -1267,4 +1310,41 @@ test("keeping a dish previews as keeping it, and the change log shows it once co
   await page.getByRole("button", { name: "Confirm change" }).click();
   await week.getByText("Changes this week").click();
   await expect(week.getByText("Keep Tofu Brown Rice Stir-fry as it is")).toBeVisible();
+});
+
+test("a week that cannot be planned is explained in the chat in place of the Plan card", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await stubApi(page);
+  const why = "S$10 for 4 people is S$0.36 a person a meal over 7 meals. The cheapest week I could plan costs about S$38.16: the cheapest my search found, not a proof that none is cheaper.";
+  const explained = {
+    ...session(false),
+    status: "collecting",
+    can_confirm: false,
+    missing_fields: ["weekly_budget_sgd"],
+    clarification_questions: [why],
+    messages: [...session(false).messages, { id: 3, role: "assistant", content: why, created_at: "2026-09-14T08:00:02Z" }],
+    pending_interaction: {
+      type: "quick_reply",
+      prompt: why,
+      field_path: "message",
+      question_id: "context-2:unplanned",
+      options: [{ id: "say_0", label: "Use S$39 for the week", value: "Make the weekly budget S$39" }],
+      allow_free_text: true,
+      context_version: 2,
+      plan_revision: null,
+      expires_at: null,
+    },
+  };
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill({ status: 422, contentType: "application/json", body: JSON.stringify({ detail: why }) }));
+  await page.route("**/api/agent/sessions/51", route => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(explained) }));
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Plan a week for 4 for S$10 total");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+
+  await expect(page.getByText(why).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Plan my week" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Use S$39 for the week" })).toBeVisible();
+  await expect(page.getByRole("alert")).toHaveCount(0);
 });

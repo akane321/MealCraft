@@ -109,6 +109,9 @@ Ask in the conversation. Two kinds of change are understood:
   soup", "add a soup on Friday", "今晚不要配菜". Only the meals affected are
   planned again, with the budget the rest of the week leaves; adding a dish keeps
   the meal's other dishes, and taking one away keeps the rest at a larger share.
+  If the budget has no room for the change with your dishes kept, it is still
+  offered, with how far it takes the week over the budget; you decide. The
+  preview lists only the new dishes; the ones that stay are not shown again.
 
 Every change is shown as a preview first, with the new dishes and the grocery
 difference. **Confirm change** applies it; **Keep as is** discards it. Cooked

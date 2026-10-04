@@ -63,7 +63,9 @@ class FinalPlanningValidator:
                 policy_version=problem.policy_version,
             )
         checks, meals = self.assignment_checks(problem, assignments)
-        assignment_checks_passed = not checks
+        # Only a hard verdict leaves the dishes, and so the cost, in doubt; a soft one (a dish outside its usual
+        # meal types) is reported and the week priced all the same.
+        assignment_checks_passed = not any(check.hard for check in checks)
         checks.extend(diversity_checks(problem, meals))
         checks.extend(
             self._failed("repetition_rule", problem_text)
@@ -218,6 +220,9 @@ class FinalPlanningValidator:
         by_role = {dish.role_id: dish for dish in dishes}
         for role in slot.composition or []:
             dish = by_role.get(role.role_id)
+            locked = (slot.locked_roles or {}).get(role.role_id)
+            if locked is not None and (dish is None or dish.recipe_id != locked):
+                checks.append(self._failed("locked_slot", f"Locked role {role.role_id} was changed.", slot.slot_id))
             if dish is None:
                 if role.required:
                     checks.append(

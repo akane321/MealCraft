@@ -110,6 +110,8 @@ class AgentConstraintState(BaseModel):
     plan_shape: MealPlanShape | None = None
     # How often one dish may be served in the week; 1 is "no repeats". None: repeats are avoided, not forbidden.
     max_uses_per_recipe: int | None = None
+    # The dishes of a week the household found monotonous: a new week avoids them while enough others remain.
+    avoid_recipe_ids: list[int] = Field(default_factory=list, max_length=200)
 
 
 class AgentReplanDraft(BaseModel):

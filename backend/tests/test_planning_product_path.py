@@ -319,3 +319,32 @@ def test_the_default_household_week_is_dinner_with_a_main_and_a_vegetable(recipe
     assert response.status_code == 201, response.text
     meals = {(d["day_index"], d["meal_type"]) for d in response.json()["days"]}
     assert meals == {(day, meal) for day in range(1, 8) for meal in ("lunch", "dinner")}
+
+
+def test_over_the_budget_no_week_offered_is_emptier_than_one_that_costs_no_more():
+    """The owner's order holds over the budget too (ADR-0052, strict): the fewest empty optional dishes first.
+
+    Charged as the cheap room charges them, a repeat-free week with one optional dish left out (two shares)
+    beats a full one with three repeats at the same price; the in-budget path, at that price, offers the full one.
+    """
+    from types import SimpleNamespace
+
+    from app.planning.product_path import over_budget_pick
+
+    slots = [SimpleNamespace(slot_id=f"slot-{i}", composition=["main", "vegetable"]) for i in range(7)]
+
+    def week(dishes: list[tuple[str, ...]], total: float):
+        assignments = [
+            SimpleNamespace(slot_id=f"slot-{i}", recipe_id=recipe) for i, meal in enumerate(dishes) for recipe in meal
+        ]
+        return assignments, None, SimpleNamespace(purchase_total_sgd=total)
+
+    # Tried first: every dinner full, three vegetables repeated. Then one dinner without its vegetable.
+    full = week([(f"main-{i}", f"veg-{i % 4}") for i in range(7)], 50.0)
+    gap = week([(f"main-{i}", f"veg-{i}") for i in range(6)] + [("main-6",)], 50.0)
+    dearer = week([(f"main-{i}", f"veg-{i}") for i in range(7)], 80.0)
+
+    assert over_budget_pick([full, gap, dearer], slots, 40.0) is full
+    # A cheaper week still wins when it is as full and as varied.
+    cheaper = week([(f"main-{i}", f"veg-{i % 4}") for i in range(7)], 40.0)
+    assert over_budget_pick([full, gap, cheaper], slots, 40.0) is cheaper
