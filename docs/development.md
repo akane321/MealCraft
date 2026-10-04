@@ -112,6 +112,26 @@ immutable versions are stored in `household_profiles` and
 and optional replaced-plan ID. Agent replanning drafts and pending
 event links are stored on `agent_sessions`.
 
+## Code evidence for recorded worker experiments
+
+The backend and worker containers read the same local `.env`, but do not mount
+the checkout's `.git`. Before recording a comparison from a committed checkout,
+run `git status --short` and `git rev-parse HEAD`, then copy the full revision
+into `CODE_COMMIT` in your local `.env`. Commit intended source edits through the
+normal review workflow first; do not label uncommitted code as that revision.
+
+After changing `.env`, recreate the two services so both receive the same value:
+
+```bash
+docker compose up --detach --force-recreate backend worker
+```
+
+The source fingerprint is recorded as well: sharing a revision string does not
+make different code comparable. Missing or incompatible evidence remains visible
+but does not yield an interpretable numeric delta. Keep the matching checkout,
+lockfile and recorded input conditions with the result. These are developer
+diagnostics, not a held-out evaluation. See [API Contracts](api-contracts.md#operations-planning-experiments).
+
 ## Authentication API
 
 The authentication slice uses Argon2id credentials and server-side opaque

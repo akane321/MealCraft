@@ -68,10 +68,12 @@ policy, not mixed-package purchasing. See the [purchasing comparison](planning-p
 
 Final-gate and feedback on/off comparisons are separate experiments gathered by
 [the suite](planning-experiment-suite.md). Ranking remains off in the five
-component conditions. Console integration is a separate consumer task. No product route exposes a validation bypass. The
-console owner can later call `run_experiments` with a validated developer dataset
-and retain the returned conditions and artifacts; no console schema, runtime
-setting or database table changes in this slice.
+component conditions. The Console's registered worker adapter consumes validated developer
+datasets and retains condition reports as operation artifacts. Its registry exposes
+component planning and single-dish/composed final-gate presets, not every CLI suite.
+See [the Console experiment contract](../api-contracts.md#operations-planning-experiments).
+No product route exposes a validation bypass, and these developer comparisons are
+not formal held-out capability evidence.
 
 The complete P8 target remains in [Planning and Validation](planning-validation-v2.md#p8--evidence).
 The reporting and split rules remain in [comparative evaluation](comparative-evaluation-v2.md).
