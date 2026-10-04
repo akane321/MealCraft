@@ -122,7 +122,7 @@ def _complete_planning_experiment(
         }
         failures = [] if passed_audit_count >= 4 else [{"code": "purchase_budget", "status": "failed"}]
         data["report"] = {
-            "protocol": "planning-component-ablation-dev-v1",
+            "protocol": "planning-component-ablation-dev-v2",
             "runs": [
                 {
                     "case_id": "budget-edge",
@@ -147,7 +147,7 @@ def _complete_planning_experiment(
     [
         (SystemRole.ORDINARY_USER, 404),
         (SystemRole.DATA_REVIEWER, 404),
-        (SystemRole.OPERATOR, 201),
+        (SystemRole.OPERATOR, 404),
         (SystemRole.ADMIN, 201),
     ],
 )
@@ -169,7 +169,7 @@ def test_every_role_is_checked_when_enqueuing(job_client, role: SystemRole, expe
     [
         (SystemRole.ORDINARY_USER, 404),
         (SystemRole.DATA_REVIEWER, 404),
-        (SystemRole.OPERATOR, 201),
+        (SystemRole.OPERATOR, 404),
         (SystemRole.ADMIN, 201),
     ],
 )
@@ -229,8 +229,8 @@ def test_planning_experiment_is_idempotent_and_records_reproducible_inputs(job_c
     ("role", "expected_status"),
     [
         (SystemRole.ORDINARY_USER, 404),
-        (SystemRole.DATA_REVIEWER, 200),
-        (SystemRole.OPERATOR, 200),
+        (SystemRole.DATA_REVIEWER, 404),
+        (SystemRole.OPERATOR, 404),
         (SystemRole.ADMIN, 200),
     ],
 )
@@ -262,7 +262,7 @@ def test_every_role_is_checked_when_opening_experiment_evidence(
             "missing": [],
             "warnings": ["Developer diagnostics do not support held-out or production-performance claims."],
         }
-        assert detail["report"]["protocol"] == "planning-component-ablation-dev-v1"
+        assert detail["report"]["protocol"] == "planning-component-ablation-dev-v2"
         assert detail["conditions"]["failure_mechanisms"] == {"purchase_budget": 1}
 
 
@@ -281,8 +281,8 @@ def test_experiment_detail_rejects_non_experiment_rows(job_client) -> None:
     ("role", "expected_status"),
     [
         (SystemRole.ORDINARY_USER, 404),
-        (SystemRole.DATA_REVIEWER, 200),
-        (SystemRole.OPERATOR, 200),
+        (SystemRole.DATA_REVIEWER, 404),
+        (SystemRole.OPERATOR, 404),
         (SystemRole.ADMIN, 200),
     ],
 )
@@ -332,7 +332,8 @@ def test_every_role_is_checked_when_comparing_experiments(job_client, role: Syst
         assert comparison["claim_scope"] == "developer_diagnostic_only"
 
 
-def test_experiment_comparison_suppresses_deltas_when_evidence_drifted(job_client) -> None:
+@pytest.mark.parametrize("drift", ["code_commit", "code_source"])
+def test_experiment_comparison_suppresses_deltas_when_evidence_drifted(job_client, drift: str) -> None:
     client, factory = job_client
     _set_role(factory, SystemRole.ADMIN)
     run_ids = []
@@ -344,14 +345,28 @@ def test_experiment_comparison_suppresses_deltas_when_evidence_drifted(job_clien
         )
         run_ids.append(response.json()["id"])
     _complete_planning_experiment(factory, run_ids[0], passed_audit_count=3, code_commit="a" * 40)
-    _complete_planning_experiment(factory, run_ids[1], passed_audit_count=4, code_commit="b" * 40)
+    _complete_planning_experiment(
+        factory, run_ids[1], passed_audit_count=4, code_commit=("b" if drift == "code_commit" else "a") * 40
+    )
+    if drift == "code_source":
+        with factory() as database:
+            run = database.get(OperationRun, run_ids[1])
+            artifact = {**run.artifact_references[0]}
+            data = {**artifact["data"]}
+            data["conditions"] = {**data["conditions"], "code_source": {"sha256": "f" * 64}}
+            run.artifact_references = [{**artifact, "data": data}]
+            database.commit()
 
     response = client.get(f"/api/ops/experiments/compare?ids={run_ids[0]},{run_ids[1]}")
 
     assert response.status_code == 200
     comparison = response.json()
     assert comparison["compatible"] is False
-    assert comparison["reasons"] == ["Code revision differs or is missing."]
+    assert comparison["reasons"] == [
+        "Code revision differs or is missing."
+        if drift == "code_commit"
+        else "Implementation fingerprint differs or is missing."
+    ]
     assert all(row["delta"] is None for row in comparison["metrics"])
     assert comparison["claim_scope"] == "not_comparable"
 
@@ -385,7 +400,7 @@ def test_planning_experiment_rejects_unregistered_or_unsafe_inputs(job_client, p
     assert _count(factory, AuditEvent) == 0
 
 
-@pytest.mark.parametrize("role", [SystemRole.ORDINARY_USER, SystemRole.DATA_REVIEWER])
+@pytest.mark.parametrize("role", [SystemRole.ORDINARY_USER, SystemRole.DATA_REVIEWER, SystemRole.OPERATOR])
 def test_denied_roles_always_receive_a_generic_not_found(job_client, role: SystemRole) -> None:
     client, factory = job_client
     actor_id = _set_role(factory, role)
@@ -509,7 +524,7 @@ def test_enqueue_rejects_key_reuse_and_arbitrary_execution_fields(job_client) ->
     [
         (SystemRole.ORDINARY_USER, 404),
         (SystemRole.DATA_REVIEWER, 404),
-        (SystemRole.OPERATOR, 201),
+        (SystemRole.OPERATOR, 404),
         (SystemRole.ADMIN, 201),
     ],
 )

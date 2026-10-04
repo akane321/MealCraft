@@ -297,7 +297,7 @@ def test_planning_experiment_handler_records_complete_conditions_once(worker_dat
         assert len(conditions["dataset"]["file_sha256"]) == 64
         assert len(conditions["dataset"]["semantic_sha256"]) == 64
         assert len(conditions["product_snapshot_sha256"]) == 64
-        assert artifact["data"]["report"]["protocol"] == "planning-component-ablation-dev-v1"
+        assert artifact["data"]["report"]["protocol"] == "planning-component-ablation-dev-v2"
         before = first.artifact_references
 
     run_planning_experiment_handler(payload, database_url, context)

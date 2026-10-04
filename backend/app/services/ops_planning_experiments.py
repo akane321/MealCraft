@@ -19,7 +19,7 @@ PLANNING_EXPERIMENTS: dict[PlanningExperimentName, dict[str, Any]] = {
         "label": "Planning component ablations",
         "description": "Beam, greedy, diversity, overlap and repair conditions on developer fixtures.",
         "dataset": "data/fixtures/planning-v2/ablation-developer-v1.json",
-        "runner": "planning-component-ablation-dev-v1",
+        "runner": "planning-component-ablation-dev-v2",
     },
     "planning-final-gate": {
         "label": "Final validation gate (single dish)",

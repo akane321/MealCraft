@@ -59,24 +59,22 @@ separate flow is documented in [fixed-menu refresh](planning-fixed-menu-refresh.
 
 ## Limits and handoff
 
-This runner accepts one dish per explicit slot, including multiple dates and
-meal types. It rejects composed-meal packets; it does not measure the product's
-MealBeamPlanner. It uses the component's one-product-per-ingredient shopping
+The v2 CLI accepts single-dish and composed packets using MealExperimentDataset.
+ExperimentDataset retains the original one-dish schema for existing callers.
+Composed packets use component MealBeamPlanner settings, not product orchestration.
+For these packets the greedy preset is width-one meal beam, explicitly recorded
+in engine_limits; it is not the formal evaluation B1 baseline. It uses the component's one-product-per-ingredient shopping
 policy, not mixed-package purchasing. See the [purchasing comparison](planning-purchasing-comparison.md).
 
-Independent-validation-off, learned-ranking-off and composed meals remain
-deferred and are named in each report. Ranking is off in all implemented
-conditions. No product route exposes a validation bypass.
-
-The internal Operations Console now exposes this fixed developer fixture as
-`planning-components`. Operators and administrators must explicitly confirm a
-bounded parameter set; they cannot supply a path, held-out packet or provider.
-The durable worker calls `run_experiments`, preserves the full report and adds
-the code revision, dataset file digest, product snapshot digest, normalized
-parameter digest, duration and paid-usage declaration to the append-only run.
-Retries reuse the same idempotent job and cannot replace a result from another
-worker attempt. This integration does not turn component diagnostics into an
-evaluation winner or a citable held-out result.
+Final-gate and feedback on/off comparisons are separate experiments gathered by
+[the suite](planning-experiment-suite.md). Ranking remains off in the five
+component conditions. Console integration is a separate consumer task. No product route exposes a validation bypass. The
+console owner can later call `run_experiments` with a validated developer dataset
+and retain the returned conditions and artifacts; no console schema, runtime
+setting or database table changes in this slice.
 
 The complete P8 target remains in [Planning and Validation](planning-validation-v2.md#p8--evidence).
 The reporting and split rules remain in [comparative evaluation](comparative-evaluation-v2.md).
+
+The composed weight and repair fixture is `data/fixtures/planning-v2/composed-ablation-developer-v1.json`.
+The extended runner reports `planning-component-ablation-dev-v2`; existing v1 reports remain unchanged.

@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.core.paths import repository_root
 from app.models.platform import OperationRun
 from app.orchestration.run_lifecycle import stable_digest
-from app.planning.developer_experiments import ExperimentDataset, digest, run_experiments
+from app.planning.developer_experiments import MealExperimentDataset, digest, run_experiments
 from app.planning.validation_gate_experiments import GateDataset, run_gate_experiments
 from app.schemas.operations import PlanningExperimentName
 from app.services.ops_planning_experiments import PLANNING_EXPERIMENT_RUN_TYPE, PLANNING_EXPERIMENTS
@@ -43,7 +43,7 @@ def run_planning_experiment_handler(payload: dict, database_url: str, context: A
         raw = dataset_path.read_bytes()
         started = perf_counter()
         if request.evaluation == "planning-components":
-            dataset = ExperimentDataset.model_validate_json(raw)
+            dataset = MealExperimentDataset.model_validate_json(raw)
             report = run_experiments(dataset, **request.parameters)
             metrics, mechanisms = _component_summary(report, len(dataset.cases))
         else:

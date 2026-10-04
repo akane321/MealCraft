@@ -366,6 +366,7 @@ def experiment_comparison(a: ExperimentDetail, b: ExperimentDetail) -> Experimen
         ("dataset_digest", ("dataset", "semantic_sha256"), "Dataset digest differs or is missing."),
         ("runner", ("runner",), "Runner protocol differs or is missing."),
         ("code_commit", ("code_commit",), "Code revision differs or is missing."),
+        ("code_source", ("code_source",), "Implementation fingerprint differs or is missing."),
         ("product_snapshot", ("product_snapshot_sha256",), "Product snapshot differs or is missing."),
         ("seed", ("seed",), "Seed differs or is missing."),
         ("repeats", ("repeats",), "Repeat count differs or is missing."),

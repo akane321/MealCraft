@@ -11,6 +11,7 @@ from itertools import product
 from math import ceil, prod
 
 from app.planning.dietary_tags import satisfies
+from app.planning.diversity import diversity_loss
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.input_audit import require_finite_problem
@@ -368,7 +369,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             validation=report,
             trace=PlanningTrace(
                 algorithm="deterministic-meal-beam-search",
-                algorithm_version="meal-beam-v1",
+                algorithm_version="meal-beam-diversity-v2" if problem.diversity_policy else "meal-beam-v1",
                 deterministic=True,
                 candidate_limit=self.limits.candidates_per_role,
                 diversity_policy=problem.diversity_policy,
@@ -553,11 +554,18 @@ def repetition_loss(problem, state: MealState, dishes, repeat_cost: float = 0.10
     """Without a diversity policy, the one-dish beam's legacy penalties, counted per dish.
 
     Each earlier use of a recipe costs 0.10 and repeating the previous meal's
-    dish costs 0.35 more (`app/planning/diversity.py`). A recorded policy makes
-    repetition a hard rule instead (`horizon_permitted`).
+    dish costs 0.35 more (`app/planning/diversity.py`). An explicit policy uses
+    hard repetition guards plus bounded diversity and overlap soft terms.
     """
     if problem.diversity_policy is not None:
-        return 0.0
+        # One bounded increment per meal: average the dish increments so adding
+        # roles cannot multiply the horizon's 0.10 soft-term bound.
+        previous = [recipe_id for _, meal in state.choices for _, recipe_id in meal]
+        loss = 0.0
+        for _, recipe_id in dishes:
+            loss += diversity_loss(problem, previous, recipe_id)
+            previous.append(recipe_id)
+        return loss / len(dishes) if dishes else 0.0
     free = set(problem.repetition_rules.repeat_ok_roles) if problem.repetition_rules else set()
     previous = [recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in free]
     last = {recipe_id for role, recipe_id in state.choices[-1][1] if role not in free} if state.choices else set()
