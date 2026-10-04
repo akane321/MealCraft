@@ -30,9 +30,10 @@ def recipe(recipe_id, course, prep, cook, *, calories, allergens=(), ingredient=
 def problem(**changes) -> FinalPlanningProblem:
     recipes = [
         recipe("chicken", "main", 15, 25, calories=500),
-        recipe("greens", "side", 10, 22, calories=100),
+        # Sides of real vegetables: the vegetable role takes only a dish led by vegetables.
+        recipe("greens", "side", 10, 22, calories=100, ingredient="spinach"),
         recipe("broth", "soup", 15, 30, calories=200),
-        recipe("peanut-slaw", "side", 10, 0, calories=150, allergens=["peanut"]),
+        recipe("peanut-slaw", "side", 10, 0, calories=150, allergens=["peanut"], ingredient="cabbage"),
     ]
     payload = {
         "problem_id": "meal-composition",
@@ -53,7 +54,7 @@ def problem(**changes) -> FinalPlanningProblem:
         "recipes": recipes,
         "products": [
             {
-                "ingredient_id": f"{r['recipe_id']}-base",
+                "ingredient_id": r["ingredients"][0]["ingredient_id"],
                 "product_id": f"p-{r['recipe_id']}",
                 "package_quantity": 100,
                 "package_unit": "g",
@@ -91,7 +92,7 @@ def test_three_dish_meal_scales_each_dish_to_its_portion_share():
     assert report.status == "passed", report.checks
     required = {line.ingredient_id: line.required_quantity for line in shopping}
     # 400 g serves 4; the household of 4 eats 0.6 of a main and 0.4 of each other dish.
-    assert required == {"chicken-base": 240, "greens-base": 160, "broth-base": 160}
+    assert required == {"chicken-base": 240, "spinach": 160, "broth-base": 160}
     demands, issues = derive_mixed_demands(
         packet, meal(("main", "chicken"), ("vegetable", "greens"), ("soup", "broth"))
     )
@@ -171,6 +172,68 @@ def test_meal_beam_drops_an_optional_dish_the_meal_time_cannot_hold():
     assert {a.role_id for a in solution.assignments} == {"main", "vegetable"}
 
 
+def with_a_pasta_side() -> FinalPlanningProblem:
+    """problem() and "Fettuccine Noodles", a quicker side than the greens that the search ranks first."""
+    base = problem().model_dump(mode="json")
+    base["recipes"].append(recipe("fettuccine", "side", 5, 5, calories=100, ingredient="egg_noodles"))
+    base["products"].append(
+        {
+            "ingredient_id": "egg_noodles",
+            "product_id": "p-fettuccine",
+            "package_quantity": 100,
+            "package_unit": "g",
+            "price_sgd": 1.0,
+        }
+    )
+    return FinalPlanningProblem.model_validate(base)
+
+
+def test_the_vegetable_role_takes_only_a_dish_led_by_vegetables(monkeypatch):
+    """Owner, 2026-10-02: walkthrough dinners got "Fettuccine Noodles" and "Refried Beans" as their vegetable."""
+    from app.planning import meal_composition
+
+    for planner in planners():
+        roles = {a.role_id: a.recipe_id for a in planner.solve(with_a_pasta_side()).assignments}
+        assert roles["vegetable"] == "greens", planner
+    report, _ = validate(with_a_pasta_side(), meal(("main", "chicken"), ("vegetable", "fettuccine")))
+    assert "meal_role_course" in failed(report)
+
+    # A household's own role keeps every dish of its courses.
+    custom = with_a_pasta_side()
+    custom.slots[0].composition[1].role_id = "side"
+    report, _ = validate(custom, meal(("main", "chicken"), ("side", "fettuccine")))
+    assert report.status == "passed", report.checks
+
+    # Without the rule, both planners chose the pasta.
+    monkeypatch.setattr(meal_composition, "vegetable_role", lambda role_id: False)
+    for planner in planners():
+        roles = {a.role_id: a.recipe_id for a in planner.solve(with_a_pasta_side()).assignments}
+        assert roles["vegetable"] == "fettuccine", planner
+
+
+def test_the_v2_baselines_fill_the_vegetable_role_with_a_vegetable_dish():
+    """The greedy floor and the strong rule baseline take the quicker pasta side unless the role refuses it."""
+    from app.evaluation.multidish_runner import greedy_selector, strong_rule_selector
+
+    for selector in (greedy_selector, strong_rule_selector):
+        roles = {a.role_id: a.recipe_id for a in selector(with_a_pasta_side()).assignments}
+        assert roles["vegetable"] == "greens", selector.__name__
+
+
+def test_with_no_vegetable_dish_an_optional_vegetable_stays_empty_and_a_required_one_has_no_meal():
+    packet = with_a_pasta_side()
+    packet.recipes = [r for r in packet.recipes if r.recipe_id != "greens"]  # and the peanut slaw is unsafe
+    beam, exact = planners()
+    assert beam.solve(packet).status == "candidate_rejected"
+    assert exact.solve(packet).status == "infeasible"
+
+    packet.slots[0].composition[1].required = False
+    for planner in (beam, exact):
+        solution = planner.solve(packet)
+        assert solution.status == "feasible", solution.validation.checks
+        assert {a.role_id for a in solution.assignments} == {"main", "soup"}  # never the pasta
+
+
 def test_meal_beam_plans_one_dish_slots_like_before():
     from app.planning.meal_beam import MealBeamPlanner
     from tests.test_planning_v2 import load_problem
@@ -208,11 +271,11 @@ def three_days(**changes):
     base = problem().model_dump(mode="json")
     base["recipes"] += [
         recipe("beef", "main", 10, 20, calories=520),
-        recipe("beans", "side", 5, 10, calories=120, ingredient="beans-base"),
+        recipe("beans", "side", 5, 10, calories=120, ingredient="green_beans"),
     ]
     base["products"].append(
         {
-            "ingredient_id": "beans-base",
+            "ingredient_id": "green_beans",
             "product_id": "p-beans",
             "package_quantity": 100,
             "package_unit": "g",
@@ -252,7 +315,7 @@ def test_a_dish_the_household_asks_for_twice_is_planned_twice_by_both_planners()
 
 
 def test_an_ingredient_asked_for_in_every_meal_and_no_repeats_are_hard_rules():
-    wanted = three_days(repetition_rules={"ingredient_meals": [{"ingredient_id": "beans-base", "min_meals": 3}]})
+    wanted = three_days(repetition_rules={"ingredient_meals": [{"ingredient_id": "green_beans", "min_meals": 3}]})
     for planner in planners():
         solution = planner.solve(wanted)
         assert solution.status == "feasible"

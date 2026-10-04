@@ -39,8 +39,10 @@ nutrition targets, and existing ingredients.
 Under **Meals and dishes**, tick the meals each day plans (breakfast, lunch,
 dinner; dinner only by default) and pick each meal's dishes: a preset (dinner
 defaults to one main and one vegetable) or your own mix of mains, vegetables and
-a soup, up to six dishes. A dish marked "if one fits" is left out when nothing
-suits it.
+a soup, up to six dishes. A vegetable dish is a side dish or salad made mostly
+of vegetables, with no meat or fish (eggs, cheese and sauces such as fish sauce
+are fine); a pasta, rice or bean side does not count as one, and neither does a
+chicken salad. A dish marked "if one fits" is left out when nothing suits it.
 
 Important semantics:
 

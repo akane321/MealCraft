@@ -47,6 +47,7 @@ class RecipeService:
                     unit=item.unit,
                     preparation=item.preparation,
                     allergens=list(item.ingredient.allergens),
+                    original_text=item.original_text,
                 )
                 for item in items
             ],

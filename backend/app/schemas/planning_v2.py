@@ -88,6 +88,8 @@ class PlanningIngredientRequirement(BaseModel):
     ingredient_id: str = Field(min_length=1, max_length=160)
     quantity: float | None = Field(default=None, gt=0)
     unit: str | None = Field(default=None, min_length=1, max_length=40)
+    # The recipe's own wording of the line; `app.planning.vegetable_led` reads it, nothing else does.
+    original_text: str | None = None
 
     @model_validator(mode="after")
     def require_unit_for_known_quantity(self) -> "PlanningIngredientRequirement":

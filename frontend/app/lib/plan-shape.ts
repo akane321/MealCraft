@@ -11,7 +11,7 @@ export const MEAL_PRESETS: Record<PlannedMealType, Record<string, MealRole[]>> =
   breakfast: { "One dish": [role("main", ["breakfast", "baked_good"])] },
   lunch: {
     "One dish": [role("main", ["main", "salad", "soup"])],
-    "Main and a side": [role("main", ["main"]), role("vegetable", ["side", "salad"])],
+    "Main and a veg": [role("main", ["main"]), role("vegetable", ["side", "salad"])],
   },
   dinner: {
     "One meat, one veg": [role("main", ["main"]), role("vegetable", ["side", "salad"], false)],
@@ -37,6 +37,20 @@ export const COURSE_LABEL: Record<DishCourse, string> = {
 export function presetName(meal: PlannedMealType, roles: MealRole[]): string {
   const same = (a: MealRole[], b: MealRole[]) => JSON.stringify(a) === JSON.stringify(b);
   return Object.entries(MEAL_PRESETS[meal]).find(([, preset]) => same(preset, roles))?.[0] ?? "Custom";
+}
+
+/** The vegetable role and its copies ("vegetable-2"): the planner gives them only vegetable dishes (backend `vegetable_role`). */
+export function isVegetableRole(roleId: string): boolean {
+  return roleId.replace(/-\d+$/, "") === "vegetable";
+}
+
+/** What a dish row is called, by what the planner does with it: the vegetable role by its id, any other by its courses. */
+export function dishLabel(item: MealRole): string {
+  if (isVegetableRole(item.role_id)) return "Vegetable dish";
+  if (item.courses.includes("main")) return item.role_id === "main" ? "Main dish" : "Another main";
+  if (item.courses.includes("soup")) return "Soup";
+  if (item.courses.includes("breakfast")) return "Breakfast dish";
+  return item.courses.every(course => course === "side" || course === "salad") ? "Side or salad" : "Another dish";
 }
 
 /** A fresh role id for a new dish: the first main is "main" (it gets the main dish's share). */

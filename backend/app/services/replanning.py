@@ -8,6 +8,7 @@ from app.planning.meal_composition import meal_minutes, portion_shares
 from app.planning.product_path import ProductPlanningError
 from app.planning.recipe_quality import dish_family
 from app.planning.recipe_similarity import RecipeSimilarity
+from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError, entry_values
 from app.repositories.recipe import RecipeRepository
@@ -462,6 +463,7 @@ class MealPlanReplanningService:
                 item
                 for item in candidates
                 if (recipes_by_id[item.recipe.id].course or "main") in role.courses
+                and (not vegetable_role(role.role_id) or catalog_vegetable_led(recipes_by_id[item.recipe.id]))
                 and self._meal_still_holds(plan, entry, recipes_by_id[item.recipe.id], constraints)
             ]
         if not candidates:
