@@ -308,9 +308,9 @@ class ProductPlanningEngine:
                 # The best-ranked dishes are rarely the cheap ones; with a budget, half
                 # the packet is the cheapest of the rest so a week within it can exist.
                 best = ranked[: limit // 2]
-                cheapest = sorted(ranked[limit // 2 :], key=dish_cost)[: limit - len(best)]
-                trace["budget_packet"] = {"ranked": len(best), "cheapest": len(cheapest)}
-                ranked = best + cheapest
+                cheap_candidates = sorted(ranked[limit // 2 :], key=dish_cost)[: limit - len(best)]
+                trace["budget_packet"] = {"ranked": len(best), "cheapest": len(cheap_candidates)}
+                ranked = best + cheap_candidates
             recommendations = ranked[:limit]
         else:
             recommendations, limits = composed_packet(

@@ -300,6 +300,27 @@ def test_a_budget_below_the_best_ranked_week_is_still_planned(recipe_client):
     assert "couldn't fit seven dinners into S$20.00" in too_low.json()["detail"]
 
 
+@pytest.mark.parametrize("strategy", ["beam", "greedy-baseline"])
+def test_budget_packet_does_not_turn_a_normal_request_into_cheapest_mode(recipe_client, monkeypatch, strategy):
+    from app.core.paths import repository_root
+    from app.data.catalog import import_catalog, load_catalog
+
+    root = repository_root()
+    with database() as session:
+        import_catalog(
+            session, load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
+        )
+    monkeypatch.setattr(ProductPlanningEngine, "_packet_limit", lambda self, days: 2)
+    response = recipe_client.post(
+        "/api/plans/generate", json={**REQUEST, "weekly_budget_sgd": 1000, "planner_strategy": strategy}
+    )
+    assert response.status_code == 201, response.text
+    assert response.json()["grocery_estimate"]["within_weekly_budget"] is True
+    _, trace = latest_trace()
+    assert trace["budget_packet"] == {"ranked": 1, "cheapest": 1}
+    assert trace["validation"]["status"] == "passed"
+
+
 def test_the_default_household_week_is_dinner_with_a_main_and_a_vegetable(recipe_client):
     """A profile that sets no shape plans ADR-0046's default; lunch added by shape plans lunches too."""
     from app.core.paths import repository_root
