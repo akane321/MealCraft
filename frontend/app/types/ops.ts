@@ -106,7 +106,8 @@ export interface OpsServiceStatus {
   label: string;
   configured: boolean;
   mode: string;
-  recent: { window_days: number; calls: number; failures: number; fallbacks: number } | null;
+  /** Runs that used the service, and for OpenAI the requests those runs sent to it: not the same number. */
+  recent: { window_days: number; runs: number; model_calls: number | null; failures: number; fallbacks: number } | null;
   note: string | null;
 }
 

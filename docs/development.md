@@ -67,6 +67,36 @@ Available services:
 The backend applies all pending Alembic migrations, validates and idempotently
 imports the reference catalog, and then starts Uvicorn.
 
+The frontend container serves `./frontend` from a bind mount and reloads on
+edits. Docker Desktop on Windows passes no file-change events through a bind
+mount, so `compose.yaml` sets `MEALCRAFT_WATCH_POLLING=true` and the dev server
+polls for changes instead (`frontend/nuxt.config.ts`). The backend's reloader
+polls too (`WATCHFILES_FORCE_POLLING=true`), and only `backend/app`
+(`--reload-dir app`), not the data and docs the container also mounts. A dev
+server run on the host keeps native file events.
+
+## Run a Demonstration
+
+The development frontend carries Nuxt DevTools, whose badge sits at the bottom
+centre of every page, and compiles each page on its first visit. For a
+demonstration, run the frontend as a production build instead:
+
+```bash
+docker compose -f compose.yaml -f compose.demo.yaml up --build --detach
+```
+
+`compose.demo.yaml` changes only the frontend: it builds the `demo` stage of
+`frontend/Dockerfile` (`pnpm build`, served by `node .output/server/index.mjs`)
+without the source bind mount, so an edit needs another `--build`. It is
+tagged `mealcraft-frontend-demo`, apart from the dev image. The backend,
+database and URLs are as above. Return to the development frontend with
+`docker compose up --detach`.
+
+In OpenAI mode the backend loads the OpenAI library and the catalog vectors in
+the background when it starts, without calling the API, so the first message
+or swap after a start is not the slow one. Give it a few seconds after the
+health check turns green before the first swap.
+
 Generated weekly plans are persisted in `meal_plans`, `meal_plan_entries`, and
 `meal_plan_grocery_items`. Meal execution status and completion timestamps are
 stored on `meal_plan_entries`. Agent conversations, extracted constraints,
@@ -156,8 +186,14 @@ curl http://localhost:8000/api/agent/sessions/<session-id>/runs/<run-id>
 ```
 
 The detail response includes checkpoints, ordered tool receipts, consumed
-budgets, terminal status and error/termination metadata. Tests use deterministic
-fixture parsing and zero live API calls.
+budgets, terminal status and error/termination metadata. `used_llm_calls` counts
+every request the turn sent to the OpenAI API: the parser's chat request and the
+embedding request, SDK retries included. It is recorded once the turn is over,
+so it never stops a turn. The console's Services page shows these model calls
+beside the number of runs, the runs that went on without the model after a
+request failed (fallbacks), and the model calls since the backend started that
+no run records (console replays, swap previews asked of the plan API directly).
+Tests use deterministic fixture parsing and zero live API calls.
 
 ## Product Pricing Modes
 
@@ -180,6 +216,11 @@ docker compose exec backend uv run --no-sync ruff check .
 docker compose exec backend uv run --no-sync ruff format --check .
 docker compose exec backend uv run --no-sync pytest
 ```
+
+The container's environment comes from `.env`, so it may select the OpenAI
+parser and hold keys. `backend/tests/conftest.py` removes the parser, model and
+key settings from the test process before any setting is read, so the suite
+behaves as it does in CI. A test that needs one sets it itself.
 
 Validate or import the catalog manually:
 
@@ -233,6 +274,12 @@ cd frontend
 pnpm exec playwright install chromium
 pnpm test:e2e
 ```
+
+The browser tests answer the API themselves and start their own dev server
+from the checkout on port 3100, not the Compose frontend on 3000, which may be
+serving older code. A server already on 3100 is an error rather than silently
+reused. To test against a dev server you started yourself from this checkout,
+run it on port 3100 and set `PLAYWRIGHT_REUSE_SERVER=1`.
 
 A successful typecheck or build does not prove that the rendered interface is
 usable. Inspect affected pages at the supported minimum 1280×720 desktop

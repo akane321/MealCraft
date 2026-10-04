@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from pydantic_core import to_jsonable_python
 
+from app.agent import model_client
 from app.agent.parser import ConstraintParser
 from app.agent.replanning import AgentReplanInterpreter
 from app.agent.shape_change import read_shape_change
@@ -65,6 +66,10 @@ class AgentSessionNotFoundError(LookupError):
 
 
 class AgentSessionNotReadyError(ValueError):
+    pass
+
+
+class AgentPlanNotFoundError(LookupError):
     pass
 
 
@@ -159,8 +164,20 @@ class AgentSessionService:
         # Saves a shape changed in the conversation as the household's usual one, on a yes (ADR-0046).
         self.keep_plan_shape = keep_plan_shape
 
-    def create(self, message: str, *, idempotency_key: str | None = None) -> AgentSessionResponse:
+    # Count this turn from its start, before its run exists.
+    @model_client.counting()
+    def create(
+        self, message: str, *, idempotency_key: str | None = None, plan_id: int | None = None
+    ) -> AgentSessionResponse:
         current = (self.starting_constraints or AgentConstraintState()).model_copy(deep=True)
+        if plan_id is not None:
+            # A change to a week no open conversation planned (one made on the profile page): the new
+            # conversation starts as that week's, and the message changes it rather than planning another.
+            self._require_plan(plan_id)
+            agent_session = self.repository.create_for_plan(
+                provider=self.parser.provider, constraints=current, plan_id=plan_id
+            )
+            return self.reply(agent_session.id, message, idempotency_key=idempotency_key)
         turn_input = _replay_input(
             message,
             current=current,
@@ -220,16 +237,20 @@ class AgentSessionService:
             items=[self._to_response(item) for item in self.repository.list_recent(limit=limit)]
         )
 
+    @model_client.counting()
     def reply(
         self,
         session_id: int,
         message: str,
         *,
         idempotency_key: str | None = None,
+        plan_id: int | None = None,
     ) -> AgentSessionResponse:
         agent_session = self.repository.get(session_id)
         if agent_session is None:
             raise AgentSessionNotFoundError
+        if plan_id is not None and agent_session.plan_id != plan_id:
+            agent_session = self._take_plan(agent_session, plan_id)
         snapshot = self._to_response(agent_session)
         started = self._start_run(
             agent_session_id=session_id,
@@ -314,6 +335,22 @@ class AgentSessionService:
             replay=_replay_record(turn_input, result),
         )
         return self._to_response(updated)
+
+    def _require_plan(self, plan_id: int) -> None:
+        if self.meal_plan_service.get(plan_id) is None:
+            raise AgentPlanNotFoundError
+
+    def _take_plan(self, agent_session: AgentSession, plan_id: int) -> AgentSession:
+        """A conversation that planned no week (an unrelated question, or one still collecting) asked to
+        change the household's week beside it: it becomes that week's conversation. One that already
+        has a week keeps it: a conversation changes one week."""
+        if agent_session.plan_id is not None:
+            raise AgentSessionNotReadyError("This conversation changes another week. Open that week's conversation.")
+        self._require_plan(plan_id)
+        attached = self.repository.attach_plan(agent_session.id, plan_id=plan_id)
+        if attached is None:
+            raise AgentSessionNotFoundError
+        return attached
 
     def answer_interaction(
         self,
@@ -892,6 +929,7 @@ class AgentSessionService:
     ) -> AgentRun:
         scope_payload = scope_decision.model_dump(mode="json") if scope_decision is not None else None
         run.scope_decision = scope_payload
+        self._record_model_calls(run)
         self.run_lifecycle.repository.session.commit()
         run = self.run_lifecycle.checkpoint(
             run,
@@ -925,6 +963,21 @@ class AgentSessionService:
             )
         return self.run_lifecycle.transition(run, AgentRunStatus.COMMITTED, termination_reason_code="TURN_COMPLETED")
 
+    @staticmethod
+    def _record_model_calls(run: AgentRun) -> None:
+        """Puts on the run, for the caller's next commit, every request this turn sent to the model API and
+        whether the turn had to go on without the model (model_client counts both).
+
+        A record of work already done, so neither the deadline nor the limit is checked here: the turn is over,
+        and a budget stop now would fail a turn whose reply is already saved, or hide why it failed."""
+        taken = model_client.take()
+        # ponytail: the table holds used <= max, so a turn past its limit records the limit; a turn sends at most
+        # 4 (one chat and one embedding request, each retried once), so check before each request if that grows.
+        run.used_llm_calls = min(run.used_llm_calls + taken.requests, run.max_llm_calls)
+        if taken.fell_back:
+            # What the console counts as a fallback.
+            run.model_config = {**(run.model_config or {}), "model_fell_back": True}
+
     def _fail_run(self, run: AgentRun, error: Exception, *, replay: dict | None = None) -> AgentRun:
         current = self.run_lifecycle.repository.get(run.id) or run
         if AgentRunStatus(current.status) in {
@@ -937,6 +990,7 @@ class AgentSessionService:
             AgentRunStatus.CANCELLED,
         }:
             return current
+        self._record_model_calls(current)
         if replay is not None:
             current = self.run_lifecycle.checkpoint(
                 current, stage="turn_failed", status="failed", state_payload={"replay": replay}

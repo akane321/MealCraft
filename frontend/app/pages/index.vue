@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { allergenLabel } from "~/lib/allergens";
 import { budgetLine, formatSgd, groceryGroups, plateStyle, sameDishChange } from "~/lib/home-surface";
+import { statedTimeLimit } from "~/lib/household-profile";
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
-import { shapeChangeSummary } from "~/lib/plan-shape";
+import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
 import type { AgentMessage, AgentSession } from "~/types/agent";
 import type { MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection } from "~/types/meal-plan";
 
@@ -24,6 +25,12 @@ const household = useHouseholdProfile();
 
 const view = ref<"landing" | "app">("landing");
 const draft = ref("");
+// A dish's button or a follow-up chip on a week the open conversation did not plan: its words and that week.
+const dishAction = ref<{ text: string; week: number } | null>(null);
+// Such an action that would set aside this conversation's "Plan my week", waiting for the household's answer.
+const takeOn = ref<{ message: string; week: number } | null>(null);
+// Open my week (enter) is reopening the week and its conversations.
+const entering = ref(false);
 const plan = ref<WeeklyMealPlan | null>(null);
 // A request in flight, a failed one and "nothing planned yet" are three different states.
 const planState = ref<"empty" | "loading" | "error" | "ready">("empty");
@@ -57,7 +64,7 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
   return [
     ...(c.household_size ? [{ text: "For", value: String(c.household_size) }] : []),
     ...(c.weekly_budget_sgd ? [{ text: "Budget", value: `S$${c.weekly_budget_sgd}` }] : []),
-    ...(c.max_cooking_time_minutes ? [{ text: "Up to", value: `${c.max_cooking_time_minutes} min` }] : []),
+    ...(statedTimeLimit(c.max_cooking_time_minutes) ? [{ text: "Up to", value: `${c.max_cooking_time_minutes} min` }] : []),
     ...c.dietary_preferences.map(value => ({ text: "", value: value.replaceAll("_", " ") })),
     ...c.excluded_ingredients.map(value => ({ text: "No", value: value.replaceAll("_", " ") })),
     ...c.allergens.map(value => ({ text: "No", value: allergenLabel(value).toLowerCase(), alert: true })),
@@ -87,26 +94,32 @@ const swapOverBudget = computed(() => {
   return after > current.weekly_budget_sgd ? formatSgd(after - current.weekly_budget_sgd) : null;
 });
 // A meal added, dropped or recomposed (ADR-0046): the new dishes by day, before the household confirms.
-const planDay = (dayIndex: number) => {
-  const start = plan.value?.start_date;
-  if (!start) return `day ${dayIndex}`;
-  const date = new Date(`${start}T00:00:00Z`);
-  date.setUTCDate(date.getUTCDate() + dayIndex - 1);
-  return formatPlanDate(date.toISOString().slice(0, 10), { weekday: "short" });
-};
 const shapePreview = computed(() => {
   const change = session.value?.pending_replan?.shape_change;
   if (!change) return null;
   const byDay = new Map<number, string[]>();
   for (const dish of change.added) byDay.set(dish.day_index ?? 0, [...(byDay.get(dish.day_index ?? 0) ?? []), dish.recipe_title]);
   return {
-    title: shapeChangeSummary(change, planDay),
-    days: [...byDay.entries()].map(([day, titles]) => ({ day: planDay(day), titles })),
+    title: shapeChangeSummary(change, plan.value?.start_date),
+    days: [...byDay.entries()].map(([day, titles]) => ({ day: planDayLabel(plan.value?.start_date, day), titles })),
     slugs: change.added.slice(0, 3).map(dish => dish.recipe_slug),
     removed: change.removed.length,
   };
 });
-const showWeek = computed(() => Boolean(plan.value && days.value.length && !session.value?.can_confirm && !session.value?.pending_replan));
+// The week shown in the panel belongs to this conversation only when the conversation planned it;
+// its card never appears inside another conversation.
+const ownsPlan = computed(() => Boolean(plan.value && session.value?.plan_id === plan.value.id));
+const showWeek = computed(() => Boolean(ownsPlan.value && days.value.length && !session.value?.pending_replan));
+// A conversation that planned no week changes the one beside it (see send).
+const canChangeWeek = computed(() => Boolean(plan.value && (ownsPlan.value || !session.value?.plan_id)));
+const readyToPlan = computed(() => Boolean(session.value?.can_confirm && session.value.status !== "planned"));
+// Still asking what it needs to plan a new week: taking the current week on would drop that question.
+const settingUp = computed(() => {
+  const s = session.value;
+  return Boolean(s && !s.plan_id && (s.pending_interaction || s.missing_fields.length || s.clarification_questions.length));
+});
+// A conversation planning a new week of its own asks before a dish's change takes the current week on (see send).
+const planningNew = computed(() => readyToPlan.value || settingUp.value);
 const initials = computed(() => (actor.value?.user.display_name ?? "?")
   .split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]!.toUpperCase()).join(""));
 const home = computed(() => {
@@ -135,10 +148,15 @@ function sessionTitle(item: AgentSession) {
   return item.messages.find(m => m.role === "user")?.content ?? "New plan";
 }
 
+/** The draft, with the dish action its words came from, kept across sign-in and reloads (restored on mount). */
+function saveDraft() {
+  try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ text: draft.value, action: dishAction.value })); }
+  catch { /* storage may be blocked; the draft is only a convenience */ }
+}
+
 async function requireAccount(): Promise<boolean> {
   if (actor.value) return true;
-  try { sessionStorage.setItem(DRAFT_KEY, draft.value); }
-  catch { /* storage may be blocked; the draft is only a convenience */ }
+  saveDraft();
   await navigateTo({ path: "/login", query: { next: "/" } });
   return false;
 }
@@ -146,26 +164,71 @@ async function requireAccount(): Promise<boolean> {
 async function enter() {
   if (!(await requireAccount())) return;
   view.value = "app";
-  if (!session.value) await agent.restoreLatest();
-  // The newest plan wins, even over the one the last conversation made: a week
-  // rebuilt on the profile page has no conversation of its own.
-  await loadLatestPlan();
+  // Until the week and its conversations are back, a send could start a second conversation (see send).
+  // Nothing below throws: each request reports its own failure.
+  entering.value = true;
+  // The household's current week is its newest plan. It reopens with the conversation that planned
+  // it; a week with no conversation (rebuilt on the profile page) opens beside a fresh one.
+  const current = await currentPlanId();
+  if (!session.value) await agent.restore(current);
+  // An open conversation keeps its own week; one that has not planned yet shows the current week.
+  const shown = session.value?.plan_id ?? current;
+  if (shown) await loadPlan(shown);
+  entering.value = false;
 }
 
-async function loadLatestPlan() {
+async function currentPlanId(): Promise<number | null> {
   try {
     const latest = await apiFetch<WeeklyMealPlanCollection>(`${config.public.apiBase}/api/plans`);
-    if (latest.items[0]) await loadPlan(latest.items[0].id);
+    return latest.items[0]?.id ?? null;
   }
-  catch { /* no plan yet is not an error */ }
+  catch { return null; /* no plan yet is not an error */ }
+}
+
+/** The panel's week: the open conversation's own, else the household's current week. */
+async function loadShownPlan() {
+  planState.value = "loading";
+  const current = session.value?.plan_id ? null : await currentPlanId();
+  // The open conversation may have changed, or planned, while the current week was looked up.
+  const shown = session.value?.plan_id ?? current;
+  if (shown) await loadPlan(shown);
+  else planState.value = "empty";
+}
+
+/** The week a message changes for a conversation that did not plan it: while the draft still starts with a dish action's words. */
+function actionWeek(message: string): number | null {
+  const action = dishAction.value;
+  return !session.value?.plan_id && action && message.startsWith(action.text) ? action.week : null;
 }
 
 async function send(text = draft.value) {
   const message = text.trim();
-  if (!message) return;
+  if (!message || entering.value) return;
   draft.value = message;
   if (!(await requireAccount())) return;
+  // A dish's words sent from the landing (kept over a reload or a sign-in) first reopen the week and its
+  // conversations, as Open my week does, so they reach the conversation holding the week; if that week
+  // was replaced meanwhile, the words go and nothing is sent.
+  if (view.value === "landing" && actionWeek(message)) {
+    await enter();
+    if (!dishAction.value) return;
+  }
   view.value = "app";
+  takeOn.value = null;
+  // A dish action on a week this conversation did not plan changes that week, never plans a new one. It goes
+  // to the conversation that planned the week when that one is in the recent list, so one conversation holds
+  // a week; else this conversation takes the week on, after asking if that sets aside the new week it is planning.
+  const week = actionWeek(message);
+  const planner = week ? agent.recent.value.find(item => item.plan_id === week) : undefined;
+  if (planner) {
+    openSession(planner);
+    draft.value = message;
+  }
+  else if (week) {
+    if (planningNew.value) takeOn.value = { message, week };
+    else await changeWeek(message, week);
+    return;
+  }
   const pending = interaction.value;
   if (pending?.allow_free_text) {
     await agent.answerInteraction({
@@ -179,6 +242,18 @@ async function send(text = draft.value) {
   else if (session.value) await agent.reply(message);
   else await agent.create(message);
   if (!errorMessage.value) draft.value = "";
+}
+
+/** This conversation takes `week` on and changes it with `message`. */
+async function changeWeek(message: string, week: number) {
+  takeOn.value = null;
+  await (session.value ? agent.reply(message, week) : agent.create(message, week));
+  if (!errorMessage.value) draft.value = "";
+}
+
+function keepPlanning() {
+  takeOn.value = null;
+  draft.value = "";
 }
 
 async function choose(optionId: string) {
@@ -213,7 +288,7 @@ async function loadPlan(planId: number) {
 
 function retryPlan() {
   if (lastPlanId.value) void loadPlan(lastPlanId.value);
-  else void loadLatestPlan();
+  else void loadShownPlan();
 }
 
 async function setStatus(entryId: number, status: MealPlanEntryStatus) {
@@ -227,6 +302,7 @@ function openTab(name: Tab) {
 
 function suggest(text: string) {
   draft.value = text;
+  dishAction.value = !ownsPlan.value && plan.value ? { text, week: plan.value.id } : null;
   ask.value?.focus();
 }
 
@@ -245,25 +321,34 @@ function toggleFilm() {
   else video.pause();
 }
 
-function newChat() {
-  // Keep the conversation being left in the recent list.
+/**
+ * Shows `item` (null: a new conversation) with its own week in the panel, or the household's current
+ * week when it planned none. Every switch of conversation goes through here.
+ */
+function showConversation(item: AgentSession | null) {
+  // Keep the conversation being left in the recent list, as it is now (its listed copy may be older).
   const leaving = session.value;
-  if (leaving?.messages.length && !agent.recent.value.some(item => item.id === leaving.id)) {
-    agent.recent.value = [leaving, ...agent.recent.value];
+  if (leaving?.messages.length) {
+    agent.recent.value = [leaving, ...agent.recent.value.filter(other => other.id !== leaving.id)];
   }
   agent.reset();
+  session.value = item;
   plan.value = null;
-  planState.value = "empty";
   lastPlanId.value = null;
   nutrition.dashboard.value = null;
   draft.value = "";
+  dishAction.value = null;
+  takeOn.value = null;
   ask.value?.focus();
+  void loadShownPlan();
+}
+
+function newChat() {
+  showConversation(null);
 }
 
 function openSession(item: AgentSession) {
-  if (item.id === session.value?.id) return;
-  newChat();
-  session.value = item;
+  if (item.id !== session.value?.id) showConversation(item);
 }
 
 function onKey(event: KeyboardEvent) {
@@ -287,24 +372,45 @@ watch(generatedPlan, (value) => {
 watch(() => session.value?.plan_id, (planId) => {
   if (planId && planId !== plan.value?.id) void loadPlan(planId);
 });
-watch(() => [messages.value.length, isLoading.value, session.value?.pending_replan?.id, showWeek.value], async () => {
+// The take-on question stands only while this conversation plans a new week: once it plans one
+// ("Plan my week") or stops, the question goes, and so do the dish's words it held in the composer.
+watch(planningNew, (planning) => {
+  if (planning || !takeOn.value) return;
+  if (draft.value === takeOn.value.message) draft.value = "";
+  takeOn.value = null;
+});
+// A dish's words change only their own week. Once another week is shown or opening (planned with
+// "Plan my week", replanned on another page and reopened), they go, with the words themselves if
+// still unedited. Synchronous, so a send that just reopened the week sees it (see send).
+watch([() => plan.value?.id, lastPlanId], (weeks) => {
+  const action = dishAction.value;
+  if (!action || weeks.every(week => !week || week === action.week)) return;
+  if (draft.value === action.text) draft.value = "";
+  dishAction.value = null;
+}, { flush: "sync" });
+watch(() => [messages.value.length, isLoading.value, session.value?.pending_replan?.id, showWeek.value, takeOn.value], async () => {
   await nextTick();
   log.value?.scrollTo({ top: log.value.scrollHeight, behavior: "smooth" });
 });
 
 useDialog(preview, () => { previewOpen.value = false; }, previewOpen);
 
-// Kept as it is typed, so a session that expires mid-sentence loses nothing (restored on mount).
 watch(draft, (value) => {
-  try { sessionStorage.setItem(DRAFT_KEY, value); }
-  catch { /* storage may be blocked; the draft is only a convenience */ }
+  if (!value) dishAction.value = null;
+  // The take-on question sends its own message: it goes once the composer says something else.
+  if (takeOn.value && value !== takeOn.value.message) takeOn.value = null;
 });
+// Kept as it is typed, so a session that expires mid-sentence loses nothing.
+watch([draft, dishAction], saveDraft);
 
 onMounted(() => {
   window.addEventListener("keydown", onKey);
   try {
-    const saved = sessionStorage.getItem(DRAFT_KEY);
-    if (saved) draft.value = saved;
+    const saved = JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? "null") as { text?: string; action?: typeof dishAction.value } | null;
+    if (saved?.text) {
+      draft.value = saved.text;
+      dishAction.value = saved.action ?? null;
+    }
     sessionStorage.removeItem(DRAFT_KEY);
   }
   catch { /* ignore */ }
@@ -442,7 +548,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               </button>
             </div>
 
-            <div v-if="session?.can_confirm && session.status !== 'planned'" class="card mc-rise">
+            <div v-if="readyToPlan" class="card mc-rise">
               <div v-if="heard.length" class="heard">
                 <span v-for="item in heard" :key="item.text + item.value" class="mc-chip" :class="{ alert: item.alert }">{{ item.text }} <b>{{ item.value }}</b></span>
               </div>
@@ -450,6 +556,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirm()">
                 {{ isLoading ? "Planning your week…" : "Plan my week" }}
               </button>
+            </div>
+
+            <div v-if="takeOn" class="card mc-rise" aria-label="Change the current week here?">
+              <p>This conversation is {{ readyToPlan ? "ready to plan" : "still setting up" }} a new week. Changing the current week here sets that aside.</p>
+              <div class="acts">
+                <button type="button" class="mc-primary" :disabled="isLoading" @click="changeWeek(takeOn.message, takeOn.week)">Change the current week</button>
+                <button type="button" class="mc-pill" :disabled="isLoading" @click="keepPlanning">Keep planning</button>
+              </div>
             </div>
 
             <HomeWeekCard
@@ -532,14 +646,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               v-model="draft"
               type="text"
               autocomplete="off"
-              :placeholder="interaction?.prompt || (plan ? 'Swap a night, change the budget, use up what\'s in the fridge…' : 'Who\'s eating, what to spend, anything to avoid…')"
+              :placeholder="interaction?.prompt || (ownsPlan ? 'Swap a night, change the budget, use up what\'s in the fridge…' : 'Who\'s eating, what to spend, anything to avoid…')"
             >
-            <button type="submit" class="send" aria-label="Send" :disabled="isLoading || !draft.trim()">
+            <button type="submit" class="send" aria-label="Send" :disabled="isLoading || entering || !draft.trim()">
               <svg class="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
           </form>
           <div class="after">
-            <template v-if="plan">
+            <template v-if="canChangeWeek">
               <button v-for="text in followUps" :key="text" type="button" class="suggest" @click="suggest(text)">{{ text }}</button>
             </template>
             <span class="fine">Suggestions can be wrong. Check allergens on product labels.</span>
@@ -565,7 +679,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <button id="tab-nutrition" type="button" role="tab" class="tab" :aria-selected="tab === 'nutrition'" aria-controls="panel-body" @click="tab = 'nutrition'">Nutrition</button>
           </div>
           <div id="panel-body" class="panel-body" role="tabpanel" :aria-labelledby="`tab-${tab}`">
-            <HomeMealList v-if="tab === 'dinners'" :days="days" :plan-id="plan.id" :revision="plan.revision" @open-recipe="recipeSlug = $event" @ask="suggest" />
+            <HomeMealList v-if="tab === 'dinners'" :days="days" :plan-id="plan.id" :revision="plan.revision" :start-date="plan.start_date" @open-recipe="recipeSlug = $event" @ask="suggest" />
             <HomeGroceryList v-else-if="tab === 'groceries'" :estimate="plan.grocery_estimate" />
             <HomeNutritionSummary
               v-else-if="nutrition.dashboard.value"
@@ -718,7 +832,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .to { font-size: 18px; line-height: 1.2; font-weight: 400; }
 .swap-card small { display: block; margin-top: 3px; color: var(--t3); font-size: 12px; }
 .swap-card .over-budget { color: var(--warn); }
-.swap-card .acts { grid-column: 1 / -1; display: flex; gap: 8px; }
+.swap-card .acts { grid-column: 1 / -1; }
+.swap-card .acts, .card .acts { display: flex; gap: 8px; }
 .shape-card .plates .plate { --size: 40px; opacity: 1; filter: none; }
 .shape-card .plates .plate + .plate { margin-left: -14px; }
 .shape-days { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; color: var(--t2); font-size: 12.5px; }

@@ -7,6 +7,8 @@ from app.schemas.recipe import RecipeListItemResponse
 
 DietaryPreference = Literal["vegetarian", "vegan", "gluten-free", "dairy-free"]
 HealthPreference = Literal["low-sodium", "low-sugar", "lower-calorie"]
+# A household that states no cooking-time limit: the longest a planning request accepts.
+NO_COOKING_TIME_LIMIT = 240
 
 
 class NutritionTargets(BaseModel):
@@ -40,7 +42,8 @@ class AvailableIngredientInput(BaseModel):
 
 class RecipeRecommendationRequest(BaseModel):
     household_size: int = Field(default=2, ge=1, le=12)
-    max_cooking_time_minutes: int = Field(default=60, ge=5, le=240)
+    # An unstated limit is no limit, as for a household profile and a conversation.
+    max_cooking_time_minutes: int = Field(default=NO_COOKING_TIME_LIMIT, ge=5, le=240)
     budget_per_meal_sgd: float | None = Field(default=None, gt=0, le=1000)
     allergens: list[str] = Field(default_factory=list, max_length=20)
     excluded_ingredients: list[str] = Field(default_factory=list, max_length=50)
