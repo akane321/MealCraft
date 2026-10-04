@@ -4,15 +4,32 @@
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `3d3e251` (bilingual planning replies, #211)
+> Verified remote `main`: `fbb8b8b` (recorded experiment comparison, #224)
 
 The merged snapshot includes developer planning diagnostics, release data-quality
 views, PostgreSQL durable catalog jobs and their console actions, administrator-only
 Console gates with session CSRF, plan-linked conversation recovery, hermetic model
-tests, vegetable-led dish roles and bilingual planning replies. Its
-[integration CI](https://github.com/akane321/MealCraft/actions/runs/37186942983)
-passed. Pending shape-change, variety and recorded-experiment comparisons are not
-claimed as merged in this snapshot.
+tests, vegetable-led dish roles, bilingual planning replies, explicit over-budget
+shape-change previews, budget-aware composed-week variety and stored experiment
+comparisons. Its
+[integration CI](https://github.com/akane321/MealCraft/actions/runs/37201698479)
+passed all five jobs. The earlier [variety integration CI](https://github.com/akane321/MealCraft/actions/runs/37201132879)
+also passed after the cross-branch regressions were corrected.
+
+The reviewed integration preserves dish locks in search and candidate packets,
+and keeps the cheapest-mode flag separate from local candidate lists. A shape
+change reports added checkout cost separately from how far the resulting week
+exceeds the actual budget; it still requires confirmation before application.
+Recorded developer experiments use the current runner, fixed registry and
+worker context. Source or evidence-condition mismatches suppress numeric deltas,
+and missing revision evidence is not silently treated as citable.
+
+Local desktop Console acceptance passed five mock-API browser tests. Real
+PostgreSQL concurrency/migration and Compose checks are CI evidence, not a claim
+that this machine ran the live full stack. A local fixture-backed variety
+regression took 7.29 seconds in its test call (13.28 seconds of fixture setup
+excluded); it is not a new real-HTTP response-time guarantee. Historical
+held-out reports were not rewritten and no paid API was used for this integration.
 
 ## How to Read This Document
 
