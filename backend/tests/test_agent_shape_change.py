@@ -9,12 +9,31 @@ from app.agent.replanning import AgentReplanInterpreter
 from app.agent.shape_change import read_shape_change
 from app.schemas.meal_plan import MEAL_PRESETS, MealPlanShape, default_plan_shape
 
-# A week from Monday 2026-09-28.
-DAYS = [SimpleNamespace(day_index=n, planned_date=date(2026, 9, 28) + timedelta(days=n - 1)) for n in range(1, 8)]
-PLAN = SimpleNamespace(plan_shape=default_plan_shape(), days=DAYS)  # dinner: main + vegetable
-WITH_SOUP = SimpleNamespace(
-    plan_shape=MealPlanShape.model_validate({"meals": {"dinner": MEAL_PRESETS["dinner"]["main, vegetable and soup"]}}),
-    days=DAYS,
+# The course of the dish each role holds in these weeks.
+COURSES = {"main": "main", "vegetable": "side", "soup": "soup"}
+
+
+def week(shape: MealPlanShape, **extra: list[str]) -> SimpleNamespace:
+    """A week from Monday 2026-09-28 planned to `shape`; `extra` gives a day ("d5") other dishes."""
+    dishes = [
+        SimpleNamespace(
+            day_index=n,
+            planned_date=date(2026, 9, 28) + timedelta(days=n - 1),
+            meal_type=meal,
+            role_id=role_id,
+            status="planned",
+            recipe=SimpleNamespace(course=COURSES[role_id.split("-")[0]]),
+        )
+        for n in range(1, 8)
+        for meal, roles in shape.meals.items()
+        for role_id in extra.get(f"d{n}", [role.role_id for role in roles])
+    ]
+    return SimpleNamespace(plan_shape=shape, days=dishes)
+
+
+PLAN = week(default_plan_shape())  # dinner: main + vegetable
+WITH_SOUP = week(
+    MealPlanShape.model_validate({"meals": {"dinner": MEAL_PRESETS["dinner"]["main, vegetable and soup"]}})
 )
 WEEKDAYS = [1, 2, 3, 4, 5]
 
@@ -95,6 +114,79 @@ def test_reads_the_shape_change_a_message_asks_for(message, days, expected):
 def test_takes_the_soup_out_of_a_dinner_that_has_one(message):
     assert roles(message, plan=WITH_SOUP) == ("dinner", ["main", "vegetable"], None)
     assert roles(message) is None  # no soup to take out
+
+
+# Friday got a soup from an earlier one-day change; the week's shape is still main + vegetable.
+FRIDAY_SOUP = week(default_plan_shape(), d5=["main", "vegetable", "soup"])
+
+
+@pytest.mark.parametrize(
+    ("message", "plan", "expected"),
+    [
+        # Another soup beside the one Friday has, so the change is an addition that keeps Friday's dishes.
+        ("周五晚餐加一个汤", FRIDAY_SOUP, ("dinner", ["main", "vegetable", "soup", "soup-2"], [5])),
+        ("add another soup on Friday", FRIDAY_SOUP, ("dinner", ["main", "vegetable", "soup", "soup-2"], [5])),
+        # Friday's soup can be taken off again.
+        ("no soup on Friday", FRIDAY_SOUP, ("dinner", ["main", "vegetable"], [5])),
+        # Days that differ (Friday has a soup, Saturday not) are read against the week's shape.
+        ("add a soup on Friday and Saturday", FRIDAY_SOUP, ("dinner", ["main", "vegetable", "soup"], [5, 6])),
+    ],
+)
+def test_a_named_day_is_read_with_the_dishes_it_has(message, plan, expected):
+    assert roles(message, plan=plan) == expected
+
+
+def test_a_skipped_dish_is_not_one_the_day_has():
+    plan = week(default_plan_shape(), d5=["main", "vegetable", "soup"])
+    next(d for d in plan.days if d.day_index == 5 and d.role_id == "soup").status = "skipped"
+    assert roles("add a soup on Friday", plan=plan) == ("dinner", ["main", "vegetable", "soup"], [5])
+    # The vegetable keeps the week's setting (optional), the new soup is asked for.
+    assert [r.required for r in intent("add another soup on Friday", plan=FRIDAY_SOUP).request.roles] == [
+        True,
+        False,
+        True,
+        True,
+    ]
+
+
+def lunch_on_friday(shape: MealPlanShape, course: str) -> SimpleNamespace:
+    """`shape`'s week with Friday's lunch one dish of `course`, planned for Friday alone."""
+    plan = week(shape)
+    plan.days = [d for d in plan.days if (d.day_index, d.meal_type) != (5, "lunch")]
+    friday = next(d.planned_date for d in plan.days if d.day_index == 5)
+    lunch = SimpleNamespace(course=course)
+    plan.days.append(
+        SimpleNamespace(
+            day_index=5, planned_date=friday, meal_type="lunch", role_id="main", status="planned", recipe=lunch
+        )
+    )
+    return plan
+
+
+MAIN_AND_SIDE_LUNCHES = MealPlanShape.model_validate(
+    {
+        "meals": {
+            "lunch": MEAL_PRESETS["lunch"]["main and vegetable"],
+            "dinner": MEAL_PRESETS["dinner"]["main and vegetable"],
+        }
+    }
+)
+
+
+@pytest.mark.parametrize(
+    ("plan", "main"),
+    [
+        # A lunch the week lacks, added for Friday with lunch's first preset ("one dish"): its main takes a main,
+        # a salad or a soup. Read from every preset at once, the last one's main (a main only) was taken.
+        (lunch_on_friday(default_plan_shape(), "main"), ["main", "salad", "soup"]),
+        # Friday's lunch made one dish on a week of main-and-side lunches, and a salad came: its main holds it.
+        (lunch_on_friday(MAIN_AND_SIDE_LUNCHES, "salad"), ["main", "salad"]),
+    ],
+)
+def test_a_meal_is_read_with_the_roles_its_dishes_have(plan, main):
+    request = intent("周五午餐加一个汤", plan=plan).request
+    assert (request.meal_type, request.day_indexes) == ("lunch", [5])
+    assert [(role.role_id, role.courses) for role in request.roles] == [("main", main), ("soup", ["soup"])]
 
 
 def test_just_one_main_is_one_main_not_the_meals_one_dish_preset():

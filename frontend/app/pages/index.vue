@@ -85,13 +85,10 @@ const budgetShare = computed(() => {
   return budget ? Math.min(100, estimate.value!.purchase_total_sgd / budget * 100) : null;
 });
 const weekEnded = computed(() => Boolean(plan.value && plan.value.end_date < todayIsoDate()));
-// What the suggested swap would do to the budget, said before the household confirms it.
+// How far the suggested change takes the week over its budget, said before the household confirms it.
 const swapOverBudget = computed(() => {
-  const change = session.value?.pending_replan;
-  const current = estimate.value;
-  if (!change || !current?.weekly_budget_sgd) return null;
-  const after = current.purchase_total_sgd + change.purchase_total_delta_sgd;
-  return after > current.weekly_budget_sgd ? formatSgd(after - current.weekly_budget_sgd) : null;
+  const over = session.value?.pending_replan?.over_budget_sgd;
+  return over && estimate.value?.weekly_budget_sgd ? formatSgd(over) : null;
 });
 // A meal added, dropped or recomposed (ADR-0046): the new dishes by day, before the household confirms.
 const shapePreview = computed(() => {
@@ -594,7 +591,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                   groceries {{ session.pending_replan.purchase_total_delta_sgd >= 0 ? "+" : "−" }}S${{ Math.abs(session.pending_replan.purchase_total_delta_sgd).toFixed(2) }} ·
                   the other meals stay the same
                 </small>
-                <small v-if="swapOverBudget" class="over-budget">This puts the week {{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}.</small>
+                <small v-if="swapOverBudget" class="over-budget">This puts the week {{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }} budget.</small>
               </div>
               <div class="acts">
                 <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirmReplan()">Confirm change</button>
@@ -621,7 +618,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                   groceries {{ session.pending_replan.purchase_total_delta_sgd >= 0 ? "+" : "−" }}S${{ Math.abs(session.pending_replan.purchase_total_delta_sgd).toFixed(2) }} ·
                   the rest of the week stays the same
                 </small>
-                <small v-if="swapOverBudget" class="over-budget">This puts the week {{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}.</small>
+                <small v-if="swapOverBudget" class="over-budget">This puts the week {{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }} budget.</small>
               </div>
               <div class="acts">
                 <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirmReplan()">Confirm change</button>
