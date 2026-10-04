@@ -1,5 +1,4 @@
 from collections import Counter
-from contextlib import suppress
 from datetime import date, timedelta
 
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
@@ -204,7 +203,10 @@ class MealPlanReplanningService:
             added = self._plan_meal(constraints, meal, request.roles, days, kept, removed)
         else:
             added = []
-        stays = {values["recipe_id"] for values, _ in added} if staying is not None else set()
+        # A dish that stays on its day, when a dish is taken away or added, is neither taken off nor new.
+        planned = {(values["day_index"], values["recipe_id"]) for values, _ in added}
+        stays = [item for item in removed if item.status != "skipped" and (item.day_index, item.recipe_id) in planned]
+        kept_on = {(item.day_index, item.recipe_id) for item in stays}
 
         wanted_ids = {item.recipe_id for item in kept} | {values["recipe_id"] for values, _ in added}
         recipes_by_id = {recipe.id: recipe for recipe in self.recipe_repository.list_by_ids(list(wanted_ids))}
@@ -237,9 +239,10 @@ class MealPlanReplanningService:
             removed=[
                 MealPlanEntrySnapshot.model_validate(self._entry_snapshot(item))
                 for item in removed
-                if item.recipe_id not in stays
+                if item not in stays
             ],
-            added=[snapshot for _, snapshot in added if staying is None],
+            added=[snap for values, snap in added if (values["day_index"], values["recipe_id"]) not in kept_on],
+            kept=len(stays),
             plan_shape=new_shape,
         )
         event = self.repository.create_shape_preview(
@@ -309,53 +312,68 @@ class MealPlanReplanningService:
         }
 
     @staticmethod
-    def _dishes_kept_when_adding(roles, present: list[MealPlanEntry]) -> tuple[set[int], set[str]] | None:
-        """Adding a dish to one meal keeps what it has: the present recipes, and the courses only they
-        may fill. None when the change is not purely an addition."""
-        present_roles = {item.role_id for item in present if item.status != "skipped"}
-        if not present_roles or not present_roles < {role.role_id for role in roles}:
+    def _dishes_kept_when_adding(roles, present: list[MealPlanEntry]) -> dict[tuple[int, str], dict[str, int]] | None:
+        """Adding a dish to a meal keeps what each day's meal has, each dish in its role: (day, meal) -> {role
+        id: recipe id}. None when the change is not purely an addition."""
+        wanted = {role.role_id for role in roles}
+        kept: dict[tuple[int, str], dict[str, int]] = {}
+        for item in present:
+            if item.status != "skipped":
+                kept.setdefault((item.day_index, item.meal_type), {})[item.role_id] = item.recipe_id
+        if not kept or not all(set(dishes) <= wanted for dishes in kept.values()):
             return None
-        held = {course for role in roles if role.role_id in present_roles for course in role.courses}
-        new = {course for role in roles if role.role_id not in present_roles for course in role.courses}
-        return {item.recipe_id for item in present}, held - new
+        if all(set(dishes) == wanted for dishes in kept.values()):
+            return None  # nothing is added
+        return kept
 
     def _plan_meal(self, constraints, meal, roles, days, kept, removed) -> list[tuple[dict, MealPlanEntrySnapshot]]:
         """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves.
 
-        When none fit it, the cheapest the search finds, offered with what they put the week over its budget
-        for the household to confirm or discard, as a swap is.
+        When nothing fits what is left (with the meal's present dishes kept, when a dish is added), the change is
+        still planned, as cheaply as the planner finds (see `plan_dishes`), and its preview says how far over
+        the budget it goes; the household confirms or discards it, as with a swap (owner decision 2026-10-02).
+        A new week keeps its budget as a hard limit.
         """
         if self.meal_plan_service is None:
             raise MealPlanReplanValidationError("Changing meals is not available here.")
         budget = constraints.weekly_budget_sgd
-        left = round(budget - sum(float(item.consumed_cost_sgd) for item in kept), 2) if budget is not None else None
+        recipes = {r.id: r for r in self.recipe_repository.list_by_ids(list({i.recipe_id for i in kept}))}
+        rest = [(recipes[item.recipe_id], float(item.portion_share)) for item in kept]
+        left = None
+        if budget is not None:
+            # What is left is what the rest of the week does not spend at the checkout, in whole packages:
+            # what its dishes use leaves room the week has already paid for, and a plan made to fit that
+            # room would go over the budget without trying the cheapest plans first.
+            paid = self.grocery_aggregator.estimate(
+                [recipe for recipe, _ in rest], constraints, shares=[share for _, share in rest]
+            ).purchase_total_sgd
+            left = round(budget - paid, 2)
+        partial = constraints.model_copy(
+            update={
+                "plan_shape": MealPlanShape(meals={meal: roles}),
+                "meal_composition": None,
+                "weekly_budget_sgd": left,
+            }
+        )
         first, last = min(days), max(days)
-
-        def planned(weekly_budget: float | None, *, cheapest: bool = False):
-            partial = constraints.model_copy(
-                update={
-                    "plan_shape": MealPlanShape(meals={meal: roles}),
-                    "meal_composition": None,
-                    "weekly_budget_sgd": weekly_budget,
-                }
-            )
-            return self.meal_plan_service.plan_dishes(
+        over_budget = None
+        if budget is not None:
+            # Over the budget, costs are weighed against one meal's share of the weekly budget (budget / the
+            # week's meals, as the week was planned) for each meal planned here, one a day from the first day to
+            # the last: each search divides this by those meals, so a repeat costs one meal's share. A day's share,
+            # or what is left when cheap meals left more of it, made a repeat up to twice as dear on two meals a
+            # day: dear varied changes beat the cheapest.
+            meals = len({(item.day_index, item.meal_type) for item in kept} | {(day, meal) for day in days})
+            over_budget = round(budget * (last - first + 1) / meals, 2)
+        try:
+            dishes = self.meal_plan_service.plan_dishes(
                 partial,
                 first_day=first,
                 day_count=last - first + 1,
-                avoid_recipe_ids={item.recipe_id for item in kept},
-                keep=self._dishes_kept_when_adding(roles, [item for item in removed if len(days) == 1]),
-                cheapest=cheapest,
+                rest=rest,
+                keep=self._dishes_kept_when_adding(roles, removed),
+                over_budget=over_budget,
             )
-
-        dishes = None
-        try:
-            if left is not None and left > 0:
-                with suppress(ProductPlanningError):
-                    dishes = planned(left)
-            if dishes is None:
-                # No budget, or not enough of it left: the cheapest dishes over it.
-                dishes = planned(None, cheapest=left is not None)
         except ProductPlanningError as error:
             raise MealPlanReplanValidationError(str(error)) from error
         added = []
@@ -718,6 +736,7 @@ class MealPlanReplanningService:
 
     @staticmethod
     def _event_response(event: MealPlanEvent) -> MealPlanReplanEventResponse:
+        after, delta = event.after_grocery, float(event.purchase_total_delta_sgd)
         return MealPlanReplanEventResponse(
             id=event.id,
             plan_id=event.plan_id,
@@ -732,7 +751,14 @@ class MealPlanReplanningService:
             shape_change=MealPlanShapeChange.model_validate(event.shape_change) if event.shape_change else None,
             nutrition_delta=MealPlanNutritionDelta.model_validate(event.nutrition_delta),
             grocery_delta=[MealPlanGroceryDeltaLine.model_validate(item) for item in event.grocery_delta],
-            purchase_total_delta_sgd=float(event.purchase_total_delta_sgd),
+            purchase_total_delta_sgd=delta,
+            # Only a change that costs more puts the week over: a keep or a skip on a week already over
+            # its budget does not.
+            over_budget_sgd=(
+                round(after["purchase_total_sgd"] - after["weekly_budget_sgd"], 2)
+                if after.get("within_weekly_budget") is False and delta > 0
+                else None
+            ),
             created_at=event.created_at,
             applied_at=event.applied_at,
         )

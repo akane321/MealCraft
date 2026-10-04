@@ -169,6 +169,8 @@ export interface MealPlanShapeChange {
   roles: MealRole[] | null;
   removed: MealPlanEntrySnapshot[];
   added: MealPlanEntrySnapshot[];
+  // The dishes that stay on their day while one is added or taken away; in neither list.
+  kept?: number;
   plan_shape: PlanShape | null;
 }
 
@@ -188,6 +190,8 @@ export interface MealPlanReplanEvent {
   nutrition_delta: MealPlanNutritionDelta;
   grocery_delta: MealPlanGroceryDeltaLine[];
   purchase_total_delta_sgd: number;
+  // How far a change that costs more takes the week over its weekly budget; null within it, and for a keep or a skip.
+  over_budget_sgd?: number | null;
   created_at: string;
   applied_at: string | null;
 }

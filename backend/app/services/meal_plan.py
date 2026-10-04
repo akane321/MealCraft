@@ -4,7 +4,9 @@ from uuid import uuid4
 
 from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
+from app.models.recipe import Recipe
 from app.planning.conflict_explanation import explain_infeasibility, product_explanation
+from app.planning.meal_beam import EMPTY_OPTIONAL_ROLE_LOSS
 from app.planning.nutrition_scope import nutrition_scope_notes
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError, meals_of_the_day
 from app.planning.week_floor import WeekFloor, week_floor
@@ -245,17 +247,18 @@ class WeeklyMealPlanService:
         *,
         first_day: int,
         day_count: int,
-        avoid_recipe_ids: set[int],
-        keep: tuple[set[int], set[str]] | None = None,
-        cheapest: bool = False,
+        rest: list[tuple[Recipe, float]],
+        keep: dict[tuple[int, str], dict[str, int]] | None = None,
+        over_budget: float | None = None,
     ) -> list[ScheduledDish]:
         """Dishes for `day_count` days from day `first_day` of a saved week, nothing saved (ADR-0046 section 2).
 
-        `constraints` carries the shape to plan and the budget left; dishes already in the week are
-        avoided while enough others remain. `keep` (recipe ids, their courses) holds a meal's present
-        dishes while a new one is added: of those courses only those recipes are offered. With `cheapest`
-        (no budget) they are the cheapest the cost-led search finds. A budget no ranked week fits fails
-        without that search: the change is offered over the budget instead (services/replanning.py).
+        `constraints` carries the shape to plan and the budget left. `rest` is the rest of the week, each dish
+        with its portion share: its dishes are avoided while enough others remain, and in every attempt their
+        uses there count towards the household's cap on uses. `keep` ((day index, meal) -> {role id: recipe
+        id}) holds each meal's present dishes in their roles while a new one is added. `over_budget` plans the
+        dishes over the budget when none fit it (none can when it is 0 or less), as cheaply as the planner finds,
+        weighing costs against this amount (see `over_budget_pick` and `charge` below).
         """
         start = constraints.start_date + timedelta(days=first_day - 1)
         # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
@@ -266,28 +269,66 @@ class WeeklyMealPlanService:
         recommendations = self.recommendation_service.recommend(
             partial, deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
         ).recommendations
-        keep_ids, keep_courses = keep if keep is not None else (set(), set())
-        course = {recipe.id: recipe.course for recipe in recipes}
-        fresh = [
-            item
-            for item in recommendations
-            if item.recipe.id in keep_ids
-            or (item.recipe.id not in avoid_recipe_ids and course.get(item.recipe.id) not in keep_courses)
-        ]
+        slugs = {recipe.id: recipe.slug for recipe in recipes}
+        keep_ids = {recipe_id for roles in (keep or {}).values() for recipe_id in roles.values()}
+        # A kept dish the planner no longer offers cannot stay: the meal is planned from every candidate.
+        kept = {
+            (day - first_day, meal): {role: slugs[recipe_id] for role, recipe_id in roles.items()}
+            for (day, meal), roles in (keep or {}).items()
+            if keep_ids <= slugs.keys()
+        }
+        used = Counter(recipe.id for recipe, _ in rest)
+        fresh = [item for item in recommendations if item.recipe.id in keep_ids or item.recipe.id not in used]
+        budget = partial.weekly_budget_sgd
+        within = budget is None or budget > 0 or over_budget is None
+        over = partial.model_copy(update={"weekly_budget_sgd": over_budget}) if over_budget is not None else None
+        pools = [fresh] + ([recommendations] if len(fresh) < len(recommendations) else [])
+        # Each step in turn; the first that finds a plan gives it. Within the budget, dishes the week does not
+        # have yet, then any (too few are left). Over it, both at once: a dish the week has may cost less than
+        # a new one, and `charge` weighs the two. When the kept dishes fit nothing at all, the meal is planned
+        # from every candidate rather than fail.
+        steps = []
+        for locked, choices in ((kept, pools), (None, [recommendations])) if kept else ((None, pools),):
+            steps += [[(pool, locked, partial, True)] for pool in choices] if within else []
+            steps += [[(pool, locked, over, False) for pool in pools]] if over is not None else []
+        by_id = {recipe.id: recipe for recipe in recipes}
 
-        def planned(candidates):
-            return self.planning_engine.plan(
-                partial, candidates, recipes, selector=self.selector, cheapest=cheapest, cheapest_last=False
-            )
+        def charge(planned) -> float:
+            """A plan over the budget as the week pays for it: the checkout with the rest of the week (a package
+            both use is bought once), and a repeat of any dish in the week at one meal's share of `over_budget`
+            and an empty optional dish at twice that, as `over_budget_pick` charges them among the meals it plans.
+            Within those meals alone, a dinner's salad served again at lunch was no repeat (the 2026-10-02
+            review: every lunch of mdw-dev-013 was one of its dinners)."""
+            week = [recipe for recipe, _ in rest] + [by_id[item.recipe.id] for item in planned.selected]
+            shares = [share for _, share in rest] + [float(place[3]) for place in planned.placements]
+            total = self.grocery_aggregator.estimate(week, partial, shares=shares).purchase_total_sgd
+            repeats = len(week) - len({recipe.id for recipe in week})
+            empty = day_count * sum(len(roles) for _, roles in meals) - len(planned.selected)
+            return total + over_budget / (day_count * len(meals)) * (repeats + EMPTY_OPTIONAL_ROLE_LOSS * empty)
 
-        try:
-            result = planned(fresh)
-        except ProductPlanningError:
-            if len(fresh) == len(recommendations):
-                raise  # every candidate was tried
-            # Too few dishes the week does not already have, or the kept dishes no longer fit:
-            # plan the meal from every candidate rather than fail.
-            result = planned(recommendations)
+        for step in steps:
+            found = []
+            for pool, locked, request, hard in step:
+                try:
+                    found.append(
+                        self.planning_engine.plan(
+                            request,
+                            pool,
+                            recipes,
+                            selector=self.selector,
+                            cheapest_last=False,
+                            budget_is_hard=hard,
+                            locked=locked,
+                            used=Counter(recipe.slug for recipe, _ in rest),
+                        )
+                    )
+                except ProductPlanningError as error:
+                    failure = error
+            if found:
+                result = min(found, key=charge) if len(found) > 1 else found[0]
+                break
+        else:
+            raise failure
         placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(result.selected))]
         return [
             ScheduledDish(
