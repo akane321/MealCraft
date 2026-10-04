@@ -32,7 +32,8 @@ conversation before deciding whether to confirm it.
 2. No unrelated overlay blocks the task, and an open panel never covers the
    conversation.
 3. Required loading, success and error feedback is visible and readable.
-4. A plan displays exactly seven dinners and a consolidated shopping list.
+4. A plan displays the configured week's days, meals and dish roles, with a
+   consolidated shopping list; the legacy one-dish condition displays seven dinners.
 5. The assistant never presents disease-specific advice as a planning output.
 6. The supported 1280×720 desktop viewport keeps primary actions accessible
    without horizontal task-level scrolling.
