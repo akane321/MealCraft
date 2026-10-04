@@ -68,10 +68,15 @@ policy, not mixed-package purchasing. See the [purchasing comparison](planning-p
 
 Final-gate and feedback on/off comparisons are separate experiments gathered by
 [the suite](planning-experiment-suite.md). Ranking remains off in the five
-component conditions. The Operations worker calls the v2 runner for the fixed
-single-dish component fixture, retaining its conditions and complete report.
-The composed component fixture and feedback replay remain available through the
-CLI suite, not this Console registry. No product route exposes a validation bypass.
+component conditions. The Console's registered worker adapter consumes validated developer
+datasets and retains condition reports as operation artifacts. Its registry exposes
+component planning and single-dish/composed final-gate presets, not every CLI suite.
+The component preset uses the fixed single-dish fixture; composed component
+ablations and feedback replay remain CLI suite actions.
+See [the Console experiment contract](../api-contracts.md#operations-planning-experiments).
+No product route exposes a validation bypass, and these developer comparisons are
+not formal held-out capability evidence.
+
 
 The complete P8 target remains in [Planning and Validation](planning-validation-v2.md#p8--evidence).
 The reporting and split rules remain in [comparative evaluation](comparative-evaluation-v2.md).

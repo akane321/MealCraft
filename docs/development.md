@@ -105,11 +105,32 @@ interaction, and generated-plan link are persisted in `agent_sessions` and
 `agent_messages`. Replanning previews and confirmations are
 stored in `meal_plan_events`; `meal_plans.revision` provides optimistic
 concurrency and `meal_plan_entries.is_locked` protects selected meals. The
-current migration head is `20260916_0014`. Household profile identity and
+database revision can be inspected with `docker compose exec backend uv run --no-sync alembic current`;
+the version chain lives in `backend/alembic/versions/`. Household profile identity and
 immutable versions are stored in `household_profiles` and
 `household_profile_versions`; linked plans preserve the exact profile version
 and optional replaced-plan ID. Agent replanning drafts and pending
 event links are stored on `agent_sessions`.
+
+## Code evidence for recorded worker experiments
+
+The backend and worker containers read the same local `.env`, but do not mount
+the checkout's `.git`. Before recording a comparison from a committed checkout,
+run `git status --short` and `git rev-parse HEAD`, then copy the full revision
+into `CODE_COMMIT` in your local `.env`. Commit intended source edits through the
+normal review workflow first; do not label uncommitted code as that revision.
+
+After changing `.env`, recreate the two services so both receive the same value:
+
+```bash
+docker compose up --detach --force-recreate backend worker
+```
+
+The source fingerprint is recorded as well: sharing a revision string does not
+make different code comparable. Missing or incompatible evidence remains visible
+but does not yield an interpretable numeric delta. Keep the matching checkout,
+lockfile and recorded input conditions with the result. These are developer
+diagnostics, not a held-out evaluation. See [API Contracts](api-contracts.md#operations-planning-experiments).
 
 ## Authentication API
 

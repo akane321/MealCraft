@@ -8,7 +8,7 @@ scope**, not only the current days × meals runtime (decision ADR-0046). The mer
 documented in [Current Status](../current-status.md); this handoff must not be
 quoted as evidence that the final optimizer is complete.
 
-The repository now contains a runnable reference scaffold:
+The reference components include:
 
 - `backend/app/schemas/planning_v2.py`: final-scope problem, solution, trace and
   validation schemas;
@@ -21,9 +21,12 @@ The repository now contains a runnable reference scaffold:
 - `data/fixtures/planning-v2/final-scope-multislot.json`: multi-day,
   multi-meal integration fixture.
 
-This is deliberately a foundation. Beam Search, live-product repair,
-relaxation search, an optimization oracle and production integration remain
-teammate work.
+Constraint compilation, bounded Beam/MealBeam, independent validation and the
+product adapter already have runtime consumers. Repair, relaxation, mixed
+purchase and oracle tools also exist, but an offline tool is not automatically
+a product feature. Use [Planning and Validation v2](planning-validation-v2.md)
+for component contracts and [Current Status](../current-status.md) for the
+integration boundary; do not rebuild these components from this older handoff.
 
 ## Final product goal
 
@@ -35,13 +38,12 @@ produce one of the following:
 2. `needs_clarification` when a material user value is missing;
 3. `needs_data` when ingredient, unit, nutrition or product evidence is
    insufficient;
-4. `infeasible` only after a complete search or a declared bounded-search
-   policy justifies that conclusion, accompanied by minimal user-controlled
-   relaxation options.
+4. `infeasible` only with a declared proof; bounded search that runs out of
+   resources reports `search_exhausted`, not global infeasibility.
 
 The horizon is represented by explicit slots rather than a hard-coded number of
-days or meals. It must support breakfast, lunch, dinner and optional snacks,
-different servings and time limits per slot, required or optional slots, and
+days or meals. The product supports breakfast, lunch and dinner (not snacks),
+with slot-specific servings/time limits, required or optional dish positions and
 locked meals. A one-week plan is one valid instance, not the schema boundary.
 
 ## Authority boundary
@@ -62,16 +64,27 @@ silently relax a constraint, or rewrite the Shopping List arithmetic.
 
 ## Canonical mathematical model
 
+### Model interpretation for composed meals
+
+The equations below use `S` as **dish positions**, identified by date, meal and
+role, not a whole composed meal. Each meal has up to six required/optional
+positions. Serving demand uses the position's cooked portion share as well as
+household servings (`v_s` is their product). Meal nutrition sums the selected
+dishes' per-person portion shares; daily nutrition sums those meals. Meal time
+uses the declared one-cook estimator, not a separate time allowance per dish.
+Completed/locked positions remain fixed in replanning. These distinctions are
+defined by ADR-0036 and ADR-0046, not by the older single-dish notation.
+
 ### Sets and parameters
 
-- `S`: explicit planning slots;
+- `S`: dated meal-and-role dish positions;
 - `R`: frozen recipe candidates;
 - `I`: canonical ingredients;
 - `P_i`: product candidates compatible with ingredient `i`;
 - `e_sr`: 1 when recipe `r` is eligible for slot `s` after hard filtering;
 - `q_ri`: normalized amount of ingredient `i` needed by recipe `r` at its
   canonical serving basis;
-- `v_s`: requested servings for slot `s`;
+- `v_s`: household servings multiplied by the position's cooked portion share;
 - `b_r`: canonical recipe servings;
 - `n_rm`: nutrient `m` per serving of recipe `r`;
 - `a_ip`: amount of ingredient `i` supplied by one package of product `p`;
@@ -120,6 +133,10 @@ remaining_i = Q_i - d_i
 
 Package coverage and purchase budget are:
 
+Multiple `P_i` alternatives express the optimization target and offline mixed
+purchase tools. The integrated product's fixed compatible-product policy is a
+special case, not a claim that mixed-package optimization is already active.
+
 ```text
 sum_(p in P_i) a_ip * y_ip >= remaining_i
 sum_i sum_(p in P_i) c_p * y_ip <= B       when budget is explicitly hard
@@ -133,9 +150,12 @@ facts produce `needs_data`; they are not interpreted as zero or compliant.
 
 User-entered nutrition targets declare their scope explicitly:
 
-- `per_slot`: each selected recipe is checked per person;
+- `per_slot`: each planned meal is checked per person (summing portion shares
+  for a composed meal);
 - `per_day`: selected meals on the same date are summed per person;
-- `horizon_average`: daily totals are averaged across represented dates.
+- `horizon_average`: the packet declares `average_basis`; product bounds use
+  selected meal slots, while older packets may average represented daily totals.
+  See [Product nutrition scope](planning-nutrition-scope.md).
 
 MealCraft does not invent BMR/TDEE or medical targets. General lower-sodium,
 lower-sugar and lower-calorie language remains a soft preference unless the
@@ -157,9 +177,13 @@ must be frozen before evaluation and must preserve this non-medical wording.
 Hard validity is not exchanged for a better preference score. Search should
 therefore use two ordered layers:
 
-1. minimize hard violations and unresolved decisive facts; a reportable
-   feasible plan has zero hard violations and zero decisive unknowns;
-2. among valid plans, minimize a normalized soft loss:
+1. reject hard violations and decisive unknowns; a reportable feasible plan has
+   neither;
+2. among composed valid weeks, minimize empty optional positions, then maximize
+   distinct dishes, then minimize same-kind repetition (ADR-0052). Soft scoring
+   helps bounded search but does not replace that final selection order.
+
+The component soft-loss model is:
 
 ```text
 J = w_n * nutrition_deviation
@@ -242,7 +266,8 @@ never auto-relaxed. The user chooses whether to accept a relaxation.
 ### Recipe and ingredient data
 
 Required fields are canonical IDs, recipe serving basis, normalized quantities
-and units, meal-type affinity (a preference, never a filter), time, allergens and
+and units, meal types (filter to the requested meal when enough candidates fit;
+otherwise retain the affinity fallback, ADR-0044/0046), time, allergens and
 the allergen vocabulary they were checked against, dietary tags, per-serving
 nutrition, cuisine/preference attributes, provenance and completeness flags.
 The planner must reject or mark unknown unsupported facts rather than patching
@@ -279,7 +304,12 @@ hard validity, nutrition deviation, budget/package correctness, preference fit,
 diversity, runtime, repair success and failure modes. Held-out labels are never
 used to tune weights or beam settings.
 
-## Work packages left for the algorithm contributor
+## Component roadmap, not an unimplemented checklist
+
+The list below names responsibilities and acceptance areas, not ten untouched
+tasks. Review the existing compiler, Beam/MealBeam, product adapter, repair,
+validator and oracle first. Remaining work and integration limits are recorded
+only in [Current Status](../current-status.md).
 
 1. **Schema hardening**: review v2 fields, add completeness/provenance links,
    dietary compatibility policy and stable serialization tests.
@@ -319,7 +349,7 @@ used to tune weights or beam settings.
 - documentation, API contract, migration and frontend states are updated when
   the scaffold becomes runtime behaviour.
 
-## Running the scaffold
+## Running the reference components
 
 From the repository root:
 

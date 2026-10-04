@@ -20,10 +20,8 @@ class Settings(BaseSettings):
     youtube_fixture_path: str = "data/fixtures/youtube-tutorials.json"
     youtube_api_key: SecretStr | None = None
     agent_parser_provider: Literal["fixture", "openai"] = "fixture"
-    # ADR-0036 section 6: "mvp" plans seven one-dish dinners and refuses anything
-    # else; "full" admits meal compositions. The Sprint 1 demonstration is mvp.
-    # Meals of several dishes and several meals a day are the product (ADR-0046); `mvp` reproduces the
-    # recorded one-dish evaluations.
+    # "full" is the days/meals/dish-roles product (ADR-0046).
+    # "mvp" reproduces the recorded seven one-dish dinner evaluations.
     planning_capability: Literal["mvp", "full"] = "full"
     agent_max_history_messages: int = 20
     openai_api_key: SecretStr | None = None

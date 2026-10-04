@@ -148,7 +148,7 @@ committed.
 
 ### Local entry points
 
-- Product home: <http://localhost:3000> (chat, with the week on the left edge and nutrition and groceries on the right)
+- Product home: <http://localhost:3000> (three-column workspace: navigation and conversations, chat, then meals and plan; nutrition and groceries open as overlays)
 - Service status: <http://localhost:3000/system>
 - Sign in or register: <http://localhost:3000/login>
 - Household profile: <http://localhost:3000/profile>
@@ -164,25 +164,30 @@ modes, migrations, and troubleshooting.
 
 ### What exists today
 
-An offline, fixture-only workbench: 20 developer planning scenarios, 40 held-out
-planning scenarios, 24 Agent extraction fixtures, and two orchestration developer
-sets covering bilingual scope routing and typed claim grounding. Every report
-records the SHA-256 digest of its input, so a dataset change is a new
-experimental condition rather than a quiet edit.
+The original offline fixture workbench covers planning, Agent extraction,
+bilingual scope routing and typed claim grounding. Additional runners compare
+multi-dish methods and test the product's meal-day-week path. Every report
+records input digests; changes to data, code or protocol are distinct conditions.
 
 ```bash
 docker compose exec backend uv run --no-sync python -m app.evaluation
 docker compose exec backend uv run --no-sync python -m app.evaluation.workbench
 ```
 
-Neither command makes a paid API call. Current numbers live in the
-[generated workbench report](docs/evaluation/workbench/latest.md) and are not
-copied here: a metric table in a README goes stale without anyone noticing,
-and this one did.
+Neither command above makes a paid API call. Read the generated reports, rather
+than a hand-copied metric table:
+
+- [v1 workbench](docs/evaluation/workbench/latest.md), its fixture diagnostics
+  and earlier planning comparisons;
+- [v2 multi-dish comparisons](docs/evaluation/v2-multidish/heldout/latest.md)
+  and [findings](docs/evaluation/v2-multidish/heldout/findings.md), including
+  live-model arms under recorded conditions;
+- [v3 meal-day-week first run](docs/evaluation/v3-meal-day-week/heldout/run-1.md)
+  and [findings](docs/evaluation/v3-meal-day-week/heldout/findings.md).
 
 ### What that evidence does not yet show
 
-**It does not show that MealCraft beats a competent alternative.** Against the
+**The original v1 workbench alone does not establish an Agent advantage.** Against the
 strong Rule-only reference, the two systems tie on task success, on
 hard-constraint violations and on recorded failures. Only recipe diversity
 separates them, and a primary metric that saturates for both systems is
@@ -192,7 +197,8 @@ planner.
 Track 5 requires evidence of improvement over a simple approach, so closing this
 is the point of
 [Capability-centred Comparative Evaluation v2](docs/design/comparative-evaluation-v2.md),
-which is an accepted design and not a reported result.
+which defines the comparisons. Executed v2/v3 reports above are evidence under
+their own protocols, not proof that every target comparison is complete.
 
 Two further limits worth stating plainly:
 
@@ -201,21 +207,28 @@ Two further limits worth stating plainly:
 - The scope and grounding sets were visible during implementation. They are
   diagnostics, not held-out evidence.
 
-### What is being built
+### Integrity and remaining evidence
 
 Strict End-to-End Task Success is the accepted primary endpoint, and the scorer
 for it recomputes every requirement from frozen facts rather than reading a
 system's claims; the v2-multidish and v3 meal-day-week runners score with it. An
-independent held-out set of roughly 80 episodes is being authored under
-cross-authoring rules - nobody writes episodes that test their own module - and
-nothing may ever be tuned against it (see the
+independent comparison must follow cross-authoring rules: nobody writes episodes
+that test their own module, and nothing may ever be tuned against held-out data
+(see the
 [authoring guide](docs/evaluation/heldout-authoring-guide.md)).
 
 The failure registry in the
 [latest workbench report](docs/evaluation/workbench/latest.md) is **not** a
 defect list: most entries are greedy-baseline failures, which are the reason the
 baseline exists, and the rest are Agent extraction or clarification failures in
-MealCraft itself.
+MealCraft itself. Registry composition depends on the generated report; it must
+not be treated as a manually maintained product bug count.
+
+After a set has been inspected and fixes chosen from its results, subsequent
+runs are diagnostics, not fresh held-out evidence. This applies to the exposed
+v2 comparisons and to v3 protocol v3.1; retain the clean first run separately.
+The v3 fixture product-path run is not a full live-LLM conversation benchmark.
+Fresh independent episodes are needed for a new unseen capability claim.
 
 Read the [Evaluation Protocol](docs/evaluation/protocol-v1.md) before quoting
 any result, and the

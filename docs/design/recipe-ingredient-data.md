@@ -14,13 +14,16 @@ canonical contract between modules.
 
 ## Verified baseline
 
-The current catalog contains 30 recipes and 34 normalized ingredients. A recipe
+The curated reference catalog is a small deterministic fixture, not the whole
+runtime catalog. The product also imports the versioned RecipeNLG release;
+release artifacts and import gates are in [Data documentation](../data/README.md),
+and runtime counts and limitations belong in [Current Status](../current-status.md). A recipe
 already exposes identity, title, description, cuisine, meal type, servings,
 preparation and cooking time, dietary tags, per-serving calories/macronutrients/
 sodium/sugar, normalized ingredient quantities, preparation notes, allergen
 labels, and ordered steps.
 
-Current limitations include small scale, limited provenance, a narrow unit
+Current limitations include uneven provenance and enrichment quality, a narrow unit
 vocabulary, limited preference attributes, and no general conversion model for
 incompatible household, recipe and product units.
 
