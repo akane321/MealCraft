@@ -17,6 +17,7 @@ critical browser path against an isolated test backend or the local stack.
 | Operations experiments | evaluations, history or evidence drawer loading | no recorded run / no failed case | confirmed job moves queued → running → completed; evidence opens; comparable A/B runs expose parameters, metrics and failure mechanisms | queue, refresh or detail error remains actionable; incompatible runs explain why their delta is not interpreted | fixed developer registry only; held-out and paid providers unavailable; legacy inline entries labelled; developer diagnostics never presented as final claims |
 | Operations: catalog jobs | queue refreshing | no recorded catalog jobs | named source queued, live status and attempt count | last recorded state retained with retry | administrators confirm writes; legacy roles cannot enter; only queued/running jobs can be cancelled |
 
+
 ## Critical task flow
 
 Sign in, describe the week, answer any clarification, plan the week, open the
