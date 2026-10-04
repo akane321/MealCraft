@@ -62,13 +62,21 @@ export function useMealCraftAgent() {
 
   async function confirm() {
     if (!session.value) return;
+    const id = session.value.id;
     const result = await run(() => apiFetch<AgentConfirmation>(
-      `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/confirm`,
+      `${config.public.apiBase}/api/agent/sessions/${id}/confirm`,
       { method: "POST" },
     ));
     if (result) {
       session.value = result.session;
       generatedPlan.value = result.plan;
+      return;
+    }
+    // A week that could not be planned is explained in the conversation, which replaces the Plan card.
+    const explained = await apiFetch<AgentSession>(`${config.public.apiBase}/api/agent/sessions/${id}`).catch(() => null);
+    if (explained && explained.messages.length > (session.value?.messages.length ?? 0)) {
+      session.value = explained;
+      errorMessage.value = null;
     }
   }
 

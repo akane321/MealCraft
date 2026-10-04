@@ -194,3 +194,25 @@ def test_nonempty_domains_do_not_claim_aggregate_budget_feasibility():
         update={"slots": list(reversed(packet.slots)), "recipes": list(reversed(packet.recipes))}
     )
     assert compiled == compile_search_domains(reversed_packet)
+
+
+def test_a_dish_outside_its_usual_meal_types_leaves_the_budget_checked():
+    # The soft affinity report must not leave the week's cost unknown: under a budget such a week could
+    # never pass, and its search would end as "some details are missing" (PR #211 round 1).
+    from app.planning.final_scope_reference import FinalScopeReferencePlanner
+    from app.planning.final_scope_validator import FinalPlanningValidator
+    from app.schemas.planning_v2 import PlanningAssignment
+
+    packet = problem()
+    slot = packet.slots[0].model_copy(update={"locked_recipe_id": None, "max_time_minutes": None})
+    other = "snack" if slot.meal_type != "snack" else "dinner"
+    recipe = packet.recipes[0].model_copy(update={"allowed_meal_types": [other]})
+    packet = packet.model_copy(
+        update={"slots": [slot], "recipes": [recipe], "nutrition_bands": [], "purchase_budget_sgd": 1000.0}
+    )
+    assignments = [PlanningAssignment(slot_id=slot.slot_id, recipe_id=recipe.recipe_id)]
+    shopping = FinalScopeReferencePlanner()._build_shopping(packet, assignments)
+
+    report = FinalPlanningValidator().validate(packet, assignments, shopping)
+    assert [check.status for check in report.checks if check.code == "purchase_budget"] == ["passed"]
+    assert report.status == "passed"

@@ -178,8 +178,10 @@
       "refusal": {
         "status": "candidate_rejected",
         "evidence": "bounded_search_exhausted",
-        "weeks_tried": 0,
-        "unmet_checks": {},
+        "weeks_tried": 33,
+        "unmet_checks": {
+          "purchase_budget failed": 33
+        },
         "search_exhausted": false,
         "input_issues": []
       }
