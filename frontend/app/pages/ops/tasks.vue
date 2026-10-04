@@ -110,6 +110,8 @@ const validation = computed(() => {
       <p>Open a task to see what it was asked, how it was understood, what the planner and validator did, and how long it took.</p>
     </header>
 
+    <OpsJobActions />
+
     <form class="filters" @submit.prevent>
       <label>Type
         <select v-model="kind">
