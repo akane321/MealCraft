@@ -20,8 +20,11 @@ test("the household chooses its meals and each meal's dishes, and they are saved
   await page.goto("/profile");
   await page.waitForLoadState("networkidle"); // clicks before hydration are lost
   await expect(page.getByText("Dinner: one meat, one veg")).toBeVisible();
+  // The vegetable row is named by its role, which the planner holds to vegetable dishes whatever its courses.
+  await expect(page.getByText("Vegetable dish", { exact: true })).toHaveAttribute("title", /no meat or fish/);
 
   await page.getByRole("checkbox", { name: "Plan lunch" }).check();
+  await expect(page.getByRole("radiogroup", { name: "Lunch dishes" }).getByRole("radio", { name: "Main and a veg" })).toBeVisible();
   await page.getByRole("radiogroup", { name: "Dinner dishes" }).getByRole("radio", { name: "Meat, veg and soup" }).click();
   await expect(page.getByText("Lunch: one dish · Dinner: meat, veg and soup")).toBeVisible();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/14-profile-meals.png`, fullPage: true });

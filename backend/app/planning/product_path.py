@@ -27,6 +27,7 @@ from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
 from app.planning.recipe_quality import dish_family, dish_kind
 from app.planning.recommendation_engine import CANDIDATE_LIMIT
+from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
 from app.planning.weekly_planner import WeeklyPlanSelectionError, WeeklyPlanSelector
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse
 from app.schemas.planning_v2 import (
@@ -213,15 +214,25 @@ class ProductPlanningEngine:
             for _, roles in composition:
                 for role in roles:
                     for course in role.courses:
-                        uses[course] = uses.get(course, 0) + constraints.day_count
-            limits = {course: max(COMPOSED_CANDIDATES_PER_COURSE, 3 * count) for course, count in uses.items()}
+                        # The vegetable role keeps the best vegetable-led dishes, which the best sides are not.
+                        key = f"vegetable {course}" if vegetable_role(role.role_id) else course
+                        uses[key] = uses.get(key, 0) + constraints.day_count
+            limits = {key: max(COMPOSED_CANDIDATES_PER_COURSE, 3 * count) for key, count in uses.items()}
             by_id = {r.id: r for r in recipes}
             kept: dict[str, int] = {}
             packet = []
             for recommendation in recommendations:
-                course = getattr(by_id.get(recommendation.recipe.id), "course", None) or "main"
-                if course in limits and kept.get(course, 0) < limits[course]:
-                    kept[course] = kept.get(course, 0) + 1
+                recipe = by_id.get(recommendation.recipe.id)
+                course = getattr(recipe, "course", None) or "main"
+                led = f"vegetable {course}"
+                keys = [
+                    key
+                    for key in (course, led)
+                    if key in limits and (key != led or (recipe is not None and catalog_vegetable_led(recipe)))
+                ]
+                if any(kept.get(key, 0) < limits[key] for key in keys):
+                    for key in keys:
+                        kept[key] = kept.get(key, 0) + 1
                     packet.append(recommendation)
             recommendations = packet
             trace["candidate_limit"] = limits

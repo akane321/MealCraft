@@ -51,6 +51,7 @@ class ChosenLine:
     unit: str | None
     preparation: str | None
     chosen_from: str  # the combined ingredient's display name, e.g. "beef or turkey"
+    original_text: str | None = None
 
 
 def choose(alternatives: Iterable[dict] | None, household: Household) -> Option | None:
@@ -86,6 +87,7 @@ def lines(recipe, household: Household) -> list:
                 unit=item.unit,
                 preparation=item.preparation,
                 chosen_from=item.ingredient.display_name,
+                original_text=item.original_text,
             )
         )
     return resolved

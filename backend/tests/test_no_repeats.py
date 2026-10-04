@@ -35,7 +35,7 @@ def varied_client(monkeypatch):
         ("broccoli-stirfry", "broccoli"),
         ("spinach-saute", "baby_spinach"),
         ("mushroom-saute", "mushroom"),
-        ("sweet-potato-mash", "sweet_potato"),
+        ("carrot-saute", "carrot"),  # not a sweet potato mash: a vegetable dish is led by vegetables
         ("zucchini-salad", "zucchini"),
         ("tomato-salad", "cherry_tomato"),
         ("cucumber-salad", "cucumber"),

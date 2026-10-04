@@ -15,7 +15,7 @@ from app.planning.diversity import diversity_loss
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.input_audit import require_finite_problem
-from app.planning.meal_composition import MAIN_ROLE, meal_minutes, portion_shares
+from app.planning.meal_composition import MAIN_ROLE, meal_minutes, portion_shares, role_admits
 from app.planning.nutrition_scope import nutrition_guard_loss
 from app.planning.recipe_quality import dish_kind
 from app.schemas.planning_v2 import (
@@ -109,7 +109,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             eligible = [
                 r
                 for r in recipes
-                if dish_eligible(problem, slot, r) and (slot.composition is None or r.course in role.courses)
+                if dish_eligible(problem, slot, r) and (slot.composition is None or role_admits(role, r))
             ]
             if slot.composition is None and slot.locked_recipe_id is not None:
                 eligible = [r for r in eligible if r.recipe_id == slot.locked_recipe_id]

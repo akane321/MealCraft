@@ -87,7 +87,7 @@
             "allergens": [],
             "ingredients": [
               {
-                "ingredient_id": "greens-base",
+                "ingredient_id": "broccoli",
                 "quantity": 400.0,
                 "unit": "g"
               }
@@ -151,7 +151,7 @@
             ],
             "ingredients": [
               {
-                "ingredient_id": "peanut-slaw-base",
+                "ingredient_id": "cabbage",
                 "quantity": 400.0,
                 "unit": "g"
               }
@@ -182,7 +182,7 @@
             "available": true
           },
           {
-            "ingredient_id": "greens-base",
+            "ingredient_id": "broccoli",
             "product_id": "p-greens",
             "package_quantity": 100.0,
             "package_unit": "g",
@@ -198,7 +198,7 @@
             "available": true
           },
           {
-            "ingredient_id": "peanut-slaw-base",
+            "ingredient_id": "cabbage",
             "product_id": "p-peanut-slaw",
             "package_quantity": 100.0,
             "package_unit": "g",
@@ -339,7 +339,7 @@
             "allergens": [],
             "ingredients": [
               {
-                "ingredient_id": "greens-base",
+                "ingredient_id": "broccoli",
                 "quantity": 400.0,
                 "unit": "g"
               }
@@ -403,7 +403,7 @@
             ],
             "ingredients": [
               {
-                "ingredient_id": "peanut-slaw-base",
+                "ingredient_id": "cabbage",
                 "quantity": 400.0,
                 "unit": "g"
               }
@@ -434,7 +434,7 @@
             "available": true
           },
           {
-            "ingredient_id": "greens-base",
+            "ingredient_id": "broccoli",
             "product_id": "p-greens",
             "package_quantity": 100.0,
             "package_unit": "g",
@@ -450,7 +450,7 @@
             "available": true
           },
           {
-            "ingredient_id": "peanut-slaw-base",
+            "ingredient_id": "cabbage",
             "product_id": "p-peanut-slaw",
             "package_quantity": 100.0,
             "package_unit": "g",
@@ -591,7 +591,7 @@
             "allergens": [],
             "ingredients": [
               {
-                "ingredient_id": "greens-base",
+                "ingredient_id": "broccoli",
                 "quantity": 400.0,
                 "unit": "g"
               }
@@ -655,7 +655,7 @@
             ],
             "ingredients": [
               {
-                "ingredient_id": "peanut-slaw-base",
+                "ingredient_id": "cabbage",
                 "quantity": 400.0,
                 "unit": "g"
               }
@@ -810,7 +810,7 @@
             "available": true
           },
           {
-            "ingredient_id": "greens-base",
+            "ingredient_id": "broccoli",
             "product_id": "p-greens",
             "package_quantity": 100.0,
             "package_unit": "g",
@@ -826,7 +826,7 @@
             "available": true
           },
           {
-            "ingredient_id": "peanut-slaw-base",
+            "ingredient_id": "cabbage",
             "product_id": "p-peanut-slaw",
             "package_quantity": 100.0,
             "package_unit": "g",

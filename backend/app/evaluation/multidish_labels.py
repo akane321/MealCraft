@@ -39,7 +39,11 @@ product's own rules, so a label never needs a week the product cannot plan:
   one whose name states an ingredient or allergen the household avoids
   (`recommendation_engine.title_mentions`). A dish that merely ranks low, or
   falls outside the packet the product keeps per course, stays eligible: a label
-  proves a week exists under the rules, not that the product's search finds it.
+  proves a week exists under the rules, not that the product's search finds it;
+- (2026-10-02) a vegetable role (`vegetable`, `vegetable-2`) takes only a dish
+  led by vegetables with no meat or fish (`app.planning.vegetable_led`), as the
+  product's `meal_composition.role_admits` does. Protocol v2 labels keep the old
+  rule.
 
 Anything else is unproven, and the author must change the episode.
 
@@ -62,6 +66,7 @@ from app.evaluation.strict_success import dish_shares, load_tag_implications, me
 from app.planning.grocery_estimator import ProductMatcher, choose_product, convert_quantity
 from app.planning.meal_beam import MealBeamLimits
 from app.planning.recommendation_engine import title_mentions
+from app.planning.vegetable_led import row_vegetable_led, vegetable_role
 from app.products.provider import FixtureProductProvider
 from app.services.product import ProductSearchService
 
@@ -139,12 +144,15 @@ def valid_meals(
     per_role = {}
     for r in roles:
         # Each dish within the limit on its own, as `meal_beam.dish_eligible` checks; the meal too, below.
+        # A v3 vegetable role takes only a dish led by vegetables, as the product's `role_admits` does.
+        led_only = meal is not None and vegetable_role(r["role_id"])
         dishes = [
             x
             for x in pool
             if x["course"] in r["courses"]
             and eligible(x)
             and (limit is None or x["prep_time_minutes"] + x["cook_time_minutes"] <= limit)
+            and (not led_only or row_vegetable_led(x))
         ]
         fitting = [x for x in dishes if meal in meal_types(x)]
         per_role[r["role_id"]] = fitting if meal and len(fitting) >= MealBeamLimits().candidates_per_role else dishes

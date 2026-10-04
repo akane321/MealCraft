@@ -40,7 +40,7 @@ from app.evaluation.release_catalog import load_release_catalog
 from app.evaluation.strict_success import Catalogs, load_tag_implications, score_episode
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.meal_beam import MealBeamPlanner, dish_eligible
-from app.planning.meal_composition import dish_servings, meal_minutes
+from app.planning.meal_composition import dish_servings, meal_minutes, role_admits
 from app.planning.meal_cp_sat import MealCpSatLimits, MealCpSatPlanner
 from app.schemas.agent import AgentConstraintState
 from app.schemas.planning_v2 import (
@@ -292,7 +292,7 @@ def greedy_selector(problem: FinalPlanningProblem) -> FinalPlanningSolution:
         chosen: list = []
         for role in slot.composition or []:
             options = sorted(
-                (r for r in problem.recipes if r.course in role.courses and dish_eligible(problem, slot, r)),
+                (r for r in problem.recipes if role_admits(role, r) and dish_eligible(problem, slot, r)),
                 key=lambda r: (r.total_time_minutes, r.recipe_id),
             )
             for recipe in options:
@@ -362,7 +362,7 @@ def strong_rule_selector(problem: FinalPlanningProblem) -> FinalPlanningSolution
             chosen: list = []
             meal_cost = 0.0
             for role in slot.composition or []:
-                options = [r for r in problem.recipes if r.course in role.courses and dish_eligible(problem, slot, r)]
+                options = [r for r in problem.recipes if role_admits(role, r) and dish_eligible(problem, slot, r)]
                 options.sort(
                     key=lambda r: (
                         not asked(r),

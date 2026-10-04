@@ -95,7 +95,7 @@ def test_multi_dish_portions_share_a_slot_checkout():
     for basket in ("per_slot", "whole_horizon"):
         assert {line["ingredient_id"]: line["required_quantity"] for line in result[basket]["lines"]} == {
             "chicken-base": 240,
-            "greens-base": 160,
+            "spinach": 160,
             "broth-base": 160,
         }
 

@@ -110,7 +110,7 @@ def test_composed_roles_and_portion_shares_are_preserved():
         assert {a["role_id"] for a in condition["assignments"]} == {"main", "vegetable", "soup"}
         assert {s["ingredient_id"]: s["required_quantity"] for s in condition["shopping"]} == {
             "chicken-base": 240,
-            "greens-base": 160,
+            "broccoli": 160,
             "broth-base": 160,
         }
     assert source.model_dump_json() == before
