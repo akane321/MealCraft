@@ -15,7 +15,7 @@ from app.planning.week_floor import WeekFloor, week_floor
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
 from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
-from app.repositories.recipe import RecipeRepository, found_weeks
+from app.repositories.recipe import FOUND_WEEKS_KEPT, RecipeRepository, found_weeks
 from app.schemas.meal_plan import (
     MealPlanEntryStatus,
     MealPlanStatusCounts,
@@ -33,17 +33,6 @@ from app.schemas.meal_plan import (
 from app.schemas.product import GroceryLineEstimate, PriceEvidence, ProductResponse
 from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
 from app.services.recommendation import RecipeRecommendationService
-
-# Weeks `check` found, by database, household, planner limits and exact request (`found_weeks`): the Plan that
-# follows a chat turn's check saves the week the check already found instead of searching again (the 2026-10-04
-# walkthrough: the reply that took the last detail planned the week in 8 s, then Plan planned it again in 5 s).
-# An entry is used once, and expires, or is cleared, with the planning pool its recipes came from.
-# ponytail: a price refreshed meanwhile is seen only once the entry expires, as with the pool's recipes.
-FOUND_WEEKS_KEPT = 8
-
-
-def _found_seconds() -> int:
-    return get_settings().planning_pool_cache_seconds
 
 
 class WeeklyMealPlanService:
@@ -78,7 +67,8 @@ class WeeklyMealPlanService:
         """Plan a week and save it: the week `check` found for these constraints while it is kept, else a new one."""
         started_at = datetime.now(UTC)
         found = found_weeks.pop(self._found_key(constraints, household_profile_version), None)
-        searched = found[1] if found is not None and time.monotonic() - found[0] < _found_seconds() else None
+        fresh = found is not None and time.monotonic() - found[0] < get_settings().planning_pool_cache_seconds
+        searched = found[1] if fresh else None
         try:
             recommendation_result, result = searched or self._search(
                 constraints, self._candidates(constraints), profile_version=household_profile_version
@@ -196,10 +186,13 @@ class WeeklyMealPlanService:
             searched = self._search(constraints, self._checked_candidates(constraints))
         except ProductPlanningError as error:
             return error
-        if _found_seconds():
+        # Kept for the Plan that follows this check (`found_weeks`): the 2026-10-04 walkthrough's reply that took
+        # the last detail planned the week in 8 s, then Plan planned it again in 5 s.
+        seconds = get_settings().planning_pool_cache_seconds
+        if seconds:
             now = time.monotonic()
             # pop, not del: requests run on several threads (a sync route) and may expire the same entry.
-            for key in [key for key, (at, _) in list(found_weeks.items()) if now - at >= _found_seconds()]:
+            for key in [key for key, (at, _) in list(found_weeks.items()) if now - at >= seconds]:
                 found_weeks.pop(key, None)
             while len(found_weeks) >= FOUND_WEEKS_KEPT:
                 found_weeks.pop(next(iter(found_weeks), None), None)
