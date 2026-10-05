@@ -505,6 +505,7 @@ def test_agent_confirms_replanning_and_updates_plan_revision(
         "day_index": None,
         "unavailable_ingredient": None,
         "reason": None,
+        "whole_meal": False,
     }
     assert "shopping list are updated" in payload["session"]["messages"][-1]["content"]
 
@@ -1778,6 +1779,8 @@ def test_a_retried_request_is_counted_and_a_fallback_is_recorded(recipe_client: 
     run = _latest_run(recipe_client, session["id"])
     assert run["used_llm_calls"] == 2
     assert run["run_config"]["model_fell_back"] is True
+    # A turn the rules had to read in the model's place is what "degraded" means on the console.
+    assert (run["status"], run["termination_reason_code"]) == ("degraded", "MODEL_FALLBACK")
     assert FallbackConstraintParser.OFFLINE_NOTE.strip() in session["messages"][-1]["content"]
 
 

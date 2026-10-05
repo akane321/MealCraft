@@ -222,7 +222,7 @@ def run_episode(episode: dict) -> tuple[dict, dict]:
         # The conversation's routing (AgentService._change_shape): one-dish events first, then the day, then the shape.
         interpreter = AgentReplanInterpreter()
         intent = None
-        if interpreter._event_type(text.lower()) is None:
+        if interpreter._event_type(text.lower(), interpreter.titles(plan)) is None:
             intent = read_shape_change(text, plan=plan, day_indexes=interpreter.day_indexes(text.lower(), plan))
         extra["understood"] = intent.request.model_dump(mode="json", exclude={"reason"}) if intent else None
         if intent is not None:

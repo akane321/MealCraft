@@ -13,6 +13,7 @@ from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError, ScheduledDish, entry_values
 from app.repositories.recipe import RecipeRepository
+from app.schemas.display import shown_title
 from app.schemas.meal_plan import (
     MealPlanEntrySnapshot,
     MealPlanGroceryDeltaLine,
@@ -34,9 +35,22 @@ from app.services.meal_plan import WeeklyMealPlanService
 from app.services.recommendation import RecipeRecommendationService
 
 
+def by_weight(grocery: WeeklyGroceryEstimateResponse) -> set[str]:
+    """What the list buys by weight. A change keeps it so: the week was planned with a dish that measures
+    milk in grams, and a swap keeps buying the milk the other dishes measure in millilitres by weight."""
+    return {line.ingredient_name for line in grocery.items if line.unit == "g"}
+
+
 def _at_share(value, share: float):
     """A dish's value at its portion share; a whole-meal dish keeps the value exactly."""
     return value if share == 1 else round(float(value) * share, 2)
+
+
+def _same_quantity(before: float | None, after: float | None) -> bool:
+    """Equal to the saved list's precision (three decimals)."""
+    if before is None or after is None:
+        return before == after
+    return abs(before - after) < 0.001
 
 
 class TimedDish:
@@ -122,6 +136,15 @@ class MealPlanReplanningService:
             )
 
         before_entry = self._entry_snapshot(entry)
+        if request.whole_meal:
+            # Every dish of the meal still to cook is kept with it, in one preview.
+            before_entry["meal_entries"] = [
+                self._entry_snapshot(item)
+                for item in plan.entries
+                if item.day_index == entry.day_index
+                and item.meal_type == entry.meal_type
+                and (item.id == entry.id or not (item.is_locked or item.status in {"completed", "skipped"}))
+            ]
         after_entry = self._after_entry_snapshot(entry, request, recommendation)
         before_grocery = self._current_grocery(plan)
         if request.event_type == "LOCK_MEAL":
@@ -136,7 +159,10 @@ class MealPlanReplanningService:
                 recipes_by_id=recipes_by_id,
             )
             after_grocery = self.grocery_aggregator.estimate(
-                [recipe for recipe, _ in future_recipes], constraints, shares=[share for _, share in future_recipes]
+                [recipe for recipe, _ in future_recipes],
+                constraints,
+                shares=[share for _, share in future_recipes],
+                by_weight=by_weight(before_grocery),
             )
             after_warnings = list(dict.fromkeys(after_grocery.warnings))
             if after_grocery.within_weekly_budget is False:
@@ -201,12 +227,13 @@ class MealPlanReplanningService:
             new_shape = MealPlanShape(meals=meals)
 
         kept = [item for item in plan.entries if item not in removed and item.status != "skipped"]
+        before_grocery = self._current_grocery(plan)
         # Taking a dish away keeps the others (at their larger share); anything else plans the meal again.
         staying = self._dishes_staying(removed, request.roles)
         if staying is not None:
             added = staying
         elif request.roles:
-            added = self._plan_meal(constraints, meal, request.roles, days, kept, removed)
+            added = self._plan_meal(constraints, meal, request.roles, days, kept, removed, by_weight(before_grocery))
         else:
             added = []
         # A dish that stays on its day, when a dish is taken away or added, is neither taken off nor new.
@@ -219,7 +246,10 @@ class MealPlanReplanningService:
         eaten = [(recipes_by_id[item.recipe_id], float(item.portion_share)) for item in kept]
         eaten += [(recipes_by_id[values["recipe_id"]], values["portion_share"]) for values, _ in added]
         after_grocery = self.grocery_aggregator.estimate(
-            [recipe for recipe, _ in eaten], constraints, shares=[share for _, share in eaten]
+            [recipe for recipe, _ in eaten],
+            constraints,
+            shares=[share for _, share in eaten],
+            by_weight=by_weight(before_grocery),
         )
         after_warnings = list(dict.fromkeys(after_grocery.warnings))
         if after_grocery.within_weekly_budget is False:
@@ -227,7 +257,6 @@ class MealPlanReplanningService:
                 f"The revised grocery total S${after_grocery.purchase_total_sgd:.2f} exceeds the "
                 f"S${constraints.weekly_budget_sgd:.2f} weekly budget."
             )
-        before_grocery = self._current_grocery(plan)
         fields = ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
         eaten_before = [item for item in removed if item.status != "skipped"]
         nutrition_delta = {
@@ -475,8 +504,12 @@ class MealPlanReplanningService:
             return None  # nothing is added
         return kept
 
-    def _plan_meal(self, constraints, meal, roles, days, kept, removed) -> list[tuple[dict, MealPlanEntrySnapshot]]:
+    def _plan_meal(
+        self, constraints, meal, roles, days, kept, removed, weighed: set[str]
+    ) -> list[tuple[dict, MealPlanEntrySnapshot]]:
         """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves.
+
+        `weighed` is what the week's list buys by weight (`by_weight`); the rest of the week is priced so.
 
         When nothing fits what is left (with the meal's present dishes kept, when a dish is added), the change is
         still planned, as cheaply as the planner finds (see `plan_dishes`), and its preview says how far over
@@ -494,7 +527,7 @@ class MealPlanReplanningService:
             # what its dishes use leaves room the week has already paid for, and a plan made to fit that
             # room would go over the budget without trying the cheapest plans first.
             paid = self.grocery_aggregator.estimate(
-                [recipe for recipe, _ in rest], constraints, shares=[share for _, share in rest]
+                [recipe for recipe, _ in rest], constraints, shares=[share for _, share in rest], by_weight=weighed
             ).purchase_total_sgd
             left = round(budget - paid, 2)
         partial = constraints.model_copy(
@@ -522,6 +555,7 @@ class MealPlanReplanningService:
                 rest=rest,
                 keep=self._dishes_kept_when_adding(roles, removed),
                 over_budget=over_budget,
+                by_weight=weighed,
             )
         except ProductPlanningError as error:
             raise MealPlanReplanValidationError(str(error)) from error
@@ -589,6 +623,23 @@ class MealPlanReplanningService:
         event = self.repository.get_event(plan_id=plan_id, event_id=event_id)
         return self._event_response(event) if event is not None else None
 
+    def dishes_using(self, *, plan_id: int, entry_id: int, ingredients: list[str]) -> dict[str, list[str]]:
+        """For each of `ingredients`, the titles of the week's other dishes still eaten that use it, as cooked
+        for this household: why skipping `entry_id` leaves its packages on the list."""
+        used: dict[str, list[str]] = {name: [] for name in ingredients}
+        plan = self.repository.get(plan_id) if ingredients else None
+        if plan is None:
+            return used
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
+        for item in plan.entries:
+            if item.id == entry_id or item.status == "skipped":
+                continue
+            names = {line.ingredient.normalized_name for line in alternatives.lines(item.recipe, constraints)}
+            for name in names & used.keys():
+                if item.recipe.title not in used[name]:
+                    used[name].append(item.recipe.title)
+        return used
+
     @staticmethod
     def _validate_target(entry: MealPlanEntry, request: MealPlanReplanPreviewRequest) -> None:
         if entry.status == "completed":
@@ -616,7 +667,7 @@ class MealPlanReplanningService:
         )
         if not candidates:
             raise MealPlanReplanValidationError(
-                f"No dish other than {entry.recipe.title} satisfies the current hard constraints."
+                f"No dish other than {shown_title(entry.recipe.title)} satisfies the current hard constraints."
             )
 
         # The same dish position on the neighbouring days, so a swap does not repeat them.
@@ -927,8 +978,10 @@ class MealPlanReplanningService:
             old = before_by_line.get((name, unit))
             new = after_by_line.get((name, unit))
             if old is not None and new is not None:
+                # The saved list keeps three decimals (Numeric(12, 3)): a recomputed 0.9199999999999999 is the
+                # saved 0.92, not a change.
                 unchanged = (
-                    old.required_quantity == new.required_quantity
+                    _same_quantity(old.required_quantity, new.required_quantity)
                     and old.packages_required == new.packages_required
                     and round(old.purchase_cost_sgd, 2) == round(new.purchase_cost_sgd, 2)
                 )
@@ -972,6 +1025,10 @@ class MealPlanReplanningService:
             unavailable_ingredient=event.unavailable_ingredient,
             before_entry=MealPlanEntrySnapshot.model_validate(event.before_entry) if event.before_entry else None,
             after_entry=MealPlanEntrySnapshot.model_validate(event.after_entry) if event.after_entry else None,
+            meal_entries=[
+                MealPlanEntrySnapshot.model_validate(item)
+                for item in (event.before_entry or {}).get("meal_entries", [])
+            ],
             shape_change=MealPlanShapeChange.model_validate(event.shape_change) if event.shape_change else None,
             nutrition_delta=MealPlanNutritionDelta.model_validate(event.nutrition_delta),
             grocery_delta=[MealPlanGroceryDeltaLine.model_validate(item) for item in event.grocery_delta],

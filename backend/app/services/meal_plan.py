@@ -1,5 +1,6 @@
 import time
 from collections import Counter
+from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -17,6 +18,7 @@ from app.planning.weekly_planner import WeeklyPlanSelector
 from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
 from app.repositories.recipe import FOUND_WEEKS_KEPT, RecipeRepository, found_weeks
 from app.schemas.meal_plan import (
+    MEAL_ORDER,
     MealPlanEntryStatus,
     MealPlanStatusCounts,
     NutritionDashboardDayResponse,
@@ -33,6 +35,11 @@ from app.schemas.meal_plan import (
 from app.schemas.product import GroceryLineEstimate, PriceEvidence, ProductResponse
 from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
 from app.services.recommendation import RecipeRecommendationService
+
+
+def _meal_rank(meal_type: str) -> int:
+    """Breakfast, lunch, dinner, then anything else (a snack)."""
+    return MEAL_ORDER.index(meal_type) if meal_type in MEAL_ORDER else len(MEAL_ORDER)
 
 
 class WeeklyMealPlanService:
@@ -270,6 +277,7 @@ class WeeklyMealPlanService:
         rest: list[tuple[Recipe, float]],
         keep: dict[tuple[int, str], dict[str, int]] | None = None,
         over_budget: float | None = None,
+        by_weight: Iterable[str] = (),
     ) -> list[ScheduledDish]:
         """Dishes for `day_count` days from day `first_day` of a saved week, nothing saved (ADR-0046 section 2).
 
@@ -278,7 +286,8 @@ class WeeklyMealPlanService:
         uses there count towards the household's cap on uses. `keep` ((day index, meal) -> {role id: recipe
         id}) holds each meal's present dishes in their roles while a new one is added. `over_budget` plans the
         dishes over the budget when none fit it (none can when it is 0 or less), as cheaply as the planner finds,
-        weighing costs against this amount (see `over_budget_pick` and `charge` below).
+        weighing costs against this amount (see `over_budget_pick` and `charge` below). `by_weight` is what the
+        week's list buys by weight, so `charge` prices the week as its list will be.
         """
         start = constraints.start_date + timedelta(days=first_day - 1)
         # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
@@ -321,7 +330,9 @@ class WeeklyMealPlanService:
             review: every lunch of mdw-dev-013 was one of its dinners)."""
             week = [recipe for recipe, _ in rest] + [by_id[item.recipe.id] for item in planned.selected]
             shares = [share for _, share in rest] + [float(place[3]) for place in planned.placements]
-            total = self.grocery_aggregator.estimate(week, partial, shares=shares).purchase_total_sgd
+            total = self.grocery_aggregator.estimate(
+                week, partial, shares=shares, by_weight=by_weight
+            ).purchase_total_sgd
             repeats = len(week) - len({recipe.id for recipe in week})
             empty = day_count * sum(len(roles) for _, roles in meals) - len(planned.selected)
             return total + over_budget / (day_count * len(meals)) * (repeats + EMPTY_OPTIONAL_ROLE_LOSS * empty)
@@ -388,6 +399,8 @@ class WeeklyMealPlanService:
         return self._to_response(plan) if plan is not None else None
 
     def list_recent(self, *, limit: int) -> WeeklyMealPlanCollectionResponse:
+        # Newest first, so every plan newer than one is listed before it (the limit cuts only older ones).
+        plans = self.repository.list_recent(limit=limit)
         return WeeklyMealPlanCollectionResponse(
             items=[
                 WeeklyMealPlanListItem(
@@ -405,8 +418,12 @@ class WeeklyMealPlanService:
                     ),
                     within_weekly_budget=plan.within_weekly_budget,
                     created_at=plan.created_at,
+                    current=not any(
+                        newer.start_date <= plan.end_date and newer.end_date >= plan.start_date
+                        for newer in plans[:index]
+                    ),
                 )
-                for plan in self.repository.list_recent(limit=limit)
+                for index, plan in enumerate(plans)
             ]
         )
 
@@ -447,7 +464,10 @@ class WeeklyMealPlanService:
         counts = {"planned": 0, "completed": 0, "skipped": 0}
         days: list[NutritionDashboardDayResponse] = []
 
-        for entry in plan.entries:
+        # In the order they are eaten: by day, then breakfast, lunch, dinner. Entries are stored by day and
+        # id, so a lunch added to a dinner week would otherwise come after that day's dinner.
+        eaten = sorted(plan.entries, key=lambda entry: (entry.day_index, _meal_rank(entry.meal_type), entry.id))
+        for entry in eaten:
             nutrition = self._entry_nutrition(entry)
             counts[entry.status] += 1
             for key in planned_totals:

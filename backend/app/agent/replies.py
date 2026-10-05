@@ -8,7 +8,11 @@ looked up by key, so a new reply is added here once, in both languages, instead 
 import re
 from collections.abc import Iterable
 
+from app.schemas.display import shown_title
+
 CJK = re.compile(r"[一-鿿]")
+# Template values that are dish titles, or titles joined with ", " or "、".
+TITLE_VALUES = ("title", "titles", "before", "after")
 ENGLISH_WORD = re.compile(r"[A-Za-z]{3,}")
 
 
@@ -25,7 +29,9 @@ def language(message: str, history: Iterable = ()) -> str:
 
 def say(key: str, lang: str, **values) -> str:
     english, chinese = REPLIES[key]
-    return (chinese if lang == "zh" else english).format(**values)
+    # A dish is named as the plan shows it; the catalog title stays what matching reads.
+    shown = {k: shown_title(v) if k in TITLE_VALUES and isinstance(v, str) else v for k, v in values.items()}
+    return (chinese if lang == "zh" else english).format(**shown)
 
 
 def people(count: int, lang: str) -> str:
@@ -36,6 +42,13 @@ def people(count: int, lang: str) -> str:
 
 def joined(items: Iterable[str], lang: str) -> str:
     return ("、" if lang == "zh" else ", ").join(items)
+
+
+def listed(items: list[str], lang: str) -> str:
+    """'A, B and C', or A、B和C."""
+    if len(items) < 2:
+        return "".join(items)
+    return f"{joined(items[:-1], lang)}{'和' if lang == 'zh' else ' and '}{items[-1]}"
 
 
 def weekday(day, lang: str) -> str:
@@ -264,7 +277,6 @@ REPLIES: dict[str, tuple[str, str]] = {
         "（助手的模型没有及时回应，所以我用简单规则读了这条消息。）",
     ),
     "ask_people": ("How many people should this weekly plan serve?", "这周的计划给几个人吃？"),
-    "ask_people_short": ("How many people should this plan serve?", "这份计划给几个人吃？"),
     "unmatched": (
         "I could not match “{term}” to an ingredient or allergen I can check, so it is not applied yet.",
         "我没能把“{term}”对应到我能检查的食材或过敏原，所以暂时没有用上。",
@@ -277,10 +289,6 @@ REPLIES: dict[str, tuple[str, str]] = {
     "ask_quantity": (
         "How much {name} do you already have? Reply “unknown” to use it only as a ranking preference.",
         "家里的{name}还有多少？回复“不知道”的话，我只在排序时优先用它。",
-    ),
-    "ask_quantity_short": (
-        "How much {name} do you already have? Enter a quantity and unit, or choose unknown to use it only for ranking.",
-        "家里的{name}还有多少？输入数量和单位，或者选“不知道”，我只在排序时优先用它。",
     ),
     "unknown_quantity": ("I don't know", "不知道"),
     "medical": (
@@ -302,6 +310,9 @@ REPLIES: dict[str, tuple[str, str]] = {
     "pantry_detail": ("{words} at home", "家里有{words}"),
     "no_repeats_detail": ("no dish twice", "菜不重样"),
     "cap_detail": ("no dish more than {count} times", "每道菜最多 {count} 次"),
+    # The composer's hint while a question is open; the question itself is the reply above it.
+    "pick_or_type": ("Pick an option or type your answer", "选一个，或者直接输入"),
+    "type_answer": ("Type your answer", "直接输入你的回答"),
     # Options the household can tap; the second of each pair is what it sends.
     "plan_week": ("Plan a week of meals", "规划一周的饭菜"),
     "plan_week_say": ("Plan a week of meals for us", "帮我们规划一周的饭菜"),
@@ -343,7 +354,29 @@ REPLIES: dict[str, tuple[str, str]] = {
     ),
     "ask_ingredient": ("Which ingredient is unavailable?", "哪一种食材买不到？"),
     "preview_lock": ("Keep {title} as it is?", "保留{title}不变？"),
+    # "Don't change Monday's dinner": every dish of that meal, in one preview.
+    "preview_lock_meal": ("Keep the {meal} on {day} as it is ({titles})?", "保留{day}的{meal}不变（{titles}）？"),
+    "already_kept": ("{title} is already kept as it is.", "{title}已经保留不变了。"),
+    "already_kept_meal": ("The {meal} on {day} is already kept as it is.", "{day}的{meal}已经保留不变了。"),
     "preview_skip": ("Skip {title}?", "跳过{title}？"),
+    # What a skip does to the shopping: whole packages other dishes still need stay on the list.
+    "skip_saves": (" That takes S${amount:.2f} off the groceries.", "买菜少花 S${amount:.2f}。"),
+    "skip_costs": (" Groceries +S${amount:.2f}.", "买菜多花 S${amount:.2f}。"),
+    "skip_same": (" Groceries stay the same.", "买菜不变。"),
+    "skip_still_used": (" Groceries stay the same: the week still needs {uses}.", "买菜不变：这周还要用{uses}。"),
+    "skip_used_by": ("{item} (for {title})", "{item}（{title}）"),
+    "skip_used_again": ("{item} (for {title} on its other day)", "{item}（另一天的{title}）"),
+    # A dish of a kind the meal already has (services/agent.py _change_shape): asked before a second one.
+    "already_has": (
+        "{Meal} {when} already has {titles}: add another {dish}, or swap it?",
+        "{when}的{meal}已经有{titles}了：再加一道{dish}，还是换掉它？",
+    ),
+    "already_has_many": (
+        "{Meal} {when} already has a {dish} ({titles}): add another {dish} anyway?",
+        "{when}的{meal}已经有{dish}了（{titles}）：还要再加一道{dish}吗？",
+    ),
+    "add_another": ("Add another {dish}", "再加一道{dish}"),
+    "swap_dish": ("Swap the {title}", "换掉{title}"),
     "preview_swap": ("How about {after} instead of {before}?", "把{before}换成{after}怎么样？"),
     "until_confirm": (" Nothing changes until you confirm.", "确认之前什么都不会改。"),
     "prepare_failed": ("I could not prepare that change: {error}", "我没法准备这个调整：{error}"),
@@ -368,6 +401,10 @@ REPLIES: dict[str, tuple[str, str]] = {
         "Groceries {sign}S${amount:.2f}.{over} Nothing changes until you confirm.",
         "买菜 {sign}S${amount:.2f}。{over}确认之前什么都不会改。",
     ),
+    "shape_groceries_same": (
+        "Groceries stay the same. Nothing changes until you confirm.",
+        "买菜不变。确认之前什么都不会改。",
+    ),
     "shape_over": (
         " That makes the week S${total:.2f}, S${over:.2f} over the S${budget:g} weekly budget.",
         "这样这周要 S${total:.2f}，超出每周 S${budget:g} 的预算 S${over:.2f}。",
@@ -386,10 +423,7 @@ REPLIES: dict[str, tuple[str, str]] = {
         "好的，只改这一周。你平常的安排保持不变。",
     ),
     "replanned": ("Done. Your week and shopping list are updated.", "好了，这周的计划和购物清单都更新了。"),
-    "discarded": (
-        "I discarded that replanning request. The saved meal plan was not changed.",
-        "已放弃这个调整，保存的计划没有改动。",
-    ),
+    "discarded": ("OK, your week stays as it is.", "好的，这周保持原样。"),
     "planned": (
         "Here's your week. Tap a dinner for the recipe, or ask me to swap anything.",
         "这是你这一周的安排。点一道菜看食谱，想换什么都可以告诉我。",
@@ -440,10 +474,10 @@ REPLIES: dict[str, tuple[str, str]] = {
     ),
     # A budget under the cheapest week the planner's search found (agent/limits.py).
     "budget_short": (
-        "S${budget:g} for {people} is S${each:.2f} a person a meal over {meals} meals. The cheapest week I could "
-        "plan costs about S${cost:.2f}: the cheapest my search found, not a proof that none is cheaper.",
-        "{people}一周 S${budget:g}，相当于每人每餐 S${each:.2f}（共 {meals} 餐）。我能排出的最便宜的一周大约要 "
-        "S${cost:.2f}：这是搜索找到的最便宜的一周，不代表一定没有更便宜的。",
+        "S${budget:g} a week for {people} comes to about S${each:.2f} a person a meal ({meals} meals). "
+        "The cheapest week I could find costs S${cost:.2f}.",
+        "{people}一周 S${budget:g}，每人每餐大约只有 S${each:.2f}（一周 {meals} 餐）。"
+        "我能找到的最便宜的一周要 S${cost:.2f}。",
     ),
     "use_weekly": ("Use S${amount} for the week", "一周用 S${amount}"),
     "use_weekly_say": ("Make the weekly budget S${amount}", "每周预算 {amount} 新币"),

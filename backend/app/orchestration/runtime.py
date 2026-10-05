@@ -10,6 +10,7 @@ from app.orchestration.interactions import (
     household_size_interaction,
     pantry_quantity_interaction,
     say_interaction,
+    short_prompt,
     unmatched_term_interaction,
 )
 from app.orchestration.scope_policy import ReferenceScopePolicy
@@ -138,10 +139,10 @@ class BoundedAgentOrchestrator:
                 elif FOOD_WISH.search(message.lower()):
                     reply = say("wish", lang)
                 pending_interaction = say_interaction(
-                    prompt=reply,
                     options=options,
                     question_id=f"context-{max(context_version, 1)}:message:{len(history)}",
                     context_version=max(context_version, 1),
+                    lang=lang,
                 )
             return AgentTurnOutcome(
                 constraints=current,
@@ -173,10 +174,10 @@ class BoundedAgentOrchestrator:
         if refusal is not None:
             # A limit no week meets: the ways out of it, as choices.
             interaction = say_interaction(
-                prompt=refusal.text,
                 options=list(refusal.options),
                 question_id=f"context-{next_context_version}:{refusal.field}",
                 context_version=next_context_version,
+                lang=lang,
             )
         else:
             interaction = self._interaction_for(
@@ -225,7 +226,6 @@ class BoundedAgentOrchestrator:
                 term=suggestion["term"],
                 meant_for=suggestion["field"],
                 options=suggestion["options"],
-                prompt=question,
                 question_id=question_id,
                 context_version=context_version,
                 lang=lang,
@@ -244,7 +244,7 @@ class BoundedAgentOrchestrator:
             return None
         return InteractionRequest(
             type="free_text",
-            prompt=question,
+            prompt=short_prompt((), lang),
             field_path=field_path,
             question_id=question_id,
             allow_free_text=True,

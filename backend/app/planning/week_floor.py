@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from itertools import accumulate, combinations
 from math import inf
 
+from app.data.units import in_grams
 from app.planning.meal_composition import MAIN_ROLE, portion_shares
 from app.planning.product_path import meals_of_the_day, normalized
 from app.schemas.planning_v2 import PlanningCompositionPolicy
@@ -49,9 +50,12 @@ def week_floor(constraints, recommendations, recipes) -> WeekFloor:
         for line in (item.grocery_estimate.items if item.grocery_estimate else [])
         if line.product is not None and line.required_quantity is not None
     ]
+    # A liquid of known density is priced by the gram whichever way a product or a line measures it: the
+    # planner buys it by weight when its dishes measure it both ways (`app.data.units.weighed`), and a floor
+    # must stay below either way of buying it.
     unit_price: dict[tuple[str, str], float] = {}
     for _, line in lines:
-        size, unit = normalized(line.product.package_size, line.product.package_unit)
+        size, unit = in_grams(*normalized(line.product.package_size, line.product.package_unit), line.ingredient_name)
         if size:
             key = (line.ingredient_name, unit)
             unit_price[key] = min(unit_price.get(key, inf), line.product.price_sgd / size)
@@ -59,7 +63,7 @@ def week_floor(constraints, recommendations, recipes) -> WeekFloor:
     bought: dict[int, float] = {}  # per recipe, every ingredient bought (as the per-meal budget reads it)
     paid: dict[int, float] = {}  # per recipe, what the household holds left out (as the weekly budget reads it)
     for recipe_id, line in lines:
-        quantity, unit = normalized(line.required_quantity, line.unit)
+        quantity, unit = in_grams(*normalized(line.required_quantity, line.unit), line.ingredient_name)
         price = quantity * unit_price.get((line.ingredient_name, unit), 0.0)
         bought[recipe_id] = bought.get(recipe_id, 0.0) + price
         paid[recipe_id] = paid.get(recipe_id, 0.0) + (0.0 if line.ingredient_name in held else price)

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetLine, conversationForPlan, groceryGroups, packageLabel, perDinner, plateStyle, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
-import type { MealPlanEntrySnapshot, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
+import { budgetLine, changedMealWhen, conversationForPlan, groceriesChange, groceryGroups, packageLabel, perDinner, plateStyle, previewChoices, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
+import type { MealPlanEntrySnapshot, MealPlanShapeChange, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
 function day(date: string, status: NutritionDashboardDay["status"]): NutritionDashboardDay {
@@ -134,6 +134,50 @@ describe("sameDishChange", () => {
   it("leaves a swap to show both dishes", () => {
     expect(sameDishChange({ event_type: "REPLACE_MEAL", before_entry: before })).toBeNull();
     expect(sameDishChange({ event_type: "ITEM_UNAVAILABLE", before_entry: before })).toBeNull();
+  });
+
+  it("reads a kept meal as every dish it keeps", () => {
+    const rice = { recipe_title: "Rice" } as MealPlanEntrySnapshot;
+    const soup = { recipe_title: "Potato Soup" } as MealPlanEntrySnapshot;
+    expect(sameDishChange({ event_type: "LOCK_MEAL", before_entry: before, meal_entries: [before, rice, soup] }))
+      .toBe("Keep Refried Beans, Rice and Potato Soup as they are");
+    expect(sameDishChange({ event_type: "LOCK_MEAL", before_entry: before, meal_entries: [] })).toBe("Keep Refried Beans as it is");
+  });
+});
+
+describe("groceriesChange", () => {
+  it("says the groceries stay the same rather than +S$0.00", () => {
+    expect(groceriesChange(0)).toBe("groceries stay the same");
+    expect(groceriesChange(2.8)).toBe("groceries +S$2.80");
+    expect(groceriesChange(-4.95)).toBe("groceries −S$4.95");
+  });
+});
+
+describe("previewChoices", () => {
+  it("never offers \"Keep as is\" to throw a lock away", () => {
+    expect(previewChoices("LOCK_MEAL")).toEqual({ confirm: "Keep it locked", discard: "Cancel" });
+  });
+
+  it("keeps the words of a swap or a skip, where \"Keep as is\" keeps the dish", () => {
+    for (const type of ["REPLACE_MEAL", "CANCEL_MEAL", "ITEM_UNAVAILABLE", "CHANGE_SHAPE"] as const) {
+      expect(previewChoices(type)).toEqual({ confirm: "Confirm change", discard: "Keep as is" });
+    }
+  });
+});
+
+describe("changedMealWhen", () => {
+  const applied = { applied_at: "2026-10-04T09:00:00Z", created_at: "2026-10-04T08:59:00Z", shape_change: null };
+  const dish = (day_index: number | null, meal_type?: string) => ({ day_index, meal_type, recipe_title: "Rolled Dumplings" }) as MealPlanEntrySnapshot;
+
+  it("dates a changed dish by the plan's weekday and meal, not the day it was changed", () => {
+    // The week starts on Sunday 4 Oct; day 5 is Thursday.
+    expect(changedMealWhen({ ...applied, before_entry: dish(5, "lunch"), after_entry: dish(5, "lunch") }, "2026-10-04")).toBe("Thu lunch");
+    expect(changedMealWhen({ ...applied, before_entry: dish(2), after_entry: null }, "2026-10-04")).toBe("Mon dinner");
+  });
+
+  it("leaves a shape change to name its own days, and an old event without a day keeps its date", () => {
+    expect(changedMealWhen({ ...applied, shape_change: {} as MealPlanShapeChange, before_entry: null, after_entry: null }, "2026-10-04")).toBeNull();
+    expect(changedMealWhen({ ...applied, before_entry: dish(null), after_entry: null }, "2026-10-04")).toBe("4 Oct");
   });
 });
 

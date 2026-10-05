@@ -328,6 +328,15 @@ A recipe detail contains:
 
 Nutrition values are descriptive planning data. They are not medical advice.
 
+Recipe titles (here, in recommendations and in meal plan entries) and preparation
+notes are returned as they read to the household: a recipe site's tag such as
+"(Ww)" is dropped, a glued parenthesis gets its space, a dash subtitle becomes a
+parenthesis, and preparation fragments the release split apart are rejoined in
+the recipe's order (`backend/app/schemas/display.py`). The assistant's replies
+and its "which dish" choices name dishes the same way, and it understands a dish
+named either way. The catalog keeps its own text and ids; search and matching
+read that text.
+
 `GET /api/recipes/{slug}/tutorial` constructs a deterministic query from the
 canonical recipe and returns at most one selected tutorial. `live=false` uses
 the reproducible fixture provider. With a configured runtime key, `live=true`

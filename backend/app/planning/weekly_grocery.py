@@ -1,6 +1,7 @@
+from collections.abc import Iterable
 from dataclasses import dataclass
 
-from app.data.units import UNIT_BASE
+from app.data.units import UNIT_BASE, in_grams, weighed
 from app.models.recipe import Recipe
 from app.planning import alternatives
 from app.planning.grocery_estimator import (
@@ -35,9 +36,13 @@ class WeeklyGroceryAggregator:
         constraints: WeeklyMealPlanRequest,
         *,
         shares: list[float] | None = None,
+        by_weight: Iterable[str] = (),
     ) -> WeeklyGroceryEstimateResponse:
-        """`shares` gives each recipe's portion share of its meal (ADR-0036); absent, every dish is a whole meal."""
-        ingredients = self._aggregate_ingredients(recipes, constraints, shares)
+        """`shares` gives each recipe's portion share of its meal (ADR-0036); absent, every dish is a whole meal.
+
+        `by_weight` names ingredients the list being changed buys by weight, so a change keeps them in grams.
+        """
+        ingredients = self._aggregate_ingredients(recipes, constraints, shares, by_weight)
         # A copy that each deduction draws down, so an ingredient needed on two
         # lines (whole carrots and grams of carrot) cannot use the same pantry twice.
         pantry = {item.normalized_name: item.model_copy() for item in constraints.available_ingredients}
@@ -56,7 +61,7 @@ class WeeklyGroceryAggregator:
                 ingredient.unit,
             )
             if pantry_deduction and pantry_item is not None and pantry_item.quantity is not None:
-                used = convert_quantity(pantry_deduction, ingredient.unit, pantry_item.unit) or 0.0
+                used = convert_quantity(pantry_deduction, ingredient.unit, pantry_item.unit, ingredient.name) or 0.0
                 pantry_item.quantity = max(0.0, pantry_item.quantity - used)
             remaining = (
                 max(0.0, ingredient.required_quantity - pantry_deduction)
@@ -165,33 +170,40 @@ class WeeklyGroceryAggregator:
 
     @staticmethod
     def _aggregate_ingredients(
-        recipes: list[Recipe], constraints, shares: list[float] | None = None
+        recipes: list[Recipe], constraints, shares: list[float] | None = None, by_weight: Iterable[str] = ()
     ) -> list[AggregatedIngredient]:
         household_size = constraints.household_size
-        # Keyed by ingredient and unit: lines whose units cannot be added (one whole
-        # carrot and 64 g of carrot) stay separate lines rather than one unknown amount.
-        aggregated: dict[tuple[str, str | None], AggregatedIngredient] = {}
+        lines = []
         for index, recipe in enumerate(recipes):
             share = shares[index] if shares is not None else 1
             scale = household_size / recipe.servings if share == 1 else household_size * share / recipe.servings
             for item in alternatives.lines(recipe, constraints):
-                name = item.ingredient.normalized_name
                 quantity = float(item.quantity) * scale if item.quantity is not None else None
-                normalized_quantity, normalized_unit = WeeklyGroceryAggregator._to_base_unit(quantity, item.unit)
-                key = (name, normalized_unit)
-                current = aggregated.get(key)
-                if current is None:
-                    aggregated[key] = AggregatedIngredient(
-                        name=name,
-                        display_name=item.ingredient.display_name,
-                        required_quantity=normalized_quantity,
-                        unit=normalized_unit,
-                    )
-                    continue
-                if current.required_quantity is None or normalized_quantity is None:
-                    current.required_quantity = None
-                else:
-                    current.required_quantity += normalized_quantity
+                lines.append((item.ingredient, *WeeklyGroceryAggregator._to_base_unit(quantity, item.unit)))
+        # Keyed by ingredient and unit: lines whose units cannot be added (one whole
+        # carrot and 64 g of carrot) stay separate lines rather than one unknown amount.
+        # Millilitres and grams of one liquid are added in grams (milk in two recipes is one carton), as
+        # are the millilitres of an ingredient `by_weight` names (the list being changed buys it by weight).
+        weigh = weighed((ingredient.normalized_name, unit) for ingredient, _, unit in lines) | set(by_weight)
+        aggregated: dict[tuple[str, str | None], AggregatedIngredient] = {}
+        for ingredient, normalized_quantity, normalized_unit in lines:
+            name = ingredient.normalized_name
+            if name in weigh:
+                normalized_quantity, normalized_unit = in_grams(normalized_quantity, normalized_unit, name)
+            key = (name, normalized_unit)
+            current = aggregated.get(key)
+            if current is None:
+                aggregated[key] = AggregatedIngredient(
+                    name=name,
+                    display_name=ingredient.display_name,
+                    required_quantity=normalized_quantity,
+                    unit=normalized_unit,
+                )
+                continue
+            if current.required_quantity is None or normalized_quantity is None:
+                current.required_quantity = None
+            else:
+                current.required_quantity += normalized_quantity
         return sorted(aggregated.values(), key=lambda item: (item.name, item.unit or ""))
 
     @staticmethod

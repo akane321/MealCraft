@@ -78,6 +78,8 @@ export interface WeeklyMealPlanListItem {
   consumed_total_sgd: number | null;
   within_weekly_budget: boolean | null;
   created_at: string;
+  /** False when a newer plan covers any of its days and so replaced it (backend `current`). */
+  current: boolean;
 }
 
 export interface WeeklyMealPlanCollection {
@@ -125,6 +127,7 @@ export type MealPlanEventStatus = "previewed" | "applied";
 export interface MealPlanEntrySnapshot {
   entry_id: number;
   day_index?: number | null;
+  meal_type?: string;
   recipe_id: number;
   recipe_slug: string;
   recipe_title: string;
@@ -188,6 +191,8 @@ export interface MealPlanReplanEvent {
   // Null for a shape change, which moves several dishes (shape_change).
   before_entry: MealPlanEntrySnapshot | null;
   after_entry: MealPlanEntrySnapshot | null;
+  // A whole-meal lock: every dish of before_entry's meal it keeps; empty otherwise.
+  meal_entries?: MealPlanEntrySnapshot[];
   shape_change?: MealPlanShapeChange | null;
   nutrition_delta: MealPlanNutritionDelta;
   grocery_delta: MealPlanGroceryDeltaLine[];
