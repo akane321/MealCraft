@@ -1307,7 +1307,7 @@ test("keeping a dish previews as keeping it, and the change log shows it once co
   await expect(page.getByText("Keep Tofu Brown Rice Stir-fry as it is")).toBeVisible();
   await expect(page.locator(".swap-card s")).toHaveCount(0);
 
-  await page.getByRole("button", { name: "Confirm change" }).click();
+  await page.getByRole("button", { name: "Keep it locked" }).click();
   await week.getByText("Changes this week").click();
   await expect(week.getByText("Keep Tofu Brown Rice Stir-fry as it is")).toBeVisible();
 });

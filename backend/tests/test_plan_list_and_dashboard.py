@@ -50,23 +50,55 @@ def test_only_the_newest_plan_for_some_dates_is_current():
 
 def entry(entry_id: int, day: int, meal: str):
     recipe = SimpleNamespace(
-        id=entry_id, slug=f"r-{entry_id}", title=f"Dish {entry_id}", description="", cuisine="Home",
-        meal_type=meal, servings=2, total_time_minutes=20, dietary_tags=[], nutrition=NUTRITION, course="main",
+        id=entry_id,
+        slug=f"r-{entry_id}",
+        title=f"Dish {entry_id}",
+        description="",
+        cuisine="Home",
+        meal_type=meal,
+        servings=2,
+        total_time_minutes=20,
+        dietary_tags=[],
+        nutrition=NUTRITION,
+        course="main",
     )
     return SimpleNamespace(
-        id=entry_id, day_index=day, planned_date=date(2026, 10, 3 + day), recipe=recipe, status="planned",
-        is_locked=False, consumed_at=None, meal_type=meal, role_id="main", portion_share=1, **NUTRITION,
+        id=entry_id,
+        day_index=day,
+        planned_date=date(2026, 10, 3 + day),
+        recipe=recipe,
+        status="planned",
+        is_locked=False,
+        consumed_at=None,
+        meal_type=meal,
+        role_id="main",
+        portion_share=1,
+        **NUTRITION,
     )
 
 
 def test_the_dashboard_lists_a_day_breakfast_lunch_then_dinner_whatever_order_the_dishes_were_added_in():
     # A dinner week, then lunch and breakfast added in the conversation: stored by day, then by id.
     week = SimpleNamespace(
-        id=9, revision=3, start_date=date(2026, 10, 4), end_date=date(2026, 10, 10), household_size=2,
+        id=9,
+        revision=3,
+        start_date=date(2026, 10, 4),
+        end_date=date(2026, 10, 10),
+        household_size=2,
         constraints={},
-        entries=[entry(1, 1, "dinner"), entry(8, 1, "lunch"), entry(9, 1, "breakfast"), entry(2, 2, "dinner"), entry(10, 2, "lunch")],
+        entries=[
+            entry(1, 1, "dinner"),
+            entry(8, 1, "lunch"),
+            entry(9, 1, "breakfast"),
+            entry(2, 2, "dinner"),
+            entry(10, 2, "lunch"),
+        ],
     )
     dashboard = service(SimpleNamespace(get=lambda plan_id: week)).dashboard(9)
     assert [(day.day_index, day.meal_type) for day in dashboard.days] == [
-        (1, "breakfast"), (1, "lunch"), (1, "dinner"), (2, "lunch"), (2, "dinner"),
+        (1, "breakfast"),
+        (1, "lunch"),
+        (1, "dinner"),
+        (2, "lunch"),
+        (2, "dinner"),
     ]

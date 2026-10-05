@@ -79,7 +79,7 @@ export interface WeeklyMealPlanListItem {
   within_weekly_budget: boolean | null;
   created_at: string;
   /** False when a newer plan covers any of its days and so replaced it (backend `current`). */
-  current?: boolean;
+  current: boolean;
 }
 
 export interface WeeklyMealPlanCollection {
