@@ -238,17 +238,18 @@ REPLIES: dict[str, tuple[str, str]] = {
     "varied_swaps": ("For more variety: {swaps}.", "多些花样：{swaps}。"),
     "varied_swap": ("{before} on {day} becomes {after}", "{day}的{before}换成{after}"),
     "varied_left": (
-        " The other {count} stay: a different dish for any of them adds S${extra:.2f} more than the week can spend.",
-        "另外 {count} 道先不换：换成别的菜要比这周能花的多 S${extra:.2f}。",
+        " {count} more stay as they are: the closest different dish I found for them needs S${extra:.2f} more than "
+        "the S${limit:.2f} the week can spend.",
+        "另外 {count} 道重复的菜先不换：我找到的最接近的换法也要比这周能花的 S${limit:.2f} 多 S${extra:.2f}。",
     ),
     "varied_none": (
-        "No dish comes twice this week. Tell me which one you're tired of and I'll swap it.",
-        "这周没有重复的菜。告诉我想换掉哪一道，我来换。",
+        "No dish still to cook this week comes twice. Tell me which one you're tired of and I'll swap it.",
+        "这周还没做的菜没有重复的。告诉我想换掉哪一道，我来换。",
     ),
     "varied_short": (
-        "No different dish fits in place of the repeated ones: the cheapest adds S${extra:.2f} to the S${limit:.2f} "
-        "the week can spend. I can swap a dish anyway.",
-        "重复的菜换不进预算：最便宜的换法要比这周能花的 S${limit:.2f} 多 S${extra:.2f}。也可以换掉一道菜试试。",
+        "No different dish fits in place of the repeated ones: the closest swap I found needs S${extra:.2f} more "
+        "than the S${limit:.2f} the week can spend. I can swap a dish anyway.",
+        "重复的菜换不进预算：我找到的最接近的换法也要比这周能花的 S${limit:.2f} 多 S${extra:.2f}。也可以换掉一道菜试试。",
     ),
     "varied_nothing": (
         "No other dish fits in place of the repeated ones. I can swap a dish instead.",

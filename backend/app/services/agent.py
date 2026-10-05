@@ -678,12 +678,14 @@ class AgentSessionService:
         except (MealPlanReplanValidationError, WeeklyPlanSelectionError) as error:
             reply = say("change_failed", lang, error=planner_message(str(error), lang))
             return self._keep_week(session_id, snapshot, plan, message, reply, lang)
+        # What the week can spend: its budget, or what it costs now when a change took it over (ADR-0046 section 2).
+        budget = plan.grocery_estimate.weekly_budget_sgd
+        limit = max(budget, plan.grocery_estimate.purchase_total_sgd) if budget is not None else None
         if preview is None:
-            budget = plan.grocery_estimate.weekly_budget_sgd
             if not repeats:
                 reply = say("varied_none", lang)
-            elif short is not None and budget is not None:
-                reply = say("varied_short", lang, budget=budget, extra=short)
+            elif short is not None and limit is not None:
+                reply = say("varied_short", lang, limit=limit, extra=short)
             else:
                 reply = say("varied_nothing", lang)
             return self._keep_week(session_id, snapshot, plan, message, reply, lang)
@@ -702,7 +704,7 @@ class AgentSessionService:
         left = repeats - len(swaps)
         reply = (
             say("varied_swaps", lang, swaps=("；" if lang == "zh" else "; ").join(swaps))
-            + (say("varied_left", lang, count=left, extra=short) if left and short is not None else "")
+            + (say("varied_left", lang, count=left, extra=short, limit=limit) if left and short is not None else "")
             + self._over_budget(preview, plan, lang)
             + say("until_confirm", lang)
         )
