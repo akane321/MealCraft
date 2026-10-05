@@ -56,6 +56,17 @@ describe("shapeChangeSummary", () => {
     expect(shapeChangeSummary(change({ roles: withVegetable, removed: [], kept: 2 }), start)).toBe("Dinner on Fri: main, vegetable if it fits, soup");
   });
 
+  it("says a swap of dishes in their places as swaps, not as the meal's make-up", () => {
+    const roles = [{ role_id: "main", courses: ["main"], required: true }, { role_id: "soup", courses: ["soup"], required: true }] as MealRole[];
+    const at = (entry_id: number, day_index: number, role_id: string) => ({ entry_id, day_index, role_id }) as MealPlanShapeChange["removed"][number];
+    const removed = [at(1, 2, "main"), at(2, 4, "soup")];
+    const added = [at(0, 2, "main"), at(0, 4, "soup")];
+    expect(shapeChangeSummary(change({ day_indexes: [2, 4], roles, removed, added }), start)).toBe("2 dishes swapped on Tue, Thu");
+    expect(shapeChangeSummary(change({ day_indexes: [2], roles, removed: removed.slice(0, 1), added: added.slice(0, 1) }), start)).toBe("A dish swapped on Tue");
+    // A soup in the vegetable's place is a meal made up anew.
+    expect(shapeChangeSummary(change({ day_indexes: [2], roles, removed: [at(1, 2, "vegetable")], added: [at(0, 2, "soup")] }), start)).toBe("Dinner on Tue: main, soup");
+  });
+
   it("names days by the plan's own dates, the same way wherever a change is shown", () => {
     // A week starting on Thursday: its fourth day is Sunday, never "day 4".
     expect(planDayLabel("2026-10-01", 4)).toBe("Sun");

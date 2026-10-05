@@ -89,6 +89,12 @@ export function shapeChangeSummary(change: MealPlanShapeChange, startDate: strin
     : `on ${change.day_indexes.map(day => planDayLabel(startDate, day)).join(", ")}`;
   if (change.roles === null) return `No ${change.meal_type} ${where}`;
   if (!change.removed.length && !change.kept) return `${meal} added ${where}`;
+  // Each new dish takes a dish's own place (its day and role in the one meal a change plans), as when the week's
+  // repeated dishes are swapped ("the dishes are boring"): the change is the swaps, not a meal's new make-up.
+  const swapped = change.removed.length > 0 && change.added.length === change.removed.length && change.added.every(dish => change.removed.some(
+    old => old.day_index === dish.day_index && old.role_id === dish.role_id,
+  ));
+  if (swapped) return `${change.added.length === 1 ? "A dish" : `${change.added.length} dishes`} swapped ${where}`;
   const counts = new Map<string, number>();
   for (const item of change.roles) {
     // An optional dish is planned only when it fits the household's limits; say so rather than promise it.

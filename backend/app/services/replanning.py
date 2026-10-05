@@ -370,6 +370,13 @@ class MealPlanReplanningService:
         after_grocery = self._week_grocery(
             plan, constraints, recipes_by_id, {entry_id: choice.recipe.id for entry_id, choice in swaps.items()}
         )
+        after_warnings = list(dict.fromkeys(after_grocery.warnings))
+        if after_grocery.within_weekly_budget is False:
+            # Over already (a change the household took over the budget), and no further over.
+            after_warnings.append(
+                f"The revised grocery total S${after_grocery.purchase_total_sgd:.2f} exceeds the "
+                f"S${constraints.weekly_budget_sgd:.2f} weekly budget."
+            )
         before_grocery = self._current_grocery(plan)
         fields = ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
         meal = removed[0].meal_type
@@ -391,7 +398,7 @@ class MealPlanReplanningService:
                 "new_entries": [values for values, _ in added],
             },
             after_grocery=after_grocery,
-            after_warnings=list(dict.fromkeys(after_grocery.warnings)),
+            after_warnings=after_warnings,
             nutrition_delta={
                 field: round(
                     sum(values[field] for values, _ in added) - sum(float(getattr(item, field)) for item in removed), 2

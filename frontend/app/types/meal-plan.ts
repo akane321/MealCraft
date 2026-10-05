@@ -131,6 +131,8 @@ export interface MealPlanEntrySnapshot {
   status: MealPlanEntryStatus;
   is_locked: boolean;
   recommendation_score: number;
+  // The dish role it fills in its meal (backend MealPlanEntrySnapshot).
+  role_id?: string | null;
 }
 
 export interface MealPlanNutritionDelta {
