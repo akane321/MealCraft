@@ -355,10 +355,9 @@ REPLIES: dict[str, tuple[str, str]] = {
     "skip_saves": (" That takes S${amount:.2f} off the groceries.", "买菜少花 S${amount:.2f}。"),
     "skip_costs": (" Groceries +S${amount:.2f}.", "买菜多花 S${amount:.2f}。"),
     "skip_same": (" Groceries stay the same.", "买菜不变。"),
-    "skip_still_used": (
-        " Groceries stay the same: {items} {verb} still used by {titles}.",
-        "买菜不变：{items}还要用在{titles}里。",
-    ),
+    "skip_still_used": (" Groceries stay the same: the week still needs {uses}.", "买菜不变：这周还要用{uses}。"),
+    "skip_used_by": ("{item} (for {title})", "{item}（{title}）"),
+    "skip_used_again": ("{item} (for {title} on its other day)", "{item}（另一天的{title}）"),
     # A dish of a kind the meal already has (services/agent.py _change_shape): asked before a second one.
     "already_has": (
         "{Meal} {when} already has {titles}: add another {dish}, or swap it?",

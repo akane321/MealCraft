@@ -38,6 +38,13 @@ def _at_share(value, share: float):
     return value if share == 1 else round(float(value) * share, 2)
 
 
+def _same_quantity(before: float | None, after: float | None) -> bool:
+    """Equal to the saved list's precision (three decimals)."""
+    if before is None or after is None:
+        return before == after
+    return abs(before - after) < 0.001
+
+
 class TimedDish:
     """The time fields `meal_minutes` reads, from a stored recipe (passive time is not cooking time)."""
 
@@ -449,22 +456,22 @@ class MealPlanReplanningService:
         event = self.repository.get_event(plan_id=plan_id, event_id=event_id)
         return self._event_response(event) if event is not None else None
 
-    def dishes_using(self, *, plan_id: int, entry_id: int, ingredients: list[str]) -> list[str]:
-        """The titles of the week's other dishes still eaten that use any of `ingredients`, as cooked for this
-        household: why skipping `entry_id` leaves those packages on the list."""
+    def dishes_using(self, *, plan_id: int, entry_id: int, ingredients: list[str]) -> dict[str, list[str]]:
+        """For each of `ingredients`, the titles of the week's other dishes still eaten that use it, as cooked
+        for this household: why skipping `entry_id` leaves its packages on the list."""
         plan = self.repository.get(plan_id)
+        used: dict[str, list[str]] = {name: [] for name in ingredients}
         if plan is None or not ingredients:
-            return []
+            return used
         constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
-        titles = [
-            item.recipe.title
-            for item in plan.entries
-            if item.id != entry_id
-            and item.status != "skipped"
-            and {line.ingredient.normalized_name for line in alternatives.lines(item.recipe, constraints)}
-            & set(ingredients)
-        ]
-        return list(dict.fromkeys(titles))
+        for item in plan.entries:
+            if item.id == entry_id or item.status == "skipped":
+                continue
+            names = {line.ingredient.normalized_name for line in alternatives.lines(item.recipe, constraints)}
+            for name in names & used.keys():
+                if item.recipe.title not in used[name]:
+                    used[name].append(item.recipe.title)
+        return used
 
     @staticmethod
     def _validate_target(entry: MealPlanEntry, request: MealPlanReplanPreviewRequest) -> None:
@@ -729,8 +736,10 @@ class MealPlanReplanningService:
             old = before_by_line.get((name, unit))
             new = after_by_line.get((name, unit))
             if old is not None and new is not None:
+                # The saved list keeps three decimals (Numeric(12, 3)): a recomputed 0.9199999999999999 is the
+                # saved 0.92, not a change.
                 unchanged = (
-                    old.required_quantity == new.required_quantity
+                    _same_quantity(old.required_quantity, new.required_quantity)
                     and old.packages_required == new.packages_required
                     and round(old.purchase_cost_sgd, 2) == round(new.purchase_cost_sgd, 2)
                 )

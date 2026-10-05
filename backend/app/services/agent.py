@@ -80,6 +80,7 @@ KEEP_SHAPE_FIELD = "plan_shape.keep"
 # with "no", and "keep Monday's dinner as it is" with "keep".
 KEEP_YES = {
     *("yes", "y", "yeah", "yep", "yup", "sure", "ok", "okay", "please", "please do", "do it", "yes please"),
+    *("sounds good", "sounds great", "good", "great", "perfect", "fine", "alright", "all right", "that's fine"),
     *("keep", "keep it", "keep them", "keep it as our usual", "keep it as usual", "make it our usual"),
     *("save", "save it", "yes keep it", "yes save it", "always", "every week", "from now on", "yes every week"),
     *("好", "是", "对", "要", "可以", "行", "保存", "保存为常用安排", "保存为我们的常用安排", "常用"),
@@ -95,16 +96,25 @@ KEEP_NO = {
 ANSWERED_SCOPES = {ScopeClass.SOCIAL, ScopeClass.DOMAIN_QUESTION}
 
 
+# A bare yes or no that only leads into the answer ("ok keep it", "no thanks, just this week").
+KEEP_LEAD = re.compile(r"^(?:yes|yeah|yep|sure|ok|okay|alright|no|nope|nah)(?:\s+(?:thanks|thank you|please))?\s+")
+KEEP_BARE = {"yes", "y", "yeah", "yep", "yup", "sure", "ok", "okay", "no", "n", "nope", "nah", "好", "是", "对", "不"}
+
+
 def keep_shape_answer(message: str) -> bool | None:
     """True to keep a changed shape as the household's usual one, False for this week only, None when the
-    message is not an answer to that question (a whole-message match, never a word inside a longer one)."""
-    text = re.sub(r"[\s,.!?;:~，。！？；：、～]+", " ", message.lower()).strip()
-    text = re.sub(r"(?:\s+(?:please|thanks|thank you)|[吧啊呀哦的了])+$", "", text).strip()
-    if text in KEEP_YES:
-        return True
-    if text in KEEP_NO:
-        return False
-    return None
+    message is not an answer to that question: every part of it ("Yes, keep it as our usual", "no thanks, just
+    this week") must be a whole answer, never a word inside a longer instruction ("no lunch on weekdays")."""
+    parts = []
+    for part in re.split(r"[,.!?;:~，。！？；：、～]+", message.lower()):
+        text = re.sub(r"(?:\s+(?:please|thanks|thank you)|[吧啊呀哦的了])+$", "", " ".join(part.split())).strip()
+        led = KEEP_LEAD.sub("", text)
+        if text:
+            parts.append(led if led in KEEP_YES | KEEP_NO else text)
+    # A bare yes or no beside a fuller answer only leads into it: "yes, just this week" is this week only.
+    said = [part for part in parts if part not in KEEP_BARE] or parts
+    answers = {True if part in KEEP_YES else False if part in KEEP_NO else None for part in said}
+    return answers.pop() if len(answers) == 1 else None
 
 
 class AgentSessionNotFoundError(LookupError):
@@ -916,31 +926,32 @@ class AgentSessionService:
             return say("skip_saves", lang, amount=-delta)
         if delta >= 0.005:  # a cheaper mix of packages for what is left can cost more; said as it is
             return say("skip_costs", lang, amount=delta)
+        # The skipped dish's own ingredients whose whole packages are still bought: less is needed, as many
+        # packages are.
         kept = [
             line
             for line in preview.grocery_delta
-            if line.after_packages_required and line.after_packages_required == line.before_packages_required
+            if line.after_packages_required
+            and line.after_packages_required == line.before_packages_required
+            and (line.after_required_quantity or 0) < (line.before_required_quantity or 0)
         ]
-        titles = (
-            self.replanning_service.dishes_using(
-                plan_id=plan_id,
-                entry_id=preview.before_entry.entry_id,
-                ingredients=[line.ingredient_name for line in kept],
-            )
-            if kept
-            else []
+        users = self.replanning_service.dishes_using(
+            plan_id=plan_id,
+            entry_id=preview.before_entry.entry_id,
+            ingredients=[line.ingredient_name for line in kept],
         )
-        if not titles:
+        skipped = preview.before_entry.recipe_title
+        uses: dict[str, str] = {}
+        for line in kept:
+            item = word(line.ingredient_name, lang) if lang == "zh" else line.ingredient_display_name.lower()
+            # Another dish first; the same dish on another day of the week only when nothing else uses it.
+            titles = sorted(users.get(line.ingredient_name, []), key=lambda title: title == skipped)
+            if titles and item not in uses:
+                again = titles[0] == skipped
+                uses[item] = say("skip_used_again" if again else "skip_used_by", lang, item=item, title=titles[0])
+        if not uses:
             return say("skip_same", lang)
-        items = [word(line.ingredient_name, lang) if lang == "zh" else line.ingredient_display_name for line in kept]
-        items = list(dict.fromkeys(items))[:3]
-        return say(
-            "skip_still_used",
-            lang,
-            items=listed(items, lang),
-            verb="is" if len(items) == 1 else "are",
-            titles=listed(titles[:3], lang),
-        )
+        return say("skip_still_used", lang, uses=listed(list(uses.values())[:3], lang))
 
     def _answer_keep_shape(
         self, session_id: int, snapshot: AgentSessionResponse, message: str, *, keep: bool, lang: str = "en"
