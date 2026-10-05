@@ -4,14 +4,18 @@
 - P4: "the dishes are boring" (菜很单调) swaps the week's repeated dishes for different ones within its budget
   (owner, 2026-10-04); lunches added to a week were one slaw five times.
 - P8: a swap's replacement was a lunch at dinner, or took the week S$9 to S$17 over its budget.
+- Review round 1: the first answer after startup, or after the recipe pool aged, loaded the pool (3.5-4.5 s on
+  PostgreSQL), taking an OpenAI-mode answer past 10 s.
 """
 
 import re
+import threading
 from collections import Counter
 from contextlib import contextmanager
 from datetime import date, timedelta
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -27,7 +31,7 @@ from app.planning.product_path import ProductPlanningEngine, meal_affinity
 from app.planning.recipe_quality import dish_family
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
-from app.repositories.recipe import clear_planning_pool
+from app.repositories.recipe import RecipeRepository, _planning_pool, clear_planning_pool
 from app.schemas.agent import AgentConstraintState
 from app.schemas.meal_plan import MEAL_PRESETS, MealPlanReplanPreviewRequest, MealPlanShapeChangeRequest
 from app.services.agent import AgentSessionService
@@ -53,6 +57,8 @@ def kept_for(seconds: int):
     """Recipe pools and found weeks kept as long as production keeps them (tests keep none: see conftest)."""
     with pytest.MonkeyPatch.context() as patch:
         patch.setattr(get_settings(), "planning_pool_cache_seconds", seconds)
+        # The API's startup would load the pool of the configured database, not the test's catalog.
+        patch.setattr("app.main.warm_planning_pool", lambda: None, raising=False)
         clear_planning_pool()  # and the weeks found from it
         try:
             yield
@@ -384,3 +390,106 @@ def test_a_swap_in_the_walkthrough_week_keeps_it_within_its_budget_with_a_dinner
     assert "dinner" in meal_affinity(chosen)
     if unavailable:
         assert unavailable not in {line.ingredient.normalized_name for line in chosen.recipe_ingredients}
+
+
+# Review round 1: no answer waits for the recipe pool to load ----------------------------------------------------
+
+
+@pytest.fixture
+def loads(monkeypatch):
+    """The thread of every load of the planner's recipe pool, in order."""
+    threads: list[str] = []
+    load = RecipeRepository._load_for_planning
+
+    def counted(self, session, courses):
+        threads.append(threading.current_thread().name)
+        return load(self, session, courses)
+
+    monkeypatch.setattr(RecipeRepository, "_load_for_planning", counted)
+    return threads
+
+
+@contextmanager
+def pooled():
+    """A session over a small catalog of every course a dinner role takes, its pool kept as production keeps it."""
+    engine = create_engine("sqlite+pysqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    Base.metadata.create_all(engine)
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    with factory() as session:
+        session.add_all(
+            [
+                _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
+                _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
+                _dish("zucchini-salad", "salad", "zucchini", 300, calories=60),
+                _dish("tomato-soup", "soup", "tomato", 500, calories=150),
+            ]
+        )
+        session.commit()
+    with kept_for(300), factory() as session:
+        yield session
+    engine.dispose()
+
+
+def joined(name: str) -> None:
+    for thread in threading.enumerate():
+        if thread.name == name:
+            thread.join()
+
+
+def test_every_dish_role_plans_from_one_load_of_the_pool(loads):
+    """A week loaded the courses of its roles, and then a swap loaded its role's courses again (seconds each)."""
+    with pooled() as session:
+        recipes = RecipeRepository(session)
+        week = recipes.list_for_planning(courses=["main", "salad", "side", "soup"])
+        assert [r.slug for r in week] == ["salmon-bake", "broccoli-stirfry", "zucchini-salad", "tomato-soup"]
+        assert [r.slug for r in recipes.list_for_planning(courses=["side", "salad"])] == [
+            "broccoli-stirfry",
+            "zucchini-salad",
+        ]
+        assert [r.slug for r in recipes.list_for_planning()] == ["salmon-bake", "tomato-soup"]
+        assert loads == ["MainThread"]
+
+
+def test_a_pool_past_its_age_answers_at_once_and_reloads_in_the_background(loads):
+    """The pool was reloaded by the first request after PLANNING_POOL_CACHE_SECONDS, which waited for it."""
+    with pooled() as session:
+        recipes = RecipeRepository(session)
+        first = recipes.list_for_planning()
+        for key, (loaded_at, kept) in list(_planning_pool.items()):
+            _planning_pool[key] = (loaded_at - 301, kept)
+
+        assert recipes.list_for_planning() == first  # the recipes in hand, not a load
+        joined("reload-planning-pool")
+        assert loads == ["MainThread", "reload-planning-pool"]
+        assert recipes.list_for_planning() != first  # the reloaded recipes, and no further load
+        assert loads == ["MainThread", "reload-planning-pool"]
+
+
+def test_a_pool_load_that_an_edit_overtook_is_not_kept(monkeypatch):
+    """An operations edit clears the pool so that the next plan sees it: a load under way may predate the edit."""
+    load = RecipeRepository._load_for_planning
+
+    def edited_meanwhile(self, session, courses):
+        recipes = load(self, session, courses)
+        clear_planning_pool()
+        return recipes
+
+    with pooled() as session:
+        monkeypatch.setattr(RecipeRepository, "_load_for_planning", edited_meanwhile)
+        assert [r.slug for r in RecipeRepository(session).list_for_planning()] == ["salmon-bake", "tomato-soup"]
+        assert not _planning_pool
+
+
+def test_the_api_loads_the_recipe_pool_at_startup(monkeypatch, loads):
+    """The first answer after startup loaded the pool itself (11.84 s in OpenAI mode in the walkthrough)."""
+    import app.main as main
+
+    warm = main.warm_planning_pool
+    with pooled() as session:
+        monkeypatch.setattr(main, "SessionLocal", sessionmaker(bind=session.get_bind(), expire_on_commit=False))
+        monkeypatch.setattr(main, "warm_planning_pool", warm)
+        with TestClient(main.app):
+            joined("warm-planning-pool")
+        assert loads == ["warm-planning-pool"]
+        RecipeRepository(session).list_for_planning(courses=["main", "side", "salad", "soup"])
+        assert loads == ["warm-planning-pool"]
