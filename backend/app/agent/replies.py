@@ -8,7 +8,11 @@ looked up by key, so a new reply is added here once, in both languages, instead 
 import re
 from collections.abc import Iterable
 
+from app.schemas.display import shown_title
+
 CJK = re.compile(r"[一-鿿]")
+# Template values that are dish titles, or titles joined with ", " or "、".
+TITLE_VALUES = ("title", "titles", "before", "after")
 ENGLISH_WORD = re.compile(r"[A-Za-z]{3,}")
 
 
@@ -25,7 +29,9 @@ def language(message: str, history: Iterable = ()) -> str:
 
 def say(key: str, lang: str, **values) -> str:
     english, chinese = REPLIES[key]
-    return (chinese if lang == "zh" else english).format(**values)
+    # A dish is named as the plan shows it; the catalog title stays what matching reads.
+    shown = {k: shown_title(v) if k in TITLE_VALUES and isinstance(v, str) else v for k, v in values.items()}
+    return (chinese if lang == "zh" else english).format(**shown)
 
 
 def people(count: int, lang: str) -> str:

@@ -5,6 +5,7 @@ from app.agent.replies import language, say, weekday
 from app.agent.shape_change import asks_for_shape, drops_a_dish
 from app.planning.recipe_similarity import wanted
 from app.schemas.agent import AgentReplanDraft
+from app.schemas.display import shown_title
 from app.schemas.meal_plan import WeeklyMealPlanResponse
 
 MEAL_WORDS = {
@@ -151,8 +152,8 @@ class AgentReplanInterpreter:
             days = sorted({day.day_index: day.planned_date for day in plan.days}.items())
             return [(weekday(date_, lang), say("day_say", lang, index=index)) for index, date_ in days]
         if draft.entry_id is None:
-            titles = list(dict.fromkeys(day.recipe.title for day in plan.days if day.day_index == draft.day_index))
-            return [(title, say("dish_say", lang, title=title)) for title in titles]
+            titles = [shown_title(day.recipe.title) for day in plan.days if day.day_index == draft.day_index]
+            return [(title, say("dish_say", lang, title=title)) for title in dict.fromkeys(titles)]
         return []
 
     _lock_words = (
@@ -301,7 +302,12 @@ class AgentReplanInterpreter:
         if len(dishes) == 1:
             return dishes[0].entry_id, False
         # A title names one dish, whatever kind of dish other words name ("the Kimchi Salad on day 5").
-        titled = [dish for dish in dishes if dish.recipe.title.lower() in text]
+        # The household names a dish as the plan shows it, or as the catalog has it.
+        titled = [
+            dish
+            for dish in dishes
+            if any(title.lower() in text for title in (dish.recipe.title, shown_title(dish.recipe.title)))
+        ]
         if len(titled) == 1:
             return titled[0].entry_id, False
         named = [

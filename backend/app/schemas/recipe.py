@@ -1,4 +1,6 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
+
+from app.schemas.display import ShownTitle, shown_preparation
 
 
 class RecipeNutritionResponse(BaseModel):
@@ -17,7 +19,7 @@ class RecipeListItemResponse(BaseModel):
 
     id: int
     slug: str
-    title: str
+    title: ShownTitle
     description: str
     cuisine: str
     meal_type: str
@@ -44,6 +46,10 @@ class RecipeIngredientResponse(BaseModel):
     allergens: list[str]
     # The source wording ("1 small head cabbage") for `app.planning.vegetable_led`; not part of the API response.
     original_text: str | None = Field(default=None, exclude=True)
+
+    @field_serializer("preparation", when_used="json")
+    def _shown_preparation(self, preparation: str | None) -> str | None:
+        return shown_preparation(preparation, self.original_text)
 
 
 class RecipeStepResponse(BaseModel):
