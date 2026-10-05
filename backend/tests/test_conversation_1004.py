@@ -224,6 +224,25 @@ def test_an_answer_to_which_dish_still_answers_it(client):
     assert answered["pending_replan"]["before_entry"]["role_id"] == "vegetable"
 
 
+@pytest.mark.parametrize(
+    ("message", "lang"), [("no soup on Friday", "en"), ("drop the soup", "en"), ("周五不要汤", "zh")]
+)
+def test_a_drop_while_which_dish_is_asked_takes_the_dish_off_never_swaps_it(client, message, lang):
+    """With "which dish?" open after "Swap Friday's dinner", a drop that names no meal became a swap of the soup."""
+    session, _ = _conversation_week(client, minutes=240)
+    say(client, session, "Add a soup on Friday")
+    applied = client.post(f"/api/agent/sessions/{session['id']}/replan/confirm").json()["session"]
+    asked = say(client, applied, "Swap Friday's dinner")
+    assert asked["clarification_questions"], reply_of(asked)
+
+    dropped = typed(client, asked, message)
+
+    change = dropped["pending_replan"]
+    assert change is not None and change["event_type"] == "CANCEL_MEAL", reply_of(dropped)
+    assert change["before_entry"]["role_id"] == "soup" and dropped["clarification_questions"] == []
+    assert reply_of(dropped).startswith("跳过" if lang == "zh" else "Skip "), reply_of(dropped)
+
+
 def test_a_shape_request_stands_on_its_own_only_when_it_names_the_meal_or_adds_a_dish(composed_client):  # noqa: F811
     _, plan = _conversation_week(composed_client)
     week = WeeklyMealPlanResponse.model_validate(plan)
@@ -233,8 +252,8 @@ def test_a_shape_request_stands_on_its_own_only_when_it_names_the_meal_or_adds_a
 
     assert stands("also plan lunch") and stands("no lunch on weekdays") and stands("add a soup")
     assert stands("no side dish tonight")
-    # "No vegetable" answers "which dish?" (the vegetable) as much as it takes the vegetable off: while a
-    # question is open, it answers the question.
+    # "No vegetable" names no meal: while "which dish?" is open it takes that day's vegetable off (a skip), not
+    # every dinner's.
     assert not stands("no vegetable")
 
 

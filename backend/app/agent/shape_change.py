@@ -221,6 +221,12 @@ def asks_for_shape(message: str) -> bool:
     return _read(message) is not None
 
 
+def drops_a_dish(message: str) -> bool:
+    """Whether a message takes a kind of dish off: "drop the soup", "no soup on Friday", 周五不要汤."""
+    read = _read(message)
+    return read is not None and read[2] is not None and read[4]
+
+
 def read_shape_change(
     message: str, *, plan: WeeklyMealPlanResponse, day_indexes: list[int] | None, lang: str = "en"
 ) -> ShapeChangeIntent | None:

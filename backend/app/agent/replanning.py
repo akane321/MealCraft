@@ -2,7 +2,7 @@ import re
 from datetime import date, timedelta
 
 from app.agent.replies import language, say, weekday
-from app.agent.shape_change import asks_for_shape
+from app.agent.shape_change import asks_for_shape, drops_a_dish
 from app.planning.recipe_similarity import wanted
 from app.schemas.agent import AgentReplanDraft
 from app.schemas.meal_plan import WeeklyMealPlanResponse
@@ -97,6 +97,10 @@ class AgentReplanInterpreter:
         draft = current.model_copy(deep=True)
 
         event_type = self._event_type(lower, self.titles(plan))
+        if event_type is None and drops_a_dish(text):
+            # "Drop the soup", 周五不要汤 while "which dish?" is open: that dish comes off, never swapped as the
+            # question's draft would have it (a drop that changes the meal's shape was read before this).
+            event_type = "CANCEL_MEAL"
         if event_type is not None:
             draft.event_type = event_type
 
