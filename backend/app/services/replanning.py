@@ -45,6 +45,13 @@ def _at_share(value, share: float):
     return value if share == 1 else round(float(value) * share, 2)
 
 
+def _same_quantity(before: float | None, after: float | None) -> bool:
+    """Equal to the saved list's precision (three decimals)."""
+    if before is None or after is None:
+        return before == after
+    return abs(before - after) < 0.001
+
+
 class TimedDish:
     """The time fields `meal_minutes` reads, from a stored recipe (passive time is not cooking time)."""
 
@@ -123,6 +130,15 @@ class MealPlanReplanningService:
             )
 
         before_entry = self._entry_snapshot(entry)
+        if request.whole_meal:
+            # Every dish of the meal still to cook is kept with it, in one preview.
+            before_entry["meal_entries"] = [
+                self._entry_snapshot(item)
+                for item in plan.entries
+                if item.day_index == entry.day_index
+                and item.meal_type == entry.meal_type
+                and (item.id == entry.id or not (item.is_locked or item.status in {"completed", "skipped"}))
+            ]
         after_entry = self._after_entry_snapshot(entry, request, recommendation)
         before_grocery = self._current_grocery(plan)
         if request.event_type == "LOCK_MEAL":
@@ -458,6 +474,23 @@ class MealPlanReplanningService:
         event = self.repository.get_event(plan_id=plan_id, event_id=event_id)
         return self._event_response(event) if event is not None else None
 
+    def dishes_using(self, *, plan_id: int, entry_id: int, ingredients: list[str]) -> dict[str, list[str]]:
+        """For each of `ingredients`, the titles of the week's other dishes still eaten that use it, as cooked
+        for this household: why skipping `entry_id` leaves its packages on the list."""
+        used: dict[str, list[str]] = {name: [] for name in ingredients}
+        plan = self.repository.get(plan_id) if ingredients else None
+        if plan is None:
+            return used
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
+        for item in plan.entries:
+            if item.id == entry_id or item.status == "skipped":
+                continue
+            names = {line.ingredient.normalized_name for line in alternatives.lines(item.recipe, constraints)}
+            for name in names & used.keys():
+                if item.recipe.title not in used[name]:
+                    used[name].append(item.recipe.title)
+        return used
+
     @staticmethod
     def _validate_target(entry: MealPlanEntry, request: MealPlanReplanPreviewRequest) -> None:
         if entry.status == "completed":
@@ -721,8 +754,10 @@ class MealPlanReplanningService:
             old = before_by_line.get((name, unit))
             new = after_by_line.get((name, unit))
             if old is not None and new is not None:
+                # The saved list keeps three decimals (Numeric(12, 3)): a recomputed 0.9199999999999999 is the
+                # saved 0.92, not a change.
                 unchanged = (
-                    old.required_quantity == new.required_quantity
+                    _same_quantity(old.required_quantity, new.required_quantity)
                     and old.packages_required == new.packages_required
                     and round(old.purchase_cost_sgd, 2) == round(new.purchase_cost_sgd, 2)
                 )
@@ -766,6 +801,10 @@ class MealPlanReplanningService:
             unavailable_ingredient=event.unavailable_ingredient,
             before_entry=MealPlanEntrySnapshot.model_validate(event.before_entry) if event.before_entry else None,
             after_entry=MealPlanEntrySnapshot.model_validate(event.after_entry) if event.after_entry else None,
+            meal_entries=[
+                MealPlanEntrySnapshot.model_validate(item)
+                for item in (event.before_entry or {}).get("meal_entries", [])
+            ],
             shape_change=MealPlanShapeChange.model_validate(event.shape_change) if event.shape_change else None,
             nutrition_delta=MealPlanNutritionDelta.model_validate(event.nutrition_delta),
             grocery_delta=[MealPlanGroceryDeltaLine.model_validate(item) for item in event.grocery_delta],

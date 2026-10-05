@@ -37,11 +37,22 @@ _FILLER = re.compile(
 )
 
 
+# A clause that says what is not wanted ("I don't want it spicy", "不要太辣", "别动周一的晚饭") is no wish; the
+# request's other clauses still are ("Swap Wednesday for fish, I don't mind if it takes longer"). 要不要 and 想不想
+# ask, 特别/区别/别的 are no "别".
+_CLAUSE = re.compile(r"[,，;；.。!！?？]|\bbut\b|但是|不过", re.IGNORECASE)
+_NOT_WANTED = re.compile(
+    r"\b(?:don['’]?t|do not)\b|(?<![特区分个告类级性识差])别(?![的人])|(?<!要)不要|(?<!想)不想", re.I
+)
+
+
 def wanted(reason: str | None) -> str | None:
-    """What the household described wanting, with the swap mechanics removed; None when nothing is left."""
+    """What the household described wanting, with the swap mechanics and any clause saying what they do not want
+    removed (ordering by "fish" in "I don't want fish" would bring fish); None when nothing is left."""
     if not reason:
         return None
-    rest = " ".join(_FILLER.sub(" ", reason).split())
+    asked = " ".join(clause for clause in _CLAUSE.split(reason) if not _NOT_WANTED.search(clause))
+    rest = " ".join(_FILLER.sub(" ", asked).split())
     return rest if re.search(r"[a-zA-Z]{3,}|[一-鿿]", rest) else None
 
 

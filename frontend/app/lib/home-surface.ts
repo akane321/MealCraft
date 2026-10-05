@@ -193,12 +193,21 @@ export function perMealAndDay(days: NutritionDashboardDay[]): { meal: RecipeNutr
 
 
 /** A kept or skipped dish stays the same dish, so it reads as what happens to it, not as a swap to itself. */
-export function sameDishChange(event: Pick<MealPlanReplanEvent, "event_type" | "before_entry">): string | null {
+export function sameDishChange(event: Pick<MealPlanReplanEvent, "event_type" | "before_entry" | "meal_entries">): string | null {
   const title = event.before_entry?.recipe_title;
   if (!title) return null;
+  // "Don't change Monday's dinner" keeps every dish of that meal.
+  const kept = (event.meal_entries ?? []).map(dish => dish.recipe_title);
+  if (event.event_type === "LOCK_MEAL" && kept.length > 1) return `Keep ${kept.slice(0, -1).join(", ")} and ${kept.at(-1)} as they are`;
   if (event.event_type === "LOCK_MEAL") return `Keep ${title} as it is`;
   if (event.event_type === "CANCEL_MEAL") return `Skip ${title}`;
   return null;
+}
+
+/** What a change does to the shopping: "groceries +S$2.80", or "groceries stay the same", never "+S$0.00". */
+export function groceriesChange(delta: number): string {
+  if (Math.abs(delta) < 0.005) return "groceries stay the same";
+  return `groceries ${delta > 0 ? "+" : "−"}S$${Math.abs(delta).toFixed(2)}`;
 }
 
 /**

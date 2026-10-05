@@ -222,6 +222,8 @@ class MealPlanReplanPreviewRequest(BaseModel):
     entry_id: int = Field(gt=0)
     reason: str | None = Field(default=None, max_length=500)
     unavailable_ingredient: str | None = Field(default=None, max_length=160)
+    # LOCK_MEAL only: keep every dish of the entry's meal, not just the entry.
+    whole_meal: bool = False
 
     @field_validator("reason")
     @classmethod
@@ -239,6 +241,8 @@ class MealPlanReplanPreviewRequest(BaseModel):
             raise ValueError("unavailable_ingredient is required for ITEM_UNAVAILABLE")
         if self.event_type != "ITEM_UNAVAILABLE" and self.unavailable_ingredient is not None:
             raise ValueError("unavailable_ingredient is only valid for ITEM_UNAVAILABLE")
+        if self.whole_meal and self.event_type != "LOCK_MEAL":
+            raise ValueError("whole_meal is only valid for LOCK_MEAL")
         return self
 
 
@@ -321,6 +325,8 @@ class MealPlanReplanEventResponse(BaseModel):
     # None for a shape change, which moves several dishes (see shape_change).
     before_entry: MealPlanEntrySnapshot | None
     after_entry: MealPlanEntrySnapshot | None
+    # A whole-meal lock: every dish of before_entry's meal it keeps, before_entry among them; empty otherwise.
+    meal_entries: list[MealPlanEntrySnapshot] = Field(default_factory=list)
     shape_change: MealPlanShapeChange | None = None
     nutrition_delta: MealPlanNutritionDelta
     grocery_delta: list[MealPlanGroceryDeltaLine]

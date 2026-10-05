@@ -188,7 +188,7 @@ def labels(session: dict) -> list[str]:
 
 
 def cheapest_quoted(reply: str) -> float:
-    return float(re.search(r"The cheapest week I could plan costs about S\$(\d+\.\d\d)", reply).group(1))
+    return float(re.search(r"The cheapest week I could find costs S\$(\d+\.\d\d)", reply).group(1))
 
 
 def plans(client, session: dict) -> dict:
@@ -207,17 +207,18 @@ def test_a_budget_whole_packages_overrun_is_refused_up_front_and_every_choice_pl
     reply = session["messages"][-1]["content"]
     assert session["status"] == "collecting" and not session["can_confirm"]
     assert "everything I need" not in reply
-    assert "S$10 for 4 people is S$0.36 a person a meal over 7 meals" in reply
-    assert "the cheapest my search found, not a proof that none is cheaper" in reply
+    assert "S$10 a week for 4 people comes to about S$0.36 a person a meal (7 meals)." in reply
+    assert "proof" not in reply and "search" not in reply  # said as a household says it, not as a log
     cost = cheapest_quoted(reply)
     assert cost > 10
     # What a week uses is far less than what it buys: the floor alone would have said "ready".
     assert floors[0] < 10 < cost
-    use, fewer = labels(session)
+    # Whole packages cost two people no less than four, so half the household is not offered (it used to be,
+    # at a dearer week than the whole household's).
+    (use,) = labels(session)
     assert use == f"Use S${math.ceil(cost)} for the week"
-    assert fewer.startswith("2 people at S$") and fewer.endswith(" a week")
 
-    for label in (use, fewer):
+    for label in (use,):
         again = packaged.post("/api/agent/sessions", json={"message": first}).json()
         ready = tap(packaged, again, label)
         assert ready["status"] == "ready" and ready["can_confirm"], ready["messages"][-1]["content"]
@@ -247,7 +248,7 @@ def test_an_impossible_budget_is_refused_up_front_in_both_parser_modes(client):
     reply = session["messages"][-1]["content"]
     assert session["status"] == "collecting" and not session["can_confirm"]
     assert "everything I need" not in reply
-    assert "S$10 for 4 people is S$0.36 a person a meal over 7 meals" in reply
+    assert "S$10 a week for 4 people comes to about S$0.36 a person a meal (7 meals)." in reply
     cost = cheapest_quoted(reply)
     ready = tap(client, session, f"Use S${math.ceil(cost)} for the week")
     assert ready["status"] == "ready" and ready["can_confirm"]
@@ -285,7 +286,7 @@ def test_a_chinese_household_is_refused_in_chinese_with_choices_in_chinese(clien
 
     reply = session["messages"][-1]["content"]
     assert session["status"] == "collecting" and not session["can_confirm"]
-    assert "4 个人一周 S$10，相当于每人每餐 S$0.36（共 7 餐）" in reply and "最便宜的一周大约要" in reply
+    assert "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$" in reply
     assert not re.search(r"[A-Za-z]{3,}", reply)
     options = session["pending_interaction"]["options"]
     assert options[0]["label"].startswith("一周用 S$")
@@ -398,8 +399,8 @@ def test_a_failed_search_names_the_limit_it_ran_into_never_a_proof():
 
     told = planning_failure(failure({"validation_attempts": [over, cheapest]}), constraints, "en")
     assert told.text == (
-        "S$50 for 4 people is S$1.79 a person a meal over 7 meals. The cheapest week I could plan costs about "
-        "S$58.40: the cheapest my search found, not a proof that none is cheaper."
+        "S$50 a week for 4 people comes to about S$1.79 a person a meal (7 meals). The cheapest week I could find "
+        "costs S$58.40."
     )
     # Only the cheapest-week search's own week backs an amount, never a ranked week or a guess.
     assert told.options == (("Use S$59 for the week", "Make the weekly budget S$59"),)
@@ -1098,7 +1099,9 @@ def test_a_new_week_the_budget_cannot_buy_keeps_the_week_and_says_why(varied):
     kept = say(varied, session, "Plan a new week with different dishes, no dish twice")
     assert kept["plan_id"] == session["plan_id"] and kept["status"] == "planned"
     reply = kept["messages"][-1]["content"]
-    assert reply.startswith("Your week stays as it is. For a new week with different dishes: S$22 for 4 people is ")
+    assert reply.startswith(
+        "Your week stays as it is. For a new week with different dishes: S$22 a week for 4 people comes to about "
+    )
     assert cheapest_quoted(reply) > 22  # the cheapest week of other dishes the search found
     assert labels(kept)[0].startswith("Swap ")  # a swap instead, not a dead end
 

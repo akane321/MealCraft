@@ -1315,7 +1315,7 @@ test("keeping a dish previews as keeping it, and the change log shows it once co
 test("a week that cannot be planned is explained in the chat in place of the Plan card", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await stubApi(page);
-  const why = "S$10 for 4 people is S$0.36 a person a meal over 7 meals. The cheapest week I could plan costs about S$38.16: the cheapest my search found, not a proof that none is cheaper.";
+  const why = "S$10 a week for 4 people comes to about S$0.36 a person a meal (7 meals). The cheapest week I could find costs S$38.16.";
   const explained = {
     ...session(false),
     status: "collecting",
@@ -1325,7 +1325,8 @@ test("a week that cannot be planned is explained in the chat in place of the Pla
     messages: [...session(false).messages, { id: 3, role: "assistant", content: why, created_at: "2026-09-14T08:00:02Z" }],
     pending_interaction: {
       type: "quick_reply",
-      prompt: why,
+      // The composer's hint; the question is the reply above it.
+      prompt: "Pick an option or type your answer",
       field_path: "message",
       question_id: "context-2:unplanned",
       options: [{ id: "say_0", label: "Use S$39 for the week", value: "Make the weekly budget S$39" }],
@@ -1347,4 +1348,44 @@ test("a week that cannot be planned is explained in the chat in place of the Pla
   await expect(page.getByRole("button", { name: "Plan my week" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Use S$39 for the week" })).toBeVisible();
   await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.getByLabel("Message MealCraft")).toHaveAttribute("placeholder", "Pick an option or type your answer");
+});
+
+test("keeping a whole meal previews every dish it keeps, and groceries that do not change say so", async ({ page }) => {
+  await stubApi(page);
+  const tofu = { entry_id: 4, day_index: 4, planned_date: isoDay(0), recipe_id: 4, recipe_slug: "dinner-4", recipe_title: "Tofu Brown Rice Stir-fry" };
+  const greens = { ...tofu, entry_id: 8, role_id: "vegetable", recipe_id: 8, recipe_slug: "dinner-8", recipe_title: "Garlic Greens" };
+  const lock = {
+    ...replanEvent,
+    id: 16,
+    applied_revision: null,
+    status: "previewed",
+    event_type: "LOCK_MEAL",
+    reason: "Don't change Thursday's dinner",
+    unavailable_ingredient: null,
+    before_entry: tofu,
+    after_entry: tofu,
+    meal_entries: [tofu, greens],
+    nutrition_delta: { calories_kcal: 0, protein_g: 0, carbohydrate_g: 0, fat_g: 0, sodium_mg: 0, sugar_g: 0 },
+    purchase_total_delta_sgd: 0,
+  };
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  await page.route("**/api/agent/sessions/51/messages", route => route.fulfill(json({ ...session(true), pending_replan: lock })));
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+  await page.getByLabel("Message MealCraft").fill("Don't change Thursday's dinner");
+  await page.getByRole("button", { name: "Send" }).click();
+
+  const card = page.locator(".swap-card");
+  await expect(card.locator(".to")).toHaveText("Keep Tofu Brown Rice Stir-fry and Garlic Greens as they are");
+  await expect(card).toContainText("groceries stay the same");
+  await expect(card).not.toContainText("S$0.00");
+  for (const [width, height] of [[1280, 720], [1440, 900]] as const) {
+    await page.setViewportSize({ width, height });
+    await expect(card.getByRole("button", { name: "Keep it locked" })).toBeInViewport();
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/17-meal-lock-${width}.png` });
+  }
 });

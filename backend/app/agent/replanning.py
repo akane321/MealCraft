@@ -2,7 +2,7 @@ import re
 from datetime import date, timedelta
 
 from app.agent.replies import language, say, weekday
-from app.agent.shape_change import asks_for_shape
+from app.agent.shape_change import asks_for_shape, drops_a_dish
 from app.planning.recipe_similarity import wanted
 from app.schemas.agent import AgentReplanDraft
 from app.schemas.display import shown_title
@@ -97,16 +97,24 @@ class AgentReplanInterpreter:
         lower = text.lower()
         draft = current.model_copy(deep=True)
 
-        event_type = self._event_type(lower)
+        event_type = self._event_type(lower, self.titles(plan))
+        if event_type is None and drops_a_dish(text):
+            # "Drop the soup", 周五不要汤 while "which dish?" is open: that dish comes off, never swapped as the
+            # question's draft would have it (a drop that changes the meal's shape was read before this).
+            event_type = "CANCEL_MEAL"
         if event_type is not None:
             draft.event_type = event_type
 
         day_index = self.day_index(lower, plan)
+        if day_index is None:
+            # "Keep the Chicken And Dumplings": a title on one day of the week names that day.
+            titled = {dish.day_index for dish in plan.days if dish.recipe.title.lower() in lower}
+            day_index = titled.pop() if len(titled) == 1 else None
         if day_index is not None:
             draft.day_index = day_index
             draft.entry_id = None
         if draft.entry_id is None and draft.day_index is not None:
-            draft.entry_id = self._dish_entry(lower, plan, draft.day_index)
+            draft.entry_id, draft.whole_meal = self._dish_entry(lower, plan, draft.day_index, draft.event_type)
 
         ingredient = self._ingredient(lower, plan)
         if ingredient is not None:
@@ -122,6 +130,11 @@ class AgentReplanInterpreter:
         r"(?<![a-z])(?:every|all(?: the)?|each)\s+(?:dish|dishes|meal|meals|dinner|dinners)(?![a-z])"
         r"|(?<![a-z])(?:whole|entire)\s+week(?![a-z])|(?<![a-z])everything(?![a-z])|所有|全部|每道菜|每一道|每顿|整周"
     )
+
+    @staticmethod
+    def titles(plan: WeeklyMealPlanResponse) -> tuple[str, ...]:
+        """The week's dish titles, in lower case as messages are read."""
+        return tuple(dict.fromkeys(dish.recipe.title.lower() for dish in plan.days))
 
     @staticmethod
     def choices(draft: AgentReplanDraft, plan: WeeklyMealPlanResponse | None, lang: str) -> list[tuple[str, str]]:
@@ -143,22 +156,47 @@ class AgentReplanInterpreter:
             return [(title, say("dish_say", lang, title=title)) for title in dict.fromkeys(titles)]
         return []
 
-    _lock_words = ("lock", "keep unchanged", "don't change", "do not change", "锁定", "保留", "不要改", "保持不变")
-    # "keep Tuesday's dinner", "keep the lunch as it is": keeping one named meal.
+    _lock_words = (
+        "lock",
+        "keep unchanged",
+        "don't change",
+        "do not change",
+        "don't touch",
+        "do not touch",
+        "锁定",
+        "保留",
+        "不要改",
+        "别改",
+        "别动",
+        "不要动",
+        "保持不变",
+    )
+    # "keep Tuesday's dinner", "keep the lunch as it is", "keep Friday's soup", "keep the salad": keeping one
+    # named meal or dish.
     _keep_meal = re.compile(
-        r"(?<![a-z])keep\s+(?:the\s+|[a-z]+'s\s+|[a-z]+\s+)?(?:breakfast|lunch|dinner|supper)(?![a-z])"
+        r"(?<![a-z])keep\s+(?:the\s+|[a-z]+'s\s+|[a-z]+\s+)?"
+        r"(?:breakfast|lunch|dinner|supper|main|vegetable|veg|side|salad|soup)(?![a-z])"
     )
 
     @classmethod
     def _locks(cls, text: str) -> bool:
-        return any(token in text for token in cls._lock_words) or cls._keep_meal.search(text) is not None
+        return any(token in text for token in cls._lock_words) or cls._keeps(text)
 
     @classmethod
-    def _event_type(cls, text: str) -> str | None:
-        """The one-dish event a message asks for, or None (a shape change or nothing).
+    def _keeps(cls, text: str, titles: tuple[str, ...] = ()) -> bool:
+        """Whether "keep" names the meal, the kind of dish or the dish's title (lower case) it keeps."""
+        return cls._keep_meal.search(text) is not None or any(
+            re.search(rf"(?<![a-z])keep\s+(?:the\s+)?{re.escape(title)}", text) for title in titles
+        )
+
+    @classmethod
+    def _event_type(cls, text: str, titles: tuple[str, ...] = ()) -> str | None:
+        """The one-dish event a message asks for, or None (a shape change or nothing); `titles` are the week's
+        dish titles in lower case ("keep the Chicken And Dumplings").
 
         A clause that only says the rest stays ("工作日不要午饭，周末的午饭保留", "no lunch on weekdays,
-        keep the weekend lunches") is not a lock when another clause adds or drops a meal.
+        keep the weekend lunches") is not a lock when another clause adds or drops a meal. "Keep" says less than
+        "lock" or "don't change": "swap the main, keep the soup" swaps.
         """
         clauses = [clause for clause in cls._clause_break.split(text) if clause.strip()]
         if any(asks_for_shape(clause) and not cls._locks(clause) for clause in clauses):
@@ -168,7 +206,7 @@ class AgentReplanInterpreter:
             for token in ("unavailable", "out of stock", "can't buy", "cannot buy", "买不到", "缺货", "没货")
         ):
             return "ITEM_UNAVAILABLE"
-        if cls._locks(text):
+        if any(token in text for token in cls._lock_words):
             return "LOCK_MEAL"
         if any(token in text for token in ("cancel", "skip", "取消", "不吃这顿", "跳过")):
             return "CANCEL_MEAL"
@@ -189,6 +227,8 @@ class AgentReplanInterpreter:
             )
         ):
             return "REPLACE_MEAL"
+        if cls._keeps(text, titles):
+            return "LOCK_MEAL"
         return None
 
     def day_index(self, text: str, plan: WeeklyMealPlanResponse) -> int | None:
@@ -249,35 +289,50 @@ class AgentReplanInterpreter:
             weekdays = set(range(7)) - weekdays  # "no lunch except on weekends": the other days
         return weekdays
 
-    def _dish_entry(self, text: str, plan: WeeklyMealPlanResponse, day_index: int) -> int | None:
-        """The day's one dish, or the dish whose role or title the message names; None while ambiguous."""
+    def _dish_entry(
+        self, text: str, plan: WeeklyMealPlanResponse, day_index: int, event_type: str | None = None
+    ) -> tuple[int | None, bool]:
+        """The day's one dish, or the dish whose title or role the message names, and whether the whole meal is
+        meant (a lock of a named meal: "don't change Monday's dinner"); None while ambiguous."""
         dishes = [day for day in plan.days if day.day_index == day_index]
         # "Tomorrow's lunch": a named meal narrows the day to that meal's dishes (ADR-0046).
         meal = next((m for m, words in MEAL_WORDS.items() if any(word in text for word in words)), None)
         if meal is not None:
             dishes = [dish for dish in dishes if dish.meal_type == meal] or dishes
         if len(dishes) == 1:
-            return dishes[0].entry_id
+            return dishes[0].entry_id, False
+        # A title names one dish, whatever kind of dish other words name ("the Kimchi Salad on day 5").
+        # The household names a dish as the plan shows it, or as the catalog has it.
+        titled = [
+            dish
+            for dish in dishes
+            if any(title.lower() in text for title in (dish.recipe.title, shown_title(dish.recipe.title)))
+        ]
+        if len(titled) == 1:
+            return titled[0].entry_id, False
         named = [
             dish
             for dish in dishes
             if any(
                 re.search(rf"(?<![a-z]){re.escape(alias)}(?![a-z])", text)
-                for alias in self._role_aliases.get(dish.role_id, (dish.role_id,))
+                for alias in self._role_aliases.get(dish.role_id.split("-")[0], (dish.role_id,))
             )
-            # The household names a dish as the plan shows it, or as the catalog has it.
-            or any(title.lower() in text for title in (dish.recipe.title, shown_title(dish.recipe.title)))
         ]
         if len(named) == 1:
-            return named[0].entry_id
+            return named[0].entry_id, False
+        if event_type == "LOCK_MEAL" and not titled and not named and len({dish.meal_type for dish in dishes}) == 1:
+            # Keeping a meal keeps every dish of it; the preview carries them all, led by its main.
+            open_dishes = [dish for dish in dishes if not dish.is_locked and dish.status == "planned"] or dishes
+            lead = next((dish for dish in open_dishes if dish.role_id == "main"), open_dishes[0])
+            return lead.entry_id, True
         # "Can tomorrow be fish instead?": what someone asks for instead is a main dish, and with
-        # several meals in the day, dinner's unless another meal was named.
-        if wanted(text):
+        # several meals in the day, dinner's unless another meal was named. Keeping or skipping asks for nothing.
+        if event_type not in {"LOCK_MEAL", "CANCEL_MEAL"} and wanted(text):
             mains = [dish for dish in dishes if dish.role_id == "main"]
             main = next((dish for dish in mains if dish.meal_type == (meal or "dinner")), None)
             if main is not None:
-                return main.entry_id
-        return None
+                return main.entry_id, False
+        return None, False
 
     def _ingredient(self, text: str, plan: WeeklyMealPlanResponse) -> str | None:
         for alias in sorted(self._ingredient_aliases, key=len, reverse=True):

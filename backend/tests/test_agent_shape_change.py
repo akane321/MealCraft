@@ -22,7 +22,7 @@ def week(shape: MealPlanShape, **extra: list[str]) -> SimpleNamespace:
             meal_type=meal,
             role_id=role_id,
             status="planned",
-            recipe=SimpleNamespace(course=COURSES[role_id.split("-")[0]]),
+            recipe=SimpleNamespace(course=COURSES[role_id.split("-")[0]], title=f"{meal} {role_id} {n}"),
         )
         for n in range(1, 8)
         for meal, roles in shape.meals.items()
@@ -134,6 +134,34 @@ FRIDAY_SOUP = week(default_plan_shape(), d5=["main", "vegetable", "soup"])
 )
 def test_a_named_day_is_read_with_the_dishes_it_has(message, plan, expected):
     assert roles(message, plan=plan) == expected
+
+
+@pytest.mark.parametrize(
+    ("message", "asked"),
+    [
+        ("周五晚餐加一个汤", "周五的晚餐已经有dinner soup 5了：再加一道汤，还是换掉它？"),
+        ("add a soup to Friday dinner", "Dinner on Friday already has dinner soup 5: add another soup, or swap it?"),
+        ("dinners with a soup", None),  # the week's dinners have none
+        # Said as one more, nothing is asked.
+        ("add another soup on Friday", None),
+        ("周五晚餐再加一个汤", None),
+        ("add one more soup on Friday", None),
+    ],
+)
+def test_a_second_dish_of_a_kind_the_meal_has_is_asked_about_first(message, asked):
+    lang = "zh" if any("一" <= char <= "鿿" for char in message) else "en"
+    read = read_shape_change(
+        message,
+        plan=FRIDAY_SOUP,
+        day_indexes=AgentReplanInterpreter().day_indexes(message.lower(), FRIDAY_SOUP),
+        lang=lang,
+    )
+    assert read.ask == asked
+    if asked is not None:
+        add, swap = read.ask_options
+        assert add[1] == read.summary  # tapped, it says "another" and is planned without asking again
+        assert read_shape_change(add[1], plan=FRIDAY_SOUP, day_indexes=[5], lang=lang).ask is None
+        assert swap[1] in ("Swap the dinner soup 5 on day 5", "把第5天的dinner soup 5换掉")
 
 
 def test_a_skipped_dish_is_not_one_the_day_has():

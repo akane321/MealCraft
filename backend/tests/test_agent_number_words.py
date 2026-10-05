@@ -213,6 +213,6 @@ def test_asking_for_a_food_swaps_the_main_dish_of_the_meal() -> None:
         ]
     )
     interpreter = AgentReplanInterpreter()
-    assert interpreter._dish_entry("can tomorrow be fish instead?", plan, 2) == 2  # dinner's main
-    assert interpreter._dish_entry("tomorrow's lunch, something with fish", plan, 2) == 1
-    assert interpreter._dish_entry("change tomorrow", plan, 2) is None  # nothing asked for: still ask
+    assert interpreter._dish_entry("can tomorrow be fish instead?", plan, 2) == (2, False)  # dinner's main
+    assert interpreter._dish_entry("tomorrow's lunch, something with fish", plan, 2) == (1, False)
+    assert interpreter._dish_entry("change tomorrow", plan, 2) == (None, False)  # nothing asked for: still ask
