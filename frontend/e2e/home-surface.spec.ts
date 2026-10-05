@@ -1385,7 +1385,7 @@ test("keeping a whole meal previews every dish it keeps, and groceries that do n
   await expect(card).not.toContainText("S$0.00");
   for (const [width, height] of [[1280, 720], [1440, 900]] as const) {
     await page.setViewportSize({ width, height });
-    await expect(card.getByRole("button", { name: "Confirm change" })).toBeInViewport();
+    await expect(card.getByRole("button", { name: "Keep it locked" })).toBeInViewport();
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/17-meal-lock-${width}.png` });
   }
 });
