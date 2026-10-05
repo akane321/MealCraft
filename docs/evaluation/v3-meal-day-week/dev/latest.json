@@ -178,9 +178,9 @@
       "refusal": {
         "status": "candidate_rejected",
         "evidence": "bounded_search_exhausted",
-        "weeks_tried": 33,
+        "weeks_tried": 32,
         "unmet_checks": {
-          "purchase_budget failed": 33
+          "purchase_budget failed": 32
         },
         "search_exhausted": false,
         "input_issues": []
@@ -407,7 +407,7 @@
       "dishes": 16,
       "distinct_recipes": 16,
       "meal_fit": "16/16",
-      "total_cost_sgd": 336.92
+      "total_cost_sgd": 327.85
     },
     {
       "episode_id": "mdw-dev-018",
@@ -493,7 +493,7 @@
     }
   ],
   "episode_set": "developer set",
-  "code_revision": "3adcf7128282fc80243c8911d089971ac6bfc42c",
+  "code_revision": "f84bbe1390704fc56cd18cf4b0d7b1b6e60b9cce",
   "inputs": {
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",
