@@ -459,9 +459,9 @@ class MealPlanReplanningService:
     def dishes_using(self, *, plan_id: int, entry_id: int, ingredients: list[str]) -> dict[str, list[str]]:
         """For each of `ingredients`, the titles of the week's other dishes still eaten that use it, as cooked
         for this household: why skipping `entry_id` leaves its packages on the list."""
-        plan = self.repository.get(plan_id)
         used: dict[str, list[str]] = {name: [] for name in ingredients}
-        if plan is None or not ingredients:
+        plan = self.repository.get(plan_id) if ingredients else None
+        if plan is None:
             return used
         constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
         for item in plan.entries:
