@@ -1,3 +1,4 @@
+import re
 from datetime import UTC, datetime
 
 from app.agent.replies import people, say, word
@@ -93,6 +94,26 @@ def say_interaction(
         allow_free_text=True,
         context_version=context_version,
     )
+
+
+# Words that point at an option rather than name it: "swap it", "add another one", "换掉它", "再加一个".
+_POINTING = {"it", "its", "that", "this", "the", "a", "an", "one", "please", "just", "ok", "okay", "yes", "sure"}
+
+
+def typed_choice(request: InteractionRequest, text: str) -> object | None:
+    """The option a typed reply picks when it is that option's own words, in no other option's label ("add
+    another" for "Add another soup", "swap it" or 换掉它 for "Swap the Tomato Soup"); None otherwise."""
+    lower = text.lower()
+    latin = set(re.findall(r"[a-z]+", lower)) - _POINTING
+    han = re.findall(r"[一-鿿]+", re.sub(r"[它吧了呢啊呀个]", " ", lower))
+    if not latin and not han:
+        return None
+    picked = [
+        option
+        for option in request.options
+        if latin <= set(re.findall(r"[a-z]+", option.label.lower())) and all(run in option.label for run in han)
+    ]
+    return picked[0].value if len(picked) == 1 else None
 
 
 def validate_interaction_answer(

@@ -109,6 +109,14 @@ def day_on(plan: dict, weekday_number: int) -> int:
         ("Just this week", False),  # what the tap sends
         ("只这周", False),
         ("不用了", False),
+        # The button's words with a yes or no around them: still the answer.
+        ("Yes, keep it as our usual", True),
+        ("ok keep it", True),
+        ("Sounds good, keep it", True),
+        ("好的，以后也这样", True),
+        ("no thanks, just this week", False),
+        ("Yes, just this week", False),  # the fuller part answers; "yes" only leads into it
+        ("不用了，只这周", False),
         # Not answers: new instructions whose words used to be read as one.
         ("no lunch on weekdays, keep the weekend", None),
         ("noodles on Friday", None),
@@ -169,7 +177,17 @@ def test_a_swap_for_noodles_while_keep_the_shape_is_asked_is_a_swap(client):
     assert usual_meals(client) == {"dinner"}
 
 
-@pytest.mark.parametrize(("answer", "kept"), [("yes", True), ("以后也这样", True), ("no", False), ("只这周", False)])
+@pytest.mark.parametrize(
+    ("answer", "kept"),
+    [
+        ("yes", True),
+        ("以后也这样", True),
+        ("Sounds good, keep it", True),
+        ("no", False),
+        ("只这周", False),
+        ("no thanks, just this week", False),
+    ],
+)
 def test_a_typed_answer_to_keep_the_shape_still_answers_it(composed_client, answer, kept):  # noqa: F811
     session, _ = lunch_added(composed_client, "Also plan lunch")
 
@@ -263,12 +281,100 @@ def test_keeping_a_named_dish_keeps_that_dish_only(client):
     assert reply_of(asked) == f"Keep {vegetable['recipe']['title']} as it is? Nothing changes until you confirm."
 
 
-def test_dont_is_never_read_as_a_wish_for_food():
+@pytest.mark.parametrize("message", ["Keep Monday's vegetable", "Keep the vegetable on Monday", "keep the side on Monday"])
+def test_keep_with_a_kind_of_dish_keeps_that_dish(client, message):
+    """The walkthrough's "Keep Friday's soup" got "I am not sure whether this is a meal-planning request"."""
+    session, plan = _conversation_week(client)
+    monday = day_on(plan, 0)
+    vegetable = next(d for d in plan["days"] if d["day_index"] == monday and d["role_id"] == "vegetable")
+
+    asked = say(client, session, message)
+
+    change = asked["pending_replan"]
+    assert change is not None and change["event_type"] == "LOCK_MEAL", reply_of(asked)
+    assert change["before_entry"]["entry_id"] == vegetable["entry_id"] and change["meal_entries"] == []
+
+
+def test_keep_with_a_dishs_title_keeps_that_dish(composed_client):  # noqa: F811
+    _broccoli_soup()
+    session, plan = _conversation_week(composed_client, minutes=240)
+    say(composed_client, session, "Add a soup on Friday")
+    week = composed_client.post(f"/api/agent/sessions/{session['id']}/replan/confirm").json()["plan"]
+    soup = next(d for d in week["days"] if d["role_id"] == "soup")  # the week's one soup names its day
+
+    asked = say(composed_client, session, f"Keep the {soup['recipe']['title']}")
+
+    assert asked["pending_replan"]["event_type"] == "LOCK_MEAL", reply_of(asked)
+    assert asked["pending_replan"]["before_entry"]["entry_id"] == soup["entry_id"]
+
+
+def test_keep_while_which_dish_is_asked_keeps_rather_than_swaps(client):
+    """The walkthrough: with the Swap chip's "which dish?" open, "Keep Friday's soup" previewed swapping it."""
+    session, plan = _conversation_week(client)
+    asked = say(client, session, "Swap Monday's dinner")
+    assert asked["clarification_questions"], reply_of(asked)
+
+    kept = typed(client, asked, "Keep Monday's vegetable")
+
+    assert kept["pending_replan"]["event_type"] == "LOCK_MEAL", reply_of(kept)
+    assert kept["pending_replan"]["before_entry"]["role_id"] == "vegetable"
+
+
+def test_swap_one_dish_and_keep_another_swaps():
+    """"Keep" says less than "lock": the swap is what is asked for."""
+    assert AgentReplanInterpreter._event_type("swap friday's main, keep the soup") == "REPLACE_MEAL"
+    assert AgentReplanInterpreter._event_type("keep friday's soup") == "LOCK_MEAL"
+    assert AgentReplanInterpreter._event_type("keep it as our usual") is None
+
+
+@pytest.mark.parametrize(
+    ("message", "lang"), [("Don't change Monday's dinner", "en"), ("别动周一的晚饭", "zh"), ("Lock Monday's vegetable", "en")]
+)
+def test_keeping_again_what_is_kept_says_so(client, message, lang):
+    """The walkthrough: saying it again answered "I could not prepare that change: This meal is locked"."""
+    session, plan = _conversation_week(client)
+    monday = day_on(plan, 0)
+    say(client, session, message)
+    client.post(f"/api/agent/sessions/{session['id']}/replan/confirm")
+
+    again = say(client, session, message)
+
+    assert again["pending_replan"] is None
+    day = weekday(date.fromisoformat(next(d["planned_date"] for d in plan["days"] if d["day_index"] == monday)), lang)
+    vegetable = next(d for d in plan["days"] if d["day_index"] == monday and d["role_id"] == "vegetable")
+    assert reply_of(again) == {
+        "Don't change Monday's dinner": f"The dinner on {day} is already kept as it is.",
+        "别动周一的晚饭": f"{day}的晚餐已经保留不变了。",
+        "Lock Monday's vegetable": f"{vegetable['recipe']['title']} is already kept as it is.",
+    }[message]
+
+
+def test_a_negated_clause_is_no_wish_and_the_rest_of_the_request_still_is():
     assert wanted("Don't change Monday's dinner") is None
     assert wanted("别动周一的晚饭") is None
     assert wanted("Swap Monday's dinner, I don't want fish") is None  # ordering by "fish" would bring fish
     assert wanted("Can Wednesday be fish instead?") == "fish"
     assert wanted("明天换个别的") is not None  # "something else": no "别" of "don't"
+    # ADR-0042: what is asked for still orders the swap beside a clause saying what is not wanted, and in a
+    # question (要不要) or with 特别 ("especially"), which hold no "don't".
+    assert wanted("Swap Wednesday for fish, I don't mind if it takes longer") == "fish"
+    assert "chicken" in wanted("Swap Wednesday's main for chicken, I don't want it spicy")
+    assert "fish" in wanted("Swap Wednesday for fish but don't make it spicy")
+    assert "鸡肉" in wanted("周三的主菜换成鸡肉，不要太辣")
+    assert "鱼" in wanted("周三要不要换成鱼？")
+    assert "鱼" in wanted("我特别想吃鱼")
+
+
+def test_a_wish_asked_as_a_question_swaps_the_main(composed_client):  # noqa: F811
+    """"周三要不要换成鱼？" (should Wednesday be fish?) asks for fish on Wednesday's main, as "换成鱼" does."""
+    _, plan = _conversation_week(composed_client)
+    week = WeeklyMealPlanResponse.model_validate(plan)
+    wednesday = day_on(plan, 2)
+    main = next(d for d in week.days if d.day_index == wednesday and d.role_id == "main")
+
+    draft, questions = AgentReplanInterpreter().parse("周三要不要换成鱼？", plan=week, current=AgentReplanDraft())
+
+    assert (draft.event_type, draft.entry_id, questions) == ("REPLACE_MEAL", main.entry_id, [])
 
 
 def test_a_title_names_its_dish_whatever_other_words_name(composed_client):  # noqa: F811
@@ -321,6 +427,37 @@ def test_a_soup_asked_for_a_dinner_that_has_one_asks_first_naming_it(composed_cl
     assert [d["role_id"] for d in change["shape_change"]["added"]] == ["soup-2"]
 
 
+@pytest.mark.parametrize(
+    ("message", "answer", "event"),
+    [
+        ("Add a soup to Friday dinner", "add another", "CHANGE_SHAPE"),
+        ("Add a soup to Friday dinner", "swap it", "REPLACE_MEAL"),
+        ("周五晚餐加个汤", "再加一道", "CHANGE_SHAPE"),
+        ("周五晚餐加个汤", "换掉它", "REPLACE_MEAL"),
+    ],
+)
+def test_a_typed_answer_to_add_another_or_swap_it_picks_that_choice(composed_client, message, answer, event):  # noqa: F811
+    """The hint says "type your answer": "swap it" got "Which day should I adjust?", "add another" got "I am not
+    sure whether this is a meal-planning request"."""
+    _broccoli_soup()
+    session, plan = _conversation_week(composed_client, minutes=240)
+    friday = _friday(plan)
+    say(composed_client, session, "Add a soup on Friday")
+    week = composed_client.post(f"/api/agent/sessions/{session['id']}/replan/confirm").json()["plan"]
+    soup = _title(_dishes(week, friday)["soup"])
+    asked = say(composed_client, session, message)
+    assert asked["pending_interaction"]["options"], reply_of(asked)
+
+    answered = typed(composed_client, asked, answer)
+
+    change = answered["pending_replan"]
+    assert change is not None and change["event_type"] == event, reply_of(answered)
+    if event == "REPLACE_MEAL":
+        assert change["before_entry"]["recipe_title"] == soup
+    else:
+        assert [d["role_id"] for d in change["shape_change"]["added"]] == ["soup-2"]
+
+
 # P20: skips and discards in plain words.
 
 
@@ -339,7 +476,51 @@ def test_a_skip_says_what_it_does_to_the_groceries_never_a_bare_zero(client):
             assert "Groceries stay the same" in reply, reply
         said.append(reply)
     # Some vegetable's whole packages are still bought for its other days: said, with who uses them.
-    assert any("still used by" in reply for reply in said), said
+    assert any("the week still needs" in reply for reply in said), said
+
+
+# What each synthetic vegetable is made of (`composed_client`).
+VEGETABLE_OF = {"broccoli-stirfry": "broccoli", "spinach-saute": "baby_spinach", "zucchini-salad": "zucchini"}
+
+
+def test_a_skip_names_only_what_the_skipped_dish_uses_whatever_the_float_noise(client, monkeypatch):
+    """The real catalog: the saved list keeps three decimals and the recomputed one is a float (0.92 against
+    0.9199999999999999), so every line looked changed and a skip named the week's alphabetically first groceries
+    and dishes. A difference below the saved precision is no change; each item is named with a dish using it."""
+    from app.planning.weekly_grocery import WeeklyGroceryAggregator
+
+    session, plan = _conversation_week(client)
+    estimate = WeeklyGroceryAggregator.estimate
+
+    def noisy(self, *args, **kwargs):
+        result = estimate(self, *args, **kwargs)
+        items = [
+            item.model_copy(update={"required_quantity": item.required_quantity + 1e-9})
+            if item.required_quantity is not None
+            else item
+            for item in result.items
+        ]
+        return result.model_copy(update={"items": items})
+
+    monkeypatch.setattr(WeeklyGroceryAggregator, "estimate", noisy)
+    stayed = 0
+    for day in sorted({d["day_index"] for d in plan["days"]}):
+        vegetable = next(d for d in plan["days"] if d["day_index"] == day and d["role_id"] == "vegetable")
+        asked = say(client, session, f"Skip day {day}'s vegetable")
+        client.post(f"/api/agent/sessions/{session['id']}/replan/discard")
+        change, reply = asked["pending_replan"], reply_of(asked)
+        used = VEGETABLE_OF[vegetable["recipe"]["slug"]]
+        assert {line["ingredient_name"] for line in change["grocery_delta"]} <= {used}, change["grocery_delta"]
+        if change["purchase_total_delta_sgd"] == 0:
+            stayed += 1
+            title = vegetable["recipe"]["title"]
+            item = next(i for i in plan["grocery_estimate"]["items"] if i["ingredient_name"] == used)
+            item = item["ingredient_display_name"].lower()
+            assert reply == (
+                f"Skip {title}? Groceries stay the same: the week still needs {item} (for {title} on its other day)."
+                " Nothing changes until you confirm."
+            )
+    assert stayed, "no skip left the packages on the list"
 
 
 @pytest.mark.parametrize(

@@ -27,6 +27,7 @@ from app.orchestration.interactions import (
     InteractionAnswerError,
     say_interaction,
     short_prompt,
+    typed_choice,
     validate_interaction_answer,
 )
 from app.orchestration.run_lifecycle import (
@@ -564,6 +565,10 @@ class AgentSessionService:
             # Not an answer but a new instruction ("no lunch on weekdays, keep the weekend"): the question lapses,
             # so the change stays this week's only, and the message is read as any other.
             snapshot = snapshot.model_copy(update={"pending_interaction": None})
+        elif interaction is not None and interaction.field_path == SAY_FIELD:
+            # Typed instead of tapped ("swap it", "add another", 再加一道): what the option it names would send.
+            chosen = typed_choice(interaction, message)
+            message = chosen if isinstance(chosen, str) else message
         if wants_variety(message):
             return self._offer_variety(session_id, snapshot, message, lang)
         # An open question ("which dish?") is answered by what answers it; a request that stands on its own
@@ -573,6 +578,9 @@ class AgentSessionService:
         )
         if changed is not None:
             return changed
+        plan = self.meal_plan_service.get(snapshot.plan_id)
+        if plan is None:
+            raise AgentSessionNotFoundError
         scope_decision = self.scope_policy.classify(message)
         if scope_decision.scope_class is ScopeClass.AMBIGUOUS and snapshot.clarification_questions:
             scope_decision = ScopeDecision(
@@ -584,9 +592,10 @@ class AgentSessionService:
             )
         elif (
             scope_decision.scope_class is ScopeClass.AMBIGUOUS
-            and self.replan_interpreter._event_type(message.lower()) is not None
+            and self.replan_interpreter._event_type(message.lower(), self.replan_interpreter.titles(plan)) is not None
         ):
-            # "别动周一的晚饭": keeping, skipping or swapping a dish of the week, in words the scope gate does not list.
+            # "别动周一的晚饭", "keep Friday's soup": keeping, skipping or swapping a dish of the week, in words the
+            # scope gate does not list.
             scope_decision = ScopeDecision(
                 scope_class=ScopeClass.DOMAIN_ACTION,
                 detected_intents=["replan_meal"],
@@ -617,9 +626,6 @@ class AgentSessionService:
                 raise AgentSessionNotFoundError
             return self._to_response(updated)
 
-        plan = self.meal_plan_service.get(snapshot.plan_id)
-        if plan is None:
-            raise AgentSessionNotFoundError
         draft, questions = self.replan_interpreter.parse(
             message,
             plan=plan,
@@ -636,6 +642,16 @@ class AgentSessionService:
                 pending_event_id=None,
                 scope_decision=scope_decision,
                 pending_interaction=self._choices(snapshot, self.replan_interpreter.choices(draft, plan, lang), lang),
+            )
+        elif draft.event_type == "LOCK_MEAL" and (kept := self._already_kept(plan, draft, lang)) is not None:
+            updated = self.repository.append_replan_exchange(
+                session_id,
+                user_message=message,
+                assistant_message=kept,
+                draft=AgentReplanDraft(),
+                clarification_questions=[],
+                pending_event_id=None,
+                scope_decision=scope_decision,
             )
         else:
             try:
@@ -811,7 +827,7 @@ class AgentSessionService:
         plan = self.meal_plan_service.get(snapshot.plan_id)
         if plan is None:
             raise AgentSessionNotFoundError
-        if self.replan_interpreter._event_type(message.lower()) is not None:
+        if self.replan_interpreter._event_type(message.lower(), self.replan_interpreter.titles(plan)) is not None:
             return None  # swap, skip, lock or can't buy: one dish, not the meal's shape
         days = self.replan_interpreter.day_indexes(message.lower(), plan)
         intent = read_shape_change(message, plan=plan, day_indexes=days, lang=lang)
@@ -917,6 +933,18 @@ class AgentSessionService:
             after = preview.after_entry.recipe_title if preview.after_entry else ""
             text = say("preview_swap", lang, before=before.recipe_title, after=after)
         return text + self._over_budget(preview, plan, lang) + say("until_confirm", lang)
+
+    @staticmethod
+    def _already_kept(plan: WeeklyMealPlanResponse, draft: AgentReplanDraft, lang: str) -> str | None:
+        """A keep said again after it was confirmed: that the dish, or the whole meal, is kept already; None while
+        there is something left to keep."""
+        target = next((dish for dish in plan.days if dish.entry_id == draft.entry_id), None)
+        if target is None or not target.is_locked:
+            return None
+        if draft.whole_meal:
+            meal, day = word(target.meal_type, lang), weekday(target.planned_date, lang)
+            return say("already_kept_meal", lang, meal=meal, day=day)
+        return say("already_kept", lang, title=target.recipe.title)
 
     def _skip_groceries(self, preview: MealPlanReplanEventResponse, plan_id: int, lang: str) -> str:
         """What skipping a dish takes off the groceries; or, when other dishes still need its whole packages,

@@ -350,6 +350,8 @@ REPLIES: dict[str, tuple[str, str]] = {
     "preview_lock": ("Keep {title} as it is?", "保留{title}不变？"),
     # "Don't change Monday's dinner": every dish of that meal, in one preview.
     "preview_lock_meal": ("Keep the {meal} on {day} as it is ({titles})?", "保留{day}的{meal}不变（{titles}）？"),
+    "already_kept": ("{title} is already kept as it is.", "{title}已经保留不变了。"),
+    "already_kept_meal": ("The {meal} on {day} is already kept as it is.", "{day}的{meal}已经保留不变了。"),
     "preview_skip": ("Skip {title}?", "跳过{title}？"),
     # What a skip does to the shopping: whole packages other dishes still need stay on the list.
     "skip_saves": (" That takes S${amount:.2f} off the groceries.", "买菜少花 S${amount:.2f}。"),

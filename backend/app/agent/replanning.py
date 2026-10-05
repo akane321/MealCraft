@@ -96,11 +96,15 @@ class AgentReplanInterpreter:
         lower = text.lower()
         draft = current.model_copy(deep=True)
 
-        event_type = self._event_type(lower)
+        event_type = self._event_type(lower, self.titles(plan))
         if event_type is not None:
             draft.event_type = event_type
 
         day_index = self.day_index(lower, plan)
+        if day_index is None:
+            # "Keep the Chicken And Dumplings": a title on one day of the week names that day.
+            titled = {dish.day_index for dish in plan.days if dish.recipe.title.lower() in lower}
+            day_index = titled.pop() if len(titled) == 1 else None
         if day_index is not None:
             draft.day_index = day_index
             draft.entry_id = None
@@ -121,6 +125,11 @@ class AgentReplanInterpreter:
         r"(?<![a-z])(?:every|all(?: the)?|each)\s+(?:dish|dishes|meal|meals|dinner|dinners)(?![a-z])"
         r"|(?<![a-z])(?:whole|entire)\s+week(?![a-z])|(?<![a-z])everything(?![a-z])|所有|全部|每道菜|每一道|每顿|整周"
     )
+
+    @staticmethod
+    def titles(plan: WeeklyMealPlanResponse) -> tuple[str, ...]:
+        """The week's dish titles, in lower case as messages are read."""
+        return tuple(dict.fromkeys(dish.recipe.title.lower() for dish in plan.days))
 
     @staticmethod
     def choices(draft: AgentReplanDraft, plan: WeeklyMealPlanResponse | None, lang: str) -> list[tuple[str, str]]:
@@ -157,21 +166,32 @@ class AgentReplanInterpreter:
         "不要动",
         "保持不变",
     )
-    # "keep Tuesday's dinner", "keep the lunch as it is": keeping one named meal.
+    # "keep Tuesday's dinner", "keep the lunch as it is", "keep Friday's soup", "keep the salad": keeping one
+    # named meal or dish.
     _keep_meal = re.compile(
-        r"(?<![a-z])keep\s+(?:the\s+|[a-z]+'s\s+|[a-z]+\s+)?(?:breakfast|lunch|dinner|supper)(?![a-z])"
+        r"(?<![a-z])keep\s+(?:the\s+|[a-z]+'s\s+|[a-z]+\s+)?"
+        r"(?:breakfast|lunch|dinner|supper|main|vegetable|veg|side|salad|soup)(?![a-z])"
     )
 
     @classmethod
     def _locks(cls, text: str) -> bool:
-        return any(token in text for token in cls._lock_words) or cls._keep_meal.search(text) is not None
+        return any(token in text for token in cls._lock_words) or cls._keeps(text)
 
     @classmethod
-    def _event_type(cls, text: str) -> str | None:
-        """The one-dish event a message asks for, or None (a shape change or nothing).
+    def _keeps(cls, text: str, titles: tuple[str, ...] = ()) -> bool:
+        """"Keep" with the meal, the kind of dish or the dish's title (lower case) it keeps."""
+        return cls._keep_meal.search(text) is not None or any(
+            re.search(rf"(?<![a-z])keep\s+(?:the\s+)?{re.escape(title)}", text) for title in titles
+        )
+
+    @classmethod
+    def _event_type(cls, text: str, titles: tuple[str, ...] = ()) -> str | None:
+        """The one-dish event a message asks for, or None (a shape change or nothing); `titles` are the week's
+        dish titles in lower case ("keep the Chicken And Dumplings").
 
         A clause that only says the rest stays ("工作日不要午饭，周末的午饭保留", "no lunch on weekdays,
-        keep the weekend lunches") is not a lock when another clause adds or drops a meal.
+        keep the weekend lunches") is not a lock when another clause adds or drops a meal. "Keep" says less than
+        "lock" or "don't change": "swap the main, keep the soup" swaps.
         """
         clauses = [clause for clause in cls._clause_break.split(text) if clause.strip()]
         if any(asks_for_shape(clause) and not cls._locks(clause) for clause in clauses):
@@ -181,7 +201,7 @@ class AgentReplanInterpreter:
             for token in ("unavailable", "out of stock", "can't buy", "cannot buy", "买不到", "缺货", "没货")
         ):
             return "ITEM_UNAVAILABLE"
-        if cls._locks(text):
+        if any(token in text for token in cls._lock_words):
             return "LOCK_MEAL"
         if any(token in text for token in ("cancel", "skip", "取消", "不吃这顿", "跳过")):
             return "CANCEL_MEAL"
@@ -202,6 +222,8 @@ class AgentReplanInterpreter:
             )
         ):
             return "REPLACE_MEAL"
+        if cls._keeps(text, titles):
+            return "LOCK_MEAL"
         return None
 
     def day_index(self, text: str, plan: WeeklyMealPlanResponse) -> int | None:
