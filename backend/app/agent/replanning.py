@@ -179,7 +179,7 @@ class AgentReplanInterpreter:
 
     @classmethod
     def _keeps(cls, text: str, titles: tuple[str, ...] = ()) -> bool:
-        """"Keep" with the meal, the kind of dish or the dish's title (lower case) it keeps."""
+        """Whether "keep" names the meal, the kind of dish or the dish's title (lower case) it keeps."""
         return cls._keep_meal.search(text) is not None or any(
             re.search(rf"(?<![a-z])keep\s+(?:the\s+)?{re.escape(title)}", text) for title in titles
         )

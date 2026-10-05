@@ -41,7 +41,9 @@ _FILLER = re.compile(
 # request's other clauses still are ("Swap Wednesday for fish, I don't mind if it takes longer"). 要不要 and 想不想
 # ask, 特别/区别/别的 are no "别".
 _CLAUSE = re.compile(r"[,，;；.。!！?？]|\bbut\b|但是|不过", re.IGNORECASE)
-_NOT_WANTED = re.compile(r"\b(?:don['’]?t|do not)\b|(?<![特区分个告类级性识差])别(?![的人])|(?<!要)不要|(?<!想)不想", re.I)
+_NOT_WANTED = re.compile(
+    r"\b(?:don['’]?t|do not)\b|(?<![特区分个告类级性识差])别(?![的人])|(?<!要)不要|(?<!想)不想", re.I
+)
 
 
 def wanted(reason: str | None) -> str | None:

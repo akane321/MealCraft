@@ -281,7 +281,9 @@ def test_keeping_a_named_dish_keeps_that_dish_only(client):
     assert reply_of(asked) == f"Keep {vegetable['recipe']['title']} as it is? Nothing changes until you confirm."
 
 
-@pytest.mark.parametrize("message", ["Keep Monday's vegetable", "Keep the vegetable on Monday", "keep the side on Monday"])
+@pytest.mark.parametrize(
+    "message", ["Keep Monday's vegetable", "Keep the vegetable on Monday", "keep the side on Monday"]
+)
 def test_keep_with_a_kind_of_dish_keeps_that_dish(client, message):
     """The walkthrough's "Keep Friday's soup" got "I am not sure whether this is a meal-planning request"."""
     session, plan = _conversation_week(client)
@@ -321,14 +323,15 @@ def test_keep_while_which_dish_is_asked_keeps_rather_than_swaps(client):
 
 
 def test_swap_one_dish_and_keep_another_swaps():
-    """"Keep" says less than "lock": the swap is what is asked for."""
+    """A keep says less than a lock: "swap the main, keep the soup" swaps."""
     assert AgentReplanInterpreter._event_type("swap friday's main, keep the soup") == "REPLACE_MEAL"
     assert AgentReplanInterpreter._event_type("keep friday's soup") == "LOCK_MEAL"
     assert AgentReplanInterpreter._event_type("keep it as our usual") is None
 
 
 @pytest.mark.parametrize(
-    ("message", "lang"), [("Don't change Monday's dinner", "en"), ("别动周一的晚饭", "zh"), ("Lock Monday's vegetable", "en")]
+    ("message", "lang"),
+    [("Don't change Monday's dinner", "en"), ("别动周一的晚饭", "zh"), ("Lock Monday's vegetable", "en")],
 )
 def test_keeping_again_what_is_kept_says_so(client, message, lang):
     """The walkthrough: saying it again answered "I could not prepare that change: This meal is locked"."""
@@ -342,11 +345,14 @@ def test_keeping_again_what_is_kept_says_so(client, message, lang):
     assert again["pending_replan"] is None
     day = weekday(date.fromisoformat(next(d["planned_date"] for d in plan["days"] if d["day_index"] == monday)), lang)
     vegetable = next(d for d in plan["days"] if d["day_index"] == monday and d["role_id"] == "vegetable")
-    assert reply_of(again) == {
-        "Don't change Monday's dinner": f"The dinner on {day} is already kept as it is.",
-        "别动周一的晚饭": f"{day}的晚餐已经保留不变了。",
-        "Lock Monday's vegetable": f"{vegetable['recipe']['title']} is already kept as it is.",
-    }[message]
+    assert (
+        reply_of(again)
+        == {
+            "Don't change Monday's dinner": f"The dinner on {day} is already kept as it is.",
+            "别动周一的晚饭": f"{day}的晚餐已经保留不变了。",
+            "Lock Monday's vegetable": f"{vegetable['recipe']['title']} is already kept as it is.",
+        }[message]
+    )
 
 
 def test_a_negated_clause_is_no_wish_and_the_rest_of_the_request_still_is():
@@ -366,7 +372,7 @@ def test_a_negated_clause_is_no_wish_and_the_rest_of_the_request_still_is():
 
 
 def test_a_wish_asked_as_a_question_swaps_the_main(composed_client):  # noqa: F811
-    """"周三要不要换成鱼？" (should Wednesday be fish?) asks for fish on Wednesday's main, as "换成鱼" does."""
+    """Asked as a question, 周三要不要换成鱼？ (should Wednesday be fish?) still swaps the main, as 换成鱼 does."""
     _, plan = _conversation_week(composed_client)
     week = WeeklyMealPlanResponse.model_validate(plan)
     wednesday = day_on(plan, 2)
