@@ -12,6 +12,7 @@ from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError, entry_values
 from app.repositories.recipe import RecipeRepository
+from app.schemas.display import shown_title
 from app.schemas.meal_plan import (
     MealPlanEntrySnapshot,
     MealPlanGroceryDeltaLine,
@@ -31,6 +32,12 @@ from app.schemas.planning_v2 import PlanningCompositionPolicy
 from app.schemas.recommendation import RecipeRecommendationResponse
 from app.services.meal_plan import WeeklyMealPlanService
 from app.services.recommendation import RecipeRecommendationService
+
+
+def by_weight(grocery: WeeklyGroceryEstimateResponse) -> set[str]:
+    """What the list buys by weight. A change keeps it so: the week was planned with a dish that measures
+    milk in grams, and a swap keeps buying the milk the other dishes measure in millilitres by weight."""
+    return {line.ingredient_name for line in grocery.items if line.unit == "g"}
 
 
 def _at_share(value, share: float):
@@ -130,7 +137,10 @@ class MealPlanReplanningService:
                 recipes_by_id=recipes_by_id,
             )
             after_grocery = self.grocery_aggregator.estimate(
-                [recipe for recipe, _ in future_recipes], constraints, shares=[share for _, share in future_recipes]
+                [recipe for recipe, _ in future_recipes],
+                constraints,
+                shares=[share for _, share in future_recipes],
+                by_weight=by_weight(before_grocery),
             )
             after_warnings = list(dict.fromkeys(after_grocery.warnings))
             if after_grocery.within_weekly_budget is False:
@@ -195,12 +205,13 @@ class MealPlanReplanningService:
             new_shape = MealPlanShape(meals=meals)
 
         kept = [item for item in plan.entries if item not in removed and item.status != "skipped"]
+        before_grocery = self._current_grocery(plan)
         # Taking a dish away keeps the others (at their larger share); anything else plans the meal again.
         staying = self._dishes_staying(removed, request.roles)
         if staying is not None:
             added = staying
         elif request.roles:
-            added = self._plan_meal(constraints, meal, request.roles, days, kept, removed)
+            added = self._plan_meal(constraints, meal, request.roles, days, kept, removed, by_weight(before_grocery))
         else:
             added = []
         # A dish that stays on its day, when a dish is taken away or added, is neither taken off nor new.
@@ -213,7 +224,10 @@ class MealPlanReplanningService:
         eaten = [(recipes_by_id[item.recipe_id], float(item.portion_share)) for item in kept]
         eaten += [(recipes_by_id[values["recipe_id"]], values["portion_share"]) for values, _ in added]
         after_grocery = self.grocery_aggregator.estimate(
-            [recipe for recipe, _ in eaten], constraints, shares=[share for _, share in eaten]
+            [recipe for recipe, _ in eaten],
+            constraints,
+            shares=[share for _, share in eaten],
+            by_weight=by_weight(before_grocery),
         )
         after_warnings = list(dict.fromkeys(after_grocery.warnings))
         if after_grocery.within_weekly_budget is False:
@@ -221,7 +235,6 @@ class MealPlanReplanningService:
                 f"The revised grocery total S${after_grocery.purchase_total_sgd:.2f} exceeds the "
                 f"S${constraints.weekly_budget_sgd:.2f} weekly budget."
             )
-        before_grocery = self._current_grocery(plan)
         fields = ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
         eaten_before = [item for item in removed if item.status != "skipped"]
         nutrition_delta = {
@@ -326,8 +339,12 @@ class MealPlanReplanningService:
             return None  # nothing is added
         return kept
 
-    def _plan_meal(self, constraints, meal, roles, days, kept, removed) -> list[tuple[dict, MealPlanEntrySnapshot]]:
+    def _plan_meal(
+        self, constraints, meal, roles, days, kept, removed, weighed: set[str]
+    ) -> list[tuple[dict, MealPlanEntrySnapshot]]:
         """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves.
+
+        `weighed` is what the week's list buys by weight (`by_weight`); the rest of the week is priced so.
 
         When nothing fits what is left (with the meal's present dishes kept, when a dish is added), the change is
         still planned, as cheaply as the planner finds (see `plan_dishes`), and its preview says how far over
@@ -345,7 +362,7 @@ class MealPlanReplanningService:
             # what its dishes use leaves room the week has already paid for, and a plan made to fit that
             # room would go over the budget without trying the cheapest plans first.
             paid = self.grocery_aggregator.estimate(
-                [recipe for recipe, _ in rest], constraints, shares=[share for _, share in rest]
+                [recipe for recipe, _ in rest], constraints, shares=[share for _, share in rest], by_weight=weighed
             ).purchase_total_sgd
             left = round(budget - paid, 2)
         partial = constraints.model_copy(
@@ -373,6 +390,7 @@ class MealPlanReplanningService:
                 rest=rest,
                 keep=self._dishes_kept_when_adding(roles, removed),
                 over_budget=over_budget,
+                by_weight=weighed,
             )
         except ProductPlanningError as error:
             raise MealPlanReplanValidationError(str(error)) from error
@@ -497,7 +515,7 @@ class MealPlanReplanningService:
             ]
         if not candidates:
             raise MealPlanReplanValidationError(
-                f"No dish other than {entry.recipe.title} satisfies the current hard constraints."
+                f"No dish other than {shown_title(entry.recipe.title)} satisfies the current hard constraints."
             )
 
         # The same dish position on the neighbouring days, so a swap does not repeat them.
