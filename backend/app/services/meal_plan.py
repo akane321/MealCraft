@@ -198,10 +198,11 @@ class WeeklyMealPlanService:
             return error
         if _found_seconds():
             now = time.monotonic()
-            for key in [key for key, (at, _) in found_weeks.items() if now - at >= _found_seconds()]:
-                del found_weeks[key]
+            # pop, not del: requests run on several threads (a sync route) and may expire the same entry.
+            for key in [key for key, (at, _) in list(found_weeks.items()) if now - at >= _found_seconds()]:
+                found_weeks.pop(key, None)
             while len(found_weeks) >= FOUND_WEEKS_KEPT:
-                del found_weeks[next(iter(found_weeks))]
+                found_weeks.pop(next(iter(found_weeks), None), None)
             found_weeks[self._found_key(constraints)] = (now, searched)
         return None
 
