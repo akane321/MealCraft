@@ -6,13 +6,17 @@
 - P8: a swap's replacement was a lunch at dinner, or took the week S$9 to S$17 over its budget.
 - Review round 1: the first answer after startup, or after the recipe pool aged, loaded the pool (3.5-4.5 s on
   PostgreSQL), taking an OpenAI-mode answer past 10 s.
+- Review round 3: the pool aged 300 s after it was loaded, and the first answer after that loaded it again (about
+  11 s in OpenAI mode); it is now loaded again in the background before it ages.
 """
 
 import re
 import threading
+import time
 from collections import Counter
 from contextlib import contextmanager
 from datetime import date, timedelta
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -27,11 +31,13 @@ from app.core.paths import repository_root
 from app.data.catalog import import_catalog, load_catalog
 from app.data.release_v2 import import_release_v2
 from app.db.base import Base
+from app.main import warm_planning_pool
 from app.planning.product_path import ProductPlanningEngine, meal_affinity
 from app.planning.recipe_quality import dish_family
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
 from app.repositories.recipe import RecipeRepository, _planning_pool, clear_planning_pool
+from app.repositories.recipe import _reloading as reloading_binds
 from app.schemas.agent import AgentConstraintState
 from app.schemas.meal_plan import MEAL_PRESETS, MealPlanReplanPreviewRequest, MealPlanShapeChangeRequest
 from app.services.agent import AgentSessionService
@@ -58,7 +64,7 @@ def kept_for(seconds: int):
     with pytest.MonkeyPatch.context() as patch:
         patch.setattr(get_settings(), "planning_pool_cache_seconds", seconds)
         # The API's startup would load the pool of the configured database, not the test's catalog.
-        patch.setattr("app.main.warm_planning_pool", lambda: None, raising=False)
+        patch.setattr("app.main.warm_planning_pool", lambda *_: None, raising=False)
         clear_planning_pool()  # and the weeks found from it
         try:
             yield
@@ -450,19 +456,97 @@ def test_every_dish_role_plans_from_one_load_of_the_pool(loads):
         assert loads == ["MainThread"]
 
 
-def test_a_pool_past_its_age_answers_at_once_and_reloads_in_the_background(loads):
-    """The pool was reloaded by the first request after PLANNING_POOL_CACHE_SECONDS, which waited for it."""
+@contextmanager
+def started(session):
+    """The API started over `session`'s database, keeping its planning pool until it stops."""
+    import app.main as main
+
+    with pytest.MonkeyPatch.context() as patch:  # undone before kept_for's stub of the pool thread is
+        patch.setattr(main, "SessionLocal", sessionmaker(bind=session.get_bind(), expire_on_commit=False))
+        patch.setattr(main, "warm_planning_pool", warm_planning_pool)
+        with TestClient(main.app):
+            yield
+    joined("warm-planning-pool")  # stopped with the API
+
+
+def waited(condition, seconds: float = 10) -> None:
+    """Until a background thread did what `condition` says."""
+    deadline = time.monotonic() + seconds
+    while not condition():
+        assert time.monotonic() < deadline, "the background thread did not get there"
+        time.sleep(0.01)
+
+
+@pytest.fixture
+def clock(monkeypatch):
+    """The planning pool's clock, moved by hand."""
+    now = SimpleNamespace(seconds=1_000.0)
+    monkeypatch.setattr("app.repositories.recipe.time", SimpleNamespace(monotonic=lambda: now.seconds))
+    monkeypatch.setattr("app.repositories.recipe.POOL_CHECK_SECONDS", 0.01, raising=False)
+    return now
+
+
+def test_a_pool_past_its_age_is_loaded_again_rather_than_planned_from(loads, clock):
+    """With nothing keeping it young, the first request past PLANNING_POOL_CACHE_SECONDS planned from it while it
+    was reloaded in the background (review round 1): a catalog imported meanwhile was not seen."""
+    with pooled() as session:
+        recipes = RecipeRepository(session)
+        recipes.list_for_planning()
+        session.add(_dish("pumpkin-soup", "soup", "pumpkin", 400, calories=120))
+        session.commit()
+        clock.seconds += 301
+        assert [r.slug for r in recipes.list_for_planning()] == ["salmon-bake", "tomato-soup", "pumpkin-soup"]
+        assert loads == ["MainThread", "MainThread"]
+
+
+def test_the_api_loads_the_pool_again_before_it_ages_so_no_request_waits_for_it(loads, clock):
+    """The pool aged 300 s after it was loaded, and the first answer after that loaded it (about 11 s in OpenAI
+    mode, ADR-0046's target is 10 s). A catalog imported meanwhile reaches the request all the same."""
+    with pooled() as session:
+        with started(session):
+            waited(lambda: len(loads) == 1 and _planning_pool and not reloading_binds)  # loaded at 1,000 s
+            clock.seconds += 100
+            session.add(_dish("pumpkin-soup", "soup", "pumpkin", 400, calories=120))  # the worker's import
+            session.commit()
+            for loaded, age in ((2, 160), (3, 320)):
+                clock.seconds = 1_000 + age
+                waited(lambda loaded=loaded: len(loads) == loaded and not reloading_binds)
+            recipes = RecipeRepository(session).list_for_planning()  # 320 s after the startup load
+        assert [r.slug for r in recipes] == ["salmon-bake", "tomato-soup", "pumpkin-soup"]
+        assert loads == ["warm-planning-pool"] * 3
+
+
+def test_a_background_load_does_not_hold_up_a_request(monkeypatch, loads, clock):
+    """Requests plan from the pool in hand while the background thread loads its successor."""
+    from app.repositories.recipe import keep_planning_pool_warm
+
+    load = RecipeRepository._load_for_planning
+    holding, finish, stop = threading.Event(), threading.Event(), threading.Event()
+
+    def held(self, session, courses):
+        if threading.current_thread().name == "warm":
+            holding.set()
+            finish.wait(10)
+        return load(self, session, courses)
+
     with pooled() as session:
         recipes = RecipeRepository(session)
         first = recipes.list_for_planning()
-        for key, (loaded_at, kept) in list(_planning_pool.items()):
-            _planning_pool[key] = (loaded_at - 301, kept)
-
-        assert recipes.list_for_planning() == first  # the recipes in hand, not a load
-        joined("reload-planning-pool")
-        assert loads == ["MainThread", "reload-planning-pool"]
-        assert recipes.list_for_planning() != first  # the reloaded recipes, and no further load
-        assert loads == ["MainThread", "reload-planning-pool"]
+        monkeypatch.setattr(RecipeRepository, "_load_for_planning", held)
+        clock.seconds += 151
+        warm = threading.Thread(target=keep_planning_pool_warm, args=(session.get_bind(), stop), name="warm")
+        warm.start()
+        try:
+            waited(holding.is_set)
+            started = time.monotonic()
+            assert recipes.list_for_planning() == first
+            assert time.monotonic() - started < 2
+        finally:
+            finish.set()
+            stop.set()
+            warm.join()
+        assert recipes.list_for_planning() != first  # the successor, loaded meanwhile
+        assert loads == ["MainThread", "warm"]
 
 
 def test_a_pool_load_that_an_edit_overtook_is_not_kept(monkeypatch):
@@ -480,16 +564,26 @@ def test_a_pool_load_that_an_edit_overtook_is_not_kept(monkeypatch):
         assert not _planning_pool
 
 
-def test_the_api_loads_the_recipe_pool_at_startup(monkeypatch, loads):
-    """The first answer after startup loaded the pool itself (11.84 s in OpenAI mode in the walkthrough)."""
-    import app.main as main
+def test_an_operations_edit_has_the_pool_loaded_again_at_once(loads):
+    """An edit cleared the pool, and the next plan loaded it, edit included, while the household waited."""
+    from app.services.ops_data import _planning_changed
 
-    warm = main.warm_planning_pool
     with pooled() as session:
-        monkeypatch.setattr(main, "SessionLocal", sessionmaker(bind=session.get_bind(), expire_on_commit=False))
-        monkeypatch.setattr(main, "warm_planning_pool", warm)
-        with TestClient(main.app):
-            joined("warm-planning-pool")
-        assert loads == ["warm-planning-pool"]
-        RecipeRepository(session).list_for_planning(courses=["main", "side", "salad", "soup"])
+        recipes = RecipeRepository(session)
+        recipes.list_for_planning()
+        session.add(_dish("pumpkin-soup", "soup", "pumpkin", 400, calories=120))
+        session.commit()
+        _planning_changed()
+        joined("reload-planning-pool")
+        assert loads == ["MainThread", "reload-planning-pool"]
+        assert [r.slug for r in recipes.list_for_planning()] == ["salmon-bake", "tomato-soup", "pumpkin-soup"]
+        assert loads == ["MainThread", "reload-planning-pool"]
+
+
+def test_the_api_loads_the_recipe_pool_at_startup(loads):
+    """The first answer after startup loaded the pool itself (11.84 s in OpenAI mode in the walkthrough)."""
+    with pooled() as session:
+        with started(session):
+            waited(lambda: loads == ["warm-planning-pool"])
+            RecipeRepository(session).list_for_planning(courses=["main", "side", "salad", "soup"])
         assert loads == ["warm-planning-pool"]

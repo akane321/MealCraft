@@ -52,8 +52,10 @@ ADR-0046): the household's plan shape names the meals of a day (breakfast, lunch
 dinner; default dinner only) and each meal's dishes (default one main and an
 optional vegetable dish), and `MealBeamPlanner` fills every (day, meal) slot. `PLANNING_CAPABILITY`
 defaults to `full`; `mvp` (one dinner dish a day) remains for reproducing the
-recorded evaluations. The candidate recipes are kept in memory for five minutes
-(`PLANNING_POOL_CACHE_SECONDS`). Earlier local Docker timings are historical;
+recorded evaluations. The candidate recipes are kept in memory, loaded at
+startup and again in the background every two and a half minutes, so none is
+older than five minutes (`PLANNING_POOL_CACHE_SECONDS`). Earlier local Docker
+timings are historical;
 the integrated search changes need a new timed walkthrough on the intended
 machine before claiming current response times.
 

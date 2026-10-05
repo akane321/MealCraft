@@ -44,8 +44,8 @@ class OpsDataConflictError(ValueError):
 
 
 def _planning_changed() -> None:
-    # The planner keeps its candidates for a few minutes; an edit must reach the next plan.
-    recipe_repo.clear_planning_pool()
+    # The planner keeps its candidates; an edit must reach the next plan, so they are loaded again now.
+    recipe_repo.clear_planning_pool(reload=True)
 
 
 def _names(values: list[str]) -> list[str]:
