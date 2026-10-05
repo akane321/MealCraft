@@ -206,10 +206,9 @@ class WeeklyMealPlanService:
         return None
 
     def _found_key(self, constraints: WeeklyMealPlanRequest, profile_version: int | None = None) -> tuple:
-        repository = self.repository
         return (
-            id(repository.session.get_bind()),
-            repository.household_id,
+            id(self.recipe_repository.session.get_bind()),  # the database, as the pool is keyed
+            self.repository.household_id,
             repr(self.planning_engine.limits),
             profile_version,
             constraints.model_dump_json(),

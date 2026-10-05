@@ -499,7 +499,14 @@ this contract.
 `POST /api/plans/{plan_id}/replan/preview` accepts an `entry_id`, optional
 `reason`, and one event type: `REPLACE_MEAL`, `CANCEL_MEAL`, `LOCK_MEAL`, or
 `ITEM_UNAVAILABLE`. The unavailable-item event additionally requires a normalized
-`unavailable_ingredient`.
+`unavailable_ingredient`. A replacement fills the same role and takes a dish for
+the slot's meal whenever one fits (a dinner for a dinner). Of those, the first in
+the swap's order that keeps the week within its budget at the checkout, given what
+the rest of the week buys (or no further over it than it is), is offered; when
+none does, the one that takes it over least, with its overage. A swap that says
+what it wants ("something with fish") chooses so among the ten candidates most
+like the request, never one unlike it; otherwise a dish the week does not serve
+comes before one it does.
 
 The preview does not modify the active plan. It persists the base revision,
 before/after meal snapshots, nutrition delta, package-level Shopping List delta,
@@ -554,15 +561,18 @@ planning message, however it is phrased. An unclear message ("something nice",
 `pending_interaction` (planning a week before a plan exists, changing a dish
 once one does). Boredom with the dishes ("the dishes are boring", "too
 repetitive", 菜很单调) is a wish for variety in either language: before a plan
-it offers a week with no dish twice; with a plan it offers a new week with
-different dishes or a swap of a dish that repeats. The new week is planned in
-the turn with `avoid_recipe_ids` set to the week's dishes: no dish twice without
-a weekly budget (or when the household asks for that), else the most varied
-week the planner finds within the budget. It takes the session's week's place,
-which stays saved, only with more different dishes, or as many and some new;
-otherwise the week stays as it is and the reply says why (the budget with the
-cheapest such week found, too few dishes, or the count of different dishes),
-with a swap offered instead. A mixed request sends only
+it offers a week with no dish twice. With a plan it swaps the week's repeated
+dishes for different ones within its budget, in one preview to confirm or discard
+(a `CHANGE_SHAPE` event whose `shape_change` replaces dishes in their own day,
+meal and role), not a new week. Of a dish served more than once, the first (or a
+cooked or locked one) stays, and each other one still to cook takes the
+best-ranked dish of its role the week does not serve that keeps the week within
+its budget at the checkout (or no further over it than it is), one dish a meal
+per preview. When no different dish fits, the week stays as it is and the reply
+says how much more than the week can spend the closest swap found needs, with a
+swap of one dish offered instead; a week with no repeats says so. "Swap the
+repeated dishes" and "plan a new week with different dishes" ask for the same.
+A mixed request sends only
 its supported segment to the parser. The persisted `last_scope_decision` makes
 this routing visible to clients and tests. Every templated reply is written in
 the language of the household's message, or, for a message with no words to
@@ -591,7 +601,10 @@ floor itself and no amount offered. The floor ignores whole packages, and no
 multiple of it bounds them (on the release catalog the cheapest week the planner
 finds costs 1.6 to 122 times it, most for one person's breakfasts with no dish
 twice), so any other weekly budget is planned up front exactly as **Plan my
-week** would plan it, nothing saved, and what that refuses is refused now. A budget refusal names the amount a person a meal and the cheapest
+week** would plan it, nothing saved, and what that refuses is refused now. The
+week found is kept, for that exact request and for as long as the planner keeps
+its recipes (`PLANNING_POOL_CACHE_SECONDS`), and **Plan my week** saves it
+instead of searching again. A budget refusal names the amount a person a meal and the cheapest
 week the search found ("S$10 for 4 people is S$0.36 a person a meal over 7 meals.
 The cheapest week I could plan costs about S$38.16: the cheapest my search found,
 not a proof that none is cheaper."). The session keeps collecting and offers
