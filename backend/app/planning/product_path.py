@@ -696,11 +696,14 @@ class ProductPlanningEngine:
                     found += limit_led()
                     # A search keeps partial weeks and cannot see the room a finished one leaves: unless a week
                     # found is filled with no dish twice, the most varied weeks found and the cheapest spend theirs
-                    # on dishes not yet in the week.
+                    # on dishes not yet in the week. Over the budget that week need not be the one chosen (the
+                    # cheapest is, a repeat charged at one meal's share: `over_budget_pick`), so the cheap weeks
+                    # spend their room too: the 2026-10-04 walkthrough's added lunches were one slaw five times
+                    # beside a S$58 week of seven different ones.
                     seen = {state.choices for _, state in found}
                     cheapest_starts = sorted(found, key=lambda item: (item[1].cost, item[1].choices))
                     starts = sorted(found, key=order)[:VARIED_STARTS] + cheapest_starts[:VARIED_STARTS]
-                    if any(variety(state)[0] == 0 and variety(state)[2] <= 1 for _, state in found):
+                    if budget_is_hard and any(variety(state)[0] == 0 and variety(state)[2] <= 1 for _, state in found):
                         starts = []
                     for weight, state in starts:
                         varied = meal_beam.vary_within_budget(problem, state)

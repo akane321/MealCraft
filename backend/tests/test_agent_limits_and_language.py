@@ -1052,103 +1052,37 @@ def slugs(client, plan_id: int) -> list[str]:
     return [dish["recipe"]["slug"] for dish in client.get(f"/api/plans/{plan_id}").json()["days"]]
 
 
-def plan_again(client, session: dict, complaint: str = "the dishes are boring") -> dict:
-    offered = say(client, session, complaint)
-    return tap(client, offered, labels(offered)[0])
-
-
-@pytest.mark.parametrize("complaint", ["菜很单调,不太好", "the dishes are boring", "too repetitive"])
-def test_a_week_found_monotonous_is_replaced_by_a_new_week_with_different_dishes(varied, complaint):
+@pytest.mark.parametrize(
+    ("complaint", "reply"),
+    [
+        ("the dishes are boring", "No dish still to cook this week comes twice. Tell me which one you're tired of"),
+        ("菜很单调,不太好", "这周还没做的菜没有重复的。告诉我想换掉哪一道，我来换。"),
+        ("too repetitive", "No dish still to cook this week comes twice."),
+        ("Plan a new week with different dishes, no dish twice", "No dish still to cook this week comes twice."),
+    ],
+)
+def test_a_week_found_monotonous_without_repeats_stays_and_offers_a_swap(varied, complaint, reply):
+    """Owner, 2026-10-04: "the dishes are boring" swaps the repeated dishes; a week with none has nothing to swap."""
     session = planned(varied, "Dinners for 4 this week")
     before = slugs(varied, session["plan_id"])
+    assert len(set(before)) == 7
 
-    offered = say(varied, session, complaint)
-    chinese = language(complaint) == "zh"
-    assert offered["messages"][-1]["content"].startswith(
-        "那就多换些花样。" if chinese else "Let's make it more varied."
-    )
-    again = labels(offered)[0]
-    assert again in {"Plan a new week with different dishes", "重新规划一周，换一批菜"}
-
-    new = tap(varied, offered, again)
-    assert new["plan_id"] not in {None, session["plan_id"]} and new["status"] == "planned"
-    assert new["messages"][-1]["content"].startswith(
-        "新的一周排好了：7 道不同的菜" if chinese else "Here's a new week with 7 different dishes"
-    )
-    mains = slugs(varied, new["plan_id"])
-    assert len(mains) == len(set(mains)) == 7  # none twice
-    assert not set(before) & set(mains)  # and none of last week's
-    assert slugs(varied, session["plan_id"]) == before  # the old week stays saved as it was
-
-
-def test_a_household_with_a_weekly_budget_gets_a_new_week_within_it(varied):
-    session = planned(varied, "Dinners for 4, S$40 total")
-    before = slugs(varied, session["plan_id"])
-
-    new = plan_again(varied, session)
-    assert new["plan_id"] not in {None, session["plan_id"]}, new["messages"][-1]["content"]
-    assert new["status"] == "planned" and new["messages"][-1]["content"].startswith("Here's a new week with ")
-    week = varied.get(f"/api/plans/{new['plan_id']}").json()
-    assert week["grocery_estimate"]["purchase_total_sgd"] <= 40  # the budget holds
-    assert not set(before) & {dish["recipe"]["slug"] for dish in week["days"]}
-
-
-def test_a_new_week_the_budget_cannot_buy_keeps_the_week_and_says_why(varied):
-    session = planned(varied, "Dinners for 4, S$22 total")  # the seven cheapest mains
-
-    kept = say(varied, session, "Plan a new week with different dishes, no dish twice")
-    assert kept["plan_id"] == session["plan_id"] and kept["status"] == "planned"
-    reply = kept["messages"][-1]["content"]
-    assert reply.startswith(
-        "Your week stays as it is. For a new week with different dishes: S$22 a week for 4 people comes to about "
-    )
-    assert cheapest_quoted(reply) > 22  # the cheapest week of other dishes the search found
-    assert labels(kept)[0].startswith("Swap ")  # a swap instead, not a dead end
-
-
-def test_a_new_week_under_a_budget_is_searched_within_it_not_with_no_dish_twice(varied):
-    """S$22 buys the seven cheapest mains once each, and no seven others: asked only for variety, the new week
-    is the most varied the budget buys, repeats allowed, and is kept out only for being less varied."""
-    session = planned(varied, "Dinners for 4, S$22 total")
-
-    kept = plan_again(varied, session)
-    assert kept["plan_id"] == session["plan_id"] and kept["status"] == "planned"
-    reply = kept["messages"][-1]["content"]
-    found = re.fullmatch(
-        r"Your week stays as it is: the most varied new week I could plan within S\$22 has (\d) different dishes, "
-        r"\1 of them new, and this one has 7\. I can swap a dish instead\.",
-        reply,
-    )
-    assert found and int(found.group(1)) < 7, reply  # not "S$22 cannot buy a new week": it buys a less varied one
-
-
-def test_a_new_week_with_too_few_dishes_keeps_the_week_and_says_why(composed_client):  # noqa: F811
-    session = planned(composed_client, "Dinners for 4 this week")  # two mains for seven dinners
-
-    kept = plan_again(composed_client, session)
-    assert kept["plan_id"] == session["plan_id"]
-    assert kept["messages"][-1]["content"].startswith(
-        "Your week stays as it is. For a new week with different dishes: I couldn't plan this week"
-    )
-
-
-def test_a_new_week_no_more_varied_than_this_one_is_not_put_in_its_place(packaged):
-    """Eight mains: too few others to leave this week's out, so the new week would be the same seven."""
-    session = planned(packaged, "Dinners for 4, S$40 total")
-
-    kept = plan_again(packaged, session)
-    assert kept["plan_id"] == session["plan_id"]
-    assert kept["messages"][-1]["content"] == (
-        "Your week stays as it is: the most varied new week I could plan within S$40 has 7 different dishes, "
-        "0 of them new, and this one has 7. I can swap a dish instead."
-    )
+    answered = say(varied, session, complaint)
+    assert answered["messages"][-1]["content"].startswith(reply)
+    assert answered["plan_id"] == session["plan_id"] and answered["pending_replan"] is None
+    assert labels(answered) and labels(answered)[0].startswith("换" if "菜" in complaint else "Swap ")
+    assert slugs(varied, session["plan_id"]) == before
 
 
 def test_a_repeated_dish_is_offered_for_a_swap_when_the_week_repeats_one(composed_client):  # noqa: F811
     session = planned(composed_client, "Dinners for 4 this week")  # two mains for seven dinners
     offered = say(composed_client, session, "the dishes are boring")
+    # Two mains and three vegetables for seven dinners: no different dish is left to swap a repeat for.
+    assert offered["messages"][-1]["content"] == (
+        "No other dish fits in place of the repeated ones. I can swap a dish instead."
+    )
 
-    swap = labels(offered)[1]
+    swap = labels(offered)[0]
     assert re.fullmatch(r"Swap the .+ on [A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}", swap)
     previewed = tap(composed_client, offered, swap)
     assert previewed["pending_replan"]["status"] == "previewed"

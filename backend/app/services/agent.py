@@ -1,12 +1,12 @@
 import re
 from collections.abc import Callable
-from datetime import date
+from datetime import date, timedelta
 from uuid import uuid4
 
 from pydantic_core import to_jsonable_python
 
 from app.agent import limits, model_client
-from app.agent.parser import ConstraintParser, says_no_repeats
+from app.agent.parser import ConstraintParser
 from app.agent.replanning import AgentReplanInterpreter
 from app.agent.replies import language, listed, planner_message, say, weekday, word
 from app.agent.shape_change import read_shape_change
@@ -725,59 +725,58 @@ class AgentSessionService:
     def _plan_again(
         self, session_id: int, snapshot: AgentSessionResponse, message: str, run: AgentRun
     ) -> AgentSessionResponse:
-        """A new week with different dishes for a household that found theirs monotonous, planned and saved in
-        its place when it is more varied; otherwise the week stays as it is and the reply says why.
+        """The week's repeated dishes swapped for different ones within its budget, previewed, for a household that
+        found it monotonous; when no different dish fits, the week stays and the reply says what it would take.
 
-        Last week's dishes are left out while a week's worth of others remain. Without a weekly budget, or when
-        the household says so, no dish comes twice; under a budget the week is the most varied the planner finds
-        within it (ADR-0052). It replaces this one only with more different dishes, or as many and some new.
+        "The dishes are boring" (菜很单调) asks for this, not a new week (owner, 2026-10-04): a new week under the
+        same budget, avoiding every dish of this one, had only dearer dishes left and came out less varied.
         """
         plan = self.meal_plan_service.get(snapshot.plan_id)
         if plan is None:
             raise AgentSessionNotFoundError
         lang = language(message, snapshot.messages)
-        before = [dish.recipe.id for dish in plan.days]
-        stated = snapshot.constraints
-        strict = stated.weekly_budget_sgd is None or says_no_repeats(message.lower())
-        constraints = stated.model_copy(
-            update={
-                "avoid_recipe_ids": sorted(set(before)),
-                "max_uses_per_recipe": 1 if strict else stated.max_uses_per_recipe,
-            }
-        )
-        request = self._plan_request(constraints)
         try:
-            searched = self.meal_plan_service.search(request)
-        except WeeklyPlanSelectionError as error:
-            why = limits.planning_failure(error, constraints, lang).text
-            return self._keep_week(session_id, snapshot, plan, message, say("varied_kept", lang, why=why), lang)
-        after = [item.recipe.id for item in searched[1].selected]
-        count, was, new = len(set(after)), len(set(before)), len(set(after) - set(before))
-        if count < was or (count == was and not new):
-            # No more varied, or the same dishes again: not worth the household's week.
-            budget = stated.weekly_budget_sgd
-            within = say("varied_within", lang, budget=budget) if budget is not None else ""
-            reply = say("varied_no_more", lang, within=within, count=count, new=new, before=was)
+            preview, repeats, short = self.replanning_service.preview_variety(plan_id=plan.id, reason=message.strip())
+        except (MealPlanReplanValidationError, WeeklyPlanSelectionError) as error:
+            reply = say("change_failed", lang, error=planner_message(str(error), lang))
             return self._keep_week(session_id, snapshot, plan, message, reply, lang)
-        week = self.meal_plan_service.generate(request, replaces_plan_id=plan.id, searched=searched)
-        for tool, effect in (("generate_plan_preview", ToolEffect.PREVIEW), ("save_plan_revision", ToolEffect.COMMIT)):
-            run = self.run_lifecycle.record_tool(
-                run,
-                tool_name=tool,
-                effect=effect,
-                status=ToolRunStatus.SUCCEEDED,
-                arguments=request.model_dump(mode="json"),
-                result_reference=f"meal-plan:{week.id}:revision:{week.revision}",
-                provider_mode=constraints.pricing_mode,
+        # What the week can spend: its budget, or what it costs now when a change took it over (ADR-0046 section 2).
+        budget = plan.grocery_estimate.weekly_budget_sgd
+        limit = max(budget, plan.grocery_estimate.purchase_total_sgd) if budget is not None else None
+        if preview is None:
+            if not repeats:
+                reply = say("varied_none", lang)
+            elif short is not None and limit is not None:
+                reply = say("varied_short", lang, limit=limit, extra=short)
+            else:
+                reply = say("varied_nothing", lang)
+            return self._keep_week(session_id, snapshot, plan, message, reply, lang)
+        change = preview.shape_change
+        before = {(dish.day_index, dish.meal_type, dish.role_id): dish.recipe_title for dish in change.removed}
+        swaps = [
+            say(
+                "varied_swap",
+                lang,
+                day=weekday(plan.start_date + timedelta(days=dish.day_index - 1), lang),
+                before=before[(dish.day_index, dish.meal_type, dish.role_id)],
+                after=dish.recipe_title,
             )
-        back = len(set(after) & set(before))
-        fresh = say("varied_back", lang, count=back) if back else say("varied_fresh", lang)
-        updated = self.repository.plan_again(
+            for dish in change.added
+        ]
+        left = repeats - len(swaps)
+        reply = (
+            say("varied_swaps", lang, swaps=("；" if lang == "zh" else "; ").join(swaps))
+            + (say("varied_left", lang, count=left, extra=short, limit=limit) if left and short is not None else "")
+            + self._over_budget(preview, plan, lang)
+            + say("until_confirm", lang)
+        )
+        updated = self.repository.append_replan_exchange(
             session_id,
-            plan_id=week.id,
-            constraints=constraints,
             user_message=message,
-            assistant_message=say("varied_planned", lang, count=count, before=was, fresh=fresh),
+            assistant_message=reply,
+            draft=AgentReplanDraft(event_type="CHANGE_SHAPE", reason=message.strip()),
+            clarification_questions=[],
+            pending_event_id=preview.id,
             scope_decision=_variety_decision(message),
         )
         if updated is None:

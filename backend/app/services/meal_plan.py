@@ -1,8 +1,10 @@
+import time
 from collections import Counter
 from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
+from app.core.config import get_settings
 from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
 from app.models.recipe import Recipe
@@ -14,7 +16,7 @@ from app.planning.week_floor import WeekFloor, week_floor
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
 from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
-from app.repositories.recipe import RecipeRepository
+from app.repositories.recipe import FOUND_WEEKS_KEPT, RecipeRepository, found_weeks
 from app.schemas.meal_plan import (
     MEAL_ORDER,
     MealPlanEntryStatus,
@@ -68,10 +70,12 @@ class WeeklyMealPlanService:
         household_profile_id: int | None = None,
         household_profile_version: int | None = None,
         replaces_plan_id: int | None = None,
-        searched: tuple | None = None,
     ) -> WeeklyMealPlanResponse:
-        """Plan a week and save it; `searched` is a week `search` already found for these constraints."""
+        """Plan a week and save it: the week `check` found for these constraints while it is kept, else a new one."""
         started_at = datetime.now(UTC)
+        found = found_weeks.pop(self._found_key(constraints, household_profile_version), None)
+        fresh = found is not None and time.monotonic() - found[0] < get_settings().planning_pool_cache_seconds
+        searched = found[1] if fresh else None
         try:
             recommendation_result, result = searched or self._search(
                 constraints, self._candidates(constraints), profile_version=household_profile_version
@@ -181,19 +185,35 @@ class WeeklyMealPlanService:
                 raise
         raise AssertionError("unreachable")
 
-    def search(self, constraints: WeeklyMealPlanRequest) -> tuple:
-        """The week `generate` would plan for these constraints, nothing saved; ProductPlanningError for none.
-
-        `generate(constraints, searched=...)` saves it."""
-        return self._search(constraints, self._checked_candidates(constraints))
-
     def check(self, constraints: WeeklyMealPlanRequest) -> ProductPlanningError | None:
-        """What `generate` would answer for these constraints, nothing saved: None for a week, else its error."""
+        """What `generate` would answer for these constraints, nothing saved: None for a week, else its error.
+
+        The week found is kept for `generate` with the same constraints, while the planner's pools are kept."""
         try:
-            self.search(constraints)
+            searched = self._search(constraints, self._checked_candidates(constraints))
         except ProductPlanningError as error:
             return error
+        # Kept for the Plan that follows this check (`found_weeks`): the 2026-10-04 walkthrough's reply that took
+        # the last detail planned the week in 8 s, then Plan planned it again in 5 s.
+        seconds = get_settings().planning_pool_cache_seconds
+        if seconds:
+            now = time.monotonic()
+            # pop, not del: requests run on several threads (a sync route) and may expire the same entry.
+            for key in [key for key, (at, _) in list(found_weeks.items()) if now - at >= seconds]:
+                found_weeks.pop(key, None)
+            while len(found_weeks) >= FOUND_WEEKS_KEPT:
+                found_weeks.pop(next(iter(found_weeks), None), None)
+            found_weeks[self._found_key(constraints)] = (now, searched)
         return None
+
+    def _found_key(self, constraints: WeeklyMealPlanRequest, profile_version: int | None = None) -> tuple:
+        return (
+            id(self.recipe_repository.session.get_bind()),  # the database, as the pool is keyed
+            self.repository.household_id,
+            repr(self.planning_engine.limits),
+            profile_version,
+            constraints.model_dump_json(),
+        )
 
     def _candidates(self, constraints: WeeklyMealPlanRequest):
         """The recipes a week may use and the recommendations `generate` plans from first."""
