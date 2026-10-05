@@ -236,14 +236,17 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
         meals=meals,
         cost=cost,
     )
-    options = [_option("use_weekly", lang, amount=math.ceil(cost))]
+    whole = math.ceil(cost)
+    options = [_option("use_weekly", lang, amount=whole)]
     fewer = size // 2
     # Half the household at its own cheapest week takes a second search: offered for one meal a day of a quick
     # size, where the two take at most 5 s; for more they would take the reply past its time limit (ADR-0046
     # section 3).
     quick = meals == 7 and max(_dishes(constraints)) <= QUICK_MEAL_DISHES and cheapest is not None and fewer >= 1
     smaller = cheapest(household_size=fewer) if quick else None
-    if smaller is not None:
+    # The cheapest-week search is a heuristic, not monotonic in who eats: fewer people can come out dearer than
+    # everyone (S$41 for 2 beside S$24 for 4). Offered only when a real week backs it and it costs less.
+    if smaller is not None and math.ceil(smaller) < whole:
         # Fewer people buy less: the budget as it is when their cheapest week fits it, else that week's cost.
         if smaller <= weekly:
             options.append(_option("fewer_people", lang, count=fewer, people=people(fewer, lang)))

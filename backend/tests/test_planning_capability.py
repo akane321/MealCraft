@@ -646,6 +646,30 @@ def _dishes(plan, day) -> dict[str, str]:
     return {d["role_id"]: d["recipe"]["slug"] for d in plan["days"] if d["day_index"] == day}
 
 
+def _title(slug: str) -> str:
+    return slug.replace("-", " ").title()  # as `_dish` titles it
+
+
+def _labels(session: dict) -> list[str]:
+    return [option["label"] for option in (session["pending_interaction"] or {}).get("options", [])]
+
+
+def _tap(client, session: dict, label: str) -> dict:
+    """Taps the pending choice labelled `label`, as the frontend does."""
+    interaction = session["pending_interaction"]
+    option = next(item for item in interaction["options"] if item["label"] == label)
+    answered = client.post(
+        f"/api/agent/sessions/{session['id']}/interactions",
+        json={
+            "question_id": interaction["question_id"],
+            "option_ids": [option["id"]],
+            "context_version": interaction["context_version"],
+        },
+    )
+    assert answered.status_code == 200, answered.text
+    return answered.json()
+
+
 def test_a_shape_change_within_the_budget_is_offered_as_before(composed_client):
     plan = _week_ahead(composed_client, COMPOSITION[:2])
     roomy = composed_client.post(
@@ -733,6 +757,12 @@ def test_another_soup_on_a_friday_that_has_one_keeps_its_dishes_over_the_budget(
     asked = composed_client.post(
         f"/api/agent/sessions/{session['id']}/messages", json={"message": "周五晚餐加一个汤"}
     ).json()
+    # Friday has a soup: asked first, naming it (the 2026-10-04 walkthrough's silent second soup).
+    soup = _title(before["soup"])
+    assert asked["pending_replan"] is None
+    assert asked["messages"][-1]["content"] == f"周五的晚餐已经有{soup}了：再加一道汤，还是换掉它？"
+    assert _labels(asked) == ["再加一道汤", f"换掉{soup}"]
+    asked = _tap(composed_client, asked, "再加一道汤")
 
     reply = asked["messages"][-1]["content"]
     change = asked["pending_replan"]
@@ -776,8 +806,9 @@ def test_another_soup_on_a_day_that_got_one_in_the_conversation_keeps_its_dishes
     before = _dishes(week, friday)
     assert set(before) == {"main", "vegetable", "soup"}
 
+    # Said as "another", nothing is asked.
     asked = composed_client.post(
-        f"/api/agent/sessions/{session['id']}/messages", json={"message": "周五晚餐加一个汤"}
+        f"/api/agent/sessions/{session['id']}/messages", json={"message": "周五晚餐再加一个汤"}
     ).json()
 
     reply = asked["messages"][-1]["content"]

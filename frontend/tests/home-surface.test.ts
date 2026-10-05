@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetLine, conversationForPlan, groceryGroups, packageLabel, perDinner, plateStyle, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
+import { budgetLine, conversationForPlan, groceriesChange, groceryGroups, packageLabel, perDinner, plateStyle, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
 import type { MealPlanEntrySnapshot, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
@@ -134,6 +134,22 @@ describe("sameDishChange", () => {
   it("leaves a swap to show both dishes", () => {
     expect(sameDishChange({ event_type: "REPLACE_MEAL", before_entry: before })).toBeNull();
     expect(sameDishChange({ event_type: "ITEM_UNAVAILABLE", before_entry: before })).toBeNull();
+  });
+
+  it("reads a kept meal as every dish it keeps", () => {
+    const rice = { recipe_title: "Rice" } as MealPlanEntrySnapshot;
+    const soup = { recipe_title: "Potato Soup" } as MealPlanEntrySnapshot;
+    expect(sameDishChange({ event_type: "LOCK_MEAL", before_entry: before, meal_entries: [before, rice, soup] }))
+      .toBe("Keep Refried Beans, Rice and Potato Soup as they are");
+    expect(sameDishChange({ event_type: "LOCK_MEAL", before_entry: before, meal_entries: [] })).toBe("Keep Refried Beans as it is");
+  });
+});
+
+describe("groceriesChange", () => {
+  it("says the groceries stay the same rather than +S$0.00", () => {
+    expect(groceriesChange(0)).toBe("groceries stay the same");
+    expect(groceriesChange(2.8)).toBe("groceries +S$2.80");
+    expect(groceriesChange(-4.95)).toBe("groceries −S$4.95");
   });
 });
 

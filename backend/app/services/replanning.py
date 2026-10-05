@@ -116,6 +116,15 @@ class MealPlanReplanningService:
             )
 
         before_entry = self._entry_snapshot(entry)
+        if request.whole_meal:
+            # Every dish of the meal still open is kept with it, in one preview.
+            before_entry["meal_entries"] = [
+                self._entry_snapshot(item)
+                for item in plan.entries
+                if item.day_index == entry.day_index
+                and item.meal_type == entry.meal_type
+                and (item.id == entry.id or not (item.is_locked or item.status == "completed"))
+            ]
         after_entry = self._after_entry_snapshot(entry, request, recommendation)
         before_grocery = self._current_grocery(plan)
         if request.event_type == "LOCK_MEAL":
@@ -440,6 +449,23 @@ class MealPlanReplanningService:
         event = self.repository.get_event(plan_id=plan_id, event_id=event_id)
         return self._event_response(event) if event is not None else None
 
+    def dishes_using(self, *, plan_id: int, entry_id: int, ingredients: list[str]) -> list[str]:
+        """The titles of the week's other dishes still eaten that use any of `ingredients`, as cooked for this
+        household: why skipping `entry_id` leaves those packages on the list."""
+        plan = self.repository.get(plan_id)
+        if plan is None or not ingredients:
+            return []
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
+        titles = [
+            item.recipe.title
+            for item in plan.entries
+            if item.id != entry_id
+            and item.status != "skipped"
+            and {line.ingredient.normalized_name for line in alternatives.lines(item.recipe, constraints)}
+            & set(ingredients)
+        ]
+        return list(dict.fromkeys(titles))
+
     @staticmethod
     def _validate_target(entry: MealPlanEntry, request: MealPlanReplanPreviewRequest) -> None:
         if entry.status == "completed":
@@ -748,6 +774,10 @@ class MealPlanReplanningService:
             unavailable_ingredient=event.unavailable_ingredient,
             before_entry=MealPlanEntrySnapshot.model_validate(event.before_entry) if event.before_entry else None,
             after_entry=MealPlanEntrySnapshot.model_validate(event.after_entry) if event.after_entry else None,
+            meal_entries=[
+                MealPlanEntrySnapshot.model_validate(item)
+                for item in (event.before_entry or {}).get("meal_entries", [])
+            ],
             shape_change=MealPlanShapeChange.model_validate(event.shape_change) if event.shape_change else None,
             nutrition_delta=MealPlanNutritionDelta.model_validate(event.nutrition_delta),
             grocery_delta=[MealPlanGroceryDeltaLine.model_validate(item) for item in event.grocery_delta],

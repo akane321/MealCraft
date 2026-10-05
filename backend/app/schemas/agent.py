@@ -121,6 +121,8 @@ class AgentReplanDraft(BaseModel):
     day_index: int | None = Field(default=None, ge=1, le=7)
     unavailable_ingredient: str | None = None
     reason: str | None = None
+    # A lock of a whole named meal ("don't change Monday's dinner"): every dish of the entry's meal.
+    whole_meal: bool = False
 
 
 class AgentRunCheckpointResponse(BaseModel):

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { allergenLabel } from "~/lib/allergens";
-import { budgetLine, formatSgd, groceryGroups, plateStyle, sameDishChange } from "~/lib/home-surface";
+import { budgetLine, formatSgd, groceriesChange, groceryGroups, plateStyle, sameDishChange } from "~/lib/home-surface";
 import { statedTimeLimit } from "~/lib/household-profile";
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
 import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
@@ -588,7 +588,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 </ul>
                 <small>
                   <template v-if="shapePreview.removed">{{ shapePreview.removed }} {{ shapePreview.removed === 1 ? "dish comes" : "dishes come" }} off ·</template>
-                  groceries {{ session.pending_replan.purchase_total_delta_sgd >= 0 ? "+" : "−" }}S${{ Math.abs(session.pending_replan.purchase_total_delta_sgd).toFixed(2) }} ·
+                  {{ groceriesChange(session.pending_replan.purchase_total_delta_sgd) }} ·
                   the other meals stay the same
                 </small>
                 <small v-if="swapOverBudget" class="over-budget">This puts the week {{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }} budget.</small>
@@ -615,7 +615,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 </template>
                 <small>
                   {{ session.pending_replan.nutrition_delta.calories_kcal >= 0 ? "+" : "" }}{{ Math.round(session.pending_replan.nutrition_delta.calories_kcal) }} kcal ·
-                  groceries {{ session.pending_replan.purchase_total_delta_sgd >= 0 ? "+" : "−" }}S${{ Math.abs(session.pending_replan.purchase_total_delta_sgd).toFixed(2) }} ·
+                  {{ groceriesChange(session.pending_replan.purchase_total_delta_sgd) }} ·
                   the rest of the week stays the same
                 </small>
                 <small v-if="swapOverBudget" class="over-budget">This puts the week {{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }} budget.</small>

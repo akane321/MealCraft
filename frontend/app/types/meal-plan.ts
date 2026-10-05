@@ -186,6 +186,8 @@ export interface MealPlanReplanEvent {
   // Null for a shape change, which moves several dishes (shape_change).
   before_entry: MealPlanEntrySnapshot | null;
   after_entry: MealPlanEntrySnapshot | null;
+  // A whole-meal lock: every dish of before_entry's meal it keeps; empty otherwise.
+  meal_entries?: MealPlanEntrySnapshot[];
   shape_change?: MealPlanShapeChange | null;
   nutrition_delta: MealPlanNutritionDelta;
   grocery_delta: MealPlanGroceryDeltaLine[];

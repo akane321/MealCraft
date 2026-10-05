@@ -9,7 +9,7 @@ one-dish events (swap, cancel, lock, can't buy).
 import re
 from dataclasses import dataclass
 
-from app.agent.replies import say, word
+from app.agent.replies import listed, say, word
 from app.schemas.meal_plan import MEAL_PRESETS, MealPlanShapeChangeRequest, PlannedMeal, WeeklyMealPlanResponse
 
 MEAL_NAMES: dict[PlannedMeal, tuple[str, ...]] = {
@@ -91,6 +91,8 @@ ONE_DISH = (
 ONLY = ("just", "only", "只做", "只煮", "只排", "只安排", "只要", "只有", "只")
 ONE = ("one", "a", "an", "single", "一道", "一个", "一")
 TONIGHT = ("tonight", "今晚")
+# "another soup", "a second main", "再加一道汤", "多一个菜": one more of a kind the meal already has, said as such.
+ANOTHER = re.compile(r"(?<![a-z])(?:another|second|one more|extra)(?![a-z])|再|多加|多一|第二")
 
 
 @dataclass(frozen=True)
@@ -98,6 +100,14 @@ class ShapeChangeIntent:
     request: MealPlanShapeChangeRequest
     # What the assistant says it understood, before the preview.
     summary: str
+    # Read without the conversation around it: it names the meal, or adds a dish. "no, the soup" does neither,
+    # so while a question is open it answers that question rather than taking the soup off.
+    stands_alone: bool = True
+    # Asked before a second dish of a kind the meal already has, when the household did not say "another"
+    # ("Dinner on Friday already has Tomato Soup: add another soup, or swap it?"), with its (label, what tapping
+    # it says) choices; None when there is nothing to ask.
+    ask: str | None = None
+    ask_options: tuple[tuple[str, str], ...] = ()
 
 
 def _alternatives(words: tuple[str, ...]) -> str:
@@ -223,6 +233,8 @@ def read_shape_change(
     if read is None:
         return None
     text, meal, dish, adds, drops, only = read
+    stands_alone = meal is not None or (adds and not drops)
+    ask, ask_options = None, ()
     meal = meal or "dinner"
     shape = plan.plan_shape.meals if plan.plan_shape is not None else {}
     days = day_indexes or None
@@ -265,9 +277,44 @@ def read_shape_change(
             roles = [*current, {"role_id": role_id, "courses": courses, "required": True}]
             key = "shape_with_another" if role_id != base else "shape_with"
             summary = say(key, lang, dish=word(dish, lang) if lang == "zh" else dish, **named)
+            if role_id != base and not ANOTHER.search(text):
+                ask, ask_options = _already_has(plan, meal, base, days, summary, named, lang)
     return ShapeChangeIntent(
         request=MealPlanShapeChangeRequest.model_validate(
             {"meal_type": meal, "roles": roles, "day_indexes": days, "reason": message.strip()}
         ),
         summary=summary,
+        stands_alone=stands_alone,
+        ask=ask,
+        ask_options=ask_options,
     )
+
+
+def _already_has(
+    plan: WeeklyMealPlanResponse, meal: str, base: str, days: list[int] | None, summary: str, named: dict, lang: str
+) -> tuple[str | None, tuple[tuple[str, str], ...]]:
+    """The question before a second dish of a kind the meal has: what it has, and to add another or swap it.
+
+    Tapping "add another" says the change's own summary, which says "another" ("Dinner with another soup on
+    Friday"), so it is planned without asking again."""
+    have = [
+        dish
+        for dish in plan.days
+        if dish.meal_type == meal
+        and dish.status != "skipped"
+        and dish.role_id.split("-")[0] == base
+        and (days is None or dish.day_index in days)
+    ]
+    if not have:
+        return None, ()
+    dish_word = word(base, lang) if lang == "zh" else base
+    add = (say("add_another", lang, dish=dish_word), summary)
+    if len(have) > 1:
+        titles = listed(list(dict.fromkeys(dish.recipe.title for dish in have))[:3], lang)
+        return say("already_has_many", lang, titles=titles, dish=dish_word, **named), (add,)
+    one = have[0]
+    swap = (
+        say("swap_dish", lang, title=one.recipe.title),
+        say("swap_repeat_say", lang, title=one.recipe.title, index=one.day_index),
+    )
+    return say("already_has", lang, titles=one.recipe.title, dish=dish_word, **named), (add, swap)

@@ -336,7 +336,11 @@ class MealPlanRepository:
             entry.status = "skipped"
             entry.consumed_at = None
         elif event.event_type == "LOCK_MEAL":
-            entry.is_locked = True
+            # A whole-meal lock keeps every dish its preview listed.
+            kept = {entry.id, *(item["entry_id"] for item in (event.before_entry or {}).get("meal_entries", []))}
+            for item in plan.entries:
+                if item.id in kept:
+                    item.is_locked = True
 
         if event.event_type != "LOCK_MEAL":
             self._replace_grocery_items(plan, grocery)

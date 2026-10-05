@@ -63,6 +63,8 @@ export interface AgentReplanDraft {
   day_index: number | null;
   unavailable_ingredient: string | null;
   reason: string | null;
+  // A lock of a whole named meal ("don't change Monday's dinner").
+  whole_meal?: boolean;
 }
 
 export interface AgentScopeDecision {

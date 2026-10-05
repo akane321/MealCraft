@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatPlanDate } from "~/lib/meal-plan-format";
-import { sameDishChange } from "~/lib/home-surface";
+import { groceriesChange, sameDishChange } from "~/lib/home-surface";
 import { shapeChangeSummary } from "~/lib/plan-shape";
 import type { MealPlanReplanEvent, MealPlanReplanEventCollection } from "~/types/meal-plan";
 
@@ -39,11 +39,6 @@ function kcal(event: MealPlanReplanEvent) {
   const value = Math.round(event.nutrition_delta.calories_kcal);
   return `${value >= 0 ? "+" : ""}${value} kcal`;
 }
-
-function money(event: MealPlanReplanEvent) {
-  const value = event.purchase_total_delta_sgd;
-  return `${value >= 0 ? "+" : "−"}S$${Math.abs(value).toFixed(2)}`;
-}
 </script>
 
 <template>
@@ -65,7 +60,7 @@ function money(event: MealPlanReplanEvent) {
           <span aria-hidden="true">→</span>
           <strong>{{ event.after_entry.recipe_title }}</strong>
         </p>
-        <p class="meta">{{ when(event) }} · {{ kcal(event) }} · groceries {{ money(event) }}</p>
+        <p class="meta">{{ when(event) }} · {{ kcal(event) }} · {{ groceriesChange(event.purchase_total_delta_sgd) }}</p>
         <p v-if="event.reason" class="meta reason">{{ event.reason }}</p>
       </li>
     </ol>

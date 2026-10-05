@@ -37,9 +37,14 @@ _FILLER = re.compile(
 )
 
 
+# "Don't change Monday's dinner", "别动周一的晚饭", "I don't want fish": what is said not to be wanted is no wish.
+_NOT_WANTED = re.compile(r"\b(?:don['’]?t|do not)\b|别|不要|不想", re.IGNORECASE)
+
+
 def wanted(reason: str | None) -> str | None:
-    """What the household described wanting, with the swap mechanics removed; None when nothing is left."""
-    if not reason:
+    """What the household described wanting, with the swap mechanics removed; None when nothing is left, or
+    when the request says what it does not want (ordering by those words would bring exactly that)."""
+    if not reason or _NOT_WANTED.search(reason):
         return None
     rest = " ".join(_FILLER.sub(" ", reason).split())
     return rest if re.search(r"[a-zA-Z]{3,}|[一-鿿]", rest) else None
