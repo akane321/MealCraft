@@ -4,6 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from app.schemas.display import ShownTitle
 from app.schemas.planning_nutrition import ProductNutritionTarget
 from app.schemas.planning_v2 import MealComposition
 from app.schemas.product import GroceryLineEstimate, PricingMode
@@ -249,7 +250,7 @@ class MealPlanEntrySnapshot(BaseModel):
     portion_share: float = 1.0
     recipe_id: int
     recipe_slug: str
-    recipe_title: str
+    recipe_title: ShownTitle
     status: MealPlanEntryStatus
     is_locked: bool
     recommendation_score: float
