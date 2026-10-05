@@ -37,8 +37,9 @@ _FILLER = re.compile(
 )
 
 
-# "Don't change Monday's dinner", "别动周一的晚饭", "I don't want fish": what is said not to be wanted is no wish.
-_NOT_WANTED = re.compile(r"\b(?:don['’]?t|do not)\b|别|不要|不想", re.IGNORECASE)
+# "Don't change Monday's dinner", "别动周一的晚饭", "I don't want fish": what is said not to be wanted is no wish
+# ("换个别的", something else, is no "别").
+_NOT_WANTED = re.compile(r"\b(?:don['’]?t|do not)\b|别(?!的)|不要|不想", re.IGNORECASE)
 
 
 def wanted(reason: str | None) -> str | None:

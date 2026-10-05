@@ -117,13 +117,13 @@ class MealPlanReplanningService:
 
         before_entry = self._entry_snapshot(entry)
         if request.whole_meal:
-            # Every dish of the meal still open is kept with it, in one preview.
+            # Every dish of the meal still to cook is kept with it, in one preview.
             before_entry["meal_entries"] = [
                 self._entry_snapshot(item)
                 for item in plan.entries
                 if item.day_index == entry.day_index
                 and item.meal_type == entry.meal_type
-                and (item.id == entry.id or not (item.is_locked or item.status == "completed"))
+                and (item.id == entry.id or not (item.is_locked or item.status in {"completed", "skipped"}))
             ]
         after_entry = self._after_entry_snapshot(entry, request, recommendation)
         before_grocery = self._current_grocery(plan)

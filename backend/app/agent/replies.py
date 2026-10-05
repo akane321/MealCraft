@@ -353,6 +353,7 @@ REPLIES: dict[str, tuple[str, str]] = {
     "preview_skip": ("Skip {title}?", "跳过{title}？"),
     # What a skip does to the shopping: whole packages other dishes still need stay on the list.
     "skip_saves": (" That takes S${amount:.2f} off the groceries.", "买菜少花 S${amount:.2f}。"),
+    "skip_costs": (" Groceries +S${amount:.2f}.", "买菜多花 S${amount:.2f}。"),
     "skip_same": (" Groceries stay the same.", "买菜不变。"),
     "skip_still_used": (
         " Groceries stay the same: {items} {verb} still used by {titles}.",

@@ -290,7 +290,7 @@ class AgentReplanInterpreter:
             return named[0].entry_id, False
         if event_type == "LOCK_MEAL" and not titled and not named and len({dish.meal_type for dish in dishes}) == 1:
             # Keeping a meal keeps every dish of it; the preview carries them all, led by its main.
-            open_dishes = [dish for dish in dishes if not dish.is_locked and dish.status != "completed"] or dishes
+            open_dishes = [dish for dish in dishes if not dish.is_locked and dish.status == "planned"] or dishes
             lead = next((dish for dish in open_dishes if dish.role_id == "main"), open_dishes[0])
             return lead.entry_id, True
         # "Can tomorrow be fish instead?": what someone asks for instead is a main dish, and with

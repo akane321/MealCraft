@@ -268,6 +268,7 @@ def test_dont_is_never_read_as_a_wish_for_food():
     assert wanted("别动周一的晚饭") is None
     assert wanted("Swap Monday's dinner, I don't want fish") is None  # ordering by "fish" would bring fish
     assert wanted("Can Wednesday be fish instead?") == "fish"
+    assert wanted("明天换个别的") is not None  # "something else": no "别" of "don't"
 
 
 def test_a_title_names_its_dish_whatever_other_words_name(composed_client):  # noqa: F811

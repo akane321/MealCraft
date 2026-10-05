@@ -912,8 +912,10 @@ class AgentSessionService:
         """What skipping a dish takes off the groceries; or, when other dishes still need its whole packages,
         that the groceries stay the same and what still uses them (never a bare +S$0.00)."""
         delta = preview.purchase_total_delta_sgd
-        if delta < 0:
+        if delta <= -0.005:
             return say("skip_saves", lang, amount=-delta)
+        if delta >= 0.005:  # a cheaper mix of packages for what is left can cost more; said as it is
+            return say("skip_costs", lang, amount=delta)
         kept = [
             line
             for line in preview.grocery_delta
