@@ -123,7 +123,7 @@ def test_the_assistant_names_a_dish_as_the_plan_shows_it() -> None:
         "那天有 2 道菜（Tsukemono (Japanese Pickles)、Pot Pie (Square Dumplings)），你想调整哪一道？"
     )
     # A count is a count.
-    assert "had 5)" in say("varied_planned", "en", count=7, before=5, fresh="")
+    assert say("shape_removed", "en", count=5) == "5 dishes come off the week."
 
 
 def test_a_dish_is_offered_and_understood_by_the_name_the_plan_shows(monkeypatch) -> None:
