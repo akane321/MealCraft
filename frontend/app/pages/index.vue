@@ -88,9 +88,9 @@ const budgetShare = computed(() => {
 });
 const weekEnded = computed(() => Boolean(plan.value && plan.value.end_date < todayIsoDate()));
 const readOnly = computed(() => Boolean(plan.value && replaced.value));
-// How far the suggested change takes the week over its budget, said before the household confirms it.
 // The preview's buttons say what each does to this kind of change (a lock is kept, not "changed").
 const choices = computed(() => previewChoices(session.value?.pending_replan?.event_type ?? "REPLACE_MEAL"));
+// How far the suggested change takes the week over its budget, said before the household confirms it.
 const swapOverBudget = computed(() => {
   const over = session.value?.pending_replan?.over_budget_sgd;
   return over && estimate.value?.weekly_budget_sgd ? formatSgd(over) : null;
