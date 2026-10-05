@@ -73,9 +73,10 @@ const range = (start: string, end: string) => `${formatPlanDate(start, { day: "n
     <p v-if="!loading && !error && !weeks.length" class="notice">No weeks yet. <NuxtLink to="/">Plan your first one</NuxtLink>.</p>
 
     <ol class="weeks">
-      <li v-for="week in weeks" :key="week.id" class="week">
+      <!-- Planning the same days again replaces a week (backend `current`): it stays listed, marked, under the newer one. -->
+      <li v-for="week in weeks" :key="week.id" class="week" :class="{ replaced: week.current === false }">
         <button type="button" class="summary" :aria-expanded="open === week.id" @click="toggle(week.id)">
-          <span class="when mc-serif">{{ range(week.start_date, week.end_date) }}</span>
+          <span class="when mc-serif">{{ range(week.start_date, week.end_date) }}<span v-if="week.current === false" class="tag">Replaced by a newer plan</span></span>
           <span class="meta">
             planned {{ plannedAt(week.created_at) }} ·
             {{ week.household_size }} {{ week.household_size === 1 ? "person" : "people" }} ·
@@ -115,7 +116,9 @@ h1 { margin: 6px 0 22px; font-family: var(--serif); font-weight: 300; font-size:
 .week { border: 1px solid var(--border); border-radius: 14px; background: var(--s1); overflow: hidden; }
 .summary { width: 100%; display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; justify-content: space-between; padding: 14px 16px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .summary:hover, .summary:focus-visible { background: var(--s2); }
-.when { font-size: 18px; }
+.when { display: inline-flex; align-items: baseline; gap: 10px; font-size: 18px; }
+.tag { padding: 1px 8px; border: 1px solid var(--border); border-radius: 999px; font-family: Figtree, system-ui, sans-serif; font-size: 11.5px; color: var(--t3); }
+.week.replaced .when { color: var(--t3); }
 .meta { color: var(--t3); font-size: 13px; font-variant-numeric: tabular-nums; }
 .days { display: grid; gap: 8px; padding: 4px 16px 16px; }
 .day { display: grid; grid-template-columns: 70px 1fr; gap: 10px; align-items: baseline; }

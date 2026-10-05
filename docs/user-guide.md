@@ -22,7 +22,9 @@ then open <http://localhost:3000>. The health endpoint at
 
 The week happens on the home page at <http://localhost:3000>. The other pages
 are `/login`, `/profile` (the household), `/browse` (recipes and groceries),
-`/history` (past weeks), `/system` (service status) and, for administrators,
+`/history` (past weeks), `/system` (service status: what works right now and
+which prices the shopping list uses; administrators also see the version and
+their links there) and, for administrators,
 `/ops`. The left rail and the header of every other page link to them.
 
 ### 1. Sign in and set up the household
@@ -114,7 +116,9 @@ Ask in the conversation. Two kinds of change are understood:
   preview lists only the new dishes; the ones that stay are not shown again.
 
 Every change is shown as a preview first, with the new dishes and the grocery
-difference. **Confirm change** applies it; **Keep as is** discards it. Cooked
+difference. **Confirm change** applies it; **Keep as is** discards it. A lock's
+preview offers **Keep it locked** and **Cancel**. The week's change list dates
+each changed dish by its own day and meal ("Thu dinner"). Cooked
 and locked meals never change, and a stale preview is rejected after another
 confirmed change. A week-wide shape change applies to this week only; the
 assistant then asks whether new weeks should plan the same way, and saves it to
@@ -126,7 +130,9 @@ the profile only if you say so.
 are samples unless you tick **Ask FairPrice now**; under the results the page
 says "Sample prices", "FairPrice prices from <date>" or "FairPrice prices now",
 and adds "FairPrice didn't respond" when it had to fall back. `/history` lists every planned week; open one to see its
-days, meals and what was cooked.
+days, meals and what was cooked. A week whose days you planned again is marked
+"Replaced by a newer plan". Reopening the conversation of a replaced week shows
+it read-only, with **Open the current week**.
 
 ## The Operations Console
 
