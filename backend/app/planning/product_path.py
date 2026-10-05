@@ -346,8 +346,8 @@ class ProductPlanningEngine:
                 ingredient.quantity, ingredient.unit = normalized(ingredient.quantity, ingredient.unit)
             sources.append((recommendation, source))
         # A liquid one dish measures in grams and another in millilitres is bought by weight in every week of
-        # this packet, as the weekly list adds it (`weighed`): its millilitres and pantry in grams, and no
-        # bottle priced by volume, so the search, the checkout and the validator see one line and one product.
+        # this packet, as the weekly list adds it (`weighed`): its millilitres in grams, and no bottle priced by
+        # volume, so the search, the checkout and the validator see one line and one product.
         weigh = weighed((item.normalized_name, item.unit) for _, source in sources for item in source.ingredients)
         line_units = defaultdict(set)  # ingredient -> the units the packet's lines of it are in
         for recommendation, source in sources:
