@@ -1,16 +1,17 @@
 from collections import Counter
 from datetime import date, timedelta
+from fractions import Fraction
 
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
 from app.models.recipe import Recipe
 from app.planning import alternatives
 from app.planning.meal_composition import meal_minutes, portion_shares
-from app.planning.product_path import ProductPlanningError
+from app.planning.product_path import ProductPlanningError, meal_affinity
 from app.planning.recipe_quality import dish_family
 from app.planning.recipe_similarity import RecipeSimilarity
 from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
-from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError, entry_values
+from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError, ScheduledDish, entry_values
 from app.repositories.recipe import RecipeRepository
 from app.schemas.meal_plan import (
     MealPlanEntrySnapshot,
@@ -261,6 +262,131 @@ class MealPlanReplanningService:
         )
         return self._event_response(event)
 
+    def preview_variety(
+        self, *, plan_id: int, reason: str | None = None
+    ) -> tuple[MealPlanReplanEventResponse | None, int, float | None]:
+        """The week's repeated dishes swapped for dishes it does not have, within its budget, as one preview.
+
+        "The dishes are boring" (菜很单调) asks for this, not a new week (owner, 2026-10-04). Of each dish served
+        more than once, one stays (a cooked or locked one first) and every other one not yet cooked or locked
+        is swapped for the best-ranked dish of its role the week does not serve, each in turn while the week
+        stays within its budget (`_fitting`). Returns the preview (None when no swap fits), how many repeats
+        there were, and when some did not fit, the least any of them would take the week over the budget with
+        a dish that exists (None when nothing fits at any price, or nothing was left over).
+        """
+        plan = self.repository.get(plan_id)
+        if plan is None:
+            raise MealPlanReplanNotFoundError("Meal plan not found")
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
+        eaten = sorted((item for item in plan.entries if item.status != "skipped"), key=lambda e: (e.day_index, e.id))
+        same: dict[str, list[MealPlanEntry]] = {}
+        for item in eaten:
+            same.setdefault(dish_family(item.recipe.title), []).append(item)
+        repeats = []
+        for dishes in same.values():
+            fixed = [item for item in dishes if item.status == "completed" or item.is_locked]
+            stays = fixed or dishes[:1]
+            repeats += [
+                item for item in dishes if item not in stays and not item.is_locked and item.status == "planned"
+            ]
+        repeats.sort(key=lambda e: (e.day_index, e.id))
+        recipes_by_id = {
+            recipe.id: recipe for recipe in self.recipe_repository.list_by_ids([e.recipe_id for e in eaten])
+        }
+        served = set(same)
+        swaps: dict[int, RecipeRecommendationResponse] = {}
+        pools: dict[tuple | None, list] = {}
+        short = None
+        changed: set[tuple[int, str]] = set()
+        for entry in repeats:
+            if (entry.day_index, entry.meal_type) in changed:
+                continue  # one dish a meal: a meal is checked with the dishes it keeps (`_meal_still_holds`)
+            role = self._role(constraints, entry)
+            courses = tuple(role.courses) if role is not None else None
+            if courses not in pools:
+                recipes = self.recipe_repository.list_for_planning(courses=list(courses) if courses else None)
+                recipes_by_id.update((recipe.id, recipe) for recipe in recipes)
+                pools[courses] = self.recommendation_service.recommend(
+                    constraints, deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
+                ).recommendations
+            candidates = self._replacements(plan, entry, constraints, pools[courses], recipes_by_id, avoid=served)
+            if not candidates:
+                continue
+            ranked = sorted(candidates, key=lambda c: (c.total_score, -c.recipe.id), reverse=True)
+            made = {entry_id: choice.recipe.id for entry_id, choice in swaps.items()}
+            choice, over = self._fitting(plan, constraints, recipes_by_id, made, entry, ranked)
+            if over is not None:
+                short = over if short is None else min(short, over)
+                continue
+            swaps[entry.id] = choice
+            served.add(dish_family(choice.recipe.title))
+            changed.add((entry.day_index, entry.meal_type))
+        if not swaps:
+            return None, len(repeats), short
+        removed = [item for item in repeats if item.id in swaps]
+        added = []
+        for item in removed:
+            values = entry_values(
+                ScheduledDish(
+                    planned_date=item.planned_date,
+                    day_index=item.day_index,
+                    meal_type=item.meal_type,
+                    role_id=item.role_id,
+                    portion_share=Fraction(str(item.portion_share)),
+                    recommendation=swaps[item.id],
+                )
+            )
+            recipe = swaps[item.id].recipe
+            snapshot = MealPlanEntrySnapshot(
+                entry_id=0,  # not saved yet
+                day_index=item.day_index,
+                meal_type=item.meal_type,
+                role_id=item.role_id,
+                portion_share=values["portion_share"],
+                recipe_id=recipe.id,
+                recipe_slug=recipe.slug,
+                recipe_title=recipe.title,
+                status="planned",
+                is_locked=False,
+                recommendation_score=values["recommendation_score"],
+            )
+            added.append((values, snapshot))
+        after_grocery = self._week_grocery(
+            plan, constraints, recipes_by_id, {entry_id: choice.recipe.id for entry_id, choice in swaps.items()}
+        )
+        before_grocery = self._current_grocery(plan)
+        fields = ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
+        meal = removed[0].meal_type
+        change = MealPlanShapeChange(
+            # A swap changes no meal's dishes or roles: the meal of the first swap names it, with its roles.
+            meal_type=meal,
+            scope="meal",
+            day_indexes=sorted({item.day_index for item in removed}),
+            roles=week_shape(plan.constraints).meals.get(meal),
+            removed=[MealPlanEntrySnapshot.model_validate(self._entry_snapshot(item)) for item in removed],
+            added=[snapshot for _, snapshot in added],
+        )
+        event = self.repository.create_shape_preview(
+            plan=plan,
+            reason=reason,
+            shape_change={
+                **change.model_dump(mode="json"),
+                "removed_entry_ids": [item.id for item in removed],
+                "new_entries": [values for values, _ in added],
+            },
+            after_grocery=after_grocery,
+            after_warnings=list(dict.fromkeys(after_grocery.warnings)),
+            nutrition_delta={
+                field: round(
+                    sum(values[field] for values, _ in added) - sum(float(getattr(item, field)) for item in removed), 2
+                )
+                for field in fields
+            },
+            grocery_delta=self._grocery_delta(before_grocery, after_grocery),
+            purchase_total_delta_sgd=round(after_grocery.purchase_total_sgd - before_grocery.purchase_total_sgd, 2),
+        )
+        return self._event_response(event), len(repeats), short
+
     @staticmethod
     def _dishes_staying(removed: list[MealPlanEntry], roles) -> list[tuple[dict, MealPlanEntrySnapshot]] | None:
         """When a change only takes dishes away, the ones left at their new shares; None otherwise."""
@@ -462,39 +588,9 @@ class MealPlanReplanningService:
         result = self.recommendation_service.recommend(
             constraints, deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
         )
-        # A swap offers another dish, never this one again nor one its meal already has: the catalog
-        # can hold one dish several times ("Singapore Noodles" is eleven recipes).
-        meal_dishes = {
-            dish_family(item.recipe.title)
-            for item in plan.entries
-            if item.day_index == entry.day_index and item.meal_type == entry.meal_type and item.status != "skipped"
-        } | {dish_family(entry.recipe.title)}
-        candidates = [
-            item
-            for item in result.recommendations
-            if item.recipe.id != entry.recipe_id and dish_family(item.recipe.title) not in meal_dishes
-        ]
-        if request.unavailable_ingredient:
-            candidates = [
-                item
-                for item in candidates
-                if request.unavailable_ingredient
-                not in {
-                    ingredient.ingredient.normalized_name
-                    for ingredient in alternatives.lines(recipes_by_id[item.recipe.id], constraints)
-                }
-            ]
-        role = self._role(constraints, entry)
-        if role is not None:
-            # One dish of a composed meal: it fills the same role, and the meal must still hold
-            # as a meal with the dishes that stay (ADR-0036; the owner chose to swap one dish).
-            candidates = [
-                item
-                for item in candidates
-                if (recipes_by_id[item.recipe.id].course or "main") in role.courses
-                and (not vegetable_role(role.role_id) or catalog_vegetable_led(recipes_by_id[item.recipe.id]))
-                and self._meal_still_holds(plan, entry, recipes_by_id[item.recipe.id], constraints)
-            ]
+        candidates = self._replacements(
+            plan, entry, constraints, result.recommendations, recipes_by_id, unavailable=request.unavailable_ingredient
+        )
         if not candidates:
             raise MealPlanReplanValidationError(
                 f"No dish other than {entry.recipe.title} satisfies the current hard constraints."
@@ -540,7 +636,108 @@ class MealPlanReplanningService:
             value = fit - use_counts[candidate.recipe.id] * 8.0 - neighbor_penalty
             return value, -candidate.recipe.id
 
-        return max(candidates, key=score)
+        ranked = sorted(candidates, key=score, reverse=True)
+        if asked:
+            # What was asked for leads: the budget chooses among the dishes most like it, never a dish unlike it.
+            # ponytail: a fixed ten; a held-out swap set with budgets would tune it.
+            ranked = ranked[:10]
+        else:
+            # Nothing described: a dish the week does not serve yet comes first, and one it does only when no other
+            # fits the budget, as the planner fills a week (ADR-0044).
+            served = {
+                dish_family(item.recipe.title)
+                for item in plan.entries
+                if item.id != entry.id and item.status != "skipped"
+            }
+            ranked.sort(key=lambda candidate: dish_family(candidate.recipe.title) in served)
+        return self._fitting(plan, constraints, recipes_by_id, {}, entry, ranked)[0]
+
+    def _replacements(
+        self,
+        plan: MealPlan,
+        entry: MealPlanEntry,
+        constraints,
+        recommendations,
+        recipes_by_id,
+        *,
+        unavailable=None,
+        avoid=(),
+    ) -> list[RecipeRecommendationResponse]:
+        """The dishes that may take `entry`'s place, in the order given: another dish (never this one again nor
+        one its meal already has, nor a dish family in `avoid`), without `unavailable`, in the same role with
+        the meal still holding, and a dish for that meal whenever one is."""
+        # The catalog can hold one dish several times ("Singapore Noodles" is eleven recipes).
+        meal_dishes = (
+            {
+                dish_family(item.recipe.title)
+                for item in plan.entries
+                if item.day_index == entry.day_index and item.meal_type == entry.meal_type and item.status != "skipped"
+            }
+            | {dish_family(entry.recipe.title)}
+            | set(avoid)
+        )
+        candidates = [
+            item
+            for item in recommendations
+            if item.recipe.id != entry.recipe_id and dish_family(item.recipe.title) not in meal_dishes
+        ]
+        if unavailable:
+            candidates = [
+                item
+                for item in candidates
+                if unavailable
+                not in {
+                    ingredient.ingredient.normalized_name
+                    for ingredient in alternatives.lines(recipes_by_id[item.recipe.id], constraints)
+                }
+            ]
+        role = self._role(constraints, entry)
+        if role is not None:
+            # One dish of a composed meal: it fills the same role, and the meal must still hold
+            # as a meal with the dishes that stay (ADR-0036; the owner chose to swap one dish).
+            candidates = [
+                item
+                for item in candidates
+                if (recipes_by_id[item.recipe.id].course or "main") in role.courses
+                and (not vegetable_role(role.role_id) or catalog_vegetable_led(recipes_by_id[item.recipe.id]))
+                and self._meal_still_holds(plan, entry, recipes_by_id[item.recipe.id], constraints)
+            ]
+        # A dinner takes a dinner dish whenever one fits, as the planner fills a slot (ADR-0044, every meal since
+        # ADR-0046): the 2026-10-04 walkthrough swapped in "Fried Rice In A Mug" (a lunch or snack) for a dinner.
+        fitting = [item for item in candidates if entry.meal_type in meal_affinity(recipes_by_id[item.recipe.id])]
+        return fitting or candidates
+
+    def _week_grocery(self, plan: MealPlan, constraints, recipes_by_id, swaps: dict[int, int]):
+        """The week's shopping with `swaps` (entry id -> recipe id) made."""
+        eaten = [
+            (recipes_by_id[swaps.get(item.id, item.recipe_id)], float(item.portion_share))
+            for item in plan.entries
+            if item.status != "skipped"
+        ]
+        return self.grocery_aggregator.estimate(
+            [recipe for recipe, _ in eaten], constraints, shares=[share for _, share in eaten]
+        )
+
+    def _fitting(self, plan, constraints, recipes_by_id, swaps, entry, ranked) -> tuple:
+        """The first of `ranked` for `entry` that keeps the week within its budget, or no further over it than it
+        is, with `swaps` also made, and None; else the one that takes it over least, and by how much.
+
+        Whole packages decide, given what the rest of the week buys: a dish sharing the week's cabbage costs
+        less than its own estimate says (the walkthrough's swaps took the week S$9 to S$17 over its budget).
+        """
+        budget = constraints.weekly_budget_sgd
+        if budget is None:
+            return ranked[0], None
+        ceiling = round(max(budget, float(plan.purchase_total_sgd)) * 100)
+        least = None
+        for candidate in ranked:
+            swapped = {**swaps, entry.id: candidate.recipe.id}
+            cents = round(self._week_grocery(plan, constraints, recipes_by_id, swapped).purchase_total_sgd * 100)
+            if cents <= ceiling:
+                return candidate, None
+            if least is None or cents < least[1]:
+                least = (candidate, cents)
+        return least[0], (least[1] - ceiling) / 100
 
     @staticmethod
     def _role(constraints: WeeklyMealPlanRequest, entry: MealPlanEntry):

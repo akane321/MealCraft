@@ -1,7 +1,9 @@
+import time
 from collections import Counter
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
+from app.core.config import get_settings
 from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
 from app.models.recipe import Recipe
@@ -31,6 +33,18 @@ from app.schemas.meal_plan import (
 from app.schemas.product import GroceryLineEstimate, PriceEvidence, ProductResponse
 from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
 from app.services.recommendation import RecipeRecommendationService
+
+# Weeks `search` found, by database, household, planner limits and exact request: the Plan that follows a chat
+# turn's check saves the week the check already found instead of searching again (the 2026-10-04 walkthrough:
+# the reply that took the last detail planned the week in 8 s, then Plan planned it again in 5 s). An entry
+# expires with the planning pool its recipes came from, and is used once.
+# ponytail: a price refreshed meanwhile is seen only once the entry expires, as with the pool's recipes.
+_found_weeks: dict[tuple, tuple[float, tuple]] = {}
+FOUND_WEEKS_KEPT = 32
+
+
+def _found_seconds() -> int:
+    return get_settings().planning_pool_cache_seconds
 
 
 class WeeklyMealPlanService:
@@ -63,8 +77,12 @@ class WeeklyMealPlanService:
         replaces_plan_id: int | None = None,
         searched: tuple | None = None,
     ) -> WeeklyMealPlanResponse:
-        """Plan a week and save it; `searched` is a week `search` already found for these constraints."""
+        """Plan a week and save it; `searched` is a week `search` already found for these constraints (by
+        default the one it found last for them, while it is fresh)."""
         started_at = datetime.now(UTC)
+        found = _found_weeks.pop(self._found_key(constraints, household_profile_version), None)
+        if searched is None and found is not None and time.monotonic() - found[0] < _found_seconds():
+            searched = found[1]
         try:
             recommendation_result, result = searched or self._search(
                 constraints, self._candidates(constraints), profile_version=household_profile_version
@@ -177,8 +195,26 @@ class WeeklyMealPlanService:
     def search(self, constraints: WeeklyMealPlanRequest) -> tuple:
         """The week `generate` would plan for these constraints, nothing saved; ProductPlanningError for none.
 
-        `generate(constraints, searched=...)` saves it."""
-        return self._search(constraints, self._checked_candidates(constraints))
+        `generate(constraints, searched=...)` saves it, as does `generate(constraints)` while it is fresh."""
+        searched = self._search(constraints, self._checked_candidates(constraints))
+        if _found_seconds():
+            now = time.monotonic()
+            for key in [key for key, (at, _) in _found_weeks.items() if now - at >= _found_seconds()]:
+                _found_weeks.pop(key, None)
+            while len(_found_weeks) >= FOUND_WEEKS_KEPT:
+                _found_weeks.pop(next(iter(_found_weeks)), None)
+            _found_weeks[self._found_key(constraints)] = (now, searched)
+        return searched
+
+    def _found_key(self, constraints: WeeklyMealPlanRequest, profile_version: int | None = None) -> tuple:
+        repository = self.repository
+        return (
+            id(repository.session.get_bind()),
+            repository.household_id,
+            repr(self.planning_engine.limits),
+            profile_version,
+            constraints.model_dump_json(),
+        )
 
     def check(self, constraints: WeeklyMealPlanRequest) -> ProductPlanningError | None:
         """What `generate` would answer for these constraints, nothing saved: None for a week, else its error."""

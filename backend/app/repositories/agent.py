@@ -137,38 +137,6 @@ class AgentSessionRepository:
         self.session.commit()
         return self.get(session_id)
 
-    def plan_again(
-        self,
-        session_id: int,
-        *,
-        plan_id: int,
-        constraints: AgentConstraintState,
-        user_message: str,
-        assistant_message: str,
-        scope_decision: ScopeDecision,
-    ) -> AgentSession | None:
-        """A new week planned in the conversation in place of the session's; the old week stays saved."""
-        agent_session = self.get(session_id)
-        if agent_session is None:
-            return None
-        agent_session.plan_id = plan_id
-        agent_session.constraints = constraints.model_dump(mode="json")
-        agent_session.status = "planned"
-        agent_session.pending_event_id = None
-        agent_session.replan_draft = {}
-        agent_session.missing_fields = []
-        agent_session.clarification_questions = []
-        agent_session.pending_interaction = None
-        agent_session.last_scope_decision = scope_decision.model_dump(mode="json")
-        agent_session.messages.extend(
-            [
-                AgentMessage(role="user", content=user_message),
-                AgentMessage(role="assistant", content=assistant_message),
-            ]
-        )
-        self.session.commit()
-        return self.get(session_id)
-
     def explain_unplanned(
         self,
         session_id: int,
