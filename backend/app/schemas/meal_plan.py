@@ -172,6 +172,9 @@ class WeeklyMealPlanListItem(BaseModel):
     consumed_total_sgd: float | None
     within_weekly_budget: bool | None
     created_at: datetime
+    # The newest plan for its dates. False when a newer plan covers any of its days: the household
+    # planned again before this week ended, so that plan replaced this one.
+    current: bool = True
 
 
 class WeeklyMealPlanCollectionResponse(BaseModel):

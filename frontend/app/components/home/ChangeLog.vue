@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { formatPlanDate } from "~/lib/meal-plan-format";
-import { sameDishChange } from "~/lib/home-surface";
+import { changedMealWhen, sameDishChange } from "~/lib/home-surface";
 import { shapeChangeSummary } from "~/lib/plan-shape";
 import type { MealPlanReplanEvent, MealPlanReplanEventCollection } from "~/types/meal-plan";
 
@@ -30,10 +29,6 @@ watch(() => [props.planId, props.revision] as const, async ([planId], previous) 
     events.value = [];
   }
 }, { immediate: true });
-
-function when(event: MealPlanReplanEvent) {
-  return formatPlanDate((event.applied_at ?? event.created_at).slice(0, 10), { day: "numeric", month: "short" });
-}
 
 function kcal(event: MealPlanReplanEvent) {
   const value = Math.round(event.nutrition_delta.calories_kcal);
@@ -65,7 +60,7 @@ function money(event: MealPlanReplanEvent) {
           <span aria-hidden="true">→</span>
           <strong>{{ event.after_entry.recipe_title }}</strong>
         </p>
-        <p class="meta">{{ when(event) }} · {{ kcal(event) }} · groceries {{ money(event) }}</p>
+        <p class="meta">{{ [changedMealWhen(event, startDate), kcal(event), `groceries ${money(event)}`].filter(Boolean).join(" · ") }}</p>
         <p v-if="event.reason" class="meta reason">{{ event.reason }}</p>
       </li>
     </ol>
