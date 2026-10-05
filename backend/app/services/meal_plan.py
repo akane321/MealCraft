@@ -15,7 +15,7 @@ from app.planning.week_floor import WeekFloor, week_floor
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
 from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
-from app.repositories.recipe import RecipeRepository
+from app.repositories.recipe import RecipeRepository, found_weeks
 from app.schemas.meal_plan import (
     MealPlanEntryStatus,
     MealPlanStatusCounts,
@@ -34,12 +34,11 @@ from app.schemas.product import GroceryLineEstimate, PriceEvidence, ProductRespo
 from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
 from app.services.recommendation import RecipeRecommendationService
 
-# Weeks `search` found, by database, household, planner limits and exact request: the Plan that follows a chat
-# turn's check saves the week the check already found instead of searching again (the 2026-10-04 walkthrough:
-# the reply that took the last detail planned the week in 8 s, then Plan planned it again in 5 s). An entry
-# expires with the planning pool its recipes came from, and is used once.
+# Weeks `check` found, by database, household, planner limits and exact request (`found_weeks`): the Plan that
+# follows a chat turn's check saves the week the check already found instead of searching again (the 2026-10-04
+# walkthrough: the reply that took the last detail planned the week in 8 s, then Plan planned it again in 5 s).
+# An entry is used once, and expires, or is cleared, with the planning pool its recipes came from.
 # ponytail: a price refreshed meanwhile is seen only once the entry expires, as with the pool's recipes.
-_found_weeks: dict[tuple, tuple[float, tuple]] = {}
 FOUND_WEEKS_KEPT = 8
 
 
@@ -75,14 +74,11 @@ class WeeklyMealPlanService:
         household_profile_id: int | None = None,
         household_profile_version: int | None = None,
         replaces_plan_id: int | None = None,
-        searched: tuple | None = None,
     ) -> WeeklyMealPlanResponse:
-        """Plan a week and save it; `searched` is a week `search` already found for these constraints (by
-        default the one it found last for them, while it is fresh)."""
+        """Plan a week and save it: the week `check` found for these constraints while it is kept, else a new one."""
         started_at = datetime.now(UTC)
-        found = _found_weeks.pop(self._found_key(constraints, household_profile_version), None)
-        if searched is None and found is not None and time.monotonic() - found[0] < _found_seconds():
-            searched = found[1]
+        found = found_weeks.pop(self._found_key(constraints, household_profile_version), None)
+        searched = found[1] if found is not None and time.monotonic() - found[0] < _found_seconds() else None
         try:
             recommendation_result, result = searched or self._search(
                 constraints, self._candidates(constraints), profile_version=household_profile_version
@@ -192,19 +188,22 @@ class WeeklyMealPlanService:
                 raise
         raise AssertionError("unreachable")
 
-    def search(self, constraints: WeeklyMealPlanRequest) -> tuple:
-        """The week `generate` would plan for these constraints, nothing saved; ProductPlanningError for none.
+    def check(self, constraints: WeeklyMealPlanRequest) -> ProductPlanningError | None:
+        """What `generate` would answer for these constraints, nothing saved: None for a week, else its error.
 
-        `generate(constraints, searched=...)` saves it, as does `generate(constraints)` while it is fresh."""
-        searched = self._search(constraints, self._checked_candidates(constraints))
+        The week found is kept for `generate` with the same constraints, while the planner's pools are kept."""
+        try:
+            searched = self._search(constraints, self._checked_candidates(constraints))
+        except ProductPlanningError as error:
+            return error
         if _found_seconds():
             now = time.monotonic()
-            for key in [key for key, (at, _) in _found_weeks.items() if now - at >= _found_seconds()]:
-                _found_weeks.pop(key, None)
-            while len(_found_weeks) >= FOUND_WEEKS_KEPT:
-                _found_weeks.pop(next(iter(_found_weeks)), None)
-            _found_weeks[self._found_key(constraints)] = (now, searched)
-        return searched
+            for key in [key for key, (at, _) in found_weeks.items() if now - at >= _found_seconds()]:
+                del found_weeks[key]
+            while len(found_weeks) >= FOUND_WEEKS_KEPT:
+                del found_weeks[next(iter(found_weeks))]
+            found_weeks[self._found_key(constraints)] = (now, searched)
+        return None
 
     def _found_key(self, constraints: WeeklyMealPlanRequest, profile_version: int | None = None) -> tuple:
         repository = self.repository
@@ -215,14 +214,6 @@ class WeeklyMealPlanService:
             profile_version,
             constraints.model_dump_json(),
         )
-
-    def check(self, constraints: WeeklyMealPlanRequest) -> ProductPlanningError | None:
-        """What `generate` would answer for these constraints, nothing saved: None for a week, else its error."""
-        try:
-            self.search(constraints)
-        except ProductPlanningError as error:
-            return error
-        return None
 
     def _candidates(self, constraints: WeeklyMealPlanRequest):
         """The recipes a week may use and the recommendations `generate` plans from first."""

@@ -33,10 +33,13 @@ def withdrawn_slugs() -> tuple[str, ...]:
 # and every plan and change needs them. Detached and fully loaded, so they are only read.
 # ponytail: a recipe edited meanwhile is planned with its old values until the entry expires.
 _planning_pool: dict[tuple, tuple[float, list[Recipe]]] = {}
+# Weeks planned from the pool and kept for a while (services/meal_plan.py `search`): they go with it.
+found_weeks: dict[tuple, tuple[float, tuple]] = {}
 
 
 def clear_planning_pool() -> None:
     _planning_pool.clear()
+    found_weeks.clear()
 
 
 class RecipeRepository:

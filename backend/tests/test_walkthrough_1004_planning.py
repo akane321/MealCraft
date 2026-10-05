@@ -30,7 +30,6 @@ from app.repositories.agent_runs import AgentRunRepository
 from app.repositories.recipe import clear_planning_pool
 from app.schemas.agent import AgentConstraintState
 from app.schemas.meal_plan import MEAL_PRESETS, MealPlanReplanPreviewRequest, MealPlanShapeChangeRequest
-from app.services import meal_plan as meal_plan_module
 from app.services.agent import AgentSessionService
 from tests.test_planning_capability import _dish, dish_client
 
@@ -54,13 +53,11 @@ def kept_for(seconds: int):
     """Recipe pools and found weeks kept as long as production keeps them (tests keep none: see conftest)."""
     with pytest.MonkeyPatch.context() as patch:
         patch.setattr(get_settings(), "planning_pool_cache_seconds", seconds)
-        clear_planning_pool()
-        meal_plan_module._found_weeks.clear()
+        clear_planning_pool()  # and the weeks found from it
         try:
             yield
         finally:
             clear_planning_pool()
-            meal_plan_module._found_weeks.clear()
 
 
 def add(*dishes) -> None:
