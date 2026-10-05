@@ -249,7 +249,8 @@ REPLIES: dict[str, tuple[str, str]] = {
     "varied_short": (
         "No different dish fits in place of the repeated ones: the closest swap I found needs S${extra:.2f} more "
         "than the S${limit:.2f} the week can spend. I can swap a dish anyway.",
-        "重复的菜换不进预算：我找到的最接近的换法也要比这周能花的 S${limit:.2f} 多 S${extra:.2f}。也可以换掉一道菜试试。",
+        "重复的菜换不进预算：我找到的最接近的换法也要比这周能花的 S${limit:.2f} 多 S${extra:.2f}。"
+        "也可以换掉一道菜试试。",
     ),
     "varied_nothing": (
         "No other dish fits in place of the repeated ones. I can swap a dish instead.",
