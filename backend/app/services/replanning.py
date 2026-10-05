@@ -51,6 +51,11 @@ class TimedDish:
         return cls(recipe.prep_time_minutes, recipe.cook_time_minutes)
 
 
+# A described swap ("something with fish") chooses, within the budget, among this many of the dishes most like
+# what was asked for (ADR-0042 orders them).
+ASKED_ALIKE = 10
+
+
 class MealPlanReplanNotFoundError(LookupError):
     pass
 
@@ -648,10 +653,11 @@ class MealPlanReplanningService:
             return value, -candidate.recipe.id
 
         ranked = sorted(candidates, key=score, reverse=True)
-        if asked:
-            # What was asked for leads: the budget chooses among the dishes most like it, never a dish unlike it.
-            # ponytail: a fixed ten; a held-out swap set with budgets would tune it.
-            ranked = ranked[:10]
+        # What was asked for leads: the budget chooses among the dishes most like it, never one unlike it.
+        # ponytail: the ten most alike; a held-out swap set with budgets would tune it.
+        alike = [candidate for candidate in ranked if asked.get(candidate.recipe.id, 0.0) > 0][:ASKED_ALIKE]
+        if alike:
+            ranked = alike
         else:
             # Nothing described: a dish the week does not serve yet comes first, and one it does only when no other
             # fits the budget, as the planner fills a week (ADR-0044).

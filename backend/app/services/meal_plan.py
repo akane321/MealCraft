@@ -40,7 +40,7 @@ from app.services.recommendation import RecipeRecommendationService
 # expires with the planning pool its recipes came from, and is used once.
 # ponytail: a price refreshed meanwhile is seen only once the entry expires, as with the pool's recipes.
 _found_weeks: dict[tuple, tuple[float, tuple]] = {}
-FOUND_WEEKS_KEPT = 32
+FOUND_WEEKS_KEPT = 8
 
 
 def _found_seconds() -> int:
