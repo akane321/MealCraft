@@ -23,8 +23,9 @@ UNIT_BASE: dict[str, tuple[str, float]] = {
 # catalog has millilitres of milk and tablespoons of oil, the release catalog grams of both. Copied from
 # the release ingredients' `unit_grams` (data-engineering/data/release/v2.1/ingredients.jsonl), the
 # weights the reviewed FairPrice mapping converts bottles with ("830 ml x 1.031 g/ml"); a test holds the
-# two equal. Only quantities of the ingredient itself are converted (a recipe line, a pantry entry), never
-# a product: a jar of stock cubes is not a litre of stock.
+# two equal. Recipe lines and pantry quantities are converted. A week buys a weighed liquid from products
+# sold by weight, as the reviewed mapping states every bottle; a bottle sold by volume is converted only
+# where a lower bound on the week's cost is wanted (`app.planning.week_floor`).
 CUP_ML = 236.6
 GRAMS_PER_CUP: dict[str, float] = {
     "milk": 244,

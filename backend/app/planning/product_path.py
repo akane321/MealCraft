@@ -6,7 +6,7 @@ prices after validation, and never promotes a bounded miss into a global proof.
 
 import hashlib
 import json
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, replace
 from datetime import timedelta
 from fractions import Fraction
@@ -20,7 +20,7 @@ from app.planning.capability import PlanningCapabilityError, require_composition
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
-from app.planning.grocery_estimator import not_purchased
+from app.planning.grocery_estimator import convert_quantity, not_purchased
 from app.planning.meal_beam import (
     EMPTY_OPTIONAL_ROLE_LOSS,
     MealBeamLimits,
@@ -349,12 +349,14 @@ class ProductPlanningEngine:
         # this packet, as the weekly list adds it (`weighed`): its millilitres and pantry in grams, and no
         # bottle priced by volume, so the search, the checkout and the validator see one line and one product.
         weigh = weighed((item.normalized_name, item.unit) for _, source in sources for item in source.ingredients)
+        line_units = defaultdict(set)  # ingredient -> the units the packet's lines of it are in
         for recommendation, source in sources:
             for ingredient in source.ingredients:
                 if ingredient.normalized_name in weigh:
                     ingredient.quantity, ingredient.unit = in_grams(
                         ingredient.quantity, ingredient.unit, ingredient.normalized_name
                     )
+                line_units[ingredient.normalized_name].add(ingredient.unit)
             converted = recipe_input(source, allowed_meal_types=meal_affinity(source), nutrition_basis="per_serving")
             if converted.candidate is None:
                 diagnostics.extend(converted.issues)
@@ -418,8 +420,12 @@ class ProductPlanningEngine:
         pantry = []
         for item in constraints.available_ingredients:
             quantity, unit = normalized(item.quantity, item.unit)
-            if item.normalized_name in weigh:
-                quantity, unit = in_grams(quantity, unit, item.normalized_name)
+            # The validator deducts a pantry quantity in its line's unit, so it is held in the unit the packet's
+            # lines use: a litre of milk at home covers grams of it, as the weekly list deducts it.
+            (wanted, *others) = line_units.get(item.normalized_name) or {unit}
+            converted = convert_quantity(quantity, unit, wanted, item.normalized_name) if quantity is not None else None
+            if not others and converted is not None:
+                quantity, unit = converted, wanted
             pantry.append(PlanningPantryItem(ingredient_id=item.normalized_name, quantity=quantity, unit=unit))
         bands = compile_nutrition_targets(
             constraints.nutrition_constraints, constraints.nutrition_guard_band, meals_per_day=len(composition or [0])

@@ -205,12 +205,13 @@ class MealPlanReplanningService:
             new_shape = MealPlanShape(meals=meals)
 
         kept = [item for item in plan.entries if item not in removed and item.status != "skipped"]
+        before_grocery = self._current_grocery(plan)
         # Taking a dish away keeps the others (at their larger share); anything else plans the meal again.
         staying = self._dishes_staying(removed, request.roles)
         if staying is not None:
             added = staying
         elif request.roles:
-            added = self._plan_meal(constraints, meal, request.roles, days, kept, removed)
+            added = self._plan_meal(constraints, meal, request.roles, days, kept, removed, by_weight(before_grocery))
         else:
             added = []
         # A dish that stays on its day, when a dish is taken away or added, is neither taken off nor new.
@@ -222,7 +223,6 @@ class MealPlanReplanningService:
         recipes_by_id = {recipe.id: recipe for recipe in self.recipe_repository.list_by_ids(list(wanted_ids))}
         eaten = [(recipes_by_id[item.recipe_id], float(item.portion_share)) for item in kept]
         eaten += [(recipes_by_id[values["recipe_id"]], values["portion_share"]) for values, _ in added]
-        before_grocery = self._current_grocery(plan)
         after_grocery = self.grocery_aggregator.estimate(
             [recipe for recipe, _ in eaten],
             constraints,
@@ -339,8 +339,12 @@ class MealPlanReplanningService:
             return None  # nothing is added
         return kept
 
-    def _plan_meal(self, constraints, meal, roles, days, kept, removed) -> list[tuple[dict, MealPlanEntrySnapshot]]:
+    def _plan_meal(
+        self, constraints, meal, roles, days, kept, removed, weighed: set[str]
+    ) -> list[tuple[dict, MealPlanEntrySnapshot]]:
         """The new dishes of `meal` on `days`, planned with the budget the rest of the week leaves.
+
+        `weighed` is what the week's list buys by weight (`by_weight`); the rest of the week is priced so.
 
         When nothing fits what is left (with the meal's present dishes kept, when a dish is added), the change is
         still planned, as cheaply as the planner finds (see `plan_dishes`), and its preview says how far over
@@ -358,7 +362,7 @@ class MealPlanReplanningService:
             # what its dishes use leaves room the week has already paid for, and a plan made to fit that
             # room would go over the budget without trying the cheapest plans first.
             paid = self.grocery_aggregator.estimate(
-                [recipe for recipe, _ in rest], constraints, shares=[share for _, share in rest]
+                [recipe for recipe, _ in rest], constraints, shares=[share for _, share in rest], by_weight=weighed
             ).purchase_total_sgd
             left = round(budget - paid, 2)
         partial = constraints.model_copy(
@@ -386,6 +390,7 @@ class MealPlanReplanningService:
                 rest=rest,
                 keep=self._dishes_kept_when_adding(roles, removed),
                 over_budget=over_budget,
+                by_weight=weighed,
             )
         except ProductPlanningError as error:
             raise MealPlanReplanValidationError(str(error)) from error

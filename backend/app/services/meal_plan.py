@@ -1,4 +1,5 @@
 from collections import Counter
+from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -250,6 +251,7 @@ class WeeklyMealPlanService:
         rest: list[tuple[Recipe, float]],
         keep: dict[tuple[int, str], dict[str, int]] | None = None,
         over_budget: float | None = None,
+        by_weight: Iterable[str] = (),
     ) -> list[ScheduledDish]:
         """Dishes for `day_count` days from day `first_day` of a saved week, nothing saved (ADR-0046 section 2).
 
@@ -258,7 +260,8 @@ class WeeklyMealPlanService:
         uses there count towards the household's cap on uses. `keep` ((day index, meal) -> {role id: recipe
         id}) holds each meal's present dishes in their roles while a new one is added. `over_budget` plans the
         dishes over the budget when none fit it (none can when it is 0 or less), as cheaply as the planner finds,
-        weighing costs against this amount (see `over_budget_pick` and `charge` below).
+        weighing costs against this amount (see `over_budget_pick` and `charge` below). `by_weight` is what the
+        week's list buys by weight, so `charge` prices the week as its list will be.
         """
         start = constraints.start_date + timedelta(days=first_day - 1)
         # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
@@ -301,7 +304,7 @@ class WeeklyMealPlanService:
             review: every lunch of mdw-dev-013 was one of its dinners)."""
             week = [recipe for recipe, _ in rest] + [by_id[item.recipe.id] for item in planned.selected]
             shares = [share for _, share in rest] + [float(place[3]) for place in planned.placements]
-            total = self.grocery_aggregator.estimate(week, partial, shares=shares).purchase_total_sgd
+            total = self.grocery_aggregator.estimate(week, partial, shares=shares, by_weight=by_weight).purchase_total_sgd
             repeats = len(week) - len({recipe.id for recipe in week})
             empty = day_count * sum(len(roles) for _, roles in meals) - len(planned.selected)
             return total + over_budget / (day_count * len(meals)) * (repeats + EMPTY_OPTIONAL_ROLE_LOSS * empty)

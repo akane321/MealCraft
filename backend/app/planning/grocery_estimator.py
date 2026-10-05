@@ -24,12 +24,14 @@ def convert_quantity(
     target = UNIT_BASE.get(to_unit.lower())
     if source is None or target is None:
         return None
-    if source[0] != target[0] and ingredient is not None:
-        # 1 l of milk against 250 g of it: both in grams when its density is known, else they stay apart.
-        source, target = (in_grams(factor, base, ingredient)[::-1] for base, factor in (source, target))
-    if source[0] != target[0]:
+    (source_base, source_factor), (target_base, target_factor) = source, target
+    if source_base != target_base and ingredient is not None:
+        # A litre of milk against grams of it: both in grams when its density is known, else they stay apart.
+        source_factor, source_base = in_grams(source_factor, source_base, ingredient)
+        target_factor, target_base = in_grams(target_factor, target_base, ingredient)
+    if source_base != target_base:
         return None
-    return quantity * source[1] / target[1]
+    return quantity * source_factor / target_factor
 
 
 @lru_cache
