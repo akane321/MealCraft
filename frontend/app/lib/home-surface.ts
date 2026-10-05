@@ -1,6 +1,8 @@
 import type { MealPlanReplanEvent, NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "~/types/recommendation";
 import type { RecipeNutrition } from "~/types/recipe";
+import { formatPlanDate } from "./meal-plan-format";
+import { planDayLabel } from "./plan-shape";
 
 /** Today's dinner if the plan covers today, otherwise the next one still planned. */
 export function tonightEntry(
@@ -206,6 +208,26 @@ export function sameDishChange(event: Pick<MealPlanReplanEvent, "event_type" | "
 export function groceriesChange(delta: number): string {
   if (Math.abs(delta) < 0.005) return "groceries stay the same";
   return `groceries ${delta > 0 ? "+" : "−"}S$${Math.abs(delta).toFixed(2)}`;
+}
+
+/**
+ * A preview card's two buttons, in the words of what each does. Discarding a lock keeps the dish
+ * unlocked, so "Keep as is" would say the opposite; for a swap or a skip it keeps the dish, as it says.
+ */
+export function previewChoices(eventType: MealPlanReplanEvent["event_type"]): { confirm: string; discard: string } {
+  if (eventType === "LOCK_MEAL") return { confirm: "Keep it locked", discard: "Cancel" };
+  return { confirm: "Confirm change", discard: "Keep as is" };
+}
+
+/**
+ * When a changed dish is eaten, by the plan's own weekday and meal ("Thu dinner"), as a shape change names
+ * its days; a shape change says that itself (null), and an old event without the dish's day keeps its date.
+ */
+export function changedMealWhen(event: Pick<MealPlanReplanEvent, "before_entry" | "after_entry" | "shape_change" | "applied_at" | "created_at">, startDate: string | null | undefined): string | null {
+  if (event.shape_change) return null;
+  const dish = event.before_entry ?? event.after_entry;
+  if (dish?.day_index) return `${planDayLabel(startDate, dish.day_index)} ${dish.meal_type ?? "dinner"}`;
+  return formatPlanDate((event.applied_at ?? event.created_at).slice(0, 10), { day: "numeric", month: "short" });
 }
 
 /**

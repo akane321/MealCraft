@@ -16,6 +16,7 @@ from app.planning.weekly_planner import WeeklyPlanSelector
 from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
 from app.repositories.recipe import RecipeRepository
 from app.schemas.meal_plan import (
+    MEAL_ORDER,
     MealPlanEntryStatus,
     MealPlanStatusCounts,
     NutritionDashboardDayResponse,
@@ -32,6 +33,11 @@ from app.schemas.meal_plan import (
 from app.schemas.product import GroceryLineEstimate, PriceEvidence, ProductResponse
 from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
 from app.services.recommendation import RecipeRecommendationService
+
+
+def _meal_rank(meal_type: str) -> int:
+    """Breakfast, lunch, dinner, then anything else (a snack)."""
+    return MEAL_ORDER.index(meal_type) if meal_type in MEAL_ORDER else len(MEAL_ORDER)
 
 
 class WeeklyMealPlanService:
@@ -373,6 +379,8 @@ class WeeklyMealPlanService:
         return self._to_response(plan) if plan is not None else None
 
     def list_recent(self, *, limit: int) -> WeeklyMealPlanCollectionResponse:
+        # Newest first, so every plan newer than one is listed before it (the limit cuts only older ones).
+        plans = self.repository.list_recent(limit=limit)
         return WeeklyMealPlanCollectionResponse(
             items=[
                 WeeklyMealPlanListItem(
@@ -390,8 +398,12 @@ class WeeklyMealPlanService:
                     ),
                     within_weekly_budget=plan.within_weekly_budget,
                     created_at=plan.created_at,
+                    current=not any(
+                        newer.start_date <= plan.end_date and newer.end_date >= plan.start_date
+                        for newer in plans[:index]
+                    ),
                 )
-                for plan in self.repository.list_recent(limit=limit)
+                for index, plan in enumerate(plans)
             ]
         )
 
@@ -432,7 +444,10 @@ class WeeklyMealPlanService:
         counts = {"planned": 0, "completed": 0, "skipped": 0}
         days: list[NutritionDashboardDayResponse] = []
 
-        for entry in plan.entries:
+        # In the order they are eaten: by day, then breakfast, lunch, dinner. Entries are stored by day and
+        # id, so a lunch added to a dinner week would otherwise come after that day's dinner.
+        eaten = sorted(plan.entries, key=lambda entry: (entry.day_index, _meal_rank(entry.meal_type), entry.id))
+        for entry in eaten:
             nutrition = self._entry_nutrition(entry)
             counts[entry.status] += 1
             for key in planned_totals:

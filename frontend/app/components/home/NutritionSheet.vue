@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { MEAL_LABEL } from "~/lib/home-surface";
 import { formatPlanDate } from "~/lib/meal-plan-format";
 import {
   chartPointCoordinates,
@@ -11,8 +12,9 @@ import {
 import type { MealPlanEntryStatus, NutritionDashboardDay, WeeklyNutritionDashboard } from "~/types/meal-plan";
 
 // ADR-0017: cumulative actuals of completed dishes first, the current plan on
-// the same scale, then labelled daily detail.
-const props = defineProps<{ dashboard: WeeklyNutritionDashboard; updatingEntryId: number | null }>();
+// the same scale, then labelled daily detail, one row a dish in the order the backend gives: by day, then meal.
+// A replaced week (readonly) is only read: its dishes can no longer be marked.
+const props = defineProps<{ dashboard: WeeklyNutritionDashboard; updatingEntryId: number | null; readonly?: boolean }>();
 const emit = defineEmits<{ close: []; setStatus: [entryId: number, status: MealPlanEntryStatus] }>();
 
 const metric = ref<NutritionMetric>("calories_kcal");
@@ -88,21 +90,22 @@ useDialog(overlay, () => emit("close"));
       </figure>
 
       <table class="mc-frost days">
-        <caption class="visually-hidden">Nutrition per dinner</caption>
+        <caption class="visually-hidden">Nutrition per dish</caption>
         <thead>
           <tr>
-            <th scope="col">Day</th><th scope="col">Dinner</th><th scope="col">Counts as</th>
+            <th scope="col">Day</th><th scope="col">Meal</th><th scope="col">Dish</th><th scope="col">Counts as</th>
             <th v-for="item in nutritionMetrics" :key="item.key" scope="col">{{ item.label }}</th>
-            <th scope="col"><span class="visually-hidden">Change status</span></th>
+            <th v-if="!readonly" scope="col"><span class="visually-hidden">Change status</span></th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="day in dashboard.days" :key="day.entry_id" :class="day.status">
             <td>{{ shortDate(day.planned_date) }}</td>
+            <td>{{ MEAL_LABEL[day.meal_type ?? "dinner"] }}</td>
             <td class="dish">{{ day.recipe.title }}</td>
             <td>{{ statusLabel(day) }}</td>
             <td v-for="item in nutritionMetrics" :key="item.key">{{ Math.round(day.nutrition_per_person[item.key]) }}</td>
-            <td class="actions">
+            <td v-if="!readonly" class="actions">
               <template v-if="day.status === 'planned'">
                 <button type="button" class="mc-pill" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'completed')">Cooked</button>
                 <button type="button" class="mc-pill" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'skipped')">Skip</button>
@@ -143,7 +146,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .legend i.plan { border-top: 2.5px dashed var(--mc-text-3); }
 .days { width: 100%; border-collapse: collapse; border-radius: 18px; overflow: hidden; font-size: 12px; }
 .days th, .days td { padding: 9px 10px; text-align: right; border-bottom: 1px solid rgba(242, 237, 228, 0.08); }
-.days th:nth-child(-n+3), .days td:nth-child(-n+3) { text-align: left; }
+.days th:nth-child(-n+4), .days td:nth-child(-n+4) { text-align: left; }
 .days th { font-weight: 600; color: var(--mc-text-3); }
 .days .dish { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .days tr.skipped td { color: var(--mc-text-3); }
