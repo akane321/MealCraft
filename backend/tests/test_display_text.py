@@ -1,6 +1,7 @@
 """Catalog titles and ingredient lines read cleanly where they are shown; the catalog keeps its text (P16).
 
-Every example is one the 2026-10-04 walkthrough showed on the week card, the meals list or a recipe sheet.
+The first examples are what the 2026-10-04 walkthrough showed on the week card, the meals list or a recipe
+sheet; the rest are the release catalog's other kinds of the same artefacts.
 """
 
 from app.agent.replies import say
@@ -21,6 +22,14 @@ SHOWN = {
     "Mexican Pulled Pork-Carnitas(Atk)": "Mexican Pulled Pork-Carnitas",
     "Fire Hot Chilli Paste (Sambal) - Indonesian Sauce": "Fire Hot Chilli Paste (Sambal) – Indonesian Sauce",
     "Honey Dijon Chicken(Fat:  3 Grams Per Serving)": "Honey Dijon Chicken (Fat: 3 Grams Per Serving)",
+    "Berbere -- Ethiopian Red Pepper And Spice Paste": "Berbere (Ethiopian Red Pepper And Spice Paste)",
+    "Grilled Rum-Soaked Shrimp (Cuba -- Caribbean)": "Grilled Rum-Soaked Shrimp (Cuba – Caribbean)",
+    "Pork Tortillas Adobo - Ww": "Pork Tortillas Adobo",
+    "Italian Spinach Salad - Toh": "Italian Spinach Salad",
+    "Thai Fried Bananas,": "Thai Fried Bananas",
+    "Tempura Avocado.": "Tempura Avocado",
+    "Korean B.B.Q.": "Korean B.B.Q.",
+    "Beef Stir-Fry": "Beef Stir-Fry",
     "Lemon Chicken": "Lemon Chicken",
     "Rolled Dumplings": "Rolled Dumplings",
     "Korean-Style Ramen": "Korean-Style Ramen",

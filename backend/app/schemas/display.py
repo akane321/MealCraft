@@ -4,12 +4,14 @@ The catalog keeps what the source sites wrote, ids and all; search and matching 
 product API and the assistant's replies show goes through here, so the same dish reads the same on a card,
 in a sheet and in a sentence:
 
-- "Chinese Egg Flower Soup (Ww)" -> "Chinese Egg Flower Soup": a recipe site's tag (Weight Watchers,
-  once-a-month cooking, America's Test Kitchen, ...) is not part of the dish's name;
+- "Chinese Egg Flower Soup (Ww)", "Pork Tortillas Adobo - Ww" -> "Chinese Egg Flower Soup", "Pork Tortillas
+  Adobo": a recipe site's tag (Weight Watchers, once-a-month cooking, America's Test Kitchen, Taste of Home,
+  ...) is not part of the dish's name, nor is a trailing comma or full stop;
 - "Pot Pie(Square Dumplings)" -> "Pot Pie (Square Dumplings)" ("Morgan'S" -> "Morgan's" is the import's,
   `app.data.release_v2.display_title`);
-- "Tsukemono – Japanese Pickles", "Tsukemono- Japanese Cabbage Salad" -> "Tsukemono (Japanese Pickles)": in
-  "Cannelloni · Tsukemono – Japanese Pickles · Pot Pie" a dash reads as one more dish;
+- "Tsukemono – Japanese Pickles", "Berbere -- Ethiopian Spice Paste" -> "Tsukemono (Japanese Pickles)",
+  "Berbere (Ethiopian Spice Paste)": in "Cannelloni · Tsukemono – Japanese Pickles · Pot Pie" a dash reads as
+  one more dish;
 - an ingredient's preparation "light; thinly sliced; white and green parts only" (fragments the release
   split "2 green onions, white and light green parts only, thinly sliced" into, sorted, with "light" cut out
   of its phrase) -> "white and light green parts only, thinly sliced".
@@ -24,12 +26,16 @@ from typing import Annotated
 
 from pydantic import PlainSerializer
 
-SCRAPER_TAG = re.compile(r"\s*\((?:ww|oamc|omac|atk|scd|sbd)\)", re.IGNORECASE)
+TAGS = r"(?:ww|oamc|omac|atk|scd|sbd|toh)"
+# "(Ww)", or "- Ww" at the end.
+SCRAPER_TAG = re.compile(rf"\s*\({TAGS}\)|\s*[-–—]+\s*{TAGS}$", re.IGNORECASE)
 GLUED_OPEN = re.compile(r"(?<=[^\s(])\(")
 GLUED_CLOSE = re.compile(r"\)(?=\w)")
 DASH_BEFORE_PAREN = re.compile(r"\s*[-–—]\s*(?=\()")
-# A dash a space sets apart; "Na-Mool" and "Korean-Style" keep theirs.
-DASH = re.compile(r"\s*[-–—]\s+|\s+[-–—]\s*")
+# A dash (or "--") a space sets apart; "Na-Mool" and "Korean-Style" keep theirs.
+DASH = re.compile(r"\s*[-–—]+\s+|\s+[-–—]+\s*")
+# "Thai Fried Bananas,", "Tempura Avocado." (not "Korean B.B.Q.").
+TRAILING = re.compile(r"[\s,;:]+$|(?<=[a-z])\.$")
 PARTS = re.compile(r"(, |、)")
 # Fragments the release parser left on their own: connectives, and the "None" of "4 None bread rolls".
 NOT_PREPARATION = {"and", "or", "none", "more"}
@@ -44,7 +50,7 @@ def _part(text: str) -> str:
         text = f"{pieces[0]} ({pieces[1]})"
     else:
         text = " – ".join(pieces)
-    return " ".join(text.split())
+    return TRAILING.sub("", " ".join(text.split()))
 
 
 def shown_title(title: str) -> str:
