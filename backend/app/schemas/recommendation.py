@@ -2,6 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from app.schemas.display import ShownTitle
 from app.schemas.product import GroceryEstimateResponse, PricingMode
 from app.schemas.recipe import RecipeListItemResponse
 
@@ -82,7 +83,7 @@ class RecipeRecommendationResponse(BaseModel):
 class ExcludedRecipeResponse(BaseModel):
     id: int
     slug: str
-    title: str
+    title: ShownTitle
     reasons: list[str]
 
 
