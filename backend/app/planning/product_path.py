@@ -14,7 +14,7 @@ from math import ceil, isfinite
 
 from app.data.allergens import checked_allergens
 from app.data.ingredient_hierarchy import expand_exclusions
-from app.data.units import UNIT_BASE
+from app.data.units import UNIT_BASE, in_grams, weighed
 from app.planning.beam_planner import BeamLimits, BeamPlanner
 from app.planning.capability import PlanningCapabilityError, require_composition_enabled
 from app.planning.constraint_compiler import compile_search_domains
@@ -332,6 +332,7 @@ class ProductPlanningEngine:
         provenance = {}  # product id -> the PriceEvidence of the observation the planner prices with
         recipe_snapshots = {}
         diagnostics = []
+        sources = []
         for recommendation in sorted(recommendations, key=lambda r: r.recipe.slug):
             if recommendation.recipe.id not in by_id:
                 diagnostics.append("recipe_snapshot_missing")
@@ -343,6 +344,17 @@ class ProductPlanningEngine:
             for ingredient in source.ingredients:
                 display_names[ingredient.normalized_name] = ingredient.name
                 ingredient.quantity, ingredient.unit = normalized(ingredient.quantity, ingredient.unit)
+            sources.append((recommendation, source))
+        # A liquid one dish measures in grams and another in millilitres is bought by weight in every week of
+        # this packet, as the weekly list adds it (`weighed`): its millilitres and pantry in grams, and no
+        # bottle priced by volume, so the search, the checkout and the validator see one line and one product.
+        weigh = weighed((item.normalized_name, item.unit) for _, source in sources for item in source.ingredients)
+        for recommendation, source in sources:
+            for ingredient in source.ingredients:
+                if ingredient.normalized_name in weigh:
+                    ingredient.quantity, ingredient.unit = in_grams(
+                        ingredient.quantity, ingredient.unit, ingredient.normalized_name
+                    )
             converted = recipe_input(source, allowed_meal_types=meal_affinity(source), nutrition_basis="per_serving")
             if converted.candidate is None:
                 diagnostics.extend(converted.issues)
@@ -361,6 +373,10 @@ class ProductPlanningEngine:
                 _, unit = normalized(line.required_quantity, line.unit)
                 if not unit:
                     continue
+                if line.ingredient_name in weigh:
+                    if product.package_unit == "ml":
+                        continue
+                    unit = "g"
                 projected = product_input(product, ingredient_id=line.ingredient_name, required_unit=unit)
                 if projected.option is None:
                     diagnostics.extend(projected.issues)
@@ -402,6 +418,8 @@ class ProductPlanningEngine:
         pantry = []
         for item in constraints.available_ingredients:
             quantity, unit = normalized(item.quantity, item.unit)
+            if item.normalized_name in weigh:
+                quantity, unit = in_grams(quantity, unit, item.normalized_name)
             pantry.append(PlanningPantryItem(ingredient_id=item.normalized_name, quantity=quantity, unit=unit))
         bands = compile_nutrition_targets(
             constraints.nutrition_constraints, constraints.nutrition_guard_band, meals_per_day=len(composition or [0])

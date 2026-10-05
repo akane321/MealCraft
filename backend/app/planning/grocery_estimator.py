@@ -7,19 +7,27 @@ from functools import lru_cache
 
 from app.core.paths import data_root
 from app.data.overrides import overrides
-from app.data.units import UNIT_BASE
+from app.data.units import UNIT_BASE, in_grams
 from app.models.recipe import Recipe
 from app.schemas.product import GroceryEstimateResponse, GroceryLineEstimate, PriceEvidence, ProductResponse
 from app.schemas.recommendation import AvailableIngredientInput, RecipeRecommendationRequest
 from app.services.product import ProductSearchService
 
 
-def convert_quantity(quantity: float, from_unit: str | None, to_unit: str | None) -> float | None:
+def convert_quantity(
+    quantity: float, from_unit: str | None, to_unit: str | None, ingredient: str | None = None
+) -> float | None:
+    """`quantity` in `to_unit`; between g and ml only for an `ingredient` whose density is known."""
     if from_unit is None or to_unit is None:
         return None
     source = UNIT_BASE.get(from_unit.lower())
     target = UNIT_BASE.get(to_unit.lower())
-    if source is None or target is None or source[0] != target[0]:
+    if source is None or target is None:
+        return None
+    if source[0] != target[0] and ingredient is not None:
+        # 1 l of milk against 250 g of it: both in grams when its density is known, else they stay apart.
+        source, target = (in_grams(factor, base, ingredient)[::-1] for base, factor in (source, target))
+    if source[0] != target[0]:
         return None
     return quantity * source[1] / target[1]
 
@@ -391,7 +399,8 @@ class GroceryEstimator:
     ) -> float:
         if pantry_item is None or pantry_item.quantity is None or required is None:
             return 0.0
-        converted = convert_quantity(pantry_item.quantity, pantry_item.unit, required_unit)
+        # The pantry is the ingredient itself: a litre of milk at home covers grams of it in a recipe.
+        converted = convert_quantity(pantry_item.quantity, pantry_item.unit, required_unit, pantry_item.normalized_name)
         return min(required, converted) if converted is not None else 0.0
 
     @staticmethod

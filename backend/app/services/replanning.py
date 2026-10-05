@@ -12,6 +12,7 @@ from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError, entry_values
 from app.repositories.recipe import RecipeRepository
+from app.schemas.display import shown_title
 from app.schemas.meal_plan import (
     MealPlanEntrySnapshot,
     MealPlanGroceryDeltaLine,
@@ -31,6 +32,12 @@ from app.schemas.planning_v2 import PlanningCompositionPolicy
 from app.schemas.recommendation import RecipeRecommendationResponse
 from app.services.meal_plan import WeeklyMealPlanService
 from app.services.recommendation import RecipeRecommendationService
+
+
+def by_weight(grocery: WeeklyGroceryEstimateResponse) -> set[str]:
+    """What the list buys by weight. A change keeps it so: the week was planned with a dish that measures
+    milk in grams, and a swap keeps buying the milk the other dishes measure in millilitres by weight."""
+    return {line.ingredient_name for line in grocery.items if line.unit == "g"}
 
 
 def _at_share(value, share: float):
@@ -130,7 +137,10 @@ class MealPlanReplanningService:
                 recipes_by_id=recipes_by_id,
             )
             after_grocery = self.grocery_aggregator.estimate(
-                [recipe for recipe, _ in future_recipes], constraints, shares=[share for _, share in future_recipes]
+                [recipe for recipe, _ in future_recipes],
+                constraints,
+                shares=[share for _, share in future_recipes],
+                by_weight=by_weight(before_grocery),
             )
             after_warnings = list(dict.fromkeys(after_grocery.warnings))
             if after_grocery.within_weekly_budget is False:
@@ -212,8 +222,12 @@ class MealPlanReplanningService:
         recipes_by_id = {recipe.id: recipe for recipe in self.recipe_repository.list_by_ids(list(wanted_ids))}
         eaten = [(recipes_by_id[item.recipe_id], float(item.portion_share)) for item in kept]
         eaten += [(recipes_by_id[values["recipe_id"]], values["portion_share"]) for values, _ in added]
+        before_grocery = self._current_grocery(plan)
         after_grocery = self.grocery_aggregator.estimate(
-            [recipe for recipe, _ in eaten], constraints, shares=[share for _, share in eaten]
+            [recipe for recipe, _ in eaten],
+            constraints,
+            shares=[share for _, share in eaten],
+            by_weight=by_weight(before_grocery),
         )
         after_warnings = list(dict.fromkeys(after_grocery.warnings))
         if after_grocery.within_weekly_budget is False:
@@ -221,7 +235,6 @@ class MealPlanReplanningService:
                 f"The revised grocery total S${after_grocery.purchase_total_sgd:.2f} exceeds the "
                 f"S${constraints.weekly_budget_sgd:.2f} weekly budget."
             )
-        before_grocery = self._current_grocery(plan)
         fields = ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
         eaten_before = [item for item in removed if item.status != "skipped"]
         nutrition_delta = {
@@ -497,7 +510,7 @@ class MealPlanReplanningService:
             ]
         if not candidates:
             raise MealPlanReplanValidationError(
-                f"No dish other than {entry.recipe.title} satisfies the current hard constraints."
+                f"No dish other than {shown_title(entry.recipe.title)} satisfies the current hard constraints."
             )
 
         # The same dish position on the neighbouring days, so a swap does not repeat them.
