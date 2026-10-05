@@ -3,7 +3,8 @@ import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
 import { MEAL_LABEL, mealsByDay, nextMeal, plateStyle } from "~/lib/home-surface";
 import type { NutritionDashboardDay } from "~/types/meal-plan";
 
-const props = defineProps<{ days: NutritionDashboardDay[]; planId: number | null; revision?: number; startDate?: string | null }>();
+// A replaced week (readonly) is only read: its dishes offer no changes.
+const props = defineProps<{ days: NutritionDashboardDay[]; planId: number | null; revision?: number; startDate?: string | null; readonly?: boolean }>();
 const emit = defineEmits<{ openRecipe: [slug: string]; ask: [text: string] }>();
 
 const week = computed(() => mealsByDay(props.days));
@@ -44,7 +45,7 @@ const ACTIONS = [
             <span v-for="(dish, index) in meal.dishes" :key="dish.entry_id" class="dish" :class="{ side: index > 0 }">
               <button type="button" class="name mc-serif" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button>
               <small v-if="index === 0">{{ dish.recipe.total_time_minutes }} min · {{ Math.round(meal.dishes.reduce((sum, d) => sum + d.nutrition_per_person.calories_kcal, 0)) }} kcal</small>
-              <span v-if="dish.status === 'planned' && !dish.is_locked" class="acts" role="group" :aria-label="`Change ${dish.recipe.title}`">
+              <span v-if="!readonly && dish.status === 'planned' && !dish.is_locked" class="acts" role="group" :aria-label="`Change ${dish.recipe.title}`">
                 <button
                   v-for="action in ACTIONS"
                   :key="action.label"

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { allergenLabel } from "~/lib/allergens";
-import { budgetLine, formatSgd, groceryGroups, plateStyle, sameDishChange } from "~/lib/home-surface";
+import { budgetLine, formatSgd, groceryGroups, plateStyle, previewChoices, sameDishChange } from "~/lib/home-surface";
 import { statedTimeLimit } from "~/lib/household-profile";
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
 import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
 import type { AgentMessage, AgentSession } from "~/types/agent";
-import type { MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection } from "~/types/meal-plan";
+import type { MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection, WeeklyMealPlanListItem } from "~/types/meal-plan";
 
 useHead({ title: "MealCraft" });
 
@@ -32,6 +32,8 @@ const takeOn = ref<{ message: string; week: number } | null>(null);
 // Open my week (enter) is reopening the week and its conversations.
 const entering = ref(false);
 const plan = ref<WeeklyMealPlan | null>(null);
+// The shown week was planned again for the same days (the plans list's `current`): it is only read.
+const replaced = ref(false);
 // A request in flight, a failed one and "nothing planned yet" are three different states.
 const planState = ref<"empty" | "loading" | "error" | "ready">("empty");
 const lastPlanId = ref<number | null>(null);
@@ -85,7 +87,10 @@ const budgetShare = computed(() => {
   return budget ? Math.min(100, estimate.value!.purchase_total_sgd / budget * 100) : null;
 });
 const weekEnded = computed(() => Boolean(plan.value && plan.value.end_date < todayIsoDate()));
+const readOnly = computed(() => Boolean(plan.value && replaced.value));
 // How far the suggested change takes the week over its budget, said before the household confirms it.
+// The preview's buttons say what each does to this kind of change (a lock is kept, not "changed").
+const choices = computed(() => previewChoices(session.value?.pending_replan?.event_type ?? "REPLACE_MEAL"));
 const swapOverBudget = computed(() => {
   const over = session.value?.pending_replan?.over_budget_sgd;
   return over && estimate.value?.weekly_budget_sgd ? formatSgd(over) : null;
@@ -108,7 +113,7 @@ const shapePreview = computed(() => {
 const ownsPlan = computed(() => Boolean(plan.value && session.value?.plan_id === plan.value.id));
 const showWeek = computed(() => Boolean(ownsPlan.value && days.value.length && !session.value?.pending_replan));
 // A conversation that planned no week changes the one beside it (see send).
-const canChangeWeek = computed(() => Boolean(plan.value && (ownsPlan.value || !session.value?.plan_id)));
+const canChangeWeek = computed(() => Boolean(plan.value && !readOnly.value && (ownsPlan.value || !session.value?.plan_id)));
 const readyToPlan = computed(() => Boolean(session.value?.can_confirm && session.value.status !== "planned"));
 // Still asking what it needs to plan a new week: taking the current week on would drop that question.
 const settingUp = computed(() => {
@@ -174,12 +179,22 @@ async function enter() {
   entering.value = false;
 }
 
+/** The household's weeks, newest first; none when they cannot be listed (no plan yet is not an error). */
+async function recentWeeks(): Promise<WeeklyMealPlanListItem[]> {
+  try { return (await apiFetch<WeeklyMealPlanCollection>(`${config.public.apiBase}/api/plans`)).items; }
+  catch { return []; }
+}
+
 async function currentPlanId(): Promise<number | null> {
-  try {
-    const latest = await apiFetch<WeeklyMealPlanCollection>(`${config.public.apiBase}/api/plans`);
-    return latest.items[0]?.id ?? null;
-  }
-  catch { return null; /* no plan yet is not an error */ }
+  return (await recentWeeks())[0]?.id ?? null;
+}
+
+/** From a replaced week to the household's current one, with the conversation that planned it when it is listed. */
+async function openCurrentWeek() {
+  const current = await currentPlanId();
+  const planner = current ? agent.recent.value.find(item => item.plan_id === current) : undefined;
+  if (planner) openSession(planner);
+  else showConversation(null);
 }
 
 /** The panel's week: the open conversation's own, else the household's current week. */
@@ -271,10 +286,14 @@ async function loadPlan(planId: number) {
   lastPlanId.value = planId;
   planState.value = "loading";
   try {
-    const loaded = await apiFetch<WeeklyMealPlan>(`${config.public.apiBase}/api/plans/${planId}`);
+    const [loaded, weeks] = await Promise.all([
+      apiFetch<WeeklyMealPlan>(`${config.public.apiBase}/api/plans/${planId}`),
+      recentWeeks(),
+    ]);
     // A newer request replaced this one while it was in flight; its answer is stale.
     if (lastPlanId.value !== planId) return;
     plan.value = loaded;
+    replaced.value = weeks.find(week => week.id === planId)?.current === false;
     await nutrition.loadDashboard(planId);
     if (lastPlanId.value === planId) planState.value = "ready";
   }
@@ -505,7 +524,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           </div>
           <div class="home-links">
             <NuxtLink to="/profile">Edit household</NuxtLink>
-            <NuxtLink to="/system">System status</NuxtLink>
+            <NuxtLink to="/system">Service status</NuxtLink>
             <button type="button" @click="logout">Sign out</button>
           </div>
         </div>
@@ -573,7 +592,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               @open-recipe="recipeSlug = $event"
             />
 
-            <div v-if="weekEnded && plan && !isLoading" class="card mc-rise">
+            <div v-if="readOnly" class="card mc-rise" aria-label="A replaced week">
+              <p>You planned these days again, so this week was replaced. It stays here to read; changes go to your current week.</p>
+              <div class="acts">
+                <button type="button" class="mc-primary" @click="openCurrentWeek">Open the current week</button>
+              </div>
+            </div>
+
+            <div v-else-if="weekEnded && plan && !isLoading" class="card mc-rise">
               <p>This plan ended on {{ formatPlanDate(plan.end_date, { weekday: "long", day: "numeric", month: "short" }) }}. Tell me about this week and I'll plan a new one.</p>
             </div>
 
@@ -594,8 +620,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <small v-if="swapOverBudget" class="over-budget">This puts the week {{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }} budget.</small>
               </div>
               <div class="acts">
-                <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirmReplan()">Confirm change</button>
-                <button type="button" class="mc-pill" :disabled="isLoading" @click="agent.discardReplan()">Keep as is</button>
+                <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirmReplan()">{{ choices.confirm }}</button>
+                <button type="button" class="mc-pill" :disabled="isLoading" @click="agent.discardReplan()">{{ choices.discard }}</button>
               </div>
             </div>
 
@@ -621,8 +647,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <small v-if="swapOverBudget" class="over-budget">This puts the week {{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }} budget.</small>
               </div>
               <div class="acts">
-                <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirmReplan()">Confirm change</button>
-                <button type="button" class="mc-pill" :disabled="isLoading" @click="agent.discardReplan()">Keep as is</button>
+                <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirmReplan()">{{ choices.confirm }}</button>
+                <button type="button" class="mc-pill" :disabled="isLoading" @click="agent.discardReplan()">{{ choices.discard }}</button>
               </div>
             </div>
 
@@ -645,7 +671,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               autocomplete="off"
               :placeholder="interaction?.prompt || (ownsPlan ? 'Swap a night, change the budget, use up what\'s in the fridge…' : 'Who\'s eating, what to spend, anything to avoid…')"
             >
-            <button type="submit" class="send" aria-label="Send" :disabled="isLoading || entering || !draft.trim()">
+            <button type="submit" class="send" aria-label="Send" :disabled="isLoading || entering || readOnly || !draft.trim()">
               <svg class="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
           </form>
@@ -663,6 +689,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           <HomeTonight
             :days="days"
             :updating-entry-id="nutrition.updatingEntryId.value"
+            :readonly="readOnly"
             @mark-cooked="setStatus($event, 'completed')"
             @mark-meal="nutrition.updateMeal($event.dayIndex, $event.mealType, 'completed', $event.dishes[0]?.entry_id ?? 0)"
             @open-recipe="recipeSlug = $event"
@@ -676,7 +703,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <button id="tab-nutrition" type="button" role="tab" class="tab" :aria-selected="tab === 'nutrition'" aria-controls="panel-body" @click="tab = 'nutrition'">Nutrition</button>
           </div>
           <div id="panel-body" class="panel-body" role="tabpanel" :aria-labelledby="`tab-${tab}`">
-            <HomeMealList v-if="tab === 'dinners'" :days="days" :plan-id="plan.id" :revision="plan.revision" :start-date="plan.start_date" @open-recipe="recipeSlug = $event" @ask="suggest" />
+            <HomeMealList v-if="tab === 'dinners'" :days="days" :readonly="readOnly" :plan-id="plan.id" :revision="plan.revision" :start-date="plan.start_date" @open-recipe="recipeSlug = $event" @ask="suggest" />
             <HomeGroceryList v-else-if="tab === 'groceries'" :estimate="plan.grocery_estimate" />
             <HomeNutritionSummary
               v-else-if="nutrition.dashboard.value"
@@ -718,6 +745,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
       v-if="nutritionOpen && nutrition.dashboard.value"
       :dashboard="nutrition.dashboard.value"
       :updating-entry-id="nutrition.updatingEntryId.value"
+      :readonly="readOnly"
       @close="nutritionOpen = false"
       @set-status="setStatus"
     />
@@ -788,7 +816,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .nav[aria-current="page"] svg { color: var(--accent); }
 .count { margin-left: auto; font-size: 11.5px; color: var(--t4); }
 .rail-label { padding: 0 10px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
-.recent { display: grid; gap: 1px; min-height: 0; overflow: auto; margin-top: -10px; }
+/* The list gives way to the rail and scrolls; each row keeps its own height (an auto row would shrink with it). */
+.recent { display: grid; grid-auto-rows: max-content; gap: 1px; min-height: 0; overflow: auto; margin-top: -10px; }
 .recent button { width: 100%; padding: 6px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--t3); font-size: 13px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .recent button:hover, .recent button.on { color: var(--ivory); background: rgba(242, 237, 228, 0.04); }
 .home-card { margin-top: auto; display: grid; gap: 10px; padding: 14px; border-radius: 14px; background: var(--s1); border: 1px solid var(--line); }

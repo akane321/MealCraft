@@ -4,7 +4,8 @@ import { MEAL_LABEL, nextMeal, plateStyle, type PlannedMeal } from "~/lib/home-s
 import type { NutritionDashboardDay } from "~/types/meal-plan";
 import type { TutorialRecommendation } from "~/types/recipe";
 
-const props = defineProps<{ days: NutritionDashboardDay[]; updatingEntryId: number | null }>();
+// A replaced week (readonly) is only read: no marking cooked, no swap.
+const props = defineProps<{ days: NutritionDashboardDay[]; updatingEntryId: number | null; readonly?: boolean }>();
 const emit = defineEmits<{
   markCooked: [entryId: number];
   markMeal: [meal: PlannedMeal];
@@ -67,7 +68,7 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
     <div class="acts">
       <button type="button" class="mc-primary" @click="emit('openRecipe', tonight.day.recipe.slug)">Recipe &amp; steps</button>
       <button
-        v-if="next && next.meal.status !== 'completed' && next.meal.status !== 'skipped'"
+        v-if="!readonly && next && next.meal.status !== 'completed' && next.meal.status !== 'skipped'"
         type="button"
         class="mc-pill"
         :disabled="updatingEntryId === tonight.day.entry_id"
@@ -75,7 +76,7 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
       >
         {{ updatingEntryId === tonight.day.entry_id ? "Saving…" : "Mark as cooked" }}
       </button>
-      <button type="button" class="mc-pill" @click="emit('swap', tonight.day)">
+      <button v-if="!readonly" type="button" class="mc-pill" @click="emit('swap', tonight.day)">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3" /></svg>Swap
       </button>
     </div>
