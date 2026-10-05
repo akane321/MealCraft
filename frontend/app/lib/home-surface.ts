@@ -201,10 +201,12 @@ export function sameDishChange(event: Pick<MealPlanReplanEvent, "event_type" | "
   return null;
 }
 
-/** A preview card's two buttons, in the words of what confirming does: "Keep as is" would discard a lock. */
+/**
+ * A preview card's two buttons, in the words of what each does. Discarding a lock keeps the dish
+ * unlocked, so "Keep as is" would say the opposite; for a swap or a skip it keeps the dish, as it says.
+ */
 export function previewChoices(eventType: MealPlanReplanEvent["event_type"]): { confirm: string; discard: string } {
   if (eventType === "LOCK_MEAL") return { confirm: "Keep it locked", discard: "Cancel" };
-  if (eventType === "CANCEL_MEAL") return { confirm: "Skip it", discard: "Keep it" };
   return { confirm: "Confirm change", discard: "Keep as is" };
 }
 

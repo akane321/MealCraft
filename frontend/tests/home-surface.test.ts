@@ -140,11 +140,10 @@ describe("sameDishChange", () => {
 describe("previewChoices", () => {
   it("never offers \"Keep as is\" to throw a lock away", () => {
     expect(previewChoices("LOCK_MEAL")).toEqual({ confirm: "Keep it locked", discard: "Cancel" });
-    expect(previewChoices("CANCEL_MEAL")).toEqual({ confirm: "Skip it", discard: "Keep it" });
   });
 
-  it("keeps a swap's words", () => {
-    for (const type of ["REPLACE_MEAL", "ITEM_UNAVAILABLE", "CHANGE_SHAPE"] as const) {
+  it("keeps the words of a swap or a skip, where \"Keep as is\" keeps the dish", () => {
+    for (const type of ["REPLACE_MEAL", "CANCEL_MEAL", "ITEM_UNAVAILABLE", "CHANGE_SHAPE"] as const) {
       expect(previewChoices(type)).toEqual({ confirm: "Confirm change", discard: "Keep as is" });
     }
   });
