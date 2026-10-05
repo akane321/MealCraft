@@ -304,7 +304,9 @@ class WeeklyMealPlanService:
             review: every lunch of mdw-dev-013 was one of its dinners)."""
             week = [recipe for recipe, _ in rest] + [by_id[item.recipe.id] for item in planned.selected]
             shares = [share for _, share in rest] + [float(place[3]) for place in planned.placements]
-            total = self.grocery_aggregator.estimate(week, partial, shares=shares, by_weight=by_weight).purchase_total_sgd
+            total = self.grocery_aggregator.estimate(
+                week, partial, shares=shares, by_weight=by_weight
+            ).purchase_total_sgd
             repeats = len(week) - len({recipe.id for recipe in week})
             empty = day_count * sum(len(roles) for _, roles in meals) - len(planned.selected)
             return total + over_budget / (day_count * len(meals)) * (repeats + EMPTY_OPTIONAL_ROLE_LOSS * empty)

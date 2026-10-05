@@ -115,3 +115,29 @@ def test_the_assistant_names_a_dish_as_the_plan_shows_it() -> None:
     )
     # A count is a count.
     assert "had 5)" in say("varied_planned", "en", count=7, before=5, fresh="")
+
+
+def test_a_dish_is_offered_and_understood_by_the_name_the_plan_shows(monkeypatch) -> None:
+    """The "which dish" choices name dishes as the week card does, and choosing one picks that dish."""
+    from tests.test_agent_limits_and_language import planned, tap
+    from tests.test_agent_limits_and_language import say as tell
+    from tests.test_planning_capability import _dish, dish_client
+
+    dishes = [
+        _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
+        _dish("chicken-roast", "main", "chicken_breast", 400, calories=450),
+        _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
+        _dish("spinach-saute", "side", "baby_spinach", 200, calories=80),
+    ]
+    for dish in dishes:
+        dish.title = f"{dish.title}(Ww)"
+    with dish_client(monkeypatch, dishes) as client:
+        asked = tell(client, planned(client, "Dinners for 4 this week"), "swap every dish")
+        which = tap(client, asked, asked["pending_interaction"]["options"][1]["label"])
+        labels = [option["label"] for option in which["pending_interaction"]["options"]]
+        assert len(labels) == 2 and all(
+            label in {"Salmon Bake", "Chicken Roast", "Broccoli Stirfry", "Spinach Saute"} for label in labels
+        )
+        previewed = tap(client, which, labels[0])
+        assert previewed["pending_replan"]["status"] == "previewed"
+        assert previewed["pending_replan"]["before_entry"]["recipe_title"] == labels[0]
