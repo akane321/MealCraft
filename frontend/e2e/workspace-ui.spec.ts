@@ -232,8 +232,9 @@ test("a lock's preview offers to keep it locked or cancel, never \"Keep as is\""
     return route.fulfill(json(planned));
   });
   await openWeek(page);
-  await page.getByLabel("Message MealCraft").fill("Don't change today's dinner");
-  await page.getByRole("button", { name: "Send" }).click();
+  const chat = page.getByRole("main");
+  await chat.getByLabel("Message MealCraft").fill("Don't change today's dinner");
+  await chat.getByRole("button", { name: "Send" }).click();
 
   await expect(page.getByText("Keep Lemon Herb Chicken as it is")).toBeVisible();
   await expect(page.getByRole("button", { name: "Keep it locked" })).toBeVisible();
@@ -260,8 +261,9 @@ test("a week planned again is shown read-only beside its conversation, with the 
   await expect(panel.getByRole("button", { name: "Mark as cooked" })).toHaveCount(0);
   await expect(panel.getByRole("button", { name: "Swap" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Swap tomorrow's dinner" })).toHaveCount(0);
-  await page.getByLabel("Message MealCraft").fill("Swap Monday's dinner");
-  await expect(page.getByRole("button", { name: "Send" })).toBeDisabled();
+  const chat = page.getByRole("main");
+  await chat.getByLabel("Message MealCraft").fill("Swap Monday's dinner");
+  await expect(chat.getByRole("button", { name: "Send" })).toBeDisabled();
   await expect(panel.getByRole("button", { name: "Recipe & steps" })).toBeVisible();
 
   await page.getByRole("button", { name: "Open the current week" }).click();
