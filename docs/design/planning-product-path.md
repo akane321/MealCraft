@@ -13,11 +13,18 @@ scaled from source servings; nutrition is per person. Unit conversions use the
 existing exact mass, volume and piece mappings. A liquid that one candidate dish
 measures in grams and another in millilitres (milk, oils, broth, soy sauce: the
 densities in `backend/app/data/units.py`, the release catalog's cup weights) is
-bought by weight across the packet: its millilitres and pantry quantity are
-converted to grams and only products sold by weight are options, so a week has
-one line and one product for it. The weekly grocery estimate
-(`backend/app/planning/weekly_grocery.py`) adds such lines the same way, and a
-change to a saved week keeps buying by weight what its list already does.
+bought by weight across the packet: its millilitres are converted to grams and
+only products sold by weight are options, so a week has one line and one
+product for it. A pantry quantity is held in the unit the packet's lines of that
+ingredient use, by the same densities: a litre of milk at home covers grams of
+it. The weekly grocery estimate (`backend/app/planning/weekly_grocery.py`) adds
+such lines and deducts the pantry the same way. A change to a saved week keeps
+buying by weight what its list already does, both in the list it previews and in
+the budget the rest of the week leaves (`by_weight` in
+`backend/app/services/replanning.py`). The week floor
+(`backend/app/planning/week_floor.py`) prices such a liquid by the gram however
+a product sells it, so it stays below what any week pays. The validator's
+compatible-unit rules are unchanged: it sees the converted quantities.
 Unknown quantities remain unknown, and duplicate pantry entries require
 clarification.
 
