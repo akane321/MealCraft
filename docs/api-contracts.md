@@ -614,13 +614,13 @@ week** would plan it, nothing saved, and what that refuses is refused now. The
 week found is kept, for that exact request and for as long as the planner keeps
 its recipes (`PLANNING_POOL_CACHE_SECONDS`), and **Plan my week** saves it
 instead of searching again. A budget refusal names the amount a person a meal and the cheapest
-week the search found ("S$10 for 4 people is S$0.36 a person a meal over 7 meals.
-The cheapest week I could plan costs about S$38.16: the cheapest my search found,
-not a proof that none is cheaper."). The session keeps collecting and offers
-choices a real week backs: "Use S$39 for the week" (that week fits it, so it
-plans), and, for one meal a day, half the people at their own cheapest week
-("2 people at S$26 a week", or "Plan for 2 people" when that fits the budget as
-it is); for more meals a day that second search would take the reply past its
+week the search found ("S$10 a week for 4 people comes to about S$0.36 a person a
+meal (7 meals). The cheapest week I could find costs S$23.36."). The session keeps
+collecting and offers choices a real week backs: "Use S$24 for the week" (that
+week fits it, so it plans), and, for one meal a day, half the people at their own
+cheapest week when that week costs less than the whole household's ("2 people at
+S$18 a week", or "Plan for 2 people" when that fits the budget as it is); for more
+meals a day that second search would take the reply past its
 time limit, so it is not offered. A meal of four or more dishes takes the
 planner's searches 5 to 26 s on the release catalog, past the reply's time
 limit, so for such a shape nothing is searched before the session is ready:
