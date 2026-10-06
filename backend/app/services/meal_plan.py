@@ -90,8 +90,14 @@ class WeeklyMealPlanService:
             grocery = self.grocery_aggregator.refresh(grocery)
         result.trace["profile_id"] = household_profile_id
 
+        recommendation_warnings = recommendation_result.warnings
+        if constraints.pricing_mode == "live":
+            # Candidate selection used fixtures, but the saved basket has just been checked.
+            recommendation_warnings = [
+                warning for warning in recommendation_warnings if not warning.startswith("Stable fixture prices")
+            ]
         warnings = self._deduplicate(
-            recommendation_result.warnings + grocery.warnings + nutrition_scope_notes(constraints.nutrition_constraints)
+            recommendation_warnings + grocery.warnings + nutrition_scope_notes(constraints.nutrition_constraints)
         )
         eligible_count = len({item.recipe.id for item in recommendation_result.recommendations})
         if eligible_count == 1:

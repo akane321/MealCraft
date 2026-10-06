@@ -280,6 +280,7 @@ def test_generation_persists_prices_and_preview_only_refreshes_when_confirmed(mo
         assert response.status_code == 201, response.text
         plan = response.json()
         grocery = plan["grocery_estimate"]
+        assert not any("select live pricing" in warning for warning in plan["warnings"])
         assert grocery["within_weekly_budget"] is False
         assert all(item["evidence"]["price_source"] == "live" for item in grocery["items"])
         stored = client.get(f"/api/plans/{plan['id']}").json()
