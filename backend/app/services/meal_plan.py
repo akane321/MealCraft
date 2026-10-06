@@ -86,6 +86,8 @@ class WeeklyMealPlanService:
             self.repository.session.commit()
             raise
         selected, grocery = result.selected, result.grocery
+        if constraints.pricing_mode == "live":
+            grocery = self.grocery_aggregator.refresh(grocery)
         result.trace["profile_id"] = household_profile_id
 
         warnings = self._deduplicate(
@@ -600,7 +602,7 @@ class WeeklyMealPlanService:
                 price_sgd=float(item.product_price_sgd),
                 product_url=item.product_url,
                 image_url=item.product_image_url,
-                in_stock=True,
+                in_stock=not (item.price_evidence and item.price_evidence.get("lookup_status") == "out_of_stock"),
                 source=item.product_source,
                 fetched_at=(
                     item.product_fetched_at.replace(tzinfo=UTC)

@@ -1,12 +1,31 @@
 # MealCraft Current Status
 
-> Last verified public snapshot: 2026-10-06
+> Last verified public snapshot: 2026-10-07
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `01a1d8b` (walkthrough planning fixes, #234)
+> Verified remote `main`: `ba75d1c` (offline candidate pricing, #240)
 
-This snapshot adds the fixes for what the 2026-10-04 real-stack walkthrough
+The owner merged the first WP1 price-strategy slice (#240). Candidate selection,
+affordability/refusal calculations and replanning previews now explicitly use
+fixture products plus reviewed release mappings, even when the requested final
+basket mode is `live`. Seven focused regressions passed and fail with the
+corresponding fixes removed; the scoped backend suite passed (1,586 tests,
+six optional migration tests skipped). Protected held-out episodes, labels and
+metrics were not used for implementation decisions, and their reports were not
+changed. The paired knowledge record was merged.
+
+This is **not yet** the final-basket live-price implementation or the chat-speed
+optimization. In the isolated real demo stack, the first slice alone did not
+meet the six-second end-to-end target: step 2 was 9.66 s cold / 6.13 s warm,
+and step 6 was 9.66 s cold / 9.79 s warm. These are single-run observations,
+not an estimate of average performance. Final-basket lookup and result-preserving
+reuse optimization are separate pending slices; their API target is specified
+in [API contracts](api-contracts.md).
+
+### Previously verified walkthrough snapshot (2026-10-06)
+
+That snapshot added the fixes for what the 2026-10-04 real-stack walkthrough
 found: a typed instruction is no longer swallowed by an open question, a whole
 meal can be kept, a liquid measured in grams by one dish and millilitres by
 another is bought once, catalog titles are cleaned where they are shown, a week
