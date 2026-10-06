@@ -116,7 +116,9 @@ class MealPlanReplanningService:
             raise MealPlanReplanNotFoundError("Meal-plan entry not found")
         self._validate_target(entry, request)
 
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
+            update={"pricing_mode": "fixture"}
+        )
         role = self._role(constraints, entry)
         recipes = self.recipe_repository.list_for_planning(courses=list(role.courses) if role is not None else None)
         recipes_by_id = {recipe.id: recipe for recipe in recipes}
@@ -198,7 +200,9 @@ class MealPlanReplanningService:
         plan = self.repository.get(plan_id)
         if plan is None:
             raise MealPlanReplanNotFoundError("Meal plan not found")
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
+            update={"pricing_mode": "fixture"}
+        )
         meal = request.meal_type
         today = today or date.today()
         ahead = [day for day in range(1, 8) if plan.start_date + timedelta(days=day - 1) >= today]
@@ -311,7 +315,9 @@ class MealPlanReplanningService:
         plan = self.repository.get(plan_id)
         if plan is None:
             raise MealPlanReplanNotFoundError("Meal plan not found")
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
+            update={"pricing_mode": "fixture"}
+        )
         eaten = sorted((item for item in plan.entries if item.status != "skipped"), key=lambda e: (e.day_index, e.id))
         same: dict[str, list[MealPlanEntry]] = {}
         for item in eaten:

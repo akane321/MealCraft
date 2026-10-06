@@ -452,6 +452,12 @@ aggregated shopping list, package checkout cost, ingredient-use cost, weekly
 budget status, and explicit warnings. Known pantry quantities are deducted once
 after every planned dish's requirements are combined.
 
+Candidate pricing, affordability checks, refusal amounts and replanning previews
+use the existing offline path: fixture products plus reviewed release mappings.
+They never query live FairPrice while selecting dishes. A stored `pricing_mode`
+is the requested Shopping List mode, not proof of a live observation: consumers
+must read each line's `evidence.mode` and original `evidence.fetched_at`.
+
 New plans must pass independent validation before storage. The weekly budget
 caps whole-package checkout cost; the legacy per-meal budget still caps
 ingredient-use cost without pantry deduction. Both comparisons use whole cents;
