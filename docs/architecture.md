@@ -53,6 +53,7 @@ must keep the core flow runnable without an API key or live retailer response.
 | --- | --- | --- |
 | Frontend | Nuxt 4, Vue 3, TypeScript | The one-surface home: film entry, then the kitchen-table workspace (rail, conversation and plan panel, decision ADR-0043 as amended by ADR-0048) with recipe, nutrition and Shopping List overlays; plus sign-in, household profile, recipe and grocery browsing (`/browse`), past weeks (`/history`), service status (`/system`) and the administrators' operations console (`/ops`) |
 | Backend | Python 3.12, FastAPI, Pydantic | HTTP contracts, orchestration, deterministic services, external adapters, and evaluation entry points |
+| Worker | Python 3.12 (`python -m app.worker`) | Executes durable operations jobs from PostgreSQL with leases, heartbeats, bounded retries, cancellation and idempotent handlers |
 | Database | PostgreSQL | Profiles and versions, recipes, ingredients, products/cache, plans, entries, grocery items, events, check-ins, and Agent sessions |
 | External provider | FairPrice public catalogue | Current product, package, and observed-price information |
 | Tutorial provider | YouTube Data API when a key is configured; the sample tutorial set otherwise | Bounded tutorial candidates after recipe selection; only one deterministic Top-1 reaches the user, labelled as a sample while the fixture is used |
@@ -153,6 +154,12 @@ semantic retrieval remain targets; see [Current Status](current-status.md).
 - Distinguishes proven infeasibility, missing decisive data and bounded-search
   exhaustion rather than manufacturing a valid-looking result.
 
+The current role, budget and variety rules are recorded in private decisions:
+`ADR-0054` (vegetable role), `ADR-0055` (changes that exceed the remaining
+budget), `ADR-0056` (variety within a weekly budget) and `ADR-0057` (a variety
+complaint swaps repeated dishes). This page links those decisions rather than
+carrying another copy of their rules.
+
 Hard constraints, soft penalties, tolerance policies, and output explanations
 must remain explicit and testable.
 
@@ -189,6 +196,9 @@ The mathematical model and remaining implementation boundary are in the
 - Applies a confirmed local change and recalculates downstream grocery demand.
 - Preserves event history and exposes before/after differences.
 
+The same decision links above govern the dish role, budget and variety behavior
+of replanning.
+
 ### Evaluation
 
 - Uses physically separated developer, held-out, and Agent datasets.
@@ -223,12 +233,16 @@ User message
  -> fixture or optional model constraint parser
  -> Pydantic-validated constraint state
  -> typed interaction or text clarification when materially incomplete
- -> user confirmation
  -> deterministic planner and validator
- -> persist and return authoritative plan
+ -> keep the checked week with the exact request
+ -> offer Plan my week
+ -> user confirms
+ -> persist the checked week and return the authoritative plan
 ```
 
-The Agent does not construct an unvalidated Shopping List in its response.
+The planning turn performs the deterministic check before confirmation; **Plan
+my week** saves that checked week instead of searching again. The Agent does not
+construct an unvalidated Shopping List in its response.
 
 ### Grocery lookup and fallback
 

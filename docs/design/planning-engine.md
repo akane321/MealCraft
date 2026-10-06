@@ -9,18 +9,20 @@ help users express intent, but it must not replace this authority.
 
 ## Verified baseline
 
-The current implementation produces seven persisted main meals. It filters
-allergens, excluded ingredients, dietary incompatibility, time and explicit
-sodium limits; ranks eligible recipes using active nutrition, pantry and time
-dimensions; controls adjacent repetition; calculates per-person nutrition;
-aggregates grocery demand; deducts only known compatible pantry quantities;
-rounds product packages; and records weekly budget status.
+The current product implementation plans the household's chosen days and meals,
+with one or more required or optional dish roles per meal, and persists one plan
+entry per dish. It filters allergens, exclusions, dietary incompatibility, time
+and explicit nutrition limits; ranks eligible recipes using active nutrition,
+pantry and time dimensions; controls repetition; calculates per-person
+nutrition; aggregates grocery demand; deducts only known compatible pantry
+quantities; rounds product packages; and records weekly budget status. The
+seven-main-meal path remains only for reproducing earlier evaluations.
 
 The current selector is deterministic and provides a useful MVP baseline. It is
 not yet evidence of global optimality, broad preference fit, or performance over
 a high-dimensional catalog.
 
-## Accepted target pipeline
+## Accepted pipeline
 
 The target is not hard-coded to seven dinners. It accepts an explicit set of
 multi-day breakfast, lunch, dinner and optional snack slots, with per-slot
