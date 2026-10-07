@@ -2,6 +2,8 @@
 
 > Generated evidence. Method, split rules and metric definitions are fixed in [`protocol-v1.md`](../../protocol-v1.md).
 
+> Scope: the original v1 planning scenarios run with the v2.1 catalog condition; this is not the current meal-day-week product-path report.
+
 ## Run status
 
 - Developer gate: **FAIL**

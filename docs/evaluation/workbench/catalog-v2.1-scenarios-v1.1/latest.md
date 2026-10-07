@@ -2,6 +2,8 @@
 
 > Generated evidence. Method, split rules and metric definitions are fixed in [`protocol-v1.md`](../../protocol-v1.md).
 
+> Scope: the v2.1-catalog scenario workbench rescored under protocol v1.1's avoidable-repetition rule; this is not the current meal-day-week product-path report.
+
 ## Run status
 
 - Developer gate: **PASS**

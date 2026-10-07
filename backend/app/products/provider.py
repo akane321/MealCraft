@@ -148,7 +148,7 @@ class FairPriceProductProvider:
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
 
-    def search(self, query: str, *, limit: int) -> list[ProductResponse]:
+    def search(self, query: str, *, limit: int, timeout_seconds: float | None = None) -> list[ProductResponse]:
         normalized_query = normalize_search_text(query)
         url = f"{self.base_url}/product-listing?{urlencode({'pageType': 'search', 'url': normalized_query})}"
         request = Request(
@@ -159,7 +159,8 @@ class FairPriceProductProvider:
             },
         )
         try:
-            with urlopen(request, timeout=self.timeout_seconds) as response:  # noqa: S310
+            timeout = self.timeout_seconds if timeout_seconds is None else min(self.timeout_seconds, timeout_seconds)
+            with urlopen(request, timeout=timeout) as response:  # noqa: S310
                 html = response.read().decode("utf-8")
         except (OSError, TimeoutError) as error:
             raise ProductProviderError(f"FairPrice request failed: {error}") from error

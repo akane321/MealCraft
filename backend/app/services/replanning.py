@@ -600,6 +600,24 @@ class MealPlanReplanningService:
         proposed = self.recipe_repository.list_by_ids([event.proposed_recipe_id] if event.proposed_recipe_id else [])
         proposed_recipe = proposed[0] if proposed else None
         grocery = WeeklyGroceryEstimateResponse.model_validate(event.after_grocery)
+        if plan.pricing_mode == "live" and event.event_type != "LOCK_MEAL":
+            grocery = self.grocery_aggregator.refresh(grocery)
+            before = self._current_grocery(plan)
+            event.after_grocery = grocery.model_dump(mode="json")
+            event.grocery_delta = self._grocery_delta(before, grocery)
+            event.purchase_total_delta_sgd = round(grocery.purchase_total_sgd - before.purchase_total_sgd, 2)
+            event.after_warnings = list(
+                dict.fromkeys(
+                    [
+                        *(
+                            warning
+                            for warning in event.after_warnings
+                            if not warning.startswith("The revised grocery total")
+                        ),
+                        *grocery.warnings,
+                    ]
+                )
+            )
         try:
             applied_plan, applied_event = self.repository.apply_event(
                 plan=plan,

@@ -182,6 +182,8 @@ than a hand-copied metric table:
 - [v2 multi-dish comparisons](docs/evaluation/v2-multidish/heldout/latest.md)
   and [findings](docs/evaluation/v2-multidish/heldout/findings.md), including
   live-model arms under recorded conditions;
+- [v3 meal-day-week developer diagnostics](docs/evaluation/v3-meal-day-week/dev/latest.md)
+  for the current product-path shape (visible developer cases, not held-out evidence);
 - [v3 meal-day-week first run](docs/evaluation/v3-meal-day-week/heldout/run-1.md)
   and [findings](docs/evaluation/v3-meal-day-week/heldout/findings.md).
 
@@ -219,10 +221,10 @@ that test their own module, and nothing may ever be tuned against held-out data
 
 The failure registry in the
 [latest workbench report](docs/evaluation/workbench/latest.md) is **not** a
-defect list: most entries are greedy-baseline failures, which are the reason the
-baseline exists, and the rest are Agent extraction or clarification failures in
-MealCraft itself. Registry composition depends on the generated report; it must
-not be treated as a manually maintained product bug count.
+defect list: every entry in that generated report is a greedy-baseline failure,
+which is the reason the baseline exists. Registry composition depends on the
+generated report; it must not be treated as a manually maintained product bug
+count.
 
 After a set has been inspected and fixes chosen from its results, subsequent
 runs are diagnostics, not fresh held-out evidence. This applies to the exposed

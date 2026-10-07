@@ -11,8 +11,9 @@ the evidence behind plan, budget and Shopping List decisions.
 
 MealCraft currently supports a desktop web product at `1280x720` or larger on
 one surface: a conversation with the week (recipes, tutorial, check-in) and the
-kitchen (cumulative nutrition, Shopping List preview and export) in edge panels
-and overlays, plus sign-in, household profile and status pages. Existing state tests and Playwright tests are
+kitchen (cumulative nutrition, Shopping List preview and export) in the fixed
+three-column kitchen-table workspace, with recipe, nutrition and Shopping List
+overlays, plus sign-in, household profile and status pages. Existing state tests and Playwright tests are
 engineering acceptance evidence. They are not, by themselves, comparative
 Agent capability or human-utility evidence.
 

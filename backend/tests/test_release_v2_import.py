@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.paths import repository_root
 from app.data.allergens import checked_allergens
-from app.data.catalog import import_catalog, load_catalog
+from app.data.catalog import CATALOG_REFRESH_MARKER, import_catalog, load_catalog
 from app.data.release_v2 import RELEASE_VERSION, import_release_v2, map_allergens, release_dir
 from app.db.base import Base
 from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient
@@ -74,7 +74,9 @@ def test_release_is_added_beside_the_curated_catalog(session: Session, release: 
 
 def test_same_release_is_skipped_and_a_changed_one_drops_stale_recipes(session: Session, release: Path) -> None:
     import_release_v2(session, release)
+    first_marker = session.get(CatalogImport, CATALOG_REFRESH_MARKER).digest
     assert import_release_v2(session, release).skipped_unchanged
+    assert session.get(CatalogImport, CATALOG_REFRESH_MARKER).digest == first_marker
 
     with (release / "recipes.jsonl").open(encoding="utf-8") as handle:
         records = [json.loads(line) for line in handle]
@@ -83,6 +85,7 @@ def test_same_release_is_skipped_and_a_changed_one_drops_stale_recipes(session: 
     report = import_release_v2(session, release)
 
     assert not report.skipped_unchanged
+    assert session.get(CatalogImport, CATALOG_REFRESH_MARKER).digest != first_marker
     assert report.recipes_removed == 1
     assert _release_count(session) == SAMPLE - 1
     assert session.scalar(select(Recipe).where(Recipe.external_id == dropped["recipe_id"])) is None

@@ -8,6 +8,7 @@ from app.api.routes.meal_plans import build_meal_plan_service
 from app.db.session import get_db_session
 from app.main import app
 from app.models.meal_plan import MealPlan
+from app.products.provider import FairPriceProductProvider
 from app.schemas.meal_plan import WeeklyMealPlanRequest
 from app.services.product import ProductSearchService
 from tests.test_planning_capability import _dish, dish_client
@@ -24,6 +25,8 @@ def offline_searches(monkeypatch):
         return original(self, query, live=live, **kwargs)
 
     monkeypatch.setattr(ProductSearchService, "search", search)
+    # Confirmation may refresh the chosen basket; never access the real site in a unit test.
+    monkeypatch.setattr(FairPriceProductProvider, "search", lambda *args, **kwargs: [])
     return searched
 
 
