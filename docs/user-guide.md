@@ -89,13 +89,20 @@ change is previewed before anything happens.
 ### 4. Nutrition and the shopping list
 
 The **Groceries** tab shows the total against the weekly budget. The price label
-says where prices came from: FairPrice with the date they were fetched, prices
-saved earlier when FairPrice did not respond, or sample prices. An ingredient
-FairPrice does not stock is listed as not priced. **Preview list** shows the
+says where each item's price came from: a current FairPrice check, a saved
+FairPrice observation with its date, or a sample price. A sample item with no
+matching FairPrice product is explicitly marked as not checked; that is different
+from a check that timed out or returned no selected product. Hover over a price
+note to see the observation and check-attempt times. A known unavailable product
+is labelled unavailable; an ingredient without a priced product remains not
+priced. **Preview list** includes these source notes on the
 sheet as it will print; **Export PDF** opens the browser's print dialog.
 
 The **Nutrition** tab leads with what has been eaten: only meals marked cooked
-count as actuals, shown per meal and per day. The full view has all six
+count as actuals. Choose a day, and a meal when that day has several, to compare
+all six nutrients in **Actual** and **Current plan**. Skipped dishes count in
+neither; Current plan includes cooked dishes. Groceries and Nutrition have their
+own panel space; the next-meal card stays on Meals. The full view has all six
 nutrients per person, a cumulative curve against the plan, and a daily table;
 each dish can be marked cooked, skipped or back to planned there. MealCraft does
 not know about food eaten elsewhere, so this is not complete dietary monitoring.
@@ -116,7 +123,9 @@ Ask in the conversation. Two kinds of change are understood:
   preview lists only the new dishes; the ones that stay are not shown again.
 
 Every change is shown as a preview first, with the new dishes and the grocery
-difference. **Confirm change** applies it; **Keep as is** discards it. A lock's
+difference. With live pricing this is an estimate: only selected products are
+checked again on confirmation, so the confirmed cost may differ without changing
+the dishes. **Confirm change** applies it; **Keep as is** discards it. A lock's
 preview offers **Keep it locked** and **Cancel**. The week's change list dates
 each changed dish by its own day and meal ("Thu dinner"). Cooked
 and locked meals never change, and a stale preview is rejected after another
@@ -188,6 +197,11 @@ Do not add `--volumes` unless the PostgreSQL development volume is intentionally
 being discarded.
 
 ## Current Limitations
+
+Shopping and nutrition totals use the recipe's recorded ingredients and
+quantities. They do not prove that the source recipe lists every ingredient:
+some recipes describe a filling, stock or frying oil only in the steps. Check
+the ingredients against the steps before cooking or treating a total as complete.
 
 The current product supports one profile per authenticated household. Shape
 changes in the conversation are read by rules, not by the model. With a tight

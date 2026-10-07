@@ -2,6 +2,72 @@ import { expect, test, type Page } from "@playwright/test";
 
 const SHOTS = process.env.HOME_SURFACE_SHOTS;
 
+test("New plan keeps its fresh draft when the previous conversation's delayed reply arrives", async ({ page }) => {
+  await stubApi(page);
+  let release!: () => void;
+  const delayed = new Promise<void>((resolve) => { release = resolve; });
+  await page.route("**/api/agent/sessions", async (route) => {
+    await delayed;
+    await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify(session(false)) });
+  });
+
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(page.getByLabel("MealCraft is thinking")).toBeVisible();
+  await page.getByRole("button", { name: /New plan/ }).click();
+  const fresh = "A fresh week for three people";
+  await page.getByLabel("Message MealCraft").fill(fresh);
+  const oldResponse = page.waitForResponse(response => response.url().endsWith("/api/agent/sessions") && response.request().method() === "POST");
+  release();
+  await oldResponse;
+  await expect(page.getByLabel("MealCraft is thinking")).toBeHidden();
+  await expect(page.getByRole("heading", { name: "New plan", exact: true })).toBeVisible();
+  await expect(page.getByLabel("Message MealCraft")).toHaveValue(fresh);
+  await expect(page.getByText("Ready when you are.")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Plan my week" })).toHaveCount(0);
+});
+
+test("New plan supersedes an initial week reopen that has not listed the household's plans yet", async ({ page }) => {
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  await page.route("**/api/**", route => route.fulfill(json({ items: [] })));
+  await stubApi(page);
+  let release!: () => void;
+  const delayed = new Promise<void>((resolve) => { release = resolve; });
+  let plansRequests = 0;
+  let restoreRequests = 0;
+  await page.route("**/api/plans", async (route) => {
+    if (++plansRequests === 1) await delayed;
+    await route.fulfill(json({ items: [{ ...plan, current: true }] }));
+  });
+  await page.route("**/api/agent/sessions?limit=8", (route) => {
+    restoreRequests += 1;
+    return route.fulfill(json({ items: [session(true)] }));
+  });
+  const sent: string[] = [];
+  await page.route("**/api/agent/sessions", (route) => {
+    sent.push(route.request().postDataJSON().message);
+    return route.fulfill({ ...json(session(false)), status: 201 });
+  });
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByRole("button", { name: "Open my week" }).click();
+  await expect.poll(() => plansRequests).toBe(1);
+  await page.getByRole("button", { name: /New plan/ }).click();
+  const fresh = "Dinners for a fresh household of three";
+  await page.getByLabel("Message MealCraft").fill(fresh);
+  await expect(page.getByRole("button", { name: "Send", exact: true })).toBeEnabled();
+  const initialResponse = page.waitForResponse(response => response.url().endsWith("/api/plans") && response.request().method() === "GET");
+  release();
+  await initialResponse;
+  await expect(page.getByRole("heading", { name: "New plan", exact: true })).toBeVisible();
+  await expect(page.getByLabel("Message MealCraft")).toHaveValue(fresh);
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect.poll(() => sent).toEqual([fresh]);
+  expect(restoreRequests).toBe(0);
+});
+
 function isoDay(offset: number) {
   const day = new Date();
   day.setDate(day.getDate() + offset);
@@ -228,6 +294,21 @@ async function planWeek(page: Page) {
   await page.getByRole("button", { name: "Plan my week" }).click();
   await expect(page.getByText("Seven dinners for S$82.60")).toBeVisible();
 }
+
+test("Groceries and Nutrition use the plan panel while Meals keeps Today at 1280x720", async ({ page }) => {
+  await planWeek(page);
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const panel = page.getByRole("complementary", { name: "This week" });
+  await expect(panel.getByRole("region", { name: "Next meal" })).toBeVisible();
+  await panel.getByRole("tab", { name: "Nutrition", exact: true }).click();
+  await expect(panel.getByRole("region", { name: "Next meal" })).toHaveCount(0);
+  await expect(panel.getByRole("button", { name: /All six nutrients/ })).toBeInViewport();
+  await panel.getByRole("tab", { name: "Meals", exact: true }).click();
+  await expect(panel.getByRole("region", { name: "Next meal" })).toBeVisible();
+  await panel.getByRole("tab", { name: /Groceries/ }).click();
+  await expect(panel.getByRole("region", { name: "Next meal" })).toHaveCount(0);
+  await expect(panel.getByRole("button", { name: "Preview list" })).toBeInViewport();
+});
 
 // A conversation still asking what it needs to plan a new week: who the plan serves.
 const asking = {
@@ -1388,4 +1469,75 @@ test("keeping a whole meal previews every dish it keeps, and groceries that do n
     await expect(card.getByRole("button", { name: "Keep it locked" })).toBeInViewport();
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/17-meal-lock-${width}.png` });
   }
+});
+
+test("grocery items and their printed list distinguish missing products from a timed-out price check", async ({ page }) => {
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  // Even a request not used in this focused scenario stays local to its synthetic API.
+  await page.route("**/api/**", route => route.fulfill(json({ items: [] })));
+  await stubApi(page);
+  const observed = "2026-10-02T08:00:00Z";
+  const checked = "2026-10-07T08:30:00Z";
+  const livePlan = {
+    ...plan,
+    grocery_estimate: {
+      ...plan.grocery_estimate,
+      pricing_mode: "live",
+      purchase_total_sgd: 12.9,
+      consumed_total_sgd: 12.9,
+      items: [
+        { ...grocery("Garlic", "Fruit & Vegetables", 2, 100), evidence: {
+          source: "fixture", mode: "fixture", price_source: "no_external_product", lookup_status: "no_external_id",
+          fetched_at: "2026-10-01T08:00:00Z", checked_at: null,
+        } },
+        { ...grocery("Salmon fillet", "Meat & Seafood", 10.9, 300),
+          product: { ...grocery("Salmon fillet", "Meat & Seafood", 10.9, 300).product, source: "fairprice" },
+          evidence: { source: "release_snapshot", mode: "snapshot", price_source: "snapshot", lookup_status: "timeout", fetched_at: observed, checked_at: checked },
+        },
+      ],
+    },
+  };
+  await page.route("**/api/plans/9001", route => route.fulfill(json(livePlan)));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: session(true), plan: livePlan })));
+  await page.route("**/api/agent/sessions/51/messages", route => route.fulfill(json({
+    ...session(true), pending_replan: { ...replanEvent, status: "previewed", applied_revision: null },
+  })));
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await page.getByRole("button", { name: "Plan my week" }).click();
+  const panel = page.getByRole("complementary", { name: "This week" });
+  const noProduct = "Sample price · no matching FairPrice product; not checked";
+  const timedOut = "Saved FairPrice price · 2 Oct · not checked in time";
+  await panel.getByRole("tab", { name: /Groceries/ }).click();
+  for (const [width, height] of [[1280, 720], [1440, 900]] as const) {
+    await page.setViewportSize({ width, height });
+    await expect(panel.getByText(noProduct, { exact: true })).toBeVisible();
+    await expect(panel.getByText(timedOut, { exact: true })).toBeVisible();
+    await expect(panel).not.toContainText("FairPrice didn't respond");
+    const format = (value: string) => new Date(value).toLocaleString("en-SG", { timeZone: "Asia/Singapore" });
+    await expect(panel.getByText(timedOut, { exact: true })).toHaveAttribute("title", `Price observed: ${format(observed)}; check attempted: ${format(checked)}`);
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/18-price-evidence-${width}.png` });
+
+    await panel.getByRole("button", { name: "Preview list" }).click();
+    const sheet = page.getByRole("dialog", { name: "Shopping list preview" });
+    await expect(sheet.getByText(noProduct, { exact: true })).toBeVisible();
+    await expect(sheet.getByText(timedOut, { exact: true })).toBeVisible();
+    await expect(sheet).not.toContainText("FairPrice didn't respond");
+    if (SHOTS) {
+      await sheet.evaluate(async (node) => {
+        await Promise.all(node.getAnimations({ subtree: true }).map(animation => animation.finished.catch(() => {})));
+      });
+      await page.screenshot({ path: `${SHOTS}/19-price-preview-${width}.png` });
+    }
+    await page.emulateMedia({ media: "print" });
+    await expect(page.locator(".mc-print-sheet").getByText(noProduct, { exact: true })).toBeVisible();
+    await expect(page.locator(".mc-print-sheet").getByText(timedOut, { exact: true })).toBeVisible();
+    await page.emulateMedia({ media: "screen" });
+    await sheet.getByRole("button", { name: "Back", exact: true }).click();
+  }
+  await page.getByLabel("Message MealCraft").fill("Swap Friday's dinner");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(page.getByText("Grocery changes are estimates. Selected product prices are checked again when you confirm.", { exact: true })).toBeVisible();
 });

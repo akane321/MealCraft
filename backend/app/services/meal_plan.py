@@ -267,9 +267,9 @@ class WeeklyMealPlanService:
     def cheapest_week(self, constraints: WeeklyMealPlanRequest) -> float:
         """What the cheapest week the planner's cost-led search finds costs at the checkout, nothing saved.
 
-        Every limit but the weekly budget holds. `generate` tries the same search's weeks last under a
-        budget, so any budget of at least this plans (with the same prices). Raises ProductPlanningError
-        when the search finds no week at all.
+        Every limit but the weekly budget holds. Adding a budget can change the bounded candidate
+        packet, so a suggestion must check that amount through the budgeted path before offering it.
+        Raises ProductPlanningError when the search finds no week at all.
         """
         unbudgeted = constraints.model_copy(update={"weekly_budget_sgd": None})
         recipes, candidates = self._checked_candidates(unbudgeted)

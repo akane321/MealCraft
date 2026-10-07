@@ -346,6 +346,25 @@ def test_the_walkthrough_household_is_planned_from_one_search(walked):
     assert walked["plan"].grocery_estimate.purchase_total_sgd <= 100
 
 
+def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
+    """A budget button is checked against the same catalog and planning path as clicking it."""
+    with walked["factory"]() as session:
+        service = agent(session)
+        service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
+        refused = service.create("一共10新币给4个人做一周")
+        options = refused.pending_interaction.options
+        assert [option.label for option in options] == ["一周用 S$53"]
+        assert "改成2 个人" in refused.messages[-1].content
+        assert "S$54" in refused.messages[-1].content
+        assert "减少人数不能降低" in refused.messages[-1].content
+        for chosen in options:
+            ready = service.reply(refused.id, chosen.value)
+            assert ready.can_confirm, (chosen.label, ready.messages[-1].content)
+            assert ready.constraints.household_size == 4
+            confirmed = service.confirm(ready.id)
+            assert confirmed.plan.grocery_estimate.purchase_total_sgd <= ready.constraints.weekly_budget_sgd
+
+
 def test_the_walkthrough_week_found_boring_swaps_its_repeats_within_its_budget(walked):
     plan = walked["plan"]
     served = Counter(dish_family(dish.recipe.title) for dish in plan.days)

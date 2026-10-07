@@ -1,0 +1,969 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-07T15:21:52.122Z",
+  "scope": "Synthetic Sprint1 workflow QA; not comparative Agent evaluation or held-out evidence",
+  "project_base": "f6a73e1b127c3df59583c4b081f00f3afbad9f49",
+  "knowledge_base": "28df048d84bdb7db2d76968ac17f7e0d46663690",
+  "environment": {
+    "isolated_database_copy": true,
+    "original_volumes_unchanged": true,
+    "recipe_release": "v2.1",
+    "desktop_only": true,
+    "synchronous_selected_price_refresh_budget_seconds": 3,
+    "live_api_guard_limit": 24,
+    "final_provider": "fixture"
+  },
+  "static_validation": {
+    "backend_ruff": "PASS: eight changed files",
+    "backend_pytest": {
+      "passed": 343,
+      "scope": "household wording, limits/language, shape changes, released-catalog budget-choice replay",
+      "network_calls": 0,
+      "protected_reads": 0
+    },
+    "frontend_eslint": "PASS",
+    "frontend_vitest": {
+      "passed": 72,
+      "files": 12
+    },
+    "frontend_typecheck": "exit 0; existing Nuxt peer-module warnings retained",
+    "frontend_production_build": "PASS",
+    "playwright": {
+      "passed": 47,
+      "scope": "home-surface, workspace-ui and nutrition-summary; desktop only"
+    }
+  },
+  "runs": [
+    {
+      "source": "fixture-final-1-cold.json",
+      "sha256": "1bf949471c7258b4025bde296febdfa2a5fdb057a8bad2834e71213a713e8861",
+      "provider": "fixture",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "functional_complete": true,
+      "console_errors": [],
+      "horizontal_overflow": false,
+      "actual_openai_requests": 0,
+      "actions": [
+        {
+          "name": "initial_request",
+          "http_status": 201,
+          "seconds": 4.837,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "confirm_week",
+          "http_status": 200,
+          "seconds": 3.919,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "sunday_request",
+          "http_status": 200,
+          "seconds": 0.12,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "confirm_sunday",
+          "http_status": 200,
+          "seconds": 3.135,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "swap_request",
+          "http_status": 200,
+          "seconds": 0.521,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "confirm_swap",
+          "http_status": 200,
+          "seconds": 2.059,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "low_budget_request",
+          "http_status": 201,
+          "seconds": 8.086,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "choose_budget",
+          "http_status": 200,
+          "seconds": 2.692,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "confirm_alternative",
+          "http_status": 200,
+          "seconds": 2.602,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        }
+      ],
+      "initial_request_plus_confirmation_seconds": 8.756,
+      "plans": {
+        "first": {
+          "id": 221,
+          "revision": 1,
+          "dishes": 21,
+          "purchase_total_sgd": 99.73,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "sunday": {
+          "id": 221,
+          "revision": 2,
+          "dishes": 19,
+          "purchase_total_sgd": 97.37,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "swap": {
+          "id": 221,
+          "revision": 3,
+          "dishes": 19,
+          "purchase_total_sgd": 97.37,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "alternative": {
+          "id": 222,
+          "revision": 1,
+          "dishes": 21,
+          "purchase_total_sgd": 51.99,
+          "weekly_budget_sgd": 53,
+          "within_weekly_budget": true
+        }
+      }
+    },
+    {
+      "source": "fixture-final-2-warm.json",
+      "sha256": "dabe950e800d4c8fdef717de5b6fbe3442ccaeaecf745abab10e310a9aabed8f",
+      "provider": "fixture",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "functional_complete": true,
+      "console_errors": [],
+      "horizontal_overflow": false,
+      "actual_openai_requests": 0,
+      "actions": [
+        {
+          "name": "initial_request",
+          "http_status": 201,
+          "seconds": 8.038,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "confirm_week",
+          "http_status": 200,
+          "seconds": 1.008,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "sunday_request",
+          "http_status": 200,
+          "seconds": 0.189,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "confirm_sunday",
+          "http_status": 200,
+          "seconds": 0.263,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "swap_request",
+          "http_status": 200,
+          "seconds": 0.884,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "confirm_swap",
+          "http_status": 200,
+          "seconds": 1.012,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "low_budget_request",
+          "http_status": 201,
+          "seconds": 22.657,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "choose_budget",
+          "http_status": 200,
+          "seconds": 1.911,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "confirm_alternative",
+          "http_status": 200,
+          "seconds": 1.933,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        }
+      ],
+      "initial_request_plus_confirmation_seconds": 9.046,
+      "plans": {
+        "first": {
+          "id": 223,
+          "revision": 1,
+          "dishes": 21,
+          "purchase_total_sgd": 99.7,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "sunday": {
+          "id": 223,
+          "revision": 2,
+          "dishes": 19,
+          "purchase_total_sgd": 97.37,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "swap": {
+          "id": 223,
+          "revision": 3,
+          "dishes": 19,
+          "purchase_total_sgd": 97.37,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "alternative": {
+          "id": 224,
+          "revision": 1,
+          "dishes": 21,
+          "purchase_total_sgd": 51.99,
+          "weekly_budget_sgd": 53,
+          "within_weekly_budget": true
+        }
+      }
+    },
+    {
+      "source": "fixture-final-3-warm.json",
+      "sha256": "6368befb5e023615f3946bd91392531459aa74c79b6adbd0ed80c16dc75b5ea3",
+      "provider": "fixture",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "functional_complete": true,
+      "console_errors": [],
+      "horizontal_overflow": false,
+      "actual_openai_requests": 0,
+      "actions": [
+        {
+          "name": "initial_request",
+          "http_status": 201,
+          "seconds": 5.734,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "confirm_week",
+          "http_status": 200,
+          "seconds": 0.909,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "sunday_request",
+          "http_status": 200,
+          "seconds": 0.107,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "confirm_sunday",
+          "http_status": 200,
+          "seconds": 0.131,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "swap_request",
+          "http_status": 200,
+          "seconds": 0.534,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "confirm_swap",
+          "http_status": 200,
+          "seconds": 0.912,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "low_budget_request",
+          "http_status": 201,
+          "seconds": 9.651,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "choose_budget",
+          "http_status": 200,
+          "seconds": 1.817,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        },
+        {
+          "name": "confirm_alternative",
+          "http_status": 200,
+          "seconds": 1.939,
+          "run_config": {
+            "parser": "fixture",
+            "parser_model": null
+          }
+        }
+      ],
+      "initial_request_plus_confirmation_seconds": 6.643,
+      "plans": {
+        "first": {
+          "id": 225,
+          "revision": 1,
+          "dishes": 21,
+          "purchase_total_sgd": 99.7,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "sunday": {
+          "id": 225,
+          "revision": 2,
+          "dishes": 19,
+          "purchase_total_sgd": 97.37,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "swap": {
+          "id": 225,
+          "revision": 3,
+          "dishes": 19,
+          "purchase_total_sgd": 97.37,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "alternative": {
+          "id": 226,
+          "revision": 1,
+          "dishes": 21,
+          "purchase_total_sgd": 51.99,
+          "weekly_budget_sgd": 53,
+          "within_weekly_budget": true
+        }
+      }
+    },
+    {
+      "source": "openai-final-1-cold.json",
+      "sha256": "6c7f74f9f51396307f172c834630d2ba5137575e0d0ea6347c35b1cf5cfc31b2",
+      "provider": "openai",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "functional_complete": true,
+      "console_errors": [],
+      "horizontal_overflow": false,
+      "actual_openai_requests": 4,
+      "actions": [
+        {
+          "name": "initial_request",
+          "http_status": 201,
+          "seconds": 6.625,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "confirm_week",
+          "http_status": 200,
+          "seconds": 3.919,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "sunday_request",
+          "http_status": 200,
+          "seconds": 0.125,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "confirm_sunday",
+          "http_status": 200,
+          "seconds": 3.161,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "swap_request",
+          "http_status": 200,
+          "seconds": 2.127,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "confirm_swap",
+          "http_status": 200,
+          "seconds": 3.942,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "low_budget_request",
+          "http_status": 201,
+          "seconds": 10.711,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "choose_budget",
+          "http_status": 200,
+          "seconds": 4.279,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "confirm_alternative",
+          "http_status": 200,
+          "seconds": 3.908,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        }
+      ],
+      "initial_request_plus_confirmation_seconds": 10.543,
+      "plans": {
+        "first": {
+          "id": 233,
+          "revision": 1,
+          "dishes": 21,
+          "purchase_total_sgd": 99.7,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "sunday": {
+          "id": 233,
+          "revision": 2,
+          "dishes": 19,
+          "purchase_total_sgd": 97.37,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "swap": {
+          "id": 233,
+          "revision": 3,
+          "dishes": 19,
+          "purchase_total_sgd": 100.27,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": false
+        },
+        "alternative": {
+          "id": 234,
+          "revision": 1,
+          "dishes": 21,
+          "purchase_total_sgd": 51.99,
+          "weekly_budget_sgd": 53,
+          "within_weekly_budget": true
+        }
+      }
+    },
+    {
+      "source": "openai-final-2-warm.json",
+      "sha256": "2e8d9c08c9fbe246ae1964251398899250547dabd653bfea898f2157c006d71a",
+      "provider": "openai",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "functional_complete": true,
+      "console_errors": [],
+      "horizontal_overflow": false,
+      "actual_openai_requests": 4,
+      "actions": [
+        {
+          "name": "initial_request",
+          "http_status": 201,
+          "seconds": 9.982,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "confirm_week",
+          "http_status": 200,
+          "seconds": 0.933,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "sunday_request",
+          "http_status": 200,
+          "seconds": 0.119,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "confirm_sunday",
+          "http_status": 200,
+          "seconds": 0.173,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "swap_request",
+          "http_status": 200,
+          "seconds": 1.462,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "confirm_swap",
+          "http_status": 200,
+          "seconds": 0.952,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "low_budget_request",
+          "http_status": 201,
+          "seconds": 12.754,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "choose_budget",
+          "http_status": 200,
+          "seconds": 3.418,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "confirm_alternative",
+          "http_status": 200,
+          "seconds": 1.867,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        }
+      ],
+      "initial_request_plus_confirmation_seconds": 10.915,
+      "plans": {
+        "first": {
+          "id": 235,
+          "revision": 1,
+          "dishes": 21,
+          "purchase_total_sgd": 99.7,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "sunday": {
+          "id": 235,
+          "revision": 2,
+          "dishes": 19,
+          "purchase_total_sgd": 97.37,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "swap": {
+          "id": 235,
+          "revision": 3,
+          "dishes": 19,
+          "purchase_total_sgd": 100.27,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": false
+        },
+        "alternative": {
+          "id": 236,
+          "revision": 1,
+          "dishes": 21,
+          "purchase_total_sgd": 51.99,
+          "weekly_budget_sgd": 53,
+          "within_weekly_budget": true
+        }
+      }
+    },
+    {
+      "source": "openai-final-3-warm.json",
+      "sha256": "cebab17c7d0d04789dcaea10a0f75c68da985cd19a1aacd24fb33f32f37ad11e",
+      "provider": "openai",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "functional_complete": true,
+      "console_errors": [],
+      "horizontal_overflow": false,
+      "actual_openai_requests": 4,
+      "actions": [
+        {
+          "name": "initial_request",
+          "http_status": 201,
+          "seconds": 7.698,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "confirm_week",
+          "http_status": 200,
+          "seconds": 0.924,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "sunday_request",
+          "http_status": 200,
+          "seconds": 0.119,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "confirm_sunday",
+          "http_status": 200,
+          "seconds": 0.174,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "swap_request",
+          "http_status": 200,
+          "seconds": 1.148,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "confirm_swap",
+          "http_status": 200,
+          "seconds": 0.957,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "low_budget_request",
+          "http_status": 201,
+          "seconds": 10.518,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "choose_budget",
+          "http_status": 200,
+          "seconds": 4.732,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        },
+        {
+          "name": "confirm_alternative",
+          "http_status": 200,
+          "seconds": 1.903,
+          "run_config": {
+            "parser": "openai",
+            "parser_model": "gpt-5.4-mini",
+            "ingredient_vectors": "text-embedding-3-small@256",
+            "recipe_vectors": "text-embedding-3-small@256"
+          }
+        }
+      ],
+      "initial_request_plus_confirmation_seconds": 8.622,
+      "plans": {
+        "first": {
+          "id": 237,
+          "revision": 1,
+          "dishes": 21,
+          "purchase_total_sgd": 99.7,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "sunday": {
+          "id": 237,
+          "revision": 2,
+          "dishes": 19,
+          "purchase_total_sgd": 97.37,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": true
+        },
+        "swap": {
+          "id": 237,
+          "revision": 3,
+          "dishes": 19,
+          "purchase_total_sgd": 100.27,
+          "weekly_budget_sgd": 100,
+          "within_weekly_budget": false
+        },
+        "alternative": {
+          "id": 238,
+          "revision": 1,
+          "dishes": 21,
+          "purchase_total_sgd": 51.99,
+          "weekly_budget_sgd": 53,
+          "within_weekly_budget": true
+        }
+      }
+    }
+  ],
+  "arithmetic": {
+    "fixture": {
+      "plan_snapshots": 12,
+      "scripted_assertions": 3657,
+      "scripted_errors": 0,
+      "scripted_unverified_items": 0,
+      "source": "final-arithmetic-review.md",
+      "sha256": "09e1c8a1ddc2138010b77ecdebf3d43ef640a6d32daba9eeec66e3c5cfa0f7c5"
+    },
+    "openai": {
+      "files": 3,
+      "plan_snapshots": 12,
+      "scripted_assertions": 3657,
+      "scripted_errors": 0,
+      "scripted_unverified_items": 0,
+      "supplemental_consistency_checks": 57,
+      "supplemental_consistency_failures": 0,
+      "result": "PASS within declared arithmetic/consistency scope",
+      "source": "model-final-arithmetic-review.json",
+      "sha256": "c56799bd551146341a5b4baeeea4b53881131d993f67bc3d5e4890a509b9bdc8"
+    },
+    "meaning": "Individual assertions, not additional test cases. Does not prove ingredient completeness or true cooking nutrition/cost."
+  },
+  "ui_readback": {
+    "source": "openai-ui-readback.json",
+    "sha256": "51520a0bba3c5611c403986bbbf7b767beeed78e80285ae84f261d0d9a4ca862",
+    "dashboards": [
+      {
+        "file": "openai-final-1-cold.json",
+        "plan_id": 233,
+        "revision": 3,
+        "mismatches": 0
+      },
+      {
+        "file": "openai-final-2-warm.json",
+        "plan_id": 235,
+        "revision": 3,
+        "mismatches": 0
+      },
+      {
+        "file": "openai-final-3-warm.json",
+        "plan_id": 237,
+        "revision": 3,
+        "mismatches": 0
+      }
+    ],
+    "desktops": [
+      {
+        "width": 1280,
+        "height": 720,
+        "swap_recipe_visible": true,
+        "confirmed_cost_visible": true,
+        "console_errors": []
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "swap_recipe_visible": true,
+        "confirmed_cost_visible": true,
+        "console_errors": []
+      }
+    ],
+    "actual_openai_requests": 0
+  },
+  "strict_fixture_ui": {
+    "source": "fixture-ui-verified-warm.json",
+    "sha256": "8a4bd764fded11b3a1932dc7a808e6ff5ba378deaac7db40a56669ef3653fd5e",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "complete": true,
+    "console_errors": [],
+    "actual_openai_requests": 0,
+    "assertion": "Each confirmation waits for every rendered recipe and the confirmed cost, not just HTTP success."
+  },
+  "actual_openai_requests_total": 24,
+  "live_request_accounting": "24 includes three earlier API-only flows (12 requests) and the final three flows (12 requests); HTTP attempts include embeddings and retries. Readback and fixture QA add zero requests. No additional paid call is authorized.",
+  "latency_acceptance": {
+    "passed": false,
+    "initial_send_to_week_budget_seconds": 6,
+    "low_budget_reply_budget_seconds": 6,
+    "limitation": "Recorded action time is click-to-HTTP-response, not full render-to-render wall time. Request-plus-confirmation sums already exceed 6s. Fixture warm run 2 overlapped CPU tests. These are workflow-QA observations, not a controlled performance benchmark or proof of the one-minute demo gate."
+  },
+  "known_limits": [
+    "Source recipes omit some filling, broth or frying oil; owner chose record-only data handoff, with no candidate filtering or fabricated quantities.",
+    "OpenAI swap preview explicitly offers S$100.30 (+S$0.30); confirmation reprices to S$100.27 (+S$0.27). Within-budget=false and warnings are truthful. ADR-0060 permits the explicitly previewed least-excess option when no eligible within-ceiling option is found; this QA does not independently prove optimality of that search.",
+    "Ignoring stale frontend responses does not cancel HTTP requests or backend writes.",
+    "OpenAI final screenshots waited for cost, while the separate persisted-plan readback verifies the new recipe after dashboard loading. A subsequent fixture flow uses the stronger all-recipes-and-cost wait. No further live repeat was performed after consuming the cap.",
+    "Full source-data completeness and unchanged latency gates remain unaccepted; a green CI is not proof of them."
+  ]
+}

@@ -56,15 +56,41 @@ export function groceryGroups(items: GroceryLineEstimate[]): Array<{ name: strin
  * fell back to sample data must not be labelled as FairPrice prices.
  */
 export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
-  const products = estimate.items.map(line => line.product).filter(product => product !== null);
-  const samples = products.filter(product => product.source !== "fairprice").length;
-  if (!products.length || samples === products.length) {
-    return estimate.pricing_mode === "live" ? "Sample prices: FairPrice didn't respond" : "Sample prices";
-  }
-  if (samples) return "Some prices are samples: FairPrice didn't respond";
-  const fetched = products.map(product => product.fetched_at).sort()[0]!;
+  const lines = estimate.items.filter(line => line.product && line.packages_required > 0);
+  const samples = lines.filter(line => line.product!.source !== "fairprice").length;
+  if (!lines.length || samples === lines.length) return "Sample prices";
+  if (samples) return "FairPrice and sample prices — source shown on each item";
+  const fetched = lines.map(line => line.evidence?.fetched_at ?? line.product!.fetched_at).sort()[0]!;
   const date = new Date(fetched).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
   return `FairPrice prices from ${date}`;
+}
+
+/** An observation's date is never replaced by the time a later price check was attempted. */
+export function groceryPriceLabel(line: GroceryLineEstimate): string {
+  if (!line.product) return "Not priced";
+  const evidence = line.evidence;
+  const source = evidence?.price_source ?? evidence?.mode;
+  if (source === "no_external_product") return "Sample price · no matching FairPrice product; not checked";
+  const sample = source === "fixture" || line.product.source === "fixture";
+  const date = new Date(evidence?.fetched_at ?? line.product.fetched_at).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
+  const base = sample ? "Sample price" : `${source === "live" ? "FairPrice" : "Saved FairPrice"} price · ${date}`;
+  switch (evidence?.lookup_status) {
+    case "timeout": return `${base} · not checked in time`;
+    case "selected_product_not_returned": return `${base} · selected product not found`;
+    case "out_of_stock": return `${base} · product marked unavailable`;
+    case "provider_error":
+    case "schema_drift":
+    case "invalid_price": return `${base} · current price could not be checked`;
+    default: return base;
+  }
+}
+
+export function groceryPriceTimes(line: GroceryLineEstimate): string | undefined {
+  if (!line.product) return undefined;
+  const format = (value: string) => new Date(value).toLocaleString("en-SG", { timeZone: "Asia/Singapore" });
+  const observed = line.evidence?.fetched_at ?? line.product.fetched_at;
+  const checked = line.evidence?.checked_at;
+  return `Price observed: ${format(observed)}${checked ? `; check attempted: ${format(checked)}` : ""}`;
 }
 
 /**
