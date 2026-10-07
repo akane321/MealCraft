@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatSgd, groceryGroups, packageLabel, priceSourceLabel } from "~/lib/home-surface";
+import { formatSgd, groceryGroups, groceryPriceLabel, packageLabel, priceSourceLabel } from "~/lib/home-surface";
 import type { WeeklyGroceryEstimate } from "~/types/meal-plan";
 
 const props = defineProps<{
@@ -27,6 +27,7 @@ const groups = computed(() => groceryGroups(props.estimate.items));
             {{ line.ingredient_display_name }}
             <small v-if="line.pantry_deduction > 0">uses {{ line.pantry_deduction }}{{ line.unit ? ` ${line.unit}` : "" }} from home</small>
             <small v-if="line.note">{{ line.note }}</small>
+            <small>{{ groceryPriceLabel(line) }}</small>
           </span>
           <span class="pack">{{ packageLabel(line) }}</span>
           <span class="price">{{ formatSgd(line.purchase_cost_sgd) }}</span>

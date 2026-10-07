@@ -1,3 +1,4 @@
+import math
 import re
 from collections.abc import Callable
 from datetime import date, timedelta
@@ -538,11 +539,34 @@ class AgentSessionService:
             return None
 
     def _cheapest(self, request: WeeklyMealPlanRequest) -> Callable[..., float | None]:
-        """What the cheapest week the planner's search finds for `request` with changes costs; None for none."""
+        """A found week's cost, backed by the same budgeted path that clicking its suggestion uses."""
 
         def cheapest(**changes) -> float | None:
             try:
-                return self.meal_plan_service.cheapest_week(request.model_copy(update=changes))
+                candidate = request.model_copy(update=changes)
+                cost = self.meal_plan_service.cheapest_week(candidate)
+                error = self.meal_plan_service.check(
+                    candidate.model_copy(update={"weekly_budget_sgd": math.ceil(cost)})
+                )
+                if error is None:
+                    return cost
+                # Adding a budget changes the bounded candidate packet. Its own cost-led search may
+                # find a dearer witness; verify that amount too, rather than offer the unrepeatable one.
+                backed = [
+                    attempt["purchase_total_sgd"]
+                    for attempt in error.trace.get("validation_attempts", [])
+                    if attempt.get("cheapest_search") and limits._failed(attempt) == {"purchase_budget"}
+                ]
+                if backed:
+                    cost = min(backed)
+                    if (
+                        self.meal_plan_service.check(
+                            candidate.model_copy(update={"weekly_budget_sgd": math.ceil(cost)})
+                        )
+                        is None
+                    ):
+                        return cost
+                return None
             except (ProductProviderError, WeeklyPlanSelectionError):
                 return None
 

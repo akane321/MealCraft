@@ -282,6 +282,7 @@ class RuleBasedConstraintParser:
                 r"(\d+)\s*(?:people|persons?|人|个人)",
                 r"\bthe\s+(?!1\b)(\d+)\s+of us\b",
                 rf"(?:for|serving|family of)\s*(\d+)(?![\d.]){NOT_EATERS}\s*(?:people|persons?)?",
+                r"\b(?:we're|we are)\s+(\d+)(?=\s*(?:[,;:!?]|\.(?:\s|$)|$))",
             ],
         )
         if people is None:
@@ -291,6 +292,7 @@ class RuleBasedConstraintParser:
                 re.search(rf"\b(?:for|serving|family of)\s+({words})\b{NOT_EATERS}", lower)
                 or re.search(rf"\b({words})\s+(?:people|persons?|adults?)\b", lower)
                 or re.search(rf"\bthe\s+(?!one\b)({words})\s+of us\b", lower)
+                or re.search(rf"\b(?:we're|we are)\s+({words})\b(?=\s*(?:[,.;:!?]|$))", lower)
             )
             if match:
                 people = NUMBER_WORDS[match.group(1)]

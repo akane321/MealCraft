@@ -255,6 +255,47 @@ def test_an_impossible_budget_is_refused_up_front_in_both_parser_modes(client):
     assert plans(client, ready)["grocery_estimate"]["purchase_total_sgd"] <= math.ceil(cost)
 
 
+@pytest.mark.parametrize("verified", [True, False])
+def test_a_budget_suggestion_rechecks_the_budgeted_packet_before_offering(verified):
+    checked = []
+    over = ProductPlanningError(
+        "infeasible",
+        "The budgeted packet needs more.",
+        {
+            "validation_attempts": [
+                {
+                    "cheapest_search": True,
+                    "purchase_total_sgd": 53.70,
+                    "checks": [{"code": "purchase_budget", "status": "failed", "hard": True}],
+                }
+            ]
+        },
+    )
+
+    def check(request):
+        checked.append(request)
+        return None if verified and request.weekly_budget_sgd == 54 else over
+
+    service = SimpleNamespace(meal_plan_service=SimpleNamespace(cheapest_week=lambda _: 40.80, check=check))
+    request = WeeklyMealPlanRequest(
+        start_date="2026-10-07", household_size=4, weekly_budget_sgd=10, allergens=["peanut"]
+    )
+    cost = AgentSessionService._cheapest(service, request)(household_size=2)
+    assert cost == (53.70 if verified else None)
+    assert [item.weekly_budget_sgd for item in checked] == [41, 54]
+    assert all(item.household_size == 2 and item.allergens == ["peanut"] for item in checked)
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_a_smaller_household_that_is_not_cheaper_is_explained_instead_of_offered(lang):
+    constraints = AgentConstraintState(household_size=4, weekly_budget_sgd=10)
+    refusal = _budget_short(52.83, constraints, lang, lambda **_: 53.70)
+    assert len(refusal.options) == 1
+    assert "53" in refusal.options[0][0]
+    assert "S$54" in refusal.text
+    assert ("does not lower" if lang == "en" else "不能降低") in refusal.text
+
+
 def no_check_up_front(monkeypatch):
     monkeypatch.setattr(AgentSessionService, "_refusal", lambda self, constraints, lang: None)
 
@@ -714,13 +755,16 @@ def test_a_budget_only_the_cap_on_uses_rules_out_is_refused_up_front(packaged):
     assert cheapest_quoted(reply) > 15
 
 
-def test_a_budget_under_the_floor_is_refused_without_planning_the_week(packaged, monkeypatch):
+def test_a_budget_under_the_floor_skips_that_week_but_checks_offered_budgets(packaged, monkeypatch):
     checked = []
     monkeypatch.setattr(WeeklyMealPlanService, "check", lambda self, constraints: checked.append(constraints))
     session = packaged.post("/api/agent/sessions", json={"message": "Dinners for 4, no dish twice, S$1 total"}).json()
 
-    assert not checked  # the floor already proves it: only the cheapest week is searched for
     cost = cheapest_quoted(session["messages"][-1]["content"])
+    # The floor proves the requested S$1 week cannot fit; only proposed alternatives enter check.
+    assert checked and all(request.weekly_budget_sgd > 1 for request in checked)
+    assert checked[0].household_size == 4 and checked[0].weekly_budget_sgd == math.ceil(cost)
+    assert all(request.max_uses_per_recipe == 1 for request in checked)
     assert labels(session)[0] == f"Use S${math.ceil(cost)} for the week"
 
 

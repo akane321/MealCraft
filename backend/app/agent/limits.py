@@ -8,8 +8,8 @@ search within a reply, only what the floor proves is refused, and Plan answers t
 found no week, `planning_failure` names the limit its trace shows the search kept running into; a search that
 found nothing proves nothing about every week, so it never says no week exists.
 
-A budget is only ever offered when a real week backs it: the planner's cheapest-week search found that
-week, and it plans again under any budget of its cost or more (planning/product_path.py).
+A budget is offered only when a real week backs it. The suggestion's amount is checked through the
+same budgeted planning path used when the household accepts it, not inferred from an unbudgeted search.
 """
 
 import math
@@ -254,6 +254,8 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
             options.append(
                 _option("fewer_people_at", lang, count=fewer, people=people(fewer, lang), amount=math.ceil(smaller))
             )
+    elif smaller is not None:
+        text += " " + say("fewer_not_cheaper", lang, people=people(fewer, lang), amount=math.ceil(smaller))
     return Refusal("weekly_budget_sgd", text, tuple(options))
 
 
