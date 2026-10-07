@@ -97,6 +97,7 @@ def _fixture_records(path: str) -> list[dict]:
 class FixtureProductProvider:
     def __init__(self, fixture_path: str) -> None:
         self.fixture_path = Path(fixture_path)
+        self._ranked: dict[str, list[dict]] = {}
 
     def search(self, query: str, *, limit: int) -> list[ProductResponse]:
         normalized_query = normalize_search_text(query)
@@ -106,23 +107,27 @@ class FixtureProductProvider:
         except (OSError, json.JSONDecodeError) as error:
             raise ProductProviderError(f"Fixture products could not be loaded: {error}") from error
 
-        ranked: list[tuple[int, dict]] = []
-        query_tokens = search_tokens(normalized_query)
-        for record in records:
-            ingredient_keys = set(record.get("ingredient_keys", []))
-            name = normalize_search_text(record["name"])
-            name_tokens = search_tokens(name)
-            if query_key in ingredient_keys:
-                score = 100
-            elif query_tokens and query_tokens.issubset(name_tokens):
-                score = 80
-            elif normalized_query in name:
-                score = 60
-            else:
-                continue
-            ranked.append((score, record))
+        # A request prices the same ingredient in many recipes. Reuse only the
+        # immutable fixture ranking, not response objects or observation times.
+        if normalized_query not in self._ranked:
+            ranked: list[tuple[int, dict]] = []
+            query_tokens = search_tokens(normalized_query)
+            for record in records:
+                ingredient_keys = set(record.get("ingredient_keys", []))
+                name = normalize_search_text(record["name"])
+                name_tokens = search_tokens(name)
+                if query_key in ingredient_keys:
+                    score = 100
+                elif query_tokens and query_tokens.issubset(name_tokens):
+                    score = 80
+                elif normalized_query in name:
+                    score = 60
+                else:
+                    continue
+                ranked.append((score, record))
 
-        ranked.sort(key=lambda item: (-item[0], float(item[1]["price_sgd"]), item[1]["external_id"]))
+            ranked.sort(key=lambda item: (-item[0], float(item[1]["price_sgd"]), item[1]["external_id"]))
+            self._ranked[normalized_query] = [record for _, record in ranked]
         fetched_at = datetime.now(UTC)
         return [
             ProductResponse(
@@ -139,7 +144,7 @@ class FixtureProductProvider:
                 source="fixture",
                 fetched_at=fetched_at,
             )
-            for _, record in ranked[:limit]
+            for record in self._ranked[normalized_query][:limit]
         ]
 
 
