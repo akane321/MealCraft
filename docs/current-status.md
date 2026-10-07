@@ -4,7 +4,7 @@
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `ba75d1c` (offline candidate pricing, #240)
+> Verified remote `main`: `136a9ca` (reviewed integration through #241)
 
 The owner merged the first WP1 price-strategy slice (#240). Candidate selection,
 affordability/refusal calculations and replanning previews now explicitly use
@@ -15,13 +15,24 @@ six optional migration tests skipped). Protected held-out episodes, labels and
 metrics were not used for implementation decisions, and their reports were not
 changed. The paired knowledge record was merged.
 
-This is **not yet** the final-basket live-price implementation or the chat-speed
-optimization. In the isolated real demo stack, the first slice alone did not
-meet the six-second end-to-end target: step 2 was 9.66 s cold / 6.13 s warm,
-and step 6 was 9.66 s cold / 9.79 s warm. These are single-run observations,
-not an estimate of average performance. Final-basket lookup and result-preserving
-reuse optimization are separate pending slices; their API target is specified
-in [API contracts](api-contracts.md).
+The owner also merged #242: final-basket repricing refreshes only the already
+selected products, with at most eight concurrent lookups and one shared
+three-second deadline. Each line reports its source, lookup outcome and time;
+an item without a real product ID is distinguished from a timed-out lookup.
+Live repricing does not replace dishes or products to hide an over-budget total.
+The exact fields and fallback semantics are in [API contracts](api-contracts.md).
+
+The reviewed integration additionally merged #236 (planning-pool refresh
+backoff), #237 (retry after a transient ingredient-override load failure), #238
+(catalog-import refresh markers across processes), and #241 (planning/display
+regression guards). Their required GitHub checks passed before merge. The
+paired knowledge records were merged; no frontend implementation, migration
+or search-policy change was added in this review.
+
+WP1 **chat-speed acceptance remains open**. These merged improvements do not
+establish that step 2 and step 6 meet the six-second end-to-end target under
+the required cold and warmed OpenAI demo conditions. Result-preserving reuse
+is a separate implementation checkpoint, not a completed demo acceptance.
 
 ### Previously verified walkthrough snapshot (2026-10-06)
 
