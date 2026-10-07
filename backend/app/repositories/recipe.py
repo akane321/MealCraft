@@ -6,11 +6,13 @@ from functools import cache
 from typing import get_args
 
 from sqlalchemy import Engine, Select, exists, or_, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.config import get_settings
 from app.core.paths import repository_root
-from app.models.recipe import Ingredient, Recipe, RecipeIngredient
+from app.data.catalog import CATALOG_REFRESH_MARKER
+from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient
 from app.planning.grocery_estimator import priceable_ingredients
 from app.planning.recipe_quality import incomplete
 from app.schemas.planning_v2 import DishCourse
@@ -109,12 +111,30 @@ def _reload_pool(bind: Engine, *, maximum_age: float | None = None, log_failure:
     return None
 
 
+def _catalog_change_marker(bind: Engine) -> tuple[bool, str | None]:
+    try:
+        with Session(bind=bind) as session:
+            marker = session.get(CatalogImport, CATALOG_REFRESH_MARKER)
+            return True, marker.digest if marker is not None else None
+    except SQLAlchemyError:
+        return False, None
+
+
 def keep_planning_pool_warm(bind: Engine, stop: threading.Event) -> None:
     """Loads `bind`'s planning pool, and again whenever it is half PLANNING_POOL_CACHE_SECONDS old or an edit
     dropped it, until `stop` is set. Requests go on planning from the pool in hand meanwhile."""
     failure_delay = POOL_CHECK_SECONDS
     consecutive_failures = 0
+    marker_available, last_catalog_marker = _catalog_change_marker(bind)
     while True:
+        current_marker_available, current_catalog_marker = _catalog_change_marker(bind)
+        if current_marker_available:
+            if marker_available and current_catalog_marker != last_catalog_marker:
+                clear_planning_pool()
+            elif not marker_available and id(bind) in _planning_pool:
+                clear_planning_pool()
+            marker_available = True
+            last_catalog_marker = current_catalog_marker
         cached = _planning_pool.get(id(bind))
         half_life = get_settings().planning_pool_cache_seconds / 2
         if (cached is None or time.monotonic() - cached[0] >= half_life) and id(bind) not in _reloading:

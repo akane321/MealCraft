@@ -6,10 +6,10 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
 from app.core.paths import repository_root
-from app.data.catalog import Catalog, import_catalog, load_catalog
+from app.data.catalog import CATALOG_REFRESH_MARKER, Catalog, import_catalog, load_catalog
 from app.db.base import Base
 from app.evaluation.runner import evaluate
-from app.models.recipe import Ingredient, Recipe
+from app.models.recipe import CatalogImport, Ingredient, Recipe
 
 ROOT = repository_root()
 INGREDIENTS = ROOT / "data/ingredients/ingredients.json"
@@ -61,9 +61,19 @@ def test_catalog_import_is_idempotent() -> None:
 
     with Session(engine) as session:
         import_catalog(session, catalog)
+        first_marker = session.get(CatalogImport, CATALOG_REFRESH_MARKER).digest
         import_catalog(session, catalog)
         assert session.scalar(select(func.count()).select_from(Recipe)) == len(catalog.recipes)
         assert session.scalar(select(func.count()).select_from(Ingredient)) == len(catalog.ingredients)
+        assert session.get(CatalogImport, CATALOG_REFRESH_MARKER).digest != first_marker
+        assert (
+            session.scalar(
+                select(func.count())
+                .select_from(CatalogImport)
+                .where(CatalogImport.release_version == CATALOG_REFRESH_MARKER)
+            )
+            == 1
+        )
 
 
 def test_mvp_evaluation_quality_gates_pass() -> None:
