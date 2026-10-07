@@ -10,6 +10,7 @@
   11 s in OpenAI mode); it is now loaded again in the background before it ages.
 """
 
+import logging
 import re
 import threading
 import time
@@ -547,6 +548,58 @@ def test_a_background_load_does_not_hold_up_a_request(monkeypatch, loads, clock)
             warm.join()
         assert recipes.list_for_planning() != first  # the successor, loaded meanwhile
         assert loads == ["MainThread", "warm"]
+
+
+def test_the_warmer_rechecks_age_after_a_request_loaded_the_pool(loads, clock):
+    """A warmer that observed an old pool before waiting for the lock does not replace a request's fresh load."""
+    from app.repositories.recipe import _reload_pool
+
+    with pooled() as session:
+        recipes = RecipeRepository(session)
+        recipes.list_for_planning()
+        clock.seconds += 301
+        recipes.list_for_planning()
+
+        assert _reload_pool(session.get_bind(), maximum_age=150) is None
+        assert loads == ["MainThread", "MainThread"]
+
+
+def test_the_warmer_backs_off_and_only_the_first_failure_has_a_traceback(monkeypatch, caplog):
+    from app.repositories.recipe import _reloading as active_reloads
+    from app.repositories.recipe import keep_planning_pool_warm
+
+    outcomes = [
+        RuntimeError("database unavailable"),
+        RuntimeError("still unavailable"),
+        None,
+        RuntimeError("down again"),
+    ]
+
+    class RecordingStop:
+        def __init__(self):
+            self.waits: list[float] = []
+
+        def wait(self, seconds):
+            self.waits.append(seconds)
+            return len(self.waits) == 4
+
+    stop = RecordingStop()
+
+    def reload_outcome(bind, **_kwargs):
+        active_reloads.discard(id(bind))
+        return outcomes.pop(0)
+
+    monkeypatch.setattr("app.repositories.recipe._reload_pool", reload_outcome)
+    monkeypatch.setattr("app.repositories.recipe.POOL_CHECK_SECONDS", 0.01)
+    monkeypatch.setattr("app.repositories.recipe.POOL_FAILURE_BACKOFF_MAX_SECONDS", 0.04)
+
+    with caplog.at_level(logging.WARNING, logger="app.repositories.recipe"):
+        keep_planning_pool_warm(object(), stop)
+
+    records = [record for record in caplog.records if "planning pool" in record.getMessage()]
+    assert outcomes == []
+    assert stop.waits == [0.01, 0.02, 0.01, 0.01]
+    assert [record.exc_info is not None for record in records] == [True, False, True]
 
 
 def test_a_pool_load_that_an_edit_overtook_is_not_kept(monkeypatch):
