@@ -566,16 +566,16 @@ def test_keep_as_is_says_the_week_stays(client, message, discarded):
 
 
 @pytest.mark.parametrize(
-    ("two", "labels"),
+    ("two", "labels", "no_lower_budget"),
     [
-        (40.2, ["Use S$24 for the week"]),  # the walkthrough's "2 people at S$41" beside S$24 for 4
-        (23.5, ["Use S$24 for the week"]),  # no cheaper
-        (15.3, ["Use S$24 for the week", "2 people at S$16 a week"]),
-        (9.5, ["Use S$24 for the week", "Plan for 2 people"]),
-        (None, ["Use S$24 for the week"]),  # no week found for two
+        (40.2, ["Use S$24 for the week"], 41),  # the walkthrough's "2 people at S$41" beside S$24 for 4
+        (23.5, ["Use S$24 for the week"], 24),  # no cheaper whole-dollar budget
+        (15.3, ["Use S$24 for the week", "2 people at S$16 a week"], None),
+        (9.5, ["Use S$24 for the week", "Plan for 2 people"], None),
+        (None, ["Use S$24 for the week"], None),  # no week found for two
     ],
 )
-def test_fewer_people_are_offered_only_when_a_real_week_backs_it_for_less(two, labels):
+def test_fewer_people_are_offered_only_when_a_real_week_backs_it_for_less(two, labels, no_lower_budget):
     constraints = AgentConstraintState(household_size=4, weekly_budget_sgd=10)
 
     refusal = _budget_short(
@@ -583,10 +583,16 @@ def test_fewer_people_are_offered_only_when_a_real_week_backs_it_for_less(two, l
     )
 
     assert [label for label, _ in refusal.options] == labels
-    assert refusal.text == (
+    expected = (
         "S$10 a week for 4 people comes to about S$0.36 a person a meal (7 meals). "
         "The cheapest week I could find costs S$23.36."
     )
+    if no_lower_budget is not None:
+        expected += (
+            f" For 2 people, the plan I could verify needs a S${no_lower_budget} budget, "
+            "so reducing the household does not lower the budget I can suggest."
+        )
+    assert refusal.text == expected
     chinese = _budget_short(23.36, constraints, "zh", lambda **changes: None)
     assert chinese.text == "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$23.36。"
 
