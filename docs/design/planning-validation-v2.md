@@ -3,7 +3,8 @@
 How the finished planning engine becomes the thing a user actually gets, and
 which deepenings follow. Decision: private `ADR-0033`; it amends `ADR-0014` and
 works inside `ADR-0021` (exact-cent purchasing), `ADR-0024` section 5 (meal type
-is a preference), `ADR-0025` (nutrition scopes) and `ADR-0031` (console,
+is a preference, amended for the product path by `ADR-0044` section 1 and
+`ADR-0046` section 3), `ADR-0025` (nutrition scopes) and `ADR-0031` (console,
 parameters, experiments).
 
 This document is the contract for building it, and the briefing for whoever

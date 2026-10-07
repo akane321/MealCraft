@@ -6,6 +6,11 @@
 > stale on the next commit - and live in the pull request and in the private
 > task history instead. Current test status comes from CI.
 
+> Product-path meal fit is governed by `ADR-0044` section 1 and `ADR-0046`
+> section 3: the product filters to the requested meal type while enough
+> candidates fit, then falls back to affinity. The component behavior described
+> below is not the current product-path policy.
+
 `app.planning.constraint_compiler.compile_constraints(problem)` consumes an already validated `FinalPlanningProblem` and returns an immutable tuple of slot/recipe decisions sorted by stable IDs. Each decision exposes `eligible` and sorted `rejection_codes`.
 
 Implemented: time, allergens (including an allergen outside the problem's checked `allergen_vocabulary`, which rejects every recipe), excluded ingredients, dietary tags, locks, and explicit hard per-slot nutrient bounds. Meal type is not a filter: a recipe's `allowed_meal_types` is a soft affinity (ADR-0024 section 5). The search adds `MEAL_AFFINITY_PENALTY` (`app/planning/final_scope_scoring.py`) for a placement outside it, more than a repeated dish costs, and the validator reports it as a soft `meal_affinity` check that never fails a plan. Numeric comparisons use the existing validator's 1e-6 tolerance. Nutrition is per person, not multiplied by household servings. Soft bands and general health preferences do not reject candidates. Daily and horizon targets remain aggregate constraints.

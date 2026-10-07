@@ -362,6 +362,9 @@ def write_reports(report: dict[str, Any], json_path: Path, markdown_path: Path) 
     lines = [
         "# MealCraft Planning Evaluation",
         "",
+        "> Scope: the v1 developer planning gate over the curated 30-recipe, 34-ingredient catalog; this is not "
+        "the current meal-day-week product-path report.",
+        "",
         f"**System:** `{report['system']}`",
         "",
         f"**Dataset:** `{report['dataset']['path']}`",

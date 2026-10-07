@@ -1,5 +1,7 @@
 # MealCraft Planning Evaluation
 
+> Scope: the v1 developer planning gate over the curated 30-recipe, 34-ingredient catalog; this is not the current meal-day-week product-path report.
+
 **System:** `mealcraft-planner`
 
 **Dataset:** `data/evaluation/dev/planning-v1.json`

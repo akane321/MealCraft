@@ -76,8 +76,10 @@ Available endpoints:
 - GET /api/plans
 - GET /api/plans/{plan_id}
 - PATCH /api/plans/{plan_id}/entries/{entry_id}
+- PATCH /api/plans/{plan_id}/meals/{day_index}/{meal_type}
 - GET /api/plans/{plan_id}/dashboard
 - POST /api/plans/{plan_id}/replan/preview
+- POST /api/plans/{plan_id}/shape/preview
 - POST /api/plans/{plan_id}/replan/{event_id}/confirm
 - GET /api/plans/{plan_id}/events
 - POST /api/agent/sessions
