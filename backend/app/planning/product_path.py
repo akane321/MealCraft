@@ -6,6 +6,7 @@ prices after validation, and never promotes a bounded miss into a global proof.
 
 import hashlib
 import json
+import time
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, replace
 from datetime import timedelta
@@ -28,6 +29,7 @@ from app.planning.meal_beam import (
     MealBeamResult,
     assignments_of,
     empty_roles,
+    repeats,
 )
 from app.planning.meal_composition import dish_servings
 from app.planning.nutrition_scope import compile_nutrition_targets, nutrition_guard_loss
@@ -86,6 +88,38 @@ CHEAPEST_MEAL_OPTIONS = 64
 # week minutes with no dish twice (ADR-0046 section 3: a plan answers within 10 s). A plan of such meals that
 # no week fits under its budget ends without the cheapest-week search.
 QUICK_MEAL_DISHES = 3
+# The budget applies only to the post-search variety pass. A start already in flight finishes so every
+# returned week still satisfies the same rules and validator; later starts are optional alternate routes.
+VARIETY_PASS_SECONDS = 2.0
+VARIETY_PASS_MIN_STARTS = 0
+HEAVY_COMPOSITION_DISH_POSITIONS = 35
+
+
+def _vary_starts_within_time_budget(
+    meal_beam,
+    problem,
+    starts,
+    seen,
+    *,
+    clock=time.perf_counter,
+    seconds=None,
+    minimum_starts=VARIETY_PASS_MIN_STARTS,
+    is_repeat_free=None,
+):
+    """Try ordered variety starts until time is spent or one produces a repeat-free week."""
+    deadline = clock() + (VARIETY_PASS_SECONDS if seconds is None else seconds)
+    is_repeat_free = is_repeat_free or (lambda state: repeats(problem, state) == 0)
+    added = []
+    for index, (weight, state) in enumerate(starts):
+        if index >= minimum_starts and clock() >= deadline:
+            break
+        varied = meal_beam.vary_within_budget(problem, state)
+        if varied.choices not in seen:
+            seen.add(varied.choices)
+            added.append((weight, varied))
+        if is_repeat_free(varied):
+            break
+    return added
 
 
 def meals_of_the_day(constraints) -> list[tuple[str, list]] | None:
@@ -705,11 +739,28 @@ class ProductPlanningEngine:
                     starts = sorted(found, key=order)[:VARIED_STARTS] + cheapest_starts[:VARIED_STARTS]
                     if budget_is_hard and any(variety(state)[0] == 0 and variety(state)[2] <= 1 for _, state in found):
                         starts = []
-                    for weight, state in starts:
-                        varied = meal_beam.vary_within_budget(problem, state)
-                        if varied.choices not in seen:
-                            seen.add(varied.choices)
-                            found.append((weight, varied))
+                    repeat_ok = set(problem.repetition_rules.repeat_ok_roles) if problem.repetition_rules else set()
+                    heavy_composition = sum(
+                        len(slot.composition or ()) for slot in problem.slots
+                    ) >= HEAVY_COMPOSITION_DISH_POSITIONS and not any(slot.locked_roles for slot in problem.slots)
+
+                    def is_repeat_free(state) -> bool:
+                        if not heavy_composition:
+                            return False
+                        dishes = [recipe for _, meal in state.choices for role, recipe in meal if role not in repeat_ok]
+                        families = [dish_family(titles[recipe]) for recipe in dishes]
+                        return len(dishes) == len(set(dishes)) and len(families) == len(set(families))
+
+                    found.extend(
+                        _vary_starts_within_time_budget(
+                            meal_beam,
+                            problem,
+                            starts,
+                            seen,
+                            seconds=(VARIETY_PASS_SECONDS if heavy_composition else float("inf")),
+                            is_repeat_free=is_repeat_free,
+                        )
+                    )
                 elif banded:
                     fallback = lambda: most_varied_first(limit_led())  # noqa: E731
                 assignments_list = most_varied_first(found)

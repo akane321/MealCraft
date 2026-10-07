@@ -22,7 +22,7 @@ from app.data.catalog import import_catalog, load_catalog
 from app.data.release_v2 import import_release_v2
 from app.db.base import Base
 from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner, MealState
-from app.planning.product_path import composed_packet
+from app.planning.product_path import _vary_starts_within_time_budget, composed_packet
 from app.planning.recipe_quality import dish_family
 from app.repositories.recipe import clear_planning_pool
 from app.schemas.meal_plan import MEAL_PRESETS, WeeklyMealPlanRequest
@@ -194,6 +194,71 @@ def test_a_repeat_is_swapped_for_the_dish_sharing_what_the_week_buys():
     # With S$12 the week stays as it was: even the noodles' S$1 pack does not fit.
     tight = problem.model_copy(update={"purchase_budget_sgd": 12.0})
     assert MealBeamPlanner().vary_within_budget(tight, repeated) == repeated
+
+
+def test_variety_starts_stop_when_the_pass_spends_its_time_budget():
+    problem = week_problem()
+    state = MealState(
+        (
+            ("d1", (("main", "chicken-rice"),)),
+            ("d2", (("main", "chicken-rice"),)),
+        )
+    )
+    calls = []
+    planner = SimpleNamespace(vary_within_budget=lambda problem, state: calls.append(state) or state)
+    ticks = iter((0.0, 0.0, 1.0, 2.0))
+
+    _vary_starts_within_time_budget(
+        planner,
+        problem,
+        [(0.0, state)] * 3,
+        {state.choices},
+        clock=lambda: next(ticks),
+        seconds=2.0,
+        minimum_starts=0,
+    )
+
+    assert len(calls) == 2
+
+
+@pytest.mark.parametrize("repeat_ok", [False, True])
+def test_variety_starts_stop_after_a_repeat_free_week_including_repeat_ok_roles(repeat_ok):
+    problem = FinalPlanningProblem.model_validate(
+        {
+            **week_problem().model_dump(),
+            "repetition_rules": {
+                "repeat_ok_roles": ["vegetable"] if repeat_ok else [],
+                "recipe_counts": [],
+            },
+        }
+    )
+    repeated_only_where_allowed = MealState(
+        (
+            ("d1", (("main", "chicken-rice"), ("vegetable", "bok-choy"))),
+            (
+                "d2",
+                (
+                    ("main", "chicken-noodles"),
+                    ("vegetable", "bok-choy" if repeat_ok else "garlic-spinach"),
+                ),
+            ),
+        )
+    )
+    calls = []
+    planner = SimpleNamespace(
+        vary_within_budget=lambda problem, state: calls.append(state) or repeated_only_where_allowed
+    )
+
+    _vary_starts_within_time_budget(
+        planner,
+        problem,
+        [(0.0, repeated_only_where_allowed)] * 3,
+        set(),
+        clock=lambda: 0.0,
+        seconds=2.0,
+    )
+
+    assert len(calls) == 1
 
 
 @pytest.fixture(scope="module")
