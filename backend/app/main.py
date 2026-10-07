@@ -9,7 +9,7 @@ from app.api.router import api_router
 from app.core.config import get_settings
 from app.data.overrides import ensure_loaded
 from app.db.session import SessionLocal
-from app.repositories.recipe import keep_planning_pool_warm
+from app.repositories.recipe import POOL_CHECK_SECONDS, keep_planning_pool_warm
 
 settings = get_settings()
 cors_origins = list(
@@ -27,7 +27,9 @@ def warm_planning_pool(stop: threading.Event) -> None:
     """Keeps the planner's recipe pool loaded and young until shutdown: loading it in a request took 3.5-4.5 s on
     the walkthrough's PostgreSQL, enough to take an OpenAI-mode answer past 10 s (ADR-0046 section 3)."""
     with SessionLocal() as session:
-        ensure_loaded(session)  # the pool keeps only recipes the estimator prices, with the console's edits
+        while not ensure_loaded(session):
+            if stop.wait(POOL_CHECK_SECONDS):
+                return
         bind = session.get_bind()
     keep_planning_pool_warm(bind, stop)
 
