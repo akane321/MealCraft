@@ -3,11 +3,11 @@
 `app/planning/product_path.py` is the boundary between the existing weekly
 request and the explicit-slot engine. The request and HTTP response contract
 live in [API contracts](../api-contracts.md#weekly-meal-plans). Implementation
-status lives in [current status](../current-status.md#planning-p1-branch-work).
+status lives in [current status](../current-status.md#planning-product-path).
 
 ## Input and search
 
-The compatibility adapter converts the requested dinner dates into slots. The
+The compatibility adapter converts the requested days and meal types into slots. The
 engine, compiler and validator work on that slot set. Recipe quantities are
 scaled from source servings; nutrition is per person. Unit conversions use the
 existing exact mass, volume and piece mappings. A liquid that one candidate dish

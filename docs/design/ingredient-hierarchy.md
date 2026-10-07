@@ -1,7 +1,8 @@
 # Ingredient Hierarchy
 
-> Status: **accepted target**, format and checker verified on `main`; the data is
-> being written in three work packages. The product already reads it, at two entry
+> Status: **implemented product data**, format and checker verified on `main`;
+> all catalog ingredients have a recorded decision in the three source files.
+> The product reads it at two entry
 > points: `RecipeRecommendationEngine.recommend` (`backend/app/planning/recommendation_engine.py`)
 > and the `FinalPlanningProblem` built in `ProductPlanningEngine.plan`
 > (`backend/app/planning/product_path.py`), both through `expand_exclusions`; and the
@@ -25,9 +26,9 @@ id and every id means one food. Neither is true:
 - **names that lie.** `almond_milk` is not milk, `peanut_butter` is not butter,
   `eggplant` is not egg, `milkfish` is not milk.
 
-So a household that says "no pork" today still gets bacon, and one that says "no
-alcohol" gets whichever wines the model happened to name. The hierarchy records
-what each ingredient belongs to, and an exclusion then removes the ingredient and
+Without a hierarchy, "no pork" would still admit bacon and "no alcohol" would
+depend on whichever wines the parser named. The implemented hierarchy records
+what each ingredient belongs to, so an exclusion removes the ingredient and
 everything that belongs to it.
 
 **Allergens are not this table's job.** Every ingredient already carries its
@@ -88,8 +89,8 @@ top-level `notes` list: the question, the answer chosen, and why.
 
 ## 3. Files
 
-Three files, one per work package, so three people can write in parallel
-without merge conflicts, and `groups.json` for the groups all three share:
+The completed data remains split across the three original work-package files,
+plus `groups.json` for the groups they share:
 
 | File | Package | Owns |
 | --- | --- | --- |

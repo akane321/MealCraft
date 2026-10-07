@@ -296,11 +296,15 @@ pnpm exec playwright install chromium
 pnpm test:e2e
 ```
 
-The browser tests answer the API themselves and start their own dev server
-from the checkout on port 3100, not the Compose frontend on 3000, which may be
-serving older code. A server already on 3100 is an error rather than silently
-reused. To test against a dev server you started yourself from this checkout,
-run it on port 3100 and set `PLAYWRIGHT_REUSE_SERVER=1`.
+The browser tests intercept the product API with `page.route`, answer those
+requests themselves, and start their own dev server from the checkout on port
+3100. They are mocked-API browser acceptance, not a real-stack test. Test counts
+come from the CI job that ran them, not from a number copied into this long-lived
+page. The separate Sprint 1 demo gate exercises the real demo environment. The
+Compose frontend on port 3000 may be serving older code; a server already on
+3100 is an error rather than silently reused. To test against a dev server you
+started yourself from this checkout, run it on port 3100 and set
+`PLAYWRIGHT_REUSE_SERVER=1`.
 
 A successful typecheck or build does not prove that the rendered interface is
 usable. Inspect affected pages at the supported minimum 1280×720 desktop

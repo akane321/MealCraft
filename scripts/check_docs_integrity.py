@@ -70,6 +70,30 @@ GENERATED_PREFIXES = (
     "frontend/node_modules/",
 )
 
+REQUIRED_PRODUCT_CONTRACT_SNIPPETS = {
+    "docs/architecture.md": (
+        "| Worker | Python 3.12 (`python -m app.worker`) |",
+        "-> keep the checked week with the exact request",
+        "-> offer Plan my week",
+    ),
+    "docs/development.md": ("They are mocked-API browser acceptance, not a real-stack test.",),
+    "README.md": ("docs/evaluation/v3-meal-day-week/dev/latest.md",),
+}
+
+FORBIDDEN_STALE_SNIPPETS = {
+    "docs/design/planning-engine.md": ("current implementation produces seven persisted main meals",),
+    "docs/design/ingredient-hierarchy.md": (
+        "being written in three work packages",
+        'a household that says "no pork" today still gets bacon',
+    ),
+    "docs/design/frontend-human-evaluation.md": ("in edge panels\nand overlays",),
+    "docs/design/planning-product-path.md": (
+        "current-status.md#planning-p1-branch-work",
+        "requested dinner dates",
+    ),
+    "docs/current-status.md": ("| Recipe catalog | 30 validated recipes and 34 normalized ingredients",),
+}
+
 
 def documents() -> list[Path]:
     found: list[Path] = []
@@ -138,11 +162,41 @@ def check_status_freshness(errors: list[str]) -> None:
         errors.append("docs/current-status.md must record a Last verified public snapshot date")
 
 
+def check_product_contract_consistency(errors: list[str]) -> None:
+    """Keep demo-facing contracts from regressing to the stale forms found in WP6."""
+    for relative, snippets in REQUIRED_PRODUCT_CONTRACT_SNIPPETS.items():
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        for snippet in snippets:
+            if snippet not in text:
+                errors.append(f"{relative} is missing the required product-contract text: {snippet}")
+
+    for relative, snippets in FORBIDDEN_STALE_SNIPPETS.items():
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        for snippet in snippets:
+            if snippet in text:
+                errors.append(f"{relative} still contains stale product-contract text: {snippet}")
+
+    api_contract = (ROOT / "docs" / "api-contracts.md").read_text(encoding="utf-8")
+    endpoint_inventory = api_contract.split("Available endpoints:", 1)[-1].split("\n##", 1)[0]
+    for endpoint in (
+        "PATCH /api/plans/{plan_id}/meals/{day_index}/{meal_type}",
+        "POST /api/plans/{plan_id}/shape/preview",
+    ):
+        if f"- {endpoint}" not in endpoint_inventory:
+            errors.append(f"docs/api-contracts.md endpoint inventory is missing: {endpoint}")
+
+    for path in sorted((ROOT / "docs" / "evaluation").rglob("latest.md")):
+        opening = path.read_text(encoding="utf-8").splitlines()[:10]
+        if not any(line.startswith("> Scope:") for line in opening):
+            errors.append(f"{path.relative_to(ROOT).as_posix()} must identify its scope in its opening lines")
+
+
 def main() -> int:
     errors: list[str] = []
     check_volatile_state(errors)
     check_links(errors)
     check_status_freshness(errors)
+    check_product_contract_consistency(errors)
     if errors:
         print("Documentation integrity check failed:")
         for error in errors:
