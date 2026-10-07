@@ -40,6 +40,7 @@ class ProductSnapshotRepository:
         source: str,
         search_query: str,
         products: list[ProductResponse],
+        commit: bool = True,
     ) -> None:
         if not products:
             return
@@ -83,7 +84,8 @@ class ProductSnapshotRepository:
                 )
             )
             self.session.add_all(ProductSnapshot(**value) for value in values)
-        self.session.commit()
+        if commit:
+            self.session.commit()
 
     @staticmethod
     def _to_response(snapshot: ProductSnapshot) -> ProductResponse:
