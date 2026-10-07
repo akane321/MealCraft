@@ -244,3 +244,8 @@ def test_the_floor_prices_a_liquid_by_the_gram_however_it_is_sold() -> None:
     found = week_floor(request, mains, [item.recipe for item in mains])
     assert found.total_sgd == pytest.approx(7 * 100 * MILK_ML * 0.2 / 100)
     assert found.total_sgd <= 1.60
+
+    # With only the litre bottle, both its package specification and the recipe's millilitres must be
+    # converted to the same gram basis. Converting only the line leaves no matching unit price and a zero floor.
+    volume_only = week_floor(request, mains[:1], [mains[0].recipe])
+    assert volume_only.total_sgd == pytest.approx(7 * 4.0 * 100 / 1000)
