@@ -126,6 +126,28 @@ def test_the_assistant_names_a_dish_as_the_plan_shows_it() -> None:
     assert say("shape_removed", "en", count=5) == "5 dishes come off the week."
 
 
+def test_a_typed_display_title_selects_the_catalog_dish() -> None:
+    """A household types the cleaned title it sees, not the catalog artefact behind it."""
+    from types import SimpleNamespace
+
+    from app.agent.replanning import AgentReplanInterpreter
+
+    def dish(entry_id: int, title: str):
+        return SimpleNamespace(
+            entry_id=entry_id,
+            day_index=2,
+            meal_type="dinner",
+            role_id="main",
+            recipe=SimpleNamespace(title=title),
+        )
+
+    plan = SimpleNamespace(days=[dish(11, "Pot Pie(Square Dumplings)"), dish(12, "Chinese Egg Flower Soup (Ww)")])
+
+    assert AgentReplanInterpreter()._dish_entry(
+        "skip pot pie (square dumplings)", plan, 2, event_type="CANCEL_MEAL"
+    ) == (11, False)
+
+
 def test_a_dish_is_offered_and_understood_by_the_name_the_plan_shows(monkeypatch) -> None:
     """The "which dish" choices name dishes as the week card does, and choosing one picks that dish."""
     from tests.test_agent_limits_and_language import planned, tap
