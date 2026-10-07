@@ -1,14 +1,17 @@
 import json
+from datetime import UTC, datetime
 from pathlib import Path
+from uuid import uuid4
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.data.allergens import checked_allergens
-from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
+from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 
 SUPPORTED_UNITS = {"g", "kg", "ml", "l", "tbsp", "tsp", "whole", "pc", "pcs"}
+CATALOG_REFRESH_MARKER = "__catalog_refresh__"
 
 
 class IngredientRecord(BaseModel):
@@ -146,5 +149,18 @@ def import_catalog(session: Session, catalog: Catalog) -> tuple[int, int]:
             for index, instruction in enumerate(record.steps, start=1)
         )
 
+    mark_catalog_changed(session, recipe_count=len(catalog.recipes), ingredient_count=len(catalog.ingredients))
     session.commit()
     return len(catalog.ingredients), len(catalog.recipes)
+
+
+def mark_catalog_changed(session: Session, *, recipe_count: int, ingredient_count: int) -> None:
+    """Update the existing-table marker that tells API processes a completed import changed the catalog."""
+    marker = session.get(CatalogImport, CATALOG_REFRESH_MARKER)
+    if marker is None:
+        marker = CatalogImport(release_version=CATALOG_REFRESH_MARKER)
+        session.add(marker)
+    marker.digest = uuid4().hex * 2
+    marker.recipe_count = recipe_count
+    marker.ingredient_count = ingredient_count
+    marker.imported_at = datetime.now(UTC)
