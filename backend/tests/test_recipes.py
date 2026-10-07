@@ -852,17 +852,24 @@ def test_weekly_plan_respects_allergen_filter_and_explains_unavoidable_repeat(
     assert any("contains 1 recipe" in warning for warning in payload["warnings"])
 
 
-def test_a_live_plan_still_produces_a_shopping_list_with_the_network_down(
+def test_live_plan_selects_offline_and_only_checks_the_final_basket(
     recipe_client: TestClient,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    # ADR-0022 section 2: with FairPrice unreachable the run must still finish
-    # with a shopping list, and say that it fell back.
+    # WP1: candidates stay offline; only the already selected final basket may refresh.
     from app.products import provider as provider_module
+    from app.services.product import ProductSearchService
+
+    original = ProductSearchService.search
+
+    def snapshot_search(self, query, *, live, **kwargs):
+        assert not live, "candidate selection must not query FairPrice"
+        return original(self, query, live=live, **kwargs)
 
     def offline(*args, **kwargs):
-        raise OSError("network is unreachable")
+        raise OSError("simulated final-basket provider failure")
 
+    monkeypatch.setattr(ProductSearchService, "search", snapshot_search)
     monkeypatch.setattr(provider_module, "urlopen", offline)
     response = recipe_client.post(
         "/api/plans/generate",
@@ -874,7 +881,8 @@ def test_a_live_plan_still_produces_a_shopping_list_with_the_network_down(
     priced = [line for line in estimate["items"] if line["product"] is not None]
     assert priced
     assert all(line["product"]["source"] == "fixture" for line in priced)
-    assert any("unavailable" in warning for warning in estimate["warnings"])
+    assert all(line["evidence"]["mode"] == "fixture" for line in priced)
+    assert not any("unavailable" in warning for warning in estimate["warnings"])
 
 
 def test_weekly_plan_returns_422_when_no_recipe_meets_hard_constraints(recipe_client: TestClient) -> None:
