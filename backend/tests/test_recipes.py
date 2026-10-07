@@ -852,17 +852,24 @@ def test_weekly_plan_respects_allergen_filter_and_explains_unavoidable_repeat(
     assert any("contains 1 recipe" in warning for warning in payload["warnings"])
 
 
-def test_live_mode_plan_selection_uses_snapshot_prices_without_network(
+def test_live_plan_selects_offline_and_only_checks_the_final_basket(
     recipe_client: TestClient,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    # WP1: selecting dishes uses snapshots even when final shopping prices are
-    # requested live. It must not pretend a network lookup failed when none ran.
+    # WP1: candidates stay offline; only the already selected final basket may refresh.
     from app.products import provider as provider_module
+    from app.services.product import ProductSearchService
+
+    original = ProductSearchService.search
+
+    def snapshot_search(self, query, *, live, **kwargs):
+        assert not live, "candidate selection must not query FairPrice"
+        return original(self, query, live=live, **kwargs)
 
     def offline(*args, **kwargs):
-        raise AssertionError("candidate selection must not query FairPrice")
+        raise OSError("simulated final-basket provider failure")
 
+    monkeypatch.setattr(ProductSearchService, "search", snapshot_search)
     monkeypatch.setattr(provider_module, "urlopen", offline)
     response = recipe_client.post(
         "/api/plans/generate",
