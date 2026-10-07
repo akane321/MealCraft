@@ -54,6 +54,22 @@ class PriceEvidence(BaseModel):
     query: str | None
     parser_version: str | None
     fetched_at: datetime
+    # Final-basket evidence. Old saved JSON remains readable without a migration.
+    price_source: Literal["live", "cache", "snapshot", "fixture", "no_external_product"] | None = None
+    lookup_status: (
+        Literal[
+            "success",
+            "timeout",
+            "provider_error",
+            "schema_drift",
+            "invalid_price",
+            "selected_product_not_returned",
+            "no_external_id",
+            "out_of_stock",
+        ]
+        | None
+    ) = None
+    checked_at: datetime | None = None
 
 
 class GroceryLineEstimate(BaseModel):

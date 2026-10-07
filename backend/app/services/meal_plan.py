@@ -86,10 +86,18 @@ class WeeklyMealPlanService:
             self.repository.session.commit()
             raise
         selected, grocery = result.selected, result.grocery
+        if constraints.pricing_mode == "live":
+            grocery = self.grocery_aggregator.refresh(grocery)
         result.trace["profile_id"] = household_profile_id
 
+        recommendation_warnings = recommendation_result.warnings
+        if constraints.pricing_mode == "live":
+            # Candidate selection used fixtures, but the saved basket has just been checked.
+            recommendation_warnings = [
+                warning for warning in recommendation_warnings if not warning.startswith("Stable fixture prices")
+            ]
         warnings = self._deduplicate(
-            recommendation_result.warnings + grocery.warnings + nutrition_scope_notes(constraints.nutrition_constraints)
+            recommendation_warnings + grocery.warnings + nutrition_scope_notes(constraints.nutrition_constraints)
         )
         eligible_count = len({item.recipe.id for item in recommendation_result.recommendations})
         if eligible_count == 1:
@@ -128,6 +136,7 @@ class WeeklyMealPlanService:
 
     def _search(self, constraints: WeeklyMealPlanRequest, candidates, *, profile_version: int | None = None):
         """The week `generate` plans from these candidates (recipes, recommendations), nothing saved."""
+        constraints = constraints.model_copy(update={"pricing_mode": "fixture"})
         recipes, recommendation_result = candidates
         broadened = not recommendation_result.recommendations
         if broadened:
@@ -217,6 +226,7 @@ class WeeklyMealPlanService:
 
     def _candidates(self, constraints: WeeklyMealPlanRequest):
         """The recipes a week may use and the recommendations `generate` plans from first."""
+        constraints = constraints.model_copy(update={"pricing_mode": "fixture"})
         # Every course a planned meal's roles may take enters the pool (ADR-0046), not only dinner's.
         meals = meals_of_the_day(constraints)
         courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
@@ -264,7 +274,11 @@ class WeeklyMealPlanService:
         unbudgeted = constraints.model_copy(update={"weekly_budget_sgd": None})
         recipes, candidates = self._checked_candidates(unbudgeted)
         result = self.planning_engine.plan(
-            unbudgeted, candidates.recommendations, recipes, selector=self.selector, cheapest=True
+            unbudgeted.model_copy(update={"pricing_mode": "fixture"}),
+            candidates.recommendations,
+            recipes,
+            selector=self.selector,
+            cheapest=True,
         )
         return result.grocery.purchase_total_sgd
 
@@ -289,6 +303,7 @@ class WeeklyMealPlanService:
         weighing costs against this amount (see `over_budget_pick` and `charge` below). `by_weight` is what the
         week's list buys by weight, so `charge` prices the week as its list will be.
         """
+        constraints = constraints.model_copy(update={"pricing_mode": "fixture"})
         start = constraints.start_date + timedelta(days=first_day - 1)
         # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
         partial = constraints.model_copy(update={"start_date": start, "day_count": day_count})
@@ -593,7 +608,7 @@ class WeeklyMealPlanService:
                 price_sgd=float(item.product_price_sgd),
                 product_url=item.product_url,
                 image_url=item.product_image_url,
-                in_stock=True,
+                in_stock=not (item.price_evidence and item.price_evidence.get("lookup_status") == "out_of_stock"),
                 source=item.product_source,
                 fetched_at=(
                     item.product_fetched_at.replace(tzinfo=UTC)

@@ -116,7 +116,9 @@ class MealPlanReplanningService:
             raise MealPlanReplanNotFoundError("Meal-plan entry not found")
         self._validate_target(entry, request)
 
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
+            update={"pricing_mode": "fixture"}
+        )
         role = self._role(constraints, entry)
         recipes = self.recipe_repository.list_for_planning(courses=list(role.courses) if role is not None else None)
         recipes_by_id = {recipe.id: recipe for recipe in recipes}
@@ -198,7 +200,9 @@ class MealPlanReplanningService:
         plan = self.repository.get(plan_id)
         if plan is None:
             raise MealPlanReplanNotFoundError("Meal plan not found")
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
+            update={"pricing_mode": "fixture"}
+        )
         meal = request.meal_type
         today = today or date.today()
         ahead = [day for day in range(1, 8) if plan.start_date + timedelta(days=day - 1) >= today]
@@ -311,7 +315,9 @@ class MealPlanReplanningService:
         plan = self.repository.get(plan_id)
         if plan is None:
             raise MealPlanReplanNotFoundError("Meal plan not found")
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
+            update={"pricing_mode": "fixture"}
+        )
         eaten = sorted((item for item in plan.entries if item.status != "skipped"), key=lambda e: (e.day_index, e.id))
         same: dict[str, list[MealPlanEntry]] = {}
         for item in eaten:
@@ -594,6 +600,24 @@ class MealPlanReplanningService:
         proposed = self.recipe_repository.list_by_ids([event.proposed_recipe_id] if event.proposed_recipe_id else [])
         proposed_recipe = proposed[0] if proposed else None
         grocery = WeeklyGroceryEstimateResponse.model_validate(event.after_grocery)
+        if plan.pricing_mode == "live" and event.event_type != "LOCK_MEAL":
+            grocery = self.grocery_aggregator.refresh(grocery)
+            before = self._current_grocery(plan)
+            event.after_grocery = grocery.model_dump(mode="json")
+            event.grocery_delta = self._grocery_delta(before, grocery)
+            event.purchase_total_delta_sgd = round(grocery.purchase_total_sgd - before.purchase_total_sgd, 2)
+            event.after_warnings = list(
+                dict.fromkeys(
+                    [
+                        *(
+                            warning
+                            for warning in event.after_warnings
+                            if not warning.startswith("The revised grocery total")
+                        ),
+                        *grocery.warnings,
+                    ]
+                )
+            )
         try:
             applied_plan, applied_event = self.repository.apply_event(
                 plan=plan,
