@@ -11,6 +11,7 @@
 """
 
 import logging
+import math
 import re
 import threading
 import time
@@ -25,6 +26,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.agent import limits
 from app.agent.parser import RuleBasedConstraintParser
 from app.api.routes.meal_plans import build_meal_plan_service, build_replanning_service
 from app.core.config import get_settings
@@ -363,6 +365,54 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
             assert ready.constraints.household_size == 4
             confirmed = service.confirm(ready.id)
             assert confirmed.plan.grocery_estimate.purchase_total_sgd <= ready.constraints.weekly_budget_sgd
+
+
+REFUSED_FOR_FOUR = (
+    "好的：4 个人，一周 S$10。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$52.83。"
+    " 改成2 个人，我能验证的方案仍需要 S$54 预算，所以减少人数不能降低我能建议的预算。"
+)
+
+
+def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budget(walked, monkeypatch):
+    """Step 6 of the demo (一共10新币给4个人做一周) took 8.4-10.3 s, 6 s allowed: after the 2-person check at its
+    cheapest week's S$41 failed, the reply searched again at S$54 to verify the week that check had already found.
+    The reply, its amounts and its choice are word for word what they were."""
+    planned = []
+    plan = ProductPlanningEngine.plan
+
+    def counted(self, constraints, *args, **kwargs):
+        planned.append((constraints.household_size, constraints.weekly_budget_sgd, bool(kwargs.get("cheapest"))))
+        return plan(self, constraints, *args, **kwargs)
+
+    monkeypatch.setattr(ProductPlanningEngine, "plan", counted)
+    with walked["factory"]() as session:
+        service = agent(session)
+        service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
+        refused = service.create("一共10新币给4个人做一周")
+    assert refused.messages[-1].content == REFUSED_FOR_FOUR
+    assert [option.label for option in refused.pending_interaction.options] == ["一周用 S$53"]
+    # Each size's cheapest week, then that amount through the budgeted path; no third search.
+    assert planned == [(4, None, True), (4, 53, False), (2, None, True), (2, 41, False)]
+
+
+def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(walked):
+    """What lets the reply above skip that search: a week of the budgeted check's cost-led search that only its
+    budget turned down plans under a budget of its cost (planning/product_path.py `cheapest_weeks`)."""
+    with walked["factory"]() as session:
+        service = agent(session)
+        request = service._plan_request(
+            WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60, "household_size": 2})
+        )
+        error = service.meal_plan_service.check(request.model_copy(update={"weekly_budget_sgd": 41}))
+        backed = sorted(
+            attempt["purchase_total_sgd"]
+            for attempt in error.trace["validation_attempts"]
+            if attempt.get("cheapest_search") and limits._failed(attempt) == {"purchase_budget"}
+        )
+        assert backed and math.ceil(backed[0]) == 54
+        for cost in {backed[0], backed[-1]}:
+            budget = math.ceil(cost)
+            assert service.meal_plan_service.check(request.model_copy(update={"weekly_budget_sgd": budget})) is None
 
 
 def test_the_walkthrough_week_found_boring_swaps_its_repeats_within_its_budget(walked):

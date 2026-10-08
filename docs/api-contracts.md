@@ -661,7 +661,11 @@ instead of searching again. A budget refusal names the amount a person a meal an
 week the search found ("S$10 a week for 4 people comes to about S$0.36 a person a
 meal (7 meals). The cheapest week I could find costs S$23.36."). The session keeps
 collecting and offers choices a real week backs: "Use S$24 for the week" (that
-week fits it, so it plans), and, for one meal a day, half the people at their own
+week fits it, so it plans). The amount is first checked as accepting it plans it,
+under that budget; a budget changes the candidate packet, so when that check finds
+no week, the cheapest week of its own cost-led search that only the budget turned
+down sets the amount instead, which plans under any budget of its cost or more,
+with no further search. A second choice, for one meal a day, is half the people at their own
 cheapest week when that week costs less than the whole household's ("2 people at
 S$18 a week", or "Plan for 2 people" when that fits the budget as it is); for more
 meals a day that second search would take the reply past its
