@@ -88,7 +88,7 @@ summary::before { content: "▸"; font-size: 10px; transition: transform 200ms v
 ol { margin: 12px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
 .swap { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-size: 13px; color: var(--mc-text-2); }
 .swap s { color: var(--mc-text-3); }
-.swap strong { font-family: var(--mc-serif); font-weight: 400; color: var(--mc-ivory); }
+.swap strong { font-family: var(--mc-serif); font-weight: 700; color: var(--mc-ivory); }
 .meta { margin: 3px 0 0; font-size: 12px; color: var(--mc-text-3); }
 .reason { font-style: italic; }
 

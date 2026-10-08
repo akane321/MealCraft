@@ -1,21 +1,21 @@
 :root {
-  color-scheme: dark;
-  --ink: #0e0c0a;
-  --s1: #151210;
-  --s2: #1c1815;
-  --s3: #24201c;
-  --ivory: #f2ede4;
-  --t2: #cbc2b4;
-  --t3: #948b7e;
-  --accent: #e8906f;
-  --sage: #a9b79a;
-  --serif: Fraunces, Georgia, "Noto Serif SC", serif;
-  --border: rgba(242, 237, 228, 0.14);
+  color-scheme: light;
+  --ink: #ffffff;
+  --s1: #fcfbf8;
+  --s2: #f7f4ee;
+  --s3: #f4f1ea;
+  --ivory: #2a2a48;
+  --t2: #5e5a70;
+  --t3: #7a7568;
+  --accent: #f0675c;
+  --sage: #2f8a4c;
+  --serif: "Bricolage Grotesque", "Noto Sans SC", system-ui, sans-serif;
+  --border: #e6e0d4;
   --muted: var(--t3);
   --success: var(--sage);
-  --danger: #ec7a5a;
-  --link: var(--accent);
-  font-family: Figtree, system-ui, -apple-system, "Segoe UI", "Noto Sans SC", sans-serif;
+  --danger: #a93a30;
+  --link: #3a63e0;
+  font-family: Nunito, system-ui, -apple-system, "Segoe UI", "Noto Sans SC", sans-serif;
   color: var(--ivory);
   background: var(--ink);
   font-synthesis: none;
@@ -47,7 +47,7 @@ button, a, input, select {
 
 h1, h2 {
   font-family: var(--serif);
-  font-weight: 300;
+  font-weight: 700;
 }
 
 .app-shell {
@@ -77,8 +77,8 @@ h1, h2 {
   color: inherit;
   font-family: var(--serif);
   font-size: 21px;
-  font-weight: 300;
-  letter-spacing: 0.02em;
+  font-weight: 700;
+  letter-spacing: -0.3px;
   text-decoration: none;
 }
 
@@ -341,9 +341,9 @@ h1, h2 {
 }
 
 .success-notice {
-  border-color: rgba(169, 183, 154, 0.35);
+  border-color: rgba(79, 184, 110, 0.4);
   color: var(--sage);
-  background: rgba(169, 183, 154, 0.08);
+  background: rgba(79, 184, 110, 0.1);
 }
 
 .profile-layout {
@@ -380,7 +380,7 @@ h1, h2 {
   padding: 6px 9px;
   border-radius: 999px;
   color: var(--sage);
-  background: rgba(169, 183, 154, 0.12);
+  background: rgba(79, 184, 110, 0.14);
   font-size: 11px;
   font-weight: 720;
 }
@@ -409,7 +409,7 @@ h1, h2 {
 
 .profile-main input:focus, .profile-main select:focus, .profile-planning-card input:focus {
   border-color: var(--link);
-  box-shadow: 0 0 0 3px rgba(232, 144, 111, 0.15);
+  box-shadow: 0 0 0 3px rgba(58, 99, 224, 0.15);
 }
 
 .profile-name-field {
@@ -604,16 +604,16 @@ h1, h2 {
 }
 
 .choice-card:has(input:checked) {
-  border-color: rgba(169, 183, 154, 0.5);
+  border-color: rgba(79, 184, 110, 0.55);
   color: var(--ivory);
-  background: rgba(169, 183, 154, 0.12);
+  background: rgba(79, 184, 110, 0.12);
 }
 
 .choice-card input {
   width: 15px;
   height: 15px;
   margin: 0;
-  accent-color: var(--sage);
+  accent-color: #4fb86e;
 }
 
 .choice-card > span {
@@ -648,14 +648,14 @@ h1, h2 {
   width: 100%;
   min-height: 48px;
   margin-top: 30px;
-  border-color: var(--ivory);
-  color: var(--ink);
-  background: var(--ivory);
+  border-color: var(--accent);
+  color: #fff;
+  background: var(--accent);
   font-size: 14px;
 }
 
 .primary-button:hover:not(:disabled) {
-  background: #fffaf1;
+  background: #e95a4f;
 }
 
 .primary-button:disabled {

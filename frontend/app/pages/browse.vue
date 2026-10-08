@@ -155,7 +155,7 @@ function packLabel(size: number | null, unit: string | null) {
 .head h1 { margin: 6px 0 18px; font-family: var(--serif); font-weight: 300; font-size: clamp(26px, 4vw, 36px); text-wrap: balance; }
 .tabs { display: flex; gap: 6px; }
 .tabs button, .chip { padding: 7px 14px; border: 1px solid var(--border); border-radius: 999px; background: transparent; color: var(--t2); cursor: pointer; font: inherit; font-size: 13px; }
-.tabs button[aria-selected="true"], .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--ivory); background: rgba(232, 144, 111, 0.12); }
+.tabs button[aria-selected="true"], .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--ivory); background: rgba(240, 103, 92, 0.1); }
 .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 22px 0 16px; }
 .search { flex: 1 1 260px; }
 .search input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--s1); color: var(--ivory); font: inherit; }

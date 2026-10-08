@@ -71,21 +71,21 @@ const ACTIONS = [
 .day-head { margin: 0; padding: 14px 22px 4px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
 .day-head span { color: var(--t2); }
 .row { display: grid; grid-template-columns: 58px 36px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 22px; border-bottom: 1px solid var(--line); }
-.row:hover { background: rgba(242, 237, 228, 0.025); }
-.row.today { background: rgba(232, 144, 111, 0.06); }
+.row:hover { background: rgba(42, 42, 72, 0.03); }
+.row.today { background: #fff4e0; }
 .d { display: grid; line-height: 1.1; }
 .d span { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
-.today .d span { color: var(--accent); }
+.today .d span { color: #b26b00; }
 .d b { font-size: 19px; }
 .row .plate { --size: 36px; }
 .dishes { min-width: 0; display: grid; gap: 2px; }
 .dish { display: grid; min-width: 0; }
-.name { padding: 0; border: 0; background: none; text-align: left; font-size: 15px; font-weight: 400; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.side .name { font-size: 13px; color: var(--t2); }
+.name { padding: 0; border: 0; background: none; text-align: left; font-size: 15px; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.side .name { font-size: 13px; font-weight: 600; color: var(--t2); }
 .name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .done .name { color: var(--t3); }
 .dish small { font-size: 11.5px; color: var(--t3); }
-.state { font-size: 11px; font-weight: 500; color: var(--accent); text-align: right; }
+.state { font-size: 11px; font-weight: 700; color: #b26b00; text-align: right; }
 .state.completed { color: var(--sage); }
 .state.skipped { color: var(--t4); }
 .log { padding: 4px 22px 18px; }

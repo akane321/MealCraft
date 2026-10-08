@@ -43,8 +43,8 @@ const emit = defineEmits<{ retry: [] }>();
   border-radius: 14px;
   border: 1px solid var(--mc-line);
   background:
-    linear-gradient(100deg, transparent 20%, rgba(242, 237, 228, 0.07) 40%, transparent 60%)
-    rgba(242, 237, 228, 0.03);
+    linear-gradient(100deg, transparent 20%, rgba(42, 42, 72, 0.06) 40%, transparent 60%)
+    rgba(42, 42, 72, 0.02);
   background-size: 260% 100%;
   animation: mc-shimmer 1400ms var(--mc-ease) infinite;
 }

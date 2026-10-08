@@ -145,7 +145,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .legend i { width: 18px; height: 0; border-top: 2.5px solid var(--mc-ivory); }
 .legend i.plan { border-top: 2.5px dashed var(--mc-text-3); }
 .days { width: 100%; border-collapse: collapse; border-radius: 18px; overflow: hidden; font-size: 12px; }
-.days th, .days td { padding: 9px 10px; text-align: right; border-bottom: 1px solid rgba(242, 237, 228, 0.08); }
+.days th, .days td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--line); }
 .days th:nth-child(-n+4), .days td:nth-child(-n+4) { text-align: left; }
 .days th { font-weight: 600; color: var(--mc-text-3); }
 .days .dish { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

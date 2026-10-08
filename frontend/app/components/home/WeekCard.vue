@@ -68,7 +68,7 @@ const repeats = computed(() => new Set(props.days.map(day => day.recipe.slug)).s
 .head { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 28px; padding: 22px 24px 18px; }
 .title { display: grid; gap: 4px; }
 h3 { margin: 0; font-size: 26px; line-height: 1.1; }
-h3 em { color: var(--accent); }
+h3 em { color: var(--accent); font-style: normal; }
 .figures { margin-left: auto; display: flex; flex-wrap: wrap; gap: 12px 26px; }
 .fig { display: grid; gap: 2px; }
 .k { font-size: 11px; color: var(--t3); letter-spacing: 0.04em; }
@@ -77,15 +77,15 @@ h3 em { color: var(--accent); }
 .strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--line); }
 .tile { display: grid; justify-items: center; align-content: start; gap: 9px; padding: 16px 6px 14px; border: 0; border-right: 1px solid var(--line); background: transparent; text-align: center; transition: background 200ms; }
 .tile:last-child { border-right: 0; }
-.tile:hover { background: rgba(242, 237, 228, 0.03); }
+.tile:hover { background: rgba(42, 42, 72, 0.03); }
 .tile.skipped { opacity: 0.45; }
 .d { font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
-.today .d { color: var(--accent); }
+.today .d { color: #b26b00; }
 .n { font-size: 12.5px; font-weight: 400; line-height: 1.25; color: var(--t2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .more { font-size: 10.5px; color: var(--t4); line-height: 1.3; }
 .tile .plate { --size: 52px; transition: transform 500ms var(--ease); }
 .tile:hover .plate { transform: rotate(-14deg) scale(1.05); }
-.foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px 24px; border-top: 1px solid var(--line); background: rgba(242, 237, 228, 0.015); }
+.foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px 24px; border-top: 1px solid var(--line); background: var(--s2); }
 .note { margin-left: auto; font-size: 12px; color: var(--sage); display: inline-flex; align-items: center; gap: 6px; }
 .note.over { color: var(--warn); }
 .repeat-note { flex-basis: 100%; margin: 2px 0 0; font-size: 12px; color: var(--t3); }

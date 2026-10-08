@@ -124,12 +124,11 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 4px 16px;
   overflow: hidden;
-  border-bottom: 1px solid var(--line);
-  background:
-    linear-gradient(180deg, rgba(21, 18, 16, 0.2) 0%, rgba(21, 18, 16, 0.6) 45%, rgba(21, 18, 16, 0.94) 85%, var(--s1) 100%),
-    url("/media/hero-poster.jpg") center 88% / cover;
+  border-bottom: 1px solid var(--line-2);
+  background: #fff4e0;
 }
 .tonight > .mc-eyebrow, .acts, .video { grid-column: 1 / -1; }
+.tonight > .mc-eyebrow { color: #b26b00; }
 h2 { margin: 6px 0 0; font-size: 28px; line-height: 1.08; letter-spacing: -0.01em; text-wrap: balance; }
 .with { margin: 6px 0 0; font-size: 13px; color: var(--t2); line-height: 1.5; }
 .dish-link { padding: 0; border: 0; background: none; color: var(--ivory); font: inherit; text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; }
@@ -142,10 +141,10 @@ h2 { margin: 6px 0 0; font-size: 28px; line-height: 1.08; letter-spacing: -0.01e
 
 .video { margin-top: 14px; }
 .video iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; display: block; }
-.poster { width: 100%; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: rgba(14, 12, 10, 0.55); display: flex; align-items: center; gap: 12px; text-align: left; }
+.poster { width: 100%; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: #fff; display: flex; align-items: center; gap: 12px; text-align: left; }
 .poster:hover { border-color: var(--line-2); }
 .thumb { width: 88px; aspect-ratio: 16 / 9; flex: none; border-radius: 8px; background: radial-gradient(circle at 35% 40%, #6b4a33, #2a1d15) center / cover; display: grid; place-items: center; }
-.thumb svg { width: 16px; height: 16px; fill: var(--ivory); filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6)); }
+.thumb svg { width: 16px; height: 16px; fill: #fff; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6)); }
 .caption { min-width: 0; display: grid; font-size: 12.5px; }
 .caption small { font-size: 11px; color: var(--t3); }
 .caption span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

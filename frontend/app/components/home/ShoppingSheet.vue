@@ -48,9 +48,9 @@ const groups = computed(() => groceryGroups(props.estimate.items));
 </template>
 
 <style scoped>
-.sheet { box-sizing: border-box; width: 100%; padding: 40px 44px; background: #fbf8f2; color: #1d1b16; font-family: Figtree, system-ui, sans-serif; }
+.sheet { box-sizing: border-box; width: 100%; padding: 40px 44px; background: #fbf8f2; color: #1d1b16; font-family: Nunito, system-ui, sans-serif; }
 header p { margin: 0; font-size: 12px; color: #5e574b; }
-h2 { margin: 4px 0 20px; font-family: Fraunces, Georgia, serif; font-size: 32px; font-weight: 400; }
+h2 { margin: 4px 0 20px; font-family: "Bricolage Grotesque", system-ui, sans-serif; font-size: 32px; font-weight: 700; }
 h3 { margin: 18px 0 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5e574b; }
 ul { list-style: none; margin: 0; padding: 0; }
 li { display: flex; align-items: center; gap: 12px; min-height: 34px; border-top: 1px solid #e7dfd0; font-size: 14px; break-inside: avoid; }
@@ -63,5 +63,5 @@ li { display: flex; align-items: center; gap: 12px; min-height: 34px; border-top
 footer { margin-top: 24px; padding-top: 12px; border-top: 1.5px solid #1d1b16; font-size: 12px; color: #5e574b; }
 footer p { margin: 4px 0; }
 .sum { display: flex; justify-content: space-between; align-items: baseline; color: #1d1b16; font-size: 14px; }
-.sum strong { font-family: Fraunces, Georgia, serif; font-size: 24px; font-weight: 400; }
+.sum strong { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-size: 24px; font-weight: 700; }
 </style>

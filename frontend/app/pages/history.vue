@@ -117,7 +117,7 @@ h1 { margin: 6px 0 22px; font-family: var(--serif); font-weight: 300; font-size:
 .summary { width: 100%; display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; justify-content: space-between; padding: 14px 16px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .summary:hover, .summary:focus-visible { background: var(--s2); }
 .when { display: inline-flex; align-items: baseline; gap: 10px; font-size: 18px; }
-.tag { padding: 1px 8px; border: 1px solid var(--border); border-radius: 999px; font-family: Figtree, system-ui, sans-serif; font-size: 11.5px; color: var(--t3); }
+.tag { padding: 1px 8px; border: 1px solid var(--border); border-radius: 999px; font-family: Nunito, system-ui, sans-serif; font-size: 11.5px; color: var(--t3); }
 .week.replaced .when { color: var(--t3); }
 .meta { color: var(--t3); font-size: 13px; font-variant-numeric: tabular-nums; }
 .days { display: grid; gap: 8px; padding: 4px 16px 16px; }
