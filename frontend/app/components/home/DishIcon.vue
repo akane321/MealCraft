@@ -1,133 +1,164 @@
 <script setup lang="ts">
-import { dishContainer, dishGroup } from "~/lib/dish-icon";
+import { dishRole, foodGroup } from "~/lib/dish-icon";
+import type { DishRole, FoodGroup } from "~/lib/dish-icon";
 
-// Container = the dish's role (plate, small dish, bowl, shallow bowl, dessert cup, drink);
-// contents = its main ingredient group. Drawn top-down, flat, one stroke weight.
+// `title` is the dish title used for mapping. The icon is decorative (call sites print the title next to it).
+// `role`/`group` override the mapping (used by the /dev/dish-icons gallery).
 const props = withDefaults(defineProps<{
-  title: string;
+  title?: string;
   course?: string | null;
   roleId?: string | null;
   ingredients?: string[];
   size?: number;
-}>(), { course: null, roleId: null, ingredients: () => [], size: 40 });
+  role?: DishRole;
+  group?: FoodGroup;
+}>(), { title: "", course: null, roleId: null, ingredients: () => [], size: 40, role: undefined, group: undefined });
 
-const container = computed(() => dishContainer(props.course, props.roleId));
-const group = computed(() => dishGroup(props.title, props.ingredients));
-// Contents are drawn for a 28-wide area; smaller containers shrink them.
-const scale = computed(() => ({ plate: 1, dish: 0.78, bowl: 0.92, shallow: 1, dessert: 0.7, drink: 0.62 })[container.value]);
-const offset = computed(() => (container.value === "drink" ? -2 : 0));
+const dish = computed(() => ({ title: props.title, course: props.course, roleId: props.roleId, ingredients: props.ingredients }));
+const role = computed(() => props.role ?? dishRole(dish.value));
+const group = computed(() => props.group ?? foodGroup(dish.value, role.value));
+
+const C = { ink: "#2A2A48", coral: "#F0675C", blue: "#3A63E0", green: "#4FB86E", yellow: "#FFE27A", orange: "#F5A33C", cream: "#F7F4EE", white: "#FFFFFF", brown: "#A8673A", pale: "#D4F2DE" };
+
+const strands = ["M-9,-5 q3,-4 6,0 t6,0 t6,0", "M-9,0 q3,-4 6,0 t6,0 t6,0", "M-9,5 q3,-4 6,0 t6,0 t6,0"];
+
+// Where the food sits on each container: centre + scale. Contents are drawn in a -12..12 box.
+const SPOT: Record<DishRole, string> = {
+  main: "translate(24 25)",
+  other: "translate(24 25)",
+  vegetable: "translate(24 26) scale(.7)",
+  salad: "translate(24 18) scale(.8)",
+  soup: "translate(24 24)",
+  dessert: "translate(24 16.5) scale(.55)",
+  drink: "translate(24 24)",
+};
+
+// Drink has no solid food on it: the group only tints the liquid.
+const DRINK_FILL: Partial<Record<FoodGroup, string>> = { fruit_sweet: C.coral, leafy: C.green, veg_mix: C.orange, broth: C.orange, bread: C.brown, noodles: C.yellow };
+const drinkFill = computed(() => DRINK_FILL[group.value] ?? C.yellow);
 </script>
 
 <template>
-  <svg class="dish-icon" viewBox="0 0 48 48" :width="size" :height="size" aria-hidden="true" :data-container="container" :data-group="group">
-    <!-- containers -->
-    <template v-if="container === 'plate'">
-      <circle cx="24" cy="24" r="21" fill="#fff" />
-      <circle cx="24" cy="24" r="16" fill="none" class="hair" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 48 48"
+    :width="size"
+    :height="size"
+    aria-hidden="true"
+    :data-role="role"
+    :data-group="group"
+    fill="none"
+    :stroke="C.ink"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+  >
+    <!-- container -->
+    <template v-if="role === 'main' || role === 'other'">
+      <circle cx="24" cy="25" r="20" :fill="role === 'main' ? C.white : C.yellow" />
+      <circle cx="24" cy="25" r="14" :fill="C.cream" />
     </template>
-    <template v-else-if="container === 'dish'">
-      <circle cx="24" cy="24" r="16" fill="#fff" />
-      <circle cx="24" cy="24" r="11.5" fill="none" class="hair" />
+    <template v-else-if="role === 'vegetable'">
+      <ellipse cx="24" cy="26" rx="20" ry="13" :fill="C.pale" />
+      <ellipse cx="24" cy="26" rx="14.5" ry="8.8" :fill="C.cream" />
     </template>
-    <template v-else-if="container === 'bowl'">
-      <circle cx="24" cy="24" r="21" fill="#DCE5FB" />
-      <circle cx="24" cy="24" r="16.5" fill="#F4F7FF" />
+    <template v-else-if="role === 'salad'">
+      <path d="M4,22 H44 Q44,40 24,40 Q4,40 4,22Z" :fill="C.green" />
+      <ellipse cx="24" cy="22" rx="20" ry="5" :fill="C.pale" />
     </template>
-    <template v-else-if="container === 'shallow'">
-      <circle cx="24" cy="24" r="21" fill="#E3F4E9" />
-      <circle cx="24" cy="24" r="17" fill="#fff" class="hair" />
+    <template v-else-if="role === 'soup'">
+      <path d="M17,16 q-3,-3 0,-6 q3,-3 0,-6 M26,16 q-3,-3 0,-6 q3,-3 0,-6 M35,16 q-3,-3 0,-6 q3,-3 0,-6" stroke-width="1.5" />
+      <path d="M5,24 H43 Q43,42 24,42 Q5,42 5,24Z" :fill="C.blue" />
+      <ellipse cx="24" cy="24" rx="19" ry="4.8" :fill="C.yellow" />
+      <path d="M17,42 v3 h14 v-3" :fill="C.cream" />
     </template>
-    <template v-else-if="container === 'dessert'">
-      <rect x="6" y="6" width="36" height="36" rx="12" fill="#FDE6E3" />
-      <circle cx="24" cy="24" r="12.5" fill="#fff" class="hair" />
+    <template v-else-if="role === 'dessert'">
+      <path d="M24,31 V40 M15,42 Q24,38 33,42" />
+      <path d="M10,22 H38 Q38,33 24,33 Q10,33 10,22Z" :fill="C.coral" />
+      <ellipse cx="24" cy="22" rx="14" ry="3.2" :fill="C.cream" />
     </template>
     <template v-else>
-      <path d="M36 19h3a4 4 0 0 1 0 9h-3" fill="none" />
-      <circle cx="22" cy="24" r="17" fill="#fff" />
-      <circle cx="22" cy="24" r="13.5" fill="#E9C9A0" />
+      <!-- drink -->
+      <path d="M26,25 L31,4" :stroke="C.blue" stroke-width="3" />
+      <path d="M13,11 H35 L32,43 H16Z" :fill="C.white" />
+      <path d="M14,19 H34 L32,43 H16Z" :fill="drinkFill" />
+      <rect x="19" y="23" width="6" height="6" rx="1.2" :fill="C.white" transform="rotate(-12 22 26)" />
     </template>
 
     <!-- contents -->
-    <g :transform="`translate(${24 + offset} 24) scale(${scale}) translate(-24 -24)`">
+    <g v-if="role !== 'drink'" :transform="SPOT[role]">
       <template v-if="group === 'noodles'">
-        <ellipse cx="24" cy="24" rx="13" ry="10.5" fill="#F6DFA0" />
-        <path d="M13 21c3-3 5 3 8 0s5 3 8 0 4 1 6-1M13 26c3-3 5 3 8 0s5 3 8 0 4 1 6-1" fill="none" />
-        <circle cx="30" cy="19" r="2.6" fill="#F0675C" />
-        <circle cx="17" cy="29" r="1.6" fill="#4FB86E" />
+        <template v-for="d in strands" :key="d">
+          <path :d="d" :stroke-width="4.6" />
+          <path :d="d" :stroke="C.yellow" :stroke-width="2" />
+        </template>
+        <path d="M3,-12 L11,3 M7,-13 L14,1" :stroke="C.brown" stroke-width="1.8" />
       </template>
       <template v-else-if="group === 'rice'">
-        <path d="M11 27c0-9 6-14 13-14s13 5 13 14c0 3-26 3-26 0z" fill="#FFF6E3" />
-        <path d="M18 21l2 1M25 18l2 1M29 24l2 1M21 26l2 1M16 26l1.5.5" fill="none" />
-        <circle cx="32" cy="17" r="2" fill="#4FB86E" />
+        <path d="M-11,7 Q-10,-9 0,-9 Q10,-9 11,7Z" :fill="C.white" />
+        <path d="M-5,-2 l2,1 M2,-4 l2,1 M5,1 l2,1 M-2,3 l2,1 M-7,4 l2,1" stroke-width="1.2" />
       </template>
       <template v-else-if="group === 'poultry'">
-        <ellipse cx="20" cy="20" rx="10" ry="7.5" transform="rotate(45 20 20)" fill="#E0A150" />
-        <path d="M26.5 26.5l6 6" fill="none" />
-        <circle cx="34" cy="31" r="2.2" fill="#fff" /><circle cx="31" cy="34" r="2.2" fill="#fff" />
+        <path d="M2,3 L10,11" :stroke-width="4.5" />
+        <path d="M2,3 L10,11" :stroke="C.cream" :stroke-width="2" />
+        <circle cx="9" cy="8" r="2.6" :fill="C.cream" />
+        <circle cx="12" cy="11" r="2.6" :fill="C.cream" />
+        <path d="M-10,-3 C-10,-11 3,-11 5,-4 C6,2 0,6 -4,5 C-8,4 -10,1 -10,-3Z" :fill="C.orange" />
+        <path d="M-6,-4 q2,-3 5,-2" stroke-width="1.2" />
       </template>
-      <template v-else-if="group === 'red-meat'">
-        <path d="M10 23c0-6 6-10 13-9s14 3 14 9-6 11-14 10-13-4-13-10z" fill="#D2605A" />
-        <path d="M15 23c0-3 4-5 8-4s8 2 8 4" fill="none" class="soft" />
-        <circle cx="19" cy="27" r="2.6" fill="#fff" />
+      <template v-else-if="group === 'red_meat'">
+        <path d="M-11,0 C-11,-8 0,-11 7,-8 C12,-5 12,5 4,9 C-4,11 -11,7 -11,0Z" :fill="C.coral" />
+        <path d="M-6,-2 q3,2 6,-1 M-3,4 q4,-3 8,-1" :stroke="C.cream" stroke-width="1.6" />
+        <circle cx="6" cy="-3" r="2" :fill="C.cream" stroke-width="1.2" />
       </template>
       <template v-else-if="group === 'seafood'">
-        <path d="M9 24c5-9 15-10 21-2l6-5v14l-6-5c-6 8-16 7-21-2z" fill="#7FB6E8" />
-        <circle cx="16" cy="23" r="1.3" fill="#2A2A48" stroke="none" />
-        <path d="M22 18v12" fill="none" class="soft" />
+        <path d="M5,0 L12,-6 L12,6Z" :fill="C.blue" />
+        <path d="M-11,0 Q-3,-9 6,0 Q-3,9 -11,0Z" :fill="C.blue" />
+        <circle cx="-6" cy="-1" r="1.3" :fill="C.ink" stroke="none" />
+        <path d="M-1,-4 q2,4 0,8" stroke-width="1.2" :stroke="C.white" />
       </template>
-      <template v-else-if="group === 'tofu-egg'">
-        <path d="M10 21c0-6 7-9 12-7 6-2 12 2 11 8s-4 9-11 8-12-3-12-9z" fill="#fff" />
-        <circle cx="21" cy="22" r="5.5" fill="#F2C14E" />
-        <rect x="27" y="26" width="9" height="9" rx="2" fill="#FFF6E3" />
+      <template v-else-if="group === 'tofu_egg'">
+        <rect x="1" y="-2" width="11" height="11" rx="2" :fill="C.white" />
+        <path d="M-11,-3 C-11,-10 -3,-11 -1,-8 C3,-8 4,-2 0,0 C-2,5 -10,5 -11,-3Z" :fill="C.white" />
+        <circle cx="-5" cy="-3" r="3.2" :fill="C.yellow" />
       </template>
-      <template v-else-if="group === 'greens'">
-        <g fill="#4FB86E">
-          <path d="M24 35C14 31 12 19 24 12c12 7 10 19 0 23z" />
-          <path d="M24 35C14 31 12 19 24 12c12 7 10 19 0 23z" transform="rotate(-42 24 35) scale(.8) translate(6 7)" />
-          <path d="M24 35C14 31 12 19 24 12c12 7 10 19 0 23z" transform="rotate(42 24 35) scale(.8) translate(6 7)" />
-        </g>
-        <path d="M24 34V17" fill="none" class="soft" />
+      <template v-else-if="group === 'leafy'">
+        <path d="M-11,4 C-12,-6 -2,-11 3,-11 C5,-1 -2,6 -11,4Z" :fill="C.green" />
+        <path d="M-9,2 L1,-8" stroke-width="1.2" />
+        <path d="M0,9 C-2,-1 6,-8 11,-6 C12,3 8,9 0,9Z" :fill="C.pale" />
+        <path d="M2,7 L9,-3" stroke-width="1.2" />
       </template>
-      <template v-else-if="group === 'veg'">
-        <path d="M27 16l9 5-14 14z" fill="#F2994A" />
-        <path d="M34 15l-3 4M37 18l-4 2" fill="none" stroke="#4FB86E" />
-        <circle cx="18" cy="27" r="7.5" fill="#F0675C" />
-        <path d="M15 20l3 2 3-2" fill="none" stroke="#4FB86E" />
+      <template v-else-if="group === 'veg_mix'">
+        <circle cx="-6" cy="-4" r="5" :fill="C.orange" />
+        <circle cx="-6" cy="-4" r="1.5" :fill="C.yellow" stroke-width="1.2" />
+        <circle cx="7" cy="-6" r="3.3" :fill="C.green" />
+        <path d="M0,10 V6 H6 V10Z" :fill="C.pale" />
+        <circle cx="-1" cy="4" r="3.6" :fill="C.green" />
+        <circle cx="4" cy="2" r="3.8" :fill="C.green" />
+        <circle cx="9" cy="5" r="3.2" :fill="C.green" />
       </template>
       <template v-else-if="group === 'broth'">
-        <circle cx="24" cy="24" r="12.5" fill="#E7A94A" />
-        <path d="M16 22c3-2 5 2 8 0s5 2 8 0M18 28c2-1.5 4 1 6 0s4 1 6 0" fill="none" class="soft" />
-        <circle cx="19" cy="18" r="1.6" fill="#4FB86E" /><circle cx="29" cy="20" r="1.6" fill="#4FB86E" /><circle cx="26" cy="29" r="1.6" fill="#4FB86E" />
+        <ellipse v-if="role !== 'soup'" cx="0" cy="0" rx="11" ry="9" :fill="C.yellow" />
+        <circle cx="-5" cy="-1" r="2.4" :fill="C.green" />
+        <circle cx="2" cy="2" r="2.4" :fill="C.coral" />
+        <circle cx="7" cy="-2" r="2.2" :fill="C.white" />
       </template>
       <template v-else-if="group === 'bread'">
-        <path d="M12 34V21c-4-1-4-9 2-10h20c6 1 6 9 2 10v13z" fill="#EBC483" />
-        <path d="M16 31V21c-2-1-1-5 2-5.5h12c3 .5 4 4.5 2 5.5v10z" fill="#F8E3B4" class="soft" />
+        <path d="M-11,3 H11 V6 Q11,9 8,9 H-8 Q-11,9 -11,6Z" :fill="C.brown" />
+        <path d="M-11,1 Q-11,-10 0,-10 Q11,-10 11,1Z" :fill="C.orange" />
+        <path d="M-4,-5 l2,1 M2,-6 l2,1 M5,-2 l2,1 M-6,-1 l2,1" :stroke="C.cream" stroke-width="1.4" />
       </template>
-      <template v-else-if="group === 'fruit'">
-        <circle cx="24" cy="24" r="12" fill="#F6A33C" />
-        <circle cx="24" cy="24" r="8.5" fill="#FFD27A" class="soft" />
-        <path d="M24 16v16M16 24h16M18.3 18.3l11.4 11.4M29.7 18.3L18.3 29.7" fill="none" class="soft" />
+      <template v-else-if="group === 'fruit_sweet'">
+        <path d="M-1,10 C-11,5 -11,-4 -5,-6 Q-1,-4 3,-6 C9,-4 9,5 -1,10Z" :fill="C.coral" />
+        <path d="M-6,-6 L-1,-10 L4,-6" :fill="C.green" />
+        <path d="M-5,-1 l.1 0 M0,1 l.1 0 M-3,4 l.1 0 M3,-1 l.1 0" :stroke="C.yellow" stroke-width="1.8" />
+        <circle cx="9" cy="-4" r="3.6" :fill="C.blue" />
       </template>
       <template v-else>
-        <circle cx="18" cy="20" r="5.5" fill="#F0675C" />
-        <circle cx="30" cy="22" r="5.5" fill="#F2C14E" />
-        <circle cx="23" cy="31" r="5.5" fill="#4FB86E" />
+        <circle cx="-6" cy="-3" r="4.5" :fill="C.coral" />
+        <rect x="1" y="-11" width="9" height="9" rx="2" :fill="C.green" />
+        <path d="M-1,10 L4,1 L9,10Z" :fill="C.yellow" />
       </template>
     </g>
-
-    <!-- container outline last so the rim stays crisp -->
-    <circle v-if="container === 'plate'" cx="24" cy="24" r="21" fill="none" />
-    <circle v-else-if="container === 'dish'" cx="24" cy="24" r="16" fill="none" />
-    <circle v-else-if="container === 'bowl'" cx="24" cy="24" r="21" fill="none" />
-    <circle v-else-if="container === 'shallow'" cx="24" cy="24" r="21" fill="none" />
-    <rect v-else-if="container === 'dessert'" x="6" y="6" width="36" height="36" rx="12" fill="none" />
-    <circle v-else cx="22" cy="24" r="17" fill="none" />
   </svg>
 </template>
-
-<style scoped>
-.dish-icon { flex: none; display: block; overflow: visible; stroke: #2A2A48; stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
-.dish-icon :deep(*) { vector-effect: non-scaling-stroke; }
-.hair { stroke: #E6E0D4; stroke-width: 1; }
-.soft { stroke-opacity: 0.45; }
-</style>
