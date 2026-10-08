@@ -36,7 +36,7 @@ from app.data.release_v2 import import_release_v2
 from app.db.base import Base
 from app.main import warm_planning_pool
 from app.planning.product_path import ProductPlanningEngine, meal_affinity
-from app.planning.recipe_quality import dish_family
+from app.planning.recipe_quality import dish_family, incomplete
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
 from app.repositories.recipe import RecipeRepository, _planning_pool, clear_planning_pool
@@ -348,6 +348,15 @@ def test_the_walkthrough_household_is_planned_from_one_search(walked):
     assert walked["plan"].grocery_estimate.purchase_total_sgd <= 100
 
 
+def test_the_walkthrough_week_has_no_wrapper_or_dough_only_meals(walked):
+    from app.repositories.recipe import RecipeRepository
+
+    with walked["factory"]() as session:
+        recipes = RecipeRepository(session).list_by_ids([dish.recipe.id for dish in walked["plan"].days])
+    bad = [recipe.title for recipe in recipes if incomplete(recipe) == "wrapper or dough with no filling"]
+    assert bad == []
+
+
 def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
     """A budget button is checked against the same catalog and planning path as clicking it."""
     with walked["factory"]() as session:
@@ -355,9 +364,9 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
         service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
         refused = service.create("一共10新币给4个人做一周")
         options = refused.pending_interaction.options
-        assert [option.label for option in options] == ["一周用 S$53"]
+        assert [option.label for option in options] == ["一周用 S$87"]
         assert "改成2 个人" in refused.messages[-1].content
-        assert "S$54" in refused.messages[-1].content
+        assert "S$103" in refused.messages[-1].content
         assert "减少人数不能降低" in refused.messages[-1].content
         for chosen in options:
             ready = service.reply(refused.id, chosen.value)
@@ -368,15 +377,15 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
 
 
 REFUSED_FOR_FOUR = (
-    "好的：4 个人，一周 S$10。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$52.83。"
-    " 改成2 个人，我能验证的方案仍需要 S$54 预算，所以减少人数不能降低我能建议的预算。"
+    "好的：4 个人，一周 S$10。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$86.15。"
+    " 改成2 个人，我能验证的方案仍需要 S$103 预算，所以减少人数不能降低我能建议的预算。"
 )
 
 
 def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budget(walked, monkeypatch):
     """Step 6 of the demo (一共10新币给4个人做一周) took 8.4-10.3 s, 6 s allowed: after the 2-person check at its
-    cheapest week's S$41 failed, the reply searched again at S$54 to verify the week that check had already found.
-    The reply, its amounts and its choice are word for word what they were."""
+    cheapest week failed, the reply searched again to verify the week that check had already found. The search reuse
+    and choice semantics stay the same after the dough-only candidates leave the planning pool."""
     planned = []
     plan = ProductPlanningEngine.plan
 
@@ -390,7 +399,7 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
         service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
         refused = service.create("一共10新币给4个人做一周")
     assert refused.messages[-1].content == REFUSED_FOR_FOUR
-    assert [option.label for option in refused.pending_interaction.options] == ["一周用 S$53"]
+    assert [option.label for option in refused.pending_interaction.options] == ["一周用 S$87"]
     # Each size's cheapest week, then that amount through the budgeted path; no third search.
     assert planned == [(4, None, True), (4, 53, False), (2, None, True), (2, 41, False)]
 
@@ -409,7 +418,7 @@ def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(w
             for attempt in error.trace["validation_attempts"]
             if attempt.get("cheapest_search") and limits._failed(attempt) == {"purchase_budget"}
         )
-        assert backed and math.ceil(backed[0]) == 54
+        assert backed and math.ceil(backed[0]) == 103
         for cost in {backed[0], backed[-1]}:
             budget = math.ceil(cost)
             assert service.meal_plan_service.check(request.model_copy(update={"weekly_budget_sgd": budget})) is None

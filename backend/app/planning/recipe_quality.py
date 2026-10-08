@@ -25,15 +25,50 @@ TITLE_PROTEINS = {
     "tofu": ("tofu",),
 }
 
+# A wrapper without its advertised filling is not a meal. Keep this deliberately
+# conservative: require both a wrapper-style dish name and ingredients made only
+# of dough components and seasonings. Broth-based soups and filled recipes
+# stay eligible because their protein, vegetable, cheese, or other filling is not
+# in this set.
+WRAPPER_TITLE = re.compile(r"\b(?:cannelloni|dumplings?|empanadas?|pierogi|ravioli|tortellini|wontons?)\b")
+DOUGH_ONLY_INGREDIENTS = frozenset(
+    {
+        "baking powder",
+        "baking soda",
+        "black pepper",
+        "brown sugar",
+        "butter",
+        "egg",
+        "flour",
+        "granulated sugar",
+        "lard",
+        "milk",
+        "olive oil",
+        "salt",
+        "self-rising flour",
+        "shortening",
+        "sugar",
+        "vegetable oil",
+        "vinegar",
+        "water",
+    }
+)
+
 
 def incomplete(recipe) -> str | None:
     """Why a release recipe cannot be trusted as a planned dinner, or None."""
     if recipe.release_version is None:
         return None
+    title = recipe.title.lower()
+    if recipe.course in {"main", "side", "soup"} and WRAPPER_TITLE.search(title):
+        ingredients = [
+            item.ingredient.normalized_name.replace("_", " ").strip().lower() for item in recipe.recipe_ingredients
+        ]
+        if ingredients and all(name in DOUGH_ONLY_INGREDIENTS for name in ingredients):
+            return "wrapper or dough with no filling"
     kcal = float(recipe.nutrition.calories_kcal) if recipe.nutrition is not None else 0.0
     if recipe.course == "main" and kcal < MAIN_KCAL_FLOOR:
         return f"{kcal:.0f} kcal a serving is not a dinner"
-    title = recipe.title.lower()
     lines = " ".join(item.ingredient.normalized_name.replace("_", " ") for item in recipe.recipe_ingredients)
     for word, sources in TITLE_PROTEINS.items():
         if re.search(rf"\b{word}s?\b", title) and not any(source in lines for source in sources):
