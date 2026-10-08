@@ -543,21 +543,21 @@ class MealPlanReplanningService:
                 "weekly_budget_sgd": left,
             }
         )
-        first, last = min(days), max(days)
+        first = min(days)
         over_budget = None
         if budget is not None:
             # Over the budget, costs are weighed against one meal's share of the weekly budget (budget / the
-            # week's meals, as the week was planned) for each meal planned here, one a day from the first day to
-            # the last: each search divides this by those meals, so a repeat costs one meal's share. A day's share,
+            # week's meals, as the week was planned) for each meal planned here. A repeat costs one meal's share.
             # or what is left when cheap meals left more of it, made a repeat up to twice as dear on two meals a
             # day: dear varied changes beat the cheapest.
             meals = len({(item.day_index, item.meal_type) for item in kept} | {(day, meal) for day in days})
-            over_budget = round(budget * (last - first + 1) / meals, 2)
+            over_budget = round(budget * len(days) / meals, 2)
         try:
             dishes = self.meal_plan_service.plan_dishes(
                 partial,
                 first_day=first,
-                day_count=last - first + 1,
+                day_count=len(days),
+                day_indices=sorted(days),
                 rest=rest,
                 keep=self._dishes_kept_when_adding(roles, removed),
                 over_budget=over_budget,

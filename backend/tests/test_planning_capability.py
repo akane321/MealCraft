@@ -283,6 +283,19 @@ def test_adding_a_soup_to_one_dinner_replans_only_that_meal(composed_client):
     assert after["revision"] == plan["revision"] + 1
 
 
+def test_adding_a_soup_on_nonconsecutive_days_plans_and_charges_only_those_days(composed_client):
+    plan = _week_ahead(composed_client, COMPOSITION[:2])
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [2, 6]},
+    )
+    assert preview.status_code == 201, preview.text
+    added = preview.json()["shape_change"]["added"]
+    assert {dish["day_index"] for dish in added} == {2, 6}
+    assert all(dish["role_id"] == "soup" for dish in added)
+    assert preview.json()["shape_change"]["kept"] == 4
+
+
 def test_dropping_a_meal_for_the_week_changes_this_weeks_shape_only(composed_client):
     plan = _week_ahead(composed_client)
     lunch = composed_client.post(

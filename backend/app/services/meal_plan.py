@@ -292,8 +292,9 @@ class WeeklyMealPlanService:
         keep: dict[tuple[int, str], dict[str, int]] | None = None,
         over_budget: float | None = None,
         by_weight: Iterable[str] = (),
+        day_indices: list[int] | None = None,
     ) -> list[ScheduledDish]:
-        """Dishes for `day_count` days from day `first_day` of a saved week, nothing saved (ADR-0046 section 2).
+        """Dishes for selected days from a saved week, nothing saved (ADR-0046 section 2).
 
         `constraints` carries the shape to plan and the budget left. `rest` is the rest of the week, each dish
         with its portion share: its dishes are avoided while enough others remain, and in every attempt their
@@ -304,8 +305,18 @@ class WeeklyMealPlanService:
         week's list buys by weight, so `charge` prices the week as its list will be.
         """
         constraints = constraints.model_copy(update={"pricing_mode": "fixture"})
+        planned_days = day_indices or list(range(first_day, first_day + day_count))
+        if (
+            len(planned_days) != day_count
+            or planned_days != sorted(set(planned_days))
+            or not planned_days
+            or planned_days[0] != first_day
+            or planned_days[0] < 1
+            or planned_days[-1] > 7
+        ):
+            raise ValueError("day_indices must contain day_count distinct, ordered days from the week")
         start = constraints.start_date + timedelta(days=first_day - 1)
-        # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
+        # Compress selected calendar days for the planner, then map its placements back to the saved week.
         partial = constraints.model_copy(update={"start_date": start, "day_count": day_count})
         meals = meals_of_the_day(partial)
         courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
@@ -316,9 +327,11 @@ class WeeklyMealPlanService:
         slugs = {recipe.id: recipe.slug for recipe in recipes}
         keep_ids = {recipe_id for roles in (keep or {}).values() for recipe_id in roles.values()}
         # A kept dish the planner no longer offers cannot stay: the meal is planned from every candidate.
+        slot_by_day = {day: slot for slot, day in enumerate(planned_days)}
         kept = {
-            (day - first_day, meal): {role: slugs[recipe_id] for role, recipe_id in roles.items()}
+            (slot_by_day[day], meal): {role: slugs[recipe_id] for role, recipe_id in roles.items()}
             for (day, meal), roles in (keep or {}).items()
+            if day in slot_by_day
             if keep_ids <= slugs.keys()
         }
         used = Counter(recipe.id for recipe, _ in rest)
@@ -378,8 +391,8 @@ class WeeklyMealPlanService:
         placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(result.selected))]
         return [
             ScheduledDish(
-                planned_date=start + timedelta(days=slot_index),
-                day_index=first_day + slot_index,
+                planned_date=constraints.start_date + timedelta(days=planned_days[slot_index] - 1),
+                day_index=planned_days[slot_index],
                 meal_type=meal_type,
                 role_id=role_id,
                 portion_share=share,
