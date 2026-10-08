@@ -50,107 +50,100 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
 }, { immediate: true });
 </script>
 
+
 <template>
   <section v-if="tonight" class="tonight" aria-label="Next meal">
-    <span class="mc-eyebrow">{{ eyebrow }} · {{ formatPlanDate(tonight.day.planned_date, { weekday: "short", day: "numeric", month: "short" }) }}</span>
-    <h2 class="mc-serif">{{ tonight.day.recipe.title }}</h2>
-    <p v-if="others.length" class="with">
-      with
-      <template v-for="(dish, index) in others" :key="dish.entry_id">
-        <button type="button" class="dish-link" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button><span v-if="index < others.length - 1">, </span>
-      </template>
-    </p>
-    <p class="meta">
-      <span>{{ tonight.day.recipe.total_time_minutes }} min</span>
-      <span>{{ mealKcal }} kcal each</span>
-      <span v-if="next?.meal.status === 'completed'" class="done">Cooked</span>
-    </p>
-    <div class="acts">
-      <button type="button" class="mc-primary" @click="emit('openRecipe', tonight.day.recipe.slug)">Recipe &amp; steps</button>
-      <button
-        v-if="!readonly && next && next.meal.status !== 'completed' && next.meal.status !== 'skipped'"
-        type="button"
-        class="mc-pill"
-        :disabled="updatingEntryId === tonight.day.entry_id"
-        @click="markCooked"
-      >
-        {{ updatingEntryId === tonight.day.entry_id ? "Saving…" : "Mark as cooked" }}
-      </button>
-      <button v-if="!readonly" type="button" class="mc-pill" @click="emit('swap', tonight.day)">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3" /></svg>Swap
-      </button>
-    </div>
-    <HomeDishIcon class="big-icon" :title="tonight.day.recipe.title" :course="tonight.day.recipe.course" :role-id="tonight.day.role_id" :size="92" />
-
-    <div class="video">
-      <iframe
-        v-if="playing && video"
-        :src="`${video.embed_url}?autoplay=1`"
-        :title="video.title"
-        allow="autoplay; encrypted-media; picture-in-picture"
-        allowfullscreen
-      />
-      <button
-        v-else-if="video"
-        type="button"
-        class="poster"
-        :aria-label="`Play how-to video: ${video.title}`"
-        @click="playing = true"
-      >
-        <span class="thumb" :style="video.thumbnail_url ? { backgroundImage: `url(${video.thumbnail_url})` } : undefined">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>
-        </span>
-        <span class="caption">
-          <small>{{ tutorial?.retrieval.provider_used === "youtube" ? "How-to video · best match on YouTube" : "Sample how-to video" }}</small>
-          <span>{{ video.title }}</span>
-        </span>
-      </button>
-      <p v-else class="no-video">
-        <svg viewBox="0 0 48 32" aria-hidden="true"><rect x="3" y="3" width="42" height="26" rx="6" fill="#fff" /><path d="M20 11v10l9-5z" fill="#f4f1ea" /><path d="M6 27 42 5" /></svg>
-        No how-to video for this dish yet.
+    <HomeDishIcon class="big-icon" :title="tonight.day.recipe.title" :course="tonight.day.recipe.course" :role-id="tonight.day.role_id" :size="64" />
+    <div class="head">
+      <span class="kicker">{{ eyebrow }} · {{ formatPlanDate(tonight.day.planned_date, { weekday: "short", day: "numeric", month: "short" }) }}</span>
+      <h2>{{ tonight.day.recipe.title }}</h2>
+      <p v-if="others.length" class="with">
+        with
+        <template v-for="(dish, index) in others" :key="dish.entry_id">
+          <button type="button" class="dish-link" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button><span v-if="index < others.length - 2">, </span><span v-else-if="index === others.length - 2"> and </span>
+        </template>
+      </p>
+      <p class="meta">
+        {{ tonight.day.recipe.total_time_minutes }} min · {{ mealKcal }} kcal each<template v-if="next?.meal.status === 'completed'"> · <span class="done">Cooked</span></template>
       </p>
     </div>
+
+    <div class="video">
+        <iframe
+          v-if="playing && video"
+          :src="`${video.embed_url}?autoplay=1`"
+          :title="video.title"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowfullscreen
+        />
+        <button
+          v-else-if="video"
+          type="button"
+          class="poster"
+          :aria-label="`Play how-to video: ${video.title}`"
+          @click="playing = true"
+        >
+          <span class="thumb" :style="video.thumbnail_url ? { backgroundImage: `url(${video.thumbnail_url})` } : undefined">
+            <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z" /></svg></span>
+            <span v-if="video.duration_seconds" class="len">{{ Math.floor(video.duration_seconds / 60) }}:{{ String(video.duration_seconds % 60).padStart(2, "0") }}</span>
+          </span>
+          <span class="caption">
+            <small>{{ tutorial?.retrieval.provider_used === "youtube" ? "How-to video · best match on YouTube" : "Sample how-to video" }}</small>
+            <span>{{ video.title }}</span>
+          </span>
+        </button>
+        <p v-else class="no-video">No how-to video for this dish yet.</p>
+      </div>
+
+      <div class="acts">
+        <button type="button" class="mc-btn primary sm" @click="emit('openRecipe', tonight.day.recipe.slug)">Recipe and steps</button>
+        <button
+          v-if="!readonly && next && next.meal.status !== 'completed' && next.meal.status !== 'skipped'"
+          type="button"
+          class="mc-btn secondary sm cooked"
+          :disabled="updatingEntryId === tonight.day.entry_id"
+          @click="markCooked"
+        >
+          {{ updatingEntryId === tonight.day.entry_id ? "Saving…" : "Mark cooked" }}
+        </button>
+        <button v-if="!readonly" type="button" class="mc-btn quiet sm" @click="emit('swap', tonight.day)">Swap</button>
+      </div>
   </section>
   <section v-else-if="days.length" class="tonight quiet" aria-label="Next meal">
-    <span class="mc-eyebrow">This week</span>
-    <h2 class="mc-serif">Every meal this week is done.</h2>
-    <p class="meta">Ask for next week whenever you're ready.</p>
+    <div class="head">
+      <span class="mc-label">This week</span>
+      <h2>Every meal this week is done.</h2>
+      <p class="meta">Ask for next week whenever you're ready.</p>
+    </div>
   </section>
 </template>
 
 <style scoped>
-.tonight {
-  position: relative;
-  flex: none;
-  padding: 20px 22px 18px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 4px 16px;
-  overflow: hidden;
-  border-bottom: 1px solid var(--line-2);
-  background: #fff4e0;
-}
-.tonight > .mc-eyebrow, .acts, .video { grid-column: 1 / -1; }
-.tonight > .mc-eyebrow { color: #b26b00; }
-h2 { margin: 6px 0 0; font-size: 28px; line-height: 1.08; letter-spacing: -0.01em; text-wrap: balance; }
-.with { margin: 6px 0 0; font-size: 13px; color: var(--t2); line-height: 1.5; }
-.dish-link { padding: 0; border: 0; background: none; color: var(--ivory); font: inherit; text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; }
-.dish-link:hover { text-decoration-color: var(--accent); }
-.meta { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 12px; color: var(--t2); font-size: 12.5px; }
-.meta .done { color: var(--sage); }
-.acts { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
-.tonight > .big-icon { grid-row: 2 / 4; grid-column: 2; align-self: center; }
-
-.video { margin-top: 14px; }
+.tonight { display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 14px; margin: 16px 16px 4px; padding: 16px; border-radius: 16px; background: var(--c-tonight); }
+.big-icon { grid-row: 1; align-self: start; }
+.head { grid-column: 2; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.video, .acts { grid-column: 1 / -1; }
+.quiet .head { grid-column: 1 / -1; }
+.kicker { font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-amber-text); }
+h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 20px; line-height: 26px; }
+.with { margin: 0; font-size: 13px; color: var(--c-neutral-text); }
+.dish-link { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; text-decoration-color: var(--c-tonight-border); text-underline-offset: 3px; }
+.dish-link:hover { color: var(--c-ink); text-decoration-color: var(--c-coral); }
+.meta { margin: 0; font-size: 12px; line-height: 16px; color: var(--c-muted); }
+.meta .done { color: var(--c-green-text); font-weight: 800; }
+.video { margin-top: 10px; }
 .video iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; display: block; }
-.poster { width: 100%; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: #fff; display: flex; align-items: center; gap: 12px; text-align: left; }
-.poster:hover { border-color: var(--line-2); }
-.thumb { width: 88px; aspect-ratio: 16 / 9; flex: none; border-radius: 8px; background: radial-gradient(circle at 35% 40%, #6b4a33, #2a1d15) center / cover; display: grid; place-items: center; }
-.thumb svg { width: 16px; height: 16px; fill: #fff; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6)); }
-.caption { min-width: 0; display: grid; font-size: 12.5px; }
-.caption small { font-size: 12px; color: var(--t3); }
-.caption span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.no-video { margin: 0; display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed var(--line-2); border-radius: 12px; font-size: 13px; color: var(--t2); }
-.no-video svg { width: 48px; height: 32px; flex: none; fill: none; stroke: #2a2a48; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.quiet { background: var(--s1); }
+.poster { width: 100%; padding: 6px; border: 0; border-radius: 12px; background: #fff; display: flex; align-items: center; gap: 10px; text-align: left; color: var(--c-ink); }
+.poster:hover .caption span { color: var(--c-coral); }
+.thumb { position: relative; width: 88px; height: 50px; flex: none; border-radius: 8px; overflow: hidden; background: linear-gradient(135deg, #7a3e1e, #d98b3a 55%, #f3d08a) center / cover; }
+.play { position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; background: rgba(255, 255, 255, 0.92); display: flex; align-items: center; justify-content: center; }
+.play svg { width: 10px; height: 10px; fill: var(--c-ink); }
+.len { position: absolute; right: 4px; bottom: 3px; padding: 0 4px; border-radius: 4px; background: rgba(0, 0, 0, 0.55); color: #fff; font-size: 12px; line-height: 14px; font-weight: 800; }
+.caption { min-width: 0; display: flex; flex-direction: column; }
+.caption small { font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-muted); }
+.caption span { font-size: 13px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.no-video { margin: 0; padding: 10px 12px; border-radius: 12px; background: #fff; font-size: 12px; line-height: 16px; color: var(--c-muted); }
+.acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.acts .cooked { border-color: var(--c-tonight-border); }
+.quiet { background: var(--c-canvas); }
 </style>

@@ -63,27 +63,30 @@ function kcal(event: MealPlanReplanEvent) {
 </template>
 
 <style scoped>
-.changes { margin: 4px 0 0; border-top: 1px solid var(--mc-line); padding-top: 12px; }
+.changes { margin: 4px 0 0; padding-top: 12px; }
 summary {
   display: flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
   font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--mc-text-3);
+  line-height: 16px;
+  font-weight: 800;
+  color: var(--c-muted);
 }
 summary::-webkit-details-marker { display: none; }
 summary::before { content: "▸"; font-size: 12px; transition: transform 200ms var(--mc-ease); }
 .changes[open] summary::before { transform: rotate(90deg); }
 .count {
   margin-left: auto;
-  padding: 1px 7px;
-  border: 1px solid var(--mc-line);
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
   border-radius: 999px;
+  background: var(--c-neutral);
+  color: var(--c-neutral-text);
   font-size: 12px;
-  letter-spacing: 0;
 }
 ol { margin: 12px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
 .swap { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-size: 13px; color: var(--mc-text-2); }

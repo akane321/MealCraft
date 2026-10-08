@@ -29,6 +29,14 @@ export function budgetLine(estimate: WeeklyGroceryEstimate): string | null {
     : `${formatSgd(-gap)} over your ${formatSgd(budget)}`;
 }
 
+/** What is left of the weekly budget, or how far over it the week is; null without a budget. */
+export function budgetGap(estimate: WeeklyGroceryEstimate): { amount: string; over: boolean } | null {
+  const budget = estimate.weekly_budget_sgd;
+  if (budget === null) return null;
+  const gap = Math.round((budget - estimate.purchase_total_sgd) * 100) / 100;
+  return { amount: formatSgd(Math.abs(gap)), over: gap < 0 };
+}
+
 export function packageLabel(line: GroceryLineEstimate): string {
   const size = line.product?.package_size;
   const unit = line.product?.package_unit ?? "";

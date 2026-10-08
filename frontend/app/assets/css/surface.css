@@ -1,26 +1,27 @@
 /* Calm light theme (trial restyle): white page, warm rails, coral action, blue navigation. Scoped by the .mc-surface root. */
 .mc-surface, .mc-overlay, .mc-sheet-overlay {
   color-scheme: light;
-  --ink: #ffffff;
-  --s1: #fcfbf8;
-  --s2: #f7f4ee;
-  --s3: #f4f1ea;
-  --line: #efeae0;
-  --line-2: #e6e0d4;
-  --ivory: #2a2a48;
-  --t2: #5e5a70;
-  --t3: #66625a;
-  --t4: #6b665c;
-  --accent: #f0675c;
-  --accent-fill: #f0675c;
-  --blue: #3a63e0;
-  --sage: #2f8a4c;
-  --green: #4fb86e;
-  --warn: #a93a30;
-  --warn-soft: #fdecea;
+  /* Legacy names on the home surface, mapped onto the design tokens in main.css. */
+  --ink: var(--c-white);
+  --s1: var(--c-canvas);
+  --s2: var(--c-rail);
+  --s3: var(--c-neutral);
+  --line: var(--c-line-soft);
+  --line-2: var(--c-line);
+  --ivory: var(--c-ink);
+  --t2: var(--c-neutral-text);
+  --t3: var(--c-muted);
+  --t4: var(--c-muted);
+  --accent: var(--c-coral);
+  --accent-fill: var(--c-coral);
+  --blue: var(--c-blue);
+  --sage: var(--c-green-text);
+  --green: var(--c-green);
+  --warn: var(--c-allergy-text);
+  --warn-soft: var(--c-allergy-bg);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --serif: "Bricolage Grotesque", "Noto Sans SC", system-ui, sans-serif;
-  --sans: Nunito, system-ui, -apple-system, "Segoe UI", "Noto Sans SC", sans-serif;
+  --serif: var(--font-display);
+  --sans: var(--font-body);
 
   /* Older names the sheets still use. */
   --mc-base: var(--ink);
@@ -35,7 +36,7 @@
   --mc-serif: var(--serif);
 
   color: var(--ivory);
-  font: 14px/1.5 var(--sans);
+  font: 600 14px/20px var(--sans);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -97,7 +98,7 @@
   flex: none;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.6;
+  stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -118,13 +119,50 @@
   animation: mc-rise 420ms var(--ease) both;
 }
 
-.mc-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+.mc-eyebrow { font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-muted); }
 .mc-serif { font-family: var(--serif); font-weight: 700; }
 .mc-num { font-variant-numeric: tabular-nums; }
 
-.mc-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; border: 0; background: var(--s3); font-size: 12px; font-weight: 700; color: var(--t2); }
-.mc-chip b { color: var(--ivory); font-weight: 800; }
-.mc-chip.alert { color: var(--warn); background: var(--warn-soft); }
+/* Chips (design v2): 24px pill, neutral unless the chip means something. */
+.mc-chip { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 10px; border-radius: 999px; border: 0; background: var(--c-neutral); font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-neutral-text); white-space: nowrap; }
+.mc-chip b { color: var(--c-ink); font-weight: 800; }
+.mc-chip.alert { color: var(--c-allergy-text); background: var(--c-allergy-bg); }
+.mc-chip.ok { color: var(--c-green-text); background: var(--c-ok-bg); }
+.mc-chip.warn { color: var(--c-amber-text); background: var(--c-warn-bg); }
+.mc-chip.info { color: var(--c-info-text); background: var(--c-info-bg); }
+.mc-chip svg { width: 12px; height: 12px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Buttons (design v2): primary coral (one per area), strong ink, secondary white, quiet. Heights 40 / 36 (.sm) / 30 (.xs). */
+.mc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--c-ink); font-family: var(--font-body); font-size: 14px; line-height: 20px; font-weight: 800; white-space: nowrap; text-decoration: none; }
+.mc-btn.primary { padding: 0 18px; background: var(--c-coral); color: #fff !important; }
+.mc-btn.primary:hover:not(:disabled) { background: var(--c-coral-hover); }
+.mc-btn.strong { background: var(--c-ink); color: #fff !important; }
+.mc-btn.strong:hover:not(:disabled) { background: #3a3a5e; }
+.mc-btn.secondary { background: #fff; border-color: var(--c-border); }
+.mc-btn.secondary:hover:not(:disabled) { background: var(--c-rail); }
+.mc-btn.quiet { padding: 0 14px; }
+.mc-btn.quiet:hover:not(:disabled) { background: var(--c-neutral); }
+.mc-btn.sm { height: 36px; padding: 0 14px; border-radius: 10px; font-size: 13px; }
+.mc-btn.sm.quiet { padding: 0 10px; }
+.mc-btn svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+/* Suggestion chips: 30px white pills. */
+.mc-suggest { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border: 1px solid var(--c-line); border-radius: 999px; background: #fff; color: var(--c-ink); font-family: var(--font-body); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.mc-suggest:hover:not(:disabled) { border-color: var(--c-border); background: var(--c-rail); }
+
+/* One card: radius 16, 1px line, rows split by soft lines, no shadow. */
+.mc-card { background: #fff; border: 1px solid var(--c-line); border-radius: 16px; overflow: hidden; }
+
+/* Type scale. */
+.mc-display { font-family: var(--font-display); font-weight: 700; font-size: 28px; line-height: 34px; }
+.mc-title { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 28px; }
+.mc-heading { font-family: var(--font-display); font-weight: 700; font-size: 18px; line-height: 24px; }
+.mc-label { font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-muted); }
+.mc-small { font-size: 12px; line-height: 16px; color: var(--c-muted); }
+
+/* Segmented tabs: the only shadow is the selected tab's. */
+.mc-segmented { display: flex; gap: 2px; padding: 3px; background: var(--c-neutral); border-radius: 12px; }
+.mc-segmented > button { height: 30px; padding: 0 14px; border: 0; border-radius: 9px; background: transparent; color: var(--c-neutral-text) !important; font-size: 13px; font-weight: 700; }
+.mc-segmented > button[aria-selected="true"] { background: #fff; color: var(--c-ink) !important; font-weight: 800; box-shadow: var(--shadow-tab); }
 
 /* Film grain over the surface. */
 .mc-grain {
