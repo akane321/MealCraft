@@ -550,23 +550,17 @@ class AgentSessionService:
                 )
                 if error is None:
                     return cost
-                # Adding a budget changes the bounded candidate packet. Its own cost-led search may
-                # find a dearer witness; verify that amount too, rather than offer the unrepeatable one.
+                # Adding a budget changes the bounded candidate packet, and its own cost-led search may find a
+                # dearer week. That search reads neither the budget nor its amount (planning/product_path.py
+                # `cheapest_weeks`), and the budgeted packet depends only on there being a budget, so a week of it
+                # that only this budget turned down is tried again, and passes, under any budget of its cost or
+                # more: the check that found it already backs that amount, with no second search.
                 backed = [
                     attempt["purchase_total_sgd"]
                     for attempt in error.trace.get("validation_attempts", [])
                     if attempt.get("cheapest_search") and limits._failed(attempt) == {"purchase_budget"}
                 ]
-                if backed:
-                    cost = min(backed)
-                    if (
-                        self.meal_plan_service.check(
-                            candidate.model_copy(update={"weekly_budget_sgd": math.ceil(cost)})
-                        )
-                        is None
-                    ):
-                        return cost
-                return None
+                return min(backed) if backed else None
             except (ProductProviderError, WeeklyPlanSelectionError):
                 return None
 
