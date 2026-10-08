@@ -162,3 +162,15 @@ def test_a_line_whose_wording_names_meat_or_fish_is_meat_whatever_the_release_ma
         ("vegetarian_ham", "1/2 cup vegetarian ham, cubed"),
     ):
         assert not meat_or_fish(name, text), text
+
+
+@pytest.mark.parametrize(
+    ("name", "text"),
+    [
+        ("butter", "butter or bacon drippings"),
+        ("vegetable_oil", "2 tbsp bacon fat or oil"),
+        ("vegetable_broth", "1 cup chicken (or vegetable) broth"),
+    ],
+)
+def test_an_alternative_rendered_as_a_non_meat_ingredient_is_not_classified_as_meat(name, text):
+    assert not meat_or_fish(name, text)
