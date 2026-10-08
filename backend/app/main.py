@@ -1,3 +1,4 @@
+import gc
 import threading
 from contextlib import asynccontextmanager
 
@@ -12,6 +13,12 @@ from app.db.session import SessionLocal
 from app.repositories.recipe import POOL_CHECK_SECONDS, keep_planning_pool_warm
 
 settings = get_settings()
+# A chat turn's planning allocates millions of short-lived objects beside the recipe pool's million or so long-lived
+# ones. At Python's default first-generation threshold (700) the collector ran about 3,000 times in one budget
+# refusal and took 2.5-3.3 s of its 8-10 s (WP1 1b, 2026-10-08); every 50,000 allocations it runs a few dozen times
+# for the same garbage. When garbage is collected changes nothing the planner computes.
+GC_FIRST_GENERATION = 50_000
+gc.set_threshold(GC_FIRST_GENERATION)
 cors_origins = list(
     dict.fromkeys(
         [
