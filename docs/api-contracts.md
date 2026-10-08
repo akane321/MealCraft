@@ -580,7 +580,12 @@ its budget at the checkout (or no further over it than it is), one dish a meal
 per preview. When no different dish fits, the week stays as it is and the reply
 says how much more than the week can spend the closest swap found needs, with a
 swap of one dish offered instead; a week with no repeats says so. "Swap the
-repeated dishes" and "plan a new week with different dishes" ask for the same.
+repeated dishes" keeps the current week and previews replacements for its
+repeated dishes. "Plan a new week with different dishes" is a distinct
+whole-week request: it runs the weekly planner again, avoids recipes from the
+current week while alternatives remain, and saves the new week as replacing
+the old one. An explicit "no dish twice" request also limits each recipe to
+one use in that new week.
 A mixed request sends only
 its supported segment to the parser. The persisted `last_scope_decision` makes
 this routing visible to clients and tests. Every templated reply is written in

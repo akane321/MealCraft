@@ -305,7 +305,7 @@ REPLIES: dict[str, tuple[str, str]] = {
     "weekly_detail": ("S${amount:g} for the week", "一周 S${amount:g}"),
     "meal_detail": ("S${amount:g} a dinner", "每餐 S${amount:g}"),
     "time_detail": ("up to {minutes} minutes of cooking", "做饭不超过 {minutes} 分钟"),
-    "allergy_detail": ("nothing with {words} (allergy)", "不含{words}（过敏）"),
+    "allergy_detail": ("allergic to {words}", "不含{words}（过敏）"),
     "exclusion_detail": ("no {words}", "不要{words}"),
     "pantry_detail": ("{words} at home", "家里有{words}"),
     "no_repeats_detail": ("no dish twice", "菜不重样"),
@@ -382,7 +382,7 @@ REPLIES: dict[str, tuple[str, str]] = {
     "prepare_failed": ("I could not prepare that change: {error}", "我没法准备这个调整：{error}"),
     "change_failed": ("I could not make that change: {error}", "我没法做这个调整：{error}"),
     "shape_summary": ("{summary}.", "{summary}。"),
-    "shape_only": ("{Meal} as one {dish} {when}", "{when}{meal}只做一道{dish}"),
+    "shape_only": ("{Meal} will have one {dish} {when}", "{when}{meal}只做一道{dish}"),
     "shape_one_dish": ("{Meal} as one dish {when}", "{when}{meal}只做一道菜"),
     "shape_no_meal": ("No {meal} {when}", "{when}不安排{meal}"),
     "shape_add_meal": ("{Meal} added {when}", "{when}加上{meal}"),
@@ -395,8 +395,7 @@ REPLIES: dict[str, tuple[str, str]] = {
     "when_weekdays": ("on weekdays", "工作日"),
     "shape_new": ("New: {titles}{more}.", "新加：{titles}{more}。"),
     "shape_more": (" and {count} more", " 等 {count} 道"),
-    "shape_removed_one": ("1 dish comes off the week.", "这周少了 1 道菜。"),
-    "shape_removed": ("{count} dishes come off the week.", "这周少了 {count} 道菜。"),
+    "shape_removed": ("Removed: {titles}.", "移除：{titles}。"),
     "shape_groceries": (
         "Groceries {sign}S${amount:.2f}.{over} Nothing changes until you confirm.",
         "买菜 {sign}S${amount:.2f}。{over}确认之前什么都不会改。",
@@ -425,7 +424,7 @@ REPLIES: dict[str, tuple[str, str]] = {
     "replanned": ("Done. Your week and shopping list are updated.", "好了，这周的计划和购物清单都更新了。"),
     "discarded": ("OK, your week stays as it is.", "好的，这周保持原样。"),
     "planned": (
-        "Here's your week. Tap a dinner for the recipe, or ask me to swap anything.",
+        "Here's your week. Click a dinner for the recipe, or ask me to swap anything.",
         "这是你这一周的安排。点一道菜看食谱，想换什么都可以告诉我。",
     ),
     # Limits a week cannot meet (agent/limits.py).

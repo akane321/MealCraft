@@ -45,14 +45,18 @@ MONOTONY = re.compile(
     r"|\b(?:more|no|not\s+(?:much|enough))\s+variety\b|\btoo\s+(?:much\s+)?(?:repetition|repeated)\b"
     r"|单调|没新意|没有新意|吃腻|腻了|老一样|老是一样|总是一样|天天都?一样|都差不多|太重复|重复太多|没什么变化|换换口味|多点花样"
 )
-# Of a planned week, the wish for variety itself or "Swap the repeated dishes for different ones", 把重复的菜换成别的菜
-# (or a new week asked for so): its repeated dishes swapped for different ones within its budget, in one preview
-# (services/agent.py _plan_again). "The dishes are boring" asks for that, not for choices first (owner, 2026-10-04).
-VARIED_WEEK = re.compile(
+# An explicit request for another whole week. This is different from merely saying
+# the current week is boring or repetitive: it goes through the full weekly planner.
+NEW_WEEK = re.compile(
     r"\b(?:re-?plan(?:\s+the\s+week)?|plan\s+(?:a\s+new|another|the)\s+week(?:\s+again)?)\b"
     r".*\b(?:different\s+dishes|no\s+(?:dish\s+twice|repeats?)|more\s+variety)\b"
-    r"|\bswap\s+the\s+repeated\s+dishes\b|把重复的菜换"
-    r"|重新(?:规划|安排).*(?:换一批|不重样|不要?重复|多点花样)"
+    r"|(?:\u91cd\u6392|\u91cd\u65b0(?:\u89c4\u5212|\u5b89\u6392)).*(?:\u4e00\u5468|\u6574\u5468).*(?:\u4e0d\u540c|\u6362\u4e00\u6279|\u4e0d\u91cd\u6837|\u4e0d\u8981?\u91cd\u590d|\u591a\u70b9\u82b1\u6837)"
+)
+
+# A complaint about monotony, or an explicit request to swap repeated dishes,
+# changes only repeated dishes in the current week.
+VARIED_WEEK = re.compile(
+    r"\bswap\s+the\s+repeated\s+dishes\b|\u628a\u91cd\u590d\u7684\u83dc\u6362"
     rf"|{MONOTONY.pattern}"
 )
 
