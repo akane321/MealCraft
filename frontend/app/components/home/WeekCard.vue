@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
 import { MEAL_LABEL, budgetLine, countWord, formatSgd, mealsByDay, perMealAndDay } from "~/lib/home-surface";
+import type { PlannedMeal } from "~/lib/home-surface";
 import type { NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
 
 const props = defineProps<{ days: NutritionDashboardDay[]; estimate: WeeklyGroceryEstimate; rangeLabel: string }>();
@@ -19,6 +20,13 @@ const perPlateLabel = computed(() => (averages.value && averages.value.mealsPerD
 const budget = computed(() => budgetLine(props.estimate));
 // A tight budget or few eligible dishes can bring a dinner back; say so rather than let it look like a slip.
 const repeats = computed(() => new Set(props.days.map(day => day.recipe.slug)).size < props.days.length);
+const slugCount = computed(() => {
+  const counts = new Map<string, number>();
+  for (const dish of props.days) counts.set(dish.recipe.slug, (counts.get(dish.recipe.slug) ?? 0) + 1);
+  return counts;
+});
+const repeated = (meal: PlannedMeal) => meal.dishes.some(dish => (slugCount.value.get(dish.recipe.slug) ?? 0) > 1);
+const mealTitle = (meal: PlannedMeal) => `${MEAL_LABEL[meal.mealType]}: ${meal.dishes.map(dish => dish.recipe.title).join(" and ")}`;
 </script>
 
 <template>
@@ -41,15 +49,23 @@ const repeats = computed(() => new Set(props.days.map(day => day.recipe.slug)).s
         type="button"
         class="tile"
         :class="{ today: day.date === today, skipped: day.meals.every(meal => meal.status === 'skipped') }"
+        :aria-current="day.date === today ? 'date' : undefined"
         :aria-label="`${formatPlanDate(day.date, { weekday: 'long' })}: ${day.meals.map(meal => meal.dishes.map(d => d.recipe.title).join(' and ')).join('; ')}`"
         @click="emit('openRecipe', day.meals[day.meals.length - 1]!.dishes[0]!.recipe.slug)"
       >
         <span class="d">{{ formatPlanDate(day.date, { weekday: "short" }) }}</span>
-        <HomeDishIcon class="icon" :title="day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title" :course="day.meals[day.meals.length - 1]!.dishes[0]!.recipe.course" :role-id="day.meals[day.meals.length - 1]!.dishes[0]!.role_id" :size="52" />
-        <span class="n mc-serif">{{ day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title }}</span>
-        <span v-if="day.meals.length > 1 || day.meals[0]!.dishes.length > 1" class="more">
-          <template v-if="day.meals.length > 1">{{ day.meals.slice(0, -1).map(meal => MEAL_LABEL[meal.mealType]).join(" · ") }} · </template>{{ day.meals.reduce((sum, meal) => sum + meal.dishes.length, 0) }} dishes
+        <span class="meals">
+          <span v-for="meal in day.meals" :key="meal.key" class="meal" :class="meal.status" :title="mealTitle(meal)">
+            <span class="ico">
+              <HomeDishIcon :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="day.meals.length > 1 ? 36 : 52" />
+              <svg v-if="meal.status === 'completed'" class="tick" viewBox="0 0 24 24" aria-label="Cooked"><circle cx="12" cy="12" r="11" /><path d="m7 12.5 3.500 3.500L17 9" /></svg>
+              <svg v-if="repeated(meal)" class="again" viewBox="0 0 24 24" aria-label="Appears more than once this week"><circle cx="12" cy="12" r="11" /><path d="M7 11a5 5 0 0 1 9-2.5M17 13a5 5 0 0 1-9 2.5M16 5v4h-4M8 19v-4h4" /></svg>
+            </span>
+            <span class="dots" :aria-label="`${meal.dishes.length} ${meal.dishes.length === 1 ? 'dish' : 'dishes'}`"><i v-for="dish in meal.dishes" :key="dish.entry_id" /></span>
+          </span>
         </span>
+        <span class="n mc-serif">{{ day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title }}</span>
+        <span v-if="day.meals.length > 1" class="more">{{ day.meals.map(meal => MEAL_LABEL[meal.mealType]).join(" · ") }}</span>
       </button>
     </div>
     <div class="foot">
@@ -71,20 +87,34 @@ h3 { margin: 0; font-size: 26px; line-height: 1.1; }
 h3 em { color: var(--accent); font-style: normal; }
 .figures { margin-left: auto; display: flex; flex-wrap: wrap; gap: 12px 26px; }
 .fig { display: grid; gap: 2px; }
-.k { font-size: 11px; color: var(--t3); letter-spacing: 0.04em; }
+.k { font-size: 12px; color: var(--t3); letter-spacing: 0.04em; }
 .v { font-size: 24px; line-height: 1; }
 .v small { margin-left: 3px; font: 400 12px var(--sans); color: var(--t3); }
 .strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--line); }
 .tile { display: grid; justify-items: center; align-content: start; gap: 9px; padding: 16px 6px 14px; border: 0; border-right: 1px solid var(--line); background: transparent; text-align: center; transition: background 200ms; }
 .tile:last-child { border-right: 0; }
 .tile:hover { background: rgba(42, 42, 72, 0.03); }
-.tile.skipped { opacity: 0.45; }
-.d { font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
-.today .d { color: #b26b00; }
+.tile.skipped { opacity: 0.5; }
+.d { font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
+.today .d { color: #8a4f00; font-weight: 800; }
 .n { font-size: 12.5px; font-weight: 400; line-height: 1.25; color: var(--t2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.more { font-size: 10.5px; color: var(--t4); line-height: 1.3; }
-.tile .icon { transition: transform 300ms var(--ease); }
-.tile:hover .icon { transform: translateY(-2px) rotate(-6deg); }
+.more { font-size: 12px; color: var(--t4); line-height: 1.3; }
+.meals { display: grid; justify-items: center; gap: 6px; }
+.meal { display: grid; justify-items: center; gap: 4px; }
+.meal.completed .ico > :first-child { opacity: 0.45; }
+.meal.skipped { opacity: 0.4; }
+.ico { position: relative; display: block; line-height: 0; transition: transform 300ms var(--ease); }
+.tile:hover .ico { transform: translateY(-2px); }
+.tick, .again { position: absolute; width: 16px; height: 16px; fill: #fff; stroke: var(--sage); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tick { right: -4px; bottom: -4px; fill: var(--green); }
+.tick path { stroke: #fff; stroke-width: 2.4; }
+.tick circle { stroke: #fff; }
+.again { left: -4px; top: -4px; stroke: var(--blue); }
+.again path { fill: none; stroke-width: 2; }
+.dots { display: inline-flex; gap: 3px; }
+.dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--t3); }
+.tile.today { background: #fff6e0; box-shadow: inset 0 3px 0 var(--accent); }
+.tile.today:hover { background: #fff0d0; }
 .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px 24px; border-top: 1px solid var(--line); background: var(--s2); }
 .note { margin-left: auto; font-size: 12px; color: var(--sage); display: inline-flex; align-items: center; gap: 6px; }
 .note.over { color: var(--warn); }

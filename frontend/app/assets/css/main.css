@@ -6,7 +6,7 @@
   --s3: #f4f1ea;
   --ivory: #2a2a48;
   --t2: #5e5a70;
-  --t3: #7a7568;
+  --t3: #66625a;
   --accent: #f0675c;
   --sage: #2f8a4c;
   --serif: "Bricolage Grotesque", "Noto Sans SC", system-ui, sans-serif;
@@ -381,7 +381,7 @@ h1, h2 {
   border-radius: 999px;
   color: var(--sage);
   background: rgba(79, 184, 110, 0.14);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 720;
 }
 
@@ -447,7 +447,7 @@ h1, h2 {
   padding: 0;
   border: 0;
   background: transparent;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
   cursor: pointer;
 }
@@ -542,13 +542,13 @@ h1, h2 {
 
 .profile-summary-list dt {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .profile-summary-list dd {
   margin: 0;
   overflow-wrap: anywhere;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -565,14 +565,14 @@ h1, h2 {
   margin: 14px 0;
   padding-left: 18px;
   color: var(--t2);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
 }
 
 .form-kicker {
   margin: 0 0 7px;
   color: var(--accent);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 750;
   letter-spacing: 0.08em;
   text-transform: uppercase;

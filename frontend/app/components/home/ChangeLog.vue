@@ -75,14 +75,14 @@ summary {
   color: var(--mc-text-3);
 }
 summary::-webkit-details-marker { display: none; }
-summary::before { content: "▸"; font-size: 10px; transition: transform 200ms var(--mc-ease); }
+summary::before { content: "▸"; font-size: 12px; transition: transform 200ms var(--mc-ease); }
 .changes[open] summary::before { transform: rotate(90deg); }
 .count {
   margin-left: auto;
   padding: 1px 7px;
   border: 1px solid var(--mc-line);
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0;
 }
 ol { margin: 12px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }

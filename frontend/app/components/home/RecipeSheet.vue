@@ -90,11 +90,11 @@ svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width:
 .body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 14px; align-items: start; }
 .card { padding: 16px; border-radius: 18px; }
 h3 { margin: 0 0 6px; font-size: 14px; }
-.hint { margin: 0 0 8px; font-size: 11px; color: var(--mc-text-3); }
+.hint { margin: 0 0 8px; font-size: 12px; color: var(--mc-text-3); }
 ul { list-style: none; margin: 0; padding: 0; }
 ul li { padding: 8px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; font-size: 13px; }
 .name small { color: var(--mc-text-3); }
 .qty { color: var(--mc-text-2); }
-.allergen { grid-column: 1 / -1; font-size: 11px; font-weight: 700; color: var(--warn); }
+.allergen { grid-column: 1 / -1; font-size: 12px; font-weight: 700; color: var(--warn); }
 ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.55; }
 </style>

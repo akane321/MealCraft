@@ -132,7 +132,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .metric { padding: 12px; border-radius: 16px; text-align: left; display: flex; flex-direction: column; gap: 2px; color: var(--mc-ivory); }
 .metric span { font-size: 12px; color: var(--mc-text-2); }
 .metric strong { font-size: 20px; }
-.metric small { font-size: 11px; color: var(--mc-text-3); }
+.metric small { font-size: 12px; color: var(--mc-text-3); }
 .metric.active { outline: 1.5px solid var(--mc-accent); }
 .chart { margin: 0; padding: 14px 16px; border-radius: 18px; }
 .chart figcaption { font-size: 12px; color: var(--mc-text-2); }
@@ -140,7 +140,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .chart polyline { stroke-width: 2.5; }
 .chart .done { stroke: var(--mc-ivory); }
 .chart .plan { stroke: var(--mc-text-3); stroke-dasharray: 6 5; }
-.legend { margin: 0; display: flex; gap: 16px; font-size: 11px; color: var(--mc-text-3); }
+.legend { margin: 0; display: flex; gap: 16px; font-size: 12px; color: var(--mc-text-3); }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend i { width: 18px; height: 0; border-top: 2.5px solid var(--mc-ivory); }
 .legend i.plan { border-top: 2.5px dashed var(--mc-text-3); }

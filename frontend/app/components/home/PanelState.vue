@@ -26,6 +26,12 @@ const emit = defineEmits<{ retry: [] }>();
     <button type="button" class="mc-pill" @click="emit('retry')">Try again</button>
   </div>
   <div v-else class="panel-state empty">
+    <svg class="art" viewBox="0 0 96 64" aria-hidden="true">
+      <ellipse cx="48" cy="56" rx="30" ry="4" fill="#efeae0" stroke="none" />
+      <circle cx="48" cy="32" r="22" fill="#fff" /><circle cx="48" cy="32" r="14" fill="#fff4e0" />
+      <path d="M12 12v14a4 4 0 0 0 4 4v22M16 12v10M20 12v14a4 4 0 0 1-4 4" fill="none" />
+      <path d="M82 12c-5 3-6 12-4 18h4v22" fill="none" /><circle cx="48" cy="32" r="4" fill="#f0675c" />
+    </svg>
     <h2 v-if="title" class="mc-serif">{{ title }}</h2>
     <p>{{ emptyText }}</p>
   </div>
@@ -35,6 +41,8 @@ const emit = defineEmits<{ retry: [] }>();
 .panel-state { display: flex; flex-direction: column; gap: 12px; padding: 22px; color: var(--mc-text-3); font-size: 13px; }
 .panel-state h2 { margin: 0 0 4px; font-size: 22px; font-weight: 400; color: var(--mc-ivory); }
 .panel-state p { margin: 0; line-height: 1.6; }
+.panel-state.empty { align-items: flex-start; }
+.art { width: 96px; height: 64px; fill: none; stroke: #2a2a48; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .panel-state.error { gap: 14px; align-items: flex-start; color: var(--mc-text-2); }
 .panel-state.error p { margin: 0; line-height: 1.6; }
 

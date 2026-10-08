@@ -9,8 +9,8 @@
   --line-2: #e6e0d4;
   --ivory: #2a2a48;
   --t2: #5e5a70;
-  --t3: #7a7568;
-  --t4: #9a9488;
+  --t3: #66625a;
+  --t4: #6b665c;
   --accent: #f0675c;
   --accent-fill: #f0675c;
   --blue: #3a63e0;
@@ -38,6 +38,14 @@
   font: 14px/1.5 var(--sans);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Numbers line up (prices, kcal, times); thin scrollbars; press feedback. */
+.mc-surface, .mc-overlay, .mc-sheet-overlay { font-variant-numeric: tabular-nums; }
+.mc-surface *, .mc-overlay *, .mc-sheet-overlay * { scrollbar-width: thin; scrollbar-color: #d6cfc0 transparent; }
+.mc-surface ::-webkit-scrollbar, .mc-overlay ::-webkit-scrollbar { width: 8px; height: 8px; }
+.mc-surface ::-webkit-scrollbar-thumb, .mc-overlay ::-webkit-scrollbar-thumb { background: #d6cfc0; border-radius: 8px; }
+.mc-surface button:active:not(:disabled), .mc-overlay button:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+.mc-surface button, .mc-overlay button { transition: background 150ms, border-color 150ms, color 150ms, transform 80ms; }
 
 .mc-surface { position: fixed; inset: 0; overflow: clip; background: var(--ink); }
 .mc-surface[data-view="landing"] { background: #2a2a48; }
@@ -76,7 +84,7 @@
   min-height: 38px;
   padding: 0 16px;
   border: 1px solid var(--accent);
-  border-radius: 11px;
+  border-radius: 12px;
   background: var(--accent);
   color: #fff !important;
   font-size: 13px;
@@ -110,7 +118,7 @@
   animation: mc-rise 420ms var(--ease) both;
 }
 
-.mc-eyebrow { font-size: 10.5px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+.mc-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
 .mc-serif { font-family: var(--serif); font-weight: 700; }
 .mc-num { font-variant-numeric: tabular-nums; }
 

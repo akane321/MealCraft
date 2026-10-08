@@ -81,12 +81,36 @@ const rangeLabel = computed(() => {
   const fmt = (d: string) => formatPlanDate(d, { day: "numeric", month: "short" });
   return `${fmt(plan.value.start_date)} – ${fmt(plan.value.end_date)}`;
 });
-const days = computed(() => nutrition.dashboard.value?.days ?? []);
+// While another week loads, the one shown before is stale: show skeletons, never its data (T38).
+const stale = computed(() => planState.value === "loading" && lastPlanId.value !== plan.value?.id);
+const days = computed(() => (stale.value ? [] : nutrition.dashboard.value?.days ?? []));
 const groceryCount = computed(() => groceryGroups(plan.value?.grocery_estimate.items ?? []).reduce((n, g) => n + g.lines.length, 0));
 const estimate = computed(() => plan.value?.grocery_estimate ?? null);
-const budgetShare = computed(() => {
+// Budget bar: within (green), near at 95% or more (amber), over (red, the overage segment marked).
+const budgetBar = computed(() => {
   const budget = estimate.value?.weekly_budget_sgd;
-  return budget ? Math.min(100, estimate.value!.purchase_total_sgd / budget * 100) : null;
+  if (!budget) return null;
+  const total = estimate.value!.purchase_total_sgd;
+  const ratio = total / budget;
+  const state = ratio > 1 ? "over" : ratio >= 0.95 ? "near" : "within";
+  const span = Math.max(total, budget);
+  return { state, spent: Math.round(Math.min(total, budget) / span * 1000) / 10, over: state === "over" ? Math.round((total - budget) / span * 1000) / 10 : 0, percent: Math.round(ratio * 100) };
+});
+// A confirmed change stamps itself on the chat for a moment.
+const stamp = ref(false);
+let confirming = false;
+let stampTimer: ReturnType<typeof setTimeout> | undefined;
+function confirmChange() {
+  confirming = true;
+  void agent.confirmReplan();
+}
+watch(() => session.value?.pending_replan, (now, before) => {
+  if (before && !now && confirming && !errorMessage.value) {
+    stamp.value = true;
+    clearTimeout(stampTimer);
+    stampTimer = setTimeout(() => { stamp.value = false; }, 1600);
+  }
+  if (!now) confirming = false;
 });
 const weekEnded = computed(() => Boolean(plan.value && plan.value.end_date < todayIsoDate()));
 const readOnly = computed(() => Boolean(plan.value && replaced.value));
@@ -113,7 +137,7 @@ const shapePreview = computed(() => {
 // The week shown in the panel belongs to this conversation only when the conversation planned it;
 // its card never appears inside another conversation.
 const ownsPlan = computed(() => Boolean(plan.value && session.value?.plan_id === plan.value.id));
-const showWeek = computed(() => Boolean(ownsPlan.value && days.value.length && !session.value?.pending_replan));
+const showWeek = computed(() => Boolean(ownsPlan.value && days.value.length && !stale.value && !session.value?.pending_replan));
 // A conversation that planned no week changes the one beside it (see send).
 const canChangeWeek = computed(() => Boolean(plan.value && !readOnly.value && (ownsPlan.value || !session.value?.plan_id)));
 const readyToPlan = computed(() => Boolean(session.value?.can_confirm && session.value.status !== "planned"));
@@ -628,7 +652,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <small v-if="swapOverBudget" class="over-budget">This puts the week {{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }} budget.</small>
               </div>
               <div class="acts">
-                <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirmReplan()">{{ choices.confirm }}</button>
+                <button type="button" class="mc-primary" :disabled="isLoading" @click="confirmChange">{{ choices.confirm }}</button>
                 <button type="button" class="mc-pill" :disabled="isLoading" @click="agent.discardReplan()">{{ choices.discard }}</button>
               </div>
             </div>
@@ -655,12 +679,13 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <small v-if="swapOverBudget" class="over-budget">This puts the week {{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }} budget.</small>
               </div>
               <div class="acts">
-                <button type="button" class="mc-primary" :disabled="isLoading" @click="agent.confirmReplan()">{{ choices.confirm }}</button>
+                <button type="button" class="mc-primary" :disabled="isLoading" @click="confirmChange">{{ choices.confirm }}</button>
                 <button type="button" class="mc-pill" :disabled="isLoading" @click="agent.discardReplan()">{{ choices.discard }}</button>
               </div>
             </div>
 
             <p v-if="session?.pending_replan && estimate?.pricing_mode === 'live'" class="caveat">Grocery changes are estimates. Selected product prices are checked again when you confirm.</p>
+            <div v-if="stamp" class="stamp" role="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10" /></svg>Change made</div>
             <div v-if="isLoading" class="typing" aria-label="MealCraft is thinking"><span /><span /><span /></div>
             <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
           </div>
@@ -694,7 +719,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
       </main>
 
       <aside v-if="panelOpen" class="panel" aria-label="This week">
-        <template v-if="plan && days.length">
+        <template v-if="plan && days.length && !stale">
           <HomeTonight
             v-if="tab === 'dinners'"
             :days="days"
@@ -726,14 +751,15 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <div class="spend">
               <b class="mc-serif mc-num">{{ formatSgd(estimate.purchase_total_sgd) }}</b>
               <span class="of">{{ groceryCount }} items</span>
-              <span v-if="budgetLine(estimate)" class="left" :class="{ over: estimate.within_weekly_budget === false }">{{ budgetLine(estimate) }}</span>
+              <span v-if="budgetLine(estimate)" class="left" :class="budgetBar?.state">{{ budgetLine(estimate) }}</span>
             </div>
-            <div v-if="budgetShare !== null" class="meter" role="img" :aria-label="`${Math.round(budgetShare)} percent of the weekly budget`">
-              <i :style="{ width: `${budgetShare}%` }" :class="{ over: estimate.within_weekly_budget === false }" />
+            <div v-if="budgetBar" class="meter" :class="budgetBar.state" role="img" :aria-label="`${budgetBar.percent} percent of the weekly budget${budgetBar.state === 'over' ? ', over budget' : ''}`">
+              <i class="fill" :style="{ width: `${budgetBar.spent}%` }" />
+              <i v-if="budgetBar.over" class="overage" :style="{ width: `${budgetBar.over}%` }" />
             </div>
             <div class="foot-acts">
               <button type="button" class="mc-pill" @click="previewOpen = true">Preview list</button>
-              <button type="button" class="mc-primary" @click="exportPdf">
+              <button type="button" class="mc-pill" @click="exportPdf">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5v-6h14v6h-2M8 14h8v6H8Z" /></svg>Export PDF
               </button>
             </div>
@@ -826,34 +852,34 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .app { position: absolute; inset: 0; z-index: 1; display: grid; grid-template-columns: 236px minmax(0, 1fr) 424px; animation: mc-rise 900ms var(--ease) 200ms both; }
 .app.no-panel { grid-template-columns: 236px minmax(0, 1fr); }
 
-.rail { display: flex; flex-direction: column; gap: 18px; min-height: 0; padding: 18px 14px; border-right: 1px solid var(--line-2); background: var(--s2); }
+.rail { display: flex; flex-direction: column; gap: 16px; min-height: 0; padding: 18px 14px; border-right: 1px solid var(--line-2); background: var(--s2); }
 .rail .brand { padding: 2px 8px 6px; }
 .rail .brand > span { font-size: 19px; }
 .new { display: flex; align-items: center; gap: 9px; width: 100%; height: 38px; padding: 0 12px; border-radius: 12px; border: 0; background: var(--blue); color: #fff; font-weight: 800; }
 .new:hover { background: #2f54c8; }
 .new kbd { margin-left: auto; font: 700 11px var(--sans); color: rgba(255, 255, 255, 0.7); }
 .nav-list { display: grid; gap: 2px; }
-.nav { display: flex; align-items: center; gap: 11px; width: 100%; padding: 8px 10px; border: 0; border-radius: 9px; background: transparent; color: var(--t3) !important; font-size: 14px; text-align: left; text-decoration: none; white-space: nowrap; transition: color 150ms, background 150ms; }
+.nav { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--t3) !important; font-size: 14px; text-align: left; text-decoration: none; white-space: nowrap; transition: color 150ms, background 150ms; }
 .nav:hover { color: var(--ivory) !important; background: rgba(42, 42, 72, 0.04); }
 .nav[aria-current="page"] { color: var(--ivory) !important; background: #fff; box-shadow: 0 1px 0 var(--line-2); font-weight: 700; }
 .nav[aria-current="page"] svg { color: var(--accent); }
-.count { margin-left: auto; font-size: 11.5px; color: var(--t4); }
-.rail-label { padding: 0 10px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
+.count { margin-left: auto; font-size: 12px; color: var(--t4); }
+.rail-label { padding: 0 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
 /* The list gives way to the rail and scrolls; each row keeps its own height (an auto row would shrink with it). */
-.recent { display: grid; grid-auto-rows: max-content; gap: 1px; min-height: 0; overflow: auto; margin-top: -10px; }
-.recent button { width: 100%; padding: 6px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--t3); font-size: 13px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.recent button:hover { color: var(--ivory); background: rgba(42, 42, 72, 0.04); }
+.recent { min-height: 96px; display: grid; grid-auto-rows: max-content; gap: 1px; min-height: 0; overflow: auto; margin-top: -10px; }
+.recent button { width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--t3); font-size: 13px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent button:hover { color: var(--ivory); background: rgba(42, 42, 72, 0.06); }
 .recent button.on { color: var(--ivory); background: #fff; box-shadow: 0 1px 0 var(--line-2); font-weight: 700; }
-.home-card { margin-top: auto; display: grid; gap: 10px; padding: 14px; border-radius: 14px; background: #fff; box-shadow: 0 1px 0 var(--line-2); }
+.home-card { margin-top: auto; display: grid; gap: 8px; padding: 12px; border-radius: 14px; background: #fff; box-shadow: 0 1px 0 var(--line-2); }
 .who { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .who .avatar { width: 30px; height: 30px; }
 .who > div { min-width: 0; }
 .who b { display: block; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .who small { color: var(--t3); font-size: 12px; }
 .chips { display: flex; flex-wrap: wrap; gap: 5px; }
-.home-links { display: flex; justify-content: space-between; font-size: 12px; }
-.home-links a, .home-links button { padding: 0; border: 0; background: none; color: var(--t3); text-decoration: none; }
-.home-links a:hover, .home-links button:hover { color: var(--ivory); }
+.home-links { display: grid; gap: 2px; margin: 0 -8px -8px; padding-top: 4px; border-top: 1px solid var(--line); font-size: 13px; }
+.home-links a, .home-links button { display: block; width: 100%; padding: 4px 8px; font-size: 12px; border: 0; border-radius: 8px; background: none; color: var(--t2); text-align: left; text-decoration: none; }
+.home-links a:hover, .home-links button:hover { color: var(--ivory); background: var(--s3); }
 
 .chat { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--ink); }
 .chat-head { display: flex; align-items: center; gap: 12px; padding: 16px 28px; border-bottom: 1px solid var(--line); }
@@ -887,6 +913,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .shape-card .plates .swap-icon + .swap-icon { margin-left: -14px; }
 .shape-days { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; color: var(--t2); font-size: 12.5px; }
 .shape-days b { display: inline-block; min-width: 34px; color: var(--t3); font-weight: 800; }
+.stamp { justify-self: start; display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border: 2px solid var(--green); border-radius: 8px; color: var(--sage); font: 800 13px var(--serif); letter-spacing: 0.08em; text-transform: uppercase; transform: rotate(-3deg); animation: mc-stamp 520ms var(--ease) both; }
+.stamp svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+@keyframes mc-stamp { 0% { opacity: 0; transform: rotate(-3deg) scale(1.8); } 60% { opacity: 1; transform: rotate(-3deg) scale(0.94); } 100% { transform: rotate(-3deg) scale(1); } }
 .typing { display: flex; gap: 5px; padding: 8px 0; }
 .typing span { width: 7px; height: 7px; border-radius: 999px; background: var(--t3); animation: mc-dot 1.2s ease-in-out infinite; }
 .typing span:nth-child(2) { animation-delay: 150ms; }
@@ -901,7 +930,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .composer .send { width: 42px; height: 42px; }
 .context { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; background: var(--s3); color: var(--t2); font-size: 12.5px; white-space: nowrap; }
 .after { max-width: 720px; margin: 10px auto 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.fine { margin-left: auto; font-size: 11.5px; color: var(--t4); }
+.fine { margin-left: auto; font-size: 12px; color: var(--t4); }
 .suggest { padding: 4px 11px; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; color: var(--t3) !important; font-size: 12px; }
 .suggest:hover { color: var(--ivory) !important; border-color: #d6cfc0; background: var(--s3); }
 
@@ -917,10 +946,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .spend b { font-size: 26px; line-height: 1; }
 .spend .of { color: var(--t3); font-size: 12.5px; }
 .spend .left { margin-left: auto; color: var(--sage); font-size: 12.5px; font-weight: 700; }
+.spend .left.near { color: #8a5a00; }
 .spend .left.over { color: var(--warn); }
-.meter { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
-.meter i { display: block; height: 100%; border-radius: 99px; background: var(--green); transition: width 600ms var(--ease); }
-.meter i.over { background: var(--warn); }
+.meter { display: flex; height: 8px; border-radius: 8px; background: var(--line); overflow: hidden; }
+.meter i { display: block; height: 100%; transition: width 600ms var(--ease); }
+.meter .fill { background: var(--green); }
+.meter.near .fill { background: #e8a33a; }
+.meter.over .fill { background: var(--green); border-right: 2px solid #fff; }
+.meter .overage { background: repeating-linear-gradient(135deg, #d94a3d 0 4px, #b93a2f 4px 8px); }
 .foot-acts { display: flex; gap: 8px; }
 .foot-acts button { flex: 1; min-height: 40px; }
 

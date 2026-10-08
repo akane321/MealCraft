@@ -309,7 +309,7 @@ onMounted(retryAll);
 .dropped-card label { display: grid; min-width: 220px; gap: 5px; color: var(--t3); font-size: 12px; }
 select { padding: 8px 10px; border: 1px solid var(--line-2); border-radius: 9px; background: var(--s2); color: var(--ivory); font: inherit; }
 .reason-counts { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 16px; }
-.reason-counts span, .reason-pill { padding: 3px 9px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--t2); font-size: 11.5px; }
+.reason-counts span, .reason-pill { padding: 3px 9px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--t2); font-size: 12px; }
 .inline-error, .empty { margin: 0; padding: 18px 20px; border-top: 1px solid var(--line); }
 .inline-error p { margin: 0 0 10px; }
 .dropped-warning { display: grid; gap: 3px; padding: 12px 20px; border-top: 1px solid rgba(217, 165, 90, 0.3); background: rgba(217, 165, 90, 0.08); color: var(--t2); font-size: 12.5px; }

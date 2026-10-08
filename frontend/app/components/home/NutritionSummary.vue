@@ -76,12 +76,12 @@ function chooseDay(value: string) {
 .eaten, .lead, .scope { margin: 0; font-size: 12px; line-height: 1.5; color: var(--t3); }
 .eaten strong { color: var(--ivory); font-weight: 500; }
 .selectors { display: flex; gap: 12px; }
-.selectors label { min-width: 0; display: grid; gap: 4px; font-size: 11px; color: var(--t3); }
+.selectors label { min-width: 0; display: grid; gap: 4px; font-size: 12px; color: var(--t3); }
 .selectors select { min-height: 34px; max-width: 100%; padding: 0 8px; color: var(--ivory); background: var(--s2); border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 12px; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
 th, td { padding: 7px 0; text-align: right; border-bottom: 1px solid var(--line); }
 th:first-child { text-align: left; }
 th { color: var(--t3); font-weight: 400; }
-thead th { font-size: 11px; }
+thead th { font-size: 12px; }
 .nutri > button { justify-self: start; min-height: 34px; font-size: 12px; }
 </style>

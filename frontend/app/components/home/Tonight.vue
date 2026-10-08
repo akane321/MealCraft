@@ -105,7 +105,10 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
           <span>{{ video.title }}</span>
         </span>
       </button>
-      <p v-else class="no-video">No how-to video for this dish yet.</p>
+      <p v-else class="no-video">
+        <svg viewBox="0 0 48 32" aria-hidden="true"><rect x="3" y="3" width="42" height="26" rx="6" fill="#fff" /><path d="M20 11v10l9-5z" fill="#f4f1ea" /><path d="M6 27 42 5" /></svg>
+        No how-to video for this dish yet.
+      </p>
     </div>
   </section>
   <section v-else-if="days.length" class="tonight quiet" aria-label="Next meal">
@@ -145,8 +148,9 @@ h2 { margin: 6px 0 0; font-size: 28px; line-height: 1.08; letter-spacing: -0.01e
 .thumb { width: 88px; aspect-ratio: 16 / 9; flex: none; border-radius: 8px; background: radial-gradient(circle at 35% 40%, #6b4a33, #2a1d15) center / cover; display: grid; place-items: center; }
 .thumb svg { width: 16px; height: 16px; fill: #fff; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6)); }
 .caption { min-width: 0; display: grid; font-size: 12.5px; }
-.caption small { font-size: 11px; color: var(--t3); }
+.caption small { font-size: 12px; color: var(--t3); }
 .caption span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.no-video { margin: 0; font-size: 12px; color: var(--t3); }
+.no-video { margin: 0; display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed var(--line-2); border-radius: 12px; font-size: 13px; color: var(--t2); }
+.no-video svg { width: 48px; height: 32px; flex: none; fill: none; stroke: #2a2a48; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .quiet { background: var(--s1); }
 </style>

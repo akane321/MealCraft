@@ -57,7 +57,7 @@ function active(path: string) {
 .ops-nav li a { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 10px; color: var(--t2); text-decoration: none; transition: background 160ms; }
 .ops-nav li a:hover { background: var(--s2); }
 .ops-nav li a.active { background: var(--s3); color: var(--ivory); box-shadow: inset 2px 0 0 var(--accent); }
-.soon { color: var(--t4); font-size: 11px; }
+.soon { color: var(--t4); font-size: 12px; }
 .ops-account { display: grid; gap: 6px; margin-top: auto; padding: 14px 12px 0; border-top: 1px solid var(--line); color: var(--t3); font-size: 12.5px; }
 .ops-account span { color: var(--ivory); }
 .ops-account a, .ops-account button { justify-self: start; padding: 0; border: 0; background: none; color: var(--t2); font-size: 12.5px; text-decoration: none; }

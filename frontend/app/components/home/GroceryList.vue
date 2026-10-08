@@ -37,7 +37,7 @@ function toggle(name: string) {
 <style scoped>
 .groceries { padding-bottom: 12px; }
 .source { margin: 0; padding: 14px 22px 0; font-size: 12px; color: var(--t3); }
-.aisle { margin: 0; padding: 16px 22px 6px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
+.aisle { margin: 0; padding: 16px 22px 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
 .item { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 22px; cursor: pointer; }
 .item:hover { background: rgba(42, 42, 72, 0.03); }
 .item > span:nth-child(2) { display: grid; min-width: 0; }
@@ -45,7 +45,7 @@ function toggle(name: string) {
 .item input:checked { background: var(--green); border-color: var(--green); }
 .item input:checked::after { content: ""; width: 7px; height: 4px; border: solid var(--ink); border-width: 0 0 1.6px 1.6px; transform: rotate(-45deg) translate(1px, -1px); }
 .p { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.s { font-size: 11.5px; color: var(--t3); }
+.s { font-size: 12px; color: var(--t3); }
 .c { font-size: 13px; color: var(--t2); }
 .item:has(input:checked) .p { color: var(--t4); text-decoration: line-through; }
 .unmapped { margin: 0; padding: 0 22px; font-size: 12.5px; line-height: 1.6; color: var(--t3); }

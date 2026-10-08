@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
-import { MEAL_LABEL, mealsByDay, nextMeal } from "~/lib/home-surface";
+import { MEAL_LABEL, mealsByDay, nextMeal, type PlannedMeal } from "~/lib/home-surface";
 import type { NutritionDashboardDay } from "~/types/meal-plan";
 
 // A replaced week (readonly) is only read: its dishes offer no changes.
@@ -13,6 +13,11 @@ const next = computed(() => nextMeal(props.days, todayIsoDate()));
 const severalMeals = computed(() => week.value.some(day => day.meals.length > 1));
 
 const STATE: Record<string, string> = { completed: "Cooked", skipped: "Skipped", partial: "Part cooked" };
+// Cooked, Next and Skipped read as icon chips; a plain planned meal has none.
+function chip(meal: PlannedMeal): { kind: string; label: string } | null {
+  if (next.value?.meal.key === meal.key) return { kind: "next", label: next.value.isToday ? (meal.mealType === "dinner" ? "Tonight" : "Today") : "Next" };
+  return STATE[meal.status] ? { kind: meal.status, label: STATE[meal.status]! } : null;
+}
 
 // Each action is a sentence the assistant already understands; it is previewed before anything changes.
 const ACTIONS = [
@@ -58,7 +63,14 @@ const ACTIONS = [
               <small v-else-if="dish.is_locked" class="kept">Kept as is</small>
             </span>
           </span>
-          <span class="state" :class="meal.status">{{ next?.meal.key === meal.key ? (next.isToday ? (meal.mealType === "dinner" ? "Tonight" : "Today") : "Next") : STATE[meal.status] ?? "" }}</span>
+          <span v-if="chip(meal)" class="state" :class="chip(meal)!.kind">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path v-if="chip(meal)!.kind === 'completed'" d="m5 12.5 4.5 4.5L19 7.5" />
+              <path v-else-if="chip(meal)!.kind === 'skipped'" d="M6 12h12" />
+              <path v-else-if="chip(meal)!.kind === 'partial'" d="M12 5a7 7 0 1 0 0 14V5Z" />
+              <path v-else d="M5 12h13M13 6l6 6-6 6" />
+            </svg>{{ chip(meal)!.label }}
+          </span>
         </div>
       </li>
     </ol>
@@ -68,14 +80,16 @@ const ACTIONS = [
 
 <style scoped>
 .days { list-style: none; margin: 0; padding: 0; }
-.day-head { margin: 0; padding: 14px 22px 4px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
+.day-head { margin: 0; padding: 14px 22px 4px; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
 .day-head span { color: var(--t2); }
-.row { display: grid; grid-template-columns: 58px 36px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 22px; border-bottom: 1px solid var(--line); }
-.row:hover { background: rgba(42, 42, 72, 0.03); }
+.row { display: grid; grid-template-columns: 58px 36px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--line); }
+.row { transition: background 150ms; }
+.row:hover { background: rgba(42, 42, 72, 0.04); }
+.row.done .icon { opacity: 0.55; }
 .row.today { background: #fff4e0; }
 .d { display: grid; line-height: 1.1; }
-.d span { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
-.today .d span { color: #b26b00; }
+.d span { font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
+.today .d span { color: #8a4f00; }
 .d b { font-size: 19px; }
 
 .dishes { min-width: 0; display: grid; gap: 2px; }
@@ -84,15 +98,17 @@ const ACTIONS = [
 .side .name { font-size: 13px; font-weight: 600; color: var(--t2); }
 .name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .done .name { color: var(--t3); }
-.dish small { font-size: 11.5px; color: var(--t3); }
-.state { font-size: 11px; font-weight: 700; color: #b26b00; text-align: right; }
-.state.completed { color: var(--sage); }
-.state.skipped { color: var(--t4); }
+.dish small { font-size: 12px; color: var(--t3); }
+.state { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 800; background: #fff1d6; color: #8a4f00; white-space: nowrap; }
+.state svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.state.partial svg { fill: currentColor; stroke-width: 1.5; }
+.state.completed { background: #e3f4e9; color: #1f6b3a; }
+.state.skipped { background: var(--s3); color: var(--t2); }
 .log { padding: 4px 22px 18px; }
 /* A dish's changes, quiet until the row is pointed at or focused. */
 .acts { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; opacity: 0.55; transition: opacity 0.15s var(--ease); }
 .row:hover .acts, .row:focus-within .acts { opacity: 1; }
-.acts button { padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--t3); font-size: 11px; }
+.acts button { padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--t3); font-size: 12px; }
 .acts button:hover { color: var(--ivory); border-color: var(--accent); }
 .kept { color: var(--sage); }
 </style>

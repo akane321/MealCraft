@@ -170,7 +170,7 @@ function packLabel(size: number | null, unit: string | null) {
 .card small { color: var(--t3); font-size: 12px; }
 .more { margin-top: 18px; }
 .products { width: 100%; border-collapse: collapse; font-size: 14px; }
-.products th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.products th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
 .products td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
 .products td small { display: block; color: var(--t3); font-size: 12px; }
 .products .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
