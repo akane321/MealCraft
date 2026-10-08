@@ -255,8 +255,10 @@ def test_an_impossible_budget_is_refused_up_front_in_both_parser_modes(client):
     assert plans(client, ready)["grocery_estimate"]["purchase_total_sgd"] <= math.ceil(cost)
 
 
-@pytest.mark.parametrize("verified", [True, False])
-def test_a_budget_suggestion_rechecks_the_budgeted_packet_before_offering(verified):
+def test_a_budget_suggestion_is_backed_by_the_budgeted_checks_own_cheapest_week():
+    """The unbudgeted cost is checked through the budgeted path; when that check fails, the week of its own
+    cost-led search that only the budget turned down backs the amount, with no second search (that it plans
+    on the release catalog: test_walkthrough_1004_planning.py)."""
     checked = []
     over = ProductPlanningError(
         "infeasible",
@@ -274,15 +276,15 @@ def test_a_budget_suggestion_rechecks_the_budgeted_packet_before_offering(verifi
 
     def check(request):
         checked.append(request)
-        return None if verified and request.weekly_budget_sgd == 54 else over
+        return over
 
     service = SimpleNamespace(meal_plan_service=SimpleNamespace(cheapest_week=lambda _: 40.80, check=check))
     request = WeeklyMealPlanRequest(
         start_date="2026-10-07", household_size=4, weekly_budget_sgd=10, allergens=["peanut"]
     )
     cost = AgentSessionService._cheapest(service, request)(household_size=2)
-    assert cost == (53.70 if verified else None)
-    assert [item.weekly_budget_sgd for item in checked] == [41, 54]
+    assert cost == 53.70
+    assert [item.weekly_budget_sgd for item in checked] == [41]
     assert all(item.household_size == 2 and item.allergens == ["peanut"] for item in checked)
 
 
