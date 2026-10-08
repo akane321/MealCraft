@@ -188,7 +188,12 @@ def labels(session: dict) -> list[str]:
 
 
 def cheapest_quoted(reply: str) -> float:
-    return float(re.search(r"The cheapest week I could find costs S\$(\d+\.\d\d)", reply).group(1))
+    return float(
+        re.search(
+            r"The cheapest week I could find(?: with at least four different dishes)? costs S\$(\d+\.\d\d)",
+            reply,
+        ).group(1)
+    )
 
 
 def plans(client, session: dict) -> dict:
@@ -278,11 +283,15 @@ def test_a_budget_suggestion_is_backed_by_the_budgeted_checks_own_cheapest_week(
         checked.append(request)
         return over
 
-    service = SimpleNamespace(meal_plan_service=SimpleNamespace(cheapest_week=lambda _: 40.80, check=check))
+    def cheapest_week(_, *, minimum_distinct_dishes):
+        assert minimum_distinct_dishes == 4
+        return 40.80
+
+    service = SimpleNamespace(meal_plan_service=SimpleNamespace(cheapest_week=cheapest_week, check=check))
     request = WeeklyMealPlanRequest(
         start_date="2026-10-07", household_size=4, weekly_budget_sgd=10, allergens=["peanut"]
     )
-    cost = AgentSessionService._cheapest(service, request)(household_size=2)
+    cost = AgentSessionService._cheapest(service, request)(household_size=2, minimum_distinct_dishes=4)
     assert cost == 53.70
     assert [item.weekly_budget_sgd for item in checked] == [41]
     assert all(item.household_size == 2 and item.allergens == ["peanut"] for item in checked)
@@ -329,7 +338,7 @@ def test_a_chinese_household_is_refused_in_chinese_with_choices_in_chinese(clien
 
     reply = session["messages"][-1]["content"]
     assert session["status"] == "collecting" and not session["can_confirm"]
-    assert "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$" in reply
+    assert "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到至少有四种不同菜的一周，预算要 S$" in reply
     assert not re.search(r"[A-Za-z]{3,}", reply)
     options = session["pending_interaction"]["options"]
     assert options[0]["label"].startswith("一周用 S$")
@@ -441,12 +450,9 @@ def test_a_failed_search_names_the_limit_it_ran_into_never_a_proof():
         return ProductPlanningError(status, message, trace)
 
     told = planning_failure(failure({"validation_attempts": [over, cheapest]}), constraints, "en")
-    assert told.text == (
-        "S$50 a week for 4 people comes to about S$1.79 a person a meal (7 meals). The cheapest week I could find "
-        "costs S$58.40."
-    )
-    # Only the cheapest-week search's own week backs an amount, never a ranked week or a guess.
-    assert told.options == (("Use S$59 for the week", "Make the weekly budget S$59"),)
+    assert told.field == "weekly_budget_sgd"
+    assert "S$50 weekly budget" in told.text
+    assert told.options == ()
     # With no such week, the budget the search ran into is still named, with no amount to offer: every week it
     # ranked failed the budget alone, or the search emptied on the budget before it ranked one.
     named = (
@@ -743,9 +749,11 @@ def test_a_budget_any_multiple_over_the_floor_is_still_planned_up_front(monkeypa
         assert session["status"] == "collecting" and not session["can_confirm"], reply
         cost = cheapest_quoted(reply)
         assert 100 * floors[0] < 15 < cost  # what the floor alone would have let through
-        ready = tap(client, session, labels(session)[0])
-        assert ready["status"] == "ready", ready["messages"][-1]["content"]
-        assert plans(client, ready)["grocery_estimate"]["purchase_total_sgd"] <= math.ceil(cost)
+    ready = tap(client, session, labels(session)[0])
+    assert ready["status"] == "ready", ready["messages"][-1]["content"]
+    varied_plan = plans(client, ready)
+    assert varied_plan["grocery_estimate"]["purchase_total_sgd"] <= math.ceil(cost)
+    assert len({dish["recipe"]["id"] for dish in varied_plan["days"]}) >= 4
 
 
 def test_a_budget_only_the_cap_on_uses_rules_out_is_refused_up_front(packaged):
@@ -791,7 +799,7 @@ def test_half_the_household_is_searched_for_only_for_one_meal_a_day():
 
     dinners = AgentConstraintState(household_size=4, weekly_budget_sgd=10)
     assert _budget_short(30.0, dinners, "en", cheapest).options[0] == use
-    assert asked == [{"household_size": 2}]
+    assert asked == [{"household_size": 2, "minimum_distinct_dishes": 4}]
 
 
 def test_the_cheapest_week_search_bisects_under_the_cheapest_week_it_found(packaged, monkeypatch):

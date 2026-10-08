@@ -531,7 +531,13 @@ class AgentSessionService:
                 constraints,
                 lambda **changes: self.meal_plan_service.week_floor(request.model_copy(update=changes)),
                 lang,
-                check=lambda **changes: self.meal_plan_service.check(request.model_copy(update=changes)),
+                check=lambda **changes: self.meal_plan_service.check(
+                    request.model_copy(
+                        update={key: value for key, value in changes.items() if key != "minimum_distinct_dishes"}
+                    ),
+                    minimum_distinct_dishes=changes.get("minimum_distinct_dishes", 0),
+                ),
+                distinct_dishes=lambda: self.meal_plan_service.checked_distinct_dishes(request),
                 cheapest=self._cheapest(request),
             )
         except (ProductProviderError, WeeklyPlanSelectionError):
@@ -543,10 +549,14 @@ class AgentSessionService:
 
         def cheapest(**changes) -> float | None:
             try:
+                minimum_distinct_dishes = changes.pop("minimum_distinct_dishes", 0)
                 candidate = request.model_copy(update=changes)
-                cost = self.meal_plan_service.cheapest_week(candidate)
+                cost = self.meal_plan_service.cheapest_week(
+                    candidate, minimum_distinct_dishes=minimum_distinct_dishes
+                )
                 error = self.meal_plan_service.check(
-                    candidate.model_copy(update={"weekly_budget_sgd": math.ceil(cost)})
+                    candidate.model_copy(update={"weekly_budget_sgd": math.ceil(cost)}),
+                    minimum_distinct_dishes=minimum_distinct_dishes,
                 )
                 if error is None:
                     return cost

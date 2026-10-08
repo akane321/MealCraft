@@ -25,6 +25,7 @@ from app.schemas.meal_plan import default_plan_shape
 
 # The floor is a float sum of per-unit prices; the planner rounds each ingredient's cost to the cent.
 SLACK_SGD = 0.05
+BUDGET_VARIETY_TARGET = 4
 # What emptied the search (planning/meal_beam.py), as the validator check it stands for.
 EMPTIED = {
     "budget": "purchase_budget",
@@ -51,6 +52,7 @@ def refusal(
     *,
     check: Callable[..., Exception | None],
     cheapest: Callable[..., float | None],
+    distinct_dishes: Callable[[], int | None] | None = None,
 ) -> Refusal | None:
     """A limit no week from the planner's candidates meets, or None.
 
@@ -89,7 +91,7 @@ def refusal(
     weekly = constraints.weekly_budget_sgd
     if weekly is not None and weekly < floor.total_sgd - SLACK_SGD:
         # Under the floor no week fits: what remains to say is what the cheapest week the search finds costs.
-        cost = cheapest() if cheapest is not None else None
+        cost = cheapest(minimum_distinct_dishes=BUDGET_VARIETY_TARGET) if cheapest is not None else None
         if cost is not None:
             return _budget_short(cost, constraints, lang, cheapest)
         # Not searched for, or the search found no week: the floor, with no amount a week backs to offer.
@@ -105,6 +107,13 @@ def refusal(
         failure = planning_failure(error, constraints, lang, cheapest=cheapest) if error is not None else None
         if failure is not None and not failure.retry:  # a slow search or late data may plan at Plan
             return failure
+        current_variety = distinct_dishes() if error is None and distinct_dishes is not None else None
+        if current_variety is not None and current_variety < BUDGET_VARIETY_TARGET:
+            varied_error = check(minimum_distinct_dishes=BUDGET_VARIETY_TARGET)
+            if varied_error is not None:
+                varied_cost = cheapest(minimum_distinct_dishes=BUDGET_VARIETY_TARGET)
+                if varied_cost is not None and varied_cost > weekly + SLACK_SGD:
+                    return _budget_short(varied_cost, constraints, lang, cheapest)
     return None
 
 
@@ -195,7 +204,10 @@ def planning_failure(error: Exception, constraints, lang: str, *, cheapest=None)
             if attempt.get("cheapest_search") and _failed(attempt) == {"purchase_budget"}
         ]
         if backed:
-            return _budget_short(min(backed), constraints, lang, cheapest)
+            varied = cheapest(minimum_distinct_dishes=BUDGET_VARIETY_TARGET) if cheapest is not None else None
+            if varied is not None:
+                return _budget_short(varied, constraints, lang, cheapest)
+            return Refusal("weekly_budget_sgd", say("weekly_limit", lang, amount=weekly))
         # No week backs an amount. The budget is still what the search ran into when every week it ranked failed
         # the budget alone (or none was ranked: the search emptied on the budget); else it is not all that binds.
         ranked = [_failed(attempt) for attempt in attempts if not attempt.get("cheapest_search")]
@@ -243,7 +255,7 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
     # size, where the two take at most 5 s; for more they would take the reply past its time limit (ADR-0046
     # section 3).
     quick = meals == 7 and max(_dishes(constraints)) <= QUICK_MEAL_DISHES and cheapest is not None and fewer >= 1
-    smaller = cheapest(household_size=fewer) if quick else None
+    smaller = cheapest(household_size=fewer, minimum_distinct_dishes=BUDGET_VARIETY_TARGET) if quick else None
     # The cheapest-week search is a heuristic, not monotonic in who eats: fewer people can come out dearer than
     # everyone (S$41 for 2 beside S$24 for 4). Offered only when a real week backs it and it costs less.
     if smaller is not None and math.ceil(smaller) < whole:

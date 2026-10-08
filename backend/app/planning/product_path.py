@@ -222,6 +222,7 @@ class ProductPlanningEngine:
         selector=None,
         profile_version=None,
         cheapest=False,
+        minimum_distinct_dishes=0,
         cheapest_last=True,
         budget_is_hard=True,
         locked=None,
@@ -655,7 +656,15 @@ class ProductPlanningEngine:
                         share = len(slots) / limit
                         blended = {slug: loss + weight * cost.get(slug, 0.0) * share for slug, loss in losses.items()}
                         bounded = problem.model_copy(deep=True, update={"purchase_budget_sgd": float(limit)})
-                        return MealBeamPlanner(led, local_losses=blended).search_candidates(bounded).states
+                        states = MealBeamPlanner(led, local_losses=blended).search_candidates(bounded).states
+                        if minimum_distinct_dishes:
+                            states = tuple(
+                                state
+                                for state in states
+                                if len({recipe for _, meal in state.choices for _, recipe in meal})
+                                >= minimum_distinct_dishes
+                            )
+                        return states
 
                     def bought(state) -> float:
                         """What the week buys in whole packages, as the validator totals it."""

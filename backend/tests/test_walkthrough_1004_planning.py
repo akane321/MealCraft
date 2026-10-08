@@ -42,7 +42,7 @@ from app.repositories.agent_runs import AgentRunRepository
 from app.repositories.recipe import RecipeRepository, _planning_pool, clear_planning_pool
 from app.repositories.recipe import _reloading as reloading_binds
 from app.schemas.agent import AgentConstraintState
-from app.schemas.meal_plan import MEAL_PRESETS, MealPlanReplanPreviewRequest, MealPlanShapeChangeRequest
+from app.schemas.meal_plan import MEAL_PRESETS, MealPlanReplanPreviewRequest, MealPlanShape, MealPlanShapeChangeRequest
 from app.services.agent import AgentSessionService
 from tests.test_planning_capability import _dish, dish_client
 
@@ -377,7 +377,8 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
 
 
 REFUSED_FOR_FOUR = (
-    "好的：4 个人，一周 S$10。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$86.15。"
+    "好的：4 个人，一周 S$10。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。"
+    "我能找到至少有四种不同菜的一周，预算要 S$57.56。"
     " 改成2 个人，我能验证的方案仍需要 S$103 预算，所以减少人数不能降低我能建议的预算。"
 )
 
@@ -399,9 +400,33 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
         service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
         refused = service.create("一共10新币给4个人做一周")
     assert refused.messages[-1].content == REFUSED_FOR_FOUR
-    assert [option.label for option in refused.pending_interaction.options] == ["一周用 S$87"]
+    assert [option.label for option in refused.pending_interaction.options] == ["一周用 S$58"]
     # Each size's cheapest week, then that amount through the budgeted path; no third search.
-    assert planned == [(4, None, True), (4, 53, False), (2, None, True), (2, 41, False)]
+    assert planned == [(4, None, True), (4, 58, False), (2, None, True), (2, 49, False)]
+
+
+def test_a_feasible_but_three_dish_week_gets_a_verified_four_dish_budget(walked):
+    with kept_for(300), walked["factory"]() as session:
+        service = agent(session)
+        constraints = WALKTHROUGH.model_copy(
+            update={
+                "household_size": 4,
+                "weekly_budget_sgd": 26.0,
+                "max_cooking_time_minutes": 240,
+                "allergens": [],
+                "excluded_ingredients": [],
+                "plan_shape": MealPlanShape(meals={"dinner": MEAL_PRESETS["dinner"]["main, vegetable and soup"]}),
+            }
+        )
+        refusal = service._refusal(constraints, "en")
+    assert refusal is not None
+    assert "at least four different dishes" in refusal.text
+    amount = float(re.search(r"costs S\$(\d+\.\d\d)", refusal.text).group(1))
+    assert amount > 26
+    request = service._plan_request(constraints).model_copy(update={"weekly_budget_sgd": math.ceil(amount)})
+    with kept_for(300):
+        assert service.meal_plan_service.check(request, minimum_distinct_dishes=4) is None
+        assert service.meal_plan_service.checked_distinct_dishes(request) >= 4
 
 
 def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(walked):

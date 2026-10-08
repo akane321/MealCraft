@@ -579,13 +579,18 @@ def test_fewer_people_are_offered_only_when_a_real_week_backs_it_for_less(two, l
     constraints = AgentConstraintState(household_size=4, weekly_budget_sgd=10)
 
     refusal = _budget_short(
-        23.36, constraints, "en", lambda **changes: two if changes == {"household_size": 2} else None
+        23.36,
+        constraints,
+        "en",
+        lambda **changes: two
+        if changes == {"household_size": 2, "minimum_distinct_dishes": 4}
+        else None,
     )
 
     assert [label for label, _ in refusal.options] == labels
     expected = (
         "S$10 a week for 4 people comes to about S$0.36 a person a meal (7 meals). "
-        "The cheapest week I could find costs S$23.36."
+        "The cheapest week I could find with at least four different dishes costs S$23.36."
     )
     if no_lower_budget is not None:
         expected += (
@@ -594,7 +599,10 @@ def test_fewer_people_are_offered_only_when_a_real_week_backs_it_for_less(two, l
         )
     assert refusal.text == expected
     chinese = _budget_short(23.36, constraints, "zh", lambda **changes: None)
-    assert chinese.text == "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$23.36。"
+    assert chinese.text == (
+        "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。"
+        "我能找到至少有四种不同菜的一周，预算要 S$23.36。"
+    )
 
 
 # P12: the composer's hint is short; the question is the reply above it.

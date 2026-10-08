@@ -134,7 +134,14 @@ class WeeklyMealPlanService:
         )
         return self._to_response(plan)
 
-    def _search(self, constraints: WeeklyMealPlanRequest, candidates, *, profile_version: int | None = None):
+    def _search(
+        self,
+        constraints: WeeklyMealPlanRequest,
+        candidates,
+        *,
+        profile_version: int | None = None,
+        minimum_distinct_dishes: int = 0,
+    ):
         """The week `generate` plans from these candidates (recipes, recommendations), nothing saved."""
         constraints = constraints.model_copy(update={"pricing_mode": "fixture"})
         recipes, recommendation_result = candidates
@@ -157,6 +164,7 @@ class WeeklyMealPlanService:
                     recipes,
                     selector=self.selector,
                     profile_version=profile_version,
+                    minimum_distinct_dishes=minimum_distinct_dishes,
                 )
                 if prior_trace is not None:
                     result.trace["prior_candidate_attempt"] = prior_trace
@@ -194,12 +202,18 @@ class WeeklyMealPlanService:
                 raise
         raise AssertionError("unreachable")
 
-    def check(self, constraints: WeeklyMealPlanRequest) -> ProductPlanningError | None:
+    def check(
+        self, constraints: WeeklyMealPlanRequest, *, minimum_distinct_dishes: int = 0
+    ) -> ProductPlanningError | None:
         """What `generate` would answer for these constraints, nothing saved: None for a week, else its error.
 
         The week found is kept for `generate` with the same constraints, while the planner's pools are kept."""
         try:
-            searched = self._search(constraints, self._checked_candidates(constraints))
+            searched = self._search(
+                constraints,
+                self._checked_candidates(constraints),
+                minimum_distinct_dishes=minimum_distinct_dishes,
+            )
         except ProductPlanningError as error:
             return error
         # Kept for the Plan that follows this check (`found_weeks`): the 2026-10-04 walkthrough's reply that took
@@ -214,6 +228,14 @@ class WeeklyMealPlanService:
                 found_weeks.pop(next(iter(found_weeks), None), None)
             found_weeks[self._found_key(constraints)] = (now, searched)
         return None
+
+    def checked_distinct_dishes(self, constraints: WeeklyMealPlanRequest) -> int | None:
+        """Distinct recipes in the week most recently checked for these constraints, if still cached."""
+        found = found_weeks.get(self._found_key(constraints))
+        if found is None or time.monotonic() - found[0] >= get_settings().planning_pool_cache_seconds:
+            return None
+        result = found[1][1]
+        return len({item.recipe.id for item in result.selected})
 
     def _found_key(self, constraints: WeeklyMealPlanRequest, profile_version: int | None = None) -> tuple:
         return (
@@ -264,7 +286,7 @@ class WeeklyMealPlanService:
         recipes, candidates = self._checked_candidates(constraints)
         return week_floor(constraints, candidates.recommendations, recipes)
 
-    def cheapest_week(self, constraints: WeeklyMealPlanRequest) -> float:
+    def cheapest_week(self, constraints: WeeklyMealPlanRequest, *, minimum_distinct_dishes: int = 0) -> float:
         """What the cheapest week the planner's cost-led search finds costs at the checkout, nothing saved.
 
         Every limit but the weekly budget holds. Adding a budget can change the bounded candidate
@@ -279,6 +301,7 @@ class WeeklyMealPlanService:
             recipes,
             selector=self.selector,
             cheapest=True,
+            minimum_distinct_dishes=minimum_distinct_dishes,
         )
         return result.grocery.purchase_total_sgd
 
