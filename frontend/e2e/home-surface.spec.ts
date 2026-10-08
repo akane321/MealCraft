@@ -261,7 +261,7 @@ test("sending from the film entry opens the workspace with the week beside the c
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/2-workspace.png` });
 
   await expect(week.getByText("S$82.60")).toBeVisible();
-  await expect(week.getByText("S$7.40 under your S$90.00")).toBeVisible();
+  await expect(week.getByText("S$7.40 left")).toBeVisible();
   await week.getByRole("tab", { name: /Groceries/ }).click();
   await expect(week.getByText("Salmon fillet")).toBeVisible();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/3-groceries.png` });
@@ -303,7 +303,7 @@ test("Groceries and Nutrition use the plan panel while Meals keeps Today at 1280
   await panel.getByRole("tab", { name: "Nutrition", exact: true }).click();
   await expect(panel.getByRole("region", { name: "Next meal" })).toHaveCount(0);
   await expect(panel.getByRole("button", { name: /All six nutrients/ })).toBeInViewport();
-  await panel.getByRole("tab", { name: "Meals", exact: true }).click();
+  await panel.getByRole("tab", { name: "Week", exact: true }).click();
   await expect(panel.getByRole("region", { name: "Next meal" })).toBeVisible();
   await panel.getByRole("tab", { name: /Groceries/ }).click();
   await expect(panel.getByRole("region", { name: "Next meal" })).toHaveCount(0);
@@ -395,7 +395,7 @@ test("a dinner opens its recipe with steps on the same surface", async ({ page }
     }),
   }));
 
-  await page.getByRole("button", { name: "Recipe & steps" }).click();
+  await page.getByRole("button", { name: "Recipe and steps" }).click();
   const recipe = page.getByRole("dialog", { name: "Tofu Brown Rice Stir-fry" });
   await expect(recipe.getByText("Stir-fry the tofu.")).toBeVisible();
   await expect(recipe.getByText("Contains soy")).toBeVisible();
@@ -1284,7 +1284,7 @@ test("asking for lunch too previews the new meals, then asks whether to keep it"
   await expect(card.getByText("Lunch added for the rest of the week")).toBeVisible();
   await expect(card.getByText("Chicken Soba Salad")).toBeVisible();
   await expect(card.getByText("groceries +S$21.40")).toBeVisible();
-  await expect(card.getByText("This puts the week S$14.00 over your S$90.00 budget.")).toBeVisible();
+  await expect(card.getByText("S$14.00 over your S$90.00")).toBeVisible();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/15-shape-change.png` });
 
   await card.getByRole("button", { name: "Confirm change" }).click();
@@ -1322,14 +1322,14 @@ test("a swap card says how far over the budget the backend found; a skip on a we
   await page.getByRole("button", { name: "Plan my week" }).click();
   await page.getByLabel("Message MealCraft").fill("Swap Thursday's Tofu Brown Rice Stir-fry");
   await page.getByRole("button", { name: "Send" }).click();
-  await expect(page.locator(".swap-card .to")).toHaveText("Salmon Teriyaki");
-  await expect(page.getByText("This puts the week S$8.20 over your S$90.00 budget.")).toBeVisible();
+  await expect(page.locator(".swap-card .tile-dish.after")).toHaveText("Salmon Teriyaki");
+  await expect(page.getByText("S$8.20 over your S$90.00")).toBeVisible();
 
   pending = skip;
   await page.getByLabel("Message MealCraft").fill("Skip Thursday's Tofu Brown Rice Stir-fry");
   await page.getByRole("button", { name: "Send" }).click();
   await expect(page.locator(".swap-card .to")).toHaveText("Skip Tofu Brown Rice Stir-fry");
-  await expect(page.locator(".swap-card .over-budget")).toHaveCount(0);
+  await expect(page.locator(".swap-card .mc-chip.warn")).toHaveCount(0);
 });
 
 test("a dish's own buttons put the change into words for the assistant", async ({ page }) => {

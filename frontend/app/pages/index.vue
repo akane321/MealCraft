@@ -644,7 +644,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                   <template v-if="shapePreview.removed">{{ shapePreview.removed }} {{ shapePreview.removed === 1 ? "dish comes" : "dishes come" }} off ·</template>
                   {{ groceriesChange(session.pending_replan.purchase_total_delta_sgd) }} · the other meals stay the same
                 </span>
-                <span v-if="swapOverBudget" class="mc-chip warn" :title="`This puts the week ${swapOverBudget} over your ${formatSgd(estimate!.weekly_budget_sgd!)} budget.`">{{ swapOverBudget }} over budget</span>
+                <span v-if="swapOverBudget" class="mc-chip warn" :title="`This puts the week ${swapOverBudget} over your ${formatSgd(estimate!.weekly_budget_sgd!)} budget.`">{{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}</span>
               </div>
               <div class="card-foot">
                 <button type="button" class="mc-btn primary" :disabled="isLoading" @click="confirmChange">{{ choices.confirm }}</button>
@@ -676,7 +676,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                   {{ session.pending_replan.nutrition_delta.calories_kcal >= 0 ? "+" : "" }}{{ Math.round(session.pending_replan.nutrition_delta.calories_kcal) }} kcal ·
                   {{ groceriesChange(session.pending_replan.purchase_total_delta_sgd) }} · the rest of the week stays the same
                 </span>
-                <span v-if="swapOverBudget" class="mc-chip warn" :title="`This puts the week ${swapOverBudget} over your ${formatSgd(estimate!.weekly_budget_sgd!)} budget.`">{{ swapOverBudget }} over budget</span>
+                <span v-if="swapOverBudget" class="mc-chip warn" :title="`This puts the week ${swapOverBudget} over your ${formatSgd(estimate!.weekly_budget_sgd!)} budget.`">{{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}</span>
               </div>
               <div class="card-foot">
                 <button type="button" class="mc-btn primary" :disabled="isLoading" @click="confirmChange">{{ choices.confirm }}</button>
@@ -922,7 +922,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .plates .swap-icon + .swap-icon { margin-left: -14px; }
 .shape-days { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 13px; color: var(--c-neutral-text); }
 .shape-days b { display: inline-block; min-width: 34px; color: var(--c-ink); font-weight: 800; }
-.delta { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-top: 1px solid var(--c-line-soft); background: var(--c-canvas); font-size: 13px; color: var(--c-neutral-text); }
+.delta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 20px; border-top: 1px solid var(--c-line-soft); background: var(--c-canvas); font-size: 13px; color: var(--c-neutral-text); }
 .delta .mc-chip { margin-left: auto; }
 .caveat { margin: 0; }
 

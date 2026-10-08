@@ -252,25 +252,25 @@ test("a week planned again is shown read-only beside its conversation, with the 
   await openWeek(page);
   const panel = page.getByRole("complementary", { name: "This week" });
   await expect(panel.getByText("Lemon Herb Chicken (9002)").first()).toBeVisible();
-  await expect(panel.getByRole("button", { name: "Mark as cooked" })).toBeVisible();
+  await expect(panel.getByRole("button", { name: "Mark cooked" })).toBeVisible();
 
   await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: "First plan of the week" }).click();
   await expect(panel.getByText("Lemon Herb Chicken").first()).toBeVisible();
   await expect(page.getByText("You planned these days again, so this week was replaced.")).toBeVisible();
   // Read, not changed: no marking cooked, no swaps, no change chips, nothing to send.
-  await expect(panel.getByRole("button", { name: "Mark as cooked" })).toHaveCount(0);
+  await expect(panel.getByRole("button", { name: "Mark cooked" })).toHaveCount(0);
   await expect(panel.getByRole("button", { name: "Swap" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Swap tomorrow's dinner" })).toHaveCount(0);
   const chat = page.getByRole("main");
   await chat.getByLabel("Message MealCraft").fill("Swap Monday's dinner");
   await expect(chat.getByRole("button", { name: "Send" })).toBeDisabled();
-  await expect(panel.getByRole("button", { name: "Recipe & steps" })).toBeVisible();
+  await expect(panel.getByRole("button", { name: "Recipe and steps" })).toBeVisible();
 
   await page.getByRole("button", { name: "Open the current week" }).click();
   await expect(page.getByRole("heading", { name: "Plan the week again" })).toBeVisible();
   await expect(panel.getByText("Lemon Herb Chicken (9002)").first()).toBeVisible();
   await expect(page.getByText("You planned these days again")).toHaveCount(0);
-  await expect(panel.getByRole("button", { name: "Mark as cooked" })).toBeVisible();
+  await expect(panel.getByRole("button", { name: "Mark cooked" })).toBeVisible();
 });
 
 test("past weeks mark the weeks that were planned again", async ({ page }) => {
