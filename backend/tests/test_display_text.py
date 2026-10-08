@@ -123,7 +123,7 @@ def test_the_assistant_names_a_dish_as_the_plan_shows_it() -> None:
         "那天有 2 道菜（Tsukemono (Japanese Pickles)、Pot Pie (Square Dumplings)），你想调整哪一道？"
     )
     # A count is a count.
-    assert say("shape_removed", "en", count=5) == "5 dishes come off the week."
+    assert say("shape_removed", "en", titles="Soup, Curry") == "Removed: Soup, Curry."
 
 
 def test_a_typed_display_title_selects_the_catalog_dish() -> None:
