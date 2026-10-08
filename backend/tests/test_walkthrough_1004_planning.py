@@ -416,6 +416,34 @@ def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(w
             assert service.meal_plan_service.check(request.model_copy(update={"weekly_budget_sgd": budget})) is None
 
 
+def test_tapping_an_offered_budget_plans_the_week_its_refusal_checked_without_searching_again(walked, monkeypatch):
+    """The refusal checks the S$53 it offers through the budgeted path; tapping it searched that week again (about
+    1-1.5 s) before the reply. The week kept by the refusal's check answers the tap's check, and Plan saves it: the
+    same week a new search finds."""
+    planned = []
+    plan = ProductPlanningEngine.plan
+
+    def counted(self, constraints, *args, **kwargs):
+        planned.append((constraints.household_size, constraints.weekly_budget_sgd))
+        return plan(self, constraints, *args, **kwargs)
+
+    with kept_for(300), walked["factory"]() as session:  # weeks are kept as production keeps them
+        service = agent(session)
+        service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
+        refused = service.create("一共10新币给4个人做一周")
+        monkeypatch.setattr(ProductPlanningEngine, "plan", counted)
+        ready = service.reply(refused.id, refused.pending_interaction.options[0].value)
+        assert ready.can_confirm and ready.constraints.weekly_budget_sgd == 53
+        confirmed = service.confirm(ready.id)
+        assert planned == []  # neither the tap's check nor Plan searched
+        monkeypatch.setattr(ProductPlanningEngine, "plan", plan)
+        request = service._plan_request(ready.constraints)
+        _, fresh = service.meal_plan_service._search(request, service.meal_plan_service._candidates(request))
+        saved = sorted(day.recipe.slug for day in confirmed.plan.days)
+        assert saved == sorted(item.recipe.slug for item in fresh.selected)
+        assert confirmed.plan.grocery_estimate.purchase_total_sgd == fresh.grocery.purchase_total_sgd <= 53
+
+
 def test_the_walkthrough_week_found_boring_swaps_its_repeats_within_its_budget(walked):
     plan = walked["plan"]
     served = Counter(dish_family(dish.recipe.title) for dish in plan.days)
