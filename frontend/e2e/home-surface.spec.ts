@@ -1490,10 +1490,15 @@ test("grocery items and their printed list distinguish missing products from a t
           source: "fixture", mode: "fixture", price_source: "no_external_product", lookup_status: "no_external_id",
           fetched_at: "2026-10-01T08:00:00Z", checked_at: null,
         } },
+        // As the API sends it: the reviewed snapshot is stored as a "fixture" product.
         { ...grocery("Salmon fillet", "Meat & Seafood", 10.9, 300),
-          product: { ...grocery("Salmon fillet", "Meat & Seafood", 10.9, 300).product, source: "fairprice" },
           evidence: { source: "release_snapshot", mode: "snapshot", price_source: "snapshot", lookup_status: "timeout", fetched_at: observed, checked_at: checked },
         },
+        { ...grocery("Chicken breast", "Meat & Seafood", 6.5, 500),
+          product: { ...grocery("Chicken breast", "Meat & Seafood", 6.5, 500).product, source: "fairprice" },
+          evidence: { source: "fairprice", mode: "live", price_source: "live", lookup_status: "success", fetched_at: checked, checked_at: checked },
+        },
+        { ...grocery("Water", "Other", 0, 500, 0), product: null, match_score: null, note: "Not purchased: drinking water and ice come from the tap and the freezer.", evidence: null },
       ],
     },
   };
@@ -1509,13 +1514,16 @@ test("grocery items and their printed list distinguish missing products from a t
   await page.getByRole("button", { name: "Plan my week" }).click();
   const panel = page.getByRole("complementary", { name: "This week" });
   const noProduct = "Sample price · no matching FairPrice product; not checked";
-  const timedOut = "Saved FairPrice price · 2 Oct · not checked in time";
+  const timedOut = "Saved FairPrice price · 2 Oct · not checked live in time";
+  const checkedLine = "Prices checked at 16:30 · 1 live · 1 saved · 1 sample";
   await panel.getByRole("tab", { name: /Groceries/ }).click();
   for (const [width, height] of [[1280, 720], [1440, 900]] as const) {
     await page.setViewportSize({ width, height });
     await expect(panel.getByText(noProduct, { exact: true })).toBeVisible();
     await expect(panel.getByText(timedOut, { exact: true })).toBeVisible();
+    await expect(panel.getByText(checkedLine, { exact: true })).toBeVisible();
     await expect(panel).not.toContainText("FairPrice didn't respond");
+    await expect(panel).not.toContainText("Water");
     const format = (value: string) => new Date(value).toLocaleString("en-SG", { timeZone: "Asia/Singapore" });
     await expect(panel.getByText(timedOut, { exact: true })).toHaveAttribute("title", `Price observed: ${format(observed)}; check attempted: ${format(checked)}`);
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/18-price-evidence-${width}.png` });
@@ -1524,6 +1532,7 @@ test("grocery items and their printed list distinguish missing products from a t
     const sheet = page.getByRole("dialog", { name: "Shopping list preview" });
     await expect(sheet.getByText(noProduct, { exact: true })).toBeVisible();
     await expect(sheet.getByText(timedOut, { exact: true })).toBeVisible();
+    await expect(sheet.getByText(checkedLine, { exact: false })).toBeVisible();
     await expect(sheet).not.toContainText("FairPrice didn't respond");
     if (SHOTS) {
       await sheet.evaluate(async (node) => {
