@@ -814,7 +814,10 @@ class MealPlanReplanningService:
             if item.status != "skipped"
         ]
         return self.grocery_aggregator.estimate(
-            [recipe for recipe, _ in eaten], constraints, shares=[share for _, share in eaten]
+            [recipe for recipe, _ in eaten],
+            constraints,
+            shares=[share for _, share in eaten],
+            by_weight=by_weight(self._current_grocery(plan)),
         )
 
     def _fitting(self, plan, constraints, recipes_by_id, swaps, entry, ranked, misfits=None) -> tuple:
