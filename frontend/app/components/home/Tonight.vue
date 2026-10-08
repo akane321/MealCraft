@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
-import { MEAL_LABEL, nextMeal, plateStyle, type PlannedMeal } from "~/lib/home-surface";
+import { MEAL_LABEL, nextMeal, type PlannedMeal } from "~/lib/home-surface";
 import type { NutritionDashboardDay } from "~/types/meal-plan";
 import type { TutorialRecommendation } from "~/types/recipe";
 
@@ -80,7 +80,7 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3" /></svg>Swap
       </button>
     </div>
-    <span class="plate" :style="plateStyle(tonight.day.recipe.slug)" aria-hidden="true" />
+    <HomeDishIcon class="big-icon" :title="tonight.day.recipe.title" :course="tonight.day.recipe.course" :role-id="tonight.day.role_id" :size="92" />
 
     <div class="video">
       <iframe
@@ -136,8 +136,7 @@ h2 { margin: 6px 0 0; font-size: 28px; line-height: 1.08; letter-spacing: -0.01e
 .meta { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 12px; color: var(--t2); font-size: 12.5px; }
 .meta .done { color: var(--sage); }
 .acts { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
-.tonight > .plate { --size: 92px; grid-row: 2 / 4; grid-column: 2; align-self: center; animation: turn 60s linear infinite; }
-@keyframes turn { to { transform: rotate(360deg); } }
+.tonight > .big-icon { grid-row: 2 / 4; grid-column: 2; align-self: center; }
 
 .video { margin-top: 14px; }
 .video iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; display: block; }

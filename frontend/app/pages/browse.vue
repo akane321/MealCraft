@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatSgd, plateStyle, productSourceLabel } from "~/lib/home-surface";
+import { formatSgd, productSourceLabel } from "~/lib/home-surface";
 import type { ProductSearchResponse } from "~/types/recommendation";
 import type { RecipeCollection, RecipeListItem } from "~/types/recipe";
 
@@ -108,7 +108,7 @@ function packLabel(size: number | null, unit: string | null) {
       <ul class="cards">
         <li v-for="recipe in recipes" :key="recipe.id">
           <button type="button" class="card" @click="openSlug = recipe.slug">
-            <span class="plate" :style="plateStyle(recipe.slug)" aria-hidden="true" />
+            <HomeDishIcon class="icon" :title="recipe.title" :course="recipe.course" :size="44" />
             <span class="title">{{ recipe.title }}</span>
             <small>{{ recipe.total_time_minutes }} min · {{ Math.round(recipe.nutrition.calories_kcal) }} kcal<template v-if="recipe.course"> · {{ recipe.course.replace("_", " ") }}</template></small>
           </button>
@@ -165,7 +165,7 @@ function packLabel(size: number | null, unit: string | null) {
 .cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
 .card { width: 100%; height: 100%; display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; column-gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--s1); color: inherit; text-align: left; cursor: pointer; font: inherit; }
 .card:hover, .card:focus-visible { border-color: var(--accent); }
-.card .plate { --size: 44px; grid-row: 1 / 3; }
+.card .icon { grid-row: 1 / 3; }
 .card .title { font-family: var(--serif); font-size: 15px; line-height: 1.25; }
 .card small { color: var(--t3); font-size: 12px; }
 .more { margin-top: 18px; }

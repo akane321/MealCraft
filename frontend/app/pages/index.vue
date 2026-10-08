@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { allergenLabel } from "~/lib/allergens";
-import { budgetLine, formatSgd, groceriesChange, groceryGroups, plateStyle, previewChoices, sameDishChange } from "~/lib/home-surface";
+import { budgetLine, formatSgd, groceriesChange, groceryGroups, previewChoices, sameDishChange } from "~/lib/home-surface";
 import { statedTimeLimit } from "~/lib/household-profile";
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
 import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
@@ -106,7 +106,7 @@ const shapePreview = computed(() => {
   return {
     title: shapeChangeSummary(change, plan.value?.start_date),
     days: [...byDay.entries()].map(([day, titles]) => ({ day: planDayLabel(plan.value?.start_date, day), titles })),
-    slugs: change.added.slice(0, 3).map(dish => dish.recipe_slug),
+    dishes: change.added.slice(0, 3).map(dish => ({ slug: dish.recipe_slug, title: dish.recipe_title, roleId: dish.role_id })),
     removed: change.removed.length,
   };
 });
@@ -613,7 +613,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
             <div v-if="session?.pending_replan && shapePreview" class="swap-card shape-card mc-rise" aria-label="Proposed change to your meals">
               <div class="plates">
-                <span v-for="slug in shapePreview.slugs" :key="slug" class="plate" :style="plateStyle(slug)" />
+                <HomeDishIcon v-for="dish in shapePreview.dishes" :key="dish.slug" class="swap-icon" :title="dish.title" :role-id="dish.roleId" :size="40" />
               </div>
               <div>
                 <div class="to mc-serif">{{ shapePreview.title }}</div>
@@ -635,10 +635,10 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
             <div v-else-if="session?.pending_replan?.before_entry && session.pending_replan.after_entry" class="swap-card mc-rise">
               <div class="plates">
-                <span class="plate" :style="plateStyle(session.pending_replan.before_entry.recipe_slug)" />
+                <HomeDishIcon class="swap-icon before" :title="session.pending_replan.before_entry.recipe_title" :role-id="session.pending_replan.before_entry.role_id" :size="34" />
                 <template v-if="!sameDishChange(session.pending_replan)">
                   <svg class="mc-icon arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-                  <span class="plate" :style="plateStyle(session.pending_replan.after_entry.recipe_slug)" />
+                  <HomeDishIcon class="swap-icon after" :title="session.pending_replan.after_entry.recipe_title" :role-id="session.pending_replan.after_entry.role_id" :size="48" />
                 </template>
               </div>
               <div>
@@ -875,8 +875,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .card .mc-primary { min-height: 42px; }
 .swap-card { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; padding: 16px 18px; border-radius: 18px; background: #fff; border: 1px solid var(--line-2); }
 .plates { display: flex; align-items: center; gap: 6px; }
-.plates .plate:first-child { --size: 34px; opacity: 0.45; filter: grayscale(0.6); }
-.plates .plate:last-child { --size: 48px; }
+.plates .before { opacity: 0.5; filter: grayscale(0.6); }
 .arrow { color: var(--t4); }
 .swap-card s { color: var(--t4); font-size: 12.5px; }
 .to { font-size: 18px; line-height: 1.2; font-weight: 700; }
@@ -884,8 +883,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .swap-card .over-budget { color: var(--warn); }
 .swap-card .acts { grid-column: 1 / -1; }
 .swap-card .acts, .card .acts { display: flex; gap: 8px; }
-.shape-card .plates .plate { --size: 40px; opacity: 1; filter: none; }
-.shape-card .plates .plate + .plate { margin-left: -14px; }
+.shape-card .plates .swap-icon { opacity: 1; filter: none; }
+.shape-card .plates .swap-icon + .swap-icon { margin-left: -14px; }
 .shape-days { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; color: var(--t2); font-size: 12.5px; }
 .shape-days b { display: inline-block; min-width: 34px; color: var(--t3); font-weight: 800; }
 .typing { display: flex; gap: 5px; padding: 8px 0; }

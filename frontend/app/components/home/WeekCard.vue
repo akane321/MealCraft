@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
-import { MEAL_LABEL, budgetLine, countWord, formatSgd, mealsByDay, perMealAndDay, plateStyle } from "~/lib/home-surface";
+import { MEAL_LABEL, budgetLine, countWord, formatSgd, mealsByDay, perMealAndDay } from "~/lib/home-surface";
 import type { NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
 
 const props = defineProps<{ days: NutritionDashboardDay[]; estimate: WeeklyGroceryEstimate; rangeLabel: string }>();
@@ -45,7 +45,7 @@ const repeats = computed(() => new Set(props.days.map(day => day.recipe.slug)).s
         @click="emit('openRecipe', day.meals[day.meals.length - 1]!.dishes[0]!.recipe.slug)"
       >
         <span class="d">{{ formatPlanDate(day.date, { weekday: "short" }) }}</span>
-        <span class="plate" :style="plateStyle(day.meals[day.meals.length - 1]!.dishes[0]!.recipe.slug)" />
+        <HomeDishIcon class="icon" :title="day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title" :course="day.meals[day.meals.length - 1]!.dishes[0]!.recipe.course" :role-id="day.meals[day.meals.length - 1]!.dishes[0]!.role_id" :size="52" />
         <span class="n mc-serif">{{ day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title }}</span>
         <span v-if="day.meals.length > 1 || day.meals[0]!.dishes.length > 1" class="more">
           <template v-if="day.meals.length > 1">{{ day.meals.slice(0, -1).map(meal => MEAL_LABEL[meal.mealType]).join(" · ") }} · </template>{{ day.meals.reduce((sum, meal) => sum + meal.dishes.length, 0) }} dishes
@@ -83,8 +83,8 @@ h3 em { color: var(--accent); font-style: normal; }
 .today .d { color: #b26b00; }
 .n { font-size: 12.5px; font-weight: 400; line-height: 1.25; color: var(--t2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .more { font-size: 10.5px; color: var(--t4); line-height: 1.3; }
-.tile .plate { --size: 52px; transition: transform 500ms var(--ease); }
-.tile:hover .plate { transform: rotate(-14deg) scale(1.05); }
+.tile .icon { transition: transform 300ms var(--ease); }
+.tile:hover .icon { transform: translateY(-2px) rotate(-6deg); }
 .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px 24px; border-top: 1px solid var(--line); background: var(--s2); }
 .note { margin-left: auto; font-size: 12px; color: var(--sage); display: inline-flex; align-items: center; gap: 6px; }
 .note.over { color: var(--warn); }

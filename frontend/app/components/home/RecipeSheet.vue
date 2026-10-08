@@ -36,6 +36,7 @@ useDialog(overlay, () => emit("close"));
   <div ref="overlay" class="mc-overlay" role="dialog" aria-modal="true" :aria-label="recipe ? recipe.title : 'Recipe'">
     <section class="mc-ribbed panel">
       <header>
+        <HomeDishIcon v-if="recipe" :title="recipe.title" :course="recipe.course" :ingredients="recipe.ingredients.map(item => item.name)" :size="44" />
         <div>
           <h2 class="mc-serif">{{ recipe?.title ?? "Recipe" }}</h2>
           <p v-if="recipe">{{ recipe.total_time_minutes }} min · serves {{ recipe.servings }} · {{ recipe.cuisine }}</p>

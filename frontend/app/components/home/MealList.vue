@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
-import { MEAL_LABEL, mealsByDay, nextMeal, plateStyle } from "~/lib/home-surface";
+import { MEAL_LABEL, mealsByDay, nextMeal } from "~/lib/home-surface";
 import type { NutritionDashboardDay } from "~/types/meal-plan";
 
 // A replaced week (readonly) is only read: its dishes offer no changes.
@@ -40,7 +40,7 @@ const ACTIONS = [
             <template v-if="severalMeals"><span>{{ MEAL_LABEL[meal.mealType] }}</span></template>
             <template v-else><span>{{ formatPlanDate(day.date, { weekday: "short" }) }}</span><b class="mc-serif">{{ Number(day.date.slice(8, 10)) }}</b></template>
           </span>
-          <span class="plate" :style="plateStyle(meal.dishes[0]!.recipe.slug)" aria-hidden="true" />
+          <HomeDishIcon class="icon" :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="36" />
           <span class="dishes">
             <span v-for="(dish, index) in meal.dishes" :key="dish.entry_id" class="dish" :class="{ side: index > 0 }">
               <button type="button" class="name mc-serif" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button>
@@ -77,7 +77,7 @@ const ACTIONS = [
 .d span { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
 .today .d span { color: #b26b00; }
 .d b { font-size: 19px; }
-.row .plate { --size: 36px; }
+
 .dishes { min-width: 0; display: grid; gap: 2px; }
 .dish { display: grid; min-width: 0; }
 .name { padding: 0; border: 0; background: none; text-align: left; font-size: 15px; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MEAL_LABEL, formatSgd, plateStyle } from "~/lib/home-surface";
+import { MEAL_LABEL, formatSgd } from "~/lib/home-surface";
 import type { MealType } from "~/lib/home-surface";
 import { formatPlanDate } from "~/lib/meal-plan-format";
 import type { WeeklyMealPlan, WeeklyMealPlanCollection } from "~/types/meal-plan";
@@ -94,7 +94,7 @@ const range = (start: string, end: string) => `${formatPlanDate(start, { day: "n
                 <template v-for="(dish, index) in meal.dishes" :key="dish.entry_id">
                   <template v-if="index"> · </template>
                   <button type="button" class="dish" :class="dish.status" @click="openSlug = dish.recipe.slug">
-                    <span class="plate" :style="plateStyle(dish.recipe.slug)" aria-hidden="true" />{{ dish.recipe.title }}
+                    <HomeDishIcon :title="dish.recipe.title" :course="dish.recipe.course" :role-id="dish.role_id" :size="20" />{{ dish.recipe.title }}
                   </button>
                 </template>
               </p>
@@ -128,5 +128,5 @@ h1 { margin: 6px 0 22px; font-family: var(--serif); font-weight: 300; font-size:
 .dish { display: inline-flex; gap: 6px; align-items: center; padding: 0; border: 0; background: transparent; color: var(--ivory); font: inherit; cursor: pointer; }
 .dish:hover { color: var(--accent); }
 .dish.skipped { color: var(--muted); text-decoration: line-through; }
-.dish .plate { --size: 16px; }
+
 </style>

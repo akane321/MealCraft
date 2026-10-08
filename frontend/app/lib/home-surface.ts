@@ -107,22 +107,6 @@ export function productSourceLabel(result: ProductSearchResponse): string {
   return `FairPrice prices from ${date}${missed}`;
 }
 
-// Sauce, starch and garnish colours; a dish's plate picks one of each.
-const SAUCES = ["#c9803f", "#d9a54a", "#e58a62", "#d6533a", "#6b3a2a", "#d77b35", "#b8653f", "#a6582e"];
-const STARCHES = ["#e9d9b5", "#f1e6cf", "#f4efe6", "#efe3c8", "#f0c64f", "#f2dfb4"];
-const GREENS = ["#6f8f4e", "#4f7a3a", "#5d8a3f", "#7aa04a", "#4a3024", "#c24a2a"];
-
-/** CSS variables for an abstract plate; the same dish always gets the same plate. */
-export function plateStyle(seed: string): Record<string, string> {
-  let hash = 2166136261;
-  for (const char of seed) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619) >>> 0;
-  return {
-    "--a": SAUCES[hash % SAUCES.length]!,
-    "--b": STARCHES[(hash >>> 8) % STARCHES.length]!,
-    "--c": GREENS[(hash >>> 16) % GREENS.length]!,
-  };
-}
-
 /** Per-person nutrition averaged over the dinners that still count (skipped ones don't). */
 export function perDinner(days: NutritionDashboardDay[]): RecipeNutrition | null {
   const counted = days.filter(day => day.status !== "skipped");
