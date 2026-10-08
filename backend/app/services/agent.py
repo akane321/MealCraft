@@ -551,9 +551,7 @@ class AgentSessionService:
             try:
                 minimum_distinct_dishes = changes.pop("minimum_distinct_dishes", 0)
                 candidate = request.model_copy(update=changes)
-                cost = self.meal_plan_service.cheapest_week(
-                    candidate, minimum_distinct_dishes=minimum_distinct_dishes
-                )
+                cost = self.meal_plan_service.cheapest_week(candidate, minimum_distinct_dishes=minimum_distinct_dishes)
                 error = self.meal_plan_service.check(
                     candidate.model_copy(update={"weekly_budget_sgd": math.ceil(cost)}),
                     minimum_distinct_dishes=minimum_distinct_dishes,

@@ -582,9 +582,7 @@ def test_fewer_people_are_offered_only_when_a_real_week_backs_it_for_less(two, l
         23.36,
         constraints,
         "en",
-        lambda **changes: two
-        if changes == {"household_size": 2, "minimum_distinct_dishes": 4}
-        else None,
+        lambda **changes: two if changes == {"household_size": 2, "minimum_distinct_dishes": 4} else None,
     )
 
     assert [label for label, _ in refusal.options] == labels
@@ -600,8 +598,7 @@ def test_fewer_people_are_offered_only_when_a_real_week_backs_it_for_less(two, l
     assert refusal.text == expected
     chinese = _budget_short(23.36, constraints, "zh", lambda **changes: None)
     assert chinese.text == (
-        "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。"
-        "我能找到至少有四种不同菜的一周，预算要 S$23.36。"
+        "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到至少有四种不同菜的一周，预算要 S$23.36。"
     )
 
 
