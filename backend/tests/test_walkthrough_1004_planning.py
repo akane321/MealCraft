@@ -34,7 +34,7 @@ from app.core.paths import repository_root
 from app.data.catalog import Catalog, import_catalog, load_catalog
 from app.data.release_v2 import import_release_v2
 from app.db.base import Base
-from app.main import warm_planning_pool
+from app.main import load_planning_pool, warm_planning_pool
 from app.planning.product_path import ProductPlanningEngine, meal_affinity
 from app.planning.recipe_quality import dish_family
 from app.repositories.agent import AgentSessionRepository
@@ -68,6 +68,7 @@ def kept_for(seconds: int):
         patch.setattr(get_settings(), "planning_pool_cache_seconds", seconds)
         # The API's startup would load the pool of the configured database, not the test's catalog.
         patch.setattr("app.main.warm_planning_pool", lambda *_: None, raising=False)
+        patch.setattr("app.main.load_planning_pool", lambda: None, raising=False)
         clear_planning_pool()  # and the weeks found from it
         try:
             yield
@@ -612,6 +613,20 @@ def test_the_api_loads_the_pool_again_before_it_ages_so_no_request_waits_for_it(
             recipes = RecipeRepository(session).list_for_planning()  # 320 s after the startup load
         assert [r.slug for r in recipes] == ["salmon-bake", "tomato-soup", "pumpkin-soup"]
         assert loads == ["warm-planning-pool"] * 3
+
+
+def test_the_api_answers_only_once_its_planning_pool_is_loaded(loads):
+    """A message sent as soon as the API answered after a restart waited about 1.2 s for the background thread's
+    first load of the pool, taking the demo's cold budget refusal past 6 s (WP1 1b). The background thread is
+    left out here (kept_for), so only the startup itself can have loaded it."""
+    import app.main as main
+
+    with pooled() as session, pytest.MonkeyPatch.context() as patch:
+        patch.setattr(main, "SessionLocal", sessionmaker(bind=session.get_bind(), expire_on_commit=False))
+        patch.setattr(main, "load_planning_pool", load_planning_pool)
+        with TestClient(main.app):
+            assert len(loads) == 1
+            assert id(session.get_bind()) in _planning_pool
 
 
 def test_a_background_load_does_not_hold_up_a_request(monkeypatch, loads, clock):
