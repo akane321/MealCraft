@@ -722,6 +722,12 @@ class ProductPlanningEngine:
                 elif banded:
                     fallback = lambda: most_varied_first(limit_led())  # noqa: E731
                 assignments_list = most_varied_first(found)
+                if minimum_distinct_dishes and assignments_list:
+                    assignments_list = [
+                        assignments
+                        for assignments in assignments_list
+                        if len({assignment.recipe_id for assignment in assignments}) >= minimum_distinct_dishes
+                    ]
                 if cheapest:
                     assignments_list, fallback, last_resort = [], None, cheapest_weeks
                 elif (
