@@ -206,6 +206,9 @@ def write_workbench(report: dict[str, Any], json_path: Path, markdown_path: Path
         "> Generated evidence. Method, split rules and metric definitions are fixed in "
         f"[`protocol-v1.md`]({_relative_to(Path('docs/evaluation/protocol-v1.md'), markdown_path)}).",
         "",
+        "> Scope: the v1 curated-catalog workbench and its historical comparisons; this is not the current "
+        "meal-day-week product-path report.",
+        "",
         "## Run status",
         "",
         f"- Developer gate: **{'PASS' if developer['passed'] else 'FAIL'}**",

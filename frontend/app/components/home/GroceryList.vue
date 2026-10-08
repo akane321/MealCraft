@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatSgd, groceryGroups, packageLabel, priceSourceLabel } from "~/lib/home-surface";
+import { formatSgd, groceryGroups, groceryPriceLabel, groceryPriceTimes, packageLabel, priceSourceLabel } from "~/lib/home-surface";
 import type { WeeklyGroceryEstimate } from "~/types/meal-plan";
 
 const props = defineProps<{ estimate: WeeklyGroceryEstimate }>();
@@ -22,7 +22,7 @@ function toggle(name: string) {
       <h3 class="aisle">{{ group.name }}</h3>
       <label v-for="line in group.lines" :key="line.ingredient_name" class="item">
         <input type="checkbox" :checked="got.has(line.ingredient_name)" @change="toggle(line.ingredient_name)">
-        <span><span class="p">{{ line.ingredient_display_name }}</span><span class="s">{{ packageLabel(line) }}</span></span>
+        <span><span class="p">{{ line.ingredient_display_name }}</span><span class="s">{{ packageLabel(line) }}</span><span class="s" :title="groceryPriceTimes(line)">{{ groceryPriceLabel(line) }}</span></span>
         <span class="c mc-num">{{ formatSgd(line.purchase_cost_sgd) }}</span>
       </label>
     </template>

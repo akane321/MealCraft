@@ -47,6 +47,7 @@ from sqlalchemy.orm import Session
 from app.core.paths import repository_root
 from app.data.allergens import checked_allergens
 from app.data.alternatives import options as alternative_options
+from app.data.catalog import mark_catalog_changed
 from app.models.meal_plan import MealPlanEntry, MealPlanEvent
 from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 
@@ -174,6 +175,11 @@ def import_release_v2(session: Session, directory: Path | None = None, *, force:
     recorded.digest = report.digest
     recorded.recipe_count = report.recipes_imported
     recorded.ingredient_count = report.ingredients_added + report.ingredients_reused
+    mark_catalog_changed(
+        session,
+        recipe_count=report.recipes_imported,
+        ingredient_count=report.ingredients_added + report.ingredients_reused,
+    )
     session.commit()
     return report
 

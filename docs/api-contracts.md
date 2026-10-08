@@ -76,8 +76,10 @@ Available endpoints:
 - GET /api/plans
 - GET /api/plans/{plan_id}
 - PATCH /api/plans/{plan_id}/entries/{entry_id}
+- PATCH /api/plans/{plan_id}/meals/{day_index}/{meal_type}
 - GET /api/plans/{plan_id}/dashboard
 - POST /api/plans/{plan_id}/replan/preview
+- POST /api/plans/{plan_id}/shape/preview
 - POST /api/plans/{plan_id}/replan/{event_id}/confirm
 - GET /api/plans/{plan_id}/events
 - POST /api/agent/sessions
@@ -452,6 +454,48 @@ aggregated shopping list, package checkout cost, ingredient-use cost, weekly
 budget status, and explicit warnings. Known pantry quantities are deducted once
 after every planned dish's requirements are combined.
 
+Candidate pricing, affordability checks, refusal amounts and replanning previews
+use the existing offline path: fixture products plus reviewed release mappings.
+They never query live FairPrice while selecting dishes. A stored `pricing_mode`
+is the requested Shopping List mode, not proof of a live observation: consumers
+  must read each line's `evidence.mode` and original `evidence.fetched_at`.
+
+For `pricing_mode=live`, saving a new week or confirming a dish/meal-shape change
+refreshes **only the final basket's selected product IDs**, with at most eight
+provider requests in flight per backend process and a shared three-second wait.
+Fresh cache entries may be reused (the demo can prewarm them). Preview and
+`LOCK_MEAL` do not initiate lookup; a stale/repeated confirmation is rejected
+before lookup. Neither refreshed prices nor stock observations change selected
+products, reviewed package sizes, package counts, ingredients or dishes.
+
+Each purchased line's existing `PriceEvidence` JSON additionally returns:
+
+| Field | Meaning |
+| --- | --- |
+| `price_source` | `live`, `cache`, `snapshot`, `fixture`, or `no_external_product`; the price actually used for this basket |
+| `lookup_status` | `success`, `timeout`, `provider_error`, `schema_drift`, `invalid_price`, `selected_product_not_returned`, `no_external_id`, or `out_of_stock` |
+| `checked_at` | UTC completion/cache-assessment/deadline time of this basket lookup; null when no real product ID exists |
+
+`fetched_at` remains the original **price observation** time, not the time the
+basket was checked. Legacy saved JSON has null new fields and remains readable
+without migration. On deadline/error/unusable price, preserve the selected
+snapshot/sample price and observation time; discard late results without
+updating the returned basket or cache. A successful search that does not return
+the selected ID (including an empty list) gets `selected_product_not_returned`:
+a limited search response does **not** prove that SKU is unavailable. This is
+distinct from the general product-search endpoint's `no_match` behavior above.
+IDs beginning `fixture-` have `no_external_product` / `no_external_id`, not a
+timeout. Lines requiring no purchase do not initiate lookup.
+
+Checkout totals use the existing package counts and whole-cent observed prices.
+If the new total exceeds the weekly budget, **save the confirmed plan**, return
+`within_weekly_budget=false` and an overrun warning; do not silently replan or
+switch products. Independent selection validation uses offline prices before
+this observation step. `complete` means quantity/price coverage, not stock
+availability: a known out-of-stock selected SKU is explicitly flagged and
+warned about, and its cost estimate is not an availability guarantee. Rendering
+per-product labels is a frontend responsibility; the backend returns evidence.
+
 New plans must pass independent validation before storage. The weekly budget
 caps whole-package checkout cost; the legacy per-meal budget still caps
 ingredient-use cost without pantry deduction. Both comparisons use whole cents;
@@ -622,7 +666,11 @@ instead of searching again. A budget refusal names the amount a person a meal an
 week the search found ("S$10 a week for 4 people comes to about S$0.36 a person a
 meal (7 meals). The cheapest week I could find costs S$23.36."). The session keeps
 collecting and offers choices a real week backs: "Use S$24 for the week" (that
-week fits it, so it plans), and, for one meal a day, half the people at their own
+week fits it, so it plans). The amount is first checked as accepting it plans it,
+under that budget; a budget changes the candidate packet, so when that check finds
+no week, the cheapest week of its own cost-led search that only the budget turned
+down sets the amount instead, which plans under any budget of its cost or more,
+with no further search. A second choice, for one meal a day, is half the people at their own
 cheapest week when that week costs less than the whole household's ("2 people at
 S$18 a week", or "Plan for 2 people" when that fits the budget as it is); for more
 meals a day that second search would take the reply past its

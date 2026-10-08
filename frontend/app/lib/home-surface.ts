@@ -50,21 +50,80 @@ export function groceryGroups(items: GroceryLineEstimate[]): Array<{ name: strin
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+type PriceKind = "live" | "saved" | "sample";
+
+/**
+ * Where a displayed price really came from. A price kept in the reviewed snapshot is a saved FairPrice price
+ * once a live check was attempted for it (the snapshot product itself is stored as a "fixture" product, so
+ * the product's own source cannot tell a reviewed price from a made-up sample). A price from the short-lived
+ * lookup cache was fetched live minutes ago, so it counts as live.
+ */
+function priceKind(line: GroceryLineEstimate): PriceKind {
+  const evidence = line.evidence;
+  const source = evidence?.price_source ?? evidence?.mode;
+  if (source === "no_external_product" || source === "fixture") return "sample";
+  if (source === "live" || source === "cache") return "live";
+  if (source === "snapshot" && evidence?.lookup_status) return "saved";
+  return line.product?.source === "fixture" ? "sample" : "saved";
+}
+
+const priced = (estimate: WeeklyGroceryEstimate) => estimate.items.filter(line => line.product && line.packages_required > 0);
+
+/** "Prices checked at 15:40 · 15 live · 19 saved · 3 sample", from the evidence of the lines to buy; null if no live check ran. */
+function priceCheckLine(estimate: WeeklyGroceryEstimate): string | null {
+  const lines = priced(estimate);
+  const checked = lines.map(line => line.evidence?.checked_at).filter((value): value is string => !!value).sort().at(-1);
+  if (!checked) return null;
+  const count = (kind: PriceKind) => lines.filter(line => priceKind(line) === kind).length;
+  const time = new Date(checked).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Singapore" });
+  const mix = ([[count("live"), "live"], [count("saved"), "saved"], [count("sample"), "sample"]] as const)
+    .filter(([n]) => n > 0).map(([n, word]) => `${n} ${word}`).join(" · ");
+  return `${count("live") ? `Prices checked at ${time}` : `Live prices not available at ${time}`} · ${mix}`;
+}
+
 /**
  * Short, user-facing note on where prices came from, read from the products
  * actually used rather than the mode that was asked for: a live request that
  * fell back to sample data must not be labelled as FairPrice prices.
  */
 export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
-  const products = estimate.items.map(line => line.product).filter(product => product !== null);
-  const samples = products.filter(product => product.source !== "fairprice").length;
-  if (!products.length || samples === products.length) {
-    return estimate.pricing_mode === "live" ? "Sample prices: FairPrice didn't respond" : "Sample prices";
-  }
-  if (samples) return "Some prices are samples: FairPrice didn't respond";
-  const fetched = products.map(product => product.fetched_at).sort()[0]!;
+  const checked = priceCheckLine(estimate);
+  if (checked) return checked;
+  const lines = priced(estimate);
+  const samples = lines.filter(line => priceKind(line) === "sample").length;
+  if (!lines.length || samples === lines.length) return "Sample prices";
+  if (samples) return "FairPrice and sample prices — source shown on each item";
+  const fetched = lines.map(line => line.evidence?.fetched_at ?? line.product!.fetched_at).sort()[0]!;
   const date = new Date(fetched).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
   return `FairPrice prices from ${date}`;
+}
+
+/** An observation's date is never replaced by the time a later price check was attempted. */
+export function groceryPriceLabel(line: GroceryLineEstimate): string {
+  if (!line.product) return line.packages_required > 0 ? "Not priced" : "Not bought · no price needed";
+  const evidence = line.evidence;
+  const source = evidence?.price_source ?? evidence?.mode;
+  if (source === "no_external_product") return "Sample price · no matching FairPrice product; not checked";
+  const kind = priceKind(line);
+  const date = new Date(evidence?.fetched_at ?? line.product.fetched_at).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
+  const base = kind === "sample" ? "Sample price" : `${kind === "live" ? "FairPrice" : "Saved FairPrice"} price · ${date}`;
+  switch (evidence?.lookup_status) {
+    case "timeout": return `${base} · not checked live in time`;
+    case "selected_product_not_returned": return `${base} · selected product not found`;
+    case "out_of_stock": return `${base} · product marked unavailable`;
+    case "provider_error":
+    case "schema_drift":
+    case "invalid_price": return `${base} · current price could not be checked`;
+    default: return base;
+  }
+}
+
+export function groceryPriceTimes(line: GroceryLineEstimate): string | undefined {
+  if (!line.product) return undefined;
+  const format = (value: string) => new Date(value).toLocaleString("en-SG", { timeZone: "Asia/Singapore" });
+  const observed = line.evidence?.fetched_at ?? line.product.fetched_at;
+  const checked = line.evidence?.checked_at;
+  return `Price observed: ${format(observed)}${checked ? `; check attempted: ${format(checked)}` : ""}`;
 }
 
 /**

@@ -1,3 +1,4 @@
+import math
 import re
 from collections.abc import Callable
 from datetime import date, timedelta
@@ -540,11 +541,28 @@ class AgentSessionService:
             return None
 
     def _cheapest(self, request: WeeklyMealPlanRequest) -> Callable[..., float | None]:
-        """What the cheapest week the planner's search finds for `request` with changes costs; None for none."""
+        """A found week's cost, backed by the same budgeted path that clicking its suggestion uses."""
 
         def cheapest(**changes) -> float | None:
             try:
-                return self.meal_plan_service.cheapest_week(request.model_copy(update=changes))
+                candidate = request.model_copy(update=changes)
+                cost = self.meal_plan_service.cheapest_week(candidate)
+                error = self.meal_plan_service.check(
+                    candidate.model_copy(update={"weekly_budget_sgd": math.ceil(cost)})
+                )
+                if error is None:
+                    return cost
+                # Adding a budget changes the bounded candidate packet, and its own cost-led search may find a
+                # dearer week. That search reads neither the budget nor its amount (planning/product_path.py
+                # `cheapest_weeks`), and the budgeted packet depends only on there being a budget, so a week of it
+                # that only this budget turned down is tried again, and passes, under any budget of its cost or
+                # more: the check that found it already backs that amount, with no second search.
+                backed = [
+                    attempt["purchase_total_sgd"]
+                    for attempt in error.trace.get("validation_attempts", [])
+                    if attempt.get("cheapest_search") and limits._failed(attempt) == {"purchase_budget"}
+                ]
+                return min(backed) if backed else None
             except (ProductProviderError, WeeklyPlanSelectionError):
                 return None
 

@@ -1,3 +1,4 @@
+import gc
 import threading
 from contextlib import asynccontextmanager
 
@@ -9,9 +10,15 @@ from app.api.router import api_router
 from app.core.config import get_settings
 from app.data.overrides import ensure_loaded
 from app.db.session import SessionLocal
-from app.repositories.recipe import keep_planning_pool_warm
+from app.repositories.recipe import POOL_CHECK_SECONDS, _reload_pool, keep_planning_pool_warm
 
 settings = get_settings()
+# A chat turn's planning allocates millions of short-lived objects beside the recipe pool's million or so long-lived
+# ones. At Python's default first-generation threshold (700) the collector ran about 3,000 times in one budget
+# refusal and took 2.5-3.3 s of its 8-10 s (WP1 1b, 2026-10-08); every 50,000 allocations it runs a few dozen times
+# for the same garbage. When garbage is collected changes nothing the planner computes.
+GC_FIRST_GENERATION = 50_000
+gc.set_threshold(GC_FIRST_GENERATION)
 cors_origins = list(
     dict.fromkeys(
         [
@@ -27,9 +34,20 @@ def warm_planning_pool(stop: threading.Event) -> None:
     """Keeps the planner's recipe pool loaded and young until shutdown: loading it in a request took 3.5-4.5 s on
     the walkthrough's PostgreSQL, enough to take an OpenAI-mode answer past 10 s (ADR-0046 section 3)."""
     with SessionLocal() as session:
-        ensure_loaded(session)  # the pool keeps only recipes the estimator prices, with the console's edits
+        while not ensure_loaded(session):
+            if stop.wait(POOL_CHECK_SECONDS):
+                return
         bind = session.get_bind()
     keep_planning_pool_warm(bind, stop)
+
+
+def load_planning_pool() -> None:
+    """The pool's first load, before the API answers: a message sent as soon as it answered after a restart waited
+    about 1.2 s for `warm_planning_pool` to load it, taking the demo's cold budget refusal past its 6 s (WP1 1b,
+    2026-10-08). A database not readable yet is left to `warm_planning_pool`, which retries with its backoff."""
+    with SessionLocal() as session:
+        if ensure_loaded(session):
+            _reload_pool(session.get_bind())
 
 
 @asynccontextmanager
@@ -45,6 +63,7 @@ async def lifespan(_app: FastAPI):
         ).start()
     stop = threading.Event()
     if settings.planning_pool_cache_seconds:
+        load_planning_pool()  # in the startup itself: the API answers once the pool is in hand
         threading.Thread(target=warm_planning_pool, args=(stop,), name="warm-planning-pool", daemon=True).start()
     yield
     stop.set()

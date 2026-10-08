@@ -9,21 +9,23 @@ help users express intent, but it must not replace this authority.
 
 ## Verified baseline
 
-The current implementation produces seven persisted main meals. It filters
-allergens, excluded ingredients, dietary incompatibility, time and explicit
-sodium limits; ranks eligible recipes using active nutrition, pantry and time
-dimensions; controls adjacent repetition; calculates per-person nutrition;
-aggregates grocery demand; deducts only known compatible pantry quantities;
-rounds product packages; and records weekly budget status.
+The current product implementation plans the household's chosen days and meals,
+with one or more required or optional dish roles per meal, and persists one plan
+entry per dish. It filters allergens, exclusions, dietary incompatibility, time
+and explicit nutrition limits; ranks eligible recipes using active nutrition,
+pantry and time dimensions; controls repetition; calculates per-person
+nutrition; aggregates grocery demand; deducts only known compatible pantry
+quantities; rounds product packages; and records weekly budget status. The
+seven-main-meal path remains only for reproducing earlier evaluations.
 
 The current selector is deterministic and provides a useful MVP baseline. It is
 not yet evidence of global optimality, broad preference fit, or performance over
 a high-dimensional catalog.
 
-## Accepted target pipeline
+## Accepted pipeline
 
 The target is not hard-coded to seven dinners. It accepts an explicit set of
-multi-day breakfast, lunch, dinner and optional snack slots, with per-slot
+multi-day breakfast, lunch and dinner slots, with per-slot
 servings, time limits, required/optional state and locks. A one-week plan is one
 instance of this model, not its upper or lower boundary. See the detailed
 [Algorithm Engineering Handoff](algorithm-engineering-handoff.md) for the
@@ -142,12 +144,12 @@ recipe ingestion or FairPrice retrieval:
 
 `data/fixtures/planning-v2/final-scope-multislot.json` is the first runnable
 final-scope-shaped packet. It covers explicit breakfast, lunch, dinner and
-optional snack slots, serving scaling, a locked meal, scoped nutrition bands,
+optional snack slots in the legacy general-purpose fixture, serving scaling, a locked meal, scoped nutrition bands,
 known and unknown pantry quantities, product packages and purchase budget.
 
-The accompanying deterministic greedy reference and independent validator are
-integration scaffolds. They are not the final Beam Search implementation and
-must not be used to claim global optimality or production completion.
+The fixture's snack slot is not a current product feature. Its deterministic
+greedy reference remains a baseline; the product uses bounded Beam Search and
+independent validation, without claiming global optimality.
 
 These fixtures let Agent, frontend and Evaluation contributors integrate before
 full upstream data is ready.

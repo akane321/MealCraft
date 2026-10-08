@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 from dataclasses import dataclass
+from decimal import Decimal
 
 from app.data.units import UNIT_BASE, in_grams, weighed
 from app.models.recipe import Recipe
@@ -29,6 +30,67 @@ class WeeklyGroceryAggregator:
     def __init__(self, product_service: ProductSearchService, matcher: ProductMatcher | None = None) -> None:
         self.product_service = product_service
         self.matcher = matcher or ProductMatcher()
+
+    def refresh(self, grocery: WeeklyGroceryEstimateResponse) -> WeeklyGroceryEstimateResponse:
+        """Reprice the confirmed basket without reselecting products or package counts."""
+        lines = self.product_service.refresh_selected(grocery.items)
+        for original, line in zip(grocery.items, lines, strict=True):
+            if (
+                line.product is None
+                or not line.packages_required
+                or line.product.price_sgd == original.product.price_sgd
+            ):
+                continue
+            priced = GroceryEstimator.price_line(
+                line.ingredient_name,
+                line.ingredient_display_name,
+                line.required_quantity,
+                line.unit,
+                line.pantry_deduction,
+                line.remaining_quantity,
+                line.product,
+                line.match_score,
+                line.evidence,
+            )
+            cents = int(Decimal(str(line.product.price_sgd)) * 100)
+            line.purchase_cost_sgd = cents * line.packages_required / 100
+            line.consumed_cost_sgd = priced.consumed_cost_sgd
+        total = sum(round(line.purchase_cost_sgd * 100) for line in lines) / 100
+        complete = grocery.complete and all(line.consumed_cost_sgd is not None for line in lines)
+        consumed = sum(round(line.consumed_cost_sgd * 100) for line in lines) / 100 if complete else None
+        budget = grocery.weekly_budget_sgd
+        within = (
+            None
+            if budget is None
+            else False
+            if round(total * 100) > round(budget * 100)
+            else True
+            if complete
+            else None
+        )
+        warnings = list(grocery.warnings)
+        if any(line.evidence and line.evidence.lookup_status not in {"success", "out_of_stock"} for line in lines):
+            warnings.append("Some selected products use saved or sample prices; see each item's price evidence.")
+        if any(line.evidence and line.evidence.lookup_status == "out_of_stock" for line in lines):
+            warnings.append(
+                "A selected product is currently out of stock; its price estimate does not guarantee availability."
+            )
+        if within is False:
+            warnings.append(
+                f"The refreshed grocery total S${total:.2f} exceeds the weekly budget S${budget:.2f} "
+                f"by S${(round(total * 100) - round(budget * 100)) / 100:.2f}."
+            )
+        return grocery.model_copy(
+            update={
+                "pricing_mode": "live",
+                "items": lines,
+                "purchase_total_sgd": total,
+                "consumed_total_sgd": consumed,
+                "complete": complete,
+                "within_weekly_budget": within,
+                "warnings": list(dict.fromkeys(warnings)),
+            }
+        )
 
     def estimate(
         self,

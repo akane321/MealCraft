@@ -279,6 +279,7 @@ class RuleBasedConstraintParser:
         people_patterns = [
             r"(\d+)\s*(?:people|persons?|\u4eba|\u4e2a\u4eba)",
             rf"(?:for|serving|family of)\s*(\d+)(?![\d.]){NOT_EATERS}\s*(?:people|persons?)?",
+            r"\b(?:we're|we are)\s+(\d+)(?=\s*(?:[,;:!?]|\.(?:\s|$)|$))",
         ]
         people_patterns.append(r"\bthe\s+(?!1\b)(\d+)\s+of us\b")
         if current.household_size is None:
@@ -288,8 +289,10 @@ class RuleBasedConstraintParser:
         if people is None:
             # "Dinners for two", "a family of four", "three people"; and, with no saved size, "two of us".
             words = "|".join(NUMBER_WORDS)
-            match = re.search(rf"\b(?:for|serving|family of)\s+({words})\b{NOT_EATERS}", lower) or re.search(
-                rf"\b({words})\s+(?:people|persons?|adults?)\b", lower
+            match = (
+                re.search(rf"\b(?:for|serving|family of)\s+({words})\b{NOT_EATERS}", lower)
+                or re.search(rf"\b({words})\s+(?:people|persons?|adults?)\b", lower)
+                or re.search(rf"\b(?:we're|we are)\s+({words})\b(?=\s*(?:[,.;:!?]|$))", lower)
             )
             if match is None:
                 match = re.search(rf"\bthe\s+(?!one\b)({words})\s+of us\b", lower)

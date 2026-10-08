@@ -26,7 +26,13 @@ from app.planning.product_path import composed_packet
 from app.planning.recipe_quality import dish_family
 from app.repositories.recipe import clear_planning_pool
 from app.schemas.meal_plan import MEAL_PRESETS, WeeklyMealPlanRequest
-from app.schemas.planning_v2 import FinalPlanningProblem
+from app.schemas.planning_v2 import (
+    FinalPlanningProblem,
+    PlanningDiversityPolicy,
+    PlanningNutritionBand,
+    PlanningRecipeCount,
+    PlanningRepetitionRules,
+)
 from app.services import recommendation as recommendation_service
 
 DINNER_WITH_SOUP = MEAL_PRESETS["dinner"]["main, vegetable and soup"]
@@ -155,6 +161,15 @@ def week_problem() -> FinalPlanningProblem:
     )
 
 
+def repeated_week() -> MealState:
+    return MealState(
+        (
+            ("d1", (("main", "chicken-rice"), ("vegetable", "garlic-spinach"))),
+            ("d2", (("main", "chicken-rice"), ("vegetable", "bok-choy"))),
+        )
+    )
+
+
 def test_a_composed_packet_keeps_a_locked_dish_outside_its_ranked_limit():
     mains = [ranked(i, f"dish {i}") for i in range(1, 41)]
     recipes = [SimpleNamespace(id=i, course="main") for i in range(1, 41)]
@@ -182,18 +197,97 @@ def test_varying_a_composed_week_does_not_replace_locked_roles():
 def test_a_repeat_is_swapped_for_the_dish_sharing_what_the_week_buys():
     """Chicken rice twice costs S$12; chicken noodles share its chicken and fit S$13, beef stew does not."""
     problem = week_problem()
-    repeated = MealState(
-        (
-            ("d1", (("main", "chicken-rice"), ("vegetable", "garlic-spinach"))),
-            ("d2", (("main", "chicken-rice"), ("vegetable", "bok-choy"))),
-        )
-    )
+    repeated = repeated_week()
     varied = MealBeamPlanner(MealBeamLimits(distinct_kinds=True)).vary_within_budget(problem, repeated)
     mains = sorted(dict(dishes)["main"] for _, dishes in varied.choices)
     assert mains == ["chicken-noodles", "chicken-rice"]
     # With S$12 the week stays as it was: even the noodles' S$1 pack does not fit.
     tight = problem.model_copy(update={"purchase_budget_sgd": 12.0})
     assert MealBeamPlanner().vary_within_budget(tight, repeated) == repeated
+
+
+def test_varying_keeps_distinct_dish_kinds_within_each_meal():
+    problem = week_problem()
+    titles = {
+        "chicken-noodles": "Chicken Bok Choy",
+        "garlic-spinach": "Garlic Bok Choy",
+        "bok-choy": "Bok Choy",
+    }
+    problem = problem.model_copy(
+        update={
+            "recipes": [
+                recipe.model_copy(update={"title": titles.get(recipe.recipe_id, recipe.title)})
+                for recipe in problem.recipes
+            ]
+        }
+    )
+    repeated = repeated_week()
+
+    assert MealBeamPlanner(MealBeamLimits(distinct_kinds=True)).vary_within_budget(problem, repeated) == repeated
+
+
+def test_varying_respects_a_candidate_recipe_maximum():
+    problem = week_problem().model_copy(
+        update={
+            "repetition_rules": PlanningRepetitionRules(
+                recipe_counts=[PlanningRecipeCount(recipe_id="chicken-noodles", max_uses=0)]
+            )
+        }
+    )
+
+    assert MealBeamPlanner().vary_within_budget(problem, repeated_week()) == repeated_week()
+
+
+def test_varying_does_not_remove_a_dish_the_household_requested():
+    problem = week_problem().model_copy(
+        update={
+            "repetition_rules": PlanningRepetitionRules(
+                recipe_counts=[PlanningRecipeCount(recipe_id="chicken-rice", min_uses=2)]
+            )
+        }
+    )
+
+    assert MealBeamPlanner().vary_within_budget(problem, repeated_week()) == repeated_week()
+
+
+def test_varying_keeps_hard_daily_nutrition_bands():
+    problem = week_problem()
+    recipes = [
+        recipe.model_copy(
+            update={"nutrients_per_serving": recipe.nutrients_per_serving.model_copy(update={"calories_kcal": 100})}
+        )
+        if recipe.recipe_id == "chicken-noodles"
+        else recipe
+        for recipe in problem.recipes
+    ]
+    problem = problem.model_copy(
+        update={
+            "recipes": recipes,
+            "nutrition_bands": [PlanningNutritionBand(metric="calories_kcal", scope="per_day", upper=20)],
+        }
+    )
+
+    assert MealBeamPlanner().vary_within_budget(problem, repeated_week()) == repeated_week()
+
+
+def test_varying_leaves_roles_the_household_allows_to_repeat():
+    problem = week_problem().model_copy(update={"repetition_rules": PlanningRepetitionRules(repeat_ok_roles=["main"])})
+
+    assert MealBeamPlanner().vary_within_budget(problem, repeated_week()) == repeated_week()
+
+
+def test_varying_defers_to_the_explicit_diversity_policy():
+    problem = week_problem().model_copy(
+        update={
+            "diversity_policy": PlanningDiversityPolicy(
+                classification_version="test",
+                classification_rule="Test classifications are intentionally empty.",
+                classifications={},
+            )
+        }
+    )
+
+    assert MealBeamPlanner().vary_within_budget(problem, repeated_week()) == repeated_week()
 
 
 @pytest.fixture(scope="module")

@@ -28,6 +28,32 @@ def test_household_size_and_weekly_budget_in_words(message, size, weekly) -> Non
     assert extraction.weekly_budget_sgd == weekly
 
 
+@pytest.mark.parametrize("opening", ["We're two", "We are two", "We\u2019re two", "We're 2"])
+def test_explicit_household_size_overrides_previous_constraints(opening: str) -> None:
+    from app.agent.workflow import AgentConstraintWorkflow
+
+    previous = AgentConstraintState(household_size=4, weekly_budget_sgd=53)
+    extraction = RuleBasedConstraintParser().parse(
+        f"{opening}, one of us is allergic to peanuts, no pork, S$100 a week, dinners with a soup",
+        current=previous,
+        acknowledged_unknowns=[],
+        history=[],
+    )
+    merged = AgentConstraintWorkflow._merge_constraints(previous, extraction)
+    assert merged.household_size == 2
+    assert merged.weekly_budget_sgd == 100
+    assert merged.allergens == ["peanut"]
+    assert merged.excluded_ingredients == ["pork"]
+
+
+@pytest.mark.parametrize(
+    "message",
+    ["We're two weeks away", "We are two of the cooks", "We're two meals short", "We're 2.5 weeks away"],
+)
+def test_we_are_counts_must_describe_the_whole_household(message: str) -> None:
+    assert parse(message).household_size is None
+
+
 @pytest.mark.parametrize(
     ("message", "excluded"),
     [
