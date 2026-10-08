@@ -108,7 +108,7 @@ function packLabel(size: number | null, unit: string | null) {
       <ul class="cards">
         <li v-for="recipe in recipes" :key="recipe.id">
           <button type="button" class="card" @click="openSlug = recipe.slug">
-            <HomeDishIcon class="icon" :title="recipe.title" :course="recipe.course" :size="44" />
+            <HomeDishIcon class="icon" :title="recipe.title" :course="recipe.course ?? recipe.meal_type" :size="44" />
             <span class="title">{{ recipe.title }}</span>
             <small>{{ recipe.total_time_minutes }} min · {{ Math.round(recipe.nutrition.calories_kcal) }} kcal<template v-if="recipe.course"> · {{ recipe.course.replace("_", " ") }}</template></small>
           </button>
