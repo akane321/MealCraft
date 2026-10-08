@@ -294,6 +294,12 @@ def test_adding_a_soup_on_nonconsecutive_days_plans_and_charges_only_those_days(
     assert {dish["day_index"] for dish in added} == {2, 6}
     assert all(dish["role_id"] == "soup" for dish in added)
     assert preview.json()["shape_change"]["kept"] == 4
+    applied = composed_client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm")
+    assert applied.status_code == 200, applied.text
+    after_total = applied.json()["plan"]["grocery_estimate"]["purchase_total_sgd"]
+    assert round(after_total - plan["grocery_estimate"]["purchase_total_sgd"], 2) == preview.json()[
+        "purchase_total_delta_sgd"
+    ]
 
 
 def test_dropping_a_meal_for_the_week_changes_this_weeks_shape_only(composed_client):
