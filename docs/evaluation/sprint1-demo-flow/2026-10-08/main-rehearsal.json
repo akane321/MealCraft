@@ -1,0 +1,281 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-08",
+  "source_commit": "b01bff05737b0290f0afa635e6c31148b2d0e1b5",
+  "result": "PASS: scoped offline workflow; full demo acceptance remains OPEN",
+  "environment": {
+    "browser": "Playwright Chromium 1243",
+    "browser_plugin": "Browser plugin not available",
+    "backend": "latest-main read-only source mount; dependency files match reused image",
+    "frontend_tree": "5bd10d07c71f72c5b564159e1fbb10789314041c",
+    "frontend": "production build; exact frontend tree matches latest main",
+    "database": "isolated database-copy volume; original database untouched",
+    "parser": "fixture",
+    "prices": "saved/sample fallback; FairPrice deliberately unavailable",
+    "worker_started": false,
+    "migrations_applied": false
+  },
+  "scope": [
+    "new conversation and week confirmation",
+    "shopping price-source labels",
+    "six daily/meal nutrient rows visible",
+    "Sunday main-only preview and confirmation with other days unchanged",
+    "single-dish replacement and confirmation",
+    "Chinese infeasible-budget refusal then execution of offered budget choice"
+  ],
+  "checker_mutation_self_test": "PASS: portion, nutrient sum, package ceiling, price and budget mutations rejected",
+  "arithmetic_inputs": [
+    {
+      "file": "arithmetic-review.txt",
+      "sha256": "cb09b3fc8c18aada31745a27a538a514415e86e4a352983cc2a057c9221335da"
+    },
+    {
+      "file": "arithmetic-card-review.txt",
+      "sha256": "7a32f8910ee381ebaa983ca3a4dd0e0010dab57ff920ac34e0b66344cf303bc9"
+    }
+  ],
+  "runs": [
+    {
+      "file": "fixture-final-1-cold.json",
+      "sha256": "1eb79aca7674d1bc039043d80622fe03d2beb231e9965e0c75fde2339225b912",
+      "started_at": "2026-10-08T03:01:05.743Z",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "condition": "fixture parser, external connections blocked, saved/sample price fallback",
+      "functional_complete": true,
+      "checkpoints": [
+        "new-plan",
+        "week",
+        "groceries",
+        "nutrition",
+        "sunday-preview",
+        "sunday-confirmed",
+        "swap-confirmed",
+        "refusal",
+        "alternative-planned"
+      ],
+      "phases": [
+        {
+          "phase": "first",
+          "dishes": 21,
+          "purchase_total_sgd": 99.73
+        },
+        {
+          "phase": "sunday",
+          "dishes": 19,
+          "purchase_total_sgd": 91.58
+        },
+        {
+          "phase": "swap",
+          "dishes": 19,
+          "purchase_total_sgd": 94.48
+        },
+        {
+          "phase": "alternative",
+          "dishes": 21,
+          "purchase_total_sgd": 51.99
+        }
+      ],
+      "overview_daily_counts_checked": false,
+      "console_errors": 0,
+      "horizontal_overflow": false,
+      "actual_openai_requests": 0,
+      "guard": {
+        "protected_file_attempts": 0,
+        "external_connect_attempts": 0,
+        "paid_request_attempts": 0
+      },
+      "arithmetic_checks": 1224,
+      "arithmetic_errors": [],
+      "arithmetic_unverified": []
+    },
+    {
+      "file": "fixture-final-2-warm.json",
+      "sha256": "74a57d01971f88c9a1f715e0b3881ec278461132d017ef2be9f13257cc0af20d",
+      "started_at": "2026-10-08T03:02:10.314Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "condition": "fixture parser, external connections blocked, saved/sample price fallback",
+      "functional_complete": true,
+      "checkpoints": [
+        "new-plan",
+        "week",
+        "groceries",
+        "nutrition",
+        "sunday-preview",
+        "sunday-confirmed",
+        "swap-confirmed",
+        "refusal",
+        "alternative-planned"
+      ],
+      "phases": [
+        {
+          "phase": "first",
+          "dishes": 21,
+          "purchase_total_sgd": 99.73
+        },
+        {
+          "phase": "sunday",
+          "dishes": 19,
+          "purchase_total_sgd": 91.58
+        },
+        {
+          "phase": "swap",
+          "dishes": 19,
+          "purchase_total_sgd": 94.48
+        },
+        {
+          "phase": "alternative",
+          "dishes": 21,
+          "purchase_total_sgd": 51.99
+        }
+      ],
+      "overview_daily_counts_checked": false,
+      "console_errors": 0,
+      "horizontal_overflow": false,
+      "actual_openai_requests": 0,
+      "guard": {
+        "protected_file_attempts": 0,
+        "external_connect_attempts": 0,
+        "paid_request_attempts": 0
+      },
+      "arithmetic_checks": 1224,
+      "arithmetic_errors": [],
+      "arithmetic_unverified": []
+    },
+    {
+      "file": "fixture-final-3-warm.json",
+      "sha256": "5f40a54e657b6433227a89fb02150de01f42a051e5ee4575a2acff99fafa4298",
+      "started_at": "2026-10-08T03:02:33.694Z",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "condition": "fixture parser, external connections blocked, saved/sample price fallback",
+      "functional_complete": true,
+      "checkpoints": [
+        "new-plan",
+        "week",
+        "groceries",
+        "nutrition",
+        "sunday-preview",
+        "sunday-confirmed",
+        "swap-confirmed",
+        "refusal",
+        "alternative-planned"
+      ],
+      "phases": [
+        {
+          "phase": "first",
+          "dishes": 21,
+          "purchase_total_sgd": 99.73
+        },
+        {
+          "phase": "sunday",
+          "dishes": 19,
+          "purchase_total_sgd": 91.58
+        },
+        {
+          "phase": "swap",
+          "dishes": 19,
+          "purchase_total_sgd": 94.48
+        },
+        {
+          "phase": "alternative",
+          "dishes": 21,
+          "purchase_total_sgd": 51.99
+        }
+      ],
+      "overview_daily_counts_checked": false,
+      "console_errors": 0,
+      "horizontal_overflow": false,
+      "actual_openai_requests": 0,
+      "guard": {
+        "protected_file_attempts": 0,
+        "external_connect_attempts": 0,
+        "paid_request_attempts": 0
+      },
+      "arithmetic_checks": 1224,
+      "arithmetic_errors": [],
+      "arithmetic_unverified": []
+    },
+    {
+      "file": "fixture-card-check.json",
+      "sha256": "4928fa1fb31addfe8a8dfbbd4299dc3e4d489631c01e8a7d06419ab9eb2d1fe2",
+      "started_at": "2026-10-08T03:09:19.404Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "condition": "fixture parser, external connections blocked, saved/sample price fallback",
+      "functional_complete": true,
+      "checkpoints": [
+        "new-plan",
+        "week",
+        "groceries",
+        "nutrition",
+        "sunday-preview",
+        "sunday-confirmed",
+        "swap-confirmed",
+        "refusal",
+        "alternative-planned"
+      ],
+      "phases": [
+        {
+          "phase": "first",
+          "dishes": 21,
+          "purchase_total_sgd": 99.73
+        },
+        {
+          "phase": "sunday",
+          "dishes": 19,
+          "purchase_total_sgd": 91.58
+        },
+        {
+          "phase": "swap",
+          "dishes": 19,
+          "purchase_total_sgd": 94.48
+        },
+        {
+          "phase": "alternative",
+          "dishes": 21,
+          "purchase_total_sgd": 51.99
+        }
+      ],
+      "overview_daily_counts_checked": true,
+      "console_errors": 0,
+      "horizontal_overflow": false,
+      "actual_openai_requests": 0,
+      "guard": {
+        "protected_file_attempts": 0,
+        "external_connect_attempts": 0,
+        "paid_request_attempts": 0
+      },
+      "arithmetic_checks": 1224,
+      "arithmetic_errors": [],
+      "arithmetic_unverified": []
+    }
+  ],
+  "visual_review": {
+    "screenshots": [
+      "fixture-final-1-cold-nutrition.png",
+      "fixture-final-1-cold-groceries.png",
+      "fixture-card-check-sunday-confirmed.png"
+    ],
+    "result": "Inspected both desktop sizes; nutrient rows and primary controls visible. Initial screenshot captured asynchronous stale overview counts; a subsequent run explicitly awaited and checked each daily count. No frontend change required."
+  },
+  "limits": [
+    "No new OpenAI requests: the previous paid-call authorization is exhausted. This is not an OpenAI-mode acceptance run.",
+    "No live FairPrice validation or physical network-disconnection demonstration. Local socket guard and deliberately unavailable provider exercise controlled fallback only.",
+    "No latency-gate pass claimed. First/cold refers to the first backend-process rehearsal, not a cold live-price cache.",
+    "Arithmetic agrees with stored recipe records, not necessarily complete real recipes: previously reported missing fillings, frying oil and broth remain a data-team risk.",
+    "This is engineering workflow QA, not comparative Agent capability evaluation.",
+    "No held-out evaluation was invoked or used for implementation/tuning. Runtime guard counters describe the backend only, not every validation process.",
+    "The existing full documentation checker passed but traverses markdown without an explicit protected-directory exclusion. Its traversal was not independently audited; a task-wide zero-protected-read claim is not established. Further validation is scoped to changed documents."
+  ],
+  "harness_note": "The added overview assertion initially failed on a trailing space; trimmed presentation whitespace and reran successfully. This was a local harness issue, not a product fix."
+}

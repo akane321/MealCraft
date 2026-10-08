@@ -1,10 +1,39 @@
 # MealCraft Current Status
 
-> Last verified public snapshot: 2026-10-07
+> Last verified public snapshot: 2026-10-08
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `136a9ca` (reviewed integration through #241)
+> Verified remote `main`: `b01bff0` (integration through #245)
+
+### Latest-main integration and offline rehearsal (2026-10-08)
+
+The owner merged #244 (result-preserving fixture-ranking reuse) and #245
+(demonstration workflow repairs); their paired knowledge records #102 and #103
+are also merged. The latest main-push CI succeeded
+([run 37652153430](https://github.com/akane321/MealCraft/actions/runs/37652153430)).
+#243 remains open with changes requested and behind main: merging its knowledge
+record #101 did not merge that heavy-composition performance proposal.
+
+Docker was restarted and the latest-main source was rehearsed against an
+isolated PostgreSQL copy and matching production frontend, without changing
+the original checkout or database. The scoped offline path passed at both
+desktop sizes: English planning, groceries and daily/meal nutrition, Sunday
+main-only preview/confirmation, one-dish replacement, and Chinese low-budget
+refusal followed by execution of the offered budget choice. A strengthened
+run also checked every overview-card daily count after asynchronous refresh.
+Arithmetic and environment details are generated in the
+[latest-main rehearsal report](evaluation/sprint1-demo-flow/2026-10-08/main-rehearsal.md).
+
+This is **offline workflow QA, not complete demo acceptance or Agent capability
+evaluation**. No new paid requests or protected held-out inputs were used.
+OpenAI-mode and live FairPrice behavior were not revalidated; the response-time
+gate remains open. Known missing recipe components remain assigned to the data
+team, not fixed or filtered here. The
+[earlier workflow report](evaluation/sprint1-demo-flow/2026-10-07/report.md)
+preserves the previous live-model results and their limits.
+
+### Earlier WP1 price and integration slices
 
 The owner merged the first WP1 price-strategy slice (#240). Candidate selection,
 affordability/refusal calculations and replanning previews now explicitly use
@@ -321,7 +350,7 @@ improved.
 
 | Design capability | Status | Remaining work |
 | --- | --- | --- |
-| Unified planning workspace | Partial | The kitchen-table workspace joins conversation, days × meals planning with editable per-meal composition, "Today", tutorial, recipe detail, nutrition detail, whole-meal check-in, Swap/Keep/Skip/Can't buy entry points, shopping-list export and applied replan history; `/browse`, `/history` and `/system` are linked from it (ADR-0048); the real-backend walkthrough is recorded (ADR-0045). Remaining: a repeatable demonstration path |
+| Unified planning workspace | Partial | The kitchen-table workspace joins conversation, days × meals planning with editable per-meal composition, "Today", tutorial, recipe detail, nutrition detail, whole-meal check-in, Swap/Keep/Skip/Can't buy entry points, shopping-list export and applied replan history; `/browse`, `/history` and `/system` are linked from it (ADR-0048); the real-backend walkthrough is recorded (ADR-0045). The scoped offline demonstration path is now repeatable (see the latest-main rehearsal above); full live-model, price and timing acceptance remains open |
 | Authentication and user separation | Partial | Authentication, non-null household ownership, household-scoped repositories, cross-household denial, per-action household authorization and browser registration/login are merged. Member-management routes, a wider isolation matrix, household collaboration, password lifecycle and account export/deletion are out of scope by owner decision (ADR-0051) |
 | High-dimensional recipe knowledge | Partial | Expand the catalog and complete cuisine, taste, method, equipment, difficulty, nutrition provenance, instruction, source, and media fields |
 | Verified recipe benchmark | Partial | Import a gated, enriched data release into the runtime catalog; the recipe count is set by what passes the release gate, not by a fixed range (decision ADR-0024) |
@@ -378,9 +407,10 @@ the next incomplete control. It is a navigation aid, not a second status source.
    set (see Weekly planning), so any further live-model comparison needs a fresh,
    unseen set.
 7. Expand dynamic-replanning stress cases and measure unnecessary disruption.
-8. Increase browser coverage and add the real-environment gate for the same
-   owner-approved demonstration skeleton; the existing Playwright suite uses a
-   mocked API and is not that gate.
+8. Complete the real-environment gate for the owner-approved demonstration
+   skeleton. The latest-main real-backend offline rehearsal is recorded above;
+   it does not establish the OpenAI/live-price/timing gate. The existing mocked
+   Playwright suite also does not establish that gate.
 9. Raise the discriminating power of the held-out evaluation before the final
    comparison. Parameters may be tuned on developer data only, never on
    held-out episodes (decision ADR-0020 as amended by ADR-0029). On the current v1 set the strong Rule-only reference
