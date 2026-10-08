@@ -716,7 +716,11 @@ class MealPlanReplanningService:
         # what was asked for leads and the recommendation score only breaks near-ties. Nothing described,
         # no vectors or no key: the swap orders by score, as before.
         asked = (
-            self.request_similarity.scores(request.reason, [recipes_by_id[c.recipe.id] for c in candidates])
+            self.request_similarity.scores(
+                request.reason,
+                [recipes_by_id[c.recipe.id] for c in candidates],
+                excluded_title=entry.recipe.title,
+            )
             if self.request_similarity is not None and request.event_type == "REPLACE_MEAL"
             else {}
         )
