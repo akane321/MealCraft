@@ -95,7 +95,10 @@ matching FairPrice product is explicitly marked as not checked; that is differen
 from a check that timed out or returned no selected product. Hover over a price
 note to see the observation and check-attempt times. A known unavailable product
 is labelled unavailable; an ingredient without a priced product remains not
-priced. **Preview list** includes these source notes on the
+priced; water and ice are not bought and are not listed. A saved price that could not be checked live in time is
+labelled "Saved FairPrice price ... not checked live in time", never as a sample. Above the list a line gives the time of
+the last live check and how many items are live, saved or sample ("Prices checked at 15:40 · 15 live · 19 saved · 3 sample").
+**Preview list** includes these source notes on the
 sheet as it will print; **Export PDF** opens the browser's print dialog.
 
 The **Nutrition** tab leads with what has been eaten: only meals marked cooked
