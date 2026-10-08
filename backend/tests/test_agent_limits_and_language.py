@@ -190,7 +190,8 @@ def labels(session: dict) -> list[str]:
 def cheapest_quoted(reply: str) -> float:
     return float(
         re.search(
-            r"The cheapest week I could find(?: with at least four different dishes)? costs S\$(\d+\.\d\d)",
+            r"(?:The cheapest week I could find costs|I found a week with at least four different dishes at a cost of) "
+            r"S\$(\d+\.\d\d)",
             reply,
         ).group(1)
     )

@@ -641,8 +641,8 @@ class ProductPlanningEngine:
 
                     It never reads the household's budget, so what it finds is the same under any budget:
                     a week it finds at S$C is tried again under a budget of S$C or more, which is what makes
-                    a budget offered as "S$C" one that plans. The cheapest week a search found, not a proof
-                    that none is cheaper.
+                    a budget offered as "S$C" one that plans. For a distinct-dish threshold, the first successful
+                    expanded search is enough: it backs a real budget but is not claimed to be the global minimum.
                     """
                     cost = {r.recipe.slug: dish_cost(r) for r in recommendations}
                     weight = COST_WEIGHTS[-1]
@@ -681,6 +681,15 @@ class ProductPlanningEngine:
                     while not states and limit < 7000:
                         low, limit = limit, min(7000, limit * 4)
                         states = within(limit)
+                    if minimum_distinct_dishes:
+                        if states:
+                            kept.update((state.choices, state) for state in states)
+                        trace["cheapest_search"] = {
+                            "budget_sgd": ceil(min(map(bought, states))) if states else None,
+                            "candidates": len(kept),
+                            "minimum_distinct_dishes": minimum_distinct_dishes,
+                        }
+                        return most_varied_first([(weight, state) for state in kept.values()])
                     high = limit
                     while states:
                         kept.update((state.choices, state) for state in states)

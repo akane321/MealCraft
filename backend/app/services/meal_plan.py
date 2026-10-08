@@ -287,10 +287,12 @@ class WeeklyMealPlanService:
         return week_floor(constraints, candidates.recommendations, recipes)
 
     def cheapest_week(self, constraints: WeeklyMealPlanRequest, *, minimum_distinct_dishes: int = 0) -> float:
-        """What the cheapest week the planner's cost-led search finds costs at the checkout, nothing saved.
+        """What a cost-led week with the requested variety costs at checkout, nothing saved.
 
         Every limit but the weekly budget holds. Adding a budget can change the bounded candidate
         packet, so a suggestion must check that amount through the budgeted path before offering it.
+        Without a variety threshold the search bisects for the cheapest week it finds; with one it returns a
+        verified candidate from the first expanded search that meets that threshold, not a global minimum.
         Raises ProductPlanningError when the search finds no week at all.
         """
         unbudgeted = constraints.model_copy(update={"weekly_budget_sgd": None})
