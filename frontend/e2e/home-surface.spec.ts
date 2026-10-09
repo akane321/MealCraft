@@ -614,6 +614,7 @@ test("a failed current-week lookup shows an error and can be retried", async ({ 
     ? { status: 500, json: { detail: "Temporarily unavailable" } }
     : { json: { items: [] } }));
   await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Open my week" }).click();
   const week = page.getByRole("complementary", { name: "This week" });
   await expect(week.getByRole("alert")).toBeVisible();
