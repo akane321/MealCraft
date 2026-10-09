@@ -1002,7 +1002,11 @@ class AgentSessionService:
             text = say("preview_skip", lang, title=before.recipe_title) + self._skip_groceries(preview, plan.id, lang)
         else:
             after = preview.after_entry.recipe_title if preview.after_entry else ""
+            # What the swap does to the groceries, said before confirming (demo step 5, 2026-10-09 rehearsal).
+            delta = preview.purchase_total_delta_sgd
+            change = "skip_saves" if delta <= -0.005 else "skip_costs" if delta >= 0.005 else "skip_same"
             text = say("preview_swap", lang, before=before.recipe_title, after=after)
+            text += say(change, lang, amount=abs(delta))
         return text + self._over_budget(preview, plan, lang) + say("until_confirm", lang)
 
     @staticmethod

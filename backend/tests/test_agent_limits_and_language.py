@@ -294,8 +294,9 @@ def test_a_smaller_household_that_is_not_cheaper_is_explained_instead_of_offered
     refusal = _budget_short(52.83, constraints, lang, lambda **_: 53.70)
     assert len(refusal.options) == 1
     assert "53" in refusal.options[0][0]
-    assert "S$54" in refusal.text
-    assert ("does not lower" if lang == "en" else "不能降低") in refusal.text
+    # Not "2 people need S$54" beside S$53 for 4: fewer people read as costing more (2026-10-09 rehearsal).
+    assert "S$54" not in refusal.text
+    assert ("fewer people would not lower" if lang == "en" else "减少人数也不能降低") in refusal.text
 
 
 def no_check_up_front(monkeypatch):

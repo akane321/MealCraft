@@ -363,7 +363,7 @@ REPLIES: dict[str, tuple[str, str]] = {
     "already_kept": ("{title} is already kept as it is.", "{title}已经保留不变了。"),
     "already_kept_meal": ("The {meal} on {day} is already kept as it is.", "{day}的{meal}已经保留不变了。"),
     "preview_skip": ("Skip {title}?", "跳过{title}？"),
-    # What a skip does to the shopping: whole packages other dishes still need stay on the list.
+    # What a skip or a swap does to the shopping: whole packages other dishes still need stay on the list.
     "skip_saves": (" That takes S${amount:.2f} off the groceries.", "买菜少花 S${amount:.2f}。"),
     "skip_costs": (" Groceries +S${amount:.2f}.", "买菜多花 S${amount:.2f}。"),
     "skip_same": (" Groceries stay the same.", "买菜不变。"),
@@ -491,10 +491,11 @@ REPLIES: dict[str, tuple[str, str]] = {
     "fewer_people_say": ("Plan for {people}", "改成{count}个人"),
     "fewer_people_at": ("{people} at S${amount} a week", "{people}，一周 S${amount}"),
     "fewer_people_at_say": ("{people}, S${amount} for the week", "{count}个人，一周{amount}新币"),
+    # Said without the smaller household's amount: "2 people need S$41" beside "4 people S$32" read as fewer
+    # people costing more (2026-10-09 rehearsal).
     "fewer_not_cheaper": (
-        "For {people}, the plan I could verify needs a S${amount} budget, so reducing the household "
-        "does not lower the budget I can suggest.",
-        "改成{people}，我能验证的方案仍需要 S${amount} 预算，所以减少人数不能降低我能建议的预算。",
+        "Planning for fewer people would not lower that budget.",
+        "减少人数也不能降低这个预算。",
     ),
     "raise_time": ("Allow up to {minutes} minutes", "放宽到 {minutes} 分钟"),
     "raise_time_say": ("Allow up to {minutes} minutes of cooking", "做饭 {minutes} 分钟以内"),

@@ -255,7 +255,7 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
                 _option("fewer_people_at", lang, count=fewer, people=people(fewer, lang), amount=math.ceil(smaller))
             )
     elif smaller is not None:
-        text += " " + say("fewer_not_cheaper", lang, people=people(fewer, lang), amount=math.ceil(smaller))
+        text += " " + say("fewer_not_cheaper", lang)
     return Refusal("weekly_budget_sgd", text, tuple(options))
 
 

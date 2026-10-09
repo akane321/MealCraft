@@ -270,7 +270,7 @@ def test_swap_budget_preview_keeps_the_saved_weight_price_for_liquids(monkeypatc
     service.grocery_aggregator = BoundaryAggregator()
     service._current_grocery = lambda plan: SimpleNamespace(items=[SimpleNamespace(ingredient_name="milk", unit="g")])
     current = SimpleNamespace(id=1, recipe_id=10, day_index=1, meal_type="dinner", status="planned", portion_share=1)
-    plan = SimpleNamespace(entries=[current], purchase_total_sgd=1.60)
+    plan = SimpleNamespace(entries=[current], purchase_total_sgd=1.60, pricing_mode="fixture")
     replacement = SimpleNamespace(recipe=SimpleNamespace(id=20))
     chosen, overage = service._fitting(
         plan,
