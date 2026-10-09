@@ -283,13 +283,26 @@ def test_adding_a_soup_to_one_dinner_replans_only_that_meal(composed_client):
     assert after["revision"] == plan["revision"] + 1
 
 
-def test_adding_a_soup_on_nonconsecutive_days_plans_and_charges_only_those_days(composed_client):
+def test_adding_a_soup_on_nonconsecutive_days_plans_and_charges_only_those_days(composed_client, monkeypatch):
+    from app.planning.product_path import ProductPlanningEngine
+
     plan = _week_ahead(composed_client, COMPOSITION[:2])
+    searched_days = []
+    search = ProductPlanningEngine.plan
+
+    def spy(self, constraints, *args, **kwargs):
+        searched_days.append(constraints.day_count)
+        return search(self, constraints, *args, **kwargs)
+
+    monkeypatch.setattr(ProductPlanningEngine, "plan", spy)
     preview = composed_client.post(
         f"/api/plans/{plan['id']}/shape/preview",
         json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [2, 6]},
     )
     assert preview.status_code == 201, preview.text
+    # Two selected days are searched as two days, not as the five from the first to the last (which also priced
+    # and budgeted the three days in between).
+    assert searched_days and set(searched_days) == {2}, searched_days
     added = preview.json()["shape_change"]["added"]
     assert {dish["day_index"] for dish in added} == {2, 6}
     assert all(dish["role_id"] == "soup" for dish in added)
