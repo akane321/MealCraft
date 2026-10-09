@@ -329,6 +329,7 @@ def test_a_chinese_household_is_refused_in_chinese_with_choices_in_chinese(clien
 
     reply = session["messages"][-1]["content"]
     assert not reply.startswith("\u597d\u7684")
+    assert reply.startswith("这个预算排不出来")
     assert reply.count("\u6211\u80fd\u627e\u5230\u7684\u6700\u4fbf\u5b9c\u7684\u4e00\u5468") == 1
     assert session["status"] == "collecting" and not session["can_confirm"]
     assert "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$" in reply
@@ -444,6 +445,7 @@ def test_a_failed_search_names_the_limit_it_ran_into_never_a_proof():
 
     told = planning_failure(failure({"validation_attempts": [over, cheapest]}), constraints, "en")
     assert told.text == (
+        "That budget can't cover this week. "
         "S$50 a week for 4 people comes to about S$1.79 a person a meal (7 meals). The cheapest week I could find "
         "costs S$58.40."
     )
@@ -520,6 +522,7 @@ def test_a_budget_under_the_floor_is_refused_with_the_floor_when_the_search_find
     told = limits.refusal(constraints, lambda **_: floor, "en", check=unsearched, cheapest=lambda **_: None)
     assert (told.field, told.options) == ("weekly_budget_sgd", ())
     assert told.text == (
+        "That budget can't cover this week. "
         "S$50 for 4 people is S$0.60 a person a meal over 21 meals: what this week's dishes use costs at least "
         "S$61.53, before buying whole packages."
     )
