@@ -3,7 +3,7 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from fractions import Fraction
 
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent, MealPlanGroceryItem
@@ -153,6 +153,19 @@ class MealPlanRepository:
             .limit(limit)
         )
         return list(self.session.scalars(statement).all())
+
+    def is_current(self, plan: MealPlan) -> bool:
+        """Check overlapping newer weeks across the household's entire history."""
+        newer = select(MealPlan.id).where(
+            MealPlan.household_id == self.household_id,
+            MealPlan.start_date <= plan.end_date,
+            MealPlan.end_date >= plan.start_date,
+            or_(
+                MealPlan.created_at > plan.created_at,
+                and_(MealPlan.created_at == plan.created_at, MealPlan.id > plan.id),
+            ),
+        )
+        return not self.session.scalar(select(newer.exists()))
 
     def update_entry_status(
         self,

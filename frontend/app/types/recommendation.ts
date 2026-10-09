@@ -28,7 +28,20 @@ export interface ProductSearchResponse {
   items: Product[];
 }
 
+export interface PriceEvidence {
+  fact_id?: string;
+  source: "fairprice" | "fixture" | "release_snapshot";
+  mode: "live" | "cache" | "snapshot" | "fixture";
+  query?: string | null;
+  parser_version?: string | null;
+  fetched_at: string;
+  price_source?: "live" | "cache" | "snapshot" | "fixture" | "no_external_product" | null;
+  lookup_status?: "success" | "timeout" | "provider_error" | "schema_drift" | "invalid_price" | "selected_product_not_returned" | "no_external_id" | "out_of_stock" | null;
+  checked_at?: string | null;
+}
+
 export interface GroceryLineEstimate {
+  evidence?: PriceEvidence | null;
   ingredient_name: string;
   ingredient_display_name: string;
   required_quantity: number | null;
@@ -42,14 +55,6 @@ export interface GroceryLineEstimate {
   consumed_cost_sgd: number | null;
   excess_quantity: number | null;
   note: string | null;
-  evidence?: {
-    source: "fairprice" | "fixture" | "release_snapshot";
-    mode: "live" | "cache" | "snapshot" | "fixture";
-    fetched_at: string;
-    price_source?: "live" | "cache" | "snapshot" | "fixture" | "no_external_product" | null;
-    lookup_status?: "success" | "timeout" | "provider_error" | "schema_drift" | "invalid_price" | "selected_product_not_returned" | "no_external_id" | "out_of_stock" | null;
-    checked_at?: string | null;
-  } | null;
 }
 
 export interface GroceryEstimate {

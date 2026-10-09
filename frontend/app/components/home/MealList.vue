@@ -25,6 +25,14 @@ const ACTIONS = [
 
 <template>
   <div>
+    <ol class="overview" aria-label="Week overview">
+      <li v-for="day in week" :key="day.dayIndex">
+        <span>{{ formatPlanDate(day.date, { weekday: "short" }) }}</span>
+        <span class="overview-dishes" :title="day.meals.map(meal => `${MEAL_LABEL[meal.mealType]}: ${meal.dishes.map(dish => dish.recipe.title).join(', ')}`).join('; ')">
+          {{ day.meals.map(meal => `${MEAL_LABEL[meal.mealType]}: ${meal.dishes.map(dish => dish.recipe.title).join(', ')}`).join('; ') }}
+        </span>
+      </li>
+    </ol>
     <ol class="days">
       <li v-for="day in week" :key="day.dayIndex" class="day">
         <p v-if="severalMeals" class="day-head">
@@ -43,7 +51,7 @@ const ACTIONS = [
           <span class="plate" :style="plateStyle(meal.dishes[0]!.recipe.slug)" aria-hidden="true" />
           <span class="dishes">
             <span v-for="(dish, index) in meal.dishes" :key="dish.entry_id" class="dish" :class="{ side: index > 0 }">
-              <button type="button" class="name mc-serif" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button>
+              <button type="button" class="name mc-serif" :title="dish.recipe.title" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button>
               <small v-if="index === 0">{{ dish.recipe.total_time_minutes }} min · {{ Math.round(meal.dishes.reduce((sum, d) => sum + d.nutrition_per_person.calories_kcal, 0)) }} kcal</small>
               <span v-if="!readonly && dish.status === 'planned' && !dish.is_locked" class="acts" role="group" :aria-label="`Change ${dish.recipe.title}`">
                 <button
@@ -62,11 +70,13 @@ const ACTIONS = [
         </div>
       </li>
     </ol>
-    <div class="log"><HomeChangeLog :plan-id="planId" :revision="revision" :start-date="startDate" /></div>
   </div>
 </template>
 
 <style scoped>
+.overview { list-style: none; margin: 0; padding: 8px 16px; border-bottom: 1px solid var(--line); }
+.overview li { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px; line-height: 24px; font-size: 12px; }
+.overview-dishes { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--t2); }
 .days { list-style: none; margin: 0; padding: 0; }
 .day-head { margin: 0; padding: 14px 22px 4px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
 .day-head span { color: var(--t2); }
@@ -88,11 +98,10 @@ const ACTIONS = [
 .state { font-size: 11px; font-weight: 500; color: var(--accent); text-align: right; }
 .state.completed { color: var(--sage); }
 .state.skipped { color: var(--t4); }
-.log { padding: 4px 22px 18px; }
 /* A dish's changes, quiet until the row is pointed at or focused. */
-.acts { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; opacity: 0.55; transition: opacity 0.15s var(--ease); }
+.acts { display: flex; flex-wrap: nowrap; gap: 4px; margin-top: 4px; opacity: 0.55; transition: opacity 0.15s var(--ease); }
 .row:hover .acts, .row:focus-within .acts { opacity: 1; }
-.acts button { padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--t3); font-size: 11px; }
+.acts button { padding: 2px 6px; white-space: nowrap; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--t3); font-size: 11px; }
 .acts button:hover { color: var(--ivory); border-color: var(--accent); }
 .kept { color: var(--sage); }
 </style>
