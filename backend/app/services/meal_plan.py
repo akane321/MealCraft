@@ -418,7 +418,9 @@ class WeeklyMealPlanService:
 
     def get(self, plan_id: int) -> WeeklyMealPlanResponse | None:
         plan = self.repository.get(plan_id)
-        return self._to_response(plan) if plan is not None else None
+        if plan is None:
+            return None
+        return self._to_response(plan).model_copy(update={"current": self.repository.is_current(plan)})
 
     def list_recent(self, *, limit: int) -> WeeklyMealPlanCollectionResponse:
         # Newest first, so every plan newer than one is listed before it (the limit cuts only older ones).
@@ -461,7 +463,7 @@ class WeeklyMealPlanService:
             entry_id=entry_id,
             status=status,
         )
-        return self._to_response(plan) if plan is not None else None
+        return self.get(plan.id) if plan is not None else None
 
     def update_meal_status(
         self,
@@ -474,7 +476,7 @@ class WeeklyMealPlanService:
         plan = self.repository.update_meal_status(
             plan_id=plan_id, day_index=day_index, meal_type=meal_type, status=status
         )
-        return self._to_response(plan) if plan is not None else None
+        return self.get(plan.id) if plan is not None else None
 
     def dashboard(self, plan_id: int) -> WeeklyNutritionDashboardResponse | None:
         plan = self.repository.get(plan_id)

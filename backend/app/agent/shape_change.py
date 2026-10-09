@@ -314,13 +314,13 @@ def _already_has(
     if not have:
         return None, ()
     dish_word = word(base, lang) if lang == "zh" else base
-    add = (say("add_another", lang, dish=dish_word), summary)
+    add = (say("add_another", "en", dish=base), summary)
     if len(have) > 1:
         titles = listed(list(dict.fromkeys(dish.recipe.title for dish in have))[:3], lang)
         return say("already_has_many", lang, titles=titles, dish=dish_word, **named), (add,)
     one = have[0]
     swap = (
-        say("swap_dish", lang, title=one.recipe.title),
+        say("swap_dish", "en", title=one.recipe.title),
         say("swap_repeat_say", lang, title=one.recipe.title, index=one.day_index),
     )
     return say("already_has", lang, titles=one.recipe.title, dish=dish_word, **named), (add, swap)
