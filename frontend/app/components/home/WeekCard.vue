@@ -19,6 +19,18 @@ const perPlateLabel = computed(() => (averages.value && averages.value.mealsPerD
 const budget = computed(() => budgetLine(props.estimate));
 // A tight budget or few eligible dishes can bring a dinner back; say so rather than let it look like a slip.
 const repeats = computed(() => new Set(props.days.map(day => day.recipe.slug)).size < props.days.length);
+
+type WeekDay = ReturnType<typeof mealsByDay>[number];
+
+const dishCount = (day: WeekDay) =>
+  day.meals.reduce((sum, meal) => sum + meal.dishes.length, 0);
+
+const earlierMealLabels = (day: WeekDay) =>
+  day.meals
+    .slice(0, -1)
+    .map(meal => MEAL_LABEL[meal.mealType])
+    .join(" \u00b7 ");
+
 </script>
 
 <template>
@@ -47,8 +59,9 @@ const repeats = computed(() => new Set(props.days.map(day => day.recipe.slug)).s
         <span class="d">{{ formatPlanDate(day.date, { weekday: "short" }) }}</span>
         <span class="plate" :style="plateStyle(day.meals[day.meals.length - 1]!.dishes[0]!.recipe.slug)" />
         <span class="n mc-serif">{{ day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title }}</span>
-        <span v-if="day.meals.length > 1 || day.meals[0]!.dishes.length > 1" class="more">
-          <template v-if="day.meals.length > 1">{{ day.meals.slice(0, -1).map(meal => MEAL_LABEL[meal.mealType]).join(" · ") }} · </template>{{ day.meals.reduce((sum, meal) => sum + meal.dishes.length, 0) }} dishes
+        <span class="more">
+          <template v-if="day.meals.length > 1">{{ earlierMealLabels(day) }} · </template>
+          {{ dishCount(day) }} {{ dishCount(day) === 1 ? "dish" : "dishes" }}
         </span>
       </button>
     </div>

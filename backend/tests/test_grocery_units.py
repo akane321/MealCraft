@@ -249,3 +249,38 @@ def test_the_floor_prices_a_liquid_by_the_gram_however_it_is_sold() -> None:
     # converted to the same gram basis. Converting only the line leaves no matching unit price and a zero floor.
     volume_only = week_floor(request, mains[:1], [mains[0].recipe])
     assert volume_only.total_sgd == pytest.approx(7 * 4.0 * 100 / 1000)
+
+
+def test_swap_budget_preview_keeps_the_saved_weight_price_for_liquids(monkeypatch) -> None:
+    """A replacement that fits the gram-priced basket must not be rejected as a bottle purchase."""
+    from types import SimpleNamespace
+
+    from app.services.replanning import MealPlanReplanningService
+
+    weighed_names = set()
+
+    class BoundaryAggregator:
+        def estimate(self, recipes, constraints, *, shares, by_weight=()):
+            weighed_names.update(by_weight)
+            # The same 100 ml of milk costs S$1.60 by the saved 100 g packs, or S$2.80 by the litre bottle.
+            total = 1.60 if "milk" in by_weight else 2.80
+            return SimpleNamespace(purchase_total_sgd=total)
+
+    service = object.__new__(MealPlanReplanningService)
+    service.grocery_aggregator = BoundaryAggregator()
+    service._current_grocery = lambda plan: SimpleNamespace(items=[SimpleNamespace(ingredient_name="milk", unit="g")])
+    current = SimpleNamespace(id=1, recipe_id=10, day_index=1, meal_type="dinner", status="planned", portion_share=1)
+    plan = SimpleNamespace(entries=[current], purchase_total_sgd=1.60)
+    replacement = SimpleNamespace(recipe=SimpleNamespace(id=20))
+    chosen, overage = service._fitting(
+        plan,
+        SimpleNamespace(weekly_budget_sgd=1.60),
+        {10: SimpleNamespace(), 20: SimpleNamespace()},
+        {},
+        current,
+        [replacement],
+    )
+
+    assert chosen is replacement
+    assert overage is None
+    assert "milk" in weighed_names
