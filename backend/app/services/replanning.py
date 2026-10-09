@@ -585,6 +585,14 @@ class MealPlanReplanningService:
                 recommendation_score=values["recommendation_score"],
             )
             added.append((values, snapshot))
+        present = self._dishes_kept_when_adding(roles, removed)
+        if present is not None and all(
+            values["role_id"] in present.get((values["day_index"], meal), {}) for values, _ in added
+        ):
+            # An addition that adds nothing is never a silent no-op (owner decision 2026-10-09).
+            raise MealPlanReplanValidationError(
+                f"Nothing could be added to {meal} on those days: no suitable dish was found, even over the budget."
+            )
         return added
 
     def confirm(self, *, plan_id: int, event_id: int) -> MealPlanReplanConfirmationResponse:

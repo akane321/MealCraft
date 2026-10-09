@@ -372,6 +372,8 @@ class WeeklyMealPlanService:
             empty = day_count * sum(len(roles) for _, roles in meals) - len(planned.selected)
             return total + over_budget / (day_count * len(meals)) * (repeats + EMPTY_OPTIONAL_ROLE_LOSS * empty)
 
+        slots = day_count * sum(len(roles) for _, roles in meals)
+        unfilled = None  # an addition the budget left empty, used only if no later step adds the dish
         for step in steps:
             found = []
             for pool, locked, request, hard in step:
@@ -392,9 +394,16 @@ class WeeklyMealPlanService:
                     failure = error
             if found:
                 result = min(found, key=charge) if len(found) > 1 else found[0]
+                # An empty optional dish is no addition: it does not "fit the budget", so the over-budget steps
+                # get their turn, and the preview says what the dish costs (T30).
+                if kept and step[0][3] and len(result.selected) < slots:
+                    unfilled = unfilled or result
+                    continue
                 break
         else:
-            raise failure
+            if unfilled is None:
+                raise failure
+            result = unfilled
         placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(result.selected))]
         return [
             ScheduledDish(

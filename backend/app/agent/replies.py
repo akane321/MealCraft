@@ -135,6 +135,10 @@ PLANNER_ZH_PATTERNS = (
     (r"There is no (?P<meal>\w+) left to change on those days\.", "那几天已经没有可以调整的{meal}了。"),
     (r"(?P<meal>\w+) is not planned on those days\.", "那几天没有安排{meal}。"),
     (
+        r"Nothing could be added to (?P<meal>\w+) on those days: no suitable dish was found, even over the budget\.",
+        "那几天的{meal}没法再加菜：即使超出预算也没找到合适的菜。",
+    ),
+    (
         r"No dish other than (?P<title>.+) satisfies the current hard constraints\.",
         "除了{title}，没有别的菜符合现在的限制。",
     ),
