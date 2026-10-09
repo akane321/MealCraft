@@ -219,7 +219,7 @@ MEAT_WORDS = re.compile(
     r"(?<!vegetarian )(?<!vegan )(?<!mock )\b(?:chicken|beef|pork|bacon|ham|turkey|lamb|mutton|veal|sausages?|salami"
     r"|pepperoni|chorizo|prosciutto|pancetta|duck|fish|salmon|tuna|cod|shrimps?|prawns?|crabs?|crabmeat|lobsters?"
     r"|clams?|mussels?|oysters?|scallops?|squid|octopus|anchov(?:y|ies)|sardines?)\b"
-    r"(?![\s-]*(?:stock|broth|bouillon|consomm|sauce|paste|flavou?r|ramen|eggs?|mushrooms?|fat|grease|drippings)"
+    r"(?![\s-]*(?:stock|broth|bouillon|consomm|sauce|paste|flavou?r|ramen|eggs?|mushrooms?|(?:fat|grease|drippings)\b)"
     r"|\s*(?:\(\s*or\s+vegetable\s*\)|or\s+vegetable)\s+(?:broth|stock))",
     re.IGNORECASE,
 )

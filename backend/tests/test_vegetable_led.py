@@ -174,3 +174,8 @@ def test_a_line_whose_wording_names_meat_or_fish_is_meat_whatever_the_release_ma
 )
 def test_an_alternative_rendered_as_a_non_meat_ingredient_is_not_classified_as_meat(name, text):
     assert not meat_or_fish(name, text)
+
+
+def test_a_fat_cut_of_meat_is_still_meat_wording():
+    # "fat" excludes rendered fat only, not a word that merely starts with it.
+    assert meat_or_fish("garlic", "1 lb pork fatback")
