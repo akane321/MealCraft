@@ -222,6 +222,7 @@ class ProductPlanningEngine:
         selector=None,
         profile_version=None,
         cheapest=False,
+        minimum_distinct_dishes=0,
         cheapest_last=True,
         budget_is_hard=True,
         locked=None,
@@ -640,8 +641,8 @@ class ProductPlanningEngine:
 
                     It never reads the household's budget, so what it finds is the same under any budget:
                     a week it finds at S$C is tried again under a budget of S$C or more, which is what makes
-                    a budget offered as "S$C" one that plans. The cheapest week a search found, not a proof
-                    that none is cheaper.
+                    a budget offered as "S$C" one that plans. For a distinct-dish threshold, the first successful
+                    expanded search is enough: it backs a real budget but is not claimed to be the global minimum.
                     """
                     cost = {r.recipe.slug: dish_cost(r) for r in recommendations}
                     weight = COST_WEIGHTS[-1]
@@ -655,7 +656,15 @@ class ProductPlanningEngine:
                         share = len(slots) / limit
                         blended = {slug: loss + weight * cost.get(slug, 0.0) * share for slug, loss in losses.items()}
                         bounded = problem.model_copy(deep=True, update={"purchase_budget_sgd": float(limit)})
-                        return MealBeamPlanner(led, local_losses=blended).search_candidates(bounded).states
+                        states = MealBeamPlanner(led, local_losses=blended).search_candidates(bounded).states
+                        if minimum_distinct_dishes:
+                            states = tuple(
+                                state
+                                for state in states
+                                if len({recipe for _, meal in state.choices for _, recipe in meal})
+                                >= minimum_distinct_dishes
+                            )
+                        return states
 
                     def bought(state) -> float:
                         """What the week buys in whole packages, as the validator totals it."""
@@ -672,6 +681,15 @@ class ProductPlanningEngine:
                     while not states and limit < 7000:
                         low, limit = limit, min(7000, limit * 4)
                         states = within(limit)
+                    if minimum_distinct_dishes:
+                        if states:
+                            kept.update((state.choices, state) for state in states)
+                        trace["cheapest_search"] = {
+                            "budget_sgd": ceil(min(map(bought, states))) if states else None,
+                            "candidates": len(kept),
+                            "minimum_distinct_dishes": minimum_distinct_dishes,
+                        }
+                        return most_varied_first([(weight, state) for state in kept.values()])
                     high = limit
                     while states:
                         kept.update((state.choices, state) for state in states)
@@ -713,6 +731,12 @@ class ProductPlanningEngine:
                 elif banded:
                     fallback = lambda: most_varied_first(limit_led())  # noqa: E731
                 assignments_list = most_varied_first(found)
+                if minimum_distinct_dishes and assignments_list:
+                    assignments_list = [
+                        assignments
+                        for assignments in assignments_list
+                        if len({assignment.recipe_id for assignment in assignments}) >= minimum_distinct_dishes
+                    ]
                 if cheapest:
                     assignments_list, fallback, last_resort = [], None, cheapest_weeks
                 elif (

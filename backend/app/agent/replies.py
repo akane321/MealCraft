@@ -475,9 +475,9 @@ REPLIES: dict[str, tuple[str, str]] = {
     # A budget under the cheapest week the planner's search found (agent/limits.py).
     "budget_short": (
         "S${budget:g} a week for {people} comes to about S${each:.2f} a person a meal ({meals} meals). "
-        "The cheapest week I could find costs S${cost:.2f}.",
+        "I found a week with at least four different dishes at a cost of S${cost:.2f}.",
         "{people}一周 S${budget:g}，每人每餐大约只有 S${each:.2f}（一周 {meals} 餐）。"
-        "我能找到的最便宜的一周要 S${cost:.2f}。",
+        "我找到一周至少有四种不同菜，预算是 S${cost:.2f}。",
     ),
     "use_weekly": ("Use S${amount} for the week", "一周用 S${amount}"),
     "use_weekly_say": ("Make the weekly budget S${amount}", "每周预算 {amount} 新币"),
