@@ -113,10 +113,10 @@ const ACTIONS = [
 .rest { font-size: 12px; line-height: 16px; color: var(--c-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kept { color: var(--c-green-text); font-weight: 800; }
 .ok-tick { color: var(--c-green); }
-/* A dish's changes stay out of the way until the row is pointed at or focused (still reachable by keyboard). */
-.acts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; max-height: 0; overflow: hidden; opacity: 0; transition: opacity 150ms var(--ease); }
-.row:hover .acts, .row:focus-within .acts { max-height: 64px; margin-top: 4px; opacity: 1; }
-.acts button { height: 24px; padding: 0 9px; border: 1px solid var(--c-line); border-radius: 999px; background: #fff; color: var(--c-ink); font-size: 12px; font-weight: 700; }
+/* A dish's changes, quiet until the row is pointed at or focused, always on one line. */
+.acts { display: flex; flex-wrap: nowrap; align-items: center; gap: 4px; margin-top: 4px; opacity: 0.6; transition: opacity 150ms var(--ease); }
+.row:hover .acts, .row:focus-within .acts { opacity: 1; }
+.acts button { flex: none; height: 24px; padding: 0 8px; white-space: nowrap; border: 1px solid var(--c-line); border-radius: 999px; background: #fff; color: var(--c-ink); font-size: 12px; font-weight: 700; }
 .acts button:hover { border-color: var(--c-coral); }
 .for { font-size: 12px; color: var(--c-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
 </style>

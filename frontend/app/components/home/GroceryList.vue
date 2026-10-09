@@ -41,7 +41,7 @@ function toggle(name: string) {
           <input type="checkbox" :checked="got.has(line.ingredient_name)" @change="toggle(line.ingredient_name)">
           <span class="what">
             <span class="p">{{ line.ingredient_display_name }}</span>
-            <span class="s" :class="{ stale: stale(line) }" :title="groceryPriceTimes(line)">{{ packageLabel(line) }} · {{ groceryPriceLabel(line) }}</span>
+            <span class="s" :class="{ stale: stale(line) }">{{ packageLabel(line) }} · <span :title="groceryPriceTimes(line)">{{ groceryPriceLabel(line) }}</span></span>
           </span>
           <span class="c mc-num">{{ formatSgd(line.purchase_cost_sgd) }}</span>
         </label>

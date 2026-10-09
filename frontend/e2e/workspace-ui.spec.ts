@@ -144,7 +144,7 @@ async function stub(page: Page, { conversations, plans, role = "user" }: { conve
 async function openWeek(page: Page) {
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
-  await page.getByRole("button", { name: "Open my week" }).click();
+  await page.getByRole("button", { name: "Let’s plan my week" }).click();
 }
 
 test("at 1280x720 eight recent conversations keep their rows and the list scrolls", async ({ page }) => {

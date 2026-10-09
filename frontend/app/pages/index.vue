@@ -722,13 +722,13 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
         <div class="composer-wrap">
           <div class="after">
+            <span v-if="contextLabel" class="mc-chip context">{{ contextLabel }}</span>
             <template v-if="canChangeWeek">
               <button v-for="text in followUps" :key="text" type="button" class="mc-suggest" @click="suggest(text)">{{ text }}</button>
             </template>
             <span class="fine">Suggestions can be wrong. Check allergens on product labels.</span>
           </div>
           <form class="composer" @submit.prevent="send()">
-            <span v-if="contextLabel" class="mc-chip context">{{ contextLabel }}</span>
             <label for="mc-ask" class="visually-hidden">Message MealCraft</label>
             <input
               id="mc-ask"
@@ -973,7 +973,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .fine { margin-left: auto; font-size: 12px; line-height: 16px; color: var(--c-muted); }
 .composer { max-width: 720px; height: 52px; margin: 0 auto; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 16px; border-radius: 16px; background: #fff; border: 1px solid var(--c-border); }
 .composer input { height: 40px; font-size: 14px; font-weight: 600; }
-.composer .context { flex: none; margin-left: -8px; }
+.context { flex: none; }
 
 /* Right panel */
 .panel { display: flex; flex-direction: column; min-height: 0; background: #fff; border-left: 1px solid var(--c-line); }

@@ -75,7 +75,10 @@ for (const [width, height] of [[1280, 720], [1440, 900]]) {
     const eaten = summary.getByText(/kcal eaten so far/);
     await expect(total).toHaveText("960");
     await expect(eaten).toContainText("240 kcal eaten so far");
-    await expect(summary.getByText("96 g", { exact: true })).toBeVisible();
+    await expect(summary.getByRole("row", { name: "Calories 240 kcal 960 kcal", exact: true })).toBeVisible();
+    await expect(summary.getByRole("row", { name: "Sugar 6 g 24 g", exact: true })).toBeVisible();
+    await expect(summary.getByRole("row")).toHaveCount(7);
+    await expect(summary.locator(".macros").getByText("96 g", { exact: true })).toBeVisible();
     await expect(summary.getByText(/1 skipped dish not counted/)).toBeVisible();
     await expect(summary.getByText(/target|limit \d/i)).toHaveCount(0);
     const body = panel.getByRole("tabpanel", { name: "Nutrition", exact: true });

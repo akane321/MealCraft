@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { nutritionMetrics } from "~/lib/dashboard";
 import { MEAL_LABEL, mealsByDay } from "~/lib/home-surface";
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
 import { nutritionForDishes } from "~/lib/nutrition-summary";
@@ -81,6 +82,18 @@ function chooseDay(value: number) {
             <span class="g mc-num">{{ Math.round(item.grams) }} g</span>
           </div>
         </div>
+        <table class="six">
+          <caption class="visually-hidden">Nutrition per person for the selected day and meal</caption>
+          <thead><tr><th scope="col">Nutrient</th><th scope="col">Actual</th><th scope="col">Current plan</th></tr></thead>
+          <tbody>
+            <tr v-for="item in nutritionMetrics" :key="item.key">
+              <th scope="row">{{ item.label }}</th>
+              <td class="mc-num">{{ kcal(totals.actual[item.key]) }} {{ item.unit }}</td>
+              <td class="mc-num">{{ kcal(totals.currentPlan[item.key]) }} {{ item.unit }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <button type="button" class="mc-btn secondary sm details" @click="emit('details')">All six nutrients &amp; daily detail</button>
         <div class="dishes mc-card">
           <span class="dishes-head">{{ scopeLabel }}, per person</span>
           <div v-for="dish in dishes" :key="dish.entry_id" class="dish" :class="{ skipped: dish.status === 'skipped' }">
@@ -92,7 +105,6 @@ function chooseDay(value: number) {
             <span class="kcal mc-num">{{ kcal(dish.nutrition_per_person.calories_kcal) }}</span>
           </div>
         </div>
-        <button type="button" class="mc-btn secondary sm details" @click="emit('details')">All six nutrients &amp; daily detail</button>
         <p class="mc-small">
           <strong>Eaten so far</strong>: {{ cooked }} {{ cooked === 1 ? "dish" : "dishes" }},
           {{ kcal(dashboard.completed_nutrition_per_person.calories_kcal) }} kcal and
@@ -125,6 +137,12 @@ function chooseDay(value: number) {
 .bar { height: 10px; border-radius: 999px; background: var(--c-line-soft); overflow: hidden; }
 .bar i { display: block; height: 100%; border-radius: 999px; }
 .g { text-align: right; font-weight: 800; }
+.six { width: 100%; border-collapse: collapse; font-size: 12px; line-height: 16px; }
+.six th, .six td { padding: 5px 0; text-align: right; border-bottom: 1px solid var(--c-line-soft); }
+.six th:first-child { text-align: left; }
+.six thead th { color: var(--c-muted); font-weight: 800; }
+.six tbody th { font-weight: 700; }
+.six td { font-weight: 800; }
 .dishes-head { height: 36px; display: flex; align-items: center; padding: 0 14px; background: var(--c-canvas); border-bottom: 1px solid var(--c-line-soft); font-size: 12px; font-weight: 800; color: var(--c-muted); }
 .dish { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 52px; padding: 6px 14px; border-bottom: 1px solid var(--c-line-soft); }
 .dish:last-child { border-bottom: 0; }
