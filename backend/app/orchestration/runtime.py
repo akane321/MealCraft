@@ -69,20 +69,20 @@ def wish_options(lang: str, *, planned: bool) -> list[tuple[str, str]]:
     """What a household with only a wish can start from: plan a week, or change a dish of the week they have."""
     if planned:
         return [
-            (say("swap_tonight", lang), say("swap_tonight", lang)),
-            (say("swap_other", lang), say("swap_say", lang)),
+            (say("swap_tonight", "en"), say("swap_tonight", lang)),
+            (say("swap_other", "en"), say("swap_say", lang)),
         ]
     return [
-        (say("plan_week", lang), say("plan_week_say", lang)),
-        (say("plan_varied", lang), say("plan_varied_say", lang)),
+        (say("plan_week", "en"), say("plan_week_say", lang)),
+        (say("plan_varied", "en"), say("plan_varied_say", lang)),
     ]
 
 
 def variety_options(lang: str) -> list[tuple[str, str]]:
     """Before a week exists, more variety is a week with no dish twice."""
     return [
-        (say("plan_varied", lang), say("plan_varied_say", lang)),
-        (say("plan_week", lang), say("plan_week_say", lang)),
+        (say("plan_varied", "en"), say("plan_varied_say", lang)),
+        (say("plan_week", "en"), say("plan_week_say", lang)),
     ]
 
 

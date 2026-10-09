@@ -356,7 +356,7 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
         service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
         refused = service.create("一共10新币给4个人做一周")
         options = refused.pending_interaction.options
-        assert [option.label for option in options] == ["一周用 S$53"]
+        assert [option.label for option in options] == ["Use S$53 for the week"]
         assert "改成2 个人" in refused.messages[-1].content
         assert "S$54" in refused.messages[-1].content
         assert "减少人数不能降低" in refused.messages[-1].content
@@ -391,7 +391,7 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
         service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
         refused = service.create("一共10新币给4个人做一周")
     assert refused.messages[-1].content == REFUSED_FOR_FOUR
-    assert [option.label for option in refused.pending_interaction.options] == ["一周用 S$53"]
+    assert [option.label for option in refused.pending_interaction.options] == ["Use S$53 for the week"]
     # Each size's cheapest week, then that amount through the budgeted path; no third search.
     assert planned == [(4, None, True), (4, 53, False), (2, None, True), (2, 41, False)]
 

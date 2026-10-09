@@ -141,16 +141,16 @@ class AgentReplanInterpreter:
         """What the household can tap to answer the question `parse` asked: (label, what it says)."""
         if draft.event_type is None:
             return [
-                (say("swap_say", lang), say("swap_say", lang)),
-                (say("skip", lang), say("skip", lang)),
-                (say("lock", lang), say("lock_say", lang)),
-                (say("unavailable", lang), say("unavailable_say", lang)),
+                (say("swap_say", "en"), say("swap_say", lang)),
+                (say("skip", "en"), say("skip", lang)),
+                (say("lock", "en"), say("lock_say", lang)),
+                (say("unavailable", "en"), say("unavailable_say", lang)),
             ]
         if plan is None:
             return []
         if draft.entry_id is None and draft.day_index is None:
             days = sorted({day.day_index: day.planned_date for day in plan.days}.items())
-            return [(weekday(date_, lang), say("day_say", lang, index=index)) for index, date_ in days]
+            return [(weekday(date_, "en"), say("day_say", lang, index=index)) for index, date_ in days]
         if draft.entry_id is None:
             titles = [shown_title(day.recipe.title) for day in plan.days if day.day_index == draft.day_index]
             return [(title, say("dish_say", lang, title=title)) for title in dict.fromkeys(titles)]

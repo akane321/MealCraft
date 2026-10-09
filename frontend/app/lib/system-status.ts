@@ -21,7 +21,7 @@ export function createServiceStatuses(health?: HealthResponse): ServiceStatus[] 
 
 /** Which prices the household's shopping list uses (ADR-0026 section 4: sample prices never pass as today's). */
 export function pricesLine(mode: PricingMode | null | undefined): string {
-  if (mode === "live") return "Today's FairPrice prices. When FairPrice doesn't answer, the list says so and uses sample prices.";
+  if (mode === "live") return "The final shopping list checks FairPrice prices and may reuse saved prices. If a lookup fails, the selected saved or sample price is kept. Each item shows its price source and check time when available.";
   if (mode === "fixture") return "Sample prices. They stay the same and are not today's FairPrice prices.";
   return "Sample prices, unless your household chooses today's FairPrice prices.";
 }
