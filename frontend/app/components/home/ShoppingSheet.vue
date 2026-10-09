@@ -64,4 +64,9 @@ footer { margin-top: 24px; padding-top: 12px; border-top: 1.5px solid #1d1b16; f
 footer p { margin: 4px 0; }
 .sum { display: flex; justify-content: space-between; align-items: baseline; color: #1d1b16; font-size: 14px; }
 .sum strong { font-family: Fraunces, Georgia, serif; font-size: 24px; font-weight: 400; }
+@media print {
+  section { break-inside: avoid; }
+  h3 { break-after: avoid; }
+  footer { break-inside: avoid; }
+}
 </style>
