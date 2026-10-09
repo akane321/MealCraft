@@ -280,7 +280,8 @@ def test_a_budget_suggestion_is_backed_by_the_budgeted_checks_own_cheapest_week(
         },
     )
 
-    def check(request):
+    def check(request, *, minimum_distinct_dishes=0):
+        assert minimum_distinct_dishes == 4  # the amount is verified with the same variety it was searched for
         checked.append(request)
         return over
 
@@ -339,7 +340,7 @@ def test_a_chinese_household_is_refused_in_chinese_with_choices_in_chinese(clien
 
     reply = session["messages"][-1]["content"]
     assert session["status"] == "collecting" and not session["can_confirm"]
-    assert "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到至少有四种不同菜的一周，预算要 S$" in reply
+    assert "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我找到一周至少有四种不同菜，预算是 S$" in reply
     assert not re.search(r"[A-Za-z]{3,}", reply)
     options = session["pending_interaction"]["options"]
     assert options[0]["label"].startswith("一周用 S$")
@@ -750,11 +751,11 @@ def test_a_budget_any_multiple_over_the_floor_is_still_planned_up_front(monkeypa
         assert session["status"] == "collecting" and not session["can_confirm"], reply
         cost = cheapest_quoted(reply)
         assert 100 * floors[0] < 15 < cost  # what the floor alone would have let through
-    ready = tap(client, session, labels(session)[0])
-    assert ready["status"] == "ready", ready["messages"][-1]["content"]
-    varied_plan = plans(client, ready)
-    assert varied_plan["grocery_estimate"]["purchase_total_sgd"] <= math.ceil(cost)
-    assert len({dish["recipe"]["id"] for dish in varied_plan["days"]}) >= 4
+        ready = tap(client, session, labels(session)[0])
+        assert ready["status"] == "ready", ready["messages"][-1]["content"]
+        varied_plan = plans(client, ready)
+        assert varied_plan["grocery_estimate"]["purchase_total_sgd"] <= math.ceil(cost)
+        assert len({dish["recipe"]["id"] for dish in varied_plan["days"]}) >= 4
 
 
 def test_a_budget_only_the_cap_on_uses_rules_out_is_refused_up_front(packaged):
@@ -768,7 +769,7 @@ def test_a_budget_only_the_cap_on_uses_rules_out_is_refused_up_front(packaged):
 
 def test_a_budget_under_the_floor_skips_that_week_but_checks_offered_budgets(packaged, monkeypatch):
     checked = []
-    monkeypatch.setattr(WeeklyMealPlanService, "check", lambda self, constraints: checked.append(constraints))
+    monkeypatch.setattr(WeeklyMealPlanService, "check", lambda self, constraints, **_: checked.append(constraints))
     session = packaged.post("/api/agent/sessions", json={"message": "Dinners for 4, no dish twice, S$1 total"}).json()
 
     cost = cheapest_quoted(session["messages"][-1]["content"])
