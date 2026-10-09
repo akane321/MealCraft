@@ -123,10 +123,15 @@ class AgentConstraintWorkflow:
         if refusal is not None:
             missing, questions = [refusal.field], [refusal.text]
         status = "ready" if not missing else "collecting"
-        parts = [extraction.assistant_summary or say("noted", lang)]
-        if extraction.medical_request_detected:
-            parts.append(say("medical", lang))
-        parts.append(questions[0] if questions else say("ready", lang))
+        if refusal is not None:
+            parts = [refusal.text]
+            if extraction.medical_request_detected:
+                parts.append(say("medical", lang))
+        else:
+            parts = [extraction.assistant_summary or say("noted", lang)]
+            if extraction.medical_request_detected:
+                parts.append(say("medical", lang))
+            parts.append(questions[0] if questions else say("ready", lang))
 
         return {
             "merged_constraints": merged.model_dump(mode="json"),
