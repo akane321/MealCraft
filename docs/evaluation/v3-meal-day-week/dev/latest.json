@@ -145,9 +145,9 @@
       "indeterminate": [],
       "details": {},
       "dishes": 28,
-      "distinct_recipes": 24,
+      "distinct_recipes": 21,
       "meal_fit": "28/28",
-      "total_cost_sgd": 401.05
+      "total_cost_sgd": 415.16
     },
     {
       "episode_id": "mdw-dev-008",
@@ -162,7 +162,7 @@
       "dishes": 28,
       "distinct_recipes": 13,
       "meal_fit": "28/28",
-      "total_cost_sgd": 102.65
+      "total_cost_sgd": 100.97
     },
     {
       "episode_id": "mdw-dev-009",
@@ -229,7 +229,7 @@
       "dishes": 28,
       "distinct_recipes": 28,
       "meal_fit": "28/28",
-      "total_cost_sgd": 445.73
+      "total_cost_sgd": 438.08
     },
     {
       "episode_id": "mdw-dev-013",
@@ -433,7 +433,7 @@
       "dishes": 16,
       "distinct_recipes": 16,
       "meal_fit": "16/16",
-      "total_cost_sgd": 249.11
+      "total_cost_sgd": 242.96
     },
     {
       "episode_id": "mdw-dev-019",
@@ -493,7 +493,7 @@
     }
   ],
   "episode_set": "developer set",
-  "code_revision": "51b091dcbe5fe3a9f20d443dd629b89d222fa203",
+  "code_revision": "ca7e02f5784551a3ae7a8b47b550d17264d3c8f3",
   "inputs": {
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",
