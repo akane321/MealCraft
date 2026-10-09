@@ -525,8 +525,13 @@ Safety restrictions are never offered for relaxation. Bounded search exhaustion
 produces no adjustment suggestions. See [conflict explanations](design/planning-conflict-explanation.md)
 for the declared-group minimality and resource limits.
 
-`GET /api/plans/{plan_id}` returns the persisted snapshot. `GET /api/plans`
-returns recent plan summaries for later history and dashboard integration.
+`GET /api/plans/{plan_id}` returns the persisted snapshot and a `current`
+boolean. A plan is no longer current when a newer plan in the same household
+overlaps its dates. This check covers the full plan history, independent of
+the recent-list page size; creation time and then ID determine which is newer.
+Pending replan confirmations and interaction answers for a replaced plan are
+rejected. `GET /api/plans` returns recent plan summaries for later history and
+dashboard integration.
 
 ## Meal Check-in and Nutrition Dashboard
 
@@ -624,7 +629,12 @@ its budget at the checkout (or no further over it than it is), one dish a meal
 per preview. When no different dish fits, the week stays as it is and the reply
 says how much more than the week can spend the closest swap found needs, with a
 swap of one dish offered instead; a week with no repeats says so. "Swap the
-repeated dishes" and "plan a new week with different dishes" ask for the same.
+repeated dishes" keeps the current week and previews replacements for its
+repeated dishes. "Plan a new week with different dishes" is a distinct
+whole-week request: it runs the weekly planner again, avoids recipes from the
+current week while alternatives remain, and saves the new week as replacing
+the old one. An explicit "no dish twice" request also limits each recipe to
+one use in that new week.
 A mixed request sends only
 its supported segment to the parser. The persisted `last_scope_decision` makes
 this routing visible to clients and tests. Every templated reply is written in

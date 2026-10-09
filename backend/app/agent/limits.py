@@ -265,7 +265,10 @@ def _dishes(constraints) -> list[int]:
 
 
 def _option(key: str, lang: str, **values) -> tuple[str, str]:
-    return say(key, lang, **values), say(f"{key}_say", lang, **values)
+    label_values = {**values}
+    if "people" in label_values:
+        label_values["people"] = people(values["count"], "en")
+    return say(key, "en", **label_values), say(f"{key}_say", lang, **values)
 
 
 def _cents_down(amount: float) -> float:

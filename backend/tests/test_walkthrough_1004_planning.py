@@ -34,7 +34,7 @@ from app.core.paths import repository_root
 from app.data.catalog import Catalog, import_catalog, load_catalog
 from app.data.release_v2 import import_release_v2
 from app.db.base import Base
-from app.main import warm_planning_pool
+from app.main import load_planning_pool, warm_planning_pool
 from app.planning.product_path import ProductPlanningEngine, meal_affinity
 from app.planning.recipe_quality import dish_family
 from app.repositories.agent import AgentSessionRepository
@@ -68,6 +68,7 @@ def kept_for(seconds: int):
         patch.setattr(get_settings(), "planning_pool_cache_seconds", seconds)
         # The API's startup would load the pool of the configured database, not the test's catalog.
         patch.setattr("app.main.warm_planning_pool", lambda *_: None, raising=False)
+        patch.setattr("app.main.load_planning_pool", lambda: None, raising=False)
         clear_planning_pool()  # and the weeks found from it
         try:
             yield
@@ -355,7 +356,7 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
         service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
         refused = service.create("一共10新币给4个人做一周")
         options = refused.pending_interaction.options
-        assert [option.label for option in options] == ["一周用 S$53"]
+        assert [option.label for option in options] == ["Use S$53 for the week"]
         assert "改成2 个人" in refused.messages[-1].content
         assert "S$54" in refused.messages[-1].content
         assert "减少人数不能降低" in refused.messages[-1].content
@@ -368,7 +369,7 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
 
 
 REFUSED_FOR_FOUR = (
-    "好的：4 个人，一周 S$10。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$52.83。"
+    "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$52.83。"
     " 改成2 个人，我能验证的方案仍需要 S$54 预算，所以减少人数不能降低我能建议的预算。"
 )
 
@@ -390,7 +391,7 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
         service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
         refused = service.create("一共10新币给4个人做一周")
     assert refused.messages[-1].content == REFUSED_FOR_FOUR
-    assert [option.label for option in refused.pending_interaction.options] == ["一周用 S$53"]
+    assert [option.label for option in refused.pending_interaction.options] == ["Use S$53 for the week"]
     # Each size's cheapest week, then that amount through the budgeted path; no third search.
     assert planned == [(4, None, True), (4, 53, False), (2, None, True), (2, 41, False)]
 
@@ -413,6 +414,34 @@ def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(w
         for cost in {backed[0], backed[-1]}:
             budget = math.ceil(cost)
             assert service.meal_plan_service.check(request.model_copy(update={"weekly_budget_sgd": budget})) is None
+
+
+def test_tapping_an_offered_budget_plans_the_week_its_refusal_checked_without_searching_again(walked, monkeypatch):
+    """The refusal checks the S$53 it offers through the budgeted path; tapping it searched that week again (about
+    1-1.5 s) before the reply. The week kept by the refusal's check answers the tap's check, and Plan saves it: the
+    same week a new search finds."""
+    planned = []
+    plan = ProductPlanningEngine.plan
+
+    def counted(self, constraints, *args, **kwargs):
+        planned.append((constraints.household_size, constraints.weekly_budget_sgd))
+        return plan(self, constraints, *args, **kwargs)
+
+    with kept_for(300), walked["factory"]() as session:  # weeks are kept as production keeps them
+        service = agent(session)
+        service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
+        refused = service.create("一共10新币给4个人做一周")
+        monkeypatch.setattr(ProductPlanningEngine, "plan", counted)
+        ready = service.reply(refused.id, refused.pending_interaction.options[0].value)
+        assert ready.can_confirm and ready.constraints.weekly_budget_sgd == 53
+        confirmed = service.confirm(ready.id)
+        assert planned == []  # neither the tap's check nor Plan searched
+        monkeypatch.setattr(ProductPlanningEngine, "plan", plan)
+        request = service._plan_request(ready.constraints)
+        _, fresh = service.meal_plan_service._search(request, service.meal_plan_service._candidates(request))
+        saved = sorted(day.recipe.slug for day in confirmed.plan.days)
+        assert saved == sorted(item.recipe.slug for item in fresh.selected)
+        assert confirmed.plan.grocery_estimate.purchase_total_sgd == fresh.grocery.purchase_total_sgd <= 53
 
 
 def test_the_walkthrough_week_found_boring_swaps_its_repeats_within_its_budget(walked):
@@ -584,6 +613,20 @@ def test_the_api_loads_the_pool_again_before_it_ages_so_no_request_waits_for_it(
             recipes = RecipeRepository(session).list_for_planning()  # 320 s after the startup load
         assert [r.slug for r in recipes] == ["salmon-bake", "tomato-soup", "pumpkin-soup"]
         assert loads == ["warm-planning-pool"] * 3
+
+
+def test_the_api_answers_only_once_its_planning_pool_is_loaded(loads):
+    """A message sent as soon as the API answered after a restart waited about 1.2 s for the background thread's
+    first load of the pool, taking the demo's cold budget refusal past 6 s (WP1 1b). The background thread is
+    left out here (kept_for), so only the startup itself can have loaded it."""
+    import app.main as main
+
+    with pooled() as session, pytest.MonkeyPatch.context() as patch:
+        patch.setattr(main, "SessionLocal", sessionmaker(bind=session.get_bind(), expire_on_commit=False))
+        patch.setattr(main, "load_planning_pool", load_planning_pool)
+        with TestClient(main.app):
+            assert len(loads) == 1
+            assert id(session.get_bind()) in _planning_pool
 
 
 def test_a_background_load_does_not_hold_up_a_request(monkeypatch, loads, clock):

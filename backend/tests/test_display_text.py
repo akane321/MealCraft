@@ -123,7 +123,7 @@ def test_the_assistant_names_a_dish_as_the_plan_shows_it() -> None:
         "那天有 2 道菜（Tsukemono (Japanese Pickles)、Pot Pie (Square Dumplings)），你想调整哪一道？"
     )
     # A count is a count.
-    assert say("shape_removed", "en", count=5) == "5 dishes come off the week."
+    assert say("shape_removed", "en", titles="Soup, Curry") == "Removed: Soup, Curry."
 
 
 def test_a_typed_display_title_selects_the_catalog_dish() -> None:
@@ -172,3 +172,15 @@ def test_a_dish_is_offered_and_understood_by_the_name_the_plan_shows(monkeypatch
         previewed = tap(client, which, labels[0])
         assert previewed["pending_replan"]["status"] == "previewed"
         assert previewed["pending_replan"]["before_entry"]["recipe_title"] == labels[0]
+
+
+def test_desktop_and_plain_wording_in_replies() -> None:
+    """DEMO-1006-13: click not tap, a plain allergy line, a refusal that says it cannot be done first."""
+    assert "Click a dinner" in say("planned", "en") and "Tap" not in say("planned", "en")
+    assert say("allergy_detail", "en", words="peanuts") == "allergic to peanuts"
+    assert (
+        say("shape_only", "en", Meal="Dinner", dish="main", when="on Sunday") == "Dinner will have one main on Sunday"
+    )
+    refusal = {"budget": 10, "people": "4 people", "each": 0.36, "meals": 7, "cost": 52.83}
+    assert say("budget_short", "en", **refusal).startswith("That budget can't cover this week.")
+    assert say("budget_short", "zh", **refusal).startswith("这个预算排不出来")

@@ -20,7 +20,7 @@ SAY_FIELD = "message"
 
 def short_prompt(options, lang: str) -> str:
     """The composer's hint while a question is open: the question itself is the reply above it."""
-    return say("pick_or_type" if options else "type_answer", lang)
+    return say("pick_or_type" if options else "type_answer", "en")
 
 
 def household_size_interaction(*, question_id: str, context_version: int, lang: str = "en") -> InteractionRequest:
@@ -30,7 +30,7 @@ def household_size_interaction(*, question_id: str, context_version: int, lang: 
         field_path="household_size",
         question_id=question_id,
         options=[
-            InteractionOption(id=f"household_size_{size}", label=people(size, lang), value=size) for size in range(1, 5)
+            InteractionOption(id=f"household_size_{size}", label=people(size, "en"), value=size) for size in range(1, 5)
         ],
         allow_free_text=True,
         context_version=context_version,
@@ -49,7 +49,7 @@ def pantry_quantity_interaction(
         prompt=short_prompt(True, lang),
         field_path=f"available_ingredients.{ingredient_name}.quantity",
         question_id=question_id,
-        options=[InteractionOption(id="quantity_unknown", label=say("unknown_quantity", lang), value="unknown")],
+        options=[InteractionOption(id="quantity_unknown", label=say("unknown_quantity", "en"), value="unknown")],
         allow_free_text=True,
         context_version=context_version,
     )
@@ -72,7 +72,7 @@ def unmatched_term_interaction(
         field_path=f"unmatched.{meant_for}.{term}",
         question_id=question_id,
         options=[
-            InteractionOption(id=f"ingredient_{option}", label=word(option, lang), value=option) for option in options
+            InteractionOption(id=f"ingredient_{option}", label=word(option, "en"), value=option) for option in options
         ],
         allow_free_text=True,
         context_version=context_version,
@@ -111,7 +111,10 @@ def typed_choice(request: InteractionRequest, text: str) -> object | None:
     picked = [
         option
         for option in request.options
-        if latin <= set(re.findall(r"[a-z]+", option.label.lower())) and all(run in option.label for run in han)
+        if any(
+            latin <= set(re.findall(r"[a-z]+", candidate.lower())) and all(run in candidate for run in han)
+            for candidate in (option.label, str(option.value))
+        )
     ]
     return picked[0].value if len(picked) == 1 else None
 
