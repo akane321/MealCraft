@@ -15,20 +15,26 @@ export function useMealCraftAgent() {
   const errorMessage = ref<string | null>(null);
   const isLoading = ref(false);
   const recent = ref<AgentSession[]>([]);
+  // Switching conversations invalidates their in-flight answers, not the household's saved week.
+  let generation = 0;
 
   async function run<T>(request: () => Promise<T>): Promise<T | null> {
+    const current = generation;
     isLoading.value = true;
     errorMessage.value = null;
     try {
-      return await request();
+      const result = await request();
+      return current === generation ? result : null;
     }
     catch (error) {
-      const detail = (error as { data?: { detail?: string } }).data?.detail;
-      errorMessage.value = detail || "The planning assistant could not complete that request.";
+      if (current === generation) {
+        const detail = (error as { data?: { detail?: string } }).data?.detail;
+        errorMessage.value = detail || "The planning assistant could not complete that request.";
+      }
       return null;
     }
     finally {
-      isLoading.value = false;
+      if (current === generation) isLoading.value = false;
     }
   }
 
@@ -40,6 +46,7 @@ export function useMealCraftAgent() {
       body: { message, plan_id: planId },
     }));
     if (result) session.value = result;
+    return result;
   }
 
   async function reply(message: string, planId: number | null = null) {
@@ -49,6 +56,7 @@ export function useMealCraftAgent() {
       { method: "POST", body: { message, plan_id: planId } },
     ));
     if (result) session.value = result;
+    return result;
   }
 
   async function answerInteraction(answer: AgentInteractionAnswer) {
@@ -58,15 +66,18 @@ export function useMealCraftAgent() {
       { method: "POST", body: answer },
     ));
     if (result) session.value = result;
+    return result;
   }
 
   async function confirm() {
     if (!session.value) return;
     const id = session.value.id;
+    const current = generation;
     const result = await run(() => apiFetch<AgentConfirmation>(
       `${config.public.apiBase}/api/agent/sessions/${id}/confirm`,
       { method: "POST" },
     ));
+    if (current !== generation) return;
     if (result) {
       session.value = result.session;
       generatedPlan.value = result.plan;
@@ -74,7 +85,7 @@ export function useMealCraftAgent() {
     }
     // A week that could not be planned is explained in the conversation, which replaces the Plan card.
     const explained = await apiFetch<AgentSession>(`${config.public.apiBase}/api/agent/sessions/${id}`).catch(() => null);
-    if (explained && explained.messages.length > (session.value?.messages.length ?? 0)) {
+    if (current === generation && explained && explained.messages.length > (session.value?.messages.length ?? 0)) {
       session.value = explained;
       errorMessage.value = null;
     }
@@ -114,9 +125,11 @@ export function useMealCraftAgent() {
   }
 
   function reset() {
+    generation += 1;
     session.value = null;
     generatedPlan.value = null;
     errorMessage.value = null;
+    isLoading.value = false;
   }
 
   return {

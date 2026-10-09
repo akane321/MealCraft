@@ -487,6 +487,11 @@ REPLIES: dict[str, tuple[str, str]] = {
     "fewer_people_say": ("Plan for {people}", "改成{count}个人"),
     "fewer_people_at": ("{people} at S${amount} a week", "{people}，一周 S${amount}"),
     "fewer_people_at_say": ("{people}, S${amount} for the week", "{count}个人，一周{amount}新币"),
+    "fewer_not_cheaper": (
+        "For {people}, the plan I could verify needs a S${amount} budget, so reducing the household "
+        "does not lower the budget I can suggest.",
+        "改成{people}，我能验证的方案仍需要 S${amount} 预算，所以减少人数不能降低我能建议的预算。",
+    ),
     "raise_time": ("Allow up to {minutes} minutes", "放宽到 {minutes} 分钟"),
     "raise_time_say": ("Allow up to {minutes} minutes of cooking", "做饭 {minutes} 分钟以内"),
     # A week the planner could not find (services/agent.py confirm).

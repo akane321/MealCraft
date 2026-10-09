@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetLine, changedMealWhen, conversationForPlan, groceriesChange, groceryGroups, packageLabel, perDinner, plateStyle, previewChoices, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
+import { budgetLine, changedMealWhen, conversationForPlan, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, packageLabel, perDinner, plateStyle, previewChoices, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
 import type { MealPlanEntrySnapshot, MealPlanShapeChange, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
@@ -52,8 +52,48 @@ describe("grocery helpers", () => {
       items: sources.map(source => line("Salmon", 10.9, "Seafood", 1, source)),
     }) as WeeklyGroceryEstimate;
     expect(priceSourceLabel(live("fairprice"))).toMatch(/^FairPrice prices from /);
-    expect(priceSourceLabel(live("fixture"))).toBe("Sample prices: FairPrice didn't respond");
-    expect(priceSourceLabel(live("fairprice", "fixture"))).toBe("Some prices are samples: FairPrice didn't respond");
+    expect(priceSourceLabel(live("fixture"))).toBe("Sample prices");
+    expect(priceSourceLabel(live("fairprice", "fixture"))).toBe("FairPrice and sample prices — source shown on each item");
+  });
+
+  it("separates uncheckable samples from a timeout and keeps observation and attempt dates apart", () => {
+    const item = line("Cucumber", 2.2, "Vegetables", 1, "fixture");
+    item.evidence = { source: "fixture", mode: "fixture", fetched_at: "2026-09-14T08:00:00Z", price_source: "no_external_product", lookup_status: "no_external_id", checked_at: null };
+    expect(groceryPriceLabel(item)).toBe("Sample price · no matching FairPrice product; not checked");
+    expect(groceryPriceLabel(item)).not.toMatch(/timeout|respond/i);
+    expect(groceryPriceTimes(item)).not.toContain("check attempted");
+    const saved = { ...item, product: { ...item.product!, source: "fairprice" as const }, evidence: { ...item.evidence, source: "release_snapshot" as const, mode: "snapshot" as const, price_source: "snapshot" as const, lookup_status: "timeout" as const, checked_at: "2026-10-07T08:00:00Z" } };
+    expect(groceryPriceLabel(saved)).toBe("Saved FairPrice price · 14 Sept · not checked live in time");
+    expect(groceryPriceTimes(saved)).toMatch(/Price observed:.*14.*9.*2026.*check attempted:.*7.*10.*2026/);
+    expect(groceryPriceLabel({ ...saved, evidence: { ...saved.evidence, lookup_status: "out_of_stock" } })).toContain("product marked unavailable");
+    // The reviewed snapshot is stored as a "fixture" product; after a timeout it is still a saved FairPrice price.
+    expect(groceryPriceLabel({ ...item, evidence: { ...item.evidence, source: "release_snapshot" as const, mode: "snapshot" as const, price_source: "snapshot", lookup_status: "timeout" } })).toBe("Saved FairPrice price · 14 Sept · not checked live in time");
+    // A real sample (no snapshot, no live check) stays a sample.
+    expect(groceryPriceLabel(line("Cucumber", 2.2, "Vegetables", 1, "fixture"))).toBe("Sample price");
+  });
+
+  it("says when prices were checked and how many are live, saved and sample", () => {
+    const evidence = (price_source: string, lookup_status: string | null, checked_at: string | null) =>
+      ({ source: "fairprice", mode: price_source, fetched_at: "2026-10-02T08:00:00Z", price_source, lookup_status, checked_at }) as GroceryLineEstimate["evidence"];
+    const make = (name: string, source: "fairprice" | "fixture", ev: GroceryLineEstimate["evidence"]) => ({ ...line(name, 1, "Veg", 1, source), evidence: ev });
+    const water = { ...line("Water", 0, "Veg", 0), product: null, evidence: null };
+    const items = [
+      make("A", "fairprice", evidence("live", "success", "2026-10-08T07:40:03Z")),
+      make("B", "fairprice", evidence("live", "success", "2026-10-08T07:40:01Z")),
+      make("C", "fixture", evidence("snapshot", "timeout", "2026-10-08T07:40:02Z")),
+      make("D", "fixture", evidence("no_external_product", "no_external_id", null)),
+      water,
+    ];
+    const estimate = { weekly_budget_sgd: 90, purchase_total_sgd: 4, pricing_mode: "live", items } as unknown as WeeklyGroceryEstimate;
+    // 07:40 UTC is 15:40 in Singapore; the water line to skip is neither counted nor labelled "Not priced".
+    expect(priceSourceLabel(estimate)).toBe("Prices checked at 15:40 · 2 live · 1 saved · 1 sample");
+    expect(groceryPriceLabel(water)).toBe("Not bought · no price needed");
+    expect(groceryPriceLabel({ ...water, packages_required: 1 })).toBe("Not priced");
+    // A live check that got nothing must not say prices were checked.
+    const none = { ...estimate, items: items.slice(2, 4) } as WeeklyGroceryEstimate;
+    expect(priceSourceLabel(none)).toBe("Live prices not available at 15:40 · 1 saved · 1 sample");
+    // Without any live check there is no time to show.
+    expect(priceSourceLabel({ ...estimate, items: [line("Salmon", 10.9, "Seafood", 1, "fixture")] })).toBe("Sample prices");
   });
 
   it("says where /browse prices came from in plain words", () => {

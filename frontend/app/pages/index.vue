@@ -31,6 +31,8 @@ const dishAction = ref<{ text: string; week: number } | null>(null);
 const takeOn = ref<{ message: string; week: number } | null>(null);
 // Open my week (enter) is reopening the week and its conversations.
 const entering = ref(false);
+// A delayed initial reopen must not override a conversation the household deliberately chose.
+let conversationVersion = 0;
 const plan = ref<WeeklyMealPlan | null>(null);
 // The shown week was planned again for the same days (the plans list's `current`): it is only read.
 const replaced = ref(false);
@@ -169,14 +171,17 @@ async function enter() {
   // Until the week and its conversations are back, a send could start a second conversation (see send).
   // Nothing below throws: each request reports its own failure.
   entering.value = true;
+  const version = conversationVersion;
   // The household's current week is its newest plan. It reopens with the conversation that planned
   // it; a week with no conversation (rebuilt on the profile page) opens beside a fresh one.
   const current = await currentPlanId();
+  if (version !== conversationVersion) return;
   if (!session.value) await agent.restore(current);
+  if (version !== conversationVersion) return;
   // An open conversation keeps its own week; one that has not planned yet shows the current week.
   const shown = session.value?.plan_id ?? current;
   if (shown) await loadPlan(shown);
-  entering.value = false;
+  if (version === conversationVersion) entering.value = false;
 }
 
 /** The household's weeks, newest first; none when they cannot be listed (no plan yet is not an error). */
@@ -242,8 +247,9 @@ async function send(text = draft.value) {
     return;
   }
   const pending = interaction.value;
+  let sent;
   if (pending?.allow_free_text) {
-    await agent.answerInteraction({
+    sent = await agent.answerInteraction({
       question_id: pending.question_id,
       option_ids: [],
       free_text: message,
@@ -251,16 +257,16 @@ async function send(text = draft.value) {
       plan_revision: pending.plan_revision,
     });
   }
-  else if (session.value) await agent.reply(message);
-  else await agent.create(message);
-  if (!errorMessage.value) draft.value = "";
+  else if (session.value) sent = await agent.reply(message);
+  else sent = await agent.create(message);
+  if (sent && draft.value === message) draft.value = "";
 }
 
 /** This conversation takes `week` on and changes it with `message`. */
 async function changeWeek(message: string, week: number) {
   takeOn.value = null;
-  await (session.value ? agent.reply(message, week) : agent.create(message, week));
-  if (!errorMessage.value) draft.value = "";
+  const sent = await (session.value ? agent.reply(message, week) : agent.create(message, week));
+  if (sent && draft.value === message) draft.value = "";
 }
 
 function keepPlanning() {
@@ -342,6 +348,8 @@ function toggleFilm() {
  * week when it planned none. Every switch of conversation goes through here.
  */
 function showConversation(item: AgentSession | null) {
+  conversationVersion += 1;
+  entering.value = false;
   // Keep the conversation being left in the recent list, as it is now (its listed copy may be older).
   const leaving = session.value;
   if (leaving?.messages.length) {
@@ -652,6 +660,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               </div>
             </div>
 
+            <p v-if="session?.pending_replan && estimate?.pricing_mode === 'live'" class="caveat">Grocery changes are estimates. Selected product prices are checked again when you confirm.</p>
             <div v-if="isLoading" class="typing" aria-label="MealCraft is thinking"><span /><span /><span /></div>
             <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
           </div>
@@ -687,6 +696,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
       <aside v-if="panelOpen" class="panel" aria-label="This week">
         <template v-if="plan && days.length">
           <HomeTonight
+            v-if="tab === 'dinners'"
             :days="days"
             :updating-entry-id="nutrition.updatingEntryId.value"
             :readonly="readOnly"
