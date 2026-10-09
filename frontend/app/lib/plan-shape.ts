@@ -95,17 +95,12 @@ export function shapeChangeSummary(change: MealPlanShapeChange, startDate: strin
     old => old.day_index === dish.day_index && old.role_id === dish.role_id,
   ));
   if (swapped) return `${change.added.length === 1 ? "A dish" : `${change.added.length} dishes`} swapped ${where}`;
-  const counts = new Map<string, number>();
+  const labels: string[] = [];
   for (const item of change.roles) {
-    // An optional dish is planned only when it fits the household's limits; say so rather than promise it.
-    const kind = `${item.role_id.replace(/-\d+$/, "")}${item.required === false ? "?" : ""}`;
-    counts.set(kind, (counts.get(kind) ?? 0) + 1);
+    // Show household-facing dish names rather than planner role ids such as "main".
+    const label = dishLabel(item);
+    labels.push(`${label}${item.required === false ? " if it fits" : ""}`);
   }
-  const dishes = [...counts]
-    .map(([kind, count]) => {
-      const name = kind.replace(/\?$/, "");
-      return `${count > 1 ? `${count} ${name}s` : name}${kind.endsWith("?") ? " if it fits" : ""}`;
-    })
-    .join(", ");
+  const dishes = labels.join(", ");
   return `${meal} ${where}: ${dishes}`;
 }

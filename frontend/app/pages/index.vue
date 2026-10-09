@@ -81,9 +81,7 @@ const rangeLabel = computed(() => {
   const fmt = (d: string) => formatPlanDate(d, { day: "numeric", month: "short" });
   return `${fmt(plan.value.start_date)} – ${fmt(plan.value.end_date)}`;
 });
-// While another week loads, the one shown before is stale: show skeletons, never its data (T38).
-const stale = computed(() => planState.value === "loading" && lastPlanId.value !== plan.value?.id);
-const days = computed(() => (stale.value ? [] : nutrition.dashboard.value?.days ?? []));
+const days = computed(() => nutrition.dashboard.value?.days ?? []);
 const groceryCount = computed(() => groceryGroups(plan.value?.grocery_estimate.items ?? []).reduce((n, g) => n + g.lines.length, 0));
 const estimate = computed(() => plan.value?.grocery_estimate ?? null);
 // Budget bar: within (green), near at 95% or more (amber), over (red, the overage segment marked).
@@ -142,7 +140,7 @@ const shapePreview = computed(() => {
 // The week shown in the panel belongs to this conversation only when the conversation planned it;
 // its card never appears inside another conversation.
 const ownsPlan = computed(() => Boolean(plan.value && session.value?.plan_id === plan.value.id));
-const showWeek = computed(() => Boolean(ownsPlan.value && days.value.length && !stale.value && !session.value?.pending_replan));
+const showWeek = computed(() => Boolean(ownsPlan.value && days.value.length && planState.value === "ready" && !session.value?.pending_replan));
 // A conversation that planned no week changes the one beside it (see send).
 const canChangeWeek = computed(() => Boolean(plan.value && !readOnly.value && (ownsPlan.value || !session.value?.plan_id)));
 const readyToPlan = computed(() => Boolean(session.value?.can_confirm && session.value.status !== "planned"));
@@ -203,14 +201,22 @@ async function enter() {
   const version = conversationVersion;
   // The household's current week is its newest plan. It reopens with the conversation that planned
   // it; a week with no conversation (rebuilt on the profile page) opens beside a fresh one.
-  const current = await currentPlanId();
-  if (version !== conversationVersion) return;
-  if (!session.value) await agent.restore(current);
-  if (version !== conversationVersion) return;
-  // An open conversation keeps its own week; one that has not planned yet shows the current week.
-  const shown = session.value?.plan_id ?? current;
-  if (shown) await loadPlan(shown);
-  if (version === conversationVersion) entering.value = false;
+  planState.value = "loading";
+  try {
+    const current = await currentPlanId();
+    if (version !== conversationVersion) return;
+    if (!session.value) await agent.restore(current);
+    if (version !== conversationVersion) return;
+    const shown = session.value?.plan_id ?? current;
+    if (shown) await loadPlan(shown);
+    else planState.value = "empty";
+  }
+  catch {
+    if (version === conversationVersion) planState.value = "error";
+  }
+  finally {
+    if (version === conversationVersion) entering.value = false;
+  }
 }
 
 /** The household's weeks, newest first; none when they cannot be listed (no plan yet is not an error). */
@@ -220,25 +226,44 @@ async function recentWeeks(): Promise<WeeklyMealPlanListItem[]> {
 }
 
 async function currentPlanId(): Promise<number | null> {
-  return (await recentWeeks())[0]?.id ?? null;
+  const collection = await apiFetch<WeeklyMealPlanCollection>(`${config.public.apiBase}/api/plans`);
+  return collection.items[0]?.id ?? null;
 }
 
 /** From a replaced week to the household's current one, with the conversation that planned it when it is listed. */
 async function openCurrentWeek() {
-  const current = await currentPlanId();
-  const planner = current ? agent.recent.value.find(item => item.plan_id === current) : undefined;
-  if (planner) openSession(planner);
-  else showConversation(null);
+  try {
+    const current = await currentPlanId();
+    const planner = current ? agent.recent.value.find(item => item.plan_id === current) : undefined;
+    if (planner) openSession(planner);
+    else {
+      showConversation(null);
+      if (current) await loadPlan(current);
+    }
+  }
+  catch {
+    planState.value = "error";
+  }
 }
 
-/** The panel's week: the open conversation's own, else the household's current week. */
+/** A fresh conversation starts empty; saved conversations retain their existing week lookup. */
 async function loadShownPlan() {
+  if (!session.value) {
+    planState.value = "empty";
+    return;
+  }
+  const selected = session.value.id;
   planState.value = "loading";
-  const current = session.value?.plan_id ? null : await currentPlanId();
-  // The open conversation may have changed, or planned, while the current week was looked up.
-  const shown = session.value?.plan_id ?? current;
-  if (shown) await loadPlan(shown);
-  else planState.value = "empty";
+  try {
+    const current = session.value.plan_id ? null : await currentPlanId();
+    if (session.value?.id !== selected) return;
+    const shown = session.value.plan_id ?? current;
+    if (shown) await loadPlan(shown);
+    else planState.value = "empty";
+  }
+  catch {
+    if (session.value?.id === selected) planState.value = "error";
+  }
 }
 
 /** The week a message changes for a conversation that did not plan it: while the draft still starts with a dish action's words. */
@@ -249,7 +274,7 @@ function actionWeek(message: string): number | null {
 
 async function send(text = draft.value) {
   const message = text.trim();
-  if (!message || entering.value) return;
+  if (!message || entering.value || readOnly.value) return;
   draft.value = message;
   if (!(await requireAccount())) return;
   // A dish's words sent from the landing (kept over a reload or a sign-in) first reopen the week and its
@@ -257,7 +282,10 @@ async function send(text = draft.value) {
   // was replaced meanwhile, the words go and nothing is sent.
   if (view.value === "landing" && actionWeek(message)) {
     await enter();
-    if (!dishAction.value) return;
+    if (!dishAction.value) {
+      errorMessage.value = "That dish belonged to a previous week. Choose a dish from the current week to make a change.";
+      return;
+    }
   }
   view.value = "app";
   takeOn.value = null;
@@ -305,7 +333,7 @@ function keepPlanning() {
 
 async function choose(optionId: string) {
   const pending = interaction.value;
-  if (!pending) return;
+  if (!pending || readOnly.value) return;
   await agent.answerInteraction({
     question_id: pending.question_id,
     option_ids: [optionId],
@@ -328,7 +356,7 @@ async function loadPlan(planId: number) {
     // A newer request replaced this one while it was in flight; its answer is stale.
     if (lastPlanId.value !== planId) return;
     plan.value = loaded;
-    replaced.value = weeks.find(week => week.id === planId)?.current === false;
+    replaced.value = (loaded.current ?? weeks.find(week => week.id === planId)?.current) === false;
     await nutrition.loadDashboard(planId);
     if (lastPlanId.value === planId) planState.value = "ready";
   }
@@ -339,7 +367,7 @@ async function loadPlan(planId: number) {
 
 function retryPlan() {
   if (lastPlanId.value) void loadPlan(lastPlanId.value);
-  else void loadShownPlan();
+  else void enter();
 }
 
 async function setStatus(entryId: number, status: MealPlanEntryStatus) {
@@ -353,7 +381,9 @@ function openTab(name: Tab) {
 
 function suggest(text: string) {
   draft.value = text;
-  dishAction.value = !ownsPlan.value && plan.value ? { text, week: plan.value.id } : null;
+  // Keep the originating week even in its own conversation: a reload restores the
+  // draft before it restores the conversation, and must not send it as a new plan.
+  dishAction.value = plan.value ? { text, week: plan.value.id } : null;
   ask.value?.focus();
 }
 
@@ -373,8 +403,7 @@ function toggleFilm() {
 }
 
 /**
- * Shows `item` (null: a new conversation) with its own week in the panel, or the household's current
- * week when it planned none. Every switch of conversation goes through here.
+ * Switches conversation and clears the previous panel. New conversations start empty.
  */
 function showConversation(item: AgentSession | null) {
   conversationVersion += 1;
@@ -518,7 +547,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
         <button type="button" class="brand" aria-label="Back to home" @click="view = 'landing'">
           <span class="logo-dot" aria-hidden="true" /><span class="mc-serif">MealCraft</span>
         </button>
-        <button type="button" class="new mc-btn strong" @click="newChat">
+        <button type="button" class="new mc-btn strong" title="Start a new plan" @click="newChat">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>New plan<kbd>Ctrl K</kbd>
         </button>
         <nav class="nav-list" aria-label="Sections">
@@ -556,7 +585,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
       <main class="chat">
         <header class="chat-head">
-          <h1 class="mc-heading">{{ title }}</h1>
+          <h1 class="mc-heading" :title="title">{{ title }}</h1>
           <span v-if="plan" class="date">{{ rangeLabel }}</span>
           <span class="spacer" />
           <button type="button" class="ghost" :aria-pressed="panelOpen" @click="panelOpen = !panelOpen">{{ panelOpen ? "Hide plan" : "Show plan" }}</button>
@@ -577,7 +606,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             </template>
 
             <div v-if="interaction?.options.length" class="options mc-rise">
-              <button v-for="option in interaction.options" :key="option.id" type="button" class="mc-btn secondary sm" :disabled="isLoading" @click="choose(option.id)">
+              <button v-for="option in interaction.options" :key="option.id" type="button" class="mc-btn secondary sm" :disabled="isLoading || readOnly" @click="choose(option.id)">
                 {{ option.label }}
               </button>
             </div>
@@ -647,7 +676,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <span v-if="swapOverBudget" class="mc-chip warn" :title="`This puts the week ${swapOverBudget} over your ${formatSgd(estimate!.weekly_budget_sgd!)} budget.`">{{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}</span>
               </div>
               <div class="card-foot">
-                <button type="button" class="mc-btn primary" :disabled="isLoading" @click="confirmChange">{{ choices.confirm }}</button>
+                <button type="button" class="mc-btn primary" :disabled="isLoading || readOnly" @click="confirmChange">{{ choices.confirm }}</button>
                 <button type="button" class="mc-btn secondary" :disabled="isLoading" @click="agent.discardReplan()">{{ choices.discard }}</button>
               </div>
             </article>
@@ -679,7 +708,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <span v-if="swapOverBudget" class="mc-chip warn" :title="`This puts the week ${swapOverBudget} over your ${formatSgd(estimate!.weekly_budget_sgd!)} budget.`">{{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}</span>
               </div>
               <div class="card-foot">
-                <button type="button" class="mc-btn primary" :disabled="isLoading" @click="confirmChange">{{ choices.confirm }}</button>
+                <button type="button" class="mc-btn primary" :disabled="isLoading || readOnly" @click="confirmChange">{{ choices.confirm }}</button>
                 <button type="button" class="mc-btn secondary" :disabled="isLoading" @click="agent.discardReplan()">{{ choices.discard }}</button>
               </div>
             </article>
@@ -707,7 +736,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               v-model="draft"
               type="text"
               autocomplete="off"
-              :placeholder="interaction?.prompt || (ownsPlan ? 'Swap a night, change the budget, use up what\'s in the fridge' : 'Who\'s eating, what to spend, anything to avoid…')"
+              :readonly="readOnly"
+              :placeholder="readOnly ? 'This week was replaced. Open the current week to make changes.' : interaction ? 'Choose an option, or type your answer…' : (ownsPlan ? 'Swap a night, change the budget, use up what\'s in the fridge…' : 'Who\'s eating, what to spend, anything to avoid…')"
             >
             <button type="submit" class="send" aria-label="Send" :disabled="isLoading || entering || readOnly || !draft.trim()">
               <svg class="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
@@ -717,7 +747,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
       </main>
 
       <aside v-if="panelOpen" class="panel" aria-label="This week">
-        <template v-if="plan && days.length && !stale">
+        <template v-if="planState === 'ready' && plan && days.length">
           <div class="panel-head">
             <div class="tabs mc-segmented" role="tablist" aria-label="Plan details">
               <button id="tab-dinners" type="button" role="tab" :aria-selected="tab === 'dinners'" aria-controls="panel-body" @click="tab = 'dinners'">Week</button>
@@ -727,6 +757,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               <button id="tab-nutrition" type="button" role="tab" :aria-selected="tab === 'nutrition'" aria-controls="panel-body" @click="tab = 'nutrition'">Nutrition</button>
             </div>
           </div>
+          <HomeChangeLog :plan-id="plan.id" :revision="plan.revision" :start-date="plan.start_date" />
           <div id="panel-body" class="panel-body" role="tabpanel" :aria-labelledby="`tab-${tab}`">
             <template v-if="tab === 'dinners'">
               <HomeTonight
@@ -744,7 +775,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <HomeNutritionSummary
               v-else-if="nutrition.dashboard.value"
               :dashboard="nutrition.dashboard.value"
-              :sodium-limit="constraints?.max_sodium_mg_per_meal ?? household.current.value?.current.max_sodium_mg_per_meal ?? null"
+              :sodium-limit="null"
               @details="nutritionOpen = true"
             />
           </div>
@@ -767,7 +798,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
         <HomePanelState
           v-else
           :state="planState === 'ready' ? 'empty' : planState"
-          title="This week"
+          :title="planState === 'empty' ? 'No plan yet' : 'This week'"
           empty-text="Your week shows up here once it's planned: your next meal, the shopping list and nutrition."
           error-text="Your week couldn't be loaded."
           :rows="6"

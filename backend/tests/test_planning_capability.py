@@ -1,5 +1,6 @@
 """The planning capability switch of ADR-0036 section 6: mvp refuses meal compositions."""
 
+import math
 from contextlib import contextmanager
 
 import pytest
@@ -281,6 +282,105 @@ def test_adding_a_soup_to_one_dinner_replans_only_that_meal(composed_client):
     others = {(d["day_index"], d["role_id"]): d["recipe"]["slug"] for d in after["days"] if d["day_index"] != 5}
     assert others == {key: slug for key, slug in before.items() if key[0] != 5}
     assert after["revision"] == plan["revision"] + 1
+
+
+def test_adding_a_soup_on_nonconsecutive_days_plans_and_charges_only_those_days(composed_client, monkeypatch):
+    from app.planning.product_path import ProductPlanningEngine
+
+    plan = _week_ahead(composed_client, COMPOSITION[:2])
+    searched_days = []
+    search = ProductPlanningEngine.plan
+
+    def spy(self, constraints, *args, **kwargs):
+        searched_days.append(constraints.day_count)
+        return search(self, constraints, *args, **kwargs)
+
+    monkeypatch.setattr(ProductPlanningEngine, "plan", spy)
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [2, 6]},
+    )
+    assert preview.status_code == 201, preview.text
+    # Two selected days are searched as two days, not as the five from the first to the last (which also priced
+    # and budgeted the three days in between).
+    assert searched_days and set(searched_days) == {2}, searched_days
+    added = preview.json()["shape_change"]["added"]
+    assert {dish["day_index"] for dish in added} == {2, 6}
+    assert all(dish["role_id"] == "soup" for dish in added)
+    assert preview.json()["shape_change"]["kept"] == 4
+    applied = composed_client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm")
+    assert applied.status_code == 200, applied.text
+    after_total = applied.json()["plan"]["grocery_estimate"]["purchase_total_sgd"]
+    assert (
+        round(after_total - plan["grocery_estimate"]["purchase_total_sgd"], 2)
+        == preview.json()["purchase_total_delta_sgd"]
+    )
+
+
+def _tight_week(client, budget):
+    from datetime import date, timedelta
+
+    response = client.post(
+        "/api/plans/generate",
+        json={
+            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "household_size": 4,
+            "max_cooking_time_minutes": 90,
+            "pricing_mode": "fixture",
+            "weekly_budget_sgd": budget,
+            "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
+        },
+    )
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def test_an_optional_soup_the_budget_cannot_hold_is_added_over_it_with_the_overage_not_dropped(composed_client):
+    """T30 review: a week with S$0.70 left added an empty optional soup that counted as "in budget": nothing was
+    added and nothing was said. First an in-budget addition that keeps the dishes; if none fits, add it anyway
+    and state the overage (ADR-0055); never a silent no-op (owner, 2026-10-09)."""
+    cost = _week_ahead(composed_client, COMPOSITION[:2])["grocery_estimate"]["purchase_total_sgd"]
+    plan = _tight_week(composed_client, math.ceil(cost) + 1)
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [5]},
+    )
+    assert preview.status_code == 201, preview.text
+    body = preview.json()
+    assert [dish["role_id"] for dish in body["shape_change"]["added"]] == ["soup"]
+    assert body["shape_change"]["kept"] == 2
+    budget = plan["grocery_estimate"]["weekly_budget_sgd"]
+    assert body["over_budget_sgd"] == round(plan["grocery_estimate"]["purchase_total_sgd"] + 2.8 - budget, 2) > 0
+
+
+def test_an_optional_soup_the_budget_can_hold_is_added_within_it(composed_client):
+    plan = _tight_week(composed_client, 100)
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [5]},
+    )
+    assert preview.status_code == 201, preview.text
+    assert [dish["role_id"] for dish in preview.json()["shape_change"]["added"]] == ["soup"]
+    assert preview.json()["over_budget_sgd"] is None
+
+
+def test_an_addition_that_can_add_nothing_says_so_in_both_languages(monkeypatch):
+    from app.agent.replies import planner_message
+
+    dishes = [
+        _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
+        _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
+    ]
+    with dish_client(monkeypatch, dishes) as client:
+        plan = _week_ahead(client, COMPOSITION[:2])
+        preview = client.post(
+            f"/api/plans/{plan['id']}/shape/preview",
+            json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [5]},
+        )
+    assert preview.status_code in (400, 409, 422), preview.text
+    said = preview.json()["detail"]
+    assert said == "Nothing could be added to dinner on those days: no suitable dish was found, even over the budget."
+    assert planner_message(said, "zh") == "那几天的晚餐没法再加菜：即使超出预算也没找到合适的菜。"
 
 
 def test_dropping_a_meal_for_the_week_changes_this_weeks_shape_only(composed_client):
@@ -761,8 +861,8 @@ def test_another_soup_on_a_friday_that_has_one_keeps_its_dishes_over_the_budget(
     soup = _title(before["soup"])
     assert asked["pending_replan"] is None
     assert asked["messages"][-1]["content"] == f"周五的晚餐已经有{soup}了：再加一道汤，还是换掉它？"
-    assert _labels(asked) == ["再加一道汤", f"换掉{soup}"]
-    asked = _tap(composed_client, asked, "再加一道汤")
+    assert _labels(asked) == ["Add another soup", f"Swap the {soup}"]
+    asked = _tap(composed_client, asked, "Add another soup")
 
     reply = asked["messages"][-1]["content"]
     change = asked["pending_replan"]

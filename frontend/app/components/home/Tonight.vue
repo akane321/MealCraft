@@ -81,6 +81,7 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
           type="button"
           class="poster"
           :aria-label="`Play how-to video: ${video.title}`"
+          :title="video.title"
           @click="playing = true"
         >
           <span class="thumb" :style="video.thumbnail_url ? { backgroundImage: `url(${video.thumbnail_url})` } : undefined">

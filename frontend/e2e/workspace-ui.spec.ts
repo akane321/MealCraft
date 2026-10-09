@@ -262,7 +262,8 @@ test("a week planned again is shown read-only beside its conversation, with the 
   await expect(panel.getByRole("button", { name: "Swap" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Swap tomorrow's dinner" })).toHaveCount(0);
   const chat = page.getByRole("main");
-  await chat.getByLabel("Message MealCraft").fill("Swap Monday's dinner");
+  await expect(chat.getByLabel("Message MealCraft")).toHaveAttribute("readonly", "");
+  await expect(chat.getByLabel("Message MealCraft")).not.toBeEditable();
   await expect(chat.getByRole("button", { name: "Send" })).toBeDisabled();
   await expect(panel.getByRole("button", { name: "Recipe and steps" })).toBeVisible();
 

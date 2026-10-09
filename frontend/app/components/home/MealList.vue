@@ -38,6 +38,14 @@ const ACTIONS = [
 
 <template>
   <div>
+    <ol class="overview" aria-label="Week overview">
+      <li v-for="day in week" :key="day.dayIndex">
+        <span>{{ formatPlanDate(day.date, { weekday: "short" }) }}</span>
+        <span class="overview-dishes" :title="day.meals.map(meal => `${MEAL_LABEL[meal.mealType]}: ${meal.dishes.map(dish => dish.recipe.title).join(', ')}`).join('; ')">
+          {{ day.meals.map(meal => `${MEAL_LABEL[meal.mealType]}: ${meal.dishes.map(dish => dish.recipe.title).join(', ')}`).join('; ') }}
+        </span>
+      </li>
+    </ol>
     <ol class="days">
       <li v-for="day in week" :key="day.dayIndex" class="day">
         <p v-if="severalMeals" class="day-head mc-label">
@@ -55,7 +63,7 @@ const ACTIONS = [
           </span>
           <HomeDishIcon class="icon" :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="32" />
           <span class="dishes">
-            <button type="button" class="name" @click="emit('openRecipe', meal.dishes[0]!.recipe.slug)">{{ meal.dishes[0]!.recipe.title }}</button>
+            <button type="button" class="name" :title="meal.dishes[0]!.recipe.title" @click="emit('openRecipe', meal.dishes[0]!.recipe.slug)">{{ meal.dishes[0]!.recipe.title }}</button>
             <span class="rest">
               <template v-if="meal.dishes.length > 1">
                 <template v-for="(dish, index) in meal.dishes.slice(1)" :key="dish.entry_id"><span v-if="index"> · </span><button type="button" class="side" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button></template>
@@ -83,11 +91,14 @@ const ACTIONS = [
         </div>
       </li>
     </ol>
-    <div class="log"><HomeChangeLog :plan-id="planId" :revision="revision" :start-date="startDate" /></div>
   </div>
 </template>
 
 <style scoped>
+.overview { list-style: none; margin: 0; padding: 8px 16px; border-bottom: 1px solid var(--c-line-soft); }
+.overview li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; font-size: 12px; line-height: 22px; }
+.overview li > span:first-child { font-weight: 800; }
+.overview-dishes { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--c-muted); }
 .days { list-style: none; margin: 0; padding: 0 16px; }
 .day-head { margin: 0; padding: 12px 0 2px; }
 .row { display: grid; grid-template-columns: 44px 32px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 52px; padding: 6px 0; border-bottom: 1px solid var(--c-line-soft); }
@@ -108,5 +119,4 @@ const ACTIONS = [
 .acts button { height: 24px; padding: 0 9px; border: 1px solid var(--c-line); border-radius: 999px; background: #fff; color: var(--c-ink); font-size: 12px; font-weight: 700; }
 .acts button:hover { border-color: var(--c-coral); }
 .for { font-size: 12px; color: var(--c-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
-.log { padding: 4px 16px 16px; }
 </style>

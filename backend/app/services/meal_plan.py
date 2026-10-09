@@ -299,8 +299,9 @@ class WeeklyMealPlanService:
         keep: dict[tuple[int, str], dict[str, int]] | None = None,
         over_budget: float | None = None,
         by_weight: Iterable[str] = (),
+        day_indices: list[int] | None = None,
     ) -> list[ScheduledDish]:
-        """Dishes for `day_count` days from day `first_day` of a saved week, nothing saved (ADR-0046 section 2).
+        """Dishes for selected days from a saved week, nothing saved (ADR-0046 section 2).
 
         `constraints` carries the shape to plan and the budget left. `rest` is the rest of the week, each dish
         with its portion share: its dishes are avoided while enough others remain, and in every attempt their
@@ -311,8 +312,18 @@ class WeeklyMealPlanService:
         week's list buys by weight, so `charge` prices the week as its list will be.
         """
         constraints = constraints.model_copy(update={"pricing_mode": "fixture"})
+        planned_days = day_indices or list(range(first_day, first_day + day_count))
+        if (
+            len(planned_days) != day_count
+            or planned_days != sorted(set(planned_days))
+            or not planned_days
+            or planned_days[0] != first_day
+            or planned_days[0] < 1
+            or planned_days[-1] > 7
+        ):
+            raise ValueError("day_indices must contain day_count distinct, ordered days from the week")
         start = constraints.start_date + timedelta(days=first_day - 1)
-        # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
+        # Compress selected calendar days for the planner, then map its placements back to the saved week.
         partial = constraints.model_copy(update={"start_date": start, "day_count": day_count})
         meals = meals_of_the_day(partial)
         courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
@@ -323,9 +334,11 @@ class WeeklyMealPlanService:
         slugs = {recipe.id: recipe.slug for recipe in recipes}
         keep_ids = {recipe_id for roles in (keep or {}).values() for recipe_id in roles.values()}
         # A kept dish the planner no longer offers cannot stay: the meal is planned from every candidate.
+        slot_by_day = {day: slot for slot, day in enumerate(planned_days)}
         kept = {
-            (day - first_day, meal): {role: slugs[recipe_id] for role, recipe_id in roles.items()}
+            (slot_by_day[day], meal): {role: slugs[recipe_id] for role, recipe_id in roles.items()}
             for (day, meal), roles in (keep or {}).items()
+            if day in slot_by_day
             if keep_ids <= slugs.keys()
         }
         used = Counter(recipe.id for recipe, _ in rest)
@@ -359,6 +372,8 @@ class WeeklyMealPlanService:
             empty = day_count * sum(len(roles) for _, roles in meals) - len(planned.selected)
             return total + over_budget / (day_count * len(meals)) * (repeats + EMPTY_OPTIONAL_ROLE_LOSS * empty)
 
+        slots = day_count * sum(len(roles) for _, roles in meals)
+        unfilled = None  # an addition the budget left empty, used only if no later step adds the dish
         for step in steps:
             found = []
             for pool, locked, request, hard in step:
@@ -379,14 +394,21 @@ class WeeklyMealPlanService:
                     failure = error
             if found:
                 result = min(found, key=charge) if len(found) > 1 else found[0]
+                # An empty optional dish is no addition: it does not "fit the budget", so the over-budget steps
+                # get their turn, and the preview says what the dish costs (T30).
+                if kept and step[0][3] and len(result.selected) < slots:
+                    unfilled = unfilled or result
+                    continue
                 break
         else:
-            raise failure
+            if unfilled is None:
+                raise failure
+            result = unfilled
         placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(result.selected))]
         return [
             ScheduledDish(
-                planned_date=start + timedelta(days=slot_index),
-                day_index=first_day + slot_index,
+                planned_date=constraints.start_date + timedelta(days=planned_days[slot_index] - 1),
+                day_index=planned_days[slot_index],
                 meal_type=meal_type,
                 role_id=role_id,
                 portion_share=share,
@@ -418,7 +440,9 @@ class WeeklyMealPlanService:
 
     def get(self, plan_id: int) -> WeeklyMealPlanResponse | None:
         plan = self.repository.get(plan_id)
-        return self._to_response(plan) if plan is not None else None
+        if plan is None:
+            return None
+        return self._to_response(plan).model_copy(update={"current": self.repository.is_current(plan)})
 
     def list_recent(self, *, limit: int) -> WeeklyMealPlanCollectionResponse:
         # Newest first, so every plan newer than one is listed before it (the limit cuts only older ones).
@@ -461,7 +485,7 @@ class WeeklyMealPlanService:
             entry_id=entry_id,
             status=status,
         )
-        return self._to_response(plan) if plan is not None else None
+        return self.get(plan.id) if plan is not None else None
 
     def update_meal_status(
         self,
@@ -474,7 +498,7 @@ class WeeklyMealPlanService:
         plan = self.repository.update_meal_status(
             plan_id=plan_id, day_index=day_index, meal_type=meal_type, status=status
         )
-        return self._to_response(plan) if plan is not None else None
+        return self.get(plan.id) if plan is not None else None
 
     def dashboard(self, plan_id: int) -> WeeklyNutritionDashboardResponse | None:
         plan = self.repository.get(plan_id)

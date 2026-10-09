@@ -6,6 +6,7 @@ prices after validation, and never promotes a bounded miss into a global proof.
 
 import hashlib
 import json
+import time
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, replace
 from datetime import timedelta
@@ -86,6 +87,31 @@ CHEAPEST_MEAL_OPTIONS = 64
 # week minutes with no dish twice (ADR-0046 section 3: a plan answers within 10 s). A plan of such meals that
 # no week fits under its budget ends without the cheapest-week search.
 QUICK_MEAL_DISHES = 3
+# The budget applies only to the post-search variety pass. A start already in flight finishes so every
+# returned week still satisfies the same rules and validator; later starts are optional alternate routes.
+VARIETY_PASS_SECONDS = 2.0
+HEAVY_COMPOSITION_DISH_POSITIONS = 35
+
+
+def _vary_starts_within_time_budget(
+    meal_beam, problem, starts, seen, *, is_best, clock=time.perf_counter, seconds=None
+):
+    """Try ordered variety starts until time is spent or one varies into a week `is_best` says none can beat.
+
+    The time is read between starts, so a start in flight finishes: a pass can run over by one start.
+    """
+    deadline = clock() + (VARIETY_PASS_SECONDS if seconds is None else seconds)
+    added = []
+    for weight, state in starts:
+        if clock() >= deadline:
+            break
+        varied = meal_beam.vary_within_budget(problem, state)
+        if varied.choices not in seen:
+            seen.add(varied.choices)
+            added.append((weight, varied))
+        if is_best(varied):
+            break
+    return added
 
 
 def meals_of_the_day(constraints) -> list[tuple[str, list]] | None:
@@ -685,10 +711,13 @@ class ProductPlanningEngine:
                     return most_varied_first([(weight, state) for state in kept.values()])
 
                 found = [(0.0, state) for state in search.states]
-                full_and_repeat_free = any(
-                    variety(state)[0] == 0 and sameness([r for _, meal in state.choices for _, r in meal]) == (0, 0)
-                    for state in search.states
-                )
+
+                def full_and_varied(state) -> bool:
+                    """Every role filled and no dish or kind twice, every role counted: the least `variety` can be."""
+                    dishes = [recipe for _, meal in state.choices for _, recipe in meal]
+                    return variety(state)[0] == 0 and sameness(dishes) == (0, 0)
+
+                full_and_repeat_free = any(full_and_varied(state) for state in search.states)
                 if budget is not None and (not full_and_repeat_free or not budget_is_hard):
                     # A budget-pruned search keeps the cheap repeats or leaves optional dishes out; the first
                     # week in that order within the budget may come from a cost-led search, so all are tried.
@@ -705,11 +734,26 @@ class ProductPlanningEngine:
                     starts = sorted(found, key=order)[:VARIED_STARTS] + cheapest_starts[:VARIED_STARTS]
                     if budget_is_hard and any(variety(state)[0] == 0 and variety(state)[2] <= 1 for _, state in found):
                         starts = []
-                    for weight, state in starts:
-                        varied = meal_beam.vary_within_budget(problem, state)
-                        if varied.choices not in seen:
-                            seen.add(varied.choices)
-                            found.append((weight, varied))
+                    heavy_composition = sum(
+                        len(slot.composition or ()) for slot in problem.slots
+                    ) >= HEAVY_COMPOSITION_DISH_POSITIONS and not any(slot.locked_roles for slot in problem.slots)
+
+                    def is_best(state) -> bool:
+                        """At the least `variety` can be, which `order` sorts by first: every role filled, no dish
+                        or kind twice, counting every role. Weeks as varied still sort by search and loss, and a
+                        later start could find one lighter; only variety is kept from getting worse."""
+                        return heavy_composition and full_and_varied(state)
+
+                    found.extend(
+                        _vary_starts_within_time_budget(
+                            meal_beam,
+                            problem,
+                            starts,
+                            seen,
+                            seconds=(VARIETY_PASS_SECONDS if heavy_composition else float("inf")),
+                            is_best=is_best,
+                        )
+                    )
                 elif banded:
                     fallback = lambda: most_varied_first(limit_led())  # noqa: E731
                 assignments_list = most_varied_first(found)

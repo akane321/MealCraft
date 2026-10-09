@@ -12,6 +12,9 @@ const events = ref<MealPlanReplanEvent[]>([]);
 // Only changes that were actually applied belong in a history; a discarded
 // suggestion never happened.
 const applied = computed(() => events.value.filter(event => event.status === "applied"));
+const latest = computed(() => [...applied.value].sort((a, b) =>
+  (b.applied_revision ?? 0) - (a.applied_revision ?? 0) || b.id - a.id,
+)[0]);
 
 // A confirmed change keeps the plan id and raises its revision; either one means new history.
 watch(() => [props.planId, props.revision] as const, async ([planId], previous) => {
@@ -37,6 +40,11 @@ function kcal(event: MealPlanReplanEvent) {
 </script>
 
 <template>
+  <div v-if="latest" class="latest" role="status" aria-label="Latest plan change">
+    <strong>Latest change</strong>
+    <span>{{ latest.shape_change ? shapeChangeSummary(latest.shape_change, startDate) : sameDishChange(latest) || changedMealWhen(latest, startDate) }}</span>
+    <span v-if="!latest.shape_change && !sameDishChange(latest) && latest.after_entry">{{ latest.after_entry.recipe_title }}</span>
+  </div>
   <details v-if="applied.length" class="changes">
     <summary>
       <span>Changes this week</span>
@@ -63,7 +71,9 @@ function kcal(event: MealPlanReplanEvent) {
 </template>
 
 <style scoped>
-.changes { margin: 4px 0 0; padding-top: 12px; }
+.latest { display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 10px 16px; border-bottom: 1px solid var(--c-line-soft); background: var(--c-canvas); font-size: 12px; line-height: 16px; color: var(--c-muted); }
+.latest strong { font-weight: 800; color: var(--c-ink); }
+.changes { flex-shrink: 0; max-height: 160px; overflow: auto; padding: 10px 16px; border-bottom: 1px solid var(--c-line-soft); }
 summary {
   display: flex;
   align-items: center;

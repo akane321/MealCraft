@@ -212,14 +212,15 @@ COUNT = re.compile(rf"\s*{NUMBER}")
 # A weight a line states for itself: "(about 1 lb.)", "(500 g)", "16 oz", "(2-pound)".
 WEIGHT = re.compile(rf"{NUMBER}[\s-]*(lb|pound|oz|ounce|kg|g|gram)s?\b", re.IGNORECASE)
 GRAMS_PER = {"lb": 453.592, "pound": 453.592, "oz": 28.3495, "ounce": 28.3495, "kg": 1000.0, "g": 1.0, "gram": 1.0}
-# Meat or fish named in a line's wording ("or 4 ounces cooked chicken"), not as what flavours a stock, a sauce, a
-# paste, instant ramen or eggs ("chicken broth", "shrimp paste", "chicken Ramen noodles", "duck eggs"), and not
-# a mushroom or a vegetarian stand-in ("oyster mushroom", "vegetarian ham").
+# Meat or fish named in a line's wording ("or 4 ounces cooked chicken"), not as a stock, rendered fat, sauce,
+# paste, instant ramen or eggs ("chicken broth", "bacon drippings", "shrimp paste", "duck eggs"), and not a
+# mushroom or vegetarian stand-in. An explicit vegetable option after a stock/broth is non-meat for that line.
 MEAT_WORDS = re.compile(
     r"(?<!vegetarian )(?<!vegan )(?<!mock )\b(?:chicken|beef|pork|bacon|ham|turkey|lamb|mutton|veal|sausages?|salami"
     r"|pepperoni|chorizo|prosciutto|pancetta|duck|fish|salmon|tuna|cod|shrimps?|prawns?|crabs?|crabmeat|lobsters?"
     r"|clams?|mussels?|oysters?|scallops?|squid|octopus|anchov(?:y|ies)|sardines?)\b"
-    r"(?![\s-]*(?:stock|broth|bouillon|consomm|sauce|paste|flavou?r|ramen|eggs?|mushrooms?))",
+    r"(?![\s-]*(?:stock|broth|bouillon|consomm|sauce|paste|flavou?r|ramen|eggs?|mushrooms?|(?:fat|grease|drippings)\b)"
+    r"|\s*(?:\(\s*or\s+vegetable\s*\)|or\s+vegetable)\s+(?:broth|stock))",
     re.IGNORECASE,
 )
 

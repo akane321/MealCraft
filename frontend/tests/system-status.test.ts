@@ -26,7 +26,9 @@ describe("createServiceStatuses", () => {
 describe("pricesLine", () => {
   it("never lets sample prices pass as today's FairPrice prices", () => {
     expect(pricesLine("fixture")).toMatch(/^Sample prices\. .*not today's FairPrice prices/);
-    expect(pricesLine("live")).toMatch(/^Today's FairPrice prices\. .*sample prices/);
+    expect(pricesLine("live")).toContain("may reuse saved prices");
+    expect(pricesLine("live")).toContain("selected saved or sample price is kept");
+    expect(pricesLine("live")).not.toContain("Today's FairPrice prices");
     expect(pricesLine(null)).toMatch(/^Sample prices, unless/);
   });
 });
