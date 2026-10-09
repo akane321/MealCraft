@@ -592,6 +592,8 @@ class MealPlanReplanningService:
         event = self.repository.get_event(plan_id=plan_id, event_id=event_id)
         if plan is None or event is None:
             raise MealPlanReplanNotFoundError("Replanning preview not found")
+        if not self.repository.is_current(plan):
+            raise MealPlanReplanConflictError("This week was replaced. Open the current week to make changes.")
         if event.status != "previewed" or event.base_revision != plan.revision:
             raise MealPlanReplanConflictError(
                 "This preview is stale because the meal plan has changed. Generate a new preview."

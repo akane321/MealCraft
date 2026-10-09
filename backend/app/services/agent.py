@@ -442,6 +442,10 @@ class AgentSessionService:
         self.repository.end_read_transaction()
         if snapshot.pending_interaction is None:
             raise AgentSessionNotReadyError("There is no pending structured interaction.")
+        if snapshot.plan_id is not None:
+            plan = self.meal_plan_service.get(snapshot.plan_id)
+            if plan is None or not plan.current:
+                raise AgentSessionNotReadyError("This week was replaced. Open the current week to make changes.")
         try:
             values = validate_interaction_answer(
                 snapshot.pending_interaction,
@@ -724,7 +728,7 @@ class AgentSessionService:
         plan = self.meal_plan_service.get(snapshot.plan_id)
         if plan is None:
             raise AgentSessionNotFoundError
-        options = [(say("replan_varied", lang), say("replan_varied_say", lang)), self._swap_option(plan, lang)]
+        options = [(say("replan_varied", "en"), say("replan_varied_say", lang)), self._swap_option(plan, lang)]
         reply = say("variety_planned", lang)
         updated = self.repository.append_bounded_exchange(
             session_id,
@@ -744,9 +748,11 @@ class AgentSessionService:
         for dish in sorted(plan.days, key=lambda item: (item.day_index, item.entry_id)):
             if dish.recipe.id in seen:
                 values = {"title": dish.recipe.title, "day": weekday(dish.planned_date, lang), "index": dish.day_index}
-                return say("swap_repeat", lang, **values), say("swap_repeat_say", lang, **values)
+                return say("swap_repeat", "en", **{**values, "day": weekday(dish.planned_date, "en")}), say(
+                    "swap_repeat_say", lang, **values
+                )
             seen.add(dish.recipe.id)
-        return say("swap_other", lang), say("swap_say", lang)
+        return say("swap_other", "en"), say("swap_say", lang)
 
     def _plan_again(
         self, session_id: int, snapshot: AgentSessionResponse, message: str, run: AgentRun
@@ -1201,8 +1207,8 @@ class AgentSessionService:
                     field_path=KEEP_SHAPE_FIELD,
                     question_id=f"keep-shape-{event_id}",
                     options=[
-                        InteractionOption(id="keep", label=say("keep_usual", lang), value="keep"),
-                        InteractionOption(id="week", label=say("just_this_week", lang), value="week"),
+                        InteractionOption(id="keep", label=say("keep_usual", "en"), value="keep"),
+                        InteractionOption(id="week", label=say("just_this_week", "en"), value="week"),
                     ],
                     context_version=snapshot.context_version,
                 ).model_dump(mode="json")

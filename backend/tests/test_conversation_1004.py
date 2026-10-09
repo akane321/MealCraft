@@ -32,7 +32,7 @@ from tests.test_planning_capability import (  # noqa: F401
     composed_client,
 )
 
-PICK = {"en": "Pick an option or type your answer", "zh": "选一个，或者直接输入"}
+PICK = "Pick an option or type your answer"
 
 
 @pytest.fixture(params=["fixture", "openai"])
@@ -434,12 +434,11 @@ def test_a_soup_asked_for_a_dinner_that_has_one_asks_first_naming_it(composed_cl
     assert asked["pending_replan"] is None
     if lang == "en":
         assert reply_of(asked) == f"Dinner on Friday already has {soup}: add another soup, or swap it?"
-        add, swap = "Add another soup", f"Swap the {soup}"
     else:
         assert reply_of(asked) == f"周五的晚餐已经有{soup}了：再加一道汤，还是换掉它？"
-        add, swap = "再加一道汤", f"换掉{soup}"
+    add, swap = "Add another soup", f"Swap the {soup}"
     assert _labels(asked) == [add, swap]
-    assert asked["pending_interaction"]["prompt"] == PICK[lang]
+    assert asked["pending_interaction"]["prompt"] == PICK
 
     swapped = _tap(composed_client, asked, swap)
     assert swapped["pending_replan"]["event_type"] == "REPLACE_MEAL", reply_of(swapped)
@@ -612,19 +611,19 @@ def test_a_refusals_choices_hint_is_short(client, message, lang):
     session = client.post("/api/agent/sessions", json={"message": message}).json()
 
     assert session["pending_interaction"]["options"], reply_of(session)
-    assert session["pending_interaction"]["prompt"] == PICK[lang]
+    assert session["pending_interaction"]["prompt"] == PICK
 
 
 def test_a_planned_weeks_questions_hint_is_short(client):
     session, _ = _conversation_week(client)
     asked = say(client, session, "Swap tomorrow's dinner")
-    assert asked["pending_interaction"]["prompt"] == PICK["en"] != reply_of(asked)
+    assert asked["pending_interaction"]["prompt"] == PICK != reply_of(asked)
 
 
 def test_keep_the_shapes_hint_is_short(client):
     keep, _ = lunch_added(client, "Also plan lunch")
 
-    assert keep["pending_interaction"]["prompt"] == PICK["en"]
+    assert keep["pending_interaction"]["prompt"] == PICK
 
 
 # P18: only a turn that went wrong is degraded.

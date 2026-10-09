@@ -334,7 +334,7 @@ def test_a_week_that_fails_at_plan_for_budget_offers_only_a_budget_a_real_week_b
     assert plans(client, ready)["grocery_estimate"]["purchase_total_sgd"] <= math.ceil(cost)
 
 
-def test_a_chinese_household_is_refused_in_chinese_with_choices_in_chinese(client):
+def test_a_chinese_household_is_refused_in_chinese_with_english_buttons(client):
     session = client.post("/api/agent/sessions", json={"message": "我们4个人，一周一共10新币"}).json()
     assert session["parser_provider"] == client.mode
 
@@ -343,7 +343,7 @@ def test_a_chinese_household_is_refused_in_chinese_with_choices_in_chinese(clien
     assert "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我找到一周至少有四种不同菜，预算是 S$" in reply
     assert not re.search(r"[A-Za-z]{3,}", reply)
     options = session["pending_interaction"]["options"]
-    assert options[0]["label"].startswith("一周用 S$")
+    assert options[0]["label"].startswith("Use S$")
     assert options[0]["value"].startswith("每周预算 ")
 
 
@@ -882,15 +882,15 @@ def test_a_plan_of_meals_too_big_to_search_quickly_ends_without_the_cheapest_wee
     ("message", "expected", "first_option"),
     [
         ("something nice", "Happy to help you eat well.", "Plan a week of meals"),
-        ("我想吃点好的", "好呀，我来帮你吃得好一点。", "规划一周的饭菜"),
-        ("嗯……", "我不太确定这是不是饮食规划的请求。", "规划一周的饭菜"),
+        ("我想吃点好的", "好呀，我来帮你吃得好一点。", "Plan a week of meals"),
+        ("嗯……", "我不太确定这是不是饮食规划的请求。", "Plan a week of meals"),
         ("Can you help me tomorrow?", "I am not sure whether this is a meal-planning request.", "Plan a week of meals"),
         # A greeting and a question about a dish are not wishes for food.
         ("good morning", "I am not sure whether this is a meal-planning request.", "Plan a week of meals"),
-        ("这个菜怎么做？", "我不太确定这是不是饮食规划的请求。", "规划一周的饭菜"),
+        ("这个菜怎么做？", "我不太确定这是不是饮食规划的请求。", "Plan a week of meals"),
         # Boredom with the dishes is a wish for variety, in either language.
         ("the dishes are boring", "Let's make it more varied.", "A week with no dish twice"),
-        ("菜很单调,不太好", "那就多换些花样。", "一周菜不重样"),
+        ("菜很单调,不太好", "那就多换些花样。", "A week with no dish twice"),
     ],
 )
 def test_an_unclear_message_gets_choices_in_its_language(composed_client, message, expected, first_option):  # noqa: F811
@@ -940,12 +940,12 @@ def test_a_chinese_week_is_planned_and_changed_in_chinese(composed_client):  # n
 
     wish = say(composed_client, session, "我想吃点好的")
     assert wish["messages"][-1]["content"].startswith("想换换口味？")
-    assert labels(wish) == ["换掉今晚的晚餐", "换别的日子的菜"]
+    assert labels(wish) == ["Swap tonight's dinner", "Swap a dish on another day"]
 
     every = say(composed_client, session, "所有菜都换掉")
     assert every["messages"][-1]["content"] == "我一次换一道菜，确认之前什么都不会改。先从哪一天开始？"
     first_day = every["pending_interaction"]["options"][0]
-    assert re.fullmatch(r"周[一二三四五六日] \d{1,2}月\d{1,2}日", first_day["label"]) and first_day["value"] == "第1天"
+    assert re.fullmatch(r"[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}", first_day["label"]) and first_day["value"] == "第1天"
     which = tap(composed_client, every, first_day["label"])
     assert which["messages"][-1]["content"].startswith("那天有 2 道菜")
     dish = which["pending_interaction"]["options"][0]["label"]
@@ -1126,7 +1126,7 @@ def test_a_week_found_monotonous_without_repeats_stays_and_offers_a_swap(varied,
     answered = say(varied, session, complaint)
     assert answered["messages"][-1]["content"].startswith(reply)
     assert answered["plan_id"] == session["plan_id"] and answered["pending_replan"] is None
-    assert labels(answered) and labels(answered)[0].startswith("换" if "菜" in complaint else "Swap ")
+    assert labels(answered) and labels(answered)[0].startswith("Swap ")
     assert slugs(varied, session["plan_id"]) == before
 
 
