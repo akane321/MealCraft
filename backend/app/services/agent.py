@@ -39,10 +39,10 @@ from app.orchestration.run_lifecycle import (
 )
 from app.orchestration.runtime import (
     FOOD_WISH,
+    NEW_WEEK,
     VARIED_WEEK,
     AgentTurnOutcome,
     BoundedAgentOrchestrator,
-    wants_variety,
     wish_options,
 )
 from app.orchestration.scope_policy import ReferenceScopePolicy
@@ -337,7 +337,9 @@ class AgentSessionService:
             self.repository.end_read_transaction()
             try:
                 response = (
-                    self._plan_again(session_id, snapshot, message, run)
+                    self._new_week(session_id, snapshot, message, run)
+                    if NEW_WEEK.search(message.lower())
+                    else self._plan_again(session_id, snapshot, message, run)
                     if VARIED_WEEK.search(message.lower())
                     else self._reply_to_planned(session_id, snapshot, message)
                 )
@@ -591,8 +593,6 @@ class AgentSessionService:
             # Typed instead of tapped ("swap it", "add another", 再加一道): what the option it names would send.
             chosen = typed_choice(interaction, message)
             message = chosen if isinstance(chosen, str) else message
-        if wants_variety(message):
-            return self._offer_variety(session_id, snapshot, message, lang)
         # An open question ("which dish?") is answered by what answers it; a request that stands on its own
         # ("also plan lunch") is handled instead, and the question goes.
         changed = self._change_shape(
@@ -713,26 +713,6 @@ class AgentSessionService:
             raise AgentSessionNotFoundError
         return self._to_response(updated)
 
-    def _offer_variety(
-        self, session_id: int, snapshot: AgentSessionResponse, message: str, lang: str
-    ) -> AgentSessionResponse:
-        """A wish for variety ("the dishes are boring", 菜很单调): a new week of different dishes, or a swap."""
-        plan = self.meal_plan_service.get(snapshot.plan_id)
-        if plan is None:
-            raise AgentSessionNotFoundError
-        options = [(say("replan_varied", "en"), say("replan_varied_say", lang)), self._swap_option(plan, lang)]
-        reply = say("variety_planned", lang)
-        updated = self.repository.append_bounded_exchange(
-            session_id,
-            user_message=message,
-            assistant_message=reply,
-            scope_decision=_variety_decision(message),
-            pending_interaction=self._choices(snapshot, options, lang),
-        )
-        if updated is None:
-            raise AgentSessionNotFoundError
-        return self._to_response(updated)
-
     @staticmethod
     def _swap_option(plan: WeeklyMealPlanResponse, lang: str) -> tuple[str, str]:
         """A dish to swap for more variety: the first that repeats, else any dish."""
@@ -745,6 +725,68 @@ class AgentSessionService:
                 )
             seen.add(dish.recipe.id)
         return say("swap_other", "en"), say("swap_say", lang)
+
+    def _new_week(
+        self, session_id: int, snapshot: AgentSessionResponse, message: str, run: AgentRun
+    ) -> AgentSessionResponse:
+        """Generate a replacement whole week with different dishes from the current one."""
+        plan = self.meal_plan_service.get(snapshot.plan_id)
+        if plan is None:
+            raise AgentSessionNotFoundError
+        if not plan.current:
+            raise AgentSessionNotReadyError("This week was replaced. Open the current week to make changes.")
+
+        lang = language(message, snapshot.messages)
+        avoid_recipe_ids = sorted(set(snapshot.constraints.avoid_recipe_ids) | {dish.recipe.id for dish in plan.days})
+
+        changes = {
+            "start_date": plan.start_date,
+            "avoid_recipe_ids": avoid_recipe_ids,
+        }
+
+        lowered = message.lower()
+        if (
+            "no dish twice" in lowered
+            or "no repeats" in lowered
+            or "\u4e0d\u91cd\u6837" in message
+            or "\u4e0d\u8981\u91cd\u590d" in message
+        ):
+            changes["max_uses_per_recipe"] = 1
+
+        request = self._plan_request(snapshot.constraints).model_copy(update=changes)
+
+        try:
+            replacement = self.meal_plan_service.generate(
+                request,
+                replaces_plan_id=plan.id,
+            )
+        except WeeklyPlanSelectionError as error:
+            reply = say("change_failed", lang, error=planner_message(str(error), lang))
+            return self._keep_week(session_id, snapshot, plan, message, reply, lang)
+
+        updated = self.repository.append_replan_exchange(
+            session_id,
+            user_message=message,
+            assistant_message=say("planned", lang),
+            draft=AgentReplanDraft(),
+            clarification_questions=[],
+            pending_event_id=None,
+            scope_decision=ScopeDecision(
+                scope_class=ScopeClass.DOMAIN_ACTION,
+                detected_intents=["plan_new_week"],
+                supported_segments=[message],
+                should_mutate_state=True,
+                reason_code="NEW_WEEK_REQUEST",
+            ),
+        )
+        if updated is None:
+            raise AgentSessionNotFoundError
+
+        attached = self.repository.attach_plan(session_id, plan_id=replacement.id)
+        if attached is None:
+            raise AgentSessionNotFoundError
+
+        return self._to_response(attached)
 
     def _plan_again(
         self, session_id: int, snapshot: AgentSessionResponse, message: str, run: AgentRun
@@ -920,8 +962,14 @@ class AgentSessionService:
             more = say("shape_more", lang, count=len(titles) - 4) if len(titles) > 4 else ""
             parts.append(say("shape_new", lang, titles=("、" if lang == "zh" else ", ").join(titles[:4]), more=more))
         if change and change.removed:
-            count = len(change.removed)
-            parts.append(say("shape_removed_one" if count == 1 else "shape_removed", lang, count=count))
+            removed_titles = list(dict.fromkeys(dish.recipe_title for dish in change.removed))
+            parts.append(
+                say(
+                    "shape_removed",
+                    lang,
+                    titles=("、" if lang == "zh" else ", ").join(removed_titles),
+                )
+            )
         delta = preview.purchase_total_delta_sgd
         budget = plan.grocery_estimate.weekly_budget_sgd
         total = round(plan.grocery_estimate.purchase_total_sgd + delta, 2)

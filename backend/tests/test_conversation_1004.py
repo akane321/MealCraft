@@ -583,7 +583,7 @@ def test_fewer_people_are_offered_only_when_a_real_week_backs_it_for_less(two, l
 
     assert [label for label, _ in refusal.options] == labels
     expected = (
-        "S$10 a week for 4 people comes to about S$0.36 a person a meal (7 meals). "
+        "That budget can't cover this week. S$10 a week for 4 people comes to about S$0.36 a person a meal (7 meals). "
         "The cheapest week I could find costs S$23.36."
     )
     if no_lower_budget is not None:
@@ -593,7 +593,9 @@ def test_fewer_people_are_offered_only_when_a_real_week_backs_it_for_less(two, l
         )
     assert refusal.text == expected
     chinese = _budget_short(23.36, constraints, "zh", lambda **changes: None)
-    assert chinese.text == "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$23.36。"
+    assert chinese.text == (
+        "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$23.36。"
+    )
 
 
 # P12: the composer's hint is short; the question is the reply above it.
