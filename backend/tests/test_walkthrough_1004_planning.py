@@ -43,6 +43,7 @@ from app.repositories.agent_runs import AgentRunRepository
 from app.repositories.recipe import RecipeRepository, _planning_pool, clear_planning_pool
 from app.repositories.recipe import _reloading as reloading_binds
 from app.schemas.agent import AgentConstraintState
+from app.schemas.display import shown_title
 from app.schemas.meal_plan import MEAL_PRESETS, MealPlanReplanPreviewRequest, MealPlanShapeChangeRequest
 from app.services.agent import AgentSessionService
 from tests.test_planning_capability import _dish, dish_client
@@ -445,7 +446,7 @@ def test_all_21_walkthrough_swap_reasons_drop_the_replaced_title(walked):
     dishes = walked["plan"].days
     assert len(dishes) == 21
     for dish in dishes:
-        reason = f"Swap Tuesday's {dish.recipe.title} for something else"
+        reason = f"Swap Tuesday's {shown_title(dish.recipe.title)} for something else"
         assert wanted(reason, excluded_title=dish.recipe.title) is None
 
 

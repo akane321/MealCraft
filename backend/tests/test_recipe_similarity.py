@@ -31,6 +31,16 @@ def test_the_replaced_dish_title_is_not_a_swap_request_but_explicit_preferences_
     assert wanted("Swap Tuesday's Teriyaki Fried Rice for fish instead", excluded_title="Teriyaki Fried Rice") == "fish"
 
 
+def test_the_replaced_dish_is_dropped_by_the_title_the_household_sees_too():
+    # The Swap chip carries the display-cleaned title; the catalog keeps "(Ww)" and "(Square Dumplings)" glued on.
+    for stored, chip in (
+        ("Chinese Egg Flower Soup (Ww)", "Chinese Egg Flower Soup"),
+        ("Cho Na-Mool(Korean Cabbage Salad)", "Cho Na-Mool (Korean Cabbage Salad)"),
+    ):
+        assert wanted(f"Swap Friday's {chip} for something else", excluded_title=stored) is None
+        assert wanted(f"Swap Friday's {stored} for something else", excluded_title=stored) is None
+
+
 def _recipe(i: int, key: str, title: str, ingredients: list[str]) -> SimpleNamespace:
     external_id, slug = (None, key.removeprefix("slug:")) if key.startswith("slug:") else (key, "")
     return SimpleNamespace(

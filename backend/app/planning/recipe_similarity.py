@@ -20,6 +20,7 @@ from app.agent import model_client
 from app.agent.ingredient_matcher import names_of
 from app.core.paths import find_repository_root
 from app.models.recipe import Recipe
+from app.schemas.display import shown_title
 
 VECTORS = "data/recipes/embeddings-v1"
 Embed = Callable[[list[str]], list[list[float]]]
@@ -55,7 +56,9 @@ def wanted(reason: str | None, *, excluded_title: str | None = None) -> str | No
     if not reason:
         return None
     if excluded_title:
-        reason = re.sub(re.escape(excluded_title), " ", reason, flags=re.IGNORECASE)
+        # The Swap chip names the dish as the household sees it (display-cleaned), the catalog as stored.
+        for title in sorted({excluded_title, shown_title(excluded_title)}, key=len, reverse=True):
+            reason = re.sub(re.escape(title), " ", reason, flags=re.IGNORECASE)
     asked = " ".join(clause for clause in _CLAUSE.split(reason) if not _NOT_WANTED.search(clause))
     rest = " ".join(_FILLER.sub(" ", asked).split())
     return rest if re.search(r"[a-zA-Z]{3,}|[一-鿿]", rest) else None
