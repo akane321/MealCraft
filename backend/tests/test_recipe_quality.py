@@ -38,6 +38,9 @@ def test_complete_dishes_soups_and_curated_recipes_are_kept():
             ["flour", "salt", "milk", "baking powder", "shortening"],
         ),
         ("Rolled Dumplings", "side", ["flour", "salt", "shortening", "milk"]),
+        ("Dumplings", "side", ["margarine", "flour", "water", "salt"]),
+        ("Dumplings", "side", ["flour", "baking_powder", "salt", "shortening", "milk_or_water"]),
+        ("Homemade Dumplings", "side", ["flour", "butter or margarine", "egg", "salt"]),
     ],
 )
 def test_wrapper_or_dough_only_recipes_are_not_planned(title, course, ingredients):
