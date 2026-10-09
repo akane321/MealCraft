@@ -2,8 +2,10 @@
 
 import copy
 import json
+from types import SimpleNamespace
 
 from app.core.paths import repository_root
+from app.evaluation import meal_day_week_runner
 from app.evaluation.meal_day_week_runner import evaluate, run_episode, scorer_catalogs, v3_checks
 from app.evaluation.multidish_labels import check, slot_roles
 from app.evaluation.multidish_pool import draw
@@ -13,6 +15,39 @@ EPISODES = repository_root() / "data/evaluation/dev/v3-meal-day-week/episodes"
 
 def load(episode_id: str) -> dict:
     return json.loads((EPISODES / f"{episode_id}.json").read_text(encoding="utf-8"))
+
+
+def test_secondary_reports_recipe_ids_and_dish_families_separately(monkeypatch):
+    """Two named fried-rice recipes are distinct IDs but one dish family."""
+    monkeypatch.setattr(
+        meal_day_week_runner,
+        "load_release_catalog",
+        lambda: SimpleNamespace(
+            by_slug={
+                "chinese-fried-rice": {"title": "Chinese-Style Fried Rice", "meal_types": ["dinner"]},
+                "basic-fried-rice": {"title": "Basic Fried Rice", "meal_types": ["dinner"]},
+                "bean-chili": {"title": "Bean Chili", "meal_types": ["dinner"]},
+            }
+        ),
+    )
+    response = {
+        "plan": {
+            "assignments": [
+                {"slot_id": "mon-dinner", "recipe_id": "chinese-fried-rice"},
+                {"slot_id": "tue-dinner", "recipe_id": "basic-fried-rice"},
+                {"slot_id": "wed-dinner", "recipe_id": "bean-chili"},
+            ],
+            "total_cost_sgd": 12.0,
+        }
+    }
+
+    assert meal_day_week_runner._secondary({}, response) == {
+        "dishes": 3,
+        "distinct_recipes": 3,
+        "distinct_dish_families": 2,
+        "meal_fit": "3/3",
+        "total_cost_sgd": 12.0,
+    }
 
 
 def test_the_committed_pools_are_the_drawn_ones_and_every_label_is_proven():
