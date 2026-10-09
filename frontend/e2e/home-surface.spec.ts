@@ -754,6 +754,7 @@ test("a replaced week outside the recent list remains read-only", async ({ page 
   await page.route("**/api/plans/9100/dashboard", route => route.fulfill({ json: { ...dashboard, plan_id: 9100 } }));
   await page.route("**/api/plans/9100/events", route => route.fulfill({ json: { items: [] } }));
   await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Open my week" }).click();
   await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /Dinners for two this week/ }).click();
   await expect(page.getByText("You planned these days again", { exact: false })).toBeVisible();
