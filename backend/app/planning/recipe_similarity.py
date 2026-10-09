@@ -20,6 +20,7 @@ from app.agent import model_client
 from app.agent.ingredient_matcher import names_of
 from app.core.paths import find_repository_root
 from app.models.recipe import Recipe
+from app.schemas.display import shown_title
 
 VECTORS = "data/recipes/embeddings-v1"
 Embed = Callable[[list[str]], list[list[float]]]
@@ -27,10 +28,10 @@ Embed = Callable[[list[str]], list[list[float]]]
 # Words that ask for a change or name a day or meal, not what to eat instead.
 _FILLER = re.compile(
     r"\b(?:can|could|would|you|we|i|i'd|id|me|my|please|pls|instead|of|for|on|at|the|a|an|to|it|be|have|"
-    r"make|want|like|feel|something|anything|some|with|dinner|lunch|meal|dish|tonight|today|tomorrow|day|"
+    r"make|want|like|feel|something|anything|some|else|with|dinner|lunch|meal|dish|tonight|today|tomorrow|day|"
     r"replace|swap|change|switch|different|another|other|new|"
     r"monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun|"
-    r"\d+)\b"
+    r"\d+)\b|(?:'s|’s)\b"
     r"|换成|换掉|换一个|换个|替换|换|改成|周[一二三四五六日天]|星期[一二三四五六日天]|今天|明天|第.天|"
     r"我想吃|想吃|我想|想要|来点|来个|有没有|吧|的|一下|晚饭|晚餐|那顿|这顿|吗|呢|[?？!！,，.。]",
     re.IGNORECASE,
@@ -46,11 +47,18 @@ _NOT_WANTED = re.compile(
 )
 
 
-def wanted(reason: str | None) -> str | None:
-    """What the household described wanting, with the swap mechanics and any clause saying what they do not want
-    removed (ordering by "fish" in "I don't want fish" would bring fish); None when nothing is left."""
+def wanted(reason: str | None, *, excluded_title: str | None = None) -> str | None:
+    """What the household described wanting, without swap mechanics or the dish being replaced.
+
+    A clause saying what they do not want is also removed (ordering by "fish" in "I don't want fish" would bring
+    fish); None when nothing is left.
+    """
     if not reason:
         return None
+    if excluded_title:
+        # The Swap chip names the dish as the household sees it (display-cleaned), the catalog as stored.
+        for title in sorted({excluded_title, shown_title(excluded_title)}, key=len, reverse=True):
+            reason = re.sub(re.escape(title), " ", reason, flags=re.IGNORECASE)
     asked = " ".join(clause for clause in _CLAUSE.split(reason) if not _NOT_WANTED.search(clause))
     rest = " ".join(_FILLER.sub(" ", asked).split())
     return rest if re.search(r"[a-zA-Z]{3,}|[一-鿿]", rest) else None
@@ -165,9 +173,11 @@ class RecipeSimilarity:
     def __init__(self, embed: Embed | None) -> None:
         self.embed = embed
 
-    def scores(self, reason: str | None, recipes: list[Recipe]) -> dict[int, float]:
+    def scores(
+        self, reason: str | None, recipes: list[Recipe], *, excluded_title: str | None = None
+    ) -> dict[int, float]:
         """Cosine similarity per recipe id; empty when there is nothing described, no vectors, or no call."""
-        text, catalog = wanted(reason), _catalog()
+        text, catalog = wanted(reason, excluded_title=excluded_title), _catalog()
         if text is None:
             return {}
         text = in_english(text)
