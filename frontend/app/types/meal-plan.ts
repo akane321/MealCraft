@@ -48,6 +48,7 @@ export interface WeeklyGroceryEstimate {
 }
 
 export interface WeeklyMealPlan {
+  current?: boolean;
   id: number;
   revision: number;
   household_profile_id: number | null;

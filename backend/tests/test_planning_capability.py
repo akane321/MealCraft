@@ -761,8 +761,8 @@ def test_another_soup_on_a_friday_that_has_one_keeps_its_dishes_over_the_budget(
     soup = _title(before["soup"])
     assert asked["pending_replan"] is None
     assert asked["messages"][-1]["content"] == f"周五的晚餐已经有{soup}了：再加一道汤，还是换掉它？"
-    assert _labels(asked) == ["再加一道汤", f"换掉{soup}"]
-    asked = _tap(composed_client, asked, "再加一道汤")
+    assert _labels(asked) == ["Add another soup", f"Swap the {soup}"]
+    asked = _tap(composed_client, asked, "Add another soup")
 
     reply = asked["messages"][-1]["content"]
     change = asked["pending_replan"]

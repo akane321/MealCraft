@@ -197,14 +197,20 @@ class WeeklyMealPlanService:
     def check(self, constraints: WeeklyMealPlanRequest) -> ProductPlanningError | None:
         """What `generate` would answer for these constraints, nothing saved: None for a week, else its error.
 
-        The week found is kept for `generate` with the same constraints, while the planner's pools are kept."""
+        The week found is kept for `generate` with the same constraints, while the planner's pools are kept; a check
+        of constraints whose week is kept answers from it."""
+        seconds = get_settings().planning_pool_cache_seconds
+        kept = found_weeks.get(self._found_key(constraints)) if seconds else None
+        if kept is not None and time.monotonic() - kept[0] < seconds:
+            # The same search over the same pool finds the same week, and it stays kept for Plan: a budget refusal
+            # checks the amount it offers, and tapping that offer asked for the very same week (WP1 1b, 2026-10-08).
+            return None
         try:
             searched = self._search(constraints, self._checked_candidates(constraints))
         except ProductPlanningError as error:
             return error
         # Kept for the Plan that follows this check (`found_weeks`): the 2026-10-04 walkthrough's reply that took
         # the last detail planned the week in 8 s, then Plan planned it again in 5 s.
-        seconds = get_settings().planning_pool_cache_seconds
         if seconds:
             now = time.monotonic()
             # pop, not del: requests run on several threads (a sync route) and may expire the same entry.
@@ -221,7 +227,8 @@ class WeeklyMealPlanService:
             self.repository.household_id,
             repr(self.planning_engine.limits),
             profile_version,
-            constraints.model_dump_json(),
+            # Validated again: an amount set by `model_copy` (an offered S$53) stays an int, as typed it is 53.0.
+            type(constraints).model_validate(constraints.model_dump()).model_dump_json(),
         )
 
     def _candidates(self, constraints: WeeklyMealPlanRequest):
@@ -411,7 +418,9 @@ class WeeklyMealPlanService:
 
     def get(self, plan_id: int) -> WeeklyMealPlanResponse | None:
         plan = self.repository.get(plan_id)
-        return self._to_response(plan) if plan is not None else None
+        if plan is None:
+            return None
+        return self._to_response(plan).model_copy(update={"current": self.repository.is_current(plan)})
 
     def list_recent(self, *, limit: int) -> WeeklyMealPlanCollectionResponse:
         # Newest first, so every plan newer than one is listed before it (the limit cuts only older ones).
@@ -454,7 +463,7 @@ class WeeklyMealPlanService:
             entry_id=entry_id,
             status=status,
         )
-        return self._to_response(plan) if plan is not None else None
+        return self.get(plan.id) if plan is not None else None
 
     def update_meal_status(
         self,
@@ -467,7 +476,7 @@ class WeeklyMealPlanService:
         plan = self.repository.update_meal_status(
             plan_id=plan_id, day_index=day_index, meal_type=meal_type, status=status
         )
-        return self._to_response(plan) if plan is not None else None
+        return self.get(plan.id) if plan is not None else None
 
     def dashboard(self, plan_id: int) -> WeeklyNutritionDashboardResponse | None:
         plan = self.repository.get(plan_id)

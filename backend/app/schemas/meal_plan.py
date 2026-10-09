@@ -143,6 +143,7 @@ class WeeklyGroceryEstimateResponse(BaseModel):
 
 class WeeklyMealPlanResponse(BaseModel):
     id: int
+    current: bool = True
     revision: int
     household_profile_id: int | None
     household_profile_version: int | None
