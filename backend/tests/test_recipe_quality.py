@@ -41,6 +41,7 @@ def test_complete_dishes_soups_and_curated_recipes_are_kept():
         ("Dumplings", "side", ["margarine", "flour", "water", "salt"]),
         ("Dumplings", "side", ["flour", "baking_powder", "salt", "shortening", "milk_or_water"]),
         ("Homemade Dumplings", "side", ["flour", "butter or margarine", "egg", "salt"]),
+        ("Dumplings", "soup", ["flour", "margarine", "water", "salt", "chicken_broth"]),
     ],
 )
 def test_wrapper_or_dough_only_recipes_are_not_planned(title, course, ingredients):
@@ -71,11 +72,10 @@ def test_a_filled_wrapper_and_a_real_vegetable_soup_remain_plannable():
     )
 
 
-def test_a_broth_based_dumpling_soup_is_not_dough_only():
-    assert (
-        incomplete(recipe("Chicken Dumpling Soup", 250, ["flour", "salt", "milk", "chicken_broth"], course="soup"))
-        is None
-    )
+def test_dough_in_broth_with_nothing_else_is_dough_only_but_any_filling_keeps_the_soup():
+    soup = ["flour", "salt", "milk", "chicken_broth"]
+    assert incomplete(recipe("Chicken Dumpling Soup", 250, soup, course="soup")) == "wrapper or dough with no filling"
+    assert incomplete(recipe("Chicken Dumpling Soup", 250, soup + ["chicken"], course="soup")) is None
 
 
 def test_planning_repository_drops_dough_only_recipes_but_keeps_filled_dishes():
