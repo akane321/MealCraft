@@ -587,11 +587,13 @@ def test_fewer_people_are_offered_only_when_a_real_week_backs_it_for_less(two, l
         "The cheapest week I could find costs S$23.36."
     )
     if no_lower_budget is not None:
-        expected += (
-            f" For 2 people, the plan I could verify needs a S${no_lower_budget} budget, "
-            "so reducing the household does not lower the budget I can suggest."
-        )
+        # Never "2 people need S$41" beside S$24 for 4: fewer people read as costing more (2026-10-09 rehearsal).
+        expected += " Planning for fewer people would not lower that budget."
+        assert f"S${no_lower_budget}" not in refusal.text
     assert refusal.text == expected
+    if no_lower_budget is not None:
+        chinese_four = _budget_short(23.36, constraints, "zh", lambda **changes: two)
+        assert chinese_four.text.endswith("我能找到的最便宜的一周要 S$23.36。 减少人数也不能降低这个预算。")
     chinese = _budget_short(23.36, constraints, "zh", lambda **changes: None)
     assert chinese.text == (
         "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$23.36。"

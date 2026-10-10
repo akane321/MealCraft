@@ -160,11 +160,15 @@ class MealPlanReplanningService:
                 proposed_recipe_id=recommendation.recipe.id if recommendation else None,
                 recipes_by_id=recipes_by_id,
             )
-            after_grocery = self.grocery_aggregator.estimate(
-                [recipe for recipe, _ in future_recipes],
-                constraints,
-                shares=[share for _, share in future_recipes],
-                by_weight=by_weight(before_grocery),
+            after_grocery = self._as_saved(
+                plan,
+                self.grocery_aggregator.estimate(
+                    [recipe for recipe, _ in future_recipes],
+                    constraints,
+                    shares=[share for _, share in future_recipes],
+                    by_weight=by_weight(before_grocery),
+                ),
+                self._drift_cents(plan, constraints, recipes_by_id),
             )
             after_warnings = list(dict.fromkeys(after_grocery.warnings))
             if after_grocery.within_weekly_budget is False:
@@ -402,8 +406,12 @@ class MealPlanReplanningService:
                 recommendation_score=values["recommendation_score"],
             )
             added.append((values, snapshot))
-        after_grocery = self._week_grocery(
-            plan, constraints, recipes_by_id, {entry_id: choice.recipe.id for entry_id, choice in swaps.items()}
+        after_grocery = self._as_saved(
+            plan,
+            self._week_grocery(
+                plan, constraints, recipes_by_id, {entry_id: choice.recipe.id for entry_id, choice in swaps.items()}
+            ),
+            self._drift_cents(plan, constraints, recipes_by_id),
         )
         after_warnings = list(dict.fromkeys(after_grocery.warnings))
         if after_grocery.within_weekly_budget is False:
@@ -842,10 +850,12 @@ class MealPlanReplanningService:
         if budget is None:
             return ranked[0], None
         ceiling = round(max(budget, float(plan.purchase_total_sgd)) * 100)
+        drift = self._drift_cents(plan, constraints, recipes_by_id)
         least = None
         for candidate in ranked:
             swapped = {**swaps, entry.id: candidate.recipe.id}
-            cents = round(self._week_grocery(plan, constraints, recipes_by_id, swapped).purchase_total_sgd * 100)
+            grocery = self._week_grocery(plan, constraints, recipes_by_id, swapped)
+            cents = drift + round(grocery.purchase_total_sgd * 100)
             if cents <= ceiling:
                 return candidate, None
             if misfits is not None:
@@ -853,6 +863,34 @@ class MealPlanReplanningService:
             if least is None or cents < least[1]:
                 least = (candidate, cents)
         return least[0], (least[1] - ceiling) / 100
+
+    def _drift_cents(self, plan: MealPlan, constraints, recipes_by_id) -> int:
+        """How far the saved week's total is from the same week at snapshot prices, in cents: 0 for a fixture week.
+
+        A live week's saved total is its basket checked at FairPrice (ADR-0058), but a change is chosen and
+        previewed at snapshot prices (ADR-0060). Compared with the saved total or its budget as they are, a swap
+        that fit at snapshot prices took the 2026-10-09 rehearsal's week from S$97.26 to S$100.16 once its basket
+        was checked again, and its preview never said so. A change moves the saved total by its snapshot
+        difference instead.
+        """
+        if plan.pricing_mode != "live":
+            return 0
+        snapshot = self._week_grocery(plan, constraints, recipes_by_id, {}).purchase_total_sgd
+        return round(float(plan.purchase_total_sgd) * 100) - round(snapshot * 100)
+
+    @staticmethod
+    def _as_saved(plan: MealPlan, grocery: WeeklyGroceryEstimateResponse, drift: int) -> WeeklyGroceryEstimateResponse:
+        """A snapshot-priced week after a change, totalled as the saved week is (`_drift_cents`): what its preview
+        says the week comes to and how far over its budget. Its lines stay snapshot-priced; a live week's confirm
+        checks them again and totals them (`WeeklyGroceryAggregator.refresh`)."""
+        if not drift:
+            return grocery
+        cents = round(grocery.purchase_total_sgd * 100) + drift
+        budget = grocery.weekly_budget_sgd
+        within = grocery.within_weekly_budget
+        if budget is not None:
+            within = False if cents > round(budget * 100) else True if grocery.complete else None
+        return grocery.model_copy(update={"purchase_total_sgd": cents / 100, "within_weekly_budget": within})
 
     @staticmethod
     def _role(constraints: WeeklyMealPlanRequest, entry: MealPlanEntry):
