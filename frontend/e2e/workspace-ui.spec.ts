@@ -144,7 +144,7 @@ async function stub(page: Page, { conversations, plans, role = "user" }: { conve
 async function openWeek(page: Page) {
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
-  await page.getByRole("button", { name: "Open my week" }).click();
+  await page.getByRole("button", { name: "Let’s plan my week" }).click();
 }
 
 test("at 1280x720 eight recent conversations keep their rows and the list scrolls", async ({ page }) => {
@@ -252,26 +252,26 @@ test("a week planned again is shown read-only beside its conversation, with the 
   await openWeek(page);
   const panel = page.getByRole("complementary", { name: "This week" });
   await expect(panel.getByText("Lemon Herb Chicken (9002)").first()).toBeVisible();
-  await expect(panel.getByRole("button", { name: "Mark as cooked" })).toBeVisible();
+  await expect(panel.getByRole("button", { name: "Mark cooked" })).toBeVisible();
 
   await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: "First plan of the week" }).click();
   await expect(panel.getByText("Lemon Herb Chicken").first()).toBeVisible();
   await expect(page.getByText("You planned these days again, so this week was replaced.")).toBeVisible();
   // Read, not changed: no marking cooked, no swaps, no change chips, nothing to send.
-  await expect(panel.getByRole("button", { name: "Mark as cooked" })).toHaveCount(0);
+  await expect(panel.getByRole("button", { name: "Mark cooked" })).toHaveCount(0);
   await expect(panel.getByRole("button", { name: "Swap" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Swap tomorrow's dinner" })).toHaveCount(0);
   const chat = page.getByRole("main");
   await expect(chat.getByLabel("Message MealCraft")).toHaveAttribute("readonly", "");
   await expect(chat.getByLabel("Message MealCraft")).not.toBeEditable();
   await expect(chat.getByRole("button", { name: "Send" })).toBeDisabled();
-  await expect(panel.getByRole("button", { name: "Recipe & steps" })).toBeVisible();
+  await expect(panel.getByRole("button", { name: "Recipe and steps" })).toBeVisible();
 
   await page.getByRole("button", { name: "Open the current week" }).click();
   await expect(page.getByRole("heading", { name: "Plan the week again" })).toBeVisible();
   await expect(panel.getByText("Lemon Herb Chicken (9002)").first()).toBeVisible();
   await expect(page.getByText("You planned these days again")).toHaveCount(0);
-  await expect(panel.getByRole("button", { name: "Mark as cooked" })).toBeVisible();
+  await expect(panel.getByRole("button", { name: "Mark cooked" })).toBeVisible();
 });
 
 test("past weeks mark the weeks that were planned again", async ({ page }) => {

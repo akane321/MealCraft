@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatSgd, plateStyle, productSourceLabel } from "~/lib/home-surface";
+import { formatSgd, productSourceLabel } from "~/lib/home-surface";
 import type { ProductSearchResponse } from "~/types/recommendation";
 import type { RecipeCollection, RecipeListItem } from "~/types/recipe";
 
@@ -108,7 +108,7 @@ function packLabel(size: number | null, unit: string | null) {
       <ul class="cards">
         <li v-for="recipe in recipes" :key="recipe.id">
           <button type="button" class="card" @click="openSlug = recipe.slug">
-            <span class="plate" :style="plateStyle(recipe.slug)" aria-hidden="true" />
+            <HomeDishIcon class="icon" :title="recipe.title" :course="recipe.course ?? recipe.meal_type" :size="44" />
             <span class="title">{{ recipe.title }}</span>
             <small>{{ recipe.total_time_minutes }} min · {{ Math.round(recipe.nutrition.calories_kcal) }} kcal<template v-if="recipe.course"> · {{ recipe.course.replace("_", " ") }}</template></small>
           </button>
@@ -155,7 +155,7 @@ function packLabel(size: number | null, unit: string | null) {
 .head h1 { margin: 6px 0 18px; font-family: var(--serif); font-weight: 300; font-size: clamp(26px, 4vw, 36px); text-wrap: balance; }
 .tabs { display: flex; gap: 6px; }
 .tabs button, .chip { padding: 7px 14px; border: 1px solid var(--border); border-radius: 999px; background: transparent; color: var(--t2); cursor: pointer; font: inherit; font-size: 13px; }
-.tabs button[aria-selected="true"], .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--ivory); background: rgba(232, 144, 111, 0.12); }
+.tabs button[aria-selected="true"], .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--ivory); background: rgba(240, 103, 92, 0.1); }
 .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 22px 0 16px; }
 .search { flex: 1 1 260px; }
 .search input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--s1); color: var(--ivory); font: inherit; }
@@ -165,12 +165,12 @@ function packLabel(size: number | null, unit: string | null) {
 .cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
 .card { width: 100%; height: 100%; display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; column-gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--s1); color: inherit; text-align: left; cursor: pointer; font: inherit; }
 .card:hover, .card:focus-visible { border-color: var(--accent); }
-.card .plate { --size: 44px; grid-row: 1 / 3; }
+.card .icon { grid-row: 1 / 3; }
 .card .title { font-family: var(--serif); font-size: 15px; line-height: 1.25; }
 .card small { color: var(--t3); font-size: 12px; }
 .more { margin-top: 18px; }
 .products { width: 100%; border-collapse: collapse; font-size: 14px; }
-.products th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.products th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
 .products td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
 .products td small { display: block; color: var(--t3); font-size: 12px; }
 .products .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }

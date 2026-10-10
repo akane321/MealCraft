@@ -95,7 +95,7 @@ async function submit() {
 .audience { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 26px; padding: 4px; border: 1px solid var(--border); border-radius: 999px; background: var(--ink); }
 .audience button { padding: 9px 12px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer; }
 .audience button.active { background: var(--s3); color: var(--ivory); font-weight: 600; }
-.eyebrow { margin: 0; color: var(--accent) !important; font-size: 10.5px; font-weight: 600; letter-spacing: 0.16em; }
+.eyebrow { margin: 0; color: var(--accent) !important; font-size: 12px; font-weight: 600; letter-spacing: 0.16em; }
 .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; margin: 28px 0 22px; border-bottom: 1px solid var(--border); }
 .auth-tabs button { padding: 12px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
 .auth-tabs button.active { box-shadow: inset 0 -2px 0 var(--accent); color: var(--ivory); font-weight: 600; }

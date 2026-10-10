@@ -36,6 +36,7 @@ useDialog(overlay, () => emit("close"));
   <div ref="overlay" class="mc-overlay" role="dialog" aria-modal="true" :aria-label="recipe ? recipe.title : 'Recipe'">
     <section class="mc-ribbed panel">
       <header>
+        <HomeDishIcon v-if="recipe" :title="recipe.title" :course="recipe.course" :ingredients="recipe.ingredients.map(item => item.name)" :size="44" />
         <div>
           <h2 class="mc-serif">{{ recipe?.title ?? "Recipe" }}</h2>
           <p v-if="recipe">{{ recipe.total_time_minutes }} min · serves {{ recipe.servings }} · {{ recipe.cuisine }}</p>
@@ -89,11 +90,11 @@ svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width:
 .body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 14px; align-items: start; }
 .card { padding: 16px; border-radius: 18px; }
 h3 { margin: 0 0 6px; font-size: 14px; }
-.hint { margin: 0 0 8px; font-size: 11px; color: var(--mc-text-3); }
+.hint { margin: 0 0 8px; font-size: 12px; color: var(--mc-text-3); }
 ul { list-style: none; margin: 0; padding: 0; }
-ul li { padding: 8px 0; border-top: 1px solid rgba(242, 237, 228, 0.08); display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; font-size: 13px; }
+ul li { padding: 8px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; font-size: 13px; }
 .name small { color: var(--mc-text-3); }
 .qty { color: var(--mc-text-2); }
-.allergen { grid-column: 1 / -1; font-size: 11px; font-weight: 600; color: var(--mc-accent); }
+.allergen { grid-column: 1 / -1; font-size: 12px; font-weight: 700; color: var(--warn); }
 ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.55; }
 </style>

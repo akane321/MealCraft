@@ -71,35 +71,37 @@ function kcal(event: MealPlanReplanEvent) {
 </template>
 
 <style scoped>
-.latest { display: flex; flex-shrink: 0; flex-wrap: wrap; gap: 4px 8px; padding: 8px 16px; font-size: 12px; color: var(--mc-text-2); }
-.latest strong { font-weight: 500; }
-.changes { max-height: 160px; overflow: auto; flex-shrink: 0; padding: 0 16px 8px; }
-.changes { margin: 4px 0 0; border-top: 1px solid var(--mc-line); padding-top: 12px; }
+.latest { display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 10px 16px; border-bottom: 1px solid var(--c-line-soft); background: var(--c-canvas); font-size: 12px; line-height: 16px; color: var(--c-muted); }
+.latest strong { font-weight: 800; color: var(--c-ink); }
+.changes { flex-shrink: 0; max-height: 160px; overflow: auto; padding: 10px 16px; border-bottom: 1px solid var(--c-line-soft); }
 summary {
   display: flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
   font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--mc-text-3);
+  line-height: 16px;
+  font-weight: 800;
+  color: var(--c-muted);
 }
 summary::-webkit-details-marker { display: none; }
-summary::before { content: "▸"; font-size: 10px; transition: transform 200ms var(--mc-ease); }
+summary::before { content: "▸"; font-size: 12px; transition: transform 200ms var(--mc-ease); }
 .changes[open] summary::before { transform: rotate(90deg); }
 .count {
   margin-left: auto;
-  padding: 1px 7px;
-  border: 1px solid var(--mc-line);
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
   border-radius: 999px;
-  font-size: 11px;
-  letter-spacing: 0;
+  background: var(--c-neutral);
+  color: var(--c-neutral-text);
+  font-size: 12px;
 }
 ol { margin: 12px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
 .swap { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-size: 13px; color: var(--mc-text-2); }
 .swap s { color: var(--mc-text-3); }
-.swap strong { font-family: var(--mc-serif); font-weight: 400; color: var(--mc-ivory); }
+.swap strong { font-family: var(--mc-serif); font-weight: 700; color: var(--mc-ivory); }
 .meta { margin: 3px 0 0; font-size: 12px; color: var(--mc-text-3); }
 .reason { font-style: italic; }
 
