@@ -7,7 +7,9 @@ from app.agent import replies
 from app.agent.limits import Refusal
 from app.agent.parser import ConstraintParser, bare_amount
 from app.agent.replies import language, say
+from app.agent.shape_change import setup_shape
 from app.schemas.agent import AgentConstraintExtraction, AgentConstraintState, AgentMessageResponse
+from app.schemas.meal_plan import default_plan_shape
 from app.schemas.recommendation import AvailableIngredientInput, NutritionTargets
 
 
@@ -90,6 +92,15 @@ class AgentConstraintWorkflow:
                     "got_it", lang, details=replies.details(AgentConstraintExtraction(**{asked: amount}), lang)[0]
                 )
         merged = AgentConstraintWorkflow._merge_constraints(current, extraction)
+        # "Dinners with a soup" in the request shapes the week it sets up, and the reply says so.
+        shaped = setup_shape(state["message"], merged.plan_shape or default_plan_shape(), lang)
+        if shaped is not None:
+            merged.plan_shape, said = shaped
+            extraction.assistant_summary = (
+                f"{extraction.assistant_summary}{'' if lang == 'zh' else ' '}{said}"
+                if extraction.assistant_summary
+                else said
+            )
         acknowledged = list(
             dict.fromkeys([*state["acknowledged_unknowns"], *extraction.acknowledged_unknown_quantities])
         )
