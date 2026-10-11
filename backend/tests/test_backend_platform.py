@@ -28,8 +28,10 @@ def test_registration_contract_normalizes_email_and_hides_password() -> None:
 
     assert payload.email == "alice@example.test"
     assert "correct-horse" not in repr(payload)
-    with pytest.raises(ValidationError, match="between 12 and 128"):
-        AccountRegistrationRequest(email="short@example.test", display_name="Short", password="short")
+    short = AccountRegistrationRequest(email="short@example.test", display_name="Short", password="a")
+    assert short.password.get_secret_value() == "a"
+    with pytest.raises(ValidationError, match="between 1 and 128"):
+        AccountRegistrationRequest(email="empty@example.test", display_name="Empty", password="")
 
 
 def test_session_token_is_random_and_only_digest_is_persistable() -> None:
