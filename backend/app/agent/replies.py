@@ -386,6 +386,9 @@ REPLIES: dict[str, tuple[str, str]] = {
     "prepare_failed": ("I could not prepare that change: {error}", "我没法准备这个调整：{error}"),
     "change_failed": ("I could not make that change: {error}", "我没法做这个调整：{error}"),
     "shape_summary": ("{summary}.", "{summary}。"),
+    # Said with "Got it" when the first request shapes the week (agent/shape_change.py setup_shape).
+    "shape_setup": ("{Meal}: {dishes}.", "{meal}：{dishes}。"),
+    "shape_no_meal_setup": ("No {meal}.", "不安排{meal}。"),
     "shape_only": ("{Meal} will have one {dish} {when}", "{when}{meal}只做一道{dish}"),
     "shape_one_dish": ("{Meal} as one dish {when}", "{when}{meal}只做一道菜"),
     "shape_no_meal": ("No {meal} {when}", "{when}不安排{meal}"),
