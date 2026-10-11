@@ -62,31 +62,33 @@ const ACTIONS = [
             <template v-else><b>{{ formatPlanDate(day.date, { weekday: "short" }) }}</b><span>{{ Number(day.date.slice(8, 10)) }}</span></template>
           </span>
           <HomeDishIcon class="icon" :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="32" />
+          <!-- One line per dish: its name, then its own changes, so a meal of several dishes never shows unlabelled rows. -->
           <span class="dishes">
-            <button type="button" class="name" :title="meal.dishes[0]!.recipe.title" @click="emit('openRecipe', meal.dishes[0]!.recipe.slug)">{{ meal.dishes[0]!.recipe.title }}</button>
-            <span class="rest">
-              <template v-if="meal.dishes.length > 1">
-                <template v-for="(dish, index) in meal.dishes.slice(1)" :key="dish.entry_id"><span v-if="index"> · </span><button type="button" class="side" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button></template>
-              </template>
-              <template v-else>{{ meal.dishes[0]!.recipe.total_time_minutes }} min · {{ Math.round(meal.dishes[0]!.nutrition_per_person.calories_kcal) }} kcal</template>
-              <span v-if="meal.dishes.some(dish => dish.is_locked)" class="kept"> · Kept as is</span>
+            <span v-for="(dish, index) in meal.dishes" :key="dish.entry_id" class="dish" :class="{ side: index > 0 }">
+              <span class="title-line">
+                <button type="button" class="name" :title="dish.recipe.title" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button>
+                <!-- The meal's chip rides on its first dish's line, leaving the full width for each dish's changes. -->
+                <span v-if="index === 0" class="mc-chip" :class="CHIP_TONE[chip(meal).kind]">
+                  <svg v-if="chip(meal).kind === 'completed'" class="ok-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                  <svg v-else-if="chip(meal).kind === 'partial'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 0 0 14V5Z" /></svg>
+                  {{ chip(meal).label }}
+                </span>
+              </span>
+              <span v-if="meal.dishes.length === 1 || dish.is_locked" class="rest">
+                <template v-if="meal.dishes.length === 1">{{ dish.recipe.total_time_minutes }} min · {{ Math.round(dish.nutrition_per_person.calories_kcal) }} kcal</template>
+                <span v-if="dish.is_locked" class="kept"><template v-if="meal.dishes.length === 1"> · </template>Kept as is</span>
+              </span>
+              <span v-if="!readonly && dish.status === 'planned' && !dish.is_locked" class="acts" role="group" :aria-label="`Change ${dish.recipe.title}`">
+                <button
+                  v-for="action in ACTIONS"
+                  :key="action.label"
+                  type="button"
+                  @click="emit('ask', action.text(formatPlanDate(day.date, { weekday: 'long' }), dish.recipe.title))"
+                >
+                  {{ action.label }}
+                </button>
+              </span>
             </span>
-            <span v-for="dish in meal.dishes.filter(item => !readonly && item.status === 'planned' && !item.is_locked)" :key="dish.entry_id" class="acts" role="group" :aria-label="`Change ${dish.recipe.title}`">
-              <button
-                v-for="action in ACTIONS"
-                :key="action.label"
-                type="button"
-                @click="emit('ask', action.text(formatPlanDate(day.date, { weekday: 'long' }), dish.recipe.title))"
-              >
-                {{ action.label }}
-              </button>
-              <span v-if="meal.dishes.length > 1" class="for">{{ dish.recipe.title }}</span>
-            </span>
-          </span>
-          <span class="mc-chip" :class="CHIP_TONE[chip(meal).kind]">
-            <svg v-if="chip(meal).kind === 'completed'" class="ok-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
-            <svg v-else-if="chip(meal).kind === 'partial'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 0 0 14V5Z" /></svg>
-            {{ chip(meal).label }}
           </span>
         </div>
       </li>
@@ -101,22 +103,25 @@ const ACTIONS = [
 .overview-dishes { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--c-muted); }
 .days { list-style: none; margin: 0; padding: 0 16px; }
 .day-head { margin: 0; padding: 12px 0 2px; }
-.row { display: grid; grid-template-columns: 44px 32px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 52px; padding: 6px 0; border-bottom: 1px solid var(--c-line-soft); }
+.row { display: grid; grid-template-columns: 44px 32px minmax(0, 1fr); gap: 10px; align-items: start; min-height: 52px; padding: 6px 0; border-bottom: 1px solid var(--c-line-soft); }
 .row.done { opacity: 0.6; }
 .d { display: flex; flex-direction: column; font-size: 12px; line-height: 16px; }
 .d b { font-weight: 800; }
 .d span { color: var(--c-muted); }
-.dishes { min-width: 0; display: flex; flex-direction: column; }
-.name, .side { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; }
-.name { font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.name:hover, .side:hover { color: var(--c-coral); }
+.dishes { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.dish { min-width: 0; display: flex; flex-direction: column; }
+.title-line { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.title-line .name { flex: 1 1 auto; min-width: 0; }
+.title-line .mc-chip { flex: none; margin-left: auto; }
+.name { max-width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 800; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dish.side .name { font-size: 13px; font-weight: 700; }
+.name:hover { color: var(--c-coral); }
 .rest { font-size: 12px; line-height: 16px; color: var(--c-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kept { color: var(--c-green-text); font-weight: 800; }
 .ok-tick { color: var(--c-green); }
-/* A dish's changes, quiet until the row is pointed at or focused, always on one line. */
-.acts { display: flex; flex-wrap: nowrap; align-items: center; gap: 4px; margin-top: 4px; opacity: 0.6; transition: opacity 150ms var(--ease); }
+/* A dish's changes, quiet until the row is pointed at or focused; they wrap rather than run under the chip. */
+.acts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 4px; opacity: 0.6; transition: opacity 150ms var(--ease); }
 .row:hover .acts, .row:focus-within .acts { opacity: 1; }
 .acts button { flex: none; height: 24px; padding: 0 8px; white-space: nowrap; border: 1px solid var(--c-line); border-radius: 999px; background: #fff; color: var(--c-ink); font-size: 12px; font-weight: 700; }
 .acts button:hover { border-color: var(--c-coral); }
-.for { font-size: 12px; color: var(--c-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
 </style>
