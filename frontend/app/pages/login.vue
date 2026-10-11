@@ -76,7 +76,7 @@ async function submit() {
         </label>
         <label>
           Password
-          <input v-model="password" :autocomplete="mode === 'login' ? 'current-password' : 'new-password'" type="password" :minlength="mode === 'register' ? 12 : undefined" required>
+          <input v-model="password" :autocomplete="mode === 'login' ? 'current-password' : 'new-password'" type="password" required>
         </label>
         <p v-if="errorMessage" class="auth-error" role="alert">{{ errorMessage }}</p>
         <button class="auth-submit" type="submit" :disabled="isLoading">
