@@ -44,9 +44,10 @@ class AccountRegistrationRequest(BaseModel):
 
     @model_validator(mode="after")
     def require_reasonable_password_length(self) -> AccountRegistrationRequest:
+        # Course project, never deployed: no strength rules, only a non-empty value of sane size.
         length = len(self.password.get_secret_value())
-        if length < 12 or length > 128:
-            raise ValueError("password must contain between 12 and 128 characters")
+        if length < 1 or length > 128:
+            raise ValueError("password must contain between 1 and 128 characters")
         return self
 
 
