@@ -337,8 +337,8 @@ def test_experiments_run_developer_sets_under_a_recorded_configuration(console) 
     assert planning.status_code == 200
     planning = planning.json()
     assert planning["status"] == "succeeded"
-    assert planning["configuration"]["planner"] == "greedy-baseline"
-    assert planning["configuration"]["agent_parser_provider"] == "fixture"
+    # Only what the evaluation reads: the parser switch plays no part in planning.
+    assert planning["configuration"] == {"planner": "greedy-baseline"}
     assert planning["metrics"]["scenario_count"] == 20
     assert planning["conditions"]["dataset"]["path"].endswith("dev/planning-v1.json")
     assert len(planning["conditions"]["dataset"]["sha256"]) == 64
@@ -442,6 +442,14 @@ def test_users_are_listed_searched_and_edited_with_an_audit_row(console) -> None
     me = client.get("/api/ops/users", params={"q": "ops@"}).json()["items"][0]["id"]
     assert client.patch(f"/api/ops/users/{me}", json={"system_role": "ordinary_user"}).status_code == 409
     assert client.get("/api/ops/users/999999").status_code == 404
+
+
+def test_user_search_treats_percent_and_underscore_as_text(console) -> None:
+    client, factory = console
+    _second_account(factory)
+
+    for text in ("_", "%", "bo_"):
+        assert client.get("/api/ops/users", params={"q": text}).json() == {"items": [], "total": 0}
 
 
 def test_users_conversations_plans_and_accounts_can_be_deleted(console) -> None:

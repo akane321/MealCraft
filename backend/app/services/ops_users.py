@@ -48,12 +48,13 @@ class UsersService:
     def list(self, *, query: str | None, offset: int, limit: int) -> OpsUserCollection:
         filters = []
         if query:
-            pattern = f"%{query.strip().casefold()}%"
+            # autoescape keeps a typed % or _ literal text rather than a LIKE wildcard.
+            needle = query.strip().casefold()
             filters.append(
                 or_(
-                    User.normalized_email.like(pattern),
-                    User.username.like(pattern),
-                    func.lower(User.display_name).like(pattern),
+                    User.normalized_email.contains(needle, autoescape=True),
+                    User.username.contains(needle, autoescape=True),
+                    func.lower(User.display_name).contains(needle, autoescape=True),
                 )
             )
         total = self.database.scalar(select(func.count()).select_from(User).where(*filters)) or 0

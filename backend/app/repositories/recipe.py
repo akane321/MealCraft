@@ -179,7 +179,7 @@ class RecipeRepository:
             statement = statement.where(Recipe.id > after_id)
         # Every word of the query appears in the title (browsing, not ranking).
         for word in (query or "").split():
-            statement = statement.where(Recipe.title.ilike(f"%{word}%"))
+            statement = statement.where(Recipe.title.icontains(word, autoescape=True))
         if course is not None:
             statement = statement.where(Recipe.course == course)
 

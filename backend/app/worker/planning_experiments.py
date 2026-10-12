@@ -160,6 +160,8 @@ def _gate_summary(report: dict, case_count: int) -> tuple[dict[str, int], dict[s
         for candidate in row["candidate_checks"]
         for failure in candidate["failures"]
     )
+    # Without the gate the first draft ships; a case with no draft at all has no audit and ships nothing.
+    unchecked = [row["conditions"]["final_gate_off"].get("audit") for row in report["runs"]]
     return (
         {
             "case_count": case_count,
@@ -167,9 +169,9 @@ def _gate_summary(report: dict, case_count: int) -> tuple[dict[str, int], dict[s
                 row["conditions"]["final_gate_on"]["candidate_index"] is not None for row in report["runs"]
             ),
             "unchecked_invalid_count": sum(
-                (row["conditions"]["final_gate_off"].get("audit") or {}).get("status") != "passed"
-                for row in report["runs"]
+                audit is not None and audit.get("status") != "passed" for audit in unchecked
             ),
+            "unchecked_no_candidate_count": sum(audit is None for audit in unchecked),
         },
         dict(sorted(mechanisms.items())),
     )

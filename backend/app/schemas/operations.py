@@ -316,7 +316,8 @@ class ExperimentComparison(BaseModel):
     configurations: list[ExperimentComparisonRow]
     metrics: list[ExperimentComparisonRow]
     failure_mechanisms: list[ExperimentComparisonRow]
-    case_differences: list[ExperimentCaseDifference]
+    # None when either run stored no case-level report: nothing could be compared.
+    case_differences: list[ExperimentCaseDifference] | None
     claim_scope: str
 
 
