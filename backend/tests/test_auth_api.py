@@ -141,6 +141,44 @@ def test_duplicate_registration_and_login_errors_are_bounded(auth_client) -> Non
         assert user.credential.locked_until is not None
 
 
+def test_username_sign_in_is_the_default_and_email_still_works(auth_client) -> None:
+    client, _ = auth_client
+    password = "correct-horse-battery-staple"
+    chosen = client.post(
+        "/api/auth/register",
+        json={"email": "lim@example.test", "username": " Lim.Family ", "display_name": "Lim", "password": password},
+    )
+    assert chosen.status_code == 201
+    assert chosen.json()["actor"]["user"]["username"] == "lim.family"
+    # Left out, the username comes from the email; a clash gets a number.
+    assert _register(client, email="alice@example.test").json()["actor"]["user"]["username"] == "alice"
+    assert _register(client, email="alice@elsewhere.test").json()["actor"]["user"]["username"] == "alice-2"
+    taken = client.post(
+        "/api/auth/register",
+        json={"email": "other@example.test", "username": "LIM.family", "display_name": "Other", "password": password},
+    )
+    assert taken.status_code == 409
+    assert taken.json() == {"detail": "That username is taken"}
+    bad = client.post(
+        "/api/auth/register",
+        json={"email": "x@example.test", "username": "-x", "display_name": "X", "password": password},
+    )
+    assert bad.status_code == 422
+    client.cookies.clear()
+
+    assert client.post("/api/auth/login", json={"username": "LIM.Family", "password": password}).status_code == 200
+    client.cookies.clear()
+    assert client.post("/api/auth/login", json={"email": "LIM@example.test", "password": password}).status_code == 200
+    client.cookies.clear()
+    wrong = client.post("/api/auth/login", json={"username": "nobody", "password": password})
+    assert wrong.status_code == 401
+    assert wrong.json() == {"detail": "Invalid username or password"}
+    both = client.post(
+        "/api/auth/login", json={"username": "alice", "email": "alice@example.test", "password": password}
+    )
+    assert both.status_code == 422
+
+
 def test_login_lists_devices_and_rejects_suspended_account(auth_client) -> None:
     client, database_factory = auth_client
     assert _register(client).status_code == 201

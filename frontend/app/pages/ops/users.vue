@@ -159,7 +159,7 @@ async function confirmRemoval() {
       <p>Find an account to see its household, profile, conversations and plans. You can rename it, give or take console access, and delete its conversations, its plans or the account itself.</p>
     </header>
 
-    <label class="search">Search by name or email
+    <label class="search">Search by name, username or email
       <input v-model="search" type="search" placeholder="e.g. alice or @example.com">
     </label>
 
@@ -174,7 +174,7 @@ async function confirmRemoval() {
         <thead><tr><th>Account</th><th>Household</th><th>Conversations</th><th>Plans</th><th>Console</th><th>Last seen</th></tr></thead>
         <tbody>
           <tr v-for="user in page.items" :key="user.id" :class="{ current: user.id === selectedId }">
-            <td><button type="button" class="link" @click="open(user)">{{ user.display_name }}</button><span class="ops-muted email">{{ user.email }}</span></td>
+            <td><button type="button" class="link" @click="open(user)">{{ user.display_name }}</button><span class="ops-muted email"><template v-if="user.username">@{{ user.username }} · </template>{{ user.email }}</span></td>
             <td>{{ user.households.map(item => item.name).join(", ") || "—" }}</td>
             <td class="mc-num">{{ user.conversations }}</td>
             <td class="mc-num">{{ user.plans }}</td>
@@ -196,7 +196,7 @@ async function confirmRemoval() {
           <div>
             <p class="mc-eyebrow">Account #{{ selectedId }}</p>
             <h2 id="user-title" class="mc-serif">{{ detail?.display_name ?? "Loading…" }}</h2>
-            <p v-if="detail" class="ops-muted">{{ detail.email }} · joined {{ formatWhen(detail.created_at) }}</p>
+            <p v-if="detail" class="ops-muted"><template v-if="detail.username">@{{ detail.username }} · </template>{{ detail.email }} · joined {{ formatWhen(detail.created_at) }}</p>
           </div>
           <button type="button" class="mc-pill" @click="close">Close</button>
         </header>

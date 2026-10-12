@@ -665,9 +665,11 @@ def test_admin_accounts_are_created_updated_and_can_sign_in(operations_client) -
     assert users["ops@example.test"].system_role == "admin"
     assert users["ops@example.test"].display_name == "Ops Renamed"
     assert users["second@example.test"].system_role == "admin"
+    # An administrator signs in with the email's local part as the username.
+    assert users["ops@example.test"].username == "ops"
 
     with TestClient(app) as admin:
-        login = admin.post("/api/auth/login", json={"email": "ops@example.test", "password": "changed-password-123"})
+        login = admin.post("/api/auth/login", json={"username": "ops", "password": "changed-password-123"})
         assert login.status_code == 200
         assert admin.get("/api/auth/me").json()["user"]["system_role"] == "admin"
         assert admin.get("/api/ops/tasks").status_code == 200

@@ -94,7 +94,7 @@ async function signIn(page: Page) {
     await page.getByRole("radio", { name: "Administrator" }).click();
     await expect(page.getByRole("heading", { name: "Administrator sign in" })).toBeVisible({ timeout: 1000 });
   }).toPass();
-  await page.getByLabel("Email").fill("ops@example.test");
+  await page.getByLabel("Username").fill("ops");
   await page.getByLabel("Password").fill("console-password");
   await page.getByRole("button", { name: "Sign in to the console" }).click();
   await expect(page).toHaveURL(/\/ops$/);

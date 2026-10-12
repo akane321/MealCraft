@@ -52,7 +52,10 @@ export function useAuth() {
       return true;
     }
     catch (error) {
-      errorMessage.value = (error as { data?: { detail?: string } }).data?.detail || "Authentication failed.";
+      const detail = (error as { data?: { detail?: string | { msg?: string }[] } }).data?.detail;
+      // A rejected field (422) comes as a list; show its first reason, as written by the API.
+      const reason = Array.isArray(detail) ? detail[0]?.msg?.replace(/^Value error, /, "") : detail;
+      errorMessage.value = reason ? reason.charAt(0).toUpperCase() + reason.slice(1) : "Authentication failed.";
       return false;
     }
     finally {

@@ -336,6 +336,7 @@ class OpsUserHousehold(BaseModel):
 class OpsUserSummary(BaseModel):
     id: int
     email: str
+    username: str | None = None
     display_name: str
     system_role: str
     status: str
