@@ -76,6 +76,20 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
   ];
 });
 const title = computed(() => messages.value.find(m => m.role === "user")?.content ?? "New plan");
+// The week the conversation will plan, shown before planning with a way to move its first day.
+const weekStart = computed(() => constraints.value?.start_date ?? null);
+const weekStartLabel = computed(() => {
+  if (!weekStart.value) return "";
+  const fmt = (d: string) => formatPlanDate(d, { weekday: "short", day: "numeric", month: "short" });
+  const end = new Date(`${weekStart.value}T00:00:00Z`);
+  end.setUTCDate(end.getUTCDate() + 6);
+  return `${fmt(weekStart.value)} – ${fmt(end.toISOString().slice(0, 10))}`;
+});
+// Moving the start is said, like any change, so the assistant reads it and the conversation records it.
+function moveStart(event: Event) {
+  const value = (event.target as HTMLInputElement).value;
+  if (value && value !== weekStart.value) void send(`Start the week on ${value}`);
+}
 const rangeLabel = computed(() => {
   if (!plan.value) return "";
   const fmt = (d: string) => formatPlanDate(d, { day: "numeric", month: "short" });
@@ -616,6 +630,12 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <div v-if="heard.length" class="heard">
                   <span v-for="item in heard" :key="item.text + item.value" class="mc-chip" :class="{ alert: item.alert }">{{ item.text }} <b>{{ item.value }}</b></span>
                 </div>
+                <div v-if="weekStart" class="week-start">
+                  <span class="mc-chip">Week <b>{{ weekStartLabel }}</b></span>
+                  <label class="mc-small">Start on
+                    <input id="week-start" type="date" :value="weekStart" :min="todayIsoDate()" :disabled="isLoading" @change="moveStart">
+                  </label>
+                </div>
                 <p>Ready to plan your week with these details.</p>
               </div>
               <div class="card-foot">
@@ -931,6 +951,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .bot p { margin: 0; max-width: 560px; white-space: pre-line; }
 .options, .heard { display: flex; flex-wrap: wrap; gap: 8px; }
 .heard { gap: 6px; }
+.week-start { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 8px; }
+.week-start label { display: inline-flex; align-items: center; gap: 6px; color: var(--c-muted); }
+.week-start input { font: inherit; padding: 2px 6px; border: 1px solid var(--c-line); border-radius: 8px; background: #fff; color: var(--c-ink); }
 .card { align-self: flex-start; width: min(460px, 100%); }
 .card-body { display: flex; flex-direction: column; gap: 12px; padding: 16px 20px; }
 .card-body p { margin: 0; }
