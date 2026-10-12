@@ -70,8 +70,8 @@ def normalized(quantity, unit):
 
 
 # Fallback searches for a stated budget: how strongly a dish's cost, relative to the budget for
-# one meal (a composed week) or to the packet's cheapest dish (one dish a dinner), is added to its
-# rank loss (which lies in 0..1).
+# one meal, is added to its rank loss (which lies in 0..1). One dish a dinner also weighs it against
+# the packet's cheapest dish (ONE_DISH_COST_WEIGHTS).
 COST_WEIGHTS = (1.0, 4.0, 16.0)
 # One dish a dinner searches once more, with cost all but deciding: against its cheapest dish, x16 at most left
 # the fixture catalog's 2-person week offering S$43.25 at every refused budget where a S$31.70 week plans (main's
@@ -568,10 +568,17 @@ class ProductPlanningEngine:
                     # with "cheapest" weeks of S$41.80 to S$55.40, and first planned at S$58.
                     unit = min((c for c in map(dish_cost, recommendations) if c > 0), default=1.0)
                     cost = {r.recipe.slug: dish_cost(r) / unit for r in recommendations}
+                    # The budget-led weights are searched too, against the budget for one dinner (here in the same
+                    # unit): a roomier budget presses cost less, and the most varied week within it comes first.
+                    # Against the cheapest dish alone, the fixture 2-person week at S$60 was one curry four times
+                    # (S$46.50) where those weights plan five different dinners (S$55.55). The fixed weights' weeks
+                    # are still tried under any budget, so a refusal names at most their cheapest (S$31.70 there).
+                    per_slot = budget / constraints.day_count
+                    weights = sorted({*(w * unit / per_slot for w in COST_WEIGHTS), *ONE_DISH_COST_WEIGHTS})
 
                     def cost_fallback() -> list[list[PlanningAssignment]]:
                         found_states: list = []
-                        for weight in ONE_DISH_COST_WEIGHTS:
+                        for weight in weights:
                             blended = {slug: loss + weight * cost[slug] for slug, loss in losses.items()}
                             found = BeamPlanner(self.limits, local_losses=blended).search_candidates(
                                 problem.model_copy(deep=True)
@@ -588,7 +595,7 @@ class ProductPlanningEngine:
                             key=lambda item: (sameness([r for _, r in item[1].choices]), item[0], item[1].loss)
                         )
                         extra = [state.choices for _, state in found_states]
-                        trace["cost_fallback"] = {"weights": list(ONE_DISH_COST_WEIGHTS), "candidates": len(extra)}
+                        trace["cost_fallback"] = {"weights": [round(w, 4) for w in weights], "candidates": len(extra)}
                         return [[PlanningAssignment(slot_id=s, recipe_id=r) for s, r in picked] for picked in extra]
 
                     fallback = cost_fallback
@@ -842,11 +849,12 @@ class ProductPlanningEngine:
         if passed:
             result = over_budget_pick(passed, problem.slots, constraints.weekly_budget_sgd)
         if result is None:
-            # A search that built no week said why (a meal, the repeats, the budget): no week reached a check, so
-            # an input issue elsewhere in the pool (one recipe's servings) did not decide it, and "details are
-            # missing" sent the household to retry a request that cannot plan as asked.
-            emptied_by = trace.get("search", {}).get("emptied_by") if not trace["validation_attempts"] else None
-            uncertain = uncertain and emptied_by is None
+            # A search that built no week said why (a meal, the repeats, the budget) or ran out of steps: no week
+            # reached a check, so an input issue elsewhere in the pool (one recipe's servings) did not decide it, and
+            # "details are missing" sent the household to retry a request that cannot plan as asked.
+            searched = trace.get("search", {}) if not trace["validation_attempts"] else {}
+            emptied_by = searched.get("emptied_by")
+            uncertain = uncertain and emptied_by is None and not searched.get("exhausted")
             evidence = "needs_data" if uncertain else "bounded_search_exhausted"
             status = "needs_data" if uncertain else "candidate_rejected"
             if (
