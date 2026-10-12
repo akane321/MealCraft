@@ -52,9 +52,18 @@ export function spendsOpenAI(evaluation: string, parser: unknown) {
   return evaluation === "agent-benchmark" && parser !== "fixture";
 }
 
+/** Only a durable-worker run waits in a queue; the others start in the request or in a background thread. */
+export const queuesRun = (evaluation: OpsEvaluation) => evaluation.execution_mode === "durable_worker";
+
+/** How the run executes, for the chip: the API calls every non-worker run "legacy_inline", but the paid OpenAI benchmark runs in the background. */
+export function experimentExecution(evaluation: OpsEvaluation, parser: unknown) {
+  if (queuesRun(evaluation)) return "Durable worker";
+  return evaluation.name === "agent-benchmark" && parser === "openai" ? "Runs in the background" : "Legacy inline";
+}
+
 /** The confirmation before an evaluation starts; `parser` is the one the run will use. */
 export function experimentConfirmMessage(evaluation: OpsEvaluation, parser: unknown) {
-  const message = `Queue ${evaluation.label} on ${evaluation.dataset}. The run records its parameters, the data hashes and the code revision where the server knows it, and cannot replace an earlier result.`;
+  const message = `${queuesRun(evaluation) ? "Queue" : "Run"} ${evaluation.label} on ${evaluation.dataset}. The run records its parameters, the data hashes and the code revision where the server knows it, and cannot replace an earlier result.`;
   if (!spendsOpenAI(evaluation.name, parser)) return message;
   return parser === "openai"
     ? `${message} It calls the paid OpenAI model twice for every message (it reads each message, then runs the assistant on it) and runs in the background.`

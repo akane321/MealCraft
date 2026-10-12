@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { diffFields, dishRows, formatSeconds, formatValue, formatWhen, humanKey, statusColor } from "~/lib/ops";
+import { REPLAY_FIELD_LABELS as fieldLabel, describeOverrides, diffFields, dishRows, formatSeconds, formatValue, formatWhen, humanKey, statusColor } from "~/lib/ops";
 import type { OpsReplay, OpsReplaySummary } from "~/types/ops";
 
 const config = useRuntimeConfig();
@@ -106,7 +106,7 @@ async function runAgain() {
             <button type="button" :class="{ current: item.id === selectedId }" @click="open(item.id)">
               <span>{{ item.kind === "agent" ? "Assistant turn" : "Planning run" }} #{{ item.source_id }}</span>
               <span class="ops-muted small">{{ humanKey(item.original_status ?? "unknown") }} → {{ humanKey(item.replay_status ?? "unknown") }}</span>
-              <span class="ops-muted small">{{ Object.keys(item.overrides).length ? Object.entries(item.overrides).map(([k, v]) => `${humanKey(k)} ${v}`).join(", ") : "Same settings" }} · {{ formatWhen(item.created_at) }}</span>
+              <span class="ops-muted small">{{ describeOverrides(item.overrides) }} · {{ formatWhen(item.created_at) }}</span>
             </button>
           </li>
         </ul>
@@ -169,21 +169,21 @@ async function runAgain() {
             <h3>Replay again with other settings</h3>
             <p class="ops-muted small">Leave a field empty to keep what the stored run used.</p>
             <div v-if="replay.kind === 'agent'" class="fields">
-              <label>Parser
+              <label>{{ fieldLabel.parser }}
                 <select v-model="agentParser"><option value="">Current setting</option><option value="fixture">Rule-based (fixture)</option><option value="openai">OpenAI model</option></select>
               </label>
             </div>
             <div v-else class="fields">
-              <label>Planner
+              <label>{{ fieldLabel.planner_strategy }}
                 <select v-model="planning.planner_strategy"><option value="">As stored</option><option value="beam">Beam search</option><option value="greedy-baseline">Greedy baseline</option></select>
               </label>
-              <label>Beam width <input v-model="planning.beam_width" type="number" min="1" max="512" placeholder="As stored"></label>
-              <label>Search steps <input v-model="planning.max_expansions" type="number" min="1" max="1000000" placeholder="As stored"></label>
-              <label>Prices
+              <label>{{ fieldLabel.beam_width }} <input v-model="planning.beam_width" type="number" min="1" max="512" placeholder="As stored"></label>
+              <label>{{ fieldLabel.max_expansions }} <input v-model="planning.max_expansions" type="number" min="1" max="1000000" placeholder="As stored"></label>
+              <label>{{ fieldLabel.pricing_mode }}
                 <select v-model="planning.pricing_mode"><option value="">As stored</option><option value="fixture">Fixture</option><option value="live">Live FairPrice</option></select>
               </label>
-              <label>Weekly budget (S$) <input v-model="planning.weekly_budget_sgd" type="number" min="1" max="7000" step="0.01" placeholder="As stored"></label>
-              <label>Capability
+              <label>{{ fieldLabel.weekly_budget_sgd }} <input v-model="planning.weekly_budget_sgd" type="number" min="1" max="7000" step="0.01" placeholder="As stored"></label>
+              <label>{{ fieldLabel.planning_capability }}
                 <select v-model="planning.planning_capability"><option value="">Current setting</option><option value="mvp">MVP (one dish a meal)</option><option value="full">Full (several dishes)</option></select>
               </label>
             </div>

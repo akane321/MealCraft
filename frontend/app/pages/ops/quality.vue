@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatWhen, humanKey } from "~/lib/ops";
-import { qualityBytes, qualityDistribution, qualityPageLabel, qualityPercent, shortQualityDigest } from "~/lib/ops-quality";
+import { qualityBytes, qualityDistribution, qualityPageLabel, qualityPercent, qualityReasonLabel, shortQualityDigest } from "~/lib/ops-quality";
 import type { OpsDataQualitySummary, OpsDroppedCandidateCollection } from "~/types/ops-quality";
 
 const PAGE_SIZE = 25;
@@ -222,7 +222,7 @@ onMounted(retryAll);
           <label>Reason
             <select v-model="reason" @change="selectReason">
               <option value="">All reasons</option>
-              <option v-for="option in reasonOptions" :key="option" :value="option">{{ humanKey(option) }}</option>
+              <option v-for="option in reasonOptions" :key="option" :value="option">{{ qualityReasonLabel(option) }}</option>
             </select>
           </label>
         </header>
@@ -235,7 +235,7 @@ onMounted(retryAll);
         </ol>
 
         <div v-if="summary.dropped_by_reason" class="reason-counts" aria-label="Dropped counts by reason">
-          <span v-for="(count, key) in summary.dropped_by_reason" :key="key"><b class="mc-num">{{ count.toLocaleString() }}</b> {{ humanKey(key) }}</span>
+          <span v-for="(count, key) in summary.dropped_by_reason" :key="key"><b class="mc-num">{{ count.toLocaleString() }}</b> {{ qualityReasonLabel(key) }}</span>
         </div>
 
         <div v-if="droppedFailed" class="inline-error" role="alert">
@@ -258,7 +258,7 @@ onMounted(retryAll);
                 <tr v-for="item in dropped.items" :key="item.candidate_id">
                   <td class="mc-num">{{ item.candidate_id }}</td>
                   <td>{{ item.title }}</td>
-                  <td><span class="reason-pill">{{ humanKey(item.reason) }}</span></td>
+                  <td><span class="reason-pill">{{ qualityReasonLabel(item.reason) }}</span></td>
                 </tr>
               </tbody>
             </table>
@@ -331,11 +331,15 @@ onMounted(retryAll);
 .dropped-card { padding: 0; overflow: hidden; }
 .dropped-card > header { padding: 20px; }
 .dropped-card > header h2 { margin-bottom: 5px; }
-.dropped-card label { display: grid; min-width: 220px; gap: 5px; color: var(--t3); font-size: 12px; }
+.dropped-card label { display: grid; flex: 0 0 220px; grid-template-columns: minmax(0, 1fr); gap: 5px; color: var(--t3); font-size: 12px; }
+.dropped-card select { width: 100%; min-width: 0; }
 select { padding: 8px 10px; border: 1px solid var(--line-2); border-radius: 9px; background: var(--s2); color: var(--ivory); font: inherit; }
-.funnel { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; padding: 0 20px 14px; list-style: none; color: var(--t2); font-size: 12.5px; }
-.funnel li + li::before { margin-right: 18px; color: var(--t3); content: "→"; }
-.funnel small { margin-left: 4px; color: var(--t3); }
+/* One column a step, so a step never wraps away from the arrow before it: the arrow sits in the gap, not in the text. */
+.funnel { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px 30px; margin: 0; padding: 0 20px 14px; list-style: none; color: var(--t2); font-size: 12.5px; }
+.funnel li { position: relative; }
+.funnel li + li::before { position: absolute; top: 0; left: -22px; color: var(--t3); content: "→"; }
+.funnel b { display: block; }
+.funnel small { display: block; margin-top: 2px; color: var(--t3); }
 .reason-counts { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 16px; }
 .reason-counts span, .reason-pill { padding: 3px 9px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--t2); font-size: 12px; }
 .inline-error, .empty { margin: 0; padding: 18px 20px; border-top: 1px solid var(--line); }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatSeconds, formatValue, formatWhen, humanKey, statusColor } from "~/lib/ops";
-import { caseEvidence, categoryRows, currentParserLabel, draftChanges, evidenceMatch, experimentConfirmMessage, experimentGates, experimentHeadline, presetBreakdown, spendsOpenAI } from "~/lib/ops-experiments";
+import { caseEvidence, categoryRows, currentParserLabel, draftChanges, evidenceMatch, experimentConfirmMessage, experimentExecution, experimentGates, experimentHeadline, presetBreakdown, queuesRun, spendsOpenAI } from "~/lib/ops-experiments";
 import type { OpsEvaluation, OpsEvaluationName, OpsExperiment, OpsExperimentComparison, OpsExperimentDetail, OpsRuntimeSetting, OpsSettingChange } from "~/types/ops";
 
 const config = useRuntimeConfig();
@@ -127,7 +127,8 @@ function askExperiment() {
   pendingExperiment.value = true;
 }
 async function runExperiment() {
-  pendingExperiment.value = false;
+  // Checked at once, not through a disabled button: a second click can arrive before the page redraws.
+  if (running.value) return;
   running.value = true;
   runError.value = "";
   const overrides: Record<string, string> = {};
@@ -161,6 +162,7 @@ async function runExperiment() {
   }
   finally {
     running.value = false;
+    pendingExperiment.value = false;
   }
 }
 
@@ -316,7 +318,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
         </label>
         <p v-if="chosen" class="ops-muted small">
           {{ chosen.description }} Dataset {{ chosen.dataset }}.
-          <span class="mc-chip">{{ chosen.execution_mode === "durable_worker" ? "Durable worker" : "Legacy inline" }}</span>
+          <span class="mc-chip">{{ experimentExecution(chosen, runParser) }}</span>
         </p>
         <template v-if="isPlanningExperiment">
           <label v-if="isComponentExperiment">Repeats
@@ -401,7 +403,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
           <h3>Case changes</h3>
           <p v-if="!comparison?.case_differences" class="ops-muted small">One or both runs stored no case-level report, so case changes cannot be compared.</p>
           <p v-else-if="!comparison.case_differences.length" class="ops-muted small">No case changed status or failure mechanism.</p>
-          <table v-else class="metrics">
+          <table v-else class="metrics case-changes">
             <thead><tr><th>Case / condition</th><th>A status</th><th>B status</th><th>Failures gained</th><th>Failures lost</th></tr></thead>
             <tbody>
               <tr v-for="item in comparison.case_differences" :key="`${item.case_id}-${item.condition}`">
@@ -456,9 +458,9 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
     />
     <OpsConfirm
       v-if="pendingExperiment"
-      title="Queue this evaluation?"
+      :title="chosen && queuesRun(chosen) ? 'Queue this evaluation?' : 'Run this evaluation?'"
       :message="experimentMessage"
-      action="Queue evaluation"
+      :action="chosen && queuesRun(chosen) ? 'Queue evaluation' : 'Start run'"
       :danger="spendsOpenAI(form.evaluation, runParser)"
       :busy="running"
       @confirm="runExperiment"
@@ -575,6 +577,11 @@ h3 { margin: 16px 0 8px; color: var(--t2); font-size: 12px; font-weight: 600; le
 .comparison-blocked { border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent); background: color-mix(in srgb, var(--danger) 8%, transparent); color: var(--t2); }
 .comparison-blocked ul { margin: 6px 0 0; padding-left: 18px; }
 .evidence-table td { max-width: 180px; overflow-wrap: anywhere; }
+/* Five columns in half a page: headings and the long failure codes wrap rather than push the card wider; a status stays whole. */
+.case-changes th, .case-changes td { padding: 9px 8px; }
+.case-changes thead th { white-space: normal; }
+.case-changes td:nth-child(-n+3) { white-space: nowrap; }
+.case-changes td:nth-child(n+4) { overflow-wrap: anywhere; }
 /* The drawer's overlay; each ops page styles its own (tasks.vue, users.vue, data.vue). */
 .drawer-scrim { position: fixed; inset: 0; z-index: 30; display: flex; justify-content: flex-end; background: rgba(14, 12, 10, 0.6); }
 .drawer { width: min(720px, 100%); height: 100%; overflow-y: auto; padding: 24px; border-left: 1px solid var(--line-2); background: var(--s1); animation: mc-rise 320ms var(--ease) both; }

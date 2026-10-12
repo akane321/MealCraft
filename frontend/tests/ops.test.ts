@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { TASK_STATUSES, compareMetrics, diffFields, dishRows, formatSeconds, formatValue, formatWhen, isConsoleAccount, isJobCancellable, jobIdempotencyKey, linePath, mayManageJobs, niceMax, packageGrams, parseTaskKey, singaporeMidnight, splitNames, statusColor, statusesIn } from "../app/lib/ops";
+import { TASK_STATUSES, compareMetrics, describeOverrides, diffFields, dishRows, formatSeconds, formatValue, formatWhen, isConsoleAccount, isJobCancellable, jobIdempotencyKey, linePath, mayManageJobs, niceMax, packageGrams, parseTaskKey, singaporeMidnight, splitNames, statusColor, statusesIn } from "../app/lib/ops";
 
 describe("ops console slice 2 helpers", () => {
   it("lists changed fields first and compares values, not references", () => {
@@ -20,6 +20,38 @@ describe("ops console slice 2 helpers", () => {
       ["Day 2 dinner (side)", null, "Rice", true],
     ]);
     expect(dishRows()).toEqual([]);
+  });
+
+  it("orders a day's dishes breakfast to snack with the main first, whatever order they arrive in", () => {
+    const dish = (day: number | null, meal: string, role: string) => ({ day, meal, role, recipe: `${meal} ${role}` });
+    const rows = dishRows([
+      dish(2, "dinner", "main"),
+      dish(1, "dinner", "vegetable-2"),
+      dish(1, "dinner", "soup"),
+      dish(1, "dinner", "vegetable"),
+      dish(1, "snack", "main"),
+      dish(1, "dinner", "main"),
+      dish(1, "lunch", "main"),
+      dish(1, "breakfast", "main"),
+      dish(null, "lunch", "main"),
+    ]);
+    expect(rows.map(row => row.slot)).toEqual([
+      "Day 1 breakfast",
+      "Day 1 lunch",
+      "Day 1 dinner",
+      "Day 1 dinner (vegetable)",
+      "Day 1 dinner (vegetable-2)",
+      "Day 1 dinner (soup)",
+      "Day 1 snack",
+      "Day 2 dinner",
+      "Day ? lunch",
+    ]);
+  });
+
+  it("names a replay's overrides as the replay form does", () => {
+    expect(describeOverrides({})).toBe("Same settings");
+    expect(describeOverrides({ weekly_budget_sgd: 60, max_expansions: 50, beam_width: 8, planner_strategy: "beam" })).toBe("Weekly budget (S$): 60, Search steps: 50, Beam width: 8, Planner: beam");
+    expect(describeOverrides({ parser: "openai", future_switch: true })).toBe("Parser: openai, Future switch: yes");
   });
 
   it("subtracts A from B only where both are numbers", () => {

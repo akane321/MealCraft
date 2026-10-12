@@ -22,7 +22,12 @@ const planningDetail = {
   warnings: [],
 };
 
-const week = (recipes: string[]) => recipes.map((recipe, index) => ({ day: index + 1, meal: "dinner", role: "main", recipe }));
+// Day 1's lunch and vegetable come last in the stub, as the planner may return them, to see the table put them in the order of the day.
+const week = (recipes: string[]) => [
+  ...recipes.map((recipe, index) => ({ day: index + 1, meal: "dinner", role: "main", recipe })),
+  { day: 1, meal: "dinner", role: "vegetable", recipe: "Garlic Bok Choy" },
+  { day: 1, meal: "lunch", role: "main", recipe: "Chicken Congee" },
+];
 function replay(id: number, overrides: Record<string, unknown>, budget: number) {
   return {
     id,
@@ -227,13 +232,19 @@ test("an administrator replays a failed plan, switches the parser and edits an a
   await expect(compare.getByRole("row", { name: /Total cost S\$34\.10 S\$37\.50/ })).toBeVisible();
   await expect(compare.getByRole("row", { name: /Checks not passed Purchase budget none/ })).toBeVisible();
   await expect(compare.getByRole("row", { name: "Day 1 dinner — Lemon Chicken" })).toHaveClass(/changed/);
+  await expect(compare.getByRole("table").nth(1).locator("tbody th")).toHaveText(["Day 1 lunch", "Day 1 dinner", "Day 1 dinner (vegetable)", "Day 2 dinner", "Day 3 dinner", "Day 4 dinner", "Day 5 dinner", "Day 6 dinner", "Day 7 dinner"]);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/ops-4-replay.png`, fullPage: true });
 
   await compare.getByLabel("Weekly budget (S$)").fill("60");
   await compare.getByRole("button", { name: "Replay with these settings" }).click();
   await expect(page).toHaveURL(/replay=6/);
   await expect(compare.getByRole("row", { name: /Total cost S\$34\.10 S\$57\.50/ })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Recent replays" }).getByRole("button")).toHaveCount(2);
+  const recent = page.getByRole("region", { name: "Recent replays" });
+  await expect(recent.getByRole("button")).toHaveCount(2);
+  // An override reads as the replay form's own label, not its key.
+  await expect(recent.getByRole("button").first()).toContainText("Weekly budget (S$): 60");
+  await expect(recent).not.toContainText("Weekly budget sgd");
+  await expect(recent.getByRole("button").last()).toContainText("Same settings");
 
   // Switch the assistant parser, with a confirmation, and see it in the history.
   await nav.getByRole("link", { name: "Experiments & config" }).click();

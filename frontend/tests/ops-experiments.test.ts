@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { caseEvidence, categoryRows, currentParserLabel, draftChanges, evidenceMatch, experimentConfirmMessage, experimentGates, experimentHeadline, presetBreakdown, spendsOpenAI } from "../app/lib/ops-experiments";
+import { caseEvidence, categoryRows, currentParserLabel, draftChanges, evidenceMatch, experimentConfirmMessage, experimentExecution, experimentGates, experimentHeadline, presetBreakdown, spendsOpenAI } from "../app/lib/ops-experiments";
 import type { OpsEvaluation, OpsExperiment, OpsRuntimeSetting } from "../app/types/ops";
 
 const run = (evaluation: string, metrics: Record<string, unknown>, extra: Partial<OpsExperiment> = {}) => ({
@@ -45,6 +45,27 @@ describe("experiments page", () => {
     expect(experimentConfirmMessage(benchmark, "fixture")).not.toContain("OpenAI");
     expect(experimentConfirmMessage(benchmark, "fixture")).toContain("cannot replace an earlier result");
     expect([spendsOpenAI("agent-benchmark", "openai"), spendsOpenAI("agent-benchmark", "fixture"), spendsOpenAI("developer-planning", "openai")]).toEqual([true, false, false]);
+  });
+
+  it("says how a run executes, and queues only a worker run", () => {
+    const evaluation = (name: string, execution_mode: OpsEvaluation["execution_mode"]) => ({ name, label: "Evaluation", dataset: "data/x.json", description: "", options: {}, execution_mode }) as OpsEvaluation;
+    const benchmark = evaluation("agent-benchmark", "legacy_inline");
+    const worker = evaluation("planning-components", "durable_worker");
+    const developer = evaluation("developer-planning", "legacy_inline");
+    // The API calls the paid OpenAI benchmark "legacy_inline", yet it runs in the background.
+    expect([experimentExecution(benchmark, "openai"), experimentExecution(benchmark, "fixture"), experimentExecution(benchmark, undefined)]).toEqual(["Runs in the background", "Legacy inline", "Legacy inline"]);
+    expect([experimentExecution(worker, "openai"), experimentExecution(developer, "openai")]).toEqual(["Durable worker", "Legacy inline"]);
+    expect(experimentConfirmMessage(worker, "fixture")).toMatch(/^Queue Evaluation on /);
+    expect(experimentConfirmMessage(developer, "fixture")).toMatch(/^Run Evaluation on /);
+    expect(experimentConfirmMessage(benchmark, "openai")).toMatch(/^Run Evaluation on .*runs in the background\.$/);
+  });
+
+  it("keeps the run in flight from starting twice and the case-changes table inside its card", () => {
+    const source = readFileSync(new URL("../app/pages/ops/experiments.vue", import.meta.url), "utf8");
+    // A disabled button is not enough: a second click can arrive before the page redraws.
+    expect(source).toContain("if (running.value) return;");
+    expect(source).toContain('class="metrics case-changes"');
+    expect(source).toMatch(/\.case-changes thead th \{ white-space: normal; \}/);
   });
 
   it("offers a number switch's change only for a new finite value", () => {
