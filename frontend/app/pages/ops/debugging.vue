@@ -177,8 +177,8 @@ async function runAgain() {
               <label>Planner
                 <select v-model="planning.planner_strategy"><option value="">As stored</option><option value="beam">Beam search</option><option value="greedy-baseline">Greedy baseline</option></select>
               </label>
-              <label>Beam width <input v-model="planning.beam_width" type="number" min="1" max="512" placeholder="32"></label>
-              <label>Search steps <input v-model="planning.max_expansions" type="number" min="1" max="1000000" placeholder="10000"></label>
+              <label>Beam width <input v-model="planning.beam_width" type="number" min="1" max="512" placeholder="As stored"></label>
+              <label>Search steps <input v-model="planning.max_expansions" type="number" min="1" max="1000000" placeholder="As stored"></label>
               <label>Prices
                 <select v-model="planning.pricing_mode"><option value="">As stored</option><option value="fixture">Fixture</option><option value="live">Live FairPrice</option></select>
               </label>

@@ -69,9 +69,14 @@ def normalized(quantity, unit):
     return (float(Fraction(str(quantity)) * Fraction(str(multiplier))) if quantity is not None else None), base
 
 
-# Fallback searches for a stated budget: how strongly a dish's cost, relative to the
-# budget for one dinner, is added to its rank loss (which lies in 0..1).
+# Fallback searches for a stated budget: how strongly a dish's cost, relative to the budget for
+# one meal (a composed week) or to the packet's cheapest dish (one dish a dinner), is added to its
+# rank loss (which lies in 0..1).
 COST_WEIGHTS = (1.0, 4.0, 16.0)
+# One dish a dinner searches once more, with cost all but deciding: against its cheapest dish, x16 at most left
+# the fixture catalog's 2-person week offering S$43.25 at every refused budget where a S$31.70 week plans (main's
+# budget-scaled weights found it at budgets up to S$10); x64 finds it, and x256 or x1000 find none cheaper.
+ONE_DISH_COST_WEIGHTS = (*COST_WEIGHTS, 64.0)
 # The cheapest-week search (see `plan`): the first budget it tries, how close it bisects the least budget it
 # completes a week within (a share of that budget), and the beam it searches with. Lighter than the ranked
 # search's beam: on the release catalog it finds as cheap a week in a third of the time (PR #211); 32 meals a
@@ -225,8 +230,11 @@ def composed_packet(
 
 
 class ProductPlanningEngine:
-    def __init__(self, *, limits=None, validator=None):
-        self.limits = limits or BeamLimits()
+    def __init__(self, *, overrides=None, validator=None):
+        # Search limits a caller sets ({"width": 2}: a Debugging replay) bound a composed week's meal beam too; a
+        # limit left out keeps the planner's own, which for a composed week grows with its slots.
+        self.overrides = overrides or {}
+        self.limits = replace(BeamLimits(), **self.overrides)
         self.validator = validator or FinalPlanningValidator()
 
     def _packet_limit(self, day_count: int) -> int:
@@ -553,13 +561,17 @@ class ProductPlanningEngine:
                 if budget is not None:
                     # The ranking never sees prices, so a tight budget can fail on every
                     # retained week. Only then do fallback searches blend each dish's
-                    # grocery cost into its rank, from lightly to strongly.
-                    per_slot = budget / constraints.day_count
-                    cost = {r.recipe.slug: dish_cost(r) / per_slot for r in recommendations}
+                    # grocery cost into its rank, from lightly to strongly. The cost is against the packet's
+                    # cheapest dish, not the budget: the weeks they find are the same under any budget, so the
+                    # cheapest week a refusal names plans under its cost and no budget plans one cheaper. Against
+                    # the budget for one dinner, the fixture catalog's 2-person week was refused at S$16 to S$52
+                    # with "cheapest" weeks of S$41.80 to S$55.40, and first planned at S$58.
+                    unit = min((c for c in map(dish_cost, recommendations) if c > 0), default=1.0)
+                    cost = {r.recipe.slug: dish_cost(r) / unit for r in recommendations}
 
                     def cost_fallback() -> list[list[PlanningAssignment]]:
                         found_states: list = []
-                        for weight in COST_WEIGHTS:
+                        for weight in ONE_DISH_COST_WEIGHTS:
                             blended = {slug: loss + weight * cost[slug] for slug, loss in losses.items()}
                             found = BeamPlanner(self.limits, local_losses=blended).search_candidates(
                                 problem.model_copy(deep=True)
@@ -576,7 +588,7 @@ class ProductPlanningEngine:
                             key=lambda item: (sameness([r for _, r in item[1].choices]), item[0], item[1].loss)
                         )
                         extra = [state.choices for _, state in found_states]
-                        trace["cost_fallback"] = {"weights": list(COST_WEIGHTS), "candidates": len(extra)}
+                        trace["cost_fallback"] = {"weights": list(ONE_DISH_COST_WEIGHTS), "candidates": len(extra)}
                         return [[PlanningAssignment(slot_id=s, recipe_id=r) for s, r in picked] for picked in extra]
 
                     fallback = cost_fallback
@@ -586,20 +598,18 @@ class ProductPlanningEngine:
             else:
                 # The search budget grows with the slots, so a three-meal week is searched as
                 # fully as a dinner week (ADR-0046 section 3).
-                meal_beam = MealBeamPlanner(
-                    MealBeamLimits(
-                        # 256 meals a slot keep the rotated dishes a 64-meal cut dropped; the budget
-                        # covers the beam's 32 states times those meals, slot by slot.
-                        meal_options_per_slot=256,
-                        max_expansions=max(MealBeamLimits().max_expansions, 32 * 256 * len(slots) + 256),
-                        repeat_cost=1.0,
-                        flat_repeat=True,
-                        max_meal_combinations=16384,
-                        distinct_kinds=True,
-                        rotate_candidates=True,
-                    ),
-                    local_losses=losses,
+                meal_limits = MealBeamLimits(
+                    # 256 meals a slot keep the rotated dishes a 64-meal cut dropped; the budget
+                    # covers the beam's 32 states times those meals, slot by slot.
+                    meal_options_per_slot=256,
+                    max_expansions=max(MealBeamLimits().max_expansions, 32 * 256 * len(slots) + 256),
+                    repeat_cost=1.0,
+                    flat_repeat=True,
+                    max_meal_combinations=16384,
+                    distinct_kinds=True,
+                    rotate_candidates=True,
                 )
+                meal_beam = MealBeamPlanner(replace(meal_limits, **self.overrides), local_losses=losses)
                 # The cheapest week is searched by the cost-led search alone (below).
                 search = (
                     MealBeamResult((), 0, False, False, ())

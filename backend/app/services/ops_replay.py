@@ -7,6 +7,7 @@ run of type "replay", which the product's task, series and service views do not 
 
 from __future__ import annotations
 
+import re
 import threading
 import time as clock
 from contextlib import contextmanager
@@ -23,7 +24,6 @@ from app.models.platform import OperationRun
 from app.models.recipe import Recipe
 from app.orchestration.contracts import InteractionRequest
 from app.orchestration.runtime import BoundedAgentOrchestrator
-from app.planning.beam_planner import BeamLimits
 from app.planning.grocery_estimator import GroceryEstimator
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
@@ -47,6 +47,7 @@ from app.services.product import create_product_search_service
 from app.services.recommendation import RecipeRecommendationService
 
 REPLAY_RUN_TYPE = "replay"
+SLOT_ID = re.compile(r"slot-(\d+)(?:-([a-z]+))?")
 
 
 class ReplayNotFoundError(LookupError):
@@ -182,11 +183,12 @@ class ReplayService:
                 key: changes[key] for key in ("planner_strategy", "pricing_mode", "weekly_budget_sgd") if key in changes
             }
         )
-        default = BeamLimits()
-        limits = BeamLimits(
-            width=changes.get("beam_width", default.width),
-            max_expansions=changes.get("max_expansions", default.max_expansions),
-        )
+        # A limit left empty keeps the planner's own, which for a composed week grows with its slots.
+        limits = {
+            field: changes[key]
+            for key, field in (("beam_width", "width"), ("max_expansions", "max_expansions"))
+            if key in changes
+        }
         captured = self._dry_run(request, limits, changes.get("planning_capability"))
         titles = self._titles(trace, captured)
         return self._record(
@@ -197,7 +199,7 @@ class ReplayService:
             _planning_outcome(captured, titles),
         )
 
-    def _dry_run(self, request: WeeklyMealPlanRequest, limits: BeamLimits, capability: str | None) -> OperationRun:
+    def _dry_run(self, request: WeeklyMealPlanRequest, limits: dict[str, int], capability: str | None) -> OperationRun:
         recipes = RecipeRepository(self.database)
         products = create_product_search_service(ProductSnapshotRepository(self.database))
         plans = _DryRunPlans()
@@ -206,7 +208,7 @@ class ReplayService:
             recipe_repository=recipes,
             recommendation_service=RecipeRecommendationService(recipes, grocery_estimator=GroceryEstimator(products)),
             grocery_aggregator=WeeklyGroceryAggregator(products),
-            planning_engine=ProductPlanningEngine(limits=limits),
+            planning_engine=ProductPlanningEngine(overrides=limits),
             actor_user_id=self.actor_user_id,
         )
         started_at = datetime.now(UTC)
@@ -318,12 +320,12 @@ def _planning_outcome(run: OperationRun, titles: dict[str, str]) -> dict[str, An
     validation = trace.get("validation") or {}
     dishes = []
     for item in trace.get("assignments") or []:
-        slot = str(item.get("slot_id", ""))
-        day = int(slot.rsplit("-", 1)[-1]) + 1 if slot.rsplit("-", 1)[-1].isdigit() else None
+        # The planner names a dinner "slot-{day}" and any other meal "slot-{day}-{meal}" (product_path.py).
+        slot = SLOT_ID.fullmatch(str(item.get("slot_id", "")))
         dishes.append(
             {
-                "day": day,
-                "meal": "dinner",
+                "day": int(slot[1]) + 1 if slot else None,
+                "meal": (slot[2] if slot else None) or "dinner",
                 "role": item.get("role_id") or "main",
                 "recipe": titles.get(item["recipe_id"], item["recipe_id"]),
             }
