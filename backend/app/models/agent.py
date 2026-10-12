@@ -70,6 +70,10 @@ class AgentSession(Base):
         ForeignKey("meal_plan_events.id", ondelete="SET NULL"),
         nullable=True,
     )
+    # The household's own name for the conversation; None shows its first message.
+    title: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    # When the household pinned it to the top of its list; None is not pinned.
+    pinned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

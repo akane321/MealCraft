@@ -16,6 +16,7 @@ from app.schemas.meal_plan import (
     WeeklyMealPlanRequest,
 )
 from app.schemas.recommendation import RecipeRecommendationResponse
+from app.services.cleanup import delete_plans
 
 
 class MealPlanRevisionConflictError(RuntimeError):
@@ -144,6 +145,17 @@ class MealPlanRepository:
             )
         )
         return self.session.scalars(statement).unique().one_or_none()
+
+    def delete(self, plan_id: int) -> bool:
+        """Delete a week of this household; a conversation that planned it stays, without a week."""
+        plan = self.session.scalar(
+            select(MealPlan).where(MealPlan.id == plan_id, MealPlan.household_id == self.household_id)
+        )
+        if plan is None:
+            return False
+        delete_plans(self.session, [plan])
+        self.session.commit()
+        return True
 
     def list_recent(self, *, limit: int) -> list[MealPlan]:
         statement = (

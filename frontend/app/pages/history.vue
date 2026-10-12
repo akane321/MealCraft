@@ -28,6 +28,27 @@ onMounted(async () => {
   }
 });
 
+// Deleting a week (testing and demos pile them up): asked first, then gone with its days and groceries.
+const removing = ref<WeeklyMealPlanCollection["items"][number] | null>(null);
+const busy = ref(false);
+async function removeWeek() {
+  const week = removing.value;
+  if (!week) return;
+  busy.value = true;
+  try {
+    await apiFetch(`${config.public.apiBase}/api/plans/${week.id}`, { method: "DELETE" });
+    weeks.value = weeks.value.filter(item => item.id !== week.id);
+    if (open.value === week.id) open.value = null;
+  }
+  catch {
+    error.value = "That week could not be deleted. Try again in a moment.";
+  }
+  finally {
+    busy.value = false;
+    removing.value = null;
+  }
+}
+
 async function toggle(planId: number) {
   open.value = open.value === planId ? null : planId;
   if (open.value === null || details.value[planId]) return;
@@ -75,6 +96,9 @@ const range = (start: string, end: string) => `${formatPlanDate(start, { day: "n
     <ol class="weeks">
       <!-- Planning the same days again replaces a week (backend `current`): it stays listed, marked, under the newer one. -->
       <li v-for="week in weeks" :key="week.id" class="week" :class="{ replaced: week.current === false }">
+        <button type="button" class="remove" :aria-label="`Delete the week of ${range(week.start_date, week.end_date)}`" title="Delete this week" @click="removing = week">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" /></svg>
+        </button>
         <button type="button" class="summary" :aria-expanded="open === week.id" @click="toggle(week.id)">
           <span class="when mc-serif">{{ range(week.start_date, week.end_date) }}<span v-if="week.current === false" class="tag">Replaced by a newer plan</span></span>
           <span class="meta">
@@ -105,6 +129,15 @@ const range = (start: string, end: string) => `${formatPlanDate(start, { day: "n
     </ol>
 
     <HomeRecipeSheet v-if="openSlug" :slug="openSlug" @close="openSlug = null" />
+    <HomeConfirm
+      v-if="removing"
+      title="Delete this week?"
+      :message="`The week of ${range(removing.start_date, removing.end_date)} will be deleted with its dishes, groceries and changes. A conversation that planned it stays. This cannot be undone.`"
+      action="Delete week"
+      :busy="busy"
+      @confirm="removeWeek"
+      @cancel="removing = null"
+    />
   </main>
 </template>
 
@@ -113,8 +146,11 @@ const range = (start: string, end: string) => `${formatPlanDate(start, { day: "n
 h1 { margin: 6px 0 22px; font-family: var(--serif); font-weight: 300; font-size: clamp(26px, 4vw, 36px); text-wrap: balance; }
 .notice { color: var(--t3); }
 .weeks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.week { border: 1px solid var(--border); border-radius: 14px; background: var(--s1); overflow: hidden; }
-.summary { width: 100%; display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; justify-content: space-between; padding: 14px 16px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.week { position: relative; border: 1px solid var(--border); border-radius: 14px; background: var(--s1); overflow: hidden; }
+.remove { position: absolute; z-index: 1; top: 10px; right: 10px; width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: var(--t3); }
+.remove:hover, .remove:focus-visible { background: var(--s2); color: var(--c-coral); }
+.remove svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.summary { width: 100%; display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; justify-content: space-between; padding: 14px 52px 14px 16px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .summary:hover, .summary:focus-visible { background: var(--s2); }
 .when { display: inline-flex; align-items: baseline; gap: 10px; font-size: 18px; }
 .tag { padding: 1px 8px; border: 1px solid var(--border); border-radius: 999px; font-family: Nunito, system-ui, sans-serif; font-size: 12px; color: var(--t3); }

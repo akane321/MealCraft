@@ -121,6 +121,9 @@ export interface AgentSession {
   last_scope_decision: AgentScopeDecision | null;
   pending_interaction: AgentInteractionRequest | null;
   can_confirm: boolean;
+  // The household's own name for it (null: its first message stands in) and when it was pinned (null: not pinned).
+  title?: string | null;
+  pinned_at?: string | null;
   created_at: string;
   updated_at: string;
 }

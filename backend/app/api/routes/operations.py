@@ -455,6 +455,28 @@ def delete_user_plans(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found") from error
 
 
+@router.delete("/users/{user_id}/conversations/{session_id}", response_model=OpsDeleted)
+def delete_user_conversation(
+    user_id: int, session_id: int, current: CurrentOperationsWriteDependency, database: DatabaseDependency
+) -> OpsDeleted:
+    try:
+        _users(current, database).delete_conversation(user_id, session_id)
+    except OpsUserNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found") from error
+    return OpsDeleted(deleted=1)
+
+
+@router.delete("/users/{user_id}/plans/{plan_id}", response_model=OpsDeleted)
+def delete_user_plan(
+    user_id: int, plan_id: int, current: CurrentOperationsWriteDependency, database: DatabaseDependency
+) -> OpsDeleted:
+    try:
+        _users(current, database).delete_plan(user_id, plan_id)
+    except OpsUserNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Week not found") from error
+    return OpsDeleted(deleted=1)
+
+
 @router.delete("/users/{user_id}", response_model=OpsDeleted)
 def delete_user(user_id: int, current: CurrentOperationsWriteDependency, database: DatabaseDependency) -> OpsDeleted:
     try:

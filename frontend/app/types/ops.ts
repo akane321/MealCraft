@@ -254,7 +254,7 @@ export interface OpsUser {
 }
 
 export interface OpsUserDetail extends OpsUser {
-  recent_conversations: Array<{ id: number; status: string; messages: number; first_message: string | null; created_at: string }>;
+  recent_conversations: Array<{ id: number; title?: string | null; status: string; messages: number; first_message: string | null; created_at: string }>;
   recent_plans: Array<{ id: number; start_date: string; total_sgd: number; household_size: number; created_at: string }>;
 }
 

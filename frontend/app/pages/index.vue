@@ -75,7 +75,8 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
     ...(repeatLabel(c.max_uses_per_recipe) ? [{ text: "", value: repeatLabel(c.max_uses_per_recipe)! }] : []),
   ];
 });
-const title = computed(() => messages.value.find(m => m.role === "user")?.content ?? "New plan");
+// The household's own name for the conversation, else its first message.
+const title = computed(() => session.value?.title || messages.value.find(m => m.role === "user")?.content || "New plan");
 // The week the conversation will plan, shown before planning with a way to move its first day.
 const weekStart = computed(() => constraints.value?.start_date ?? null);
 const weekStartLabel = computed(() => {
@@ -183,14 +184,18 @@ const home = computed(() => {
     ],
   };
 });
+// Every listed conversation, the open one in its place with its newest copy (or first, while it is new).
 const recent = computed(() => {
   const current = session.value;
-  const others = agent.recent.value.filter(item => item.id !== current?.id);
-  return (current?.messages.length ? [current, ...others] : others).slice(0, 8);
+  const listed = agent.recent.value.map(item => (item.id === current?.id ? current : item));
+  return current?.messages.length && !listed.some(item => item.id === current.id) ? [current, ...listed] : listed;
 });
+// The household's current week (its newest plan): its conversation is marked "This week" in the list.
+const weekId = ref<number | null>(null);
 
-function sessionTitle(item: AgentSession) {
-  return item.messages.find(m => m.role === "user")?.content ?? "New plan";
+async function removeConversation(item: AgentSession) {
+  const removed = await agent.remove(item.id);
+  if (removed && item.id === session.value?.id) newChat();
 }
 
 /** The draft, with the dish action its words came from, kept across sign-in and reloads (restored on mount). */
@@ -218,6 +223,7 @@ async function enter() {
   planState.value = "loading";
   try {
     const current = await currentPlanId();
+    weekId.value = current;
     if (version !== conversationVersion) return;
     if (!session.value) await agent.restore(current);
     if (version !== conversationVersion) return;
@@ -463,7 +469,9 @@ watch(view, (value) => {
   else void film.value?.play();
 });
 watch(generatedPlan, (value) => {
-  if (value) void loadPlan(value.id);
+  if (!value) return;
+  weekId.value = value.id;  // a week just planned is the household's newest
+  void loadPlan(value.id);
 });
 watch(() => session.value?.plan_id, (planId) => {
   if (planId && planId !== plan.value?.id) void loadPlan(planId);
@@ -564,23 +572,24 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
         <button type="button" class="new mc-btn strong" title="Start a new plan" @click="newChat">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>New plan<kbd>Ctrl K</kbd>
         </button>
-        <nav class="nav-list" aria-label="Sections">
-          <button type="button" class="nav" aria-current="page" @click="ask?.focus()"><i aria-hidden="true" />Assistant</button>
-          <button type="button" class="nav" @click="openTab('dinners')"><i aria-hidden="true" />This week<span v-if="days.length" class="count">{{ days.length }}</span></button>
-          <button type="button" class="nav" @click="openTab('groceries')"><i aria-hidden="true" />Groceries<span v-if="groceryCount" class="count">{{ groceryCount }}</span></button>
-          <button type="button" class="nav" @click="openTab('nutrition')"><i aria-hidden="true" />Nutrition</button>
-          <NuxtLink to="/browse" class="nav"><i aria-hidden="true" />Recipes and groceries</NuxtLink>
-          <NuxtLink to="/history" class="nav"><i aria-hidden="true" />Past weeks</NuxtLink>
-          <NuxtLink to="/profile" class="nav"><i aria-hidden="true" />Household</NuxtLink>
+        <HomeConversationList
+          :items="recent"
+          :current-id="session?.id ?? null"
+          :week-id="weekId"
+          @open="openSession"
+          @rename="(id, title) => agent.label(id, { title })"
+          @pin="(id, pinned) => agent.label(id, { pinned })"
+          @remove="removeConversation"
+        />
+        <!-- Other pages: these leave the workbench, so they look like links, not like the conversations above. -->
+        <nav class="pages" aria-label="Pages">
+          <NuxtLink to="/browse" class="page-link">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h10" /></svg>Recipes &amp; groceries<span class="go" aria-hidden="true">›</span>
+          </NuxtLink>
+          <NuxtLink to="/history" class="page-link">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></svg>Past weeks<span class="go" aria-hidden="true">›</span>
+          </NuxtLink>
         </nav>
-        <div v-if="recent.length" class="recent-block">
-          <div class="mc-label rail-label">Recent</div>
-          <div class="recent">
-            <button v-for="item in recent" :key="item.id" type="button" :class="{ on: item.id === session?.id }" :title="sessionTitle(item)" @click="openSession(item)">
-              {{ sessionTitle(item) }}
-            </button>
-          </div>
-        </div>
         <div class="home-card">
           <div class="who">
             <span class="avatar">{{ initials }}</span>
@@ -905,27 +914,20 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .app.no-panel { grid-template-columns: 236px minmax(0, 1fr); }
 
 /* Rail */
-.rail { display: flex; flex-direction: column; gap: 20px; min-height: 0; padding: 20px 16px; border-right: 1px solid var(--c-line); background: var(--c-rail); }
+.rail { display: flex; flex-direction: column; gap: 14px; min-height: 0; padding: 20px 16px; border-right: 1px solid var(--c-line); background: var(--c-rail); }
 .rail .brand { padding: 0 8px; }
 .rail .brand > span { font-size: 20px; line-height: 24px; }
 .logo-dot { width: 22px; height: 22px; flex: none; border-radius: 50%; background: var(--c-coral); }
 .new { width: 100%; justify-content: flex-start; padding: 0 14px; }
 .new kbd { margin-left: auto; font: 700 12px var(--sans); color: #b9b6cc; }
-.nav-list { display: grid; gap: 2px; }
-.nav { display: flex; align-items: center; gap: 10px; width: 100%; height: 36px; padding: 0 10px; border: 0; border-radius: 10px; background: transparent; color: var(--c-ink) !important; font-size: 14px; font-weight: 700; text-align: left; text-decoration: none; white-space: nowrap; }
-.nav i { width: 8px; height: 8px; flex: none; border-radius: 3px; background: var(--c-dot); }
-.nav:hover { background: rgba(42, 42, 72, 0.04); }
-.nav[aria-current="page"] { background: #fff; font-weight: 800; }
-.nav[aria-current="page"] i { background: var(--c-coral); }
-.count { margin-left: auto; font-size: 12px; color: var(--c-muted); }
-/* The list gives way to the rail and scrolls; each row keeps its own height. */
-.recent-block { min-height: 0; display: flex; flex-direction: column; }
-.rail-label { padding: 0 10px 6px; }
-.recent { min-height: 0; display: grid; grid-auto-rows: max-content; gap: 2px; overflow: auto; }
-.recent button { width: 100%; height: 34px; padding: 0 10px; border: 0; border-radius: 10px; background: transparent; color: var(--c-neutral-text); font-size: 14px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.recent button:hover { color: var(--c-ink); background: rgba(42, 42, 72, 0.05); }
-.recent button.on { color: var(--c-ink); background: #fff; box-shadow: 0 0 0 1px var(--c-line); font-weight: 800; }
-.home-card { margin-top: auto; display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid var(--c-line); border-radius: 16px; background: #fff; }
+/* The conversation list takes the rail's free height and scrolls; pages and the household sit below it. */
+.rail > .convos { flex: 1 1 auto; }
+.pages { display: grid; gap: 2px; padding-top: 10px; border-top: 1px solid var(--c-line); }
+.page-link { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border-radius: 10px; color: var(--c-ink); font-size: 14px; font-weight: 700; text-decoration: none; }
+.page-link:hover { background: rgba(42, 42, 72, 0.05); }
+.page-link svg { width: 17px; height: 17px; flex: none; fill: none; stroke: var(--c-muted); stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.page-link .go { margin-left: auto; color: var(--c-muted); font-size: 18px; }
+.home-card { display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid var(--c-line); border-radius: 16px; background: #fff; }
 .who { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .who .avatar { width: 32px; height: 32px; background: var(--c-neutral); color: var(--c-ink); }
 .who > div { min-width: 0; display: flex; flex-direction: column; }
