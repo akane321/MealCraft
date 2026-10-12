@@ -167,7 +167,7 @@ test("sign-in asks for a username by default and switches to email on request", 
   await page.getByRole("button", { name: "Use username instead" }).click();
   await page.getByLabel("Username").fill("Lim.Family");
   await page.getByLabel("Password").fill("x");
-  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await page.locator("form").getByRole("button", { name: "Sign in", exact: true }).click();
   await expect.poll(() => sent.length).toBe(1);
   expect(sent[0]).toEqual({ username: "Lim.Family", password: "x" });
 });
