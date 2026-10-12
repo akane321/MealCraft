@@ -212,8 +212,18 @@ class AgentSessionResponse(BaseModel):
     pending_interaction: InteractionRequest | None
     latest_run: AgentRunResponse | None = None
     can_confirm: bool
+    # The household's name for it (None: its first message stands in) and when it was pinned (None: not pinned).
+    title: str | None = None
+    pinned_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
+
+
+class AgentSessionLabel(BaseModel):
+    """Rename (a blank title goes back to the first message) or pin a conversation; a field left out stays."""
+
+    title: str | None = Field(default=None, max_length=120)
+    pinned: bool | None = None
 
 
 class AgentSessionCollectionResponse(BaseModel):

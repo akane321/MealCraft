@@ -122,7 +122,7 @@ async function stub(page: Page, { conversations, plans, role = "user" }: { conve
     active_household_id: 1,
     household_role: "owner",
   })));
-  await page.route("**/api/agent/sessions?limit=8", route => route.fulfill(json({ items: conversations })));
+  await page.route("**/api/agent/sessions?limit=50", route => route.fulfill(json({ items: conversations })));
   await page.route("**/api/household-profiles/current", route => route.fulfill({ status: 404, contentType: "application/json", body: "{}" }));
   await page.route("**/api/plans", route => route.fulfill(json({ items: plans.map(item => listed(item.id, item.current)) })));
   for (const { id } of plans) {
@@ -147,20 +147,20 @@ async function openWeek(page: Page) {
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
 }
 
-test("at 1280x720 eight recent conversations keep their rows and the list scrolls", async ({ page }) => {
+test("at 1280x720 eight conversations keep their rows and the list scrolls", async ({ page }) => {
   const titles = Array.from({ length: 8 }, (_, index) => `Conversation number ${index + 1} about a week of dinners`);
   await stub(page, { conversations: titles.map((title, index) => conversation(100 + index, title, index ? null : 9001)), plans: [{ id: 9001, current: true }] });
   await openWeek(page);
   const rail = page.getByRole("complementary", { name: "Navigation" });
-  const rows = rail.locator(".recent button");
+  const rows = rail.locator(".convos .open");
   await expect(rows).toHaveCount(8);
   await expect(page.getByRole("complementary", { name: "This week" }).getByText("Lemon Herb Chicken").first()).toBeVisible();
 
-  const layout = await rail.locator(".recent").evaluate((list) => {
-    const buttons = [...list.querySelectorAll("button")];
+  const layout = await rail.locator(".convos .groups").evaluate((list) => {
+    const buttons = [...list.querySelectorAll("button.open")] as HTMLElement[];
     return {
       scrolls: list.scrollHeight > list.clientHeight,
-      rows: buttons.map(button => ({ top: button.offsetTop, height: button.offsetHeight, clipped: button.scrollHeight > button.clientHeight })),
+      rows: buttons.map(button => ({ top: button.getBoundingClientRect().top + list.scrollTop, height: button.offsetHeight, clipped: button.scrollHeight > button.clientHeight })),
     };
   });
   // Rows keep their own height (none clipped, none on top of the one before) and the list scrolls instead.
@@ -254,7 +254,7 @@ test("a week planned again is shown read-only beside its conversation, with the 
   await expect(panel.getByText("Lemon Herb Chicken (9002)").first()).toBeVisible();
   await expect(panel.getByRole("button", { name: "Mark cooked" })).toBeVisible();
 
-  await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: "First plan of the week" }).click();
+  await page.getByRole("complementary", { name: "Navigation" }).locator(".convos .open", { hasText: "First plan of the week" }).click();
   await expect(panel.getByText("Lemon Herb Chicken").first()).toBeVisible();
   await expect(page.getByText("You planned these days again, so this week was replaced.")).toBeVisible();
   // Read, not changed: no marking cooked, no swaps, no change chips, nothing to send.
@@ -321,4 +321,45 @@ test("the service status page speaks to the household; developer details are for
   await expect(page.getByRole("heading", { name: "For administrators" })).toBeVisible();
   await expect(page.getByRole("link", { name: "API documentation" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Operations console" })).toBeVisible();
+});
+
+test("a conversation is renamed, pinned and deleted from its own menu; rows only open conversations", async ({ page }) => {
+  await stub(page, { conversations: [conversation(100, "Dinners for two", 9001), conversation(101, "Lunch ideas", null)], plans: [{ id: 9001, current: true }] });
+  const calls: Array<{ method: string; body: unknown }> = [];
+  await page.route(/\/api\/agent\/sessions\/10[01]$/, (route) => {
+    const request = route.request();
+    if (request.method() === "GET") return route.fallback();
+    const body = request.method() === "PATCH" ? request.postDataJSON() : null;
+    calls.push({ method: request.method(), body });
+    if (request.method() === "DELETE") return route.fulfill({ status: 204, body: "" });
+    return route.fulfill(json({ ...conversation(101, "Lunch ideas", null), title: body.title ?? "Office lunches", pinned_at: body.pinned ? "2099-01-01T00:00:00Z" : null }));
+  });
+  await openWeek(page);
+  const rail = page.getByRole("complementary", { name: "Navigation" });
+  // The panel switches (This week, Groceries, Nutrition) are gone from the rail; its pages read as links.
+  await expect(rail.getByRole("button", { name: "Nutrition", exact: true })).toHaveCount(0);
+  await expect(rail.getByRole("navigation", { name: "Pages" }).getByRole("link")).toHaveCount(2);
+  await expect(rail.locator(".convos .open", { hasText: "Dinners for two" })).toContainText("This week");
+
+  await rail.getByRole("button", { name: "Options for Lunch ideas" }).click();
+  await rail.getByRole("menuitem", { name: "Rename" }).click();
+  await rail.getByLabel("Rename plan").fill("Office lunches");
+  await rail.getByLabel("Rename plan").press("Enter");
+  await expect.poll(() => calls.length).toBe(1);
+  expect(calls[0]).toEqual({ method: "PATCH", body: { title: "Office lunches" } });
+  await expect(rail.locator(".convos .open", { hasText: "Office lunches" })).toBeVisible();
+
+  await rail.getByRole("button", { name: "Options for Office lunches" }).click();
+  await rail.getByRole("menuitem", { name: "Pin to top" }).click();
+  await expect.poll(() => calls.length).toBe(2);
+  expect(calls[1]).toEqual({ method: "PATCH", body: { pinned: true } });
+  await expect(rail.getByRole("region", { name: "Pinned" })).toContainText("Office lunches");
+
+  await rail.getByRole("button", { name: "Options for Office lunches" }).click();
+  await rail.getByRole("menuitem", { name: "Delete…" }).click();
+  const dialog = page.getByRole("alertdialog", { name: "Delete this conversation?" });
+  await expect(dialog).toContainText("cannot be undone");
+  await dialog.getByRole("button", { name: "Delete" }).click();
+  await expect.poll(() => calls.at(-1)?.method).toBe("DELETE");
+  await expect(rail.locator(".convos .open", { hasText: "Office lunches" })).toHaveCount(0);
 });

@@ -205,6 +205,17 @@ def get_weekly_plan(plan_id: int, service: MealPlanServiceDependency) -> WeeklyM
     return plan
 
 
+@router.delete("/{plan_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_weekly_plan(
+    plan_id: int,
+    service: MealPlanServiceDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
+) -> None:
+    """Delete a week (its days, groceries and changes); a conversation that planned it stays."""
+    if not service.delete(plan_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Meal plan not found")
+
+
 @router.patch("/{plan_id}/entries/{entry_id}", response_model=WeeklyMealPlanResponse)
 def update_meal_status(
     plan_id: int,

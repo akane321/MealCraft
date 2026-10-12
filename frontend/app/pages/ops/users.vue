@@ -103,6 +103,29 @@ const confirmText = computed(() => {
   if (pending.value === "plans") return `Every saved plan in ${who}'s households (${detail.value?.plans ?? 0}) is deleted for good, with its shopping list and check-ins.`;
   return `${who} can no longer sign in. Households nobody else belongs to are deleted with their conversations, plans and profile.`;
 });
+// One conversation or one week of the account, deleted on its own (the household can do the same itself).
+const single = ref<{ kind: "conversations" | "plans"; id: number; label: string } | null>(null);
+async function confirmSingle() {
+  if (!detail.value || !single.value) return;
+  const id = detail.value.id;
+  const { kind, id: itemId } = single.value;
+  removing.value = true;
+  failure.value = "";
+  try {
+    await apiFetch(api(`/users/${id}/${kind}/${itemId}`), { method: "DELETE" });
+    single.value = null;
+    await loadList();
+    await loadDetail(id);
+    message.value = kind === "plans" ? "Deleted 1 plan." : "Deleted 1 conversation.";
+  }
+  catch (error) {
+    single.value = null;
+    failure.value = detailOf(error, "That couldn't be deleted.");
+  }
+  finally {
+    removing.value = false;
+  }
+}
 async function confirmRemoval() {
   if (!detail.value || !pending.value) return;
   const id = detail.value.id;
@@ -207,7 +230,7 @@ async function confirmRemoval() {
             <h3>Conversations ({{ detail.conversations }})</h3>
             <p v-if="!detail.recent_conversations.length" class="ops-muted">None.</p>
             <ul v-else class="rows">
-              <li v-for="item in detail.recent_conversations" :key="item.id"><span>“{{ item.first_message ?? "…" }}”</span><span class="ops-muted">{{ humanKey(item.status) }} · {{ item.messages }} messages · {{ formatWhen(item.created_at) }}</span></li>
+              <li v-for="item in detail.recent_conversations" :key="item.id"><span>“{{ item.title || item.first_message || "…" }}”</span><span class="ops-muted">{{ humanKey(item.status) }} · {{ item.messages }} messages · {{ formatWhen(item.created_at) }}</span><button type="button" class="mc-pill row-delete" :aria-label="`Delete conversation ${item.title || item.first_message || item.id}`" @click="single = { kind: 'conversations', id: item.id, label: `“${item.title || item.first_message || '…'}”` }">Delete</button></li>
             </ul>
           </section>
 
@@ -215,7 +238,7 @@ async function confirmRemoval() {
             <h3>Plans ({{ detail.plans }})</h3>
             <p v-if="!detail.recent_plans.length" class="ops-muted">None.</p>
             <ul v-else class="rows">
-              <li v-for="plan in detail.recent_plans" :key="plan.id"><span>Week of {{ plan.start_date }} for {{ plan.household_size }}</span><span class="ops-muted mc-num">S${{ plan.total_sgd.toFixed(2) }} · {{ formatWhen(plan.created_at) }}</span></li>
+              <li v-for="plan in detail.recent_plans" :key="plan.id"><span>Week of {{ plan.start_date }} for {{ plan.household_size }}</span><span class="ops-muted mc-num">S${{ plan.total_sgd.toFixed(2) }} · {{ formatWhen(plan.created_at) }}</span><button type="button" class="mc-pill row-delete" :aria-label="`Delete the week of ${plan.start_date}`" @click="single = { kind: 'plans', id: plan.id, label: `the week of ${plan.start_date}` }">Delete</button></li>
             </ul>
           </section>
 
@@ -242,10 +265,21 @@ async function confirmRemoval() {
       @confirm="confirmRemoval"
       @cancel="pending = null"
     />
+    <OpsConfirm
+      v-if="single"
+      :title="single.kind === 'plans' ? 'Delete this week?' : 'Delete this conversation?'"
+      :message="single.kind === 'plans' ? `${single.label} is deleted for good, with its shopping list and check-ins. A conversation that planned it stays.` : `${single.label} and its messages are deleted for good. The week it planned stays.`"
+      :action="single.kind === 'plans' ? 'Delete week' : 'Delete conversation'"
+      danger
+      :busy="removing"
+      @confirm="confirmSingle"
+      @cancel="single = null"
+    />
   </div>
 </template>
 
 <style scoped>
+.row-delete { margin-left: auto; padding: 2px 10px; font-size: 12px; }
 .search { display: grid; gap: 6px; max-width: 420px; color: var(--t3); font-size: 12px; }
 input:not([type="checkbox"]) { padding: 9px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--s2); color: var(--ivory); font: inherit; font-size: 13px; }
 .table-card { padding: 0; overflow-x: auto; }

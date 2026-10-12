@@ -46,7 +46,7 @@ async function stubNutrition(page: Page) {
   const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
   await page.route("**/api/auth/me", route => route.fulfill(json({ user: { id: 1, email: "synthetic@example.com", display_name: "Synthetic household", system_role: "user", status: "active" }, active_household_id: 1, household_role: "owner" })));
   await page.route("**/api/household-profiles/current", route => route.fulfill({ status: 404, contentType: "application/json", body: "{}" }));
-  await page.route("**/api/agent/sessions?limit=8", route => route.fulfill(json({ items: [] })));
+  await page.route("**/api/agent/sessions?limit=50", route => route.fulfill(json({ items: [] })));
   await page.route("**/api/agent/sessions", route => route.fulfill({ ...json(session(false)), status: 201 }));
   await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: session(true), plan })));
   await page.route("**/api/plans/9001", route => route.fulfill(json(plan)));

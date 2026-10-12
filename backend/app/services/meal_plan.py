@@ -438,6 +438,9 @@ class WeeklyMealPlanService:
             finished_at=datetime.now(UTC),
         )
 
+    def delete(self, plan_id: int) -> bool:
+        return self.repository.delete(plan_id)
+
     def get(self, plan_id: int) -> WeeklyMealPlanResponse | None:
         plan = self.repository.get(plan_id)
         if plan is None:

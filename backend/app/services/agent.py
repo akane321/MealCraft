@@ -1,7 +1,7 @@
 import math
 import re
 from collections.abc import Callable
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from pydantic_core import to_jsonable_python
@@ -63,6 +63,7 @@ from app.schemas.agent import (
     AgentRunCollectionResponse,
     AgentRunResponse,
     AgentSessionCollectionResponse,
+    AgentSessionLabel,
     AgentSessionResponse,
 )
 from app.schemas.meal_plan import (
@@ -303,6 +304,20 @@ class AgentSessionService:
     def get(self, session_id: int) -> AgentSessionResponse | None:
         agent_session = self.repository.get(session_id)
         return self._to_response(agent_session) if agent_session is not None else None
+
+    def label(self, session_id: int, change: AgentSessionLabel) -> AgentSessionResponse | None:
+        """Rename and/or (un)pin a conversation of this household."""
+        values: dict = {}
+        if "title" in change.model_fields_set:
+            values["title"] = " ".join((change.title or "").split()) or None
+        if change.pinned is not None:
+            values["pinned_at"] = datetime.now(UTC) if change.pinned else None
+        agent_session = self.repository.label(session_id, values) if values else self.repository.get(session_id)
+        return self._to_response(agent_session) if agent_session is not None else None
+
+    def delete(self, session_id: int) -> bool:
+        """Delete a conversation of this household with its messages; a week it planned stays."""
+        return self.repository.delete(session_id)
 
     def list_recent(self, *, limit: int) -> AgentSessionCollectionResponse:
         return AgentSessionCollectionResponse(
@@ -1563,6 +1578,8 @@ class AgentSessionService:
             ),
             latest_run=AgentRunResponse.model_validate(latest_run) if latest_run is not None else None,
             can_confirm=agent_session.status == "ready" and agent_session.plan_id is None,
+            title=agent_session.title,
+            pinned_at=agent_session.pinned_at,
             created_at=agent_session.created_at,
             updated_at=agent_session.updated_at,
         )
