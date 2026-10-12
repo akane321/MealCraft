@@ -33,6 +33,25 @@ const estimatedShares = computed(() => {
     : [];
 });
 
+// Every candidate from enrichment to release: build failures carry a recorded reason below; the quota pick has only a count.
+const funnel = computed(() => {
+  const coverage = summary.value?.coverage;
+  if (!coverage) return [];
+  const built = coverage.built_before_quota ?? null;
+  const unbucketed = coverage.unbucketed_cuisine ?? null;
+  return [
+    { label: "entered enrichment", count: coverage.enrichment_set, note: "" },
+    { label: "dropped by the build", count: built === null ? null : coverage.enrichment_set - built, note: "" },
+    { label: "built", count: built, note: "" },
+    {
+      label: "not picked by the cuisine and course quota",
+      count: coverage.not_picked_by_quota ?? null,
+      note: unbucketed ? `${unbucketed.toLocaleString()} with a cuisine no quota bucket claims` : "",
+    },
+    { label: "released", count: coverage.released_recipes, note: "" },
+  ];
+});
+
 function estimatedWidth(value: number) {
   return `${Math.min(100, Math.max(0, value * 100))}%`;
 }
@@ -144,7 +163,6 @@ onMounted(retryAll);
           <article class="ops-card metric"><span>Recipes</span><strong class="mc-num">{{ summary.coverage.released_recipes.toLocaleString() }}</strong></article>
           <article class="ops-card metric"><span>Ingredients</span><strong class="mc-num">{{ summary.coverage.released_ingredients.toLocaleString() }}</strong></article>
           <article class="ops-card metric"><span>Every release field</span><strong class="mc-num">{{ summary.coverage.recipes_with_every_field.toLocaleString() }}</strong><small>of {{ summary.coverage.released_recipes.toLocaleString() }} recipes</small></article>
-          <article class="ops-card metric"><span>Enrichment set</span><strong class="mc-num">{{ summary.coverage.enrichment_set.toLocaleString() }}</strong></article>
         </div>
       </section>
 
@@ -199,7 +217,7 @@ onMounted(retryAll);
         <header>
           <div>
             <h2 id="dropped-title">Dropped candidates</h2>
-            <p class="ops-muted">Candidates that did not enter the release, with the recorded reason.</p>
+            <p class="ops-muted">Candidates that failed the build, with the recorded reason. Built recipes the cuisine and course quota did not pick have a count, not a record.</p>
           </div>
           <label>Reason
             <select v-model="reason" @change="selectReason">
@@ -208,6 +226,13 @@ onMounted(retryAll);
             </select>
           </label>
         </header>
+
+        <ol v-if="funnel.length" class="funnel" aria-label="Release funnel">
+          <li v-for="step in funnel" :key="step.label">
+            <b class="mc-num">{{ step.count === null ? "—" : step.count.toLocaleString() }}</b> {{ step.label }}
+            <small v-if="step.note">{{ step.note }}</small>
+          </li>
+        </ol>
 
         <div v-if="summary.dropped_by_reason" class="reason-counts" aria-label="Dropped counts by reason">
           <span v-for="(count, key) in summary.dropped_by_reason" :key="key"><b class="mc-num">{{ count.toLocaleString() }}</b> {{ humanKey(key) }}</span>
@@ -280,7 +305,7 @@ onMounted(retryAll);
 .issues li { display: grid; gap: 2px; padding: 9px 12px; border-radius: 10px; background: var(--s2); font-size: 13px; }
 .issues li span { color: var(--t3); }
 .section-heading { margin-bottom: 10px; }
-.metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .metric { display: grid; gap: 5px; padding: 16px; }
 .metric span, .metric small { color: var(--t3); font-size: 12px; }
 .metric strong { font-family: var(--serif); font-size: 30px; font-weight: 300; }
@@ -308,6 +333,9 @@ onMounted(retryAll);
 .dropped-card > header h2 { margin-bottom: 5px; }
 .dropped-card label { display: grid; min-width: 220px; gap: 5px; color: var(--t3); font-size: 12px; }
 select { padding: 8px 10px; border: 1px solid var(--line-2); border-radius: 9px; background: var(--s2); color: var(--ivory); font: inherit; }
+.funnel { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; padding: 0 20px 14px; list-style: none; color: var(--t2); font-size: 12.5px; }
+.funnel li + li::before { margin-right: 18px; color: var(--t3); content: "→"; }
+.funnel small { margin-left: 4px; color: var(--t3); }
 .reason-counts { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 16px; }
 .reason-counts span, .reason-pill { padding: 3px 9px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--t2); font-size: 12px; }
 .inline-error, .empty { margin: 0; padding: 18px 20px; border-top: 1px solid var(--line); }
