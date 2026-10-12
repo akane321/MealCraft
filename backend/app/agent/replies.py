@@ -117,6 +117,10 @@ PLANNER_ZH = {
         "我找不到满足所有限制的安排，放宽其中一个再试试。"
     ),
     "Planning took longer than it should this time. Please try again.": "这次规划花的时间太长了，请再试一次。",
+    "I couldn't find enough different dishes for a week without repeats under these limits. "
+    "Allow a dish twice, or relax one of the limits.": (
+        "在这些限制下，找不到足够多不同的菜来排一周不重样的安排。可以允许一道菜出现两次，或者放宽一个限制。"
+    ),
     "No candidate plan was found; try a different recipe selection.": "没有找到可行的安排，换一些菜再试试。",
     "No recipes satisfy the supplied hard constraints.": "没有菜符合你的硬性限制。",
     "A week plans at least one meal a day.": "一周每天至少要安排一顿饭。",

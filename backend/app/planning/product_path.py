@@ -832,6 +832,11 @@ class ProductPlanningEngine:
         if passed:
             result = over_budget_pick(passed, problem.slots, constraints.weekly_budget_sgd)
         if result is None:
+            # A search that built no week said why (a meal, the repeats, the budget): no week reached a check, so
+            # an input issue elsewhere in the pool (one recipe's servings) did not decide it, and "details are
+            # missing" sent the household to retry a request that cannot plan as asked.
+            emptied_by = trace.get("search", {}).get("emptied_by") if not trace["validation_attempts"] else None
+            uncertain = uncertain and emptied_by is None
             evidence = "needs_data" if uncertain else "bounded_search_exhausted"
             status = "needs_data" if uncertain else "candidate_rejected"
             if (
@@ -860,6 +865,11 @@ class ProductPlanningEngine:
             elif trace.get("search", {}).get("exhausted"):
                 # A search that ran out of steps proves nothing about the limits themselves.
                 message = "Planning took longer than it should this time. Please try again."
+            elif emptied_by == "repeats":
+                message = (
+                    "I couldn't find enough different dishes for a week without repeats under these limits. "
+                    "Allow a dish twice, or relax one of the limits."
+                )
             else:
                 message = "I couldn't find a week that meets every limit. Try relaxing one of them."
             raise ProductPlanningError(status, message, trace, problem=problem.model_copy(deep=True))
