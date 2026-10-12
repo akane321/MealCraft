@@ -131,7 +131,7 @@ async function stubConsole(page: Page) {
   await page.route(path("/api/ops/experiments"), (route: Route) => {
     const evaluations = [
       { name: "planning-components", label: "Planning component ablations", description: "Fixed developer component conditions.", dataset: "data/fixtures/planning-v2/ablation-developer-v1.json", options: {}, execution_mode: "durable_worker" },
-      { name: "developer-planning", label: "Developer planning set", description: "20 planning scenarios.", dataset: "data/evaluation/dev/planning-v1.json", options: { planner: ["mealcraft-planner"] }, execution_mode: "legacy_inline" },
+      { name: "developer-planning", label: "Developer planning set", description: "Protocol v1: 20 weeks of one dish a dinner on the curated 30-recipe catalog with fixture prices, scored for each planner on the same candidates.", dataset: "data/evaluation/dev/planning-v1.json", options: { planner: ["product-planner", "greedy-baseline", "rule-only-baseline"] }, execution_mode: "legacy_inline" },
     ];
     if (route.request().method() === "POST") {
       expect(route.request().headers()["idempotency-key"]).toMatch(/^ops-experiment-/);

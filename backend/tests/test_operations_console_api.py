@@ -337,8 +337,8 @@ def test_experiments_run_developer_sets_under_a_recorded_configuration(console) 
     assert planning.status_code == 200
     planning = planning.json()
     assert planning["status"] == "succeeded"
-    assert planning["configuration"]["planner"] == "greedy-baseline"
-    assert planning["configuration"]["agent_parser_provider"] == "fixture"
+    # Only what the evaluation reads: the parser switch plays no part in planning.
+    assert planning["configuration"] == {"planner": "greedy-baseline"}
     assert planning["metrics"]["scenario_count"] == 20
     assert planning["conditions"]["dataset"]["path"].endswith("dev/planning-v1.json")
     assert len(planning["conditions"]["dataset"]["sha256"]) == 64

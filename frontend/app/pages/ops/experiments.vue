@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatSeconds, formatValue, formatWhen, humanKey, statusColor } from "~/lib/ops";
+import { caseEvidence, categoryRows, currentParserLabel, draftChanges, evidenceMatch, experimentConfirmMessage, experimentGates, experimentHeadline, presetBreakdown, spendsOpenAI } from "~/lib/ops-experiments";
 import type { OpsEvaluation, OpsEvaluationName, OpsExperiment, OpsExperimentComparison, OpsExperimentDetail, OpsRuntimeSetting, OpsSettingChange } from "~/types/ops";
 
 const config = useRuntimeConfig();
@@ -15,7 +16,8 @@ const detailOf = (error: unknown, fallback: string) => {
 const settings = ref<OpsRuntimeSetting[] | null>(null);
 const history = ref<OpsSettingChange[]>([]);
 const settingsFailed = ref(false);
-const drafts = reactive<Record<string, string>>({});
+// A number input's v-model stores a number once typed in.
+const drafts = reactive<Record<string, string | number>>({});
 
 async function loadSettings() {
   settingsFailed.value = false;
@@ -34,6 +36,7 @@ async function loadSettings() {
 }
 
 const labelOf = (key: string) => settings.value?.find(item => item.key === key)?.label ?? humanKey(key);
+const currentParser = computed(() => settings.value?.find(item => item.key === "agent_parser_provider")?.value);
 const pending = ref<{ setting: OpsRuntimeSetting; value: string | number | null } | null>(null);
 const saving = ref(false);
 const saveError = ref("");
@@ -103,7 +106,7 @@ onBeforeUnmount(() => {
 const form = reactive({
   evaluation: "planning-components" as OpsEvaluationName,
   label: "",
-  planner: "",
+  planner: "product-planner",
   parser: "",
   repeats: 1,
   width: 32,
@@ -116,10 +119,9 @@ const isComponentExperiment = computed(() => form.evaluation === "planning-compo
 const running = ref(false);
 const runError = ref("");
 const pendingExperiment = ref(false);
-const experimentMessage = computed(() => {
-  if (!chosen.value) return "";
-  return `Queue ${chosen.value.label} on ${chosen.value.dataset}. The run records its code, data hashes and parameters and cannot replace an earlier result.`;
-});
+// The parser the run will use: the one chosen, else the switch's current value.
+const runParser = computed(() => form.parser || currentParser.value);
+const experimentMessage = computed(() => (chosen.value ? experimentConfirmMessage(chosen.value, runParser.value) : ""));
 function askExperiment() {
   runError.value = "";
   pendingExperiment.value = true;
@@ -197,13 +199,6 @@ const evidenceRows = computed(() => comparison.value?.evidence.map(row => ({ ...
 const metricRows = computed(() => comparison.value?.metrics.map(row => ({ ...row, metric: row.key })) ?? []);
 const configRows = computed(() => comparison.value?.configurations.filter(row => row.matches === false).map(row => ({ key: row.key, before: row.a, after: row.b })) ?? []);
 const failureRows = computed(() => comparison.value?.failure_mechanisms.map(row => ({ key: row.key, before: row.a, after: row.b })) ?? []);
-const headline = (run: OpsExperiment) => {
-  const preferred = run.evaluation === "developer-planning" ? "scenario_expectation_rate" : run.evaluation === "agent-benchmark" ? "exact_case_rate" : "case_count";
-  const metric = run.metrics[preferred] === undefined ? Object.keys(run.metrics)[0] : preferred;
-  if (!metric) return "—";
-  return run.metrics[metric] === undefined ? "—" : `${humanKey(metric)} ${formatValue(run.metrics[metric])}`;
-};
-const recordedConditions = (run: OpsExperiment) => run.conditions.conditions_complete === true;
 // Whether higher is better differs by metric, so a change is only marked, not judged.
 const deltaClass = (delta: number | null) => (delta ? "moved" : "");
 
@@ -233,10 +228,17 @@ function closeExperiment() {
   selectedExperiment.value = null;
   detailFailed.value = false;
 }
+// Escape closes the drawer, as on the Tasks page.
+function onKey(event: KeyboardEvent) {
+  if (event.key === "Escape" && selectedExperimentId.value !== null) closeExperiment();
+}
+onMounted(() => window.addEventListener("keydown", onKey));
+onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 const reportRuns = computed<Record<string, unknown>[]>(() => {
   const runs = selectedExperiment.value?.report?.runs;
   return Array.isArray(runs) ? runs.filter(item => item && typeof item === "object") as Record<string, unknown>[] : [];
 });
+const presets = computed(() => presetBreakdown(selectedExperiment.value?.report ?? null));
 const failedCases = computed(() => reportRuns.value.filter((item) => {
   if (Array.isArray(item.failures) && item.failures.length) return true;
   if (item.audit && typeof item.audit === "object" && (item.audit as Record<string, unknown>).status !== "passed") return true;
@@ -255,7 +257,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
     <header>
       <p class="mc-eyebrow">Experiments &amp; configuration</p>
       <h1 class="mc-serif">Switches, evaluations and A/B comparisons</h1>
-      <p>Each switch starts at the server's default. A change is recorded with who made it and what it was before, and new requests pick it up. Evaluations run only the developer sets; held-out sets are never offered here.</p>
+      <p>Each switch starts at the server's default, and a change is recorded with who made it and what it was before. Only switches marked “Used by the product” reach new requests; the others are stored until the planner reads them. Evaluations run only the developer sets; held-out sets are never offered here.</p>
     </header>
 
     <section class="ops-card" aria-labelledby="settings-title">
@@ -279,7 +281,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
                 <option v-for="choice in setting.choices" :key="choice" :value="choice">{{ choice }}</option>
               </select>
               <input v-else :id="`set-${setting.key}`" v-model="drafts[setting.key]" type="number" :min="setting.minimum ?? undefined" :max="setting.maximum ?? undefined" :step="setting.integer ? 1 : 'any'">
-              <button type="button" class="mc-primary" :disabled="drafts[setting.key] === String(setting.value)" @click="ask(setting)">Change</button>
+              <button type="button" class="mc-primary" :disabled="!draftChanges(setting, drafts[setting.key])" @click="ask(setting)">Change</button>
               <button v-if="setting.overridden" type="button" class="mc-pill" @click="ask(setting, true)">Use default</button>
             </div>
           </li>
@@ -333,14 +335,14 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
         </template>
         <label v-else-if="form.evaluation === 'developer-planning'">Planner
           <select v-model="form.planner">
-            <option value="">MealCraft planner</option>
-            <option value="greedy-baseline">Greedy baseline</option>
-            <option value="rule-only-baseline">Rule-only baseline</option>
+            <option value="product-planner">MealCraft product planner (beam search, as the assistant plans)</option>
+            <option value="greedy-baseline">Greedy baseline (the top-ranked recipe every night)</option>
+            <option value="rule-only-baseline">Strong rule-only baseline (fixed tie-breaks, no repeat in a row)</option>
           </select>
         </label>
         <label v-else>Parser
           <select v-model="form.parser">
-            <option value="">Current switch</option>
+            <option value="">{{ currentParserLabel(currentParser) }}</option>
             <option value="fixture">Rule-based (fixture)</option>
             <option value="openai">OpenAI model (paid, runs in the background)</option>
           </select>
@@ -370,7 +372,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
                 <th>{{ row.label }}</th>
                 <td>{{ formatValue(row.a) }}</td>
                 <td>{{ formatValue(row.b) }}</td>
-                <td>{{ row.matches ? "Same" : "Different" }}</td>
+                <td>{{ evidenceMatch(row) }}</td>
               </tr>
             </tbody>
           </table>
@@ -397,12 +399,13 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
             <tbody><tr v-for="row in failureRows" :key="row.key"><th>{{ humanKey(row.key) }}</th><td>{{ formatValue(row.before) }}</td><td>{{ formatValue(row.after) }}</td></tr></tbody>
           </table>
           <h3>Case changes</h3>
-          <p v-if="!comparison?.case_differences.length" class="ops-muted small">No case changed status or failure mechanism.</p>
+          <p v-if="!comparison?.case_differences" class="ops-muted small">One or both runs stored no case-level report, so case changes cannot be compared.</p>
+          <p v-else-if="!comparison.case_differences.length" class="ops-muted small">No case changed status or failure mechanism.</p>
           <table v-else class="metrics">
             <thead><tr><th>Case / condition</th><th>A status</th><th>B status</th><th>Failures gained</th><th>Failures lost</th></tr></thead>
             <tbody>
               <tr v-for="item in comparison.case_differences" :key="`${item.case_id}-${item.condition}`">
-                <th>{{ item.case_id }} · {{ item.condition }}</th>
+                <th>{{ item.case_id }}<template v-if="item.condition"> · {{ item.condition }}</template></th>
                 <td>{{ item.a_status ?? "—" }}</td>
                 <td>{{ item.b_status ?? "—" }}</td>
                 <td>{{ item.failures_gained.length ? item.failures_gained.join(", ") : "none" }}</td>
@@ -432,8 +435,8 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
             <td><input v-model="pickB" type="radio" name="pick-b" :value="run.id" :aria-label="`Use run ${run.id} as B`"></td>
             <td>#{{ run.id }} {{ evaluations.find(item => item.name === run.evaluation)?.label ?? run.evaluation }}<span v-if="run.label" class="ops-muted"> · {{ run.label }}</span></td>
             <td><span class="ops-badge" :style="{ '--dot': statusColor(run.status) }">{{ humanKey(run.status) }}</span><p v-if="run.error" class="ops-error small">{{ run.error }}</p></td>
-            <td>{{ headline(run) }}</td>
-            <td>{{ recordedConditions(run) ? "Conditions recorded" : run.passed === null ? "—" : run.passed ? "Passed" : "Not passed" }}</td>
+            <td>{{ experimentHeadline(run) }}</td>
+            <td>{{ experimentGates(run) }}</td>
             <td class="mc-num">{{ formatSeconds(run.duration_seconds) }}</td>
             <td class="ops-muted">{{ formatWhen(run.created_at) }}</td>
             <td><button type="button" class="mc-pill" @click="openExperiment(run)">Open</button></td>
@@ -456,6 +459,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
       title="Queue this evaluation?"
       :message="experimentMessage"
       action="Queue evaluation"
+      :danger="spendsOpenAI(form.evaluation, runParser)"
       :busy="running"
       @confirm="runExperiment"
       @cancel="pendingExperiment = false"
@@ -477,7 +481,38 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
             <span class="ops-badge" :style="{ '--dot': statusColor(selectedExperiment.status) }">{{ humanKey(selectedExperiment.status) }}</span>
             <span class="mc-chip" :class="{ alert: !selectedExperiment.reproducibility.complete }">{{ selectedExperiment.reproducibility.complete ? "Reproducibility complete" : "Conditions incomplete" }}</span>
             <span class="mc-chip">{{ humanKey(selectedExperiment.reproducibility.claim_scope) }}</span>
+            <span v-if="selectedExperiment.passed !== null" class="mc-chip" :class="{ alert: !selectedExperiment.passed }">{{ selectedExperiment.passed ? "Gates passed" : "Gates not passed" }}</span>
           </div>
+          <section aria-labelledby="detail-metrics">
+            <h3 id="detail-metrics">Results</h3>
+            <p v-if="!Object.keys(selectedExperiment.metrics).length" class="ops-muted">No result is recorded yet.</p>
+            <OpsFields v-else :data="selectedExperiment.metrics" />
+            <table v-if="categoryRows(selectedExperiment.report).length" class="metrics">
+              <thead><tr><th>Category</th><th>Cases</th><th>Failed</th></tr></thead>
+              <tbody>
+                <tr v-for="row in categoryRows(selectedExperiment.report)" :key="row.category">
+                  <th>{{ humanKey(row.category) }}</th>
+                  <td class="mc-num">{{ formatValue(row.cases) }}</td>
+                  <td class="mc-num">{{ formatValue(row.failed) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+          <section v-if="presets" aria-labelledby="detail-presets">
+            <h3 id="detail-presets">By preset</h3>
+            <p class="ops-muted small">What each switch did on each case: beam is the beam search, greedy the reference greedy planner, variety_off and overlap_off drop that weight, repair_off skips repair. Each cell is the final audit and the hard failures it found.</p>
+            <div class="preset-table">
+              <table class="metrics">
+                <thead><tr><th>Case</th><th v-for="preset in presets.presets" :key="preset">{{ preset }}</th></tr></thead>
+                <tbody>
+                  <tr v-for="row in presets.rows" :key="row.caseId">
+                    <th>{{ row.caseId }}</th>
+                    <td v-for="(cell, index) in row.cells" :key="presets.presets[index]">{{ cell }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
           <section aria-labelledby="detail-reproduce">
             <h3 id="detail-reproduce">Reproducibility</h3>
             <OpsFields :data="selectedExperiment.conditions" />
@@ -490,8 +525,9 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
             <p v-else-if="!failedCases.length" class="ops-muted">No failed or indeterminate case is recorded.</p>
             <template v-else>
               <details v-for="(item, index) in failedCases" :key="String(item.case_id ?? index)">
-                <summary>{{ String(item.case_id ?? `Case ${index + 1}`) }}<template v-if="item.preset"> · {{ item.preset }}</template></summary>
-                <pre>{{ JSON.stringify(item, null, 2) }}</pre>
+                <summary>{{ String(item.case_id ?? `Case ${index + 1}`) }}<template v-if="item.preset"> · {{ item.preset }}</template><template v-else-if="item.category"> · {{ humanKey(String(item.category)) }}</template></summary>
+                <OpsFields v-if="caseEvidence(item)" :data="caseEvidence(item)!" />
+                <pre v-else>{{ JSON.stringify(item, null, 2) }}</pre>
               </details>
             </template>
           </section>
@@ -539,5 +575,15 @@ h3 { margin: 16px 0 8px; color: var(--t2); font-size: 12px; font-weight: 600; le
 .comparison-blocked { border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent); background: color-mix(in srgb, var(--danger) 8%, transparent); color: var(--t2); }
 .comparison-blocked ul { margin: 6px 0 0; padding-left: 18px; }
 .evidence-table td { max-width: 180px; overflow-wrap: anywhere; }
+/* The drawer's overlay; each ops page styles its own (tasks.vue, users.vue, data.vue). */
+.drawer-scrim { position: fixed; inset: 0; z-index: 30; display: flex; justify-content: flex-end; background: rgba(14, 12, 10, 0.6); }
+.drawer { width: min(720px, 100%); height: 100%; overflow-y: auto; padding: 24px; border-left: 1px solid var(--line-2); background: var(--s1); animation: mc-rise 320ms var(--ease) both; }
+.drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.drawer-head h2 { margin: 6px 0 0; font-size: 24px; font-weight: 300; }
+.drawer .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.drawer section { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
+.drawer h3 { margin: 0 0 12px; }
+.preset-table { overflow-x: auto; }
+.preset-table td { min-width: 96px; font-size: 12px; }
 .drawer pre { max-height: 360px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
 </style>

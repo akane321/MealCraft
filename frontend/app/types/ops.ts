@@ -227,7 +227,8 @@ export interface OpsExperimentComparison {
   configurations: OpsExperimentComparisonRow[];
   metrics: OpsExperimentComparisonRow[];
   failure_mechanisms: OpsExperimentComparisonRow[];
-  case_differences: Array<{
+  // null when either run stored no case-level report.
+  case_differences: null | Array<{
     case_id: string;
     condition: string;
     a_status: string | null;

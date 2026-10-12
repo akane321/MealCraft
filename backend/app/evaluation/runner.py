@@ -17,6 +17,7 @@ from app.data.release_v2 import import_release_v2
 from app.db.base import Base
 from app.evaluation.baseline import greedy_repeat_selector, strong_rule_only_selector
 from app.planning.grocery_estimator import GroceryEstimator
+from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
 from app.products.provider import FixtureProductProvider
@@ -26,7 +27,9 @@ from app.schemas.meal_plan import WeeklyMealPlanRequest
 from app.services.product import ProductSearchService
 from app.services.recommendation import RecipeRecommendationService
 
-PlanningSystem = Literal["greedy-baseline", "rule-only-baseline", "mealcraft-planner"]
+# "mealcraft-planner" is protocol v1's weekly selector, the name the recorded reports carry; the product now
+# plans with ProductPlanningEngine (beam search), scored here as "product-planner".
+PlanningSystem = Literal["greedy-baseline", "rule-only-baseline", "mealcraft-planner", "product-planner"]
 # The planning scenario sets (v1 and their catalog relabelling) were written and labelled when a request
 # stating no cooking time meant 60 minutes; the runner keeps that meaning so the frozen sets, their labels
 # (scripts/derive_catalog_labels.py) and their recorded results stay comparable.
@@ -112,6 +115,18 @@ def _fixture_mapping_coverage(catalog: Catalog, fixture_path: Path) -> tuple[int
     used = {item.ingredient for recipe in catalog.recipes for item in recipe.ingredients}
     mapped = len(used.intersection(mapped_keys))
     return mapped, len(used), round(mapped / max(len(used), 1), 4)
+
+
+def _product_week(engine: ProductPlanningEngine, request, recommendations, recipes) -> list | None:
+    """The week the product's planning engine plans from these candidates; None when it refuses.
+
+    WeeklyMealPlanService._search also retries once over a broadened pool (240 minutes, no diet filter) after an
+    infeasible answer; that retry is not reproduced, so a week found only on it is scored here as infeasible.
+    """
+    try:
+        return engine.plan(request, recommendations, recipes).selected
+    except ProductPlanningError:
+        return None
 
 
 def _file_sha256(path: Path) -> str:
@@ -209,6 +224,7 @@ def evaluate(
             grocery_estimator=GroceryEstimator(product_service),
         )
         selector = WeeklyPlanSelector()
+        product_engine = ProductPlanningEngine()  # built as WeeklyMealPlanService builds it (no retry)
         aggregator = WeeklyGroceryAggregator(product_service)
 
         for index, scenario in enumerate(scenarios, start=1):
@@ -226,6 +242,14 @@ def evaluate(
             grocery_complete: bool | None = None
             within_weekly_budget: bool | None = None
 
+            if actual_feasible and system == "product-planner":
+                # Twice, as every system, for determinism. A week the product refuses is its answer that none
+                # fits, so the scenario is scored as answered infeasible.
+                weeks = [
+                    _product_week(product_engine, request, recommendation_result.recommendations, planning_recipes)
+                    for _ in range(2)
+                ]
+                actual_feasible = weeks[0] is not None
             if actual_feasible:
                 if system == "greedy-baseline":
                     selected, _ = greedy_repeat_selector(recommendation_result.recommendations, request)
@@ -233,6 +257,8 @@ def evaluate(
                 elif system == "rule-only-baseline":
                     selected, _ = strong_rule_only_selector(recommendation_result.recommendations, request)
                     second, _ = strong_rule_only_selector(recommendation_result.recommendations, request)
+                elif system == "product-planner":
+                    selected, second = weeks[0], weeks[1] or []
                 else:
                     selected, _ = selector.select(recommendation_result.recommendations, request)
                     second, _ = selector.select(recommendation_result.recommendations, request)

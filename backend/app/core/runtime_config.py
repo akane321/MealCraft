@@ -1,12 +1,14 @@
 """Runtime settings the operations console may change (ADR-0047).
 
-Each registered key has a meaning, the values it accepts and a default taken from the server
-environment. A console override is stored in `runtime_settings`; `runtime_value` returns it, else the
-default. A change applies to new requests only.
+Each registered key has a meaning, the values it accepts and a default: what the product runs with when
+nothing is changed. A console override is stored in `runtime_settings`; `runtime_value` returns it, else the
+default. A change to a wired key applies to new requests only; an unwired key is stored and shown, and
+nothing reads it yet.
 """
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
@@ -16,7 +18,11 @@ from sqlalchemy.orm import Session
 from app.core.config import Settings
 from app.models.platform import RuntimeSetting
 from app.planning.beam_planner import BeamLimits
-from app.planning.meal_beam import MealBeamLimits
+
+# What the product's composed-week search keeps (planning/product_path.py), not MealBeamLimits' 64, which
+# reproduces the recorded multi-dish evaluations. ponytail: a copy of that literal; read one constant from
+# both places once the planner reads `meal_options_per_slot`.
+PRODUCT_MEAL_OPTIONS_PER_SLOT = 256
 
 
 @dataclass(frozen=True)
@@ -39,6 +45,10 @@ class RuntimeKey:
             return value
         if isinstance(value, bool) or not isinstance(value, (int, float)):
             raise ValueError(f"{self.label} must be a number.")
+        # JSON reads 1e999 as infinity; int() of it would raise OverflowError (a 500), not this 422.
+        # Only floats: math.isfinite() of a huge int itself raises OverflowError, and the range check covers ints.
+        if isinstance(value, float) and not math.isfinite(value):
+            raise ValueError(f"{self.label} must be between {self.minimum:g} and {self.maximum:g}.")
         if self.integer and value != int(value):
             raise ValueError(f"{self.label} must be a whole number.")
         if not (self.minimum <= value <= self.maximum):
@@ -93,7 +103,8 @@ REGISTRY: dict[str, RuntimeKey] = {
         RuntimeKey(
             "beam_max_expansions",
             "Beam search steps",
-            "The most steps the planner may take before it stops searching.",
+            "The most steps the planner may take on a week of one dish a meal before it stops searching;"
+            " a week of several dishes a meal searches longer, by its number of meals.",
             lambda settings: BeamLimits().max_expansions,
             minimum=1,
             maximum=1_000_000,
@@ -103,7 +114,7 @@ REGISTRY: dict[str, RuntimeKey] = {
             "meal_options_per_slot",
             "Meal options per slot",
             "For meals of several dishes: how many dish combinations are kept for each meal.",
-            lambda settings: MealBeamLimits().meal_options_per_slot,
+            lambda settings: PRODUCT_MEAL_OPTIONS_PER_SLOT,
             minimum=1,
             maximum=1024,
             integer=True,

@@ -38,13 +38,21 @@ from app.services.ops_planning_experiments import (
 )
 
 EXPERIMENT_RUN_TYPE = "experiment"
-PLANNERS = ("mealcraft-planner", "greedy-baseline", "rule-only-baseline")
+# The systems of the protocol-v1 runner (app.evaluation.runner) the console offers, and what each runs (kept
+# with the run): the planner the product runs against both baselines. The runner's "mealcraft-planner" is the
+# v1 weekly selector its recorded reports name, which the product no longer plans with, so it is not offered.
+PLANNERS = {
+    "product-planner": "ProductPlanningEngine, beam search: the planner the assistant plans weeks with",
+    "greedy-baseline": "Protocol v1 greedy baseline: the top-ranked eligible recipe every night",
+    "rule-only-baseline": "Protocol v1 strong rule-only baseline: cheapest, then fastest, no recipe twice in a row",
+}
 
 # Developer sets only. Held-out sets stay read-once and are not offered for tuning (ADR-0031 section 3).
 EVALUATIONS: dict[str, dict[str, Any]] = {
     "developer-planning": {
         "label": "Developer planning set",
-        "description": "20 planning scenarios on the curated catalog with fixture prices.",
+        "description": "Protocol v1: 20 weeks of one dish a dinner on the curated 30-recipe catalog with fixture"
+        " prices, scored for each planner on the same candidates.",
         "dataset": "data/evaluation/dev/planning-v1.json",
         "options": {"planner": list(PLANNERS)},
         "keys": [],
@@ -181,14 +189,15 @@ class SettingsService:
 
     def run_experiment(self, request: ExperimentRequest, *, actor_user_id: int) -> ExperimentRun:
         evaluation = EVALUATIONS[request.evaluation]
-        configuration = {key: runtime_value(key, self.settings, self.database) for key in REGISTRY}
+        # Only what the evaluation reads: a switch it ignores would be recorded, and compared, as if it counted.
+        configuration = {key: runtime_value(key, self.settings, self.database) for key in evaluation["keys"]}
         configuration.update({name: choices[0] for name, choices in evaluation["options"].items()})
         for key, value in request.overrides.items():
             if key in evaluation["options"]:
                 if value not in evaluation["options"][key]:
                     raise ValueError(f"{key} must be one of: {', '.join(evaluation['options'][key])}.")
                 configuration[key] = value
-            elif key in REGISTRY:
+            elif key in evaluation["keys"]:
                 configuration[key] = REGISTRY[key].check(value)
             else:
                 raise ValueError(f"{key} is not a setting this evaluation can change.")
@@ -244,8 +253,8 @@ def _finish_in_background(factory: sessionmaker, run_id: int, settings: Settings
 def _finish(database: Session, row: OperationRun, settings: Settings) -> None:
     data = dict(row.artifact_references[0]["data"])
     try:
-        metrics, passed, dataset = _evaluate(data["evaluation"], data["configuration"], settings)
-        data.update(metrics=metrics, passed=passed)
+        metrics, passed, dataset, report = _evaluate(data["evaluation"], data["configuration"], settings)
+        data.update(metrics=metrics, passed=passed, report=report)
         data["conditions"] = {**data["conditions"], "dataset": dataset}
         row.status = "succeeded"
     except Exception as error:  # noqa: BLE001 - the run records its failure
@@ -257,7 +266,7 @@ def _finish(database: Session, row: OperationRun, settings: Settings) -> None:
     database.commit()
 
 
-def _evaluate(name: str, configuration: dict, settings: Settings) -> tuple[dict, bool | None, dict]:
+def _evaluate(name: str, configuration: dict, settings: Settings) -> tuple[dict, bool | None, dict, dict]:
     root = repository_root()
     dataset = root / EVALUATIONS[name]["dataset"]
     if name == "developer-planning":
@@ -270,7 +279,14 @@ def _evaluate(name: str, configuration: dict, settings: Settings) -> tuple[dict,
             fixture_path=root / "data/fixtures/fairprice-products.json",
             system=configuration["planner"],
         )
-        return result["metrics"], result["passed"], result["dataset"]
+        report = _case_report(
+            result,
+            result["scenarios"],
+            system=result["system"],
+            planner=PLANNERS[result["system"]],
+            thresholds=result["thresholds"],
+        )
+        return result["metrics"], result["passed"], result["dataset"], report
     from app.evaluation.agent_benchmark import evaluate_agent  # noqa: PLC0415
 
     provider = configuration["agent_parser_provider"]
@@ -282,11 +298,31 @@ def _evaluate(name: str, configuration: dict, settings: Settings) -> tuple[dict,
         api_key=key,
         model=settings.openai_model,
     )
-    return result["metrics"], result["metrics"]["failure_case_count"] == 0, result["dataset"]
+    report = _case_report(result, result["cases"], provider=result["provider"], model=result["model"])
+    return result["metrics"], result["metrics"]["failure_case_count"] == 0, result["dataset"], report
+
+
+def _case_report(result: dict, rows: list[dict], **context: Any) -> dict:
+    """Every case a runner scored, in the row shape the drawer and the A/B case diff read (as the worker's)."""
+    return {
+        **context,
+        "category_metrics": result["category_metrics"],
+        "runs": [
+            {
+                "case_id": row["id"],
+                "status": "failed" if row["failure_reasons"] else "passed",
+                "failures": [{"code": reason} for reason in row["failure_reasons"]],
+                **{key: value for key, value in row.items() if key != "id"},
+            }
+            for row in rows
+        ],
+    }
 
 
 def experiment_view(row: OperationRun) -> ExperimentRun:
     data = row.artifact_references[0]["data"]
+    conditions = _recorded_conditions(row)
+    duration_seconds = _duration(row.started_at, row.finished_at)
     return ExperimentRun(
         id=row.id,
         evaluation=data["evaluation"],
@@ -295,34 +331,52 @@ def experiment_view(row: OperationRun) -> ExperimentRun:
         configuration=data["configuration"],
         metrics=data.get("metrics") or {},
         passed=data.get("passed"),
+        # The server's one verdict, so the list says what the drawer says. The worker's own flag (its fields
+        # are written, code_commit aside) stays in storage, where it marks a stored result.
         conditions={
-            **data.get("conditions", {}),
-            "code_commit": row.code_commit,
-            "parameter_digest": data.get("conditions", {}).get("parameter_digest") or row.input_digest,
+            **conditions,
+            "conditions_complete": _reproducibility(row, conditions, duration_seconds)["complete"],
         },
         error=row.error_detail,
         created_at=row.created_at,
-        duration_seconds=_duration(row.started_at, row.finished_at),
+        duration_seconds=duration_seconds,
     )
+
+
+def _recorded_conditions(row: OperationRun) -> dict[str, Any]:
+    conditions = row.artifact_references[0]["data"].get("conditions", {})
+    return {
+        **conditions,
+        "code_commit": row.code_commit,
+        "parameter_digest": conditions.get("parameter_digest") or row.input_digest,
+    }
 
 
 def experiment_detail(row: OperationRun) -> ExperimentDetail:
     summary = experiment_view(row)
     data = row.artifact_references[0]["data"]
-    conditions = summary.conditions
+    return ExperimentDetail(
+        **summary.model_dump(),
+        reproducibility=_reproducibility(row, _recorded_conditions(row), summary.duration_seconds),
+        report=data.get("report") if isinstance(data.get("report"), dict) else None,
+    )
+
+
+def _reproducibility(row: OperationRun, conditions: dict[str, Any], duration_seconds: float | None) -> dict:
     dataset = conditions.get("dataset") if isinstance(conditions.get("dataset"), dict) else {}
     paid_model = conditions.get("paid_model") if isinstance(conditions.get("paid_model"), dict) else {}
     required = {
         "code_commit": conditions.get("code_commit"),
         "parameter_digest": conditions.get("parameter_digest"),
         "dataset.path": dataset.get("path"),
-        "dataset.file_sha256": dataset.get("file_sha256"),
+        # The inline runners record the file hash as "sha256".
+        "dataset.file_sha256": dataset.get("file_sha256") or dataset.get("sha256"),
         "dataset.semantic_sha256": dataset.get("semantic_sha256"),
         "runner": conditions.get("runner"),
         "code_source": conditions.get("code_source"),
         "product_snapshot_sha256": conditions.get("product_snapshot_sha256"),
         "repeats": conditions.get("repeats"),
-        "duration_seconds": conditions.get("duration_seconds") or summary.duration_seconds,
+        "duration_seconds": conditions.get("duration_seconds") or duration_seconds,
         "paid_model.used": paid_model.get("used") if "used" in paid_model else None,
         "paid_model.budget_usd": paid_model.get("budget_usd"),
         "paid_model.usage_usd": paid_model.get("usage_usd"),
@@ -341,17 +395,13 @@ def experiment_detail(row: OperationRun) -> ExperimentDetail:
         warnings.append("Legacy inline run: reproducibility fields may be incomplete.")
     if row.status != "succeeded":
         warnings.append("Only a succeeded run can be cited.")
-    return ExperimentDetail(
-        **summary.model_dump(),
-        reproducibility={
-            "complete": complete,
-            "citation_allowed": complete and claim_scope == "developer_diagnostic_only",
-            "claim_scope": claim_scope,
-            "missing": sorted(set(missing)),
-            "warnings": warnings,
-        },
-        report=data.get("report") if isinstance(data.get("report"), dict) else None,
-    )
+    return {
+        "complete": complete,
+        "citation_allowed": complete and claim_scope == "developer_diagnostic_only",
+        "claim_scope": claim_scope,
+        "missing": sorted(set(missing)),
+        "warnings": warnings,
+    }
 
 
 def experiment_comparison(a: ExperimentDetail, b: ExperimentDetail) -> ExperimentComparison:
@@ -398,7 +448,8 @@ def experiment_comparison(a: ExperimentDetail, b: ExperimentDetail) -> Experimen
             _mapping(a.conditions.get("failure_mechanisms")),
             _mapping(b.conditions.get("failure_mechanisms")),
         ),
-        case_differences=_case_differences(a.report, b.report),
+        # None, not "no change", when a run stored no case-level report to compare.
+        case_differences=_case_differences(a.report, b.report) if a.report and b.report else None,
         claim_scope="developer_diagnostic_only" if compatible else "not_comparable",
     )
 
@@ -467,7 +518,8 @@ def _indexed_case_rows(report: dict[str, Any] | None) -> dict[tuple[str, str], d
     for row in rows:
         if not isinstance(row, dict) or not row.get("case_id"):
             continue
-        condition = str(row.get("preset") or "paired_gate")
+        # A component row names its preset and a gate row pairs gate on and off; an inline run's row is the case.
+        condition = str(row.get("preset") or ("paired_gate" if isinstance(row.get("conditions"), dict) else ""))
         if row.get("repeat") is not None:
             condition = f"{condition} repeat {row['repeat']}"
         indexed[(str(row["case_id"]), condition)] = row
