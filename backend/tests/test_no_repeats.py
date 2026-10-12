@@ -101,7 +101,8 @@ def test_no_dish_twice_is_refused_when_two_mains_cannot_fill_seven_dinners(compo
     response = composed_client.post("/api/plans/generate", json={**WEEK, "max_uses_per_recipe": 1})
 
     assert response.status_code == 422, response.text
-    assert "every limit" in response.json()["detail"]
+    # The search ran out of different dishes: it says so, rather than a vague "every limit".
+    assert "different dishes for a week without repeats" in response.json()["detail"]
 
 
 def test_a_one_dish_week_holds_the_cap_too(recipe_client):  # noqa: F811
