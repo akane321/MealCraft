@@ -55,7 +55,7 @@ const ACTIONS = [
           v-for="meal in day.meals"
           :key="meal.key"
           class="row"
-          :class="{ done: meal.status === 'completed' || meal.status === 'skipped' }"
+          :class="{ done: meal.status === 'completed' || meal.status === 'skipped', named: severalMeals }"
         >
           <span class="d">
             <template v-if="severalMeals"><b>{{ MEAL_LABEL[meal.mealType] }}</b></template>
@@ -104,6 +104,8 @@ const ACTIONS = [
 .days { list-style: none; margin: 0; padding: 0 16px; }
 .day-head { margin: 0; padding: 12px 0 2px; }
 .row { display: grid; grid-template-columns: 44px 32px minmax(0, 1fr); gap: 10px; align-items: start; min-height: 52px; padding: 6px 0; border-bottom: 1px solid var(--c-line-soft); }
+/* With several meals a day the first column names the meal ("Breakfast"), wider than a weekday. */
+.row.named { grid-template-columns: 64px 32px minmax(0, 1fr); }
 .row.done { opacity: 0.6; }
 .d { display: flex; flex-direction: column; font-size: 12px; line-height: 16px; }
 .d b { font-weight: 800; }

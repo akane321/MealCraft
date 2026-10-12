@@ -74,7 +74,8 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
           </span>
         </span>
         <span class="n">{{ day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title }}</span>
-        <span class="mc-small more">{{ [...day.meals.slice(0, -1).map(meal => MEAL_LABEL[meal.mealType]), dishCount(day.meals.reduce((sum, meal) => sum + meal.dishes.length, 0))].join(" · ") }}</span>
+        <!-- The name above is the day's last meal; with several meals, count them rather than name one. -->
+        <span class="mc-small more">{{ [day.meals.length > 1 ? `${day.meals.length} meals` : null, dishCount(day.meals.reduce((sum, meal) => sum + meal.dishes.length, 0))].filter(Boolean).join(" · ") }}</span>
       </button>
     </div>
     <div class="foot">

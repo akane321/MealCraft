@@ -17,7 +17,7 @@ import threading
 import time
 from collections import Counter
 from contextlib import contextmanager
-from datetime import date, timedelta
+from datetime import timedelta
 from types import SimpleNamespace
 
 import pytest
@@ -29,6 +29,7 @@ from sqlalchemy.pool import StaticPool
 from app.agent import limits
 from app.agent.parser import RuleBasedConstraintParser
 from app.api.routes.meal_plans import build_meal_plan_service, build_replanning_service
+from app.core.clock import today as local_today
 from app.core.config import get_settings
 from app.core.paths import repository_root
 from app.data.catalog import Catalog, import_catalog, load_catalog
@@ -228,7 +229,7 @@ def a_week_of_seven(client) -> dict:
     response = client.post(
         "/api/plans/generate",
         json={
-            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "start_date": (local_today() + timedelta(days=1)).isoformat(),
             "household_size": 4,
             "max_cooking_time_minutes": 90,
             "weekly_budget_sgd": 20,
