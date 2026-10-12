@@ -277,7 +277,7 @@ test("an administrator replays a failed plan, switches the parser and edits an a
   await expect(ab.getByText("Comparable developer diagnostic.")).toBeVisible();
   await expect(ab.getByRole("row", { name: /Passed audit count 5 4 -1/ })).toBeVisible();
   await expect(ab.getByRole("row", { name: /Purchase budget.*1/ })).toBeVisible();
-  await expect(ab.getByRole("row", { name: /budget-edge.*repair_off repeat 0.*purchase_budget/ })).toBeVisible();
+  await expect(ab.getByRole("row", { name: /budget-edge.*repair_off repeat 0.*Purchase budget/ })).toBeVisible();
   await page.getByLabel("Use run 79 as A").check();
   await expect(ab.getByText("Do not interpret these deltas.")).toBeVisible();
   await expect(ab.getByText("Code revision differs or is missing.")).toBeVisible();

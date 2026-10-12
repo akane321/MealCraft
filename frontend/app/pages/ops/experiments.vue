@@ -410,8 +410,8 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
                 <th>{{ item.case_id }}<template v-if="item.condition"> · {{ item.condition }}</template></th>
                 <td>{{ item.a_status ?? "—" }}</td>
                 <td>{{ item.b_status ?? "—" }}</td>
-                <td>{{ item.failures_gained.length ? item.failures_gained.join(", ") : "none" }}</td>
-                <td>{{ item.failures_lost.length ? item.failures_lost.join(", ") : "none" }}</td>
+                <td>{{ item.failures_gained.length ? item.failures_gained.map(humanKey).join(", ") : "none" }}</td>
+                <td>{{ item.failures_lost.length ? item.failures_lost.map(humanKey).join(", ") : "none" }}</td>
               </tr>
             </tbody>
           </table>
@@ -577,11 +577,10 @@ h3 { margin: 16px 0 8px; color: var(--t2); font-size: 12px; font-weight: 600; le
 .comparison-blocked { border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent); background: color-mix(in srgb, var(--danger) 8%, transparent); color: var(--t2); }
 .comparison-blocked ul { margin: 6px 0 0; padding-left: 18px; }
 .evidence-table td { max-width: 180px; overflow-wrap: anywhere; }
-/* Five columns in half a page: headings and the long failure codes wrap rather than push the card wider; a status stays whole. */
+/* Five columns in half a page: headings and the humanized failure codes wrap at spaces rather than push the card wider; a status stays whole. */
 .case-changes th, .case-changes td { padding: 9px 8px; }
 .case-changes thead th { white-space: normal; }
 .case-changes td:nth-child(-n+3) { white-space: nowrap; }
-.case-changes td:nth-child(n+4) { overflow-wrap: anywhere; }
 /* The drawer's overlay; each ops page styles its own (tasks.vue, users.vue, data.vue). */
 .drawer-scrim { position: fixed; inset: 0; z-index: 30; display: flex; justify-content: flex-end; background: rgba(14, 12, 10, 0.6); }
 .drawer { width: min(720px, 100%); height: 100%; overflow-y: auto; padding: 24px; border-left: 1px solid var(--line-2); background: var(--s1); animation: mc-rise 320ms var(--ease) both; }

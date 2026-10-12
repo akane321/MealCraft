@@ -92,7 +92,7 @@ for (const [width, height] of [[1280, 720], [1440, 900]] as const) {
     expect(fit.cardOverflows).toBe(false);
     expect(fit.mainOverflows).toBe(false);
     expect(fit.pageOverflows).toBe(false);
-    await expect(table.getByRole("row", { name: /dev-002.*consecutive_recipe_repetition, hard_constraint_violation/ })).toBeVisible();
+    await expect(table.getByRole("row", { name: /dev-002.*Consecutive recipe repetition, Hard constraint violation/ })).toBeVisible();
     if (SHOTS) {
       await ab.screenshot({ path: `${SHOTS}/experiments-ab-card-${width}.png` });
       await page.screenshot({ path: `${SHOTS}/experiments-case-changes-${width}.png` });
