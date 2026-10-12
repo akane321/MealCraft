@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import re
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 
@@ -15,6 +16,7 @@ from app.core.runtime_config import REGISTRY
 from app.evaluation import runner
 from app.evaluation.agent_benchmark import evaluate_agent
 from app.models.platform import OperationRun
+from app.planning import product_path
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
 from app.services.ops_settings import (
     _case_differences,
@@ -271,7 +273,8 @@ def test_an_overflowing_number_is_a_422_not_a_500(console) -> None:  # noqa: F81
 
 
 def test_the_meal_options_default_is_what_the_product_planner_keeps() -> None:
-    source = (ROOT / "backend/app/planning/product_path.py").read_text(encoding="utf-8")
+    # The module's own file, so the test reads it in a checkout and in the backend container alike.
+    source = Path(product_path.__file__).read_text(encoding="utf-8")
     default = REGISTRY["meal_options_per_slot"].default(Settings(environment="test", database_url="sqlite://"))
 
     # The planner's literal and the console's default are kept in step until the planner reads the key.

@@ -6,6 +6,7 @@ import json
 import shutil
 from pathlib import Path
 
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
@@ -65,9 +66,14 @@ def test_a_reason_maps_to_the_bucket_the_build_counted_it_under() -> None:
     assert reason_bucket("not a food recipe: furniture polish", {"reviewed incomplete"}) == "not a food recipe"
 
 
+BUILDER = repository_root() / "data-engineering" / "scripts" / "build_release_v2.py"
+
+
+# The backend image carries the release data but not the data-engineering scripts; the checkout CI job runs this.
+@pytest.mark.skipif(not BUILDER.exists(), reason="the release builder is not in this layout")
 def test_the_reason_mapping_matches_the_builder() -> None:
     # reason_bucket copies the builder's normalisation; a change there must be copied here too.
-    builder = (repository_root() / "data-engineering" / "scripts" / "build_release_v2.py").read_text(encoding="utf-8")
+    builder = BUILDER.read_text(encoding="utf-8")
 
     assert f'r"{_REASON_DETAIL.pattern}"' in builder
     assert f'"{ENRICHER_REASON}"' in builder
