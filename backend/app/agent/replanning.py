@@ -1,8 +1,9 @@
 import re
-from datetime import date, timedelta
+from datetime import timedelta
 
 from app.agent.replies import language, say, weekday
 from app.agent.shape_change import asks_for_shape, drops_a_dish
+from app.core.clock import today as local_today
 from app.planning.recipe_similarity import wanted
 from app.schemas.agent import AgentReplanDraft
 from app.schemas.display import shown_title
@@ -245,7 +246,7 @@ class AgentReplanInterpreter:
 
         for tokens, offset in ((("today", "tonight", "今天", "今晚"), 0), (("tomorrow", "明天"), 1)):
             if any(token in text for token in tokens):
-                wanted = date.today() + timedelta(days=offset)
+                wanted = local_today() + timedelta(days=offset)
                 return next((day.day_index for day in plan.days if day.planned_date == wanted), None)
 
         named = [self._weekday_of[match.group()] for match in self._weekday_pattern.finditer(text)]

@@ -1,7 +1,7 @@
 import math
 import re
 from collections.abc import Callable
-from datetime import date, timedelta
+from datetime import timedelta
 from uuid import uuid4
 
 from pydantic_core import to_jsonable_python
@@ -11,6 +11,7 @@ from app.agent.parser import ConstraintParser
 from app.agent.replanning import AgentReplanInterpreter
 from app.agent.replies import language, listed, planner_message, say, weekday, word
 from app.agent.shape_change import read_shape_change
+from app.core.clock import today as local_today
 from app.models.agent import AgentRun, AgentSession
 from app.orchestration.contracts import (
     AgentRunStatus,
@@ -507,7 +508,7 @@ class AgentSessionService:
 
     def _plan_request(self, constraints: AgentConstraintState) -> WeeklyMealPlanRequest:
         return WeeklyMealPlanRequest(
-            start_date=date.today(),
+            start_date=local_today(),
             day_count=7,
             household_size=constraints.household_size,
             max_cooking_time_minutes=constraints.max_cooking_time_minutes,

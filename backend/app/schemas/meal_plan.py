@@ -4,6 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from app.core.clock import today as local_today
 from app.schemas.display import ShownTitle
 from app.schemas.planning_nutrition import ProductNutritionTarget
 from app.schemas.planning_v2 import MealComposition
@@ -72,7 +73,7 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     nutrition_constraints: list[ProductNutritionTarget] = Field(default_factory=list, max_length=12)
     nutrition_guard_band: float = Field(default=0.25, ge=0, le=1, allow_inf_nan=False)
     planner_strategy: Literal["beam", "greedy-baseline"] = "beam"
-    start_date: date = Field(default_factory=date.today)
+    start_date: date = Field(default_factory=local_today)
     day_count: int = Field(default=7, ge=7, le=7)
     weekly_budget_sgd: float | None = Field(default=None, gt=0, le=7000)
     # Dish roles of every dinner (ADR-0036); None is one dish, the MVP.

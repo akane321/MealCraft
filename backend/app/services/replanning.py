@@ -2,6 +2,7 @@ from collections import Counter
 from datetime import date, timedelta
 from fractions import Fraction
 
+from app.core.clock import today as local_today
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
 from app.models.recipe import Recipe
 from app.planning import alternatives
@@ -208,7 +209,7 @@ class MealPlanReplanningService:
             update={"pricing_mode": "fixture"}
         )
         meal = request.meal_type
-        today = today or date.today()
+        today = today or local_today()
         ahead = [day for day in range(1, 8) if plan.start_date + timedelta(days=day - 1) >= today]
         # A meal already cooked, or one the household locked, is left as it is.
         held = {
