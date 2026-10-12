@@ -444,6 +444,14 @@ def test_users_are_listed_searched_and_edited_with_an_audit_row(console) -> None
     assert client.get("/api/ops/users/999999").status_code == 404
 
 
+def test_user_search_treats_percent_and_underscore_as_text(console) -> None:
+    client, factory = console
+    _second_account(factory)
+
+    for text in ("_", "%", "bo_"):
+        assert client.get("/api/ops/users", params={"q": text}).json() == {"items": [], "total": 0}
+
+
 def test_users_conversations_plans_and_accounts_can_be_deleted(console) -> None:
     client, factory = console
     bob = _second_account(factory)

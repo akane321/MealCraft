@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 
 import pytest
 
+from app.agent import model_client
 from app.core.config import Settings
 from app.core.paths import repository_root
 from app.core.runtime_config import REGISTRY
@@ -15,7 +16,14 @@ from app.evaluation import runner
 from app.evaluation.agent_benchmark import evaluate_agent
 from app.models.platform import OperationRun
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
-from app.services.ops_settings import _case_differences, _case_report, experiment_detail, experiment_view
+from app.services.ops_settings import (
+    _case_differences,
+    _case_report,
+    _evaluate,
+    experiment_comparison,
+    experiment_detail,
+    experiment_view,
+)
 from app.worker.planning_experiments import _gate_summary
 from tests.test_operations_console_api import console  # noqa: F401 - the console API fixture
 
@@ -124,6 +132,21 @@ def test_the_assistant_benchmark_keeps_each_message_and_category(console) -> Non
     assert sum(item["case_count"] for item in report["category_metrics"].values()) == 24
 
 
+def test_the_assistant_benchmark_records_its_own_model_calls_not_the_process_count(monkeypatch) -> None:
+    def sends_three_requests(**kwargs):
+        for _ in range(3):
+            model_client._count(None)
+        return evaluate_agent(**kwargs)
+
+    monkeypatch.setattr("app.evaluation.agent_benchmark.evaluate_agent", sends_three_requests)
+    before = model_client.unrecorded_requests()
+
+    report = _evaluate("agent-benchmark", {"agent_parser_provider": "fixture"}, Settings())[3]
+
+    assert report["model_calls"] == 3
+    assert model_client.unrecorded_requests() == before
+
+
 def test_a_failing_message_is_listed_and_compared_by_its_failure_codes() -> None:
     passing = evaluate_agent(dataset_path=ROOT / "data/evaluation/agent/fixture-v1.json")
     failing = {**passing, "cases": [{**passing["cases"][0], "failure_reasons": ["extraction_mismatch"]}]}
@@ -181,6 +204,42 @@ def test_the_list_and_the_drawer_give_one_reproducibility_verdict() -> None:
     row.code_commit = "a" * 40
     assert experiment_view(row).conditions["conditions_complete"] is True
     assert experiment_detail(row).reproducibility.complete is True
+
+
+def test_the_dataset_digest_row_compares_the_file_hash_when_a_run_has_no_semantic_digest() -> None:
+    def detail(row_id: int, dataset: dict):
+        now = datetime.now(UTC)
+        data = {"evaluation": "agent-benchmark", "configuration": {}, "metrics": {}, "conditions": {"dataset": dataset}}
+        return experiment_detail(
+            OperationRun(
+                id=row_id,
+                run_type="experiment",
+                status="succeeded",
+                created_at=now,
+                started_at=now,
+                finished_at=now,
+                artifact_references=[{"kind": "experiment", "data": data}],
+            )
+        )
+
+    def digest_row(a: dict, b: dict):
+        comparison = experiment_comparison(detail(1, a), detail(2, b))
+        rows = [row.model_dump(exclude={"delta"}) for row in comparison.evidence]
+        return next(row for row in rows if row["key"].startswith("dataset_")), comparison
+
+    both = {"sha256": "f" * 64}
+    row, comparison = digest_row(both, both)
+    assert row == {"key": "dataset_file_digest", "a": "f" * 64, "b": "f" * 64, "matches": True}
+    assert comparison.compatible is False  # the runs still lack the rest of the recorded conditions
+    row, _ = digest_row(both, {"file_sha256": "0" * 64})
+    assert (row["key"], row["matches"]) == ("dataset_file_digest", False)
+    # One run's semantic digest is no use against a run that recorded none.
+    row, _ = digest_row({**both, "semantic_sha256": "s" * 64}, both)
+    assert (row["key"], row["matches"]) == ("dataset_file_digest", True)
+    row, _ = digest_row({**both, "semantic_sha256": "s" * 64}, {**both, "semantic_sha256": "s" * 64})
+    assert row == {"key": "dataset_digest", "a": "s" * 64, "b": "s" * 64, "matches": True}
+    row, _ = digest_row({}, {})
+    assert (row["a"], row["b"], row["matches"]) == (None, None, False)
 
 
 def test_a_gate_case_with_no_draft_is_not_an_unchecked_invalid_draft() -> None:

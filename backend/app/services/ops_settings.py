@@ -14,6 +14,7 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.agent import model_client
 from app.core.code_version import code_commit
 from app.core.config import Settings
 from app.core.paths import repository_root
@@ -291,14 +292,19 @@ def _evaluate(name: str, configuration: dict, settings: Settings) -> tuple[dict,
 
     provider = configuration["agent_parser_provider"]
     key = settings.openai_api_key.get_secret_value() if provider == "openai" and settings.openai_api_key else None
-    result = evaluate_agent(
-        dataset_path=dataset,
-        provider=provider,
-        allow_live_api=provider == "openai",
-        api_key=key,
-        model=settings.openai_model,
+    # The run's own requests to the model API, taken here so they are in its report, not the process-wide count.
+    with model_client.counting():
+        result = evaluate_agent(
+            dataset_path=dataset,
+            provider=provider,
+            allow_live_api=provider == "openai",
+            api_key=key,
+            model=settings.openai_model,
+        )
+        calls = model_client.take().requests
+    report = _case_report(
+        result, result["cases"], provider=result["provider"], model=result["model"], model_calls=calls
     )
-    report = _case_report(result, result["cases"], provider=result["provider"], model=result["model"])
     return result["metrics"], result["metrics"]["failure_case_count"] == 0, result["dataset"], report
 
 
@@ -369,8 +375,7 @@ def _reproducibility(row: OperationRun, conditions: dict[str, Any], duration_sec
         "code_commit": conditions.get("code_commit"),
         "parameter_digest": conditions.get("parameter_digest"),
         "dataset.path": dataset.get("path"),
-        # The inline runners record the file hash as "sha256".
-        "dataset.file_sha256": dataset.get("file_sha256") or dataset.get("sha256"),
+        "dataset.file_sha256": _dataset_file_sha(conditions),
         "dataset.semantic_sha256": dataset.get("semantic_sha256"),
         "runner": conditions.get("runner"),
         "code_source": conditions.get("code_source"),
@@ -413,7 +418,6 @@ def experiment_comparison(a: ExperimentDetail, b: ExperimentDetail) -> Experimen
     if not a.reproducibility.complete or not b.reproducibility.complete:
         reasons.append("Both runs need complete recorded conditions.")
     evidence_fields = [
-        ("dataset_digest", ("dataset", "semantic_sha256"), "Dataset digest differs or is missing."),
         ("runner", ("runner",), "Runner protocol differs or is missing."),
         ("code_commit", ("code_commit",), "Code revision differs or is missing."),
         ("code_source", ("code_source",), "Implementation fingerprint differs or is missing."),
@@ -422,10 +426,19 @@ def experiment_comparison(a: ExperimentDetail, b: ExperimentDetail) -> Experimen
         ("repeats", ("repeats",), "Repeat count differs or is missing."),
         ("claim_scope", ("citation_scope",), "Claim scope differs or is missing."),
     ]
+    # The semantic digest when both runs recorded one, else the dataset file's hash; a "file" key says which.
+    semantic = [_condition_value(run.conditions, ("dataset", "semantic_sha256")) for run in (a, b)]
+    digest_key, digests = (
+        ("dataset_digest", semantic)
+        if None not in semantic
+        else ("dataset_file_digest", [_dataset_file_sha(run.conditions) for run in (a, b)])
+    )
+    rows = [(digest_key, *digests, "Dataset digest differs or is missing.")] + [
+        (key, _condition_value(a.conditions, path), _condition_value(b.conditions, path), message)
+        for key, path, message in evidence_fields
+    ]
     evidence = []
-    for key, path, message in evidence_fields:
-        left = _condition_value(a.conditions, path)
-        right = _condition_value(b.conditions, path)
+    for key, left, right, message in rows:
         present = (left is not None and right is not None) or (key == "seed" and left is None and right is None)
         matches = present and left == right
         evidence.append({"key": key, "a": left, "b": right, "matches": matches})
@@ -452,6 +465,12 @@ def experiment_comparison(a: ExperimentDetail, b: ExperimentDetail) -> Experimen
         case_differences=_case_differences(a.report, b.report) if a.report and b.report else None,
         claim_scope="developer_diagnostic_only" if compatible else "not_comparable",
     )
+
+
+def _dataset_file_sha(conditions: dict[str, Any]) -> Any:
+    dataset = conditions.get("dataset") if isinstance(conditions.get("dataset"), dict) else {}
+    # The inline runners record the file hash as "sha256".
+    return dataset.get("file_sha256") or dataset.get("sha256")
 
 
 def _condition_value(conditions: dict[str, Any], path: tuple[str, ...]) -> Any:

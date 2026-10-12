@@ -213,3 +213,41 @@ def test_planning_run_shows_the_warnings_of_the_plan_it_saved(console) -> None: 
         database.get(MealPlan, plan.json()["id"]).revision = 2
         database.commit()
     assert client.get(f"/api/ops/tasks/planning/{run_id}").json()["warnings"] == plan.json()["warnings"]
+
+
+def _generate_plan(client):
+    plan = client.post(
+        "/api/plans/generate",
+        json={
+            "start_date": "2026-09-01",
+            "household_size": 2,
+            "max_cooking_time_minutes": 60,
+            "weekly_budget_sgd": 40,
+            "pricing_mode": "fixture",
+        },
+    )
+    assert plan.status_code == 201
+    return plan.json()
+
+
+def test_planning_run_records_the_commit_that_made_it(console, monkeypatch) -> None:  # noqa: F811
+    client, factory = console
+    monkeypatch.setenv("CODE_COMMIT", "commit-planned")
+    _generate_plan(client)
+    (run_id,) = _planning_run_ids(factory)
+
+    assert client.get(f"/api/ops/tasks/planning/{run_id}").json()["evidence"]["code_commit"] == "commit-planned"
+
+
+def test_planning_drawer_says_when_the_saved_plan_was_deleted(console) -> None:  # noqa: F811
+    client, factory = console
+    plan = _generate_plan(client)
+    (run_id,) = _planning_run_ids(factory)
+
+    assert "note" not in client.get(f"/api/ops/tasks/planning/{run_id}").json()["inputs"]
+    assert client.delete(f"/api/plans/{plan['id']}").status_code == 204
+
+    inputs = client.get(f"/api/ops/tasks/planning/{run_id}").json()["inputs"]
+    assert f"plan {plan['id']} was deleted" in inputs["note"]
+    assert "saved none" not in inputs["note"]
+    assert inputs["plan_id"] == plan["id"]

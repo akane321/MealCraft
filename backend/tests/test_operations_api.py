@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
 
 import pytest
 from fastapi.routing import APIRoute
@@ -653,6 +654,19 @@ def test_fairprice_live_check_uses_the_provider(operations_client, monkeypatch) 
     assert payload["ok"] is False
     assert payload["error_kind"] == "unavailable"
     assert "timed out" in payload["detail"]
+
+
+def test_fairprice_live_check_names_the_product_without_stray_spaces(operations_client, monkeypatch) -> None:
+    client, database_factory = operations_client
+    _set_system_role(database_factory, SystemRole.ADMIN)
+    monkeypatch.setattr(
+        FairPriceProductProvider, "search", lambda self, query, *, limit: [SimpleNamespace(name="Songhe Rice ")]
+    )
+
+    payload = client.post("/api/ops/services/fairprice/check").json()
+
+    assert payload["ok"] is True
+    assert payload["detail"] == "One search returned Songhe Rice."
 
 
 def test_ordinary_user_cannot_reach_console_endpoints(operations_client) -> None:

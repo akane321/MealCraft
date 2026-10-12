@@ -138,6 +138,14 @@ def _variety_decision(message: str) -> ScopeDecision:
     )
 
 
+REPLAN_REFUSED = "REPLAN_REFUSED"
+
+
+def _refused(decision: ScopeDecision) -> ScopeDecision:
+    """The decision of a turn whose change the planner could not make: the reply says why and nothing changed."""
+    return decision.model_copy(update={"reason_code": REPLAN_REFUSED})
+
+
 class AgentSessionNotReadyError(ValueError):
     pass
 
@@ -722,7 +730,7 @@ class AgentSessionService:
                     draft=AgentReplanDraft(),
                     clarification_questions=[],
                     pending_event_id=None,
-                    scope_decision=scope_decision,
+                    scope_decision=_refused(scope_decision),
                 )
             else:
                 updated = self.repository.append_replan_exchange(
@@ -787,7 +795,7 @@ class AgentSessionService:
             )
         except WeeklyPlanSelectionError as error:
             reply = say("change_failed", lang, error=planner_message(str(error), lang))
-            return self._keep_week(session_id, snapshot, plan, message, reply, lang)
+            return self._keep_week(session_id, snapshot, plan, message, reply, lang, refused=True)
 
         updated = self.repository.append_replan_exchange(
             session_id,
@@ -830,7 +838,7 @@ class AgentSessionService:
             preview, repeats, short = self.replanning_service.preview_variety(plan_id=plan.id, reason=message.strip())
         except (MealPlanReplanValidationError, WeeklyPlanSelectionError) as error:
             reply = say("change_failed", lang, error=planner_message(str(error), lang))
-            return self._keep_week(session_id, snapshot, plan, message, reply, lang)
+            return self._keep_week(session_id, snapshot, plan, message, reply, lang, refused=True)
         # What the week can spend: its budget, or what it costs now when a change took it over (ADR-0046 section 2).
         budget = plan.grocery_estimate.weekly_budget_sgd
         limit = max(budget, plan.grocery_estimate.purchase_total_sgd) if budget is not None else None
@@ -882,13 +890,16 @@ class AgentSessionService:
         message: str,
         reply: str,
         lang: str,
+        *,
+        refused: bool = False,
     ) -> AgentSessionResponse:
         """No new week replaced this one: say why, and offer a swap instead."""
+        decision = _variety_decision(message)
         updated = self.repository.append_bounded_exchange(
             session_id,
             user_message=message,
             assistant_message=reply,
-            scope_decision=_variety_decision(message),
+            scope_decision=_refused(decision) if refused else decision,
             pending_interaction=self._choices(snapshot, [self._swap_option(plan, lang)], lang),
         )
         if updated is None:
@@ -953,6 +964,7 @@ class AgentSessionService:
                 None,
                 AgentReplanDraft(),
             )
+            decision = _refused(decision)
         else:
             reply, pending = self._describe_shape_preview(intent.summary, preview, plan, lang), preview.id
             draft = AgentReplanDraft(event_type="CHANGE_SHAPE", reason=message.strip())
@@ -1479,6 +1491,8 @@ class AgentSessionService:
         # answered question is a turn done as meant.
         if fell_back:
             return self.run_lifecycle.transition(run, AgentRunStatus.DEGRADED, termination_reason_code="MODEL_FALLBACK")
+        if scope_decision is not None and scope_decision.reason_code == REPLAN_REFUSED:
+            return self.run_lifecycle.transition(run, AgentRunStatus.DEGRADED, termination_reason_code=REPLAN_REFUSED)
         if scope_decision is not None and not scope_decision.should_mutate_state:
             reason = f"SCOPE_{scope_decision.scope_class.value.upper()}"
             if scope_decision.scope_class in ANSWERED_SCOPES:

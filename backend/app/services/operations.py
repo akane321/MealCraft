@@ -551,6 +551,10 @@ def _planning_detail(
     inputs: dict[str, Any] = {"input_digest": run.input_digest, "plan_id": plan_id}
     if constraints is not None:
         inputs["constraints"] = _redact(constraints)
+    elif plan_id is not None:
+        inputs["note"] = (
+            f"Constraints are kept with a saved plan; plan {plan_id} was deleted, so only their digest remains."
+        )
     else:
         inputs["note"] = "Constraints are kept with a saved plan; this run saved none, so only their digest remains."
     return OperationsTaskDetail(
@@ -622,7 +626,7 @@ def _check_fairprice(settings: Settings) -> str:
         raise LiveCheckError(error.kind, str(error)) from None
     if not found:
         raise LiveCheckError("empty", "FairPrice answered but the search returned no products.")
-    return f"One search returned {found[0].name}."
+    return f"One search returned {found[0].name.strip()}."
 
 
 def _network_kind(error: Exception) -> str:

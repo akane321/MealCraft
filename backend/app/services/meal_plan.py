@@ -4,6 +4,7 @@ from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
+from app.core.code_version import code_commit
 from app.core.config import get_settings
 from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
@@ -457,6 +458,7 @@ class WeeklyMealPlanService:
             triggered_by_user_id=self.actor_user_id,
             household_id=self.repository.household_id,
             input_digest=trace["input_digest"],
+            code_commit=code_commit(),
             catalog_version=trace.get("catalog_version"),
             product_snapshot_version=trace.get("product_snapshot_version"),
             policy_version=trace["policy_version"],

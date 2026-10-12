@@ -17,9 +17,12 @@ from app.agent.replanning import AgentReplanInterpreter
 from app.agent.replies import weekday
 from app.agent.shape_change import read_shape_change
 from app.planning.recipe_similarity import wanted
+from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.schemas.agent import AgentConstraintState, AgentReplanDraft
 from app.schemas.meal_plan import WeeklyMealPlanResponse
 from app.services.agent import keep_shape_answer
+from app.services.meal_plan import WeeklyMealPlanService
+from app.services.replanning import MealPlanReplanningService, MealPlanReplanValidationError
 from tests.test_agent_limits_and_language import stub_openai
 from tests.test_planning_capability import (  # noqa: F401
     _broccoli_soup,
@@ -641,3 +644,41 @@ def test_a_greeting_beside_a_planned_week_is_not_degraded(client):
     greeted = say(client, session, "thanks")
 
     assert latest_run(client, greeted)["status"] == "committed"
+
+
+def test_a_change_the_planner_refuses_is_a_degraded_turn(client):
+    """The walkthrough's "Committed" beside "I could not make that change": the turn went wrong, nothing changed."""
+    session, plan = _conversation_week(client)
+    say(client, session, "Keep Monday's main")
+    client.post(f"/api/agent/sessions/{session['id']}/replan/confirm")
+
+    refused = say(client, session, "Swap Monday's main")
+
+    assert reply_of(refused).startswith("I could not prepare that change")
+    assert refused["pending_replan"] is None
+    run = latest_run(client, refused)
+    assert (run["status"], run["termination_reason_code"]) == ("degraded", "REPLAN_REFUSED")
+
+
+@pytest.mark.parametrize(
+    ("message", "target", "method", "error"),
+    [
+        ("Add a soup on weekends", MealPlanReplanningService, "preview_shape", MealPlanReplanValidationError),
+        ("The dishes are boring", MealPlanReplanningService, "preview_variety", WeeklyPlanSelectionError),
+        ("Plan a new week with different dishes", WeeklyMealPlanService, "generate", WeeklyPlanSelectionError),
+    ],
+)
+def test_a_shape_variety_or_new_week_the_planner_refuses_is_degraded(
+    client, monkeypatch, message, target, method, error
+):
+    session, _ = _conversation_week(client)
+
+    def refuse(*args, **kwargs):
+        raise error("There is no dinner left to change on those days.")
+
+    monkeypatch.setattr(target, method, refuse)
+    refused = say(client, session, message)
+
+    assert reply_of(refused).startswith("I could not make that change")
+    run = latest_run(client, refused)
+    assert (run["status"], run["termination_reason_code"]) == ("degraded", "REPLAN_REFUSED")

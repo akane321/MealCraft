@@ -139,6 +139,11 @@ def test_recipes_can_be_searched_by_title_words(recipe_client: TestClient) -> No
     assert recipe_client.get("/api/recipes", params={"course": "nonsense"}).status_code == 422
 
 
+def test_recipe_search_treats_percent_and_underscore_as_text(recipe_client: TestClient) -> None:
+    for text in ("_", "%", "so_a"):
+        assert recipe_client.get("/api/recipes", params={"q": text}).json()["items"] == []
+
+
 def test_get_recipe_returns_ingredients_and_steps(recipe_client: TestClient) -> None:
     response = recipe_client.get("/api/recipes/lemon-chicken")
 
