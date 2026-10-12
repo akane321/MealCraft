@@ -208,8 +208,8 @@ def test_planning_run_shows_the_warnings_of_the_plan_it_saved(console) -> None: 
 
     assert client.get(f"/api/ops/tasks/planning/{run_id}").json()["warnings"] == plan.json()["warnings"]
 
-    # Once the plan is changed its warnings are the change's, no longer this run's.
+    # The run keeps its own warnings after the plan is changed.
     with factory() as database:
         database.get(MealPlan, plan.json()["id"]).revision = 2
         database.commit()
-    assert client.get(f"/api/ops/tasks/planning/{run_id}").json()["warnings"] == []
+    assert client.get(f"/api/ops/tasks/planning/{run_id}").json()["warnings"] == plan.json()["warnings"]

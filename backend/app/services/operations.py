@@ -223,8 +223,7 @@ class OperationsService:
             None,
         )
         constraints = self.repository.plan_constraints(plan_id) if plan_id is not None else None
-        # ponytail: planning runs are saved without their warnings (meal_plan._operation_run); until they keep
-        # them, an unchanged plan's warnings are the ones this run produced.
+        # Runs recorded before planning runs kept their warnings fall back to the plan's, while it is unchanged.
         warnings = run.warnings or (self.repository.plan_warnings(plan_id) if plan_id is not None else None)
         return _planning_detail(run, plan_id=plan_id, constraints=constraints, warnings=warnings or [])
 
