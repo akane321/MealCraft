@@ -19,6 +19,7 @@ from app.api.routes.auth import (
 from app.api.routes.operations import router as operations_router
 from app.auth.authorization import SystemRole
 from app.auth.passwords import Argon2PasswordAdapter, Argon2PasswordPolicy
+from app.core.clock import SINGAPORE
 from app.core.config import Settings, get_settings
 from app.data.admin_accounts import ensure_admin_accounts, parse_admin_accounts
 from app.db.base import Base
@@ -376,11 +377,10 @@ def test_overview_reports_recorded_evidence_without_guessing(operations_client) 
     assert payload["database_status"] == "connected"
     assert payload["service"] == "MealCraft Test"
     assert payload["app_version"] == "9.9.9"
-    assert payload["latest_recorded_versions"] == {
-        "code_commit": "commit-current",
-        "catalog_version": "catalog-current",
-        "product_snapshot_version": "products-current",
-    }
+    # Versions name the running code and the loaded release (test_console_tasks_overview), never a run's own.
+    assert not {"commit-current", "catalog-current", "products-current"} & set(
+        payload["latest_recorded_versions"].values()
+    )
     assert payload["runs"] == {
         "queued": 1,
         "running": 1,
@@ -497,7 +497,7 @@ def test_series_buckets_fourteen_days_with_planning_latency(operations_client) -
     payload = response.json()
     assert len(payload["days"]) == 14
     today = payload["days"][-1]
-    assert today["day"] == now.date().isoformat()
+    assert today["day"] == now.astimezone(SINGAPORE).date().isoformat()  # Singapore days, as the console shows
     assert today["agent_sessions"] == 1
     assert today["agent_runs"] == {"committed": 1}
     assert today["planning_runs"] == {"succeeded": 3}
@@ -549,7 +549,8 @@ def test_task_detail_returns_stored_run_without_keys(operations_client) -> None:
     assert agent.status_code == 200
     agent_payload = agent.json()
     assert agent_payload["inputs"]["conversation"][0]["content"] == "Dinners for two, S$90"
-    assert agent_payload["inputs"]["understood_constraints"] == {"household_size": 2}
+    # This run kept no record of its input, so the conversation's state is shown as it is now.
+    assert agent_payload["inputs"]["conversation_now"]["constraints"] == {"household_size": 2}
     assert agent_payload["model_configuration"] == {"parser": "openai", "parser_model": "gpt-test"}
     assert agent_payload["trace"]["checkpoints"][0]["stage"] == "parse"
     assert agent_payload["timings"]["duration_seconds"] == 3.0
@@ -604,12 +605,13 @@ def test_services_report_configuration_and_recent_fallbacks(operations_client, m
     assert response.status_code == 200
     services = {item["name"]: item for item in response.json()["items"]}
     assert services["openai"]["configured"] is False
-    # Runs and the model requests they sent are separate figures: two runs, three requests.
+    # Runs and the model requests they sent are separate figures: two runs, three requests. The run whose
+    # request failed went on without the model: one failure, one fallback.
     assert services["openai"]["recent"] == {
         "window_days": 7,
         "runs": 2,
         "model_calls": 3,
-        "failures": 0,
+        "failures": 1,
         "fallbacks": 1,
     }
     assert services["fairprice"]["recent"] == {

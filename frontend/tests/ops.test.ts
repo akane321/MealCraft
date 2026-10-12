@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { compareMetrics, diffFields, dishRows, formatSeconds, formatValue, isConsoleAccount, isJobCancellable, jobIdempotencyKey, linePath, mayManageJobs, niceMax, packageGrams, parseTaskKey, splitNames, statusesIn } from "../app/lib/ops";
+import { TASK_STATUSES, compareMetrics, diffFields, dishRows, formatSeconds, formatValue, formatWhen, isConsoleAccount, isJobCancellable, jobIdempotencyKey, linePath, mayManageJobs, niceMax, packageGrams, parseTaskKey, singaporeMidnight, splitNames, statusColor, statusesIn } from "../app/lib/ops";
 
 describe("ops console slice 2 helpers", () => {
   it("lists changed fields first and compares values, not references", () => {
@@ -84,6 +84,26 @@ describe("ops console helpers", () => {
       { day: "2026-09-25", agent_sessions: 0, agent_runs: { failed: 1, committed: 2, running: 1 }, planning_runs: {}, planning_median_seconds: null, planning_p90_seconds: null },
     ];
     expect(statusesIn(days, day => day.agent_runs)).toEqual(["committed", "running", "failed"]);
+  });
+
+  // The backend's AgentRunStatus and OperationStatus.
+  const AGENT_STATUSES = ["created", "needs_clarification", "ready_for_confirmation", "running", "preview_ready", "committed", "degraded", "failed", "cancelled"];
+  const PLANNING_STATUSES = ["queued", "running", "succeeded", "failed", "cancelled", "degraded"];
+
+  it("offers every status a task can have as a filter", () => {
+    expect([...TASK_STATUSES].sort()).toEqual([...new Set([...AGENT_STATUSES, ...PLANNING_STATUSES])].sort());
+  });
+
+  it("gives each status of one chart its own colour", () => {
+    for (const statuses of [AGENT_STATUSES, PLANNING_STATUSES]) {
+      expect(new Set(statuses.map(statusColor)).size).toBe(statuses.length);
+    }
+  });
+
+  it("filters and shows times in Singapore whatever the browser's zone", () => {
+    expect(singaporeMidnight("2026-10-12")).toBe("2026-10-12T00:00:00+08:00");
+    expect(new Date(singaporeMidnight("2026-10-12")).toISOString()).toBe("2026-10-11T16:00:00.000Z");
+    expect(formatWhen("2026-10-11T16:30:00Z")).toMatch(/^12 Oct.*12:30/);
   });
 
   it("formats durations and task keys", () => {

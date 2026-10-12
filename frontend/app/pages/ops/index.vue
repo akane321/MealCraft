@@ -43,7 +43,7 @@ const tiles = computed(() => {
     { label: "Conversations", value: sum(day => day.agent_sessions), note: "started in 14 days" },
     { label: "Assistant turns", value: sum(day => count(day.agent_runs)), note: `${agentFailed} failed or degraded` },
     { label: "Planning runs", value: planning, note: `${planningFailed} failed` },
-    { label: "In flight now", value: (overview.value?.runs.queued ?? 0) + (overview.value?.runs.running ?? 0), note: "queued or running" },
+    { label: "In flight now", value: (overview.value?.runs.queued ?? 0) + (overview.value?.runs.running ?? 0), note: "turns and jobs queued or running" },
   ];
 });
 
@@ -123,9 +123,9 @@ const failures = computed(() => Object.entries(overview.value?.runs.failures_las
             <li v-for="[code, value] in failures" :key="code"><span>{{ code }}</span><span /><span class="mc-num">{{ value }}</span></li>
           </ul>
           <p class="ops-muted versions">
-            Latest recorded code {{ overview?.latest_recorded_versions.code_commit ?? "—" }},
-            catalog {{ overview?.latest_recorded_versions.catalog_version ?? "—" }},
-            products {{ overview?.latest_recorded_versions.product_snapshot_version ?? "—" }}.
+            Running code {{ overview?.latest_recorded_versions.code_commit ?? "not set (CODE_COMMIT)" }},
+            catalog release {{ overview?.latest_recorded_versions.catalog_version ?? "—" }},
+            price snapshot {{ overview?.latest_recorded_versions.product_snapshot_version ?? "—" }}.
             Median planning time today {{ formatSeconds(days.at(-1)?.planning_median_seconds) }}.
           </p>
         </section>

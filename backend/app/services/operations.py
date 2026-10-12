@@ -1,18 +1,23 @@
 from __future__ import annotations
 
 import math
+import re
 import time as clock
-from datetime import UTC, datetime, time, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 from app.agent import model_client
+from app.core.clock import SINGAPORE
+from app.core.code_version import code_commit
 from app.core.config import Settings
+from app.core.paths import data_root
 from app.core.runtime_config import runtime_value
 from app.models.agent import AgentRun, AgentSession
 from app.models.platform import OperationRun
+from app.planning.grocery_estimator import RELEASE_SNAPSHOT_FILE
 from app.products.provider import FairPriceProductProvider, ProductProviderError
 from app.repositories.operations import OperationsRepository
 from app.retrieval.tutorials import TutorialProviderError, YouTubeDataApiProvider
@@ -63,10 +68,11 @@ class OperationsService:
             service=self.settings.app_name,
             app_version=self.settings.app_version,
             generated_at=generated_at,
+            # What this backend runs on, not the digests a planning run keeps of its own candidates and prices.
             latest_recorded_versions=OperationsVersionSummary(
-                code_commit=snapshot.code_commit,
+                code_commit=code_commit(),
                 catalog_version=snapshot.catalog_version,
-                product_snapshot_version=snapshot.product_snapshot_version,
+                product_snapshot_version=_product_snapshot_version(),
             ),
             runs=OperationsCountSummary(
                 queued=snapshot.queued,
@@ -87,7 +93,7 @@ class OperationsService:
         runs, total = self.repository.list_runs(
             run_type=run_type,
             status=status,
-            since=since,
+            since=_instant(since),
             limit=limit,
         )
         return OperationsRunCollectionResponse(
@@ -124,17 +130,18 @@ class OperationsService:
     # --- Console (ADR-0047) ---
 
     def series(self) -> OperationsSeriesResponse:
-        today = datetime.now(UTC).date()
+        # Singapore days, the dates the console shows beside every run.
+        today = datetime.now(SINGAPORE).date()
         first = today - timedelta(days=SERIES_DAYS - 1)
-        since = datetime.combine(first, time.min, UTC)
+        since = _instant(datetime.combine(first, time.min))
         days = {first + timedelta(days=offset): _DayBucket() for offset in range(SERIES_DAYS)}
         provider_modes: dict[str, int] = {}
 
         for (created_at,) in self.repository.created_rows(AgentSession, since=since):
-            if bucket := days.get(_aware(created_at).date()):
+            if bucket := days.get(_day(created_at)):
                 bucket.sessions += 1
         for created_at, status in self.repository.created_rows(AgentRun, AgentRun.status, since=since):
-            if bucket := days.get(_aware(created_at).date()):
+            if bucket := days.get(_day(created_at)):
                 bucket.agent[status] = bucket.agent.get(status, 0) + 1
         planning = self.repository.created_rows(
             OperationRun,
@@ -148,7 +155,7 @@ class OperationsService:
         for created_at, status, started_at, finished_at, provider_mode in planning:
             for source in filter(None, (provider_mode or "").split(",")):
                 provider_modes[source] = provider_modes.get(source, 0) + 1
-            if bucket := days.get(_aware(created_at).date()):
+            if bucket := days.get(_day(created_at)):
                 bucket.planning[status] = bucket.planning.get(status, 0) + 1
                 if (seconds := _duration(started_at, finished_at)) is not None:
                     bucket.durations.append(seconds)
@@ -181,6 +188,7 @@ class OperationsService:
         # ponytail: two tables merged in memory, so a deep page reads offset+limit rows from each;
         # a union query when the console pages past a few thousand runs.
         fetch = offset + limit
+        since, until = _instant(since), _instant(until)
         items: list[OperationsTaskSummary] = []
         total = 0
         if kind in (None, "agent"):
@@ -215,21 +223,26 @@ class OperationsService:
             None,
         )
         constraints = self.repository.plan_constraints(plan_id) if plan_id is not None else None
-        return _planning_detail(run, plan_id=plan_id, constraints=constraints)
+        # ponytail: planning runs are saved without their warnings (meal_plan._operation_run); until they keep
+        # them, an unchanged plan's warnings are the ones this run produced.
+        warnings = run.warnings or (self.repository.plan_warnings(plan_id) if plan_id is not None else None)
+        return _planning_detail(run, plan_id=plan_id, constraints=constraints, warnings=warnings or [])
 
     def services(self) -> OperationsServiceCollectionResponse:
         since = datetime.now(UTC) - timedelta(days=SERVICE_WINDOW_DAYS)
         settings = self.settings
 
         # OpenAI: agent runs whose recorded parser was openai, the model requests each sent, and whether one
-        # failed and the run went on without the model.
+        # failed. A failed request never fails the turn: the run goes on without the model, so each failure is
+        # also a fallback. A run that failed for another reason (no week found) is no OpenAI failure.
         openai_runs = [
-            (status, used_llm_calls, bool((config or {}).get("model_fell_back")))
-            for _, status, config, used_llm_calls in self.repository.created_rows(
-                AgentRun, AgentRun.status, AgentRun.model_config, AgentRun.used_llm_calls, since=since
+            (used_llm_calls, bool((config or {}).get("model_fell_back")))
+            for _, config, used_llm_calls in self.repository.created_rows(
+                AgentRun, AgentRun.model_config, AgentRun.used_llm_calls, since=since
             )
             if (config or {}).get("parser") == "openai"
         ]
+        model_failures = sum(failed for _, failed in openai_runs)
         # FairPrice: planning runs that asked for live prices; one priced without FairPrice fell back.
         # ponytail: reads whole traces for the window; a requested_mode column if this gets slow.
         live_runs = [
@@ -257,14 +270,16 @@ class OperationsService:
                     recent=OperationsServiceRecent(
                         window_days=SERVICE_WINDOW_DAYS,
                         runs=len(openai_runs),
-                        model_calls=sum(calls for _, calls, _ in openai_runs),
-                        failures=sum(status == "failed" for status, _, _ in openai_runs),
-                        fallbacks=sum(fell_back for _, _, fell_back in openai_runs),
+                        model_calls=sum(calls for calls, _ in openai_runs),
+                        failures=model_failures,
+                        fallbacks=model_failures,
                     ),
                     note="Runs are assistant runs recorded while the OpenAI parser was selected: turns, plan"
                     " confirmations and discards alike. Model calls are the requests those runs sent to OpenAI"
-                    " (chat and embeddings, retries included). A fallback is a run that went on without the model"
-                    " after a request failed: the rules read the message, or shared words stood in for embeddings."
+                    " (chat and embeddings, retries included). A failure is a run in which a request to OpenAI"
+                    " failed; runs that failed for other reasons, such as no week fitting, are not counted. A"
+                    " failed request never fails the turn, so every failure is also a fallback: the run went on"
+                    " without the model, the rules reading the message or shared words standing in for embeddings."
                     f" Not in these figures: {model_client.unrecorded_requests()} model calls sent since the"
                     " backend started that no run records (console replays, swap previews asked of the plan API"
                     " directly).",
@@ -324,6 +339,28 @@ class _DayBucket:
 def _aware(moment: datetime) -> datetime:
     # SQLite hands back naive datetimes; they were written in UTC.
     return moment if moment.tzinfo is not None else moment.replace(tzinfo=UTC)
+
+
+def _instant(moment: datetime | None) -> datetime | None:
+    """A filter time in UTC, which SQLite compares as written. One without an offset is Singapore time, the time
+    the console shows."""
+    if moment is None:
+        return None
+    return (moment if moment.tzinfo is not None else moment.replace(tzinfo=SINGAPORE)).astimezone(UTC)
+
+
+def _day(created_at: datetime) -> date:
+    return _aware(created_at).astimezone(SINGAPORE).date()
+
+
+def _product_snapshot_version() -> str | None:
+    """The release price snapshot fixture prices come from ("fairprice-v2"), read from the head of its file."""
+    path = data_root() / RELEASE_SNAPSHOT_FILE
+    if not path.exists():
+        return None
+    with path.open(encoding="utf-8") as handle:
+        found = re.search(r'"snapshot_version"\s*:\s*"([^"]+)"', handle.read(4096))
+    return found.group(1) if found else None
 
 
 def _duration(started_at: datetime | None, finished_at: datetime | None) -> float | None:
@@ -423,12 +460,7 @@ def _agent_detail(run: AgentRun) -> OperationsTaskDetail:
         inputs=_redact(
             {
                 "intent": run.intent,
-                "conversation": [
-                    {"role": message.role, "content": message.content, "at": message.created_at}
-                    for message in run.session.messages
-                ],
-                "understood_constraints": run.session.constraints,
-                "missing_fields": run.session.missing_fields,
+                **_turn_inputs(run),
                 "scope_decision": run.scope_decision,
                 "context_version": run.context_version,
                 "plan_revision": run.plan_revision,
@@ -460,7 +492,50 @@ def _agent_detail(run: AgentRun) -> OperationsTaskDetail:
     )
 
 
-def _planning_detail(run: OperationRun, *, plan_id: int | None, constraints: dict | None) -> OperationsTaskDetail:
+def _turn_inputs(run: AgentRun) -> dict[str, Any]:
+    """What this turn was given and how it read it, from the record it kept for replays; never the conversation's
+    later state passed off as the turn's."""
+    record = next(
+        (
+            item.state_payload["replay"]
+            for item in reversed(run.checkpoints)
+            if isinstance(item.state_payload, dict) and "replay" in item.state_payload
+        ),
+        None,
+    )
+    if record is not None:
+        given, outcome = record["input"], record["outcome"] or {}
+        conversation = [{"role": item["role"], "content": item["content"]} for item in given.get("history") or []]
+        conversation.append({"role": "user", "content": given["message"]})
+        if outcome.get("assistant_message"):
+            conversation.append({"role": "assistant", "content": outcome["assistant_message"]})
+        return {
+            "conversation": conversation,
+            "constraints_before": given.get("current"),
+            "understood_constraints": outcome.get("constraints"),
+            "missing_fields": outcome.get("missing_fields"),
+        }
+    # Confirmations, changes to a saved plan and older turns kept no record: the messages up to this run's end,
+    # and the conversation's state as it is now, labelled so.
+    end = _aware(run.completed_at or run.updated_at)
+    return {
+        "conversation": [
+            {"role": message.role, "content": message.content}
+            for message in run.session.messages
+            if _aware(message.created_at) <= end
+        ],
+        "note": "This run kept no record of its own input. Conversation now is the conversation's current"
+        " state, which later turns may have changed.",
+        "conversation_now": {
+            "constraints": run.session.constraints,
+            "missing_fields": run.session.missing_fields,
+        },
+    }
+
+
+def _planning_detail(
+    run: OperationRun, *, plan_id: int | None, constraints: dict | None, warnings: list[str]
+) -> OperationsTaskDetail:
     trace = _redact(_planning_trace(run.artifact_references))
     evidence: dict[str, Any] = {key: value for key, value in trace.items() if "digest" in key}
     evidence.update(
@@ -497,7 +572,7 @@ def _planning_detail(run: OperationRun, *, plan_id: int | None, constraints: dic
             "timeout_seconds": trace.get("timeout_seconds"),
         },
         error_detail=run.error_detail,
-        warnings=list(run.warnings or []),
+        warnings=list(warnings),
     )
 
 
