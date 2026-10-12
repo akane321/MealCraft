@@ -261,6 +261,8 @@ class AgentSessionService:
             current_questions=[],
             context_version=0,
         )
+        # The turn starts before its parse (the model call), so its run is timed from here, as `reply`'s is.
+        turn_started = datetime.now(UTC)
         result = self.orchestrator.process(
             message,
             current=current,
@@ -291,8 +293,9 @@ class AgentSessionService:
             context_version=result.context_version,
             idempotency_key=idempotency_key,
             scope_decision=result.scope_decision,
+            now=turn_started,
         )
-        run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
+        run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING, now=turn_started)
         self._finish_turn_run(
             run,
             result_status=result.status,
@@ -1413,6 +1416,7 @@ class AgentSessionService:
         idempotency_key: str | None,
         plan_revision: int | None = None,
         scope_decision: ScopeDecision | None = None,
+        now: datetime | None = None,
     ) -> StartedRun:
         normalized_key = (idempotency_key or f"generated:{uuid4().hex}").strip()
         if not normalized_key or len(normalized_key) > 120:
@@ -1428,6 +1432,7 @@ class AgentSessionService:
             model_config=self.model_config(),
             actor_user_id=self.actor_user_id,
             household_id=self.household_id,
+            now=now,
         )
 
     def model_config(self) -> dict:

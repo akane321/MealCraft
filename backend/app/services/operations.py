@@ -278,9 +278,12 @@ class OperationsService:
                         window_days=SERVICE_WINDOW_DAYS,
                         runs=len(live_runs),
                         failures=sum(status == "failed" for status, _ in live_runs),
-                        fallbacks=sum("fairprice" not in sources for _, sources in live_runs),
+                        # A failed plan priced nothing (no week was found), so it fell back to nothing.
+                        fallbacks=sum(
+                            status != "failed" and "fairprice" not in sources for status, sources in live_runs
+                        ),
                     ),
-                    note="Runs are plans that asked for live prices; a fallback is one priced without FairPrice.",
+                    note="Runs are plans asking for live prices; a fallback is a saved one priced without FairPrice.",
                 ),
                 OperationsServiceStatus(
                     name="youtube",

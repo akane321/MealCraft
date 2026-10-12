@@ -76,18 +76,31 @@ class WeeklyMealPlanService:
         found = found_weeks.pop(self._found_key(constraints, household_profile_version), None)
         fresh = found is not None and time.monotonic() - found[0] < get_settings().planning_pool_cache_seconds
         searched = found[1] if fresh else None
+        if searched is not None:
+            # `check` searched this week before the reply and Plan only saves it: the run is timed as that search
+            # and this save, not the 1 ms of the save alone (the console's planning time read 0 s on 2026-10-05).
+            searched[1].trace["reused_checked_week"] = True
+            started_at -= timedelta(seconds=searched[1].trace["search_seconds"])
         try:
             recommendation_result, result = searched or self._search(
                 constraints, self._candidates(constraints), profile_version=household_profile_version
             )
         except ProductPlanningError as error:
             error.trace["profile_id"] = household_profile_id
+            self._priced_as_asked(error.trace, constraints)
             self.repository.session.add(self._operation_run(error.trace, started_at, error=str(error)))
             self.repository.session.commit()
             raise
         selected, grocery = result.selected, result.grocery
+        self._priced_as_asked(result.trace, constraints)
         if constraints.pricing_mode == "live":
             grocery = self.grocery_aggregator.refresh(grocery)
+            # Only the saved list is checked at FairPrice (ADR-0058): what it came to, as the household sees it.
+            result.trace["final_list"] = {
+                "pricing_mode": grocery.pricing_mode,
+                "purchase_total_sgd": grocery.purchase_total_sgd,
+                "price_sources": sorted({line.evidence.source for line in grocery.items if line.evidence}),
+            }
         result.trace["profile_id"] = household_profile_id
 
         recommendation_warnings = recommendation_result.warnings
@@ -108,6 +121,7 @@ class WeeklyMealPlanService:
                 f"The current eligible catalog contains {eligible_count} {recipe_label}; "
                 "recipes are rotated across the seven days."
             )
+        warnings = self._deduplicate(warnings)
         placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(selected))]
         scheduled = [
             ScheduledDish(
@@ -126,13 +140,21 @@ class WeeklyMealPlanService:
             constraints=constraints,
             scheduled=scheduled,
             grocery=grocery,
-            warnings=self._deduplicate(warnings),
+            warnings=warnings,
             household_profile_id=household_profile_id,
             household_profile_version=household_profile_version,
             replaces_plan_id=replaces_plan_id,
-            operation_run=self._operation_run(result.trace, started_at),
+            operation_run=self._operation_run(result.trace, started_at, warnings=warnings),
         )
         return self._to_response(plan)
+
+    @staticmethod
+    def _priced_as_asked(trace: dict, constraints: WeeklyMealPlanRequest) -> None:
+        """A search's trace with the pricing its request asked for. Every week is chosen at snapshot prices
+        (ADR-0058), so the planner's trace says fixture; that stays as the planning basis, but a live plan is no
+        fixture plan to the console, its replays ("as stored") or its FairPrice count."""
+        trace.setdefault("planning_pricing_mode", trace["requested_pricing_mode"])
+        trace["requested_pricing_mode"] = trace["request"]["pricing_mode"] = constraints.pricing_mode
 
     def _search(self, constraints: WeeklyMealPlanRequest, candidates, *, profile_version: int | None = None):
         """The week `generate` plans from these candidates (recipes, recommendations), nothing saved."""
@@ -205,6 +227,7 @@ class WeeklyMealPlanService:
             # The same search over the same pool finds the same week, and it stays kept for Plan: a budget refusal
             # checks the amount it offers, and tapping that offer asked for the very same week (WP1 1b, 2026-10-08).
             return None
+        started = time.monotonic()
         try:
             searched = self._search(constraints, self._checked_candidates(constraints))
         except ProductPlanningError as error:
@@ -218,6 +241,8 @@ class WeeklyMealPlanService:
                 found_weeks.pop(key, None)
             while len(found_weeks) >= FOUND_WEEKS_KEPT:
                 found_weeks.pop(next(iter(found_weeks), None), None)
+            # What the search took, for the run of the Plan that saves this week without searching (`generate`).
+            searched[1].trace["search_seconds"] = round(now - started, 3)
             found_weeks[self._found_key(constraints)] = (now, searched)
         return None
 
@@ -417,7 +442,14 @@ class WeeklyMealPlanService:
             for (slot_index, meal_type, role_id, share), recommendation in zip(placements, result.selected, strict=True)
         ]
 
-    def _operation_run(self, trace: dict, started_at: datetime, *, error: str | None = None) -> OperationRun:
+    def _operation_run(
+        self, trace: dict, started_at: datetime, *, error: str | None = None, warnings: Iterable[str] = ()
+    ) -> OperationRun:
+        # The sources the planner priced with, and FairPrice where it priced the saved list (`final_list`). Only the
+        # provider is added: a line FairPrice did not confirm keeps its evidence label (release_snapshot), which is
+        # no provider, and with it "fairprice,fixture,release_snapshot" overflows provider_mode's String(30).
+        checked = {"fairprice"} & set(trace.get("final_list", {}).get("price_sources", []))
+        sources = {*trace.get("observed_sources", []), *checked}
         return OperationRun(
             trace_id=f"planning-{uuid4().hex}",
             run_type="planning",
@@ -429,9 +461,9 @@ class WeeklyMealPlanService:
             product_snapshot_version=trace.get("product_snapshot_version"),
             policy_version=trace["policy_version"],
             algorithm_version=f"{trace['algorithm']}-product-v1",
-            provider_mode=",".join(trace.get("observed_sources", [])) or None,
+            provider_mode=",".join(sorted(sources)) or None,
             artifact_references=[{"kind": "planning_trace", "data": trace}],
-            warnings=[],
+            warnings=list(warnings),
             error_code=trace["status"] if error else None,
             error_detail=error,
             started_at=started_at,

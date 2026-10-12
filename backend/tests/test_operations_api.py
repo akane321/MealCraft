@@ -588,6 +588,16 @@ def test_services_report_configuration_and_recent_fallbacks(operations_client, m
         artifact_references=_planning_trace(requested_pricing_mode="live"),
         created_at=now,
     )
+    # A live plan that found no week failed before any list was priced: a failure, no fallback.
+    _add_run(
+        database_factory,
+        trace_id="planning-live-failed",
+        run_type="planning",
+        status="failed",
+        provider_mode="fixture",
+        artifact_references=_planning_trace(requested_pricing_mode="live"),
+        created_at=now,
+    )
 
     response = client.get("/api/ops/services")
 
@@ -604,9 +614,9 @@ def test_services_report_configuration_and_recent_fallbacks(operations_client, m
     }
     assert services["fairprice"]["recent"] == {
         "window_days": 7,
-        "runs": 1,
+        "runs": 2,
         "model_calls": None,
-        "failures": 0,
+        "failures": 1,
         "fallbacks": 1,
     }
     assert "5 model calls sent since the backend started that no run records" in services["openai"]["note"]
