@@ -623,6 +623,7 @@ def test_services_report_configuration_and_recent_fallbacks(operations_client, m
         "fallbacks": 1,
     }
     assert "5 model calls sent since the backend started that no run records" in services["openai"]["note"]
+    assert "benchmark run in Experiments keeps its own model-call count" in services["openai"]["note"]
     assert services["youtube"]["recent"] is None
 
 

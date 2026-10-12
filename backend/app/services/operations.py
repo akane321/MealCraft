@@ -281,7 +281,8 @@ class OperationsService:
                     " without the model, the rules reading the message or shared words standing in for embeddings."
                     f" Not in these figures: {model_client.unrecorded_requests()} model calls sent since the"
                     " backend started that no run records (console replays, swap previews asked of the plan API"
-                    " directly).",
+                    " directly). An assistant benchmark run in Experiments keeps its own model-call count in its"
+                    " stored report instead.",
                 ),
                 OperationsServiceStatus(
                     name="fairprice",
