@@ -31,6 +31,7 @@ from app.services.authentication import (
     EmailAlreadyRegisteredError,
     InvalidCredentialsError,
     IssuedAuthentication,
+    UsernameTakenError,
 )
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -226,7 +227,7 @@ def register(
 ) -> AuthenticationResponse:
     try:
         issued = service.register(payload, user_agent=request.headers.get("user-agent"))
-    except EmailAlreadyRegisteredError as error:
+    except (EmailAlreadyRegisteredError, UsernameTakenError) as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
     _set_authentication_cookies(response, issued=issued, settings=settings)
     return _authentication_response(issued)
@@ -243,7 +244,8 @@ def login(
     try:
         issued = service.login(payload, user_agent=request.headers.get("user-agent"))
     except InvalidCredentialsError as error:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password") from error
+        what = "username" if payload.username is not None else "email"
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid {what} or password") from error
     except AccountUnavailableError as error:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error)) from error
     _set_authentication_cookies(response, issued=issued, settings=settings)

@@ -243,6 +243,7 @@ export interface OpsUserHousehold { id: number; name: string; role: string; memb
 export interface OpsUser {
   id: number;
   email: string;
+  username: string | null;
   display_name: string;
   system_role: string;
   status: string;

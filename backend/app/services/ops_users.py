@@ -49,7 +49,13 @@ class UsersService:
         filters = []
         if query:
             pattern = f"%{query.strip().casefold()}%"
-            filters.append(or_(User.normalized_email.like(pattern), func.lower(User.display_name).like(pattern)))
+            filters.append(
+                or_(
+                    User.normalized_email.like(pattern),
+                    User.username.like(pattern),
+                    func.lower(User.display_name).like(pattern),
+                )
+            )
         total = self.database.scalar(select(func.count()).select_from(User).where(*filters)) or 0
         users = self.database.scalars(
             select(User).where(*filters).order_by(User.created_at.desc(), User.id.desc()).offset(offset).limit(limit)
@@ -217,6 +223,7 @@ class UsersService:
         return OpsUserSummary(
             id=user.id,
             email=user.normalized_email,
+            username=user.username,
             display_name=user.display_name,
             system_role=user.system_role,
             status=user.status,

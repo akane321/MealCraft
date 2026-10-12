@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.platform import AuthSession, Household, HouseholdMembership, User, UserCredential
+from app.schemas.platform import username_from_email
 
 
 class PlatformRepository:
@@ -22,9 +23,11 @@ class PlatformRepository:
         password_hash: str,
         locale: str = "en-SG",
         timezone: str = "Asia/Singapore",
+        username: str | None = None,
     ) -> User:
         user = User(
             normalized_email=normalized_email,
+            username=username or self.free_username(username_from_email(normalized_email)),
             display_name=display_name,
             locale=locale,
             timezone=timezone,
@@ -44,11 +47,13 @@ class PlatformRepository:
         household_name: str,
         locale: str = "en-SG",
         timezone: str = "Asia/Singapore",
+        username: str | None = None,
     ) -> tuple[User, Household]:
         """Create the first account, household and owner membership atomically."""
 
         user = User(
             normalized_email=normalized_email,
+            username=username or self.free_username(username_from_email(normalized_email)),
             display_name=display_name,
             locale=locale,
             timezone=timezone,
@@ -75,6 +80,18 @@ class PlatformRepository:
         return self.session.scalars(
             select(User).where(User.id == user_id).options(selectinload(User.credential))
         ).one_or_none()
+
+    def get_user_by_username(self, username: str) -> User | None:
+        return self.session.scalars(
+            select(User).where(User.username == username).options(selectinload(User.credential))
+        ).one_or_none()
+
+    def free_username(self, base: str) -> str:
+        """`base`, or `base-2`, `base-3`, ... : the first no account has."""
+        name, number = base, 2
+        while self.session.scalar(select(User.id).where(User.username == name)) is not None:
+            name, number = f"{base}-{number}", number + 1
+        return name
 
     def get_user_by_email(self, normalized_email: str) -> User | None:
         return self.session.scalars(

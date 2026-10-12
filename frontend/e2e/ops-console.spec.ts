@@ -149,10 +149,28 @@ async function signIn(page: Page) {
     await page.getByRole("radio", { name: "Administrator" }).click();
     await expect(page.getByRole("heading", { name: "Administrator sign in" })).toBeVisible({ timeout: 1000 });
   }).toPass();
-  await page.getByLabel("Email").fill("ops@example.test");
+  await page.getByLabel("Username").fill("ops");
   await page.getByLabel("Password").fill("console-password");
   await page.getByRole("button", { name: "Sign in to the console" }).click();
 }
+
+test("sign-in asks for a username by default and switches to email on request", async ({ page }) => {
+  await stubConsole(page);
+  const sent: Array<Record<string, string>> = [];
+  page.on("request", (request) => { if (request.url().endsWith("/api/auth/login")) sent.push(request.postDataJSON()); });
+  await page.goto("/login");
+  await expect(async () => {
+    await page.getByRole("button", { name: "Use email instead" }).click();
+    await expect(page.getByLabel("Email")).toBeVisible({ timeout: 1000 });
+  }).toPass();
+  await expect(page.getByLabel("Username")).toHaveCount(0);
+  await page.getByRole("button", { name: "Use username instead" }).click();
+  await page.getByLabel("Username").fill("Lim.Family");
+  await page.getByLabel("Password").fill("x");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect.poll(() => sent.length).toBe(1);
+  expect(sent[0]).toEqual({ username: "Lim.Family", password: "x" });
+});
 
 test("an administrator signs in, reads the overview, opens a task and runs a live check", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
