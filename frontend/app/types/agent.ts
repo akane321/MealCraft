@@ -55,6 +55,8 @@ export interface AgentConstraintState {
   pricing_mode: PricingMode;
   // How often one dish may be served in the week; 1 is "no repeats", null leaves it to the planner.
   max_uses_per_recipe: number | null;
+  // The week's first day, YYYY-MM-DD (backend agent/plan_dates.py); absent on older conversations.
+  start_date?: string | null;
 }
 
 export interface AgentReplanDraft {

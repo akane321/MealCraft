@@ -137,6 +137,10 @@ PLANNER_ZH_PATTERNS = (
         "S${budget} 排不下这些饭菜：我找到的最便宜的一周要 S${cost}。可以提高预算，或者少一些限制。",
     ),
     (r"There is no (?P<meal>\w+) left to change on those days\.", "那几天已经没有可以调整的{meal}了。"),
+    (
+        r"(?P<days>.+?) (?:has|have) already passed, so its (?P<meal>\w+) cannot change\.",
+        "{days}已经过去了，那天的{meal}不能再改。",
+    ),
     (r"(?P<meal>\w+) is not planned on those days\.", "那几天没有安排{meal}。"),
     (
         r"Nothing could be added to (?P<meal>\w+) on those days: no suitable dish was found, even over the budget\.",
@@ -392,6 +396,9 @@ REPLIES: dict[str, tuple[str, str]] = {
     "shape_summary": ("{summary}.", "{summary}。"),
     # Said with "Got it" when the first request shapes the week (agent/shape_change.py setup_shape).
     "shape_setup": ("{Meal}: {dishes}.", "{meal}：{dishes}。"),
+    # Said with "Got it" when the request names when the week starts (agent/plan_dates.py).
+    "week_runs": ("The week runs {start} – {end}.", "这周从{start}到{end}。"),
+    "start_passed": ("{day} has passed, so the week starts today.", "{day}已经过去了，这周从今天开始。"),
     "shape_no_meal_setup": ("No {meal}.", "不安排{meal}。"),
     "shape_only": ("{Meal} will have one {dish} {when}", "{when}{meal}只做一道{dish}"),
     "shape_one_dish": ("{Meal} as one dish {when}", "{when}{meal}只做一道菜"),

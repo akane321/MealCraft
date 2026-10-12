@@ -141,9 +141,16 @@ class ReferenceScopePolicy:
                 )
 
         from app.agent.parser import mentions_money  # the parser's own reading; it imports this package
+        from app.agent.plan_dates import read_start
+        from app.core import clock
 
-        # A sum of money is a budget, however it is said: "S$10 total", "$10 a week", 总共10块, 一百块.
-        has_domain = any(token in lower for token in self._domain_tokens) or mentions_money(lower)
+        # A sum of money is a budget, however it is said: "S$10 total", "$10 a week", 总共10块, 一百块; and when
+        # the week starts is the plan's too: "from next Monday", 下周开始.
+        has_domain = (
+            any(token in lower for token in self._domain_tokens)
+            or mentions_money(lower)
+            or read_start(lower, clock.today()) is not None
+        )
         has_off_topic = any(token in lower for token in self._off_topic_tokens)
         has_medical = any(token in lower for token in self._medical_tokens)
         asks_for_treatment = any(token in lower for token in self._treatment_tokens)

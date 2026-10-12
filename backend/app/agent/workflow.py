@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from datetime import timedelta
 from typing import TypedDict
 
 from langgraph.graph import END, START, StateGraph
@@ -6,8 +7,10 @@ from langgraph.graph import END, START, StateGraph
 from app.agent import replies
 from app.agent.limits import Refusal
 from app.agent.parser import ConstraintParser, bare_amount
+from app.agent.plan_dates import default_start, read_start
 from app.agent.replies import language, say
 from app.agent.shape_change import setup_shape
+from app.core import clock
 from app.schemas.agent import AgentConstraintExtraction, AgentConstraintState, AgentMessageResponse
 from app.schemas.meal_plan import default_plan_shape
 from app.schemas.recommendation import AvailableIngredientInput, NutritionTargets
@@ -92,14 +95,35 @@ class AgentConstraintWorkflow:
                     "got_it", lang, details=replies.details(AgentConstraintExtraction(**{asked: amount}), lang)[0]
                 )
         merged = AgentConstraintWorkflow._merge_constraints(current, extraction)
+        # "Next week", "from Wednesday": when the week starts, and the reply says so. Its words are left out of
+        # what the shape reader sees, so "dinners with a soup from Monday" still shapes the week.
+        notes: list[str] = []
+        today = clock.today()
+        start = read_start(state["message"], today)
+        message = state["message"]
+        if start is not None:
+            message = message.lower().replace(start.words, " ")
+            if start.start < today:
+                notes.append(say("start_passed", lang, day=replies.weekday(start.start, lang)))
+            merged.start_date = max(start.start, today)
+            end = merged.start_date + timedelta(days=6)
+            notes.append(
+                say("week_runs", lang, start=replies.weekday(merged.start_date, lang), end=replies.weekday(end, lang))
+            )
         # "Dinners with a soup" in the request shapes the week it sets up, and the reply says so.
-        shaped = setup_shape(state["message"], merged.plan_shape or default_plan_shape(), lang)
+        shaped = setup_shape(message, merged.plan_shape or default_plan_shape(), lang)
         if shaped is not None:
             merged.plan_shape, said = shaped
+            notes.append(said)
+        if merged.start_date is None:
+            meals = list((merged.plan_shape or default_plan_shape()).meals)
+            merged.start_date = default_start(clock.now(), meals)
+        if notes:
+            joined = ("" if lang == "zh" else " ").join(notes)
             extraction.assistant_summary = (
-                f"{extraction.assistant_summary}{'' if lang == 'zh' else ' '}{said}"
+                f"{extraction.assistant_summary}{'' if lang == 'zh' else ' '}{joined}"
                 if extraction.assistant_summary
-                else said
+                else joined
             )
         acknowledged = list(
             dict.fromkeys([*state["acknowledged_unknowns"], *extraction.acknowledged_unknown_quantities])

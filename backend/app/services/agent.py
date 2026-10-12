@@ -8,9 +8,11 @@ from pydantic_core import to_jsonable_python
 
 from app.agent import limits, model_client
 from app.agent.parser import ConstraintParser
+from app.agent.plan_dates import default_start
 from app.agent.replanning import AgentReplanInterpreter
 from app.agent.replies import language, listed, planner_message, say, weekday, word
 from app.agent.shape_change import read_shape_change
+from app.core.clock import now as clock_now
 from app.core.clock import today as local_today
 from app.models.agent import AgentRun, AgentSession
 from app.orchestration.contracts import (
@@ -507,8 +509,12 @@ class AgentSessionService:
         raise AgentSessionNotReadyError("This interaction field is not supported by the current runtime.")
 
     def _plan_request(self, constraints: AgentConstraintState) -> WeeklyMealPlanRequest:
+        # The day the conversation set (agent/plan_dates.py); one that has passed since, or none, is today's default.
+        start = constraints.start_date
+        if start is None or start < local_today():
+            start = default_start(clock_now(), list((constraints.plan_shape or default_plan_shape()).meals))
         return WeeklyMealPlanRequest(
-            start_date=local_today(),
+            start_date=start,
             day_count=7,
             household_size=constraints.household_size,
             max_cooking_time_minutes=constraints.max_cooking_time_minutes,

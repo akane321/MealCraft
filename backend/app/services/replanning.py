@@ -219,6 +219,12 @@ class MealPlanReplanningService:
         }
         days = [day for day in (request.day_indexes or ahead) if day in ahead and day not in held]
         if not days:
+            # Every day named has passed: say which, rather than that nothing is "left".
+            past = [plan.start_date + timedelta(days=day - 1) for day in request.day_indexes or [] if day not in ahead]
+            if past and len(past) == len(request.day_indexes or []):
+                named = " and ".join(f"{day:%A} {day.day} {day:%b}" for day in past)
+                verb = "have" if len(past) > 1 else "has"
+                raise MealPlanReplanValidationError(f"{named} {verb} already passed, so its {meal} cannot change.")
             raise MealPlanReplanValidationError(f"There is no {meal} left to change on those days.")
         removed = [item for item in plan.entries if item.meal_type == meal and item.day_index in days]
         if request.roles is None and not removed:

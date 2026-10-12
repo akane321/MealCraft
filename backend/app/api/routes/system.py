@@ -5,6 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from app.core import clock
 from app.core.config import Settings, get_settings
 from app.db.session import get_db_session
 from app.schemas.system import AppInfoResponse, HealthResponse
@@ -29,6 +30,8 @@ def health_check(settings: SettingsDependency, database: DatabaseDependency) -> 
         status="ok",
         service=settings.app_name,
         database="connected",
+        today=clock.today(),
+        simulated_today=clock.simulated(),
     )
 
 

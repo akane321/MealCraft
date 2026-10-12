@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Literal
 
@@ -112,6 +112,9 @@ class AgentConstraintState(BaseModel):
     max_uses_per_recipe: int | None = None
     # The dishes of a week the household found monotonous: a new week avoids them while enough others remain.
     avoid_recipe_ids: list[int] = Field(default_factory=list, max_length=200)
+    # The week's first day: what the request said ("next week", "from Wednesday"), else today or tomorrow
+    # (agent/plan_dates.py). A day already past by the time the week is planned becomes today.
+    start_date: date | None = None
 
 
 class AgentReplanDraft(BaseModel):
