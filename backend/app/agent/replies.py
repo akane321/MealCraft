@@ -117,6 +117,10 @@ PLANNER_ZH = {
         "我找不到满足所有限制的安排，放宽其中一个再试试。"
     ),
     "Planning took longer than it should this time. Please try again.": "这次规划花的时间太长了，请再试一次。",
+    "I couldn't find enough different dishes for a week without repeats under these limits. "
+    "Allow a dish twice, or relax one of the limits.": (
+        "在这些限制下，找不到足够多不同的菜来排一周不重样的安排。可以允许一道菜出现两次，或者放宽一个限制。"
+    ),
     "No candidate plan was found; try a different recipe selection.": "没有找到可行的安排，换一些菜再试试。",
     "No recipes satisfy the supplied hard constraints.": "没有菜符合你的硬性限制。",
     "A week plans at least one meal a day.": "一周每天至少要安排一顿饭。",
@@ -133,7 +137,15 @@ PLANNER_ZH_PATTERNS = (
         "S${budget} 排不下这些饭菜：我找到的最便宜的一周要 S${cost}。可以提高预算，或者少一些限制。",
     ),
     (r"There is no (?P<meal>\w+) left to change on those days\.", "那几天已经没有可以调整的{meal}了。"),
+    (
+        r"(?P<days>.+?) (?:has|have) already passed, so its (?P<meal>\w+) cannot change\.",
+        "{days}已经过去了，那天的{meal}不能再改。",
+    ),
     (r"(?P<meal>\w+) is not planned on those days\.", "那几天没有安排{meal}。"),
+    (
+        r"Nothing could be added to (?P<meal>\w+) on those days: no suitable dish was found, even over the budget\.",
+        "那几天的{meal}没法再加菜：即使超出预算也没找到合适的菜。",
+    ),
     (
         r"No dish other than (?P<title>.+) satisfies the current hard constraints\.",
         "除了{title}，没有别的菜符合现在的限制。",
@@ -305,7 +317,7 @@ REPLIES: dict[str, tuple[str, str]] = {
     "weekly_detail": ("S${amount:g} for the week", "一周 S${amount:g}"),
     "meal_detail": ("S${amount:g} a dinner", "每餐 S${amount:g}"),
     "time_detail": ("up to {minutes} minutes of cooking", "做饭不超过 {minutes} 分钟"),
-    "allergy_detail": ("nothing with {words} (allergy)", "不含{words}（过敏）"),
+    "allergy_detail": ("allergic to {words}", "不含{words}（过敏）"),
     "exclusion_detail": ("no {words}", "不要{words}"),
     "pantry_detail": ("{words} at home", "家里有{words}"),
     "no_repeats_detail": ("no dish twice", "菜不重样"),
@@ -359,7 +371,7 @@ REPLIES: dict[str, tuple[str, str]] = {
     "already_kept": ("{title} is already kept as it is.", "{title}已经保留不变了。"),
     "already_kept_meal": ("The {meal} on {day} is already kept as it is.", "{day}的{meal}已经保留不变了。"),
     "preview_skip": ("Skip {title}?", "跳过{title}？"),
-    # What a skip does to the shopping: whole packages other dishes still need stay on the list.
+    # What a skip or a swap does to the shopping: whole packages other dishes still need stay on the list.
     "skip_saves": (" That takes S${amount:.2f} off the groceries.", "买菜少花 S${amount:.2f}。"),
     "skip_costs": (" Groceries +S${amount:.2f}.", "买菜多花 S${amount:.2f}。"),
     "skip_same": (" Groceries stay the same.", "买菜不变。"),
@@ -382,7 +394,13 @@ REPLIES: dict[str, tuple[str, str]] = {
     "prepare_failed": ("I could not prepare that change: {error}", "我没法准备这个调整：{error}"),
     "change_failed": ("I could not make that change: {error}", "我没法做这个调整：{error}"),
     "shape_summary": ("{summary}.", "{summary}。"),
-    "shape_only": ("{Meal} as one {dish} {when}", "{when}{meal}只做一道{dish}"),
+    # Said with "Got it" when the first request shapes the week (agent/shape_change.py setup_shape).
+    "shape_setup": ("{Meal}: {dishes}.", "{meal}：{dishes}。"),
+    # Said with "Got it" when the request names when the week starts (agent/plan_dates.py).
+    "week_runs": ("The week runs {start} – {end}.", "这周从{start}到{end}。"),
+    "start_passed": ("{day} has passed, so the week starts today.", "{day}已经过去了，这周从今天开始。"),
+    "shape_no_meal_setup": ("No {meal}.", "不安排{meal}。"),
+    "shape_only": ("{Meal} will have one {dish} {when}", "{when}{meal}只做一道{dish}"),
     "shape_one_dish": ("{Meal} as one dish {when}", "{when}{meal}只做一道菜"),
     "shape_no_meal": ("No {meal} {when}", "{when}不安排{meal}"),
     "shape_add_meal": ("{Meal} added {when}", "{when}加上{meal}"),
@@ -395,8 +413,7 @@ REPLIES: dict[str, tuple[str, str]] = {
     "when_weekdays": ("on weekdays", "工作日"),
     "shape_new": ("New: {titles}{more}.", "新加：{titles}{more}。"),
     "shape_more": (" and {count} more", " 等 {count} 道"),
-    "shape_removed_one": ("1 dish comes off the week.", "这周少了 1 道菜。"),
-    "shape_removed": ("{count} dishes come off the week.", "这周少了 {count} 道菜。"),
+    "shape_removed": ("Removed: {titles}.", "移除：{titles}。"),
     "shape_groceries": (
         "Groceries {sign}S${amount:.2f}.{over} Nothing changes until you confirm.",
         "买菜 {sign}S${amount:.2f}。{over}确认之前什么都不会改。",
@@ -425,7 +442,7 @@ REPLIES: dict[str, tuple[str, str]] = {
     "replanned": ("Done. Your week and shopping list are updated.", "好了，这周的计划和购物清单都更新了。"),
     "discarded": ("OK, your week stays as it is.", "好的，这周保持原样。"),
     "planned": (
-        "Here's your week. Tap a dinner for the recipe, or ask me to swap anything.",
+        "Here's your week. Click a dinner for the recipe, or ask me to swap anything.",
         "这是你这一周的安排。点一道菜看食谱，想换什么都可以告诉我。",
     ),
     # Limits a week cannot meet (agent/limits.py).
@@ -467,16 +484,25 @@ REPLIES: dict[str, tuple[str, str]] = {
     "cap_rule": ("Each dish at most {count} times", "每道菜最多 {count} 次"),
     # A budget under the floor, for meals too big to search for the cheapest week within a reply (agent/limits.py).
     "floor_week": (
-        "S${budget:g} for {people} is S${each:.2f} a person a meal over {meals} meals: what this week's dishes "
-        "use costs at least S${floor:.2f}, before buying whole packages.",
-        "{people}一周 S${budget:g}，相当于每人每餐 S${each:.2f}（共 {meals} 餐）：这周的菜光是用到的食材就至少要 "
-        "S${floor:.2f}，还没算整包购买。",
+        "That budget can't cover this week. S${budget:g} for {people} is S${each:.2f} a person a meal over "
+        "{meals} meals: what this week's dishes use costs at least S${floor:.2f}, before buying whole packages.",
+        "这个预算排不出来。{people}一周 S${budget:g}，相当于每人每餐 S${each:.2f}（共 {meals} 餐）："
+        "这周的菜光是用到的食材就至少要 S${floor:.2f}，还没算整包购买。",
     ),
     # A budget under the cheapest week the planner's search found (agent/limits.py).
     "budget_short": (
-        "S${budget:g} a week for {people} comes to about S${each:.2f} a person a meal ({meals} meals). "
+        "That budget can't cover this week. S${budget:g} a week for {people} comes to about S${each:.2f} "
+        "a person a meal ({meals} meals). "
+        "The cheapest week I could find costs S${cost:.2f}.",
+        "这个预算排不出来。{people}一周 S${budget:g}，每人每餐大约只有 S${each:.2f}（一周 {meals} 餐）。"
+        "我能找到的最便宜的一周要 S${cost:.2f}。",
+    ),
+    # The least-cost week with at least four different dishes, when one is verified (T04 ADR; agent/limits.py).
+    "budget_varied": (
+        "That budget can't cover this week. S${budget:g} a week for {people} comes to about S${each:.2f} "
+        "a person a meal ({meals} meals). "
         "I found a week with at least four different dishes at a cost of S${cost:.2f}.",
-        "{people}一周 S${budget:g}，每人每餐大约只有 S${each:.2f}（一周 {meals} 餐）。"
+        "这个预算排不出来。{people}一周 S${budget:g}，每人每餐大约只有 S${each:.2f}（一周 {meals} 餐）。"
         "我找到一周至少有四种不同菜，预算是 S${cost:.2f}。",
     ),
     "use_weekly": ("Use S${amount} for the week", "一周用 S${amount}"),
@@ -487,10 +513,11 @@ REPLIES: dict[str, tuple[str, str]] = {
     "fewer_people_say": ("Plan for {people}", "改成{count}个人"),
     "fewer_people_at": ("{people} at S${amount} a week", "{people}，一周 S${amount}"),
     "fewer_people_at_say": ("{people}, S${amount} for the week", "{count}个人，一周{amount}新币"),
+    # Said without the smaller household's amount: "2 people need S$41" beside "4 people S$32" read as fewer
+    # people costing more (2026-10-09 rehearsal).
     "fewer_not_cheaper": (
-        "For {people}, the plan I could verify needs a S${amount} budget, so reducing the household "
-        "does not lower the budget I can suggest.",
-        "改成{people}，我能验证的方案仍需要 S${amount} 预算，所以减少人数不能降低我能建议的预算。",
+        "Planning for fewer people would not lower that budget.",
+        "减少人数也不能降低这个预算。",
     ),
     "raise_time": ("Allow up to {minutes} minutes", "放宽到 {minutes} 分钟"),
     "raise_time_say": ("Allow up to {minutes} minutes of cooking", "做饭 {minutes} 分钟以内"),

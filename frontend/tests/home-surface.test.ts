@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetLine, changedMealWhen, conversationForPlan, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, packageLabel, perDinner, plateStyle, previewChoices, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
+import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, packageLabel, perDinner, previewChoices, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
 import type { MealPlanEntrySnapshot, MealPlanShapeChange, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
@@ -42,6 +42,9 @@ describe("grocery helpers", () => {
     expect(budgetLine(estimate)).toBe("S$7.40 under your S$90.00");
     expect(budgetLine({ ...estimate, purchase_total_sgd: 95.5 })).toBe("S$5.50 over your S$90.00");
     expect(budgetLine({ ...estimate, weekly_budget_sgd: null })).toBeNull();
+    expect(budgetGap(estimate)).toEqual({ amount: "S$7.40", over: false });
+    expect(budgetGap({ ...estimate, purchase_total_sgd: 95.5 })).toEqual({ amount: "S$5.50", over: true });
+    expect(budgetGap({ ...estimate, weekly_budget_sgd: null })).toBeNull();
   });
 
   it("labels prices by the source actually used, not the mode asked for", () => {
@@ -128,13 +131,7 @@ describe("grocery helpers", () => {
   });
 });
 
-describe("plates and averages", () => {
-  it("gives a dish the same plate every time and different dishes different plates", () => {
-    expect(plateStyle("tofu-stir-fry")).toEqual(plateStyle("tofu-stir-fry"));
-    const plates = new Set(["a", "b", "c", "d", "e", "f"].map(slug => JSON.stringify(plateStyle(slug))));
-    expect(plates.size).toBeGreaterThan(3);
-  });
-
+describe("averages", () => {
   it("averages only the dinners that still count", () => {
     const eat = (kcal: number, status: NutritionDashboardDay["status"]) =>
       ({ status, nutrition_per_person: { calories_kcal: kcal, protein_g: 10 } }) as unknown as NutritionDashboardDay;

@@ -131,9 +131,9 @@ function removeDish(meal: PlannedMealType, index: number) {
 .dish { display: grid; grid-template-columns: 130px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; }
 .dish-name { font-size: 13px; color: var(--ivory); }
 .courses { display: flex; flex-wrap: wrap; gap: 4px; }
-.course { padding: 3px 8px; border: 1px solid var(--border); border-radius: 999px; background: transparent; color: var(--muted); font-size: 11px; cursor: pointer; }
+.course { padding: 3px 8px; border: 1px solid var(--border); border-radius: 999px; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; }
 .course[aria-pressed="true"] { border-color: rgba(169, 183, 154, 0.6); color: var(--ivory); background: rgba(169, 183, 154, 0.14); }
-.optional { display: flex; gap: 6px; align-items: center; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.optional { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); white-space: nowrap; }
 .remove { width: 26px; height: 26px; border: 1px solid var(--border); border-radius: 50%; background: transparent; color: var(--danger); cursor: pointer; }
 .add { display: flex; gap: 8px; margin-top: 10px; }
 </style>

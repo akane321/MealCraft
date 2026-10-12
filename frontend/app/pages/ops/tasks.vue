@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { formatSeconds, formatWhen, humanKey, parseTaskKey, statusColor } from "~/lib/ops";
+import { TASK_STATUSES, formatSeconds, formatWhen, humanKey, parseTaskKey, singaporeMidnight, statusColor } from "~/lib/ops";
 import type { OpsReplay, OpsTaskCollection, OpsTaskDetail, OpsTaskSummary } from "~/types/ops";
 
 const PAGE = 25;
-const STATUSES = ["succeeded", "committed", "failed", "degraded", "needs_clarification", "preview_ready", "running", "queued", "cancelled"];
 
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
@@ -22,7 +21,7 @@ async function loadList() {
   const query: Record<string, string | number> = { offset: offset.value, limit: PAGE };
   if (kind.value) query.type = kind.value;
   if (status.value) query.status = status.value;
-  if (since.value) query.since = `${since.value}T00:00:00`;
+  if (since.value) query.since = singaporeMidnight(since.value);
   try {
     page.value = await apiFetch<OpsTaskCollection>(`${config.public.apiBase}/api/ops/tasks`, { query });
   }
@@ -123,7 +122,7 @@ const validation = computed(() => {
       <label>Status
         <select v-model="status">
           <option value="">Any</option>
-          <option v-for="item in STATUSES" :key="item" :value="item">{{ humanKey(item) }}</option>
+          <option v-for="item in TASK_STATUSES" :key="item" :value="item">{{ humanKey(item) }}</option>
         </select>
       </label>
       <label>Since
@@ -261,8 +260,8 @@ tr.current td { background: var(--s2); }
 .conversation { display: grid; gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; font-size: 13px; }
 .conversation li { padding: 9px 12px; border-radius: 10px; background: var(--s2); }
 .conversation li.user { background: var(--s3); }
-.conversation b { display: block; margin-bottom: 2px; color: var(--t3); font-size: 11px; font-weight: 500; text-transform: uppercase; }
+.conversation b { display: block; margin-bottom: 2px; color: var(--t3); font-size: 12px; font-weight: 500; text-transform: uppercase; }
 details { margin-bottom: 6px; border: 1px solid var(--line); border-radius: 10px; }
 summary { padding: 9px 12px; color: var(--t2); cursor: pointer; font-size: 13px; }
-details pre { margin: 0; max-height: 360px; overflow: auto; padding: 10px 12px; border-top: 1px solid var(--line); color: var(--t2); font-size: 11.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
+details pre { margin: 0; max-height: 360px; overflow: auto; padding: 10px 12px; border-top: 1px solid var(--line); color: var(--t2); font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
 </style>

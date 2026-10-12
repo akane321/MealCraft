@@ -23,6 +23,7 @@ from app.agent.parser import (
     RuleBasedConstraintParser,
 )
 from app.agent.replies import language, planner_message
+from app.core.config import get_settings
 from app.planning import meal_beam
 from app.planning.meal_composition import portion_shares
 from app.planning.product_path import CHEAPEST_MEAL_OPTIONS, ProductPlanningEngine, ProductPlanningError
@@ -299,14 +300,37 @@ def test_a_budget_suggestion_is_backed_by_the_budgeted_checks_own_cheapest_week(
     assert all(item.household_size == 2 and item.allergens == ["peanut"] for item in checked)
 
 
+def test_a_four_dish_check_searches_past_a_kept_week_of_fewer_and_keeps_its_own(monkeypatch):
+    """A kept week of one dish seven times answered the four-dish check too, so a S$32 week for two (fixture
+    catalog, one main a dinner) was planned with one dish where the T04 ADR offers a four-dish week's budget."""
+    monkeypatch.setattr(get_settings(), "planning_pool_cache_seconds", 300)
+    monkeypatch.setattr("app.services.meal_plan.found_weeks", {})
+    searched = []
+
+    def search(constraints, candidates, *, minimum_distinct_dishes=0):
+        searched.append(minimum_distinct_dishes)
+        ids = (1, 2, 3, 4) if minimum_distinct_dishes else (1, 1, 1, 1)
+        return None, SimpleNamespace(selected=[SimpleNamespace(recipe=SimpleNamespace(id=i)) for i in ids], trace={})
+
+    service = SimpleNamespace(_found_key=lambda _: "week", _checked_candidates=lambda _: None, _search=search)
+    request = WeeklyMealPlanRequest(start_date="2026-10-07", household_size=2, weekly_budget_sgd=32)
+    assert WeeklyMealPlanService.check(service, request) is None
+    assert WeeklyMealPlanService.checked_distinct_dishes(service, request) == 1
+    assert WeeklyMealPlanService.check(service, request, minimum_distinct_dishes=4) is None
+    assert WeeklyMealPlanService.check(service, request) is None  # the four-dish week, kept for Plan
+    assert searched == [0, 4]
+    assert WeeklyMealPlanService.checked_distinct_dishes(service, request) == 4
+
+
 @pytest.mark.parametrize("lang", ["en", "zh"])
 def test_a_smaller_household_that_is_not_cheaper_is_explained_instead_of_offered(lang):
     constraints = AgentConstraintState(household_size=4, weekly_budget_sgd=10)
     refusal = _budget_short(52.83, constraints, lang, lambda **_: 53.70)
     assert len(refusal.options) == 1
     assert "53" in refusal.options[0][0]
-    assert "S$54" in refusal.text
-    assert ("does not lower" if lang == "en" else "不能降低") in refusal.text
+    # Not "2 people need S$54" beside S$53 for 4: fewer people read as costing more (2026-10-09 rehearsal).
+    assert "S$54" not in refusal.text
+    assert ("fewer people would not lower" if lang == "en" else "减少人数也不能降低") in refusal.text
 
 
 def no_check_up_front(monkeypatch):
@@ -339,6 +363,9 @@ def test_a_chinese_household_is_refused_in_chinese_with_english_buttons(client):
     assert session["parser_provider"] == client.mode
 
     reply = session["messages"][-1]["content"]
+    assert not reply.startswith("\u597d\u7684")
+    assert reply.startswith("这个预算排不出来")
+    assert reply.count("\u6211\u627e\u5230\u4e00\u5468\u81f3\u5c11\u6709\u56db\u79cd\u4e0d\u540c\u83dc") == 1
     assert session["status"] == "collecting" and not session["can_confirm"]
     assert "4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我找到一周至少有四种不同菜，预算是 S$" in reply
     assert not re.search(r"[A-Za-z]{3,}", reply)
@@ -452,9 +479,22 @@ def test_a_failed_search_names_the_limit_it_ran_into_never_a_proof():
         return ProductPlanningError(status, message, trace)
 
     told = planning_failure(failure({"validation_attempts": [over, cheapest]}), constraints, "en")
-    assert told.field == "weekly_budget_sgd"
-    assert "S$50 weekly budget" in told.text
-    assert told.options == ()
+    assert told.text == (
+        "That budget can't cover this week. "
+        "S$50 a week for 4 people comes to about S$1.79 a person a meal (7 meals). The cheapest week I could find "
+        "costs S$58.40."
+    )
+    # Only the cheapest-week search's own week backs an amount, never a ranked week or a guess.
+    assert told.options == (("Use S$59 for the week", "Make the weekly budget S$59"),)
+    # A verified week with at least four different dishes is offered first (T04 ADR).
+    varied = planning_failure(
+        failure({"validation_attempts": [over, cheapest]}),
+        constraints,
+        "en",
+        cheapest=lambda **changes: 63.2 if changes == {"minimum_distinct_dishes": 4} else None,
+    )
+    assert varied.text.endswith("I found a week with at least four different dishes at a cost of S$63.20.")
+    assert varied.options[0] == ("Use S$64 for the week", "Make the weekly budget S$64")
     # With no such week, the budget the search ran into is still named, with no amount to offer: every week it
     # ranked failed the budget alone, or the search emptied on the budget before it ranked one.
     named = (
@@ -526,6 +566,7 @@ def test_a_budget_under_the_floor_is_refused_with_the_floor_when_the_search_find
     told = limits.refusal(constraints, lambda **_: floor, "en", check=unsearched, cheapest=lambda **_: None)
     assert (told.field, told.options) == ("weekly_budget_sgd", ())
     assert told.text == (
+        "That budget can't cover this week. "
         "S$50 for 4 people is S$0.60 a person a meal over 21 meals: what this week's dishes use costs at least "
         "S$61.53, before buying whole packages."
     )
@@ -1114,7 +1155,6 @@ def slugs(client, plan_id: int) -> list[str]:
         ("the dishes are boring", "No dish still to cook this week comes twice. Tell me which one you're tired of"),
         ("菜很单调,不太好", "这周还没做的菜没有重复的。告诉我想换掉哪一道，我来换。"),
         ("too repetitive", "No dish still to cook this week comes twice."),
-        ("Plan a new week with different dishes, no dish twice", "No dish still to cook this week comes twice."),
     ],
 )
 def test_a_week_found_monotonous_without_repeats_stays_and_offers_a_swap(varied, complaint, reply):
@@ -1128,6 +1168,26 @@ def test_a_week_found_monotonous_without_repeats_stays_and_offers_a_swap(varied,
     assert answered["plan_id"] == session["plan_id"] and answered["pending_replan"] is None
     assert labels(answered) and labels(answered)[0].startswith("Swap ")
     assert slugs(varied, session["plan_id"]) == before
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "Plan a new week with different dishes, no dish twice",
+        "\u7ed9\u6211\u91cd\u6392\u4e00\u5468\u4e0d\u540c\u7684\u83dc",
+    ],
+)
+def test_explicit_new_week_replaces_the_whole_week(varied, message):
+    session = planned(varied, "Dinners for 4 this week")
+    old_plan_id = session["plan_id"]
+    old_slugs = set(slugs(varied, old_plan_id))
+
+    answered = say(varied, session, message)
+
+    assert answered["plan_id"] != old_plan_id
+    new_slugs = set(slugs(varied, answered["plan_id"]))
+    assert new_slugs
+    assert old_slugs.isdisjoint(new_slugs)
 
 
 def test_a_repeated_dish_is_offered_for_a_swap_when_the_week_repeats_one(composed_client):  # noqa: F811

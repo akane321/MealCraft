@@ -1,9 +1,10 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.agent import AgentMessage, AgentSession
 from app.orchestration.contracts import InteractionRequest, ScopeDecision
 from app.schemas.agent import AgentConstraintState, AgentReplanDraft
+from app.services.cleanup import delete_sessions
 
 
 class AgentSessionRepository:
@@ -59,10 +60,37 @@ class AgentSessionRepository:
             select(AgentSession)
             .where(AgentSession.household_id == self.household_id)
             .options(selectinload(AgentSession.messages))
-            .order_by(AgentSession.updated_at.desc(), AgentSession.id.desc())
+            # Pinned first, the latest pin on top; then the rest by when they last changed.
+            .order_by(
+                AgentSession.pinned_at.is_(None),
+                AgentSession.pinned_at.desc(),
+                AgentSession.updated_at.desc(),
+                AgentSession.id.desc(),
+            )
             .limit(limit)
         )
         return list(self.session.scalars(statement).unique().all())
+
+    def label(self, session_id: int, values: dict) -> AgentSession | None:
+        """Rename or (un)pin; when it last changed stays as it was, so the list does not reorder by a rename."""
+        statement = (
+            update(AgentSession)
+            .where(AgentSession.id == session_id, AgentSession.household_id == self.household_id)
+            .values(**values, updated_at=AgentSession.updated_at)
+        )
+        if self.session.execute(statement).rowcount == 0:
+            return None
+        self.session.commit()
+        self.session.expire_all()
+        return self.get(session_id)
+
+    def delete(self, session_id: int) -> bool:
+        agent_session = self.get(session_id)
+        if agent_session is None:
+            return False
+        delete_sessions(self.session, [agent_session])
+        self.session.commit()
+        return True
 
     def append_exchange(
         self,

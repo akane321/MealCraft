@@ -254,7 +254,7 @@ th { padding: 10px 12px; border-bottom: 1px solid var(--line-2); color: var(--t3
 td { padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 tbody tr:last-child td { border-bottom: 0; }
 td b { display: block; font-weight: 550; }
-.trace { display: block; max-width: 300px; overflow: hidden; color: var(--t3); font-family: ui-monospace, monospace; font-size: 10.5px; text-overflow: ellipsis; white-space: nowrap; }
-.error-code { display: block; margin-top: 4px; color: var(--warn); font-size: 11px; }
+.trace { display: block; max-width: 300px; overflow: hidden; color: var(--t3); font-family: ui-monospace, monospace; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.error-code { display: block; margin-top: 4px; color: var(--warn); font-size: 12px; }
 .cancel-job { color: var(--warn); }
 </style>

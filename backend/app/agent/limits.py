@@ -10,6 +10,8 @@ found nothing proves nothing about every week, so it never says no week exists.
 
 A budget is offered only when a real week backs it. The suggestion's amount is checked through the
 same budgeted planning path used when the household accepts it, not inferred from an unbudgeted search.
+The week offered has at least four different dishes when one is verified, else it is the cheapest week found
+(T04 ADR); a budget whose week has fewer is offered the four-dish week's budget instead.
 """
 
 import math
@@ -25,6 +27,7 @@ from app.schemas.meal_plan import default_plan_shape
 
 # The floor is a float sum of per-unit prices; the planner rounds each ingredient's cost to the cent.
 SLACK_SGD = 0.05
+# The fewest different dishes a week offered for a budget has, when one is verified (T04 ADR, owner 2026-10-08).
 BUDGET_VARIETY_TARGET = 4
 # What emptied the search (planning/meal_beam.py), as the validator check it stands for.
 EMPTIED = {
@@ -90,10 +93,12 @@ def refusal(
             return Refusal("budget_per_meal_sgd", text, _raise_meal(check, math.ceil(cheapest_meal), lang))
     weekly = constraints.weekly_budget_sgd
     if weekly is not None and weekly < floor.total_sgd - SLACK_SGD:
-        # Under the floor no week fits: what remains to say is what the cheapest week the search finds costs.
-        cost = cheapest(minimum_distinct_dishes=BUDGET_VARIETY_TARGET) if cheapest is not None else None
-        if cost is not None:
-            return _budget_short(cost, constraints, lang, cheapest)
+        # Under the floor no week fits: what remains to say is what the cheapest week the search finds costs, of
+        # four different dishes when it finds one.
+        for minimum in (BUDGET_VARIETY_TARGET, 0) if cheapest is not None else ():
+            cost = cheapest(minimum_distinct_dishes=minimum)
+            if cost is not None:
+                return _budget_short(cost, constraints, lang, cheapest, minimum=minimum)
         # Not searched for, or the search found no week: the floor, with no amount a week backs to offer.
         size, meals = constraints.household_size or 1, floor.meals
         each, least = weekly / (size * meals), _cents_down(floor.total_sgd)
@@ -107,6 +112,8 @@ def refusal(
         failure = planning_failure(error, constraints, lang, cheapest=cheapest) if error is not None else None
         if failure is not None and not failure.retry:  # a slow search or late data may plan at Plan
             return failure
+        # A week of fewer than four different dishes: the least budget a verified four-dish week needs, when this one
+        # cannot plan it (a check that can keeps that week for Plan).
         current_variety = distinct_dishes() if error is None and distinct_dishes is not None else None
         if current_variety is not None and current_variety < BUDGET_VARIETY_TARGET:
             varied_error = check(minimum_distinct_dishes=BUDGET_VARIETY_TARGET)
@@ -207,7 +214,7 @@ def planning_failure(error: Exception, constraints, lang: str, *, cheapest=None)
             varied = cheapest(minimum_distinct_dishes=BUDGET_VARIETY_TARGET) if cheapest is not None else None
             if varied is not None:
                 return _budget_short(varied, constraints, lang, cheapest)
-            return Refusal("weekly_budget_sgd", say("weekly_limit", lang, amount=weekly))
+            return _budget_short(min(backed), constraints, lang, cheapest, minimum=0)
         # No week backs an amount. The budget is still what the search ran into when every week it ranked failed
         # the budget alone (or none was ranked: the search emptied on the budget); else it is not all that binds.
         ranked = [_failed(attempt) for attempt in attempts if not attempt.get("cheapest_search")]
@@ -234,13 +241,13 @@ def _failed(attempt: dict) -> set[str]:
     return {check["code"] for check in attempt.get("checks", []) if check.get("hard") and check["status"] == "failed"}
 
 
-def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
-    """A weekly budget under the cheapest week the search found: what it is a person a meal, that week's
-    cost, and the budgets a real week backs."""
+def _budget_short(cost: float, constraints, lang: str, cheapest, *, minimum: int = BUDGET_VARIETY_TARGET) -> Refusal:
+    """A weekly budget under the cheapest week the search found of `minimum` different dishes (0: any): what it is
+    a person a meal, that week's cost, and the budgets a real week backs."""
     weekly, size = constraints.weekly_budget_sgd, constraints.household_size or 1
     meals = 7 * len((constraints.plan_shape or default_plan_shape()).meals)
     text = say(
-        "budget_short",
+        "budget_varied" if minimum else "budget_short",
         lang,
         budget=weekly,
         people=people(size, lang),
@@ -255,7 +262,7 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
     # size, where the two take at most 5 s; for more they would take the reply past its time limit (ADR-0046
     # section 3).
     quick = meals == 7 and max(_dishes(constraints)) <= QUICK_MEAL_DISHES and cheapest is not None and fewer >= 1
-    smaller = cheapest(household_size=fewer, minimum_distinct_dishes=BUDGET_VARIETY_TARGET) if quick else None
+    smaller = cheapest(household_size=fewer, minimum_distinct_dishes=minimum) if quick else None
     # The cheapest-week search is a heuristic, not monotonic in who eats: fewer people can come out dearer than
     # everyone (S$41 for 2 beside S$24 for 4). Offered only when a real week backs it and it costs less.
     if smaller is not None and math.ceil(smaller) < whole:
@@ -267,7 +274,7 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
                 _option("fewer_people_at", lang, count=fewer, people=people(fewer, lang), amount=math.ceil(smaller))
             )
     elif smaller is not None:
-        text += " " + say("fewer_not_cheaper", lang, people=people(fewer, lang), amount=math.ceil(smaller))
+        text += " " + say("fewer_not_cheaper", lang)
     return Refusal("weekly_budget_sgd", text, tuple(options))
 
 

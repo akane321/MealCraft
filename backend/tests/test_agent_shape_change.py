@@ -228,7 +228,7 @@ def test_just_one_main_is_one_main_not_the_meals_one_dish_preset():
         ("add a soup on weekends", "Dinner with a soup on Saturday and Sunday"),
         ("take lunch off Monday to Friday", "No lunch on weekdays"),
         ("周三、周五不要配菜", "Dinner without the vegetable on Wednesday and Friday"),
-        ("周五晚饭只做一道主菜就行", "Dinner as one main on Friday"),
+        ("周五晚饭只做一道主菜就行", "Dinner will have one main on Friday"),
         ("午饭也帮我们安排上", "Lunch added for the rest of this week"),
         ("以后午饭就煮一道就好", "Lunch as one dish for the rest of this week"),
     ],

@@ -72,8 +72,14 @@ class DataService:
     ) -> OpsRecipeCollection:
         filters = []
         if query:
-            pattern = f"%{query.strip().casefold()}%"
-            filters.append(or_(func.lower(Recipe.title).like(pattern), Recipe.slug.like(pattern)))
+            # autoescape keeps a typed % or _ literal text rather than a LIKE wildcard.
+            needle = query.strip().casefold()
+            filters.append(
+                or_(
+                    func.lower(Recipe.title).contains(needle, autoescape=True),
+                    Recipe.slug.contains(needle, autoescape=True),
+                )
+            )
         if course:
             filters.append(Recipe.course == course)
         if meal_type:

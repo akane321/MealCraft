@@ -38,6 +38,8 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
     normalized_email: Mapped[str] = mapped_column(String(320), unique=True)
+    # What people type to sign in (lower case); every account has one (migration 20261012_0029).
+    username: Mapped[str | None] = mapped_column(String(32), unique=True, nullable=True)
     display_name: Mapped[str] = mapped_column(String(120))
     locale: Mapped[str] = mapped_column(String(20), default="en-SG", server_default="en-SG")
     timezone: Mapped[str] = mapped_column(

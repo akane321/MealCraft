@@ -21,9 +21,10 @@ from app.core.paths import repository_root
 from app.data.catalog import import_catalog, load_catalog
 from app.data.release_v2 import import_release_v2
 from app.db.base import Base
+from app.planning import product_path
 from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner, MealState
-from app.planning.product_path import composed_packet
-from app.planning.recipe_quality import dish_family
+from app.planning.product_path import _vary_starts_within_time_budget, composed_packet
+from app.planning.recipe_quality import dish_family, dish_kind
 from app.repositories.recipe import clear_planning_pool
 from app.schemas.meal_plan import MEAL_PRESETS, WeeklyMealPlanRequest
 from app.schemas.planning_v2 import (
@@ -206,6 +207,39 @@ def test_a_repeat_is_swapped_for_the_dish_sharing_what_the_week_buys():
     assert MealBeamPlanner().vary_within_budget(tight, repeated) == repeated
 
 
+def test_variety_starts_stop_when_the_pass_spends_its_time_budget():
+    """The time is read between starts: the start begun before two seconds finishes, the next is not begun."""
+    state = repeated_week()
+    calls = []
+    planner = SimpleNamespace(vary_within_budget=lambda problem, state: calls.append(state) or state)
+    ticks = iter((0.0, 0.0, 1.0, 2.0))
+
+    _vary_starts_within_time_budget(
+        planner,
+        week_problem(),
+        [(0.0, state)] * 3,
+        {state.choices},
+        is_best=lambda state: False,
+        clock=lambda: next(ticks),
+        seconds=2.0,
+    )
+
+    assert len(calls) == 2
+
+
+@pytest.mark.parametrize(("best", "starts_tried"), [(True, 1), (False, 3)])
+def test_variety_starts_stop_only_at_a_week_none_can_beat(best, starts_tried):
+    state = repeated_week()
+    calls = []
+    planner = SimpleNamespace(vary_within_budget=lambda problem, state: calls.append(state) or state)
+
+    _vary_starts_within_time_budget(
+        planner, week_problem(), [(0.0, state)] * 3, set(), is_best=lambda state: best, clock=lambda: 0.0
+    )
+
+    assert len(calls) == starts_tried
+
+
 def test_varying_keeps_distinct_dish_kinds_within_each_meal():
     problem = week_problem()
     titles = {
@@ -329,3 +363,80 @@ def test_the_walkthrough_week_varies_within_its_budget(product):
     assert sum(dishes.values()) == 21
     assert len(dishes) >= 16, dishes
     assert max(dishes.values()) <= 2, dishes
+
+
+# Breakfast, a lunch of a main and a vegetable dish and a dinner of a main and an optional vegetable dish:
+# 35 dish positions, the fewest the heavy-composition gate bounds.
+THREE_MEALS_35 = {
+    "breakfast": MEAL_PRESETS["breakfast"]["one dish"],
+    "lunch": MEAL_PRESETS["lunch"]["main and vegetable"],
+    "dinner": MEAL_PRESETS["dinner"]["main and vegetable"],
+}
+WALKTHROUGH = {"allergens": ["peanut"], "excluded_ingredients": ["pork"], "max_cooking_time_minutes": 60}
+
+
+def three_meals(budget: float, meals=THREE_MEALS_35, **household) -> WeeklyMealPlanRequest:
+    return WeeklyMealPlanRequest.model_validate(
+        {
+            "start_date": "2026-09-28",
+            "household_size": 2,
+            "max_cooking_time_minutes": 240,
+            "weekly_budget_sgd": budget,
+            "plan_shape": {"meals": meals},
+            "pricing_mode": "fixture",
+            **household,
+        }
+    )
+
+
+def variety_passes(monkeypatch) -> list[dict]:
+    """Each variety pass `plan` runs: its time budget, its starts, and the starts it tried."""
+    passes = []
+    real = product_path._vary_starts_within_time_budget
+
+    def spy(meal_beam, problem, starts, seen, *, is_best, seconds):
+        tried = []
+        added = real(meal_beam, problem, starts, seen, is_best=lambda s: tried.append(s) or is_best(s), seconds=seconds)
+        passes.append({"seconds": seconds, "starts": len(starts), "tried": len(tried)})
+        return added
+
+    monkeypatch.setattr(product_path, "_vary_starts_within_time_budget", spy)
+    return passes
+
+
+def test_a_heavy_week_stops_varying_only_at_a_week_the_final_order_cannot_beat(product, monkeypatch):
+    """PR #243 review: the early stop took a week with no dish or dish family twice as one no start could beat,
+    but the order that picks the week also counts empty optional dishes and dish kinds. Here that stop ended
+    after one start with 33 dish kinds of 35; with the time budget lifted, a new heavy week is now as varied as
+    trying every start makes it (35 kinds)."""
+    monkeypatch.setattr(product_path, "VARIETY_PASS_SECONDS", float("inf"))
+    plans = build_meal_plan_service(product, 1)
+    request = three_meals(150.0, **WALKTHROUGH)
+
+    def variety(plan) -> tuple[int, int, int, int]:
+        titles = [dish.recipe.title for dish in plan.days]
+        uses = Counter(titles)
+        return len(titles), len(uses), max(uses.values()), len({dish_kind(title) for title in titles})
+
+    bounded = variety(plans.generate(request))
+    monkeypatch.setattr(product_path, "HEAVY_COMPOSITION_DISH_POSITIONS", 10**6)  # every start, as before #243
+    assert bounded == variety(plans.generate(request))
+
+
+def test_only_new_heavy_weeks_bound_their_variety_pass(product, monkeypatch):
+    """Ordinary weeks (under 35 dish positions) and replanning with locked dishes try every start, unbounded."""
+    plans = build_meal_plan_service(product, 1)
+    passes = variety_passes(monkeypatch)
+
+    plans.generate(three_meals(200.0))
+    assert passes[-1]["seconds"] == product_path.VARIETY_PASS_SECONDS
+
+    plans.generate(three_meals(100.0, {"dinner": DINNER_WITH_SOUP}, **WALKTHROUGH))
+    assert passes[-1]["seconds"] == float("inf") and passes[-1]["tried"] == passes[-1]["starts"] > 0
+
+    request = three_meals(200.0)
+    recipes, found = plans._candidates(request)
+    course = {recipe.id: recipe.course for recipe in recipes}
+    main = next(r.recipe.slug for r in found.recommendations if course.get(r.recipe.id) == "main")
+    plans.planning_engine.plan(request, found.recommendations, recipes, locked={(0, "dinner"): {"main": main}})
+    assert passes[-1]["seconds"] == float("inf") and passes[-1]["tried"] == passes[-1]["starts"] > 0

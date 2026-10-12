@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Literal
@@ -40,6 +41,10 @@ class AgentCaseResult:
     id: str
     category: str
     language: str
+    # What was asked and expected, beside what came back, so a failing case reads without the fixture.
+    message: str
+    expected_extraction: dict[str, Any]
+    expected_missing_fields: list[str]
     exact_match: bool
     matched_fields: int
     expected_fields: int
@@ -156,6 +161,9 @@ def evaluate_agent(
                 id=case.id,
                 category=case.category,
                 language=case.language,
+                message=case.message,
+                expected_extraction=expected,
+                expected_missing_fields=sorted(case.expected_missing_fields),
                 exact_match=not failure_reasons,
                 matched_fields=matched,
                 expected_fields=len(expected),
@@ -189,6 +197,9 @@ def evaluate_agent(
         ),
         "failure_case_count": sum(bool(item.failure_reasons) for item in results),
     }
+    categories: dict[str, list[AgentCaseResult]] = defaultdict(list)
+    for item in results:
+        categories[item.category].append(item)
     return {
         "schema_version": "1.0",
         "provider": provider,
@@ -199,6 +210,11 @@ def evaluate_agent(
             "sha256": hashlib.sha256(dataset_path.read_bytes()).hexdigest(),
         },
         "metrics": metrics,
+        # Counts only, as the planning report's categories: a rate over a handful of cases is noise.
+        "category_metrics": {
+            category: {"case_count": len(items), "failure_case_count": sum(bool(i.failure_reasons) for i in items)}
+            for category, items in sorted(categories.items())
+        },
         "failure_cases": [asdict(item) for item in results if item.failure_reasons],
         "cases": [asdict(item) for item in results],
     }

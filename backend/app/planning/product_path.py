@@ -6,6 +6,7 @@ prices after validation, and never promotes a bounded miss into a global proof.
 
 import hashlib
 import json
+import time
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, replace
 from datetime import timedelta
@@ -68,9 +69,14 @@ def normalized(quantity, unit):
     return (float(Fraction(str(quantity)) * Fraction(str(multiplier))) if quantity is not None else None), base
 
 
-# Fallback searches for a stated budget: how strongly a dish's cost, relative to the
-# budget for one dinner, is added to its rank loss (which lies in 0..1).
+# Fallback searches for a stated budget: how strongly a dish's cost, relative to the budget for
+# one meal, is added to its rank loss (which lies in 0..1). One dish a dinner also weighs it against
+# the packet's cheapest dish (ONE_DISH_COST_WEIGHTS).
 COST_WEIGHTS = (1.0, 4.0, 16.0)
+# One dish a dinner searches once more, with cost all but deciding: against its cheapest dish, x16 at most left
+# the fixture catalog's 2-person week offering S$43.25 at every refused budget where a S$31.70 week plans (main's
+# budget-scaled weights found it at budgets up to S$10); x64 finds it, and x256 or x1000 find none cheaper.
+ONE_DISH_COST_WEIGHTS = (*COST_WEIGHTS, 64.0)
 # The cheapest-week search (see `plan`): the first budget it tries, how close it bisects the least budget it
 # completes a week within (a share of that budget), and the beam it searches with. Lighter than the ranked
 # search's beam: on the release catalog it finds as cheap a week in a third of the time (PR #211); 32 meals a
@@ -86,6 +92,31 @@ CHEAPEST_MEAL_OPTIONS = 64
 # week minutes with no dish twice (ADR-0046 section 3: a plan answers within 10 s). A plan of such meals that
 # no week fits under its budget ends without the cheapest-week search.
 QUICK_MEAL_DISHES = 3
+# The budget applies only to the post-search variety pass. A start already in flight finishes so every
+# returned week still satisfies the same rules and validator; later starts are optional alternate routes.
+VARIETY_PASS_SECONDS = 2.0
+HEAVY_COMPOSITION_DISH_POSITIONS = 35
+
+
+def _vary_starts_within_time_budget(
+    meal_beam, problem, starts, seen, *, is_best, clock=time.perf_counter, seconds=None
+):
+    """Try ordered variety starts until time is spent or one varies into a week `is_best` says none can beat.
+
+    The time is read between starts, so a start in flight finishes: a pass can run over by one start.
+    """
+    deadline = clock() + (VARIETY_PASS_SECONDS if seconds is None else seconds)
+    added = []
+    for weight, state in starts:
+        if clock() >= deadline:
+            break
+        varied = meal_beam.vary_within_budget(problem, state)
+        if varied.choices not in seen:
+            seen.add(varied.choices)
+            added.append((weight, varied))
+        if is_best(varied):
+            break
+    return added
 
 
 def meals_of_the_day(constraints) -> list[tuple[str, list]] | None:
@@ -199,8 +230,11 @@ def composed_packet(
 
 
 class ProductPlanningEngine:
-    def __init__(self, *, limits=None, validator=None):
-        self.limits = limits or BeamLimits()
+    def __init__(self, *, overrides=None, validator=None):
+        # Search limits a caller sets ({"width": 2}: a Debugging replay) bound a composed week's meal beam too; a
+        # limit left out keeps the planner's own, which for a composed week grows with its slots.
+        self.overrides = overrides or {}
+        self.limits = replace(BeamLimits(), **self.overrides)
         self.validator = validator or FinalPlanningValidator()
 
     def _packet_limit(self, day_count: int) -> int:
@@ -235,7 +269,8 @@ class ProductPlanningEngine:
         2026-10-02): every other rule holds, the budget is only reported, and of the weeks found (cost-led
         searches among them) one costing least at the checkout is chosen (see `over_budget_pick`). `used` (recipe
         slug -> uses) is what the rest of a week already serves when part of it is planned: those uses count
-        towards the household's cap on uses.
+        towards the household's cap on uses. `minimum_distinct_dishes` takes only weeks of at least that many
+        different dishes (the T04 ADR's four).
         """
         locked = locked or {}
         kept_dishes = {slug for roles in locked.values() for slug in roles.values()}
@@ -528,13 +563,24 @@ class ProductPlanningEngine:
                 if budget is not None:
                     # The ranking never sees prices, so a tight budget can fail on every
                     # retained week. Only then do fallback searches blend each dish's
-                    # grocery cost into its rank, from lightly to strongly.
+                    # grocery cost into its rank, from lightly to strongly. The cost is against the packet's
+                    # cheapest dish, not the budget: the weeks they find are the same under any budget, so the
+                    # cheapest week a refusal names plans under its cost and no budget plans one cheaper. Against
+                    # the budget for one dinner, the fixture catalog's 2-person week was refused at S$16 to S$52
+                    # with "cheapest" weeks of S$41.80 to S$55.40, and first planned at S$58.
+                    unit = min((c for c in map(dish_cost, recommendations) if c > 0), default=1.0)
+                    cost = {r.recipe.slug: dish_cost(r) / unit for r in recommendations}
+                    # The budget-led weights are searched too, against the budget for one dinner (here in the same
+                    # unit): a roomier budget presses cost less, and the most varied week within it comes first.
+                    # Against the cheapest dish alone, the fixture 2-person week at S$60 was one curry four times
+                    # (S$46.50) where those weights plan five different dinners (S$55.55). The fixed weights' weeks
+                    # are still tried under any budget, so a refusal names at most their cheapest (S$31.70 there).
                     per_slot = budget / constraints.day_count
-                    cost = {r.recipe.slug: dish_cost(r) / per_slot for r in recommendations}
+                    weights = sorted({*(w * unit / per_slot for w in COST_WEIGHTS), *ONE_DISH_COST_WEIGHTS})
 
                     def cost_fallback() -> list[list[PlanningAssignment]]:
                         found_states: list = []
-                        for weight in COST_WEIGHTS:
+                        for weight in weights:
                             blended = {slug: loss + weight * cost[slug] for slug, loss in losses.items()}
                             found = BeamPlanner(self.limits, local_losses=blended).search_candidates(
                                 problem.model_copy(deep=True)
@@ -551,7 +597,7 @@ class ProductPlanningEngine:
                             key=lambda item: (sameness([r for _, r in item[1].choices]), item[0], item[1].loss)
                         )
                         extra = [state.choices for _, state in found_states]
-                        trace["cost_fallback"] = {"weights": list(COST_WEIGHTS), "candidates": len(extra)}
+                        trace["cost_fallback"] = {"weights": [round(w, 4) for w in weights], "candidates": len(extra)}
                         return [[PlanningAssignment(slot_id=s, recipe_id=r) for s, r in picked] for picked in extra]
 
                     fallback = cost_fallback
@@ -561,20 +607,18 @@ class ProductPlanningEngine:
             else:
                 # The search budget grows with the slots, so a three-meal week is searched as
                 # fully as a dinner week (ADR-0046 section 3).
-                meal_beam = MealBeamPlanner(
-                    MealBeamLimits(
-                        # 256 meals a slot keep the rotated dishes a 64-meal cut dropped; the budget
-                        # covers the beam's 32 states times those meals, slot by slot.
-                        meal_options_per_slot=256,
-                        max_expansions=max(MealBeamLimits().max_expansions, 32 * 256 * len(slots) + 256),
-                        repeat_cost=1.0,
-                        flat_repeat=True,
-                        max_meal_combinations=16384,
-                        distinct_kinds=True,
-                        rotate_candidates=True,
-                    ),
-                    local_losses=losses,
+                meal_limits = MealBeamLimits(
+                    # 256 meals a slot keep the rotated dishes a 64-meal cut dropped; the budget
+                    # covers the beam's 32 states times those meals, slot by slot.
+                    meal_options_per_slot=256,
+                    max_expansions=max(MealBeamLimits().max_expansions, 32 * 256 * len(slots) + 256),
+                    repeat_cost=1.0,
+                    flat_repeat=True,
+                    max_meal_combinations=16384,
+                    distinct_kinds=True,
+                    rotate_candidates=True,
                 )
+                meal_beam = MealBeamPlanner(replace(meal_limits, **self.overrides), local_losses=losses)
                 # The cheapest week is searched by the cost-led search alone (below).
                 search = (
                     MealBeamResult((), 0, False, False, ())
@@ -641,8 +685,9 @@ class ProductPlanningEngine:
 
                     It never reads the household's budget, so what it finds is the same under any budget:
                     a week it finds at S$C is tried again under a budget of S$C or more, which is what makes
-                    a budget offered as "S$C" one that plans. For a distinct-dish threshold, the first successful
-                    expanded search is enough: it backs a real budget but is not claimed to be the global minimum.
+                    a budget offered as "S$C" one that plans. The cheapest week a search found, not a proof
+                    that none is cheaper. With `minimum_distinct_dishes` only weeks of that many different dishes
+                    count, in the probes and the bisection alike (the T04 ADR's least-cost four-dish week).
                     """
                     cost = {r.recipe.slug: dish_cost(r) for r in recommendations}
                     weight = COST_WEIGHTS[-1]
@@ -681,15 +726,6 @@ class ProductPlanningEngine:
                     while not states and limit < 7000:
                         low, limit = limit, min(7000, limit * 4)
                         states = within(limit)
-                    if minimum_distinct_dishes:
-                        if states:
-                            kept.update((state.choices, state) for state in states)
-                        trace["cheapest_search"] = {
-                            "budget_sgd": ceil(min(map(bought, states))) if states else None,
-                            "candidates": len(kept),
-                            "minimum_distinct_dishes": minimum_distinct_dishes,
-                        }
-                        return most_varied_first([(weight, state) for state in kept.values()])
                     high = limit
                     while states:
                         kept.update((state.choices, state) for state in states)
@@ -700,13 +736,18 @@ class ProductPlanningEngine:
                             states = within(limit)
                             low = low if states else limit
                     trace["cheapest_search"] = {"budget_sgd": high, "candidates": len(kept)}
+                    if minimum_distinct_dishes:
+                        trace["cheapest_search"]["minimum_distinct_dishes"] = minimum_distinct_dishes
                     return most_varied_first([(weight, state) for state in kept.values()])
 
                 found = [(0.0, state) for state in search.states]
-                full_and_repeat_free = any(
-                    variety(state)[0] == 0 and sameness([r for _, meal in state.choices for _, r in meal]) == (0, 0)
-                    for state in search.states
-                )
+
+                def full_and_varied(state) -> bool:
+                    """Every role filled and no dish or kind twice, every role counted: the least `variety` can be."""
+                    dishes = [recipe for _, meal in state.choices for _, recipe in meal]
+                    return variety(state)[0] == 0 and sameness(dishes) == (0, 0)
+
+                full_and_repeat_free = any(full_and_varied(state) for state in search.states)
                 if budget is not None and (not full_and_repeat_free or not budget_is_hard):
                     # A budget-pruned search keeps the cheap repeats or leaves optional dishes out; the first
                     # week in that order within the budget may come from a cost-led search, so all are tried.
@@ -723,20 +764,29 @@ class ProductPlanningEngine:
                     starts = sorted(found, key=order)[:VARIED_STARTS] + cheapest_starts[:VARIED_STARTS]
                     if budget_is_hard and any(variety(state)[0] == 0 and variety(state)[2] <= 1 for _, state in found):
                         starts = []
-                    for weight, state in starts:
-                        varied = meal_beam.vary_within_budget(problem, state)
-                        if varied.choices not in seen:
-                            seen.add(varied.choices)
-                            found.append((weight, varied))
+                    heavy_composition = sum(
+                        len(slot.composition or ()) for slot in problem.slots
+                    ) >= HEAVY_COMPOSITION_DISH_POSITIONS and not any(slot.locked_roles for slot in problem.slots)
+
+                    def is_best(state) -> bool:
+                        """At the least `variety` can be, which `order` sorts by first: every role filled, no dish
+                        or kind twice, counting every role. Weeks as varied still sort by search and loss, and a
+                        later start could find one lighter; only variety is kept from getting worse."""
+                        return heavy_composition and full_and_varied(state)
+
+                    found.extend(
+                        _vary_starts_within_time_budget(
+                            meal_beam,
+                            problem,
+                            starts,
+                            seen,
+                            seconds=(VARIETY_PASS_SECONDS if heavy_composition else float("inf")),
+                            is_best=is_best,
+                        )
+                    )
                 elif banded:
                     fallback = lambda: most_varied_first(limit_led())  # noqa: E731
                 assignments_list = most_varied_first(found)
-                if minimum_distinct_dishes and assignments_list:
-                    assignments_list = [
-                        assignments
-                        for assignments in assignments_list
-                        if len({assignment.recipe_id for assignment in assignments}) >= minimum_distinct_dishes
-                    ]
                 if cheapest:
                     assignments_list, fallback, last_resort = [], None, cheapest_weeks
                 elif (
@@ -771,6 +821,8 @@ class ProductPlanningEngine:
                 continue
             assignments = assignments_list[index]
             index += 1
+            if len({a.recipe_id for a in assignments}) < minimum_distinct_dishes:
+                continue  # a week with fewer different dishes than asked for is not one (T04 ADR)
             shopping = builder._build_shopping(
                 problem.model_copy(deep=True), [a.model_copy(deep=True) for a in assignments]
             )
@@ -812,6 +864,12 @@ class ProductPlanningEngine:
         if passed:
             result = over_budget_pick(passed, problem.slots, constraints.weekly_budget_sgd)
         if result is None:
+            # A search that built no week said why (a meal, the repeats, the budget) or ran out of steps: no week
+            # reached a check, so an input issue elsewhere in the pool (one recipe's servings) did not decide it, and
+            # "details are missing" sent the household to retry a request that cannot plan as asked.
+            searched = trace.get("search", {}) if not trace["validation_attempts"] else {}
+            emptied_by = searched.get("emptied_by")
+            uncertain = uncertain and emptied_by is None and not searched.get("exhausted")
             evidence = "needs_data" if uncertain else "bounded_search_exhausted"
             status = "needs_data" if uncertain else "candidate_rejected"
             if (
@@ -840,6 +898,11 @@ class ProductPlanningEngine:
             elif trace.get("search", {}).get("exhausted"):
                 # A search that ran out of steps proves nothing about the limits themselves.
                 message = "Planning took longer than it should this time. Please try again."
+            elif emptied_by == "repeats":
+                message = (
+                    "I couldn't find enough different dishes for a week without repeats under these limits. "
+                    "Allow a dish twice, or relax one of the limits."
+                )
             else:
                 message = "I couldn't find a week that meets every limit. Try relaxing one of them."
             raise ProductPlanningError(status, message, trace, problem=problem.model_copy(deep=True))

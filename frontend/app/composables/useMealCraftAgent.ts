@@ -117,11 +117,36 @@ export function useMealCraftAgent() {
   async function restore(planId: number | null) {
     const result = await run(() => apiFetch<AgentSessionCollection>(
       `${config.public.apiBase}/api/agent/sessions`,
-      { query: { limit: 8 } },
+      { query: { limit: 50 } },
     ));
     if (!result) return;
     recent.value = result.items;
     session.value = conversationForPlan(result.items, planId);
+  }
+
+  /** Renames or (un)pins a conversation; the list and the open one take the server's copy. */
+  async function label(id: number, change: { title?: string | null; pinned?: boolean }) {
+    const result = await run(() => apiFetch<AgentSession>(
+      `${config.public.apiBase}/api/agent/sessions/${id}`,
+      { method: "PATCH", body: change },
+    ));
+    if (!result) return;
+    recent.value = recent.value.map(item => (item.id === id ? result : item));
+    if (!recent.value.some(item => item.id === id)) recent.value = [result, ...recent.value];
+    // Pinned first, the latest pin on top, then by when each last changed (the server's order).
+    recent.value = [...recent.value].sort((a, b) => (b.pinned_at ?? "").localeCompare(a.pinned_at ?? "") || (b.updated_at ?? "").localeCompare(a.updated_at ?? ""));
+    if (session.value?.id === id) session.value = result;
+  }
+
+  /** Deletes a conversation; true once it is gone. */
+  async function remove(id: number): Promise<boolean> {
+    const done = await run(async () => {
+      await apiFetch(`${config.public.apiBase}/api/agent/sessions/${id}`, { method: "DELETE" });
+      return true;
+    });
+    if (!done) return false;
+    recent.value = recent.value.filter(item => item.id !== id);
+    return true;
   }
 
   function reset() {
@@ -141,7 +166,9 @@ export function useMealCraftAgent() {
     errorMessage,
     generatedPlan,
     isLoading,
+    label,
     recent,
+    remove,
     reply,
     reset,
     restore,

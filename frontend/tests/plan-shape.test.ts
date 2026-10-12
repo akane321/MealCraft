@@ -50,10 +50,10 @@ describe("shapeChangeSummary", () => {
     expect(shapeChangeSummary(change({ roles: null }), start)).toBe("No dinner on Fri");
     const roles = [{ role_id: "main", courses: ["main"] }, { role_id: "soup", courses: ["soup"] }, { role_id: "main-2", courses: ["main"] }] as MealRole[];
     const removed = [{ entry_id: 1 }] as MealPlanShapeChange["removed"];
-    expect(shapeChangeSummary(change({ roles, removed }), start)).toBe("Dinner on Fri: 2 mains, soup");
+    expect(shapeChangeSummary(change({ roles, removed }), start)).toBe("Dinner on Fri: Main dish, Soup, Another main");
     const withVegetable = [{ role_id: "main", courses: ["main"], required: true }, { role_id: "vegetable", courses: ["side"], required: false }, { role_id: "soup", courses: ["soup"], required: true }] as MealRole[];
-    expect(shapeChangeSummary(change({ roles: withVegetable, removed }), start)).toBe("Dinner on Fri: main, vegetable if it fits, soup");
-    expect(shapeChangeSummary(change({ roles: withVegetable, removed: [], kept: 2 }), start)).toBe("Dinner on Fri: main, vegetable if it fits, soup");
+    expect(shapeChangeSummary(change({ roles: withVegetable, removed }), start)).toBe("Dinner on Fri: Main dish, Vegetable dish if it fits, Soup");
+    expect(shapeChangeSummary(change({ roles: withVegetable, removed: [], kept: 2 }), start)).toBe("Dinner on Fri: Main dish, Vegetable dish if it fits, Soup");
   });
 
   it("says a swap of dishes in their places as swaps, not as the meal's make-up", () => {
@@ -64,7 +64,7 @@ describe("shapeChangeSummary", () => {
     expect(shapeChangeSummary(change({ day_indexes: [2, 4], roles, removed, added }), start)).toBe("2 dishes swapped on Tue, Thu");
     expect(shapeChangeSummary(change({ day_indexes: [2], roles, removed: removed.slice(0, 1), added: added.slice(0, 1) }), start)).toBe("A dish swapped on Tue");
     // A soup in the vegetable's place is a meal made up anew.
-    expect(shapeChangeSummary(change({ day_indexes: [2], roles, removed: [at(1, 2, "vegetable")], added: [at(0, 2, "soup")] }), start)).toBe("Dinner on Tue: main, soup");
+    expect(shapeChangeSummary(change({ day_indexes: [2], roles, removed: [at(1, 2, "vegetable")], added: [at(0, 2, "soup")] }), start)).toBe("Dinner on Tue: Main dish, Soup");
   });
 
   it("names days by the plan's own dates, the same way wherever a change is shown", () => {

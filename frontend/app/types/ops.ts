@@ -227,7 +227,8 @@ export interface OpsExperimentComparison {
   configurations: OpsExperimentComparisonRow[];
   metrics: OpsExperimentComparisonRow[];
   failure_mechanisms: OpsExperimentComparisonRow[];
-  case_differences: Array<{
+  // null when either run stored no case-level report.
+  case_differences: null | Array<{
     case_id: string;
     condition: string;
     a_status: string | null;
@@ -243,6 +244,7 @@ export interface OpsUserHousehold { id: number; name: string; role: string; memb
 export interface OpsUser {
   id: number;
   email: string;
+  username: string | null;
   display_name: string;
   system_role: string;
   status: string;
@@ -254,7 +256,7 @@ export interface OpsUser {
 }
 
 export interface OpsUserDetail extends OpsUser {
-  recent_conversations: Array<{ id: number; status: string; messages: number; first_message: string | null; created_at: string }>;
+  recent_conversations: Array<{ id: number; title?: string | null; status: string; messages: number; first_message: string | null; created_at: string }>;
   recent_plans: Array<{ id: number; start_date: string; total_sgd: number; household_size: number; created_at: string }>;
 }
 

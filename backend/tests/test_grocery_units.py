@@ -5,11 +5,12 @@ a carton of Low Fat Fresh Milk for another.
 """
 
 import json
-from datetime import date, timedelta
+from datetime import timedelta
 from decimal import Decimal
 
 import pytest
 
+from app.core.clock import today as local_today
 from app.core.paths import data_root
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 from app.planning.grocery_estimator import GroceryEstimator
@@ -123,7 +124,7 @@ def test_a_planned_week_and_its_swap_buy_milk_once_by_weight(recipe_client) -> N
             ]
         )
         session.commit()
-    start = date.today() + timedelta(days=1)
+    start = local_today() + timedelta(days=1)
     request = {"start_date": start.isoformat(), "household_size": 2, "pricing_mode": "fixture"}
     response = recipe_client.post("/api/plans/generate", json={**request, "max_uses_per_recipe": 1})
     assert response.status_code == 201, response.text
@@ -165,7 +166,7 @@ def _milk_dishes(*units: str) -> list[Recipe]:
 
 
 def _week(client, **request) -> dict:
-    start = (date.today() + timedelta(days=1)).isoformat()
+    start = (local_today() + timedelta(days=1)).isoformat()
     payload = {"start_date": start, "household_size": 4, "pricing_mode": "fixture", "max_uses_per_recipe": 1}
     response = client.post("/api/plans/generate", json={**payload, **request})
     assert response.status_code == 201, response.text
@@ -249,3 +250,38 @@ def test_the_floor_prices_a_liquid_by_the_gram_however_it_is_sold() -> None:
     # converted to the same gram basis. Converting only the line leaves no matching unit price and a zero floor.
     volume_only = week_floor(request, mains[:1], [mains[0].recipe])
     assert volume_only.total_sgd == pytest.approx(7 * 4.0 * 100 / 1000)
+
+
+def test_swap_budget_preview_keeps_the_saved_weight_price_for_liquids(monkeypatch) -> None:
+    """A replacement that fits the gram-priced basket must not be rejected as a bottle purchase."""
+    from types import SimpleNamespace
+
+    from app.services.replanning import MealPlanReplanningService
+
+    weighed_names = set()
+
+    class BoundaryAggregator:
+        def estimate(self, recipes, constraints, *, shares, by_weight=()):
+            weighed_names.update(by_weight)
+            # The same 100 ml of milk costs S$1.60 by the saved 100 g packs, or S$2.80 by the litre bottle.
+            total = 1.60 if "milk" in by_weight else 2.80
+            return SimpleNamespace(purchase_total_sgd=total)
+
+    service = object.__new__(MealPlanReplanningService)
+    service.grocery_aggregator = BoundaryAggregator()
+    service._current_grocery = lambda plan: SimpleNamespace(items=[SimpleNamespace(ingredient_name="milk", unit="g")])
+    current = SimpleNamespace(id=1, recipe_id=10, day_index=1, meal_type="dinner", status="planned", portion_share=1)
+    plan = SimpleNamespace(entries=[current], purchase_total_sgd=1.60, pricing_mode="fixture")
+    replacement = SimpleNamespace(recipe=SimpleNamespace(id=20))
+    chosen, overage = service._fitting(
+        plan,
+        SimpleNamespace(weekly_budget_sgd=1.60),
+        {10: SimpleNamespace(), 20: SimpleNamespace()},
+        {},
+        current,
+        [replacement],
+    )
+
+    assert chosen is replacement
+    assert overage is None
+    assert "milk" in weighed_names

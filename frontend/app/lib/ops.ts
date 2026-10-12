@@ -1,4 +1,5 @@
 import type { OpsDayPoint, OpsReplayDish, OpsTaskKind } from "~/types/ops";
+import { DISH_ROLES } from "./dish-icon";
 
 export function isConsoleAccount(actor: { user: { system_role: string } } | null | undefined) {
   return actor?.user.system_role === "admin";
@@ -35,17 +36,31 @@ export const OPS_MODULES: OpsModule[] = [
   { slug: "users", label: "Users", path: "/ops/users", blurb: "Accounts, households, profiles, conversations and plans.", ready: true },
 ];
 
-const GOOD = new Set(["succeeded", "committed", "preview_ready"]);
-const BAD = new Set(["failed"]);
-const WARN = new Set(["degraded", "cancelled", "needs_clarification"]);
+/** Every status a task can have: an assistant turn's (AgentRunStatus) and a planning run's (OperationStatus). */
+export const TASK_STATUSES = ["succeeded", "committed", "preview_ready", "ready_for_confirmation", "needs_clarification", "degraded", "failed", "running", "queued", "cancelled", "created"];
 
-/** One colour per status family, so every chart and badge reads the same way. */
+const GOOD = new Set(["succeeded", "committed", "preview_ready", "ready_for_confirmation"]);
+const BAD = new Set(["failed"]);
+const WARN = new Set(["degraded", "cancelled"]);
+
+// A hue per family (done, waiting on the household, degraded, failed, in flight) and a shade per status, so the
+// statuses of one stacked chart stay apart and every badge matches its bar. succeeded is a planning run's,
+// committed a turn's: they never share a chart.
+const COLORS: Record<string, string> = {
+  succeeded: "var(--sage)",
+  committed: "var(--sage)",
+  preview_ready: "var(--c-green)",
+  ready_for_confirmation: "var(--c-blue)",
+  needs_clarification: "#9db3f0",
+  degraded: "#d9a55a",
+  cancelled: "var(--c-amber-text)",
+  failed: "var(--danger)",
+  running: "var(--accent)",
+  queued: "#f6a49d",
+};
+
 export function statusColor(status: string) {
-  if (GOOD.has(status)) return "var(--sage)";
-  if (BAD.has(status)) return "var(--danger)";
-  if (WARN.has(status)) return "#d9a55a";
-  if (status === "running" || status === "queued") return "var(--accent)";
-  return "var(--t3)";
+  return COLORS[status] ?? "var(--t3)";
 }
 
 /** Statuses seen in a window, good ones first, so stacked bars keep a stable order. */
@@ -88,15 +103,38 @@ export function formatSeconds(seconds: number | null | undefined) {
   return `${Math.floor(seconds / 60)} min ${Math.round(seconds % 60)} s`;
 }
 
+/** Times are Singapore times, the days the console filters and charts by, whatever the browser's zone. */
 export function formatWhen(value: string | null | undefined) {
   if (!value) return "—";
-  return new Date(value).toLocaleString("en-SG", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return new Date(value).toLocaleString("en-SG", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Singapore" });
+}
+
+/** A date input's day ("2026-10-12") as midnight in Singapore, with its offset, for a "since" filter. */
+export function singaporeMidnight(day: string) {
+  return `${day}T00:00:00+08:00`;
 }
 
 /** "requested_pricing_mode" → "Requested pricing mode". */
 export function humanKey(key: string) {
   const words = key.replaceAll("_", " ");
   return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/** The replay form's field names, so a stored override reads the way it was entered. */
+export const REPLAY_FIELD_LABELS: Record<string, string> = {
+  parser: "Parser",
+  planner_strategy: "Planner",
+  beam_width: "Beam width",
+  max_expansions: "Search steps",
+  pricing_mode: "Prices",
+  weekly_budget_sgd: "Weekly budget (S$)",
+  planning_capability: "Capability",
+};
+
+/** A replay's overrides for the Recent replays list: "Weekly budget (S$): 60, Search steps: 50". */
+export function describeOverrides(overrides: Record<string, unknown>) {
+  const entries = Object.entries(overrides);
+  return entries.length ? entries.map(([key, value]) => `${REPLAY_FIELD_LABELS[key] ?? humanKey(key)}: ${formatValue(value)}`).join(", ") : "Same settings";
 }
 
 /** The drawer's query value, "planning-12", split back into its kind and id. */
@@ -128,9 +166,11 @@ export function diffFields(before: Record<string, unknown> | null | undefined, a
     .sort((a, b) => Number(b.changed) - Number(a.changed));
 }
 
-export interface DishRow { slot: string; day: number | null; before: string | null; after: string | null; changed: boolean }
+export interface DishRow { slot: string; day: number | null; meal: string; role: string; before: string | null; after: string | null; changed: boolean }
 
-/** The two weeks dish by dish, matched on day, meal and role. */
+const orderIn = (order: readonly string[], value: string) => (order.includes(value) ? order.indexOf(value) : order.length);
+
+/** The two weeks dish by dish, matched on day, meal and role; in the order of the day: breakfast to snack, a main first. */
 export function dishRows(before: OpsReplayDish[] = [], after: OpsReplayDish[] = []): DishRow[] {
   const key = (dish: OpsReplayDish) => `${dish.day ?? "?"}|${dish.meal}|${dish.role}`;
   const rows = new Map<string, DishRow>();
@@ -139,6 +179,8 @@ export function dishRows(before: OpsReplayDish[] = [], after: OpsReplayDish[] = 
       const row = rows.get(key(dish)) ?? {
         slot: `Day ${dish.day ?? "?"} ${dish.meal}${dish.role === "main" ? "" : ` (${dish.role})`}`,
         day: dish.day,
+        meal: dish.meal,
+        role: dish.role,
         before: null,
         after: null,
         changed: false,
@@ -149,7 +191,11 @@ export function dishRows(before: OpsReplayDish[] = [], after: OpsReplayDish[] = 
   }
   return [...rows.values()]
     .map(row => ({ ...row, changed: row.before !== row.after }))
-    .sort((a, b) => (a.day ?? 99) - (b.day ?? 99) || a.slot.localeCompare(b.slot));
+    .sort((a, b) => (a.day ?? 99) - (b.day ?? 99)
+      || orderIn(DATA_MEAL_TYPES, a.meal) - orderIn(DATA_MEAL_TYPES, b.meal)
+      // "vegetable-2" is the vegetable role's copy.
+      || orderIn(DISH_ROLES, a.role.replace(/-\d+$/, "")) - orderIn(DISH_ROLES, b.role.replace(/-\d+$/, ""))
+      || a.role.localeCompare(b.role));
 }
 
 export interface MetricRow { metric: string; a: unknown; b: unknown; delta: number | null }

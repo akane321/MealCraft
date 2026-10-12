@@ -27,6 +27,10 @@ class OpsDataQualityCoverage(BaseModel):
     enrichment_set: int = Field(ge=0)
     released_ingredients: int = Field(ge=0)
     recipes_with_every_field: int = Field(ge=0)
+    # From the release manifest: recipes built before the cuisine/course quota pick, and how many it did not pick.
+    built_before_quota: int | None = Field(default=None, ge=0)
+    not_picked_by_quota: int | None = Field(default=None, ge=0)
+    unbucketed_cuisine: int | None = Field(default=None, ge=0)
 
 
 class OpsDataQualityEstimatedShare(BaseModel):

@@ -47,8 +47,8 @@ function shortDay(day: string) {
 .ops-chart { margin: 0; }
 svg { display: block; width: 100%; height: auto; overflow: visible; }
 .axis { stroke: var(--border); }
-.grid { stroke: rgba(242, 237, 228, 0.06); stroke-dasharray: 3 4; }
-.tick { fill: var(--t3); font-size: 11px; }
+.grid { stroke: rgba(42, 42, 72, 0.1); stroke-dasharray: 3 4; }
+.tick { fill: var(--t3); font-size: 12px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; color: var(--t3); font-size: 12px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 12px; height: 2px; border-radius: 1px; }

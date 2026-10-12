@@ -1,5 +1,4 @@
-from datetime import date
-
+from app.core.clock import today as local_today
 from app.models.household import HouseholdProfile, HouseholdProfileVersion
 from app.planning.capability import require_composition_enabled
 from app.repositories.household import HouseholdProfileRepository, HouseholdProfileVersionConflictError
@@ -121,7 +120,7 @@ class HouseholdProfileService:
         version = self._select_version(profile, request.profile_version)
         # Rebuilding a week still under way keeps its dates; a week that has ended is
         # replaced by one starting on the requested date, not replayed in the past.
-        start = previous.start_date if previous.end_date >= date.today() else request.start_date
+        start = previous.start_date if previous.end_date >= local_today() else request.start_date
         replan_request = request.model_copy(update={"start_date": start})
         constraints = self._planning_constraints(version, replan_request)
         current_constraints = previous.constraints if isinstance(previous.constraints, dict) else {}

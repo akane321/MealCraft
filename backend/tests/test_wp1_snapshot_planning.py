@@ -1,10 +1,9 @@
 """Product planning and previews never price candidate ingredients against the network."""
 
-from datetime import date
-
 import pytest
 
 from app.api.routes.meal_plans import build_meal_plan_service
+from app.core.clock import today as local_today
 from app.db.session import get_db_session
 from app.main import app
 from app.models.meal_plan import MealPlan
@@ -76,7 +75,7 @@ def test_live_plan_preview_keeps_network_out_of_selection(monkeypatch, offline_s
                 "household_size": 2,
                 "weekly_budget_sgd": 100,
                 "pricing_mode": "live",
-                "start_date": date.today().isoformat(),
+                "start_date": local_today().isoformat(),
             },
         )
         assert generated.status_code == 201, generated.text

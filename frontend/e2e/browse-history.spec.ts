@@ -67,7 +67,7 @@ test("past weeks open to show what was eaten", async ({ page }) => {
 
   await page.goto("/history");
   await page.waitForLoadState("networkidle");
-  const week = page.getByRole("button", { name: /14 Sept – 20 Sept|14 Sep – 20 Sep/ });
+  const week = page.getByRole("button", { name: /^(14 Sept – 20 Sept|14 Sep – 20 Sep)/ });
   await week.click();
   await expect(week).toHaveAttribute("aria-expanded", "true");
   await expect(page.getByRole("button", { name: "Tofu Soba" })).toBeVisible();

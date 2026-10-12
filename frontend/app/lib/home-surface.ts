@@ -29,6 +29,14 @@ export function budgetLine(estimate: WeeklyGroceryEstimate): string | null {
     : `${formatSgd(-gap)} over your ${formatSgd(budget)}`;
 }
 
+/** What is left of the weekly budget, or how far over it the week is; null without a budget. */
+export function budgetGap(estimate: WeeklyGroceryEstimate): { amount: string; over: boolean } | null {
+  const budget = estimate.weekly_budget_sgd;
+  if (budget === null) return null;
+  const gap = Math.round((budget - estimate.purchase_total_sgd) * 100) / 100;
+  return { amount: formatSgd(Math.abs(gap)), over: gap < 0 };
+}
+
 export function packageLabel(line: GroceryLineEstimate): string {
   const size = line.product?.package_size;
   const unit = line.product?.package_unit ?? "";
@@ -138,22 +146,6 @@ export function productSourceLabel(result: ProductSearchResponse): string {
   if (!fetched) return `Saved FairPrice prices${missed}`;
   const date = new Date(fetched).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
   return `FairPrice prices from ${date}${missed}`;
-}
-
-// Sauce, starch and garnish colours; a dish's plate picks one of each.
-const SAUCES = ["#c9803f", "#d9a54a", "#e58a62", "#d6533a", "#6b3a2a", "#d77b35", "#b8653f", "#a6582e"];
-const STARCHES = ["#e9d9b5", "#f1e6cf", "#f4efe6", "#efe3c8", "#f0c64f", "#f2dfb4"];
-const GREENS = ["#6f8f4e", "#4f7a3a", "#5d8a3f", "#7aa04a", "#4a3024", "#c24a2a"];
-
-/** CSS variables for an abstract plate; the same dish always gets the same plate. */
-export function plateStyle(seed: string): Record<string, string> {
-  let hash = 2166136261;
-  for (const char of seed) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619) >>> 0;
-  return {
-    "--a": SAUCES[hash % SAUCES.length]!,
-    "--b": STARCHES[(hash >>> 8) % STARCHES.length]!,
-    "--c": GREENS[(hash >>> 16) % GREENS.length]!,
-  };
 }
 
 /** Per-person nutrition averaged over the dinners that still count (skipped ones don't). */

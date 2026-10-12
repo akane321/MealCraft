@@ -22,7 +22,12 @@ const planningDetail = {
   warnings: [],
 };
 
-const week = (recipes: string[]) => recipes.map((recipe, index) => ({ day: index + 1, meal: "dinner", role: "main", recipe }));
+// Day 1's lunch and vegetable come last in the stub, as the planner may return them, to see the table put them in the order of the day.
+const week = (recipes: string[]) => [
+  ...recipes.map((recipe, index) => ({ day: index + 1, meal: "dinner", role: "main", recipe })),
+  { day: 1, meal: "dinner", role: "vegetable", recipe: "Garlic Bok Choy" },
+  { day: 1, meal: "lunch", role: "main", recipe: "Chicken Congee" },
+];
 function replay(id: number, overrides: Record<string, unknown>, budget: number) {
   return {
     id,
@@ -131,7 +136,7 @@ async function stubConsole(page: Page) {
   await page.route(path("/api/ops/experiments"), (route: Route) => {
     const evaluations = [
       { name: "planning-components", label: "Planning component ablations", description: "Fixed developer component conditions.", dataset: "data/fixtures/planning-v2/ablation-developer-v1.json", options: {}, execution_mode: "durable_worker" },
-      { name: "developer-planning", label: "Developer planning set", description: "20 planning scenarios.", dataset: "data/evaluation/dev/planning-v1.json", options: { planner: ["mealcraft-planner"] }, execution_mode: "legacy_inline" },
+      { name: "developer-planning", label: "Developer planning set", description: "Protocol v1: 20 weeks of one dish a dinner on the curated 30-recipe catalog with fixture prices, scored for each planner on the same candidates.", dataset: "data/evaluation/dev/planning-v1.json", options: { planner: ["product-planner", "greedy-baseline", "rule-only-baseline"] }, execution_mode: "legacy_inline" },
     ];
     if (route.request().method() === "POST") {
       expect(route.request().headers()["idempotency-key"]).toMatch(/^ops-experiment-/);
@@ -204,7 +209,7 @@ async function signIn(page: Page) {
     await page.getByRole("radio", { name: "Administrator" }).click();
     await expect(page.getByRole("heading", { name: "Administrator sign in" })).toBeVisible({ timeout: 1000 });
   }).toPass();
-  await page.getByLabel("Email").fill("ops@example.test");
+  await page.getByLabel("Username").fill("ops");
   await page.getByLabel("Password").fill("console-password");
   await page.getByRole("button", { name: "Sign in to the console" }).click();
   await expect(page).toHaveURL(/\/ops$/);
@@ -227,13 +232,19 @@ test("an administrator replays a failed plan, switches the parser and edits an a
   await expect(compare.getByRole("row", { name: /Total cost S\$34\.10 S\$37\.50/ })).toBeVisible();
   await expect(compare.getByRole("row", { name: /Checks not passed Purchase budget none/ })).toBeVisible();
   await expect(compare.getByRole("row", { name: "Day 1 dinner — Lemon Chicken" })).toHaveClass(/changed/);
+  await expect(compare.getByRole("table").nth(1).locator("tbody th")).toHaveText(["Day 1 lunch", "Day 1 dinner", "Day 1 dinner (vegetable)", "Day 2 dinner", "Day 3 dinner", "Day 4 dinner", "Day 5 dinner", "Day 6 dinner", "Day 7 dinner"]);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/ops-4-replay.png`, fullPage: true });
 
   await compare.getByLabel("Weekly budget (S$)").fill("60");
   await compare.getByRole("button", { name: "Replay with these settings" }).click();
   await expect(page).toHaveURL(/replay=6/);
   await expect(compare.getByRole("row", { name: /Total cost S\$34\.10 S\$57\.50/ })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Recent replays" }).getByRole("button")).toHaveCount(2);
+  const recent = page.getByRole("region", { name: "Recent replays" });
+  await expect(recent.getByRole("button")).toHaveCount(2);
+  // An override reads as the replay form's own label, not its key.
+  await expect(recent.getByRole("button").first()).toContainText("Weekly budget (S$): 60");
+  await expect(recent).not.toContainText("Weekly budget sgd");
+  await expect(recent.getByRole("button").last()).toContainText("Same settings");
 
   // Switch the assistant parser, with a confirmation, and see it in the history.
   await nav.getByRole("link", { name: "Experiments & config" }).click();
@@ -266,7 +277,7 @@ test("an administrator replays a failed plan, switches the parser and edits an a
   await expect(ab.getByText("Comparable developer diagnostic.")).toBeVisible();
   await expect(ab.getByRole("row", { name: /Passed audit count 5 4 -1/ })).toBeVisible();
   await expect(ab.getByRole("row", { name: /Purchase budget.*1/ })).toBeVisible();
-  await expect(ab.getByRole("row", { name: /budget-edge.*repair_off repeat 0.*purchase_budget/ })).toBeVisible();
+  await expect(ab.getByRole("row", { name: /budget-edge.*repair_off repeat 0.*Purchase budget/ })).toBeVisible();
   await page.getByLabel("Use run 79 as A").check();
   await expect(ab.getByText("Do not interpret these deltas.")).toBeVisible();
   await expect(ab.getByText("Code revision differs or is missing.")).toBeVisible();
