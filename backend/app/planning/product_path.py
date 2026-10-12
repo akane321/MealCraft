@@ -697,17 +697,28 @@ class ProductPlanningEngine:
                         meal_options_per_slot=CHEAPEST_MEAL_OPTIONS,
                     )
 
+                    def distinct(state) -> int:
+                        return len({recipe for _, meal in state.choices for _, recipe in meal})
+
                     def within(limit: int) -> tuple:
                         share = len(slots) / limit
                         blended = {slug: loss + weight * cost.get(slug, 0.0) * share for slug, loss in losses.items()}
                         bounded = problem.model_copy(deep=True, update={"purchase_budget_sgd": float(limit)})
                         states = MealBeamPlanner(led, local_losses=blended).search_candidates(bounded).states
                         if minimum_distinct_dishes:
+                            # The cost-led search keeps cheap repeats: a week short of the dishes asked for spends
+                            # the room the limit leaves on dishes not yet in it, as the ranked week's variety pass
+                            # does. Without it four different dishes first came at S$50.35 for two (fixture catalog,
+                            # one main a dinner) where the budgeted check plans them at S$43.
                             states = tuple(
-                                state
-                                for state in states
-                                if len({recipe for _, meal in state.choices for _, recipe in meal})
-                                >= minimum_distinct_dishes
+                                varied
+                                for varied in (
+                                    state
+                                    if distinct(state) >= minimum_distinct_dishes
+                                    else meal_beam.vary_within_budget(bounded, state)
+                                    for state in states
+                                )
+                                if distinct(varied) >= minimum_distinct_dishes
                             )
                         return states
 
