@@ -55,6 +55,8 @@ export interface AgentConstraintState {
   pricing_mode: PricingMode;
   // How often one dish may be served in the week; 1 is "no repeats", null leaves it to the planner.
   max_uses_per_recipe: number | null;
+  // The week's first day, YYYY-MM-DD (backend agent/plan_dates.py); absent on older conversations.
+  start_date?: string | null;
 }
 
 export interface AgentReplanDraft {
@@ -119,6 +121,9 @@ export interface AgentSession {
   last_scope_decision: AgentScopeDecision | null;
   pending_interaction: AgentInteractionRequest | null;
   can_confirm: boolean;
+  // The household's own name for it (null: its first message stands in) and when it was pinned (null: not pinned).
+  title?: string | null;
+  pinned_at?: string | null;
   created_at: string;
   updated_at: string;
 }

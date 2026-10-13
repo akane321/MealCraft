@@ -17,7 +17,7 @@ import threading
 import time
 from collections import Counter
 from contextlib import contextmanager
-from datetime import date, timedelta
+from datetime import timedelta
 from types import SimpleNamespace
 
 import pytest
@@ -29,6 +29,7 @@ from sqlalchemy.pool import StaticPool
 from app.agent import limits
 from app.agent.parser import RuleBasedConstraintParser
 from app.api.routes.meal_plans import build_meal_plan_service, build_replanning_service
+from app.core.clock import today as local_today
 from app.core.config import get_settings
 from app.core.paths import repository_root
 from app.data.catalog import Catalog, import_catalog, load_catalog
@@ -44,7 +45,7 @@ from app.repositories.recipe import RecipeRepository, _planning_pool, clear_plan
 from app.repositories.recipe import _reloading as reloading_binds
 from app.schemas.agent import AgentConstraintState
 from app.schemas.display import shown_title
-from app.schemas.meal_plan import MEAL_PRESETS, MealPlanReplanPreviewRequest, MealPlanShapeChangeRequest
+from app.schemas.meal_plan import MEAL_PRESETS, MealPlanReplanPreviewRequest, MealPlanShape, MealPlanShapeChangeRequest
 from app.services.agent import AgentSessionService
 from tests.test_planning_capability import _dish, dish_client
 
@@ -230,7 +231,7 @@ def a_week_of_seven(client) -> dict:
     response = client.post(
         "/api/plans/generate",
         json={
-            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "start_date": (local_today() + timedelta(days=1)).isoformat(),
             "household_size": 4,
             "max_cooking_time_minutes": 90,
             "weekly_budget_sgd": 20,
@@ -276,6 +277,73 @@ def test_a_swap_asked_for_by_name_keeps_what_was_asked_and_says_the_overage(monk
         ).json()
         assert preview["after_entry"]["recipe_slug"] == "salmon-bake"
         assert preview["over_budget_sgd"] > 0
+
+
+def checked_at_the_shop(plan_id: int, total: float, budget: float) -> None:
+    """The week as a live plan saves it: its basket checked at FairPrice on confirm, above its snapshot (ADR-0058),
+    with a weekly budget of `budget`."""
+    from app.db.session import get_db_session
+    from app.main import app
+    from app.models.meal_plan import MealPlan
+
+    sessions = app.dependency_overrides[get_db_session]()
+    session = next(sessions)
+    plan = session.get(MealPlan, plan_id)
+    plan.pricing_mode, plan.purchase_total_sgd, plan.weekly_budget_sgd = "live", total, budget
+    plan.constraints = {**plan.constraints, "weekly_budget_sgd": budget}
+    session.commit()
+    sessions.close()
+
+
+def test_a_swap_of_a_week_priced_at_the_shop_is_chosen_and_previewed_at_its_saved_total(monkeypatch):
+    """2026-10-09 rehearsal: a live week saved at S$97.26 took a swap that fit S$100 at snapshot prices, and its
+    preview said nothing; confirming it checked the new basket and the week came to S$100.16. The swap is chosen,
+    and its preview totalled, from the saved total moved by the snapshot difference."""
+    with dish_client(monkeypatch, mains(*SEVEN)) as client:
+        plan = a_week_of_seven(client)  # S$18.35 at snapshot prices
+        first = next(dish for dish in plan["days"] if dish["day_index"] == 1)
+        swap = {"entry_id": first["entry_id"], "event_type": "REPLACE_MEAL"}
+        salmon = {**swap, "reason": "something with salmon"}
+        dearer = client.post(f"/api/plans/{plan['id']}/replan/preview", json=salmon).json()["purchase_total_delta_sgd"]
+        cheaper = client.post(f"/api/plans/{plan['id']}/replan/preview", json=swap).json()["purchase_total_delta_sgd"]
+        # The salmon, ranked first, fits the budget at snapshot prices; not once the week is S$1.00 dearer at the shop.
+        budget = round(18.35 + dearer + 0.5, 2)
+        checked_at_the_shop(plan["id"], 19.35, budget)
+
+        preview = client.post(f"/api/plans/{plan['id']}/replan/preview", json=swap).json()
+        assert preview["after_entry"]["recipe_slug"] == "bean-chili"
+        assert preview["over_budget_sgd"] is None
+        assert preview["purchase_total_delta_sgd"] == cheaper  # the snapshot difference, not snapshot minus shop
+        # Asked for, the salmon stays, and its preview says the overage at the saved total before confirming.
+        asked = client.post(f"/api/plans/{plan['id']}/replan/preview", json=salmon).json()
+        assert asked["after_entry"]["recipe_slug"] == "salmon-bake"
+        assert asked["purchase_total_delta_sgd"] == dearer
+        assert asked["over_budget_sgd"] == 0.5
+
+
+def test_a_swap_preview_says_what_it_does_to_the_groceries_and_the_budget():
+    preview = SimpleNamespace(
+        event_type="REPLACE_MEAL",
+        before_entry=SimpleNamespace(recipe_title="Teriyaki Fried Rice"),
+        after_entry=SimpleNamespace(recipe_title="Dinner Tonight: Kimchi Chahan (Fried Rice) Recipe"),
+        purchase_total_delta_sgd=2.9,
+        over_budget_sgd=0.16,
+    )
+    plan = SimpleNamespace(grocery_estimate=SimpleNamespace(weekly_budget_sgd=100.0))
+    describe = AgentSessionService.__new__(AgentSessionService)._describe_dish_preview
+    assert describe(preview, plan, "en") == (
+        "How about Kimchi Chahan (Fried Rice) instead of Teriyaki Fried Rice? Groceries +S$2.90. "
+        "That makes the week S$100.16, S$0.16 over the S$100 weekly budget. Nothing changes until you confirm."
+    )
+    assert describe(preview, plan, "zh") == (
+        "把Teriyaki Fried Rice换成Kimchi Chahan (Fried Rice)怎么样？买菜多花 S$2.90。"
+        "这样这周要 S$100.16，超出每周 S$100 的预算 S$0.16。确认之前什么都不会改。"
+    )
+    within = SimpleNamespace(**{**vars(preview), "purchase_total_delta_sgd": -1.5, "over_budget_sgd": None})
+    assert describe(within, plan, "en") == (
+        "How about Kimchi Chahan (Fried Rice) instead of Teriyaki Fried Rice? That takes S$1.50 off the groceries. "
+        "Nothing changes until you confirm."
+    )
 
 
 # The walkthrough household on the full catalog ---------------------------------------------------------------
@@ -368,9 +436,9 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
         refused = service.create("一共10新币给4个人做一周")
         options = refused.pending_interaction.options
         assert [option.label for option in options] == ["Use S$87 for the week"]
-        assert "改成2 个人" in refused.messages[-1].content
-        assert "S$103" in refused.messages[-1].content
-        assert "减少人数不能降低" in refused.messages[-1].content
+        # Two people's week (S$103) costs more than four's: said without its amount (2026-10-09 rehearsal).
+        assert "S$103" not in refused.messages[-1].content
+        assert "减少人数也不能降低这个预算" in refused.messages[-1].content
         for chosen in options:
             ready = service.reply(refused.id, chosen.value)
             assert ready.can_confirm, (chosen.label, ready.messages[-1].content)
@@ -380,8 +448,8 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
 
 
 REFUSED_FOR_FOUR = (
-    "好的：4 个人，一周 S$10。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$86.15。"
-    " 改成2 个人，我能验证的方案仍需要 S$103 预算，所以减少人数不能降低我能建议的预算。"
+    "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$86.15。"
+    " 减少人数也不能降低这个预算。"
 )
 
 
@@ -403,8 +471,56 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
         refused = service.create("一共10新币给4个人做一周")
     assert refused.messages[-1].content == REFUSED_FOR_FOUR
     assert [option.label for option in refused.pending_interaction.options] == ["Use S$87 for the week"]
-    # Each size's cheapest week, then that amount through the budgeted path; no third search.
+    # Each size's cheapest week, then that amount through the budgeted path; no third search, and no four-dish search
+    # (ADR-0067: a budget no week fits is refused as before).
     assert planned == [(4, None, True), (4, 53, False), (2, None, True), (2, 41, False)]
+
+
+@pytest.fixture(scope="module")
+def fixture_catalog():
+    """The fixture catalog alone (data/recipes), as the console's one-dish budget probes plan it."""
+    root = repository_root()
+    engine = create_engine("sqlite+pysqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    Base.metadata.create_all(engine)
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    with factory() as session:
+        import_catalog(
+            session, load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
+        )
+    yield factory
+    engine.dispose()
+
+
+@pytest.mark.parametrize(("size", "budget", "dishes", "four"), [(2, 40, 3, 50.35), (4, 60, 2, 82.20)])
+def test_a_budget_that_plans_only_a_repeating_week_plans_it_and_names_a_checked_four_dish_week(
+    fixture_catalog, size, budget, dishes, four
+):
+    """Owner, 2026-10-13 (ADR-0067): a budget that plans only a week of fewer than four different dishes plans that
+    week as main does, the household keeping its budget, and the reply adds what a four-dish week the search found
+    and checked costs. As first written, T04 refused both with only "Use S$51" and "Use S$83". The amount is a
+    week that plans, not the least: two people plan four dishes at S$42 (S$41.95)."""
+    one_main = MealPlanShape(meals={"dinner": MEAL_PRESETS["dinner"]["one main"]})
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        service.starting_constraints = AgentConstraintState(
+            household_size=size, weekly_budget_sgd=budget, pricing_mode="fixture", plan_shape=one_main
+        )
+        ready = service.create(f"Plan dinners for {size} people this week, S${budget} for the week")
+        reply = ready.messages[-1].content
+        assert ready.status == "ready" and ready.can_confirm, reply
+        assert reply.endswith(
+            "That's everything I need. Check the details below and plan your week when you're ready. "
+            f"If you'd like at least four different dishes, a week we checked costs S${four:.2f}."
+        )
+        assert "can't cover" not in reply and ready.pending_interaction is None
+        confirmed = service.confirm(ready.id)
+        assert len({day.recipe.id for day in confirmed.plan.days}) == dishes
+        assert confirmed.plan.grocery_estimate.purchase_total_sgd <= budget
+        assert confirmed.session.constraints.weekly_budget_sgd == budget  # the household's own budget
+        # The amount named plans a week of four different dishes through the budgeted path.
+        offered = service._plan_request(ready.constraints).model_copy(update={"weekly_budget_sgd": math.ceil(four)})
+        assert service.meal_plan_service.check(offered, minimum_distinct_dishes=4) is None
+        assert service.meal_plan_service.checked_distinct_dishes(offered) >= 4
 
 
 def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(walked):

@@ -1,5 +1,13 @@
-export function todayIsoDate(now = new Date()): string {
-  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
+// The date the server plans from (Singapore, or a simulated day); set at start by plugins/server-today.ts.
+let serverToday: string | null = null;
+export function setServerToday(value: string | null): void {
+  serverToday = value;
+}
+
+export function todayIsoDate(now?: Date): string {
+  if (!now && serverToday) return serverToday;
+  const at = now ?? new Date();
+  const local = new Date(at.getTime() - at.getTimezoneOffset() * 60_000);
   return local.toISOString().slice(0, 10);
 }
 

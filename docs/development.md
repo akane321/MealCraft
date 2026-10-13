@@ -213,7 +213,8 @@ embedding request, SDK retries included. It is recorded once the turn is over,
 so it never stops a turn. The console's Services page shows these model calls
 beside the number of runs, the runs that went on without the model after a
 request failed (fallbacks), and the model calls since the backend started that
-no run records (console replays, swap previews asked of the plan API directly).
+no run records (console replays, swap previews asked of the plan API directly). An assistant benchmark run
+in Experiments records its own model calls in its stored report instead.
 Tests use deterministic fixture parsing and zero live API calls.
 
 ## Product Pricing Modes

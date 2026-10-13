@@ -274,31 +274,39 @@ class RuleBasedConstraintParser:
         lower = text.lower().replace("’", "'")
         extraction = AgentConstraintExtraction()
 
-        # Who eats. "One of us" or "two of us" is part of the household, not its size: only "the 4 of us" is
-        # all of it, and "the one of us who cooks" is one of them.
-        people = self._first_number(
-            lower,
-            [
-                r"(\d+)\s*(?:people|persons?|人|个人)",
-                r"\bthe\s+(?!1\b)(\d+)\s+of us\b",
-                rf"(?:for|serving|family of)\s*(\d+)(?![\d.]){NOT_EATERS}\s*(?:people|persons?)?",
-                r"\b(?:we're|we are)\s+(\d+)(?=\s*(?:[,;:!?]|\.(?:\s|$)|$))",
-            ],
-        )
+        # Who eats. "One of us" is one household member, never the household size.
+        # "Two of us" or more can establish the size only when no saved/current size is known.
+        people_patterns = [
+            r"(\d+)\s*(?:people|persons?|\u4eba|\u4e2a\u4eba)",
+            rf"(?:for|serving|family of)\s*(\d+)(?![\d.]){NOT_EATERS}\s*(?:people|persons?)?",
+            r"\b(?:we're|we are)\s+(\d+)(?=\s*(?:[,;:!?]|\.(?:\s|$)|$))",
+        ]
+        people_patterns.append(r"\bthe\s+(?!1\b)(\d+)\s+of us\b")
+        if current.household_size is None:
+            people_patterns.append(r"\b(?!1\b)(\d+)\s+of us\b")
+        people = self._first_number(lower, people_patterns)
+
         if people is None:
-            # "Dinners for two", "a family of four", "three people", "the four of us"; not "for seven dinners".
+            # "Dinners for two", "a family of four", "three people"; and, with no saved size, "two of us".
             words = "|".join(NUMBER_WORDS)
             match = (
                 re.search(rf"\b(?:for|serving|family of)\s+({words})\b{NOT_EATERS}", lower)
                 or re.search(rf"\b({words})\s+(?:people|persons?|adults?)\b", lower)
-                or re.search(rf"\bthe\s+(?!one\b)({words})\s+of us\b", lower)
                 or re.search(rf"\b(?:we're|we are)\s+({words})\b(?=\s*(?:[,.;:!?]|$))", lower)
             )
+            if match is None:
+                match = re.search(rf"\bthe\s+(?!one\b)({words})\s+of us\b", lower)
+            if match is None and current.household_size is None:
+                match = re.search(rf"\b(?!one\b)({words})\s+of us\b", lower)
             if match:
                 people = NUMBER_WORDS[match.group(1)]
+
         if people is None:
-            # 两个人, 三口人, 四人.
-            match = re.search(r"([一二两三四五六七八九十])\s*(?:个人|口人|人)", text)
+            # Chinese household-size forms such as two people, three-person household, four people.
+            match = re.search(
+                r"([\u4e00\u4e8c\u4e24\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d\u5341])\s*(?:\u4e2a\u4eba|\u53e3\u4eba|\u4eba)",
+                text,
+            )
             if match:
                 people = CHINESE_NUMBERS[match.group(1)]
         extraction.household_size = int(people) if people is not None else None
@@ -593,6 +601,21 @@ Latest user message: {message}
         if not isinstance(result, AgentConstraintExtraction):
             result = AgentConstraintExtraction.model_validate(result)
         aligned = align_to_vocabulary(result, self.vocabulary) if self.vocabulary else result
+
+        # With a saved household size, bare "two of us" describes part of the
+        # household rather than replacing its total size.
+        lower_message = message.lower()
+        of_us = re.search(
+            r"\b(?:\d+|" + "|".join(NUMBER_WORDS) + r")\s+of us\b",
+            lower_message,
+        )
+        explicit_total = re.search(
+            r"\bthe\s+(?:\d+|" + "|".join(NUMBER_WORDS) + r")\s+of us\b",
+            lower_message,
+        )
+        if current.household_size is not None and of_us and not explicit_total:
+            aligned.household_size = None
+
         # The reply is a template over what was understood, never the model's own sentence.
         aligned.assistant_summary = RuleBasedConstraintParser._summary(aligned, replies.language(message, history))
         return aligned

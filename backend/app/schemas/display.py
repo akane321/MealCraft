@@ -7,6 +7,8 @@ in a sheet and in a sentence:
 - "Chinese Egg Flower Soup (Ww)", "Pork Tortillas Adobo - Ww" -> "Chinese Egg Flower Soup", "Pork Tortillas
   Adobo": a recipe site's tag (Weight Watchers, once-a-month cooking, America's Test Kitchen, Taste of Home,
   ...) is not part of the dish's name, nor is a trailing comma or full stop;
+- "Dinner Tonight: Kimchi Chahan (Fried Rice) Recipe" -> "Kimchi Chahan (Fried Rice)": a recipe site's column
+  ("Dinner Tonight:", "Seriously Asian:", ...) and its closing "Recipe" are not part of the dish's name either;
 - "Pot Pie(Square Dumplings)" -> "Pot Pie (Square Dumplings)" ("Morgan'S" -> "Morgan's" is the import's,
   `app.data.release_v2.display_title`);
 - "Tsukemono – Japanese Pickles", "Berbere -- Ethiopian Spice Paste" -> "Tsukemono (Japanese Pickles)",
@@ -29,6 +31,13 @@ from pydantic import PlainSerializer
 TAGS = r"(?:ww|oamc|omac|atk|scd|sbd|toh)"
 # "(Ww)", or "- Ww" at the end.
 SCRAPER_TAG = re.compile(rf"\s*\({TAGS}\)|\s*[-–—]+\s*{TAGS}$", re.IGNORECASE)
+# Serious Eats' columns, as the catalog has them (2026-10-09 rehearsal: "Dinner Tonight: Kimchi Chahan (Fried Rice)
+# Recipe"), and the "Recipe" its titles end with ("Mongolian Beef For 4: $10 Recipe!" keeps both).
+COLUMN = re.compile(
+    r"^(?:dinner tonight|seriously asian|serious (?:salads|heat)|breakfast flash|cook the book"
+    r"|the secret ingredient \([^)]*\))\s*:\s*|\s+recipe$",
+    re.IGNORECASE,
+)
 GLUED_OPEN = re.compile(r"(?<=[^\s(])\(")
 GLUED_CLOSE = re.compile(r"\)(?=\w)")
 DASH_BEFORE_PAREN = re.compile(r"\s*[-–—]\s*(?=\()")
@@ -43,7 +52,7 @@ NOT_PREPARATION = {"and", "or", "none", "more"}
 
 def _part(text: str) -> str:
     text = html.unescape(text)
-    text = SCRAPER_TAG.sub("", text)
+    text = COLUMN.sub("", SCRAPER_TAG.sub("", text).strip())
     text = GLUED_CLOSE.sub(") ", GLUED_OPEN.sub(" (", DASH_BEFORE_PAREN.sub(" ", text)))
     pieces = DASH.split(text)
     if len(pieces) == 2 and "(" not in text and all(piece.strip() for piece in pieces):

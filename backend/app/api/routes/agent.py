@@ -33,6 +33,7 @@ from app.schemas.agent import (
     AgentRunCollectionResponse,
     AgentRunResponse,
     AgentSessionCollectionResponse,
+    AgentSessionLabel,
     AgentSessionResponse,
 )
 from app.services.agent import (
@@ -135,9 +136,34 @@ def create_agent_session(
 @router.get("", response_model=AgentSessionCollectionResponse)
 def list_agent_sessions(
     service: AgentServiceDependency,
-    limit: Annotated[int, Query(ge=1, le=20)] = 5,
+    limit: Annotated[int, Query(ge=1, le=50)] = 5,
 ) -> AgentSessionCollectionResponse:
     return service.list_recent(limit=limit)
+
+
+@router.patch("/{session_id}", response_model=AgentSessionResponse)
+def label_agent_session(
+    session_id: int,
+    payload: AgentSessionLabel,
+    service: AgentServiceDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
+) -> AgentSessionResponse:
+    """Rename or pin a conversation."""
+    agent_session = service.label(session_id, payload)
+    if agent_session is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found")
+    return agent_session
+
+
+@router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_agent_session(
+    session_id: int,
+    service: AgentServiceDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
+) -> None:
+    """Delete a conversation and its messages; the week it planned stays in Past weeks."""
+    if not service.delete(session_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found")
 
 
 @router.get("/{session_id}", response_model=AgentSessionResponse)

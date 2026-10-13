@@ -23,6 +23,9 @@ export interface OpsDataQualitySummary {
     enrichment_set: number;
     released_ingredients: number;
     recipes_with_every_field: number;
+    built_before_quota: number | null;
+    not_picked_by_quota: number | null;
+    unbucketed_cuisine: number | null;
   } | null;
   by_cuisine: Record<string, number> | null;
   by_course: Record<string, number> | null;

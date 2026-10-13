@@ -4,6 +4,7 @@ from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
+from app.core.code_version import code_commit
 from app.core.config import get_settings
 from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
@@ -42,6 +43,11 @@ def _meal_rank(meal_type: str) -> int:
     return MEAL_ORDER.index(meal_type) if meal_type in MEAL_ORDER else len(MEAL_ORDER)
 
 
+def _distinct(result) -> int:
+    """How many different recipes a planned week serves."""
+    return len({item.recipe.id for item in result.selected})
+
+
 class WeeklyMealPlanService:
     def __init__(
         self,
@@ -76,18 +82,31 @@ class WeeklyMealPlanService:
         found = found_weeks.pop(self._found_key(constraints, household_profile_version), None)
         fresh = found is not None and time.monotonic() - found[0] < get_settings().planning_pool_cache_seconds
         searched = found[1] if fresh else None
+        if searched is not None:
+            # `check` searched this week before the reply and Plan only saves it: the run is timed as that search
+            # and this save, not the 1 ms of the save alone (the console's planning time read 0 s on 2026-10-05).
+            searched[1].trace["reused_checked_week"] = True
+            started_at -= timedelta(seconds=searched[1].trace["search_seconds"])
         try:
             recommendation_result, result = searched or self._search(
                 constraints, self._candidates(constraints), profile_version=household_profile_version
             )
         except ProductPlanningError as error:
             error.trace["profile_id"] = household_profile_id
+            self._priced_as_asked(error.trace, constraints)
             self.repository.session.add(self._operation_run(error.trace, started_at, error=str(error)))
             self.repository.session.commit()
             raise
         selected, grocery = result.selected, result.grocery
+        self._priced_as_asked(result.trace, constraints)
         if constraints.pricing_mode == "live":
             grocery = self.grocery_aggregator.refresh(grocery)
+            # Only the saved list is checked at FairPrice (ADR-0058): what it came to, as the household sees it.
+            result.trace["final_list"] = {
+                "pricing_mode": grocery.pricing_mode,
+                "purchase_total_sgd": grocery.purchase_total_sgd,
+                "price_sources": sorted({line.evidence.source for line in grocery.items if line.evidence}),
+            }
         result.trace["profile_id"] = household_profile_id
 
         recommendation_warnings = recommendation_result.warnings
@@ -108,6 +127,7 @@ class WeeklyMealPlanService:
                 f"The current eligible catalog contains {eligible_count} {recipe_label}; "
                 "recipes are rotated across the seven days."
             )
+        warnings = self._deduplicate(warnings)
         placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(selected))]
         scheduled = [
             ScheduledDish(
@@ -126,15 +146,30 @@ class WeeklyMealPlanService:
             constraints=constraints,
             scheduled=scheduled,
             grocery=grocery,
-            warnings=self._deduplicate(warnings),
+            warnings=warnings,
             household_profile_id=household_profile_id,
             household_profile_version=household_profile_version,
             replaces_plan_id=replaces_plan_id,
-            operation_run=self._operation_run(result.trace, started_at),
+            operation_run=self._operation_run(result.trace, started_at, warnings=warnings),
         )
         return self._to_response(plan)
 
-    def _search(self, constraints: WeeklyMealPlanRequest, candidates, *, profile_version: int | None = None):
+    @staticmethod
+    def _priced_as_asked(trace: dict, constraints: WeeklyMealPlanRequest) -> None:
+        """A search's trace with the pricing its request asked for. Every week is chosen at snapshot prices
+        (ADR-0058), so the planner's trace says fixture; that stays as the planning basis, but a live plan is no
+        fixture plan to the console, its replays ("as stored") or its FairPrice count."""
+        trace.setdefault("planning_pricing_mode", trace["requested_pricing_mode"])
+        trace["requested_pricing_mode"] = trace["request"]["pricing_mode"] = constraints.pricing_mode
+
+    def _search(
+        self,
+        constraints: WeeklyMealPlanRequest,
+        candidates,
+        *,
+        profile_version: int | None = None,
+        minimum_distinct_dishes: int = 0,
+    ):
         """The week `generate` plans from these candidates (recipes, recommendations), nothing saved."""
         constraints = constraints.model_copy(update={"pricing_mode": "fixture"})
         recipes, recommendation_result = candidates
@@ -157,6 +192,7 @@ class WeeklyMealPlanService:
                     recipes,
                     selector=self.selector,
                     profile_version=profile_version,
+                    minimum_distinct_dishes=minimum_distinct_dishes,
                 )
                 if prior_trace is not None:
                     result.trace["prior_candidate_attempt"] = prior_trace
@@ -194,19 +230,29 @@ class WeeklyMealPlanService:
                 raise
         raise AssertionError("unreachable")
 
-    def check(self, constraints: WeeklyMealPlanRequest) -> ProductPlanningError | None:
+    def check(
+        self, constraints: WeeklyMealPlanRequest, *, minimum_distinct_dishes: int = 0
+    ) -> ProductPlanningError | None:
         """What `generate` would answer for these constraints, nothing saved: None for a week, else its error.
 
         The week found is kept for `generate` with the same constraints, while the planner's pools are kept; a check
-        of constraints whose week is kept answers from it."""
+        of constraints whose week is kept answers from it. A check for at least `minimum_distinct_dishes` different
+        dishes searches past a kept week with fewer, and the week it finds is the one kept: Plan saves the varied week
+        (ADR-0067)."""
         seconds = get_settings().planning_pool_cache_seconds
         kept = found_weeks.get(self._found_key(constraints)) if seconds else None
-        if kept is not None and time.monotonic() - kept[0] < seconds:
+        fresh = kept is not None and time.monotonic() - kept[0] < seconds
+        if fresh and _distinct(kept[1][1]) >= minimum_distinct_dishes:
             # The same search over the same pool finds the same week, and it stays kept for Plan: a budget refusal
             # checks the amount it offers, and tapping that offer asked for the very same week (WP1 1b, 2026-10-08).
             return None
+        started = time.monotonic()
         try:
-            searched = self._search(constraints, self._checked_candidates(constraints))
+            searched = self._search(
+                constraints,
+                self._checked_candidates(constraints),
+                minimum_distinct_dishes=minimum_distinct_dishes,
+            )
         except ProductPlanningError as error:
             return error
         # Kept for the Plan that follows this check (`found_weeks`): the 2026-10-04 walkthrough's reply that took
@@ -218,8 +264,17 @@ class WeeklyMealPlanService:
                 found_weeks.pop(key, None)
             while len(found_weeks) >= FOUND_WEEKS_KEPT:
                 found_weeks.pop(next(iter(found_weeks), None), None)
+            # What the search took, for the run of the Plan that saves this week without searching (`generate`).
+            searched[1].trace["search_seconds"] = round(now - started, 3)
             found_weeks[self._found_key(constraints)] = (now, searched)
         return None
+
+    def checked_distinct_dishes(self, constraints: WeeklyMealPlanRequest) -> int | None:
+        """Distinct recipes in the week most recently checked for these constraints, if still cached."""
+        found = found_weeks.get(self._found_key(constraints))
+        if found is None or time.monotonic() - found[0] >= get_settings().planning_pool_cache_seconds:
+            return None
+        return _distinct(found[1][1])
 
     def _found_key(self, constraints: WeeklyMealPlanRequest, profile_version: int | None = None) -> tuple:
         return (
@@ -271,12 +326,13 @@ class WeeklyMealPlanService:
         recipes, candidates = self._checked_candidates(constraints)
         return week_floor(constraints, candidates.recommendations, recipes)
 
-    def cheapest_week(self, constraints: WeeklyMealPlanRequest) -> float:
-        """What the cheapest week the planner's cost-led search finds costs at the checkout, nothing saved.
+    def cheapest_week(self, constraints: WeeklyMealPlanRequest, *, minimum_distinct_dishes: int = 0) -> float:
+        """What a cost-led week with the requested variety costs at checkout, nothing saved.
 
         Every limit but the weekly budget holds. Adding a budget can change the bounded candidate
         packet, so a suggestion must check that amount through the budgeted path before offering it.
-        Raises ProductPlanningError when the search finds no week at all.
+        With `minimum_distinct_dishes` the search bisects for the cheapest week it finds of that many different
+        dishes. Raises ProductPlanningError when the search finds no week at all.
         """
         unbudgeted = constraints.model_copy(update={"weekly_budget_sgd": None})
         recipes, candidates = self._checked_candidates(unbudgeted)
@@ -286,6 +342,7 @@ class WeeklyMealPlanService:
             recipes,
             selector=self.selector,
             cheapest=True,
+            minimum_distinct_dishes=minimum_distinct_dishes,
         )
         return result.grocery.purchase_total_sgd
 
@@ -299,8 +356,9 @@ class WeeklyMealPlanService:
         keep: dict[tuple[int, str], dict[str, int]] | None = None,
         over_budget: float | None = None,
         by_weight: Iterable[str] = (),
+        day_indices: list[int] | None = None,
     ) -> list[ScheduledDish]:
-        """Dishes for `day_count` days from day `first_day` of a saved week, nothing saved (ADR-0046 section 2).
+        """Dishes for selected days from a saved week, nothing saved (ADR-0046 section 2).
 
         `constraints` carries the shape to plan and the budget left. `rest` is the rest of the week, each dish
         with its portion share: its dishes are avoided while enough others remain, and in every attempt their
@@ -311,8 +369,18 @@ class WeeklyMealPlanService:
         week's list buys by weight, so `charge` prices the week as its list will be.
         """
         constraints = constraints.model_copy(update={"pricing_mode": "fixture"})
+        planned_days = day_indices or list(range(first_day, first_day + day_count))
+        if (
+            len(planned_days) != day_count
+            or planned_days != sorted(set(planned_days))
+            or not planned_days
+            or planned_days[0] != first_day
+            or planned_days[0] < 1
+            or planned_days[-1] > 7
+        ):
+            raise ValueError("day_indices must contain day_count distinct, ordered days from the week")
         start = constraints.start_date + timedelta(days=first_day - 1)
-        # day_count is fixed at 7 for a whole week; a part of one is planned the same way.
+        # Compress selected calendar days for the planner, then map its placements back to the saved week.
         partial = constraints.model_copy(update={"start_date": start, "day_count": day_count})
         meals = meals_of_the_day(partial)
         courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
@@ -323,9 +391,11 @@ class WeeklyMealPlanService:
         slugs = {recipe.id: recipe.slug for recipe in recipes}
         keep_ids = {recipe_id for roles in (keep or {}).values() for recipe_id in roles.values()}
         # A kept dish the planner no longer offers cannot stay: the meal is planned from every candidate.
+        slot_by_day = {day: slot for slot, day in enumerate(planned_days)}
         kept = {
-            (day - first_day, meal): {role: slugs[recipe_id] for role, recipe_id in roles.items()}
+            (slot_by_day[day], meal): {role: slugs[recipe_id] for role, recipe_id in roles.items()}
             for (day, meal), roles in (keep or {}).items()
+            if day in slot_by_day
             if keep_ids <= slugs.keys()
         }
         used = Counter(recipe.id for recipe, _ in rest)
@@ -359,6 +429,8 @@ class WeeklyMealPlanService:
             empty = day_count * sum(len(roles) for _, roles in meals) - len(planned.selected)
             return total + over_budget / (day_count * len(meals)) * (repeats + EMPTY_OPTIONAL_ROLE_LOSS * empty)
 
+        slots = day_count * sum(len(roles) for _, roles in meals)
+        unfilled = None  # an addition the budget left empty, used only if no later step adds the dish
         for step in steps:
             found = []
             for pool, locked, request, hard in step:
@@ -379,14 +451,21 @@ class WeeklyMealPlanService:
                     failure = error
             if found:
                 result = min(found, key=charge) if len(found) > 1 else found[0]
+                # An empty optional dish is no addition: it does not "fit the budget", so the over-budget steps
+                # get their turn, and the preview says what the dish costs (T30).
+                if kept and step[0][3] and len(result.selected) < slots:
+                    unfilled = unfilled or result
+                    continue
                 break
         else:
-            raise failure
+            if unfilled is None:
+                raise failure
+            result = unfilled
         placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(result.selected))]
         return [
             ScheduledDish(
-                planned_date=start + timedelta(days=slot_index),
-                day_index=first_day + slot_index,
+                planned_date=constraints.start_date + timedelta(days=planned_days[slot_index] - 1),
+                day_index=planned_days[slot_index],
                 meal_type=meal_type,
                 role_id=role_id,
                 portion_share=share,
@@ -395,7 +474,14 @@ class WeeklyMealPlanService:
             for (slot_index, meal_type, role_id, share), recommendation in zip(placements, result.selected, strict=True)
         ]
 
-    def _operation_run(self, trace: dict, started_at: datetime, *, error: str | None = None) -> OperationRun:
+    def _operation_run(
+        self, trace: dict, started_at: datetime, *, error: str | None = None, warnings: Iterable[str] = ()
+    ) -> OperationRun:
+        # The sources the planner priced with, and FairPrice where it priced the saved list (`final_list`). Only the
+        # provider is added: a line FairPrice did not confirm keeps its evidence label (release_snapshot), which is
+        # no provider, and with it "fairprice,fixture,release_snapshot" overflows provider_mode's String(30).
+        checked = {"fairprice"} & set(trace.get("final_list", {}).get("price_sources", []))
+        sources = {*trace.get("observed_sources", []), *checked}
         return OperationRun(
             trace_id=f"planning-{uuid4().hex}",
             run_type="planning",
@@ -403,18 +489,22 @@ class WeeklyMealPlanService:
             triggered_by_user_id=self.actor_user_id,
             household_id=self.repository.household_id,
             input_digest=trace["input_digest"],
+            code_commit=code_commit(),
             catalog_version=trace.get("catalog_version"),
             product_snapshot_version=trace.get("product_snapshot_version"),
             policy_version=trace["policy_version"],
             algorithm_version=f"{trace['algorithm']}-product-v1",
-            provider_mode=",".join(trace.get("observed_sources", [])) or None,
+            provider_mode=",".join(sorted(sources)) or None,
             artifact_references=[{"kind": "planning_trace", "data": trace}],
-            warnings=[],
+            warnings=list(warnings),
             error_code=trace["status"] if error else None,
             error_detail=error,
             started_at=started_at,
             finished_at=datetime.now(UTC),
         )
+
+    def delete(self, plan_id: int) -> bool:
+        return self.repository.delete(plan_id)
 
     def get(self, plan_id: int) -> WeeklyMealPlanResponse | None:
         plan = self.repository.get(plan_id)

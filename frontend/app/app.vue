@@ -1,11 +1,22 @@
 <script setup lang="ts">
+import { formatPlanDate } from "~/lib/meal-plan-format";
+import type { ServerClock } from "~/plugins/server-today";
+
 const { actor, load, logout } = useAuth();
 const route = useRoute();
+// A simulated day (SIMULATED_TODAY, debugging and demos) is always visible, so it is never mistaken for today.
+const clock = useState<ServerClock | null>("server-clock");
+const simulatedLabel = computed(() => {
+  const value = clock.value?.simulated;
+  if (!value || !clock.value) return null;
+  const day = formatPlanDate(clock.value.today, { weekday: "short", day: "numeric", month: "short" });
+  return value.includes("T") ? `${day}, ${value.slice(11, 16)}` : day;
+});
 
 useHead({
   link: [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
-    { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Figtree:wght@400;500;600&display=swap" },
+    { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Nunito:wght@500;600;700;800&display=swap" },
   ],
 });
 
@@ -14,6 +25,7 @@ onMounted(load);
 
 <template>
   <div class="app-shell">
+    <p v-if="simulatedLabel" class="simulated-clock" role="status">Simulated date: {{ simulatedLabel }} · for debugging</p>
     <!-- The home surface and the console (/ops) draw their own navigation. -->
     <header v-if="route.path !== '/' && !route.path.startsWith('/ops')" class="app-header">
       <div class="page-width header-content">
@@ -36,3 +48,8 @@ onMounted(load);
     <NuxtPage />
   </div>
 </template>
+
+<style scoped>
+/* A thin strip along the top edge, where every page leaves room, so it never covers a title. */
+.simulated-clock { position: fixed; z-index: 1000; top: 0; left: 0; right: 0; margin: 0; padding: 1px 12px; background: #2b2a33; color: #ffd76a; font-size: 11px; line-height: 16px; font-weight: 800; text-align: center; pointer-events: none; }
+</style>

@@ -629,7 +629,12 @@ its budget at the checkout (or no further over it than it is), one dish a meal
 per preview. When no different dish fits, the week stays as it is and the reply
 says how much more than the week can spend the closest swap found needs, with a
 swap of one dish offered instead; a week with no repeats says so. "Swap the
-repeated dishes" and "plan a new week with different dishes" ask for the same.
+repeated dishes" keeps the current week and previews replacements for its
+repeated dishes. "Plan a new week with different dishes" is a distinct
+whole-week request: it runs the weekly planner again, avoids recipes from the
+current week while alternatives remain, and saves the new week as replacing
+the old one. An explicit "no dish twice" request also limits each recipe to
+one use in that new week.
 A mixed request sends only
 its supported segment to the parser. The persisted `last_scope_decision` makes
 this routing visible to clients and tests. Every templated reply is written in
@@ -662,7 +667,14 @@ twice), so any other weekly budget is planned up front exactly as **Plan my
 week** would plan it, nothing saved, and what that refuses is refused now. The
 week found is kept, for that exact request and for as long as the planner keeps
 its recipes (`PLANNING_POOL_CACHE_SECONDS`), and **Plan my week** saves it
-instead of searching again. A budget refusal names the amount a person a meal and the cheapest
+instead of searching again. A week found with fewer than four different dishes is
+still planned (ADR-0067): a week of four different dishes within the budget is
+searched for and, when found, is the one kept instead; otherwise the session is
+ready with the repeating week, and when the cost-led search finds a four-dish week
+dearer than the budget, which plans when checked as accepting it would, the reply
+adds its cost ("If you'd like at least four different dishes, a week we checked
+costs S$50.35."). That is a week that plans, not the least budget that does; the
+household keeps its own budget unless it asks for that one. A budget refusal names the amount a person a meal and the cheapest
 week the search found ("S$10 a week for 4 people comes to about S$0.36 a person a
 meal (7 meals). The cheapest week I could find costs S$23.36."). The session keeps
 collecting and offers choices a real week backs: "Use S$24 for the week" (that

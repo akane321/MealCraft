@@ -20,6 +20,10 @@ class EmailAlreadyRegisteredError(AuthenticationError):
     pass
 
 
+class UsernameTakenError(AuthenticationError):
+    pass
+
+
 class InvalidCredentialsError(AuthenticationError):
     pass
 
@@ -93,6 +97,8 @@ class AuthenticationService:
     ) -> IssuedAuthentication:
         if self.repository.get_user_by_email(payload.email) is not None:
             raise EmailAlreadyRegisteredError("An account with this email already exists")
+        if payload.username is not None and self.repository.get_user_by_username(payload.username) is not None:
+            raise UsernameTakenError("That username is taken")
 
         password_hash = self.password_adapter.hash_password(payload.password.get_secret_value())
         household_name = f"{payload.display_name} Household"[:120]
@@ -104,6 +110,7 @@ class AuthenticationService:
                 household_name=household_name,
                 locale=payload.locale,
                 timezone=payload.timezone,
+                username=payload.username,
             )
         except IntegrityError as error:
             self.repository.session.rollback()
@@ -118,7 +125,11 @@ class AuthenticationService:
         now: datetime | None = None,
     ) -> IssuedAuthentication:
         moment = now or datetime.now(UTC)
-        user = self.repository.get_user_by_email(payload.email)
+        user = (
+            self.repository.get_user_by_username(payload.username)
+            if payload.username is not None
+            else self.repository.get_user_by_email(payload.email or "")
+        )
         credential = user.credential if user is not None else None
         encoded_hash = credential.password_hash if credential is not None else None
         verification = self.password_adapter.verify_password(encoded_hash, payload.password.get_secret_value())

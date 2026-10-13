@@ -3,6 +3,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from app.core.clock import today as local_today
 from app.schemas.meal_plan import MealPlanShape, WeeklyMealPlanResponse
 from app.schemas.planning_v2 import MealComposition, PlanningMealRole
 from app.schemas.product import PricingMode
@@ -127,7 +128,7 @@ class HouseholdPlanningOverrides(BaseModel):
 
 
 class HouseholdProfilePlanRequest(BaseModel):
-    start_date: date = Field(default_factory=date.today)
+    start_date: date = Field(default_factory=local_today)
     profile_version: int | None = Field(default=None, ge=1)
     overrides: HouseholdPlanningOverrides = Field(default_factory=HouseholdPlanningOverrides)
 

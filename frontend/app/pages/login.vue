@@ -8,6 +8,9 @@ const route = useRoute();
 const audience = ref<"household" | "admin">(route.query.as === "admin" ? "admin" : "household");
 const mode = ref<"login" | "register">("login");
 const email = ref("");
+const username = ref("");
+// Sign in with a username by default; email is the other way in (2026-10-12, owner).
+const signInWith = ref<"username" | "email">("username");
 const password = ref("");
 const displayName = ref("");
 const { actor, authenticate, errorMessage, isLoading } = useAuth();
@@ -30,8 +33,10 @@ function choose(value: "household" | "admin") {
 }
 
 async function submit() {
-  const payload: Record<string, string> = { email: email.value, password: password.value };
-  if (mode.value === "register") payload.display_name = displayName.value;
+  const payload: Record<string, string> = { password: password.value };
+  if (mode.value === "register") Object.assign(payload, { display_name: displayName.value, username: username.value, email: email.value });
+  else if (signInWith.value === "username") payload.username = username.value;
+  else payload.email = email.value;
   await authenticate(mode.value, payload);
 }
 </script>
@@ -70,13 +75,23 @@ async function submit() {
           Display name
           <input v-model="displayName" autocomplete="name" maxlength="120" required>
         </label>
-        <label>
-          Email
-          <input v-model="email" autocomplete="email" type="email" maxlength="320" required>
-        </label>
+        <div v-if="mode === 'register' || signInWith === 'username'" class="field">
+          <span class="field-head">
+            <label for="sign-in-username">Username</label>
+            <button v-if="mode === 'login'" type="button" class="switch" @click="signInWith = 'email'">Use email instead</button>
+          </span>
+          <input id="sign-in-username" v-model="username" autocomplete="username" maxlength="32" required>
+        </div>
+        <div v-if="mode === 'register' || signInWith === 'email'" class="field">
+          <span class="field-head">
+            <label for="sign-in-email">Email</label>
+            <button v-if="mode === 'login'" type="button" class="switch" @click="signInWith = 'username'">Use username instead</button>
+          </span>
+          <input id="sign-in-email" v-model="email" :autocomplete="mode === 'login' ? 'username' : 'email'" type="email" maxlength="320" required>
+        </div>
         <label>
           Password
-          <input v-model="password" :autocomplete="mode === 'login' ? 'current-password' : 'new-password'" type="password" :minlength="mode === 'register' ? 12 : undefined" required>
+          <input v-model="password" :autocomplete="mode === 'login' ? 'current-password' : 'new-password'" type="password" required>
         </label>
         <p v-if="errorMessage" class="auth-error" role="alert">{{ errorMessage }}</p>
         <button class="auth-submit" type="submit" :disabled="isLoading">
@@ -95,13 +110,16 @@ async function submit() {
 .audience { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 26px; padding: 4px; border: 1px solid var(--border); border-radius: 999px; background: var(--ink); }
 .audience button { padding: 9px 12px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer; }
 .audience button.active { background: var(--s3); color: var(--ivory); font-weight: 600; }
-.eyebrow { margin: 0; color: var(--accent) !important; font-size: 10.5px; font-weight: 600; letter-spacing: 0.16em; }
+.eyebrow { margin: 0; color: var(--accent) !important; font-size: 12px; font-weight: 600; letter-spacing: 0.16em; }
 .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; margin: 28px 0 22px; border-bottom: 1px solid var(--border); }
 .auth-tabs button { padding: 12px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
 .auth-tabs button.active { box-shadow: inset 0 -2px 0 var(--accent); color: var(--ivory); font-weight: 600; }
 .auth-spacer { height: 12px; }
 form { display: grid; gap: 18px; }
-label { display: grid; gap: 8px; color: var(--t2); font-size: 13px; font-weight: 500; }
+label, .field { display: grid; gap: 8px; color: var(--t2); font-size: 13px; font-weight: 500; }
+.field-head { display: flex; justify-content: space-between; align-items: baseline; }
+.switch { padding: 0; border: 0; background: none; color: var(--accent); font: inherit; font-weight: 500; cursor: pointer; }
+.switch:hover { text-decoration: underline; }
 input { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--s2); color: var(--ivory); font: inherit; }
 input:focus { outline: none; border-color: var(--accent); }
 .auth-submit { padding: 13px 18px; border: 0; border-radius: 999px; color: var(--ink); background: var(--ivory); font-weight: 600; cursor: pointer; }

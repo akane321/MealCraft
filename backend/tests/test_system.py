@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.core import clock
 from app.db.session import get_db_session
 from app.main import app
 
@@ -42,6 +43,9 @@ def test_health_endpoint_returns_ok(system_client: TestClient) -> None:
         "status": "ok",
         "service": "MealCraft",
         "database": "connected",
+        # The day the product plans from, so the page shows the same "today" (app/core/clock.py).
+        "today": clock.today().isoformat(),
+        "simulated_today": clock.simulated(),
     }
 
 

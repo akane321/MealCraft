@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
+from collections.abc import Collection
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, TypeVar
@@ -26,6 +28,18 @@ RELEASE_MANIFEST = "release_manifest.json"
 DROPPED_RECORDS = "dropped.jsonl"
 NonNegativeInt = Annotated[int, Field(ge=0)]
 ModelT = TypeVar("ModelT", bound=BaseModel)
+# build_release_v2.py counts a build failure under its reason with ids, numbers and brackets made "#" and the
+# detail after a colon cut, and every enricher exclusion under one fixed name; dropped.jsonl keeps the raw text.
+# A test checks both still appear in the builder.
+_REASON_DETAIL = re.compile(r"ING_\S+|\d+(\.\d+)?|\([^)]*\)")
+ENRICHER_REASON = "excluded by enricher"
+
+
+def reason_bucket(reason: str, buckets: Collection[str]) -> str:
+    """The quality-summary bucket a raw dropped reason is counted under, given the summary's buckets."""
+    bucket = _REASON_DETAIL.sub("#", reason).split(":")[0].strip()
+    # The enricher writes free text, so a reason that names no build bucket is the enricher's.
+    return ENRICHER_REASON if bucket not in buckets and ENRICHER_REASON in buckets else bucket
 
 
 class _CoverageArtifact(BaseModel):
@@ -66,12 +80,20 @@ class _QualitySummaryArtifact(BaseModel):
     nutrition_per_serving: _NutritionArtifact
 
 
+class _ManifestCountsArtifact(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    built_before_quota: int | None = Field(default=None, ge=0)
+    unbucketed_cuisine: int | None = Field(default=None, ge=0)
+
+
 class _ReleaseManifestArtifact(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     release_version: str
     schema_version: str
     created_at: datetime
+    counts: _ManifestCountsArtifact | None = None
 
 
 class DataQualityService:
@@ -115,7 +137,27 @@ class DataQualityService:
                 issues=issues,
             )
 
-        coverage = OpsDataQualityCoverage.model_validate(summary.coverage.model_dump())
+        # The quota pick after the build leaves no dropped record; only the manifest counts tell how many it cut.
+        # Counts from a manifest of another release would mix two builds, so they are left unknown.
+        same_release = manifest is not None and manifest.release_version == summary.release_version
+        counts = manifest.counts if same_release and manifest.counts else _ManifestCountsArtifact()
+        built = counts.built_before_quota
+        released = summary.coverage.released_recipes
+        if built is not None and not released <= built <= summary.coverage.enrichment_set:
+            issues.append(
+                self._issue(
+                    RELEASE_MANIFEST,
+                    "invalid_contract",
+                    "The built count does not fall between the released and enrichment counts.",
+                )
+            )
+            built = None
+        coverage = OpsDataQualityCoverage(
+            **summary.coverage.model_dump(),
+            built_before_quota=built,
+            not_picked_by_quota=None if built is None else built - released,
+            unbucketed_cuisine=counts.unbucketed_cuisine,
+        )
         nutrition = OpsDataQualityNutrition(
             complete_recipes=coverage.recipes_with_every_field,
             total_recipes=coverage.released_recipes,
@@ -156,6 +198,8 @@ class DataQualityService:
                 issues=issues,
             )
 
+        # The filter offers the summary's buckets; a record matches its bucket or its exact raw reason.
+        buckets = self._dropped_buckets() if reason is not None else {}
         records: list[OpsDroppedCandidate] = []
         invalid_json_lines: list[int] = []
         invalid_record_lines: list[int] = []
@@ -174,7 +218,7 @@ class DataQualityService:
                     except ValidationError:
                         invalid_record_lines.append(line_number)
                         continue
-                    if reason is None or record.reason == reason:
+                    if reason is None or reason in (record.reason, reason_bucket(record.reason, buckets)):
                         records.append(record)
         except OSError:
             issues.append(self._issue(DROPPED_RECORDS, "unreadable", "The registered artifact cannot be read."))
@@ -209,6 +253,11 @@ class DataQualityService:
             artifact=artifact,
             issues=issues,
         )
+
+    def _dropped_buckets(self) -> dict[str, int]:
+        # The summary reports its own failures; this lookup only narrows the filter.
+        summary = self._load_model(QUALITY_SUMMARY, _QualitySummaryArtifact, [])
+        return summary.dropped_by_reason if summary else {}
 
     def _load_model(self, name: str, model: type[ModelT], issues: list[OpsDataQualityIssue]) -> ModelT | None:
         path = self.release_directory / name

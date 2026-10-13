@@ -14,6 +14,7 @@ def parse(message: str):
     ("message", "size", "weekly"),
     [
         ("Dinners for two this week, around S$90", 2, 90),
+        ("Plan our dinners this week: two of us, one has a peanut allergy, no pork, S$100 for the week", 2, 100),
         ("Dinners for two this week, around S$90. We still have brown rice at home.", 2, 90),
         ("Cooking for a family of four, weekly budget 120", 4, 120),
         ("Three people, S$15 per meal this week", 3, None),

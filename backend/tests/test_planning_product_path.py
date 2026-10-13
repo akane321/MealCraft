@@ -10,7 +10,6 @@ from app.db.session import get_db_session
 from app.main import app
 from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
-from app.planning.beam_planner import BeamLimits
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.product_path import ProductPlanningEngine
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
@@ -62,7 +61,7 @@ def test_search_limit_is_not_infeasibility_and_does_not_save_a_plan(recipe_clien
     original = ProductPlanningEngine.__init__
 
     def limited(self, **kwargs):
-        original(self, limits=BeamLimits(width=1, max_expansions=1))
+        original(self, overrides={"width": 1, "max_expansions": 1})
 
     monkeypatch.setattr(ProductPlanningEngine, "__init__", limited)
     response = recipe_client.post("/api/plans/generate", json=REQUEST)

@@ -8,9 +8,16 @@ one-dish events (swap, cancel, lock, can't buy).
 
 import re
 from dataclasses import dataclass
+from types import SimpleNamespace
 
 from app.agent.replies import listed, say, word
-from app.schemas.meal_plan import MEAL_PRESETS, MealPlanShapeChangeRequest, PlannedMeal, WeeklyMealPlanResponse
+from app.schemas.meal_plan import (
+    MEAL_PRESETS,
+    MealPlanShape,
+    MealPlanShapeChangeRequest,
+    PlannedMeal,
+    WeeklyMealPlanResponse,
+)
 
 MEAL_NAMES: dict[PlannedMeal, tuple[str, ...]] = {
     "breakfast": ("breakfast", "早饭", "早餐"),
@@ -293,6 +300,49 @@ def read_shape_change(
         stands_alone=stands_alone,
         ask=ask,
         ask_options=ask_options,
+    )
+
+
+# A setup message that names days ("add a soup on Friday", 周末加汤) shapes a week that does not exist yet:
+# it is left for a change once the week is planned.
+NAMES_DAYS = re.compile(
+    r"(?<![a-z])(?:mon|tues|wednes|thurs|fri|satur|sun)days?(?![a-z])|weekdays?|weekends?|weeknights?|tonight|today"
+    r"|tomorrow|周[一二三四五六日天末]|星期|礼拜|今天|明天|今晚|工作日"
+)
+
+
+def setup_shape(message: str, shape: MealPlanShape, lang: str = "en") -> tuple[MealPlanShape, str] | None:
+    """The week shape a request names before any week is planned ("dinners with a soup", "also plan lunch",
+    "no breakfast"), applied to the household's shape, with what to say about it; None when it names none.
+
+    The same rules as a change to a planned week (read_shape_change), on a week with no dishes yet."""
+    text = message.lower()
+    if NAMES_DAYS.search(text):
+        return None
+    week = SimpleNamespace(plan_shape=shape, days=[])
+    intent = read_shape_change(message, plan=week, day_indexes=None, lang=lang)  # type: ignore[arg-type]
+    if intent is None:
+        return None
+    meals = {meal: [role.model_dump() for role in roles] for meal, roles in shape.meals.items()}
+    change = intent.request
+    if change.roles is None:
+        if change.meal_type not in meals or len(meals) == 1:
+            return None
+        del meals[change.meal_type]
+        return MealPlanShape.model_validate({"meals": meals}), say(
+            "shape_no_meal_setup", lang, meal=word(change.meal_type, lang)
+        )
+    roles = [role.model_dump() for role in change.roles]
+    have = {role["role_id"].split("-")[0] for role in meals.get(change.meal_type, [])}
+    added = [role for role in roles if role["role_id"] not in {r["role_id"] for r in meals.get(change.meal_type, [])}]
+    # "Dinners with a soup" for a household whose dinners already have one asks for nothing new.
+    if added and all(role["role_id"].split("-")[0] in have for role in added) and not ANOTHER.search(text):
+        return None
+    meals[change.meal_type] = roles
+    dishes = listed([word(role["role_id"].split("-")[0], lang) for role in roles], lang)
+    meal = word(change.meal_type, lang)
+    return MealPlanShape.model_validate({"meals": meals}), say(
+        "shape_setup", lang, Meal=meal.capitalize(), meal=meal, dishes=dishes
     )
 
 

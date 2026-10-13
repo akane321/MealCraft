@@ -1,10 +1,12 @@
 """The planning capability switch of ADR-0036 section 6: mvp refuses meal compositions."""
 
+import math
 from contextlib import contextmanager
 
 import pytest
 from fastapi.testclient import TestClient
 
+from app.core.clock import today as local_today
 from app.core.config import get_settings
 from tests.test_recipes import _household_profile_payload, recipe_client  # noqa: F401
 
@@ -240,12 +242,12 @@ def test_the_agent_asks_which_dish_when_a_day_has_several(composed_client):
 
 
 def _week_ahead(client, composition=COMPOSITION):
-    from datetime import date, timedelta
+    from datetime import timedelta
 
     response = client.post(
         "/api/plans/generate",
         json={
-            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "start_date": (local_today() + timedelta(days=1)).isoformat(),
             "household_size": 4,
             "max_cooking_time_minutes": 90,
             "pricing_mode": "fixture",
@@ -281,6 +283,105 @@ def test_adding_a_soup_to_one_dinner_replans_only_that_meal(composed_client):
     others = {(d["day_index"], d["role_id"]): d["recipe"]["slug"] for d in after["days"] if d["day_index"] != 5}
     assert others == {key: slug for key, slug in before.items() if key[0] != 5}
     assert after["revision"] == plan["revision"] + 1
+
+
+def test_adding_a_soup_on_nonconsecutive_days_plans_and_charges_only_those_days(composed_client, monkeypatch):
+    from app.planning.product_path import ProductPlanningEngine
+
+    plan = _week_ahead(composed_client, COMPOSITION[:2])
+    searched_days = []
+    search = ProductPlanningEngine.plan
+
+    def spy(self, constraints, *args, **kwargs):
+        searched_days.append(constraints.day_count)
+        return search(self, constraints, *args, **kwargs)
+
+    monkeypatch.setattr(ProductPlanningEngine, "plan", spy)
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [2, 6]},
+    )
+    assert preview.status_code == 201, preview.text
+    # Two selected days are searched as two days, not as the five from the first to the last (which also priced
+    # and budgeted the three days in between).
+    assert searched_days and set(searched_days) == {2}, searched_days
+    added = preview.json()["shape_change"]["added"]
+    assert {dish["day_index"] for dish in added} == {2, 6}
+    assert all(dish["role_id"] == "soup" for dish in added)
+    assert preview.json()["shape_change"]["kept"] == 4
+    applied = composed_client.post(f"/api/plans/{plan['id']}/replan/{preview.json()['id']}/confirm")
+    assert applied.status_code == 200, applied.text
+    after_total = applied.json()["plan"]["grocery_estimate"]["purchase_total_sgd"]
+    assert (
+        round(after_total - plan["grocery_estimate"]["purchase_total_sgd"], 2)
+        == preview.json()["purchase_total_delta_sgd"]
+    )
+
+
+def _tight_week(client, budget):
+    from datetime import timedelta
+
+    response = client.post(
+        "/api/plans/generate",
+        json={
+            "start_date": (local_today() + timedelta(days=1)).isoformat(),
+            "household_size": 4,
+            "max_cooking_time_minutes": 90,
+            "pricing_mode": "fixture",
+            "weekly_budget_sgd": budget,
+            "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
+        },
+    )
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def test_an_optional_soup_the_budget_cannot_hold_is_added_over_it_with_the_overage_not_dropped(composed_client):
+    """T30 review: a week with S$0.70 left added an empty optional soup that counted as "in budget": nothing was
+    added and nothing was said. First an in-budget addition that keeps the dishes; if none fits, add it anyway
+    and state the overage (ADR-0055); never a silent no-op (owner, 2026-10-09)."""
+    cost = _week_ahead(composed_client, COMPOSITION[:2])["grocery_estimate"]["purchase_total_sgd"]
+    plan = _tight_week(composed_client, math.ceil(cost) + 1)
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [5]},
+    )
+    assert preview.status_code == 201, preview.text
+    body = preview.json()
+    assert [dish["role_id"] for dish in body["shape_change"]["added"]] == ["soup"]
+    assert body["shape_change"]["kept"] == 2
+    budget = plan["grocery_estimate"]["weekly_budget_sgd"]
+    assert body["over_budget_sgd"] == round(plan["grocery_estimate"]["purchase_total_sgd"] + 2.8 - budget, 2) > 0
+
+
+def test_an_optional_soup_the_budget_can_hold_is_added_within_it(composed_client):
+    plan = _tight_week(composed_client, 100)
+    preview = composed_client.post(
+        f"/api/plans/{plan['id']}/shape/preview",
+        json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [5]},
+    )
+    assert preview.status_code == 201, preview.text
+    assert [dish["role_id"] for dish in preview.json()["shape_change"]["added"]] == ["soup"]
+    assert preview.json()["over_budget_sgd"] is None
+
+
+def test_an_addition_that_can_add_nothing_says_so_in_both_languages(monkeypatch):
+    from app.agent.replies import planner_message
+
+    dishes = [
+        _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
+        _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
+    ]
+    with dish_client(monkeypatch, dishes) as client:
+        plan = _week_ahead(client, COMPOSITION[:2])
+        preview = client.post(
+            f"/api/plans/{plan['id']}/shape/preview",
+            json={"meal_type": "dinner", "roles": COMPOSITION, "day_indexes": [5]},
+        )
+    assert preview.status_code in (400, 409, 422), preview.text
+    said = preview.json()["detail"]
+    assert said == "Nothing could be added to dinner on those days: no suitable dish was found, even over the budget."
+    assert planner_message(said, "zh") == "那几天的晚餐没法再加菜：即使超出预算也没找到合适的菜。"
 
 
 def test_dropping_a_meal_for_the_week_changes_this_weeks_shape_only(composed_client):
@@ -550,10 +651,10 @@ def test_a_vegetable_swap_never_offers_a_side_not_led_by_vegetables(monkeypatch)
 
 
 def test_a_change_that_goes_over_the_weekly_budget_is_saved_as_over_it(composed_client):
-    from datetime import date, timedelta
+    from datetime import timedelta
 
     request = {
-        "start_date": (date.today() + timedelta(days=1)).isoformat(),
+        "start_date": (local_today() + timedelta(days=1)).isoformat(),
         "household_size": 4,
         "max_cooking_time_minutes": 90,
         "pricing_mode": "fixture",
@@ -598,7 +699,6 @@ THREE_DISHES = [COMPOSITION[0], COMPOSITION[1], {**COMPOSITION[2], "required": T
 
 def _budget_conversation_week(client, roles):
     """A week of `roles` dinners planned in the conversation with a weekly budget it just fits."""
-    from datetime import date
 
     profile = {
         **_household_profile_payload(),
@@ -611,7 +711,7 @@ def _budget_conversation_week(client, roles):
     }
     request = {key: profile[key] for key in ("max_cooking_time_minutes", "pricing_mode", "plan_shape")}
     unbudgeted = client.post(
-        "/api/plans/generate", json={**request, "start_date": date.today().isoformat(), "household_size": 2}
+        "/api/plans/generate", json={**request, "start_date": local_today().isoformat(), "household_size": 2}
     )
     profile["weekly_budget_sgd"] = unbudgeted.json()["grocery_estimate"]["purchase_total_sgd"]
     assert client.post("/api/household-profiles", json=profile).status_code == 201
@@ -853,7 +953,7 @@ def test_a_change_on_a_week_of_two_meals_a_day_goes_over_by_the_cheapest_week(mo
     each (S$1.85 to S$2.75): the cheapest change is one soup all week, costing S$1.85 more. A repeat is charged one
     meal's share of the budget, as the week's own planning charges it; charged a day's share (twice as much
     on two meals a day), seven different soups looked cheapest and the change went S$15.95 over."""
-    from datetime import date, timedelta
+    from datetime import timedelta
 
     def only_for(meal, recipe):
         recipe.meal_types = [meal]
@@ -869,7 +969,7 @@ def test_a_change_on_a_week_of_two_meals_a_day_goes_over_by_the_cheapest_week(mo
     main = {"role_id": "main", "courses": ["main"]}
     with dish_client(monkeypatch, dishes) as client:
         request = {
-            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "start_date": (local_today() + timedelta(days=1)).isoformat(),
             "household_size": 2,
             "max_cooking_time_minutes": 240,
             "pricing_mode": "fixture",
@@ -899,7 +999,7 @@ def test_a_change_with_cheap_lunches_left_still_charges_a_repeat_one_meals_share
     rest of the week leaves (S$21.80) is more than the dinners' share of the budget (S$12.80). A repeat is still
     charged one meal's share (S$1.83): one soup all week, S$1.85 over. Charged what is left per dinner instead
     (S$3.11, nearly a day's share), seven different soups looked cheapest and the change went S$15.95 over."""
-    from datetime import date, timedelta
+    from datetime import timedelta
 
     def only_for(meal, recipe):
         recipe.meal_types = [meal]
@@ -915,7 +1015,7 @@ def test_a_change_with_cheap_lunches_left_still_charges_a_repeat_one_meals_share
     main = {"role_id": "main", "courses": ["main"]}
     with dish_client(monkeypatch, dishes) as client:
         request = {
-            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "start_date": (local_today() + timedelta(days=1)).isoformat(),
             "household_size": 2,
             "max_cooking_time_minutes": 240,
             "pricing_mode": "fixture",
@@ -964,7 +1064,7 @@ def test_a_soup_added_day_by_day_over_the_budget_is_the_one_the_week_already_buy
     """Over the budget, a dish the rest of the week has is weighed against new ones: Tuesday's soup is
     Monday's, from the package the week already buys. Drawn first from dishes the week did not have, every day
     bought a new soup (the 2026-10-02 review: S$96.82 over on mdw-dev-019 at S$40)."""
-    from datetime import date, timedelta
+    from datetime import timedelta
 
     soups = ["chickpea", "black_bean", "cucumber", "canned_tomato"]
     dishes = [
@@ -975,7 +1075,7 @@ def test_a_soup_added_day_by_day_over_the_budget_is_the_one_the_week_already_buy
     soup = {"role_id": "soup", "courses": ["soup"], "required": True}
     with dish_client(monkeypatch, dishes) as client:
         request = {
-            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "start_date": (local_today() + timedelta(days=1)).isoformat(),
             "household_size": 2,
             "max_cooking_time_minutes": 240,
             "pricing_mode": "fixture",
@@ -1020,12 +1120,12 @@ def test_a_meal_added_over_the_budget_keeps_the_households_cap_across_the_week(m
     dinners' dishes are the cheapest lunches, and the planner held the cap only among the meals it planned
     (the 2026-10-02 review: 'Also plan lunch' on mdw-dev-013 served five of its dinner salads again)."""
     from collections import Counter
-    from datetime import date, timedelta
+    from datetime import timedelta
 
     main = {"role_id": "main", "courses": ["main"]}
     with dish_client(monkeypatch, _lunch_and_dinner_dishes()) as client:
         request = {
-            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "start_date": (local_today() + timedelta(days=1)).isoformat(),
             "household_size": 2,
             "max_cooking_time_minutes": 240,
             "pricing_mode": "fixture",
@@ -1070,7 +1170,7 @@ def test_a_meal_added_over_the_budget_counts_repeats_with_the_rest_of_the_week(m
     the week went uncharged, and every lunch was one of the week's dinners (the 2026-10-02 review: 'Also plan
     lunch' on mdw-dev-013 at S$180 served seven of its dinners again)."""
     from collections import Counter
-    from datetime import date, timedelta
+    from datetime import timedelta
 
     package = {"chickpea": 400, "firm_tofu": 300, "black_bean": 400, "cucumber": 500, "canned_tomato": 400}
     package |= {"ginger": 300, "garlic": 300, "broccoli": 300, "wholewheat_pasta": 500, "baby_spinach": 200}
@@ -1081,7 +1181,7 @@ def test_a_meal_added_over_the_budget_counts_repeats_with_the_rest_of_the_week(m
     main = {"role_id": "main", "courses": ["main"]}
     with dish_client(monkeypatch, dishes) as client:
         request = {
-            "start_date": (date.today() + timedelta(days=1)).isoformat(),
+            "start_date": (local_today() + timedelta(days=1)).isoformat(),
             "household_size": 2,
             "max_cooking_time_minutes": 240,
             "pricing_mode": "fixture",

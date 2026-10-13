@@ -2,6 +2,7 @@ from collections import Counter
 from datetime import date, timedelta
 from fractions import Fraction
 
+from app.core.clock import today as local_today
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
 from app.models.recipe import Recipe
 from app.planning import alternatives
@@ -160,11 +161,15 @@ class MealPlanReplanningService:
                 proposed_recipe_id=recommendation.recipe.id if recommendation else None,
                 recipes_by_id=recipes_by_id,
             )
-            after_grocery = self.grocery_aggregator.estimate(
-                [recipe for recipe, _ in future_recipes],
-                constraints,
-                shares=[share for _, share in future_recipes],
-                by_weight=by_weight(before_grocery),
+            after_grocery = self._as_saved(
+                plan,
+                self.grocery_aggregator.estimate(
+                    [recipe for recipe, _ in future_recipes],
+                    constraints,
+                    shares=[share for _, share in future_recipes],
+                    by_weight=by_weight(before_grocery),
+                ),
+                self._drift_cents(plan, constraints, recipes_by_id),
             )
             after_warnings = list(dict.fromkeys(after_grocery.warnings))
             if after_grocery.within_weekly_budget is False:
@@ -204,7 +209,7 @@ class MealPlanReplanningService:
             update={"pricing_mode": "fixture"}
         )
         meal = request.meal_type
-        today = today or date.today()
+        today = today or local_today()
         ahead = [day for day in range(1, 8) if plan.start_date + timedelta(days=day - 1) >= today]
         # A meal already cooked, or one the household locked, is left as it is.
         held = {
@@ -214,6 +219,12 @@ class MealPlanReplanningService:
         }
         days = [day for day in (request.day_indexes or ahead) if day in ahead and day not in held]
         if not days:
+            # Every day named has passed: say which, rather than that nothing is "left".
+            past = [plan.start_date + timedelta(days=day - 1) for day in request.day_indexes or [] if day not in ahead]
+            if past and len(past) == len(request.day_indexes or []):
+                named = " and ".join(f"{day:%A} {day.day} {day:%b}" for day in past)
+                verb = "have" if len(past) > 1 else "has"
+                raise MealPlanReplanValidationError(f"{named} {verb} already passed, so its {meal} cannot change.")
             raise MealPlanReplanValidationError(f"There is no {meal} left to change on those days.")
         removed = [item for item in plan.entries if item.meal_type == meal and item.day_index in days]
         if request.roles is None and not removed:
@@ -402,8 +413,12 @@ class MealPlanReplanningService:
                 recommendation_score=values["recommendation_score"],
             )
             added.append((values, snapshot))
-        after_grocery = self._week_grocery(
-            plan, constraints, recipes_by_id, {entry_id: choice.recipe.id for entry_id, choice in swaps.items()}
+        after_grocery = self._as_saved(
+            plan,
+            self._week_grocery(
+                plan, constraints, recipes_by_id, {entry_id: choice.recipe.id for entry_id, choice in swaps.items()}
+            ),
+            self._drift_cents(plan, constraints, recipes_by_id),
         )
         after_warnings = list(dict.fromkeys(after_grocery.warnings))
         if after_grocery.within_weekly_budget is False:
@@ -543,21 +558,21 @@ class MealPlanReplanningService:
                 "weekly_budget_sgd": left,
             }
         )
-        first, last = min(days), max(days)
+        first = min(days)
         over_budget = None
         if budget is not None:
             # Over the budget, costs are weighed against one meal's share of the weekly budget (budget / the
-            # week's meals, as the week was planned) for each meal planned here, one a day from the first day to
-            # the last: each search divides this by those meals, so a repeat costs one meal's share. A day's share,
-            # or what is left when cheap meals left more of it, made a repeat up to twice as dear on two meals a
-            # day: dear varied changes beat the cheapest.
+            # week's meals, as the week was planned) for each meal planned here: each search divides this by those
+            # meals, so a repeat costs one meal's share. A day's share, or what is left when cheap meals left more
+            # of it, made a repeat up to twice as dear on two meals a day: dear varied changes beat the cheapest.
             meals = len({(item.day_index, item.meal_type) for item in kept} | {(day, meal) for day in days})
-            over_budget = round(budget * (last - first + 1) / meals, 2)
+            over_budget = round(budget * len(days) / meals, 2)
         try:
             dishes = self.meal_plan_service.plan_dishes(
                 partial,
                 first_day=first,
-                day_count=last - first + 1,
+                day_count=len(days),
+                day_indices=sorted(days),
                 rest=rest,
                 keep=self._dishes_kept_when_adding(roles, removed),
                 over_budget=over_budget,
@@ -585,6 +600,14 @@ class MealPlanReplanningService:
                 recommendation_score=values["recommendation_score"],
             )
             added.append((values, snapshot))
+        present = self._dishes_kept_when_adding(roles, removed)
+        if present is not None and all(
+            values["role_id"] in present.get((values["day_index"], meal), {}) for values, _ in added
+        ):
+            # An addition that adds nothing is never a silent no-op (owner decision 2026-10-09).
+            raise MealPlanReplanValidationError(
+                f"Nothing could be added to {meal} on those days: no suitable dish was found, even over the budget."
+            )
         return added
 
     def confirm(self, *, plan_id: int, event_id: int) -> MealPlanReplanConfirmationResponse:
@@ -820,7 +843,10 @@ class MealPlanReplanningService:
             if item.status != "skipped"
         ]
         return self.grocery_aggregator.estimate(
-            [recipe for recipe, _ in eaten], constraints, shares=[share for _, share in eaten]
+            [recipe for recipe, _ in eaten],
+            constraints,
+            shares=[share for _, share in eaten],
+            by_weight=by_weight(self._current_grocery(plan)),
         )
 
     def _fitting(self, plan, constraints, recipes_by_id, swaps, entry, ranked, misfits=None) -> tuple:
@@ -835,10 +861,12 @@ class MealPlanReplanningService:
         if budget is None:
             return ranked[0], None
         ceiling = round(max(budget, float(plan.purchase_total_sgd)) * 100)
+        drift = self._drift_cents(plan, constraints, recipes_by_id)
         least = None
         for candidate in ranked:
             swapped = {**swaps, entry.id: candidate.recipe.id}
-            cents = round(self._week_grocery(plan, constraints, recipes_by_id, swapped).purchase_total_sgd * 100)
+            grocery = self._week_grocery(plan, constraints, recipes_by_id, swapped)
+            cents = drift + round(grocery.purchase_total_sgd * 100)
             if cents <= ceiling:
                 return candidate, None
             if misfits is not None:
@@ -846,6 +874,34 @@ class MealPlanReplanningService:
             if least is None or cents < least[1]:
                 least = (candidate, cents)
         return least[0], (least[1] - ceiling) / 100
+
+    def _drift_cents(self, plan: MealPlan, constraints, recipes_by_id) -> int:
+        """How far the saved week's total is from the same week at snapshot prices, in cents: 0 for a fixture week.
+
+        A live week's saved total is its basket checked at FairPrice (ADR-0058), but a change is chosen and
+        previewed at snapshot prices (ADR-0060). Compared with the saved total or its budget as they are, a swap
+        that fit at snapshot prices took the 2026-10-09 rehearsal's week from S$97.26 to S$100.16 once its basket
+        was checked again, and its preview never said so. A change moves the saved total by its snapshot
+        difference instead.
+        """
+        if plan.pricing_mode != "live":
+            return 0
+        snapshot = self._week_grocery(plan, constraints, recipes_by_id, {}).purchase_total_sgd
+        return round(float(plan.purchase_total_sgd) * 100) - round(snapshot * 100)
+
+    @staticmethod
+    def _as_saved(plan: MealPlan, grocery: WeeklyGroceryEstimateResponse, drift: int) -> WeeklyGroceryEstimateResponse:
+        """A snapshot-priced week after a change, totalled as the saved week is (`_drift_cents`): what its preview
+        says the week comes to and how far over its budget. Its lines stay snapshot-priced; a live week's confirm
+        checks them again and totals them (`WeeklyGroceryAggregator.refresh`)."""
+        if not drift:
+            return grocery
+        cents = round(grocery.purchase_total_sgd * 100) + drift
+        budget = grocery.weekly_budget_sgd
+        within = grocery.within_weekly_budget
+        if budget is not None:
+            within = False if cents > round(budget * 100) else True if grocery.complete else None
+        return grocery.model_copy(update={"purchase_total_sgd": cents / 100, "within_weekly_budget": within})
 
     @staticmethod
     def _role(constraints: WeeklyMealPlanRequest, entry: MealPlanEntry):

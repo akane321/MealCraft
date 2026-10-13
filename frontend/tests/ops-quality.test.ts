@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { qualityBytes, qualityDistribution, qualityPageLabel, qualityPercent, shortQualityDigest } from "../app/lib/ops-quality";
+import { qualityBytes, qualityDistribution, qualityPageLabel, qualityPercent, qualityReasonLabel, shortQualityDigest } from "../app/lib/ops-quality";
 
 describe("operations data-quality helpers", () => {
   it("formats estimated shares without turning missing evidence into zero", () => {
@@ -24,6 +24,13 @@ describe("operations data-quality helpers", () => {
     expect(qualityPageLabel(0, 0, null)).toBe("Total unavailable");
     expect(qualityPageLabel(0, 0, 0)).toBe("No records");
     expect(qualityPageLabel(25, 3, 28)).toBe("26–28 of 28");
+  });
+
+  it("reads a dropped reason without the backend's # placeholder", () => {
+    expect(qualityReasonLabel("implausible energy # kcal per serving")).toBe("Implausible energy per serving");
+    expect(qualityReasonLabel("ingredient form # not enriched")).toBe("Ingredient form not enriched");
+    expect(qualityReasonLabel("excluded by enricher")).toBe("Excluded by enricher");
+    expect(qualityReasonLabel("missing_ingredient")).toBe("Missing ingredient");
   });
 
   it("keeps artifact metadata compact without changing the evidence", () => {

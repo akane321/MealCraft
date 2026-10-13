@@ -29,6 +29,7 @@ from app.schemas.operations import (
     OpsUserSummary,
     OpsUserUpdate,
 )
+from app.services.cleanup import delete_plans, delete_sessions
 
 
 class OpsUserNotFoundError(LookupError):
@@ -47,8 +48,15 @@ class UsersService:
     def list(self, *, query: str | None, offset: int, limit: int) -> OpsUserCollection:
         filters = []
         if query:
-            pattern = f"%{query.strip().casefold()}%"
-            filters.append(or_(User.normalized_email.like(pattern), func.lower(User.display_name).like(pattern)))
+            # autoescape keeps a typed % or _ literal text rather than a LIKE wildcard.
+            needle = query.strip().casefold()
+            filters.append(
+                or_(
+                    User.normalized_email.contains(needle, autoescape=True),
+                    User.username.contains(needle, autoescape=True),
+                    func.lower(User.display_name).contains(needle, autoescape=True),
+                )
+            )
         total = self.database.scalar(select(func.count()).select_from(User).where(*filters)) or 0
         users = self.database.scalars(
             select(User).where(*filters).order_by(User.created_at.desc(), User.id.desc()).offset(offset).limit(limit)
@@ -74,6 +82,7 @@ class UsersService:
             recent_conversations=[
                 {
                     "id": item.id,
+                    "title": item.title,
                     "status": item.status,
                     "messages": len(item.messages),
                     "first_message": next((m.content for m in item.messages if m.role == "user"), None),
@@ -120,6 +129,28 @@ class UsersService:
         self._audit("user.plans_deleted", user_id, {"households": households, "deleted": count})
         self.database.commit()
         return count
+
+    def delete_conversation(self, user_id: int, session_id: int) -> None:
+        households = self._household_ids(self._user(user_id))
+        item = self.database.scalar(
+            select(AgentSession).where(AgentSession.id == session_id, AgentSession.household_id.in_(households))
+        )
+        if item is None:
+            raise OpsUserNotFoundError
+        delete_sessions(self.database, [item])
+        self._audit("user.conversation_deleted", user_id, {"conversation": session_id})
+        self.database.commit()
+
+    def delete_plan(self, user_id: int, plan_id: int) -> None:
+        households = self._household_ids(self._user(user_id))
+        plan = self.database.scalar(
+            select(MealPlan).where(MealPlan.id == plan_id, MealPlan.household_id.in_(households))
+        )
+        if plan is None:
+            raise OpsUserNotFoundError
+        delete_plans(self.database, [plan])
+        self._audit("user.plan_deleted", user_id, {"plan": plan_id})
+        self.database.commit()
 
     def delete(self, user_id: int) -> None:
         user = self._user(user_id)
@@ -193,6 +224,7 @@ class UsersService:
         return OpsUserSummary(
             id=user.id,
             email=user.normalized_email,
+            username=user.username,
             display_name=user.display_name,
             system_role=user.system_role,
             status=user.status,
@@ -233,27 +265,11 @@ class UsersService:
 
     def _delete_sessions(self, household_ids: list[int]) -> int:
         sessions = list(self.database.scalars(select(AgentSession).where(AgentSession.household_id.in_(household_ids))))
-        for item in sessions:
-            item.latest_run_id = None
-        self.database.flush()
-        for item in sessions:
-            self.database.delete(item)
-        self.database.flush()
-        return len(sessions)
+        return delete_sessions(self.database, sessions)
 
     def _delete_plans(self, household_ids: list[int]) -> int:
         plans = list(self.database.scalars(select(MealPlan).where(MealPlan.household_id.in_(household_ids))))
-        if not plans:
-            return 0
-        ids = [plan.id for plan in plans]
-        self.database.execute(
-            update(AgentSession).where(AgentSession.plan_id.in_(ids)).values(plan_id=None, pending_event_id=None)
-        )
-        self.database.execute(update(MealPlan).where(MealPlan.id.in_(ids)).values(replaces_plan_id=None))
-        for plan in plans:
-            self.database.delete(plan)
-        self.database.flush()
-        return len(plans)
+        return delete_plans(self.database, plans)
 
     def _audit(self, action: str, user_id: int, details: dict) -> None:
         self.database.add(

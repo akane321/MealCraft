@@ -34,6 +34,8 @@ ANY_COURSE = PlanningMealRole(role_id=MAIN_ROLE, courses=["main"])
 # An optional role the household asked for is left empty only when no dish fits:
 # the cost of an empty one exceeds any dish's share-weighted loss (at most 1.5).
 EMPTY_OPTIONAL_ROLE_LOSS = 2.0
+# How many times each role's usual number of dishes a slot tries before it has no meal (meal_options).
+MEAL_OPTION_WIDENING = (1, 2, 4)
 
 
 @dataclass(frozen=True)
@@ -98,14 +100,34 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         self.local_losses = dict(local_losses) if local_losses is not None else None
 
     def meal_options(self, problem: FinalPlanningProblem, slot: PlanningSlot) -> list[MealOption]:
-        """The slot's best meals: dishes that pass on their own, combined into meals that pass as meals."""
+        """The slot's best meals: dishes that pass on their own, combined into meals that pass as meals.
+
+        Each role offers only its best few dishes, and every meal of those can fail a meal's own limit (its
+        sodium, its time) while meals of lower-ranked dishes pass: the slot then had no meal, and the whole
+        week failed although a stricter household, with a different few, planned. Before a slot is called
+        empty, more of each role's dishes are tried."""
+        meals: list[MealOption] = []
+        for scale in MEAL_OPTION_WIDENING:
+            meals, more = self._meal_options(problem, slot, scale)
+            if meals or not more:
+                break
+        return meals
+
+    def _meal_options(
+        self, problem: FinalPlanningProblem, slot: PlanningSlot, scale: int
+    ) -> tuple[list[MealOption], bool]:
+        """The meals of each role's best `scale` × its usual number of dishes, and whether a role had more."""
         recipes = sorted(problem.recipes, key=lambda r: r.recipe_id)
         prices = cheapest_per_gram(problem) if problem.purchase_budget_sgd is not None else {}
         roles = slot.composition or [ANY_COURSE]
         per_role_limit = self.limits.candidates_per_role
         if self.limits.max_meal_combinations is not None:
             per_role_limit = max(3, min(per_role_limit, int(self.limits.max_meal_combinations ** (1 / len(roles)))))
-        role_limits = capped_role_limits(problem, roles, per_role_limit, self.limits.max_meal_combinations)
+        role_limits = [
+            limit * scale
+            for limit in capped_role_limits(problem, roles, per_role_limit, self.limits.max_meal_combinations)
+        ]
+        more = False
         per_role: list[list[tuple[str | None, str] | None]] = []
         position = [s.slot_id for s in sorted(problem.slots, key=self._slot_key)].index(slot.slot_id)
         for role_index, (role, role_limit) in enumerate(zip(roles, role_limits, strict=True)):
@@ -131,6 +153,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                     role_limit if self.limits.max_meal_combinations is None else role_limit - best,
                     turn,
                 )
+            more = more or len(ranked) > len(kept)
             options: list[tuple[str | None, str] | None] = [(key, r.recipe_id) for r in kept]
             if not role.required and locked is None:
                 options.append(None)
@@ -193,8 +216,8 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             # the cheap combinations were cut here before the search could ever hold one.
             room = max(1, limit // 4)
             cheapest = sorted(meals[limit - room :], key=lambda meal: (meal.cost, meal.dishes))
-            return meals[: limit - room] + cheapest[:room]
-        return meals[:limit]
+            return meals[: limit - room] + cheapest[:room], more
+        return meals[:limit], more
 
     def role_dishes(self, problem, slot: PlanningSlot, role: PlanningMealRole, recipes=None) -> list:
         """The dishes `role` may take in `slot`, in recipe id order."""
