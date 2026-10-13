@@ -446,8 +446,7 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
 
 
 REFUSED_FOR_FOUR = (
-    "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。"
-    "我找到一周至少有四种不同菜，预算是 S$86.15。"
+    "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$86.15。"
     " 减少人数也不能降低这个预算。"
 )
 
@@ -470,33 +469,56 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
         refused = service.create("一共10新币给4个人做一周")
     assert refused.messages[-1].content == REFUSED_FOR_FOUR
     assert [option.label for option in refused.pending_interaction.options] == ["Use S$87 for the week"]
-    # Each size's cheapest week of four different dishes (dearer than the S$53 and S$41 of any dishes, T04 ADR), then
-    # that amount through the budgeted path; no third search.
-    assert planned == [(4, None, True), (4, 58, False), (2, None, True), (2, 49, False)]
+    # Each size's cheapest week, then that amount through the budgeted path; no third search, and no four-dish search
+    # (ADR-0067: a budget no week fits is refused as before).
+    assert planned == [(4, None, True), (4, 53, False), (2, None, True), (2, 41, False)]
 
 
-def test_a_feasible_but_three_dish_week_gets_a_verified_four_dish_budget(walked):
-    with kept_for(300), walked["factory"]() as session:
-        service = agent(session)
-        constraints = WALKTHROUGH.model_copy(
-            update={
-                "household_size": 4,
-                "weekly_budget_sgd": 26.0,
-                "max_cooking_time_minutes": 240,
-                "allergens": [],
-                "excluded_ingredients": [],
-                "plan_shape": MealPlanShape(meals={"dinner": MEAL_PRESETS["dinner"]["main, vegetable and soup"]}),
-            }
+@pytest.fixture(scope="module")
+def fixture_catalog():
+    """The fixture catalog alone (data/recipes), as the console's one-dish budget probes plan it."""
+    root = repository_root()
+    engine = create_engine("sqlite+pysqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    Base.metadata.create_all(engine)
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    with factory() as session:
+        import_catalog(
+            session, load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
         )
-        refusal = service._refusal(constraints, "en")
-    assert refusal is not None
-    assert "at least four different dishes" in refusal.text
-    amount = float(re.search(r"at a cost of S\$(\d+\.\d\d)", refusal.text).group(1))
-    assert amount > 26
-    request = service._plan_request(constraints).model_copy(update={"weekly_budget_sgd": math.ceil(amount)})
-    with kept_for(300):
-        assert service.meal_plan_service.check(request, minimum_distinct_dishes=4) is None
-        assert service.meal_plan_service.checked_distinct_dishes(request) >= 4
+    yield factory
+    engine.dispose()
+
+
+@pytest.mark.parametrize(("size", "budget", "dishes", "four"), [(2, 40, 3, 50.35), (4, 60, 2, 82.20)])
+def test_a_budget_that_plans_only_a_repeating_week_plans_it_and_names_a_checked_four_dish_week(
+    fixture_catalog, size, budget, dishes, four
+):
+    """Owner, 2026-10-13 (ADR-0067): a budget that plans only a week of fewer than four different dishes plans that
+    week as main does, the household keeping its budget, and the reply adds what a four-dish week the search found
+    and checked costs. As first written, T04 refused both with only "Use S$51" and "Use S$83". The amount is a
+    week that plans, not the least: two people plan four dishes at S$42 (S$41.95)."""
+    one_main = MealPlanShape(meals={"dinner": MEAL_PRESETS["dinner"]["one main"]})
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        service.starting_constraints = AgentConstraintState(
+            household_size=size, weekly_budget_sgd=budget, pricing_mode="fixture", plan_shape=one_main
+        )
+        ready = service.create(f"Plan dinners for {size} people this week, S${budget} for the week")
+        reply = ready.messages[-1].content
+        assert ready.status == "ready" and ready.can_confirm, reply
+        assert reply.endswith(
+            "That's everything I need. Check the details below and plan your week when you're ready. "
+            f"If you'd like at least four different dishes, a week we checked costs S${four:.2f}."
+        )
+        assert "can't cover" not in reply and ready.pending_interaction is None
+        confirmed = service.confirm(ready.id)
+        assert len({day.recipe.id for day in confirmed.plan.days}) == dishes
+        assert confirmed.plan.grocery_estimate.purchase_total_sgd <= budget
+        assert confirmed.session.constraints.weekly_budget_sgd == budget  # the household's own budget
+        # The amount named plans a week of four different dishes through the budgeted path.
+        offered = service._plan_request(ready.constraints).model_copy(update={"weekly_budget_sgd": math.ceil(four)})
+        assert service.meal_plan_service.check(offered, minimum_distinct_dishes=4) is None
+        assert service.meal_plan_service.checked_distinct_dishes(offered) >= 4
 
 
 def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(walked):

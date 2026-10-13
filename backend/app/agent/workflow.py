@@ -155,6 +155,9 @@ class AgentConstraintWorkflow:
 
         # Everything is known: before saying so, a limit no week can meet is refused with its reason.
         refusal = self.check(merged, lang) if self.check is not None and not missing else None
+        aside = None
+        if refusal is not None and refusal.aside:  # the week plans: said after "ready" (ADR-0067)
+            aside, refusal = refusal.text, None
         if refusal is not None:
             missing, questions = [refusal.field], [refusal.text]
         status = "ready" if not missing else "collecting"
@@ -167,6 +170,8 @@ class AgentConstraintWorkflow:
             if extraction.medical_request_detected:
                 parts.append(say("medical", lang))
             parts.append(questions[0] if questions else say("ready", lang))
+            if aside is not None:
+                parts.append(aside)
 
         return {
             "merged_constraints": merged.model_dump(mode="json"),

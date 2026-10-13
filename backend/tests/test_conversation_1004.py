@@ -581,16 +581,13 @@ def test_fewer_people_are_offered_only_when_a_real_week_backs_it_for_less(two, l
     constraints = AgentConstraintState(household_size=4, weekly_budget_sgd=10)
 
     refusal = _budget_short(
-        23.36,
-        constraints,
-        "en",
-        lambda **changes: two if changes == {"household_size": 2, "minimum_distinct_dishes": 4} else None,
+        23.36, constraints, "en", lambda **changes: two if changes == {"household_size": 2} else None
     )
 
     assert [label for label, _ in refusal.options] == labels
     expected = (
         "That budget can't cover this week. S$10 a week for 4 people comes to about S$0.36 a person a meal (7 meals). "
-        "I found a week with at least four different dishes at a cost of S$23.36."
+        "The cheapest week I could find costs S$23.36."
     )
     if no_lower_budget is not None:
         # Never "2 people need S$41" beside S$24 for 4: fewer people read as costing more (2026-10-09 rehearsal).
@@ -599,15 +596,11 @@ def test_fewer_people_are_offered_only_when_a_real_week_backs_it_for_less(two, l
     assert refusal.text == expected
     if no_lower_budget is not None:
         chinese_four = _budget_short(23.36, constraints, "zh", lambda **changes: two)
-        assert chinese_four.text.endswith("我找到一周至少有四种不同菜，预算是 S$23.36。 减少人数也不能降低这个预算。")
+        assert chinese_four.text.endswith("我能找到的最便宜的一周要 S$23.36。 减少人数也不能降低这个预算。")
     chinese = _budget_short(23.36, constraints, "zh", lambda **changes: None)
     assert chinese.text == (
-        "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。"
-        "我找到一周至少有四种不同菜，预算是 S$23.36。"
+        "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$23.36。"
     )
-    # With no four-dish week verified, the cheapest week found is offered as before.
-    cheapest = _budget_short(23.36, constraints, "en", lambda **changes: None, minimum=0)
-    assert cheapest.text.endswith("The cheapest week I could find costs S$23.36.")
 
 
 # P12: the composer's hint is short; the question is the reply above it.

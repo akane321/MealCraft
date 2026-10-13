@@ -238,7 +238,7 @@ class WeeklyMealPlanService:
         The week found is kept for `generate` with the same constraints, while the planner's pools are kept; a check
         of constraints whose week is kept answers from it. A check for at least `minimum_distinct_dishes` different
         dishes searches past a kept week with fewer, and the week it finds is the one kept: Plan saves the varied week
-        (T04 ADR)."""
+        (ADR-0067)."""
         seconds = get_settings().planning_pool_cache_seconds
         kept = found_weeks.get(self._found_key(constraints)) if seconds else None
         fresh = kept is not None and time.monotonic() - kept[0] < seconds
