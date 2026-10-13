@@ -598,6 +598,28 @@ def test_all_21_walkthrough_swap_reasons_drop_the_replaced_title(walked):
         assert wanted(reason, excluded_title=dish.recipe.title) is None
 
 
+def test_a_walkthrough_swap_naming_the_old_dish_picks_what_a_swap_naming_nothing_picks(walked):
+    """The swap service passes the replaced title on: without it 16 of the 21 swaps differed, all three of the
+    sixth day's (Hearty Potato Soup went to Irish Potato Soup). Checked on that day: 42 previews take a minute."""
+    plan = walked["plan"]
+
+    def swapped(entry_id: int, reason: str) -> int:
+        with kept_for(300), walked["factory"]() as session:
+            preview = build_replanning_service(session, 1, 1).preview(
+                plan_id=plan.id,
+                request=MealPlanReplanPreviewRequest(event_type="REPLACE_MEAL", entry_id=entry_id, reason=reason),
+            )
+        return preview.after_entry.recipe_id
+
+    sixth = [dish for dish in plan.days if dish.day_index == 6]
+    assert {dish.role_id for dish in sixth} == {"main", "vegetable", "soup"}
+    for dish in sixth:
+        named = f"Swap Tuesday's {shown_title(dish.recipe.title)} for something else"
+        assert swapped(dish.entry_id, named) == swapped(dish.entry_id, "Swap Tuesday's dish for something else"), (
+            dish.recipe.title
+        )
+
+
 def test_lunch_added_to_the_walkthrough_week_is_not_one_dish_all_week(walked):
     """The walkthrough's added lunches were Lou's German Slaw five times of seven."""
     with kept_for(300), walked["factory"]() as session:
