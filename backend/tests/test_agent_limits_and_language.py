@@ -23,6 +23,7 @@ from app.agent.parser import (
     RuleBasedConstraintParser,
 )
 from app.agent.replies import language, planner_message
+from app.core.config import get_settings
 from app.planning import meal_beam
 from app.planning.meal_composition import portion_shares
 from app.planning.product_path import CHEAPEST_MEAL_OPTIONS, ProductPlanningEngine, ProductPlanningError
@@ -274,18 +275,131 @@ def test_a_budget_suggestion_is_backed_by_the_budgeted_checks_own_cheapest_week(
         },
     )
 
-    def check(request):
+    def check(request, *, minimum_distinct_dishes=0):
+        assert minimum_distinct_dishes == 4  # the amount is verified with the same variety it was searched for
         checked.append(request)
         return over
 
-    service = SimpleNamespace(meal_plan_service=SimpleNamespace(cheapest_week=lambda _: 40.80, check=check))
+    def cheapest_week(_, *, minimum_distinct_dishes):
+        assert minimum_distinct_dishes == 4
+        return 40.80
+
+    service = SimpleNamespace(meal_plan_service=SimpleNamespace(cheapest_week=cheapest_week, check=check))
     request = WeeklyMealPlanRequest(
         start_date="2026-10-07", household_size=4, weekly_budget_sgd=10, allergens=["peanut"]
     )
-    cost = AgentSessionService._cheapest(service, request)(household_size=2)
+    cost = AgentSessionService._cheapest(service, request)(household_size=2, minimum_distinct_dishes=4)
     assert cost == 53.70
     assert [item.weekly_budget_sgd for item in checked] == [41]
     assert all(item.household_size == 2 and item.allergens == ["peanut"] for item in checked)
+
+
+def test_a_four_dish_check_searches_past_a_kept_week_of_fewer_and_keeps_its_own(monkeypatch):
+    """A kept week of one dish seven times answered the four-dish check too, so a four-dish week within the budget
+    was never found, and Plan saved the one-dish week (ADR-0067: the four-dish week within the budget is planned)."""
+    monkeypatch.setattr(get_settings(), "planning_pool_cache_seconds", 300)
+    monkeypatch.setattr("app.services.meal_plan.found_weeks", {})
+    searched = []
+
+    def search(constraints, candidates, *, minimum_distinct_dishes=0):
+        searched.append(minimum_distinct_dishes)
+        ids = (1, 2, 3, 4) if minimum_distinct_dishes else (1, 1, 1, 1)
+        return None, SimpleNamespace(selected=[SimpleNamespace(recipe=SimpleNamespace(id=i)) for i in ids], trace={})
+
+    service = SimpleNamespace(_found_key=lambda _: "week", _checked_candidates=lambda _: None, _search=search)
+    request = WeeklyMealPlanRequest(start_date="2026-10-07", household_size=2, weekly_budget_sgd=32)
+    assert WeeklyMealPlanService.check(service, request) is None
+    assert WeeklyMealPlanService.checked_distinct_dishes(service, request) == 1
+    assert WeeklyMealPlanService.check(service, request, minimum_distinct_dishes=4) is None
+    assert WeeklyMealPlanService.check(service, request) is None  # the four-dish week, kept for Plan
+    assert searched == [0, 4]
+    assert WeeklyMealPlanService.checked_distinct_dishes(service, request) == 4
+
+
+OVER_FLOOR = WeekFloor(days=7, meals=7, total_sgd=20.0, meal_sgd={}, empty_roles=[], roles={})
+
+
+def variety_refusal(lang="en", *, dishes=3, varied_error=True, varied_cost=50.35, budget=40):
+    """`limits.refusal` for a budget whose week plans with `dishes` different dishes, and the calls it made."""
+    calls = []
+    error = ProductPlanningError("infeasible", "No four-dish week.", {})
+
+    def check(**changes):
+        calls.append(("check", changes))
+        return error if changes.get("minimum_distinct_dishes") and varied_error else None
+
+    def cheapest(**changes):
+        calls.append(("cheapest", changes))
+        return varied_cost if changes.get("minimum_distinct_dishes") == 4 else 31.70
+
+    constraints = AgentConstraintState(household_size=2, weekly_budget_sgd=budget)
+    told = limits.refusal(
+        constraints, lambda **_: OVER_FLOOR, lang, check=check, cheapest=cheapest, distinct_dishes=lambda: dishes
+    )
+    return told, calls
+
+
+@pytest.mark.parametrize(
+    ("lang", "said"),
+    [
+        ("en", "If you'd like at least four different dishes, a week we checked costs S$50.35."),
+        ("zh", "如果想要至少四种不同的菜，我们核对过的一周要 S$50.35。"),
+    ],
+)
+def test_a_budget_that_plans_only_a_repeating_week_plans_it_and_adds_a_checked_four_dish_week(lang, said):
+    """Owner, 2026-10-13: two people at S$32 to S$40 plan a week of one to three dishes, as main does (ADR-0044,
+    ADR-0056); the reply also says what a four-dish week the search found and checked costs, never "you need"."""
+    told, calls = variety_refusal(lang)
+    assert told.aside and told.text == said and told.options == ()
+    # The week as asked, a four-dish week within the budget, then a four-dish week's cost (checked in `cheapest`).
+    assert calls == [
+        ("check", {}),
+        ("check", {"minimum_distinct_dishes": 4}),
+        ("cheapest", {"minimum_distinct_dishes": 4}),
+    ]
+
+
+def test_a_four_dish_week_within_the_budget_is_planned_with_nothing_to_add():
+    told, calls = variety_refusal(varied_error=False)
+    assert told is None  # the check kept the four-dish week, and Plan saves it
+    assert calls == [("check", {}), ("check", {"minimum_distinct_dishes": 4})]
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        {"varied_cost": None},  # no four-dish week verified: nothing is suggested
+        {"varied_cost": 40.0},  # one within the budget that the budget's own search missed: no "costs S$40"
+        {"dishes": 4},  # four different dishes already: no search
+        {"dishes": None},  # no week kept to count: no search
+    ],
+)
+def test_a_repeating_week_adds_no_amount_without_a_dearer_checked_four_dish_week(case):
+    told, calls = variety_refusal(**case)
+    assert told is None
+    assert calls[0] == ("check", {}) and len(calls) == (1 if "dishes" in case else 3)
+
+
+def test_a_budget_under_the_floor_is_refused_with_the_cheapest_week_and_no_four_dish_search():
+    """Owner, 2026-10-13: a budget no week fits is refused with main's cheapest-week offer and wording, as before
+    ADR-0067; a four-dish search would only lengthen that reply (its cost comes once a budget plans)."""
+    asked = []
+
+    def cheapest(**changes):
+        asked.append(changes)
+        return 31.70 if not changes else None
+
+    constraints = AgentConstraintState(household_size=2, weekly_budget_sgd=20)
+    floor = WeekFloor(days=7, meals=7, total_sgd=25.0, meal_sgd={}, empty_roles=[], roles={})
+    told = limits.refusal(
+        constraints, lambda **_: floor, "en", check=unsearched, cheapest=cheapest, distinct_dishes=lambda: 1
+    )
+    assert told.text == (
+        "That budget can't cover this week. S$20 a week for 2 people comes to about S$1.43 a person a meal "
+        "(7 meals). The cheapest week I could find costs S$31.70."
+    )
+    assert not told.aside and told.options[0] == ("Use S$32 for the week", "Make the weekly budget S$32")
+    assert asked == [{}, {"household_size": 1}]  # the cheapest week, then half the household's; no four-dish week
 
 
 @pytest.mark.parametrize("lang", ["en", "zh"])
@@ -765,7 +879,7 @@ def test_a_budget_only_the_cap_on_uses_rules_out_is_refused_up_front(packaged):
 
 def test_a_budget_under_the_floor_skips_that_week_but_checks_offered_budgets(packaged, monkeypatch):
     checked = []
-    monkeypatch.setattr(WeeklyMealPlanService, "check", lambda self, constraints: checked.append(constraints))
+    monkeypatch.setattr(WeeklyMealPlanService, "check", lambda self, constraints, **_: checked.append(constraints))
     session = packaged.post("/api/agent/sessions", json={"message": "Dinners for 4, no dish twice, S$1 total"}).json()
 
     cost = cheapest_quoted(session["messages"][-1]["content"])

@@ -497,6 +497,12 @@ REPLIES: dict[str, tuple[str, str]] = {
         "这个预算排不出来。{people}一周 S${budget:g}，每人每餐大约只有 S${each:.2f}（一周 {meals} 餐）。"
         "我能找到的最便宜的一周要 S${cost:.2f}。",
     ),
+    # After a week that plans with fewer than four different dishes: a four-dish week the search found and checked,
+    # not proven the least (ADR-0067; agent/limits.py).
+    "budget_variety": (
+        "If you'd like at least four different dishes, a week we checked costs S${cost:.2f}.",
+        "如果想要至少四种不同的菜，我们核对过的一周要 S${cost:.2f}。",
+    ),
     "use_weekly": ("Use S${amount} for the week", "一周用 S${amount}"),
     "use_weekly_say": ("Make the weekly budget S${amount}", "每周预算 {amount} 新币"),
     "raise_meal": ("Raise the per-meal budget to S${amount}", "把每餐预算提高到 S${amount}"),

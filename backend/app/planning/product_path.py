@@ -256,6 +256,7 @@ class ProductPlanningEngine:
         selector=None,
         profile_version=None,
         cheapest=False,
+        minimum_distinct_dishes=0,
         cheapest_last=True,
         budget_is_hard=True,
         locked=None,
@@ -268,7 +269,8 @@ class ProductPlanningEngine:
         2026-10-02): every other rule holds, the budget is only reported, and of the weeks found (cost-led
         searches among them) one costing least at the checkout is chosen (see `over_budget_pick`). `used` (recipe
         slug -> uses) is what the rest of a week already serves when part of it is planned: those uses count
-        towards the household's cap on uses.
+        towards the household's cap on uses. `minimum_distinct_dishes` takes only weeks of at least that many
+        different dishes (ADR-0067's four).
         """
         locked = locked or {}
         kept_dishes = {slug for roles in locked.values() for slug in roles.values()}
@@ -684,7 +686,8 @@ class ProductPlanningEngine:
                     It never reads the household's budget, so what it finds is the same under any budget:
                     a week it finds at S$C is tried again under a budget of S$C or more, which is what makes
                     a budget offered as "S$C" one that plans. The cheapest week a search found, not a proof
-                    that none is cheaper.
+                    that none is cheaper. With `minimum_distinct_dishes` only weeks of that many different dishes
+                    count, in the probes and the bisection alike (ADR-0067).
                     """
                     cost = {r.recipe.slug: dish_cost(r) for r in recommendations}
                     weight = COST_WEIGHTS[-1]
@@ -698,7 +701,15 @@ class ProductPlanningEngine:
                         share = len(slots) / limit
                         blended = {slug: loss + weight * cost.get(slug, 0.0) * share for slug, loss in losses.items()}
                         bounded = problem.model_copy(deep=True, update={"purchase_budget_sgd": float(limit)})
-                        return MealBeamPlanner(led, local_losses=blended).search_candidates(bounded).states
+                        states = MealBeamPlanner(led, local_losses=blended).search_candidates(bounded).states
+                        if minimum_distinct_dishes:
+                            states = tuple(
+                                state
+                                for state in states
+                                if len({recipe for _, meal in state.choices for _, recipe in meal})
+                                >= minimum_distinct_dishes
+                            )
+                        return states
 
                     def bought(state) -> float:
                         """What the week buys in whole packages, as the validator totals it."""
@@ -725,6 +736,8 @@ class ProductPlanningEngine:
                             states = within(limit)
                             low = low if states else limit
                     trace["cheapest_search"] = {"budget_sgd": high, "candidates": len(kept)}
+                    if minimum_distinct_dishes:
+                        trace["cheapest_search"]["minimum_distinct_dishes"] = minimum_distinct_dishes
                     return most_varied_first([(weight, state) for state in kept.values()])
 
                 found = [(0.0, state) for state in search.states]
@@ -808,6 +821,8 @@ class ProductPlanningEngine:
                 continue
             assignments = assignments_list[index]
             index += 1
+            if len({a.recipe_id for a in assignments}) < minimum_distinct_dishes:
+                continue  # a week with fewer different dishes than asked for is not one (ADR-0067)
             shopping = builder._build_shopping(
                 problem.model_copy(deep=True), [a.model_copy(deep=True) for a in assignments]
             )
