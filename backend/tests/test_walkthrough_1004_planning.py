@@ -38,11 +38,13 @@ from app.db.base import Base
 from app.main import load_planning_pool, warm_planning_pool
 from app.planning.product_path import ProductPlanningEngine, meal_affinity
 from app.planning.recipe_quality import dish_family, incomplete
+from app.planning.recipe_similarity import wanted
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
 from app.repositories.recipe import RecipeRepository, _planning_pool, clear_planning_pool
 from app.repositories.recipe import _reloading as reloading_binds
 from app.schemas.agent import AgentConstraintState
+from app.schemas.display import shown_title
 from app.schemas.meal_plan import MEAL_PRESETS, MealPlanReplanPreviewRequest, MealPlanShape, MealPlanShapeChangeRequest
 from app.services.agent import AgentSessionService
 from tests.test_planning_capability import _dish, dish_client
@@ -585,6 +587,37 @@ def test_the_walkthrough_week_found_boring_swaps_its_repeats_within_its_budget(w
     assert {dish_family(dish.recipe_title) for dish in change.added}.isdisjoint(served)
     assert all(served[dish_family(dish.recipe_title)] > 1 for dish in change.removed)
     assert plan.grocery_estimate.purchase_total_sgd + preview.purchase_total_delta_sgd <= 100
+
+
+def test_all_21_walkthrough_swap_reasons_drop_the_replaced_title(walked):
+    """The Swap chip names the old dish; none of the 21 titles is a request for its own near-duplicate."""
+    dishes = walked["plan"].days
+    assert len(dishes) == 21
+    for dish in dishes:
+        reason = f"Swap Tuesday's {shown_title(dish.recipe.title)} for something else"
+        assert wanted(reason, excluded_title=dish.recipe.title) is None
+
+
+def test_a_walkthrough_swap_naming_the_old_dish_picks_what_a_swap_naming_nothing_picks(walked):
+    """The swap service passes the replaced title on: without it 16 of the 21 swaps differed, all three of the
+    sixth day's (Hearty Potato Soup went to Irish Potato Soup). Checked on that day: 42 previews take a minute."""
+    plan = walked["plan"]
+
+    def swapped(entry_id: int, reason: str) -> int:
+        with kept_for(300), walked["factory"]() as session:
+            preview = build_replanning_service(session, 1, 1).preview(
+                plan_id=plan.id,
+                request=MealPlanReplanPreviewRequest(event_type="REPLACE_MEAL", entry_id=entry_id, reason=reason),
+            )
+        return preview.after_entry.recipe_id
+
+    sixth = [dish for dish in plan.days if dish.day_index == 6]
+    assert {dish.role_id for dish in sixth} == {"main", "vegetable", "soup"}
+    for dish in sixth:
+        named = f"Swap Tuesday's {shown_title(dish.recipe.title)} for something else"
+        assert swapped(dish.entry_id, named) == swapped(dish.entry_id, "Swap Tuesday's dish for something else"), (
+            dish.recipe.title
+        )
 
 
 def test_lunch_added_to_the_walkthrough_week_is_not_one_dish_all_week(walked):
