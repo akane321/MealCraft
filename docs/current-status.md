@@ -12,7 +12,7 @@ The owner merged #244 (result-preserving fixture-ranking reuse) and #245
 (demonstration workflow repairs); their paired knowledge records #102 and #103
 are also merged. The latest main-push CI succeeded
 ([run 37652153430](https://github.com/akane321/MealCraft/actions/runs/37652153430)).
-#243 remains open with changes requested and behind main: merging its knowledge
+#243 remained open with changes requested and behind main at this snapshot (it was merged on 2026-10-09): merging its knowledge
 record #101 did not merge that heavy-composition performance proposal.
 
 Docker was restarted and the latest-main source was rehearsed against an
@@ -119,10 +119,10 @@ recorded evaluations. The candidate recipes are kept in memory, loaded at
 startup and again in the background every two and a half minutes, so none is
 older than five minutes (`PLANNING_POOL_CACHE_SECONDS`). The week the
 conversation's readiness check finds is kept for that exact request while the
-pool is current, and **Plan my week** saves it without searching again. Earlier local Docker
-timings are historical;
-the integrated search changes need a new timed walkthrough on the intended
-machine before claiming current response times.
+pool is current, and **Plan my week** saves it without searching again. Response times on
+the real stack are recorded in dated reports, the latest being the
+[2026-10-17 demo-path timing](evaluation/sprint1-demo-flow/2026-10-17/timing.md)
+(rule parser only); earlier local Docker timings are historical.
 
 Of ADR-0033's packets, P1 (product path), P2 ([conflict explanations](design/planning-conflict-explanation.md))
 and P4 ([nutrition scope](design/planning-nutrition-scope.md)) are wired into the product.
@@ -388,9 +388,10 @@ the next incomplete control. It is a navigation aid, not a second status source.
    remaining mechanisms (a weekday-only shape request read as every day; a budget
    week and a no-repeat week refused although feasible) were fixed on new developer
    episodes (#201, #202) and are not measured on that set. A held-out score needs a
-   fresh set. Composed-meal plans retain the 10-second target (ADR-0046 section 3);
-   rerun the timed walkthrough after integrated search changes before asserting
-   that the current build meets it.
+   fresh set. Response budgets are the demo's (ADR-0059, amended by ADR-0061:
+   a response need only be reasonable); the latest real-stack measurement is the
+   [2026-10-17 demo-path timing](evaluation/sprint1-demo-flow/2026-10-17/timing.md),
+   rule parser only, in which the Chinese refusal (step 6) was over its budget.
 2. Prepare the Sprint 1 demonstration in OpenAI parser mode with rule fallback,
    following the owner-approved skeleton at
    `MealCraft-Knowledge/operations/sprint1-work-packages/demo-skeleton.md`.
