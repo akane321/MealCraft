@@ -1,4 +1,4 @@
-"""Time the product's week planning (ADR-0046 section 3: a plan answers within 10 s).
+"""Time the product's week planning (response budgets: ADR-0059, amended by ADR-0061).
 
 Plans each shape through `WeeklyMealPlanService.generate` with fixture prices, once to warm the
 candidate cache and then REPEATS times, and prints the median and slowest wall time with the time
