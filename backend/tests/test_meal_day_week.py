@@ -9,6 +9,7 @@ from app.evaluation import meal_day_week_runner
 from app.evaluation.meal_day_week_runner import evaluate, run_episode, scorer_catalogs, v3_checks
 from app.evaluation.multidish_labels import check, slot_roles
 from app.evaluation.multidish_pool import draw
+from app.evaluation.variety_sweep import BREAKFAST, DINNER, DINNER_WITH_SOUP, LUNCH, synthetic
 
 EPISODES = repository_root() / "data/evaluation/dev/v3-meal-day-week/episodes"
 
@@ -17,35 +18,37 @@ def load(episode_id: str) -> dict:
     return json.loads((EPISODES / f"{episode_id}.json").read_text(encoding="utf-8"))
 
 
-def test_secondary_reports_recipe_ids_and_dish_families_separately(monkeypatch):
-    """Two named fried-rice recipes are distinct IDs but one dish family."""
+def test_secondary_counts_variety_by_recipe_and_by_the_planners_dish_kind(monkeypatch):
+    """Three named fried rices are three recipes but one kind, as the planner's `sameness` counts them
+    (`dish_kind`); counted by `dish_family`, "teriyaki fried rice" and "kimchi fried rice" stayed apart."""
     monkeypatch.setattr(
         meal_day_week_runner,
         "load_release_catalog",
         lambda: SimpleNamespace(
             by_slug={
+                "teriyaki-fried-rice": {"title": "Teriyaki Fried Rice", "meal_types": ["dinner"]},
+                "kimchi-fried-rice": {"title": "Kimchi Fried Rice", "meal_types": ["dinner"]},
                 "chinese-fried-rice": {"title": "Chinese-Style Fried Rice", "meal_types": ["dinner"]},
-                "basic-fried-rice": {"title": "Basic Fried Rice", "meal_types": ["dinner"]},
                 "bean-chili": {"title": "Bean Chili", "meal_types": ["dinner"]},
             }
         ),
     )
+    slugs = ["teriyaki-fried-rice", "kimchi-fried-rice", "chinese-fried-rice", "bean-chili", "bean-chili"]
+    days = ["mon", "tue", "wed", "thu", "fri"]
     response = {
         "plan": {
-            "assignments": [
-                {"slot_id": "mon-dinner", "recipe_id": "chinese-fried-rice"},
-                {"slot_id": "tue-dinner", "recipe_id": "basic-fried-rice"},
-                {"slot_id": "wed-dinner", "recipe_id": "bean-chili"},
-            ],
+            "assignments": [{"slot_id": f"{d}-dinner", "recipe_id": s} for d, s in zip(days, slugs, strict=True)],
             "total_cost_sgd": 12.0,
         }
     }
 
     assert meal_day_week_runner._secondary({}, response) == {
-        "dishes": 3,
-        "distinct_recipes": 3,
-        "distinct_dish_families": 2,
-        "meal_fit": "3/3",
+        "dishes": 5,
+        "distinct_recipes": 4,
+        "distinct_dish_kinds": 2,
+        "most_uses_of_a_recipe": 2,
+        "most_uses_of_a_kind": 3,
+        "meal_fit": "5/5",
         "total_cost_sgd": 12.0,
     }
 
@@ -144,36 +147,6 @@ def test_a_daily_target_is_a_hard_day_band_and_a_soft_meal_guide():
     day, meal = compile_nutrition_targets([target], 0.25, meals_per_day=3)
     assert (day.scope, day.hard, day.lower, day.upper) == ("per_day", True, 900, 1500)
     assert (meal.scope, meal.hard, meal.lower, meal.upper) == ("per_slot", False, 225, 625)
-
-
-def synthetic(episode_id: str, meals: dict, *, budget=None, bands=(), size=None) -> dict:
-    """A developer episode of this shape and limit, its pool drawn and its label proven."""
-    episode = copy.deepcopy(load("mdw-dev-008"))
-    episode["episode_id"] = episode_id
-    if size is not None:
-        episode["scenario"]["household_profile"]["household_size"] = size
-    episode["scenario"]["household_profile"]["plan_shape"] = {"meals": meals}
-    days = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
-    order = ("breakfast", "lunch", "dinner")
-    episode["scenario"]["planning_horizon"]["slots"] = [f"{d}-{m}" for d in days for m in order if m in meals]
-    hard = episode["gold"]["applicable_hard_constraints"]
-    hard["budget_sgd"], hard["nutrition_bands"] = budget, list(bands)
-    episode["scenario"]["recipe_candidate_slugs"], episode["scenario"]["fairprice_product_ids"] = draw(episode)
-    assert check(episode) is None, check(episode)
-    return episode
-
-
-BREAKFAST = [{"role_id": "main", "courses": ["breakfast", "baked_good"], "required": True}]
-LUNCH = [{"role_id": "main", "courses": ["main", "salad", "soup"], "required": True}]
-DINNER = [
-    {"role_id": "main", "courses": ["main"], "required": True},
-    {"role_id": "vegetable", "courses": ["side", "salad"], "required": False},
-]
-DINNER_WITH_SOUP = [
-    {"role_id": "main", "courses": ["main"], "required": True},
-    {"role_id": "vegetable", "courses": ["side", "salad"], "required": True},
-    {"role_id": "soup", "courses": ["soup"], "required": True},
-]
 
 
 def test_a_budget_the_search_prunes_to_nothing_is_planned_by_a_cost_led_search():
