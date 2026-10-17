@@ -162,9 +162,19 @@ Protocol v2-multidish scoring is unchanged. Added checks:
 | `kept_dishes_identical` | Each role in `kept_dishes` keeps its dish. |
 | `shape_change_applied` | Failed when the preview or confirmation refused the change. |
 
-The report also records, beside strict success, the number of dishes and of
-distinct recipes, meal fit (dishes whose release meal types include their
-slot's meal) and cost. Results are counts per category (ADR-0028).
+The report also records, beside strict success, the number of dishes, their
+variety counted twice (distinct recipes, and distinct dish kinds: the planner's
+own measure of sameness, `dish_kind` in `backend/app/planning/recipe_quality.py`,
+so differently named fried rices are several recipes but one kind), the most
+uses of one recipe and of one kind, meal fit (dishes whose release meal types
+include their slot's meal) and cost. Results are counts per category (ADR-0028).
+
+The same measures are reported for a sweep of synthetic households
+(`python -m app.evaluation.variety_sweep`): each plan shape, household size and
+set of safety limits, built on a developer episode with its label proven, at
+fixed multiples of the label's witness week. Its report is
+`docs/evaluation/v3-meal-day-week/variety-sweep/latest.md`; it is a developer
+diagnostic, never held-out evidence.
 
 ## 6. Exposure
 
