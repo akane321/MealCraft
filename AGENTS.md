@@ -153,7 +153,7 @@ If the private knowledge repository cannot be accessed, state that the context i
   canonical definition, versioned fixture, missing-value semantics, provenance
   where required, and a documented consumer. Use `docs/design/README.md`.
 - Preserve unrelated user changes and use feature branches plus pull requests.
-- Keep numeric constraints, nutrition, cost, package quantity, Shopping List, and evaluation logic deterministic and testable. The Agent may parse intent and explain tool results.
+- Keep numeric constraints, nutrition, cost, package quantity, Shopping List, and evaluation logic deterministic and testable. The Agent classifies intent, dispatches tools and sub-agents, and explains tool results; it never relaxes a hard constraint and every number it states comes from a tool (ADR-0073).
 - Never read held-out episodes, their gold labels or any metric computed from them in order to choose a parameter, prompt or threshold, and do not pass tuning results to episode authors before the set is frozen (decision ADR-0020 as amended by ADR-0029). Fit on synthetic or developer data.
 - Never commit secrets, `.env`, real personal health data, private memory content, or raw restricted course material to this public repository.
 

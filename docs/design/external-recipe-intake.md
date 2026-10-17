@@ -59,6 +59,8 @@ until confirmed, and the question is only ever asked when it matters:
 | Household declares an allergen, ingredient status known | rule decides, as today |
 | Household declares an allergen, status unknown | ask: contains / does not contain / not sure |
 
+> Agent-driven intake of web recipes (ADR-0073 section 5, ADR-0069) is stricter: an unknown allergen or halal status keeps that recipe out of any household with the limit, without asking for consent.
+
 "Not sure" leaves the status unknown. An unknown status does not block the
 asker: they may include the ingredient by saying so, the interface states that
 the status is unverified, and the consent is recorded with who, when and which
