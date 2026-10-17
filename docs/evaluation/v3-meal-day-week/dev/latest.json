@@ -56,6 +56,9 @@
       "details": {},
       "dishes": 21,
       "distinct_recipes": 21,
+      "distinct_dish_kinds": 20,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 2,
       "meal_fit": "21/21",
       "total_cost_sgd": 293.7
     },
@@ -71,6 +74,9 @@
       "details": {},
       "dishes": 28,
       "distinct_recipes": 28,
+      "distinct_dish_kinds": 26,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 3,
       "meal_fit": "28/28",
       "total_cost_sgd": 470.13
     },
@@ -86,6 +92,9 @@
       "details": {},
       "dishes": 21,
       "distinct_recipes": 20,
+      "distinct_dish_kinds": 17,
+      "most_uses_of_a_recipe": 2,
+      "most_uses_of_a_kind": 3,
       "meal_fit": "21/21",
       "total_cost_sgd": 404.42
     },
@@ -101,6 +110,9 @@
       "details": {},
       "dishes": 28,
       "distinct_recipes": 28,
+      "distinct_dish_kinds": 28,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 1,
       "meal_fit": "28/28",
       "total_cost_sgd": 486.4
     },
@@ -116,6 +128,9 @@
       "details": {},
       "dishes": 28,
       "distinct_recipes": 28,
+      "distinct_dish_kinds": 24,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 2,
       "meal_fit": "28/28",
       "total_cost_sgd": 463.29
     },
@@ -131,6 +146,9 @@
       "details": {},
       "dishes": 21,
       "distinct_recipes": 20,
+      "distinct_dish_kinds": 20,
+      "most_uses_of_a_recipe": 2,
+      "most_uses_of_a_kind": 2,
       "meal_fit": "21/21",
       "total_cost_sgd": 380.9
     },
@@ -146,6 +164,9 @@
       "details": {},
       "dishes": 28,
       "distinct_recipes": 21,
+      "distinct_dish_kinds": 19,
+      "most_uses_of_a_recipe": 5,
+      "most_uses_of_a_kind": 5,
       "meal_fit": "28/28",
       "total_cost_sgd": 415.16
     },
@@ -161,6 +182,9 @@
       "details": {},
       "dishes": 28,
       "distinct_recipes": 13,
+      "distinct_dish_kinds": 12,
+      "most_uses_of_a_recipe": 7,
+      "most_uses_of_a_kind": 7,
       "meal_fit": "28/28",
       "total_cost_sgd": 100.97
     },
@@ -198,6 +222,9 @@
       "details": {},
       "dishes": 28,
       "distinct_recipes": 28,
+      "distinct_dish_kinds": 24,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 3,
       "meal_fit": "26/28",
       "total_cost_sgd": 387.35
     },
@@ -213,6 +240,9 @@
       "details": {},
       "dishes": 14,
       "distinct_recipes": 14,
+      "distinct_dish_kinds": 14,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 1,
       "meal_fit": "14/14",
       "total_cost_sgd": 301.27
     },
@@ -228,6 +258,9 @@
       "details": {},
       "dishes": 28,
       "distinct_recipes": 28,
+      "distinct_dish_kinds": 23,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 6,
       "meal_fit": "28/28",
       "total_cost_sgd": 438.08
     },
@@ -258,6 +291,9 @@
       },
       "dishes": 21,
       "distinct_recipes": 21,
+      "distinct_dish_kinds": 19,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 3,
       "meal_fit": "21/21",
       "total_cost_sgd": 330.57
     },
@@ -278,6 +314,9 @@
       },
       "dishes": 14,
       "distinct_recipes": 14,
+      "distinct_dish_kinds": 14,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 1,
       "meal_fit": "14/14",
       "total_cost_sgd": 266.69
     },
@@ -323,6 +362,9 @@
       },
       "dishes": 15,
       "distinct_recipes": 15,
+      "distinct_dish_kinds": 15,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 1,
       "meal_fit": "15/15",
       "total_cost_sgd": 393.27
     },
@@ -360,6 +402,9 @@
       },
       "dishes": 20,
       "distinct_recipes": 20,
+      "distinct_dish_kinds": 20,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 1,
       "meal_fit": "20/20",
       "total_cost_sgd": 333.48
     },
@@ -406,6 +451,9 @@
       },
       "dishes": 16,
       "distinct_recipes": 16,
+      "distinct_dish_kinds": 16,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 1,
       "meal_fit": "16/16",
       "total_cost_sgd": 327.85
     },
@@ -432,6 +480,9 @@
       },
       "dishes": 16,
       "distinct_recipes": 16,
+      "distinct_dish_kinds": 16,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 1,
       "meal_fit": "16/16",
       "total_cost_sgd": 242.96
     },
@@ -458,6 +509,9 @@
       },
       "dishes": 16,
       "distinct_recipes": 16,
+      "distinct_dish_kinds": 16,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 1,
       "meal_fit": "16/16",
       "total_cost_sgd": 303.93
     },
@@ -473,6 +527,9 @@
       "details": {},
       "dishes": 28,
       "distinct_recipes": 4,
+      "distinct_dish_kinds": 4,
+      "most_uses_of_a_recipe": 14,
+      "most_uses_of_a_kind": 14,
       "meal_fit": "28/28",
       "total_cost_sgd": 50.9
     },
@@ -488,12 +545,15 @@
       "details": {},
       "dishes": 35,
       "distinct_recipes": 35,
+      "distinct_dish_kinds": 34,
+      "most_uses_of_a_recipe": 1,
+      "most_uses_of_a_kind": 2,
       "meal_fit": "35/35",
       "total_cost_sgd": 544.25
     }
   ],
   "episode_set": "developer set",
-  "code_revision": "ca7e02f5784551a3ae7a8b47b550d17264d3c8f3",
+  "code_revision": "0c3357a54d71b2776cf15f51ddea2f3474ffd2e0",
   "inputs": {
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",

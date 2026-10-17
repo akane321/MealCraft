@@ -184,6 +184,9 @@ than a hand-copied metric table:
   live-model arms under recorded conditions;
 - [v3 meal-day-week developer diagnostics](docs/evaluation/v3-meal-day-week/dev/latest.md)
   for the current product-path shape (visible developer cases, not held-out evidence);
+- [v3 variety sweep](docs/evaluation/v3-meal-day-week/variety-sweep/latest.md):
+  synthetic households across shapes, sizes and budgets, variety counted by recipe
+  and by dish kind (developer diagnostic);
 - [v3 meal-day-week first run](docs/evaluation/v3-meal-day-week/heldout/run-1.md)
   and [findings](docs/evaluation/v3-meal-day-week/heldout/findings.md).
 

@@ -23,6 +23,7 @@ import json
 import shutil
 import subprocess
 import tempfile
+from collections import Counter
 from contextlib import contextmanager
 from datetime import date
 from pathlib import Path
@@ -43,6 +44,7 @@ from app.evaluation.common_output import CommonEpisodeResponse
 from app.evaluation.multidish_labels import DAYS, meal_nutrients, slot_roles
 from app.evaluation.release_catalog import fixture_products, load_release_catalog
 from app.evaluation.strict_success import Catalogs, Check, Tolerances, dish_shares, load_tag_implications, score_episode
+from app.planning.recipe_quality import dish_kind
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.recipe import clear_planning_pool
 from app.schemas.meal_plan import WeeklyMealPlanRequest, WeeklyMealPlanResponse
@@ -321,16 +323,23 @@ def v3_checks(episode: dict, response: dict, extra: dict, catalogs: Catalogs) ->
 
 
 def _secondary(episode: dict, response: dict) -> dict:
-    """Measures strict success does not score: variety, meal fit and cost."""
+    """Measures strict success does not score: variety, meal fit and cost.
+
+    Variety is counted twice: by recipe id, and by dish kind, the planner's own measure of sameness
+    (`dish_kind`, product_path's `sameness`), so five fried rices are five recipes but one kind."""
     plan = response.get("plan")
     if not plan:
         return {}
     recipes = load_release_catalog().by_slug
     dishes = plan["assignments"]
     fit = sum(a["slot_id"].split("-", 1)[1] in recipes[a["recipe_id"]]["meal_types"] for a in dishes)
+    kinds = [dish_kind(recipes[a["recipe_id"]]["title"]) for a in dishes]
     return {
         "dishes": len(dishes),
         "distinct_recipes": len({a["recipe_id"] for a in dishes}),
+        "distinct_dish_kinds": len(set(kinds)),
+        "most_uses_of_a_recipe": max(Counter(a["recipe_id"] for a in dishes).values(), default=0),
+        "most_uses_of_a_kind": max(Counter(kinds).values(), default=0),
         "meal_fit": f"{fit}/{len(dishes)}",
         "total_cost_sgd": plan["total_cost_sgd"],
     }
@@ -457,15 +466,16 @@ def markdown(report: dict) -> str:
     lines += [
         f"| **all** | **{report['summary']['strict_success']}** | |",
         "",
-        "| Episode | Category | Lang | Class | Answered | Success | Failed checks | Dishes | Distinct | Meal fit "
-        "| Cost |",
-        "| --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: |",
+        "| Episode | Category | Lang | Class | Answered | Success | Failed checks | Dishes | Distinct recipes "
+        "| Distinct dish kinds | Meal fit | Cost |",
+        "| --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for r in report["episodes"]:
         lines.append(
             f"| {r['episode_id']} | {r['category']} | {r['language']} | {r['class']} | {r['answered']} "
             f"| {'yes' if r['strict_success'] else 'no'} | {', '.join(r['failed']) or '-'} | {r.get('dishes', '-')} "
-            f"| {r.get('distinct_recipes', '-')} | {r.get('meal_fit', '-')} | {r.get('total_cost_sgd', '-')} |"
+            f"| {r.get('distinct_recipes', '-')} | {r.get('distinct_dish_kinds', '-')} "
+            f"| {r.get('meal_fit', '-')} | {r.get('total_cost_sgd', '-')} |"
         )
     lines += ["", "## Parameters", ""]
     lines += [f"- {key}: {value}" for key, value in report["parameters"].items()]
