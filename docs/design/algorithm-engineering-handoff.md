@@ -157,7 +157,7 @@ User-entered nutrition targets declare their scope explicitly:
   selected meal slots, while older packets may average represented daily totals.
   See [Product nutrition scope](planning-nutrition-scope.md).
 
-MealCraft does not invent BMR/TDEE or medical targets. General lower-sodium,
+MealCraft does not invent medical targets. Per-member default targets from HPB reference intakes are soft goals (ADR-0071); hard nutrition limits stay opt-in. General lower-sodium,
 lower-sugar and lower-calorie language remains a soft preference unless the
 user enters a numeric constraint.
 

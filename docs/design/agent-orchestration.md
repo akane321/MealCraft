@@ -189,7 +189,7 @@ confidence where relevant and status. Distinguish `not_mentioned`,
 `confirmed`. Contradictions trigger clarification instead of silent overwrite.
 
 Unknown pantry quantity remains unknown and affects only ranking after user
-acknowledgement. The Agent never derives BMR/TDEE or disease-treatment targets.
+acknowledgement. The Agent never derives disease-treatment targets or displays calorie prescriptions. Default member targets come from HPB reference intakes as soft goals (ADR-0071).
 
 ## Bounded execution, recovery and external trust
 
@@ -250,6 +250,8 @@ committed action receipt permits wording such as `saved`; only a live trace
 permits `live price`.
 
 ## LangGraph target
+
+> Direction (ADR-0073): the model becomes the gatekeeper and dispatcher of tools and sub-agents, while deterministic code enforces every hard constraint. The node list below describes the earlier fixed-pipeline target and is revised when that work lands.
 
 The current application already uses a two-node LangGraph extraction workflow.
 Extend it after contracts are stable. Proposed nodes are:

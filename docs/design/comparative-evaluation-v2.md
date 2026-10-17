@@ -303,6 +303,8 @@ held-out v2 set of approximately 80 end-to-end episodes:
 | infeasible and conflicting requests | 8 | truthful rejection and relaxation |
 | multi-turn replanning | 8 | state retention, minimal disruption and grocery delta |
 
+> From Sprint 2 (ADR-0074), the new held-out set reports results by category and by language, with Chinese at least a third. The paragraph below describes the v2 set.
+
 The set carries no language ratio. Understanding English and Chinese is
 ordinary Agent capability rather than a research direction, so language is not
 an evaluation dimension and results are not broken out by language. One

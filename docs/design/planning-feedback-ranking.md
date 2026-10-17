@@ -1,5 +1,7 @@
 # Offline feedback ranking
 
+> Direction (ADR-0073 section 6): household feedback moves into the product ranking with a bounded effect. This page describes the current offline hook until that lands.
+
 `app.planning.feedback_ranking` provides a default-off candidate ordering hook and
 a chronological developer replay. It does not run in the product, record real
 check-ins or train a production personalization model. The versioned feedback
