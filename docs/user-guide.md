@@ -73,7 +73,8 @@ that grows with the people at it, each lunch and dinner with its staple:
 | 7 or more | 3 protein mains, 2 vegetable dishes, soup |
 
 "People at dinner" counts who is home that evening, so a weekend dinner with
-grandparents gets more dishes. A protein main may be a meat, fish, tofu, egg or
+grandparents gets more dishes. It counts people, not portions: two adults and
+three small children are five at dinner, however little the children eat. A protein main may be a meat, fish, tofu, egg or
 bean dish. The **staple** is rice by default, or noodles, bread or flatbread to
 suit the meal's cuisine; it is on the shopping list, in the price, the nutrition
 and the cooking time (cooking unattended, like a rice cooker). A one-bowl dish

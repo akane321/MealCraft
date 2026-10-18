@@ -156,11 +156,6 @@ export function removable(meal: PlannedMealType, roles: MealRole[], index: numbe
   return !(item.role_id === "staple" && !core?.meal_roles?.every(kind => kind === "one_bowl"));
 }
 
-/** How many people a meal's portions count as for its dish count (backend people_at): halves round up. */
-export function peopleAt(portions: number): number {
-  return Math.max(1, Math.floor(portions + 0.5));
-}
-
 /** The dishes a meal has with `people` at it: a dish "from N people" only from that many on. */
 export function plannedRoles(roles: MealRole[], people: number): MealRole[] {
   return roles.filter(item => (item.min_people ?? 0) <= people);

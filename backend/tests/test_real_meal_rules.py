@@ -237,6 +237,19 @@ def test_the_default_is_the_full_structure_and_dinner_grows_with_the_people():
         8: (3, 2, 1, 1),
     }
     assert [people_at(s) for s in (0.73, 2.49, 2.5, 4.89)] == [1, 2, 3, 5]
+    # A household of members counts the members present, not their portions: two adults and three toddlers are
+    # five at the table (the 5-6 row) on about 3.3 portions.
+    from datetime import date
+
+    from app.planning.household_slots import slot_people, slot_servings
+    from app.schemas.household_rules import HouseholdPlanning
+
+    servings = [1.0, 1.0, 0.43, 0.47, 0.43, 0.7]
+    household = HouseholdPlanning.model_validate(
+        {"members": [{"name": f"M{n}", "servings": s, "default_present": n < 5} for n, s in enumerate(servings)]}
+    )
+    assert slot_servings(household, date(2027, 1, 4), "dinner") == pytest.approx(3.33)
+    assert slot_people(household, date(2027, 1, 4), "dinner") == 5
     assert meal_structure.dinner_counts()[0] == {
         "min_people": 1,
         "max_people": 2,

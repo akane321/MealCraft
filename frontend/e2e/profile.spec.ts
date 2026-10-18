@@ -34,6 +34,8 @@ test("a new household starts with the recommended full day, its dinner growing w
   await page.getByRole("button", { name: "+ Add person" }).click();
   await expect(page.getByText("Dinner for 3 at the table:")).toBeVisible();
   await expect(page.getByText("2 protein mains, 1 vegetable dish, soup and a staple")).toBeVisible();
+  // The header counts the dishes planned at this table, not every "from N people" row.
+  await expect(page.getByText("5 dishes", { exact: true })).toBeVisible();
   if (SHOTS) {
     await page.screenshot({ path: `${SHOTS}/profile-1280x720.png`, fullPage: true });
     await page.setViewportSize({ width: 1440, height: 900 });

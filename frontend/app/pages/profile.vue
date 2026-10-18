@@ -16,7 +16,7 @@ import {
   parseExcludedIngredients,
   toOptionalNumber,
 } from "~/lib/recommendation-form";
-import { DEFAULT_SHAPE, EQUIPMENT, EQUIPMENT_LABEL, describeShape, peopleAt } from "~/lib/plan-shape";
+import { DEFAULT_SHAPE, EQUIPMENT, EQUIPMENT_LABEL, describeShape } from "~/lib/plan-shape";
 import type {
   ActivityLevel,
   AgeBand,
@@ -145,8 +145,9 @@ const savedSummary = computed(() => current.value
   ? summarizeHouseholdMembers(current.value.current.members.map(member => ({ ...member, servings_per_meal: member.resolved_servings_per_meal })))
   : null);
 const homePortions = computed(() => (savedSummary.value ?? draftSummary.value).planningHouseholdSize);
-// The editor's dish counts follow the draft: who's eating as entered now.
-const tablePeople = computed(() => peopleAt(draftSummary.value.planningHouseholdSize));
+// The editor's dish counts follow the draft: the people usually home as entered now, not their portions
+// (ADR-0070, backend slot_people): two adults and three small children are five at the table.
+const tablePeople = computed(() => Math.max(1, memberPayloads.value.filter(member => member.default_present !== false).length));
 const planWord = computed(() => (dayCount.value === 7 ? "Plan this week" : `Plan ${dayCount.value} ${dayCount.value === 1 ? "day" : "days"}`));
 const ruleMembers = computed(() => members.value.map(member => ({
   name: member.name,

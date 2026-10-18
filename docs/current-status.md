@@ -115,7 +115,7 @@ ADR-0046): the household's plan shape names the meals of a day and each meal's
 dishes, and `MealBeamPlanner` fills every (day, meal) slot. A household that
 chose no shape plans the **full default** (ADR-0070, layer 08 PR-3): breakfast,
 lunch (protein main, vegetable dish, staple) and a dinner that grows with the
-people at it (1-2: one protein main, a vegetable dish and soup; 3-4: two mains;
+members present at it, counted as people rather than portions (1-2: one protein main, a vegetable dish and soup; 3-4: two mains;
 5-6: two vegetable dishes; 7+: three mains), each lunch and dinner with a
 staple. Roles of the full default admit recipes by their meal-role tag
 (`meal_roles`); every structured lunch and dinner holds the hard real-meal rules
@@ -128,8 +128,13 @@ protocol reports are unchanged. A plan may be 1 to 14 days; past 7 days it shops
 twice (before day 1 and day 8, the budget per trip), and with household rules on
 a perishable dish is cooked within 3 days of its trip and a recipe needing
 missing equipment is never planned. The
-[full-default report](evaluation/full-default/latest.md) checks four fixed
-households. Deferred: adding a vegetable dish when vegetables fall short (no
+[full-default report](evaluation/full-default/latest.md) checks five fixed
+households (one of seven people on under five portions); its
+[timing](evaluation/full-default/timing.md) marks the six-person budgeted week
+over the ADR-0075 target of about 4 s (about 26 s warm on the developer
+machine, the budget-led search re-checking about a million candidate dinners),
+and the plan button only shows "Planning…" through a wait that long (no progress
+or time estimate yet). Deferred: adding a vegetable dish when vegetables fall short (no
 vegetable measure yet), CP-SAT for structured meals, day references 8-14 in the
 conversation, and a curated plain Chinese steamed rice (the release has none). `PLANNING_CAPABILITY`
 defaults to `full`; `mvp` (one dinner dish a day) remains for reproducing the

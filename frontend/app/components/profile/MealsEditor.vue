@@ -11,6 +11,7 @@ import {
   isStructured,
   isVegetableRole,
   newDish,
+  plannedRoles,
   nextRoleId,
   presetName,
   removable,
@@ -19,7 +20,7 @@ import {
 import type { DishCourse, MealRole, PlannedMealType, PlanShape } from "~/types/household";
 
 const shape = defineModel<PlanShape>({ required: true });
-// How many people a meal is planned for (portions at the table, halves rounded up): the dinner grows with them.
+// How many people a meal is planned for (members at the table, not their portions): the dinner grows with them.
 const props = defineProps<{ people: number }>();
 
 const MEAL_TITLE: Record<PlannedMealType, string> = { breakfast: "Breakfast", lunch: "Lunch", dinner: "Dinner" };
@@ -116,6 +117,8 @@ function hint(item: MealRole): string | undefined {
 }
 
 const tableWord = computed(() => `${props.people} at the table`);
+// The dishes planned at this table: a dish "from N people" counts only from that many on.
+const dishTotal = (list: MealRole[]) => (isStructured(list) ? plannedRoles(list, props.people).length : list.length);
 </script>
 
 <template>
@@ -134,7 +137,7 @@ const tableWord = computed(() => `${props.people} at the table`);
       <label class="switch">
         <input type="checkbox" :checked="Boolean(roles(meal))" :aria-label="`Plan ${MEAL_TITLE[meal].toLowerCase()}`" @change="toggle(meal, ($event.target as HTMLInputElement).checked)">
         <span class="title">{{ MEAL_TITLE[meal] }}</span>
-        <small v-if="roles(meal)">{{ roles(meal)!.length }} {{ roles(meal)!.length === 1 ? "dish" : "dishes" }}</small>
+        <small v-if="roles(meal)">{{ dishTotal(roles(meal)!) }} {{ dishTotal(roles(meal)!) === 1 ? "dish" : "dishes" }}</small>
         <small v-else>Not planned</small>
       </label>
 

@@ -29,6 +29,7 @@ from app.planning.household_slots import (
     assumed_basics,
     basics_note,
     limit_targets,
+    slot_people,
     slot_servings,
     slot_time_limit,
 )
@@ -171,7 +172,8 @@ def pool_for(meals, recipes) -> list:
 
 
 def people_at(servings) -> int:
-    """How many people a meal's servings count as for its dish count (ADR-0070 table), halves rounded up."""
+    """How many people a household size counts as for its dish count (ADR-0070 table), halves rounded up. A
+    household of members counts the members present instead (`slot_people`)."""
     return max(1, floor(float(servings) + 0.5))
 
 
@@ -559,7 +561,12 @@ class ProductPlanningEngine:
                 if structured(roles):
                     # The dinner grows with the people at it (ADR-0070 table); a count the household stated has no
                     # role planned by who is present, so it stays as stated.
-                    meal_roles = meal_structure_roles(roles, people_at(servings))
+                    people = (
+                        slot_people(household, planned_date, meal)
+                        if household is not None and household.members is not None
+                        else people_at(servings)
+                    )
+                    meal_roles = meal_structure_roles(roles, people)
                     floor_share = meal_structure.energy_floor_share(meal)
                     if kept_roles:
                         kept_roles = {r: d for r, d in kept_roles.items() if r in {x.role_id for x in meal_roles}}

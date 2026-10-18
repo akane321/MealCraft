@@ -10,7 +10,6 @@ import {
   isStructured,
   newDish,
   nextRoleId,
-  peopleAt,
   planDayLabel,
   plannedRoles,
   presetName,
@@ -64,10 +63,6 @@ describe("plan shape", () => {
     expect(plannedRoles(dinner, 4).map(item => item.role_id)).toEqual(["main", "main-2", "vegetable", "soup", "staple"]);
     expect(dishCounts(DEFAULT_SHAPE.meals.breakfast!, 4)).toBe("1 breakfast dish");
     expect(dishCounts(MEAL_PRESETS.lunch["One-bowl meal"]!, 2)).toBe("1 one-bowl dish");
-    // Portions count as people with halves rounded up (backend people_at): two adults and a child are 3.
-    expect(peopleAt(2.73)).toBe(3);
-    expect(peopleAt(2.4)).toBe(2);
-    expect(peopleAt(0.3)).toBe(1);
   });
 
   it("adds meal-role dishes and keeps a real meal's core and staple", () => {

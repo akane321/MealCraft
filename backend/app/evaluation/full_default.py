@@ -1,6 +1,6 @@
 """The full meal structure (ADR-0070) on fixed households: is every lunch and dinner a real meal?
 
-Four households are planned with the full default through `WeeklyMealPlanService.generate`, on the whole release
+Five households are planned with the full default through `WeeklyMealPlanService.generate`, on the whole release
 catalog at fixture prices, as `app.evaluation.plan_timing` plans it. No model is called and no held-out data is
 read. For every lunch and dinner the report checks: a filling core (a protein main and a staple, or a dish that
 carries its staple), no non-meal dish, no protein source twice among the mains, the energy floor per serving,
@@ -39,9 +39,8 @@ from app.evaluation.meal_day_week_runner import product_database
 from app.models.recipe import Recipe, RecipeIngredient
 from app.planning import product_path
 from app.planning.grocery_estimator import not_purchased
-from app.planning.household_slots import slot_servings
-from app.planning.meal_composition import equipment_met, fills_staple, role_base
-from app.planning.product_path import meal_structure_roles, people_at
+from app.planning.household_slots import slot_people
+from app.planning.meal_composition import fills_staple, role_base
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.schemas.meal_plan import MEAL_ORDER, WeeklyMealPlanRequest, default_plan_shape
 from app.schemas.planning_v2 import NON_MEAL_ROLES
@@ -90,7 +89,10 @@ CASES = [
     },
     {
         "case": "six-tight-budget",
-        "about": "Six adults on a tight weekly budget (S$420, chosen once on developer runs); a refusal is an outcome.",
+        "about": (
+            "Six adults on a tight weekly budget (S$420, chosen once on developer runs); it planned when set, so a "
+            "refusal fails."
+        ),
         "request": {"household_size": 6, "day_count": 7, "weekly_budget_sgd": 420.0},
         "household": {"members": [{"name": f"Adult {n}", "servings": 1.0} for n in range(1, 7)]},
     },
@@ -103,7 +105,45 @@ CASES = [
             "missing_equipment": ["oven"],
         },
     },
+    {
+        "case": "seven-with-young-children",
+        "about": (
+            "Two adults, three toddlers and two children: seven at the table on about 4.8 portions, so dinner is "
+            "the 7+ row (3 protein mains, 2 vegetable dishes) by people present, not by portions; 7 days."
+        ),
+        "request": {"household_size": 7, "day_count": 7},
+        "household": {
+            "members": [
+                {"name": "Ann", "servings": 0.88},
+                {"name": "Ben", "servings": 1.12},
+                {"name": "Tod 1", "servings": 0.43},
+                {"name": "Tod 2", "servings": 0.47},
+                {"name": "Tod 3", "servings": 0.43},
+                {"name": "Kid 1", "servings": 0.7},
+                {"name": "Kid 2", "servings": 0.75},
+            ]
+        },
+    },
 ]
+
+# The ADR-0070 dish table, written out here rather than read from the planner, so a bug in the planner's
+# own helpers shows as a failed check: (most people at dinner, protein mains, vegetable dishes).
+DINNER_ROWS = [(2, 1, 1), (4, 2, 1), (6, 2, 2), (None, 3, 2)]
+
+
+def expected_dishes(meal: str, people: int) -> Counter:
+    """The dishes of a full-default meal by kind (`role_base` of its role ids) with `people` at it."""
+    if meal == "breakfast":
+        return Counter(main=1)
+    if meal == "lunch":
+        return Counter(main=1, vegetable=1, staple=1)
+    mains, vegetables = next((m, v) for top, m, v in DINNER_ROWS if top is None or people <= top)
+    return Counter(main=mains, vegetable=vegetables, soup=1, staple=1)
+
+
+def _equipment_met(needs, missing) -> bool:
+    """Every any-of group of the recipe's equipment has an item the kitchen has (written out, as above)."""
+    return not missing or all(set(group) - set(missing) for group in needs or ())
 
 
 def request_for(case: dict) -> WeeklyMealPlanRequest:
@@ -126,10 +166,6 @@ def _recipes(session, slugs) -> dict[str, Recipe]:
         .options(selectinload(Recipe.recipe_ingredients).joinedload(RecipeIngredient.ingredient))
     )
     return {recipe.slug: recipe for recipe in session.scalars(statement).unique()}
-
-
-def _expected_roles(request: WeeklyMealPlanRequest, meal: str, servings: float) -> list:
-    return meal_structure_roles(request.plan_shape.meals[meal], people_at(servings))
 
 
 def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Recipe]) -> dict:
@@ -157,12 +193,22 @@ def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Re
                 for line in recipe.recipe_ingredients
             ):
                 failures["perishable_within_days"] += 1
-            if missing and not equipment_met(recipe.equipment, missing):
+            if not _equipment_met(recipe.equipment, missing):
                 failures["equipment"] += 1
+        core = tags.get("main")
+        bowl = meal != "breakfast" and core is not None and fills_staple(core)
+        # Dish counts as the table says for the people present, give or take one dish left out (a one-bowl
+        # main also stands for the staple); breakfast too.
+        people = slot_people(request.household, date.fromisoformat(dishes[0]["planned_date"]), meal)
+        expected = expected_dishes(meal, people)
+        filled = Counter(role_base(role) for role in tags)
+        left_out = expected - filled - (Counter(staple=1) if bowl else Counter())
+        if filled - expected or sum(left_out.values()) > 1:
+            failures["dish_count_within_one_move"] += 1
+        if left_out:
+            moves.append(f"day {day} {meal}: {', '.join(sorted(left_out))} left out")
         if meal not in ("lunch", "dinner"):
             continue
-        core = tags.get("main")
-        bowl = core is not None and fills_staple(core)
         if (
             core is None
             or (bowl and "staple" in tags)
@@ -182,14 +228,6 @@ def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Re
         energy.append(per_serving >= floor[meal] - 1e-6)
         if not energy[-1]:
             failures["energy_floor"] += 1
-        servings = slot_servings(request.household, date.fromisoformat(dishes[0]["planned_date"]), meal)
-        expected = {role.role_id for role in _expected_roles(request, meal, servings)}
-        filled = set(tags)
-        moved = sorted((expected - filled) - ({"staple"} if bowl else set()))
-        if filled - expected or len(moved) > 1:
-            failures["dish_count_within_one_move"] += 1
-        if moved:
-            moves.append(f"day {day} {meal}: {', '.join(moved)} left out")
         if "staple" in tags:
             staple = {
                 line.ingredient.normalized_name
@@ -310,7 +348,6 @@ def evaluate(repeats: int = 0) -> tuple[dict, dict]:
             results.append(result)
             warm = [run_case(plans, session, case)[1] for _ in range(repeats)]
             seconds[case["case"]] = {"first": round(first, 2), "warm": [round(s, 2) for s in warm]}
-    planned = [r for r in results if r["outcome"] == "planned"]
     report = {
         "report": "full-default-v1",
         "decision": "ADR-0070, ADR-0072, ADR-0075; operations/sprint2-plan/08-household.md section 0",
@@ -318,7 +355,8 @@ def evaluate(repeats: int = 0) -> tuple[dict, dict]:
         "energy_floor_kcal_per_serving": {
             meal: round(share * hpb()["adult_reference"]["energy_kcal"], 1) for meal, share in _floors().items()
         },
-        "passed": bool(planned) and all(r["passed"] for r in planned),
+        # Every case planned when it was set, so a case that now refuses is a regression, not an outcome.
+        "passed": all(r["outcome"] == "planned" and r["passed"] for r in results),
         "cases": results,
     }
     return report, seconds
@@ -328,14 +366,14 @@ def markdown(report: dict) -> str:
     lines = [
         "# Full default: is every lunch and dinner a real meal?",
         "",
-        "> Scope: four fixed households planned with the full meal structure (ADR-0070) on the whole release "
+        "> Scope: five fixed households planned with the full meal structure (ADR-0070) on the whole release "
         "catalog, fixture prices, the product path; developer cases, no held-out data. It is a regression check "
-        "of the real-meal rules, not a quality score. Wall time is not in this file (it differs by machine): "
-        "see the module docstring.",
+        "of the real-meal rules, not a quality score: PASS says nothing about speed. Wall time is not in this "
+        "file (it differs by machine): `timing.md` beside it marks each case over the ADR-0075 target.",
         "",
         "Generated by `python -m app.evaluation.full_default`.",
         "",
-        f"**Overall result: {'PASS' if report['passed'] else 'FAIL'}** (every planned case passes every check)",
+        f"**Overall result: {'PASS' if report['passed'] else 'FAIL'}** (every case plans and passes every check)",
         "",
         "Energy floor per serving: "
         + ", ".join(f"{meal} {kcal} kcal" for meal, kcal in report["energy_floor_kcal_per_serving"].items())
@@ -374,20 +412,45 @@ def markdown(report: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+TARGET_SECONDS = 4.0  # ADR-0075: about 4 s for a common request
+
+# Why a case is slow, from a profile of one warm run (cProfile, 2026-10-19). Written by hand when a case is
+# profiled, so a newly slow case reads "not profiled yet" until someone looks.
+SLOW_CAUSES = {
+    "six-tight-budget": (
+        "the budget-led search (`product_path.limit_led`, about two thirds of the run) re-runs the meal beam: "
+        "about 1.1 million candidate dinners of up to six roles go through `meal_permitted`, and "
+        "`real_meal_issues` (filling core, protein sources, the energy floor in fractions) is about 40% of the "
+        "run. Upgrade path: a short-circuiting yes/no real-meal check for the search, and fewer cheapest-dish "
+        "candidates per role under a budget."
+    ),
+}
+
+
 def timing_markdown(timing: dict) -> str:
+    over = [case for case, row in timing["cases"].items() if (row["median"] or row["first"]) > TARGET_SECONDS]
     lines = [
         "# Full default: plan wall time",
         "",
-        "> Scope: the four cases of `latest.md`, one machine. The report's run lets the variety pass finish (and "
+        "> Scope: the cases of `latest.md`, one machine. The report's run lets the variety pass finish (and "
         "warms the candidate cache); the warm runs plan as the product does, the variety pass cut at its two "
-        "seconds. Median and slowest of the warm runs. ADR-0075 targets about 4 s for a common request.",
+        f"seconds. Median and slowest of the warm runs. ADR-0075 targets about {TARGET_SECONDS:g} s for a common "
+        "request: a case whose warm median is over it is marked, and no feature is cut to meet it.",
         "",
         f"Machine: {timing['machine']}. The code commit is in `timing.json` beside this file.",
         "",
-        "| Case | Report run (s) | Warm median (s) | Warm max (s) |",
-        "|---|---:|---:|---:|",
-        *[f"| {case} | {row['first']} | {row['median']} | {row['max']} |" for case, row in timing["cases"].items()],
+        f"| Case | Report run (s) | Warm median (s) | Warm max (s) | Against ~{TARGET_SECONDS:g} s |",
+        "|---|---:|---:|---:|---|",
+        *[
+            f"| {case} | {row['first']} | {row['median']} | {row['max']} | "
+            f"{'over target' if case in over else 'within'} |"
+            for case, row in timing["cases"].items()
+        ],
+        "",
+        f"Over target: {', '.join(over) or 'none'}.",
     ]
+    for case in over:
+        lines += ["", f"- `{case}`: {SLOW_CAUSES.get(case, 'not profiled yet.')}"]
     return "\n".join(lines) + "\n"
 
 
