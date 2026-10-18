@@ -3,11 +3,16 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.agent import model_client
+from app.agent.rule_sentences import OpenAIRuleReader, read_rule_sentence
 from app.api.routes.auth import (
     CurrentHouseholdCreatePlanCsrfDependency,
     CurrentHouseholdEditProfileCsrfDependency,
     CurrentHouseholdViewDependency,
 )
+from app.core.config import Settings, get_settings
+from app.core.runtime_config import runtime_value
+from app.data.household_reference import reference_table
 from app.db.session import get_db_session
 from app.planning.capability import PlanningCapabilityError
 from app.planning.grocery_estimator import GroceryEstimator
@@ -24,6 +29,9 @@ from app.schemas.household import (
     HouseholdProfileUpdate,
     HouseholdProfileVersionCollectionResponse,
     HouseholdProfileWrite,
+    HouseholdReferenceResponse,
+    RuleParseRequest,
+    RuleParseResponse,
 )
 from app.services.household import (
     HouseholdProfileAlreadyExistsError,
@@ -80,6 +88,36 @@ def create_household_profile(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
     except PlanningCapabilityError as error:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
+
+
+@router.get("/reference", response_model=HouseholdReferenceResponse)
+def get_household_reference(_current: CurrentHouseholdViewDependency) -> HouseholdReferenceResponse:
+    """HPB default portions and sodium limits, the basic seasonings and the meal shares (layer 08)."""
+    return HouseholdReferenceResponse.model_validate(reference_table())
+
+
+def rule_reader(settings: Settings, database: Session) -> OpenAIRuleReader | None:
+    """The model reader when the agent parser is the model and a key is set (as `create_constraint_parser`);
+    None reads with the rules, also when the configuration is incomplete."""
+    if runtime_value("agent_parser_provider", settings, database) != "openai" or settings.openai_api_key is None:
+        return None
+    return OpenAIRuleReader.create(
+        api_key=settings.openai_api_key.get_secret_value(),
+        model=settings.openai_model,
+        timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
+    )
+
+
+@router.post("/parse-rule", response_model=RuleParseResponse)
+def parse_household_rule(
+    payload: RuleParseRequest,
+    database: DatabaseDependency,
+    settings: Annotated[Settings, Depends(get_settings)],
+    _current: CurrentHouseholdEditProfileCsrfDependency,
+) -> RuleParseResponse:
+    """One sentence read into draft rules for the confirmation card; nothing is stored until the profile is saved."""
+    with model_client.counting():
+        return read_rule_sentence(payload, rule_reader(settings, database))
 
 
 @router.get("/current", response_model=HouseholdProfileResponse)

@@ -1,9 +1,12 @@
 from app.core.clock import today as local_today
+from app.data.household_reference import sodium_limit
 from app.models.household import HouseholdProfile, HouseholdProfileVersion
 from app.planning.capability import require_composition_enabled
 from app.repositories.household import HouseholdProfileRepository, HouseholdProfileVersionConflictError
 from app.repositories.meal_plan import MealPlanRepository
 from app.schemas.household import (
+    HouseholdMemberInput,
+    HouseholdMemberResponse,
     HouseholdProfilePlanRequest,
     HouseholdProfilePlanResponse,
     HouseholdProfileResponse,
@@ -13,6 +16,7 @@ from app.schemas.household import (
     HouseholdProfileWrite,
     ProfileConstraintChange,
 )
+from app.schemas.household_rules import HouseholdPlanning, NutritionLimit, PlanningMember
 from app.schemas.meal_plan import WeeklyMealPlanRequest, default_plan_shape
 from app.schemas.recommendation import NutritionTargets
 from app.services.meal_plan import WeeklyMealPlanService
@@ -28,6 +32,31 @@ class HouseholdProfileAlreadyExistsError(RuntimeError):
 
 class HouseholdProfilePlanError(RuntimeError):
     pass
+
+
+def household_planning(version: HouseholdProfileVersion) -> HouseholdPlanning:
+    """A saved version's members, rules and limits as the planner reads them (layer 08): each member's portions
+    resolved, and a sodium limit left to HPB resolved to the tightest limit of the members usually home."""
+    members = [HouseholdMemberInput.model_validate(member) for member in version.members]
+    home = [member for member in members if member.default_present]
+    limits = []
+    for limit in version.nutrition_limits or []:
+        limit = NutritionLimit.model_validate(limit)
+        if limit.max_value is None:
+            known = [value for value in (sodium_limit(member.age_band) for member in home) if value is not None]
+            limit = limit.model_copy(update={"max_value": min(known) if known else None})
+        limits.append(limit)
+    return HouseholdPlanning(
+        members=[
+            PlanningMember(name=m.name, servings=m.resolved_servings()[0], default_present=m.default_present)
+            for m in members
+        ],
+        presence_rules=version.presence_rules or [],
+        cooking_time_rules=version.cooking_time_rules or [],
+        missing_basics=version.missing_basics or [],
+        nutrition_limits=[limit for limit in limits if limit.max_value is not None],
+        protein_priority=any(member.goal == "muscle_gain" for member in members),
+    )
 
 
 class HouseholdProfileService:
@@ -169,7 +198,7 @@ class HouseholdProfileService:
     def _version_response(version: HouseholdProfileVersion) -> HouseholdProfileVersionResponse:
         return HouseholdProfileVersionResponse(
             version=version.version,
-            members=version.members,
+            members=[HouseholdMemberResponse.of(member) for member in version.members],
             planning_household_size=version.planning_household_size,
             max_cooking_time_minutes=version.max_cooking_time_minutes,
             budget_per_meal_sgd=(
@@ -188,6 +217,10 @@ class HouseholdProfileService:
             pricing_mode=version.pricing_mode,
             meal_composition=version.meal_composition,
             plan_shape=version.plan_shape,
+            presence_rules=version.presence_rules or [],
+            cooking_time_rules=version.cooking_time_rules or [],
+            missing_basics=version.missing_basics or [],
+            nutrition_limits=version.nutrition_limits or [],
             created_at=version.created_at,
         )
 
@@ -219,6 +252,7 @@ class HouseholdProfileService:
             # A household that set neither plans the default week: dinner, one main and one vegetable.
             "plan_shape": version.plan_shape
             or (default_plan_shape().model_dump(mode="json") if version.meal_composition is None else None),
+            "household": household_planning(version),
         }
         for field in request.overrides.model_fields_set:
             override = getattr(request.overrides, field)
@@ -242,9 +276,21 @@ class HouseholdProfileService:
             "pricing_mode": "Pricing source",
             "meal_composition": "Dishes per meal",
             "plan_shape": "Meals and dishes",
+            "household.members": "Members' portions",
+            "household.presence_rules": "Who is home",
+            "household.cooking_time_rules": "Cooking-time rules",
+            "household.missing_basics": "Basics to buy",
+            "household.nutrition_limits": "Nutrition limits",
         }
+
+        def value(constraints: dict, key: str):
+            if not key.startswith("household."):
+                return constraints.get(key)
+            household = constraints.get("household") or {}
+            return household.get(key.removeprefix("household.")) or None  # no rules and an empty list are one
+
         return [
-            ProfileConstraintChange(field=labels[key], before=before.get(key), after=after.get(key))
+            ProfileConstraintChange(field=labels[key], before=value(before, key), after=value(after, key))
             for key in labels
-            if before.get(key) != after.get(key)
+            if value(before, key) != value(after, key)
         ]

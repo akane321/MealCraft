@@ -1,7 +1,9 @@
 """Household member, rule and preference types of the Sprint 2 schema foundation.
 
-They are defined here and not yet wired: no request or response model uses them, so the API is unchanged
-until a feature PR wires one in. Meanings and NULL rules are in docs/design/sprint2-schema-foundation.md.
+Wired by layer 08 PR-1: `AgeBand`, `Sex`, `PersonalGoal`, `Weekday`, `PresenceRule`, `CookingTimeRule` and
+`NutritionLimit` are profile fields, and `HouseholdPlanning` carries them into a planning request. Still unwired:
+`ActivityLevel` (only HPB's moderate column is researched), `MissingEquipment` (recipes have no equipment tags),
+`FlavorBoost` and `PlanningPreferences`. Meanings and NULL rules are in docs/design/sprint2-schema-foundation.md.
 """
 
 from typing import Literal
@@ -75,3 +77,68 @@ class PlanningPreferences(BaseModel):
     flavor_boosts: list[FlavorBoost] = Field(default_factory=list, max_length=20)
     more_vegetables: bool = False
     lighter: bool = False
+
+
+class PlanningMember(BaseModel):
+    """A member as the planner sees one: portions a meal (stated, or the HPB default) and whether usually home."""
+
+    model_config = ConfigDict(extra="forbid")
+    name: str = Field(min_length=1, max_length=80)
+    servings: float = Field(gt=0, le=3)
+    default_present: bool = True
+
+
+class HouseholdPlanning(BaseModel):
+    """The household's own rules for a planning request (layer 08); absent, a request plans as before.
+
+    Its presence alone means the basic seasonings are assumed at home (ADR-0068, ADR-0072 section 2).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    # None: every meal is cooked for `household_size` (a conversation changed the size).
+    members: list[PlanningMember] | None = Field(default=None, min_length=1, max_length=12)
+    presence_rules: list[PresenceRule] = Field(default_factory=list, max_length=20)
+    cooking_time_rules: list[CookingTimeRule] = Field(default_factory=list, max_length=20)
+    # Basic seasonings the household has run out of: bought and priced as any ingredient.
+    missing_basics: list[str] = Field(default_factory=list, max_length=20)
+    # Each limit's max_value resolved (a profile's None is its members' HPB limit) before planning.
+    nutrition_limits: list[NutritionLimit] = Field(default_factory=list, max_length=1)
+    # A member's muscle-gain goal: protein-rich dishes rank higher.
+    protein_priority: bool = False
+
+
+WEEKDAYS: tuple[Weekday, ...] = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+
+
+def _joined(words: list[str]) -> str:
+    return words[0] if len(words) == 1 else f"{', '.join(words[:-1])} and {words[-1]}"
+
+
+def day_phrase(weekdays: list[str]) -> str:
+    days = sorted(set(weekdays), key=WEEKDAYS.index)
+    if not days or len(days) == 7:
+        return "Every day"
+    if days == list(WEEKDAYS[:5]):
+        return "Monday to Friday"
+    if days == ["saturday", "sunday"]:
+        return "Saturday and Sunday"
+    start = WEEKDAYS.index(days[0])
+    if len(days) > 2 and days == list(WEEKDAYS[start : start + len(days)]):
+        return f"{days[0].capitalize()} to {days[-1].capitalize()}"
+    return _joined([day.capitalize() for day in days])
+
+
+def meal_phrase(meal_types: list[str]) -> str:
+    order = ("breakfast", "lunch", "dinner", "snack")
+    meals = sorted(set(meal_types), key=order.index)
+    return "every meal" if not meals else _joined(meals)
+
+
+def restate(rule: PresenceRule | CookingTimeRule) -> str:
+    """The confirmation card's sentence, always from this template and never from a model."""
+    when = f"{day_phrase(rule.weekdays)}, {meal_phrase(rule.meal_types)}"
+    if isinstance(rule, PresenceRule):
+        return f"{when}: {rule.member_name} {'joins' if rule.present else 'eats elsewhere'}."[:200]
+    if rule.max_minutes >= 240:
+        return f"{when}: no cooking-time limit."
+    return f"{when}: within {rule.max_minutes} minutes."
