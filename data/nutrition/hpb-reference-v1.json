@@ -1,0 +1,226 @@
+{
+  "version": "hpb-reference-v1",
+  "source": {
+    "title": "Recommended Dietary Allowances (HealthHub, Health Promotion Board)",
+    "url": "https://www.healthhub.sg/well-being-and-lifestyle/food-diet-and-nutrition/recommended_dietary_allowances",
+    "retrieved_on": "2026-10-18",
+    "note": "Energy tables only; the page has no protein or sodium values."
+  },
+  "sodium_source": {
+    "title": "Reduce Your Salt And Sugar Intake (HealthHub)",
+    "url": "https://www.healthhub.sg/programmes/nutrition-hub/eat-less",
+    "retrieved_on": "2026-10-18",
+    "quote": "recommended daily sodium limit of 2,000 mg"
+  },
+  "activity_column": "moderate",
+  "adult_reference": {
+    "energy_kcal": 2313,
+    "basis": "Unweighted mean of HPB Adults 30-59 Moderate active male 2590 and female 2035 = 2312.5, rounded. MealCraft's own calculation; HPB gives no unisex figure."
+  },
+  "goal_factors": {
+    "fat_loss": 0.9,
+    "basis": "ADR-0071 section 3: fat loss lowers the energy target by about 10%. MealCraft's design value, not HPB's."
+  },
+  "meal_shares": {
+    "breakfast": 0.25,
+    "lunch": 0.35,
+    "dinner": 0.35,
+    "basis": "operations/sprint2-plan/08-household.md section 2.2 and ADR-0071: about 25%, 35% and 35%. MealCraft's design values, not HPB's."
+  },
+  "rows": [
+    {
+      "age_band": "toddler",
+      "sex": "female",
+      "energy_kcal": 1000,
+      "protein_g": null,
+      "sodium_mg_max": null,
+      "hpb_band": "Infants and young children, age 2 (midpoint of 1-3); not split by activity"
+    },
+    {
+      "age_band": "toddler",
+      "sex": "male",
+      "energy_kcal": 1080,
+      "protein_g": null,
+      "sodium_mg_max": null,
+      "hpb_band": "Infants and young children, age 2 (midpoint of 1-3); not split by activity"
+    },
+    {
+      "age_band": "child",
+      "sex": "female",
+      "energy_kcal": 1620,
+      "protein_g": null,
+      "sodium_mg_max": null,
+      "hpb_band": "Children and adolescents, age 8, Moderate physical activity"
+    },
+    {
+      "age_band": "child",
+      "sex": "male",
+      "energy_kcal": 1740,
+      "protein_g": null,
+      "sodium_mg_max": null,
+      "hpb_band": "Children and adolescents, age 8, Moderate physical activity"
+    },
+    {
+      "age_band": "teen",
+      "sex": "female",
+      "energy_kcal": 2400,
+      "protein_g": null,
+      "sodium_mg_max": null,
+      "hpb_band": "Children and adolescents, age 16, Moderate physical activity"
+    },
+    {
+      "age_band": "teen",
+      "sex": "male",
+      "energy_kcal": 3120,
+      "protein_g": null,
+      "sodium_mg_max": null,
+      "hpb_band": "Children and adolescents, age 16, Moderate physical activity"
+    },
+    {
+      "age_band": "adult",
+      "sex": "female",
+      "energy_kcal": 2035,
+      "protein_g": null,
+      "sodium_mg_max": 2000,
+      "hpb_band": "Adults 30-59 years, Moderate active"
+    },
+    {
+      "age_band": "adult",
+      "sex": "male",
+      "energy_kcal": 2590,
+      "protein_g": null,
+      "sodium_mg_max": 2000,
+      "hpb_band": "Adults 30-59 years, Moderate active"
+    },
+    {
+      "age_band": "senior",
+      "sex": "female",
+      "energy_kcal": 1865,
+      "protein_g": null,
+      "sodium_mg_max": 2000,
+      "hpb_band": "Adults 60+ years, Moderate active"
+    },
+    {
+      "age_band": "senior",
+      "sex": "male",
+      "energy_kcal": 2235,
+      "protein_g": null,
+      "sodium_mg_max": 2000,
+      "hpb_band": "Adults 60+ years, Moderate active"
+    }
+  ],
+  "checks": [
+    {
+      "field": "toddler.female.energy_kcal",
+      "value": 1000,
+      "source_cell": "Infants and young children, age 2 (midpoint of 1-3); not split by activity, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "toddler.male.energy_kcal",
+      "value": 1080,
+      "source_cell": "Infants and young children, age 2 (midpoint of 1-3); not split by activity, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "child.female.energy_kcal",
+      "value": 1620,
+      "source_cell": "Children and adolescents, age 8, Moderate physical activity, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "child.male.energy_kcal",
+      "value": 1740,
+      "source_cell": "Children and adolescents, age 8, Moderate physical activity, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "teen.female.energy_kcal",
+      "value": 2400,
+      "source_cell": "Children and adolescents, age 16, Moderate physical activity, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "teen.male.energy_kcal",
+      "value": 3120,
+      "source_cell": "Children and adolescents, age 16, Moderate physical activity, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "adult.female.energy_kcal",
+      "value": 2035,
+      "source_cell": "Adults 30-59 years, Moderate active, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "adult.male.energy_kcal",
+      "value": 2590,
+      "source_cell": "Adults 30-59 years, Moderate active, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "senior.female.energy_kcal",
+      "value": 1865,
+      "source_cell": "Adults 60+ years, Moderate active, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "senior.male.energy_kcal",
+      "value": 2235,
+      "source_cell": "Adults 60+ years, Moderate active, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "adult.female.sodium_mg_max",
+      "value": 2000,
+      "source_cell": "HealthHub: recommended daily sodium limit of 2,000 mg (adults)",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "adult.male.sodium_mg_max",
+      "value": 2000,
+      "source_cell": "HealthHub: recommended daily sodium limit of 2,000 mg (adults)",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "senior.female.sodium_mg_max",
+      "value": 2000,
+      "source_cell": "HealthHub: recommended daily sodium limit of 2,000 mg (adults)",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "senior.male.sodium_mg_max",
+      "value": 2000,
+      "source_cell": "HealthHub: recommended daily sodium limit of 2,000 mg (adults)",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    }
+  ],
+  "todo": [
+    {
+      "field": "*.protein_g",
+      "reason": "No HPB/MOH protein table by age and sex found; HealthHub gives only per-kg statements."
+    },
+    {
+      "field": "toddler|child|teen.sodium_mg_max",
+      "reason": "No official age-specific HPB limit verified; a school newsletter's 1000 mg is not used."
+    },
+    {
+      "field": "activity low/high",
+      "reason": "Light and Vigorous columns (ages 6+) not transcribed; only Moderate is used, so a member's activity is not asked for yet."
+    }
+  ]
+}
