@@ -76,7 +76,10 @@ test("a household sentence is read, confirmed and saved with portions, basics an
   })));
   await page.route("**/api/household-profiles/current", route => route.fulfill(json({ detail: "none" }, 404)));
   await page.route("**/api/household-profiles/reference", route => route.fulfill(json({
-    default_servings: { adult: { female: { none: 0.88 }, male: { none: 1.12 }, any: { none: 1 } }, child: { female: { none: 0.7 }, male: { none: 0.75 }, any: { none: 0.73 } } },
+    default_servings: {
+      adult: { female: { moderate: { none: 0.88 } }, male: { moderate: { none: 1.12 } }, any: { moderate: { none: 1 } } },
+      child: { female: { moderate: { none: 0.7 } }, male: { moderate: { none: 0.75 } }, any: { moderate: { none: 0.73 } } },
+    },
     sodium_limit_mg: { adult: 2000, child: null },
     basics: [{ normalized_name: "salt", display_name: "Salt", allergens: [] }, { normalized_name: "soy_sauce", display_name: "Soy sauce", allergens: ["soy", "gluten"] }],
     meal_shares: { breakfast: 0.25, lunch: 0.35, dinner: 0.35 },
@@ -103,7 +106,7 @@ test("a household sentence is read, confirmed and saved with portions, basics an
   await page.waitForLoadState("networkidle"); // clicks before hydration are lost
   await page.getByLabel("Name", { exact: true }).fill("Mei");
   await page.getByLabel("Age group").selectOption("child");
-  await expect(page.getByRole("option", { name: "Auto (0.73), from age and sex" })).toBeAttached();
+  await expect(page.getByRole("option", { name: "Auto (0.73), from age, sex and activity" })).toBeAttached();
 
   await page.getByLabel("Who's home: one sentence").fill("孩子工作日午饭在学校吃");
   await page.getByRole("button", { name: "Read it" }).first().click();
@@ -121,7 +124,7 @@ test("a household sentence is read, confirmed and saved with portions, basics an
   await page.getByRole("button", { name: "Save household" }).click();
   await expect.poll(() => saved).not.toBeNull();
   expect(saved).toMatchObject({
-    members: [{ name: "Mei", servings_per_meal: null, age_band: "child", sex: null, goal: null, default_present: true }],
+    members: [{ name: "Mei", servings_per_meal: null, age_band: "child", sex: null, activity: null, goal: null, default_present: true }],
     presence_rules: [{ member_name: "Mei", present: false, meal_types: ["lunch"] }],
     cooking_time_rules: [],
     missing_basics: ["soy_sauce"],

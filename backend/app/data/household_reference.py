@@ -14,6 +14,7 @@ HPB_FILE = "nutrition/hpb-reference-v1.json"
 BASICS_FILE = "ingredients/basic-seasonings-v1.json"
 AGE_BANDS = ("toddler", "child", "teen", "adult", "senior")
 SEXES = ("female", "male")
+ACTIVITIES = ("low", "moderate", "high")
 SERVINGS_RANGE = (Fraction(1, 4), Fraction(3))
 
 
@@ -34,20 +35,27 @@ def _rows(age_band: str | None, sex: str | None) -> list[dict]:
     return [row for row in hpb()["rows"] if row["age_band"] == band and (sex is None or row["sex"] == sex)]
 
 
-def energy(age_band: str | None, sex: str | None) -> float | None:
-    """The HPB moderate-activity energy need in kcal; a null sex is the mean of both rows."""
-    values = [row["energy_kcal"] for row in _rows(age_band, sex)]
+def _row_energy(row: dict, activity: str | None) -> float | None:
+    # A null activity reads as moderate (`energy_kcal`); toddler rows are not split by activity.
+    return row.get("energy_kcal_by_activity", {}).get(activity or "moderate", row["energy_kcal"])
+
+
+def energy(age_band: str | None, sex: str | None, activity: str | None = None) -> float | None:
+    """The HPB energy need in kcal for the activity column; a null sex is the mean of both rows."""
+    values = [_row_energy(row, activity) for row in _rows(age_band, sex)]
     if not values or any(value is None for value in values):
         return None
     return sum(values) / len(values)
 
 
-def default_servings(age_band: str | None, sex: str | None, goal: str | None) -> tuple[float, str]:
+def default_servings(
+    age_band: str | None, sex: str | None, goal: str | None, activity: str | None = None
+) -> tuple[float, str]:
     """Portions a meal from energy need over the adult reference (ADR-0071 section 3), and where it came from.
 
     Fat loss takes 10% off (the table's `goal_factors`). A band with no researched energy is 1.0, flagged.
     """
-    need = energy(age_band, sex)
+    need = energy(age_band, sex, activity)
     if need is None:
         return 1.0, "fallback_todo"
     table = hpb()
@@ -69,13 +77,19 @@ def meal_shares() -> dict[str, float]:
 
 
 def reference_table() -> dict:
-    """What the profile page shows: default portions for every band, sex and goal, sodium limits, the basics."""
+    """What the profile page shows: default portions for every band, sex, activity and goal, sodium limits, the
+    basics."""
     table = hpb()
     goals = {"none": None, "fat_loss": "fat_loss", "muscle_gain": "muscle_gain"}
     return {
         "default_servings": {
             band: {
-                sex_key: {goal_key: default_servings(band, sex, goal)[0] for goal_key, goal in goals.items()}
+                sex_key: {
+                    activity: {
+                        goal_key: default_servings(band, sex, goal, activity)[0] for goal_key, goal in goals.items()
+                    }
+                    for activity in ACTIVITIES
+                }
                 for sex_key, sex in (("female", "female"), ("male", "male"), ("any", None))
             }
             for band in AGE_BANDS

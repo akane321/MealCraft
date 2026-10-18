@@ -28,6 +28,17 @@ ENERGY = {
     ("senior", "female"): 1865,
     ("senior", "male"): 2235,
 }
+# The same page's Light / Vigorous (children, teens) and Low / Very active (adults) columns, low-moderate-high.
+ACTIVITY = {
+    ("child", "female"): (1380, 1620, 1860),
+    ("child", "male"): (1480, 1740, 2000),
+    ("teen", "female"): (2040, 2400, 2760),
+    ("teen", "male"): (2650, 3120, 3590),
+    ("adult", "female"): (1720, 2035, 2800),
+    ("adult", "male"): (2185, 2590, 3560),
+    ("senior", "female"): (1570, 1865, 2560),
+    ("senior", "male"): (1885, 2235, 3070),
+}
 SERVINGS = {
     "toddler": (0.43, 0.47, 0.45),
     "child": (0.70, 0.75, 0.73),
@@ -51,7 +62,14 @@ def test_the_table_holds_only_researched_values_each_with_a_check():
         for field in ("energy_kcal", "sodium_mg_max"):
             if row[field] is not None:
                 assert checked[f"{band}.{sex}.{field}"] == row[field]
-    assert len(checked) == 14
+    for (band, sex), levels in ACTIVITY.items():
+        assert rows[band, sex]["energy_kcal_by_activity"] == dict(zip(("low", "moderate", "high"), levels, strict=True))
+        assert levels[1] == ENERGY[band, sex]
+        for level, value in zip(("low", "high"), (levels[0], levels[2]), strict=True):
+            assert checked[f"{band}.{sex}.energy_kcal_by_activity.{level}"] == value
+    assert "energy_kcal_by_activity" not in rows["toddler", "male"]
+    assert len(checked) == 14 + 16
+    assert not [item for item in table["todo"] if item["field"].startswith("activity")]
     assert table["adult_reference"]["energy_kcal"] == 2313
     for part in ("source", "sodium_source"):
         assert table[part]["url"].startswith("https://www.healthhub.sg/")
@@ -66,7 +84,18 @@ def test_default_portions_are_energy_over_the_adult_reference(band):
     # Fat loss takes 10% off; muscle gain changes ranking, not portions.
     assert default_servings(band, "male", "fat_loss")[0] == round(ENERGY[band, "male"] / 2313 * 0.9, 2)
     assert default_servings(band, "male", "muscle_gain")[0] == male
-    assert reference_table()["default_servings"][band]["any"]["none"] == either
+    assert reference_table()["default_servings"][band]["any"]["moderate"]["none"] == either
+
+
+def test_activity_picks_the_hpb_column_and_unset_reads_as_moderate():
+    assert default_servings("adult", "male", None, "high") == (round(3560 / 2313, 2), "hpb_default")
+    assert default_servings("adult", "female", None, "low") == (round(1720 / 2313, 2), "hpb_default")
+    assert default_servings("teen", "male", None, None) == default_servings("teen", "male", None, "moderate")
+    # Toddlers are one value at every level; fat loss still takes 10% off the active column.
+    assert default_servings("toddler", "male", None, "high") == default_servings("toddler", "male", None, "low")
+    assert default_servings("adult", "male", "fat_loss", "high")[0] == round(3560 / 2313 * 0.9, 2)
+    assert energy("adult", None, "low") == (2185 + 1720) / 2
+    assert reference_table()["default_servings"]["adult"]["male"]["high"]["none"] == 1.54
 
 
 def test_an_unset_age_band_reads_as_adult_and_sodium_is_known_for_adults_only():
@@ -80,6 +109,7 @@ def test_a_band_with_no_researched_energy_falls_back_to_one_portion(monkeypatch)
     for row in table["rows"]:
         if row["age_band"] == "teen":
             row["energy_kcal"] = None
+            row.pop("energy_kcal_by_activity")
     monkeypatch.setattr(household_reference, "hpb", lambda: table)
     assert default_servings("teen", "female", None) == (1.0, "fallback_todo")
     assert default_servings("adult", "female", None) == (0.88, "hpb_default")

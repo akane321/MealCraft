@@ -4,7 +4,7 @@
     "title": "Recommended Dietary Allowances (HealthHub, Health Promotion Board)",
     "url": "https://www.healthhub.sg/well-being-and-lifestyle/food-diet-and-nutrition/recommended_dietary_allowances",
     "retrieved_on": "2026-10-18",
-    "note": "Energy tables only; the page has no protein or sodium values."
+    "note": "Energy tables only (all three activity columns); the page has no protein or sodium values."
   },
   "sodium_source": {
     "title": "Reduce Your Salt And Sugar Intake (HealthHub)",
@@ -12,7 +12,12 @@
     "retrieved_on": "2026-10-18",
     "quote": "recommended daily sodium limit of 2,000 mg"
   },
-  "activity_column": "moderate",
+  "activity_columns": {
+    "low": "Children and adolescents: Light physical activity; adults: Low active",
+    "moderate": "Children and adolescents: Moderate physical activity; adults: Moderate active",
+    "high": "Children and adolescents: Vigorous physical activity; adults: Very active",
+    "unset": "An unset activity reads as moderate. Toddlers are not split by activity: every level is the one value."
+  },
   "adult_reference": {
     "energy_kcal": 2313,
     "basis": "Unweighted mean of HPB Adults 30-59 Moderate active male 2590 and female 2035 = 2312.5, rounded. MealCraft's own calculation; HPB gives no unisex figure."
@@ -50,7 +55,12 @@
       "energy_kcal": 1620,
       "protein_g": null,
       "sodium_mg_max": null,
-      "hpb_band": "Children and adolescents, age 8, Moderate physical activity"
+      "hpb_band": "Children and adolescents, age 8",
+      "energy_kcal_by_activity": {
+        "low": 1380,
+        "moderate": 1620,
+        "high": 1860
+      }
     },
     {
       "age_band": "child",
@@ -58,7 +68,12 @@
       "energy_kcal": 1740,
       "protein_g": null,
       "sodium_mg_max": null,
-      "hpb_band": "Children and adolescents, age 8, Moderate physical activity"
+      "hpb_band": "Children and adolescents, age 8",
+      "energy_kcal_by_activity": {
+        "low": 1480,
+        "moderate": 1740,
+        "high": 2000
+      }
     },
     {
       "age_band": "teen",
@@ -66,7 +81,12 @@
       "energy_kcal": 2400,
       "protein_g": null,
       "sodium_mg_max": null,
-      "hpb_band": "Children and adolescents, age 16, Moderate physical activity"
+      "hpb_band": "Children and adolescents, age 16",
+      "energy_kcal_by_activity": {
+        "low": 2040,
+        "moderate": 2400,
+        "high": 2760
+      }
     },
     {
       "age_band": "teen",
@@ -74,7 +94,12 @@
       "energy_kcal": 3120,
       "protein_g": null,
       "sodium_mg_max": null,
-      "hpb_band": "Children and adolescents, age 16, Moderate physical activity"
+      "hpb_band": "Children and adolescents, age 16",
+      "energy_kcal_by_activity": {
+        "low": 2650,
+        "moderate": 3120,
+        "high": 3590
+      }
     },
     {
       "age_band": "adult",
@@ -82,7 +107,12 @@
       "energy_kcal": 2035,
       "protein_g": null,
       "sodium_mg_max": 2000,
-      "hpb_band": "Adults 30-59 years, Moderate active"
+      "hpb_band": "Adults 30-59 years",
+      "energy_kcal_by_activity": {
+        "low": 1720,
+        "moderate": 2035,
+        "high": 2800
+      }
     },
     {
       "age_band": "adult",
@@ -90,7 +120,12 @@
       "energy_kcal": 2590,
       "protein_g": null,
       "sodium_mg_max": 2000,
-      "hpb_band": "Adults 30-59 years, Moderate active"
+      "hpb_band": "Adults 30-59 years",
+      "energy_kcal_by_activity": {
+        "low": 2185,
+        "moderate": 2590,
+        "high": 3560
+      }
     },
     {
       "age_band": "senior",
@@ -98,7 +133,12 @@
       "energy_kcal": 1865,
       "protein_g": null,
       "sodium_mg_max": 2000,
-      "hpb_band": "Adults 60+ years, Moderate active"
+      "hpb_band": "Adults 60+ years",
+      "energy_kcal_by_activity": {
+        "low": 1570,
+        "moderate": 1865,
+        "high": 2560
+      }
     },
     {
       "age_band": "senior",
@@ -106,7 +146,12 @@
       "energy_kcal": 2235,
       "protein_g": null,
       "sodium_mg_max": 2000,
-      "hpb_band": "Adults 60+ years, Moderate active"
+      "hpb_band": "Adults 60+ years",
+      "energy_kcal_by_activity": {
+        "low": 1885,
+        "moderate": 2235,
+        "high": 3070
+      }
     }
   ],
   "checks": [
@@ -132,9 +177,37 @@
       "checked_on": "2026-10-18"
     },
     {
+      "field": "child.female.energy_kcal_by_activity.low",
+      "value": 1380,
+      "source_cell": "Children and adolescents, age 8, Light physical activity, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "child.female.energy_kcal_by_activity.high",
+      "value": 1860,
+      "source_cell": "Children and adolescents, age 8, Vigorous physical activity, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
       "field": "child.male.energy_kcal",
       "value": 1740,
       "source_cell": "Children and adolescents, age 8, Moderate physical activity, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "child.male.energy_kcal_by_activity.low",
+      "value": 1480,
+      "source_cell": "Children and adolescents, age 8, Light physical activity, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "child.male.energy_kcal_by_activity.high",
+      "value": 2000,
+      "source_cell": "Children and adolescents, age 8, Vigorous physical activity, Males",
       "status": "verified",
       "checked_on": "2026-10-18"
     },
@@ -146,9 +219,37 @@
       "checked_on": "2026-10-18"
     },
     {
+      "field": "teen.female.energy_kcal_by_activity.low",
+      "value": 2040,
+      "source_cell": "Children and adolescents, age 16, Light physical activity, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "teen.female.energy_kcal_by_activity.high",
+      "value": 2760,
+      "source_cell": "Children and adolescents, age 16, Vigorous physical activity, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
       "field": "teen.male.energy_kcal",
       "value": 3120,
       "source_cell": "Children and adolescents, age 16, Moderate physical activity, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "teen.male.energy_kcal_by_activity.low",
+      "value": 2650,
+      "source_cell": "Children and adolescents, age 16, Light physical activity, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "teen.male.energy_kcal_by_activity.high",
+      "value": 3590,
+      "source_cell": "Children and adolescents, age 16, Vigorous physical activity, Males",
       "status": "verified",
       "checked_on": "2026-10-18"
     },
@@ -160,9 +261,37 @@
       "checked_on": "2026-10-18"
     },
     {
+      "field": "adult.female.energy_kcal_by_activity.low",
+      "value": 1720,
+      "source_cell": "Adults 30-59 years, Low active, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "adult.female.energy_kcal_by_activity.high",
+      "value": 2800,
+      "source_cell": "Adults 30-59 years, Very active, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
       "field": "adult.male.energy_kcal",
       "value": 2590,
       "source_cell": "Adults 30-59 years, Moderate active, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "adult.male.energy_kcal_by_activity.low",
+      "value": 2185,
+      "source_cell": "Adults 30-59 years, Low active, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "adult.male.energy_kcal_by_activity.high",
+      "value": 3560,
+      "source_cell": "Adults 30-59 years, Very active, Males",
       "status": "verified",
       "checked_on": "2026-10-18"
     },
@@ -174,9 +303,37 @@
       "checked_on": "2026-10-18"
     },
     {
+      "field": "senior.female.energy_kcal_by_activity.low",
+      "value": 1570,
+      "source_cell": "Adults 60+ years, Low active, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "senior.female.energy_kcal_by_activity.high",
+      "value": 2560,
+      "source_cell": "Adults 60+ years, Very active, Females",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
       "field": "senior.male.energy_kcal",
       "value": 2235,
       "source_cell": "Adults 60+ years, Moderate active, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "senior.male.energy_kcal_by_activity.low",
+      "value": 1885,
+      "source_cell": "Adults 60+ years, Low active, Males",
+      "status": "verified",
+      "checked_on": "2026-10-18"
+    },
+    {
+      "field": "senior.male.energy_kcal_by_activity.high",
+      "value": 3070,
+      "source_cell": "Adults 60+ years, Very active, Males",
       "status": "verified",
       "checked_on": "2026-10-18"
     },
@@ -217,10 +374,6 @@
     {
       "field": "toddler|child|teen.sodium_mg_max",
       "reason": "No official age-specific HPB limit verified; a school newsletter's 1000 mg is not used."
-    },
-    {
-      "field": "activity low/high",
-      "reason": "Light and Vigorous columns (ages 6+) not transcribed; only Moderate is used, so a member's activity is not asked for yet."
     }
   ]
 }

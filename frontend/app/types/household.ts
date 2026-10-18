@@ -9,15 +9,18 @@ import type {
 
 export type AgeBand = "toddler" | "child" | "teen" | "adult" | "senior";
 export type Sex = "female" | "male";
+/** HPB activity column for default portions; null reads as moderate. */
+export type ActivityLevel = "low" | "moderate" | "high";
 export type PersonalGoal = "fat_loss" | "muscle_gain";
 export type Weekday = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
 
 export interface HouseholdMemberInput {
   name: string;
-  /** Portions a meal (0.25-3, two decimals); null is the HPB default from age band, sex and goal. */
+  /** Portions a meal (0.25-3, two decimals); null is the HPB default from age band, sex, activity and goal. */
   servings_per_meal: number | null;
   age_band?: AgeBand | null;
   sex?: Sex | null;
+  activity?: ActivityLevel | null;
   goal?: PersonalGoal | null;
   /** False is an occasional guest, who eats only at the meals a presence rule adds them to. */
   default_present?: boolean;
@@ -83,8 +86,9 @@ export interface BasicSeasoning {
 
 /** GET /api/household-profiles/reference: looked up, never recomputed, on the page. */
 export interface HouseholdReference {
-  /** age band -> "female" | "male" | "any" -> "none" | "fat_loss" | "muscle_gain" -> portions a meal. */
-  default_servings: Record<string, Record<string, Record<string, number>>>;
+  /** age band -> "female" | "male" | "any" -> "low" | "moderate" | "high" -> "none" | "fat_loss" | "muscle_gain"
+   *  -> portions a meal. */
+  default_servings: Record<string, Record<string, Record<string, Record<string, number>>>>;
   sodium_limit_mg: Record<string, number | null>;
   basics: BasicSeasoning[];
   meal_shares: Record<string, number>;

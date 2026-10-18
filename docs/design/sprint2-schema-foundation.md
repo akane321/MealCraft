@@ -27,11 +27,12 @@ their behaviour and the [API Contracts](../api-contracts.md):
 
 The basic seasonings are a data file, `data/ingredients/basic-seasonings-v1.json`;
 `ingredients.basic_seasoning` stays unwritten until the first tagging PR copies
-the file into it with importer version `6`. Still unwired: `activity`
-(`ActivityLevel`; only HPB's moderate column is researched),
+the file into it with importer version `6`. Still unwired:
 `self_only_allergens`, `missing_equipment` and every `recipes` tag column,
 `FlavorBoost` and `PlanningPreferences`, and the other columns below. The
 evaluation reports did not change: their requests carry no household block.
+`python -m app.evaluation.household_rules` (in CI) measures the rules instead:
+`docs/evaluation/household-rules/latest.md`.
 
 ## Rules of this foundation
 
@@ -68,7 +69,7 @@ for compatibility. Shopping days are not stored: the plan's first day and day 8
 are derived.
 
 **Member JSON keys** (no migration needed; a feature PR adds them to
-`HouseholdMemberInput`; layer 08 PR-1 wired all but `activity` and
+`HouseholdMemberInput`; layer 08 PR-1 wired all but
 `self_only_allergens`). Their names are fixed here:
 
 | Key | Type | Default | Meaning |

@@ -52,6 +52,12 @@ PRESENCE = [
     ("Grandma comes over for lunch on Sundays", [("Grandma", True, ["sunday"], ["lunch"])]),
     ("爷爷奶奶星期天来吃午饭", [("Grandma", True, ["sunday"], ["lunch"]), ("Grandpa", True, ["sunday"], ["lunch"])]),
     ("I skip breakfast every day", [("Ann", False, [], ["breakfast"])]),
+    # Negated "eat / join / home" is away, never a presence (review of layer 08 PR-1).
+    ("Mei doesn't eat at home on weekdays", [("Mei", False, WEEKDAYS, [])]),
+    ("Ben won't join us for dinner on Fridays", [("Ben", False, ["friday"], ["dinner"])]),
+    ("Ben can't make it to dinner on Fridays", [("Ben", False, ["friday"], ["dinner"])]),
+    ("Mei is not eating lunch at home on Mondays", [("Mei", False, ["monday"], ["lunch"])]),
+    ("孩子周三不吃晚饭", [("Mei", False, ["wednesday"], ["dinner"])]),
 ]
 
 
@@ -87,8 +93,8 @@ def test_the_card_restates_from_the_template():
         "Monday to Friday, lunch: Mei eats elsewhere."
     ]
     assert [r.restatement for r in read("my parents join us for dinner on weekends").rules] == [
-        "Saturday and Sunday, dinner: Grandma joins.",
-        "Saturday and Sunday, dinner: Grandpa joins.",
+        "Saturday and Sunday, dinner: Grandma eats at home.",
+        "Saturday and Sunday, dinner: Grandpa eats at home.",
     ]
     assert [r.restatement for r in read("工作日晚饭30分钟以内，周末无所谓", kind="cooking_time").rules] == [
         "Monday to Friday, dinner: within 30 minutes.",
@@ -104,6 +110,7 @@ def test_the_card_restates_from_the_template():
         ("Tom eats out on Fridays", "presence", NAME_THE_PERSON),
         ("奶奶星期天来吃午饭", "presence", NAME_THE_PERSON),  # two older members: which one?
         ("Mei on Fridays at lunch", "presence", NO_POLARITY),
+        ("孩子不吃猪肉", "presence", NO_POLARITY),  # a food, not a meal: not an absence
         ("dinner within 300 minutes", "cooking_time", TIME_RANGE),
     ],
 )

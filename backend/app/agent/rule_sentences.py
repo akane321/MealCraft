@@ -58,7 +58,12 @@ ABSENT = (
     r"\bat school\b|\bat work\b|\bat the office\b|\beats? out\b|\beating out\b|\bnot (?:at )?home\b|\baway\b"
     r"|\bworks? late\b|\bworking late\b|\bwon'?t be (?:at )?home\b|\b(?:isn'?t|aren'?t) (?:at )?home\b"
     r"|\bskips?\b|\btravel(?:s|ling)?\b|\beats? elsewhere\b"
-    r"|在学校|在公司|不在家|不回来|不回家|加班|出去吃|在外面吃|在外吃|不吃|出差"
+    # A negated "eat / join / home": "Mei doesn't eat at home", "Ben won't join us", "Mei is not eating lunch".
+    r"|\b(?:don'?t|doesn'?t|do not|does not|won'?t|will not|never|not)\b(?:\s+\w+){0,2}?"
+    r"\s+(?:eat(?:s|ing)?|join(?:s|ing)?|home|have|having)\b"
+    r"|\b(?:can'?t|cannot|can not)\s+(?:make it|come|join|be (?:at )?home)\b"
+    # 不吃 only before a meal word: "周三不吃晚饭" is away, "孩子不吃猪肉" is not a presence sentence.
+    r"|在学校|在公司|不在家|不回来|不回家|加班|出去吃|在外面吃|在外吃|不吃(?=饭|早|午|中|晚)|出差"
 )
 PRESENT = (
     r"\bjoins? us\b|\bcomes? over\b|\bcome for\b|\beats? with us\b|\bvisits?\b|\b(?:is|are) (?:at )?home\b"

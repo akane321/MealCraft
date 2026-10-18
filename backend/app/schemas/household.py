@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from app.core.clock import today as local_today
 from app.data.household_reference import basic_seasonings, default_servings, sodium_limit
 from app.schemas.household_rules import (
+    ActivityLevel,
     AgeBand,
     CookingTimeRule,
     NutritionLimit,
@@ -37,10 +38,12 @@ def _normalize_terms(values: list[str], *, ingredient_ids: bool = False) -> list
 
 class HouseholdMemberInput(BaseModel):
     name: str = Field(min_length=1, max_length=80)
-    # Portions a meal, to two decimals; None is the HPB default from age band, sex and goal (layer 08).
+    # Portions a meal, to two decimals; None is the HPB default from age band, sex, activity and goal (layer 08).
     servings_per_meal: float | None = Field(default=1, ge=0.25, le=3)
     age_band: AgeBand | None = None
     sex: Sex | None = None
+    # HPB's activity column for the default portions; None reads as moderate.
+    activity: ActivityLevel | None = None
     # Fat loss: 10% smaller default portions. Muscle gain: protein-rich dishes rank higher.
     goal: PersonalGoal | None = None
     # False is an occasional guest, who eats only at the meals a presence rule adds them to.
@@ -73,7 +76,7 @@ class HouseholdMemberInput(BaseModel):
         """Portions a meal and where they came from: as stated, or the HPB default."""
         if self.servings_per_meal is not None:
             return self.servings_per_meal, "stated"
-        return default_servings(self.age_band, self.sex, self.goal)
+        return default_servings(self.age_band, self.sex, self.goal, self.activity)
 
 
 class HouseholdMemberResponse(HouseholdMemberInput):
@@ -269,8 +272,9 @@ class ReferenceSource(BaseModel):
 class HouseholdReferenceResponse(BaseModel):
     """The profile page's reference values; the page looks them up and never repeats a formula."""
 
-    # age band -> sex ("female", "male", "any") -> goal ("none", "fat_loss", "muscle_gain") -> portions a meal.
-    default_servings: dict[str, dict[str, dict[str, float]]]
+    # age band -> sex ("female", "male", "any") -> activity ("low", "moderate", "high") -> goal ("none",
+    # "fat_loss", "muscle_gain") -> portions a meal.
+    default_servings: dict[str, dict[str, dict[str, dict[str, float]]]]
     # age band -> HPB daily sodium limit in mg; None where HPB gives none.
     sodium_limit_mg: dict[str, float | None]
     basics: list[BasicSeasoning]

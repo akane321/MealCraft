@@ -1,9 +1,9 @@
 """Household member, rule and preference types of the Sprint 2 schema foundation.
 
-Wired by layer 08 PR-1: `AgeBand`, `Sex`, `PersonalGoal`, `Weekday`, `PresenceRule`, `CookingTimeRule` and
-`NutritionLimit` are profile fields, and `HouseholdPlanning` carries them into a planning request. Still unwired:
-`ActivityLevel` (only HPB's moderate column is researched), `MissingEquipment` (recipes have no equipment tags),
-`FlavorBoost` and `PlanningPreferences`. Meanings and NULL rules are in docs/design/sprint2-schema-foundation.md.
+Wired by layer 08 PR-1: `AgeBand`, `Sex`, `ActivityLevel`, `PersonalGoal`, `Weekday`, `PresenceRule`,
+`CookingTimeRule` and `NutritionLimit` are profile fields, and `HouseholdPlanning` carries them into a planning
+request. Still unwired: `MissingEquipment` (recipes have no equipment tags), `FlavorBoost` and
+`PlanningPreferences`. Meanings and NULL rules are in docs/design/sprint2-schema-foundation.md.
 """
 
 from typing import Literal
@@ -138,7 +138,7 @@ def restate(rule: PresenceRule | CookingTimeRule) -> str:
     """The confirmation card's sentence, always from this template and never from a model."""
     when = f"{day_phrase(rule.weekdays)}, {meal_phrase(rule.meal_types)}"
     if isinstance(rule, PresenceRule):
-        return f"{when}: {rule.member_name} {'joins' if rule.present else 'eats elsewhere'}."[:200]
+        return f"{when}: {rule.member_name} {'eats at home' if rule.present else 'eats elsewhere'}."[:200]
     if rule.max_minutes >= 240:
         return f"{when}: no cooking-time limit."
     return f"{when}: within {rule.max_minutes} minutes."

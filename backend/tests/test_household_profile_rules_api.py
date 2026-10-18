@@ -23,7 +23,7 @@ def payload(**changes) -> dict:
     body = {
         "name": "Tan household",
         "members": [
-            {"name": "Ann", "servings_per_meal": None, "age_band": "adult", "sex": "female"},
+            {"name": "Ann", "servings_per_meal": None, "age_band": "adult", "sex": "female", "activity": "low"},
             {"name": "Ben", "servings_per_meal": 1.25, "age_band": "adult", "sex": "male", "goal": "muscle_gain"},
             {"name": "Mei", "servings_per_meal": None, "age_band": "child"},
             {"name": "Grandma", "servings_per_meal": None, "age_band": "senior", "default_present": False},
@@ -43,12 +43,14 @@ def test_a_profile_keeps_member_fields_rules_basics_and_limits(recipe_client):
     assert created.status_code == 201, created.text
     current = created.json()["current"]
     members = {m["name"]: m for m in current["members"]}
-    assert (members["Ann"]["resolved_servings_per_meal"], members["Ann"]["servings_source"]) == (0.88, "hpb_default")
+    # HPB adult female, low active: 1720 / 2313.
+    assert (members["Ann"]["resolved_servings_per_meal"], members["Ann"]["servings_source"]) == (0.74, "hpb_default")
+    assert members["Ann"]["activity"] == "low" and members["Mei"]["activity"] is None
     assert members["Ann"]["servings_per_meal"] is None
     assert (members["Ben"]["resolved_servings_per_meal"], members["Ben"]["servings_source"]) == (1.25, "stated")
     assert members["Mei"]["resolved_servings_per_meal"] == 0.73
     assert members["Grandma"]["default_present"] is False
-    # Usually home: 0.88 + 1.25 + 0.73 = 2.86, rounded up; the guest is not counted.
+    # Usually home: 0.74 + 1.25 + 0.73 = 2.72, rounded up; the guest is not counted.
     assert current["planning_household_size"] == 3
     assert current["presence_rules"][0]["restatement"] == "Monday to Friday, lunch: Mei eats elsewhere."
     assert current["cooking_time_rules"][0]["restatement"] == "Monday to Friday, dinner: within 30 minutes."
@@ -104,8 +106,9 @@ def test_reference_lists_hpb_defaults_and_the_basics(recipe_client):
     response = recipe_client.get("/api/household-profiles/reference")
     assert response.status_code == 200, response.text
     reference = response.json()
-    assert reference["default_servings"]["teen"]["male"]["none"] == 1.35
-    assert reference["default_servings"]["adult"]["any"]["fat_loss"] == 0.9
+    assert reference["default_servings"]["teen"]["male"]["moderate"]["none"] == 1.35
+    assert reference["default_servings"]["adult"]["any"]["moderate"]["fat_loss"] == 0.9
+    assert reference["default_servings"]["teen"]["male"]["high"]["none"] == 1.55
     assert reference["sodium_limit_mg"]["adult"] == 2000 and reference["sodium_limit_mg"]["child"] is None
     assert {"salt", "soy_sauce"} <= {item["normalized_name"] for item in reference["basics"]}
     assert len(reference["sources"]) == 2

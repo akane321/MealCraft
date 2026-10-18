@@ -172,6 +172,7 @@ records input digests; changes to data, code or protocol are distinct conditions
 ```bash
 docker compose exec backend uv run --no-sync python -m app.evaluation
 docker compose exec backend uv run --no-sync python -m app.evaluation.workbench
+docker compose exec backend uv run --no-sync python -m app.evaluation.household_rules
 ```
 
 Neither command above makes a paid API call. Read the generated reports, rather

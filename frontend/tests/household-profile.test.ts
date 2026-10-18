@@ -18,8 +18,16 @@ import type { WeeklyGroceryEstimate } from "../app/types/meal-plan";
 
 const reference: HouseholdReference = {
   default_servings: {
-    adult: { female: { none: 0.88, fat_loss: 0.79, muscle_gain: 0.88 }, male: { none: 1.12, fat_loss: 1.01, muscle_gain: 1.12 }, any: { none: 1, fat_loss: 0.9, muscle_gain: 1 } },
-    child: { female: { none: 0.7, fat_loss: 0.63, muscle_gain: 0.7 }, male: { none: 0.75, fat_loss: 0.68, muscle_gain: 0.75 }, any: { none: 0.73, fat_loss: 0.65, muscle_gain: 0.73 } },
+    adult: {
+      female: { low: { none: 0.74 }, moderate: { none: 0.88, fat_loss: 0.79, muscle_gain: 0.88 } },
+      male: { moderate: { none: 1.12, fat_loss: 1.01, muscle_gain: 1.12 }, high: { none: 1.54 } },
+      any: { moderate: { none: 1, fat_loss: 0.9, muscle_gain: 1 } },
+    },
+    child: {
+      female: { moderate: { none: 0.7, fat_loss: 0.63, muscle_gain: 0.7 } },
+      male: { moderate: { none: 0.75, fat_loss: 0.68, muscle_gain: 0.75 } },
+      any: { moderate: { none: 0.73, fat_loss: 0.65, muscle_gain: 0.73 } },
+    },
   },
   sodium_limit_mg: { toddler: null, child: null, teen: null, adult: 2000, senior: 2000 },
   basics: [{ normalized_name: "soy_sauce", display_name: "Soy sauce", allergens: ["soy", "gluten"] }],
@@ -60,6 +68,12 @@ describe("portions from the HPB reference", () => {
     expect(defaultServings(reference, { age_band: "child", sex: "male", goal: null })).toBe(0.75);
     expect(defaultServings(reference, { age_band: null, sex: null, goal: "fat_loss" })).toBe(0.9);
     expect(defaultServings(null, { age_band: "adult" })).toBeNull();
+  });
+
+  it("looks up the activity column; unset activity reads as moderate", () => {
+    expect(defaultServings(reference, { age_band: "adult", sex: "male", activity: "high", goal: null })).toBe(1.54);
+    expect(defaultServings(reference, { age_band: "adult", sex: "female", activity: "low" })).toBe(0.74);
+    expect(defaultServings(reference, { age_band: "adult", sex: "female", activity: null })).toBe(0.88);
   });
 
   it("uses the stated number first, the default next, and 1 before the reference loads", () => {

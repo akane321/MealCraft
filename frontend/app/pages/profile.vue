@@ -18,6 +18,7 @@ import {
 } from "~/lib/recommendation-form";
 import { DEFAULT_SHAPE, describeShape } from "~/lib/plan-shape";
 import type {
+  ActivityLevel,
   AgeBand,
   CookingTimeRule,
   HouseholdMemberInput,
@@ -38,11 +39,12 @@ useHead({ title: "Household · MealCraft" });
 
 interface MemberForm {
   name: string;
-  // Auto is the HPB default from age group, sex and goal; set is the household's own number.
+  // Auto is the HPB default from age group, sex, activity and goal; set is the household's own number.
   servingsMode: "auto" | "set";
   servingsPerMeal: number;
   ageBand: AgeBand | "";
   sex: Sex | "";
+  activity: ActivityLevel | "";
   goal: PersonalGoal | "";
   defaultPresent: boolean;
   allergens: string[];
@@ -57,6 +59,11 @@ const ageOptions: { label: string; value: AgeBand }[] = [
   { label: "Teen (13–18)", value: "teen" },
   { label: "Adult (19–59)", value: "adult" },
   { label: "Older adult (60+)", value: "senior" },
+];
+// HPB's three columns: Light / Moderate / Vigorous (children, teens), Low / Moderate / Very active (adults).
+const activityOptions: { label: string; value: ActivityLevel }[] = [
+  { label: "Light (mostly sitting)", value: "low" },
+  { label: "Very active (sport or physical work)", value: "high" },
 ];
 const goalOptions: { label: string; value: PersonalGoal }[] = [
   { label: "Fat loss (slightly smaller portions)", value: "fat_loss" },
@@ -88,6 +95,7 @@ function newMember(number: number): MemberForm {
     servingsPerMeal: 1,
     ageBand: "",
     sex: "",
+    activity: "",
     goal: "",
     defaultPresent: true,
     allergens: [],
@@ -145,7 +153,7 @@ const plannedShare = computed(() => Object.keys(planShape.value.meals)
 const sodiumPerDay = computed(() => toOptionalNumber(sodiumLimitMg.value) ?? hpbSodium.value);
 
 function autoServings(member: MemberForm) {
-  return defaultServings(reference.value, { age_band: member.ageBand || null, sex: member.sex || null, goal: member.goal || null });
+  return defaultServings(reference.value, { age_band: member.ageBand || null, sex: member.sex || null, activity: member.activity || null, goal: member.goal || null });
 }
 const hasCurrentPlan = computed(() => current.value?.latest_plan_id !== null && current.value?.latest_plan_id !== undefined);
 
@@ -170,6 +178,7 @@ function hydrateFromCurrent() {
     servingsPerMeal: member.resolved_servings_per_meal,
     ageBand: member.age_band ?? "",
     sex: member.sex ?? "",
+    activity: member.activity ?? "",
     goal: member.goal ?? "",
     defaultPresent: member.default_present ?? true,
     allergens: [...member.allergens],
@@ -214,6 +223,7 @@ function memberPayload(member: MemberForm): HouseholdMemberInput {
     servings_per_meal: member.servingsMode === "set" ? toOptionalNumber(member.servingsPerMeal) : null,
     age_band: member.ageBand || null,
     sex: member.sex || null,
+    activity: member.activity || null,
     goal: member.goal || null,
     default_present: member.defaultPresent,
     allergens: member.allergens,
@@ -327,7 +337,7 @@ onMounted(async () => {
                 <span>Portions a meal</span>
                 <span class="portion-field">
                   <select v-model="member.servingsMode" aria-label="How portions are set">
-                    <option value="auto">Auto{{ autoServings(member) === null ? "" : ` (${formatPortions(autoServings(member)!)})` }}, from age and sex</option>
+                    <option value="auto">Auto{{ autoServings(member) === null ? "" : ` (${formatPortions(autoServings(member)!)})` }}, from age, sex and activity</option>
                     <option value="set">A set number</option>
                   </select>
                   <input v-if="member.servingsMode === 'set'" v-model.number="member.servingsPerMeal" type="number" min="0.25" max="3" step="0.05" aria-label="Portions they eat" required>
@@ -351,6 +361,13 @@ onMounted(async () => {
                 </select>
               </label>
               <label>
+                <span>Activity</span>
+                <select v-model="member.activity">
+                  <option value="">Moderate (not set)</option>
+                  <option v-for="option in activityOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
+                </select>
+              </label>
+              <label>
                 <span>Goal</span>
                 <select v-model="member.goal">
                   <option value="">None</option>
@@ -361,7 +378,7 @@ onMounted(async () => {
             <div class="member-presence">
               <label class="choice-card plain"><input v-model="member.defaultPresent" type="checkbox"><span>Usually eats at home</span></label>
               <p v-if="!member.defaultPresent" class="field-help">Occasional guest: joins only when a rule below says so.</p>
-              <p v-else-if="member.servingsMode === 'auto'" class="field-help">Auto portions follow HPB's energy need for this age group and sex, moderately active.</p>
+              <p v-else-if="member.servingsMode === 'auto'" class="field-help">Auto portions follow HPB's energy need for this age group, sex and activity.</p>
             </div>
             <div class="member-constraint-group">
               <p>Allergens</p>
@@ -543,7 +560,7 @@ onMounted(async () => {
 <style scoped>
 .portion-field { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 9px; }
 .portion-field:has(select:only-child) { grid-template-columns: minmax(0, 1fr); }
-.member-basis { margin-top: 0; }
+.member-basis { margin-top: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .member-presence { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .choice-card.plain > span { text-transform: none; }
 .choice-card small { color: var(--muted); font-size: 12px; }

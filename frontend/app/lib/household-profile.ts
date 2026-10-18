@@ -8,11 +8,12 @@ export interface HouseholdConstraintSummary {
   dietaryPreferences: string[];
 }
 
-type MemberBasis = Pick<HouseholdMemberInput, "age_band" | "sex" | "goal">;
+type MemberBasis = Pick<HouseholdMemberInput, "age_band" | "sex" | "activity" | "goal">;
 
 /** The HPB default portions for a member (backend reference table), or null before it loads. */
 export function defaultServings(reference: HouseholdReference | null, member: MemberBasis): number | null {
-  return reference?.default_servings[member.age_band ?? "adult"]?.[member.sex ?? "any"]?.[member.goal ?? "none"] ?? null;
+  return reference?.default_servings[member.age_band ?? "adult"]?.[member.sex ?? "any"]
+    ?.[member.activity ?? "moderate"]?.[member.goal ?? "none"] ?? null;
 }
 
 /** Portions a meal as planned: as stated, else the HPB default; 1 until the reference loads. */

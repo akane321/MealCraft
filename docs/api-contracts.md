@@ -300,6 +300,9 @@ diets stay household-wide in this version).
 
 - `age_band`: `toddler`, `child`, `teen`, `adult` or `senior`; null reads as adult;
 - `sex`: `female` or `male`; null is the mean of both;
+- `activity`: `low`, `moderate` or `high`, HPB's Light / Moderate / Vigorous
+  (children and teens) or Low / Moderate / Very active (adults) column of the
+  default portions; null reads as moderate; toddlers are not split by activity;
 - `goal`: `fat_loss` (10% smaller default portions) or `muscle_gain`
   (protein-rich dishes rank higher: a dish's protein per serving as a
   percentile of the eligible dishes joins its nutrition score); null is none;
@@ -315,8 +318,8 @@ Reads return each member with `resolved_servings_per_meal` and
 no researched value). The resolved portions of all members are at most 12.
 `planning_household_size` is still an integer: the usually-home members'
 portions, rounded up. Each meal of a plan is cooked for the exact sum of the
-members home for it. Activity, missing equipment and member-only allergens are
-not accepted yet.
+members home for it. Missing equipment and member-only allergens are not
+accepted yet.
 
 **Household rules (layer 08).** The body and every version read add four lists,
 each empty by default (stored as NULL):
@@ -346,7 +349,7 @@ each empty by default (stored as NULL):
 The server writes each rule's `restatement` itself, from a fixed template.
 
 `GET /api/household-profiles/reference` is read-only:
-`default_servings[age_band][female|male|any][none|fat_loss|muscle_gain]`,
+`default_servings[age_band][female|male|any][low|moderate|high][none|fat_loss|muscle_gain]`,
 `sodium_limit_mg[age_band]` (null where HPB gives none), `basics`
 (`normalized_name`, `display_name`, `allergens`), `meal_shares` and the
 `sources` (title, URL, retrieved date). The profile page looks values up here
