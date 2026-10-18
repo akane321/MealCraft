@@ -10,6 +10,7 @@ from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
 from app.models.recipe import Recipe
 from app.planning.conflict_explanation import explain_infeasibility, product_explanation
+from app.planning.household_slots import limit_targets, widest_time_limit
 from app.planning.meal_beam import EMPTY_OPTIONAL_ROLE_LOSS
 from app.planning.nutrition_scope import nutrition_scope_notes
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError, meals_of_the_day
@@ -41,6 +42,15 @@ from app.services.recommendation import RecipeRecommendationService
 def _meal_rank(meal_type: str) -> int:
     """Breakfast, lunch, dinner, then anything else (a snack)."""
     return MEAL_ORDER.index(meal_type) if meal_type in MEAL_ORDER else len(MEAL_ORDER)
+
+
+def pool_constraints(constraints: WeeklyMealPlanRequest) -> WeeklyMealPlanRequest:
+    """The request the recipe pool is recommended for: with cooking-time rules, the loosest limit any meal has,
+    so each meal's own limit is held by the planner (layer 08); the request itself without them."""
+    widest = widest_time_limit(constraints.household, constraints.max_cooking_time_minutes)
+    if widest == constraints.max_cooking_time_minutes:
+        return constraints
+    return constraints.model_copy(update={"max_cooking_time_minutes": widest})
 
 
 def _distinct(result) -> int:
@@ -115,8 +125,11 @@ class WeeklyMealPlanService:
             recommendation_warnings = [
                 warning for warning in recommendation_warnings if not warning.startswith("Stable fixture prices")
             ]
+        meals = [meal for meal, _ in meals_of_the_day(constraints) or [("dinner", None)]]
         warnings = self._deduplicate(
-            recommendation_warnings + grocery.warnings + nutrition_scope_notes(constraints.nutrition_constraints)
+            recommendation_warnings
+            + grocery.warnings
+            + nutrition_scope_notes([*constraints.nutrition_constraints, *limit_targets(constraints.household, meals)])
         )
         eligible_count = len({item.recipe.id for item in recommendation_result.recommendations})
         if eligible_count == 1:
@@ -128,7 +141,7 @@ class WeeklyMealPlanService:
                 "recipes are rotated across the seven days."
             )
         warnings = self._deduplicate(warnings)
-        placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(selected))]
+        placements = result.placements or [(index, "dinner", "main", 1, None) for index in range(len(selected))]
         scheduled = [
             ScheduledDish(
                 planned_date=constraints.start_date + timedelta(days=slot_index),
@@ -137,8 +150,10 @@ class WeeklyMealPlanService:
                 role_id=role_id,
                 portion_share=portion_share,
                 recommendation=recommendation,
+                servings=servings,
+                household_size=constraints.household_size,
             )
-            for (slot_index, meal_type, role_id, portion_share), recommendation in zip(
+            for (slot_index, meal_type, role_id, portion_share, servings), recommendation in zip(
                 placements, selected, strict=True
             )
         ]
@@ -294,7 +309,7 @@ class WeeklyMealPlanService:
         courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
         recipes = self.recipe_repository.list_for_planning(courses=courses)
         result = self.recommendation_service.recommend(
-            constraints,
+            pool_constraints(constraints),
             deduct_pantry_from_cost=False,
             recipes=recipes,
             priced_release_only=True,
@@ -361,12 +376,12 @@ class WeeklyMealPlanService:
         """Dishes for selected days from a saved week, nothing saved (ADR-0046 section 2).
 
         `constraints` carries the shape to plan and the budget left. `rest` is the rest of the week, each dish
-        with its portion share: its dishes are avoided while enough others remain, and in every attempt their
-        uses there count towards the household's cap on uses. `keep` ((day index, meal) -> {role id: recipe
-        id}) holds each meal's present dishes in their roles while a new one is added. `over_budget` plans the
-        dishes over the budget when none fit it (none can when it is 0 or less), as cheaply as the planner finds,
-        weighing costs against this amount (see `over_budget_pick` and `charge` below). `by_weight` is what the
-        week's list buys by weight, so `charge` prices the week as its list will be.
+        with its share of a household-size batch (`grocery_share`): its dishes are avoided while enough others
+        remain, and in every attempt their uses there count towards the household's cap on uses. `keep` ((day
+        index, meal) -> {role id: recipe id}) holds each meal's present dishes in their roles while a new one is
+        added. `over_budget` plans the dishes over the budget when none fit it (none can when it is 0 or less), as
+        cheaply as the planner finds, weighing costs against this amount (see `over_budget_pick` and `charge`
+        below). `by_weight` is what the week's list buys by weight, so `charge` prices the week as its list will be.
         """
         constraints = constraints.model_copy(update={"pricing_mode": "fixture"})
         planned_days = day_indices or list(range(first_day, first_day + day_count))
@@ -386,7 +401,7 @@ class WeeklyMealPlanService:
         courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
         recipes = self.recipe_repository.list_for_planning(courses=courses)
         recommendations = self.recommendation_service.recommend(
-            partial, deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
+            pool_constraints(partial), deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
         ).recommendations
         slugs = {recipe.id: recipe.slug for recipe in recipes}
         keep_ids = {recipe_id for roles in (keep or {}).values() for recipe_id in roles.values()}
@@ -421,7 +436,10 @@ class WeeklyMealPlanService:
             Within those meals alone, a dinner's salad served again at lunch was no repeat (the 2026-10-02
             review: every lunch of mdw-dev-013 was one of its dinners)."""
             week = [recipe for recipe, _ in rest] + [by_id[item.recipe.id] for item in planned.selected]
-            shares = [share for _, share in rest] + [float(place[3]) for place in planned.placements]
+            shares = [share for _, share in rest] + [
+                float(place[3] if place[4] is None else place[4] / partial.household_size)
+                for place in planned.placements
+            ]
             total = self.grocery_aggregator.estimate(
                 week, partial, shares=shares, by_weight=by_weight
             ).purchase_total_sgd
@@ -445,6 +463,7 @@ class WeeklyMealPlanService:
                             budget_is_hard=hard,
                             locked=locked,
                             used=Counter(recipe.slug for recipe, _ in rest),
+                            dates=[constraints.start_date + timedelta(days=day - 1) for day in planned_days],
                         )
                     )
                 except ProductPlanningError as error:
@@ -461,7 +480,7 @@ class WeeklyMealPlanService:
             if unfilled is None:
                 raise failure
             result = unfilled
-        placements = result.placements or [(index, "dinner", "main", 1) for index in range(len(result.selected))]
+        placements = result.placements or [(index, "dinner", "main", 1, None) for index in range(len(result.selected))]
         return [
             ScheduledDish(
                 planned_date=constraints.start_date + timedelta(days=planned_days[slot_index] - 1),
@@ -470,8 +489,12 @@ class WeeklyMealPlanService:
                 role_id=role_id,
                 portion_share=share,
                 recommendation=recommendation,
+                servings=servings,
+                household_size=constraints.household_size,
             )
-            for (slot_index, meal_type, role_id, share), recommendation in zip(placements, result.selected, strict=True)
+            for (slot_index, meal_type, role_id, share, servings), recommendation in zip(
+                placements, result.selected, strict=True
+            )
         ]
 
     def _operation_run(
@@ -645,6 +668,7 @@ class WeeklyMealPlanService:
                     meal_type=entry.meal_type,
                     role_id=entry.role_id,
                     portion_share=float(entry.portion_share),
+                    servings=float(entry.servings) if entry.servings is not None else None,
                     recipe=RecipeListItemResponse.model_validate(entry.recipe),
                     recommendation_score=float(entry.recommendation_score),
                     nutrition_per_person=nutrition,

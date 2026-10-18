@@ -6,13 +6,20 @@ from app.core.clock import today as local_today
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
 from app.models.recipe import Recipe
 from app.planning import alternatives
+from app.planning.household_slots import limit_targets, slot_time_limit
 from app.planning.meal_composition import meal_minutes, portion_shares
 from app.planning.product_path import ProductPlanningError, meal_affinity, meals_of_the_day
 from app.planning.recipe_quality import dish_family
 from app.planning.recipe_similarity import RecipeSimilarity
 from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
-from app.repositories.meal_plan import MealPlanRepository, MealPlanRevisionConflictError, ScheduledDish, entry_values
+from app.repositories.meal_plan import (
+    MealPlanRepository,
+    MealPlanRevisionConflictError,
+    ScheduledDish,
+    entry_values,
+    grocery_share,
+)
 from app.repositories.recipe import RecipeRepository
 from app.schemas.display import shown_title
 from app.schemas.meal_plan import (
@@ -32,7 +39,7 @@ from app.schemas.meal_plan import (
 )
 from app.schemas.planning_v2 import PlanningCompositionPolicy
 from app.schemas.recommendation import RecipeRecommendationResponse
-from app.services.meal_plan import WeeklyMealPlanService
+from app.services.meal_plan import WeeklyMealPlanService, pool_constraints
 from app.services.recommendation import RecipeRecommendationService
 
 
@@ -45,6 +52,13 @@ def by_weight(grocery: WeeklyGroceryEstimateResponse) -> set[str]:
 def _at_share(value, share: float):
     """A dish's value at its portion share; a whole-meal dish keeps the value exactly."""
     return value if share == 1 else round(float(value) * share, 2)
+
+
+def _values_share(values: dict, household_size: int) -> float:
+    """An unsaved dish's share of a household-size batch (`grocery_share`), from its `entry_values`."""
+    if values.get("servings") is None:
+        return values["portion_share"]
+    return values["servings"] / household_size
 
 
 def _same_quantity(before: float | None, after: float | None) -> bool:
@@ -148,7 +162,7 @@ class MealPlanReplanningService:
                 and item.meal_type == entry.meal_type
                 and (item.id == entry.id or not (item.is_locked or item.status in {"completed", "skipped"}))
             ]
-        after_entry = self._after_entry_snapshot(entry, request, recommendation)
+        after_entry = self._after_entry_snapshot(entry, request, recommendation, plan.household_size)
         before_grocery = self._current_grocery(plan)
         if request.event_type == "LOCK_MEAL":
             after_grocery = before_grocery
@@ -258,8 +272,10 @@ class MealPlanReplanningService:
 
         wanted_ids = {item.recipe_id for item in kept} | {values["recipe_id"] for values, _ in added}
         recipes_by_id = {recipe.id: recipe for recipe in self.recipe_repository.list_by_ids(list(wanted_ids))}
-        eaten = [(recipes_by_id[item.recipe_id], float(item.portion_share)) for item in kept]
-        eaten += [(recipes_by_id[values["recipe_id"]], values["portion_share"]) for values, _ in added]
+        eaten = [(recipes_by_id[item.recipe_id], grocery_share(item, plan.household_size)) for item in kept]
+        eaten += [
+            (recipes_by_id[values["recipe_id"]], _values_share(values, plan.household_size)) for values, _ in added
+        ]
         after_grocery = self.grocery_aggregator.estimate(
             [recipe for recipe, _ in eaten],
             constraints,
@@ -349,7 +365,7 @@ class MealPlanReplanningService:
         courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
         recipes = self.recipe_repository.list_for_planning(courses=courses)
         pool = self.recommendation_service.recommend(
-            constraints, deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
+            pool_constraints(constraints), deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
         ).recommendations
         recipes_by_id = {recipe.id: recipe for recipe in recipes}
         missing = [item.recipe_id for item in eaten if item.recipe_id not in recipes_by_id]
@@ -396,6 +412,9 @@ class MealPlanReplanningService:
                     role_id=item.role_id,
                     portion_share=Fraction(str(item.portion_share)),
                     recommendation=swaps[item.id],
+                    # The new dish is cooked for the replaced one's servings.
+                    servings=Fraction(str(item.servings)) if item.servings is not None else None,
+                    household_size=plan.household_size,
                 )
             )
             recipe = swaps[item.id].recipe
@@ -506,6 +525,7 @@ class MealPlanReplanningService:
             "meal_type": item.meal_type,
             "role_id": item.role_id,
             "portion_share": round(share, 3),
+            "servings": round(float(item.servings) * ratio, 3) if item.servings is not None else None,
             "recommendation_score": float(item.recommendation_score),
             **{field: round(float(getattr(item, field)) * ratio, 2) for field in scaled},
         }
@@ -541,7 +561,7 @@ class MealPlanReplanningService:
             raise MealPlanReplanValidationError("Changing meals is not available here.")
         budget = constraints.weekly_budget_sgd
         recipes = {r.id: r for r in self.recipe_repository.list_by_ids(list({i.recipe_id for i in kept}))}
-        rest = [(recipes[item.recipe_id], float(item.portion_share)) for item in kept]
+        rest = [(recipes[item.recipe_id], grocery_share(item, constraints.household_size)) for item in kept]
         left = None
         if budget is not None:
             # What is left is what the rest of the week does not spend at the checkout, in whole packages:
@@ -709,7 +729,7 @@ class MealPlanReplanningService:
         recipes_by_id: dict[int, Recipe],
     ) -> RecipeRecommendationResponse:
         result = self.recommendation_service.recommend(
-            constraints, deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
+            pool_constraints(constraints), deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
         )
         candidates = self._replacements(
             plan, entry, constraints, result.recommendations, recipes_by_id, unavailable=request.unavailable_ingredient
@@ -838,7 +858,7 @@ class MealPlanReplanningService:
     def _week_grocery(self, plan: MealPlan, constraints, recipes_by_id, swaps: dict[int, int]):
         """The week's shopping with `swaps` (entry id -> recipe id) made."""
         eaten = [
-            (recipes_by_id[swaps.get(item.id, item.recipe_id)], float(item.portion_share))
+            (recipes_by_id[swaps.get(item.id, item.recipe_id)], grocery_share(item, plan.household_size))
             for item in plan.entries
             if item.status != "skipped"
         ]
@@ -915,7 +935,7 @@ class MealPlanReplanningService:
 
     @staticmethod
     def _meal_still_holds(plan: MealPlan, entry: MealPlanEntry, candidate: Recipe, constraints) -> bool:
-        """A replacement keeps its meal's distinct dishes, one-cook time and per-meal sodium ceiling."""
+        """A replacement keeps its meal's distinct dishes, one-cook time, per-meal sodium ceiling and daily limits."""
         others = [
             item
             for item in plan.entries
@@ -927,7 +947,10 @@ class MealPlanReplanningService:
         if candidate.id in {item.recipe_id for item in others}:
             return False
         dishes = [TimedDish.of(item.recipe) for item in others] + [TimedDish.of(candidate)]
-        limit = constraints.max_cooking_time_minutes
+        # The meal's own limit: a cooking-time rule for its weekday and meal, else the household's (layer 08).
+        limit = slot_time_limit(
+            constraints.household, constraints.max_cooking_time_minutes, entry.planned_date, entry.meal_type
+        )
         if limit is not None and meal_minutes(dishes, PlanningCompositionPolicy()) > limit:
             return False
         ceiling = constraints.max_sodium_mg_per_meal
@@ -935,6 +958,17 @@ class MealPlanReplanningService:
             sodium = sum(float(item.sodium_mg) for item in others)
             sodium += float(candidate.nutrition.sodium_mg) * float(entry.portion_share)
             if sodium > ceiling + 1e-6:
+                return False
+        # A daily limit the household switched on (layer 08) holds over the day's dishes, per person.
+        meals = list(week_shape(plan.constraints).meals)
+        for target in limit_targets(constraints.household, meals) if candidate.nutrition is not None else []:
+            day = sum(
+                float(getattr(item, target.metric))
+                for item in plan.entries
+                if item.day_index == entry.day_index and item.id != entry.id and item.status != "skipped"
+            )
+            day += float(getattr(candidate.nutrition, target.metric)) * float(entry.portion_share)
+            if day > target.upper + 1e-6:
                 return False
         return True
 
@@ -958,7 +992,7 @@ class MealPlanReplanningService:
             recipe = recipes_by_id.get(recipe_id)
             if recipe is None:
                 raise MealPlanReplanNotFoundError("A recipe used by this plan no longer exists")
-            recipes.append((recipe, float(entry.portion_share)))
+            recipes.append((recipe, grocery_share(entry, plan.household_size)))
         return recipes
 
     @staticmethod
@@ -986,6 +1020,7 @@ class MealPlanReplanningService:
         entry: MealPlanEntry,
         request: MealPlanReplanPreviewRequest,
         recommendation: RecipeRecommendationResponse | None,
+        household_size: int | None = None,
     ) -> dict:
         snapshot = MealPlanReplanningService._entry_snapshot(entry)
         if request.event_type == "LOCK_MEAL":
@@ -995,6 +1030,8 @@ class MealPlanReplanningService:
         elif recommendation is not None:
             estimate = recommendation.grocery_estimate
             share = float(entry.portion_share)
+            # Its cost is for the replaced dish's servings: the estimate is for the household size.
+            cost_share = grocery_share(entry, household_size) if household_size else share
             snapshot.update(
                 {
                     "recipe_id": recommendation.recipe.id,
@@ -1002,8 +1039,8 @@ class MealPlanReplanningService:
                     "recipe_title": recommendation.recipe.title,
                     "recommendation_score": recommendation.total_score,
                     # The new dish is eaten at the replaced dish's share of the meal.
-                    "consumed_cost_sgd": _at_share(estimate.consumed_total_sgd, share) if estimate else 0,
-                    "purchase_cost_sgd": _at_share(estimate.purchase_total_sgd, share) if estimate else 0,
+                    "consumed_cost_sgd": _at_share(estimate.consumed_total_sgd, cost_share) if estimate else 0,
+                    "purchase_cost_sgd": _at_share(estimate.purchase_total_sgd, cost_share) if estimate else 0,
                     "nutrition_per_person": {
                         key: _at_share(value, share)
                         for key, value in recommendation.recipe.nutrition.model_dump(mode="json").items()

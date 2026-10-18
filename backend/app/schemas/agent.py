@@ -2,7 +2,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_serializer
 from pydantic.json_schema import SkipJsonSchema
 
 from app.orchestration.contracts import (
@@ -13,6 +13,7 @@ from app.orchestration.contracts import (
     ToolEffect,
     ToolRunStatus,
 )
+from app.schemas.household_rules import HouseholdPlanning
 from app.schemas.meal_plan import (
     MealPlanEventType,
     MealPlanReplanEventResponse,
@@ -115,6 +116,17 @@ class AgentConstraintState(BaseModel):
     # The week's first day: what the request said ("next week", "from Wednesday"), else today or tomorrow
     # (agent/plan_dates.py). A day already past by the time the week is planned becomes today.
     start_date: date | None = None
+    # The saved household's members, rules and limits (layer 08); a size the conversation states replaces its
+    # members and who is home. None: a conversation with no saved household.
+    household: HouseholdPlanning | None = None
+
+    @model_serializer(mode="wrap")
+    def _no_household_key(self, handler):
+        # Without a household block a state dumps as before the field existed (digests, stored checkpoints).
+        data = handler(self)
+        if self.household is None and isinstance(data, dict):
+            data.pop("household", None)
+        return data
 
 
 class AgentReplanDraft(BaseModel):

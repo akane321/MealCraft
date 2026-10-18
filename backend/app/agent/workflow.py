@@ -201,6 +201,14 @@ class AgentConstraintWorkflow:
             value = getattr(extraction, field)
             if value is not None:
                 state[field] = value
+        if (
+            extraction.household_size is not None
+            and extraction.household_size != current.household_size
+            and state.get("household")
+        ):
+            # A size the conversation states wins over the saved members and who is home; the basics, time
+            # rules and limits stay (layer 08).
+            state["household"] = {**state["household"], "members": None, "presence_rules": []}
 
         for field in ("allergens", "excluded_ingredients", "dietary_preferences", "health_preferences"):
             values = getattr(extraction, field)
