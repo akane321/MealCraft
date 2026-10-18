@@ -5,7 +5,7 @@ Sprint 2 layers need, in one revision, so that feature work does not have to
 write competing migrations. It changes no behaviour.
 
 **Status.** The columns, the table and the types below are a **verified
-baseline**: they exist on `main` and are covered by
+baseline**: they are defined by migration `20261018_0030` and covered by
 `backend/tests/test_sprint2_foundation_types.py` and
 `backend/tests/migrations/test_sprint2_foundation_migration.py`. What reads and
 writes them is an **accepted target**: nothing in the planner, the API or the
