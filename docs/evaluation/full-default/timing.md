@@ -6,7 +6,7 @@ Machine: Intel64 Family 6 Model 198 Stepping 2, GenuineIntel (Windows). The code
 
 | Case | Report run (s) | Warm median (s) | Warm max (s) |
 |---|---:|---:|---:|
-| one-adult | 6.54 | 3.68 | 4.22 |
-| four-with-vegetarian | 5.22 | 5.03 | 5.04 |
-| six-tight-budget | 41.08 | 31.12 | 31.33 |
-| two-no-oven-ten-days | 4.35 | 4.77 | 5.23 |
+| one-adult | 6.33 | 3.69 | 4.06 |
+| four-with-vegetarian | 5.52 | 4.74 | 5.1 |
+| six-tight-budget | 40.67 | 25.73 | 27.02 |
+| two-no-oven-ten-days | 3.65 | 4.21 | 4.38 |
