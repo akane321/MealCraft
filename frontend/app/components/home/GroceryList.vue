@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatSgd, groceryGroups, groceryPriceLabel, groceryPriceTimes, packageLabel, priceSourceLabel } from "~/lib/home-surface";
+import { basicsNote, formatSgd, groceryGroups, groceryPriceLabel, groceryPriceTimes, packageLabel, priceSourceLabel } from "~/lib/home-surface";
 import type { WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { GroceryLineEstimate } from "~/types/recommendation";
 
@@ -11,6 +11,7 @@ const groups = computed(() => groceryGroups(props.estimate.items).map(group => (
 })));
 const lines = computed(() => groups.value.flatMap(group => group.lines));
 const source = computed(() => priceSourceLabel(props.estimate));
+const basics = computed(() => basicsNote(props.estimate));
 // Green when every price is FairPrice's, amber when some are samples, grey when all are.
 const sourceTone = computed(() => (source.value.startsWith("FairPrice prices") ? "ok" : source.value.startsWith("FairPrice") ? "warn" : ""));
 const priceSource = (line: GroceryLineEstimate) => line.evidence?.price_source ?? line.evidence?.mode;
@@ -51,6 +52,7 @@ function toggle(name: string) {
         <p class="unmapped">{{ estimate.unmapped_ingredients.join(", ") }}</p>
       </template>
       <p v-if="!groups.length && !estimate.unmapped_ingredients.length" class="unmapped">Everything this week is already at home.</p>
+      <p v-if="basics" class="basics">{{ basics }}</p>
     </div>
   </div>
 </template>
@@ -76,4 +78,5 @@ function toggle(name: string) {
 .c { font-weight: 800; }
 .item:has(input:checked) .p { color: var(--c-muted); text-decoration: line-through; }
 .unmapped { margin: 0; font-size: 12px; line-height: 16px; color: var(--c-muted); }
+.basics { margin: 12px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--c-info-bg); color: var(--c-info-text); font-size: 12px; line-height: 16px; }
 </style>

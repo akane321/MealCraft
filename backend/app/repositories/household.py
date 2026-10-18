@@ -1,4 +1,6 @@
 from decimal import Decimal
+from fractions import Fraction
+from math import ceil
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -117,7 +119,11 @@ class HouseholdProfileRepository:
         return HouseholdProfileVersion(
             version=version,
             members=[member.model_dump(mode="json") for member in payload.members],
-            planning_household_size=sum(member.servings_per_meal for member in payload.members),
+            # The usually-home members' portions, rounded up: the union column stays written (the foundation
+            # contract) and buys enough at the recommendation stage; each meal is planned for its exact sum.
+            planning_household_size=min(
+                12, ceil(sum(Fraction(str(m.resolved_servings()[0])) for m in payload.members if m.default_present))
+            ),
             max_cooking_time_minutes=payload.max_cooking_time_minutes,
             budget_per_meal_sgd=(
                 Decimal(str(payload.budget_per_meal_sgd)) if payload.budget_per_meal_sgd is not None else None
@@ -141,4 +147,9 @@ class HouseholdProfileRepository:
                 else None
             ),
             plan_shape=payload.plan_shape.model_dump(mode="json") if payload.plan_shape is not None else None,
+            # An empty list is stored as NULL, which means the same (docs/design/sprint2-schema-foundation.md).
+            presence_rules=[rule.model_dump(mode="json") for rule in payload.presence_rules] or None,
+            cooking_time_rules=[rule.model_dump(mode="json") for rule in payload.cooking_time_rules] or None,
+            missing_basics=list(payload.missing_basics) or None,
+            nutrition_limits=[limit.model_dump(mode="json") for limit in payload.nutrition_limits] or None,
         )

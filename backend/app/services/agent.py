@@ -74,6 +74,7 @@ from app.schemas.meal_plan import (
     WeeklyMealPlanResponse,
     default_plan_shape,
 )
+from app.services.household import household_planning
 from app.services.meal_plan import WeeklyMealPlanService
 from app.services.replanning import (
     MealPlanReplanningService,
@@ -172,6 +173,7 @@ def profile_constraints(version) -> AgentConstraintState:
             "pricing_mode": version.pricing_mode,
             "plan_shape": version.plan_shape
             or ({"meals": {"dinner": version.meal_composition}} if version.meal_composition else None),
+            "household": household_planning(version),
         }
     )
 
@@ -557,6 +559,7 @@ class AgentSessionService:
             plan_shape=constraints.plan_shape or default_plan_shape(),
             max_uses_per_recipe=constraints.max_uses_per_recipe,
             avoid_recipe_ids=constraints.avoid_recipe_ids,
+            household=constraints.household,
         )
 
     def _refusal(self, constraints: AgentConstraintState, lang: str) -> limits.Refusal | None:

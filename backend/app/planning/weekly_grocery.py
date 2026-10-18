@@ -13,6 +13,7 @@ from app.planning.grocery_estimator import (
     not_purchased,
     not_purchased_line,
 )
+from app.planning.household_slots import assumed_basics, basics_note
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse, WeeklyMealPlanRequest
 from app.schemas.product import GroceryLineEstimate
 from app.services.product import ProductSearchService
@@ -114,8 +115,14 @@ class WeeklyGroceryAggregator:
         purchase_total = 0.0
         consumed_total = 0.0
         consumed_total_known = True
+        assumed = assumed_basics(getattr(constraints, "household", None), constraints.excluded_ingredients)
+        at_home = {ingredient.name for ingredient in ingredients if ingredient.name in assumed}
+        if at_home:
+            warnings.append(basics_note(at_home))
 
         for ingredient in ingredients:
+            if ingredient.name in at_home:
+                continue  # assumed at home: not listed or priced (ADR-0068)
             pantry_item = pantry.get(ingredient.name)
             pantry_deduction = GroceryEstimator.pantry_deduction(
                 pantry_item,

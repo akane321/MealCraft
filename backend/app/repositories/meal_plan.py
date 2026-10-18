@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from fractions import Fraction
 
@@ -33,18 +33,34 @@ class ScheduledDish:
     role_id: str
     portion_share: Fraction | int
     recommendation: RecipeRecommendationResponse
+    # The servings the dish is cooked for (layer 08: the members home); None is the household size at the
+    # portion share, as before.
+    servings: Fraction | None = None
+    # The plan's household size, which the recommendation's estimate is priced for; needed with `servings`.
+    household_size: int | None = None
+
+
+def grocery_share(entry, household_size: int) -> float:
+    """A saved dish's share of a household-size batch, as the weekly list scales it: its portion share, or its
+    servings over the household size."""
+    if entry.servings is None:
+        return float(entry.portion_share)
+    return float(Fraction(str(entry.servings)) / household_size)
 
 
 def entry_values(dish: ScheduledDish) -> dict:
-    """The stored columns of one planned dish, its cost and nutrition at its portion share."""
+    """The stored columns of one planned dish: cost for the servings it is cooked for, nutrition per person at its
+    portion share."""
     recommendation = dish.recommendation
     estimate = recommendation.grocery_estimate
     nutrition = recommendation.recipe.nutrition
     share = dish.portion_share
+    # The estimate is for the household size; a dish cooked for the members home costs their servings' part.
+    cost_share = share if dish.servings is None else dish.servings / dish.household_size
 
-    def scaled(value):
+    def scaled(value, factor=share):
         # A whole-meal dish keeps the source value exactly.
-        return float(value) if share == 1 else round(float(Fraction(str(value)) * share), 2)
+        return float(value) if factor == 1 else round(float(Fraction(str(value)) * factor), 2)
 
     return {
         "recipe_id": recommendation.recipe.id,
@@ -53,9 +69,10 @@ def entry_values(dish: ScheduledDish) -> dict:
         "meal_type": dish.meal_type,
         "role_id": dish.role_id,
         "portion_share": round(float(share), 3),
+        "servings": round(float(dish.servings), 3) if dish.servings is not None else None,
         "recommendation_score": float(recommendation.total_score),
-        "consumed_cost_sgd": scaled(estimate.consumed_total_sgd) if estimate else 0,
-        "purchase_cost_sgd": scaled(estimate.purchase_total_sgd) if estimate else 0,
+        "consumed_cost_sgd": scaled(estimate.consumed_total_sgd, cost_share) if estimate else 0,
+        "purchase_cost_sgd": scaled(estimate.purchase_total_sgd, cost_share) if estimate else 0,
         **{
             field: scaled(getattr(nutrition, field))
             for field in ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
@@ -80,6 +97,8 @@ NUMERIC_FIELDS = (
 def new_entry(values: dict) -> MealPlanEntry:
     """A plan entry from `entry_values`, which a shape-change preview stores as JSON."""
     numbers = {field: Decimal(str(values[field])) for field in NUMERIC_FIELDS}
+    servings = values.get("servings")  # absent from a preview stored before layer 08
+    numbers["servings"] = Decimal(str(servings)) if servings is not None else None
     return MealPlanEntry(**{**values, **numbers, "planned_date": date.fromisoformat(values["planned_date"])})
 
 
@@ -103,7 +122,13 @@ class MealPlanRepository:
         plan = MealPlan(
             household_id=self.household_id,
             start_date=constraints.start_date,
-            end_date=max(dish.planned_date for dish in scheduled),
+            # The horizon's last day, also when nobody is home for its meals (layer 08 presence rules).
+            end_date=max(
+                [
+                    *(dish.planned_date for dish in scheduled),
+                    constraints.start_date + timedelta(constraints.day_count - 1),
+                ]
+            ),
             day_count=constraints.day_count,
             household_size=constraints.household_size,
             pricing_mode=constraints.pricing_mode,

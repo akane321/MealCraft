@@ -105,7 +105,7 @@ def dish_servings(problem: FinalPlanningProblem, assignments: list[PlanningAssig
         if shares is None or len(set(keys)) != len(keys):
             continue
         for index, key in zip(indexes, keys, strict=True):
-            servings[index] = slot.servings * shares[key]
+            servings[index] = Fraction(str(slot.servings)) * shares[key]
     return servings
 
 

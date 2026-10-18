@@ -65,7 +65,9 @@ class PlanningSlot(BaseModel):
     slot_id: str = Field(min_length=1, max_length=80)
     planned_date: date
     meal_type: MealType
-    servings: int = Field(ge=1, le=24)
+    # The servings of the members home for this meal (layer 08): a decimal when portions are; a whole number
+    # stays an int, so a slot dumps as before.
+    servings: int | float = Field(gt=0, le=24)
     # The whole meal's time; for several dishes, the estimate of ADR-0036 section 3.
     max_time_minutes: int | None = Field(default=None, ge=5, le=360)
     # Only when the user says the limit applies to each dish.

@@ -1,4 +1,5 @@
 import re
+from bisect import bisect_left
 from dataclasses import dataclass
 
 from app.data import ingredient_hierarchy
@@ -49,6 +50,7 @@ class RecipeRecommendationEngine:
         # Expanded once per call, not per recipe: "no pork" also removes bacon.
         excluded_ingredients = ingredient_hierarchy.expand_exclusions(constraints.excluded_ingredients)
 
+        eligible = []
         for recipe in recipes:
             exclusion_reasons = self._exclusion_reasons(recipe, constraints, excluded_ingredients)
             if exclusion_reasons:
@@ -61,8 +63,18 @@ class RecipeRecommendationEngine:
                     )
                 )
                 continue
+            eligible.append(recipe)
 
-            response = self._score_recipe(recipe, constraints)
+        # A member's muscle-gain goal (layer 08): a dish's protein per serving as a percentile of the eligible
+        # dishes joins the nutrition score, so protein-rich dishes rank higher with no invented target.
+        household = getattr(constraints, "household", None)
+        proteins = sorted(float(recipe.nutrition.protein_g) for recipe in eligible)
+        for recipe in eligible:
+            protein_rank = None
+            if household is not None and household.protein_priority:
+                protein = float(recipe.nutrition.protein_g)
+                protein_rank = 100.0 * bisect_left(proteins, protein) / max(1, len(proteins) - 1)
+            response = self._score_recipe(recipe, constraints, protein_rank)
             scored.append(ScoredRecipe(recipe=recipe, response=response))
 
         scored.sort(key=lambda item: (-item.response.total_score, item.recipe.id))
@@ -139,12 +151,13 @@ class RecipeRecommendationEngine:
         self,
         recipe: Recipe,
         constraints: RecipeRecommendationRequest,
+        protein_rank: float | None = None,
     ) -> RecipeRecommendationResponse:
         reasons = [
             f"Fits the {constraints.max_cooking_time_minutes}-minute limit ({recipe.total_time_minutes} minutes)."
         ]
         time_score = self._time_score(recipe.total_time_minutes, constraints.max_cooking_time_minutes)
-        nutrition_score = self._nutrition_score(recipe, constraints, reasons)
+        nutrition_score = self._nutrition_score(recipe, constraints, reasons, protein_rank)
         pantry_score = self._pantry_score(recipe, constraints, reasons)
 
         weighted_scores = [(time_score, 25.0)]
@@ -177,8 +190,12 @@ class RecipeRecommendationEngine:
         recipe: Recipe,
         constraints: RecipeRecommendationRequest,
         reasons: list[str],
+        protein_rank: float | None = None,
     ) -> float | None:
         scores: list[float] = []
+        if protein_rank is not None:
+            scores.append(protein_rank)
+            reasons.append("Protein-rich dishes rank higher for a muscle-gain goal.")
         targets = constraints.nutrition_targets
         target_pairs = [
             (float(recipe.nutrition.calories_kcal), targets.calories_kcal),

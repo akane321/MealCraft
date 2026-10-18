@@ -2,10 +2,11 @@ from datetime import date, datetime
 from math import isfinite
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_serializer, model_validator
 
 from app.core.clock import today as local_today
 from app.schemas.display import ShownTitle
+from app.schemas.household_rules import HouseholdPlanning
 from app.schemas.planning_nutrition import ProductNutritionTarget
 from app.schemas.planning_v2 import MealComposition
 from app.schemas.product import GroceryLineEstimate, PricingMode
@@ -86,6 +87,17 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     # Recipes a new week leaves out, each course only while a week's worth of its other dishes remain
     # ("plan a new week with different dishes" after one found monotonous).
     avoid_recipe_ids: list[int] = Field(default_factory=list, max_length=200)
+    # The household's members, rules and limits (layer 08); None plans exactly as before.
+    household: HouseholdPlanning | None = None
+
+    @model_serializer(mode="wrap")
+    def _no_household_key(self, handler):
+        # Without a household block a request dumps as it did before the field existed: the same digests,
+        # stored constraints and evaluation reports.
+        data = handler(self)
+        if self.household is None and isinstance(data, dict):
+            data.pop("household", None)
+        return data
 
     @model_validator(mode="after")
     def one_way_to_say_the_shape(self) -> "WeeklyMealPlanRequest":
@@ -107,6 +119,8 @@ class WeeklyPlanDayResponse(BaseModel):
     meal_type: str = "dinner"
     role_id: str = "main"
     portion_share: float = 1.0
+    # How many servings the dish is cooked for (the members home); None: household_size at portion_share.
+    servings: float | None = None
     recipe: RecipeListItemResponse
     recommendation_score: float
     nutrition_per_person: RecipeNutritionResponse

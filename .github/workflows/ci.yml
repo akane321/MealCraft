@@ -91,6 +91,9 @@ jobs:
       - name: Offline evaluation workbench
         run: uv run --project backend python -m app.evaluation.workbench
 
+      - name: Household rules evaluation
+        run: uv run --project backend python -m app.evaluation.household_rules
+
   migrations:
     name: migrations
     runs-on: ubuntu-latest
@@ -249,6 +252,9 @@ jobs:
 
       - name: Offline evaluation workbench
         run: docker compose exec -T backend uv run --no-sync python -m app.evaluation.workbench
+
+      - name: Household rules evaluation
+        run: docker compose exec -T backend uv run --no-sync python -m app.evaluation.household_rules
 
       - name: Generated evaluation reports are reproducible
         # The workbench writes into the bind-mounted `docs/evaluation`. Regenerating

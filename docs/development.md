@@ -259,6 +259,7 @@ Run the reproducible baseline evaluation and refresh both reports:
 ```bash
 docker compose exec backend uv run --no-sync python -m app.evaluation
 docker compose exec backend uv run --no-sync python -m app.evaluation.workbench
+docker compose exec backend uv run --no-sync python -m app.evaluation.household_rules
 ```
 
 The evaluation covers 20 constraint combinations and fails when catalog size,
@@ -267,8 +268,11 @@ consecutive-repeat avoidance, product mapping, or grocery completeness falls
 below its gate. Results are written to `docs/evaluation/latest.json` and
 `docs/evaluation/latest.md`. The workbench additionally runs the held-out
 planner comparison and offline Agent fixture benchmark and writes
-`docs/evaluation/workbench/latest.json` and `latest.md`. Both commands are
-fixture-only by default and do not make a paid API call.
+`docs/evaluation/workbench/latest.json` and `latest.md`. The household rules
+report plans one fixed household's week with and without its members, presence
+and cooking-time rules and sodium limit, checks each rule held, and writes
+`docs/evaluation/household-rules/latest.json` and `latest.md`. All three
+commands are fixture-only by default and do not make a paid API call.
 
 Compile the leakage-resistant Evaluation v2 developer packets without calling
 an external model:

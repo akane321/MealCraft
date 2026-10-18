@@ -94,6 +94,8 @@ Available endpoints:
 - GET /api/agent/sessions/{session_id}/runs/{run_id}
 - POST /api/agent/sessions/{session_id}/runs/{run_id}/cancel
 - POST /api/household-profiles
+- GET /api/household-profiles/reference
+- POST /api/household-profiles/parse-rule
 - GET /api/household-profiles/current
 - GET /api/household-profiles/{profile_id}
 - PUT /api/household-profiles/{profile_id}
@@ -289,10 +291,79 @@ artifact has `total: null`, which is distinct from a valid empty file with
 ## Household Profiles
 
 The current implementation maintains one profile per authenticated household.
-Each member supplies a name, one to
-three planned servings, allergens, prohibited ingredient IDs, and dietary
-requirements. The backend deterministically sums servings and merges every
-member's safety constraints into the shared-plan hard constraints.
+Each member supplies a name, portions a meal, allergens, prohibited ingredient
+IDs, and dietary requirements. The backend merges every member's safety
+constraints into the shared-plan hard constraints (allergens, exclusions and
+diets stay household-wide in this version).
+
+**Member fields (layer 08).** Each member may also give:
+
+- `age_band`: `toddler`, `child`, `teen`, `adult` or `senior`; null reads as adult;
+- `sex`: `female` or `male`; null is the mean of both;
+- `activity`: `low`, `moderate` or `high`, HPB's Light / Moderate / Vigorous
+  (children and teens) or Low / Moderate / Very active (adults) column of the
+  default portions; null reads as moderate; toddlers are not split by activity;
+- `goal`: `fat_loss` (10% smaller default portions) or `muscle_gain`
+  (protein-rich dishes rank higher: a dish's protein per serving as a
+  percentile of the eligible dishes joins its nutrition score); null is none;
+- `default_present` (default `true`): `false` is an occasional guest, who eats
+  only at the meals a presence rule adds them to;
+- `servings_per_meal`: a decimal from 0.25 to 3, rounded to two places, or
+  `null` for the HPB default: the member's energy need over the adult
+  reference (2313 kcal), from `data/nutrition/hpb-reference-v1.json`. The
+  default stays `1`, so an older client's members are unchanged.
+
+Reads return each member with `resolved_servings_per_meal` and
+`servings_source` (`stated`, `hpb_default` or `fallback_todo` for a band with
+no researched value). The resolved portions of all members are at most 12.
+`planning_household_size` is still an integer: the usually-home members'
+portions, rounded up. Each meal of a plan is cooked for the exact sum of the
+members home for it. Missing equipment and member-only allergens are not
+accepted yet.
+
+**Household rules (layer 08).** The body and every version read add four lists,
+each empty by default (stored as NULL):
+
+- `presence_rules`: `PresenceRule` objects (`source_text`, `restatement`,
+  `member_name`, `present`, `weekdays`, `meal_types`; an empty list is every
+  weekday or meal). A meal's servings are those of the usually-home members,
+  then each rule naming its weekday and meal applies, the last rule for a member
+  winning. A meal nobody is home for is not planned, and the week's warnings
+  say so. `member_name` must name a member.
+- `cooking_time_rules`: `CookingTimeRule` objects (the same text, weekday and
+  meal fields, and `max_minutes` 5 to 240). A meal's time limit is the tightest
+  rule naming it, else `max_cooking_time_minutes`; 240 is no limit.
+- `missing_basics`: basic seasonings (`data/ingredients/basic-seasonings-v1.json`)
+  the household has run out of. Every other basic is assumed at home: left off
+  the shopping list, unpriced and outside the budget, with a note on the list.
+  A basic stays a recipe ingredient for allergens, exclusions and diets, and a
+  basic the household excludes is never assumed.
+- `nutrition_limits`: at most one `NutritionLimit`, and only `sodium_mg`
+  (`scope: "per_day"`). A `max_value` of null is the tightest HPB limit of the
+  usually-home members (2,000 mg for adults and seniors); a household whose
+  usually-home members have none (children only) must enter a value. It is a
+  hard per-person band of each day, pro-rated to the meals planned (breakfast
+  25%, lunch 35%, dinner 35%; MealCraft's design shares): a dinner-only week
+  keeps each dinner within 35% of the limit.
+
+The server writes each rule's `restatement` itself, from a fixed template.
+
+`GET /api/household-profiles/reference` is read-only:
+`default_servings[age_band][female|male|any][low|moderate|high][none|fat_loss|muscle_gain]`,
+`sodium_limit_mg[age_band]` (null where HPB gives none), `basics`
+(`normalized_name`, `display_name`, `allergens`), `meal_shares` and the
+`sources` (title, URL, retrieved date). The profile page looks values up here
+and never repeats the formula.
+
+`POST /api/household-profiles/parse-rule` stores nothing. It takes
+`{kind: "presence" | "cooking_time", text, members: [{name, age_band,
+default_present}], speaker}` and returns `{rules, issues, provider:
+"openai" | "rules", fell_back}`. With the OpenAI parser configured the model
+reads the sentence (structured output) and the rules read it when the model
+fails (`fell_back: true`); otherwise the rules read common Chinese and English
+weekday and meal phrases. Names outside `members` and dates ("初一", "10 Nov")
+are issues, never guesses. The card shows the restatements and the profile
+stores the rules only when it is saved with them.
 
 Shared defaults include cooking time, per-meal and weekly budgets, general
 health preferences, user-entered nutrition targets, an optional sodium target,
@@ -312,7 +383,14 @@ the profile ID, profile version, and complete effective-constraint snapshot.
 
 The replan endpoint leaves the original plan unchanged and generates a linked
 replacement from the requested profile version. Its response contains the old
-plan ID and a deterministic, field-level list of changed constraints.
+plan ID and a deterministic, field-level list of changed constraints, including
+"Members' portions", "Who is home", "Cooking-time rules", "Basics to buy" and
+"Nutrition limits".
+
+A profile plan carries the version's `household` block (below). A conversation
+started from a profile carries it too; a household size the conversation states
+replaces its members and presence rules, and keeps the basics, time rules and
+limits.
 
 ## Recipe Catalog
 
@@ -437,6 +515,13 @@ for bounds, compatibility, examples and the Agent handoff.
   conversation sets it to last week's dishes when the household asks for a new,
   more varied week.
 
+- an optional `household` (layer 08, default null): `members` (`name`,
+  `servings` above 0 and at most 3, `default_present`; null cooks every meal for
+  `household_size`), `presence_rules`, `cooking_time_rules`, `missing_basics`,
+  `nutrition_limits` (each `max_value` given) and `protein_priority`. A profile
+  fills it from the saved version. Its presence alone assumes the basic
+  seasonings at home. Null plans exactly as before, and a request without it
+  dumps without the key.
 - an optional `plan_shape` (decision ADR-0046): which meals of each day are
   planned and each meal's dish roles; the older `meal_composition` (dinner only)
   is still accepted, but not both.
@@ -448,7 +533,10 @@ for bounds, compatibility, examples and the Agent handoff.
   courses.
 
 The response holds the week as days × meals: one persisted entry per dish, each
-with its `day_index`, `meal_type`, `role_id` and `portion_share`, plus the
+with its `day_index`, `meal_type`, `role_id`, `portion_share` and `servings`
+(the servings the dish is cooked for when the request had a `household`; null is
+`household_size` at `portion_share`; cost follows the servings, nutrition per
+person stays at the portion share), plus the
 `plan_shape` it was planned with, per-person weekly nutrition totals, an
 aggregated shopping list, package checkout cost, ingredient-use cost, weekly
 budget status, and explicit warnings. Known pantry quantities are deducted once

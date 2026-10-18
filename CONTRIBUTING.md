@@ -150,6 +150,7 @@ Evaluation:
 ```bash
 docker compose exec backend uv run --no-sync python -m app.evaluation
 docker compose exec backend uv run --no-sync python -m app.evaluation.workbench
+docker compose exec backend uv run --no-sync python -m app.evaluation.household_rules
 ```
 
 Browser acceptance, when relevant:

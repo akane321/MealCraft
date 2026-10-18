@@ -1,0 +1,383 @@
+{
+  "report": "household-rules-v1",
+  "request": {
+    "start_date": "2027-01-03",
+    "household_size": 3,
+    "pricing_mode": "fixture",
+    "plan_shape": {
+      "meals": {
+        "lunch": [
+          {
+            "role_id": "main",
+            "courses": [
+              "main"
+            ]
+          }
+        ],
+        "dinner": [
+          {
+            "role_id": "main",
+            "courses": [
+              "main"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "household": {
+    "members": [
+      {
+        "name": "Ann",
+        "servings": 0.88
+      },
+      {
+        "name": "Ben",
+        "servings": 1.12
+      },
+      {
+        "name": "Mei",
+        "servings": 0.73
+      },
+      {
+        "name": "Grandma",
+        "servings": 0.81,
+        "default_present": false
+      }
+    ],
+    "presence_rules": [
+      {
+        "source_text": "孩子工作日午饭在学校吃",
+        "restatement": "-",
+        "member_name": "Mei",
+        "present": false,
+        "weekdays": [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday"
+        ],
+        "meal_types": [
+          "lunch"
+        ]
+      },
+      {
+        "source_text": "I work late on Wednesday evenings",
+        "restatement": "-",
+        "member_name": "Ann",
+        "present": false,
+        "weekdays": [
+          "wednesday"
+        ],
+        "meal_types": [
+          "dinner"
+        ]
+      },
+      {
+        "source_text": "Grandma joins us for dinner on weekends",
+        "restatement": "-",
+        "member_name": "Grandma",
+        "present": true,
+        "weekdays": [
+          "saturday",
+          "sunday"
+        ],
+        "meal_types": [
+          "dinner"
+        ]
+      }
+    ],
+    "cooking_time_rules": [
+      {
+        "source_text": "weekday dinners within 30 minutes",
+        "restatement": "-",
+        "weekdays": [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday"
+        ],
+        "meal_types": [
+          "dinner"
+        ],
+        "max_minutes": 30
+      }
+    ],
+    "nutrition_limits": [
+      {
+        "nutrient": "sodium_mg",
+        "max_value": 2000
+      }
+    ]
+  },
+  "passed": true,
+  "checks": {
+    "without_the_block_servings_are_unset": true,
+    "every_meal_cooks_for_the_members_home": true,
+    "weekday_dinners_keep_the_time_rule": true,
+    "each_day_keeps_its_share_of_the_sodium_limit": true,
+    "basics_are_bought_without_the_block": true,
+    "basics_leave_the_list_with_the_block": true
+  },
+  "without_household": {
+    "meals_planned": 14,
+    "servings_by_meal": [
+      {
+        "day": "sunday",
+        "meal": "lunch",
+        "recipe": "egg-vegetable-rice",
+        "servings": null,
+        "minutes": 30,
+        "sodium_mg_per_person": 590.0
+      },
+      {
+        "day": "sunday",
+        "meal": "dinner",
+        "recipe": "savoury-vegan-oats",
+        "servings": null,
+        "minutes": 25,
+        "sodium_mg_per_person": 430.0
+      },
+      {
+        "day": "monday",
+        "meal": "lunch",
+        "recipe": "spinach-oat-egg-cakes",
+        "servings": null,
+        "minutes": 25,
+        "sodium_mg_per_person": 450.0
+      },
+      {
+        "day": "monday",
+        "meal": "dinner",
+        "recipe": "chickpea-quinoa-salad",
+        "servings": null,
+        "minutes": 30,
+        "sodium_mg_per_person": 360.0
+      },
+      {
+        "day": "tuesday",
+        "meal": "lunch",
+        "recipe": "egg-tomato-quinoa",
+        "servings": null,
+        "minutes": 30,
+        "sodium_mg_per_person": 440.0
+      },
+      {
+        "day": "tuesday",
+        "meal": "dinner",
+        "recipe": "chickpea-sweet-potato-curry",
+        "servings": null,
+        "minutes": 45,
+        "sodium_mg_per_person": 500.0
+      },
+      {
+        "day": "wednesday",
+        "meal": "lunch",
+        "recipe": "mushroom-spinach-pasta",
+        "servings": null,
+        "minutes": 30,
+        "sodium_mg_per_person": 390.0
+      },
+      {
+        "day": "wednesday",
+        "meal": "dinner",
+        "recipe": "tuna-spinach-pasta",
+        "servings": null,
+        "minutes": 30,
+        "sodium_mg_per_person": 610.0
+      },
+      {
+        "day": "thursday",
+        "meal": "lunch",
+        "recipe": "chicken-quinoa-pepper",
+        "servings": null,
+        "minutes": 35,
+        "sodium_mg_per_person": 420.0
+      },
+      {
+        "day": "thursday",
+        "meal": "dinner",
+        "recipe": "salmon-quinoa-bowl",
+        "servings": null,
+        "minutes": 35,
+        "sodium_mg_per_person": 410.0
+      },
+      {
+        "day": "friday",
+        "meal": "lunch",
+        "recipe": "salmon-sweet-potato-tray",
+        "servings": null,
+        "minutes": 40,
+        "sodium_mg_per_person": 390.0
+      },
+      {
+        "day": "friday",
+        "meal": "dinner",
+        "recipe": "black-bean-sweet-potato-bowl",
+        "servings": null,
+        "minutes": 45,
+        "sodium_mg_per_person": 470.0
+      },
+      {
+        "day": "saturday",
+        "meal": "lunch",
+        "recipe": "tomato-lentil-stew",
+        "servings": null,
+        "minutes": 50,
+        "sodium_mg_per_person": 520.0
+      },
+      {
+        "day": "saturday",
+        "meal": "dinner",
+        "recipe": "tuna-cucumber-rice-bowl",
+        "servings": null,
+        "minutes": 30,
+        "sodium_mg_per_person": 570.0
+      }
+    ],
+    "basics_used": [
+      "garlic",
+      "ginger"
+    ],
+    "basics_on_list": [
+      "garlic",
+      "ginger"
+    ],
+    "grocery_lines": 28,
+    "purchase_total_sgd": 216.3,
+    "warnings": [
+      "Stable fixture prices are shown for reproducible planning; select live pricing to query FairPrice."
+    ]
+  },
+  "with_household": {
+    "meals_planned": 14,
+    "servings_by_meal": [
+      {
+        "day": "sunday",
+        "meal": "lunch",
+        "recipe": "chickpea-quinoa-salad",
+        "servings": 2.73,
+        "minutes": 30,
+        "sodium_mg_per_person": 360.0
+      },
+      {
+        "day": "sunday",
+        "meal": "dinner",
+        "recipe": "savoury-vegan-oats",
+        "servings": 3.54,
+        "minutes": 25,
+        "sodium_mg_per_person": 430.0
+      },
+      {
+        "day": "monday",
+        "meal": "lunch",
+        "recipe": "spinach-oat-egg-cakes",
+        "servings": 2.0,
+        "minutes": 25,
+        "sodium_mg_per_person": 450.0
+      },
+      {
+        "day": "monday",
+        "meal": "dinner",
+        "recipe": "egg-vegetable-rice",
+        "servings": 2.73,
+        "minutes": 30,
+        "sodium_mg_per_person": 590.0
+      },
+      {
+        "day": "tuesday",
+        "meal": "lunch",
+        "recipe": "egg-tomato-quinoa",
+        "servings": 2.0,
+        "minutes": 30,
+        "sodium_mg_per_person": 440.0
+      },
+      {
+        "day": "tuesday",
+        "meal": "dinner",
+        "recipe": "mushroom-spinach-pasta",
+        "servings": 2.73,
+        "minutes": 30,
+        "sodium_mg_per_person": 390.0
+      },
+      {
+        "day": "wednesday",
+        "meal": "lunch",
+        "recipe": "tuna-cucumber-rice-bowl",
+        "servings": 2.0,
+        "minutes": 30,
+        "sodium_mg_per_person": 570.0
+      },
+      {
+        "day": "wednesday",
+        "meal": "dinner",
+        "recipe": "tuna-spinach-pasta",
+        "servings": 1.85,
+        "minutes": 30,
+        "sodium_mg_per_person": 610.0
+      },
+      {
+        "day": "thursday",
+        "meal": "lunch",
+        "recipe": "chicken-quinoa-pepper",
+        "servings": 2.0,
+        "minutes": 35,
+        "sodium_mg_per_person": 420.0
+      },
+      {
+        "day": "thursday",
+        "meal": "dinner",
+        "recipe": "tuna-tomato-pasta",
+        "servings": 2.73,
+        "minutes": 30,
+        "sodium_mg_per_person": 650.0
+      },
+      {
+        "day": "friday",
+        "meal": "lunch",
+        "recipe": "salmon-sweet-potato-tray",
+        "servings": 2.0,
+        "minutes": 40,
+        "sodium_mg_per_person": 390.0
+      },
+      {
+        "day": "friday",
+        "meal": "dinner",
+        "recipe": "savoury-vegan-oats",
+        "servings": 2.73,
+        "minutes": 25,
+        "sodium_mg_per_person": 430.0
+      },
+      {
+        "day": "saturday",
+        "meal": "lunch",
+        "recipe": "lentil-sweet-potato-curry",
+        "servings": 2.73,
+        "minutes": 50,
+        "sodium_mg_per_person": 480.0
+      },
+      {
+        "day": "saturday",
+        "meal": "dinner",
+        "recipe": "black-bean-quinoa-skillet",
+        "servings": 3.54,
+        "minutes": 35,
+        "sodium_mg_per_person": 540.0
+      }
+    ],
+    "basics_used": [
+      "garlic",
+      "ginger"
+    ],
+    "basics_on_list": [],
+    "grocery_lines": 26,
+    "purchase_total_sgd": 186.2,
+    "warnings": [
+      "Stable fixture prices are shown for reproducible planning; select live pricing to query FairPrice.",
+      "Basic seasonings are assumed at home and left off this list: garlic, ginger. Mark one as run out on your profile to buy it.",
+      "Sodium: at most 1400 mg per person for each day."
+    ]
+  }
+}

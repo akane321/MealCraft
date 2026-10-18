@@ -38,6 +38,28 @@ Record household members and servings, then configure shared defaults such as
 budget, maximum cooking time, general preferences, optional user-entered
 nutrition targets, and existing ingredients.
 
+Each member has an age group, sex, activity and goal. **Portions a meal** is
+either **Auto**, which is that member's daily energy need from HPB's Recommended
+Dietary Allowances over an adult reference, or a number you set (0.25 to 3).
+Untick **Usually eats at home** for someone who joins only sometimes, such as
+grandparents on weekends.
+
+Under **Who's home and cooking time**, write one sentence in English or Chinese:
+for example "The kids have lunch at school on weekdays", "我周三晚上加班不回来" or
+"Weekday dinners within 30 minutes". MealCraft shows what it understood, and
+nothing is added until you choose **Add this rule**. The rule is kept when you
+save. Each meal is then cooked for the people home at that meal, and each meal
+keeps its own time limit.
+
+Under **Basics at home**, salt, sugar, cooking oil, soy sauce, garlic, ginger
+and the other listed basics are assumed to be in your kitchen. They are left off
+the shopping list unless you tick one as run out. Allergen checks still apply to
+them: a dish with soy sauce is never planned for a soy allergy.
+
+**Keep sodium within a daily limit** turns on a hard daily cap for each person.
+It defaults to HPB's 2,000 mg for adults. The meals you plan keep within their
+share of it: dinner only is 35% of the day.
+
 Under **Meals and dishes**, tick the meals each day plans (breakfast, lunch,
 dinner; dinner only by default) and pick each meal's dishes: a preset (dinner
 defaults to one main and one vegetable) or your own mix of mains, vegetables and
@@ -49,7 +71,8 @@ chicken salad. A dish marked "if one fits" is left out when nothing suits it.
 Important semantics:
 
 - member allergens, prohibited ingredients, and diet requirements are merged
-  into the safety boundary for the shared plan;
+  into the safety boundary for the shared plan, for every meal, even one that
+  member is away for;
 - an allergen MealCraft cannot check for excludes every recipe rather than
   none, and allergen labels come from ingredient data, so check product labels;
 - saving an edit creates a new profile version, and a plan records the exact

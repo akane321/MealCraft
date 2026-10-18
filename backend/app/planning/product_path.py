@@ -22,6 +22,13 @@ from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.grocery_estimator import convert_quantity, not_purchased
+from app.planning.household_slots import (
+    assumed_basics,
+    basics_note,
+    limit_targets,
+    slot_servings,
+    slot_time_limit,
+)
 from app.planning.meal_beam import (
     EMPTY_OPTIONAL_ROLE_LOSS,
     MealBeamLimits,
@@ -163,8 +170,9 @@ class ProductPlan:
     selected: list
     grocery: WeeklyGroceryEstimateResponse
     trace: dict
-    # One per selected recommendation: (slot index, meal type, role, portion share).
-    placements: list[tuple[int, str, str, Fraction]] | None = None
+    # One per selected recommendation: (slot index, meal type, role, portion share, servings cooked). Servings
+    # are None without a household block: the household size at the portion share, as before.
+    placements: list[tuple[int, str, str, Fraction, Fraction | None]] | None = None
 
 
 # Recommendations kept for each course a composed meal's roles admit.
@@ -261,6 +269,7 @@ class ProductPlanningEngine:
         budget_is_hard=True,
         locked=None,
         used=None,
+        dates=None,
     ):
         """A validated week, or ProductPlanningError saying why there is none.
 
@@ -270,10 +279,17 @@ class ProductPlanningEngine:
         searches among them) one costing least at the checkout is chosen (see `over_budget_pick`). `used` (recipe
         slug -> uses) is what the rest of a week already serves when part of it is planned: those uses count
         towards the household's cap on uses. `minimum_distinct_dishes` takes only weeks of at least that many
-        different dishes (ADR-0067's four).
+        different dishes (ADR-0067's four). `dates` are the calendar days planned when they are not consecutive
+        (part of a saved week), so a household's weekday rules read the right day.
         """
         locked = locked or {}
         kept_dishes = {slug for roles in locked.values() for slug in roles.values()}
+        household = getattr(constraints, "household", None)
+        # A limit the household switched on is a hard band of each day, pro-rated to the meals planned.
+        nutrition_targets = [
+            *constraints.nutrition_constraints,
+            *limit_targets(household, [meal for meal, _ in meals_of_the_day(constraints) or [("dinner", None)]]),
+        ]
         trace = {
             "trace_version": "planning-product-v1",
             "status": "needs_data",
@@ -287,9 +303,7 @@ class ProductPlanningEngine:
             "requested_pricing_mode": constraints.pricing_mode,
             "profile_version": profile_version,
             "input_digest": digest(constraints.model_dump(mode="json")),
-            "policy_version": (
-                "product-scoped-nutrition-v1" if constraints.nutrition_constraints else "product-fixed-shopping-v1"
-            ),
+            "policy_version": ("product-scoped-nutrition-v1" if nutrition_targets else "product-fixed-shopping-v1"),
             "validation": None,
         }
         trace["request"] = constraints.model_dump(mode="json")
@@ -364,6 +378,8 @@ class ProductPlanningEngine:
                 "candidate_rejected", "No candidate plan was found; try a different recipe selection.", trace
             )
         by_id = {r.id: r for r in recipes}
+        assumed = assumed_basics(household, constraints.excluded_ingredients)
+        basics_used: dict[str, set[str]] = {}  # recipe -> the basics it uses and the week does not buy
         candidates, options, observations, display_names = [], {}, {}, {}
         provenance = {}  # product id -> the PriceEvidence of the observation the planner prices with
         recipe_snapshots = {}
@@ -398,6 +414,15 @@ class ProductPlanningEngine:
                 diagnostics.extend(converted.issues)
                 continue
             candidate = converted.candidate
+            # Basic seasonings at home are not shopping (ADR-0068): the lines go only after the candidate's
+            # allergens were read from every line, and an excluded basic is never assumed (`assumed_basics`).
+            bought = [item for item in candidate.ingredients if item.ingredient_id not in assumed]
+            if bought and len(bought) < len(candidate.ingredients):
+                basics_used[candidate.recipe_id] = {item.ingredient_id for item in candidate.ingredients} - {
+                    item.ingredient_id for item in bought
+                }
+                candidate = candidate.model_copy(update={"ingredients": bought})
+            # ponytail: a recipe of basics alone is bought as listed; none is in the catalog's meal courses.
             if composition is not None and candidate.course is None:
                 # The curated catalog predates course labels and holds only dinner mains.
                 candidate = candidate.model_copy(update={"course": "main"})
@@ -437,22 +462,36 @@ class ProductPlanningEngine:
             raise ProductPlanningError(
                 "needs_data", "Recipe or price details could not be verified; refresh them and try again.", trace
             )
-        slots = [
-            PlanningSlot(
-                slot_id=f"slot-{i}" if meal == "dinner" else f"slot-{i}-{meal}",
-                planned_date=constraints.start_date + timedelta(days=i),
-                meal_type=meal,
-                servings=constraints.household_size,
-                max_time_minutes=constraints.max_cooking_time_minutes,
-                composition=roles,
-                locked_roles=locked.get((i, meal)),
-            )
-            for i in range(constraints.day_count)
-            for meal, roles in (composition or [("dinner", None)])
-        ]
-        slot_day = {
-            slot.slot_id: (index // len(composition or [0]), slot.meal_type) for index, slot in enumerate(slots)
-        }
+        slots, slot_day, unattended = [], {}, []
+        for i in range(constraints.day_count):
+            planned_date = dates[i] if dates else constraints.start_date + timedelta(days=i)
+            for meal, roles in composition or [("dinner", None)]:
+                # Each meal is cooked for the members home for it (layer 08 presence rules); nobody home, no meal.
+                servings = (
+                    slot_servings(household, planned_date, meal)
+                    if household is not None and household.members is not None
+                    else constraints.household_size
+                )
+                if not servings:
+                    unattended.append(f"{planned_date:%A} {meal} is not planned: nobody is home.")
+                    continue
+                slot = PlanningSlot(
+                    slot_id=f"slot-{i}" if meal == "dinner" else f"slot-{i}-{meal}",
+                    planned_date=planned_date,
+                    meal_type=meal,
+                    servings=servings,
+                    max_time_minutes=slot_time_limit(
+                        household, constraints.max_cooking_time_minutes, planned_date, meal
+                    ),
+                    composition=roles,
+                    locked_roles=locked.get((i, meal)),
+                )
+                slots.append(slot)
+                slot_day[slot.slot_id] = (i, meal)
+        if unattended:
+            trace["unattended_slots"] = unattended
+        if not slots:
+            raise ProductPlanningError("candidate_rejected", "Nobody is home for any planned meal this week.", trace)
         pantry = []
         for item in constraints.available_ingredients:
             quantity, unit = normalized(item.quantity, item.unit)
@@ -464,7 +503,7 @@ class ProductPlanningEngine:
                 quantity, unit = converted, wanted
             pantry.append(PlanningPantryItem(ingredient_id=item.normalized_name, quantity=quantity, unit=unit))
         bands = compile_nutrition_targets(
-            constraints.nutrition_constraints, constraints.nutrition_guard_band, meals_per_day=len(composition or [0])
+            nutrition_targets, constraints.nutrition_guard_band, meals_per_day=len(composition or [0])
         )
         trace["nutrition_scope"] = [b.model_dump(exclude={"lower", "upper"}) for b in bands]
         trace["settings"]["nutrition_guard_band"] = constraints.nutrition_guard_band
@@ -942,7 +981,18 @@ class ProductPlanningEngine:
             unmapped_ingredients=[],
             warnings=list(
                 dict.fromkeys(
-                    warning for r in recommendations if r.grocery_estimate for warning in r.grocery_estimate.warnings
+                    [
+                        *(
+                            warning
+                            for r in recommendations
+                            if r.grocery_estimate
+                            for warning in r.grocery_estimate.warnings
+                        ),
+                        *filter(
+                            None, [basics_note({b for a in assignments for b in basics_used.get(a.recipe_id, ())})]
+                        ),
+                        *unattended,
+                    ]
                 )
             ),
         )
@@ -954,8 +1004,15 @@ class ProductPlanningEngine:
             for a in assignments
         ]
         servings = dish_servings(problem, assignments)
+        slot_servings_of = {slot.slot_id: Fraction(str(slot.servings)) for slot in slots}
         placements = [
-            (*slot_day[a.slot_id], a.role_id or "main", servings[i] / constraints.household_size)
+            (
+                *slot_day[a.slot_id],
+                a.role_id or "main",
+                # The dish's share of its meal; with a household block, the servings it is cooked for besides.
+                servings[i] / (slot_servings_of[a.slot_id] if household is not None else constraints.household_size),
+                servings[i] if household is not None else None,
+            )
             for i, a in enumerate(assignments)
         ]
         return ProductPlan(selected, grocery, trace, placements)

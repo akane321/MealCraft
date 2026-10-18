@@ -9,6 +9,7 @@ from app.core.paths import data_root
 from app.data.overrides import overrides
 from app.data.units import UNIT_BASE, in_grams
 from app.models.recipe import Recipe
+from app.planning.household_slots import assumed_basics
 from app.schemas.product import GroceryEstimateResponse, GroceryLineEstimate, PriceEvidence, ProductResponse
 from app.schemas.recommendation import AvailableIngredientInput, RecipeRecommendationRequest
 from app.services.product import ProductSearchService
@@ -205,8 +206,15 @@ def _release_product(item: dict) -> ProductResponse:
     )
 
 
+BASIC_SEASONING_NOTE = "Basic seasoning: assumed at home, not priced."
+
+
 def not_purchased_line(
-    ingredient_name: str, ingredient_display_name: str, required: float | None, unit: str | None
+    ingredient_name: str,
+    ingredient_display_name: str,
+    required: float | None,
+    unit: str | None,
+    note: str = "Not purchased: drinking water and ice come from the tap and the freezer.",
 ) -> GroceryLineEstimate:
     return GroceryLineEstimate(
         ingredient_name=ingredient_name,
@@ -221,7 +229,7 @@ def not_purchased_line(
         purchase_cost_sgd=0.0,
         consumed_cost_sgd=0.0,
         excess_quantity=0.0,
-        note="Not purchased: drinking water and ice come from the tap and the freezer.",
+        note=note,
     )
 
 
@@ -288,6 +296,7 @@ class GroceryEstimator:
         purchase_total = 0.0
         consumed_total = 0.0
         consumed_total_known = True
+        assumed = assumed_basics(getattr(constraints, "household", None), constraints.excluded_ingredients)
 
         from app.planning import alternatives  # alternatives imports this module
 
@@ -321,6 +330,17 @@ class GroceryEstimator:
             if not_purchased(ingredient.normalized_name):
                 lines.append(
                     not_purchased_line(ingredient.normalized_name, ingredient.display_name, required, recipe_item.unit)
+                )
+                continue
+            if ingredient.normalized_name in assumed:
+                lines.append(
+                    not_purchased_line(
+                        ingredient.normalized_name,
+                        ingredient.display_name,
+                        required,
+                        recipe_item.unit,
+                        BASIC_SEASONING_NOTE,
+                    )
                 )
                 continue
             choice = choose_product(
