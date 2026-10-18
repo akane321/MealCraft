@@ -16,11 +16,12 @@ import {
   parseExcludedIngredients,
   toOptionalNumber,
 } from "~/lib/recommendation-form";
-import { DEFAULT_SHAPE, describeShape } from "~/lib/plan-shape";
+import { DEFAULT_SHAPE, EQUIPMENT, EQUIPMENT_LABEL, describeShape, peopleAt } from "~/lib/plan-shape";
 import type {
   ActivityLevel,
   AgeBand,
   CookingTimeRule,
+  Equipment,
   HouseholdMemberInput,
   HouseholdProfileInput,
   PersonalGoal,
@@ -116,6 +117,11 @@ const pantryItems = ref<AvailableIngredientInput[]>([
 const saveNotice = ref<string | null>(null);
 // Which meals each day plans and each one's dishes (ADR-0046).
 const planShape = ref<PlanShape>(structuredClone(DEFAULT_SHAPE));
+// Equipment the kitchen lacks (layer 08): a dish that needs it is never planned. Empty: all at home.
+const missingEquipment = ref<Equipment[]>([]);
+// Days a plan covers (1 to 14); longer than a week shops twice, before day 1 and day 8 (ADR-0072).
+const dayCount = ref(7);
+const DAY_OPTIONS = Array.from({ length: 14 }, (_, index) => index + 1);
 
 const {
   current,
@@ -139,6 +145,9 @@ const savedSummary = computed(() => current.value
   ? summarizeHouseholdMembers(current.value.current.members.map(member => ({ ...member, servings_per_meal: member.resolved_servings_per_meal })))
   : null);
 const homePortions = computed(() => (savedSummary.value ?? draftSummary.value).planningHouseholdSize);
+// The editor's dish counts follow the draft: who's eating as entered now.
+const tablePeople = computed(() => peopleAt(draftSummary.value.planningHouseholdSize));
+const planWord = computed(() => (dayCount.value === 7 ? "Plan this week" : `Plan ${dayCount.value} ${dayCount.value === 1 ? "day" : "days"}`));
 const ruleMembers = computed(() => members.value.map(member => ({
   name: member.name,
   age_band: member.ageBand || null,
@@ -188,6 +197,7 @@ function hydrateFromCurrent() {
   presenceRules.value = (version.presence_rules ?? []).map(rule => ({ ...rule }));
   timeRules.value = (version.cooking_time_rules ?? []).map(rule => ({ ...rule }));
   missingBasics.value = [...(version.missing_basics ?? [])];
+  missingEquipment.value = [...(version.missing_equipment ?? [])];
   const sodium = (version.nutrition_limits ?? []).find(limit => limit.nutrient === "sodium_mg");
   sodiumLimitOn.value = Boolean(sodium);
   sodiumLimitMg.value = sodium?.max_value ?? null;
@@ -253,6 +263,7 @@ function buildPayload(): HouseholdProfileInput {
     presence_rules: presenceRules.value,
     cooking_time_rules: timeRules.value,
     missing_basics: missingBasics.value,
+    missing_equipment: missingEquipment.value,
     nutrition_limits: sodiumLimitOn.value
       ? [{ nutrient: "sodium_mg", scope: "per_day", max_value: toOptionalNumber(sodiumLimitMg.value) }]
       : [],
@@ -270,14 +281,14 @@ async function saveProfile() {
 
 async function generateFromProfile() {
   saveNotice.value = null;
-  const generated = await generatePlan({ start_date: form.planningStartDate });
-  if (generated) saveNotice.value = "Your new week is ready. It's on the home page now.";
+  const generated = await generatePlan({ start_date: form.planningStartDate, day_count: dayCount.value });
+  if (generated) saveNotice.value = "Your new plan is ready. It's on the home page now.";
 }
 
 async function rebuildLatestPlan() {
   saveNotice.value = null;
-  const rebuilt = await replanLatest({ start_date: form.planningStartDate });
-  if (rebuilt) saveNotice.value = "Your week was replanned with these details. The home page shows the new one.";
+  const rebuilt = await replanLatest({ start_date: form.planningStartDate, day_count: dayCount.value });
+  if (rebuilt) saveNotice.value = "Your plan was redone with these details. The home page shows the new one.";
 }
 
 onMounted(async () => {
@@ -406,8 +417,8 @@ onMounted(async () => {
         <section class="profile-form-section">
           <p class="form-kicker">Meals and dishes</p>
           <h2>What each day plans</h2>
-          <p class="field-help">{{ describeShape(planShape) }}. You can also change this in the chat for one week, e.g. "also plan lunch" or "add a soup on Friday".</p>
-          <ProfileMealsEditor v-model="planShape" />
+          <p class="field-help">{{ describeShape(planShape) }}. Dish counts follow who's home at each meal. A dish marked "if one fits" is the one a meal may leave out when the budget, time or dishes can't fit it. You can also change this in the chat for one week, e.g. "also plan lunch" or "add a soup on Friday".</p>
+          <ProfileMealsEditor v-model="planShape" :people="tablePeople" />
         </section>
 
         <section class="profile-form-section">
@@ -473,6 +484,20 @@ onMounted(async () => {
           <ProfileRuleSentence v-model="timeRules" kind="cooking_time" :members="ruleMembers" />
         </section>
 
+        <section class="profile-form-section">
+          <p class="form-kicker">Kitchen</p>
+          <h2>Cooking equipment</h2>
+          <p class="field-help">We assume a stove and a rice cooker. Tick what your kitchen doesn't have, and dishes that need it are never planned.</p>
+          <div class="member-constraint-group">
+            <p>We don't have</p>
+            <div class="choice-grid">
+              <label v-for="item in reference?.meal_structure?.equipment ?? EQUIPMENT" :key="item" class="choice-card plain">
+                <input v-model="missingEquipment" type="checkbox" :value="item"><span>{{ EQUIPMENT_LABEL[item] }}</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
         <section v-if="reference?.basics.length" class="profile-form-section">
           <p class="form-kicker">Basics at home</p>
           <h2>Salt, oil, soy sauce and the like</h2>
@@ -522,7 +547,8 @@ onMounted(async () => {
             <div><dt>Won't eat</dt><dd>{{ current.current.excluded_ingredients.join(", ") || "None" }}</dd></div>
             <div><dt>Diet</dt><dd>{{ current.current.dietary_preferences.join(", ") || "None" }}</dd></div>
             <div><dt>Rules</dt><dd>{{ current.current.presence_rules.length + current.current.cooking_time_rules.length || "None" }}</dd></div>
-            <div><dt>This week</dt><dd>{{ current.latest_plan_id ? "Planned" : "Not planned yet" }}</dd></div>
+            <div><dt>Kitchen</dt><dd>{{ current.current.missing_equipment?.length ? `No ${current.current.missing_equipment.map(item => EQUIPMENT_LABEL[item].toLowerCase()).join(", ")}` : "All equipment" }}</dd></div>
+            <div><dt>Latest plan</dt><dd>{{ current.latest_plan_id ? "Planned" : "Not planned yet" }}</dd></div>
           </dl>
           <dl v-else class="profile-summary-list">
             <div><dt>Allergens</dt><dd>{{ draftSummary.allergens.join(", ") || "None" }}</dd></div>
@@ -532,25 +558,34 @@ onMounted(async () => {
         </section>
 
         <section class="profile-planning-card">
-          <p class="form-kicker">Plan a week</p>
-          <label><span>Week starts</span><input v-model="form.planningStartDate" type="date" required></label>
+          <p class="form-kicker">Plan your meals</p>
+          <div class="plan-when">
+            <label><span>Starts</span><input v-model="form.planningStartDate" type="date" required></label>
+            <label>
+              <span>Days to plan</span>
+              <select v-model.number="dayCount">
+                <option v-for="days in DAY_OPTIONS" :key="days" :value="days">{{ days }} {{ days === 1 ? "day" : "days" }}{{ days === 7 ? " (a week)" : "" }}</option>
+              </select>
+            </label>
+          </div>
+          <p v-if="dayCount > 7" class="field-help">Two shopping trips: before day 1 and before day 8. Fresh meat, fish and greens are used within 3 days of the trip they're bought on.</p>
           <button class="primary-button" type="button" :disabled="!current || isPlanning" @click="generateFromProfile">
-            {{ isPlanning ? "Planning…" : "Plan this week" }}
+            {{ isPlanning ? "Planning…" : planWord }}
           </button>
           <button v-if="hasCurrentPlan" class="secondary-button profile-replan-button" type="button" :disabled="isPlanning" @click="rebuildLatestPlan">
-            Replan my week with these details
+            Replan with these details
           </button>
-          <p class="field-help">Replanning keeps the old week in your history and notes what changed. Save your changes first.</p>
+          <p class="field-help">Replanning keeps the old plan in your history and notes what changed. Save your changes first.</p>
         </section>
 
         <section v-if="planResult" class="profile-change-card">
           <p class="form-kicker">Done</p>
-          <h2>Your week is ready</h2>
-          <p v-if="planResult.constraint_changes.length">What changed since the last week:</p>
+          <h2>Your plan is ready</h2>
+          <p v-if="planResult.constraint_changes.length">What changed since the last plan:</p>
           <ul v-if="planResult.constraint_changes.length">
             <li v-for="change in planResult.constraint_changes" :key="change.field">{{ change.field.replaceAll("_", " ") }}</li>
           </ul>
-          <NuxtLink class="secondary-button" to="/">See the week</NuxtLink>
+          <NuxtLink class="secondary-button" to="/">See the plan</NuxtLink>
         </section>
       </aside>
     </form>
@@ -568,4 +603,5 @@ onMounted(async () => {
 .sodium-limit > .choice-card { justify-self: start; }
 .sodium-field { max-width: 320px; }
 .basics-safety { margin-top: 12px; }
+.plan-when { display: grid; gap: 12px; }
 </style>

@@ -117,7 +117,8 @@ Type what the week should look like, in English or Chinese. The assistant
 extracts structured constraints and asks a focused question when something is
 missing; some questions offer buttons. When the details are complete, **Plan my
 week** plans every chosen meal of the seven days. A plan from the household
-profile may be 1 to 14 days long. A plan longer than a week shops twice: before
+profile may be 1 to 14 days long (**Days to plan**, beside the plan button on
+the Household page). A plan longer than a week shops twice: before
 day 1 and before day 8, with the weekly budget holding on each trip.
 
 MealCraft handles meal planning, recipes, groceries, budgets and explicit
@@ -148,7 +149,8 @@ The **Groceries** tab shows the total against the weekly budget. Perishable
 items (leafy greens, fresh fish and seafood, bean sprouts) are marked **Use
 within 3 days**: the planner cooks them within three days of the shopping trip
 that buys them, and assumes everything else keeps until its day. In a plan
-longer than a week the list is split by trip. The price label
+longer than a week the list is split by trip, under **Shop before day 1** and
+**Shop before day 8**. The price label
 says where each item's price came from: a current FairPrice check, a saved
 FairPrice observation with its date, or a sample price. A sample item with no
 matching FairPrice product is explicitly marked as not checked; that is different

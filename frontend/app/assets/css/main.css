@@ -430,7 +430,7 @@ h1, h2 {
   font-weight: 650;
 }
 
-.profile-main input[type="text"], .profile-main input[type="number"], .profile-main select, .profile-planning-card input[type="date"] {
+.profile-main input[type="text"], .profile-main input[type="number"], .profile-main select, .profile-planning-card input[type="date"], .profile-planning-card select {
   width: 100%;
   min-height: 42px;
   padding: 9px 11px;
@@ -441,7 +441,7 @@ h1, h2 {
   outline: none;
 }
 
-.profile-main input:focus, .profile-main select:focus, .profile-planning-card input:focus {
+.profile-main input:focus, .profile-main select:focus, .profile-planning-card input:focus, .profile-planning-card select:focus {
   border-color: var(--link);
   box-shadow: 0 0 0 3px rgba(58, 99, 224, 0.15);
 }

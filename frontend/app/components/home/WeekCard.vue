@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
-import { MEAL_LABEL, budgetGap, countWord, formatSgd, mealsByDay, perMealAndDay } from "~/lib/home-surface";
+import { MEAL_LABEL, budgetGap, countWord, formatSgd, mealsByDay, perMealAndDay, shoppingTrips } from "~/lib/home-surface";
 import type { PlannedMeal } from "~/lib/home-surface";
 import type { NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
 
@@ -12,6 +12,10 @@ const week = computed(() => mealsByDay(props.days));
 const meals = computed(() => week.value.flatMap(day => day.meals));
 const dinnersOnly = computed(() => meals.value.every(meal => meal.mealType === "dinner"));
 const headline = computed(() => (dinnersOnly.value ? `${countWord(meals.value.length)} dinners` : `${countWord(meals.value.length)} meals`));
+// A plan longer than a week shops twice (before day 1 and day 8).
+const shops = computed(() => (shoppingTrips(props.estimate) > 1 ? "two shops" : "one shop"));
+// Seven tiles a row; a plan longer than a week takes a second row.
+const columns = computed(() => Math.min(7, Math.max(1, week.value.length)));
 const eyebrow = computed(() => [props.rangeLabel, props.householdSize ? `${dinnersOnly.value ? "dinners" : "meals"} for ${props.householdSize}` : null].filter(Boolean).join(" · "));
 // Cooking time of a meal is its main dish's; nutrition per meal, or per day when a day has several.
 const avgCook = computed(() => Math.round(meals.value.reduce((sum, meal) => sum + meal.dishes[0]!.recipe.total_time_minutes, 0) / (meals.value.length || 1)));
@@ -42,7 +46,7 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
     <div class="head">
       <div class="title">
         <span class="mc-label">{{ eyebrow }}</span>
-        <h3 class="mc-title">{{ headline }}, one shop.</h3>
+        <h3 class="mc-title">{{ headline }}, {{ shops }}.</h3>
       </div>
       <div class="figures">
         <div class="fig"><span class="k">Groceries</span><span class="v mc-num">{{ formatSgd(estimate.purchase_total_sgd) }}</span></div>
@@ -51,7 +55,7 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
         <div v-if="!left" class="fig"><span class="k">{{ perPlateLabel }}</span><span class="v mc-num">{{ perPlate }} kcal</span></div>
       </div>
     </div>
-    <div class="strip">
+    <div class="strip" :style="{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }">
       <button
         v-for="day in week"
         :key="day.dayIndex"
@@ -70,7 +74,7 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
               <HomeDishIcon :title="badge(meal)!.recipe.title" :course="badge(meal)!.recipe.course" :role-id="badge(meal)!.role_id" :size="22" />
             </span>
             <svg v-if="meal.status === 'completed'" class="tick" viewBox="0 0 24 24" aria-label="Cooked"><circle cx="12" cy="12" r="11" /><path d="m7 12.5 3.5 3.5L17 9" /></svg>
-            <svg v-if="repeated(meal)" class="again" viewBox="0 0 24 24" aria-label="Appears more than once this week"><circle cx="12" cy="12" r="11" /><path d="M7 11a5 5 0 0 1 9-2.5M17 13a5 5 0 0 1-9 2.5M16 5v4h-4M8 19v-4h4" /></svg>
+            <svg v-if="repeated(meal)" class="again" viewBox="0 0 24 24" aria-label="Appears more than once in this plan"><circle cx="12" cy="12" r="11" /><path d="M7 11a5 5 0 0 1 9-2.5M17 13a5 5 0 0 1-9 2.5M16 5v4h-4M8 19v-4h4" /></svg>
           </span>
         </span>
         <span class="n">{{ day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title }}</span>
@@ -81,7 +85,7 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
     <div class="foot">
       <button type="button" class="mc-btn secondary" @click="emit('open', 'groceries')">Shopping list</button>
       <button type="button" class="mc-btn quiet" @click="emit('open', 'nutrition')">Nutrition</button>
-      <span v-if="repeats" class="mc-small repeat-note">Some dishes appear more than once: not enough different ones fit your limits this week.</span>
+      <span v-if="repeats" class="mc-small repeat-note">Some dishes appear more than once: not enough different ones fit your limits in this plan.</span>
     </div>
   </section>
 </template>
@@ -98,7 +102,8 @@ h3 { margin: 0; }
 .fig.over .v { color: var(--c-amber-text); }
 .strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--c-line-soft); }
 .tile { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 12px 6px 14px; border: 0; border-right: 1px solid var(--c-line-soft); background: #fff; color: var(--c-ink); text-align: center; }
-.tile:last-child { border-right: 0; }
+.tile:last-child, .tile:nth-child(7n) { border-right: 0; }
+.tile:nth-child(n + 8) { border-top: 1px solid var(--c-line-soft); }
 .tile:hover { background: var(--c-canvas); }
 .tile.skipped { opacity: 0.5; }
 .tile.today { background: var(--c-today); }
