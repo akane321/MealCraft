@@ -88,3 +88,13 @@ def limit_targets(household: HouseholdPlanning | None, planned_meals) -> list[Pr
         for limit in household.nutrition_limits
         if limit.max_value is not None and share
     ]
+
+
+def rules_on(constraints) -> bool:
+    """Whether a request plans with the household's rules (layer 08): a household block, or a meal of meal roles
+    (ADR-0070). Without either it plans exactly as before: no tags read, no shelf life, no equipment."""
+    if getattr(constraints, "household", None) is not None:
+        return True
+    shape = getattr(constraints, "plan_shape", None)
+    meals = list(shape.meals.values()) if shape is not None else [getattr(constraints, "meal_composition", None)]
+    return any(roles and roles[0].meal_roles for roles in meals)

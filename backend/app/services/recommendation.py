@@ -5,6 +5,7 @@ from app.planning.grocery_estimator import GroceryEstimator
 from app.planning.product_path import meals_of_the_day
 from app.planning.recommendation_engine import CANDIDATE_LIMIT, RecipeRecommendationEngine
 from app.repositories.recipe import RecipeRepository
+from app.schemas.planning_v2 import structured
 from app.schemas.recommendation import (
     ExcludedRecipeResponse,
     RecipeRecommendationCollectionResponse,
@@ -46,12 +47,15 @@ class RecipeRecommendationService:
         enriched = []
         # A composed meal fills each role from its own courses. Kept as one list, the quickest mains crowded
         # out the rest: the 2026-10-02 walkthrough's 500 held 12 of its 178 soups.
-        per_course = meals_of_the_day(constraints) is not None
+        meals = meals_of_the_day(constraints)
+        per_course = meals is not None
+        # Meals of meal roles fill each role by its tag (ADR-0070): the quota is kept per meal role instead.
+        by_tag = per_course and any(structured(roles) for _, roles in meals)
         kept: Counter = Counter()
 
         for recommendation in recommendations:
             recipe = recipes_by_id[recommendation.recipe.id]
-            course = (recipe.course or "main") if per_course else None
+            course = (getattr(recipe, "meal_role", None) if by_tag else recipe.course or "main") if per_course else None
             if kept[course] == CANDIDATE_LIMIT:
                 if per_course:
                     continue

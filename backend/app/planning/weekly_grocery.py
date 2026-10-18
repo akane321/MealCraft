@@ -13,7 +13,7 @@ from app.planning.grocery_estimator import (
     not_purchased,
     not_purchased_line,
 )
-from app.planning.household_slots import assumed_basics, basics_note
+from app.planning.household_slots import assumed_basics, basics_note, rules_on
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse, WeeklyMealPlanRequest
 from app.schemas.product import GroceryLineEstimate
 from app.services.product import ProductSearchService
@@ -100,15 +100,25 @@ class WeeklyGroceryAggregator:
         *,
         shares: list[float] | None = None,
         by_weight: Iterable[str] = (),
+        trips: list[int | None] | None = None,
+        _pantry: dict | None = None,
     ) -> WeeklyGroceryEstimateResponse:
         """`shares` gives each recipe's portion share of its meal (ADR-0036); absent, every dish is a whole meal.
 
         `by_weight` names ingredients the list being changed buys by weight, so a change keeps them in grams.
+        `trips` gives each recipe's shopping trip in a plan longer than a week (ADR-0072): each trip is its own
+        list, the pantry going to the first, and the weekly budget holds on each.
         """
+        if trips is not None and any(trip == 2 for trip in trips):
+            return self._two_trips(recipes, constraints, shares, by_weight, trips)
         ingredients = self._aggregate_ingredients(recipes, constraints, shares, by_weight)
         # A copy that each deduction draws down, so an ingredient needed on two
         # lines (whole carrots and grams of carrot) cannot use the same pantry twice.
-        pantry = {item.normalized_name: item.model_copy() for item in constraints.available_ingredients}
+        pantry = (
+            _pantry
+            if _pantry is not None
+            else {item.normalized_name: item.model_copy() for item in constraints.available_ingredients}
+        )
         lines: list[GroceryLineEstimate] = []
         warnings: list[str] = []
         unmapped: list[str] = []
@@ -225,6 +235,17 @@ class WeeklyGroceryAggregator:
             within_budget = False
         else:
             within_budget = True if consumed_total_known else None
+        if rules_on(constraints):
+            # A perishable line says so on the list: used within 3 days of its trip (layer 08).
+            perishable = {
+                line.ingredient.normalized_name
+                for recipe in recipes
+                for line in getattr(recipe, "recipe_ingredients", None) or []
+                if line.ingredient.perishable is True
+            }
+            for line in lines:
+                if line.ingredient_name in perishable:
+                    line.perishable = True
         return WeeklyGroceryEstimateResponse(
             pricing_mode=constraints.pricing_mode,
             complete=not unmapped and consumed_total_known,
@@ -235,6 +256,41 @@ class WeeklyGroceryAggregator:
             items=lines,
             unmapped_ingredients=sorted(unmapped),
             warnings=warnings,
+        )
+
+    def _two_trips(self, recipes, constraints, shares, by_weight, trips) -> WeeklyGroceryEstimateResponse:
+        """One list per shopping trip, each line marked with its trip, the pantry drawn down by the first."""
+        pantry = {item.normalized_name: item.model_copy() for item in constraints.available_ingredients}
+        parts = []
+        for trip in (1, 2):
+            picked = [index for index, value in enumerate(trips) if (value or 1) == trip]
+            part = self.estimate(
+                [recipes[index] for index in picked],
+                constraints,
+                shares=[shares[index] for index in picked] if shares is not None else None,
+                by_weight=by_weight,
+                _pantry=pantry,
+            )
+            for line in part.items:
+                line.shopping_trip = trip
+            parts.append(part)
+        first, second = parts
+        consumed = (
+            round(first.consumed_total_sgd + second.consumed_total_sgd, 2)
+            if first.consumed_total_sgd is not None and second.consumed_total_sgd is not None
+            else None
+        )
+        within = [part.within_weekly_budget for part in parts]
+        return first.model_copy(
+            update={
+                "complete": first.complete and second.complete,
+                "purchase_total_sgd": round(first.purchase_total_sgd + second.purchase_total_sgd, 2),
+                "consumed_total_sgd": consumed,
+                "within_weekly_budget": False if False in within else None if None in within else True,
+                "items": [*first.items, *second.items],
+                "unmapped_ingredients": sorted({*first.unmapped_ingredients, *second.unmapped_ingredients}),
+                "warnings": list(dict.fromkeys([*first.warnings, *second.warnings])),
+            }
         )
 
     @staticmethod

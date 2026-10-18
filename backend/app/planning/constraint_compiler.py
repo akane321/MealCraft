@@ -8,6 +8,7 @@ from dataclasses import dataclass
 
 from app.planning.dietary_tags import satisfies
 from app.planning.input_audit import require_finite_problem
+from app.planning.meal_composition import equipment_met
 from app.schemas.planning_v2 import FinalPlanningProblem
 
 
@@ -95,6 +96,14 @@ def compile_constraints(problem: FinalPlanningProblem) -> tuple[CandidateEligibi
             # data/recipes/dietary-tag-implications.json for the admission rule.
             if not satisfies(problem.dietary_requirements, recipe.dietary_tags):
                 reasons.add("dietary_requirement")
+            if problem.missing_equipment and not equipment_met(recipe.equipment, problem.missing_equipment):
+                reasons.add("equipment")
+            if (
+                problem.perishable_days is not None
+                and recipe.perishable
+                and (slot.days_after_shopping or 0) > problem.perishable_days
+            ):
+                reasons.add("perishable_day")
             for band in problem.nutrition_bands:
                 if not band.hard or band.scope != "per_slot":
                     continue

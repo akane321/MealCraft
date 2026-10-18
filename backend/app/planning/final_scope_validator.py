@@ -6,7 +6,16 @@ from math import isfinite
 from app.planning.dietary_tags import expand_tags
 from app.planning.diversity_validation import diversity_checks
 from app.planning.input_audit import nonfinite_issues
-from app.planning.meal_composition import meal_minutes, portion_shares, repetition_shortfalls, role_admits, role_key
+from app.planning.meal_composition import (
+    equipment_met,
+    meal_minutes,
+    meal_shares,
+    real_meal_issues,
+    repetition_shortfalls,
+    role_admits,
+    role_key,
+    structured_slot,
+)
 from app.schemas.planning_v2 import (
     CheckStatus,
     FinalPlanningProblem,
@@ -67,10 +76,12 @@ class FinalPlanningValidator:
         # meal types) is reported and the week priced all the same.
         assignment_checks_passed = not any(check.hard for check in checks)
         checks.extend(diversity_checks(problem, meals))
+        uncounted = problem.uncounted_roles  # the staple repeats by design (ADR-0070)
         checks.extend(
             self._failed("repetition_rule", problem_text)
             for problem_text in repetition_shortfalls(
-                problem, [[dish.recipe_id for dish in dishes] for dishes in meals.values()]
+                problem,
+                [[dish.recipe_id for dish in dishes if dish.role_id not in uncounted] for dishes in meals.values()],
             )
         )
         checks.extend(self._nutrition_checks(problem, meals))
@@ -88,22 +99,34 @@ class FinalPlanningValidator:
             # input; it differed only for sub-cent prices, which the input audit
             # now reports as a data problem rather than rounding into compliance.
             budget_cents = round(problem.purchase_budget_sgd * 100)
-            total_cents = round(purchase_total * 100)
-            margin = round((budget_cents - total_cents) / 100, 2)
-            status: CheckStatus = "passed" if total_cents <= budget_cents else "failed"
-            if not cost_complete:
-                status = "indeterminate"
-            checks.append(
-                PlanningConstraintCheck(
-                    code="purchase_budget",
-                    status=status,
-                    hard=problem.budget_is_hard,
-                    actual=purchase_total,
-                    limit=problem.purchase_budget_sgd,
-                    margin=margin if cost_complete else None,
-                    detail="Budget requires valid assignments and complete demand and product costs.",
-                )
+            trips = sorted({line.trip for line in shopping if line.trip is not None})
+            # A plan of two shopping trips holds the budget on each trip (ADR-0072); one trip, on the plan.
+            spent = (
+                [(None, purchase_total)]
+                if not trips
+                else [
+                    (f"trip-{trip}", self._product_checks(problem, [x for x in shopping if x.trip == trip])[1])
+                    for trip in trips
+                ]
             )
+            for scope_id, total in spent:
+                total_cents = round(total * 100)
+                margin = round((budget_cents - total_cents) / 100, 2)
+                status: CheckStatus = "passed" if total_cents <= budget_cents else "failed"
+                if not cost_complete:
+                    status = "indeterminate"
+                checks.append(
+                    PlanningConstraintCheck(
+                        code="purchase_budget",
+                        status=status,
+                        hard=problem.budget_is_hard,
+                        scope_id=scope_id,
+                        actual=total,
+                        limit=problem.purchase_budget_sgd,
+                        margin=margin if cost_complete else None,
+                        detail="Budget requires valid assignments and complete demand and product costs.",
+                    )
+                )
 
         hard_failures = sum(check.status == "failed" and check.hard for check in checks)
         indeterminate = sum(check.status == "indeterminate" for check in checks)
@@ -202,11 +225,39 @@ class FinalPlanningValidator:
                 checks.extend(
                     self._slot_checks(problem, slot.slot_id, assignment.recipe_id, meal_time=slot.composition is None)
                 )
+                checks.extend(self._household_dish_checks(problem, slot, recipes[assignment.recipe_id]))
                 known.append(assignment)
             if slot.composition is not None:
                 checks.extend(self._meal_checks(problem, slot, known))
             meals[slot.slot_id] = known
         return checks, meals
+
+    def _household_dish_checks(self, problem: FinalPlanningProblem, slot: PlanningSlot, recipe) -> list:
+        """Layer 08 rules of one dish: the kitchen's equipment and the perishable's days after its trip."""
+        checks = []
+        if problem.missing_equipment and not equipment_met(recipe.equipment, problem.missing_equipment):
+            checks.append(
+                self._failed(
+                    "equipment",
+                    f"Recipe needs equipment the kitchen lacks ({', '.join(problem.missing_equipment)}).",
+                    slot.slot_id,
+                )
+            )
+        days = slot.days_after_shopping
+        if problem.perishable_days is not None and recipe.perishable and days is not None:
+            if days > problem.perishable_days:
+                checks.append(
+                    PlanningConstraintCheck(
+                        code="perishable_within_days",
+                        status="failed",
+                        scope_id=slot.slot_id,
+                        actual=days,
+                        limit=problem.perishable_days,
+                        margin=float(problem.perishable_days - days),
+                        detail="A perishable ingredient is used later than its days after the shopping trip.",
+                    )
+                )
+        return checks
 
     def _meal_checks(
         self,
@@ -214,15 +265,19 @@ class FinalPlanningValidator:
         slot: PlanningSlot,
         dishes: list[PlanningAssignment],
     ) -> list[PlanningConstraintCheck]:
-        """Composition, portions, distinct dishes and meal time (ADR-0036 sections 1-4)."""
+        """Composition, portions, distinct dishes and meal time (ADR-0036 sections 1-4); for a structured meal the
+        real-meal rules of ADR-0070 instead of course labels."""
         checks: list[PlanningConstraintCheck] = []
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
         by_role = {dish.role_id: dish for dish in dishes}
+        structured = structured_slot(slot)
         for role in slot.composition or []:
             dish = by_role.get(role.role_id)
             locked = (slot.locked_roles or {}).get(role.role_id)
             if locked is not None and (dish is None or dish.recipe_id != locked):
                 checks.append(self._failed("locked_slot", f"Locked role {role.role_id} was changed.", slot.slot_id))
+            if structured:
+                continue  # real_meal_issues below: tags, required roles, the staple and the vegetable beside a bowl
             if dish is None:
                 if role.required:
                     checks.append(
@@ -259,8 +314,13 @@ class FinalPlanningValidator:
         if len(chosen) != len(set(chosen)):
             checks.append(self._failed("meal_duplicate_dish", "A meal holds the same recipe twice.", slot.slot_id))
         if not dishes:
+            if structured:
+                checks.extend(self._real_meal_checks(slot, [], recipes, None))
             return checks
-        shares = portion_shares(problem.composition_policy, [dish.role_id for dish in dishes])
+        pairs = [(dish.role_id, dish.recipe_id) for dish in dishes]
+        shares = meal_shares(problem, slot, pairs, recipes)
+        if structured:
+            checks.extend(self._real_meal_checks(slot, pairs, recipes, shares))
         if shares is None:
             checks.append(
                 self._failed("meal_size", f"No portion shares are defined for {len(dishes)} dishes.", slot.slot_id)
@@ -291,6 +351,20 @@ class FinalPlanningValidator:
                     )
                 )
         return checks
+
+    def _real_meal_checks(self, slot, pairs, recipes, shares) -> list[PlanningConstraintCheck]:
+        return [
+            PlanningConstraintCheck(
+                code=code,
+                status="failed",
+                scope_id=slot.slot_id,
+                actual=actual,
+                limit=limit,
+                margin=round(actual - limit, 3) if code == "meal_energy_floor" else None,
+                detail=detail,
+            )
+            for code, detail, actual, limit in real_meal_issues(slot, pairs, recipes, shares)
+        ]
 
     def _slot_checks(
         self,
@@ -396,7 +470,7 @@ class FinalPlanningValidator:
             known = [dish for dish in dishes if dish.recipe_id in recipes]
             if slot is None or not known:
                 continue
-            shares = portion_shares(problem.composition_policy, [role_key(slot, dish) for dish in known])
+            shares = meal_shares(problem, slot, [(role_key(slot, dish), dish.recipe_id) for dish in known], recipes)
             if shares is None:
                 continue  # The meal check reports a meal size without shares.
             for dish in known:
@@ -491,25 +565,27 @@ class FinalPlanningValidator:
         """Rebuild demand from assignments; never reuse the planner's shopping builder."""
         checks: list[PlanningConstraintCheck] = []
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
-        amounts: dict[tuple[str, str | None], list[float | None]] = defaultdict(list)
+        # Keyed by ingredient, unit and the shopping trip that buys it (None: the plan's only trip).
+        amounts: dict[tuple[str, str | None, int | None], list[float | None]] = defaultdict(list)
         for slot in problem.slots:
             dishes = [dish for dish in meals.get(slot.slot_id, []) if dish.recipe_id in recipes]
             # Assignment validation reports invalid or missing recipes.
-            shares = portion_shares(problem.composition_policy, [role_key(slot, dish) for dish in dishes])
+            pairs = [(role_key(slot, dish), dish.recipe_id) for dish in dishes]
+            shares = meal_shares(problem, slot, pairs, recipes) if dishes else None
             for dish in dishes if shares is not None else []:
                 recipe = recipes[dish.recipe_id]
                 servings = slot.servings * shares[role_key(slot, dish)]
                 for item in recipe.ingredients:
-                    amounts[item.ingredient_id, item.unit].append(
+                    amounts[item.ingredient_id, item.unit, slot.trip].append(
                         None
                         if item.quantity is None
                         else item.quantity / recipe.servings * slot.servings
                         if len(dishes) == 1
                         else item.quantity / recipe.servings * float(servings)
                     )
-        lines: dict[tuple[str, str | None], list[PlanningShoppingSelection]] = defaultdict(list)
+        lines: dict[tuple[str, str | None, int | None], list[PlanningShoppingSelection]] = defaultdict(list)
         for line in shopping:
-            lines[line.ingredient_id, line.unit].append(line)
+            lines[line.ingredient_id, line.unit, line.trip].append(line)
         pantry = defaultdict(list)
         for item in problem.pantry:
             pantry[item.ingredient_id].append(item)
@@ -528,8 +604,9 @@ class FinalPlanningValidator:
             # Existing shopping output rounds quantities to three decimal places.
             return actual is not None and isfinite(actual) and abs(actual - expected) <= 0.000500001
 
-        for key in sorted(set(amounts) | set(lines), key=lambda value: (value[0], value[1] or "")):
-            ingredient, unit = key
+        drawn: dict[tuple[str, str | None], float] = {}  # pantry used by the first trip, per ingredient and unit
+        for key in sorted(set(amounts) | set(lines), key=lambda value: (value[0], value[1] or "", value[2] or 0)):
+            ingredient, unit, trip = key
             rows = lines.get(key, [])
             if key not in amounts:
                 issue("unexpected_shopping_line", ingredient, "Shopping line has no assigned recipe demand.")
@@ -556,7 +633,9 @@ class FinalPlanningValidator:
                 if not isfinite(stocks[0].quantity):
                     issue("pantry_quantity", ingredient, "Pantry quantity must be finite.", True)
                     continue
-                deduction = min(required, stocks[0].quantity)
+                # The pantry goes to the first trip first; the second takes what is left (ADR-0072).
+                deduction = min(required, stocks[0].quantity - drawn.get((ingredient, unit), 0.0))
+                drawn[ingredient, unit] = drawn.get((ingredient, unit), 0.0) + deduction
             remaining = required - deduction
             for code, actual, expected in (
                 ("required_quantity", line.required_quantity, required),

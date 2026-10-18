@@ -28,6 +28,8 @@ class RecipeListItemResponse(BaseModel):
     dietary_tags: list[str]
     nutrition: RecipeNutritionResponse
     course: str | None = None
+    # The recipe's meal-role tag (layer 08): "staple", "protein_main", "one_bowl" ...; null when untagged.
+    meal_role: str | None = None
 
 
 class RecipeCollectionResponse(BaseModel):
