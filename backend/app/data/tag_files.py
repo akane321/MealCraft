@@ -4,8 +4,9 @@ The tag files are written by `python -m app.data.recipe_tags` and reviewed as da
 (`data-engineering/docs/recipe-tags-v1-sample.json`). The importers apply them in the
 overlay order of docs/design/sprint2-schema-foundation.md: the release file first, then
 the tag files, then runtime writes. So a recipe or ingredient missing from a tag file
-keeps its release value (NULL for every recipe tag), and an ingredient row a runtime
-path wrote (`provenance` set) keeps any tag value it already holds.
+keeps its release value (NULL for every recipe tag), an ingredient row a runtime path wrote
+(`provenance` set) keeps any tag value it already holds, and a recipe keeps a tag value a runtime
+path wrote (no estimate on the row for it, or one marked `reviewed`).
 """
 
 from __future__ import annotations
@@ -48,11 +49,24 @@ def tag_file_bytes() -> bytes:
 
 
 def apply_recipe_tags(recipe, key: str) -> None:
-    """Set the tag columns and `estimated` from the entry for `key`, or NULL when it has none."""
+    """Set the tag columns and `estimated` from the entry for `key`, or NULL when it has none.
+
+    A value a runtime path wrote wins: one with no estimate on the row (a person or an intake set it, so it is
+    not an estimate) or one whose estimate a person marked `reviewed`. Runtime writers mark their writes so.
+    """
     entry = recipe_tags().get(key) or {}
+    held = dict(recipe.estimated or {})
+    estimated = dict(entry.get("estimated") or {})
     for name in RECIPE_TAG_FIELDS:
-        setattr(recipe, name, entry.get(name))
-    recipe.estimated = entry.get("estimated") or None
+        value = getattr(recipe, name)
+        runtime = value is not None and (name not in held or held[name].get("reviewed"))
+        if runtime:
+            estimated.pop(name, None)
+            if name in held:
+                estimated[name] = held[name]
+        else:
+            setattr(recipe, name, entry.get(name))
+    recipe.estimated = estimated or None
 
 
 def apply_ingredient_tags(row, release_food_group: str | None = None) -> None:

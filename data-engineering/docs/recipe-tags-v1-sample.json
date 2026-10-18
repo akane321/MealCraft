@@ -4,77 +4,24 @@
   "how_to_review": "data-engineering/README.md, section 'Reviewing recipe and ingredient tags'",
   "recipes": [
     {
-      "key": "RCP2_15BCD52E8739",
-      "title": "Sprouts, Chorizo & Almond Bowl",
+      "key": "RCP2_CCE0A720003A",
+      "title": "Raita",
       "course": "side",
-      "cuisine": "british_irish",
+      "cuisine": "indian",
       "ingredients": [
-        "375g Brussels sprouts (trimmed)",
-        "1 garlic clove (crushed)",
-        "35g sliced chorizo (cut into strips)",
-        "1 tsp olive oil",
-        "1 1/2 tbsp flaked almonds (toasted until golden)"
+        "1 cup plain yogurt",
+        "1 cup shredded English cucumber",
+        "1/2 cup chopped onion",
+        "1/4 cup chopped tomato",
+        "1/4 teaspoon salt",
+        "1/4 teaspoon pepper"
       ],
       "tags": {
         "meal_role": null,
         "contains_staple": null,
-        "protein_sources": [
-          "pork"
-        ],
+        "protein_sources": [],
         "cooking_methods": [
-          "pan_fry",
-          "steam"
-        ],
-        "equipment": [
-          [
-            "steamer"
-          ]
-        ],
-        "flavor_tags": [
-          "rich"
-        ]
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_641ABD3FC590",
-      "title": "Bavarian Cabbage",
-      "course": "side",
-      "cuisine": "german",
-      "ingredients": [
-        "1 1/2 lb. cabbage, shredded",
-        "4 slices bacon, diced",
-        "1 medium onion, diced",
-        "2 medium tart apples, diced",
-        "1/2 c. dry white wine",
-        "1/2 c. water",
-        "1 1/2 tsp. caraway seed",
-        "1 1/2 tsp. sugar",
-        "1 1/2 tsp. red wine vinegar",
-        "1 1/2 tsp. salt"
-      ],
-      "tags": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": [
-          "pork"
-        ],
-        "cooking_methods": [
-          "pan_fry"
+          "raw"
         ],
         "equipment": [],
         "flavor_tags": []
@@ -85,6 +32,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role None by open",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -96,32 +44,25 @@
       }
     },
     {
-      "key": "RCP2_0724466545EF",
-      "title": "Kimchi With Daikon Radish",
-      "course": "side",
-      "cuisine": "korean",
+      "key": "RCP2_0895BCE481E8",
+      "title": "Chinese Spareribs",
+      "course": "main",
+      "cuisine": "chinese",
       "ingredients": [
-        "1 lb daikon radish, peeled",
-        "4 ounces cabbage, shredded",
-        "2 ounces carrots, peeled",
-        "2 ounces gingerroot, peeled and grated",
-        "2 garlic cloves, grated",
-        "1 ounce green onion",
-        "5 tablespoons kosher salt",
-        "1 teaspoon crushed red pepper flakes (or Korean chili flakes)",
-        "3 anchovy fillets, finely chopped",
-        "1 ounce fish sauce",
-        "2 ounces rice vinegar",
-        "1 teaspoon sugar"
+        "1/2 c. soy sauce",
+        "1/2 c. water",
+        "1 c. brown sugar",
+        "2 Tbsp. ketchup"
       ],
       "tags": {
         "meal_role": null,
         "contains_staple": null,
         "protein_sources": [],
-        "cooking_methods": [],
+        "cooking_methods": [
+          "bake"
+        ],
         "equipment": [],
         "flavor_tags": [
-          "fragrant",
           "light"
         ]
       },
@@ -131,6 +72,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role None by open",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -142,26 +84,117 @@
       }
     },
     {
-      "key": "RCP2_D190FCD7C0C1",
-      "title": "Sweet And Sour Red Cabbage",
+      "key": "RCP2_0AE60D683F0D",
+      "title": "Abuela'S Frijoles Negros - Grandma'S Cuban Black Beans",
       "course": "side",
-      "cuisine": "german",
+      "cuisine": "caribbean",
       "ingredients": [
-        "5 c. shredded red cabbage",
-        "1 tsp. salt",
-        "4 slices bacon",
-        "2 Tbsp. brown sugar",
-        "2 Tbsp. flour",
-        "1/2 c. water",
-        "1/3 c. vinegar",
-        "1/8 tsp. pepper",
-        "1 small sliced onion"
+        "1 lb black beans",
+        "2 large green peppers (cut into several large slices)",
+        "10 cups water",
+        "2/3 cup olive oil",
+        "1/2 teaspoon black pepper",
+        "1 large onion (diced)",
+        "1/4 teaspoon oregano",
+        "4 garlic cloves (crushed)",
+        "1 bay leaf",
+        "2 teaspoons sugar",
+        "4 teaspoons salt",
+        "2 teaspoons vinegar",
+        "2 teaspoons olive oil",
+        "2 teaspoons dry wine"
       ],
       "tags": {
         "meal_role": null,
         "contains_staple": null,
         "protein_sources": [
-          "pork"
+          "legume"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "meal_role None by open",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_C97748B5ED55",
+      "title": "Fat-Free Paneer",
+      "course": "side",
+      "cuisine": "indian",
+      "ingredients": [
+        "8 cups skim milk",
+        "1/4 cup fat free plain yogurt",
+        "1 1/2 tablespoons fresh lemon juice"
+      ],
+      "tags": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": [],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "meal_role None by open",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_15F1AAB4C310",
+      "title": "Korean Gaeran Mari (Stuffed Egg Omelette W Cheese)",
+      "course": "side",
+      "cuisine": "korean",
+      "ingredients": [
+        "5 eggs beaten",
+        "1/2 onion small, finely chopped",
+        "1/2 small carrot finely chopped",
+        "1 green onion finely chopped",
+        "1 slice American cheese or mozzarella",
+        "1 sheet seaweed Korean roasted, optional",
+        "1/2 teaspoon garlic powder",
+        "1 teaspoon salt",
+        "1 dash ground pepper",
+        "1 tablespoon olive oil"
+      ],
+      "tags": {
+        "meal_role": "breakfast",
+        "contains_staple": false,
+        "protein_sources": [
+          "egg"
         ],
         "cooking_methods": [
           "pan_fry"
@@ -175,8 +208,107 @@
         "protein_sources": "rule",
         "cooking_methods": "rule",
         "equipment": "rule",
-        "flavor_tags": "rule"
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
       },
+      "why": "meal_role breakfast by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_5D84F859E558",
+      "title": "English Popovers",
+      "course": "baked_good",
+      "cuisine": "british_irish",
+      "ingredients": [
+        "2 eggs",
+        "1 c. milk",
+        "1 c. flour, sifted"
+      ],
+      "tags": {
+        "meal_role": "breakfast",
+        "contains_staple": false,
+        "protein_sources": [
+          "egg"
+        ],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ],
+          [
+            "blender"
+          ]
+        ],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role breakfast by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_6336ACA2F9AE",
+      "title": "Japanese Tamago Egg",
+      "course": "side",
+      "cuisine": "japanese",
+      "ingredients": [
+        "4 eggs",
+        "1/4 cup prepared dashi stock",
+        "1 tablespoon white sugar",
+        "1 teaspoon mirin (Japanese sweet wine)",
+        "1/2 teaspoon soy sauce",
+        "1/2 teaspoon vegetable oil, or more as needed"
+      ],
+      "tags": {
+        "meal_role": "breakfast",
+        "contains_staple": false,
+        "protein_sources": [
+          "egg"
+        ],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role breakfast by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -222,6 +354,7 @@
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role breakfast by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -233,30 +366,79 @@
       }
     },
     {
-      "key": "RCP2_958B37782112",
-      "title": "Basic Souffle Recipe",
-      "course": "side",
-      "cuisine": "french",
+      "key": "RCP2_1988A5F66AD1",
+      "title": "Potato Scramble",
+      "course": "breakfast",
+      "cuisine": "american",
       "ingredients": [
-        "1 1/3 c. milk",
-        "7 Tbsp. flour",
-        "6 Tbsp. butter",
+        "6 slices bacon, diced",
+        "2 c. potatoes, diced and cooked",
+        "1 medium onion, diced",
         "1 tsp. salt",
-        "4 egg yolks",
-        "4 egg whites"
+        "1/4 tsp. pepper",
+        "4 eggs, beaten"
       ],
       "tags": {
         "meal_role": "breakfast",
         "contains_staple": false,
         "protein_sources": [
+          "pork",
           "egg"
         ],
         "cooking_methods": [
-          "bake"
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "meal_role breakfast by rule",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_2C5C8884B484",
+      "title": "Jamaican Cornmeal Porridge",
+      "course": "breakfast",
+      "cuisine": "caribbean",
+      "ingredients": [
+        "1 cup water",
+        "1/3 cup cornmeal",
+        "1/4 cup whole milk",
+        "1/4 cup coconut milk",
+        "3 tablespoons white sugar",
+        "1/2 teaspoon vanilla extract",
+        "1/2 teaspoon salt",
+        "1/4 teaspoon ground nutmeg",
+        "1/4 teaspoon ground cinnamon",
+        "2 tablespoons raisins (optional)"
+      ],
+      "tags": {
+        "meal_role": "breakfast",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [
+          "boil"
         ],
         "equipment": [
           [
-            "oven"
+            "blender"
           ]
         ],
         "flavor_tags": [
@@ -264,105 +446,14 @@
         ]
       },
       "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
         "protein_sources": "rule",
         "cooking_methods": "rule",
         "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
+        "flavor_tags": "rule"
       },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_409262770DBA",
-      "title": "Popovers(Portuguese)",
-      "course": "baked_good",
-      "cuisine": "spanish_portuguese",
-      "ingredients": [
-        "1 c. sifted flour",
-        "1 c. milk",
-        "1/2 tsp. salt",
-        "2 eggs"
-      ],
-      "tags": {
-        "meal_role": "breakfast",
-        "contains_staple": false,
-        "protein_sources": [
-          "egg"
-        ],
-        "cooking_methods": [
-          "bake"
-        ],
-        "equipment": [
-          [
-            "oven"
-          ]
-        ],
-        "flavor_tags": [
-          "light"
-        ]
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_5954131C04AC",
-      "title": "Scrumpets",
-      "course": "baked_good",
-      "cuisine": "british_irish",
-      "ingredients": [
-        "4 cups all-purpose flour, sifted",
-        "2 tablespoons white sugar",
-        "4 teaspoons baking powder",
-        "1 teaspoon salt",
-        "1 cup milk",
-        "3 eggs",
-        "1/2 cup butter, melted",
-        "1 teaspoon butter, or as needed (optional)"
-      ],
-      "tags": {
-        "meal_role": "breakfast",
-        "contains_staple": false,
-        "protein_sources": [
-          "egg"
-        ],
-        "cooking_methods": [
-          "pan_fry"
-        ],
-        "equipment": [],
-        "flavor_tags": []
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
+      "why": "meal_role breakfast by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -407,6 +498,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role breakfast by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -467,6 +559,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role breakfast by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -513,6 +606,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role breakfast by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -524,32 +618,27 @@
       }
     },
     {
-      "key": "RCP2_309F85EE7E4E",
-      "title": "Impossible Quiche",
-      "course": "breakfast",
-      "cuisine": "french",
+      "key": "RCP2_44C42897EBAD",
+      "title": "Peruvian Alfajores",
+      "course": "baked_good",
+      "cuisine": "latin_american",
       "ingredients": [
-        "3 eggs",
-        "1/2 c. Bisquick",
-        "1/2 c. melted margarine",
-        "1 1/2 c. milk",
-        "1 tsp. minced onion"
+        "2 cups all-purpose flour",
+        "1/4 cup confectioners' sugar",
+        "3/4 cup vegetable shortening, chilled",
+        "1/4 cup dulce de leche",
+        "Confectioners' sugar"
       ],
       "tags": {
-        "meal_role": "breakfast",
+        "meal_role": "dessert",
         "contains_staple": false,
-        "protein_sources": [
-          "egg"
-        ],
+        "protein_sources": [],
         "cooking_methods": [
           "bake"
         ],
         "equipment": [
           [
             "oven"
-          ],
-          [
-            "blender"
           ]
         ],
         "flavor_tags": [
@@ -557,13 +646,14 @@
         ]
       },
       "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
+        "protein_sources": "llm",
         "cooking_methods": "rule",
         "equipment": "rule",
-        "flavor_tags": "rule"
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
       },
+      "why": "meal_role dessert by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -575,45 +665,47 @@
       }
     },
     {
-      "key": "RCP2_A66A4E335674",
-      "title": "Swedish Egg Kake(A Breakfast Treat)",
-      "course": "breakfast",
-      "cuisine": "scandinavian",
+      "key": "RCP2_BA5501343E98",
+      "title": "Hungarian Kifliks",
+      "course": "baked_good",
+      "cuisine": "eastern_european",
       "ingredients": [
-        "3 eggs",
-        "2 c. milk",
-        "1/4 to 1/2 c. sugar",
-        "1 tsp. salt (or less)",
-        "1 c. flour",
-        "1/4 c. butter"
+        "2 1/2 c. flour",
+        "3 egg yolks",
+        "1/2 c. sour cream",
+        "3/4 c. margarine, softened",
+        "1/2 tsp. vanilla",
+        "3 egg whites",
+        "1/2 c. sugar",
+        "1/2 tsp. vanilla",
+        "1 tsp. cinnamon",
+        "12 oz. walnuts, ground"
       ],
       "tags": {
-        "meal_role": "breakfast",
+        "meal_role": "dessert",
         "contains_staple": false,
-        "protein_sources": [
-          "egg"
-        ],
+        "protein_sources": [],
         "cooking_methods": [
           "bake"
         ],
         "equipment": [
           [
             "oven"
-          ],
-          [
-            "blender"
           ]
         ],
-        "flavor_tags": []
+        "flavor_tags": [
+          "rich"
+        ]
       },
       "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
+        "protein_sources": "llm",
         "cooking_methods": "rule",
         "equipment": "rule",
-        "flavor_tags": "rule"
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
       },
+      "why": "meal_role dessert by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -654,13 +746,14 @@
         "flavor_tags": []
       },
       "methods": {
-        "protein_sources": "rule",
+        "protein_sources": "llm",
         "cooking_methods": "rule",
         "equipment": "rule",
         "flavor_tags": "rule",
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role dessert by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -672,84 +765,43 @@
       }
     },
     {
-      "key": "RCP2_CEEA9D67A7EE",
-      "title": "Basic Italian Cookies",
+      "key": "RCP2_9C9E0673ECB8",
+      "title": "Quickly Made Kolache",
       "course": "baked_good",
-      "cuisine": "italian",
-      "ingredients": [
-        "5 c. flour",
-        "1 1/2 c. sifted confectioners sugar",
-        "3 eggs",
-        "2 Tbsp. baking powder",
-        "1 c. margarine or butter",
-        "1 Tbsp. vanilla"
-      ],
-      "tags": {
-        "meal_role": "dessert",
-        "contains_staple": false,
-        "protein_sources": [
-          "egg"
-        ],
-        "cooking_methods": [
-          "bake"
-        ],
-        "equipment": [
-          [
-            "oven"
-          ]
-        ],
-        "flavor_tags": []
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_5C1AF74A7B55",
-      "title": "Šúĺlance s Makom",
-      "course": "main",
       "cuisine": "eastern_european",
       "ingredients": [
-        "700g Potatoes",
-        "300g All purpose flour",
-        "100g Semolina",
-        "Pinch Salt",
-        "150g Ground Poppy seeds",
-        "100g Powdered Sugar",
-        "100g Butter"
+        "8 c. flour",
+        "1/2 lb. shortening (1/2 lb.)",
+        "1 c. milk",
+        "6 tsp. baking powder",
+        "4 eggs",
+        "1 c. sugar",
+        "1/2 tsp. salt",
+        "2 tsp. vanilla"
       ],
       "tags": {
         "meal_role": "dessert",
         "contains_staple": false,
         "protein_sources": [],
         "cooking_methods": [
-          "boil"
+          "bake"
         ],
-        "equipment": [],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
         "flavor_tags": []
       },
       "methods": {
-        "protein_sources": "rule",
+        "protein_sources": "llm",
         "cooking_methods": "rule",
         "equipment": "rule",
         "flavor_tags": "rule",
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role dessert by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -761,48 +813,57 @@
       }
     },
     {
-      "key": "RCP2_BA5501343E98",
-      "title": "Hungarian Kifliks",
+      "key": "RCP2_F55B3A8E2629",
+      "title": "Filipino Custard Chiffon Cake",
       "course": "baked_good",
-      "cuisine": "eastern_european",
+      "cuisine": "filipino",
       "ingredients": [
-        "2 1/2 c. flour",
+        "1/2 cup sugar",
+        "1/2 cup water",
+        "1 (12 ounce) can fat-free evaporated milk",
+        "1 (14 ounce) can sweetened condensed milk",
+        "1 teaspoon vanilla",
         "3 egg yolks",
-        "1/2 c. sour cream",
-        "3/4 c. margarine, softened",
-        "1/2 tsp. vanilla",
-        "3 egg whites",
-        "1/2 c. sugar",
-        "1/2 tsp. vanilla",
-        "1 tsp. cinnamon",
-        "12 oz. walnuts, ground"
+        "2 eggs",
+        "2 1/2 cups cake flour",
+        "1 1/2 cups sugar",
+        "3 teaspoons baking powder",
+        "1 teaspoon salt",
+        "1/2 cup oil",
+        "8 egg yolks",
+        "3/4 cup orange juice",
+        "1 teaspoon vanilla",
+        "8 egg whites",
+        "1/2 teaspoon cream of tartar"
       ],
       "tags": {
         "meal_role": "dessert",
         "contains_staple": false,
-        "protein_sources": [
-          "egg"
-        ],
+        "protein_sources": [],
         "cooking_methods": [
+          "pan_fry",
+          "steam",
           "bake"
         ],
         "equipment": [
           [
             "oven"
+          ],
+          [
+            "steamer"
           ]
         ],
-        "flavor_tags": [
-          "rich"
-        ]
+        "flavor_tags": []
       },
       "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
         "protein_sources": "rule",
         "cooking_methods": "rule",
         "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
+        "flavor_tags": "rule"
       },
+      "why": "meal_role dessert by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -851,6 +912,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role dessert by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -897,6 +959,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role dessert by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -940,6 +1003,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role dessert by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -987,6 +1051,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role dessert by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1033,6 +1098,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role dessert by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1044,32 +1110,31 @@
       }
     },
     {
-      "key": "RCP2_34DA3EAE5111",
-      "title": "Flan",
-      "course": "dessert",
-      "cuisine": "spanish_portuguese",
+      "key": "RCP2_D02CAEBD39F4",
+      "title": "Irish Cream",
+      "course": "drink",
+      "cuisine": "british_irish",
       "ingredients": [
-        "3/4 c. granulated sugar",
-        "12 oz. can evaporated milk",
-        "14 oz. sweetened condensed milk",
-        "3 large eggs",
-        "1 Tbsp. vanilla"
+        "1 c. whiskey",
+        "3 eggs",
+        "1/2 tsp. pure vanilla",
+        "1/4 to 1/2 tsp. coconut extract",
+        "2 tsp. chocolate syrup",
+        "1 can Eagle Brand milk"
       ],
       "tags": {
-        "meal_role": "dessert",
+        "meal_role": "drink",
         "contains_staple": false,
         "protein_sources": [],
         "cooking_methods": [
-          "bake"
+          "raw"
         ],
         "equipment": [
           [
-            "oven"
+            "blender"
           ]
         ],
-        "flavor_tags": [
-          "light"
-        ]
+        "flavor_tags": []
       },
       "methods": {
         "meal_role": "rule",
@@ -1079,6 +1144,54 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role drink by rule",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_2CD41B054088",
+      "title": "Mexican Hot Chocolate",
+      "course": "drink",
+      "cuisine": "mexican",
+      "ingredients": [
+        "2/3 cup slivered almonds",
+        "2 quarts milk",
+        "8 ounces unsweetened chocolate, coarsely chopped",
+        "1 cup sugar",
+        "1 tablespoon vanilla",
+        "2 teaspoons ground cinnamon",
+        "8 cinnamon sticks (each 4 to 5 in. long), optional"
+      ],
+      "tags": {
+        "meal_role": "drink",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [
+          [
+            "blender"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "meal_role drink by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1123,6 +1236,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role drink by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1163,6 +1277,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role drink by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1174,112 +1289,144 @@
       }
     },
     {
-      "key": "RCP2_9615565AAFEC",
-      "title": "Portuguese Licoro",
-      "course": "drink",
-      "cuisine": "spanish_portuguese",
+      "key": "RCP2_CB88A5A0DF4C",
+      "title": "Africa-Bobotie",
+      "course": "main",
+      "cuisine": "african",
       "ingredients": [
-        "1 quart whiskey",
-        "1/2 lemon",
-        "4 1/2 cups white sugar",
-        "1 quart milk",
-        "6 (1 ounce) squares unsweetened chocolate",
-        "2 vanilla beans"
-      ],
-      "tags": {
-        "meal_role": "drink",
-        "contains_staple": false,
-        "protein_sources": [],
-        "cooking_methods": [],
-        "equipment": [],
-        "flavor_tags": []
-      },
-      "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_7CD185D0F201",
-      "title": "Salty (Namkin) Lassi",
-      "course": "drink",
-      "cuisine": "indian",
-      "ingredients": [
-        "4 cups (1 L) yogurt",
-        "3 cups (750 ml) cold water",
-        "Fresh green chile peppers (quantity according to taste), chopped",
-        "1 tsp cumin seeds, roasted and ground",
-        "3 tbsp lime or lemon juice",
-        "2 tsp salt",
-        "1 cup (250 ml) crushed ice"
-      ],
-      "tags": {
-        "meal_role": "drink",
-        "contains_staple": false,
-        "protein_sources": [],
-        "cooking_methods": [
-          "raw"
-        ],
-        "equipment": [
-          [
-            "blender"
-          ]
-        ],
-        "flavor_tags": [
-          "spicy"
-        ]
-      },
-      "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_185C6CEAE1C2",
-      "title": "Enchiladas",
-      "course": "baked_good",
-      "cuisine": "tex_mex",
-      "ingredients": [
-        "1 c. flour",
-        "1/2 c. cornmeal",
-        "1 egg",
-        "1 tsp. salt",
-        "1 1/2 c. water"
+        "1 onion",
+        "1 Tbsp. olive oil",
+        "2 slices bread",
+        "1 c. milk",
+        "1 lb. ground beef",
+        "1 Tbsp. curry powder",
+        "1/4 c. slivered almonds",
+        "1/3 c. raisins",
+        "1 Tbsp. lemon juice",
+        "pinch of salt and pepper",
+        "2 eggs"
       ],
       "tags": {
         "meal_role": "one_bowl",
         "contains_staple": true,
         "protein_sources": [
+          "beef",
           "egg"
         ],
         "cooking_methods": [
-          "pan_fry"
+          "pan_fry",
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role one_bowl by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_C1E68B157F31",
+      "title": "Stuffed Lamb Tomatoes",
+      "course": "main",
+      "cuisine": "greek",
+      "ingredients": [
+        "4 large Tomatoes",
+        "Pinch Sugar",
+        "4 tbs Olive Oil",
+        "1 chopped Onion",
+        "2 finely chopped Garlic Clove",
+        "200g Lamb",
+        "1 tbs Cinnamon",
+        "2 tbs chopped Tomato Puree",
+        "50g Rice",
+        "100ml Chicken Stock",
+        "4 tbs Dill",
+        "2 tbs Chopped Parsley",
+        "1 tbs Mint"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "lamb"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil",
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "fragrant",
+          "rich"
+        ]
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role one_bowl by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_1BBDFA22270A",
+      "title": "Sweet And Sour Lentils",
+      "course": "side",
+      "cuisine": "american",
+      "ingredients": [
+        "2 1/2 c. water",
+        "1 c. lentils",
+        "1 small onion",
+        "3 to 4 Tbsp. cider vinegar",
+        "2 Tbsp. honey",
+        "1/2 tsp. salt",
+        "1 tsp. basil"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "legume"
+        ],
+        "cooking_methods": [
+          "boil"
         ],
         "equipment": [],
         "flavor_tags": [
@@ -1294,6 +1441,7 @@
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role one_bowl by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1305,35 +1453,29 @@
       }
     },
     {
-      "key": "RCP2_F8E5BA1851FC",
-      "title": "Quesadilla Casserole",
+      "key": "RCP2_29EF8FF66D07",
+      "title": "Thai Chickpea Pizza",
       "course": "main",
-      "cuisine": "mexican",
+      "cuisine": "thai",
       "ingredients": [
-        "2 teaspoons chili powder",
-        "1 teaspoon ground cumin",
-        "1 teaspoon minced dried onion",
-        "1/2 teaspoon oregano leaves",
-        "1/2 teaspoon crushed red pepper flakes (optional)",
-        "1 lb ground beef",
-        "1/2 cup chopped onion",
-        "16 ounces tomato sauce",
-        "15 ounces black beans, drained and rinsed",
-        "8 3/4 ounces whole kernel corn, undrained",
-        "4 1/2 ounces chopped green chilies, undrained",
-        "6 tortillas (9-inch)",
-        "2 cups shredded cheddar cheese"
+        "1 prepared pizza crust, recipe",
+        "1/2 cup plum sauce",
+        "1 cup cooked chickpeas",
+        "1 pinch red pepper flakes",
+        "1/4 red onion, thinly sliced",
+        "1/2 yellow pepper, thinly sliced",
+        "1/2 red pepper, thinly sliced",
+        "1/4 cup peanut sauce",
+        "1 tablespoon thinly sliced green onion",
+        "1 tablespoon chopped cilantro"
       ],
       "tags": {
         "meal_role": "one_bowl",
         "contains_staple": true,
         "protein_sources": [
-          "beef",
           "legume"
         ],
         "cooking_methods": [
-          "pan_fry",
-          "boil",
           "bake"
         ],
         "equipment": [
@@ -1342,7 +1484,7 @@
           ]
         ],
         "flavor_tags": [
-          "spicy"
+          "light"
         ]
       },
       "methods": {
@@ -1353,6 +1495,7 @@
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role one_bowl by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1364,141 +1507,44 @@
       }
     },
     {
-      "key": "RCP2_1CB98FB35F9C",
-      "title": "Mexican Slow Cooker Chicken Burritos",
+      "key": "RCP2_F42F58917A76",
+      "title": "Chicken, Date And Apricot Tagine",
       "course": "main",
-      "cuisine": "tex_mex",
+      "cuisine": "north_african",
       "ingredients": [
-        "3 chicken thighs, boneless",
-        "2 cups salsa",
-        "2 cups corn",
-        "2 cups black beans",
-        "3 flour tortillas",
-        "1 1/2 cups lettuce, chopped",
-        "1/3 cup cheddar cheese, shredded",
-        "1/4 cup sour cream"
+        "1 whole chicken (3 1/2 pounds)",
+        "1 tablespoon olive oil",
+        "1 cup onion, chopped",
+        "1 teaspoon ground turmeric",
+        "1 teaspoon ground cumin",
+        "1/2 teaspoon ground ginger",
+        "1/2 teaspoon ground cinnamon",
+        "1/8 teaspoon ground red pepper",
+        "5 garlic cloves, minced",
+        "1 1/2 cups fat-free chicken broth",
+        "1/3 cup dates, pitted and sliced",
+        "1/3 cup dried apricot, sliced",
+        "2 teaspoons lemon rind, julienned (1 inch pieces)",
+        "1/2 teaspoon salt",
+        "1/3 cup fresh parsley, chopped",
+        "1/3 cup lemon, sections peeled and chopped",
+        "2 tablespoons fresh cilantro, chopped",
+        "3 cups couscous, cooked (hot)"
       ],
       "tags": {
         "meal_role": "one_bowl",
         "contains_staple": true,
         "protein_sources": [
-          "chicken",
-          "legume"
+          "chicken"
         ],
         "cooking_methods": [
-          "braise"
+          "boil"
         ],
         "equipment": [],
-        "flavor_tags": []
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_E6D5DE6253DA",
-      "title": "Easy Manicotti",
-      "course": "main",
-      "cuisine": "italian",
-      "ingredients": [
-        "48 oz. jar spaghetti sauce",
-        "1 c. water",
-        "2 c. (15 oz.) Ricotta cheese",
-        "2 c. (8 oz.) shredded Mozzarella",
-        "1/4 c. grated Parmesan",
-        "2 Tbsp. chopped fresh parsley",
-        "1/2 tsp. salt",
-        "1/4 tsp. pepper"
-      ],
-      "tags": {
-        "meal_role": "one_bowl",
-        "contains_staple": true,
-        "protein_sources": [],
-        "cooking_methods": [
-          "bake"
-        ],
-        "equipment": [
-          [
-            "oven"
-          ]
-        ],
-        "flavor_tags": []
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_F7F39DDBB842",
-      "title": "Egg Foo Young",
-      "course": "main",
-      "cuisine": "chinese",
-      "ingredients": [
-        "1 cup Unsalted Beef Stock",
-        "1 tablespoon Soy Sauce",
-        "1 tablespoon Shaoxing Wine",
-        "1 tablespoon Oyster Sauce",
-        "1/2 tsp Pepper",
-        "1 tablespoon Cornstarch",
-        "1 tablespoon Water",
-        "1 tablespoon Cornstarch",
-        "1 tablespoon Water",
-        "8 large Egg",
-        "1/2 tsp Kosher Salt",
-        "1/4 tsp Sugar",
-        "1 Spring Onions",
-        "1 cup Mung Bean Sprouts",
-        "20 Shrimp",
-        "3 Cups Vegetable Oil",
-        "2 cups Jasmine Rice"
-      ],
-      "tags": {
-        "meal_role": "one_bowl",
-        "contains_staple": true,
-        "protein_sources": [
-          "shellfish",
-          "egg"
-        ],
-        "cooking_methods": [
-          "stir_fry",
-          "pan_fry",
-          "boil",
-          "bake"
-        ],
-        "equipment": [
-          [
-            "oven"
-          ]
-        ],
-        "flavor_tags": []
+        "flavor_tags": [
+          "fragrant",
+          "light"
+        ]
       },
       "methods": {
         "meal_role": "rule",
@@ -1508,6 +1554,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1519,22 +1566,21 @@
       }
     },
     {
-      "key": "RCP2_ADC5F7A60CCD",
-      "title": "Korean Ground Beef And Rice Bowls",
+      "key": "RCP2_F6575FE524DC",
+      "title": "Corned Beef Kimchi Fried Rice",
       "course": "main",
       "cuisine": "korean",
       "ingredients": [
-        "1 lb lean ground beef (90% lean)",
-        "3 garlic cloves, minced",
-        "1/4 cup brown sugar, packed",
-        "1/4 cup reduced sodium soy sauce",
-        "2 teaspoons sesame oil",
-        "1/4 teaspoon ground ginger",
-        "1/4 teaspoon crushed red pepper flakes",
-        "1/4 teaspoon pepper",
-        "2 cups cooked white rice",
-        "1/4 cup sliced green onion",
-        "1 dash sesame seeds (to garnish)"
+        "1 1/4 cups kimchi, or to taste",
+        "2 tablespoons olive oil",
+        "1 1/2 cups diced fully cooked corned beef",
+        "3 cups cold cooked rice",
+        "1/4 cup water",
+        "2 tablespoons gochujang (Korean hot pepper paste)",
+        "1/2 cup sliced green onion",
+        "2 teaspoons toasted sesame seeds",
+        "2 teaspoons sesame oil, or to taste",
+        "1/4 teaspoon soy sauce"
       ],
       "tags": {
         "meal_role": "one_bowl",
@@ -1543,12 +1589,11 @@
           "beef"
         ],
         "cooking_methods": [
-          "pan_fry",
-          "boil"
+          "pan_fry"
         ],
         "equipment": [],
         "flavor_tags": [
-          "fragrant"
+          "spicy"
         ]
       },
       "methods": {
@@ -1559,6 +1604,57 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role one_bowl by rule",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_AC83743D8B1C",
+      "title": "Greek Shrimp With Orzo",
+      "course": "main",
+      "cuisine": "greek",
+      "ingredients": [
+        "12 ounces orzo pasta, uncooked",
+        "2 teaspoons olive oil",
+        "1/2 cup onion, chopped",
+        "1 medium green pepper, chopped",
+        "2 medium garlic cloves, minced",
+        "28 ounces diced tomatoes, diced",
+        "1 teaspoon dried oregano",
+        "1 lb medium shrimp, peeled and deveined",
+        "1/4 cup fresh basil, chopped",
+        "2 tablespoons feta cheese, crumbled"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "shellfish"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1602,6 +1698,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1651,6 +1748,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1662,133 +1760,34 @@
       }
     },
     {
-      "key": "RCP2_C9AC8E08ACF5",
-      "title": "Vegetable Quiche",
+      "key": "RCP2_C8D5CDA59BB1",
+      "title": "Thai Style One-Pot",
       "course": "main",
-      "cuisine": "french",
+      "cuisine": "thai",
       "ingredients": [
-        "1 1/2 cups cooked brown rice, room temperature",
-        "3/4 cup egg substitute, divided",
-        "3/4 cup shredded low fat mozzarella cheese, divided",
-        "1 1/2 cups fresh broccoli",
-        "3/4 cup sliced fresh mushrooms",
-        "1/4 cup skim milk",
-        "1 Tbsp. margarine, melted"
+        "2 teaspoons vegetable oil",
+        "1 pound ground pork",
+        "2 red bell peppers, cut into strips",
+        "2 cups chicken broth",
+        "1 cup uncooked white rice",
+        "1 tablespoon soy sauce",
+        "3/4 tablespoon chile-garlic sauce",
+        "4 ounces snow peas, trimmed and halved",
+        "4 scallions, thinly sliced",
+        "1/2 cup coarsely chopped fresh cilantro",
+        "2 tablespoons lime juice"
       ],
       "tags": {
         "meal_role": "one_bowl",
         "contains_staple": true,
         "protein_sources": [
-          "egg"
+          "pork"
         ],
         "cooking_methods": [
-          "bake"
-        ],
-        "equipment": [
-          [
-            "oven"
-          ]
-        ],
-        "flavor_tags": []
-      },
-      "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_23097F49A432",
-      "title": "Penne Pasta With Shrimp & Bacon",
-      "course": "main",
-      "cuisine": "italian",
-      "ingredients": [
-        "1 lb penne pasta",
-        "1/4 lb bacon, cut into 1/2-inch bits",
-        "1/2 cup frozen peas, thawed",
-        "1 lb shrimp, uncooked, peeled & deveined",
-        "1 1/2 tablespoons butter",
-        "1/2 cup ricotta cheese",
-        "1 tablespoon grated parmesan cheese"
-      ],
-      "tags": {
-        "meal_role": "one_bowl",
-        "contains_staple": true,
-        "protein_sources": [
-          "pork",
-          "shellfish"
-        ],
-        "cooking_methods": [
-          "pan_fry"
+          "boil"
         ],
         "equipment": [],
-        "flavor_tags": []
-      },
-      "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_F951780070AF",
-      "title": "Chicken Teriyaki With Vegetables",
-      "course": "main",
-      "cuisine": "japanese",
-      "ingredients": [
-        "3 boneless skinless chicken breasts",
-        "1/2 cup Kikkoman soy sauce, Less Sodium",
-        "1/4 cup packed light brown sugar",
-        "1 tablespoon garlic, minced",
-        "1 teaspoon ground ginger",
-        "3/4 cup frozen sliced carrots, julienned",
-        "1 cup snow peas",
-        "1 red pepper, sliced",
-        "2 green onions, diced",
-        "1 1/2 cups cooked brown rice"
-      ],
-      "tags": {
-        "meal_role": "one_bowl",
-        "contains_staple": true,
-        "protein_sources": [
-          "chicken"
-        ],
-        "cooking_methods": [
-          "stir_fry",
-          "pan_fry",
-          "grill"
-        ],
-        "equipment": [
-          [
-            "microwave"
-          ]
-        ],
         "flavor_tags": [
-          "fragrant",
           "spicy",
           "light"
         ]
@@ -1801,6 +1800,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1812,36 +1812,197 @@
       }
     },
     {
-      "key": "RCP2_3A89815DD43E",
-      "title": "Pancit(Rice Noodles)",
+      "key": "RCP2_22FFF55CE5D1",
+      "title": "Pad Thai",
       "course": "main",
-      "cuisine": "filipino",
+      "cuisine": "thai",
       "ingredients": [
-        "1/2 head cabbage, thinly shredded",
-        "1 pkg. rice noodles",
-        "2 cloves garlic (whole)",
-        "1 onion",
-        "carrots, celery and bell pepper",
-        "meat of choice",
-        "1 bouillon cube (beef or chicken)"
+        "7 oz dried rice noodles",
+        "2 cloves garlic, quartered",
+        "2 None fresh red bird's eye chilies, roughly chopped",
+        "2 tbsp peanut oil",
+        "2 None large eggs, lightly beaten",
+        "3 oz shallots, chopped",
+        "4 oz tofu, cut into 3/4 inch cubes",
+        "1/4 cup roasted unsalted peanuts, roughly chopped",
+        "8 oz bean sprouts",
+        "6 None spring onions, thinly sliced",
+        "2 tbsp light soy sauce",
+        "1 tbsp lime juice",
+        "2 tbsp chopped fresh cilantro leaves"
       ],
       "tags": {
         "meal_role": "one_bowl",
         "contains_staple": true,
         "protein_sources": [
-          "pork"
+          "soy",
+          "egg"
         ],
         "cooking_methods": [
-          "steam"
+          "stir_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "fragrant",
+          "spicy"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "meal_role one_bowl by rule",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_F6D0DA4417B5",
+      "title": "Enchilada Casserole",
+      "course": "main",
+      "cuisine": "tex_mex",
+      "ingredients": [
+        "1 1/2 lb. ground beef",
+        "1 c. chopped onion",
+        "1 1/2 tsp. ground cumin",
+        "2 garlic cloves, crushed",
+        "4 tsp. chili powder",
+        "1 1/2 tsp. salt",
+        "1/2 tsp. pepper",
+        "1 c. water",
+        "2 c. taco sauce",
+        "12 corn tortillas",
+        "1 lb. Monterey Jack cheese",
+        "1 c. sour cream"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil",
+          "bake"
         ],
         "equipment": [
           [
-            "steamer"
+            "oven"
           ]
         ],
         "flavor_tags": [
+          "spicy",
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "meal_role one_bowl by rule",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_3A3FEF3D06B8",
+      "title": "Thai Tilapia",
+      "course": "main",
+      "cuisine": "thai",
+      "ingredients": [
+        "1-1/2 cups cooked rice",
+        "1/3 cup chopped green onions",
+        "1/3 cup chopped sweet red pepper",
+        "1 tablespoon minced fresh basil",
+        "2 tilapia fillets (6 ounces each)",
+        "1 cup fresh snow peas",
+        "1/3 to 1/2 cup Thai peanut sauce"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "fish"
+        ],
+        "cooking_methods": [
+          "grill"
+        ],
+        "equipment": [],
+        "flavor_tags": [
           "light"
         ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "meal_role one_bowl by rule",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_1DDBB68902A6",
+      "title": "Cantonese Fried Rice",
+      "course": "main",
+      "cuisine": "chinese",
+      "ingredients": [
+        "1 -2 tablespoon vegetable oil",
+        "1 cup finely chopped onion",
+        "1 garlic clove, minced",
+        "3 eggs, slightly beaten",
+        "1 -2 cup cooked meat, diced",
+        "3 cups cooked rice",
+        "3 -4 green onions, sliced",
+        "1 cup bean sprouts",
+        "2 -4 tablespoons low sodium soy sauce"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "pork",
+          "beef",
+          "egg"
+        ],
+        "cooking_methods": [
+          "stir_fry",
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": []
       },
       "methods": {
         "meal_role": "rule",
@@ -1851,6 +2012,7 @@
         "flavor_tags": "rule",
         "protein_sources": "llm"
       },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1862,20 +2024,23 @@
       }
     },
     {
-      "key": "RCP2_1DE8CBC4C30F",
-      "title": "Seviche-Style Shrimp And Avocado Tacos",
+      "key": "RCP2_E0768BBE02E6",
+      "title": "Shrimp Creole",
       "course": "main",
-      "cuisine": "tex_mex",
+      "cuisine": "cajun_creole",
       "ingredients": [
-        "3 limes",
-        "1 cup chopped seeded tomato",
-        "1 cup diced peeled avocado (about 1 avocado)",
-        "1/2 cup chopped fresh cilantro",
-        "3/4 teaspoon salt",
-        "1/4 teaspoon black pepper",
-        "3 garlic cloves, minced",
-        "1 pound cooked peeled medium shrimp",
-        "12 (6-inch) corn tortillas"
+        "1/4 c. oil",
+        "1 c. chopped green onion",
+        "1/2 c. chopped celery",
+        "1 tsp. chopped garlic",
+        "1/2 c. water",
+        "6 to 7 chopped tomatoes",
+        "1/2 tsp. salt",
+        "1/2 tsp. cayenne pepper",
+        "1 Tbsp. cornstarch",
+        "1 1/2 lb. shrimp, peeled and deveined",
+        "1 1/2 bay leaves",
+        "4 c. cooked rice"
       ],
       "tags": {
         "meal_role": "one_bowl",
@@ -1883,7 +2048,9 @@
         "protein_sources": [
           "shellfish"
         ],
-        "cooking_methods": [],
+        "cooking_methods": [
+          "boil"
+        ],
         "equipment": [],
         "flavor_tags": []
       },
@@ -1895,6 +2062,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -1906,90 +2074,37 @@
       }
     },
     {
-      "key": "RCP2_E2BD8CFEF050",
-      "title": "Thai Peanut Chicken Pasta",
+      "key": "RCP2_D1124DDE3F57",
+      "title": "Stir-Fried Thick And Thin Noodles With Vegetables And Tofu (Pancit)",
       "course": "main",
-      "cuisine": "thai",
+      "cuisine": "filipino",
       "ingredients": [
-        "12 ounces spiral pasta",
-        "2 cups cooked chicken breast shredded, a pre-cooked rotisserie chicken from the grocery",
-        "1/2 cup carrots shredded",
-        "1/2 cup cucumbers diced",
-        "1/2 cup fresh cilantro chopped",
-        "1/2 cup salted peanuts",
-        "1/4 cup green onions chopped",
-        "1 cup chunky peanut butter",
-        "1/4 cup chicken stock",
-        "1/4 cup rice vinegar",
-        "1/4 cup fresh lime juice do not use bottled",
-        "2 tablespoons dark sesame oil",
-        "2 tablespoons soy sauce",
-        "2 tablespoons white sugar",
-        "2 tablespoons ground ginger fresh"
+        "3 1/2 ounces rice vermicelli",
+        "8 ounces medium-thick fresh wheat noodles*",
+        "1/4 cup plus 2 tbsp. vegetable oil",
+        "2 tablespoons chopped garlic, divided",
+        "1 medium onion, thinly sliced",
+        "2 cups shredded green cabbage",
+        "1 carrot, peeled and grated",
+        "1 package (12 oz.) firm tofu, patted dry, cut in 1/2-in. cubes",
+        "3 tablespoons soy sauce",
+        "1 1/2 teaspoons freshly ground black pepper",
+        "1 cup reduced-sodium chicken broth",
+        "1 lemon, cut into wedges"
       ],
       "tags": {
         "meal_role": "one_bowl",
         "contains_staple": true,
         "protein_sources": [
-          "chicken"
-        ],
-        "cooking_methods": [],
-        "equipment": [
-          [
-            "microwave"
-          ]
-        ],
-        "flavor_tags": [
-          "fragrant"
-        ]
-      },
-      "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_D2976DD6560F",
-      "title": "Quick Ham Stir-Fry",
-      "course": "main",
-      "cuisine": "chinese",
-      "ingredients": [
-        "2 tablespoons vegetable oil",
-        "1 cup sliced celery",
-        "1/2 cup chopped onion",
-        "1/2 cup chopped green pepper",
-        "2 cups cubed cooked ham",
-        "1/8 teaspoon garlic powder, to taste",
-        "1/8 teaspoon black pepper, to taste",
-        "3 cups cooked rice",
-        "2 tablespoons soy sauce"
-      ],
-      "tags": {
-        "meal_role": "one_bowl",
-        "contains_staple": true,
-        "protein_sources": [
-          "pork"
+          "soy"
         ],
         "cooking_methods": [
-          "stir_fry"
+          "stir_fry",
+          "pan_fry",
+          "boil"
         ],
         "equipment": [],
-        "flavor_tags": [
-          "light"
-        ]
+        "flavor_tags": []
       },
       "methods": {
         "meal_role": "rule",
@@ -1999,6 +2114,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2046,6 +2162,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2057,19 +2174,22 @@
       }
     },
     {
-      "key": "RCP2_CD473FFEFDE5",
-      "title": "Spanish Rice",
+      "key": "RCP2_CC128C568DA7",
+      "title": "Crock Pot Non-Hungarian Goulash",
       "course": "main",
-      "cuisine": "tex_mex",
+      "cuisine": "american",
       "ingredients": [
-        "1 1/2 c. rice",
-        "2 2/3 c. water",
-        "1 tsp. salt",
-        "1 lb. ground beef",
-        "1 qt. tomatoes, blended",
-        "2 Tbsp. vinegar",
-        "1 Tbsp. Worcestershire sauce",
-        "1/2 c. brown sugar"
+        "1 lb ground beef",
+        "2 medium onions (chopped)",
+        "1 teaspoon dry mustard",
+        "3 tablespoons Worcestershire sauce",
+        "6 tablespoons ketchup",
+        "1 teaspoon cider vinegar",
+        "1 cup water (hot)",
+        "2 tablespoons brown sugar",
+        "1/2 cup water (cool)",
+        "3 tablespoons flour",
+        "16 ounces noodles (cooked)"
       ],
       "tags": {
         "meal_role": "one_bowl",
@@ -2078,7 +2198,8 @@
           "beef"
         ],
         "cooking_methods": [
-          "boil"
+          "pan_fry",
+          "braise"
         ],
         "equipment": [],
         "flavor_tags": []
@@ -2091,6 +2212,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2144,6 +2266,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2155,36 +2278,79 @@
       }
     },
     {
-      "key": "RCP2_76C1E62BAAEB",
-      "title": "Thai Shrimp Stir-Fry",
+      "key": "RCP2_75E1F21FF0A2",
+      "title": "No Meat Tacos",
       "course": "main",
-      "cuisine": "thai",
+      "cuisine": "tex_mex",
       "ingredients": [
-        "2 medium sweet red peppers, cut into thin slices",
-        "1 teaspoon canola oil",
-        "1 cup fresh snow peas",
-        "1/2 cup thinly sliced green onions",
-        "1 garlic clove, minced",
-        "1/2 cup reduced-sodium chicken broth",
-        "2 tablespoons reduced-fat peanut butter",
-        "4-1/2 teaspoons reduced-sodium soy sauce",
-        "1 tablespoon rice vinegar",
-        "1 teaspoon sesame oil",
-        "1 teaspoon minced fresh gingerroot",
-        "1/2 teaspoon crushed red pepper flakes",
-        "1 pound uncooked medium shrimp, peeled and deveined",
-        "Hot cooked fettuccine"
+        "15 ounces black beans",
+        "15 ounces corn",
+        "10 ounces rotel",
+        "15 ounces refried beans",
+        "1 cup cheddar cheese",
+        "2 cups spinach",
+        "1 cup sour cream",
+        "10 flour tortillas"
       ],
       "tags": {
         "meal_role": "one_bowl",
         "contains_staple": true,
         "protein_sources": [
-          "shellfish"
+          "legume"
+        ],
+        "cooking_methods": [],
+        "equipment": [
+          [
+            "microwave"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "meal_role one_bowl by rule",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_C5F775294C3E",
+      "title": "Vietnamese Pork Banh Mi Sandwiches",
+      "course": "main",
+      "cuisine": "vietnamese",
+      "ingredients": [
+        "2 cloves Garlic",
+        "2 tablespoons Fish Sauce",
+        "2 tablespoons Soy Sauce",
+        "2 teaspoons Sugar",
+        "1 teaspoon Black Pepper, Ground",
+        "2 tablespoons Shallots, Finely Chopped",
+        "1/4 cup Vegetable Oil",
+        "1 teaspoon Sesame Oil",
+        "1 pound Pork Loin, Thinly Sliced",
+        "1 loaf Baguette, Cut into 4 inch sandwich-sized slices"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "pork"
         ],
         "cooking_methods": [
-          "stir_fry",
           "pan_fry",
-          "boil"
+          "grill"
         ],
         "equipment": [],
         "flavor_tags": [
@@ -2200,6 +2366,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2211,36 +2378,41 @@
       }
     },
     {
-      "key": "RCP2_C7C11F3DB671",
-      "title": "Rare Beef Vietnamese Style",
+      "key": "RCP2_FEC9FB4AE8D2",
+      "title": "Tantalizing Thai Nutty Chicken",
       "course": "main",
-      "cuisine": "vietnamese",
+      "cuisine": "thai",
       "ingredients": [
-        "1 lb beef tenderloin",
-        "2 teaspoons fresh ginger, grated",
-        "2 tablespoons fish sauce",
-        "1/4 cup rice, roasted and pulverized (optional)"
+        "1/2 lb thin rice noodles",
+        "1 1/2 tablespoons sesame oil",
+        "2 tablespoons vegetable oil",
+        "2 tablespoons honey",
+        "3 tablespoons soy sauce",
+        "2 tablespoons balsamic vinegar",
+        "1 1/2 tablespoons rice wine vinegar",
+        "1/2 teaspoon cayenne pepper",
+        "1/2 tablespoon ginger, grated",
+        "1 orange bell pepper, sliced into thin strips",
+        "3 cups chicken breasts, fully cooked and sliced into thin strips",
+        "1 cup peas",
+        "8 green onions, chopped",
+        "3/4 cup chopped walnuts",
+        "1/2 cup whole cashews",
+        "3/4 cup cilantro, chopped",
+        "1 lemon, sliced for garnish"
       ],
       "tags": {
         "meal_role": "one_bowl",
         "contains_staple": true,
         "protein_sources": [
-          "beef"
+          "chicken"
         ],
         "cooking_methods": [
-          "pan_fry",
-          "bake",
-          "grill"
+          "pan_fry"
         ],
-        "equipment": [
-          [
-            "oven"
-          ],
-          [
-            "blender"
-          ]
-        ],
+        "equipment": [],
         "flavor_tags": [
+          "fragrant",
           "rich"
         ]
       },
@@ -2252,6 +2424,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role one_bowl by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2263,24 +2436,248 @@
       }
     },
     {
-      "key": "RCP2_272521E2053B",
-      "title": "Layered Ramen Casserole",
+      "key": "RCP2_1C43BC6CC166",
+      "title": "Stroganoff Steak Sandwiches",
       "course": "main",
       "cuisine": "american",
       "ingredients": [
-        "2 (3 ounce) packages ramen noodles (chicken flavored)",
-        "1 lb ground beef",
-        "3 eggs",
-        "2 cups shredded cheese (any kind)",
-        "1 tablespoon minced onion (rehydrated)",
-        "1 cup spaghetti sauce"
+        "1 cup beer (preferably dark, but any beer will do)",
+        "1/3 cup vegetable oil",
+        "1 teaspoon salt",
+        "1/2 teaspoon garlic powder",
+        "1/2 teaspoon pepper, course ground",
+        "4 1/2 lbs flank steaks",
+        "2 tablespoons butter",
+        "1/2 teaspoon paprika (we use Smoked Spanish Paprika)",
+        "4 cups sliced onions",
+        "12 ounces sour cream",
+        "1 teaspoon horseradish (more or less, to taste)",
+        "12 slices French bread (Thick cut, we buy whole loaves and slice, on the diaganol, into 3/4-inch slices)"
       ],
       "tags": {
-        "meal_role": "one_bowl",
-        "contains_staple": true,
+        "meal_role": "protein_main",
+        "contains_staple": false,
         "protein_sources": [
-          "beef",
-          "egg"
+          "beef"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "grill"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role protein_main by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_3D5ADFE023AB",
+      "title": "Lamb & apricot meatballs",
+      "course": "main",
+      "cuisine": "middle_eastern",
+      "ingredients": [
+        "2 tablespoons Olive Oil",
+        "2 chopped Red Onions",
+        "4 Cloves Crushed Garlic",
+        "2 tsp Ground Cumin",
+        "2 tsp Ground Coriander",
+        "400g Tinned Tomatos",
+        "1/2 teaspoon Sugar",
+        "10g Mint",
+        "500g Lamb Mince",
+        "8 Dried Apricots",
+        "50g Breadcrumbs",
+        "To serve Pita Bread"
+      ],
+      "tags": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "lamb"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "fragrant"
+        ]
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role protein_main by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_8C948ACDB0BC",
+      "title": "Vietnamese Beef Curry",
+      "course": "main",
+      "cuisine": "vietnamese",
+      "ingredients": [
+        "2 tablespoons vegetable oil",
+        "1 1/2 pounds beef chuck steak trimmed and cubed",
+        "1 onion large, peeled and sliced",
+        "4 cloves garlic peeled and minced",
+        "2 red chilies long, cut into large pieces",
+        "2 pieces ginger peeled, grated",
+        "1/2 tablespoon curry powder",
+        "2 teaspoons sugar",
+        "2 teaspoons turmeric",
+        "2 carrots peeled and sliced",
+        "15 ounces coconut milk",
+        "15 ounces chopped tomatoes",
+        "1 cup water",
+        "1 tablespoon fish sauce",
+        "lime wedges",
+        "cilantro leaves",
+        "baguette"
+      ],
+      "tags": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "fragrant",
+          "spicy",
+          "rich"
+        ]
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role protein_main by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_0B06E6177DA3",
+      "title": "Crunchy Chicken Casserole",
+      "course": "main",
+      "cuisine": "american",
+      "ingredients": [
+        "2 c. cooked chicken or turkey",
+        "1 c. frozen peas, thawed",
+        "1 c. sliced celery",
+        "2/3 c. sliced water chestnuts",
+        "1/2 c. shredded Cheddar cheese",
+        "1/2 tsp. salt",
+        "1/2 c. sour cream",
+        "1/2 c. mayonnaise",
+        "1 c. chow mein noodles"
+      ],
+      "tags": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role protein_main by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_17017A585981",
+      "title": "Gigantes Plaki",
+      "course": "main",
+      "cuisine": "greek",
+      "ingredients": [
+        "400g Butter Beans",
+        "3 tbs Olive Oil",
+        "1 chopped Onion",
+        "2 chopped Garlic Clove",
+        "2 tbs Tomato Puree",
+        "800g Tomatoes",
+        "1 tbs Sugar",
+        "1 tbs Dried Oregano",
+        "Pinch Cinnamon",
+        "2 tbs Chopped Parsley"
+      ],
+      "tags": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "legume"
         ],
         "cooking_methods": [
           "pan_fry",
@@ -2292,244 +2689,17 @@
             "oven"
           ]
         ],
-        "flavor_tags": [
-          "rich"
-        ]
-      },
-      "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_66FB96D30435",
-      "title": "Chicken, Tomato, And Spinach Quesadillas",
-      "course": "main",
-      "cuisine": "tex_mex",
-      "ingredients": [
-        "4 flour tortillas",
-        "2 cups shredded Cheddar cheese",
-        "2 cups cooked shredded chicken",
-        "1 cup fresh spinach",
-        "1/2 cup chopped cherry tomatoes",
-        "1 tablespoon vegetable oil, or as needed"
-      ],
-      "tags": {
-        "meal_role": "one_bowl",
-        "contains_staple": true,
-        "protein_sources": [
-          "chicken"
-        ],
-        "cooking_methods": [
-          "pan_fry",
-          "bake"
-        ],
-        "equipment": [
-          [
-            "oven"
-          ]
-        ],
-        "flavor_tags": [
-          "rich"
-        ]
-      },
-      "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_1729D7258E04",
-      "title": "Egg Filling For Sushi",
-      "course": "side",
-      "cuisine": "japanese",
-      "ingredients": [
-        "2 eggs",
-        "2 tablespoons flour",
-        "2 tablespoons sugar",
-        "1 teaspoon salt"
-      ],
-      "tags": {
-        "meal_role": "protein_main",
-        "contains_staple": false,
-        "protein_sources": [
-          "egg"
-        ],
-        "cooking_methods": [
-          "pan_fry"
-        ],
-        "equipment": [],
-        "flavor_tags": [
-          "light"
-        ]
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_A5E3A0513E4A",
-      "title": "Pizza Meatballs",
-      "course": "main",
-      "cuisine": "american",
-      "ingredients": [
-        "1/2 lb. Monterey Jack cheese",
-        "1 lb. lean ground beef",
-        "2 slices bread, cubed",
-        "1/2 c. milk",
-        "2 Tbsp. instant minced onion",
-        "1/8 tsp. pepper",
-        "1/2 tsp. salt",
-        "1 egg",
-        "2 Tbsp. vegetable oil",
-        "1 (15 oz.) spaghetti sauce"
-      ],
-      "tags": {
-        "meal_role": "protein_main",
-        "contains_staple": false,
-        "protein_sources": [
-          "beef"
-        ],
-        "cooking_methods": [
-          "raw"
-        ],
-        "equipment": [],
-        "flavor_tags": [
-          "rich"
-        ]
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_0C181842D295",
-      "title": "Chinese Salt And Pepper Tofu",
-      "course": "side",
-      "cuisine": "chinese",
-      "ingredients": [
-        "1 lb firm tofu",
-        "2 teaspoons salt",
-        "2 teaspoons garlic powder",
-        "1 teaspoon fresh ground black pepper",
-        "3 tablespoons cornstarch",
-        "3 tablespoons vegetable oil"
-      ],
-      "tags": {
-        "meal_role": "protein_main",
-        "contains_staple": false,
-        "protein_sources": [
-          "soy"
-        ],
-        "cooking_methods": [
-          "stir_fry",
-          "pan_fry"
-        ],
-        "equipment": [],
-        "flavor_tags": [
-          "rich"
-        ]
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_15AF96C45EB8",
-      "title": "Paneer (Panir)",
-      "course": "side",
-      "cuisine": "indian",
-      "ingredients": [
-        "2 gallons milk",
-        "1/2 cup lemon juice (fresh or bottled)",
-        "1 cup water"
-      ],
-      "tags": {
-        "meal_role": "protein_main",
-        "contains_staple": false,
-        "protein_sources": [],
-        "cooking_methods": [
-          "boil"
-        ],
-        "equipment": [],
         "flavor_tags": []
       },
       "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
         "protein_sources": "rule",
         "cooking_methods": "rule",
         "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
+        "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2580,6 +2750,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2634,6 +2805,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2691,6 +2863,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2742,6 +2915,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2776,6 +2950,7 @@
         "meal_role": "protein_main",
         "contains_staple": false,
         "protein_sources": [
+          "pork",
           "beef",
           "egg"
         ],
@@ -2801,6 +2976,7 @@
         "flavor_tags": "rule",
         "protein_sources": "llm"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2847,6 +3023,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2903,6 +3080,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2948,6 +3126,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -2995,6 +3174,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3044,6 +3224,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3090,6 +3271,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3138,6 +3320,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3183,6 +3366,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3230,6 +3414,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3281,6 +3466,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3335,6 +3521,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3384,6 +3571,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3433,6 +3621,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3487,6 +3676,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3536,6 +3726,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3589,6 +3780,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3637,6 +3829,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3684,6 +3877,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3735,6 +3929,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3788,6 +3983,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3838,6 +4034,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3888,6 +4085,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3939,6 +4137,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -3994,6 +4193,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4052,6 +4252,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4102,6 +4303,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4148,6 +4350,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4200,6 +4403,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4247,6 +4451,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4297,6 +4502,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4352,6 +4558,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4396,6 +4603,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4447,6 +4655,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4495,6 +4704,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4550,6 +4760,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4605,6 +4816,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4657,6 +4869,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4722,6 +4935,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4770,6 +4984,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role protein_main by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4781,27 +4996,24 @@
       }
     },
     {
-      "key": "RCP2_2BC68B388FC1",
-      "title": "Beef And Vegetable Grill",
-      "course": "main",
+      "key": "RCP2_17E73EAD0F33",
+      "title": "Curry Chicken Salad",
+      "course": "salad",
       "cuisine": "american",
       "ingredients": [
-        "3 lb. beef chuck roast",
-        "1 tsp. salt",
-        "1 c. barbecue sauce",
-        "6 small onions, peeled",
-        "6 medium carrots, pared",
-        "6 medium potatoes, peeled"
+        "3 cooked skinless, boneless chicken breast halves, chopped",
+        "3 stalks celery, chopped",
+        "1/2 cup low-fat mayonnaise",
+        "2 teaspoons curry powder"
       ],
       "tags": {
-        "meal_role": "protein_main",
+        "meal_role": "salad",
         "contains_staple": false,
         "protein_sources": [
-          "beef"
+          "chicken"
         ],
         "cooking_methods": [
-          "bake",
-          "grill"
+          "raw"
         ],
         "equipment": [],
         "flavor_tags": [
@@ -4816,6 +5028,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role salad by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4860,6 +5073,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role salad by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4914,6 +5128,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role salad by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -4958,6 +5173,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role salad by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5000,6 +5216,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role salad by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5053,6 +5270,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role salad by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5064,85 +5282,38 @@
       }
     },
     {
-      "key": "RCP2_94A964FFDAE2",
-      "title": "Korean Coleslaw",
-      "course": "salad",
-      "cuisine": "korean",
-      "ingredients": [
-        "1 1/2 Tbsp. sugar",
-        "1/2 c. oil",
-        "4 Tbsp. vinegar",
-        "1/4 tsp. pepper",
-        "flavor packet (envelope) of chicken Ramen noodles",
-        "1/2 large head cabbage",
-        "1/2 c. sunflower seeds",
-        "3/4 c. sliced almonds, toasted if desired (peanuts, pecans or cashews can be substituted)"
-      ],
-      "tags": {
-        "meal_role": "salad",
-        "contains_staple": false,
-        "protein_sources": [],
-        "cooking_methods": [
-          "raw"
-        ],
-        "equipment": [],
-        "flavor_tags": [
-          "rich"
-        ]
-      },
-      "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_7CCF8129610B",
-      "title": "Teriyaki",
+      "key": "RCP2_F9AC64939A2C",
+      "title": "Welsh Rarebit",
       "course": "main",
-      "cuisine": "japanese",
+      "cuisine": "british_irish",
       "ingredients": [
-        "1/8 tsp. garlic powder",
-        "1 Tbsp. brown sugar",
-        "1/2 tsp. pepper",
-        "1/2 tsp. ginger",
-        "1 Tbsp. cooking oil",
-        "2 Tbsp. water",
-        "1/4 c. soy sauce"
+        "1 1/2 Tbsp. butter",
+        "1 1/2 Tbsp. flour",
+        "1 1/2 c. milk",
+        "1 c. grated Cheddar cheese",
+        "1/2 tsp. salt",
+        "1/2 tsp. mustard",
+        "1/8 tsp. paprika"
       ],
       "tags": {
         "meal_role": "sauce",
         "contains_staple": false,
         "protein_sources": [],
-        "cooking_methods": [
-          "bake",
-          "grill"
-        ],
+        "cooking_methods": [],
         "equipment": [],
         "flavor_tags": [
           "rich"
         ]
       },
       "methods": {
-        "protein_sources": "rule",
+        "protein_sources": "llm",
         "cooking_methods": "rule",
         "equipment": "rule",
         "flavor_tags": "rule",
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role sauce by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5184,13 +5355,14 @@
         ]
       },
       "methods": {
-        "protein_sources": "rule",
+        "protein_sources": "llm",
         "cooking_methods": "rule",
         "equipment": "rule",
         "flavor_tags": "rule",
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role sauce by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5202,46 +5374,43 @@
       }
     },
     {
-      "key": "RCP2_4A04FF1CF1AB",
-      "title": "Watermelon Curry (Matira)",
+      "key": "RCP2_561E7EDAC82C",
+      "title": "Cuban Black Beans",
       "course": "side",
-      "cuisine": "indian",
+      "cuisine": "caribbean",
       "ingredients": [
-        "1/4 large watermelon",
-        "1/8 teaspoon paprika",
-        "1 1/2 teaspoons ground red pepper",
-        "1/8 teaspoon ground turmeric",
-        "1/2 teaspoon ground coriander",
-        "1 teaspoon garlic, puree",
-        "1/2 teaspoon salt",
-        "2 teaspoons oil",
-        "1/4 teaspoon cumin seed",
-        "1 tablespoon lime juice",
-        "1/2 tablespoon sugar"
+        "1 1/2 teaspoons chopped garlic",
+        "2 teaspoons olive oil",
+        "1/4 cup chopped red onion",
+        "1/4 cup chopped red bell pepper",
+        "1/4 cup chopped carrot",
+        "2 jalapenos, seeded and chopped",
+        "2 cups cooked black beans (drained and rinsed if canned)",
+        "1 1/2 teaspoons chopped fresh coriander",
+        "2 tablespoons fresh lime juice"
       ],
       "tags": {
         "meal_role": "sauce",
         "contains_staple": false,
         "protein_sources": [],
         "cooking_methods": [
-          "pan_fry",
-          "boil"
+          "pan_fry"
         ],
         "equipment": [],
         "flavor_tags": [
-          "fragrant",
           "spicy",
           "light"
         ]
       },
       "methods": {
-        "protein_sources": "rule",
+        "protein_sources": "llm",
         "cooking_methods": "rule",
         "equipment": "rule",
         "flavor_tags": "rule",
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role sauce by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5253,37 +5422,47 @@
       }
     },
     {
-      "key": "RCP2_B12163C95EC7",
-      "title": "Tofu Stir Fry",
+      "key": "RCP2_E3B3B3009341",
+      "title": "Teriyaki Steak",
       "course": "main",
-      "cuisine": "chinese",
+      "cuisine": "japanese",
       "ingredients": [
-        "2 tablespoons low-sodium soy sauce",
-        "2 tablespoons oyster sauce",
-        "2 1/2 teaspoons cornstarch",
-        "2 teaspoons rice vinegar",
-        "2 teaspoons dark sesame oil"
+        "1/4 c. vinegar",
+        "1/4 c. water",
+        "2 tsp. cloves",
+        "1 tsp. ginger",
+        "garlic powder",
+        "1/2 c. soy sauce",
+        "1/4 c. brown sugar",
+        "2 Tbsp. lemon juice",
+        "1 tsp. Worcestershire sauce"
       ],
       "tags": {
         "meal_role": "sauce",
         "contains_staple": false,
         "protein_sources": [],
         "cooking_methods": [
-          "stir_fry"
+          "bake",
+          "grill"
         ],
-        "equipment": [],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
         "flavor_tags": [
-          "rich"
+          "light"
         ]
       },
       "methods": {
-        "protein_sources": "rule",
+        "protein_sources": "llm",
         "cooking_methods": "rule",
         "equipment": "rule",
         "flavor_tags": "rule",
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role sauce by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5325,6 +5504,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role sauce by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5369,6 +5549,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role sauce by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5414,6 +5595,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role sauce by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5459,6 +5641,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role sauce by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5470,68 +5653,31 @@
       }
     },
     {
-      "key": "RCP2_8F8576285D7F",
-      "title": "Fried Plantains",
+      "key": "RCP2_783368D92192",
+      "title": "Tempura",
       "course": "side",
-      "cuisine": "caribbean",
+      "cuisine": "japanese",
       "ingredients": [
-        "3 large plantains",
-        "1/4 cup butter or margarine",
-        "1 tablespoon sugar",
-        "1/2 teaspoon ground cinnamon"
+        "12 shrimp (prawns), shells removed and cleaned",
+        "1 sweet potato",
+        "3 mushrooms",
+        "1 carrot",
+        "1 zucchini",
+        "1 green pepper",
+        "6 celery leaves",
+        "5 c. salad oil",
+        "1/2 c. sesame oil"
       ],
       "tags": {
         "meal_role": "snack",
         "contains_staple": false,
-        "protein_sources": [],
+        "protein_sources": [
+          "shellfish"
+        ],
         "cooking_methods": [
-          "pan_fry"
+          "raw"
         ],
         "equipment": [],
-        "flavor_tags": []
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_8C859FF10E5B",
-      "title": "Coconut Baked Bananas (Or Plantains)",
-      "course": "side",
-      "cuisine": "caribbean",
-      "ingredients": [
-        "2 tablespoons butter",
-        "4 bananas (VERY RIPE or plantains)",
-        "1 pinch ground cinnamon",
-        "1 cup coconut milk",
-        "1/3 cup coconut, sweet shredded"
-      ],
-      "tags": {
-        "meal_role": "snack",
-        "contains_staple": false,
-        "protein_sources": [],
-        "cooking_methods": [
-          "bake"
-        ],
-        "equipment": [
-          [
-            "oven"
-          ]
-        ],
         "flavor_tags": [
           "rich"
         ]
@@ -5544,6 +5690,7 @@
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role snack by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5555,17 +5702,64 @@
       }
     },
     {
-      "key": "RCP2_2635DC1E3E4B",
-      "title": "Pao De Queijo (Aka Brazilian Cheese Puffs)",
-      "course": "baked_good",
-      "cuisine": "latin_american",
+      "key": "RCP2_765D954B952B",
+      "title": "Cheese Dumplings For Soup",
+      "course": "side",
+      "cuisine": "british_irish",
       "ingredients": [
-        "2 cups tapioca flour*",
-        "1 cup milk (I use 2%)",
-        "1/2 cup butter (or margarine)",
-        "1 teaspoon salt",
-        "1 1/2 cups grated Parmesan cheese",
-        "2 eggs"
+        "30 g cold butter, cut into small pieces",
+        "2 cups self raising flour",
+        "60 g finely grated cheddar cheese",
+        "2 teaspoons finely chopped fresh thyme",
+        "2 teaspoons finely grated fresh lemon rind (optional)"
+      ],
+      "tags": {
+        "meal_role": "snack",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role snack by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_2FC102A3D309",
+      "title": "Mexican Corn Bread",
+      "course": "baked_good",
+      "cuisine": "tex_mex",
+      "ingredients": [
+        "1 c. flour",
+        "1 c. corn meal",
+        "1/4 c. sugar (optional)",
+        "4 tsp. baking powder",
+        "1/2 tsp. salt",
+        "1/4 tsp. chili powder",
+        "2 eggs",
+        "1/2 c. milk",
+        "1/2 c. soft butter or margarine",
+        "1/4 c. finely diced green pepper",
+        "1/4 c. finely chopped onion",
+        "2 Tbsp. chopped pimentos"
       ],
       "tags": {
         "meal_role": "snack",
@@ -5574,7 +5768,6 @@
           "egg"
         ],
         "cooking_methods": [
-          "boil",
           "bake"
         ],
         "equipment": [
@@ -5582,9 +5775,7 @@
             "oven"
           ]
         ],
-        "flavor_tags": [
-          "rich"
-        ]
+        "flavor_tags": []
       },
       "methods": {
         "protein_sources": "rule",
@@ -5594,6 +5785,7 @@
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role snack by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5605,25 +5797,29 @@
       }
     },
     {
-      "key": "RCP2_EFA12409FC76",
-      "title": "Indian Raita (Cucumber Mix)",
+      "key": "RCP2_A4661EEE5B7A",
+      "title": "Fainá",
       "course": "side",
-      "cuisine": "indian",
+      "cuisine": "latin_american",
       "ingredients": [
-        "1 cup cucumber, grated",
-        "1 cup plain 1% yogurt",
-        "2 tablespoons mint, chopped",
-        "1 teaspoon cumin seed",
-        "salt and pepper"
+        "200g Chickpea Flour",
+        "600ml Water",
+        "4 tablespoons Olive Oil",
+        "To taste Salt",
+        "To taste Pepper"
       ],
       "tags": {
         "meal_role": "snack",
         "contains_staple": false,
         "protein_sources": [],
         "cooking_methods": [
-          "raw"
+          "bake"
         ],
-        "equipment": [],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
         "flavor_tags": []
       },
       "methods": {
@@ -5634,6 +5830,7 @@
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role snack by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5684,6 +5881,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role snack by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5729,6 +5927,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role snack by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5778,6 +5977,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role snack by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5830,6 +6030,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role snack by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -5841,78 +6042,14 @@
       }
     },
     {
-      "key": "RCP2_7E88DD39A727",
-      "title": "Vietnamese Kabocha Squash Soup",
-      "course": "soup",
-      "cuisine": "vietnamese",
+      "key": "RCP2_F19948BC59AA",
+      "title": "Hungarian Goulash(Serves 6 To 8)",
+      "course": "main",
+      "cuisine": "eastern_european",
       "ingredients": [
-        "12 dried shiitake mushrooms",
-        "1 (10.5 ounce) package bean-thread noodles, or to taste",
-        "1 kabocha squash, quartered and seeded",
-        "1 pound ground turkey",
-        "1 1/2 teaspoons fish sauce, or more to taste",
-        "1 pinch ground white pepper",
-        "3 quarts water",
-        "1 quart chicken stock",
-        "1 pound shrimp",
-        "2 scallions, chopped",
-        "3 tablespoons chopped cilantro, or to taste",
-        "cracked black pepper to taste"
-      ],
-      "tags": {
-        "meal_role": "soup",
-        "contains_staple": false,
-        "protein_sources": [
-          "chicken",
-          "shellfish"
-        ],
-        "cooking_methods": [
-          "boil",
-          "bake"
-        ],
-        "equipment": [
-          [
-            "oven"
-          ]
-        ],
-        "flavor_tags": [
-          "light"
-        ]
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_4070469D0041",
-      "title": "French Onion Soup",
-      "course": "soup",
-      "cuisine": "french",
-      "ingredients": [
-        "5 c. onions, sliced thin",
-        "3 Tbsp. butter",
-        "1/4 tsp. black pepper",
-        "1 Tbsp. flour",
-        "3 (10 oz.) beef broth",
-        "3 c. water",
-        "1 bay leaf",
-        "6 to 8 slices French bread",
-        "2 Tbsp. Parmesan cheese",
-        "1 c. Swiss cheese, grated"
+        "2 Tbsp. softened butter or margarine",
+        "2 Tbsp. flour",
+        "1 Tbsp. paprika"
       ],
       "tags": {
         "meal_role": "soup",
@@ -5920,99 +6057,6 @@
         "protein_sources": [],
         "cooking_methods": [
           "pan_fry",
-          "boil"
-        ],
-        "equipment": [],
-        "flavor_tags": []
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_0537F95C51D2",
-      "title": "French Onion Soup",
-      "course": "soup",
-      "cuisine": "french",
-      "ingredients": [
-        "5 c. sliced onions",
-        "4 Tbsp. margarine",
-        "6 beef bouillon cubes",
-        "1 tsp. salt",
-        "1/4 tsp. pepper",
-        "1/2 tsp. Worcestershire sauce",
-        "1 tsp. Kitchen Bouquet",
-        "6 slices French bread",
-        "1/2 c. shredded Jack cheese"
-      ],
-      "tags": {
-        "meal_role": "soup",
-        "contains_staple": false,
-        "protein_sources": [],
-        "cooking_methods": [
-          "pan_fry",
-          "boil"
-        ],
-        "equipment": [],
-        "flavor_tags": []
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_6025B7C095E6",
-      "title": "African Peanut Chicken Soup",
-      "course": "soup",
-      "cuisine": "african",
-      "ingredients": [
-        "2 onions, chopped fine",
-        "2 large peppers, chopped",
-        "3 to 4 garlic, minced",
-        "2 Tbsp. vegetable oil",
-        "1/4 tsp. black pepper",
-        "1/2 c. long grain rice",
-        "2/3 c. creamy peanut butter",
-        "28 oz. Italian tomatoes, chopped (include juice)",
-        "8 c. chicken broth",
-        "1/4 tsp. dried red pepper flakes",
-        "1 1/2 c. diced, cooked chicken"
-      ],
-      "tags": {
-        "meal_role": "soup",
-        "contains_staple": false,
-        "protein_sources": [
-          "chicken"
-        ],
-        "cooking_methods": [
           "boil"
         ],
         "equipment": [],
@@ -6028,6 +6072,267 @@
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role soup by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_F0A2E3140892",
+      "title": "Hearty French Onion Soup",
+      "course": "soup",
+      "cuisine": "french",
+      "ingredients": [
+        "1/4 c. butter",
+        "5 medium yellow onions, thinly sliced",
+        "1/8 tsp. sugar",
+        "2 Tbsp. flour",
+        "5 c. low sodium beef broth",
+        "1/2 tsp. thyme, crumbled",
+        "1 bay leaf",
+        "1/4 tsp. pepper",
+        "8 (1/2-inch) slices French bread, toasted",
+        "1 c. shredded Swiss cheese",
+        "1/4 c. Parmesan cheese"
+      ],
+      "tags": {
+        "meal_role": "soup",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [
+          "boil",
+          "grill"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role soup by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_546DFF631ED4",
+      "title": "Cauliflower Au Gratin",
+      "course": "side",
+      "cuisine": "french",
+      "ingredients": [
+        "6 Tbsp. oleo or butter",
+        "1 to 2 garlic cloves, minced",
+        "4 oz. cooked ham, chopped",
+        "1 head cauliflower, chopped",
+        "2 Tbsp. flour",
+        "1 1/2 c. whipping cream",
+        "1/4 tsp. salt",
+        "1 1/2 c. shredded Swiss cheese",
+        "2 to 3 Tbsp. parsley"
+      ],
+      "tags": {
+        "meal_role": "soup",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "bake",
+          "grill"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role soup by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_31457FBD2E5C",
+      "title": "Indian Pinto Beans",
+      "course": "side",
+      "cuisine": "american",
+      "ingredients": [
+        "1 lb. dried pinto beans",
+        "3 qt. water",
+        "1 lb. can tomatoes",
+        "1 large onion, chopped",
+        "8 slices bacon, cut 2-inch lengths",
+        "3/4 c. sliced celery",
+        "1 1/2 tsp. salt",
+        "3/4 tsp. ground cinnamon",
+        "6 Tbsp. sugar",
+        "3 Tbsp. vinegar"
+      ],
+      "tags": {
+        "meal_role": "soup",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork",
+          "legume"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role soup by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_04DD4A6EDFCC",
+      "title": "Chop Suey Tong, Chop Suey Soup With Egg",
+      "course": "soup",
+      "cuisine": "chinese",
+      "ingredients": [
+        "1 teaspoon cornstarch",
+        "1 teaspoon soy sauce",
+        "1 tablespoon oil",
+        "1/4 lb pork, cut into 1/8 pieces",
+        "6 cups chicken stock",
+        "1 cup carrot, sliced in 1/4 inch pieces",
+        "1/2 cup celery, cut in 1/4 inch pieces",
+        "1/4 cup mushroom, canned",
+        "1 egg"
+      ],
+      "tags": {
+        "meal_role": "soup",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork",
+          "egg"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "meal_role soup by rule",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_2BAD888FB0D3",
+      "title": "Tom Kha Kai",
+      "course": "soup",
+      "cuisine": "thai",
+      "ingredients": [
+        "2½ cups (600 ml) coconut milk",
+        "3¼ cups (775 ml) chicken stock",
+        "4 stalks lemongrass, cut into 1-inch (2.5 cm) pieces or split lengthwise",
+        "2 x 1-inch (5 x 2.5 cm) cube galangal, sliced thin",
+        "3–4 mini Thai bird chilies, finely chopped",
+        "400 g chicken, cubed",
+        "1 medium onion, quartered",
+        "1 tomato, quartered and peeled",
+        "1 cup (150 g) mushrooms, sliced",
+        "1½ teaspoon sugar",
+        "¼ teaspoon pepper",
+        "3 tablespoons lime juice",
+        "2 tablespoons soy sauce",
+        "4 tablespoons cilantro"
+      ],
+      "tags": {
+        "meal_role": "soup",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "fragrant",
+          "spicy",
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "meal_role soup by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6074,6 +6379,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role soup by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6119,6 +6425,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role soup by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6130,119 +6437,31 @@
       }
     },
     {
-      "key": "RCP2_748E29C9B8E1",
-      "title": "How To Cook Vietnamese Pho",
-      "course": "soup",
-      "cuisine": "vietnamese",
-      "ingredients": [
-        "1 chicken (boiling fowl)",
-        "1 cinnamon stick",
-        "2 star anises",
-        "1 black cardamom",
-        "2 onions",
-        "1 big shallot",
-        "a piece ginger"
-      ],
-      "tags": {
-        "meal_role": "soup",
-        "contains_staple": false,
-        "protein_sources": [
-          "chicken"
-        ],
-        "cooking_methods": [
-          "boil",
-          "grill"
-        ],
-        "equipment": [
-          [
-            "microwave"
-          ]
-        ],
-        "flavor_tags": [
-          "fragrant"
-        ]
-      },
-      "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_899AAE02CE2D",
-      "title": "African Peanut Soup",
-      "course": "soup",
-      "cuisine": "african",
-      "ingredients": [
-        "1 c. tomato soup",
-        "1/4 onion diced",
-        "1/4 bunch fresh spinach, drained and cut in small pieces",
-        "4-5 mushrooms, sliced",
-        "1/4 to 1/2 tsp. Cajun seasoning (to taste)",
-        "1/4 c. crushed peanuts",
-        "1 soup can milk or heavy cream"
-      ],
-      "tags": {
-        "meal_role": "soup",
-        "contains_staple": false,
-        "protein_sources": [],
-        "cooking_methods": [
-          "pan_fry"
-        ],
-        "equipment": [],
-        "flavor_tags": []
-      },
-      "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_64DBD7C2EF10",
-      "title": "Guadalajaran Jalisco Mexican Rice",
+      "key": "RCP2_66CDC4D02656",
+      "title": "Napa Cabbage with Dried Shrimp",
       "course": "side",
-      "cuisine": "mexican",
+      "cuisine": "chinese",
       "ingredients": [
-        "12 ounces tomatoes, very ripe and diced or 8 ounces tomato sauce",
-        "1 medium white onion, finely chopped",
-        "2 minced garlic cloves, mashed",
-        "1 cup long grain white rice, rinsed",
-        "1/4 cup canola oil",
-        "1 chicken bouillon cube",
-        "2 cups water",
-        "1/2 cup fresh cilantro, minced",
-        "1 lime, juiced"
+        "2 tablespoons Dried Shrimp",
+        "3/4 cup Boiling Water",
+        "1 head Napa Cabbage",
+        "2 tablespoons Peanut Oil",
+        "4 Chopped Scallions",
+        "1 tablespoon Ginger",
+        "1 tablespoon Soy Sauce",
+        "1 tablespoon Water",
+        "2 tsp Cornstarch",
+        "1 tsp Kosher Salt",
+        "1/2 tsp Pepper"
       ],
       "tags": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [],
+        "protein_sources": [
+          "shellfish"
+        ],
         "cooking_methods": [
+          "stir_fry",
           "pan_fry",
           "boil"
         ],
@@ -6257,6 +6476,7 @@
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role staple by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6268,117 +6488,20 @@
       }
     },
     {
-      "key": "RCP2_370E5046B39F",
-      "title": "Spanish Rice",
+      "key": "RCP2_7791CF2A7CDD",
+      "title": "Polenta",
       "course": "side",
-      "cuisine": "mexican",
+      "cuisine": "italian",
       "ingredients": [
-        "1 c. cooked rice",
-        "1 pt. tomatoes",
-        "1/2 lb. cheese",
-        "1 green pepper, diced"
+        "6 cups water",
+        "1 teaspoon salt",
+        "2 cups cornmeal",
+        "3 tablespoons butter"
       ],
       "tags": {
         "meal_role": "staple",
         "contains_staple": true,
         "protein_sources": [],
-        "cooking_methods": [
-          "braise",
-          "bake"
-        ],
-        "equipment": [
-          [
-            "oven"
-          ]
-        ],
-        "flavor_tags": [
-          "rich"
-        ]
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_A660E279682A",
-      "title": "Easy Potato Dumplings",
-      "course": "side",
-      "cuisine": "german",
-      "ingredients": [
-        "1 cup instant instant potato flakes",
-        "1 cup hot water",
-        "1/2 teaspoon salt",
-        "1 egg",
-        "1 cup all-purpose flour",
-        "1/4 cup melted butter",
-        "1/4 cup breadcrumbs"
-      ],
-      "tags": {
-        "meal_role": "staple",
-        "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ],
-        "cooking_methods": [
-          "boil",
-          "bake"
-        ],
-        "equipment": [
-          [
-            "oven"
-          ]
-        ],
-        "flavor_tags": []
-      },
-      "methods": {
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule",
-        "meal_role": "llm",
-        "contains_staple": "llm"
-      },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_21D46B7E4C32",
-      "title": "Spaetzles",
-      "course": "side",
-      "cuisine": "german",
-      "ingredients": [
-        "2 eggs",
-        "1/4 c. milk",
-        "1/2 tsp. salt",
-        "1 1/2 c. sifted all-purpose flour"
-      ],
-      "tags": {
-        "meal_role": "staple",
-        "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ],
         "cooking_methods": [
           "boil"
         ],
@@ -6395,6 +6518,136 @@
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role staple by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_76DAFDABA87D",
+      "title": "Simply English Bubble & Squeak",
+      "course": "side",
+      "cuisine": "british_irish",
+      "ingredients": [
+        "3 large potatoes, cooked & unpeeled",
+        "4 cups cabbage, chopped parboiled and drained well",
+        "1 small onion, chopped",
+        "4 slices bacon",
+        "1 tablespoon parsley (optional)"
+      ],
+      "tags": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role staple by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_402F11758D8C",
+      "title": "Injera",
+      "course": "baked_good",
+      "cuisine": "african",
+      "ingredients": [
+        "4 cups (about 5 ounces) teff flour",
+        "5 cups water",
+        "1 1/2 teaspoons salt"
+      ],
+      "tags": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": [],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "methods": {
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "meal_role staple by llm",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_271DF91944CB",
+      "title": "Grandma Vicky'S Mexican Rice",
+      "course": "side",
+      "cuisine": "mexican",
+      "ingredients": [
+        "1 cup rice, long-grain",
+        "2 tablespoons oil",
+        "1/2 cup onion, white, chopped",
+        "8 ounces tomato sauce",
+        "3 teaspoons chicken bouillon",
+        "2 3/4 cups water"
+      ],
+      "tags": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": [],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "meal_role staple by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6439,6 +6692,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role staple by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6486,6 +6740,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role staple by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6526,6 +6781,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role staple by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6575,6 +6831,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role staple by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6620,6 +6877,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role staple by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6669,43 +6927,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
-      "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "cooking_methods": null,
-        "equipment": null,
-        "flavor_tags": null,
-        "note": ""
-      }
-    },
-    {
-      "key": "RCP2_D3D9C9AE769E",
-      "title": "Breezy Cheesy Macaroni",
-      "course": "main",
-      "cuisine": "american",
-      "ingredients": [
-        "8 oz. (2 c.) macaroni",
-        "8 oz. processed cheese, shredded or cut in small pieces",
-        "1/2 c. milk",
-        "2 Tbsp. butter or margarine"
-      ],
-      "tags": {
-        "meal_role": "staple",
-        "contains_staple": true,
-        "protein_sources": [],
-        "cooking_methods": [],
-        "equipment": [],
-        "flavor_tags": []
-      },
-      "methods": {
-        "meal_role": "rule",
-        "contains_staple": "rule",
-        "protein_sources": "rule",
-        "cooking_methods": "rule",
-        "equipment": "rule",
-        "flavor_tags": "rule"
-      },
+      "why": "meal_role staple by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6756,6 +6978,7 @@
         "meal_role": "llm",
         "contains_staple": "llm"
       },
+      "why": "meal_role vegetable by llm",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6799,6 +7022,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role vegetable by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6844,6 +7068,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role vegetable by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6891,6 +7116,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role vegetable by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6934,6 +7160,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role vegetable by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -6978,6 +7205,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role vegetable by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -7032,6 +7260,7 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role vegetable by rule",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -7081,6 +7310,1988 @@
         "equipment": "rule",
         "flavor_tags": "rule"
       },
+      "why": "meal_role vegetable by rule",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_644A347C7523",
+      "title": "Jane Cody'S Awesome Stir Fry",
+      "course": "main",
+      "cuisine": "chinese",
+      "ingredients": [
+        "1 pound Meat",
+        "4 teaspoon Rice Flour",
+        "6 tablespoon Soy Sauce",
+        "4 teaspoon Sesame Oil"
+      ],
+      "tags": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "stir_fry",
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_5216E8F6555E",
+      "title": "Refritos (Refried Beans)",
+      "course": "side",
+      "cuisine": "tex_mex",
+      "ingredients": [
+        "2 c. raw pinto beans",
+        "1 1/2 tsp. salt",
+        "1 1/2 c. chopped onion",
+        "3 cloves crushed garlic",
+        "1/2 minced green pepper",
+        "2 tsp. ground cumin",
+        "1/4 tsp. black pepper",
+        "3 Tbsp. olive oil"
+      ],
+      "tags": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "methods": {
+        "protein_sources": "llm",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_491808DE2CEB",
+      "title": "Spiedies (Kabobs)",
+      "course": "main",
+      "cuisine": "italian",
+      "ingredients": [
+        "1/3 cup cooking oil",
+        "1/2 cup vinegar",
+        "2 teaspoons garlic powder",
+        "1 teaspoon salt",
+        "1/2 teaspoon black pepper",
+        "1 teaspoon celery salt",
+        "1 teaspoon garlic salt",
+        "1 tablespoon parsley",
+        "1 tablespoon rosemary",
+        "1 bay leaf",
+        "1 clove garlic",
+        "5 lbs meat, cut into cubes (pork & chicken)"
+      ],
+      "tags": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "grill"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_3A89815DD43E",
+      "title": "Pancit(Rice Noodles)",
+      "course": "main",
+      "cuisine": "filipino",
+      "ingredients": [
+        "1/2 head cabbage, thinly shredded",
+        "1 pkg. rice noodles",
+        "2 cloves garlic (whole)",
+        "1 onion",
+        "carrots, celery and bell pepper",
+        "meat of choice",
+        "1 bouillon cube (beef or chicken)"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "pork",
+          "beef"
+        ],
+        "cooking_methods": [
+          "steam"
+        ],
+        "equipment": [
+          [
+            "steamer"
+          ]
+        ],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_628A7F873ED3",
+      "title": "Mexican Higado Tacos",
+      "course": "main",
+      "cuisine": "mexican",
+      "ingredients": [
+        "1/2 lb liver",
+        "8 jalapenos",
+        "1 medium onion",
+        "4 tablespoons oil",
+        "8 ounces tomato sauce",
+        "1/2 teaspoon salt",
+        "8 corn tortillas or 8 flour tortillas"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "spicy"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_35E7E466C238",
+      "title": "Pizza Burger'S Fcs School Recipe",
+      "course": "main",
+      "cuisine": "italian",
+      "ingredients": [
+        "3/4 lb meat (ground up hot dogs)",
+        "1 lb cheese (any)",
+        "3/4 cup tomato paste",
+        "4 tablespoons vegetable oil",
+        "1/2 teaspoon garlic salt (to taste)",
+        "1/2 teaspoon oregano (to taste)",
+        "8 hamburger buns",
+        "8 slices mozzarella cheese"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "pork",
+          "beef"
+        ],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_2DEFB0F27019",
+      "title": "Meat Croquettes",
+      "course": "main",
+      "cuisine": "american",
+      "ingredients": [
+        "1/4 c. flour",
+        "1/4 c. butter",
+        "1/4 tsp. salt",
+        "1/8 tsp. pepper",
+        "1 c. milk",
+        "1 tsp. onion",
+        "1 tsp. parsley",
+        "2 c. chopped meat (turkey, chicken, beef, pork or ham)",
+        "1 egg"
+      ],
+      "tags": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork",
+          "beef"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_313E4C8B9C7B",
+      "title": "Betty Crocker 1950S Welsh Rarebit",
+      "course": "main",
+      "cuisine": "british_irish",
+      "ingredients": [
+        "2 cups grated sharp cheddar cheese (about 1/2 lb)",
+        "2/3 cup milk",
+        "1/4 teaspoon dry mustard",
+        "1/4 teaspoon Worcestershire sauce",
+        "1/8 teaspoon salt",
+        "1/8 teaspoon pepper"
+      ],
+      "tags": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "protein_sources": "llm",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_C8FFCB4AA279",
+      "title": "Fried Rice",
+      "course": "main",
+      "cuisine": "chinese",
+      "ingredients": [
+        "1 c. boiling water",
+        "1 1/3 c. Minute rice",
+        "1 beaten egg",
+        "3 Tbsp. margarine",
+        "1/3 c. chopped onion",
+        "1 c. meat, chopped (such as leftover pork chops, chicken, beef, ham)",
+        "1 c. frozen peas",
+        "3 Tbsp. soy sauce",
+        "1/3 c. water"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "pork",
+          "beef",
+          "egg"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_956FD7177508",
+      "title": "Ramen Hot And Sour Soup",
+      "course": "soup",
+      "cuisine": "japanese",
+      "ingredients": [
+        "1 (3 ounce) package ramen noodles",
+        "2 cups water",
+        "1/8 cup mushroom, thinly sliced",
+        "1 tablespoon rice vinegar",
+        "1/8 teaspoon chili sauce",
+        "1 egg, beaten",
+        "1/8 cup meat, cooked, sliced thinly. (optional)",
+        "1 green onion, light and dark green parts, sliced thin"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "pork",
+          "beef",
+          "shellfish",
+          "egg"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "spicy"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_DB61A80B71EF",
+      "title": "Sinigang",
+      "course": "soup",
+      "cuisine": "filipino",
+      "ingredients": [
+        "1 tablespoon oil",
+        "9 cups water",
+        "1 large onion",
+        "2 roma tomatoes (or one large one)",
+        "1 tablespoon patis (fish sauce )",
+        "5 small bok choy or 2 cups Baby Spinach",
+        "2 lbs meat",
+        "1 packet soup, 1 . 4oz (sinigang large packet)",
+        "2 garlic cloves (mashed )"
+      ],
+      "tags": {
+        "meal_role": "soup",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork",
+          "beef"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_0780C777C0AB",
+      "title": "Stir Fry Rice",
+      "course": "main",
+      "cuisine": "chinese",
+      "ingredients": [
+        "1 c. diced meat (pork, ham or chicken)",
+        "1/8 c. onion",
+        "4 c. cooked rice",
+        "2 eggs",
+        "2 tsp. salt",
+        "1/8 c. whole corn",
+        "8 tbsp. oil"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "beef",
+          "egg"
+        ],
+        "cooking_methods": [
+          "stir_fry",
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_CB386B8363E1",
+      "title": "Marilyn'S English Pasties",
+      "course": "main",
+      "cuisine": "british_irish",
+      "ingredients": [
+        "14 c. flour",
+        "2 Tbsp. salt",
+        "2 lb. Crisco",
+        "4 1/2 c. water",
+        "1 lb. onions, diced",
+        "5 lb. meat, cut small (beef stew or chuck roast)",
+        "14 lb. potatoes",
+        "3 Tbsp. salt",
+        "1 Tbsp. pepper",
+        "1/4 c. grated rutabaga"
+      ],
+      "tags": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork",
+          "beef"
+        ],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_8C859FF10E5B",
+      "title": "Coconut Baked Bananas (Or Plantains)",
+      "course": "side",
+      "cuisine": "caribbean",
+      "ingredients": [
+        "2 tablespoons butter",
+        "4 bananas (VERY RIPE or plantains)",
+        "1 pinch ground cinnamon",
+        "1 cup coconut milk",
+        "1/3 cup coconut, sweet shredded"
+      ],
+      "tags": {
+        "meal_role": "dessert",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "protein_sources": "llm",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_0CFF755F4ED0",
+      "title": "Mexican Wedding Cakes",
+      "course": "baked_good",
+      "cuisine": "mexican",
+      "ingredients": [
+        "1 c. butter",
+        "1/2 c. powdered sugar",
+        "1 3/4 c. flour",
+        "1/2 c. chopped pecans",
+        "1/2 tsp. vanilla"
+      ],
+      "tags": {
+        "meal_role": "dessert",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "protein_sources": "llm",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_8CDACD3A0704",
+      "title": "Vietnamese Fried Rice",
+      "course": "main",
+      "cuisine": "vietnamese",
+      "ingredients": [
+        "4 tsp. cooking oil",
+        "3 cloves minced garlic",
+        "1 large onion, chopped",
+        "1 tsp. salt",
+        "1/2 tsp. pepper",
+        "1 tsp. sugar",
+        "2 Tbsp. soy sauce",
+        "3 c. cooked rice",
+        "1 c. or more cooked vegetables (optional)",
+        "1 c. or more cooked meat"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "pork",
+          "beef"
+        ],
+        "cooking_methods": [
+          "stir_fry",
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_B4D718862D00",
+      "title": "Mexican Rice",
+      "course": "main",
+      "cuisine": "tex_mex",
+      "ingredients": [
+        "1/2 c. uncooked rice",
+        "2 Tbsp. shortening",
+        "1/2 medium onion, diced",
+        "1/2 clove garlic",
+        "1/2 tsp. salt",
+        "1/2 tsp. chili powder",
+        "1/2 c. tomatoes, chopped",
+        "1/2 lb. ground meat",
+        "1 c. water"
+      ],
+      "tags": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "pork",
+          "beef"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_614D0DC32132",
+      "title": "Meatballs",
+      "course": "main",
+      "cuisine": "american",
+      "ingredients": [
+        "1 lb. ground meat",
+        "1/2 c. dry bread crumbs",
+        "1/4 c. milk",
+        "2 Tbsp. finely chopped onion",
+        "1 tsp. Worcestershire sauce",
+        "1 egg"
+      ],
+      "tags": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork",
+          "beef",
+          "egg"
+        ],
+        "cooking_methods": [],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_E68974FE5EFE",
+      "title": "West African Meat Kebabs",
+      "course": "main",
+      "cuisine": "african",
+      "ingredients": [
+        "2 lbs cubed meat (beef, goat, lamb etc)",
+        "2 beef bouillon cubes",
+        "1 teaspoon ground black pepper",
+        "1/2 teaspoon salt",
+        "2 cups peanut butter",
+        "1 tablespoon peanut oil",
+        "1 onion, cubed",
+        "red wine vinegar"
+      ],
+      "tags": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "grill"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "protein_sources": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_EFA12409FC76",
+      "title": "Indian Raita (Cucumber Mix)",
+      "course": "side",
+      "cuisine": "indian",
+      "ingredients": [
+        "1 cup cucumber, grated",
+        "1 cup plain 1% yogurt",
+        "2 tablespoons mint, chopped",
+        "1 teaspoon cumin seed",
+        "salt and pepper"
+      ],
+      "tags": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [
+          "raw"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "protein_sources": "llm",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule",
+        "meal_role": "llm",
+        "contains_staple": "llm"
+      },
+      "why": "llm protein_sources",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_F99CD39666E1",
+      "title": "Japanese Salad",
+      "course": "salad",
+      "cuisine": "japanese",
+      "ingredients": [
+        "1 chicken breast, boiled and cubed",
+        "1/2 head cabbage, chopped",
+        "4 green onions, tops and all chopped",
+        "1 pkg. Ramen noodles, broken in pieces raw",
+        "1/2 c. raw slivered almonds",
+        "2 Tbsp. sesame seed"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "bake"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_F8739F1647F1",
+      "title": "German Potato Salad",
+      "course": "salad",
+      "cuisine": "german",
+      "ingredients": [
+        "1 1/2 to 2 lb. bacon",
+        "3 1/2 lb. potatoes, cooked and diced (7 c.)",
+        "1 1/2 c. onion",
+        "1/4 c. flour",
+        "1/4 c. sugar",
+        "1 1/2 c. water",
+        "1/4 c. vinegar",
+        "1 1/2 tsp. salt",
+        "1/4 tsp. pepper",
+        "1/2 c. light cream"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_34B11C1D26FE",
+      "title": "Cuban Beans And Rice Salad",
+      "course": "salad",
+      "cuisine": "caribbean",
+      "ingredients": [
+        "1/2 cup diced peeled avocado",
+        "2 tablespoons balsamic vinegar",
+        "1 tablespoon olive oil",
+        "1 teaspoon ground cumin",
+        "1/2 teaspoon salt",
+        "1/4 teaspoon black pepper",
+        "3 cups cooked white rice",
+        "1 cup chopped seeded plum tomato",
+        "1 (15 ounce) can black beans, rinsed and drained",
+        "2 tablespoons minced fresh cilantro"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "legume"
+        ],
+        "cooking_methods": [],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_F9A3DB689C72",
+      "title": "German Potato Salad",
+      "course": "salad",
+      "cuisine": "german",
+      "ingredients": [
+        "10 large potatoes",
+        "1/2 lb. bacon",
+        "1/2 c. chopped onions",
+        "1/2 c. celery, chopped",
+        "3 boiled eggs",
+        "2 Tbsp. vinegar",
+        "2 c. salad dressing"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_5EE55C7D0C8E",
+      "title": "Vietnamese Chicken Cabbage Salad",
+      "course": "salad",
+      "cuisine": "vietnamese",
+      "ingredients": [
+        "16 ounces boneless skinless chicken breasts, shredded",
+        "3 tablespoons freshly squeezed lime juice",
+        "2 tablespoons fish sauce",
+        "1 tablespoon vinegar (I used cider vinegar)",
+        "1 tablespoon sugar",
+        "1/2 teaspoon ground black pepper",
+        "1 cup thinly sliced sweet onion",
+        "2 cups finely shredded cabbage, savoy or 2 cups napa cabbage",
+        "3/4 cup carrot, shredded",
+        "1/2 cup mint leaf",
+        "1/2 cup basil leaves"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_3A4F20CBF931",
+      "title": "Slata Tunisiya - Tunisian Salad",
+      "course": "salad",
+      "cuisine": "north_african",
+      "ingredients": [
+        "100 g tuna packed in oil",
+        "250 g tomatoes",
+        "250 g green peppers",
+        "100 g onions",
+        "100 g feta cheese",
+        "50 g green olives",
+        "3 tablespoons mint leaves",
+        "1 cup olive oil",
+        "2 tablespoons lemon juice",
+        "1/2 teaspoon salt",
+        "8 -10 lettuce leaves",
+        "4 radishes",
+        "2 -4 hard-boiled eggs",
+        "1 tomatoes"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "fish",
+          "egg"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_4BB2B43E45F6",
+      "title": "Mexican Chicken Salad In Tortilla Bowls",
+      "course": "salad",
+      "cuisine": "tex_mex",
+      "ingredients": [
+        "3/4 cup shredded reduced-fat monterey jack cheese",
+        "3 tablespoons low-fat mayonnaise",
+        "3 tablespoons nonfat sour cream",
+        "2 tablespoons chopped cilantro",
+        "1 tablespoon chopped jalapeno",
+        "1 garlic cloves, minced or 4 ounces cooked chicken, cut up into bite size pieces",
+        "4 large tortillas",
+        "4 cups shredded lettuce",
+        "1 large tomatoes, cut into bite sized pieces"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ],
+          [
+            "blender"
+          ]
+        ],
+        "flavor_tags": [
+          "spicy",
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_D5010357345B",
+      "title": "Saigon Chicken Cole Slaw",
+      "course": "salad",
+      "cuisine": "vietnamese",
+      "ingredients": [
+        "16 ounces shredded cabbage, angel hair cut if available",
+        "1/2 large onion, extra thin sliced",
+        "2 large carrots, julienned",
+        "2 large boneless skinless chicken breast halves, cooked, chilled, and shredded",
+        "1 1/2 teaspoons fresh coarse ground black pepper",
+        "1/4 cup rice wine vinegar",
+        "1/2 large lemons, juice of or 1 lime, juice of",
+        "1/4 cup fish sauce",
+        "3 tablespoons sugar"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "raw"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_DB79BFB06100",
+      "title": "Hot Potato Salad",
+      "course": "salad",
+      "cuisine": "german",
+      "ingredients": [
+        "5 to 6 medium red potatoes",
+        "1/4 lb. bacon",
+        "1 Tbsp. finely chopped onion",
+        "1/2 c. diced celery",
+        "2 Tbsp. salt",
+        "2 Tbsp. flour",
+        "1/4 tsp. powdered mustard",
+        "3 Tbsp. sugar",
+        "1/2 c. vinegar",
+        "1/4 c. water",
+        "1 Tbsp. chopped parsley"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_614EE2B3C2D8",
+      "title": "Quinoa Edamame Feta Salad",
+      "course": "salad",
+      "cuisine": "greek",
+      "ingredients": [
+        "1 cup Quinoa",
+        "2 cups Water",
+        "1 cup Edamame, Cooked According To Package Instructions",
+        "1/2 cups Kalamata Olives, Drained, Sliced",
+        "2 whole Scallions, Chopped",
+        "1/2 cups Feta Cheese, Crumbled",
+        "2 Tablespoons Olive Oil",
+        "2 Tablespoons Lemon Juice",
+        "Salt And Pepper, to taste"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "soy"
+        ],
+        "cooking_methods": [
+          "boil",
+          "bake"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_294D48225815",
+      "title": "Fresh Broccoli Salad",
+      "course": "salad",
+      "cuisine": "american",
+      "ingredients": [
+        "2 to 3 bunches broccoli, chopped",
+        "1/2 to 1 chopped onion",
+        "1/2 to 2/3 c. raisins",
+        "8 to 10 strips bacon",
+        "1 c. mayonnaise",
+        "2 Tbsp. vinegar",
+        "1/2 c. sugar"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "raw"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_0BE588F0D306",
+      "title": "Valley Fresh Chicken Salad",
+      "course": "salad",
+      "cuisine": "american",
+      "ingredients": [
+        "1/2 c. mayonnaise",
+        "1/4 tsp. onion powder",
+        "1/2 c. diced celery",
+        "1/4 tsp. garlic powder",
+        "1/8 tsp. dry mustard",
+        "2 Tbsp. green onion, chopped",
+        "2 large cooked chicken breasts"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "raw"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_1E63CFFF252C",
+      "title": "Greek Salad With Shredded Chicken",
+      "course": "salad",
+      "cuisine": "greek",
+      "ingredients": [
+        "1/3 cup red wine vinegar",
+        "2 tablespoons extra-virgin olive oil",
+        "1 teaspoon dried dill weed",
+        "1/4 teaspoon dried oregano",
+        "1 tablespoon garlic (minced)",
+        "1/2 teaspoon salt",
+        "1/2 teaspoon fresh ground pepper",
+        "6 cups chopped romaine lettuce",
+        "2 1/2 cups chicken (cooked & shredded)",
+        "1/2 cup sun-dried tomato (chopped)",
+        "1 medium cucumber (peeled, seeded & chopped)",
+        "1/3 cup finely chopped red onion",
+        "1/2 cup sliced ripe black olives",
+        "1/2 cup crumbled feta cheese"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "raw"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_D61467804F23",
+      "title": "German Winter Carrot Salad",
+      "course": "salad",
+      "cuisine": "german",
+      "ingredients": [
+        "8 medium carrots, peeled",
+        "3/4 c. mayonnaise",
+        "1 Tbsp. parsley flakes",
+        "1/2 tsp. salt",
+        "1/2 tsp. pepper",
+        "8 oz. bacon, chopped",
+        "1 large onion, chopped",
+        "1/2 c. sugar",
+        "1/2 c. vinegar"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_480DE1F6F39D",
+      "title": "Mexican Chicken Salad",
+      "course": "salad",
+      "cuisine": "mexican",
+      "ingredients": [
+        "3 cups cooked shredded chicken",
+        "1/3 cup sour cream",
+        "2/3 cup mayonnaise",
+        "2 tablespoons fresh lime juice",
+        "1/2 teaspoon cumin",
+        "1/2 teaspoon salt",
+        "1/4 teaspoon pepper",
+        "1 tablespoon Tabasco sauce (more or less to taste)",
+        "1/4 cup sliced carrot",
+        "1/4 cup chopped green bell pepper",
+        "1/4 cup chopped red bell pepper",
+        "1/4 cup chopped onion",
+        "2 ripe avocados, chopped",
+        "2 tablespoons chopped cilantro"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "raw"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "spicy",
+          "rich"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_F9F0024A5D19",
+      "title": "Danish Potato Salad",
+      "course": "salad",
+      "cuisine": "scandinavian",
+      "ingredients": [
+        "1/4 c. vinegar",
+        "1/4 c. water",
+        "1/4 c. sugar",
+        "1/4 tsp. salt",
+        "1/16 tsp. pepper",
+        "1 tsp. prepared mustard",
+        "2 eggs, well beaten",
+        "1 c. salad dressing",
+        "4 c. cooked potatoes (about 2 lb.), cubed",
+        "2 hard-cooked eggs, chopped",
+        "1/2 c. chopped cucumber",
+        "1 Tbsp. minced onion",
+        "1 Tbsp. chopped green pepper"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "egg"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_3C98608011B1",
+      "title": "Danish Potato Salad",
+      "course": "salad",
+      "cuisine": "scandinavian",
+      "ingredients": [
+        "1/4 c. vinegar",
+        "1/4 c. water",
+        "1/4 c. sugar",
+        "1 tsp. salt",
+        "1 tsp. pepper",
+        "1 Tbsp. mustard",
+        "2 eggs, well beaten",
+        "4 c. cubed, cooked potatoes",
+        "2 hard-boiled eggs",
+        "1/2 c. chopped pickle",
+        "1 Tbsp. minced onion",
+        "1 Tbsp. chopped pepper",
+        "1 c. salad dressing"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "egg"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_080DB0AD158B",
+      "title": "Vietnamese Summer Roll Salad",
+      "course": "salad",
+      "cuisine": "vietnamese",
+      "ingredients": [
+        "8 ounces, weight Bean Thread Noodles",
+        "1 Tablespoon Coconut Oil",
+        "2 whole Shallots, Thinly Sliced",
+        "1/2 pounds Shrimp, Shells, Veins And Tails Removed",
+        "3/4 cups Fish Sauce",
+        "3/4 cups Rice Vinegar",
+        "2 Tablespoons Ginger, grated",
+        "2 whole Small Red Chilies, Diced",
+        "2 Tablespoons Honey",
+        "1 whole Medium Cucumber, Julienned",
+        "2 whole Carrots, Peeled And Julienned",
+        "1 cup Bean Sprouts",
+        "1/3 cups Fresh Basil, Chopped",
+        "1/3 cups Fresh Cilantro, Chopped",
+        "1/3 cups Fresh Mint, Chopped",
+        "1/3 cups Roasted Peanuts, Smashed",
+        "3 whole Lime Wedges"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "shellfish"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "fragrant",
+          "spicy"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_BEF6AEB06ABA",
+      "title": "Tabbouleh With Chicken And Red Pepper",
+      "course": "salad",
+      "cuisine": "middle_eastern",
+      "ingredients": [
+        "1/2 cup uncooked bulgur",
+        "1/2 cup boiling water",
+        "1 1/2 cups diced plum tomato",
+        "3/4 cup shredded cooked chicken breast",
+        "3/4 cup minced fresh flat-leaf parsley",
+        "1/2 cup finely chopped red bell pepper",
+        "1/2 cup diced English cucumber",
+        "1/4 cup minced fresh mint",
+        "1 1/2 tablespoons fresh lemon juice",
+        "1 tablespoon extra-virgin olive oil",
+        "1/2 teaspoon salt",
+        "1/4 teaspoon freshly ground black pepper"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
+      "verdict": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": null,
+        "equipment": null,
+        "flavor_tags": null,
+        "note": ""
+      }
+    },
+    {
+      "key": "RCP2_488E23289EBE",
+      "title": "German Potato Salad",
+      "course": "salad",
+      "cuisine": "german",
+      "ingredients": [
+        "1/2 lb. bacon, fried & diced",
+        "5 cooked potatoes, chopped",
+        "1 onion, chopped",
+        "1/2 tsp. salt",
+        "1 Tbsp. sugar",
+        "1/2 cup vinegar",
+        "1 egg"
+      ],
+      "tags": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "methods": {
+        "meal_role": "rule",
+        "contains_staple": "rule",
+        "protein_sources": "rule",
+        "cooking_methods": "rule",
+        "equipment": "rule",
+        "flavor_tags": "rule"
+      },
+      "why": "hearty salad",
       "verdict": {
         "meal_role": null,
         "contains_staple": null,
@@ -7752,63 +9963,7 @@
       }
     },
     {
-      "normalized_name": "bacon_grease",
-      "tags": {
-        "food_group": "fat",
-        "perishable": false,
-        "basic_seasoning": false
-      },
-      "why": "random",
-      "verdict": {
-        "perishable": null,
-        "basic_seasoning": null,
-        "note": ""
-      }
-    },
-    {
-      "normalized_name": "beef_broth",
-      "tags": {
-        "food_group": "prepared",
-        "perishable": false,
-        "basic_seasoning": false
-      },
-      "why": "random",
-      "verdict": {
-        "perishable": null,
-        "basic_seasoning": null,
-        "note": ""
-      }
-    },
-    {
-      "normalized_name": "caramel",
-      "tags": {
-        "food_group": "sweetener",
-        "perishable": false,
-        "basic_seasoning": false
-      },
-      "why": "random",
-      "verdict": {
-        "perishable": null,
-        "basic_seasoning": null,
-        "note": ""
-      }
-    },
-    {
-      "normalized_name": "chili_paste",
-      "tags": {
-        "food_group": "condiment",
-        "perishable": false,
-        "basic_seasoning": false
-      },
-      "why": "random",
-      "verdict": {
-        "perishable": null,
-        "basic_seasoning": null,
-        "note": ""
-      }
-    },
-    {
-      "normalized_name": "chipped_beef",
+      "normalized_name": "beef_steak",
       "tags": {
         "food_group": "protein",
         "perishable": false,
@@ -7822,9 +9977,9 @@
       }
     },
     {
-      "normalized_name": "clam_juice",
+      "normalized_name": "bell_pepper",
       "tags": {
-        "food_group": "prepared",
+        "food_group": "vegetable",
         "perishable": false,
         "basic_seasoning": false
       },
@@ -7836,9 +9991,23 @@
       }
     },
     {
-      "normalized_name": "coffee",
+      "normalized_name": "chicken",
       "tags": {
-        "food_group": "beverage",
+        "food_group": "protein",
+        "perishable": false,
+        "basic_seasoning": false
+      },
+      "why": "random",
+      "verdict": {
+        "perishable": null,
+        "basic_seasoning": null,
+        "note": ""
+      }
+    },
+    {
+      "normalized_name": "chow_mein_noodles",
+      "tags": {
+        "food_group": "grain",
         "perishable": false,
         "basic_seasoning": false
       },
@@ -7864,7 +10033,21 @@
       }
     },
     {
-      "normalized_name": "egg_substitute",
+      "normalized_name": "dijon",
+      "tags": {
+        "food_group": "condiment",
+        "perishable": false,
+        "basic_seasoning": false
+      },
+      "why": "random",
+      "verdict": {
+        "perishable": null,
+        "basic_seasoning": null,
+        "note": ""
+      }
+    },
+    {
+      "normalized_name": "fava_bean",
       "tags": {
         "food_group": "protein",
         "perishable": false,
@@ -7878,9 +10061,9 @@
       }
     },
     {
-      "normalized_name": "parmesan",
+      "normalized_name": "maple_syrup",
       "tags": {
-        "food_group": "dairy",
+        "food_group": "sweetener",
         "perishable": false,
         "basic_seasoning": false
       },
@@ -7892,9 +10075,9 @@
       }
     },
     {
-      "normalized_name": "taro",
+      "normalized_name": "nutmeg",
       "tags": {
-        "food_group": "vegetable",
+        "food_group": "seasoning",
         "perishable": false,
         "basic_seasoning": false
       },
@@ -7906,9 +10089,9 @@
       }
     },
     {
-      "normalized_name": "thai_basil",
+      "normalized_name": "pineapple_juice",
       "tags": {
-        "food_group": "herb",
+        "food_group": "fruit",
         "perishable": false,
         "basic_seasoning": false
       },
@@ -7920,9 +10103,37 @@
       }
     },
     {
-      "normalized_name": "tortilla_chips",
+      "normalized_name": "tamarind",
+      "tags": {
+        "food_group": "flavoring",
+        "perishable": false,
+        "basic_seasoning": false
+      },
+      "why": "random",
+      "verdict": {
+        "perishable": null,
+        "basic_seasoning": null,
+        "note": ""
+      }
+    },
+    {
+      "normalized_name": "whole_wheat_flour",
       "tags": {
         "food_group": "grain",
+        "perishable": false,
+        "basic_seasoning": false
+      },
+      "why": "random",
+      "verdict": {
+        "perishable": null,
+        "basic_seasoning": null,
+        "note": ""
+      }
+    },
+    {
+      "normalized_name": "yellow_squash",
+      "tags": {
+        "food_group": "vegetable",
         "perishable": false,
         "basic_seasoning": false
       },

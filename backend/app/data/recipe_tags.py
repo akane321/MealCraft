@@ -21,21 +21,28 @@ The rules, and why:
 
 - **Meal role.** A fixed course decides it: breakfast, dessert, sauce, drink, snack, salad. A salad
   stays a salad whatever it holds, since a salad only ever fills the vegetable side (ADR-0070); the
-  planner's vegetable-led check still decides whether it may. A dish is `vegetable` only when it is
+  planner's vegetable-led check still decides whether it may. A hearty salad (not vegetable-led, with a
+  main protein) therefore fills no slot; the owner reviews them as their own stratum of the sample packet
+  before deciding whether one may be a main. A dish is `vegetable` only when it is
   vegetable-led (`app.planning.vegetable_led`, ADR-0054), so the role and the planner's rule agree.
   A main or soup that carries its own staple (rice, noodles, pasta, bread or other grain staples:
   `staple_share`) is `one_bowl`; a main made mostly of a staple with no protein is a `staple`. A
   main with a main protein is a `protein_main`; one led by vegetables without one is a `vegetable`.
-  Baked goods go by title words and sugar. Grey zones go to the model.
+  A soup whose noodles, rice or pasta are a tenth of it is `one_bowl` too. Baked goods go by title words
+  and sugar. Grey zones go to the model, which may not make a side, or a dish with no main protein, a
+  `protein_main`, and may answer null when no allowed role fits.
 - **Contains staple** is true exactly for `one_bowl` and `staple` dishes, so it follows the role.
 - **Protein sources** are the sources whose ingredients make at least 5 % (meat, poultry, fish,
   seafood) or 10 % (egg, soy, legumes) of the dish's counted raw grams, so an egg that binds a
   meatloaf or bacon bits on a salad are not its protein. A line with no weight counts. Seasonings,
   stocks and fats made from meat or fish are not protein (`SEASONING_FROM_FLESH`). Turkey and other
   poultry count as chicken, goose as duck, goat as lamb, veal as beef, so the no-repeat rule errs
-  towards strictness. Meat the table cannot name (game, generic meat, liver), and a title naming
-  meat or fish that no line holds (a line the release lost), go to the model. Desserts, sauces and
-  drinks have none: the eggs of a cake are not its main protein.
+  towards strictness. A title naming meat or fish names the protein of a dish whose lines hold none by
+  weight (a small line, or one the release lost), and what an unnamed meat line is; a quoted mock meat
+  (Tempeh "Bacon") and what a dish is served with ("for fish") do not count. Unnamed meat the title
+  does not name (game, generic meat, liver) goes to the model, whose answer keeps only the sources a
+  line or the title supports. Desserts, sauces and drinks have none: the eggs of a cake are not its
+  main protein.
 - **Cooking methods** come from step and title keywords; a dish with no heating step is `raw`, and
   one that heats without a listed method (a microwave dish) has none. The "fried" of a deep-fried
   dish is not also a pan fry.
@@ -126,6 +133,11 @@ GREY_SHARE = 0.05  # below this a main holds no staple; between the two the mode
 SOUP_ONE_BOWL_SHARE = 0.3
 SOUP_GREY_SHARE = 0.1
 SIDE_STAPLE_SHARE = 0.5
+# The noodles, rice and pasta that make a soup a one-bowl meal; barley or quinoa in a soup leave it to the model.
+SOUP_STAPLES = COOKED_STAPLES - {
+    "barley", "quinoa", "oats", "grits", "bulgur", "wheat_berries", "buckwheat", "wild_rice",
+    "long_grain_wild_rice_mix", "couscous",
+}  # fmt: skip
 NOODLE_SOUP = re.compile(
     r"\b(?:pho|laksa|ramen|noodles?|udon|soba|congee|porridge|jook|juk|bubur|mee|bee hoon|kway teow|kuey teow"
     r"|sopas|arroz caldo|lugaw|mohinga|khao soi|bun bo|wonton noodle)\b"
@@ -159,6 +171,20 @@ _SOURCE_IDS = {
     " kidney_beans lentil red_lentil lima_beans mung_bean pinto_beans refried_beans split_peas toor_dal falafel",
 }
 SOURCE_OF = {name: source for source, names in _SOURCE_IDS.items() for name in names.split()}
+# The source a `MEAT_WORDS` title word names. Sausage is left out: a chicken sausage is not pork.
+_TITLE_WORDS = {
+    "chicken": "chicken turkey",
+    "duck": "duck",
+    "pork": "pork bacon ham salami pepperoni chorizo prosciutto pancetta",
+    "beef": "beef veal",
+    "lamb": "lamb mutton",
+    "fish": "fish salmon tuna cod anchovy anchovies sardine sardines",
+    "shellfish": "shrimp shrimps prawn prawns crab crabs crabmeat lobster lobsters clam clams mussel mussels oyster"
+    " oysters scallop scallops squid octopus",
+}
+TITLE_SOURCE = {word: source for source, words in _TITLE_WORDS.items() for word in words.split()}
+SERVED_WITH = re.compile(r"\b(?:for|(?:great|good|served|serve) with)\b.*", re.IGNORECASE)
+QUOTE = re.compile("[\"'\u201c\u2018\ufffd]")
 
 # Cooking-method keywords over the lower-cased title and steps. Deep and stir frying, air frying and the Dutch
 # oven are taken out before the plainer words are looked for, so "deep-fry" is not also a pan fry.
@@ -334,6 +360,8 @@ class Tags:
     # What the model is asked to decide: "meal_role", "protein_sources".
     open: list[str] = field(default_factory=list)
     allowed_roles: tuple[str, ...] = MEAL_ROLES
+    # The protein sources the dish's lines or title support; a model answer outside them is dropped.
+    allowed_sources: frozenset[str] = frozenset(PROTEIN_SOURCES)
 
 
 def release_name(name: str) -> str:
@@ -382,10 +410,35 @@ def protein_sources(dish: Dish) -> list[str] | None:
         threshold = PLANT_EGG_SHARE if source in {"soy", "egg", "legume"} else FLESH_SHARE
         if total and weight / total >= threshold:
             found.add(source)
-    # Unnamed meat, or a title naming meat or fish that no line holds (a line the release lost), is open.
-    if "?" in found or (not found & FLESH_SOURCES and MEAT_WORDS.search(dish.title)):
-        return None
+    # A title naming meat or fish names the main protein of a dish whose lines hold none by weight (a small or
+    # lost line: "Chicken Fried Rice" with no chicken line), and what an unnamed meat line is. Unnamed meat the
+    # title does not name is open. Lines that hold meat or fish win over the title ("Chicken Fried Steak").
+    named = title_sources(dish.title)
+    if "?" in found:
+        if not named:
+            return None
+        found = (found - {"?"}) | named
+    elif not found & FLESH_SOURCES:
+        found |= named
     return [source for source in PROTEIN_SOURCES if source in found]
+
+
+def title_sources(title: str) -> set[str]:
+    """The sources a title names, leaving out a quoted mock meat (Tempeh "Bacon") and what it is served with."""
+    title = SERVED_WITH.sub("", title)
+    return {
+        TITLE_SOURCE[m.group(0).lower()]
+        for m in MEAT_WORDS.finditer(title)
+        if m.group(0).lower() in TITLE_SOURCE and not QUOTE.match(title[m.start() - 1 : m.start()])
+    }
+
+
+def model_sources(dish: Dish) -> frozenset[str]:
+    """What the model may answer for a dish's protein: what a line holds, and any meat for an unnamed meat line."""
+    held = {source_of(line.name) for line in dish.lines} - {None}
+    if "?" in held:
+        held |= FLESH_SOURCES
+    return frozenset((held - {"?"}) | title_sources(dish.title))
 
 
 def staple_share(dish: Dish, names: frozenset[str] | set[str] = STAPLES) -> float:
@@ -426,7 +479,9 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
         return None, ("breakfast", "dessert", "staple", "snack", "one_bowl", "protein_main")
     share = staple_share(dish)
     if dish.course == "soup":
-        if (NOODLE_SOUP.search(title) and share > 0) or share >= SOUP_ONE_BOWL_SHARE:
+        # A noodle soup by its title, a soup this much staple, or one whose noodles or rice are a tenth of it.
+        cooked = staple_share(dish, SOUP_STAPLES) >= SOUP_GREY_SHARE
+        if (NOODLE_SOUP.search(title) and share > 0) or share >= SOUP_ONE_BOWL_SHARE or cooked:
             return "one_bowl", ()
         if share < SOUP_GREY_SHARE:
             return "soup", ()
@@ -436,7 +491,8 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
             return "vegetable", ()
         if staple_share(dish, STAPLES | STARCHY) >= SIDE_STAPLE_SHARE:
             return "staple", ()
-        return None, open_roles
+        # A side is never the meal's main, even with bacon in it; one that is not vegetable-led may stay null.
+        return None, tuple(role for role in open_roles if role != "protein_main")
     # main, and the curated catalog's mains
     if share >= ONE_BOWL_SHARE:
         return ("staple" if not has_protein and share >= STAPLE_ONLY_SHARE else "one_bowl"), ()
@@ -521,6 +577,8 @@ def rule_tags(dish: Dish) -> Tags:
     led = dish_vegetable_led(dish)
     sources = protein_sources(dish)
     role, allowed = meal_role(dish, sources, led)
+    if sources == []:  # a dish with no main protein is never a protein main, whatever the model would say
+        allowed = tuple(name for name in allowed if name != "protein_main")
     if role in SWEET_OR_CONDIMENT:
         sources = []  # the eggs of a cake are not its main protein
     methods = cooking_methods(dish)
@@ -541,6 +599,7 @@ def rule_tags(dish: Dish) -> Tags:
         tags.allowed_roles = allowed
     if sources is None:
         tags.open.append("protein_sources")
+    tags.allowed_sources = model_sources(dish)
     return tags
 
 
@@ -663,9 +722,15 @@ meal_role: what the dish is in a meal.
 - staple: the meal's starch on its own (rice, noodles, bread, flatbread, potatoes as a side).
 - vegetable: a vegetable side dish. soup: a soup served beside the meal. breakfast: breakfast-only food.
 - snack, dessert, sauce, drink: never a lunch or dinner dish.
-protein_sources: the main protein sources of the dish, from the allowed list; [] when it has no main protein.
-Treat other poultry as chicken, goose as duck, goat or mutton as lamb, veal as beef; game meat goes to the
-closest of these.
+- Egg rolls, spring rolls, dumplings, fritters, dips and other finger food are snack, not protein_main.
+- A soup with noodles, rice or dumplings as a large part of it is one_bowl, not soup.
+- Read the title first: a dish the title calls a main protein keeps that protein even if a line is missing.
+- When none of "allowed_meal_roles" fits the dish (a vegetable side when vegetable is not allowed), answer null.
+protein_sources: the main protein sources of the dish, from "allowed_protein_sources" only; [] when it has no
+main protein. Name only sources the ingredient lines or the title name: never add legume without a bean, lentil
+or pea line, nor egg or soy without an egg or soy line. Turkey and other poultry are chicken, goose is duck,
+goat or mutton is lamb, veal is beef; game meat goes to the closest of these. A line that is only "meat" (no
+animal named in the title, cuisine or steps) is both beef and pork.
 
 Recipes (JSON):
 {recipes}
@@ -682,6 +747,9 @@ def _llm_payload(dish: Dish, tags: Tags) -> dict:
         "steps": dish.steps[:500],
         "decide": tags.open,
         "allowed_meal_roles": list(tags.allowed_roles) if "meal_role" in tags.open else [],
+        "allowed_protein_sources": [s for s in PROTEIN_SOURCES if s in tags.allowed_sources]
+        if "protein_sources" in tags.open
+        else [],
     }
 
 
@@ -737,15 +805,23 @@ def ask_model(open_dishes: list[tuple[Dish, Tags]], max_usd: float, log) -> dict
 
 
 def merge_answer(tags: Tags, answer: dict) -> None:
-    """Take the model's open fields when they are allowed; anything else stays null."""
+    """Take the model's open fields when they are allowed; anything else stays null.
+
+    A protein the dish's lines and title do not support (a legume with no bean line) is dropped, and a role
+    the model makes sweet or a condiment has no protein, as with the rules.
+    """
     role = answer.get("meal_role")
     if "meal_role" in tags.open and role in tags.allowed_roles:
         tags.values["meal_role"] = role
         tags.values["contains_staple"] = role in {"one_bowl", "staple"}
         tags.methods["meal_role"] = tags.methods["contains_staple"] = "llm"
+        if role in SWEET_OR_CONDIMENT:
+            tags.values["protein_sources"] = []
+            tags.methods["protein_sources"] = "llm"
+            return
     sources = answer.get("protein_sources")
     if "protein_sources" in tags.open and sources is not None and set(sources) <= set(PROTEIN_SOURCES):
-        tags.values["protein_sources"] = [source for source in PROTEIN_SOURCES if source in sources]
+        tags.values["protein_sources"] = [s for s in PROTEIN_SOURCES if s in sources and s in tags.allowed_sources]
         tags.methods["protein_sources"] = "llm"
 
 
@@ -789,11 +865,11 @@ def previous_answers(previous: dict) -> dict[str, dict]:
     return kept
 
 
-def build(use_llm: bool, max_usd: float, log=print) -> dict:
+def build(use_llm: bool, max_usd: float, log=print, reask: bool = False) -> dict:
     dishes = curated_dishes() + release_dishes()
     tagged = [(dish, rule_tags(dish)) for dish in dishes]
     previous = previous_file()
-    earlier = previous_answers(previous)
+    earlier = {} if reask else previous_answers(previous)
     for dish, tags in tagged:
         if dish.key in earlier and tags.open:
             merge_answer(tags, earlier[dish.key])
@@ -806,7 +882,9 @@ def build(use_llm: bool, max_usd: float, log=print) -> dict:
         for name in ("calls", "input_tokens", "output_tokens", "usd"):
             usage[name] += run[name]
         usage.update(
-            asked=usage["asked"] + len(still_open), stopped=run["stopped"], model=run["model"] or usage["model"]
+            asked=usage["asked"] + (len(still_open) if run["calls"] else 0),
+            stopped=run["stopped"],
+            model=run["model"] or usage["model"],
         )
         for dish, tags in still_open:
             if dish.key in result["answers"]:
@@ -823,6 +901,11 @@ def ingredient_entries() -> dict[str, dict]:
     return {name: ingredient_entry(name, basics) for name in catalog_ingredients()}
 
 
+def hearty_salad(dish: Dish, tags: Tags) -> bool:
+    """A salad the vegetable side cannot take (not vegetable-led) that carries a main protein."""
+    return tags.values["meal_role"] == "salad" and bool(tags.values["protein_sources"]) and not dish_vegetable_led(dish)
+
+
 def sample_packet(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict]) -> dict:
     """At least 100 recipes stratified by meal role and how it was decided, plus 50 ingredients."""
     rng = random.Random(SEED)
@@ -836,7 +919,19 @@ def sample_packet(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict])
     for stratum in sorted(strata):
         members = strata[stratum]
         count = min(len(members), max(4, round(110 * len(members) / total)))
-        picked.extend(rng.sample(members, count))
+        picked.extend((*pair, f"meal_role {stratum[0]} by {stratum[1]}") for pair in rng.sample(members, count))
+    # Two strata the owner must review before the planner reads these values: the model's protein answers
+    # (they feed the hard no-repeat rule), and hearty salads, which as `salad` only ever fill the vegetable side.
+    extra = {
+        "llm protein_sources": [pair for pair in tagged if pair[1].methods.get("protein_sources") == "llm"],
+        "hearty salad": [pair for pair in tagged if hearty_salad(*pair)],
+    }
+    chosen = {dish.key for dish, _, _ in picked}
+    for why, members in extra.items():
+        members = [pair for pair in members if pair[0].key not in chosen]
+        more = rng.sample(members, min(len(members), 20))
+        picked.extend((*pair, why) for pair in more)
+        chosen |= {dish.key for dish, _ in more}
     recipes = [
         {
             "key": dish.key,
@@ -846,9 +941,10 @@ def sample_packet(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict])
             "ingredients": [line.text or line.name for line in dish.lines],
             "tags": {name: tags.values[name] for name in tags.values},
             "methods": dict(tags.methods),
+            "why": why,
             "verdict": {name: None for name in tags.values} | {"note": ""},
         }
-        for dish, tags in picked
+        for dish, tags, why in picked
     ]
     perishable = sorted(name for name, entry in ingredients.items() if entry["perishable"])
     basic = sorted(name for name, entry in ingredients.items() if entry["basic_seasoning"])
@@ -909,6 +1005,13 @@ def report(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict], usage:
     lines += [f"| contains_staple {value} | {staple[value]} |" for value in (True, False, None)]
     lines += [f"| equipment {group} | {count} |" for group, count in sorted(groups.items())]
     lines.append(f"| no equipment (`[]`) | {sum(1 for _, t in tagged if t.values['equipment'] == [])} |")
+    lines += [
+        "",
+        f"Hearty salads (`salad`, not vegetable-led, with a main protein): {sum(hearty_salad(*p) for p in tagged)}. "
+        "As salads they fill only the vegetable side, which their vegetable-led check refuses, so they fill no slot "
+        "until the owner decides; the sample packet carries them as their own stratum, as it does the model's "
+        "protein answers. The planner reads no model-decided value before its batch sample is reviewed.",
+    ]
     perishable = sorted(name for name, entry in ingredients.items() if entry["perishable"])
     origin = Counter(entry["methods"]["food_group"] for entry in ingredients.values())
     lines += [
@@ -946,10 +1049,11 @@ def main() -> None:
     parser.add_argument(
         "--max-usd", type=float, default=5.0, help="estimated spend at which the model is no longer asked"
     )
+    parser.add_argument("--reask", action="store_true", help="drop the model's earlier answers and ask again")
     args = parser.parse_args()
 
     root = repository_root()
-    result = build(args.llm, args.max_usd)
+    result = build(args.llm, args.max_usd, reask=args.reask)
     tagged = result["tagged"]
     write_keyed(
         root / RECIPE_TAGS,

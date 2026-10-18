@@ -21,6 +21,7 @@ from app.data.recipe_tags import (
     curated_dishes,
     dish_vegetable_led,
     ingredient_entries,
+    merge_answer,
     release_dishes,
     rule_tags,
 )
@@ -82,6 +83,10 @@ def test_the_vegetable_role_follows_the_vegetable_led_rule() -> None:
     bacon = rule_tags(dish("Cabbage With Bacon", "side", [("cabbage", 400), ("bacon", 60)]))
     assert bacon.values["meal_role"] is None
     assert "vegetable" not in bacon.allowed_roles and "salad" not in bacon.allowed_roles
+    # A side is never the meal's main, and a dish with no main protein never a protein main.
+    assert "protein_main" not in bacon.allowed_roles
+    plain = rule_tags(dish("Cornmeal Bake", "main", [("cornmeal", 300), ("milk", 200)]))
+    assert plain.values["meal_role"] is None and "protein_main" not in plain.allowed_roles
     assert bacon.values["protein_sources"] == ["pork"]
 
 
@@ -93,6 +98,9 @@ def test_a_stock_is_not_the_soups_protein_and_a_noodle_soup_is_one_bowl() -> Non
     pho = tags("Beef Pho", "soup", [("rice_noodles", 200), ("beef", 250), ("beef_broth", 1500), ("bean_sprouts", 100)])
     assert pho["meal_role"] == "one_bowl"
     assert pho["protein_sources"] == ["beef"]
+    # No noodle word in the title, but the noodles are a good part of it.
+    prawn = tags("Vietnamese Prawn Soup", "soup", [("rice_noodles", 120), ("shrimp", 300), ("water", 1500)])
+    assert prawn["meal_role"] == "one_bowl"
 
 
 def test_baked_goods_go_by_title_and_sugar_and_a_cakes_eggs_are_not_protein() -> None:
@@ -110,14 +118,33 @@ def test_minor_protein_lines_are_not_the_main_protein_and_poultry_counts_as_chic
     assert goat["protein_sources"] == ["lamb"]
 
 
-def test_meat_the_lines_do_not_name_is_left_to_the_model() -> None:
+def test_the_title_names_the_meat_no_line_holds_and_unnamed_meat_is_left_to_the_model() -> None:
     # A title naming meat that no line holds: the release lost the line.
-    lost = rule_tags(dish("Mutton Biryani", "main", [("yogurt", 245), ("anise", 1.4), ("cumin", 1.1)]))
-    assert lost.values["protein_sources"] is None
-    assert "protein_sources" in lost.open
+    assert tags("Mutton Biryani", "main", [("yogurt", 245), ("anise", 1.4)])["protein_sources"] == ["lamb"]
+    lost = tags("Chicken Fried Rice", "main", [("rice", 300), ("egg", 150), ("chicken", 10), ("soy_sauce", 20)])
+    assert lost["protein_sources"] == ["chicken", "egg"]
+    assert tags("Turkey Banh Mi", "main", [("baguette", 200), ("carrot", 100)])["protein_sources"] == ["chicken"]
+    assert tags("Meat Loaf (Beef)", "main", [("meat", 900), ("breadcrumbs", 60)])["protein_sources"] == ["beef"]
+    # Lines holding meat win over the title; mock meat and what a dish is served with do not count.
+    assert tags("Chicken Fried Steak", "main", [("beef_steak", 600), ("flour", 60)])["protein_sources"] == ["beef"]
+    assert tags('Tempeh "Bacon"', "side", [("tempeh", 200), ("soy_sauce", 20)])["protein_sources"] == ["soy"]
+    assert tags("Toasted Rice For Fish", "side", [("rice", 200), ("butter", 20)])["protein_sources"] == []
     game = rule_tags(dish("Braised Rabbit", "main", [("rabbit", 900), ("carrot", 200)]))
-    assert game.values["protein_sources"] is None
+    assert game.values["protein_sources"] is None and "protein_sources" in game.open
     assert game.values["meal_role"] == "protein_main"
+
+
+def test_the_models_answer_keeps_only_what_the_lines_support() -> None:
+    meat = rule_tags(dish("Fried Rice", "main", [("rice", 300), ("meat", 200), ("egg", 100)]))
+    merge_answer(meat, {"protein_sources": ["pork", "beef", "egg", "legume"]})
+    # No bean line: the invented legume is dropped; unnamed meat may be any meat.
+    assert meat.values["protein_sources"] == ["pork", "beef", "egg"]
+    assert meat.methods["protein_sources"] == "llm"
+    cookie = rule_tags(dish("Kifliks", "baked_good", [("flour", 300), ("egg", 100), ("walnut", 100)], sugar_g=8.0))
+    assert cookie.values["meal_role"] is None and cookie.values["protein_sources"] == ["egg"]
+    merge_answer(cookie, {"meal_role": "dessert", "protein_sources": None})
+    # A dessert's eggs are not its protein, whoever decided the role.
+    assert cookie.values["protein_sources"] == [] and cookie.methods["protein_sources"] == "llm"
 
 
 def test_cooking_methods_and_equipment_come_from_keywords() -> None:
@@ -235,7 +262,8 @@ def test_the_tag_files_are_current_with_the_rules() -> None:
         for field, estimate in entries[key]["estimated"].items():
             if estimate["method"] == "rule" and found.values[field] != entries[key][field]:
                 stale.append((key, field))
-            if estimate["method"] == "llm" and field not in {"contains_staple", *found.open}:
+            sweet = field == "protein_sources" and entries[key]["meal_role"] in {"dessert", "drink", "sauce"}
+            if estimate["method"] == "llm" and field not in {"contains_staple", *found.open} and not sweet:
                 stale.append((key, field))
     assert not stale, stale[:10]
     assert committed(tag_files.INGREDIENT_TAGS, "ingredients") == ingredient_entries()
@@ -319,3 +347,24 @@ def test_the_tag_files_are_part_of_the_release_digest(release: Path, monkeypatch
     before = release_digest(release)
     monkeypatch.setattr(release_v2, "tag_file_bytes", lambda: b"re-tagged")
     assert release_digest(release) != before
+
+
+def test_a_recipe_tag_a_runtime_path_wrote_survives_a_re_import(session: Session, release: Path) -> None:
+    _curated(session)
+    import_release_v2(session, release)
+    first, second, third = session.scalars(select(Recipe).where(Recipe.external_id.is_not(None))).all()[:3]
+    # A person set the role (so it is no longer an estimate), confirmed one, and left the third alone.
+    first.meal_role = "snack"
+    first.estimated = {name: value for name, value in first.estimated.items() if name != "meal_role"}
+    second.estimated = second.estimated | {"flavor_tags": second.estimated["flavor_tags"] | {"reviewed": True}}
+    second.flavor_tags = ["spicy"]
+    third.meal_role = "drink"
+    session.commit()
+    import_release_v2(session, release, force=True)
+
+    entries = committed(tag_files.RECIPE_TAGS, "recipes")
+    assert first.meal_role == "snack" and "meal_role" not in first.estimated
+    assert second.flavor_tags == ["spicy"] and second.estimated["flavor_tags"]["reviewed"] is True
+    # A value still marked as the tag file's own estimate is the tag file's to change.
+    assert third.meal_role == entries[third.external_id]["meal_role"]
+    assert first.cooking_methods == entries[first.external_id]["cooking_methods"]

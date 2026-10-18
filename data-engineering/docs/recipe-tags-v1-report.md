@@ -7,9 +7,9 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Field | rule | llm | open (null) |
 | --- | ---: | ---: | ---: |
-| `meal_role` | 8557 | 406 | 34 |
-| `contains_staple` | 8557 | 406 | 34 |
-| `protein_sources` | 8883 | 114 | 0 |
+| `meal_role` | 8568 | 376 | 53 |
+| `contains_staple` | 8568 | 376 | 53 |
+| `protein_sources` | 8920 | 77 | 0 |
 | `cooking_methods` | 8997 | 0 | 0 |
 | `equipment` | 8997 | 0 | 0 |
 | `flavor_tags` | 8997 | 0 | 0 |
@@ -18,16 +18,16 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Meal role | rule | llm |
 | --- | ---: | ---: |
-| protein_main | 3662 | 100 |
+| protein_main | 3662 | 27 |
 | vegetable | 571 | 1 |
-| soup | 213 | 19 |
-| staple | 606 | 123 |
-| one_bowl | 1454 | 101 |
-| breakfast | 390 | 7 |
+| soup | 213 | 14 |
+| staple | 606 | 114 |
+| one_bowl | 1465 | 93 |
+| breakfast | 390 | 13 |
 | salad | 484 | 0 |
-| snack | 240 | 36 |
+| snack | 240 | 90 |
 | dessert | 529 | 13 |
-| sauce | 330 | 6 |
+| sauce | 330 | 11 |
 | drink | 78 | 0 |
 | open (null) | 0 | 0 |
 
@@ -35,17 +35,17 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Value | Recipes |
 | --- | ---: |
-| chicken | 2198 |
+| chicken | 2203 |
 | duck | 4 |
-| pork | 1249 |
-| beef | 1301 |
-| lamb | 38 |
-| fish | 236 |
-| shellfish | 490 |
-| soy | 145 |
-| egg | 1088 |
-| legume | 225 |
-| none (`[]`) | 2830 |
+| pork | 1269 |
+| beef | 1309 |
+| lamb | 36 |
+| fish | 233 |
+| shellfish | 489 |
+| soy | 142 |
+| egg | 1081 |
+| legume | 215 |
+| none (`[]`) | 2838 |
 
 ## `cooking_methods` values (recipes carrying each)
 
@@ -76,14 +76,16 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Value | Recipes |
 | --- | ---: |
-| contains_staple True | 2284 |
-| contains_staple False | 6679 |
-| contains_staple None | 34 |
+| contains_staple True | 2278 |
+| contains_staple False | 6666 |
+| contains_staple None | 53 |
 | equipment ('blender',) | 532 |
 | equipment ('microwave',) | 218 |
 | equipment ('oven',) | 2921 |
 | equipment ('steamer',) | 100 |
 | no equipment (`[]`) | 5506 |
+
+Hearty salads (`salad`, not vegetable-led, with a main protein): 162. As salads they fill only the vegetable side, which their vegetable-led check refuses, so they fill no slot until the owner decides; the sample packet carries them as their own stratum, as it does the model's protein answers. The planner reads no model-decided value before its batch sample is reviewed.
 
 ## Ingredients
 
@@ -100,4 +102,4 @@ Perishable: arugula, baby_spinach, bean_sprouts, bok_choy, catfish, clam, cod, c
 
 ## Language model
 
-Recipe questions sent to the model over all runs: 551 (recipes with a field the rules left open). Model: gpt-5.4-mini; calls: 28; input tokens: 142951; output tokens: 14968; estimated cost: US$0.175 at US$0.75 and US$4.5 per million input and output tokens; spend cap hit in the last run: False. Earlier model answers are kept in the tag file and reused, so a re-run asks only for what is still open.
+Recipe questions sent to the model over all runs: 1997 (recipes with a field the rules left open). Model: gpt-5.4-mini; calls: 103; input tokens: 548162; output tokens: 52378; estimated cost: US$0.647 at US$0.75 and US$4.5 per million input and output tokens; spend cap hit in the last run: False. Earlier model answers are kept in the tag file and reused, so a re-run asks only for what is still open.
