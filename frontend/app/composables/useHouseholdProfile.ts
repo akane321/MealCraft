@@ -1,24 +1,27 @@
+import { errorDetail } from "~/lib/household-profile";
 import type {
   HouseholdProfile,
   HouseholdProfileInput,
   HouseholdProfilePlanRequest,
   HouseholdProfilePlanResult,
   HouseholdProfileUpdate,
+  HouseholdReference,
+  RuleParseRequest,
+  RuleParseResult,
 } from "~/types/household";
 
 export function useHouseholdProfile() {
   const config = useRuntimeConfig();
   const apiFetch = useApiFetch();
   const current = ref<HouseholdProfile | null>(null);
+  const reference = ref<HouseholdReference | null>(null);
   const planResult = ref<HouseholdProfilePlanResult | null>(null);
   const errorMessage = ref<string | null>(null);
   const isLoading = ref(false);
   const isSaving = ref(false);
   const isPlanning = ref(false);
 
-  function detail(error: unknown, fallback: string) {
-    return (error as { data?: { detail?: string } }).data?.detail || fallback;
-  }
+  const detail = errorDetail;
 
   async function loadCurrent() {
     isLoading.value = true;
@@ -40,6 +43,30 @@ export function useHouseholdProfile() {
     }
     finally {
       isLoading.value = false;
+    }
+  }
+
+  /** HPB default portions, sodium limits and the basics list; the page works without them. */
+  async function loadReference() {
+    try {
+      reference.value = await apiFetch<HouseholdReference>(`${config.public.apiBase}/api/household-profiles/reference`);
+    }
+    catch {
+      reference.value = null;
+    }
+    return reference.value;
+  }
+
+  /** Reads one sentence into draft rules; stores nothing. Throws with the reason shown to the household. */
+  async function parseRule(request: RuleParseRequest) {
+    try {
+      return await apiFetch<RuleParseResult>(
+        `${config.public.apiBase}/api/household-profiles/parse-rule`,
+        { method: "POST", body: request },
+      );
+    }
+    catch (error) {
+      throw new Error(detail(error, "That sentence could not be read just now. Try again."), { cause: error });
     }
   }
 
@@ -124,7 +151,10 @@ export function useHouseholdProfile() {
     isPlanning,
     isSaving,
     loadCurrent,
+    loadReference,
+    parseRule,
     planResult,
+    reference,
     replanLatest,
     save,
   };

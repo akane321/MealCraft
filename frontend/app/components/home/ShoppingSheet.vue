@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatSgd, groceryGroups, groceryPriceLabel, packageLabel, priceSourceLabel } from "~/lib/home-surface";
+import { basicsNote, formatSgd, groceryGroups, groceryPriceLabel, packageLabel, priceSourceLabel } from "~/lib/home-surface";
 import type { WeeklyGroceryEstimate } from "~/types/meal-plan";
 
 const props = defineProps<{
@@ -9,6 +9,7 @@ const props = defineProps<{
 }>();
 
 const groups = computed(() => groceryGroups(props.estimate.items));
+const basics = computed(() => basicsNote(props.estimate));
 </script>
 
 <template>
@@ -42,6 +43,7 @@ const groups = computed(() => groceryGroups(props.estimate.items));
 
     <footer>
       <p class="sum"><span>Estimated total</span><strong>{{ formatSgd(estimate.purchase_total_sgd) }}</strong></p>
+      <p v-if="basics">{{ basics }}</p>
       <p>{{ priceSourceLabel(estimate) }}. Prices can change at the store. Check allergens on product labels.</p>
     </footer>
   </article>

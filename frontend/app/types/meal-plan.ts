@@ -23,6 +23,8 @@ export interface WeeklyPlanDay {
   meal_type: string;
   role_id: string;
   portion_share: number;
+  /** Portions cooked of this dish (layer 08); null for a plan made without household rules. */
+  servings?: number | null;
   recipe: RecipeListItem;
   recommendation_score: number;
   nutrition_per_person: RecipeNutrition;

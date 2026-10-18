@@ -1,30 +1,99 @@
 import { describe, expect, it } from "vitest";
 
-import { NO_TIME_LIMIT_MINUTES, noGoals, statedTimeLimit, summarizeHouseholdMembers } from "../app/lib/household-profile";
+import {
+  defaultServings,
+  errorDetail,
+  formatPortions,
+  hpbSodiumLimit,
+  memberServings,
+  NO_TIME_LIMIT_MINUTES,
+  noGoals,
+  statedTimeLimit,
+  summarizeHouseholdMembers,
+  totalServings,
+} from "../app/lib/household-profile";
+import { basicsNote } from "../app/lib/home-surface";
+import type { HouseholdMemberInput, HouseholdReference } from "../app/types/household";
+import type { WeeklyGroceryEstimate } from "../app/types/meal-plan";
+
+const reference: HouseholdReference = {
+  default_servings: {
+    adult: { female: { none: 0.88, fat_loss: 0.79, muscle_gain: 0.88 }, male: { none: 1.12, fat_loss: 1.01, muscle_gain: 1.12 }, any: { none: 1, fat_loss: 0.9, muscle_gain: 1 } },
+    child: { female: { none: 0.7, fat_loss: 0.63, muscle_gain: 0.7 }, male: { none: 0.75, fat_loss: 0.68, muscle_gain: 0.75 }, any: { none: 0.73, fat_loss: 0.65, muscle_gain: 0.73 } },
+  },
+  sodium_limit_mg: { toddler: null, child: null, teen: null, adult: 2000, senior: 2000 },
+  basics: [{ normalized_name: "soy_sauce", display_name: "Soy sauce", allergens: ["soy", "gluten"] }],
+  meal_shares: { breakfast: 0.25, lunch: 0.35, dinner: 0.35 },
+  sources: [],
+};
+
+function member(change: Partial<HouseholdMemberInput>): HouseholdMemberInput {
+  return { name: "Akane", servings_per_meal: 1, allergens: [], excluded_ingredients: [], dietary_preferences: [], ...change };
+}
 
 describe("household profile constraints", () => {
   it("merges member safety constraints and sums planned servings", () => {
     expect(summarizeHouseholdMembers([
-      {
-        name: "Akane",
-        servings_per_meal: 1,
-        allergens: ["soy"],
-        excluded_ingredients: ["mushroom"],
-        dietary_preferences: [],
-      },
-      {
-        name: "Guest",
-        servings_per_meal: 2,
-        allergens: ["soy", "sesame"],
-        excluded_ingredients: ["yellow_onion"],
-        dietary_preferences: ["vegetarian"],
-      },
+      member({ allergens: ["soy"], excluded_ingredients: ["mushroom"] }),
+      member({ name: "Guest", servings_per_meal: 2, allergens: ["soy", "sesame"], excluded_ingredients: ["yellow_onion"], dietary_preferences: ["vegetarian"] }),
     ])).toEqual({
       planningHouseholdSize: 3,
       allergens: ["sesame", "soy"],
       excludedIngredients: ["mushroom", "yellow_onion"],
       dietaryPreferences: ["vegetarian"],
     });
+  });
+
+  it("counts only members usually home at a meal, but every member towards the 12-portion limit", () => {
+    const members = [
+      member({ servings_per_meal: null, age_band: "child", sex: "female" }),
+      member({ name: "Grandma", servings_per_meal: 0.8, default_present: false }),
+      member({ name: "Wei", servings_per_meal: null }),
+    ];
+    expect(summarizeHouseholdMembers(members, reference).planningHouseholdSize).toBe(1.7);
+    expect(totalServings(members, reference)).toBe(2.5);
+  });
+});
+
+describe("portions from the HPB reference", () => {
+  it("looks up the default by age band, sex and goal; unset reads as an adult of either sex", () => {
+    expect(defaultServings(reference, { age_band: "child", sex: "male", goal: null })).toBe(0.75);
+    expect(defaultServings(reference, { age_band: null, sex: null, goal: "fat_loss" })).toBe(0.9);
+    expect(defaultServings(null, { age_band: "adult" })).toBeNull();
+  });
+
+  it("uses the stated number first, the default next, and 1 before the reference loads", () => {
+    expect(memberServings(member({ servings_per_meal: 1.25, age_band: "child" }), reference)).toBe(1.25);
+    expect(memberServings(member({ servings_per_meal: null, sex: "female" }), reference)).toBe(0.88);
+    expect(memberServings(member({ servings_per_meal: null }), null)).toBe(1);
+  });
+
+  it("shows portions to two decimals", () => {
+    expect(formatPortions(1)).toBe("1");
+    expect(formatPortions(0.7 + 0.88)).toBe("1.58");
+  });
+
+  it("takes the tightest HPB sodium limit of the members usually home, or none", () => {
+    expect(hpbSodiumLimit(reference, [{ age_band: "child" }, { age_band: null }])).toBe(2000);
+    expect(hpbSodiumLimit(reference, [{ age_band: "child" }, { age_band: "adult", default_present: false }])).toBeNull();
+  });
+});
+
+describe("API errors", () => {
+  it("reads a string detail and the messages of a validation error", () => {
+    expect(errorDetail({ data: { detail: "Profile changed" } }, "fallback")).toBe("Profile changed");
+    expect(errorDetail({ data: { detail: [{ msg: "Value error, A presence rule names Mei, who is not a member" }] } }, "fallback"))
+      .toBe("A presence rule names Mei, who is not a member");
+    expect(errorDetail(new Error("offline"), "fallback")).toBe("fallback");
+  });
+});
+
+describe("the grocery list's basics note", () => {
+  it("shows the backend's note only when the week assumes basics at home", () => {
+    const note = "Basic seasonings are assumed at home and left off this list: garlic, salt. Mark one as run out on your profile to buy it.";
+    const estimate = { warnings: ["Some prices are samples.", note] } as WeeklyGroceryEstimate;
+    expect(basicsNote(estimate)).toBe(note);
+    expect(basicsNote({ warnings: [] } as unknown as WeeklyGroceryEstimate)).toBeNull();
   });
 });
 
