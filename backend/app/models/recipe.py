@@ -4,6 +4,7 @@ from decimal import Decimal
 from sqlalchemy import (
     JSON,
     BigInteger,
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -32,6 +33,18 @@ class Recipe(Base):
         CheckConstraint(
             "passive_time_minutes IS NULL OR passive_time_minutes >= 0", name="recipes_passive_time_nonnegative"
         ),
+        # The value lists of MealRole and HalalStatus in app/schemas/catalog_tags.py.
+        CheckConstraint(
+            "meal_role IS NULL OR meal_role IN ('protein_main', 'vegetable', 'soup', 'staple', 'one_bowl', "
+            "'breakfast', 'salad', 'snack', 'dessert', 'sauce', 'drink')",
+            name="recipes_meal_role_valid",
+        ),
+        CheckConstraint(
+            "halal_status IS NULL OR halal_status IN ('halal', 'needs_certification', 'not_halal', 'uncertain')",
+            name="recipes_halal_status_valid",
+        ),
+        Index("recipes_meal_role_idx", "meal_role"),
+        Index("recipes_owner_household_id_idx", "owner_household_id"),
     )
 
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
@@ -61,6 +74,22 @@ class Recipe(Base):
     # data/recipes/withdrawn.json is withdrawn as well (app/repositories/recipe.py).
     withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     withdrawn_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Sprint 2 tags (docs/design/sprint2-schema-foundation.md). NULL is untagged: planning ignores the column.
+    meal_role: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    contains_staple: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    protein_sources: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    cooking_methods: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    flavor_tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    equipment: Mapped[list[list[str]] | None] = mapped_column(JSON, nullable=True)
+    halal_status: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    unknown_safety: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    estimated: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # NULL is a shared recipe; a household's id is that household's provisional recipe.
+    owner_household_id: Mapped[int | None] = mapped_column(
+        BIGINT_ID,
+        ForeignKey("households.id", ondelete="RESTRICT", name="recipes_owner_household_id_fkey"),
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -117,6 +146,13 @@ class RecipeNutrition(Base):
 
 class Ingredient(Base):
     __tablename__ = "ingredients"
+    __table_args__ = (
+        # The value list of IngredientHalalStatus in app/schemas/catalog_tags.py.
+        CheckConstraint(
+            "halal_status IS NULL OR halal_status IN ('halal', 'not_halal', 'uncertain')",
+            name="ingredients_halal_status_valid",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
     normalized_name: Mapped[str] = mapped_column(String(160), unique=True, index=True)
@@ -126,6 +162,16 @@ class Ingredient(Base):
     # A combined ingredient ("beef or turkey") lists the options it allows, each as
     # {normalized_name, display_name, allergens}; null for an ordinary ingredient.
     alternatives: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
+    # Sprint 2 (docs/design/sprint2-schema-foundation.md); NULL is unknown and changes nothing.
+    food_group: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    # Only a confirmed true is perishable; NULL and false are "other".
+    perishable: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    # True is assumed at home: never listed or priced unless the household says it has none.
+    basic_seasoning: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    halal_status: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    # Only for extension-table and externally added ingredients (PlanningNutrients keys).
+    nutrition_per_100g: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    provenance: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     recipe_ingredients: Mapped[list["RecipeIngredient"]] = relationship(back_populates="ingredient")
 
@@ -148,6 +194,8 @@ class RecipeIngredient(Base):
     grams: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     original_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     sort_order: Mapped[int]
+    # IngredientLineProvenance; NULL is a line as released.
+    provenance: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     recipe: Mapped[Recipe] = relationship(back_populates="recipe_ingredients")
     ingredient: Mapped[Ingredient] = relationship(back_populates="recipe_ingredients")
@@ -167,6 +215,30 @@ class RecipeStep(Base):
     instruction: Mapped[str] = mapped_column(Text)
 
     recipe: Mapped[Recipe] = relationship(back_populates="steps")
+
+
+class RecipeFeedback(Base):
+    """One like, dislike or "never again" from a household. Rows are only added; undoing one deletes it."""
+
+    __tablename__ = "recipe_feedback"
+    __table_args__ = (
+        # The value lists of FeedbackKind and FeedbackSource in app/schemas/catalog_tags.py.
+        CheckConstraint("kind IN ('like', 'dislike', 'never_again')", name="recipe_feedback_kind_valid"),
+        CheckConstraint("source IN ('button', 'chat')", name="recipe_feedback_source_valid"),
+        Index("recipe_feedback_household_created_idx", "household_id", "created_at", "id"),
+        Index("recipe_feedback_recipe_id_idx", "recipe_id"),
+    )
+
+    id: Mapped[int] = mapped_column(BIGINT_ID, Identity(), primary_key=True)
+    household_id: Mapped[int] = mapped_column(
+        BIGINT_ID, ForeignKey("households.id", ondelete="CASCADE", name="recipe_feedback_household_id_fkey")
+    )
+    recipe_id: Mapped[int] = mapped_column(
+        BIGINT_ID, ForeignKey("recipes.id", ondelete="CASCADE", name="recipe_feedback_recipe_id_fkey")
+    )
+    kind: Mapped[str] = mapped_column(String(20))
+    source: Mapped[str] = mapped_column(String(20))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class CatalogImport(Base):

@@ -44,6 +44,11 @@ responsibilities are defined in [Planning diversity](planning-diversity.md).
 Planning's structured nutrition targets and Agent handoff are defined in
 [Product nutrition scope](planning-nutrition-scope.md).
 
+The Sprint 2 columns, the `recipe_feedback` table, the shared tag and rule
+types, the tag-file overlay order, the evaluation record header and how to
+request a schema change are defined in
+[Sprint 2 Schema Foundation](sprint2-schema-foundation.md).
+
 | Producer | Versioned artifact | Required consumer | Contract risk if missing |
 | --- | --- | --- | --- |
 | Recipe data | Canonical recipe, ingredient IDs, quantities, tags, nutrition completeness and provenance | retrieval, planner, grocery mapping, Evaluation | a planner may appear correct only because unsafe or missing facts were never represented |

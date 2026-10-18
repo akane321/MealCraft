@@ -110,7 +110,10 @@ the version chain lives in `backend/alembic/versions/`. Household profile identi
 immutable versions are stored in `household_profiles` and
 `household_profile_versions`; linked plans preserve the exact profile version
 and optional replaced-plan ID. Agent replanning drafts and pending
-event links are stored on `agent_sessions`.
+event links are stored on `agent_sessions`. Household likes, dislikes and
+"never again" choices go to `recipe_feedback`; it and the other Sprint 2
+columns from migration `20261018_0030` are not read or written yet (see
+[Sprint 2 Schema Foundation](design/sprint2-schema-foundation.md)).
 
 ## Code evidence for recorded worker experiments
 
@@ -338,6 +341,10 @@ The suite verifies all of the following before CI accepts the migration:
 - rerunning `upgrade head` does not create duplicate legacy users, households, or memberships.
 
 If an upgrade fails, retain the database and migration logs before changing anything. Correct the cause, then rerun `alembic upgrade head`; Alembic will continue from the recorded revision. If application compatibility requires rollback and `20260916_0014` is still the latest applied migration, run `alembic downgrade 20260909_0013`, verify that the three tenant-root columns were removed and row counts are unchanged, then retry the upgrade. Do not manually delete the suspended legacy user or household: later upgrades reuse that identity to avoid duplicate imports.
+
+### Sprint 2 foundation migration verification
+
+The same suite runs `backend/tests/migrations/test_sprint2_foundation_migration.py`. It seeds a 7-day plan at `20261012_0029`, upgrades to `20261018_0030`, and checks that every new column is present and nullable, `recipe_feedback` exists and is empty, row counts are unchanged, each CHECK value list equals its Pydantic enum, a 14-day plan is accepted and invalid tag values are rejected. It then proves that a downgrade fails while a 14-day plan exists, that after that plan is removed the downgrade drops every new column and restores `day_count = 7` and `day_index BETWEEN 1 AND 7`, and that the upgrade runs again.
 
 Show the current revision:
 

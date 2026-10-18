@@ -27,7 +27,8 @@ from app.models.recipe import BIGINT_ID, Recipe
 class MealPlan(Base):
     __tablename__ = "meal_plans"
     __table_args__ = (
-        CheckConstraint("day_count = 7", name="meal_plans_day_count_seven"),
+        # Requests still ask for 7 days; the table allows the 14-day plans Sprint 2 adds.
+        CheckConstraint("day_count BETWEEN 1 AND 14", name="meal_plans_day_count_valid"),
         CheckConstraint("household_size > 0", name="meal_plans_household_size_positive"),
         CheckConstraint("pricing_mode IN ('fixture', 'live')", name="meal_plans_pricing_mode_valid"),
         CheckConstraint(
@@ -108,7 +109,8 @@ class MealPlan(Base):
 class MealPlanEntry(Base):
     __tablename__ = "meal_plan_entries"
     __table_args__ = (
-        CheckConstraint("day_index BETWEEN 1 AND 7", name="meal_plan_entries_day_index_valid"),
+        CheckConstraint("day_index BETWEEN 1 AND 14", name="meal_plan_entries_day_index_valid"),
+        CheckConstraint("servings IS NULL OR servings > 0", name="meal_plan_entries_servings_positive"),
         CheckConstraint("recommendation_score BETWEEN 0 AND 100", name="meal_plan_entries_score_valid"),
         CheckConstraint("consumed_cost_sgd >= 0", name="meal_plan_entries_consumed_cost_nonnegative"),
         CheckConstraint("purchase_cost_sgd >= 0", name="meal_plan_entries_purchase_cost_nonnegative"),
@@ -140,6 +142,9 @@ class MealPlanEntry(Base):
     meal_type: Mapped[str] = mapped_column(String(20), default="dinner", server_default="dinner")
     role_id: Mapped[str] = mapped_column(String(40), default="main", server_default="main")
     portion_share: Mapped[Decimal] = mapped_column(Numeric(4, 3), default=Decimal(1), server_default="1")
+    # Servings this dish is cooked for: the sum of the present members' servings who can eat it.
+    # NULL is the older rule, the plan's household size at portion_share.
+    servings: Mapped[Decimal | None] = mapped_column(Numeric(6, 3), nullable=True)
     recommendation_score: Mapped[Decimal] = mapped_column(Numeric(5, 1))
     consumed_cost_sgd: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     purchase_cost_sgd: Mapped[Decimal] = mapped_column(Numeric(10, 2))
@@ -171,6 +176,10 @@ class MealPlanGroceryItem(Base):
         ),
         CheckConstraint("packages_required >= 0", name="meal_plan_grocery_packages_nonnegative"),
         CheckConstraint("purchase_cost_sgd >= 0", name="meal_plan_grocery_purchase_nonnegative"),
+        CheckConstraint(
+            "product_regular_price_sgd IS NULL OR product_regular_price_sgd >= 0",
+            name="meal_plan_grocery_regular_price_nonnegative",
+        ),
         # One line per ingredient and unit: whole eggs and grams of egg cannot be added up.
         UniqueConstraint("plan_id", "ingredient_name", "unit", name="meal_plan_grocery_plan_ingredient_unit_key"),
         Index("meal_plan_grocery_plan_id_idx", "plan_id"),
@@ -203,6 +212,11 @@ class MealPlanGroceryItem(Base):
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Where the shown price came from (PriceEvidence); null for lines priced before it was recorded.
     price_evidence: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # The store this line is bought from (a Retailer slug); NULL reads as fairprice. Not product_source,
+    # which says how the product data was obtained.
+    retailer: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # The price before any promotion; savings are computed, not stored.
+    product_regular_price_sgd: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
 
     plan: Mapped[MealPlan] = relationship(back_populates="grocery_items")
 

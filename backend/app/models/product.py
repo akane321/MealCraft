@@ -26,6 +26,10 @@ class ProductSnapshot(Base):
     __table_args__ = (
         CheckConstraint("package_size IS NULL OR package_size > 0", name="product_snapshots_package_size_positive"),
         CheckConstraint("price_sgd >= 0", name="product_snapshots_price_nonnegative"),
+        CheckConstraint(
+            "regular_price_sgd IS NULL OR regular_price_sgd >= 0",
+            name="product_snapshots_regular_price_nonnegative",
+        ),
         CheckConstraint("rank >= 0", name="product_snapshots_rank_nonnegative"),
         UniqueConstraint(
             "source",
@@ -57,3 +61,8 @@ class ProductSnapshot(Base):
     in_stock: Mapped[bool] = mapped_column(Boolean, default=True)
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     raw_data: Mapped[dict] = mapped_column(JSON, default=dict)
+    # `source` is the retailer's slug (app/schemas/catalog_tags.py RETAILERS); every row so far is fairprice.
+    # The price before any promotion; NULL when the source did not give one.
+    regular_price_sgd: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+    # NULL is unknown and counts as not certified.
+    halal_certified: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
