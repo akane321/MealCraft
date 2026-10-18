@@ -105,6 +105,13 @@ class HouseholdProfileVersion(Base):
     meal_composition: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
     # Which meals are planned and each one's dish roles (ADR-0046); NULL reads meal_composition.
     plan_shape: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Sprint 2 rules (app/schemas/household_rules.py). NULL is today's behaviour: every member at every
+    # meal, only max_cooking_time_minutes, all equipment and basic seasonings at home, only the sodium cap.
+    presence_rules: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
+    cooking_time_rules: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
+    missing_equipment: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    missing_basics: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    nutrition_limits: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     profile: Mapped[HouseholdProfile] = relationship(back_populates="versions")
