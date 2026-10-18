@@ -1,0 +1,999 @@
+"""Tag every catalog recipe and ingredient for the Sprint 2 planner (layer 08; ADR-0070, ADR-0076).
+
+`python -m app.data.recipe_tags` writes two reviewed data files, which the importers copy onto the
+catalog rows (`app.data.tag_files`):
+
+- `data/recipes/recipe-tags-v1.json`, keyed by release `external_id` or curated slug: `meal_role`,
+  `contains_staple`, `protein_sources`, `cooking_methods`, `equipment`, `flavor_tags`, and
+  `estimated` (how each field was decided: `rule` or `llm`, its batch, `reviewed`);
+- `data/ingredients/ingredient-tags-v1.json`, keyed by `normalized_name`: `food_group`, `perishable`,
+  `basic_seasoning`, and `methods` (where each value came from).
+
+It also writes the owner's spot-check packet and the coverage report in `data-engineering/docs`.
+
+Deterministic rules decide first, from the course, the ingredients' release food groups and dietary
+origin, the ingredient hierarchy, gram shares, title words and step keywords. The language model
+(`--llm`) is asked only for what the rules leave open: a meal role, or the protein of a dish whose
+meat the source table does not name. A value the rules and the model both leave open stays null,
+which the planner reads as untagged. Allergen, halal and diet labels are never estimated here.
+
+The rules, and why:
+
+- **Meal role.** A fixed course decides it: breakfast, dessert, sauce, drink, snack, salad. A salad
+  stays a salad whatever it holds, since a salad only ever fills the vegetable side (ADR-0070); the
+  planner's vegetable-led check still decides whether it may. A dish is `vegetable` only when it is
+  vegetable-led (`app.planning.vegetable_led`, ADR-0054), so the role and the planner's rule agree.
+  A main or soup that carries its own staple (rice, noodles, pasta, bread or other grain staples:
+  `staple_share`) is `one_bowl`; a main made mostly of a staple with no protein is a `staple`. A
+  main with a main protein is a `protein_main`; one led by vegetables without one is a `vegetable`.
+  Baked goods go by title words and sugar. Grey zones go to the model.
+- **Contains staple** is true exactly for `one_bowl` and `staple` dishes, so it follows the role.
+- **Protein sources** are the sources whose ingredients make at least 5 % (meat, poultry, fish,
+  seafood) or 10 % (egg, soy, legumes) of the dish's counted raw grams, so an egg that binds a
+  meatloaf or bacon bits on a salad are not its protein. A line with no weight counts. Seasonings,
+  stocks and fats made from meat or fish are not protein (`SEASONING_FROM_FLESH`). Turkey and other
+  poultry count as chicken, goose as duck, goat as lamb, veal as beef, so the no-repeat rule errs
+  towards strictness. Meat the table cannot name (game, generic meat, liver), and a title naming
+  meat or fish that no line holds (a line the release lost), go to the model. Desserts, sauces and
+  drinks have none: the eggs of a cake are not its main protein.
+- **Cooking methods** come from step and title keywords; a dish with no heating step is `raw`, and
+  one that heats without a listed method (a microwave dish) has none. The "fried" of a deep-fried
+  dish is not also a pan fry.
+- **Equipment** comes from keywords (ADR-0068: every household has every appliance until it says
+  otherwise): an oven, an air fryer, or both as one any-of group when the recipe offers either; a
+  steamer; a microwave; a blender or food processor. A Dutch oven is a pot, not an oven.
+- **Flavour tags**: `spicy` from hot ingredients by weight per serving or title words; `fragrant`
+  from at least three aromatics (alliums, ginger, fresh herbs, whole spices); `rich` from fat at
+  least half of the energy, 35 g of fat a serving or a coconut-milk base; `light` from at most 30 %
+  of energy from fat, at most 450 kcal a serving and no deep frying. Rich and light never meet;
+  sauces and drinks get neither.
+- **Ingredients.** `food_group` is the release's, or for a curated id the release ingredient it is
+  the same as or a variety of. `perishable` is ADR-0068's short-lived class only (leafy greens, bean
+  and pea sprouts, fresh fish, fresh shellfish); every true value is confirmed by the owner.
+  `basic_seasoning` is `data/ingredients/basic-seasonings-v1.json`.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import random
+import re
+from collections import Counter
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import get_args
+
+from app.core.paths import repository_root
+from app.data.catalog import load_catalog
+from app.data.release_v2 import LINE_CORRECTIONS, release_dir
+from app.data.tag_files import INGREDIENT_TAGS, RECIPE_TAGS
+from app.planning.vegetable_led import (
+    COOKED_STAPLES,
+    COOKED_YIELD,
+    MEAT_WORDS,
+    SEASONING_FROM_FLESH,
+    UNCOUNTED,
+    UNCOUNTED_GROUPS,
+    food_groups,
+    vegetable_led,
+)
+from app.schemas.catalog_tags import CookingMethod, FlavorTag, MealRole, ProteinSource
+
+VERSION = "recipe-tags-v1"
+INGREDIENT_VERSION = "ingredient-tags-v1"
+RULE_BATCH = f"{VERSION}/rules"
+LLM_BATCH = f"{VERSION}/llm"
+SAMPLE = "data-engineering/docs/recipe-tags-v1-sample.json"
+REPORT = "data-engineering/docs/recipe-tags-v1-report.md"
+BASIC_SEASONINGS = "data/ingredients/basic-seasonings-v1.json"
+SEED = 20261018
+
+MEAL_ROLES: tuple[str, ...] = get_args(MealRole)
+FIXED_COURSE_ROLES = {
+    "breakfast": "breakfast",
+    "dessert": "dessert",
+    "sauce_condiment": "sauce",
+    "drink": "drink",
+    "snack_appetizer": "snack",
+    "salad": "salad",
+}
+
+# Grain staples a dish can carry, as release ids. Dry ones count at COOKED_YIELD, as in vegetable_led.
+STAPLES = COOKED_STAPLES | {
+    "bread",
+    "baguette",
+    "tortilla",
+    "pita_bread",
+    "dinner_roll",
+    "hamburger_bun",
+    "hot_dog_bun",
+    "english_muffin",
+    "pizza_crust",
+    "frozen_bread_dough",
+    "taco_shell",
+    "shirataki_noodles",
+    "mac_and_cheese",
+    "rice_paper",
+}
+# Starchy sides that serve as a meal's staple when they are the dish (mashed potatoes), never inside a main.
+STARCHY = frozenset(
+    {"potato", "sweet_potato", "mashed_potatoes", "instant_mashed_potato", "hash_brown", "tater_tots", "french_fries"}
+)
+ONE_BOWL_SHARE = 0.15  # a main's staple share from which it carries its staple
+STAPLE_ONLY_SHARE = 0.6  # a protein-less main this much staple is the staple itself
+GREY_SHARE = 0.05  # below this a main holds no staple; between the two the model decides
+SOUP_ONE_BOWL_SHARE = 0.3
+SOUP_GREY_SHARE = 0.1
+SIDE_STAPLE_SHARE = 0.5
+NOODLE_SOUP = re.compile(
+    r"\b(?:pho|laksa|ramen|noodles?|udon|soba|congee|porridge|jook|juk|bubur|mee|bee hoon|kway teow|kuey teow"
+    r"|sopas|arroz caldo|lugaw|mohinga|khao soi|bun bo|wonton noodle)\b"
+)
+BREAD_TITLE = re.compile(
+    r"\b(?:breads?|loaf|loaves|rolls?|buns?|baguettes?|naan|roti|chapatis?|paratha|pitas?|focaccia|ciabatta"
+    r"|brioche|tortillas?|flatbreads?|pandesal|pan de sal|challah|cornbread|biscuits?|farls?|crumpets?)\b"
+)
+BREAKFAST_TITLE = re.compile(r"\b(?:muffins?|scones?|pancakes?|waffles?|granola|croissants?|bagels?|danish)\b")
+PIZZA_TITLE = re.compile(r"\b(?:pizzas?|calzones?)\b")
+
+PROTEIN_SOURCES: tuple[str, ...] = get_args(ProteinSource)
+FLESH_SOURCES = frozenset({"chicken", "duck", "pork", "beef", "lamb", "fish", "shellfish"})
+SWEET_OR_CONDIMENT = frozenset({"dessert", "drink", "sauce"})
+FLESH_SHARE = 0.05
+PLANT_EGG_SHARE = 0.10
+_SOURCE_IDS = {
+    "chicken": "chicken chicken_breast chicken_thigh chicken_wings cooked_chicken cornish_hen chicken_or_turkey turkey"
+    " turkey_bacon",
+    "duck": "duck goose",
+    "pork": "pork pork_belly pork_chop ground_pork bacon ham pancetta prosciutto chorizo pepperoni sausage hot_dog"
+    " pork_fatback gyoza",
+    "beef": "beef beef_heart beef_steak chipped_beef corned_beef ground_beef pastrami beef_or_turkey veal",
+    "lamb": "lamb lamb_chop goat mutton",
+    "fish": "fish anchovy catfish cod fish_cake fish_fillet hake halibut milkfish red_snapper salmon salt_cod sardine"
+    " smoked_haddock swordfish trout tuna imitation_crab salmon_fillet canned_tuna",
+    "shellfish": "shellfish shrimp clam crab lobster mussel oyster scallop squid octopus seafood_mix",
+    "soy": "soybean tofu firm_tofu tempeh edamame fermented_soybeans vegetarian_ham vegetarian_sausage",
+    "egg": "egg egg_white egg_yolk quail_egg egg_substitute",
+    "legume": "adzuki_bean baked_beans black_beans black_bean black_eyed_peas cannellini chickpea fava_bean"
+    " kidney_beans lentil red_lentil lima_beans mung_bean pinto_beans refried_beans split_peas toor_dal falafel",
+}
+SOURCE_OF = {name: source for source, names in _SOURCE_IDS.items() for name in names.split()}
+
+# Cooking-method keywords over the lower-cased title and steps. Deep and stir frying, air frying and the Dutch
+# oven are taken out before the plainer words are looked for, so "deep-fry" is not also a pan fry.
+DEEP_FRY = re.compile(
+    r"deep[- ]?fr(?:y|ied|ies|ying|yer)|deep[- ]fat|oil (?:to|reaches|registers) 3[2-9]\d|(?:inch|inches|cm) of oil"
+    r"|oil for (?:deep )?frying|fry (?:them |it )?in (?:hot )?oil until"
+)
+STIR_FRY = re.compile(r"stir[- ]?fr(?:y|ied|ies|ying)|\bwok\b")
+AIR_FRY = re.compile(r"air[- ]?fr(?:y|ied|ies|ying|yer)")
+DUTCH_OVEN = re.compile(r"dutch ovens?")
+PAN_FRY = re.compile(
+    r"\b(?:saut[eé]e?[ds]?|saut[eé]ing|sear(?:ed|ing|s)?|pan[- ]?fr\w*|shallow[- ]?fr\w*"
+    r"|skillet|frying pan|brown (?:the|meat|beef|chicken|pork|lamb|on all sides))\b"
+)
+# A bare "fry" or "fried" is a pan fry only in a dish that is not deep-fried ("Fried Chicken").
+FRY = re.compile(r"\b(?:fry|fries|fried|frying)\b")
+STEAM = re.compile(
+    r"\bsteamer\b|\bsteam(?:ed|ing)?\s+(?:for|until|over|in|on|the|it|them|covered|about|gently)\b"
+    r"|\bsteaming (?:basket|rack|tray)"
+)
+BOIL = re.compile(r"\b(?:boil\w*|simmer\w*|poach\w*|blanch\w*|parboil\w*)\b")
+BRAISE = re.compile(r"\b(?:brais\w*|stew(?:ed|ing)?|slow[- ]?cook\w*|crock[- ]?pot|pressure[- ]cook\w*|instant pot)\b")
+BAKE = re.compile(r"\b(?:bak(?:e|ed|es|ing)(?! (?:soda|powder))|roast\w*|oven)\b")
+GRILL = re.compile(r"\b(?:grill\w*|broil\w*|barbecue\w*|barbeque\w*|bbq|char[- ]?grill\w*|griddle)\b")
+HEAT = re.compile(r"\b(?:cook\w*|heat\w*|warm\w*|melt\w*|toast\w*|microwav\w*|fire|flame|temperature|scald\w*)\b")
+OVEN = re.compile(
+    r"\boven\b|\bbak(?:e|ed|es)\b|\bbaking (?:dish|sheet|pan|tray|tin)\b"
+    r"|\broast(?:ed|ing)? (?:in|at|for|until)\b|\bbroil"
+)
+MICROWAVE = re.compile(r"\bmicrowav")
+BLENDER = re.compile(
+    r"\bblender\b|food processor|\bprocessor\b|liquidi[sz]e|\bblitz|\bblend (?:until|till|on high|on low|to a)"
+    r"|pur[eé]e (?:in|until|the|it|with|them)"
+)
+
+HOT = frozenset(
+    {
+        "chili_pepper",
+        "green_chili",
+        "jalapeno",
+        "habanero_pepper",
+        "scotch_bonnet",
+        "chipotle_pepper",
+        "chipotle_in_adobo",
+        "gochugaru",
+        "gochujang",
+        "gochujang_sauce",
+        "sambal_oelek",
+        "sriracha",
+        "hot_sauce",
+        "chili_oil",
+        "chili_paste",
+        "chili_sauce",
+        "chili_garlic_sauce",
+        "harissa",
+        "curry_paste",
+        "laksa_paste",
+        "tom_yum_paste",
+        "szechwan_pepper",
+        "wasabi",
+        "berbere",
+        "jerk_seasoning",
+    }
+)
+HOT_POWDER = frozenset({"cayenne", "chili_powder"})
+HOT_GRAMS = 1.0  # grams a serving of a hot ingredient that make a dish spicy
+HOT_POWDER_GRAMS = 0.5
+SPICY_TITLE = re.compile(
+    r"\b(?:spicy|hot and sour|hot & sour|chil(?:i|li|e)|sichuan|szechuan|szechwan|buffalo|jerk|vindaloo|sambal"
+    r"|mala|kung pao|diablo|arrabbiata|piri|peri|harissa|fiery|gochujang|tom yum|tom yam|rendang|phaal)\b"
+)
+AROMATICS = frozenset(
+    {
+        "garlic",
+        "ginger",
+        "galangal",
+        "green_onion",
+        "shallot",
+        "leek",
+        "chives",
+        "lemongrass",
+        "kaffir_lime_leaf",
+        "curry_leaf",
+        "pandan_leaf",
+        "basil",
+        "thai_basil",
+        "cilantro",
+        "mint",
+        "perilla",
+        "dill",
+        "rosemary",
+        "thyme",
+        "sage",
+        "tarragon",
+        "anise",
+        "cinnamon",
+        "cloves_spice",
+        "cardamom",
+        "cumin",
+        "coriander",
+        "fennel_seed",
+        "garam_masala",
+        "curry_powder",
+        "chinese_five_spice",
+        "sesame_oil",
+        "saffron",
+        "turmeric",
+        "szechwan_pepper",
+    }
+)
+FRAGRANT_COUNT = 3
+COCONUT_BASE = frozenset({"coconut_milk", "coconut_cream"})
+COCONUT_SHARE = 0.15
+RICH_FAT_SHARE = 0.5
+RICH_FAT_GRAMS = 35.0
+LIGHT_FAT_SHARE = 0.3
+LIGHT_KCAL = 450.0
+NO_RICHNESS_ROLES = frozenset({"sauce", "drink"})
+
+LEAFY = frozenset(
+    {
+        "arugula",
+        "bok_choy",
+        "collard",
+        "gai_lan",
+        "kale",
+        "lettuce",
+        "spinach",
+        "swiss_chard",
+        "watercress",
+        "pea_shoots",
+        "radish_sprouts",
+        "bean_sprouts",
+    }
+)
+FRESH_FISH = frozenset(
+    {"catfish", "cod", "fish_fillet", "hake", "halibut", "milkfish", "red_snapper", "salmon", "swordfish", "trout"}
+)
+FRESH_SHELLFISH = frozenset(
+    {"shrimp", "clam", "crab", "lobster", "mussel", "oyster", "scallop", "squid", "octopus", "seafood_mix"}
+)
+PERISHABLE = LEAFY | FRESH_FISH | FRESH_SHELLFISH
+PRESERVED = re.compile(r"(?:^|_)(?:canned|dried|smoked|salt|salted|frozen|pickled|cured)(?:_|$)")
+
+
+@dataclass
+class Line:
+    name: str
+    grams: float | None
+    text: str | None
+
+
+@dataclass
+class Dish:
+    key: str
+    title: str
+    course: str
+    cuisine: str
+    servings: int
+    kcal: float | None
+    fat_g: float | None
+    sugar_g: float | None
+    carbohydrate_g: float | None
+    lines: list[Line]
+    steps: str
+    curated: bool = False
+
+
+@dataclass
+class Tags:
+    values: dict = field(default_factory=dict)
+    methods: dict = field(default_factory=dict)
+    # What the model is asked to decide: "meal_role", "protein_sources".
+    open: list[str] = field(default_factory=list)
+    allowed_roles: tuple[str, ...] = MEAL_ROLES
+
+
+def release_name(name: str) -> str:
+    """The release id an ingredient is, or is the same as or a variety of (`baby_spinach` is `spinach`)."""
+    return food_groups().get(name, (name, None, None))[0]
+
+
+def group_of(name: str) -> str | None:
+    return food_groups().get(name, (name, None, None))[1]
+
+
+def origin_of(name: str) -> str | None:
+    return food_groups().get(name, (name, None, None))[2]
+
+
+def counted(line: Line) -> bool:
+    return release_name(line.name) not in UNCOUNTED and group_of(line.name) not in UNCOUNTED_GROUPS
+
+
+def source_of(name: str) -> str | None:
+    """A main-protein source, `"?"` for meat or fish the table cannot name, or None."""
+    # Not the hierarchy's made_from links: soy sauce is made from soybeans and broth from chicken; neither is protein.
+    if release_name(name) in SEASONING_FROM_FLESH:
+        return None
+    for candidate in (name, release_name(name)):
+        if candidate in SOURCE_OF:
+            return SOURCE_OF[candidate]
+    return "?" if origin_of(name) == "flesh" else None
+
+
+def protein_sources(dish: Dish) -> list[str] | None:
+    """The main protein sources, in `PROTEIN_SOURCES` order; None when unnamed meat or fish is one of them."""
+    total = sum(line.grams for line in dish.lines if line.grams and counted(line))
+    grams: Counter[str] = Counter()
+    unweighed: set[str] = set()
+    for line in dish.lines:
+        source = source_of(line.name)
+        if source is None:
+            continue
+        if line.grams:
+            grams[source] += line.grams
+        else:
+            unweighed.add(source)
+    found = set(unweighed)
+    for source, weight in grams.items():
+        threshold = PLANT_EGG_SHARE if source in {"soy", "egg", "legume"} else FLESH_SHARE
+        if total and weight / total >= threshold:
+            found.add(source)
+    # Unnamed meat, or a title naming meat or fish that no line holds (a line the release lost), is open.
+    if "?" in found or (not found & FLESH_SOURCES and MEAT_WORDS.search(dish.title)):
+        return None
+    return [source for source in PROTEIN_SOURCES if source in found]
+
+
+def staple_share(dish: Dish, names: frozenset[str] | set[str] = STAPLES) -> float:
+    """The staples' share of a dish's counted grams, dry ones at their cooked weight (as `vegetable_share`)."""
+    total = part = 0.0
+    for line in dish.lines:
+        if not line.grams or not counted(line):
+            continue
+        name = release_name(line.name)
+        weight = line.grams * (COOKED_YIELD if name in COOKED_STAPLES else 1.0)
+        total += weight
+        if name in names:
+            part += weight
+    return part / total if total else 0.0
+
+
+def dish_vegetable_led(dish: Dish) -> bool:
+    return vegetable_led((line.name, line.grams, line.text) for line in dish.lines)
+
+
+def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | None, tuple[str, ...]]:
+    """The rule's role, or None with the roles the model may choose from."""
+    title = dish.title.lower()
+    open_roles = tuple(role for role in MEAL_ROLES if led or role not in {"vegetable", "salad"})
+    if dish.course in FIXED_COURSE_ROLES:
+        return FIXED_COURSE_ROLES[dish.course], ()
+    has_protein = sources is None or bool(sources)
+    if dish.course == "baked_good":
+        sweet = bool(dish.carbohydrate_g) and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.3
+        if PIZZA_TITLE.search(title):
+            return "one_bowl", ()
+        if BREAKFAST_TITLE.search(title):
+            return "breakfast", ()
+        if BREAD_TITLE.search(title) and dish.carbohydrate_g and (dish.sugar_g or 0) / dish.carbohydrate_g < 0.2:
+            return "staple", ()
+        if sweet:
+            return "dessert", ()
+        return None, ("breakfast", "dessert", "staple", "snack", "one_bowl", "protein_main")
+    share = staple_share(dish)
+    if dish.course == "soup":
+        if (NOODLE_SOUP.search(title) and share > 0) or share >= SOUP_ONE_BOWL_SHARE:
+            return "one_bowl", ()
+        if share < SOUP_GREY_SHARE:
+            return "soup", ()
+        return None, ("soup", "one_bowl")
+    if dish.course == "side":
+        if led:
+            return "vegetable", ()
+        if staple_share(dish, STAPLES | STARCHY) >= SIDE_STAPLE_SHARE:
+            return "staple", ()
+        return None, open_roles
+    # main, and the curated catalog's mains
+    if share >= ONE_BOWL_SHARE:
+        return ("staple" if not has_protein and share >= STAPLE_ONLY_SHARE else "one_bowl"), ()
+    if share >= GREY_SHARE:
+        return None, ("one_bowl", "protein_main", "staple", *(("vegetable",) if led else ()))
+    if has_protein:
+        return "protein_main", ()
+    if led:
+        return "vegetable", ()
+    return None, open_roles
+
+
+def cooking_methods(dish: Dish) -> list[str]:
+    text = f"{dish.title}\n{dish.steps}".lower()
+    found = []
+    if DEEP_FRY.search(text):
+        found.append("deep_fry")
+    if STIR_FRY.search(text):
+        found.append("stir_fry")
+    plain = DUTCH_OVEN.sub("pot", AIR_FRY.sub("air-crisp", STIR_FRY.sub("", DEEP_FRY.sub("", text))))
+    if PAN_FRY.search(plain) or (FRY.search(plain) and "deep_fry" not in found):
+        found.append("pan_fry")
+    for method, pattern in (("steam", STEAM), ("boil", BOIL), ("braise", BRAISE)):
+        if pattern.search(plain):
+            found.append(method)
+    if BAKE.search(plain) or AIR_FRY.search(text):
+        found.append("bake")
+    if GRILL.search(plain):
+        found.append("grill")
+    if not found and not HEAT.search(plain):
+        found.append("raw")
+    return found
+
+
+def equipment(dish: Dish) -> list[list[str]]:
+    text = DUTCH_OVEN.sub("pot", f"{dish.title}\n{dish.steps}".lower())
+    oven = bool(OVEN.search(AIR_FRY.sub("", text)))
+    air = bool(AIR_FRY.search(text))
+    needs = []
+    if oven or air:
+        needs.append([name for name, used in (("oven", oven), ("air_fryer", air)) if used])
+    if STEAM.search(text):
+        needs.append(["steamer"])
+    if MICROWAVE.search(text):
+        needs.append(["microwave"])
+    if BLENDER.search(text):
+        needs.append(["blender"])
+    return needs
+
+
+def flavor_tags(dish: Dish, role: str | None, methods: list[str]) -> list[str]:
+    title = dish.title.lower()
+    per_serving: Counter[str] = Counter()
+    names = set()
+    for line in dish.lines:
+        name = release_name(line.name)
+        names.add(name)
+        if line.grams:
+            per_serving[name] += line.grams / max(dish.servings, 1)
+    hot = sum(per_serving[n] for n in HOT) >= HOT_GRAMS or sum(per_serving[n] for n in HOT_POWDER) >= HOT_POWDER_GRAMS
+    tags = []
+    if len(names & AROMATICS) >= FRAGRANT_COUNT:
+        tags.append("fragrant")
+    if hot or SPICY_TITLE.search(title):
+        tags.append("spicy")
+    if role in NO_RICHNESS_ROLES or not dish.kcal:
+        return tags
+    fat_share = (dish.fat_g or 0) * 9 / dish.kcal
+    total = sum(line.grams for line in dish.lines if line.grams and counted(line))
+    coconut = sum(line.grams for line in dish.lines if line.grams and release_name(line.name) in COCONUT_BASE)
+    rich = fat_share >= RICH_FAT_SHARE or (dish.fat_g or 0) >= RICH_FAT_GRAMS
+    rich = rich or bool(total) and coconut / (total + coconut) >= COCONUT_SHARE
+    if rich:
+        tags.append("rich")
+    elif fat_share <= LIGHT_FAT_SHARE and dish.kcal <= LIGHT_KCAL and "deep_fry" not in methods:
+        tags.append("light")
+    return tags
+
+
+def rule_tags(dish: Dish) -> Tags:
+    tags = Tags()
+    led = dish_vegetable_led(dish)
+    sources = protein_sources(dish)
+    role, allowed = meal_role(dish, sources, led)
+    if role in SWEET_OR_CONDIMENT:
+        sources = []  # the eggs of a cake are not its main protein
+    methods = cooking_methods(dish)
+    decided = {
+        "meal_role": role,
+        "contains_staple": None if role is None else role in {"one_bowl", "staple"},
+        "protein_sources": sources,
+        "cooking_methods": methods,
+        "equipment": equipment(dish),
+        "flavor_tags": flavor_tags(dish, role, methods),
+    }
+    for name, value in decided.items():
+        tags.values[name] = value
+        if value is not None:
+            tags.methods[name] = "rule"
+    if role is None:
+        tags.open.append("meal_role")
+        tags.allowed_roles = allowed
+    if sources is None:
+        tags.open.append("protein_sources")
+    return tags
+
+
+# --- the catalog -------------------------------------------------------------------------------------------
+
+
+def release_dishes(directory: Path | None = None) -> list[Dish]:
+    """Every release recipe the importer loads, with its lines as the importer corrects them."""
+    directory = directory or release_dir()
+    corrections = json.loads((repository_root() / LINE_CORRECTIONS).read_text(encoding="utf-8"))["corrections"]
+    corrected = {(c["recipe_id"], c["original_text"]): c["ingredient"]["normalized_name"] for c in corrections}
+    dishes = []
+    with (directory / "recipes.jsonl").open(encoding="utf-8") as handle:
+        for record in map(json.loads, filter(str.strip, handle)):
+            steps = [step["text"].strip() for step in record["instructions"] if step["text"].strip()]
+            if len(record["ingredients"]) < 2 or not steps:
+                continue
+            lines = [
+                Line(
+                    corrected.get(
+                        (record["recipe_id"], line["original_text"]), line["canonical_ingredient_id"][4:].lower()
+                    ),
+                    float(round(line["grams"], 2)) or None,
+                    line["original_text"],
+                )
+                for line in record["ingredients"]
+            ]
+            nutrition = record["nutrition"]
+            dishes.append(
+                Dish(
+                    key=record["recipe_id"],
+                    title=record["title"],
+                    course=record["course"],
+                    cuisine=record["cuisine"],
+                    servings=int(record["servings"]),
+                    kcal=nutrition["energy_kcal"],
+                    fat_g=nutrition["fat_g"],
+                    sugar_g=nutrition["sugar_g"],
+                    carbohydrate_g=nutrition["carbohydrate_g"],
+                    lines=lines,
+                    steps="\n".join(steps),
+                )
+            )
+    return dishes
+
+
+def curated_dishes() -> list[Dish]:
+    data = repository_root() / "data"
+    catalog = load_catalog(data / "ingredients/ingredients.json", data / "recipes/recipes.json")
+    return [
+        Dish(
+            key=recipe.slug,
+            title=recipe.title,
+            course=recipe.meal_type,
+            cuisine=recipe.cuisine,
+            servings=recipe.servings,
+            kcal=recipe.nutrition.calories_kcal,
+            fat_g=recipe.nutrition.fat_g,
+            sugar_g=recipe.nutrition.sugar_g,
+            carbohydrate_g=recipe.nutrition.carbohydrate_g,
+            # Only gram lines are weighed, as `app.planning.vegetable_led.weighed` reads the curated catalog.
+            lines=[
+                Line(item.ingredient, item.quantity if item.unit == "g" else None, None) for item in recipe.ingredients
+            ],
+            steps="\n".join(recipe.steps),
+            curated=True,
+        )
+        for recipe in catalog.recipes
+    ]
+
+
+def catalog_ingredients() -> list[str]:
+    """Every ingredient `normalized_name` an import can create: release, curated and line-correction targets."""
+    root = repository_root()
+    names = {
+        line["ingredient_id"][4:].lower()
+        for line in map(
+            json.loads,
+            filter(str.strip, (release_dir() / "ingredients.jsonl").read_text(encoding="utf-8").splitlines()),
+        )
+    }
+    names |= {
+        item["normalized_name"]
+        for item in json.loads((root / "data/ingredients/ingredients.json").read_text(encoding="utf-8"))
+    }
+    corrections = json.loads((root / LINE_CORRECTIONS).read_text(encoding="utf-8"))["corrections"]
+    names |= {c["ingredient"]["normalized_name"] for c in corrections}
+    return sorted(names)
+
+
+def ingredient_entry(name: str, basics: set[str]) -> dict:
+    groups = food_groups()
+    release, group, _ = groups.get(name, (name, None, None))
+    perishable = (name in PERISHABLE or release in PERISHABLE) and not PRESERVED.search(name)
+    return {
+        "food_group": group,
+        "perishable": perishable,
+        "basic_seasoning": name in basics,
+        "methods": {
+            "food_group": "release" if release == name and group else ("hierarchy" if group else "none"),
+            "perishable": "rule",
+            "basic_seasoning": "basic-seasonings-v1",
+        },
+    }
+
+
+# --- the language model ------------------------------------------------------------------------------------
+
+# USD per million tokens, an upper estimate for gpt-5.4-mini; the cap stops the run on this estimate.
+INPUT_USD_PER_M = 0.75
+OUTPUT_USD_PER_M = 4.5
+BATCH_SIZE = 20
+PROMPT = """You tag recipes for a Singapore household meal planner. For each recipe, decide only the fields listed in
+"decide". Use only the allowed values.
+
+meal_role: what the dish is in a meal.
+- protein_main: a dish built on meat, fish, seafood, tofu, egg or legumes, eaten with rice or another staple.
+- one_bowl: a complete dish that carries its own staple (rice, noodles, pasta, bread), e.g. fried rice, laksa, a
+  sandwich, a pasta dish.
+- staple: the meal's starch on its own (rice, noodles, bread, flatbread, potatoes as a side).
+- vegetable: a vegetable side dish. soup: a soup served beside the meal. breakfast: breakfast-only food.
+- snack, dessert, sauce, drink: never a lunch or dinner dish.
+protein_sources: the main protein sources of the dish, from the allowed list; [] when it has no main protein.
+Treat other poultry as chicken, goose as duck, goat or mutton as lamb, veal as beef; game meat goes to the
+closest of these.
+
+Recipes (JSON):
+{recipes}
+"""
+
+
+def _llm_payload(dish: Dish, tags: Tags) -> dict:
+    return {
+        "key": dish.key,
+        "title": dish.title,
+        "course": dish.course,
+        "cuisine": dish.cuisine,
+        "ingredients": [f"{line.name} {round(line.grams) if line.grams else '?'} g" for line in dish.lines][:25],
+        "steps": dish.steps[:500],
+        "decide": tags.open,
+        "allowed_meal_roles": list(tags.allowed_roles) if "meal_role" in tags.open else [],
+    }
+
+
+def ask_model(open_dishes: list[tuple[Dish, Tags]], max_usd: float, log) -> dict:
+    """The model's answers by recipe key, batched, stopping once the estimated spend would pass `max_usd`."""
+    from langchain_openai import ChatOpenAI
+    from pydantic import BaseModel
+
+    from app.core.config import get_settings
+
+    settings = get_settings()
+    usage = {"calls": 0, "input_tokens": 0, "output_tokens": 0, "usd": 0.0, "stopped": False, "model": None}
+    if settings.openai_api_key is None:
+        log("No OpenAI key configured; the open fields stay null.")
+        return {"answers": {}, "usage": usage}
+
+    class Answer(BaseModel):
+        key: str
+        meal_role: MealRole | None
+        protein_sources: list[ProteinSource] | None
+
+    class Answers(BaseModel):
+        recipes: list[Answer]
+
+    usage["model"] = settings.openai_model
+    model = ChatOpenAI(
+        api_key=settings.openai_api_key.get_secret_value(), model=settings.openai_model, temperature=0, timeout=120
+    ).with_structured_output(Answers, method="json_schema", include_raw=True)
+    answers: dict[str, dict] = {}
+    for start in range(0, len(open_dishes), BATCH_SIZE):
+        batch = open_dishes[start : start + BATCH_SIZE]
+        if usage["calls"]:
+            per_call = usage["usd"] / usage["calls"]
+            if usage["usd"] + per_call > max_usd:
+                usage["stopped"] = True
+                log(f"Spend cap reached at an estimated US${usage['usd']:.3f}; {len(open_dishes) - start} left null.")
+                break
+        payload = json.dumps([_llm_payload(dish, tags) for dish, tags in batch], ensure_ascii=False)
+        result = model.invoke(PROMPT.format(recipes=payload))
+        meta = getattr(result["raw"], "usage_metadata", None) or {}
+        usage["calls"] += 1
+        usage["input_tokens"] += meta.get("input_tokens", 0)
+        usage["output_tokens"] += meta.get("output_tokens", 0)
+        usage["usd"] = (usage["input_tokens"] * INPUT_USD_PER_M + usage["output_tokens"] * OUTPUT_USD_PER_M) / 1_000_000
+        log(
+            f"model batch {usage['calls']}: {meta.get('input_tokens', 0)} in, {meta.get('output_tokens', 0)} out,"
+            f" US${usage['usd']:.4f} so far"
+        )
+        parsed = result.get("parsed")
+        for answer in parsed.recipes if parsed else []:
+            answers[answer.key] = answer.model_dump()
+    return {"answers": answers, "usage": usage}
+
+
+def merge_answer(tags: Tags, answer: dict) -> None:
+    """Take the model's open fields when they are allowed; anything else stays null."""
+    role = answer.get("meal_role")
+    if "meal_role" in tags.open and role in tags.allowed_roles:
+        tags.values["meal_role"] = role
+        tags.values["contains_staple"] = role in {"one_bowl", "staple"}
+        tags.methods["meal_role"] = tags.methods["contains_staple"] = "llm"
+    sources = answer.get("protein_sources")
+    if "protein_sources" in tags.open and sources is not None and set(sources) <= set(PROTEIN_SOURCES):
+        tags.values["protein_sources"] = [source for source in PROTEIN_SOURCES if source in sources]
+        tags.methods["protein_sources"] = "llm"
+
+
+# --- writing -----------------------------------------------------------------------------------------------
+
+
+def recipe_entry(tags: Tags) -> dict:
+    entry = {name: tags.values[name] for name in tags.values}
+    entry["estimated"] = {
+        name: {"method": method, "batch": RULE_BATCH if method == "rule" else LLM_BATCH, "reviewed": False}
+        for name, method in tags.methods.items()
+    }
+    return entry
+
+
+def write_keyed(path: Path, header: dict, key: str, entries: dict[str, dict]) -> None:
+    """One entry per line, so a change to one recipe is a one-line diff."""
+    body = ",\n".join(
+        f"    {json.dumps(name)}: {json.dumps(entry, ensure_ascii=False, sort_keys=True)}"
+        for name, entry in entries.items()
+    )
+    head = json.dumps(header, indent=2, ensure_ascii=False)[:-2]
+    path.write_text(f"{head},\n  {json.dumps(key)}: {{\n{body}\n  }}\n}}\n", encoding="utf-8", newline="\n")
+
+
+NO_USAGE = {"calls": 0, "input_tokens": 0, "output_tokens": 0, "usd": 0.0, "asked": 0, "stopped": False, "model": None}
+
+
+def previous_file() -> dict:
+    path = repository_root() / RECIPE_TAGS
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def previous_answers(previous: dict) -> dict[str, dict]:
+    """The model's earlier decisions, so a re-run asks only for what is still open."""
+    kept = {}
+    for key, entry in previous.get("recipes", {}).items():
+        llm = [name for name, estimate in entry.get("estimated", {}).items() if estimate["method"] == "llm"]
+        if llm:
+            kept[key] = {name: entry[name] for name in llm}
+    return kept
+
+
+def build(use_llm: bool, max_usd: float, log=print) -> dict:
+    dishes = curated_dishes() + release_dishes()
+    tagged = [(dish, rule_tags(dish)) for dish in dishes]
+    previous = previous_file()
+    earlier = previous_answers(previous)
+    for dish, tags in tagged:
+        if dish.key in earlier and tags.open:
+            merge_answer(tags, earlier[dish.key])
+    still_open = [(dish, tags) for dish, tags in tagged if any(tags.values[name] is None for name in tags.open)]
+    # The model's spend over every run, kept in the tag file's header.
+    usage = dict(NO_USAGE) | previous.get("llm_usage", {})
+    if use_llm and still_open:
+        result = ask_model(still_open, max_usd, log)
+        run = result["usage"]
+        for name in ("calls", "input_tokens", "output_tokens", "usd"):
+            usage[name] += run[name]
+        usage.update(
+            asked=usage["asked"] + len(still_open), stopped=run["stopped"], model=run["model"] or usage["model"]
+        )
+        for dish, tags in still_open:
+            if dish.key in result["answers"]:
+                merge_answer(tags, result["answers"][dish.key])
+    usage["usd"] = round(usage["usd"], 4)
+    return {"tagged": tagged, "usage": usage, "open": len(still_open)}
+
+
+def ingredient_entries() -> dict[str, dict]:
+    basics = {
+        item["normalized_name"]
+        for item in json.loads((repository_root() / BASIC_SEASONINGS).read_text(encoding="utf-8"))["items"]
+    }
+    return {name: ingredient_entry(name, basics) for name in catalog_ingredients()}
+
+
+def sample_packet(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict]) -> dict:
+    """At least 100 recipes stratified by meal role and how it was decided, plus 50 ingredients."""
+    rng = random.Random(SEED)
+    strata: dict[tuple, list] = {}
+    for dish, tags in tagged:
+        strata.setdefault((str(tags.values["meal_role"]), tags.methods.get("meal_role", "open")), []).append(
+            (dish, tags)
+        )
+    total = len(tagged)
+    picked = []
+    for stratum in sorted(strata):
+        members = strata[stratum]
+        count = min(len(members), max(4, round(110 * len(members) / total)))
+        picked.extend(rng.sample(members, count))
+    recipes = [
+        {
+            "key": dish.key,
+            "title": dish.title,
+            "course": dish.course,
+            "cuisine": dish.cuisine,
+            "ingredients": [line.text or line.name for line in dish.lines],
+            "tags": {name: tags.values[name] for name in tags.values},
+            "methods": dict(tags.methods),
+            "verdict": {name: None for name in tags.values} | {"note": ""},
+        }
+        for dish, tags in picked
+    ]
+    perishable = sorted(name for name, entry in ingredients.items() if entry["perishable"])
+    basic = sorted(name for name, entry in ingredients.items() if entry["basic_seasoning"])
+    rest = sorted(set(ingredients) - set(perishable) - set(basic))
+    others = rng.sample(rest, max(0, 50 - len(perishable) - len(basic)) + 10)
+    return {
+        "version": f"{VERSION}-sample",
+        "seed": SEED,
+        "how_to_review": "data-engineering/README.md, section 'Reviewing recipe and ingredient tags'",
+        "recipes": recipes,
+        "ingredients": [
+            {
+                "normalized_name": name,
+                "tags": {key: ingredients[name][key] for key in ("food_group", "perishable", "basic_seasoning")},
+                "why": "every perishable" if name in perishable else ("every basic" if name in basic else "random"),
+                "verdict": {"perishable": None, "basic_seasoning": None, "note": ""},
+            }
+            for name in perishable + basic + sorted(others)
+        ],
+    }
+
+
+def report(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict], usage: dict) -> str:
+    fields = ("meal_role", "contains_staple", "protein_sources", "cooking_methods", "equipment", "flavor_tags")
+    lines = [
+        "# Recipe and ingredient tags v1: coverage",
+        "",
+        "Generated by `python -m app.data.recipe_tags` (rules in `backend/app/data/recipe_tags.py`); do not edit.",
+        f"Recipes: {len(tagged)} (release v2.1 recipes the importer loads, and the curated catalog). "
+        f"Ingredients: {len(ingredients)}.",
+        "",
+        "## How each recipe field was decided",
+        "",
+        "| Field | rule | llm | open (null) |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    for name in fields:
+        methods = Counter(tags.methods.get(name, "open") for _, tags in tagged)
+        lines.append(f"| `{name}` | {methods['rule']} | {methods['llm']} | {methods['open']} |")
+    lines += ["", "## Meal role by method", "", "| Meal role | rule | llm |", "| --- | ---: | ---: |"]
+    roles = Counter((tags.values["meal_role"], tags.methods.get("meal_role", "open")) for _, tags in tagged)
+    for role in (*MEAL_ROLES, None):
+        lines.append(f"| {role or 'open (null)'} | {roles[(role, 'rule')]} | {roles[(role, 'llm')]} |")
+    value_counts = {
+        "protein_sources": PROTEIN_SOURCES,
+        "cooking_methods": get_args(CookingMethod),
+        "flavor_tags": get_args(FlavorTag),
+    }
+    for name, values in value_counts.items():
+        counts = Counter(value for _, tags in tagged for value in tags.values[name] or [])
+        empty = sum(1 for _, tags in tagged if tags.values[name] == [])
+        lines += ["", f"## `{name}` values (recipes carrying each)", "", "| Value | Recipes |", "| --- | ---: |"]
+        lines += [f"| {value} | {counts[value]} |" for value in values]
+        lines.append(f"| none (`[]`) | {empty} |")
+    staple = Counter(tags.values["contains_staple"] for _, tags in tagged)
+    groups = Counter(str(tuple(group)) for _, tags in tagged for group in tags.values["equipment"])
+    lines += ["", "## `contains_staple` and `equipment`", "", "| Value | Recipes |", "| --- | ---: |"]
+    lines += [f"| contains_staple {value} | {staple[value]} |" for value in (True, False, None)]
+    lines += [f"| equipment {group} | {count} |" for group, count in sorted(groups.items())]
+    lines.append(f"| no equipment (`[]`) | {sum(1 for _, t in tagged if t.values['equipment'] == [])} |")
+    perishable = sorted(name for name, entry in ingredients.items() if entry["perishable"])
+    origin = Counter(entry["methods"]["food_group"] for entry in ingredients.values())
+    lines += [
+        "",
+        "## Ingredients",
+        "",
+        "| Field | Value | Count |",
+        "| --- | --- | ---: |",
+        f"| `food_group` | from the release | {origin['release']} |",
+        f"| `food_group` | from the release ingredient it is the same as (hierarchy) | {origin['hierarchy']} |",
+        f"| `food_group` | none (null) | {origin['none']} |",
+        f"| `perishable` | true (rule; every one is confirmed by the owner) | {len(perishable)} |",
+        f"| `perishable` | false | {len(ingredients) - len(perishable)} |",
+        f"| `basic_seasoning` | true | {sum(1 for e in ingredients.values() if e['basic_seasoning'])} |",
+        "",
+        f"Perishable: {', '.join(perishable)}.",
+        "",
+        "## Language model",
+        "",
+        f"Recipe questions sent to the model over all runs: {usage['asked']} (recipes with a field the rules left "
+        f"open). Model: {usage['model'] or 'not called'}; calls: {usage['calls']}; "
+        f"input tokens: {usage['input_tokens']}; "
+        f"output tokens: {usage['output_tokens']}; estimated cost: US${usage['usd']:.3f} at US${INPUT_USD_PER_M} "
+        f"and US${OUTPUT_USD_PER_M} per million input and output tokens; spend cap hit in the last run: "
+        f"{usage['stopped']}. "
+        "Earlier model answers are kept in the tag file and reused, so a re-run asks only for what is still open.",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Tag every catalog recipe and ingredient (recipe-tags-v1).")
+    parser.add_argument("--llm", action="store_true", help="ask the configured OpenAI model for the open fields")
+    parser.add_argument(
+        "--max-usd", type=float, default=5.0, help="estimated spend at which the model is no longer asked"
+    )
+    args = parser.parse_args()
+
+    root = repository_root()
+    result = build(args.llm, args.max_usd)
+    tagged = result["tagged"]
+    write_keyed(
+        root / RECIPE_TAGS,
+        {
+            "version": VERSION,
+            "generated_by": "python -m app.data.recipe_tags",
+            "rules": "backend/app/data/recipe_tags.py",
+            "key": "release external_id (RCP2_...) or curated slug",
+            "note": "estimated says how each field was decided (rule or llm) and in which batch; null is untagged.",
+            "llm_usage": result["usage"],
+        },
+        "recipes",
+        {dish.key: recipe_entry(tags) for dish, tags in tagged},
+    )
+    ingredients = ingredient_entries()
+    write_keyed(
+        root / INGREDIENT_TAGS,
+        {
+            "version": INGREDIENT_VERSION,
+            "generated_by": "python -m app.data.recipe_tags",
+            "rules": "backend/app/data/recipe_tags.py",
+            "key": "ingredient normalized_name",
+            "note": "perishable is ADR-0068's short-lived class; every true value needs the owner's confirmation.",
+        },
+        "ingredients",
+        ingredients,
+    )
+    sample = root / SAMPLE
+    if sample.exists() and any(
+        value not in (None, "")
+        for item in json.loads(sample.read_text(encoding="utf-8"))["recipes"]
+        for value in item["verdict"].values()
+    ):
+        print(f"{SAMPLE} has verdicts; left as it is.")
+    else:
+        sample.write_text(
+            json.dumps(sample_packet(tagged, ingredients), indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+    (root / REPORT).write_text(report(tagged, ingredients, result["usage"]), encoding="utf-8", newline="\n")
+    open_count = sum(1 for _, tags in tagged if any(value is None for value in tags.values.values()))
+    print(f"Tagged {len(tagged)} recipes and {len(ingredients)} ingredients; {open_count} recipes keep a null field.")
+
+
+if __name__ == "__main__":
+    main()
