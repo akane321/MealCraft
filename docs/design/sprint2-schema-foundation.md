@@ -12,6 +12,27 @@ writes them is an **accepted target**: nothing in the planner, the API or the
 importer uses them yet. A feature PR that starts using a column also wires its
 API field, its behaviour and any regenerated evaluation report.
 
+**Wired so far.** Layer 08 PR-1 (household member fields and rules) wires, with
+their behaviour and the [API Contracts](../api-contracts.md):
+
+- the member keys `age_band`, `sex`, `goal`, `default_present` and the decimal
+  or null `servings_per_meal` (HPB defaults from
+  `data/nutrition/hpb-reference-v1.json`);
+- `household_profile_versions.presence_rules`, `cooking_time_rules`,
+  `missing_basics` and `nutrition_limits` (sodium only);
+- `meal_plan_entries.servings`, written for plans whose request carries a
+  household block and NULL otherwise;
+- the types `AgeBand`, `Sex`, `PersonalGoal`, `Weekday`, `PresenceRule`,
+  `CookingTimeRule` and `NutritionLimit`, with the new `HouseholdPlanning`.
+
+The basic seasonings are a data file, `data/ingredients/basic-seasonings-v1.json`;
+`ingredients.basic_seasoning` stays unwritten until the first tagging PR copies
+the file into it with importer version `6`. Still unwired: `activity`
+(`ActivityLevel`; only HPB's moderate column is researched),
+`self_only_allergens`, `missing_equipment` and every `recipes` tag column,
+`FlavorBoost` and `PlanningPreferences`, and the other columns below. The
+evaluation reports did not change: their requests carry no household block.
+
 ## Rules of this foundation
 
 - **Nothing reads or writes the new columns.** The planner, the importer and
@@ -35,11 +56,11 @@ API field, its behaviour and any regenerated evaluation report.
 
 | Column | Type | Content | NULL means |
 | --- | --- | --- | --- |
-| `presence_rules` | JSON list of `PresenceRule` | who is away or added at which weekdays and meals | every member at every meal |
-| `cooking_time_rules` | JSON list of `CookingTimeRule` | cooking-time limits per weekday and meal | only `max_cooking_time_minutes` applies |
+| `presence_rules` (wired) | JSON list of `PresenceRule` | who is away or added at which weekdays and meals | every member at every meal |
+| `cooking_time_rules` (wired) | JSON list of `CookingTimeRule` | cooking-time limits per weekday and meal | only `max_cooking_time_minutes` applies |
 | `missing_equipment` | JSON list of `Equipment` | equipment the household says it lacks | all equipment is at home |
-| `missing_basics` | JSON list of ingredient `normalized_name` | basic seasonings the household says it has run out of | every basic seasoning is at home |
-| `nutrition_limits` | JSON list of `NutritionLimit` | upper limits the household switched on | only `max_sodium_mg_per_meal` applies |
+| `missing_basics` (wired) | JSON list of ingredient `normalized_name` | basic seasonings the household says it has run out of | every basic seasoning is at home |
+| `nutrition_limits` (wired) | JSON list of `NutritionLimit` | upper limits the household switched on | only `max_sodium_mg_per_meal` applies |
 
 The household-wide union columns (`allergens`, `excluded_ingredients`,
 `dietary_preferences`, `planning_household_size`) stay and are still written,
@@ -47,7 +68,8 @@ for compatibility. Shopping days are not stored: the plan's first day and day 8
 are derived.
 
 **Member JSON keys** (no migration needed; a feature PR adds them to
-`HouseholdMemberInput`). Their names are fixed here:
+`HouseholdMemberInput`; layer 08 PR-1 wired all but `activity` and
+`self_only_allergens`). Their names are fixed here:
 
 | Key | Type | Default | Meaning |
 | --- | --- | --- | --- |
@@ -65,7 +87,7 @@ are derived.
 | --- | --- | --- |
 | `meal_plans_day_count_valid` (was `meal_plans_day_count_seven`) | `day_count = 7` | `day_count BETWEEN 1 AND 14` |
 | `meal_plan_entries_day_index_valid` | `day_index BETWEEN 1 AND 7` | `day_index BETWEEN 1 AND 14` |
-| `meal_plan_entries.servings` | none | `NUMERIC(6,3)`, `> 0` (`meal_plan_entries_servings_positive`) |
+| `meal_plan_entries.servings` (wired) | none | `NUMERIC(6,3)`, `> 0` (`meal_plan_entries_servings_positive`) |
 
 `servings` is how many servings the dish is cooked for: the sum of the servings
 of the present members who can eat it. NULL is the existing rule (the plan's
