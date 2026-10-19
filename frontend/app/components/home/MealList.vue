@@ -12,7 +12,8 @@ const next = computed(() => nextMeal(props.days, todayIsoDate()));
 // A dinner-only week reads as before, one row a day; with several meals each day gets a heading.
 const severalMeals = computed(() => week.value.some(day => day.meals.length > 1));
 // The overview line of a day of several meals names each meal's main (in meal order), as the whole day of a full
-// structure cannot fit one line; its tooltip lists every dish.
+// structure cannot fit one line; each main is shortened in proportion, so the dinner's stays in view at 1280. Its
+// tooltip lists every dish.
 const dayText = (day: { meals: PlannedMeal[] }) => day.meals.map(meal => `${MEAL_LABEL[meal.mealType]}: ${meal.dishes.map(dish => dish.recipe.title).join(", ")}`).join("; ");
 
 const STATE: Record<string, string> = { completed: "Cooked", skipped: "Skipped", partial: "Part cooked" };
@@ -44,7 +45,10 @@ const ACTIONS = [
     <ol class="overview" aria-label="Week overview">
       <li v-for="day in week" :key="day.dayIndex">
         <span>{{ formatPlanDate(day.date, { weekday: "short" }) }}</span>
-        <span class="overview-dishes" :title="dayText(day)">{{ day.meals.length > 1 ? day.meals.map(meal => meal.dishes[0]!.recipe.title).join(" · ") : dayText(day) }}</span>
+        <span v-if="day.meals.length > 1" class="overview-dishes overview-mains" :title="dayText(day)">
+          <span v-for="meal in day.meals" :key="meal.key">{{ meal.dishes[0]!.recipe.title }}</span>
+        </span>
+        <span v-else class="overview-dishes" :title="dayText(day)">{{ dayText(day) }}</span>
       </li>
     </ol>
     <ol class="days">
@@ -103,6 +107,10 @@ const ACTIONS = [
 .overview li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; font-size: 12px; line-height: 22px; }
 .overview li > span:first-child { font-weight: 800; }
 .overview-dishes { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--c-muted); }
+/* Each meal's main shrinks in proportion to its length, so the last (dinner) never falls off the line. */
+.overview-mains { display: flex; min-width: 0; }
+.overview-mains > span { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.overview-mains > span + span::before { content: " · "; white-space: pre; }
 .days { list-style: none; margin: 0; padding: 0 16px; }
 .day-head { margin: 0; padding: 12px 0 2px; }
 .row { display: grid; grid-template-columns: 44px 32px minmax(0, 1fr); gap: 10px; align-items: start; min-height: 52px; padding: 6px 0; border-bottom: 1px solid var(--c-line-soft); }

@@ -120,8 +120,9 @@ protein main, a vegetable dish and soup; 3-4: two mains; 5-6: two vegetable
 dishes; 7+: three mains), each lunch and dinner with a staple; the planner
 (`household_slots.slot_people`), the profile editor and the user guide all
 count the members home, and portions only size the dishes. Roles of the full
-default admit recipes by their meal-role tag (`meal_roles`); every structured lunch and dinner holds the hard real-meal rules
-in the search and the validator (filling core, no non-meal dish, distinct
+default admit recipes by their meal-role tag (`meal_roles`); every structured
+lunch and dinner holds the hard real-meal rules in the search and the
+validator (filling core, no non-meal dish, distinct
 protein sources, an energy floor of 25% of the day per serving, at most one dish
 moved from the default) and soft cuisine-group, deep-fry and staple-kind terms
 (`data/planning/meal-structure-v1.json`, `data/recipes/cuisine-groups.json`).
