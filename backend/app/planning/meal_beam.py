@@ -188,7 +188,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         costs: dict[tuple, float] = {}
         meals = []
         spread: dict[tuple, int] = {}
-        for combination in product(*per_role):
+        for combination in core_combinations(per_role, roles, by_id, slot.meal_type if structured else None):
             dishes = tuple(dish for dish in combination if dish is not None)
             if not dishes:
                 continue
@@ -712,6 +712,31 @@ def capped_role_limits(problem, roles, per_role_limit: int, max_combinations: in
             break
         limits[spare] -= 1
     return limits
+
+
+def core_combinations(per_role, roles, recipes, meal_type):
+    """The combinations of each role's options (`product`), less those whose filling core `real_meal_issues` refuses
+    whatever else they hold: a structured lunch or dinner (`meal_type`; None for any other meal) has a protein main
+    beside its staple, or a dish that carries its staple and no second one (ADR-0070 section 3). About 60% of a
+    six-dish dinner's combinations fail there; skipping them leaves the same meals to `meal_permitted`, which still
+    checks every one (the order of the meals found is set by their sort)."""
+    core = core_role(roles) if meal_type in ("lunch", "dinner") else None
+    if core is None:
+        yield from product(*per_role)
+        return
+    at = roles.index(core)
+    staple = next((i for i, role in enumerate(roles) if role.role_id == "staple"), None)
+    for dish in per_role[at]:
+        if dish is None:
+            continue
+        recipe = recipes[dish[1]]
+        bowl = fills_staple(recipe)
+        if not bowl and (staple is None or recipe.meal_role != "protein_main"):
+            continue
+        options = [[dish] if i == at else choices for i, choices in enumerate(per_role)]
+        if staple is not None:
+            options[staple] = [choice for choice in per_role[staple] if (choice is None) == bowl]
+        yield from product(*options)
 
 
 def meal_permitted(problem, slot, dishes, recipes, shares=None) -> bool:

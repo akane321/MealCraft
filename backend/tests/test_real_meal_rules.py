@@ -258,3 +258,31 @@ def test_the_default_is_the_full_structure_and_dinner_grows_with_the_people():
         "soup": 1,
         "staple": 1,
     }
+
+
+def test_core_combinations_skip_only_meals_whose_filling_core_fails():
+    """The meal beam's speed-up leaves out exactly the combinations `real_meal_issues` refuses for their core."""
+    from itertools import product
+
+    from app.planning.meal_beam import core_combinations
+    from app.planning.meal_composition import real_meal_issues
+
+    built = problem()
+    slot = built.slots[0]
+    by_id = {r.recipe_id: r for r in built.recipes}
+    roles = slot.composition
+    options = {
+        "main": ["chicken", "duck", "bowl"],
+        "main-2": ["chicken-two", "duck", None],
+        "vegetable": ["greens", "slaw", None],
+        "soup": ["broth", None],
+        "staple": ["rice", None],
+    }
+    per_role = [[None if o is None else (role.role_id, o) for o in options[role.role_id]] for role in roles]
+    kept = set(core_combinations(per_role, roles, by_id, "dinner"))
+    for combination in product(*per_role):
+        dishes = tuple(d for d in combination if d is not None)
+        core_fails = any(code == "meal_filling_core" for code, *_ in real_meal_issues(slot, dishes, by_id, None))
+        assert (combination in kept) is not core_fails, combination
+    # A breakfast, or any meal with no meal-role core, keeps every combination.
+    assert set(core_combinations(per_role, roles, by_id, None)) == set(product(*per_role))
