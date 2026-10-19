@@ -63,6 +63,15 @@ DOUGH_ONLY_INGREDIENTS = frozenset(
 
 BROTH = re.compile(r"(?:broth|stock|bouillon)$")
 
+# Owner-reviewed source conflict (changed-case review 24). Remove only after the recipe is corrected and reviewed.
+REVIEWED_CONFLICTS = {
+    "RCP2_0DA06DF48EDB": "ingredient/step conflict: turkey or vegan sausage listed, but steps cook pork",
+}
+
+
+def reviewed_source_conflict(recipe_key: str | None) -> str | None:
+    return REVIEWED_CONFLICTS.get(recipe_key)
+
 
 def missing_named_protein(title: str, lines: list[tuple[str, str | None]]) -> str | None:
     """A title is a completeness check, never evidence that an absent ingredient exists."""
@@ -86,6 +95,8 @@ def incomplete(recipe) -> str | None:
     """Why a release recipe cannot be trusted as a planned dinner, or None."""
     if recipe.release_version is None:
         return None
+    if conflict := reviewed_source_conflict(getattr(recipe, "external_id", None)):
+        return conflict
     title = recipe.title.lower()
     if recipe.course in {"main", "side", "soup"} and WRAPPER_TITLE.search(title):
         ingredients = [

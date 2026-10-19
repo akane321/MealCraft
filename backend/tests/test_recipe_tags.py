@@ -15,6 +15,9 @@ from app.core.paths import repository_root
 from app.data import release_v2, tag_files
 from app.data.catalog import import_catalog, load_catalog
 from app.data.recipe_tags import (
+    ONE_BOWL_SHARE,
+    RICE_DISH,
+    RICE_GRAINS,
     Dish,
     Line,
     catalog_ingredients,
@@ -25,6 +28,7 @@ from app.data.recipe_tags import (
     merge_answer,
     release_dishes,
     rule_tags,
+    staple_share,
 )
 from app.data.release_v2 import IMPORTER_VERSION, import_release_v2, release_digest, release_dir
 from app.db.base import Base
@@ -245,6 +249,41 @@ def test_cooked_rice_is_not_multiplied_by_the_dry_rice_yield_again() -> None:
     assert staple_share(cooked) == pytest.approx(250 / 350)
 
 
+def test_rice_meals_filed_as_sides_keep_their_real_staple_without_lowering_thresholds() -> None:
+    spanish = dish("Spanish Rice", "side", [("rice", 316), ("bell_pepper", 120), ("tomato", 123), ("onion", 110)])
+    spanish.lines[0].text = "2 c. cooked rice"
+    assert rule_tags(spanish).values["meal_role"] == "staple"
+    pumpkin = dish("Pumpkin Fried Rice", "side", [("rice", 316), ("pumpkin", 245), ("egg", 100), ("onion", 55)])
+    pumpkin.lines[0].text = "2 cups Cooked White Rice"
+    found = rule_tags(pumpkin).values
+    assert found["meal_role"] == "one_bowl" and found["contains_staple"] is True
+    # A title cannot supply rice that is absent or present only as a tiny garnish.
+    absent = tags("Cauliflower Rice", "side", [("cauliflower", 500)])
+    assert absent["contains_staple"] is False
+    tiny = dish("Vegetables With Rice", "side", [("rice", 10), ("carrot", 500)])
+    tiny.lines[0].text = "10 g cooked rice"
+    assert rule_tags(tiny).values["meal_role"] != "staple"
+
+
+def test_imitation_crab_is_not_reinterpreted_as_real_crab_by_a_word_match() -> None:
+    imitation = dish("Crab Salad", "salad", [("imitation_crab", 227), ("tomato", 246)])
+    imitation.lines[0].text = "8 oz. imitation crab meat, chunked"
+    assert rule_tags(imitation).values["protein_sources"] == ["fish"]
+    real = dish("Crab Salad", "salad", [("crab", 227), ("tomato", 246)])
+    real.lines[0].text = "8 oz. fresh crab meat"
+    assert rule_tags(real).values["protein_sources"] == ["shellfish"]
+
+
+def test_owner_reviewed_source_conflict_is_unknown_without_erasing_the_known_soup_role() -> None:
+    soup = dish("Korean Fusion Butternut Squash Soup", "soup", [("sausage", 255), ("butternut_squash", 800)])
+    soup.key = "RCP2_0DA06DF48EDB"
+    soup.lines[0].text = "3 Italian sausages (I use Turkey, can substitute vegan alternative)"
+    found = rule_tags(soup)
+    assert found.values["meal_role"] == "soup" and found.values["contains_staple"] is False
+    assert found.values["protein_sources"] is None and found.open == []
+    assert found.incomplete_reason.startswith("ingredient/step conflict")
+
+
 def test_rule_regeneration_keeps_the_unreviewed_model_batch_frozen(monkeypatch) -> None:
     from app.data import recipe_tags
 
@@ -388,7 +427,15 @@ def test_the_vegetable_role_agrees_with_the_planners_vegetable_led_rule() -> Non
         for key, item in dishes().items()
         if item.course == "side" and dish_vegetable_led(item) and not component(item.title, item.course)
     ]
-    assert sides and all(entries[key]["meal_role"] == "vegetable" for key in sides)
+    assert sides and all(
+        entries[key]["meal_role"] == "vegetable"
+        or (
+            entries[key]["meal_role"] in {"staple", "one_bowl"}
+            and RICE_DISH.search(dishes()[key].title.lower())
+            and staple_share(dishes()[key], RICE_GRAINS) >= ONE_BOWL_SHARE
+        )
+        for key in sides
+    )
 
 
 def test_the_tag_files_are_current_with_the_rules() -> None:

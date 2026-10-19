@@ -7,9 +7,9 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Field | rule | llm | open (null) |
 | --- | ---: | ---: | ---: |
-| `meal_role` | 8511 | 369 | 117 |
-| `contains_staple` | 8511 | 369 | 117 |
-| `protein_sources` | 8813 | 77 | 107 |
+| `meal_role` | 8519 | 369 | 109 |
+| `contains_staple` | 8519 | 369 | 109 |
+| `protein_sources` | 8812 | 77 | 108 |
 | `cooking_methods` | 8997 | 0 | 0 |
 | `equipment` | 8997 | 0 | 0 |
 | `flavor_tags` | 8997 | 0 | 0 |
@@ -19,10 +19,10 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 | Meal role | rule | llm |
 | --- | ---: | ---: |
 | protein_main | 3621 | 27 |
-| vegetable | 567 | 1 |
+| vegetable | 560 | 1 |
 | soup | 213 | 14 |
-| staple | 577 | 107 |
-| one_bowl | 1443 | 93 |
+| staple | 564 | 107 |
+| one_bowl | 1471 | 93 |
 | breakfast | 390 | 13 |
 | salad | 484 | 0 |
 | snack | 240 | 90 |
@@ -35,13 +35,13 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Value | Recipes |
 | --- | ---: |
-| chicken | 2155 |
+| chicken | 2154 |
 | duck | 4 |
 | pork | 1226 |
 | beef | 1276 |
 | lamb | 33 |
-| fish | 227 |
-| shellfish | 484 |
+| fish | 232 |
+| shellfish | 479 |
 | soy | 141 |
 | egg | 1050 |
 | legume | 215 |
@@ -76,9 +76,9 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Value | Recipes |
 | --- | ---: |
-| contains_staple True | 2220 |
-| contains_staple False | 6660 |
-| contains_staple None | 117 |
+| contains_staple True | 2235 |
+| contains_staple False | 6653 |
+| contains_staple None | 109 |
 | equipment ('blender',) | 532 |
 | equipment ('microwave',) | 218 |
 | equipment ('oven',) | 2921 |
@@ -96,6 +96,7 @@ A meat-bearing title with no matching ingredient line is incomplete, not a prote
 | RCP2_01FECEF74FBA | Mutton Biryani | named mutton but lists none |
 | RCP2_0447589B2FD3 | Chicken Curry | named chicken but lists none |
 | RCP2_0ACA3701E911 | Cilantro Thai Grilled Chicken (Serves 4) | named chicken but lists none |
+| RCP2_0DA06DF48EDB | Korean Fusion Butternut Squash Soup | ingredient/step conflict: turkey or vegan sausage listed, but steps cook pork |
 | RCP2_1A6624DD03C8 | Tofu Teriyaki Steak | named steak but lists none |
 | RCP2_2473ECA0B2C4 | Chicken Teriyaki | named chicken but lists none |
 | RCP2_28626CFF47A0 | Beef Carnitas Tacos | named beef but lists none |

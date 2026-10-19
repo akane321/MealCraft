@@ -134,12 +134,80 @@ def compare_default(base: str) -> None:
     (folder / "rule-change-comparison.md").write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
 
+def verify_owner_review() -> dict:
+    """Check the applied values without rewriting the owner's original rule-output snapshot."""
+    review_bytes = OUT.with_suffix(".json").read_bytes()
+    packet = json.loads(review_bytes)
+    assert packet["owner_confirmed"] is True, "Owner review is not complete."
+    records = packet["records"]
+    assert len(records) == len({row["key"] for row in records}) == packet["sample_count"]
+    current_bytes = (ROOT / RECIPE_TAGS).read_bytes()
+    current = json.loads(current_bytes)["recipes"]
+    checked = []
+    for row in records:
+        corrected = row.get("corrected_values", {})
+        rejected = {field for field in row["changed_fields"] if row["verdict"][field] is False}
+        assert set(corrected) == rejected, f"Missing or excessive owner corrections: {row['key']}"
+        expected = {}
+        for field in row["changed_fields"]:
+            assert type(row["verdict"][field]) is bool, f"Unreviewed field: {row['key']} / {field}"
+            expected[field] = corrected[field] if field in corrected else row["after"][field]
+            assert current[row["key"]][field] == expected[field], f"Not applied: {row['key']} / {field}"
+        assert not row["model_batch_still_gated"] or row["key"] in gated(current)
+        checked.append({"key": row["key"], "title": row["title"], "verified_values": expected, "corrected": corrected})
+    payload = {
+        "scope": "owner-assisted changed-case regression review; not independent population accuracy or model release",
+        "review_packet_sha256": hashlib.sha256(review_bytes).hexdigest(),
+        "reviewed_tag_snapshot_sha256": packet["tag_file_sha256"],
+        "applied_tag_file_sha256": hashlib.sha256(current_bytes).hexdigest(),
+        "owner_reviewed_cases": len(checked),
+        "unreviewed_model_gate": len(gated(current)),
+        "all_reviewed_fields_applied": True,
+        "cases": checked,
+    }
+    target = OUT.with_name(OUT.name + "-applied")
+    target.with_suffix(".json").write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    lines = [
+        "# 人工复核后的修正落实检查",
+        "",
+        "由脚本核对当前标签与原审查包中人工确认的展示字段。原包的before/after仍是当时快照，"
+        "不同意的字段使用corrected_values；不把修正算成规则原本判对。"
+        "这不是独立盲审、总体准确率或模型批次放行。",
+        "",
+        f"已核验并落实：{len(checked)}项；未审核模型门禁：{len(gated(current))}项。",
+        "",
+        "| 菜谱 | 已核对字段的新值 | 人工纠正字段 |",
+        "|---|---|---|",
+    ]
+    for row in checked:
+        lines.append(
+            f"| {row['title']} | {json.dumps(row['verified_values'], ensure_ascii=False)} | "
+            f"{', '.join(row['corrected']) or '—'} |"
+        )
+    lines += ["", f"当前标签SHA256：`{payload['applied_tag_file_sha256']}`", ""]
+    target.with_suffix(".md").write_text("\n".join(lines), encoding="utf-8")
+    return payload
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-ref", required=True)
     parser.add_argument("--count", type=int, default=25, choices=range(20, 31))
     parser.add_argument("--seed", type=int, default=20261019)
+    parser.add_argument(
+        "--verify-owner-review", action="store_true", help="verify applied owner judgments; keep the packet"
+    )
     args = parser.parse_args()
+    if args.verify_owner_review:
+        payload = verify_owner_review()
+        compare_default(args.base_ref)
+        print(
+            json.dumps(
+                {key: payload[key] for key in ("owner_reviewed_cases", "all_reviewed_fields_applied")},
+                ensure_ascii=False,
+            )
+        )
+        return
     if OUT.with_suffix(".json").exists():
         prior = json.loads(OUT.with_suffix(".json").read_text(encoding="utf-8"))
         assert not any(value not in (None, "") for row in prior["records"] for value in row["verdict"].values()), (

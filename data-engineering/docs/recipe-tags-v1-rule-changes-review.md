@@ -1,12 +1,14 @@
-# 规则修复后的小范围复核（部分人工确认）
+# 规则修复后的小范围复核（25项已人工核验，含纠正）
 
 本表只核对变动后的标签，不复写上一轮审查，也不宣称总体准确率。优先包含已知回归案例，其余由固定种子从变动菜谱中抽取。
+
+本表保留审查时的标签输出与逐轮意见，条目中的“待实施”是记录当时的状态。最终代码与标签是否落实人工意见，以[修正落实检查](recipe-tags-v1-rule-changes-review-applied.md)为准；不回写这里的原规则输出。
 
 同意某个新标签不表示原标签正确。未审核模型字段继续冻结；fresh_rule_proposal只是新规则建议，不是已放行的模型值。原料克重是release数据，不是另行实测。
 
 变动菜谱：206；本次抽取：25；未审核模型门禁：422 → 422。
 
-人工确认进度：20 / 25。2026-10-19，owner在第一组回复“这5项全部同意”，确认第1–5项；在第二组回复“西班牙米饭可判定为主食，其他全部同意”，确认第6–9项的新值并纠正第10项。2026-10-20，第三组回复“全部同意”，确认第11–14项的新值并同意纠正第15项仿蟹肉误判；第四组回复“全部同意”，确认第16、17、19、20项并纠正第18项南瓜蛋炒饭。其余5项仍待确认。JSON的`verdict=true`表示同意本次新值，包括“应保留未知”；`false`表示不同意本次新值，人工正确值写入该条note。两者均不表示整道菜所有字段已核验。整包`owner_confirmed`仍为false。不计算总体准确率，不执行模型批次放行。
+人工确认进度：25 / 25。2026-10-19，owner在第一组回复“这5项全部同意”，确认第1–5项；在第二组回复“西班牙米饭可判定为主食，其他全部同意”，确认第6–9项的新值并纠正第10项。2026-10-20，第三组回复“全部同意”，确认第11–14项的新值并同意纠正第15项仿蟹肉误判；第四组回复“全部同意”，确认第16、17、19、20项并纠正第18项南瓜蛋炒饭；第五组回复“全部同意”，确认第21、22、23、25项并纠正第24项南瓜汤资料冲突。JSON的`verdict=true`表示同意本次新值，包括“应保留未知”；`false`表示不同意本次新值，人工正确值写入该条note。两者均不表示整道菜所有字段已核验。整包`owner_confirmed=true`仅表示这25项展示字段的对话辅助核验已完成，不是所有标签正确或模型批次放行。不计算总体准确率，不执行模型批次放行。
 
 ## 1. Marilyn'S English Pasties (RCP2_CB386B8363E1)
 
@@ -690,7 +692,7 @@ Brown beef in skillet, stirring until crumbly; drain excess fat.
 Stir in remaining ingredients; simmer, covered, for 10 minutes.
 Makes filling for 8 taco shells.
 
-人工意见：待确认。
+人工意见：owner已确认本次三个新值；塔可肉馅是配料组件，不能单独成餐。正餐用途的主要蛋白与风味标签不用于组件，不代表不含牛肉或口味清淡。
 
 ## 22. Chicken Adobo (RCP2_9E72C3378CDE)
 
@@ -725,7 +727,7 @@ OPTIONS:
 **Add finely minced/pureed chicken livers in the end of cooking as a thickener and flavor enhancer.
 ***For color, infuse annato seeds in the olive oil before sauteeing the garlic.
 
-人工意见：待确认。
+人工意见：owner已确认本次protein_sources新值应保留未知；鸡肉可与猪肩肉混合，未给出各自比例。保留肉类主菜身份，不直接认定只有鸡肉或猪肉一定存在。
 
 ## 23. Ravioli Bolognese (RCP2_616F0B3CE6CC)
 
@@ -760,7 +762,7 @@ Heat remaining oil in a pan and fry onion until soft. Add beef, carrots, celery 
 Roll out dough thinly on a floured surface, and divide into 4 sheets. Press one of the sheets into a non-stick ravioli tray and fill the pockets with Bolognese sauce. Brush the edges of the sheet with water. Press another sheet on top and trim excess dough. Cut out the ravioli and repeat with remaining 2 sheets. (Makes about 24 ravioli.)
 Boil salted water and cook the ravioli for 6 minutes. Meanwhile, heat remaining Bolognese with the stock, stir in Parmesan and cream. Divide ravioli onto 4 plates and top each serving with sauce.
 
-人工意见：待确认。
+人工意见：owner已确认本次meal_role、contains_staple新值；明确用面粉鸡蛋制皮并包入牛肉蔬菜馅，是自带主食的完整餐食。
 
 ## 24. Korean Fusion Butternut Squash Soup (RCP2_0DA06DF48EDB)
 
@@ -797,7 +799,7 @@ In a small bowl, wisk together the water, hot pepper paste and sesame oil.
 Remove skins from sausage and place in a saute pan and cook until most of the pink is gone and the pork is crumbled. Next add the mushroom, garlic and pepper paste mixture and bring pan to a boil. Reduce heat and continue to cook until most of the liquid is reduced.
 Serving: 	Ladle soup into bowls and top with garnish and serve.
 
-人工意见：待确认。
+人工意见：owner同意纠正本次禽类新值；原料写火鸡香肠、可换素香肠，步骤却写猪肉，资料冲突。人工正确值为protein_sources=null，并暂不用于规划；鸡高汤只是汤底，不自行选择肉类或素版本。上表保留当时的规则输出，不把纠正算成规则原本判对。
 
 ## 25. Taco Filling (Ground Beef) (RCP2_0FFB8C985C34)
 
@@ -830,4 +832,4 @@ Add ground beef to your favorite Taco shells.
 Top with cheese, sour cream, lettuce, tomato, etc.
 Enjoy!
 
-人工意见：待确认。
+人工意见：owner已确认本次三个新值；牛肉塔可馅是配料组件，不能单独成餐。清空正餐用途的标签不等于不含牛肉或口味清淡。

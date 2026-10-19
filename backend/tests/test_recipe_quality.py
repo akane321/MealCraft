@@ -36,6 +36,15 @@ def test_complete_dishes_soups_and_curated_recipes_are_kept():
     assert incomplete(recipe("Lemon Chicken", 90, ["lemon"], release=None)) is None
 
 
+def test_owner_reviewed_ingredient_step_conflict_stays_out_of_planning():
+    soup = recipe("Korean Fusion Butternut Squash Soup", 300, ["sausage", "butternut_squash"], course="soup")
+    soup.external_id = "RCP2_0DA06DF48EDB"
+    assert incomplete(soup).startswith("ingredient/step conflict")
+    # The exclusion is evidence for one reviewed record, not a blanket ban on sausage soups.
+    soup.external_id = "another-recipe"
+    assert incomplete(soup) is None
+
+
 @pytest.mark.parametrize(
     ("title", "course", "ingredients"),
     [
@@ -136,6 +145,10 @@ def test_planning_repository_drops_dough_only_recipes_but_keeps_filled_dishes():
         )
 
     with Session(engine) as session:
+        conflicted = release_recipe(
+            "conflicted-soup", "Korean Fusion Butternut Squash Soup", "soup", ["sausage", "butternut_squash"]
+        )
+        conflicted.external_id = "RCP2_0DA06DF48EDB"
         session.add_all(
             [
                 release_recipe("wrapper", "Magdalena's Empanadas", "main", ["flour", "water", "butter", "salt"]),
@@ -143,6 +156,7 @@ def test_planning_repository_drops_dough_only_recipes_but_keeps_filled_dishes():
                     "filled", "Beef Empanadas", "main", ["flour", "water", "butter", "salt", "beef", "onion"]
                 ),
                 release_recipe("dough-side", "Rolled Dumplings", "side", ["flour", "salt", "shortening", "milk"]),
+                conflicted,
             ]
         )
         session.commit()

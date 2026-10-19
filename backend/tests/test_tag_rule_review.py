@@ -1,4 +1,7 @@
 import importlib.util
+import json
+
+import pytest
 
 from app.core.paths import repository_root
 
@@ -28,3 +31,64 @@ def test_only_an_unreviewed_critical_model_field_triggers_the_gate():
         "rule": {"estimated": {"meal_role": {"method": "rule", "reviewed": False}}},
     }
     assert module.gated(estimates) == {"blocked"}
+
+
+def test_owner_application_check_keeps_rejected_outputs_and_requires_actual_corrections(tmp_path, monkeypatch):
+    path = repository_root() / "data-engineering/scripts/review_tag_rule_changes.py"
+    spec = importlib.util.spec_from_file_location("tag_rule_review", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    monkeypatch.setattr(module, "OUT", tmp_path / "review")
+    packet = {
+        "owner_confirmed": True,
+        "sample_count": 2,
+        "tag_file_sha256": "original-snapshot-hash",
+        "records": [
+            {
+                "key": "rice",
+                "title": "Rice",
+                "changed_fields": ["meal_role"],
+                "after": {"meal_role": None},
+                "corrected_values": {"meal_role": "staple"},
+                "verdict": {"meal_role": False},
+                "model_batch_still_gated": False,
+            },
+            {
+                "key": "missing",
+                "title": "Missing",
+                "changed_fields": ["protein_sources"],
+                "after": {"protein_sources": None},
+                "verdict": {"protein_sources": True},
+                "model_batch_still_gated": False,
+            },
+        ],
+    }
+    review_path = tmp_path / "review.json"
+    review_path.write_text(json.dumps(packet), encoding="utf-8")
+    tags = tmp_path / module.RECIPE_TAGS
+    tags.parent.mkdir(parents=True)
+    tags.write_text(
+        json.dumps({"recipes": {"rice": {"meal_role": "staple"}, "missing": {"protein_sources": None}}}),
+        encoding="utf-8",
+    )
+    result = module.verify_owner_review()
+    assert result["all_reviewed_fields_applied"] and result["owner_reviewed_cases"] == 2
+    assert result["cases"][0]["corrected"] == {"meal_role": "staple"}
+    assert json.loads(review_path.read_text(encoding="utf-8")) == packet
+    current = json.loads(tags.read_text(encoding="utf-8"))
+    current["recipes"]["rice"]["meal_role"] = None
+    tags.write_text(json.dumps(current), encoding="utf-8")
+    with pytest.raises(AssertionError, match="Not applied"):
+        module.verify_owner_review()
+    current["recipes"]["rice"]["meal_role"] = "staple"
+    tags.write_text(json.dumps(current), encoding="utf-8")
+    packet["records"][1]["verdict"]["protein_sources"] = None
+    review_path.write_text(json.dumps(packet), encoding="utf-8")
+    with pytest.raises(AssertionError, match="Unreviewed field"):
+        module.verify_owner_review()
+    packet["records"][1]["verdict"]["protein_sources"] = True
+    packet["records"][0]["corrected_values"] = {}
+    review_path.write_text(json.dumps(packet), encoding="utf-8")
+    with pytest.raises(AssertionError, match="Missing or excessive owner corrections"):
+        module.verify_owner_review()

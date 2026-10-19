@@ -13,7 +13,7 @@
   "unreviewed_model_gate_before": 422,
   "unreviewed_model_gate_after": 422,
   "sample_count": 25,
-  "owner_confirmed": false,
+  "owner_confirmed": true,
   "records": [
     {
       "key": "RCP2_CB386B8363E1",
@@ -1260,6 +1260,7 @@
     {
       "key": "RCP2_4F1F492DB38E",
       "title": "Spanish Rice",
+      "corrected_values": {"meal_role": "staple", "contains_staple": true},
       "course": "side",
       "selection": "seeded random changed case",
       "changed_fields": [
@@ -1908,6 +1909,7 @@
     {
       "key": "RCP2_010D47D8B41A",
       "title": "Mexican Crab Salad",
+      "corrected_values": {"protein_sources": ["fish"]},
       "course": "salad",
       "selection": "seeded random changed case",
       "changed_fields": [
@@ -2286,6 +2288,7 @@
     {
       "key": "RCP2_586E24DE73A6",
       "title": "Pumpkin Fried Rice",
+      "corrected_values": {"meal_role": "one_bowl", "contains_staple": true},
       "course": "side",
       "selection": "seeded random changed case",
       "changed_fields": [
@@ -2756,10 +2759,10 @@
       ],
       "steps": "Brown beef in skillet, stirring until crumbly; drain excess fat.\nStir in remaining ingredients; simmer, covered, for 10 minutes.\nMakes filling for 8 taco shells.",
       "verdict": {
-        "meal_role": null,
-        "protein_sources": null,
-        "flavor_tags": null,
-        "note": ""
+        "meal_role": true,
+        "protein_sources": true,
+        "flavor_tags": true,
+        "note": "【owner已确认】2026-10-20 对话复核第五组第21项；owner回复：全部同意。归配料组件，不能单独成餐；主要蛋白和风味正餐标签不用于组件，不代表没有牛肉或口味清淡。仅确认展示的三个变动字段。"
       }
     },
     {
@@ -2887,8 +2890,8 @@
       ],
       "steps": "1. Combine the chicken with the vinegar, soy sauce, crushed garlic, peppercorns, and bay leaves together in a saucepan. stir to evenly coat(May be marinated up to 8 hours or overnight in the refrigerator ).\n2. Over medium heat, let it come to a simmer. Cover with a lid and lower heat for a gentle simmer, stirring occassionally. The chicken will release a lot of liquid.\n3. When the chicken is barely cooked through. Remove the pieces, draining and shaking off as much liquid as possible. Reserve the stewing liquid.\n4. Heat a heavy gauge saute pan large enough to accomodate all the chicken pieces. Add the oil and swirl to evenly coat. Add the garlic and cook over medium heat until golden, constantly stirring to avoid burning. Remove the garlic and set aside.\n5. Pan fry the chicken pieces in the garlic-infused oil over medium to high heat to get a deep brown sear. Turn to sear on all sides. Be careful with hot oil splattering. Some of the chicken pieces will stick to the bottom of the pan if the chicken was not drained well of its stewing liquid.\n6. Once all the chicken pieces are seared, add the reserved stewing liquid and the sauteed garlic with the chicken in the pan. Let the liquid reduce over medium heat until slightly thickened.\n7. Serve with steamed rice.\nOPTIONS:\n*You may add the sauteed garlic as garnish in a serving dish instead of being part of the sauce.\n**Add finely minced/pureed chicken livers in the end of cooking as a thickener and flavor enhancer.\n***For color, infuse annato seeds in the olive oil before sauteeing the garlic.",
       "verdict": {
-        "protein_sources": null,
-        "note": ""
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第五组第22项；owner回复：全部同意。鸡肉允许与猪肩肉混合且没有各自比例，确认主要蛋白来源保留未知；保留肉类主菜身份，不能认定只有鸡肉或猪肉一定存在。"
       }
     },
     {
@@ -3053,14 +3056,15 @@
       ],
       "steps": "Mix flour, eggs, 1 tbsp oil and 1 pinch of salt to a smooth dough, cover and leave for 1 hour to rest.\nHeat remaining oil in a pan and fry onion until soft. Add beef, carrots, celery and garlic and fry over medium heat. Add tomato paste, tomatoes and bay leaf. Season to taste. Simmer for 30 mins, uncovered, until liquid is reduced. Season and leave to cool slightly.\nRoll out dough thinly on a floured surface, and divide into 4 sheets. Press one of the sheets into a non-stick ravioli tray and fill the pockets with Bolognese sauce. Brush the edges of the sheet with water. Press another sheet on top and trim excess dough. Cut out the ravioli and repeat with remaining 2 sheets. (Makes about 24 ravioli.)\nBoil salted water and cook the ravioli for 6 minutes. Meanwhile, heat remaining Bolognese with the stock, stir in Parmesan and cream. Divide ravioli onto 4 plates and top each serving with sauce.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "note": "【owner已确认】2026-10-20 对话复核第五组第23项；owner回复：全部同意。原料和步骤明确制作面皮并包入牛肉蔬菜馅，确认本次新值为自带主食的完整餐食，不是需另配主食的纯肉主菜。"
       }
     },
     {
       "key": "RCP2_0DA06DF48EDB",
       "title": "Korean Fusion Butternut Squash Soup",
+      "corrected_values": {"protein_sources": null},
       "course": "soup",
       "selection": "seeded random changed case",
       "changed_fields": [
@@ -3239,8 +3243,8 @@
       ],
       "steps": "Place stock, garlic, bay leaves, and marjoram into your soup pot and bring just up to a low boil for about 15 minutes, then reduce heat to simmer. Scoop out marjoram, garlic and bay leaves prior to adding next ingredients to the pot.\nWhile stock is coming up to temperature saute the Mirepoix vegetables in sesame oil until they begin to caramelize. Then transfer to the stock pot. Scoop the roasted butternut squash out of the squash skins and add to the pot as well. Now, bring heat up on pot and maintain a high simmer, just below boiling.\nJust prior to serving add Korean soybean paste then blend until smooth with an immersion blender (alternately you can transfer to a VitaMix or other blender).\nIn a small bowl, wisk together the water, hot pepper paste and sesame oil.\nRemove skins from sausage and place in a saute pan and cook until most of the pink is gone and the pork is crumbled. Next add the mushroom, garlic and pepper paste mixture and bring pan to a boil. Reduce heat and continue to cook until most of the liquid is reduced.\nServing: \tLadle soup into bowls and top with garnish and serve.",
       "verdict": {
-        "protein_sources": null,
-        "note": ""
+        "protein_sources": false,
+        "note": "【owner已确认纠正】2026-10-20 对话复核第五组第24项；owner回复：全部同意。原料写火鸡香肠且可换素香肠，步骤却写猪肉；鸡高汤只算汤底。人工正确值为{\"protein_sources\":null}，并标资料冲突、暂不用于规划，不自行选猪肉、禽肉或素版本。保留规则输出快照，不把纠正算成规则原本判对。"
       }
     },
     {
@@ -3350,10 +3354,10 @@
       ],
       "steps": "Brown ground beef with onion drain.\nAdd other ingredients.\nSimmer add more seasoning to taste.\nThis can be a little dry.\nThis is not Health Food!\nI have added a little cooking oil to the Mix.\nAdd salt and pepper.\nAdd ground beef to your favorite Taco shells.\nTop with cheese, sour cream, lettuce, tomato, etc.\nEnjoy!",
       "verdict": {
-        "meal_role": null,
-        "protein_sources": null,
-        "flavor_tags": null,
-        "note": ""
+        "meal_role": true,
+        "protein_sources": true,
+        "flavor_tags": true,
+        "note": "【owner已确认】2026-10-20 对话复核第五组第25项；owner回复：全部同意。与第21项相同，牛肉馅是配料组件，不能单独成餐；清空正餐用途的主要蛋白和风味标签，不等于不含牛肉或清淡。仅确认展示的三个变动字段。"
       }
     }
   ]

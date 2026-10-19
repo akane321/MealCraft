@@ -78,7 +78,7 @@ from app.core.paths import repository_root
 from app.data.catalog import load_catalog
 from app.data.release_v2 import LINE_CORRECTIONS, release_dir
 from app.data.tag_files import INGREDIENT_TAGS, RECIPE_TAGS
-from app.planning.recipe_quality import missing_named_protein
+from app.planning.recipe_quality import missing_named_protein, reviewed_source_conflict
 from app.planning.vegetable_led import (
     COOKED_STAPLES,
     COOKED_YIELD,
@@ -137,6 +137,8 @@ GREY_SHARE = 0.05  # below this a main holds no staple; between the two the mode
 SOUP_ONE_BOWL_SHARE = 0.3
 SOUP_GREY_SHARE = 0.1
 SIDE_STAPLE_SHARE = 0.5
+RICE_GRAINS = COOKED_STAPLES & {"rice", "brown_rice", "glutinous_rice", "wild_rice", "long_grain_wild_rice_mix"}
+RICE_DISH = re.compile(r"\b(?:rice|risotto|pilaf|paella)\s*$")
 # The noodles, rice and pasta that make a soup a one-bowl meal; barley or quinoa in a soup leave it to the model.
 SOUP_STAPLES = COOKED_STAPLES - {
     "barley", "quinoa", "oats", "grits", "bulgur", "wheat_berries", "buckwheat", "wild_rice",
@@ -419,6 +421,8 @@ def line_sources(line: Line) -> set[str]:
     source = source_of(line.name)
     if release_name(line.name) in SEASONING_FROM_FLESH:
         return set()
+    if release_name(line.name) == "imitation_crab":
+        return {"fish"}  # The catalog's surimi product, not real crab just because its wording contains "crab".
     named = title_sources(line.text or "")
     if named and (source == "?" or source in FLESH_SOURCES):
         # Alternatives are not two animals known to be present.
@@ -547,6 +551,9 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
             return "soup", ()
         return None, ("soup", "one_bowl")
     if dish.course == "side":
+        # A rice dish may have been filed as a side; its real rice carrier still fills the staple.
+        if RICE_DISH.search(title) and staple_share(dish, RICE_GRAINS) >= ONE_BOWL_SHARE:
+            return ("one_bowl" if has_protein else "staple"), ()
         if led:
             return "vegetable", ()
         if staple_share(dish, STAPLES | STARCHY) >= SIDE_STAPLE_SHARE:
@@ -642,7 +649,9 @@ def rule_tags(dish: Dish) -> Tags:
     led = dish_vegetable_led(dish)
     sources = protein_sources(dish)
     role, allowed = meal_role(dish, sources, led)
-    if not dish.curated and dish.course in {"main", "side", "soup"} and not component(dish.title, dish.course):
+    if not dish.curated and (conflict := reviewed_source_conflict(dish.key)):
+        tags.incomplete_reason, sources = conflict, None
+    elif not dish.curated and dish.course in {"main", "side", "soup"} and not component(dish.title, dish.course):
         tags.incomplete_reason = missing_named_protein(dish.title, [(line.name, line.text) for line in dish.lines])
         if tags.incomplete_reason:
             role, allowed, sources = None, (), None

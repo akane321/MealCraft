@@ -1,0 +1,252 @@
+{
+  "scope": "owner-assisted changed-case regression review; not independent population accuracy or model release",
+  "review_packet_sha256": "c226a90f2be82dc81dea13ad93b813a426d25a71a2db7884eaf4623db58ec751",
+  "reviewed_tag_snapshot_sha256": "5f2cd930482555445acd753acb2618b9549d645b269d40f76d934032beae19a9",
+  "applied_tag_file_sha256": "046629cf82a096d00e3d83acb53b708bafab98f9db479251fba6713dee66d1fc",
+  "owner_reviewed_cases": 25,
+  "unreviewed_model_gate": 422,
+  "all_reviewed_fields_applied": true,
+  "cases": [
+    {
+      "key": "RCP2_CB386B8363E1",
+      "title": "Marilyn'S English Pasties",
+      "verified_values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_AA52264E15D0",
+      "title": "Chinese Pork Chops",
+      "verified_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_631314414D3C",
+      "title": "Kid Friendly Jamaican Chicken",
+      "verified_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_DA28B246E699",
+      "title": "Barbecue Beef",
+      "verified_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_1D97F9CF9C30",
+      "title": "Chicken Stir-Fry",
+      "verified_values": {
+        "meal_role": "protein_main",
+        "contains_staple": false
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_3B3606EBC933",
+      "title": "Baked Macaroni And Cheese",
+      "verified_values": {
+        "meal_role": "one_bowl"
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_80E876686DA8",
+      "title": "Kalbi Beef Marinate (Flank Steak)",
+      "verified_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_961449012D5D",
+      "title": "Acorn Squash Stuffed With Italian Sausage & Penne",
+      "verified_values": {
+        "meal_role": "protein_main",
+        "contains_staple": false
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_557753E022A8",
+      "title": "Mon-Doo(Korean Egg Rolls)",
+      "verified_values": {
+        "protein_sources": null
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_4F1F492DB38E",
+      "title": "Spanish Rice",
+      "verified_values": {
+        "meal_role": "staple",
+        "contains_staple": true
+      },
+      "corrected": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "key": "RCP2_D666EF442FE4",
+      "title": "Kim Bap (Korean Rice Rolls)",
+      "verified_values": {
+        "meal_role": "one_bowl"
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_0447589B2FD3",
+      "title": "Chicken Curry",
+      "verified_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_66CDC4D02656",
+      "title": "Napa Cabbage with Dried Shrimp",
+      "verified_values": {
+        "protein_sources": []
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_28626CFF47A0",
+      "title": "Beef Carnitas Tacos",
+      "verified_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_010D47D8B41A",
+      "title": "Mexican Crab Salad",
+      "verified_values": {
+        "protein_sources": [
+          "fish"
+        ]
+      },
+      "corrected": {
+        "protein_sources": [
+          "fish"
+        ]
+      }
+    },
+    {
+      "key": "RCP2_FAC00DA2B400",
+      "title": "Stuffed Green Peppers",
+      "verified_values": {
+        "meal_role": "protein_main",
+        "contains_staple": false
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_975C4431AA56",
+      "title": "Chicken Teriyaki",
+      "verified_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_586E24DE73A6",
+      "title": "Pumpkin Fried Rice",
+      "verified_values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      },
+      "corrected": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "key": "RCP2_7B87DB0F6AFE",
+      "title": "Parmesan Chicken",
+      "verified_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_C4333C1C5043",
+      "title": "Lo Mein",
+      "verified_values": {
+        "protein_sources": null
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_4FBC8094CB72",
+      "title": "Taco Meat Filling",
+      "verified_values": {
+        "meal_role": "sauce",
+        "protein_sources": [],
+        "flavor_tags": []
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_9E72C3378CDE",
+      "title": "Chicken Adobo",
+      "verified_values": {
+        "protein_sources": null
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_616F0B3CE6CC",
+      "title": "Ravioli Bolognese",
+      "verified_values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      },
+      "corrected": {}
+    },
+    {
+      "key": "RCP2_0DA06DF48EDB",
+      "title": "Korean Fusion Butternut Squash Soup",
+      "verified_values": {
+        "protein_sources": null
+      },
+      "corrected": {
+        "protein_sources": null
+      }
+    },
+    {
+      "key": "RCP2_0FFB8C985C34",
+      "title": "Taco Filling (Ground Beef)",
+      "verified_values": {
+        "meal_role": "sauce",
+        "protein_sources": [],
+        "flavor_tags": []
+      },
+      "corrected": {}
+    }
+  ]
+}

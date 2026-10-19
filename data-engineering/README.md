@@ -94,6 +94,10 @@ python scripts/fairprice_mapping.py export                 # 写运行时快照 
 有实质面包载体的完整三明治属于自带主食的餐，豆类不当谷物主食。
 已经煮熟的米不再套用干米膨胀系数。烤制、焗制不是正餐角色的充分条件，
 馅料和配料本身则是 `sauce` 部件，不单独成餐。
+原始菜类写成配菜的米饭菜式，只有实际米饭克重占比达到现有主食载体门槛时才判为主食或完整餐食，
+不会只凭菜名或降低全局门槛补判。仿蟹肉保留食材库的鱼类身份，不因原文含 `crab` 就改成真蟹。
+人工核实的原料与步骤冲突由标签器和规划器共用排除记录，源资料修正并复核前不参与规划；
+明确的汤类身份不必因此抹掉，但其主要蛋白来源保留未知。
 
 改完规则后，另生成[变动菜谱复核包](docs/recipe-tags-v1-rule-changes-review.md)：
 
@@ -104,6 +108,17 @@ python data-engineering/scripts/review_tag_rule_changes.py --base-ref <修复前
 包中包含原标签、新标签、变动字段、完整步骤与release归一化克重。已知回归案例优先，
 其余按固定种子从变动菜谱抽取；这证明修复的针对性，不是独立总体准确率。
 模型字段仍被门禁拦截时会明确标出，新规则建议不能被误读为已放行。
+
+人工核验完成后，原包的 `before`、`after` 和标签哈希保留为当时的快照；
+不同意的字段记为 `verdict=false`，人工正确值另存 `corrected_values`，不覆盖原预测。
+落实修正后运行：
+
+```bash
+python data-engineering/scripts/review_tag_rule_changes.py --base-ref <修复前的提交> --verify-owner-review
+```
+
+该命令逐字段验证当前标签与人工意见一致，生成[修正落实报告](docs/recipe-tags-v1-rule-changes-review-applied.md)，
+同时刷新获准的满血默认开发集前后对照；不重抽样、不覆盖审查包、不计算全库准确率、不放行模型批次。
 
 ```bash
 uv run --project backend python -m app.data.recipe_tags          # 只用规则；之前模型给的答案保留并复用
