@@ -132,8 +132,8 @@ PLANNER_ZH = {
 # ... and those that carry a value: a meal is named in Chinese, a dish by its title.
 PLANNER_ZH_PATTERNS = (
     (
-        r"I couldn't fit seven dinners into S\$(?P<budget>[\d.]+)\. The cheapest week I found costs "
-        r"S\$(?P<cost>[\d.]+)\. Try a higher budget or fewer limits\.",
+        r"I couldn't fit (?:seven dinners|these meals) into S\$(?P<budget>[\d.]+)\. The cheapest (?:week|plan) I found "
+        r"costs S\$(?P<cost>[\d.]+)\. Try a higher budget or fewer limits\.",
         "S${budget} 排不下这些饭菜：我找到的最便宜的一周要 S${cost}。可以提高预算，或者少一些限制。",
     ),
     (r"There is no (?P<meal>\w+) left to change on those days\.", "那几天已经没有可以调整的{meal}了。"),

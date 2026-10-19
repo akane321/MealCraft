@@ -2,8 +2,8 @@
 
 Wired by layer 08 PR-1: `AgeBand`, `Sex`, `ActivityLevel`, `PersonalGoal`, `Weekday`, `PresenceRule`,
 `CookingTimeRule` and `NutritionLimit` are profile fields, and `HouseholdPlanning` carries them into a planning
-request. Still unwired: `MissingEquipment` (recipes have no equipment tags), `FlavorBoost` and
-`PlanningPreferences`. Meanings and NULL rules are in docs/design/sprint2-schema-foundation.md.
+request. Layer 08 PR-3 wires `MissingEquipment`. Still unwired: `FlavorBoost` and `PlanningPreferences`.
+Meanings and NULL rules are in docs/design/sprint2-schema-foundation.md.
 """
 
 from typing import Literal
@@ -105,6 +105,8 @@ class HouseholdPlanning(BaseModel):
     nutrition_limits: list[NutritionLimit] = Field(default_factory=list, max_length=1)
     # A member's muscle-gain goal: protein-rich dishes rank higher.
     protein_priority: bool = False
+    # Equipment the kitchen lacks: a recipe whose equipment cannot be met is never planned (section 4.3).
+    missing_equipment: MissingEquipment = Field(default_factory=list, max_length=5)
 
 
 WEEKDAYS: tuple[Weekday, ...] = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")

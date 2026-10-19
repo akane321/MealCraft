@@ -143,6 +143,12 @@ def main() -> int:
                 people = f", {household_size} people" if name in {"heavy three meals", "walkthrough + lunch"} else ""
                 label = f"{name}{people}, {'no budget' if budget is None else f'S${budget:.0f}'}"
                 print(f"{label:34} {timed(plans, request, args.repeats)}", flush=True)
+            # The full default's households (app/evaluation/full_default.py), as the product plans them.
+            from app.evaluation.full_default import CASES, request_for
+
+            for case in CASES:
+                if not args.cases or case["case"] in args.cases:
+                    print(f"{case['case']:34} {timed(plans, request_for(case), args.repeats)}", flush=True)
     for path in args.episodes:
         episode = json.loads(path.read_text(encoding="utf-8"))
         with product_database(episode) as factory, factory() as session:

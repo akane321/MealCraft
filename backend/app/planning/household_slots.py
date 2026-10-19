@@ -19,18 +19,27 @@ def _applies(rule, planned_date: date, meal: str) -> bool:
     return (not rule.weekdays or weekday in rule.weekdays) and (not rule.meal_types or meal in rule.meal_types)
 
 
-def slot_servings(household: HouseholdPlanning, planned_date: date, meal: str) -> int | float:
-    """The servings of the members home for this meal: each usually-home member, then each rule that names the
-    weekday and meal, the last one for a member winning. 0 when nobody is home. A whole number stays an int, so a
-    household of whole portions plans exactly as a household size does."""
+def _present(household: HouseholdPlanning, planned_date: date, meal: str) -> list:
+    """The members home for this meal: each usually-home member, then each rule that names the weekday and meal,
+    the last one for a member winning."""
     present = {member.name: member.default_present for member in household.members or []}
     for rule in household.presence_rules:
         if rule.member_name in present and _applies(rule, planned_date, meal):
             present[rule.member_name] = rule.present
-    total = sum(
-        (Fraction(str(member.servings)) for member in household.members or [] if present[member.name]), Fraction(0)
-    )
+    return [member for member in household.members or [] if present[member.name]]
+
+
+def slot_servings(household: HouseholdPlanning, planned_date: date, meal: str) -> int | float:
+    """The servings of the members home for this meal. 0 when nobody is home. A whole number stays an int, so a
+    household of whole portions plans exactly as a household size does."""
+    total = sum((Fraction(str(member.servings)) for member in _present(household, planned_date, meal)), Fraction(0))
     return int(total) if total.denominator == 1 else float(total)
+
+
+def slot_people(household: HouseholdPlanning, planned_date: date, meal: str) -> int:
+    """How many members are home for this meal: the dish count follows people present (ADR-0070), not portions,
+    so two adults and three children are five at the table."""
+    return len(_present(household, planned_date, meal))
 
 
 def slot_time_limit(household: HouseholdPlanning | None, default: int, planned_date: date, meal: str) -> int:
@@ -88,3 +97,13 @@ def limit_targets(household: HouseholdPlanning | None, planned_meals) -> list[Pr
         for limit in household.nutrition_limits
         if limit.max_value is not None and share
     ]
+
+
+def rules_on(constraints) -> bool:
+    """Whether a request plans with the household's rules (layer 08): a household block, or a meal of meal roles
+    (ADR-0070). Without either it plans exactly as before: no tags read, no shelf life, no equipment."""
+    if getattr(constraints, "household", None) is not None:
+        return True
+    shape = getattr(constraints, "plan_shape", None)
+    meals = list(shape.meals.values()) if shape is not None else [getattr(constraints, "meal_composition", None)]
+    return any(roles and roles[0].meal_roles for roles in meals)

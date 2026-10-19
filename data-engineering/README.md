@@ -104,6 +104,22 @@ uv run --project backend python -m app.data.recipe_tags --llm    # 规则定不�
    保持这样）。模型定的值（`estimated` 里 `method` 为 `llm`）在本批抽检审完前，规划器不读。
 4. 提交填好的文件。重跑标签命令时，已有判定的抽检包不会被覆盖。正餐角色的准确率按
    `meal_role` 判定为 `true` 的比例计算，写进报告（`08-household.md` 第 0.9 节）。
+5. 抽检通过后接受这一批模型的值：
+
+   ```bash
+   uv run --project backend python -m app.data.recipe_tags --accept-batch recipe-tags-v1/llm
+   ```
+
+   它把标签文件里这一批 `method` 为 `llm` 的条目全部设为 `reviewed: true`（规则的值不动），导入器再把它带进数据库。
+   在此之前，`meal_role`、`contains_staple` 或 `protein_sources` 里有一项是模型定的、还没 `reviewed` 的菜，
+   结构化规划（按 `meal_roles` 的餐）当它没打标签，哪个正餐角色都不填；按菜类（courses）的旧规划不受影响。
+   重跑标签命令时，值没变的条目保持 `reviewed`，值变了的回到待审。
+
+面团、饼底、面糊、酱、腌料、干料、沙拉汁、肉汁、高汤、酱料膏和调味料这类"菜的一部分"由规则判成 `sauce`
+（`sauce` 即所有不能单独成菜的部分），永远不填一餐：标题去掉括号、结尾的 `Recipe`/`I`/`II` 和 ` - ...`、
+` for ...` 之后，最后一个名词是这类词，且它前面没有 `with`、`in`、`on`、`over`（酱汁类还要没有 `and`/`&`/`'n`）；
+括号里是面团、饼底或面糊（`(Batter)`、`(Empanada Dough)`）也算。配菜里的 dressing 是填馅，仍是菜。
+`Chicken In Tarragon Sauce`、`Cauliflower Crust Pizza`、`Meatballs For Spaghetti Sauce` 仍是菜。
 
 ## 目录
 

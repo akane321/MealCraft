@@ -18,6 +18,7 @@ from app.data.recipe_tags import (
     Dish,
     Line,
     catalog_ingredients,
+    component,
     curated_dishes,
     dish_vegetable_led,
     ingredient_entries,
@@ -109,6 +110,55 @@ def test_baked_goods_go_by_title_and_sugar_and_a_cakes_eggs_are_not_protein() ->
     cake = tags("Chocolate Cake", "baked_good", [("flour", 250), ("sugar", 200), ("egg", 200)], sugar_g=30.0)
     assert cake["meal_role"] == "dessert"
     assert cake["protein_sources"] == []
+
+
+COMPONENTS = (
+    ("Italian Pizza Dough", "baked_good"),
+    ("Egg Pasta Dough", "main"),
+    ("Curry Sauce", "main"),
+    ("Spaghetti Sauce", "main"),
+    ("Chicken Teriyaki Marinade", "main"),
+    ("Lamb Shish Kebab Marinade", "main"),
+    ("Manicotti(Batter)", "main"),
+    ("Kolache Dough", "baked_good"),
+    ("Masa De Empanadas (Empanada Dough)", "baked_good"),
+    ("Great Pizza Crust", "baked_good"),
+    ("Broccoli Pizza Crust", "main"),
+    ("Pizza Crust I", "baked_good"),
+    ("Basic New York-Style Pizza Dough Recipe", "baked_good"),
+    ("Garlic And Oregano Pizza Dough", "baked_good"),
+    ("Grilled Chicken Marinade - Super Easy; Great For Fajitas!", "main"),
+    ("Pancake Batter For Tacos", "side"),
+    ("Jamaican Jerk Rub", "main"),
+    ("Chicken Stock", "soup"),
+)
+DISHES = (
+    ("Chicken In Tarragon Sauce", "main"),
+    ("Satay With Peanut Sauce", "main"),
+    ("Pizza With A Hamburger Crust", "main"),
+    ("Cauliflower Crust Pizza", "main"),
+    ("No Crust Quiche", "main"),
+    ("Two-Step Batter Fried Chicken", "main"),
+    ("Meatballs For Spaghetti Sauce", "main"),
+    ("Meatballs And Marinara Sauce", "main"),
+    ("Steak 'N Korean Sauce", "main"),
+    ("Pan-fried hake, white bean & chorizo broth", "main"),
+    ("Ca Kho To (Vietnamese Fish In Caramel Sauce)", "main"),
+    ("Squash Dressing", "side"),
+)
+
+
+@pytest.mark.parametrize(("title", "course"), COMPONENTS)
+def test_a_component_recipe_is_a_sauce_and_fills_no_meal(title: str, course: str) -> None:
+    found = rule_tags(dish(title, course, [("chicken_thigh", 400), ("flour", 300), ("rice", 300)]))
+    assert found.values["meal_role"] == "sauce", title
+    assert found.values["contains_staple"] is False and found.values["protein_sources"] == []
+    assert found.methods["meal_role"] == "rule" and not found.open
+
+
+@pytest.mark.parametrize(("title", "course"), DISHES)
+def test_a_dish_with_a_component_in_its_title_stays_a_dish(title: str, course: str) -> None:
+    assert not component(title, course), title
 
 
 def test_minor_protein_lines_are_not_the_main_protein_and_poultry_counts_as_chicken() -> None:
@@ -248,8 +298,12 @@ def test_the_vegetable_role_agrees_with_the_planners_vegetable_led_rule() -> Non
     for key, entry in entries.items():
         if entry["meal_role"] == "vegetable":
             assert dish_vegetable_led(dishes()[key]), key
-    # Every side the planner's rule admits as a vegetable dish is tagged one.
-    sides = [key for key, item in dishes().items() if item.course == "side" and dish_vegetable_led(item)]
+    # Every side the planner's rule admits as a vegetable dish is tagged one, unless it is a part of a dish (a batter).
+    sides = [
+        key
+        for key, item in dishes().items()
+        if item.course == "side" and dish_vegetable_led(item) and not component(item.title, item.course)
+    ]
     assert sides and all(entries[key]["meal_role"] == "vegetable" for key in sides)
 
 
@@ -368,3 +422,34 @@ def test_a_recipe_tag_a_runtime_path_wrote_survives_a_re_import(session: Session
     # A value still marked as the tag file's own estimate is the tag file's to change.
     assert third.meal_role == entries[third.external_id]["meal_role"]
     assert first.cooking_methods == entries[first.external_id]["cooking_methods"]
+
+
+def test_accepting_a_batch_marks_its_model_values_reviewed_and_a_re_run_keeps_them(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.data import recipe_tags
+
+    target = tmp_path / tag_files.RECIPE_TAGS
+    target.parent.mkdir(parents=True)
+    shutil.copy(repository_root() / tag_files.RECIPE_TAGS, target)
+    monkeypatch.setattr(recipe_tags, "repository_root", lambda: tmp_path)
+    before = json.loads(target.read_text(encoding="utf-8"))
+    model = sum(e["method"] == "llm" for entry in before["recipes"].values() for e in entry["estimated"].values())
+    assert model and recipe_tags.accept_batch("recipe-tags-v1/other") == 0
+
+    assert recipe_tags.accept_batch(recipe_tags.LLM_BATCH) == model
+    after = json.loads(target.read_text(encoding="utf-8"))
+    assert {k: v for k, v in after.items() if k != "recipes"} == {k: v for k, v in before.items() if k != "recipes"}
+    for key, entry in after["recipes"].items():
+        for name, estimate in entry["estimated"].items():
+            assert estimate["reviewed"] is (estimate["method"] == "llm"), (key, name)
+            assert entry[name] == before["recipes"][key][name]
+    assert recipe_tags.accept_batch(recipe_tags.LLM_BATCH) == 0
+
+    # A re-run keeps an accepted value reviewed while it is unchanged, and a changed one goes back to review.
+    key, entry = next((k, e) for k, e in after["recipes"].items() if e["estimated"]["meal_role"]["method"] == "llm")
+    tags = recipe_tags.Tags(values={name: entry[name] for name in tag_files.RECIPE_TAG_FIELDS})
+    tags.methods = {name: e["method"] for name, e in entry["estimated"].items()}
+    assert recipe_tags.recipe_entry(tags, entry)["estimated"]["meal_role"]["reviewed"] is True
+    tags.values["meal_role"] = "snack" if entry["meal_role"] != "snack" else "dessert"
+    assert recipe_tags.recipe_entry(tags, entry)["estimated"]["meal_role"]["reviewed"] is False

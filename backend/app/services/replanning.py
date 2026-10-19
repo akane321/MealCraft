@@ -3,15 +3,24 @@ from datetime import date, timedelta
 from fractions import Fraction
 
 from app.core.clock import today as local_today
+from app.data import meal_structure
+from app.data.household_reference import hpb
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
 from app.models.recipe import Recipe
 from app.planning import alternatives
-from app.planning.household_slots import limit_targets, slot_time_limit
-from app.planning.meal_composition import meal_minutes, portion_shares
-from app.planning.product_path import ProductPlanningError, meal_affinity, meals_of_the_day
+from app.planning.household_slots import limit_targets, rules_on, slot_time_limit
+from app.planning.meal_composition import (
+    catalog_role_admits,
+    equipment_met,
+    fills_staple,
+    meal_minutes,
+    portion_shares,
+    role_base,
+    structured_shares,
+)
+from app.planning.product_path import ProductPlanningError, meal_affinity, meals_of_the_day, pool_courses, pool_for
 from app.planning.recipe_quality import dish_family
 from app.planning.recipe_similarity import RecipeSimilarity
-from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import (
     MealPlanRepository,
@@ -37,7 +46,7 @@ from app.schemas.meal_plan import (
     WeeklyMealPlanRequest,
     week_shape,
 )
-from app.schemas.planning_v2 import PlanningCompositionPolicy
+from app.schemas.planning_v2 import STAPLE_ROLE, PlanningCompositionPolicy, core_role, structured
 from app.schemas.recommendation import RecipeRecommendationResponse
 from app.services.meal_plan import WeeklyMealPlanService, pool_constraints
 from app.services.recommendation import RecipeRecommendationService
@@ -71,18 +80,37 @@ def _same_quantity(before: float | None, after: float | None) -> bool:
 class TimedDish:
     """The time fields `meal_minutes` reads, from a stored recipe (passive time is not cooking time)."""
 
-    def __init__(self, prep: int, cook: int):
+    def __init__(self, prep: int, cook: int, meal_role: str | None = None):
         self.prep_minutes, self.cook_minutes, self.passive_minutes = prep, cook, 0
         self.total_time_minutes = prep + cook
+        self.meal_role = meal_role
 
     @classmethod
     def of(cls, recipe: Recipe) -> "TimedDish":
-        return cls(recipe.prep_time_minutes, recipe.cook_time_minutes)
+        return cls(recipe.prep_time_minutes, recipe.cook_time_minutes, getattr(recipe, "meal_role", None))
+
+
+# A structured meal's time reads its staple as cooking unattended (meal-structure-v1 `staple_hands_off_cook`).
+STRUCTURED_TIME = PlanningCompositionPolicy(staple_hands_off_cook=True)
+
+
+def entry_trips(plan: MealPlan, entries) -> list[int | None] | None:
+    """Each dish's shopping trip in a plan longer than a week (ADR-0072: day 8 on is the second); None for one."""
+    if getattr(plan, "day_count", 7) <= meal_structure.trip_days():
+        return None
+    return [1 + (entry.day_index - 1) // meal_structure.trip_days() for entry in entries]
 
 
 # A described swap ("something with fish") chooses, within the budget, among this many of the dishes most like
 # what was asked for (ADR-0042 orders them).
 ASKED_ALIKE = 10
+
+
+class _Day:
+    """A dish's day number, for `entry_trips`."""
+
+    def __init__(self, day_index: int):
+        self.day_index = day_index
 
 
 class MealPlanReplanNotFoundError(LookupError):
@@ -135,7 +163,8 @@ class MealPlanReplanningService:
             update={"pricing_mode": "fixture"}
         )
         role = self._role(constraints, entry)
-        recipes = self.recipe_repository.list_for_planning(courses=list(role.courses) if role is not None else None)
+        meals = [(entry.meal_type, [role])] if role is not None else None
+        recipes = pool_for(meals, self.recipe_repository.list_for_planning(courses=pool_courses(meals)))
         recipes_by_id = {recipe.id: recipe for recipe in recipes}
         # A planned recipe may sit outside today's candidate pool; fetch it directly.
         missing = [item.recipe_id for item in plan.entries if item.recipe_id not in recipes_by_id]
@@ -178,10 +207,11 @@ class MealPlanReplanningService:
             after_grocery = self._as_saved(
                 plan,
                 self.grocery_aggregator.estimate(
-                    [recipe for recipe, _ in future_recipes],
+                    [recipe for recipe, _, _ in future_recipes],
                     constraints,
-                    shares=[share for _, share in future_recipes],
+                    shares=[share for _, share, _ in future_recipes],
                     by_weight=by_weight(before_grocery),
+                    trips=entry_trips(plan, [item for _, _, item in future_recipes]),
                 ),
                 self._drift_cents(plan, constraints, recipes_by_id),
             )
@@ -224,7 +254,9 @@ class MealPlanReplanningService:
         )
         meal = request.meal_type
         today = today or local_today()
-        ahead = [day for day in range(1, 8) if plan.start_date + timedelta(days=day - 1) >= today]
+        if any(day > plan.day_count for day in request.day_indexes or []):
+            raise MealPlanReplanValidationError(f"This plan has {plan.day_count} days.")
+        ahead = [day for day in range(1, plan.day_count + 1) if plan.start_date + timedelta(days=day - 1) >= today]
         # A meal already cooked, or one the household locked, is left as it is.
         held = {
             item.day_index
@@ -276,11 +308,13 @@ class MealPlanReplanningService:
         eaten += [
             (recipes_by_id[values["recipe_id"]], _values_share(values, plan.household_size)) for values, _ in added
         ]
+        days_of = [item.day_index for item in kept] + [values["day_index"] for values, _ in added]
         after_grocery = self.grocery_aggregator.estimate(
             [recipe for recipe, _ in eaten],
             constraints,
             shares=[share for _, share in eaten],
             by_weight=by_weight(before_grocery),
+            trips=entry_trips(plan, [_Day(day) for day in days_of]),
         )
         after_warnings = list(dict.fromkeys(after_grocery.warnings))
         if after_grocery.within_weekly_budget is False:
@@ -362,8 +396,7 @@ class MealPlanReplanningService:
         # The planner's own candidates for the week (services/meal_plan.py `_candidates`): the recipes it loaded
         # for the week's courses are kept for a while, and one ranking serves every role.
         meals = meals_of_the_day(constraints)
-        courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
-        recipes = self.recipe_repository.list_for_planning(courses=courses)
+        recipes = pool_for(meals, self.recipe_repository.list_for_planning(courses=pool_courses(meals)))
         pool = self.recommendation_service.recommend(
             pool_constraints(constraints), deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
         ).recommendations
@@ -494,7 +527,14 @@ class MealPlanReplanningService:
         policy = PlanningCompositionPolicy()
         for dishes in by_day.values():
             left = [item for item in dishes if item.role_id in wanted]
-            shares = portion_shares(policy, [item.role_id for item in left]) or {}
+            if structured(roles):
+                pairs = [(item.role_id, item.recipe) for item in left]
+                ids = [role for role, _ in pairs]
+                bowl = STAPLE_ROLE not in ids and any(role_base(r) == "main" and fills_staple(x) for r, x in pairs)
+                mains, vegetables = (sum(role_base(r) == kind for r in ids) for kind in ("main", "vegetable"))
+                shares = structured_shares(policy, ids, mains, vegetables, bowl, pairs)
+            else:
+                shares = portion_shares(policy, [item.role_id for item in left]) or {}
             for item in left:
                 share = float(shares.get(item.role_id, 1))
                 values = MealPlanReplanningService._rescaled(item, share)
@@ -829,6 +869,14 @@ class MealPlanReplanningService:
             for item in recommendations
             if item.recipe.id != entry.recipe_id and dish_family(item.recipe.title) not in meal_dishes
         ]
+        household = constraints.household
+        if household is not None and household.missing_equipment:
+            # The kitchen's equipment holds for a swap as for the planner (section 4.3).
+            candidates = [
+                item
+                for item in candidates
+                if equipment_met(getattr(recipes_by_id[item.recipe.id], "equipment", None), household.missing_equipment)
+            ]
         if unavailable:
             candidates = [
                 item
@@ -846,8 +894,7 @@ class MealPlanReplanningService:
             candidates = [
                 item
                 for item in candidates
-                if (recipes_by_id[item.recipe.id].course or "main") in role.courses
-                and (not vegetable_role(role.role_id) or catalog_vegetable_led(recipes_by_id[item.recipe.id]))
+                if catalog_role_admits(role, recipes_by_id[item.recipe.id])
                 and self._meal_still_holds(plan, entry, recipes_by_id[item.recipe.id], constraints)
             ]
         # A dinner takes a dinner dish whenever one fits, as the planner fills a slot (ADR-0044, every meal since
@@ -857,16 +904,13 @@ class MealPlanReplanningService:
 
     def _week_grocery(self, plan: MealPlan, constraints, recipes_by_id, swaps: dict[int, int]):
         """The week's shopping with `swaps` (entry id -> recipe id) made."""
-        eaten = [
-            (recipes_by_id[swaps.get(item.id, item.recipe_id)], grocery_share(item, plan.household_size))
-            for item in plan.entries
-            if item.status != "skipped"
-        ]
+        eaten = [item for item in plan.entries if item.status != "skipped"]
         return self.grocery_aggregator.estimate(
-            [recipe for recipe, _ in eaten],
+            [recipes_by_id[swaps.get(item.id, item.recipe_id)] for item in eaten],
             constraints,
-            shares=[share for _, share in eaten],
+            shares=[grocery_share(item, plan.household_size) for item in eaten],
             by_weight=by_weight(self._current_grocery(plan)),
+            trips=entry_trips(plan, eaten),
         )
 
     def _fitting(self, plan, constraints, recipes_by_id, swaps, entry, ranked, misfits=None) -> tuple:
@@ -951,7 +995,13 @@ class MealPlanReplanningService:
         limit = slot_time_limit(
             constraints.household, constraints.max_cooking_time_minutes, entry.planned_date, entry.meal_type
         )
-        if limit is not None and meal_minutes(dishes, PlanningCompositionPolicy()) > limit:
+        roles = MealPlanReplanningService._meal_roles(constraints, entry)
+        policy = STRUCTURED_TIME if structured(roles) else PlanningCompositionPolicy()
+        if limit is not None and meal_minutes(dishes, policy) > limit:
+            return False
+        if structured(roles) and not MealPlanReplanningService._real_meal_holds(entry, candidate, others, roles):
+            return False
+        if rules_on(constraints) and MealPlanReplanningService._perishable_late(plan, entry, candidate):
             return False
         ceiling = constraints.max_sodium_mg_per_meal
         if ceiling is not None and candidate.nutrition is not None:
@@ -973,6 +1023,48 @@ class MealPlanReplanningService:
         return True
 
     @staticmethod
+    def _meal_roles(constraints: WeeklyMealPlanRequest, entry: MealPlanEntry) -> list:
+        roles = (
+            constraints.plan_shape.meals.get(entry.meal_type)
+            if constraints.plan_shape is not None
+            else constraints.meal_composition
+        )
+        return list(roles or [])
+
+    @staticmethod
+    def _real_meal_holds(entry: MealPlanEntry, candidate: Recipe, others: list[MealPlanEntry], roles) -> bool:
+        """A swap in a structured meal keeps it a real meal (ADR-0070): a core dish keeps whether it carries the
+        staple, a protein main shares no protein source with the meal's other mains, and a lunch or dinner keeps
+        its energy floor per serving. Tags hold by the role (`catalog_role_admits`)."""
+        core = core_role(roles)
+        if core is not None and entry.role_id == core.role_id and fills_staple(candidate) != fills_staple(entry.recipe):
+            return False
+        if role_base(entry.role_id) == "main":
+            taken = {
+                source
+                for item in others
+                if role_base(item.role_id) == "main"
+                for source in getattr(item.recipe, "protein_sources", None) or []
+            }
+            if taken & set(getattr(candidate, "protein_sources", None) or []):
+                return False
+        share = meal_structure.energy_floor_share(entry.meal_type)
+        if share and candidate.nutrition is not None:
+            energy = sum(float(item.calories_kcal) for item in others)
+            energy += float(candidate.nutrition.calories_kcal) * float(entry.portion_share)
+            if energy < share * hpb()["adult_reference"]["energy_kcal"] - 1e-6:
+                return False
+        return True
+
+    @staticmethod
+    def _perishable_late(plan: MealPlan, entry: MealPlanEntry, candidate: Recipe) -> bool:
+        """A perishable dish later than its days after its shopping trip (ADR-0072)."""
+        since_trip = (entry.day_index - 1) % meal_structure.trip_days() + 1
+        if since_trip <= meal_structure.perishable_days():
+            return False
+        return any(line.ingredient.perishable is True for line in getattr(candidate, "recipe_ingredients", None) or [])
+
+    @staticmethod
     def _recipes_after_event(
         *,
         plan: MealPlan,
@@ -980,9 +1072,9 @@ class MealPlanReplanningService:
         event_type: str,
         proposed_recipe_id: int | None,
         recipes_by_id: dict[int, Recipe],
-    ) -> list[tuple[Recipe, float]]:
-        """Each dish still eaten after the event, with its portion share."""
-        recipes: list[tuple[Recipe, float]] = []
+    ) -> list[tuple[Recipe, float, MealPlanEntry]]:
+        """Each dish still eaten after the event, with its portion share and its entry."""
+        recipes: list[tuple[Recipe, float, MealPlanEntry]] = []
         for entry in plan.entries:
             if entry.status == "skipped" or (entry.id == target.id and event_type == "CANCEL_MEAL"):
                 continue
@@ -992,7 +1084,7 @@ class MealPlanReplanningService:
             recipe = recipes_by_id.get(recipe_id)
             if recipe is None:
                 raise MealPlanReplanNotFoundError("A recipe used by this plan no longer exists")
-            recipes.append((recipe, grocery_share(entry, plan.household_size)))
+            recipes.append((recipe, grocery_share(entry, plan.household_size), entry))
         return recipes
 
     @staticmethod

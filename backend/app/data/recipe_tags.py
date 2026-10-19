@@ -19,7 +19,11 @@ which the planner reads as untagged. Allergen, halal and diet labels are never e
 
 The rules, and why:
 
-- **Meal role.** A fixed course decides it: breakfast, dessert, sauce, drink, snack, salad. A salad
+- **Meal role.** A fixed course decides it: breakfast, dessert, sauce, drink, snack, salad. A recipe that
+  is a part of a dish, not a dish (a dough, crust, batter, sauce, marinade, rub, dressing, gravy, stock,
+  broth, paste or seasoning by its title's final head noun: `component`) is a `sauce`, the role of every
+  such part, so it never fills a meal; "Chicken In Tarragon Sauce" and "Cauliflower Crust Pizza" stay
+  dishes. A salad
   stays a salad whatever it holds, since a salad only ever fills the vegetable side (ADR-0070); the
   planner's vegetable-led check still decides whether it may. A hearty salad (not vegetable-led, with a
   main protein) therefore fills no slot; the owner reviews them as their own stratum of the sample packet
@@ -148,6 +152,17 @@ BREAD_TITLE = re.compile(
 )
 BREAKFAST_TITLE = re.compile(r"\b(?:muffins?|scones?|pancakes?|waffles?|granola|croissants?|bagels?|danish)\b")
 PIZZA_TITLE = re.compile(r"\b(?:pizzas?|calzones?)\b")
+# A dish that is a part of another (a dough, crust, sauce, marinade, stock ...) by its title's final head noun.
+# Doughs, crusts and batters are one even after "and" ("Garlic And Oregano Pizza Dough") or in brackets
+# ("Masa De Empanadas (Empanada Dough)"); a sauce after "and" belongs to a dish ("Meatballs And Marinara Sauce").
+COMPONENT = re.compile(
+    r"\b(?:(doughs?|crusts?|batters?)|sauces?|marinades?|rubs?|dressings?|grav(?:y|ies)|stocks?|broths?|pastes?"
+    r"|seasonings?)$"
+)
+DISH_LINK = re.compile(r"\b(?:with|in|on|over)\b")
+AND_LINK = re.compile(r"\b(?:and|n)\b|&")
+TITLE_TAIL = re.compile(r"\s+-\s.*$|\s+for\b.*$")  # "Spaghetti Sauce - Slow Cooker", "Meatballs For Spaghetti Sauce"
+TITLE_SUFFIX = re.compile(r"(?:\s+(?:recipe|i{1,3}))+$")
 
 PROTEIN_SOURCES: tuple[str, ...] = get_args(ProteinSource)
 FLESH_SOURCES = frozenset({"chicken", "duck", "pork", "beef", "lamb", "fish", "shellfish"})
@@ -459,12 +474,35 @@ def dish_vegetable_led(dish: Dish) -> bool:
     return vegetable_led((line.name, line.grams, line.text) for line in dish.lines)
 
 
+def component(title: str, course: str) -> bool:
+    """A recipe that is a part of a dish, not a dish: a dough, crust, batter, sauce, marinade, rub, dressing,
+    gravy, stock, broth, paste or seasoning by the final head noun of its title, with no "with", "in", "on" or
+    "over" before it ("Chicken In Tarragon Sauce" is a dish). A side's dressing is a stuffing, a dish."""
+    title = title.lower()
+    bare = TITLE_TAIL.sub("", re.sub(r"\([^)]*\)", " ", title)).strip(" \"'!.,;")
+    candidates = [(TITLE_SUFFIX.sub("", bare), True)]
+    candidates += [(inner.strip(), False) for inner in re.findall(r"\(([^)]*)\)", title)]
+    for text, whole in candidates:
+        match = COMPONENT.search(text)
+        if match is None or (not whole and match.group(1) is None):
+            continue
+        before = text[: match.start()]
+        if DISH_LINK.search(before) or (match.group(1) is None and AND_LINK.search(before)):
+            continue
+        if match.group(0).startswith("dressing") and course == "side":
+            continue
+        return True
+    return False
+
+
 def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | None, tuple[str, ...]]:
     """The rule's role, or None with the roles the model may choose from."""
     title = dish.title.lower()
     open_roles = tuple(role for role in MEAL_ROLES if led or role not in {"vegetable", "salad"})
     if dish.course in FIXED_COURSE_ROLES:
         return FIXED_COURSE_ROLES[dish.course], ()
+    if component(dish.title, dish.course):
+        return "sauce", ()  # `sauce` is every non-meal part of a dish, a dough or stock as much as a sauce
     has_protein = sources is None or bool(sources)
     if dish.course == "baked_good":
         sweet = bool(dish.carbohydrate_g) and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.3
@@ -828,13 +866,34 @@ def merge_answer(tags: Tags, answer: dict) -> None:
 # --- writing -----------------------------------------------------------------------------------------------
 
 
-def recipe_entry(tags: Tags) -> dict:
+def recipe_entry(tags: Tags, previous: dict | None = None) -> dict:
+    """The tag file's entry; a value the owner accepted (`--accept-batch`) stays reviewed while it is unchanged."""
+    previous = previous or {}
     entry = {name: tags.values[name] for name in tags.values}
-    entry["estimated"] = {
-        name: {"method": method, "batch": RULE_BATCH if method == "rule" else LLM_BATCH, "reviewed": False}
-        for name, method in tags.methods.items()
-    }
+    entry["estimated"] = {}
+    for name, method in tags.methods.items():
+        batch = RULE_BATCH if method == "rule" else LLM_BATCH
+        held = previous.get("estimated", {}).get(name, {})
+        same = held.get("batch") == batch and held.get("method") == method and previous.get(name) == entry[name]
+        entry["estimated"][name] = {"method": method, "batch": batch, "reviewed": bool(same and held.get("reviewed"))}
     return entry
+
+
+def accept_batch(batch: str) -> int:
+    """Mark every model-decided value of `batch` in the recipe tag file reviewed, after the owner's spot check of
+    its sample (data-engineering/README.md); the importer then carries `reviewed` onto the rows and the planner
+    reads the values. Returns how many values were accepted."""
+    path = repository_root() / RECIPE_TAGS
+    data = json.loads(path.read_text(encoding="utf-8"))
+    accepted = 0
+    for entry in data["recipes"].values():
+        for estimate in entry.get("estimated", {}).values():
+            if estimate["batch"] == batch and estimate["method"] == "llm" and not estimate["reviewed"]:
+                estimate["reviewed"] = True
+                accepted += 1
+    header = {name: value for name, value in data.items() if name != "recipes"}
+    write_keyed(path, header, "recipes", data["recipes"])
+    return accepted
 
 
 def write_keyed(path: Path, header: dict, key: str, entries: dict[str, dict]) -> None:
@@ -1051,9 +1110,18 @@ def main() -> None:
         "--max-usd", type=float, default=5.0, help="estimated spend at which the model is no longer asked"
     )
     parser.add_argument("--reask", action="store_true", help="drop the model's earlier answers and ask again")
+    parser.add_argument(
+        "--accept-batch",
+        metavar="BATCH",
+        help=f"mark the model's values of a reviewed batch ({LLM_BATCH}) reviewed in the tag file, and stop",
+    )
     args = parser.parse_args()
 
     root = repository_root()
+    if args.accept_batch:
+        print(f"Accepted {accept_batch(args.accept_batch)} model-decided values of {args.accept_batch}.")
+        return
+    previous = previous_file().get("recipes", {})
     result = build(args.llm, args.max_usd, reask=args.reask)
     tagged = result["tagged"]
     write_keyed(
@@ -1067,7 +1135,7 @@ def main() -> None:
             "llm_usage": result["usage"],
         },
         "recipes",
-        {dish.key: recipe_entry(tags) for dish, tags in tagged},
+        {dish.key: recipe_entry(tags, previous.get(dish.key)) for dish, tags in tagged},
     )
     ingredients = ingredient_entries()
     write_keyed(

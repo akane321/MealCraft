@@ -11,9 +11,12 @@ from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, replace
 from datetime import timedelta
 from fractions import Fraction
-from math import ceil, isfinite
+from math import ceil, floor, isfinite
+from typing import get_args
 
+from app.data import meal_structure
 from app.data.allergens import checked_allergens
+from app.data.household_reference import hpb
 from app.data.ingredient_hierarchy import expand_exclusions
 from app.data.units import UNIT_BASE, in_grams, weighed
 from app.planning.beam_planner import BeamLimits, BeamPlanner
@@ -26,6 +29,7 @@ from app.planning.household_slots import (
     assumed_basics,
     basics_note,
     limit_targets,
+    slot_people,
     slot_servings,
     slot_time_limit,
 )
@@ -36,8 +40,9 @@ from app.planning.meal_beam import (
     MealBeamResult,
     assignments_of,
     empty_roles,
+    staple_slots,
 )
-from app.planning.meal_composition import dish_servings
+from app.planning.meal_composition import dish_servings, meal_role_of, structured_slot, unreviewed
 from app.planning.nutrition_scope import compile_nutrition_targets, nutrition_guard_loss
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
@@ -47,14 +52,17 @@ from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
 from app.planning.weekly_planner import WeeklyPlanSelectionError, WeeklyPlanSelector
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse
 from app.schemas.planning_v2 import (
+    DishCourse,
     FinalPlanningProblem,
     PlanningAssignment,
+    PlanningCompositionPolicy,
     PlanningConstraintCheck,
     PlanningNutritionBand,
     PlanningPantryItem,
     PlanningRecipeCount,
     PlanningRepetitionRules,
     PlanningSlot,
+    structured,
 )
 from app.schemas.product import GroceryLineEstimate
 from app.schemas.recipe import RecipeListItemResponse
@@ -138,6 +146,36 @@ def meals_of_the_day(constraints) -> list[tuple[str, list]] | None:
     return [("dinner", composition)] if composition is not None else None
 
 
+def pool_courses(meals) -> list[str] | None:
+    """The courses the recipe pool loads for a plan's meals (None: mains and soups, the one-dish dinner). A meal of
+    meal roles loads every dish course: a staple may be a side or a baked good, a vegetable dish a main."""
+    if not meals:
+        return None
+    courses = {course for _, roles in meals for role in roles for course in role.courses}
+    if any(structured(roles) for _, roles in meals):
+        courses |= set(get_args(DishCourse))
+    return sorted(courses)
+
+
+def pool_for(meals, recipes) -> list:
+    """The pool's recipes a plan's meals can take: for meals of meal roles, only those a role's tags admit."""
+    if not meals or not any(structured(roles) for _, roles in meals):
+        return recipes
+    tags = {tag for _, roles in meals if structured(roles) for role in roles for tag in role.meal_roles}
+    courses = {course for _, roles in meals if not structured(roles) for role in roles for course in role.courses}
+    return [
+        recipe
+        for recipe in recipes
+        if meal_role_of(recipe) in tags or (courses and (recipe.course is None or recipe.course in courses))
+    ]
+
+
+def people_at(servings) -> int:
+    """How many people a household size counts as for its dish count (ADR-0070 table), halves rounded up. A
+    household of members counts the members present instead (`slot_people`)."""
+    return max(1, floor(float(servings) + 0.5))
+
+
 def meal_affinity(recipe) -> tuple[str, ...]:
     """A release recipe states its meal types (ADR-0038); a curated one's meal_type
     may name one; otherwise it is a lunch or dinner dish."""
@@ -205,22 +243,31 @@ def composed_packet(
     uses: dict[str, int] = {}
     for _, roles in composition:
         for role in roles:
-            for course in role.courses:
+            # A role of meal roles keeps dishes by their tag ("role:staple"), one of courses by its course.
+            tags = getattr(role, "meal_roles", None)
+            for kind in [f"role:{tag}" for tag in tags] if tags else role.courses:
                 # The vegetable role keeps the best vegetable-led dishes, which the best sides are not.
-                key = f"vegetable {course}" if vegetable_role(role.role_id) else course
+                key = f"vegetable {kind}" if vegetable_role(role.role_id) else kind
                 uses[key] = uses.get(key, 0) + day_count
     limits = {key: max(COMPOSED_CANDIDATES_PER_COURSE, 3 * count) for key, count in uses.items()}
+    if "role:staple" in limits:
+        # Rice by default repeats by design (ADR-0070): a few staples of each kind, not three a meal.
+        limits["role:staple"] = meal_structure.meal_structure()["staple_candidates"]
     by_id = {r.id: r for r in recipes}
     ranked_by_key: dict[str, list] = {}
     for recommendation in recommendations:
         recipe = by_id.get(recommendation.recipe.id)
         course = getattr(recipe, "course", None) or "main"
-        led = f"vegetable {course}"
-        for key in (course, led):
-            if key in limits and (key != led or (recipe is not None and catalog_vegetable_led(recipe))):
+        tag = f"role:{meal_role_of(recipe)}"
+        for key in (course, f"vegetable {course}", tag, f"vegetable {tag}"):
+            led = key.startswith("vegetable ")
+            if key in limits and (not led or (recipe is not None and catalog_vegetable_led(recipe))):
                 ranked_by_key.setdefault(key, []).append(recommendation)
     chosen: set[int] = set()
     for key, ranked in ranked_by_key.items():
+        if key == "role:staple":
+            chosen |= {r.recipe.id for r in staple_packet(ranked, limits[key])}
+            continue
         best = ranked[: limits[key]]
         if budget is not None:
             # As the one-dish packet does: the best-ranked dishes are rarely the cheap ones, so with a budget
@@ -235,6 +282,21 @@ def composed_packet(
             best += families_first(sorted(ranked[len(best) :], key=dish_cost), kept)[: limits[key] - len(best)]
         chosen |= {r.recipe.id for r in best}
     return [r for r in recommendations if r.recipe.id in chosen or (keep and r.recipe.slug in keep)], limits
+
+
+def staple_packet(ranked, limit: int) -> list:
+    """The staples a week is planned from: the best few plain staples of each kind (rice, noodles, flatbread ...,
+    data/planning/meal-structure-v1.json `staple_defaults`), then the best of the rest."""
+    per_kind = meal_structure.meal_structure()["staple_candidates_per_kind"]
+    taken: Counter = Counter()
+    first = []
+    for recommendation in ranked:
+        kind = meal_structure.plain_staple_kind(recommendation.recipe.slug)
+        if kind is not None and taken[kind] < per_kind:
+            taken[kind] += 1
+            first.append(recommendation)
+    rest = [r for r in ranked if r not in first]
+    return (first + rest)[:limit]
 
 
 class ProductPlanningEngine:
@@ -270,6 +332,8 @@ class ProductPlanningEngine:
         locked=None,
         used=None,
         dates=None,
+        plan_days=None,
+        plan_day_count=None,
     ):
         """A validated week, or ProductPlanningError saying why there is none.
 
@@ -280,7 +344,9 @@ class ProductPlanningEngine:
         slug -> uses) is what the rest of a week already serves when part of it is planned: those uses count
         towards the household's cap on uses. `minimum_distinct_dishes` takes only weeks of at least that many
         different dishes (ADR-0067's four). `dates` are the calendar days planned when they are not consecutive
-        (part of a saved week), so a household's weekday rules read the right day.
+        (part of a saved week), so a household's weekday rules read the right day; `plan_days` are those days'
+        numbers in the saved plan of `plan_day_count` days (1-based), so each meal is bought on its own trip and a
+        perishable is counted from that trip.
         """
         locked = locked or {}
         kept_dishes = {slug for roles in locked.values() for slug in roles.values()}
@@ -310,6 +376,13 @@ class ProductPlanningEngine:
         # The meals of each day and their dish roles (ADR-0046). None is the MVP: one dish a dinner.
         shape = meals_of_the_day(constraints)
         composition = shape  # kept as the name for "planned with the meal beam" below
+        # The household's rules (layer 08) are on with a household block or a structured meal (ADR-0070): only
+        # then are the recipes' tags read, perishables kept to their days and equipment checked. Without either the
+        # packet, and so every digest and protocol report, is exactly as before.
+        any_structured = any(structured(roles) for _, roles in shape or [])
+        household_rules = household is not None or any_structured
+        plan_day_count = plan_day_count or constraints.day_count
+        plan_days = plan_days or list(range(1, constraints.day_count + 1))
         try:
             for _, roles in shape or []:
                 require_composition_enabled(roles)
@@ -426,6 +499,8 @@ class ProductPlanningEngine:
             if composition is not None and candidate.course is None:
                 # The curated catalog predates course labels and holds only dinner mains.
                 candidate = candidate.model_copy(update={"course": "main"})
+            if household_rules:
+                candidate = candidate.model_copy(update=recipe_tags(by_id[recommendation.recipe.id], candidate))
             candidates.append(candidate)
             estimate = recommendation.grocery_estimate
             for line in estimate.items if estimate else []:
@@ -463,8 +538,14 @@ class ProductPlanningEngine:
                 "needs_data", "Recipe or price details could not be verified; refresh them and try again.", trace
             )
         slots, slot_day, unattended = [], {}, []
+        trip_days = meal_structure.trip_days()
+        floor_kcal = hpb()["adult_reference"]["energy_kcal"]
         for i in range(constraints.day_count):
             planned_date = dates[i] if dates else constraints.start_date + timedelta(days=i)
+            # The plan's day number: its trip (before day 1, and day 8 in a longer plan) and days since it.
+            day = plan_days[i] - 1
+            trip = 1 + day // trip_days if plan_day_count > trip_days else None
+            since_trip = day % trip_days + 1 if household_rules else None
             for meal, roles in composition or [("dinner", None)]:
                 # Each meal is cooked for the members home for it (layer 08 presence rules); nobody home, no meal.
                 servings = (
@@ -475,6 +556,19 @@ class ProductPlanningEngine:
                 if not servings:
                     unattended.append(f"{planned_date:%A} {meal} is not planned: nobody is home.")
                     continue
+                meal_roles, floor_share, kept_roles = roles, None, locked.get((i, meal))
+                if structured(roles):
+                    # The dinner grows with the people at it (ADR-0070 table); a count the household stated has no
+                    # role planned by who is present, so it stays as stated.
+                    people = (
+                        slot_people(household, planned_date, meal)
+                        if household is not None and household.members is not None
+                        else people_at(servings)
+                    )
+                    meal_roles = meal_structure_roles(roles, people)
+                    floor_share = meal_structure.energy_floor_share(meal)
+                    if kept_roles:
+                        kept_roles = {r: d for r, d in kept_roles.items() if r in {x.role_id for x in meal_roles}}
                 slot = PlanningSlot(
                     slot_id=f"slot-{i}" if meal == "dinner" else f"slot-{i}-{meal}",
                     planned_date=planned_date,
@@ -483,8 +577,11 @@ class ProductPlanningEngine:
                     max_time_minutes=slot_time_limit(
                         household, constraints.max_cooking_time_minutes, planned_date, meal
                     ),
-                    composition=roles,
-                    locked_roles=locked.get((i, meal)),
+                    composition=meal_roles,
+                    locked_roles=kept_roles,
+                    min_energy_kcal=round(floor_share * floor_kcal, 1) if floor_share else None,
+                    trip=trip,
+                    days_after_shopping=since_trip,
                 )
                 slots.append(slot)
                 slot_day[slot.slot_id] = (i, meal)
@@ -527,6 +624,16 @@ class ProductPlanningEngine:
             nutrition_bands=bands,
             purchase_budget_sgd=constraints.weekly_budget_sgd,
             budget_is_hard=budget_is_hard,
+            composition_policy=(
+                PlanningCompositionPolicy(
+                    structured_shares=meal_structure.portion_shares(),
+                    staple_hands_off_cook=meal_structure.meal_structure()["staple_hands_off_cook"],
+                )
+                if any_structured
+                else PlanningCompositionPolicy()
+            ),
+            missing_equipment=list(household.missing_equipment) if household is not None else [],
+            perishable_days=meal_structure.perishable_days() if household_rules else None,
             # Only a stated cap is a rule; the search and the validator both hold it (ADR-0046 variety), and a dish
             # the rest of the week serves has only what its uses there leave of it.
             repetition_rules=(
@@ -670,6 +777,8 @@ class ProductPlanningEngine:
                 banded = any(band.hard and band.scope == "per_day" for band in problem.nutrition_bands)
 
                 roles_of = {s.slot_id: len(s.composition or [None]) for s in problem.slots}
+                staples = staple_slots(problem)
+                uncounted = problem.uncounted_roles
 
                 def variety(state) -> tuple[int, int, int, int]:
                     """Sorts the fewest empty optional dishes, then the most distinct dishes, then the fewest
@@ -678,10 +787,11 @@ class ProductPlanningEngine:
                     The owner's order (2026-10-02, amending ADR-0045 for composed weeks): a week with its
                     optional dishes filled comes before one with a dish or two more of variety. Of two weeks
                     as varied, one dish twice and another twice beats one dish three times ("菜很单调")."""
-                    dishes = [recipe for _, meal in state.choices for _, recipe in meal]
+                    # The staple repeats by design (ADR-0070) and counts towards no variety.
+                    dishes = [recipe for _, meal in state.choices for role, recipe in meal if role not in uncounted]
                     repeats, same_kind = sameness(dishes)
                     most = max(Counter(dishes).values(), default=0)
-                    return empty_roles(state, roles_of), repeats - len(dishes), most, same_kind - len(dishes)
+                    return empty_roles(state, roles_of, staples), repeats - len(dishes), most, same_kind - len(dishes)
 
                 def order(item) -> tuple:
                     """The fullest, then most varied week first (ADR-0045 as amended), then the lighter search, loss."""
@@ -783,7 +893,7 @@ class ProductPlanningEngine:
 
                 def full_and_varied(state) -> bool:
                     """Every role filled and no dish or kind twice, every role counted: the least `variety` can be."""
-                    dishes = [recipe for _, meal in state.choices for _, recipe in meal]
+                    dishes = [recipe for _, meal in state.choices for role, recipe in meal if role not in uncounted]
                     return variety(state)[0] == 0 and sameness(dishes) == (0, 0)
 
                 full_and_repeat_free = any(full_and_varied(state) for state in search.states)
@@ -901,7 +1011,7 @@ class ProductPlanningEngine:
                 else:
                     passed.append((assignments, shopping, report))
         if passed:
-            result = over_budget_pick(passed, problem.slots, constraints.weekly_budget_sgd)
+            result = over_budget_pick(passed, problem.slots, constraints.weekly_budget_sgd, problem.uncounted_roles)
         if result is None:
             # A search that built no week said why (a meal, the repeats, the budget) or ran out of steps: no week
             # reached a check, so an input issue elsewhere in the pool (one recipe's servings) did not decide it, and
@@ -930,8 +1040,14 @@ class ProductPlanningEngine:
             if status == "needs_data":
                 message = "Some recipe or price details are missing. Try again in a moment."
             elif only_budget_failures and totals and constraints.weekly_budget_sgd is not None:
+                # A seven-day plan of course roles keeps its words (and the protocol reports theirs).
+                what, span = (
+                    ("seven dinners", "week")
+                    if constraints.day_count == 7 and not any_structured
+                    else ("these meals", "plan")
+                )
                 message = (
-                    f"I couldn't fit seven dinners into S${constraints.weekly_budget_sgd:.2f}. The cheapest week "
+                    f"I couldn't fit {what} into S${constraints.weekly_budget_sgd:.2f}. The cheapest {span} "
                     f"I found costs S${min(totals):.2f}. Try a higher budget or fewer limits."
                 )
             elif trace.get("search", {}).get("exhausted"):
@@ -946,6 +1062,8 @@ class ProductPlanningEngine:
                 message = "I couldn't find a week that meets every limit. Try relaxing one of them."
             raise ProductPlanningError(status, message, trace, problem=problem.model_copy(deep=True))
         assignments, shopping, report = result
+        # A perishable line says "use within N days" on the list (layer 08); only with the household's rules on.
+        perishables = perishable_ingredients(by_id.values()) if household_rules else set()
         lines = []
         for row in shopping:
             product = observations.get(row.selected_product_id)
@@ -966,6 +1084,8 @@ class ProductPlanningEngine:
                     excess_quantity=row.surplus_quantity,
                     note=row.note,
                     evidence=provenance.get(row.selected_product_id),
+                    shopping_trip=row.trip,
+                    perishable=True if row.ingredient_id in perishables else None,
                 )
             )
         budget_check = next((c for c in report.checks if c.code == "purchase_budget"), None)
@@ -1018,7 +1138,42 @@ class ProductPlanningEngine:
         return ProductPlan(selected, grocery, trace, placements)
 
 
-def over_budget_pick(passed, slots, budget):
+def meal_structure_roles(roles, people: int) -> list:
+    """A structured meal's roles with `people` at it: a role with min_people only from that many on."""
+    return [role for role in roles if (role.min_people or 0) <= people]
+
+
+def recipe_tags(recipe, candidate) -> dict:
+    """The layer 08 tags a candidate carries (PR-2), from its catalog recipe: its meal role, staple, protein
+    sources, cooking methods, equipment, cuisine group, and whether a line it buys is perishable. A recipe whose
+    meal role, staple or protein sources wait for review carries none of the three: it is untagged."""
+    bought = {item.ingredient_id for item in candidate.ingredients}
+    perishable = any(
+        line.ingredient.perishable is True and line.ingredient.normalized_name in bought
+        for line in getattr(recipe, "recipe_ingredients", None) or []
+    )
+    held = not unreviewed(recipe)
+    return {
+        "meal_role": recipe.meal_role if held else None,
+        "contains_staple": recipe.contains_staple if held else None,
+        "protein_sources": recipe.protein_sources if held else None,
+        "cooking_methods": recipe.cooking_methods,
+        "equipment": recipe.equipment,
+        "cuisine_group": meal_structure.cuisine_group(recipe.cuisine),
+        "perishable": True if perishable else None,
+    }
+
+
+def perishable_ingredients(recipes) -> set[str]:
+    return {
+        line.ingredient.normalized_name
+        for recipe in recipes
+        for line in getattr(recipe, "recipe_ingredients", None) or []
+        if line.ingredient.perishable is True
+    }
+
+
+def over_budget_pick(passed, slots, budget, uncounted=frozenset()):
     """The week offered over the budget, of `passed` (weeks holding every other rule, in the order the
     in-budget path tries them: fewest empty optional dishes, then most distinct dishes, first; ADR-0052).
 
@@ -1032,8 +1187,19 @@ def over_budget_pick(passed, slots, budget):
     def charged(item) -> float:
         assignments, _, report = item
         filled = Counter(a.slot_id for a in assignments)
-        dishes = [a.recipe_id for a in assignments]
-        empty = sum(len(slot.composition or [None]) - filled[slot.slot_id] for slot in slots)
+        dishes = [a.recipe_id for a in assignments if getattr(a, "role_id", None) not in uncounted]
+        staples = {a.slot_id for a in assignments if getattr(a, "role_id", None) == "staple"}
+        # A staple left out beside a dish that carries it is no empty dish (ADR-0070).
+        empty = sum(
+            len(slot.composition or [None])
+            - filled[slot.slot_id]
+            - (
+                structured_slot(slot)
+                and slot.slot_id not in staples
+                and any(r.role_id == "staple" for r in slot.composition)
+            )
+            for slot in slots
+        )
         return report.purchase_total_sgd + share * (len(dishes) - len(set(dishes)) + EMPTY_OPTIONAL_ROLE_LOSS * empty)
 
     price = min(passed, key=charged)[2].purchase_total_sgd

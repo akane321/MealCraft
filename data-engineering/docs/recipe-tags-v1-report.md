@@ -7,8 +7,8 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Field | rule | llm | open (null) |
 | --- | ---: | ---: | ---: |
-| `meal_role` | 8568 | 376 | 53 |
-| `contains_staple` | 8568 | 376 | 53 |
+| `meal_role` | 8575 | 369 | 53 |
+| `contains_staple` | 8575 | 369 | 53 |
 | `protein_sources` | 8920 | 77 | 0 |
 | `cooking_methods` | 8997 | 0 | 0 |
 | `equipment` | 8997 | 0 | 0 |
@@ -18,16 +18,16 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Meal role | rule | llm |
 | --- | ---: | ---: |
-| protein_main | 3662 | 27 |
-| vegetable | 571 | 1 |
+| protein_main | 3653 | 27 |
+| vegetable | 568 | 1 |
 | soup | 213 | 14 |
-| staple | 606 | 114 |
-| one_bowl | 1465 | 93 |
+| staple | 606 | 107 |
+| one_bowl | 1452 | 93 |
 | breakfast | 390 | 13 |
 | salad | 484 | 0 |
 | snack | 240 | 90 |
 | dessert | 529 | 13 |
-| sauce | 330 | 11 |
+| sauce | 362 | 11 |
 | drink | 78 | 0 |
 | open (null) | 0 | 0 |
 
@@ -35,17 +35,17 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Value | Recipes |
 | --- | ---: |
-| chicken | 2203 |
+| chicken | 2201 |
 | duck | 4 |
 | pork | 1269 |
-| beef | 1309 |
-| lamb | 36 |
+| beef | 1306 |
+| lamb | 35 |
 | fish | 233 |
 | shellfish | 489 |
 | soy | 142 |
-| egg | 1081 |
+| egg | 1074 |
 | legume | 215 |
-| none (`[]`) | 2838 |
+| none (`[]`) | 2851 |
 
 ## `cooking_methods` values (recipes carrying each)
 
@@ -68,16 +68,16 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 | --- | ---: |
 | fragrant | 1539 |
 | spicy | 1324 |
-| light | 1895 |
-| rich | 3503 |
-| none (`[]`) | 2597 |
+| light | 1880 |
+| rich | 3496 |
+| none (`[]`) | 2617 |
 
 ## `contains_staple` and `equipment`
 
 | Value | Recipes |
 | --- | ---: |
-| contains_staple True | 2278 |
-| contains_staple False | 6666 |
+| contains_staple True | 2258 |
+| contains_staple False | 6686 |
 | contains_staple None | 53 |
 | equipment ('blender',) | 532 |
 | equipment ('microwave',) | 218 |
