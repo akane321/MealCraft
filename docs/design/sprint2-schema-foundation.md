@@ -48,7 +48,16 @@ stays at version `6`), and migration `20261019_0031`:
 `meal_plan_grocery_plan_ingredient_unit_key` becomes the unique index
 `meal_plan_grocery_plan_trip_ingredient_unit_key` on (`plan_id`,
 `COALESCE(shopping_trip, 1)`, `ingredient_name`, `unit`). Its report is
-`docs/evaluation/full-default/latest.md`. Still
+`docs/evaluation/full-default/latest.md`. A recipe whose `meal_role`,
+`contains_staple` or `protein_sources` the model decided (`estimated[field]`
+`method` `llm`) and that is not `reviewed` is untagged to a structured meal: it
+fills no meal-role role until the owner has spot-checked its batch's sample and
+run `python -m app.data.recipe_tags --accept-batch recipe-tags-v1/llm`, which
+sets `reviewed` on that batch's model-decided entries in the tag file for the
+importer to carry (`app.planning.meal_composition.unreviewed`). Roles of
+courses are unaffected. A recipe that is a part of a dish (a dough, crust,
+batter, sauce, marinade, stock and the like) is `meal_role` `sauce`, the
+non-meal role of every such part. Still
 unwired: `self_only_allergens`, the halal and
 `unknown_safety` columns, `FlavorBoost` and `PlanningPreferences`, and the other
 columns below. The

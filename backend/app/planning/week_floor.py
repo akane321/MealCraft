@@ -15,7 +15,7 @@ from math import inf
 
 from app.data import meal_structure
 from app.data.units import in_grams
-from app.planning.meal_composition import MAIN_ROLE, portion_shares, role_base
+from app.planning.meal_composition import MAIN_ROLE, meal_role_of, portion_shares, role_base
 from app.planning.product_path import meals_of_the_day, normalized
 from app.schemas.planning_v2 import PlanningCompositionPolicy
 
@@ -45,7 +45,7 @@ class WeekFloor:
 def week_floor(constraints, recommendations, recipes) -> WeekFloor:
     shape = meals_of_the_day(constraints) or [("dinner", ONE_DISH)]
     course = {recipe.id: getattr(recipe, "course", None) or "main" for recipe in recipes}
-    tag = {recipe.id: getattr(recipe, "meal_role", None) for recipe in recipes}
+    tag = {recipe.id: meal_role_of(recipe) for recipe in recipes}
     lines = [
         (item.recipe.id, line)
         for item in recommendations

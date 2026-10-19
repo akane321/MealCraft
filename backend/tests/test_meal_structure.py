@@ -121,3 +121,46 @@ def test_a_ten_day_plan_shops_twice_and_saves_each_trip(tmp_path):
     finally:
         clear_planning_pool()
         engine.dispose()
+
+
+def _catalog_recipe(recipe_id, role, course="main", **estimated):
+    marks = {
+        name: {"method": method, "batch": "b", "reviewed": reviewed} for name, (method, reviewed) in estimated.items()
+    }
+    return SimpleNamespace(
+        id=recipe_id,
+        meal_role=role,
+        course=course,
+        contains_staple=role == "one_bowl",
+        protein_sources=["chicken"],
+        cooking_methods=[],
+        equipment=[],
+        cuisine="chinese",
+        recipe_ingredients=[],
+        estimated=marks,
+    )
+
+
+def test_a_model_decided_tag_fills_no_meal_role_until_its_batch_is_reviewed():
+    from app.planning.meal_composition import catalog_role_admits, unreviewed
+    from app.planning.product_path import pool_for, recipe_tags
+    from app.schemas.planning_v2 import PlanningMealRole
+
+    rule = _catalog_recipe(1, "protein_main", meal_role=("rule", False))
+    model = _catalog_recipe(2, "one_bowl", meal_role=("llm", False), contains_staple=("llm", False))
+    sources = _catalog_recipe(3, "protein_main", meal_role=("rule", False), protein_sources=("llm", False))
+    accepted = _catalog_recipe(4, "one_bowl", meal_role=("llm", True), contains_staple=("llm", True))
+    recipes = [rule, model, sources, accepted]
+    assert [unreviewed(r) for r in recipes] == [False, True, True, False]
+
+    tagged = PlanningMealRole(role_id="main", meal_roles=["protein_main", "one_bowl"])
+    assert [r.id for r in pool_for([("dinner", [tagged])], recipes)] == [1, 4]
+    assert [catalog_role_admits(tagged, r) for r in recipes] == [True, False, False, True]
+    candidate = SimpleNamespace(ingredients=[])
+    assert recipe_tags(model, candidate)["meal_role"] is None
+    assert recipe_tags(sources, candidate)["protein_sources"] is None
+    assert recipe_tags(accepted, candidate)["meal_role"] == "one_bowl"
+    # A role of courses is the older form: it admits by course, the tags' review aside.
+    by_course = PlanningMealRole(role_id="main", courses=["main"])
+    assert pool_for([("dinner", [by_course])], recipes) == recipes
+    assert all(catalog_role_admits(by_course, r) for r in recipes)

@@ -42,7 +42,7 @@ from app.planning.meal_beam import (
     empty_roles,
     staple_slots,
 )
-from app.planning.meal_composition import dish_servings, structured_slot
+from app.planning.meal_composition import dish_servings, meal_role_of, structured_slot, unreviewed
 from app.planning.nutrition_scope import compile_nutrition_targets, nutrition_guard_loss
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
@@ -166,8 +166,7 @@ def pool_for(meals, recipes) -> list:
     return [
         recipe
         for recipe in recipes
-        if getattr(recipe, "meal_role", None) in tags
-        or (courses and (recipe.course is None or recipe.course in courses))
+        if meal_role_of(recipe) in tags or (courses and (recipe.course is None or recipe.course in courses))
     ]
 
 
@@ -259,7 +258,7 @@ def composed_packet(
     for recommendation in recommendations:
         recipe = by_id.get(recommendation.recipe.id)
         course = getattr(recipe, "course", None) or "main"
-        tag = f"role:{getattr(recipe, 'meal_role', None)}"
+        tag = f"role:{meal_role_of(recipe)}"
         for key in (course, f"vegetable {course}", tag, f"vegetable {tag}"):
             led = key.startswith("vegetable ")
             if key in limits and (not led or (recipe is not None and catalog_vegetable_led(recipe))):
@@ -1146,16 +1145,18 @@ def meal_structure_roles(roles, people: int) -> list:
 
 def recipe_tags(recipe, candidate) -> dict:
     """The layer 08 tags a candidate carries (PR-2), from its catalog recipe: its meal role, staple, protein
-    sources, cooking methods, equipment, cuisine group, and whether a line it buys is perishable."""
+    sources, cooking methods, equipment, cuisine group, and whether a line it buys is perishable. A recipe whose
+    meal role, staple or protein sources wait for review carries none of the three: it is untagged."""
     bought = {item.ingredient_id for item in candidate.ingredients}
     perishable = any(
         line.ingredient.perishable is True and line.ingredient.normalized_name in bought
         for line in getattr(recipe, "recipe_ingredients", None) or []
     )
+    held = not unreviewed(recipe)
     return {
-        "meal_role": recipe.meal_role,
-        "contains_staple": recipe.contains_staple,
-        "protein_sources": recipe.protein_sources,
+        "meal_role": recipe.meal_role if held else None,
+        "contains_staple": recipe.contains_staple if held else None,
+        "protein_sources": recipe.protein_sources if held else None,
         "cooking_methods": recipe.cooking_methods,
         "equipment": recipe.equipment,
         "cuisine_group": meal_structure.cuisine_group(recipe.cuisine),

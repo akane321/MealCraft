@@ -2,6 +2,7 @@ from collections import Counter
 
 from app.models.recipe import Recipe
 from app.planning.grocery_estimator import GroceryEstimator
+from app.planning.meal_composition import meal_role_of
 from app.planning.product_path import meals_of_the_day
 from app.planning.recommendation_engine import CANDIDATE_LIMIT, RecipeRecommendationEngine
 from app.repositories.recipe import RecipeRepository
@@ -55,7 +56,7 @@ class RecipeRecommendationService:
 
         for recommendation in recommendations:
             recipe = recipes_by_id[recommendation.recipe.id]
-            course = (getattr(recipe, "meal_role", None) if by_tag else recipe.course or "main") if per_course else None
+            course = (meal_role_of(recipe) if by_tag else recipe.course or "main") if per_course else None
             if kept[course] == CANDIDATE_LIMIT:
                 if per_course:
                     continue

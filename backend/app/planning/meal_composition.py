@@ -24,6 +24,23 @@ from app.schemas.planning_v2 import (
 )
 
 MAIN_ROLE = "main"
+# The tags a meal's structure rests on. One the model decided is read only once its batch is reviewed.
+GATED_TAGS = ("meal_role", "contains_staple", "protein_sources")
+
+
+def unreviewed(recipe) -> bool:
+    """A catalog recipe whose meal role, staple or protein sources the model decided and nobody has reviewed yet
+    (`python -m app.data.recipe_tags --accept-batch`): the structured planner treats it as untagged."""
+    estimated = getattr(recipe, "estimated", None) or {}
+    return any(
+        (estimated.get(name) or {}).get("method") == "llm" and (estimated.get(name) or {}).get("reviewed") is not True
+        for name in GATED_TAGS
+    )
+
+
+def meal_role_of(recipe) -> str | None:
+    """A catalog recipe's meal role as the structured planner reads it: None while it is `unreviewed`."""
+    return None if unreviewed(recipe) else getattr(recipe, "meal_role", None)
 
 
 def role_admits(role: PlanningMealRole, recipe: PlanningRecipeCandidate) -> bool:
@@ -39,7 +56,7 @@ def role_admits(role: PlanningMealRole, recipe: PlanningRecipeCandidate) -> bool
 def catalog_role_admits(role: PlanningMealRole, recipe) -> bool:
     """`role_admits` for a catalog recipe (`app.models.recipe.Recipe`), as a swap reads it."""
     if role.meal_roles:
-        admitted = getattr(recipe, "meal_role", None) in role.meal_roles
+        admitted = meal_role_of(recipe) in role.meal_roles
     else:
         admitted = (recipe.course or "main") in role.courses
     return admitted and (not vegetable_role(role.role_id) or catalog_vegetable_led(recipe))
