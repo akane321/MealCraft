@@ -80,12 +80,25 @@ class PlanningPreferences(BaseModel):
 
 
 class PlanningMember(BaseModel):
-    """A member as the planner sees one: portions a meal (stated, or the HPB default) and whether usually home."""
+    """A member as the planner sees one: portions a meal (stated, or the HPB default), whether usually home, and
+    the limits that are this member's own (ADR-0071 section 1: a dish may be served when at least one present
+    member can eat it, and every present member is covered).
+
+    `allergens` holds every allergen of this member, including the ones only this member avoids: a dish with one
+    is never this member's food. The household-wide avoidance stays in the request's own `allergens`, so an
+    allergen nobody marked "only I avoid it" keeps every dish of the week off the table (ADR-0071 section 2).
+    """
 
     model_config = ConfigDict(extra="forbid")
     name: str = Field(min_length=1, max_length=80)
     servings: float = Field(gt=0, le=3)
     default_present: bool = True
+    allergens: list[str] = Field(default_factory=list, max_length=20)
+    excluded_ingredients: list[str] = Field(default_factory=list, max_length=50)
+    dietary_preferences: list[str] = Field(default_factory=list, max_length=4)
+    # This member's HPB daily energy target in kcal, after a fat-loss goal; None where HPB researched none, and
+    # the meal's energy floor then stays the adult reference at this member's servings (ADR-0070 section 3).
+    daily_energy_kcal: float | None = Field(default=None, gt=0, le=6000)
 
 
 class HouseholdPlanning(BaseModel):
@@ -95,7 +108,8 @@ class HouseholdPlanning(BaseModel):
     """
 
     model_config = ConfigDict(extra="forbid")
-    # None: every meal is cooked for `household_size` (a conversation changed the size).
+    # None: every meal is cooked for `household_size` (a conversation changed the size), and the request's own
+    # allergens, exclusions and diets are the whole household's, as before the shared-dish model.
     members: list[PlanningMember] | None = Field(default=None, min_length=1, max_length=12)
     presence_rules: list[PresenceRule] = Field(default_factory=list, max_length=20)
     cooking_time_rules: list[CookingTimeRule] = Field(default_factory=list, max_length=20)

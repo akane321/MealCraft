@@ -9,6 +9,7 @@ from fractions import Fraction
 from math import ceil
 
 from app.data import meal_structure
+from app.planning.member_coverage import coverage_issues, dish_base_servings
 from app.planning.vegetable_led import candidate_vegetable_led, catalog_vegetable_led, vegetable_role
 from app.schemas.planning_v2 import (
     NON_MEAL_ROLES,
@@ -146,7 +147,8 @@ def real_meal_issues(
     Empty for a meal of course roles. The search keeps only meals with none; the validator reports each. A lunch
     or dinner has a filling core (a protein main and its staple, or a dish that carries its staple), no non-meal
     dish, at most one dish moved from its default, distinct protein sources across its mains and its energy
-    floor; a structured breakfast only fills its roles with dishes of their tags."""
+    floor; a structured breakfast only fills its roles with dishes of their tags. With members home for the slot,
+    each one's own coverage and energy floor are checked instead of the table's one floor (`member_coverage`)."""
     roles = slot.composition or []
     if not structured(roles):
         return []
@@ -198,7 +200,11 @@ def real_meal_issues(
     ]
     if sum(len(group) for group in sources) != len(set().union(*sources)):
         issues.append(("meal_protein_repeat", "Two protein mains share a protein source.", None, None))
-    if slot.min_energy_kcal is not None and shares is not None:
+    if slot.members:
+        # The shared-dish model (ADR-0071 section 1): every present member is covered by the dishes that member
+        # can eat, and each one's energy floor is that member's own, not one adult reference for the table.
+        issues.extend(coverage_issues(slot, dishes, recipes, shares))
+    elif slot.min_energy_kcal is not None and shares is not None:
         energy = meal_energy(dishes, recipes, shares)
         if energy - slot.min_energy_kcal < -1e-6:
             detail = "The meal gives less than its energy floor per serving."
@@ -268,15 +274,30 @@ def dish_servings(problem: FinalPlanningProblem, assignments: list[PlanningAssig
     """Servings each assignment is cooked for, by its index in `assignments`.
 
     A slot's household eats its meal once: each dish is scaled to
-    `servings * share`. Assignments to unknown slots, or meals outside the
-    policy's sizes, are left out; the validator reports them.
+    `servings * share`, where the servings are the present members who can eat
+    that dish (ADR-0071 section 1), or the slot's own without members.
+    Assignments to unknown slots, or meals outside the policy's sizes, are left
+    out; the validator reports them.
+    """
+    return {index: share * base for index, (share, base) in dish_portions(problem, assignments).items()}
+
+
+def dish_portions(
+    problem: FinalPlanningProblem, assignments: list[PlanningAssignment]
+) -> dict[int, tuple[Fraction, Fraction]]:
+    """Each assignment's share of its meal and the servings that share is cooked for, by its index.
+
+    The share is the dish's role share, what one person who eats it has of the meal; it never changes with who
+    can eat the dish. The servings are the present members who can eat it (ADR-0071 section 1), the slot's own
+    without members. Keeping them apart matters: a dish cooked for fewer people is still a full share for each
+    of them, so nutrition per person stays the share and only the quantities bought follow the servings.
     """
     slots = {slot.slot_id: slot for slot in problem.slots}
     recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
     by_slot: dict[str, list[int]] = defaultdict(list)
     for index, assignment in enumerate(assignments):
         by_slot[assignment.slot_id].append(index)
-    servings: dict[int, Fraction] = {}
+    portions: dict[int, tuple[Fraction, Fraction]] = {}
     for slot_id, indexes in by_slot.items():
         slot = slots.get(slot_id)
         if slot is None:
@@ -290,8 +311,10 @@ def dish_servings(problem: FinalPlanningProblem, assignments: list[PlanningAssig
         if shares is None or len(set(keys)) != len(keys):
             continue
         for index, key in zip(indexes, keys, strict=True):
-            servings[index] = Fraction(str(slot.servings)) * shares[key]
-    return servings
+            recipe = recipes.get(assignments[index].recipe_id)
+            base = dish_base_servings(slot, recipe) if recipe is not None else Fraction(str(slot.servings))
+            portions[index] = (shares[key], base)
+    return portions
 
 
 def hands_on_and_waiting(recipe: PlanningRecipeCandidate, policy: PlanningCompositionPolicy) -> tuple[float, float]:

@@ -131,3 +131,57 @@ def test_parse_rule_reads_a_sentence_and_stores_nothing(recipe_client):
         "/api/household-profiles/parse-rule", json={**body, "kind": "cooking_time", "text": "周末晚饭一个小时"}
     ).json()
     assert [rule["max_minutes"] for rule in timed["rules"]] == [60]
+
+
+# --- The shared-dish model through the API (layer 08 PR-4, ADR-0071 sections 1 and 2) ----------------------
+
+
+def test_a_profile_keeps_each_members_own_limits_and_the_household_wide_allergens(recipe_client):
+    body = payload(
+        members=[
+            {"name": "Ann", "servings_per_meal": 1, "dietary_preferences": ["vegetarian"]},
+            {"name": "Ben", "servings_per_meal": 1, "allergens": ["shellfish"], "excluded_ingredients": ["Pork"]},
+            {"name": "Mei", "servings_per_meal": 1, "allergens": ["peanut"], "self_only_allergens": ["Peanut"]},
+        ],
+        presence_rules=[],
+    )
+    created = recipe_client.post("/api/household-profiles", json=body)
+    assert created.status_code == 201, created.text
+    current = created.json()["current"]
+    members = {m["name"]: m for m in current["members"]}
+    assert members["Mei"]["self_only_allergens"] == ["peanut"]
+    assert members["Ann"]["self_only_allergens"] == []
+    # The whole household avoids shellfish, which nobody marked; peanut stays Mei's own.
+    assert current["allergens"] == ["shellfish"]
+    # The exclusion and diet union columns stay written for compatibility, and planning no longer reads them.
+    assert current["excluded_ingredients"] == ["pork"] and current["dietary_preferences"] == ["vegetarian"]
+
+
+def test_only_an_allergen_the_member_has_may_be_marked_as_theirs_alone(recipe_client):
+    body = payload(
+        members=[{"name": "Ann", "servings_per_meal": 1, "self_only_allergens": ["peanut"]}], presence_rules=[]
+    )
+    response = recipe_client.post("/api/household-profiles", json=body)
+    assert response.status_code == 422, response.text
+    assert "peanut" in response.text
+
+
+def test_a_plan_from_a_profile_carries_each_members_limits_and_not_the_union(recipe_client):
+    body = payload(
+        members=[
+            {"name": "Ann", "servings_per_meal": 1, "dietary_preferences": ["vegetarian"]},
+            {"name": "Ben", "servings_per_meal": 1, "excluded_ingredients": ["pork"]},
+        ],
+        presence_rules=[],
+    )
+    created = recipe_client.post("/api/household-profiles", json=body)
+    assert created.status_code == 201, created.text
+    planned = recipe_client.post(f"/api/household-profiles/{created.json()['id']}/plans", json={"day_count": 1})
+    assert planned.status_code == 201, planned.text
+    week = planned.json()["plan"]
+    # Each dish says who at the meal cannot eat it, so the plan can show "Not for Ann" beside it. Ann's own
+    # diet no longer removes a dish for everyone: it only takes her off that dish.
+    for dish in week["days"]:
+        vegetarian = {"vegetarian", "vegan"} & set(dish["recipe"]["dietary_tags"])
+        assert ("Ann" in dish["not_for"]) is not bool(vegetarian)
+        assert "Ben" not in dish["not_for"]

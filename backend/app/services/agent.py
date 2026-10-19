@@ -163,9 +163,12 @@ def profile_constraints(version) -> AgentConstraintState:
             "max_cooking_time_minutes": version.max_cooking_time_minutes,
             "budget_per_meal_sgd": version.budget_per_meal_sgd,
             "weekly_budget_sgd": version.weekly_budget_sgd,
+            # The whole household's allergens; each member's exclusions and diet stay with the member in
+            # `household` (ADR-0071 sections 1 and 2). What the conversation itself states is the household's,
+            # the safe reading for an allergen named out loud.
             "allergens": version.allergens,
-            "excluded_ingredients": version.excluded_ingredients,
-            "dietary_preferences": version.dietary_preferences,
+            "excluded_ingredients": [],
+            "dietary_preferences": [],
             "health_preferences": version.health_preferences,
             "nutrition_targets": version.nutrition_targets,
             "max_sodium_mg_per_meal": version.max_sodium_mg_per_meal,

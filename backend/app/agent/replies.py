@@ -474,6 +474,18 @@ REPLIES: dict[str, tuple[str, str]] = {
         "我这里没有能排进{meal}的{role}，所以这周还排不出来。",
     ),
     "limit_safety": ("your allergies and the foods you avoid", "你的过敏原和忌口"),
+    "no_cover": (
+        "I can't give {name} a main dish and a staple at every {meal} with what {name} can eat, so I can't plan "
+        "this week. I won't relax an allergy, a diet or a food you avoid to make it fit.",
+        "按 {name} 能吃的菜，我没法让每顿{meal}都给 {name} 配上主菜和主食，所以这周排不出来。"
+        "我不会为了排出来而放宽过敏原、饮食类型或忌口。",
+    ),
+    "no_cover_limit": (
+        "I can't give {name} a main dish and a staple at every {meal} under your other limits. Relax the budget, "
+        "the cooking time or the number of dishes and I can; I won't relax an allergy, a diet or a food you avoid.",
+        "在你其他限制之下，我没法让每顿{meal}都给 {name} 配上主菜和主食。放宽预算、做饭时间或菜数就可以；"
+        "我不会放宽过敏原、饮食类型或忌口。",
+    ),
     "limit_together": ("your limits together ({limits})", "你所有的限制（{limits}）"),
     "too_few": (
         "{rule} needs {needed} different {role} for {meal} this week, and only {count} fit your other limits, "

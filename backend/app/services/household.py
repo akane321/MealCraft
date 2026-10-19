@@ -1,5 +1,5 @@
 from app.core.clock import today as local_today
-from app.data.household_reference import sodium_limit
+from app.data.household_reference import daily_energy_kcal, sodium_limit
 from app.models.household import HouseholdProfile, HouseholdProfileVersion
 from app.planning.capability import require_composition_enabled
 from app.repositories.household import HouseholdProfileRepository, HouseholdProfileVersionConflictError
@@ -35,8 +35,14 @@ class HouseholdProfilePlanError(RuntimeError):
 
 
 def household_planning(version: HouseholdProfileVersion) -> HouseholdPlanning:
-    """A saved version's members, rules and limits as the planner reads them (layer 08): each member's portions
-    resolved, and a sodium limit left to HPB resolved to the tightest limit of the members usually home."""
+    """A saved version's members, rules and limits as the planner reads them (layer 08): each member's portions,
+    own allergens, exclusions, diet and HPB energy target, and a sodium limit left to HPB resolved to the
+    tightest limit of the members usually home.
+
+    A member's `allergens` holds every allergen of theirs, the ones marked "only I avoid it" included: those are
+    this member's own food rule. What the whole household avoids is the version's `allergens` column
+    (ADR-0071 section 2), which `HouseholdProfileService._planning_constraints` passes as the request's own.
+    """
     members = [HouseholdMemberInput.model_validate(member) for member in version.members]
     home = [member for member in members if member.default_present]
     limits = []
@@ -48,7 +54,15 @@ def household_planning(version: HouseholdProfileVersion) -> HouseholdPlanning:
         limits.append(limit)
     return HouseholdPlanning(
         members=[
-            PlanningMember(name=m.name, servings=m.resolved_servings()[0], default_present=m.default_present)
+            PlanningMember(
+                name=m.name,
+                servings=m.resolved_servings()[0],
+                default_present=m.default_present,
+                allergens=m.allergens,
+                excluded_ingredients=m.excluded_ingredients,
+                dietary_preferences=list(m.dietary_preferences),
+                daily_energy_kcal=daily_energy_kcal(m.age_band, m.sex, m.goal, m.activity),
+            )
             for m in members
         ],
         presence_rules=version.presence_rules or [],
@@ -240,9 +254,12 @@ class HouseholdProfileService:
                 float(version.budget_per_meal_sgd) if version.budget_per_meal_sgd is not None else None
             ),
             "weekly_budget_sgd": float(version.weekly_budget_sgd) if version.weekly_budget_sgd is not None else None,
+            # The whole household's limits only. Each member's exclusions and diet travel with the member
+            # (ADR-0071 sections 1 and 2), so one member's diet no longer narrows the week for everyone; the
+            # union columns stay stored for compatibility and are not read here.
             "allergens": version.allergens,
-            "excluded_ingredients": version.excluded_ingredients,
-            "dietary_preferences": version.dietary_preferences,
+            "excluded_ingredients": [],
+            "dietary_preferences": [],
             "health_preferences": version.health_preferences,
             "nutrition_targets": NutritionTargets.model_validate(version.nutrition_targets),
             "max_sodium_mg_per_meal": (

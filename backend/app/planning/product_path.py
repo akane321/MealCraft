@@ -29,6 +29,7 @@ from app.planning.household_slots import (
     assumed_basics,
     basics_note,
     limit_targets,
+    slot_members,
     slot_people,
     slot_servings,
     slot_time_limit,
@@ -39,10 +40,26 @@ from app.planning.meal_beam import (
     MealBeamPlanner,
     MealBeamResult,
     assignments_of,
+    dish_eligible,
     empty_roles,
     staple_slots,
 )
-from app.planning.meal_composition import dish_servings, meal_role_of, structured_slot, unreviewed
+from app.planning.meal_composition import (
+    dish_portions,
+    dish_servings,
+    fills_staple,
+    meal_role_of,
+    role_base,
+    structured_slot,
+    unreviewed,
+)
+from app.planning.member_coverage import (
+    STAPLE_ROLE,
+    catalog_can_eat,
+    covering_groups,
+    member_can_eat,
+    member_limits,
+)
 from app.planning.nutrition_scope import compile_nutrition_targets, nutrition_guard_loss
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
@@ -146,6 +163,37 @@ def meals_of_the_day(constraints) -> list[tuple[str, list]] | None:
     return [("dinner", composition)] if composition is not None else None
 
 
+def uncoverable_members(problem) -> list[str]:
+    """Members of a slot that no meal of the frozen candidates can cover (ADR-0071 section 1).
+
+    For each structured lunch or dinner and each member home for it: is there a filling core at all among the
+    dishes eligible for that slot which the member can eat - a dish that carries its staple, or a protein main
+    beside a staple. It proves a member uncoverable; it does not prove the rest coverable together.
+    """
+    names: list[str] = []
+    for slot in problem.slots:
+        if not slot.members or not structured_slot(slot) or slot.meal_type not in ("lunch", "dinner"):
+            continue
+        roles = slot.composition or []
+        if not any(role.role_id == STAPLE_ROLE for role in roles):
+            continue
+        eligible = [recipe for recipe in problem.recipes if dish_eligible(problem, slot, recipe)]
+        mains = [
+            r
+            for r in eligible
+            if any(r.meal_role in (role.meal_roles or ()) for role in roles if role_base(role.role_id) == "main")
+        ]
+        staples = [r for r in eligible if r.meal_role == STAPLE_ROLE]
+        for member in slot.members:
+            mine = [r for r in mains if member_can_eat(member, r)]
+            covered = any(fills_staple(r) for r in mine) or (
+                any(member_can_eat(member, r) for r in staples) and any(r.meal_role == "protein_main" for r in mine)
+            )
+            if not covered and member.name not in names:
+                names.append(member.name)
+    return names
+
+
 def pool_courses(meals) -> list[str] | None:
     """The courses the recipe pool loads for a plan's meals (None: mains and soups, the one-dish dinner). A meal of
     meal roles loads every dish course: a staple may be a side or a baked good, a vegetable dish a main."""
@@ -231,14 +279,22 @@ def families_first(recommendations, seen=()) -> list:
     return first + again
 
 
+# Dishes of each kind the packet keeps for each member a meal has to cover (`_packet_covering`).
+PACKET_COVERAGE_CANDIDATES = 4
+
+
 def composed_packet(
-    composition, day_count: int, budget, recommendations, recipes, *, keep=()
+    composition, day_count: int, budget, recommendations, recipes, *, keep=(), members=()
 ) -> tuple[list, dict[str, int]]:
     """The recommendations a composed week is planned from, and how many each kind of dish keeps.
 
     The meal beam ranks each role's dishes itself; keep the best of every course it may fill, enough of each
     for every slot that uses it to get a different dish (a lunch-and-dinner week needs fourteen mains, not the
     24 a dinner week kept).
+
+    `members` are the household's own limits (ADR-0071 section 1): each kind also keeps a few dishes each member
+    can eat, and a few every member can, because a packet chosen by rank alone can hold no dish at all that
+    suits one member, and then no meal covers that member however the search combines what it was given.
     """
     uses: dict[str, int] = {}
     for _, roles in composition:
@@ -281,7 +337,30 @@ def composed_packet(
             kept = {dish_family(r.recipe.title) for r in best}
             best += families_first(sorted(ranked[len(best) :], key=dish_cost), kept)[: limits[key] - len(best)]
         chosen |= {r.recipe.id for r in best}
+        chosen |= {r.recipe.id for r in _packet_covering(ranked, best, members, by_id)}
     return [r for r in recommendations if r.recipe.id in chosen or (keep and r.recipe.slug in keep)], limits
+
+
+def _packet_covering(ranked: list, best: list, members, by_id: dict) -> list:
+    """Recommendations added to one kind of dish so a meal of them can cover every member (ADR-0071 section 1).
+
+    Empty without members and for a household whose members are all alike (`covering_groups`), so a packet that
+    is not a shared-dish household's is exactly the packet it was before.
+    """
+    groups = covering_groups(members)
+    if not groups:
+        return []
+    added: list = []
+    for group in groups:
+
+        def suits(recommendation, group=group) -> bool:
+            recipe = by_id.get(recommendation.recipe.id)
+            return recipe is not None and all(catalog_can_eat(member, recipe) for member in group)
+
+        if any(suits(r) for r in best):
+            continue
+        added += [r for r in ranked if suits(r) and r not in added][:PACKET_COVERAGE_CANDIDATES]
+    return added
 
 
 def staple_packet(ranked, limit: int) -> list:
@@ -443,6 +522,7 @@ class ProductPlanningEngine:
                 recommendations,
                 recipes,
                 keep=kept_dishes,
+                members=member_limits(household),
             )
             trace["candidate_limit"] = limits
         if not recommendations:
@@ -582,6 +662,8 @@ class ProductPlanningEngine:
                     min_energy_kcal=round(floor_share * floor_kcal, 1) if floor_share else None,
                     trip=trip,
                     days_after_shopping=since_trip,
+                    # The shared-dish model (ADR-0071 section 1): who is at this meal, and each one's own limits.
+                    members=slot_members(household, planned_date, meal, floor_share),
                 )
                 slots.append(slot)
                 slot_day[slot.slot_id] = (i, meal)
@@ -1060,6 +1142,17 @@ class ProductPlanningEngine:
                 )
             else:
                 message = "I couldn't find a week that meets every limit. Try relaxing one of them."
+            uncovered = uncoverable_members(problem)
+            if uncovered:
+                # Every member needs a plate of their own at every lunch and dinner (ADR-0071 section 1), which
+                # ADR-0068 keeps outside idealization: the plan is refused rather than leaving someone uncovered.
+                who = ", ".join(uncovered)
+                message = (
+                    f"I couldn't give {who} a main dish and a staple at every lunch and dinner with what "
+                    f"{'they' if len(uncovered) > 1 else who} can eat. Try a higher budget, more cooking time or "
+                    "fewer dishes a meal; no allergen, diet or excluded ingredient will be relaxed."
+                )
+                trace["uncovered_members"] = uncovered
             raise ProductPlanningError(status, message, trace, problem=problem.model_copy(deep=True))
         assignments, shopping, report = result
         # A perishable line says "use within N days" on the list (layer 08); only with the household's rules on.
@@ -1123,15 +1216,15 @@ class ProductPlanningEngine:
             by_slug[a.recipe_id].model_copy(deep=True, update={"recipe": recipe_snapshots[a.recipe_id]})
             for a in assignments
         ]
-        servings = dish_servings(problem, assignments)
-        slot_servings_of = {slot.slot_id: Fraction(str(slot.servings)) for slot in slots}
+        portions = dish_portions(problem, assignments)
         placements = [
             (
                 *slot_day[a.slot_id],
                 a.role_id or "main",
-                # The dish's share of its meal; with a household block, the servings it is cooked for besides.
-                servings[i] / (slot_servings_of[a.slot_id] if household is not None else constraints.household_size),
-                servings[i] if household is not None else None,
+                # The dish's share of its meal, what one person who eats it has; with a household block, the
+                # servings it is cooked for besides, which are the members who can eat it (ADR-0071 section 1).
+                portions[i][0],
+                portions[i][0] * portions[i][1] if household is not None else None,
             )
             for i, a in enumerate(assignments)
         ]

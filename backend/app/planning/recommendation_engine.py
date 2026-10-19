@@ -7,6 +7,7 @@ from app.data.allergens import allergen_conflicts, conflict_reasons
 from app.models.recipe import Recipe
 from app.planning import alternatives
 from app.planning.dietary_tags import expand_tags
+from app.planning.member_coverage import MemberLimits, member_limits
 from app.schemas.recipe import RecipeListItemResponse
 from app.schemas.recommendation import (
     ExcludedRecipeResponse,
@@ -49,10 +50,12 @@ class RecipeRecommendationEngine:
         excluded: list[ExcludedRecipeResponse] = []
         # Expanded once per call, not per recipe: "no pork" also removes bacon.
         excluded_ingredients = ingredient_hierarchy.expand_exclusions(constraints.excluded_ingredients)
+        # The shared-dish model (ADR-0071 section 1): each member's own exclusions and diet, expanded once.
+        members = member_limits(getattr(constraints, "household", None))
 
         eligible = []
         for recipe in recipes:
-            exclusion_reasons = self._exclusion_reasons(recipe, constraints, excluded_ingredients)
+            exclusion_reasons = self._exclusion_reasons(recipe, constraints, excluded_ingredients, members)
             if exclusion_reasons:
                 excluded.append(
                     ExcludedRecipeResponse(
@@ -82,8 +85,19 @@ class RecipeRecommendationEngine:
         return [item.response for item in scored], excluded
 
     def _exclusion_reasons(
-        self, recipe: Recipe, constraints: RecipeRecommendationRequest, excluded_ingredients: list[str]
+        self,
+        recipe: Recipe,
+        constraints: RecipeRecommendationRequest,
+        excluded_ingredients: list[str],
+        members: list[MemberLimits] | None = None,
     ) -> list[str]:
+        """Why this household cannot have the recipe at all.
+
+        The household's own allergens, exclusions, diets, time and sodium limits reject it as before. With
+        members, their exclusions and diets reject it only when no member can eat it: a dish is served when at
+        least one present member can (ADR-0071 section 1). Allergens are the whole household's by default; an
+        allergen only one member avoids is that member's own and is checked here per member (section 2).
+        """
         reasons: list[str] = []
         # An "A or B" line counts as the option this household can eat, if there is one.
         cooked = alternatives.lines(recipe, constraints)
@@ -114,6 +128,12 @@ class RecipeRecommendationEngine:
             if not self._satisfies_dietary_preference(preference, recipe_tags):
                 reasons.append(f"Does not satisfy the {preference} requirement.")
 
+        if members:
+            blocked = [(member, why) for member in members if (why := self._member_reasons(recipe, cooked, member))]
+            if len(blocked) == len(members):
+                told = "; ".join(f"{member.name}: {' '.join(why)}" for member, why in blocked)
+                reasons.append(f"No member of this household can eat it. {told}")
+
         sodium_limit = constraints.max_sodium_mg_per_meal
         if sodium_limit is not None and float(recipe.nutrition.sodium_mg) > sodium_limit:
             reasons.append(
@@ -121,6 +141,26 @@ class RecipeRecommendationEngine:
                 f"above the user-entered {sodium_limit:.0f} mg limit."
             )
 
+        return reasons
+
+    def _member_reasons(self, recipe: Recipe, cooked: list, member: MemberLimits) -> list[str]:
+        """Why this one member cannot eat the recipe: their own allergens, exclusions and diet."""
+        reasons: list[str] = []
+        recipe_allergens = {allergen for item in cooked for allergen in item.ingredient.allergens}
+        present, unverifiable = allergen_conflicts(sorted(member.allergens), recipe_allergens)
+        reasons.extend(conflict_reasons(present, unverifiable))
+        matches = sorted({item.ingredient.normalized_name for item in cooked} & member.excluded_ingredients)
+        if matches:
+            reasons.append(f"Contains excluded ingredient: {', '.join(matches)}.")
+        named = title_mentions(recipe.title, [*member.stated, *sorted(member.allergens)])
+        if named and not matches:
+            reasons.append(f"Its name mentions {', '.join(named)}.")
+        recipe_tags = set(recipe.dietary_tags)
+        reasons.extend(
+            f"Does not satisfy the {preference} requirement."
+            for preference in member.dietary_requirements
+            if not self._satisfies_dietary_preference(preference, recipe_tags)
+        )
         return reasons
 
     @staticmethod

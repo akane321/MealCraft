@@ -16,6 +16,7 @@ from app.planning.meal_composition import (
     role_key,
     structured_slot,
 )
+from app.planning.member_coverage import dish_base_servings, servable
 from app.schemas.planning_v2 import (
     CheckStatus,
     FinalPlanningProblem,
@@ -233,8 +234,17 @@ class FinalPlanningValidator:
         return checks, meals
 
     def _household_dish_checks(self, problem: FinalPlanningProblem, slot: PlanningSlot, recipe) -> list:
-        """Layer 08 rules of one dish: the kitchen's equipment and the perishable's days after its trip."""
+        """Layer 08 rules of one dish: whom it is served to, the kitchen's equipment and the perishable's days
+        after its trip."""
         checks = []
+        if not servable(slot, recipe):
+            checks.append(
+                self._failed(
+                    "dish_not_servable",
+                    "No member home for this meal can eat this dish.",
+                    slot.slot_id,
+                )
+            )
         if problem.missing_equipment and not equipment_met(recipe.equipment, problem.missing_equipment):
             checks.append(
                 self._failed(
@@ -360,7 +370,11 @@ class FinalPlanningValidator:
                 scope_id=slot.slot_id,
                 actual=actual,
                 limit=limit,
-                margin=round(actual - limit, 3) if code == "meal_energy_floor" else None,
+                margin=(
+                    round(actual - limit, 3)
+                    if code in ("meal_energy_floor", "member_energy_floor") and actual is not None
+                    else None
+                ),
                 detail=detail,
             )
             for code, detail, actual, limit in real_meal_issues(slot, pairs, recipes, shares)
@@ -574,14 +588,17 @@ class FinalPlanningValidator:
             shares = meal_shares(problem, slot, pairs, recipes) if dishes else None
             for dish in dishes if shares is not None else []:
                 recipe = recipes[dish.recipe_id]
-                servings = slot.servings * shares[role_key(slot, dish)]
+                # The dish is bought for the present members who can eat it (ADR-0071 section 1), rebuilt here
+                # from the slot's members rather than read from the planner's own servings.
+                base = float(dish_base_servings(slot, recipe))
+                servings = base * float(shares[role_key(slot, dish)])
                 for item in recipe.ingredients:
                     amounts[item.ingredient_id, item.unit, slot.trip].append(
                         None
                         if item.quantity is None
-                        else item.quantity / recipe.servings * slot.servings
+                        else item.quantity / recipe.servings * base
                         if len(dishes) == 1
-                        else item.quantity / recipe.servings * float(servings)
+                        else item.quantity / recipe.servings * servings
                     )
         lines: dict[tuple[str, str | None, int | None], list[PlanningShoppingSelection]] = defaultdict(list)
         for line in shopping:

@@ -50,6 +50,9 @@ class HouseholdMemberInput(BaseModel):
     # False is an occasional guest, who eats only at the meals a presence rule adds them to.
     default_present: bool = True
     allergens: list[str] = Field(default_factory=list, max_length=20)
+    # Allergens of this member's own that only this member avoids (ADR-0071 section 2): a subset of `allergens`,
+    # empty by default, so one kitchen's cross-contact stays the safe default for every allergen.
+    self_only_allergens: list[str] = Field(default_factory=list, max_length=20)
     excluded_ingredients: list[str] = Field(default_factory=list, max_length=50)
     dietary_preferences: list[DietaryPreference] = Field(default_factory=list, max_length=4)
 
@@ -63,10 +66,19 @@ class HouseholdMemberInput(BaseModel):
     def two_decimals(cls, value: float | None) -> float | None:
         return round(value, 2) if value is not None else None
 
-    @field_validator("allergens")
+    @field_validator("allergens", "self_only_allergens")
     @classmethod
     def normalize_allergens(cls, values: list[str]) -> list[str]:
         return _normalize_terms(values)
+
+    @model_validator(mode="after")
+    def self_only_is_own_allergen(self) -> "HouseholdMemberInput":
+        unknown = sorted(set(self.self_only_allergens) - set(self.allergens))
+        if unknown:
+            raise ValueError(
+                f'"Only {self.name} avoids it" needs {", ".join(unknown)} among this member\'s own allergens'
+            )
+        return self
 
     @field_validator("excluded_ingredients")
     @classmethod
@@ -78,6 +90,17 @@ class HouseholdMemberInput(BaseModel):
         if self.servings_per_meal is not None:
             return self.servings_per_meal, "stated"
         return default_servings(self.age_band, self.sex, self.goal, self.activity)
+
+
+def household_allergens(members: list[HouseholdMemberInput]) -> list[str]:
+    """What the whole household avoids: every member's allergens, less the ones every member who has them
+    marked "only I avoid it" (ADR-0071 section 2). One member keeping an allergen household-wide keeps it so.
+
+    A member's own allergens stay that member's own (`PlanningMember.allergens`); this is only the
+    household-wide list, which removes a dish from the table for everyone.
+    """
+    whole = {item for member in members for item in set(member.allergens) - set(member.self_only_allergens)}
+    return sorted(whole)
 
 
 class HouseholdMemberResponse(HouseholdMemberInput):
