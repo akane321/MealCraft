@@ -1010,7 +1010,8 @@ def report(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict], usage:
         f"Hearty salads (`salad`, not vegetable-led, with a main protein): {sum(hearty_salad(*p) for p in tagged)}. "
         "As salads they fill only the vegetable side, which their vegetable-led check refuses, so they fill no slot: "
         "the owner decided on 2026-10-19 that a salad with meat is not a main. The sample packet carries them as "
-        "their own stratum, as it does the model's protein answers. The planner reads no model-decided value before its batch sample is reviewed.",
+        "their own stratum, as it does the model's protein answers. The planner reads no model-decided value "
+        "before its batch sample is reviewed.",
     ]
     perishable = sorted(name for name, entry in ingredients.items() if entry["perishable"])
     origin = Counter(entry["methods"]["food_group"] for entry in ingredients.values())
