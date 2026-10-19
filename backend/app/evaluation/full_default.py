@@ -39,8 +39,6 @@ from app.evaluation.meal_day_week_runner import product_database
 from app.models.recipe import Recipe, RecipeIngredient
 from app.planning import product_path
 from app.planning.grocery_estimator import not_purchased
-from app.planning.household_slots import slot_people
-from app.planning.meal_composition import fills_staple, role_base
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.schemas.meal_plan import MEAL_ORDER, WeeklyMealPlanRequest, default_plan_shape
 from app.schemas.planning_v2 import NON_MEAL_ROLES
@@ -132,7 +130,7 @@ DINNER_ROWS = [(2, 1, 1), (4, 2, 1), (6, 2, 2), (None, 3, 2)]
 
 
 def expected_dishes(meal: str, people: int) -> Counter:
-    """The dishes of a full-default meal by kind (`role_base` of its role ids) with `people` at it."""
+    """The dishes of a full-default meal by kind (`_kind` of its role ids) with `people` at it."""
     if meal == "breakfast":
         return Counter(main=1)
     if meal == "lunch":
@@ -144,6 +142,27 @@ def expected_dishes(meal: str, people: int) -> Counter:
 def _equipment_met(needs, missing) -> bool:
     """Every any-of group of the recipe's equipment has an item the kitchen has (written out, as above)."""
     return not missing or all(set(group) - set(missing) for group in needs or ())
+
+
+def people_present(household, day: date, meal: str) -> int:
+    """The members home for a meal: each usually-home member, then each rule naming the weekday and meal, the
+    last one for a member winning (written out, as above, rather than the planner's `slot_people`)."""
+    home = {member.name: member.default_present for member in household.members}
+    weekday = day.strftime("%A").lower()
+    for rule in household.presence_rules:
+        if (not rule.weekdays or weekday in rule.weekdays) and (not rule.meal_types or meal in rule.meal_types):
+            home[rule.member_name] = rule.present
+    return sum(home.values())
+
+
+def _kind(role_id: str) -> str:
+    """ "main-2" -> "main": the kind of dish a role id names."""
+    return role_id.split("-")[0]
+
+
+def _carries_staple(recipe) -> bool:
+    """A one-bowl dish, or one tagged as holding its staple (ADR-0070 section 2)."""
+    return recipe.meal_role == "one_bowl" or recipe.contains_staple is True
 
 
 def request_for(case: dict) -> WeeklyMealPlanRequest:
@@ -196,12 +215,12 @@ def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Re
             if not _equipment_met(recipe.equipment, missing):
                 failures["equipment"] += 1
         core = tags.get("main")
-        bowl = meal != "breakfast" and core is not None and fills_staple(core)
+        bowl = meal != "breakfast" and core is not None and _carries_staple(core)
         # Dish counts as the table says for the people present, give or take one dish left out (a one-bowl
         # main also stands for the staple); breakfast too.
-        people = slot_people(request.household, date.fromisoformat(dishes[0]["planned_date"]), meal)
+        people = people_present(request.household, date.fromisoformat(dishes[0]["planned_date"]), meal)
         expected = expected_dishes(meal, people)
-        filled = Counter(role_base(role) for role in tags)
+        filled = Counter(_kind(role) for role in tags)
         left_out = expected - filled - (Counter(staple=1) if bowl else Counter())
         if filled - expected or sum(left_out.values()) > 1:
             failures["dish_count_within_one_move"] += 1
@@ -216,12 +235,12 @@ def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Re
         ):
             failures["filling_core_and_staple"] += 1
         if any(recipe.meal_role in NON_MEAL_ROLES for recipe in tags.values()) or any(
-            (recipe.meal_role == "salad" and role_base(role) != "vegetable")
-            or (recipe.meal_role == "soup" and role_base(role) != "soup")
+            (recipe.meal_role == "salad" and _kind(role) != "vegetable")
+            or (recipe.meal_role == "soup" and _kind(role) != "soup")
             for role, recipe in tags.items()
         ):
             failures["no_non_meal_dish"] += 1
-        sources = [set(recipe.protein_sources or ()) for role, recipe in tags.items() if role_base(role) == "main"]
+        sources = [set(recipe.protein_sources or ()) for role, recipe in tags.items() if _kind(role) == "main"]
         if sum(map(len, sources)) != len(set().union(*sources)):
             failures["protein_sources_distinct"] += 1
         per_serving = sum(d["nutrition_per_person"]["calories_kcal"] for d in dishes)
@@ -406,23 +425,39 @@ def markdown(report: dict) -> str:
             "",
             f"Moves: {'; '.join(metrics['moves']) or 'none'}.",
             "",
+            *meal_table(case["meals"]),
         ]
         if case["failures"]:
             lines += [f"Failures: {case['failures']}", ""]
     return "\n".join(lines) + "\n"
 
 
+def meal_table(rows: list[dict]) -> list[str]:
+    """The plan itself, a row a day: each meal's dishes in the plan's order, the staple marked."""
+    days: dict[tuple, dict[str, list[str]]] = {}
+    for row in rows:
+        title = f"{row['recipe']} (staple)" if row["role"] == "staple" else row["recipe"]
+        days.setdefault((row["day"], row["weekday"]), {}).setdefault(row["meal"], []).append(title)
+    lines = ["| Day | " + " | ".join(meal.title() for meal in MEAL_ORDER) + " |", "|---|" + "---|" * len(MEAL_ORDER)]
+    for (day, weekday), meals in sorted(days.items()):
+        cells = [" + ".join(meals.get(meal, [])).replace("|", "/") or "-" for meal in MEAL_ORDER]
+        lines.append(f"| {day} {weekday} | " + " | ".join(cells) + " |")
+    return [*lines, ""]
+
+
 TARGET_SECONDS = 4.0  # ADR-0075: about 4 s for a common request
 
-# Why a case is slow, from a profile of one warm run (cProfile, 2026-10-19). Written by hand when a case is
-# profiled, so a newly slow case reads "not profiled yet" until someone looks.
+# Why a case is slow, from a profile of one warm run (cProfile, 2026-10-19, after `meal_beam.core_combinations`
+# skipped the dinners whose filling core fails). Written by hand when a case is profiled, so a newly slow case
+# reads "not profiled yet" until someone looks.
 SLOW_CAUSES = {
     "six-tight-budget": (
-        "the budget-led search (`product_path.limit_led`, about two thirds of the run) re-runs the meal beam: "
-        "about 1.1 million candidate dinners of up to six roles go through `meal_permitted`, and "
-        "`real_meal_issues` (filling core, protein sources, the energy floor in fractions) is about 40% of the "
-        "run. Upgrade path: a short-circuiting yes/no real-meal check for the search, and fewer cheapest-dish "
-        "candidates per role under a budget."
+        "four whole-week beam searches instead of one: the ranked search keeps no week filled with no dish twice "
+        "under the budget, so the three budget-led searches (`product_path.limit_led`) run as well. Each builds "
+        "every six-dish dinner of its candidates again (about 90,000 combinations a search, 360,000 real-meal "
+        "checks in all, half the run) and expands 32 partial weeks by 256 meals a slot (the other half). "
+        "Upgrade path: share the meal checks between the four searches (they do not depend on the ranking) "
+        "and price beam states incrementally."
     ),
 }
 
@@ -469,10 +504,13 @@ def main() -> int:
     print(f"Full default: {'PASS' if report['passed'] else 'FAIL'}")
     for case in report["cases"]:
         times = seconds[case["case"]]
-        print(
-            f"  {case['case']}: {case['outcome']} {case.get('failures', '')} "
-            f"first {times['first']} s, warm {times['warm']}"
+        planned = (
+            f"{case['metrics']['meals']} meals, {case['metrics']['dishes']} dishes, "
+            f"failures {case['failures'] or 'none'}"
+            if case["outcome"] == "planned"
+            else case["reason"]
         )
+        print(f"  {case['case']}: {case['outcome']} ({planned}); first {times['first']} s, warm {times['warm']}")
     if args.timing_report:
         commit = subprocess.run(
             ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False
