@@ -9,6 +9,8 @@ serves a sauce as a dinner and counts it as one. Curated recipes are exempt; the
 import re
 from functools import cache
 
+from app.planning.vegetable_led import SEASONING_FROM_FLESH
+
 # A main under this is a sauce, a marinade or a dish that lost its main line, not a dinner.
 MAIN_KCAL_FLOOR = 150
 
@@ -21,6 +23,7 @@ TITLE_PROTEINS = {
     "salmon": ("salmon",),
     "shrimp": ("shrimp", "prawn"),
     "lamb": ("lamb",),
+    "mutton": ("lamb", "mutton"),
     "turkey": ("turkey",),
     "tofu": ("tofu",),
 }
@@ -61,6 +64,24 @@ DOUGH_ONLY_INGREDIENTS = frozenset(
 BROTH = re.compile(r"(?:broth|stock|bouillon)$")
 
 
+def missing_named_protein(title: str, lines: list[tuple[str, str | None]]) -> str | None:
+    """A title is a completeness check, never evidence that an absent ingredient exists."""
+    evidence = " ".join(
+        f"{name.replace('_', ' ')} {text or ''}".lower()
+        for name, text in lines
+        if name not in SEASONING_FROM_FLESH and not BROTH.search(name)
+    )
+    title = title.lower()
+    for word, sources in TITLE_PROTEINS.items():
+        if word == "chicken" and "chicken fried steak" in title:
+            continue  # This names the coating style, not a chicken ingredient.
+        if re.search(rf"\b{word}s?\b", title) and not any(
+            re.search(rf"\b{source}s?\b", evidence) for source in sources
+        ):
+            return f"named {word} but lists none"
+    return None
+
+
 def incomplete(recipe) -> str | None:
     """Why a release recipe cannot be trusted as a planned dinner, or None."""
     if recipe.release_version is None:
@@ -75,11 +96,10 @@ def incomplete(recipe) -> str | None:
     kcal = float(recipe.nutrition.calories_kcal) if recipe.nutrition is not None else 0.0
     if recipe.course == "main" and kcal < MAIN_KCAL_FLOOR:
         return f"{kcal:.0f} kcal a serving is not a dinner"
-    lines = " ".join(item.ingredient.normalized_name.replace("_", " ") for item in recipe.recipe_ingredients)
-    for word, sources in TITLE_PROTEINS.items():
-        if re.search(rf"\b{word}s?\b", title) and not any(source in lines for source in sources):
-            return f"named {word} but lists none"
-    return None
+    return missing_named_protein(
+        title,
+        [(item.ingredient.normalized_name, getattr(item, "original_text", None)) for item in recipe.recipe_ingredients],
+    )
 
 
 # Words that describe a recipe rather than the dish: "Basic Chinese-Style Fried Rice" is fried rice.

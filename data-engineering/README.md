@@ -80,6 +80,30 @@ python scripts/fairprice_mapping.py export                 # 写运行时快照 
 
 ## 菜谱与食材标签 v1 的抽检（Reviewing recipe and ingredient tags）
 
+### 规则修复与原审查分开
+
+`docs/recipe-tags-v1-sample.json` 是原批次的固定审查包，标签重生成不覆盖它。
+已审核字段、AI建议和待定项不能混作完整人工准确率，更正建议也不等于原预测正确。
+失败模型批次的关键字段在仅规则重生成时保持原值、原来源和未审核门禁，
+不会因为新规则可以给出答案就自动放行。`--accept-batch` 是独立且须获准的操作。
+
+规则只采用食材行有依据的肉种（包括括号内说明）；泛称肉、不同肉类共用一个总重的主要来源比例保留未知。
+标题可发现缺料，不能补出缺失的肉或数量。标签器与规划器共享缺肉检查；这样的菜不进入规划。
+主食以克重构成为依据，完整馅饼的面皮计入，肉馅黏合料和炸衣不自动计入；
+有实质面包载体的完整三明治属于自带主食的餐，豆类不当谷物主食。
+已经煮熟的米不再套用干米膨胀系数。烤制、焗制不是正餐角色的充分条件，
+馅料和配料本身则是 `sauce` 部件，不单独成餐。
+
+改完规则后，另生成[变动菜谱复核包](docs/recipe-tags-v1-rule-changes-review.md)：
+
+```bash
+python data-engineering/scripts/review_tag_rule_changes.py --base-ref <修复前的提交> --count 25
+```
+
+包中包含原标签、新标签、变动字段、完整步骤与release归一化克重。已知回归案例优先，
+其余按固定种子从变动菜谱抽取；这证明修复的针对性，不是独立总体准确率。
+模型字段仍被门禁拦截时会明确标出，新规则建议不能被误读为已放行。
+
 ```bash
 uv run --project backend python -m app.data.recipe_tags          # 只用规则；之前模型给的答案保留并复用
 uv run --project backend python -m app.data.recipe_tags --llm    # 规则定不了的再问模型，默认花费上限约 US$5

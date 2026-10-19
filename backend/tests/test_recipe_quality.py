@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.planning.recipe_quality import incomplete
+from app.planning.recipe_quality import incomplete, missing_named_protein
 
 
 def recipe(title, kcal, ingredients, course="main", release="v2.1"):
@@ -18,6 +18,16 @@ def recipe(title, kcal, ingredients, course="main", release="v2.1"):
 def test_a_main_that_lost_its_main_line_is_not_planned():
     assert incomplete(recipe("Steak Teriyaki", 64, ["soy_sauce", "brown_sugar"])) is not None
     assert incomplete(recipe("Korean Pork Chops", 420, ["soy_sauce", "sesame_seed"])) == "named pork but lists none"
+
+
+def test_title_evidence_checks_use_real_ingredient_lines_not_broth_or_guessed_meat():
+    assert missing_named_protein("Steak Teriyaki", [("soy_sauce", "2 Tbsp soy sauce")]) == "named steak but lists none"
+    assert (
+        missing_named_protein("Chicken Dinner", [("chicken_broth", "1 cup chicken broth")])
+        == "named chicken but lists none"
+    )
+    assert missing_named_protein("Beef Pasties", [("meat", "5 lb meat (beef stew or chuck roast)")]) is None
+    assert missing_named_protein("Chicken Fried Steak", [("beef_steak", "1 lb beef steak")]) is None
 
 
 def test_complete_dishes_soups_and_curated_recipes_are_kept():

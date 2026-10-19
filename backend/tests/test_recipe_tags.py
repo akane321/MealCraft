@@ -113,6 +113,15 @@ def test_baked_goods_go_by_title_and_sugar_and_a_cakes_eggs_are_not_protein() ->
 
 
 COMPONENTS = (
+    ("Taco Meat Filling", "main"),
+    ("Beef Taco Filling", "main"),
+    ("Taco Filling (Ground Beef)", "main"),
+    ("Carnitas Filling", "main"),
+    ("Egg Filling For Pita Bread", "breakfast"),
+    ("Cheese And Prosciutto Manicotti Filling", "main"),
+    ("Herbed Ricotta Filling For Manicotti", "main"),
+    ("Spinach Pizza Topping", "side"),
+    ("Menma Ramen Topping", "main"),
     ("Italian Pizza Dough", "baked_good"),
     ("Egg Pasta Dough", "main"),
     ("Curry Sauce", "main"),
@@ -133,6 +142,8 @@ COMPONENTS = (
     ("Chicken Stock", "soup"),
 )
 DISHES = (
+    ("Chicken With Mushroom Filling", "main"),
+    ("Pizza With Spinach Topping", "main"),
     ("Chicken In Tarragon Sauce", "main"),
     ("Satay With Peanut Sauce", "main"),
     ("Pizza With A Hamburger Crust", "main"),
@@ -168,33 +179,93 @@ def test_minor_protein_lines_are_not_the_main_protein_and_poultry_counts_as_chic
     assert goat["protein_sources"] == ["lamb"]
 
 
-def test_the_title_names_the_meat_no_line_holds_and_unnamed_meat_is_left_to_the_model() -> None:
-    # A title naming meat that no line holds: the release lost the line.
-    assert tags("Mutton Biryani", "main", [("yogurt", 245), ("anise", 1.4)])["protein_sources"] == ["lamb"]
+def test_missing_meat_is_not_fabricated_from_a_title_or_asked_of_a_model() -> None:
+    missing = rule_tags(dish("Mutton Biryani", "main", [("yogurt", 245), ("anise", 1.4)]))
+    assert missing.values["protein_sources"] is None and missing.values["meal_role"] is None
+    assert missing.incomplete_reason == "named mutton but lists none" and missing.open == []
     lost = tags("Chicken Fried Rice", "main", [("rice", 300), ("egg", 150), ("chicken", 10), ("soy_sauce", 20)])
-    assert lost["protein_sources"] == ["chicken", "egg"]
-    assert tags("Turkey Banh Mi", "main", [("baguette", 200), ("carrot", 100)])["protein_sources"] == ["chicken"]
-    assert tags("Meat Loaf (Beef)", "main", [("meat", 900), ("breadcrumbs", 60)])["protein_sources"] == ["beef"]
+    assert lost["protein_sources"] == ["egg"]  # The real chicken line is below the main-source threshold.
+    assert tags("Turkey Banh Mi", "main", [("baguette", 200), ("carrot", 100)])["protein_sources"] is None
+    assert tags("Meat Loaf (Beef)", "main", [("meat", 900), ("breadcrumbs", 60)])["protein_sources"] is None
     # Lines holding meat win over the title; mock meat and what a dish is served with do not count.
     assert tags("Chicken Fried Steak", "main", [("beef_steak", 600), ("flour", 60)])["protein_sources"] == ["beef"]
     assert tags('Tempeh "Bacon"', "side", [("tempeh", 200), ("soy_sauce", 20)])["protein_sources"] == ["soy"]
     assert tags("Toasted Rice For Fish", "side", [("rice", 200), ("butter", 20)])["protein_sources"] == []
     game = rule_tags(dish("Braised Rabbit", "main", [("rabbit", 900), ("carrot", 200)]))
-    assert game.values["protein_sources"] is None and "protein_sources" in game.open
-    assert game.values["meal_role"] == "protein_main"
+    assert game.values["protein_sources"] is None and "protein_sources" not in game.open
+    assert game.values["meal_role"] is None
 
 
 def test_the_models_answer_keeps_only_what_the_lines_support() -> None:
     meat = rule_tags(dish("Fried Rice", "main", [("rice", 300), ("meat", 200), ("egg", 100)]))
     merge_answer(meat, {"protein_sources": ["pork", "beef", "egg", "legume"]})
-    # No bean line: the invented legume is dropped; unnamed meat may be any meat.
-    assert meat.values["protein_sources"] == ["pork", "beef", "egg"]
-    assert meat.methods["protein_sources"] == "llm"
+    # Neither an animal nor a major source may be guessed for generic meat.
+    assert meat.values["protein_sources"] is None
+    assert "protein_sources" not in meat.methods
     cookie = rule_tags(dish("Kifliks", "baked_good", [("flour", 300), ("egg", 100), ("walnut", 100)], sugar_g=8.0))
     assert cookie.values["meal_role"] is None and cookie.values["protein_sources"] == ["egg"]
     merge_answer(cookie, {"meal_role": "dessert", "protein_sources": None})
     # A dessert's eggs are not its protein, whoever decided the role.
     assert cookie.values["protein_sources"] == [] and cookie.methods["protein_sources"] == "llm"
+
+
+def test_explicit_ingredient_wording_beats_generic_ids_and_does_not_split_mixed_weights() -> None:
+    beef = dish("Pasties", "main", [("meat", 900), ("onion", 200)])
+    beef.lines[0].text = "5 lb. meat, cut small (beef stew or chuck roast)"
+    assert rule_tags(beef).values["protein_sources"] == ["beef"]
+    mixed = dish("Spiedies", "main", [("meat", 900)])
+    mixed.lines[0].text = "5 lbs meat, cut into cubes (pork & chicken)"
+    found = rule_tags(mixed)
+    assert found.values["protein_sources"] is None and found.allowed_sources == {"pork", "chicken"}
+    mixed.lines[0].text = "5 lbs pork or chicken"
+    assert rule_tags(mixed).values["protein_sources"] is None
+
+
+def test_complete_carriers_count_but_a_meatloaf_binder_and_legumes_are_not_staples() -> None:
+    bobotie = tags("Bobotie", "main", [("beef", 454), ("bread", 58), ("egg", 100), ("onion", 110)])
+    assert bobotie["meal_role"] == "protein_main" and bobotie["contains_staple"] is False
+    sandwich = tags("Steak Sandwiches", "main", [("beef_steak", 2041), ("bread", 348), ("onion", 640)])
+    assert sandwich["meal_role"] == "one_bowl" and sandwich["contains_staple"] is True
+    pasties = tags("Beef Pasties", "main", [("flour", 1750), ("beef", 2268), ("potato", 6350)])
+    assert pasties["meal_role"] == "one_bowl" and pasties["contains_staple"] is True
+    lentils = rule_tags(dish("Sweet And Sour Lentils", "side", [("lentil", 192), ("onion", 110)]))
+    assert lentils.values["meal_role"] is None and "one_bowl" not in lentils.allowed_roles
+    gratin = rule_tags(dish("Cauliflower Au Gratin", "side", [("cauliflower", 588), ("ham", 113)]))
+    assert gratin.values["meal_role"] is None and "soup" not in gratin.allowed_roles
+
+
+def test_cooked_rice_is_not_multiplied_by_the_dry_rice_yield_again() -> None:
+    from app.data.recipe_tags import staple_share
+
+    cooked = dish("Rice", "main", [("rice", 100), ("egg", 100)])
+    cooked.lines[0].text = "100 g cooked rice"
+    assert staple_share(cooked) == 0.5
+    cooked.lines[0].text = "100 g dry rice"
+    assert staple_share(cooked) == pytest.approx(250 / 350)
+
+
+def test_rule_regeneration_keeps_the_unreviewed_model_batch_frozen(monkeypatch) -> None:
+    from app.data import recipe_tags
+
+    item = dish("Bobotie", "main", [("beef", 454), ("bread", 58), ("egg", 100), ("onion", 110)])
+    old = {
+        "meal_role": "one_bowl",
+        "contains_staple": True,
+        "estimated": {
+            name: {"method": "llm", "batch": recipe_tags.LLM_BATCH, "reviewed": False}
+            for name in ("meal_role", "contains_staple")
+        },
+    }
+    monkeypatch.setattr(recipe_tags, "curated_dishes", lambda: [])
+    monkeypatch.setattr(recipe_tags, "release_dishes", lambda: [item])
+    monkeypatch.setattr(recipe_tags, "previous_file", lambda: {"recipes": {item.key: old}})
+    monkeypatch.setattr(recipe_tags, "ask_model", lambda *a: pytest.fail("No model call authorized"))
+    fresh = rule_tags(item)
+    assert fresh.values["meal_role"] == "protein_main"
+    frozen = recipe_tags.build(False, 0)["tagged"][0][1]
+    assert frozen.values["meal_role"] == "one_bowl" and frozen.methods["meal_role"] == "llm"
+    entry = recipe_tags.recipe_entry(frozen, old)
+    assert entry["estimated"]["meal_role"]["reviewed"] is False
 
 
 def test_cooking_methods_and_equipment_come_from_keywords() -> None:
@@ -317,7 +388,12 @@ def test_the_tag_files_are_current_with_the_rules() -> None:
             if estimate["method"] == "rule" and found.values[field] != entries[key][field]:
                 stale.append((key, field))
             sweet = field == "protein_sources" and entries[key]["meal_role"] in {"dessert", "drink", "sauce"}
-            if estimate["method"] == "llm" and field not in {"contains_staple", *found.open} and not sweet:
+            if (
+                estimate["method"] == "llm"
+                and estimate["reviewed"]
+                and field not in {"contains_staple", *found.open}
+                and not sweet
+            ):
                 stale.append((key, field))
     assert not stale, stale[:10]
     assert committed(tag_files.INGREDIENT_TAGS, "ingredients") == ingredient_entries()
