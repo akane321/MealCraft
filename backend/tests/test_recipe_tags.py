@@ -193,7 +193,7 @@ def test_missing_meat_is_not_fabricated_from_a_title_or_asked_of_a_model() -> No
     assert tags("Toasted Rice For Fish", "side", [("rice", 200), ("butter", 20)])["protein_sources"] == []
     game = rule_tags(dish("Braised Rabbit", "main", [("rabbit", 900), ("carrot", 200)]))
     assert game.values["protein_sources"] is None and "protein_sources" not in game.open
-    assert game.values["meal_role"] is None
+    assert game.values["meal_role"] == "protein_main"
 
 
 def test_the_models_answer_keeps_only_what_the_lines_support() -> None:
@@ -217,6 +217,7 @@ def test_explicit_ingredient_wording_beats_generic_ids_and_does_not_split_mixed_
     mixed.lines[0].text = "5 lbs meat, cut into cubes (pork & chicken)"
     found = rule_tags(mixed)
     assert found.values["protein_sources"] is None and found.allowed_sources == {"pork", "chicken"}
+    assert found.values["meal_role"] == "protein_main" and found.values["contains_staple"] is False
     mixed.lines[0].text = "5 lbs pork or chicken"
     assert rule_tags(mixed).values["protein_sources"] is None
 
@@ -266,6 +267,18 @@ def test_rule_regeneration_keeps_the_unreviewed_model_batch_frozen(monkeypatch) 
     assert frozen.values["meal_role"] == "one_bowl" and frozen.methods["meal_role"] == "llm"
     entry = recipe_tags.recipe_entry(frozen, old)
     assert entry["estimated"]["meal_role"]["reviewed"] is False
+
+
+def test_a_known_role_is_not_erased_but_unknown_main_sources_are_not_structured_candidates() -> None:
+    from types import SimpleNamespace
+
+    from app.planning.meal_composition import meal_role_of
+
+    recipe = SimpleNamespace(meal_role="protein_main", protein_sources=None, estimated={})
+    assert meal_role_of(recipe) is None
+    assert recipe.meal_role == "protein_main"  # Known taxonomy and planning eligibility are different facts.
+    recipe.protein_sources = ["pork", "chicken"]
+    assert meal_role_of(recipe) == "protein_main"
 
 
 def test_cooking_methods_and_equipment_come_from_keywords() -> None:

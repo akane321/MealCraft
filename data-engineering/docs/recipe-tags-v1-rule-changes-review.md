@@ -4,47 +4,9 @@
 
 同意某个新标签不表示原标签正确。未审核模型字段继续冻结；fresh_rule_proposal只是新规则建议，不是已放行的模型值。原料克重是release数据，不是另行实测。
 
-变动菜谱：252；本次抽取：25；未审核模型门禁：422 → 422。
+变动菜谱：206；本次抽取：25；未审核模型门禁：422 → 422。
 
-## 1. Spiedies (Kabobs) (RCP2_491808DE2CEB)
-
-抽样方式：known regression；原菜类：main。
-
-| 变动字段 | 原值 | 新值 |
-|---|---|---|
-| meal_role | "protein_main" | null |
-| contains_staple | false | null |
-
-**仍受模型门禁拦截；历史模型字段不作为新规则已核实事实。**
-
-原料证据：
-
-- 1/3 cup cooking oil（归一化 72.7 g）
-- 1/2 cup vinegar（归一化 120.0 g）
-- 2 teaspoons garlic powder（归一化 5.3 g）
-- 1 teaspoon salt（归一化 6.1 g）
-- 1/2 teaspoon black pepper（归一化 1.1 g）
-- 1 teaspoon celery salt（归一化 3.6 g）
-- 1 teaspoon garlic salt（归一化 6.0 g）
-- 1 tablespoon parsley（归一化 3.8 g）
-- 1 tablespoon rosemary（归一化 5.8 g）
-- 1 bay leaf（归一化 0.2 g）
-- 1 clove garlic（归一化 3.0 g）
-- 5 lbs meat, cut into cubes (pork & chicken)（归一化 2268.0 g）
-
-步骤证据：
-
-Mix all ingredients and pour over meat.
-Marinade in fridge for three days, stirring at least twice a day.
-(This is important).
-Remove meat from marinade; discard marinade.
-Skewer meat and grill.
-Serve with sliced Italian bread.
-Cooked meat can be frozen and heated up.
-
-人工意见：待确认。
-
-## 2. Marilyn'S English Pasties (RCP2_CB386B8363E1)
+## 1. Marilyn'S English Pasties (RCP2_CB386B8363E1)
 
 抽样方式：known regression；原菜类：main。
 
@@ -80,38 +42,7 @@ Let sit for a few minutes.
 
 人工意见：待确认。
 
-## 3. Spicy Thai One Pot (RCP2_87CBA929A2C6)
-
-抽样方式：seeded random changed case；原菜类：main。
-
-| 变动字段 | 原值 | 新值 |
-|---|---|---|
-| meal_role | "one_bowl" | null |
-| contains_staple | true | null |
-
-**仍受模型门禁拦截；历史模型字段不作为新规则已核实事实。**
-
-原料证据：
-
-- 1 1/2 cups cold water（归一化 355.5 g）
-- 2 tablespoons soy sauce（归一化 31.9 g）
-- 1/4 teaspoon cayenne pepper（归一化 0.4 g）
-- 1 lb meat, diced (chicken, beef, turkey, sausage... any will work)（归一化 453.6 g）
-- 1 medium red bell pepper, seeded and chopped（归一化 120.0 g）
-- 3/4 cup jasmine rice（归一化 138.8 g）
-- 3 green onions, chopped (tops included)（归一化 45.0 g）
-- 1 tablespoon minced cilantro（归一化 1.0 g）
-
-步骤证据：
-
-Combine water, soy sauce and cayenne pepper. Heat large wok or fry pan over high heat (Spray with cooking spray if using a "drier meat" like poultry). Add meat and stir fry for 4-5 minutes or until browned.
-Add bell pepper. Stir fry for one more minute.
-Mix in rice and soy sauce mixture. Bring to a boil, then reduce heat, cover and simmer for 20 minutes or until liquid is absorbed.
-Mix in green onions and cilantro. Serve.
-
-人工意见：待确认。
-
-## 4. Cabbage And Beef Dish (RCP2_509FEF2160AC)
+## 2. Chinese Pork Chops (RCP2_AA52264E15D0)
 
 抽样方式：seeded random changed case；原菜类：main。
 
@@ -119,215 +50,94 @@ Mix in green onions and cilantro. Serve.
 |---|---|---|
 | meal_role | "protein_main" | null |
 | contains_staple | false | null |
-| protein_sources | ["beef"] | null |
-
-原料证据：
-
-- 1 lb. ground beef or turkey（归一化 453.6 g）
-- 1 onion（归一化 110.0 g）
-- 3 c. cabbage, shredded（归一化 267.0 g）
-- 1 c. tomato soup（归一化 250.0 g）
-
-步骤证据：
-
-Brown ground beef or ground turkey and onion. Drain and season to taste. Spread in baking dish. Top with cabbage. Pour diluted tomato soup on top and cover. Bake at 350° for 1 hour. Makes 6 servings, 1/2 cup each.
-
-人工意见：待确认。
-
-## 5. Chappal Kebab (RCP2_F7D5083A01CE)
-
-抽样方式：seeded random changed case；原菜类：main。
-
-| 变动字段 | 原值 | 新值 |
-|---|---|---|
-| meal_role | "protein_main" | null |
-| contains_staple | false | null |
-| protein_sources | ["beef"] | null |
-
-原料证据：
-
-- 1 tablespoon chickpea flour（归一化 5.8 g）
-- 1 1/2 lbs ground beef (or ground lamb)（归一化 680.4 g）
-- 6 -7 tablespoons cilantro, chopped（归一化 6.5 g）
-- 2 -3 green chilies, chopped fine（归一化 112.5 g）
-- 1 1/2 teaspoons cumin seeds（归一化 3.3 g）
-- 1 1/2 teaspoons coriander seeds（归一化 1.4 g）
-- 1 teaspoon ground black pepper（归一化 2.3 g）
-- 1 1/4 teaspoons salt（归一化 7.6 g）
-- 1/2 egg, beaten（归一化 25.0 g）
-- 3 -4 tablespoons vegetable oil（归一化 47.7 g）
-
-步骤证据：
-
-Toast the cumin and coriander in a dry skillet until they start to pop, but take care not to burn them.
-Put all ingredients into a big bowl and work it together with your hands, as if you were making a meatloaf. Once it has formed a workable mass, knead it for a few minutes to make the meat smoother.
-Press into small patties, as thin as you can possibly make them. Mine are about five inches across when they're raw, but shrink a lot during cooking. I find pressing between two sheets of cling film (Saran Wrap or similar) helps me get a really fine patty in one piece.
-Fry in a hot skillet in the vegetable oil until browned on both sides.
-
-人工意见：待确认。
-
-## 6. Khao Pad (Thai Fried Rice) (RCP2_B3CA4D294329)
-
-抽样方式：seeded random changed case；原菜类：main。
-
-| 变动字段 | 原值 | 新值 |
-|---|---|---|
-| meal_role | "one_bowl" | null |
-| contains_staple | true | null |
-
-**仍受模型门禁拦截；历史模型字段不作为新规则已核实事实。**
-
-原料证据：
-
-- 1 tablespoon vegetable oil（归一化 13.6 g）
-- 1 tablespoon minced garlic（归一化 8.5 g）
-- 2 eggs（归一化 100.0 g）
-- 2 cups cooked rice, cooled（归一化 316.0 g）
-- 1 tablespoon fish sauce（归一化 18.0 g）
-- 1 tablespoon soy sauce（归一化 15.9 g）
-- 1 cup cooked meat (e.g. shrimp, pork, chicken, etc.)（归一化 140.0 g）
-- 2 teaspoons sugar（归一化 8.3 g）
-- ½ teaspoon ground black pepper（归一化 1.1 g）
-- Spring onion as desired, sliced（归一化 12.5 g）
-
-步骤证据：
-
-Heat up a frying pan or wok and add the oil, then the minced garlic. Stir fry until fragrant.
-Add the eggs, and stir fry the eggs until cooked.
-Add the rice and stir fry.
-Season with fish sauce, soy sauce, and sugar, then continue frying until the rice is crumbly.
-Add meat, pepper, and spring onions. Stir again until heated through, then transfer to a serving dish.
-
-人工意见：待确认。
-
-## 7. Chicken Adobo(Can Be Made With Pork Too) (RCP2_F5A97F6A48C9)
-
-抽样方式：seeded random changed case；原菜类：main。
-
-| 变动字段 | 原值 | 新值 |
-|---|---|---|
-| meal_role | "protein_main" | null |
-| contains_staple | false | null |
-| protein_sources | ["chicken"] | null |
+| protein_sources | ["pork"] | null |
 
 资料不完整：named pork but lists none。
 
 原料证据：
 
-- 3 lbs. chicken thighs, cut into serving pieces（归一化 1360.8 g）
-- 1/2 c. white vinegar（归一化 120.0 g）
-- 1/2 c. soy sauce（归一化 127.5 g）
-- 1/4 c. peppercorns, crushed（归一化 28.0 g）
-- 1 tsp. brown sugar（归一化 4.6 g）
-- 5 garlic cloves, crushed（归一化 15.0 g）
-- 3 bay leaves（归一化 0.6 g）
-- salt, to taste（归一化 6.1 g）
+- 2 c. hot water（归一化 474.0 g）
+- 2 chicken bouillon cubes（归一化 8.0 g）
+- 1/2 c. catsup（归一化 136.0 g）
+- 1 c. honey（归一化 336.0 g）
+- 1 1/2 tsp. salt（归一化 9.1 g）
+- 1/2 tsp. ginger（归一化 1.0 g）
+- 1/2 tsp. Accent（归一化 2.1 g）
+- 1/2 tsp. soy sauce（归一化 2.7 g）
 
 步骤证据：
 
-Combine all ingredients in a pan.
-Cover and allow to marinate 1-3 hours.
-Bring to a boil then lower heat and simmer for 30 minutes.
-Uncover the pan and continue simmering an additional 15 minutes or until most of the liquid has evaporated and the chicken is light brown.
-Serve with white rice.
-Serves 4-6.
+Marinate 8 to 10 pork chops in sauce overnight.
+Place pork chops in shallow roasting pan and pour sauce over them.
+Bake 1 1/2 hours at 325°.
+Serve over hot buttered rice.
 
 人工意见：待确认。
 
-## 8. Cornish Finnish Michigan Pasties (RCP2_1BC59C8F7B88)
+## 3. Kid Friendly Jamaican Chicken (RCP2_631314414D3C)
 
 抽样方式：seeded random changed case；原菜类：main。
 
 | 变动字段 | 原值 | 新值 |
 |---|---|---|
-| meal_role | "protein_main" | "one_bowl" |
-| contains_staple | false | true |
-
-原料证据：
-
-- 4 1/2 cups all-purpose flour（归一化 562.5 g）
-- 1 cup shortening（归一化 205.0 g）
-- 1 1/4 cups ice water（归一化 296.2 g）
-- 1 teaspoon salt（归一化 6.1 g）
-- 5 1/2 cups thinly sliced potatoes（归一化 825.0 g）
-- 2 carrots, shredded（归一化 122.0 g）
-- 1 onion（归一化 110.0 g）
-- 1/2 cup diced rutabaga（归一化 70.0 g）
-- 1 1/2 lbs lean ground beef（归一化 680.4 g）
-- 1/2 lb ground lean pork（归一化 226.8 g）
-- 1 tablespoon salt（归一化 18.2 g）
-- 1 teaspoon ground black pepper（归一化 2.3 g）
-- 1 1/2 teaspoons msg (MSG)（归一化 6.2 g）
-- 1 beef bouillon cube（归一化 4.0 g）
-- 1/2 cup hot water（归一化 118.5 g）
-
-步骤证据：
-
-Whisk together flour and salt in a large bowl. Cut shortening. Make a well in the center of the mixture, and quickly stir in ice cold water. Form dough into a ball. Set aside.
-Dissolve the bouillon cube in the hot water. Combine uncooked vegetables, uncooked meats, salt, pepper, monosodium glutamate (MSG), and bouillon.
-Roll out pastry dough into 6 x 8 inch rectangles. Place about 1 1/2 cups of filling in the center of each rectangle. Bring 6 inch sides together, and seal. Cut a slit in the top of each pasty. Place on dull, not black, baking pans.
-Bake at 425°F for 45 minutes.
-
-人工意见：待确认。
-
-## 9. Chicken & Noodle Laksa (RCP2_33694E3F32AF)
-
-抽样方式：seeded random changed case；原菜类：main。
-
-| 变动字段 | 原值 | 新值 |
-|---|---|---|
-| meal_role | "one_bowl" | null |
-| contains_staple | true | null |
+| meal_role | "protein_main" | null |
+| contains_staple | false | null |
 | protein_sources | ["chicken"] | null |
 
 资料不完整：named chicken but lists none。
 
 原料证据：
 
-- 1/2 red chili（归一化 22.5 g）
-- 2 stalks lemongrass（归一化 40.0 g）
-- 4 garlic cloves（归一化 12.0 g）
-- 1 inch ginger piece of（归一化 15.0 g）
-- 8 ounces thai noodles（归一化 226.8 g）
-- 1/2 onion large, finely chopped（归一化 55.0 g）
+- 2 tablespoons light brown sugar（归一化 27.5 g）
+- 1 1/2 teaspoons salt（归一化 9.1 g）
+- 1/2 teaspoon ground black pepper（归一化 1.1 g）
+- 1/2 teaspoon ground paprika（归一化 1.1 g）
+- 1/2 teaspoon ground allspice（归一化 0.9 g）
+- 1/4 teaspoon garlic powder（归一化 0.7 g）
+- 1/4 teaspoon onion powder（归一化 0.6 g）
+- 1/8 teaspoon ground cayenne pepper, as desired for additional spice（归一化 0.2 g）
+- 1/8 teaspoon ground cinnamon（归一化 0.3 g）
 
 步骤证据：
 
-Place the chili, lemongrass, garlic and ginger in a food processor or mortar and grind or bash to a rough paste.
-Place the Pad Thai noodles in a large bowl and pour boiling water over the noodles. Allow to sit until pliable but still a bit firm to bite. This takes about 10 minutes. Drain the noodles.
+Mix all ingredients in a small bowl, set aside. Place boneless, skinless chicken breasts between sheets of plastic wrap or in large plastic bags and pound thin. Chicken breasts should be 1/2 thick or less. Rub chicken with olive oil on both sides. Sprinkle on seasoning. Place in skillet that has been pre-heated to medium-high and sprayed with non-stick cooking oil. Cook for 4 to 5 minutes per side or until done. Slice into 1/4 cubes or strips or leave whole as desired.
 
 人工意见：待确认。
 
-## 10. Egg Filling For Pita Bread (RCP2_6E980A921C14)
+## 4. Barbecue Beef (RCP2_DA28B246E699)
 
 抽样方式：seeded random changed case；原菜类：main。
 
 | 变动字段 | 原值 | 新值 |
 |---|---|---|
-| meal_role | "protein_main" | "sauce" |
-| protein_sources | ["egg"] | [] |
-| flavor_tags | ["rich"] | [] |
+| meal_role | "protein_main" | null |
+| contains_staple | false | null |
+| protein_sources | ["beef"] | null |
+
+资料不完整：named beef but lists none。
 
 原料证据：
 
-- 3 oz. cream cheese（归一化 85.0 g）
-- 1/4 c. mayonnaise（归一化 55.0 g）
-- 3/4 tsp. dill weed（归一化 0.1 g）
-- 1/2 tsp. salt（归一化 3.0 g）
-- 1/2 tsp. dry mustard（归一化 1.0 g）
-- 8 hard-boiled eggs, chopped fine（归一化 400.0 g）
-- 1 c. ripe olives, sliced（归一化 135.0 g）
-- 1/2 c. chopped celery（归一化 50.5 g）
-- 2 Tbsp. chopped onion（归一化 20.0 g）
+- 2 onions, diced（归一化 220.0 g）
+- 1 pt. catsup（归一化 544.0 g）
+- 1 Tbsp. Worcestershire sauce（归一化 17.0 g）
+- 1 Tbsp. vinegar（归一化 15.0 g）
+- 2 Tbsp. mustard（归一化 31.0 g）
+- 1 tsp. cinnamon（归一化 2.6 g）
+- 2 Tbsp. sugar（归一化 25.0 g）
+- 1 1/2 c. beef stock（归一化 360.0 g）
 
 步骤证据：
 
-Blend cream cheese, mayonnaise and seasonings.	Stir in remaining ingredients.
-Regular bread may be used for a sandwich.
+Season and brown roast.
+Cook until done. Shred roast into small pieces.
+Add remaining ingredients. Simmer 30 minutes or until mixture is thick.
+Serve over toasted buns.
+Yields 12 servings.
 
 人工意见：待确认。
 
-## 11. Thai Shrimp And Snow Peas (RCP2_7C5C5294C996)
+## 5. Chicken Stir-Fry (RCP2_1D97F9CF9C30)
 
 抽样方式：seeded random changed case；原菜类：main。
 
@@ -338,104 +148,61 @@ Regular bread may be used for a sandwich.
 
 原料证据：
 
-- 1/2 cup lemon juice（归一化 124.0 g）
-- 1/4 cup soy sauce（归一化 63.8 g）
-- 2 tablespoons brown sugar（归一化 27.5 g）
-- 2 teaspoons fish sauce（归一化 12.0 g）
-- 1 teaspoon red pepper flakes, or to taste（归一化 1.8 g）
-- 1/2 teaspoon cornstarch, or as desired (optional)（归一化 1.3 g）
-- 6 tablespoons olive oil, divided（归一化 81.0 g）
-- 10 cloves garlic, minced（归一化 30.0 g）
-- 2 jalapeno peppers, seeded and chopped（归一化 28.0 g）
-- 10 whole black peppercorns（归一化 0.5 g）
-- 2 onions, sliced（归一化 220.0 g）
-- 2 (6 ounce) packages frozen sugar snap peas, thawed（归一化 340.0 g）
-- 12 cherry tomatoes（归一化 1476.0 g）
-- 1 yellow bell pepper, thinly sliced（归一化 120.0 g）
-- 1 red bell pepper, thinly sliced（归一化 120.0 g）
-- 1 green bell pepper, thinly sliced（归一化 120.0 g）
-- 2 pounds fresh shrimp, peeled and deveined（归一化 907.2 g）
-- 1/4 cup chopped fresh cilantro（归一化 4.0 g）
-- 1/4 cup chopped fresh mint（归一化 10.0 g）
-- 2 cups cooked long-grain rice（归一化 316.0 g）
-- 1 cup fresh bean sprouts, or to taste（归一化 104.0 g）
+- 1 (20 oz.) pineapple chunks（归一化 567.0 g）
+- 1 lb. chicken breasts（归一化 453.6 g）
+- 2 cloves garlic（归一化 6.0 g）
+- 1 tsp. ginger（归一化 2.0 g）
+- 2 Tbsp. vegetable oil（归一化 27.2 g）
+- 2 medium carrots（归一化 122.0 g）
+- 1 pepper（归一化 0.1 g）
+- 4 oz. cooked spaghetti（归一化 113.4 g）
+- 3 onions（归一化 330.0 g）
+- 1/3 c. pineapple juice（归一化 83.3 g）
+- 1/3 c. soy sauce（归一化 85.0 g）
+- 1 Tbsp. cornstarch（归一化 8.0 g）
+- 1 Tbsp. sesame oil（归一化 13.6 g）
 
 步骤证据：
 
-Bring lemon juice, soy sauce, brown sugar, fish sauce, red pepper flakes, and cornstarch to a simmer in a saucepan over medium heat until sauce is thickened, 3 to 5 minutes.
-Heat 2 tablespoons olive oil in a non-stick skillet over medium heat. Add garlic, jalapeno peppers, and peppercorns; cook and stir until fragrant, 1 to 2 minutes. Add remaining olive oil, onions, snap peas, cherry tomatoes, yellow bell pepper, red bell pepper, and green bell pepper; cook and stir until peppers are tender, about 8 minutes. Add shrimp, cilantro, and mint; cook and stir until shrimp is bright pink on the outside and the meat is opaque, 2 to 3 minutes.
-Place shrimp mixture on a serving platter with rice and bean sprouts; pour sauce on top.
+Drain pineapple.
+Reserve 1/3 cup of juice.
+Slice chicken in strips.
+Stir-fry with garlic and ginger in oil.
+Add pineapple, carrots, onions and pepper.
+Steam for 2 to 3 minutes.
+Stir in spaghetti.
 
 人工意见：待确认。
 
-## 12. Singapore Noodles (RCP2_4A61D1E39E99)
+## 6. Baked Macaroni And Cheese (RCP2_3B3606EBC933)
 
 抽样方式：seeded random changed case；原菜类：main。
 
 | 变动字段 | 原值 | 新值 |
 |---|---|---|
-| meal_role | "one_bowl" | null |
-| contains_staple | true | null |
-| protein_sources | ["pork"] | null |
+| meal_role | "staple" | "one_bowl" |
 
 原料证据：
 
-- 1 lb ground pork (or beef or poultry)（归一化 453.6 g）
-- 5 garlic cloves, minced（归一化 15.0 g）
-- 3 teaspoons ground ginger（归一化 6.0 g）
-- 1/4 teaspoon cayenne（归一化 0.4 g）
-- 1 1/2 tablespoons curry powder（归一化 9.0 g）
-- 1/3 cup green onion, slivered (or chopped)（归一化 33.3 g）
-- 1/4 cup oyster sauce（归一化 67.5 g）
-- 2 teaspoons soy sauce（归一化 10.6 g）
-- 1 lb spaghetti（归一化 453.6 g）
+- 2 Tbsp. margarine（归一化 28.4 g）
+- 2 Tbsp. flour（归一化 15.6 g）
+- 1 tsp. salt（归一化 6.1 g）
+- 1 tsp. mustard（归一化 5.2 g）
+- 2 1/2 c. milk（归一化 610.0 g）
+- 2 c. macaroni, cooked（归一化 280.0 g）
+- 2 c. shredded cheese（归一化 226.0 g）
+- 1/4 c. buttered bread crumbs（归一化 31.2 g）
 
 步骤证据：
 
-In a wok or large frying pan, scramble-fry pork with garlic, ginger, cayenne, curry, and green onion. (If you're not using lean meat, you may want to partially cook the meat by itself and then drain most of the fat before adding the other ingredients.).
-Meanwhile, cook spaghetti according to package instructions.
-Add oyster sauce and soy sauce to meat mixture and toss well to mix thoroughly.
-Drain spaghetti and add to meat. Toss to mix and serve.
+In saucepan, melt margarine. Blend in flour, salt and mustard. Add milk and heat, stirring constantly. The sauce will thicken a little.
+Add 1 1/2 cups cheese, stirring often. Add macaroni with sauce. Top with remaining cheese, bread crumbs and a pinch of paprika.
+Bake at 350° for 1/2 hour.
+Makes 4 to 6 servings.
 
 人工意见：待确认。
 
-## 13. Lasagna Style Bow Tie Dish (RCP2_44870004D5FB)
-
-抽样方式：seeded random changed case；原菜类：main。
-
-| 变动字段 | 原值 | 新值 |
-|---|---|---|
-| meal_role | "one_bowl" | null |
-| contains_staple | true | null |
-
-**仍受模型门禁拦截；历史模型字段不作为新规则已核实事实。**
-
-原料证据：
-
-- 8 oz. bow tie pasta（归一化 226.8 g）
-- 1 Tbsp. oil（归一化 13.6 g）
-- 1 chopped onion（归一化 110.0 g）
-- 1/2 lb. chopped meat（归一化 226.8 g）
-- 14 oz. spaghetti sauce（归一化 396.9 g）
-- 1 c. low-fat cottage cheese（归一化 226.0 g）
-- 1 egg（归一化 50.0 g）
-- 2 Tbsp. Parmesan cheese（归一化 12.5 g）
-- 4 oz. Mozzarella cheese, grated（归一化 113.4 g）
-
-步骤证据：
-
-Preheat oven to 425°.
-Grease an 8-inch square baking dish. Partially cook pasta 1/2 time required on package.
-In skillet, heat oil.
-Saute onion 1 minute.
-Stir in ground meat.
-Cook until browned.
-Add spaghetti sauce and bring to boil.
-Cover and cook 5 minutes.
-
-人工意见：待确认。
-
-## 14. Parmesan Chicken (RCP2_B11FE7812622)
+## 7. Kalbi Beef Marinate (Flank Steak) (RCP2_80E876686DA8)
 
 抽样方式：seeded random changed case；原菜类：main。
 
@@ -443,24 +210,156 @@ Cover and cook 5 minutes.
 |---|---|---|
 | meal_role | "protein_main" | null |
 | contains_staple | false | null |
-| protein_sources | ["chicken"] | null |
+| protein_sources | ["beef"] | null |
 
-资料不完整：named chicken but lists none。
+资料不完整：named beef but lists none。
 
 原料证据：
 
-- 1 c. Miracle Whip（归一化 220.0 g）
-- 1/2 c. grated Parmesan cheese（归一化 50.0 g）
-- 2 tsp. oregano（归一化 3.6 g）
+- 1/2 cup soy sauce（归一化 127.5 g）
+- 1/4 cup water（归一化 59.2 g）
+- 4 clove garlic, minced（归一化 12.0 g）
+- 1 teaspoon ginger, minced（归一化 2.0 g）
+- 1/2 cup brown sugar（归一化 110.0 g）
+- 1/4 cup sesame oil（归一化 54.5 g）
+- 2 tablespoon sesame seeds, toasted（归一化 18.0 g）
+- 1 1/2 tablespoon chili paste（归一化 22.5 g）
+- 5 Green onions, chopped（归一化 75.0 g）
+- 1/2 cup Saki wine（归一化 118.5 g）
 
 步骤证据：
 
-Spoon over 2 to 3 pounds chicken.
-Bake 45 minutes at 375°. Serves 4 to 6.
+Combine all ingredients except ribs in a 1 gallon ziplock bag. add flank steak and seal bag, squeezing out excess air. Work sauce into ribs by kneading bag
+Marinate for 8 hours. Remove from zip lock and grill for 6 minutes each side.
 
 人工意见：待确认。
 
-## 15. Chicken Curry (RCP2_0447589B2FD3)
+## 8. Acorn Squash Stuffed With Italian Sausage & Penne (RCP2_961449012D5D)
+
+抽样方式：seeded random changed case；原菜类：main。
+
+| 变动字段 | 原值 | 新值 |
+|---|---|---|
+| meal_role | "one_bowl" | "protein_main" |
+| contains_staple | true | false |
+
+原料证据：
+
+- 2 medium acorn squash, halved and cleaned（归一化 900.0 g）
+- 1/2 lb Italian sausage, casings removed（归一化 226.8 g）
+- 1/2 cup onion, sliced（归一化 80.0 g）
+- 2 cups pasta sauce（归一化 490.0 g）
+- 1/2 lb penne, cooked（归一化 226.8 g）
+- 1/4 lb mozzarella cheese, shredded（归一化 113.4 g）
+
+步骤证据：
+
+Preheat the oven to 350 degrees F.
+Season the squash with olive oil, salt and pepper. Place on a baking sheet, flesh side up and add 1/2 cup water to the pan. Cover with alluminum foil and bake until tender, about 1 hour. Remove from the oven and cool completely.
+In a large saute pan, over medium heat, brown the sausage and onions, about 6 to 8 minutes.
+In a large mixing bowl, toss the sausage and onions with the pasta sauce, pasta, and cheese. Season with salt and pepper. Mix well.
+Spoon the pasta mixture into the cavity of each squash. Place the filled squashes on a baking sheet and place in the oven.
+Bake until the squash is heated through and the cheese melts, about 20 minutes.
+
+人工意见：待确认。
+
+## 9. Mon-Doo(Korean Egg Rolls) (RCP2_557753E022A8)
+
+抽样方式：seeded random changed case；原菜类：snack_appetizer。
+
+| 变动字段 | 原值 | 新值 |
+|---|---|---|
+| protein_sources | ["pork"] | null |
+
+原料证据：
+
+- egg roll wrappers (available at Oriental market)（归一化 450.0 g）
+- 2 lb. pork or beef, cooked and cut into very small pieces（归一化 907.2 g）
+- 1 c. green onions, chopped fine（归一化 100.0 g）
+- 2 c. cabbage, shredded（归一化 178.0 g）
+- 2 c. mushrooms, chopped small（归一化 140.0 g）
+- 1 Tbsp. soy sauce（归一化 15.9 g）
+- 1/4 tsp. garlic powder（归一化 0.7 g）
+- 2 Tbsp. sesame seed oil (use 100% not blend)（归一化 27.2 g）
+
+步骤证据：
+
+Brown meat, onions and mushrooms in 2 tablespoons sesame seed oil.
+Season according to taste with soy sauce and garlic powder. Place a small amount into the middle of egg roll wrapper.
+Roll and seal wrapper by wetting finger with a little water (egg roll wrappers will seal tight).
+Fry egg rolls in sesame seed oil or deep fry.
+Can be frozen and microwaved when needed.
+
+人工意见：待确认。
+
+## 10. Spanish Rice (RCP2_4F1F492DB38E)
+
+抽样方式：seeded random changed case；原菜类：side。
+
+| 变动字段 | 原值 | 新值 |
+|---|---|---|
+| meal_role | "staple" | null |
+| contains_staple | true | null |
+
+原料证据：
+
+- 1 green pepper, chopped（归一化 120.0 g）
+- 1 tomato, chopped（归一化 123.0 g）
+- 1 onion, chopped（归一化 110.0 g）
+- 2 Tbsp. butter（归一化 28.4 g）
+- 2 c. cooked rice（归一化 316.0 g）
+- 1/3 c. water（归一化 79.0 g）
+- 1/2 tsp. salt（归一化 3.0 g）
+- 1/4 tsp. pepper（归一化 0.6 g）
+
+步骤证据：
+
+Cook green pepper, tomato and onion in hot butter until tender.
+Stir in cooked rice, water, salt and pepper.
+Heat through, stirring occasionally.
+Serves 6.
+
+人工意见：待确认。
+
+## 11. Kim Bap (Korean Rice Rolls) (RCP2_D666EF442FE4)
+
+抽样方式：seeded random changed case；原菜类：main。
+
+| 变动字段 | 原值 | 新值 |
+|---|---|---|
+| meal_role | "staple" | "one_bowl" |
+
+原料证据：
+
+- 4 cups hot cooked rice（归一化 632.0 g）
+- 1 teaspoon rice vinegar（归一化 5.4 g）
+- 1/2 teaspoon soy sauce（归一化 2.7 g）
+- 1/2 teaspoon dark sesame oil（归一化 2.3 g）
+- 4 sheets kim fresh seaweed（归一化 8.0 g）
+- 1 small carrot, julienned（归一化 61.0 g）
+- 2 eggs, beaten（归一化 100.0 g）
+- 10 ounces frozen spinach, thawed and drained（归一化 283.5 g）
+- 1/2 teaspoon sesame oil（归一化 2.3 g）
+- 1/2 teaspoon soy sauce（归一化 2.7 g）
+- 4 slices pickled yellow radishes（归一化 40.0 g）
+- 1 tablespoon sesame seeds, toasted（归一化 9.0 g）
+
+步骤证据：
+
+Let rice cool a bit.
+Meanwhile, mix the rice with the vinegar, soy sauce, and sesame oil.
+Fry eggs as if it were a pancake.
+Cut egg into strips.
+Mix spinach with sesame oil and soy sauce.
+To assemble, put rice on a bamboo roller (I do not have one and it works fine, just not as pretty).
+Spread rice over 2/3 of the sheet, lay carrots, spinach, and egg on top.
+Sprinkle with sesame seeds and roll like a jelly roll.
+Cut into 1/2 inch rounds.
+You can adapt this to your own tastes, some people put imitation crab meat in them, I put marinated soy bean sprouts and cucumbers in mine, etc.
+
+人工意见：待确认。
+
+## 12. Chicken Curry (RCP2_0447589B2FD3)
 
 抽样方式：seeded random changed case；原菜类：main。
 
@@ -499,63 +398,87 @@ Let set for 24 hours in refrigerator. Heat and serve over hot rice.
 
 人工意见：待确认。
 
-## 16. Pumpkin Fried Rice (RCP2_586E24DE73A6)
+## 13. Napa Cabbage with Dried Shrimp (RCP2_66CDC4D02656)
 
 抽样方式：seeded random changed case；原菜类：side。
 
 | 变动字段 | 原值 | 新值 |
 |---|---|---|
-| meal_role | "staple" | null |
-| contains_staple | true | null |
-
-原料证据：
-
-- 1/2 whole Large Onion, Chopped（归一化 55.0 g）
-- 1 cup Canned Pumpkin（归一化 245.0 g）
-- 2 cups Cooked White Rice（归一化 316.0 g）
-- 2 whole Eggs, Beaten（归一化 100.0 g）
-- 2 Tablespoons Soy Sauce（归一化 31.9 g）
-
-步骤证据：
-
-1. Spray a medium to large size skillet with oil and heat over medium-high.
-2. Cook onion in oil until slightly softened.
-3. Add pumpkin and rice and stir well.
-4. Push rice to one side of the pan and pour beaten eggs onto exposed skillet surface.
-5. Let cook slightly and stir in such a way that the eggs are scrambled.
-6. Stir rice mixture into eggs and sprinkle with soy. Stir and let cook a few more minutes.
-7. Remove from heat and enjoy!
-
-人工意见：待确认。
-
-## 17. Satay (RCP2_21ADEFC9A0C2)
-
-抽样方式：seeded random changed case；原菜类：main。
-
-| 变动字段 | 原值 | 新值 |
-|---|---|---|
-| meal_role | "protein_main" | null |
-| contains_staple | false | null |
+| protein_sources | ["shellfish"] | [] |
 
 **仍受模型门禁拦截；历史模型字段不作为新规则已核实事实。**
 
 原料证据：
 
-- 2 Tbsp. curry powder（归一化 12.0 g）
-- 2 Tbsp. sugar（归一化 25.0 g）
-- 1/2 c. salad oil（归一化 109.0 g）
-- 1/2 c. soy sauce（归一化 127.5 g）
-- 4 cloves garlic, pressed（归一化 12.0 g）
-- 2 to 3 lb. meat（归一化 1134.0 g）
+- 2 tablespoons Dried Shrimp（归一化 21.2 g）
+- 3/4 cup Boiling Water（归一化 177.8 g）
+- 1 head Napa Cabbage（归一化 908.0 g）
+- 2 tablespoons Peanut Oil（归一化 27.0 g）
+- 4 Chopped Scallions（归一化 60.0 g）
+- 1 tablespoon Ginger（归一化 6.0 g）
+- 1 tablespoon Soy Sauce（归一化 15.9 g）
+- 1 tablespoon Water（归一化 14.8 g）
+- 2 tsp Cornstarch（归一化 5.3 g）
+- 1 tsp Kosher Salt（归一化 6.1 g）
+- 1/2 tsp Pepper（归一化 1.1 g）
 
 步骤证据：
 
-Mix first 5 ingredients in a bowl.
-This makes an excellent marinade for any kind of meat, whether it's game or domestic. Marinate meat 4 hours or longer and then barbecue or stir-fry the meat.
+Dried shrimp gives this Chinese dish a punch of salty umami flavor. You can find it at an Asian grocery store in the frozen or refrigerated section. Look for small-sized dried shrimp, about a 1/4-inch in size. If you use medium or large dried shrimp, hydrate the shrimp with more water (1 cup for medium-sized shrimp, 1 1/4 cup for large) and for longer time (45 to 60 minutes), then chop it up into smaller 1/4-inch chunks. To make this recipe vegetarian, omit the dried shrimp and use four or five dried shiitake mushrooms, rehydrated, and sliced thin.
+Rehydrate the dried shrimp:
+Place the dried shrimp in a small bowl and pour the boiling water over it. Cover with a small plate and let sit for 30 minutes so the shrimp can rehydrate. The shrimp will be lighter in color and plump up slightly.
+Prep the cabbage:
+Meanwhile, split the napa cabbage in half lengthwise. Rinse the cabbage and shake it dry. Cut out the core of the cabbage and discard.
+Set out two large bowls. Cut the remaining cabbage into 1-inch pieces, putting the thicker white pieces at the bottom of the cabbage into one bowl and the top thinner leafy green pieces into the other bowl.
+Drain the shrimp:
+Once the shrimp has rehydrated, drain it and discard the liquid.
+Cook the shrimp and cabbage:
+In a large wok or skillet over high heat add the peanut oil, swirling it around to coat the pan.
+Heat until the oil looks shimmering hot, then carefully add the scallions, ginger, and rehydrated shrimp, paying specially attention as the wet ingredients may cause the hot oil to splatter. Toss with a spatula until the scallions are bright green and the entire mixture is fragrant, about 1 minute.
+Add the thicker white part of the napa cabbage to the pan and lower the heat to medium high. Continue to cook and stir for 3 to 4 minutes, or until the edges of the cabbage pieces start to look slightly translucent but the center of the cabbage pieces are still opaque white.
+Reduce the heat to medium low and add the leafy green pieces of cabbage into the pan. Cook until the leaves are wilted, about 2 minutes.
+Make a cornstarch slurry:
+In a small bowl, combine the soy sauce, cold water, and cornstarch, stirring to make a slurry. Then pour over the cabbage and continue to cook and stir until a sauce has thickened slightly to the consistency of whole milk.
+Season the stir fry:
+Season the stir fry with salt and pepper, then taste and add more salt and pepper if you wish. The cabbage will be translucent and silky looking, with specks of dried shrimp all over.
 
 人工意见：待确认。
 
-## 18. Mexican Crab Salad (RCP2_010D47D8B41A)
+## 14. Beef Carnitas Tacos (RCP2_28626CFF47A0)
+
+抽样方式：seeded random changed case；原菜类：main。
+
+| 变动字段 | 原值 | 新值 |
+|---|---|---|
+| meal_role | "one_bowl" | null |
+| contains_staple | true | null |
+| protein_sources | ["beef"] | null |
+
+资料不完整：named beef but lists none。
+
+原料证据：
+
+- 2 cups chopped plum tomato (about 2 medium)（归一化 360.0 g）
+- 1/3 cup chopped onion（归一化 53.3 g）
+- 1/4 cup diced peeled avocado（归一化 37.5 g）
+- 2 tablespoons minced fresh cilantro（归一化 2.0 g）
+- 1 tablespoon fresh lime juice（归一化 15.1 g）
+- 1/8 teaspoon salt（归一化 0.8 g）
+- 1/8 teaspoon freshly ground black pepper（归一化 0.3 g）
+- 8 (6-inch) corn tortillas（归一化 360.0 g）
+- 1 lime, cut into 8 wedges（归一化 67.0 g）
+
+步骤证据：
+
+Combine first 7 ingredients in a medium bowl; toss well. Warm tortillas according to package directions. Spoon 1/4 cup Beef Carnitas onto each tortilla; top each with about 3 tablespoons avocado mixture. Fold in half; serve with lime wedges.
+This recipe was updated for the November, 2012 25th anniversary issue.
+MyRecipes is working with
+, the Partnership for a Healthier America, and USDA's MyPlate to give anyone looking for healthier options access to a trove of recipes that will help them create healthy, tasty plates. For more information about creating a healthy plate, visit
+.
+
+人工意见：待确认。
+
+## 15. Mexican Crab Salad (RCP2_010D47D8B41A)
 
 抽样方式：seeded random changed case；原菜类：salad。
 
@@ -588,7 +511,7 @@ Enjoy!
 
 人工意见：待确认。
 
-## 19. Stuffed Green Peppers (RCP2_FAC00DA2B400)
+## 16. Stuffed Green Peppers (RCP2_FAC00DA2B400)
 
 抽样方式：seeded random changed case；原菜类：main。
 
@@ -621,39 +544,7 @@ Serves 4.
 
 人工意见：待确认。
 
-## 20. Singapore Chicken Noodles (RCP2_7C8F0E835E9F)
-
-抽样方式：seeded random changed case；原菜类：main。
-
-| 变动字段 | 原值 | 新值 |
-|---|---|---|
-| meal_role | "one_bowl" | "protein_main" |
-| contains_staple | true | false |
-
-原料证据：
-
-- 1 teaspoon olive oil（归一化 4.5 g）
-- 2 chicken breasts, cut into strips（归一化 348.0 g）
-- 1 red bell pepper, cut into strips（归一化 120.0 g）
-- 4 baby corn（归一化 360.0 g）
-- 1/2 cup chicken broth（归一化 118.3 g）
-- 2 eggs, beaten（归一化 100.0 g）
-- 2 tablespoons fresh cilantro, chopped（归一化 2.0 g）
-- 2 teaspoons soy sauce（归一化 10.6 g）
-- 3 ounces egg noodles (cooked according to packet instructions)（归一化 85.0 g）
-- 1 tablespoon sesame oil（归一化 13.6 g）
-- 1 dash Tabasco sauce（归一化 0.6 g）
-
-步骤证据：
-
-Heat the oil in a wok and stir-fry the chicken, pepper and baby sweetcorn. Add the chicken broth and stir until chicken is cooked through.
-Add the eggs and stir until scrambled.
-Add the cilantro, soy sauce, noodles, sesame oil and Tabasco.
-Garnish with a handful of coriander to serve.
-
-人工意见：待确认。
-
-## 21. Israeli Kabobs (RCP2_4AC9B1A326C6)
+## 17. Chicken Teriyaki (RCP2_975C4431AA56)
 
 抽样方式：seeded random changed case；原菜类：main。
 
@@ -661,111 +552,180 @@ Garnish with a handful of coriander to serve.
 |---|---|---|
 | meal_role | "protein_main" | null |
 | contains_staple | false | null |
+| protein_sources | ["chicken"] | null |
+
+资料不完整：named chicken but lists none。
+
+原料证据：
+
+- 1/2 c. soy sauce（归一化 127.5 g）
+- 1/4 c. salad oil（归一化 54.5 g）
+- 2 Tbsp. molasses（归一化 40.0 g）
+- 2 tsp. ground ginger（归一化 4.0 g）
+- 6 cloves garlic（归一化 18.0 g）
+
+步骤证据：
+
+Mix all ingredients and pour over chicken.
+Marinate in refrigerator at least 1 hour.
+Grill over medium hot grill.
+
+人工意见：待确认。
+
+## 18. Pumpkin Fried Rice (RCP2_586E24DE73A6)
+
+抽样方式：seeded random changed case；原菜类：side。
+
+| 变动字段 | 原值 | 新值 |
+|---|---|---|
+| meal_role | "staple" | null |
+| contains_staple | true | null |
+
+原料证据：
+
+- 1/2 whole Large Onion, Chopped（归一化 55.0 g）
+- 1 cup Canned Pumpkin（归一化 245.0 g）
+- 2 cups Cooked White Rice（归一化 316.0 g）
+- 2 whole Eggs, Beaten（归一化 100.0 g）
+- 2 Tablespoons Soy Sauce（归一化 31.9 g）
+
+步骤证据：
+
+1. Spray a medium to large size skillet with oil and heat over medium-high.
+2. Cook onion in oil until slightly softened.
+3. Add pumpkin and rice and stir well.
+4. Push rice to one side of the pan and pour beaten eggs onto exposed skillet surface.
+5. Let cook slightly and stir in such a way that the eggs are scrambled.
+6. Stir rice mixture into eggs and sprinkle with soy. Stir and let cook a few more minutes.
+7. Remove from heat and enjoy!
+
+人工意见：待确认。
+
+## 19. Parmesan Chicken (RCP2_7B87DB0F6AFE)
+
+抽样方式：seeded random changed case；原菜类：main。
+
+| 变动字段 | 原值 | 新值 |
+|---|---|---|
+| meal_role | "protein_main" | null |
+| contains_staple | false | null |
+| protein_sources | ["chicken", "egg"] | null |
+
+资料不完整：named chicken but lists none。
+
+原料证据：
+
+- 1 egg（归一化 50.0 g）
+- 1 Tbsp. milk（归一化 15.2 g）
+- 1/2 c. Parmesan cheese（归一化 50.0 g）
+- 1/4 c. flour（归一化 31.2 g）
+- 1 tsp. paprika（归一化 2.3 g）
+- 1/2 tsp. salt（归一化 3.0 g）
+- 1/8 tsp. pepper（归一化 0.3 g）
+
+步骤证据：
+
+Mix dry ingredients in plastic baggie.
+Mix egg and milk.
+Dip chicken in egg and milk, then place in baggie; shake well.
+Place in pan.
+Pour 1/2 stick melted butter over.
+Bake at 350° for 1 hour uncovered.
+
+人工意见：待确认。
+
+## 20. Lo Mein (RCP2_C4333C1C5043)
+
+抽样方式：seeded random changed case；原菜类：main。
+
+| 变动字段 | 原值 | 新值 |
+|---|---|---|
 | protein_sources | ["beef"] | null |
 
 原料证据：
 
-- 2 lbs ground beef (or lamb)（归一化 907.2 g）
-- 1 minced onion（归一化 110.0 g）
-- 1 teaspoon garlic powder（归一化 2.7 g）
-- 1 teaspoon salt（归一化 6.1 g）
-- fresh ground pepper（归一化 1.1 g）
-- 1/2 cup fresh parsley, minced（归一化 30.0 g）
-- 2 teaspoons of fresh mint (or dried)（归一化 1.7 g）
-- 1 teaspoon allspice（归一化 1.9 g）
-- 1 teaspoon cumin（归一化 2.2 g）
-- 1/2 teaspoon ginger（归一化 1.0 g）
-- 2 eggs, beaten（归一化 100.0 g）
+- 1 lb. egg noodles (Asian lo mein noodles- fresh or dried)（归一化 453.6 g）
+- 5 T soy sauce (or Oyster Sauce)（归一化 79.7 g）
+- 6 T oil（归一化 81.8 g）
+- 1 egg（归一化 50.0 g）
+- 3 cups Napa cabbage, finely shredded（归一化 267.0 g）
+- 1/2 c bamboo shoots, shredded（归一化 65.5 g）
+- 1 cup cooked beef, pork or chicken (shredded)（归一化 135.0 g）
+- 2 t cornstarch（归一化 5.3 g）
+- 1/2 t salt（归一化 3.0 g）
+- 3 stalks scallions, washed and cut into 1" pieces.（归一化 45.0 g）
 
 步骤证据：
 
-Combine ingedients in a large bowl and mix well.
-Form into oblong patties (or mini-hamburger shapes).
-Place patties onto sprayed broiler pan and place in oven.
-Broil for about 10 minutes on each side.
-Serve with hummus, pita and Israeli salad!
-B'tayavon!
+Cook noodles in boiling salt water until al dente. Rinse under cold water. Drain.
+Mix 2 T soy sauce with noodles and set aside. (You can use Oyster Sauce)
+Stir any of the beef, pork or chicken in 1 T oil. Mix 1/2 t salt and 1 t cornstarch. Add this to the stir-fry. Remove it from the pan and set it aside. Add 3 T oil to wok and stir-fry cabbage ,and bamboo shoots. Add meat mixture to wok. Mix well. Beat egg and add it slowly to wok on top of everything. Add noodles. Toss until noodles are blended in with everything. Add 3 T Oyster sauce or soy sauce. You can add the scallions as garnish or throw them into the stir fry to cook them.
 
 人工意见：待确认。
 
-## 22. Tacos (RCP2_686557404CA1)
+## 21. Taco Meat Filling (RCP2_4FBC8094CB72)
 
 抽样方式：seeded random changed case；原菜类：main。
 
 | 变动字段 | 原值 | 新值 |
 |---|---|---|
-| meal_role | "one_bowl" | null |
-| contains_staple | true | null |
-
-**仍受模型门禁拦截；历史模型字段不作为新规则已核实事实。**
+| meal_role | "protein_main" | "sauce" |
+| protein_sources | ["beef"] | [] |
+| flavor_tags | ["rich"] | [] |
 
 原料证据：
 
-- 1 lb. ground meat（归一化 453.6 g）
-- 1/2 tsp. garlic powder（归一化 1.3 g）
-- 1/2 tsp. salt（归一化 3.0 g）
-- 1/4 tsp. pepper（归一化 0.6 g）
-- 1 c. mashed potatoes（归一化 210.0 g）
-- 12 corn tortillas（归一化 540.0 g）
+- 1 lb. ground beef（归一化 453.6 g）
+- 1/2 c. chopped onion（归一化 80.0 g）
+- 1 c. (8 oz.) tomato sauce（归一化 245.0 g）
+- 1 tsp. chili powder（归一化 2.7 g）
+- 3/4 tsp. salt（归一化 4.6 g）
+- 1/2 tsp. garlic salt（归一化 3.0 g）
 
 步骤证据：
 
-Brown meat in skillet.
-Add garlic, salt and pepper.
-Add small amount of water and cook slowly until tender.
-Add mashed potatoes and mix well with meat.
-Warm tortillas in grease in skillet; remove and place 1 tablespoon of meat mixture on center of tortilla.
-Fold over and pin with toothpick.
-Fry taco in grease until brown; drain well on paper towel.
-Serve with chopped onions, lettuce, canned, peeled green chili peppers and hot sauce.
+Brown beef in skillet, stirring until crumbly; drain excess fat.
+Stir in remaining ingredients; simmer, covered, for 10 minutes.
+Makes filling for 8 taco shells.
 
 人工意见：待确认。
 
-## 23. Gochujang Pulled Pork In The Slow Cooker (RCP2_951E934B1396)
+## 22. Chicken Adobo (RCP2_9E72C3378CDE)
 
 抽样方式：seeded random changed case；原菜类：main。
 
 | 变动字段 | 原值 | 新值 |
 |---|---|---|
-| meal_role | null | "protein_main" |
-| contains_staple | null | false |
+| protein_sources | ["chicken"] | null |
 
 原料证据：
 
-- 2/3 cup gochujang (Korean hot pepper paste)（归一化 181.3 g）
-- 1 large onion, thinly sliced（归一化 110.0 g）
-- 1/2 cup apple cider vinegar（归一化 119.5 g）
-- 1/2 cup chicken stock（归一化 118.3 g）
-- 1/4 cup honey（归一化 84.0 g）
-- 1/4 cup brown sugar（归一化 55.0 g）
-- 2 tablespoons fresh ginger（归一化 12.0 g）
-- 1 tablespoon soy sauce（归一化 15.9 g）
-- 1 tablespoon yellow mustard（归一化 15.5 g）
-- 3 cloves garlic, minced（归一化 9.0 g）
-- 1 tablespoon ground cinnamon（归一化 7.8 g）
-- 1 teaspoon salt（归一化 6.1 g）
-- 5 sprigs thyme, stemmed（归一化 5.0 g）
-- 1/2 teaspoon ground black pepper（归一化 1.1 g）
-- 1 (4 pound) boneless pork shoulder roast, trimmed（归一化 1814.4 g）
-- 1/4 cup butter, divided（归一化 56.8 g）
-- 1 tablespoon all-purpose flour（归一化 7.8 g）
-- 8 hamburger buns, split（归一化 344.0 g）
-- 3 green onions, thinly sliced（归一化 45.0 g）
+- 3 lbs Chicken, whole, disjointed & cut into serving pieces (or in combination with pork shoulder, 2" cubes)（归一化 1360.8 g）
+- 1/2 cup Vinegar, cane（归一化 120.0 g）
+- 1/3 cup Soy sauce, dark（归一化 85.0 g）
+- 8 cloves Garlic, peeled, crushed（归一化 24.0 g）
+- 1/2 tsp Peppercorn, black,whole,cracked（归一化 1.2 g）
+- 2 each Bay leaves（归一化 0.4 g）
+- 21/2 Tbsp Olive oil, pure（归一化 141.8 g）
+- 3 cloves Garlic, peeled, chopped（归一化 9.0 g）
 
 步骤证据：
 
-Combine gochujang, onion, vinegar, chicken stock, honey, brown sugar, ginger, soy sauce, mustard, garlic, cinnamon, salt, thyme, and black pepper together in a large bowl and mix well.
-Dredge pork in the gochujang sauce on all sides. Pour sauce into a slow cooker and add the pork. Spoon some of the sauce on top of the pork. Cover and cook on Low until pork roast shreds easily with a fork, about 8 hours.
-Preheat oven to 350 degrees F (175 degrees C).
-Place roast in a large bowl and shred the meat with 2 forks. Pour the sauce from the slow cooker into a pot over medium-high heat. Cover and bring to a boil. Uncover; reduce heat to a simmer.
-Mix 1 tablespoon butter and flour in a small bowl; combine with the sauce in the pot and mix well. Cook until heated through and slightly thickened, about 5 minutes. Remove from heat and stir again.
-Spread remaining 3 tablespoons butter over insides of buns. Place on a baking sheet.
-Toast in the preheated oven until golden brown, 5 to 7 minutes.
-Pour the sauce into the bowl with the shredded pork and mix. Top pork with green onions. Spoon pork over the toasted buns.
+1. Combine the chicken with the vinegar, soy sauce, crushed garlic, peppercorns, and bay leaves together in a saucepan. stir to evenly coat(May be marinated up to 8 hours or overnight in the refrigerator ).
+2. Over medium heat, let it come to a simmer. Cover with a lid and lower heat for a gentle simmer, stirring occassionally. The chicken will release a lot of liquid.
+3. When the chicken is barely cooked through. Remove the pieces, draining and shaking off as much liquid as possible. Reserve the stewing liquid.
+4. Heat a heavy gauge saute pan large enough to accomodate all the chicken pieces. Add the oil and swirl to evenly coat. Add the garlic and cook over medium heat until golden, constantly stirring to avoid burning. Remove the garlic and set aside.
+5. Pan fry the chicken pieces in the garlic-infused oil over medium to high heat to get a deep brown sear. Turn to sear on all sides. Be careful with hot oil splattering. Some of the chicken pieces will stick to the bottom of the pan if the chicken was not drained well of its stewing liquid.
+6. Once all the chicken pieces are seared, add the reserved stewing liquid and the sauteed garlic with the chicken in the pan. Let the liquid reduce over medium heat until slightly thickened.
+7. Serve with steamed rice.
+OPTIONS:
+*You may add the sauteed garlic as garnish in a serving dish instead of being part of the sauce.
+**Add finely minced/pureed chicken livers in the end of cooking as a thickener and flavor enhancer.
+***For color, infuse annato seeds in the olive oil before sauteeing the garlic.
 
 人工意见：待确认。
 
-## 24. Herbed Cornish Pasties (RCP2_44A2C72808DA)
+## 23. Ravioli Bolognese (RCP2_616F0B3CE6CC)
 
 抽样方式：seeded random changed case；原菜类：main。
 
@@ -776,62 +736,96 @@ Pour the sauce into the bowl with the shredded pork and mix. Top pork with green
 
 原料证据：
 
-- 2 cups all-purpose flour（归一化 250.0 g）
-- 1 teaspoon salt（归一化 6.1 g）
-- 1/2 teaspoon dried basil（归一化 0.2 g）
-- 1/2 teaspoon dried thyme（归一化 0.3 g）
-- 1/2 cup shortening（归一化 102.5 g）
-- 1/4 cup butter（归一化 56.8 g）
-- 5 to 6 tablespoons ice water（归一化 81.5 g）
-- 1 pound boneless beef chuck, cut into 1/2-inch cubes（归一化 453.6 g）
-- 2 tablespoons canola oil, divided（归一化 27.2 g）
-- 1 teaspoon salt（归一化 6.1 g）
-- 1/8 teaspoon pepper（归一化 0.3 g）
-- 2 tablespoons all-purpose flour（归一化 15.6 g）
-- 1 cup water（归一化 237.0 g）
-- 2 medium potatoes, peeled and diced（归一化 426.0 g）
-- 1/2 cup diced carrot（归一化 64.0 g）
-- 1/2 cup diced onion（归一化 80.0 g）
-- 1 egg, lightly beaten（归一化 50.0 g）
+- 2 1/2 cups all purpose flour（归一化 312.5 g）
+- 3 eggs（归一化 150.0 g）
+- 3 tablespoons olive oil（归一化 40.5 g）
+- 1 onion peeled and finely diced（归一化 110.0 g）
+- 2 cloves garlic peeled and finely chopped（归一化 6.0 g）
+- 3 carrots peeled and finely diced（归一化 183.0 g）
+- 3 celery stalks trimmed and finely diced（归一化 120.0 g）
+- 1 pound ground beef（归一化 453.6 g）
+- 1 tablespoon tomato paste（归一化 16.4 g）
+- 15 ounces peeled tomatoes（归一化 425.2 g）
+- 1 bay leaf（归一化 0.2 g）
+- 1/2 cup vegetable stock（归一化 119.5 g）
+- 1 tablespoon Parmesan grated（归一化 6.2 g）
+- 2 tablespoons heavy cream（归一化 29.8 g）
 
 步骤证据：
 
-In a large bowl, combine the flour, salt, basil and thyme; cut in shortening and butter until crumbly. Add water, 1 tablespoon at a time, tossing lightly with a fork until mixture forms a ball. Cover and chill for at least 30 minutes.
-Meanwhile, in a skillet, brown beef in 1 tablespoon oil until no longer pink; sprinkle with salt and pepper. Remove with a slotted spoon; set aside. Add remaining oil to skillet; gradually stir in flour until smooth. Cook and stir over medium heat for about 2-3 minutes or until lightly browned. Gradually add water; whisk until smooth.
-Return beef to skillet. Reduce heat; cover and simmer for 20 minutes. Add the potatoes, carrot and onion. Cover and simmer for 25 minutes or until tender. Remove from the heat; cool.
-Divide pastry into four equal portions. On a lightly floured surface, roll out one portion into a 9-in. circle. Mound 3/4 cup filling on half of circle. Moisten edges with water; fold dough over filling and press edges with a fork to seal.
-Place on an ungreased
-. Repeat with remaining pastry and filling. Cut three slits in top of each; brush with egg.
-Bake at 400° for 25-30 minutes or until golden brown.
+Mix flour, eggs, 1 tbsp oil and 1 pinch of salt to a smooth dough, cover and leave for 1 hour to rest.
+Heat remaining oil in a pan and fry onion until soft. Add beef, carrots, celery and garlic and fry over medium heat. Add tomato paste, tomatoes and bay leaf. Season to taste. Simmer for 30 mins, uncovered, until liquid is reduced. Season and leave to cool slightly.
+Roll out dough thinly on a floured surface, and divide into 4 sheets. Press one of the sheets into a non-stick ravioli tray and fill the pockets with Bolognese sauce. Brush the edges of the sheet with water. Press another sheet on top and trim excess dough. Cut out the ravioli and repeat with remaining 2 sheets. (Makes about 24 ravioli.)
+Boil salted water and cook the ravioli for 6 minutes. Meanwhile, heat remaining Bolognese with the stock, stir in Parmesan and cream. Divide ravioli onto 4 plates and top each serving with sauce.
 
 人工意见：待确认。
 
-## 25. Cabbage Lasagna(Low-Fat Recipe) (RCP2_7FB565152BDB)
+## 24. Korean Fusion Butternut Squash Soup (RCP2_0DA06DF48EDB)
+
+抽样方式：seeded random changed case；原菜类：soup。
+
+| 变动字段 | 原值 | 新值 |
+|---|---|---|
+| protein_sources | ["pork"] | ["chicken"] |
+
+原料证据：
+
+- 1 butternut squash (split and roasted for 1 hour @ 350f or until fork tender)（归一化 800.0 g）
+- 6 cups chicken stock (can substitute vegetable stock)（归一化 1419.6 g）
+- 2 medium carrots (grated)（归一化 122.0 g）
+- 1 small onion (diced)（归一化 110.0 g）
+- 1 celery rib (diced)（归一化 40.0 g）
+- 1 sprig marjoram（归一化 0.1 g）
+- 6 garlic cloves (smashed)（归一化 18.0 g）
+- 3 bay leaves（归一化 0.6 g）
+- 2 tablespoons soybean paste (Korean Doenjang)（归一化 31.2 g）
+- 3 Italian sausages (I use Turkey, can substitute vegan alternative)（归一化 255.0 g）
+- 1 king oyster mushroom (Diced)（归一化 18.0 g）
+- 6 garlic cloves (minced)（归一化 18.0 g）
+- 2 tablespoons red pepper paste (Korean Gochujang)（归一化 34.0 g）
+- 1 tablespoon sesame oil（归一化 13.6 g）
+- 1 1/2 cups water（归一化 355.5 g）
+
+步骤证据：
+
+Place stock, garlic, bay leaves, and marjoram into your soup pot and bring just up to a low boil for about 15 minutes, then reduce heat to simmer. Scoop out marjoram, garlic and bay leaves prior to adding next ingredients to the pot.
+While stock is coming up to temperature saute the Mirepoix vegetables in sesame oil until they begin to caramelize. Then transfer to the stock pot. Scoop the roasted butternut squash out of the squash skins and add to the pot as well. Now, bring heat up on pot and maintain a high simmer, just below boiling.
+Just prior to serving add Korean soybean paste then blend until smooth with an immersion blender (alternately you can transfer to a VitaMix or other blender).
+In a small bowl, wisk together the water, hot pepper paste and sesame oil.
+Remove skins from sausage and place in a saute pan and cook until most of the pink is gone and the pork is crumbled. Next add the mushroom, garlic and pepper paste mixture and bring pan to a boil. Reduce heat and continue to cook until most of the liquid is reduced.
+Serving: 	Ladle soup into bowls and top with garnish and serve.
+
+人工意见：待确认。
+
+## 25. Taco Filling (Ground Beef) (RCP2_0FFB8C985C34)
 
 抽样方式：seeded random changed case；原菜类：main。
 
 | 变动字段 | 原值 | 新值 |
 |---|---|---|
-| meal_role | "protein_main" | null |
-| contains_staple | false | null |
-| protein_sources | ["beef"] | null |
+| meal_role | "protein_main" | "sauce" |
+| protein_sources | ["beef"] | [] |
+| flavor_tags | ["rich"] | [] |
 
 原料证据：
 
-- 1 small head cabbage, shredded（归一化 100.0 g）
-- 18 oz. tomato juice（归一化 510.3 g）
-- 1 c. fresh mushrooms, sliced（归一化 70.0 g）
-- 1/2 green pepper, diced（归一化 60.0 g）
-- 1/4 c. onion, diced（归一化 40.0 g）
-- 1 lb. lean ground beef or turkey（归一化 453.6 g）
-- 1 c. low-fat cheese, shredded（归一化 113.0 g）
+- 1 lb ground beef（归一化 453.6 g）
+- 1 medium onion, chopped（归一化 110.0 g）
+- 1 tablespoon oregano（归一化 5.4 g）
+- 2 teaspoons cumin（归一化 4.4 g）
+- 1 teaspoon garlic powder（归一化 2.7 g）
 
 步骤证据：
 
-Brown ground beef with onion and green pepper. Drain well. Add sauce.
-In
-a large casserole, sprayed with nonstick cooking spray, layer cabbage, meat, cheese and mushrooms.
-Cover and bake at 350° until cabbage is tender, about 1 hour.
-Great dish if you love cabbage.
+Brown ground beef with onion drain.
+Add other ingredients.
+Simmer add more seasoning to taste.
+This can be a little dry.
+This is not Health Food!
+I have added a little cooking oil to the Mix.
+Add salt and pepper.
+Add ground beef to your favorite Taco shells.
+Top with cheese, sour cream, lettuce, tomato, etc.
+Enjoy!
 
 人工意见：待确认。

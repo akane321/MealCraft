@@ -642,8 +642,6 @@ def rule_tags(dish: Dish) -> Tags:
     led = dish_vegetable_led(dish)
     sources = protein_sources(dish)
     role, allowed = meal_role(dish, sources, led)
-    if sources is None and role in {"protein_main", "one_bowl"}:
-        role, allowed = None, ()
     if not dish.curated and dish.course in {"main", "side", "soup"} and not component(dish.title, dish.course):
         tags.incomplete_reason = missing_named_protein(dish.title, [(line.name, line.text) for line in dish.lines])
         if tags.incomplete_reason:

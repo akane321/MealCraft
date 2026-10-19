@@ -39,8 +39,12 @@ def unreviewed(recipe) -> bool:
 
 
 def meal_role_of(recipe) -> str | None:
-    """A catalog recipe's meal role as the structured planner reads it: None while it is `unreviewed`."""
-    return None if unreviewed(recipe) else getattr(recipe, "meal_role", None)
+    """Admissible role: retain catalog facts, but unknown main sources cannot satisfy no-repeat constraints."""
+    role = getattr(recipe, "meal_role", None)
+    unknown_sources = (
+        role in {"protein_main", "one_bowl"} and hasattr(recipe, "protein_sources") and recipe.protein_sources is None
+    )
+    return None if unreviewed(recipe) or unknown_sources else role
 
 
 def role_admits(role: PlanningMealRole, recipe: PlanningRecipeCandidate) -> bool:
