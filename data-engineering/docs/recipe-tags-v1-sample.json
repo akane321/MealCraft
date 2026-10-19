@@ -1342,7 +1342,7 @@
         "cooking_methods": null,
         "equipment": null,
         "flavor_tags": null,
-        "note": "AI建议：Bobotie以1磅牛肉为主，2片面包更像黏结辅料，建议protein_main/false；beef有明确原料支持，但两蛋是否达到计入原重的10%缺规范克重，不能把水、油或高汤当分母贸然删除egg。无步骤不能核验煎烤/烤箱，rich缺营养。 正确值建议：{\"contains_staple\": false, \"meal_role\": \"protein_main\"}"
+        "note": "AI建议：Bobotie以1磅牛肉为主，2片面包更像黏结辅料，建议protein_main/false；beef有明确原料支持，但两蛋是否达到计入原重的10%缺规范克重，不能把水、油或高汤当分母贸然删除egg。无步骤不能核验煎烤/烤箱，rich缺营养。 正确值建议：{\"contains_staple\": false, \"meal_role\": \"protein_main\"} 【owner已确认】2026-10-19 聊天摘要辅助核验第1轮；仅确认字段：meal_role, contains_staple；其余字段不随之确认，待定保持待定。"
       }
     },
     {
@@ -1449,7 +1449,7 @@
         "cooking_methods": null,
         "equipment": null,
         "flavor_tags": null,
-        "note": "AI建议：扁豆足量支持legume，却没有米面谷物，不能据豆类直接判one_bowl；course=side又不能硬升为蛋白主菜，建议角色暂null、主食false。酸甜标题有依据，boil/设备和light仍缺步骤及营养。 正确值建议：{\"contains_staple\": false, \"meal_role\": null}"
+        "note": "AI建议：扁豆足量支持legume，却没有米面谷物，不能据豆类直接判one_bowl；course=side又不能硬升为蛋白主菜，建议角色暂null、主食false。酸甜标题有依据，boil/设备和light仍缺步骤及营养。 正确值建议：{\"contains_staple\": false, \"meal_role\": null} 【owner已确认】2026-10-19 聊天摘要辅助核验第1轮；仅确认字段：meal_role, contains_staple, protein_sources；其余字段不随之确认，待定保持待定。"
       }
     },
     {
@@ -1499,11 +1499,11 @@
       "verdict": {
         "meal_role": true,
         "contains_staple": true,
-        "protein_sources": true,
+        "protein_sources": null,
         "cooking_methods": null,
         "equipment": null,
         "flavor_tags": null,
-        "note": "AI建议：完整pizza crust加一杯鹰嘴豆是带主食整菜，one_bowl/true合理，legume大概率足量。缺饼底克重仍宜核验10%；少许辣椒不保证spicy，light缺营养，烤法与烤箱缺实际步骤。"
+        "note": "AI建议：完整pizza crust加一杯鹰嘴豆是带主食整菜，one_bowl/true合理，legume大概率足量。缺饼底克重仍宜核验10%；少许辣椒不保证spicy，light缺营养，烤法与烤箱缺实际步骤。 【owner已确认】2026-10-19 聊天摘要辅助核验第2轮；仅确认表中餐食角色、主食和有证据/无证据的来源判断：鹰嘴豆实际存在，但主要蛋白比例门槛缺克重；protein_sources仍待定，撤回原先大概率足量的肯定判断。做法、厨具和营养/风味不随之确认。"
       }
     },
     {
@@ -2527,7 +2527,7 @@
         "cooking_methods": null,
         "equipment": null,
         "flavor_tags": null,
-        "note": "AI建议：标题Sandwiches且列12片厚法棍，是完整带面包主餐，不应仅protein_main，建议one_bowl/true；4.5磅牛排支持beef。无步骤不能确认pan_fry/grill及烤箱，空flavor缺营养核验。 正确值建议：{\"contains_staple\": true, \"meal_role\": \"one_bowl\"}"
+        "note": "AI建议：标题Sandwiches且列12片厚法棍，是完整带面包主餐，不应仅protein_main，建议one_bowl/true；4.5磅牛排支持beef。无步骤不能确认pan_fry/grill及烤箱，空flavor缺营养核验。 正确值建议：{\"contains_staple\": true, \"meal_role\": \"one_bowl\"} 【owner已确认】2026-10-19 聊天摘要辅助核验第1轮；仅确认字段：meal_role, contains_staple；其余字段不随之确认，待定保持待定。"
       }
     },
     {
@@ -2749,7 +2749,7 @@
         "cooking_methods": null,
         "equipment": null,
         "flavor_tags": null,
-        "note": "AI建议：完整Pasties含14杯面粉酥皮及肉薯馅，主食并入成餐，建议one_bowl/true；meat括号明确beef stew/chuck roast，纠正为beef，不能猜pork，Crisco不算肉蛋白。烤法/烤箱需步骤，rich需营养。 正确值建议：{\"contains_staple\": true, \"meal_role\": \"one_bowl\", \"protein_sources\": [\"beef\"]}"
+        "note": "AI建议：完整Pasties含14杯面粉酥皮及肉薯馅，主食并入成餐，建议one_bowl/true；meat括号明确beef stew/chuck roast，纠正为beef，不能猜pork，Crisco不算肉蛋白。烤法/烤箱需步骤，rich需营养。 正确值建议：{\"contains_staple\": true, \"meal_role\": \"one_bowl\", \"protein_sources\": [\"beef\"]} 【owner已确认】2026-10-19 聊天摘要辅助核验第2轮；仅确认表中餐食角色、主食和有证据/无证据的来源判断：自带主食，明确牛肉而无猪肉依据。做法、厨具和营养/风味不随之确认。"
       }
     },
     {
@@ -5371,13 +5371,13 @@
       },
       "why": "meal_role sauce by llm",
       "verdict": {
-        "meal_role": false,
+        "meal_role": null,
         "contains_staple": true,
-        "protein_sources": false,
+        "protein_sources": null,
         "cooking_methods": null,
         "equipment": null,
         "flavor_tags": null,
-        "note": "AI建议：main 与 Steak Teriyaki 标题指完整牛排菜而非名为酱汁的部件；按标题可补漏列肉的口径，建议 protein_main、beef，contains_staple=false。原料仅腌料提示遗漏，缺步骤、牛排克重和营养；bake+grill/oven/light 不能验证。 正确值建议：{\"meal_role\": \"protein_main\", \"protein_sources\": [\"beef\"]}"
+        "note": "AI建议：原初审曾仅凭标题补 beef/protein_main，此建议已撤回。原料清单仅有腌料，没有关键肉料；contains_staple=false 仍为AI建议，做法、设备及营养仍缺证据。 【owner已确认】2026-10-19 确认资料不完整，不凭菜名确认牛肉或完整主菜身份；meal_role、protein_sources 均待完整配方，不将原标签算作已核实正确或错误。"
       }
     },
     {
@@ -5471,13 +5471,13 @@
       },
       "why": "meal_role sauce by llm",
       "verdict": {
-        "meal_role": false,
+        "meal_role": null,
         "contains_staple": true,
-        "protein_sources": false,
+        "protein_sources": null,
         "cooking_methods": null,
         "equipment": null,
         "flavor_tags": null,
-        "note": "AI建议：Teriyaki Steak 与 main 指完整牛排菜，非独立腌料标题；按可由标题支持漏列肉的口径建议 protein_main 与 beef，仍无主食。仅调味料清单不足判 sauce，缺步骤、牛肉克重和营养，方法/oven/light 不能确认。 正确值建议：{\"meal_role\": \"protein_main\", \"protein_sources\": [\"beef\"]}"
+        "note": "AI建议：原初审曾仅凭标题补 beef/protein_main，此建议已撤回。原料清单仅有腌料，没有关键肉料；contains_staple=false 仍为AI建议，做法、设备及营养仍缺证据。 【owner已确认】2026-10-19 确认资料不完整，不凭菜名确认牛肉或完整主菜身份；meal_role、protein_sources 均待完整配方，不将原标签算作已核实正确或错误。"
       }
     },
     {
@@ -6201,7 +6201,7 @@
         "cooking_methods": null,
         "equipment": null,
         "flavor_tags": null,
-        "note": "AI建议：Cauliflower Au Gratin 的标题和原料不支持 soup；但含4盎司火腿，不得建议为要求无肉鱼的 vegetable。它又是side，不能直接升为protein_main，替代角色暂未定。pork有明确原料支持，contains_staple=false合理；缺步骤、菜花规范克重及营养，其他全集未核。 正确值建议：{\"meal_role\": null}"
+        "note": "AI建议：Cauliflower Au Gratin 的标题和原料不支持 soup；但含4盎司火腿，不得建议为要求无肉鱼的 vegetable。它又是side，不能直接升为protein_main，替代角色暂未定。pork有明确原料支持，contains_staple=false合理；缺步骤、菜花规范克重及营养，其他全集未核。 正确值建议：{\"meal_role\": null} 【owner已确认】2026-10-19 聊天摘要辅助核验第1轮；仅确认字段：meal_role, protein_sources；其余字段不随之确认，待定保持待定。"
       }
     },
     {
@@ -7478,7 +7478,7 @@
         "cooking_methods": null,
         "equipment": null,
         "flavor_tags": null,
-        "note": "AI建议：5 lb 方块肉明确括注 pork & chicken，不支持 beef；建议主要蛋白为 pork、chicken。无主食，protein_main/false 合理。未给两肉分量、串烤步骤及每份营养，grill、设备和 rich 暂不确认。 正确值建议：{\"protein_sources\": [\"pork\", \"chicken\"]}"
+        "note": "AI建议：5 lb 方块肉明确括注 pork & chicken，不支持 beef；建议主要蛋白为 pork、chicken。无主食，protein_main/false 合理。未给两肉分量、串烤步骤及每份营养，grill、设备和 rich 暂不确认。 正确值建议：{\"protein_sources\": [\"pork\", \"chicken\"]} 【owner已确认】2026-10-19 聊天摘要辅助核验第2轮；仅确认表中餐食角色、主食和有证据/无证据的来源判断：牛肉无依据，原来源集合判错；猪肉和鸡肉的存在有依据，更正建议不代表各自主要蛋白比例已核准。做法、厨具和营养/风味不随之确认。"
       }
     },
     {
@@ -7527,7 +7527,7 @@
         "cooking_methods": null,
         "equipment": null,
         "flavor_tags": null,
-        "note": "AI建议：饭、肉与蛋组成完整一锅饭，one_bowl/true 合理；原料明确 meat (beef) 及 5 蛋，不支持 pork，建议 beef、egg。缺完整步骤与每份营养，空方法/设备和 light 不能确认。 正确值建议：{\"protein_sources\": [\"beef\", \"egg\"]}"
+        "note": "AI建议：饭、肉与蛋组成完整一锅饭，one_bowl/true 合理；原料明确 meat (beef) 及 5 蛋，不支持 pork，建议 beef、egg。缺完整步骤与每份营养，空方法/设备和 light 不能确认。 正确值建议：{\"protein_sources\": [\"beef\", \"egg\"]} 【owner已确认】2026-10-19 聊天摘要辅助核验第2轮；仅确认表中餐食角色、主食和有证据/无证据的来源判断：猪肉无依据，原来源集合判错；牛肉和鸡蛋的存在有依据，更正建议不代表主要蛋白比例已核准。做法、厨具和营养/风味不随之确认。"
       }
     },
     {
@@ -7934,7 +7934,7 @@
         "cooking_methods": null,
         "equipment": null,
         "flavor_tags": null,
-        "note": "AI建议：Cookies 与糖/黄油配方支持 dessert，contains_staple=false；按定义甜点中的鸡蛋不作为主要蛋白，空列表合理。缺完整步骤、份数和营养，不能确认 bake、oven 及空风味集合完整。"
+        "note": "AI建议：Cookies 与糖/黄油配方支持 dessert，contains_staple=false；按定义甜点中的鸡蛋不作为主要蛋白，空列表合理。缺完整步骤、份数和营养，不能确认 bake、oven 及空风味集合完整。 【owner已确认】2026-10-19 聊天摘要辅助核验第2轮；仅确认表中餐食角色、主食和有证据/无证据的来源判断：甜点不作为正餐主食或蛋白主菜；鸡蛋过敏原仍须保留。做法、厨具和营养/风味不随之确认。"
       }
     },
     {
@@ -9336,7 +9336,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：芝麻菜属于叶菜，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：芝麻菜属于叶菜，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9350,7 +9350,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：嫩菠菜属于叶菜，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：嫩菠菜属于叶菜，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9364,7 +9364,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：豆芽属于约定的芽菜短保类别，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：豆芽属于约定的芽菜短保类别，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9378,7 +9378,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：小白菜属于叶菜，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：小白菜属于叶菜，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9390,9 +9390,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：鲶鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：鲶鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9404,9 +9404,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：蛤蜊的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：蛤蜊的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9418,9 +9418,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：鳕鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：鳕鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9434,7 +9434,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：羽衣甘蓝类叶菜符合项目短保分类，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：羽衣甘蓝类叶菜符合项目短保分类，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9446,9 +9446,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：蟹的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：蟹的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9460,9 +9460,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：鱼片的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：鱼片的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9476,7 +9476,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：芥兰为叶菜，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：芥兰为叶菜，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9488,9 +9488,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：无须鳕的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：无须鳕的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9502,9 +9502,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：大比目鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：大比目鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9518,7 +9518,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：羽衣甘蓝为叶菜，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：羽衣甘蓝为叶菜，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9532,7 +9532,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：生菜为叶菜，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：生菜为叶菜，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9544,9 +9544,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：龙虾的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：龙虾的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9558,9 +9558,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：虱目鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：虱目鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9572,9 +9572,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：贻贝的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：贻贝的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9586,9 +9586,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：章鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：章鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9600,9 +9600,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：牡蛎的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：牡蛎的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9616,7 +9616,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：豌豆苗符合叶菜/芽菜短保类别，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：豌豆苗符合叶菜/芽菜短保类别，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9630,7 +9630,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：萝卜芽属于鲜芽菜，建议与豆芽采用同类标签，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：萝卜芽属于鲜芽菜，建议与豆芽采用同类标签，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9642,9 +9642,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：红鲷鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：红鲷鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9656,9 +9656,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：三文鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：三文鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9670,9 +9670,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：三文鱼片的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：三文鱼片的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9684,9 +9684,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：扇贝的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：扇贝的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9698,9 +9698,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：混合海鲜的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：混合海鲜的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9712,9 +9712,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：虾的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：虾的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9728,7 +9728,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：菠菜为叶菜，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：菠菜为叶菜，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9740,9 +9740,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：鱿鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：鱿鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9756,7 +9756,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：莙荙菜为叶菜，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：莙荙菜为叶菜，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9768,9 +9768,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：剑鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：剑鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9782,9 +9782,9 @@
       },
       "why": "every perishable",
       "verdict": {
-        "perishable": null,
+        "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：鳟鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。"
+        "note": "AI建议：鳟鱼的名称没有鲜/冻/罐装状态；鲜品符合短保类，但现有材料不足以确认 perishable=true，请 owner 明确目录按鲜品解释。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：按简化设计将未注明状态的抽象海产品视为鲜品；这是 owner 选择的建模假设，不是对商品鲜冻状态的事实核验，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
@@ -9798,7 +9798,7 @@
       "verdict": {
         "perishable": true,
         "basic_seasoning": true,
-        "note": "AI建议：西洋菜为叶菜，建议现有 perishable=true；仍须 owner 本人确认。"
+        "note": "AI建议：西洋菜为叶菜，建议现有 perishable=true；仍须 owner 本人确认。 【owner已确认】2026-10-19 聊天逐项列名后统一确认 perishable=true：明确同意按叶菜/芽菜短保类处理，购物后3天内使用。仅确认 perishable，不连带确认 basic_seasoning。"
       }
     },
     {
