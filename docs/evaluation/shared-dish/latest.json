@@ -1,0 +1,664 @@
+{
+  "report": "shared-dish-v1",
+  "decision": "ADR-0071 sections 1 and 2; operations/sprint2-plan/08-household.md section 1",
+  "start_date": "2027-01-03",
+  "day_count": 3,
+  "energy_floor_share": {
+    "lunch": 0.25,
+    "dinner": 0.25
+  },
+  "passed": true,
+  "safety_violations": 0,
+  "cases": [
+    {
+      "case": "four-one-vegetarian",
+      "about": "Two adults, a teen and a child; Ann is vegetarian.",
+      "passed": true,
+      "runs": {
+        "merged": {
+          "arrangement": "merged",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 3088,
+            "dishes": 23,
+            "distinct_dishes_excluding_staples": 20,
+            "purchase_total_sgd": 282.34,
+            "energy_attainment_by_member": {
+              "Ann": 1.585,
+              "Ben": 1.585,
+              "Kai": 1.586,
+              "Mei": 1.592
+            },
+            "lowest_energy_attainment": 1.585
+          }
+        },
+        "shared": {
+          "arrangement": "shared",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8967,
+            "dishes": 25,
+            "distinct_dishes_excluding_staples": 21,
+            "purchase_total_sgd": 296.23,
+            "energy_attainment_by_member": {
+              "Ann": 1.353,
+              "Ben": 1.481,
+              "Kai": 1.482,
+              "Mei": 1.488
+            },
+            "lowest_energy_attainment": 1.353
+          }
+        }
+      }
+    },
+    {
+      "case": "two-one-vegetarian",
+      "about": "Two adults, one of them vegetarian: the smallest household the model has to serve.",
+      "passed": true,
+      "runs": {
+        "merged": {
+          "arrangement": "merged",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 3088,
+            "dishes": 21,
+            "distinct_dishes_excluding_staples": 17,
+            "purchase_total_sgd": 189.25,
+            "energy_attainment_by_member": {
+              "Lin": 1.438,
+              "Raj": 1.438
+            },
+            "lowest_energy_attainment": 1.438
+          }
+        },
+        "shared": {
+          "arrangement": "shared",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8967,
+            "dishes": 20,
+            "distinct_dishes_excluding_staples": 15,
+            "purchase_total_sgd": 172.01,
+            "energy_attainment_by_member": {
+              "Lin": 1.399,
+              "Raj": 1.399
+            },
+            "lowest_energy_attainment": 1.399
+          }
+        }
+      }
+    },
+    {
+      "case": "with-a-child",
+      "about": "Two adults and a child who will not eat mushroom; the child's exclusion is the child's own.",
+      "passed": true,
+      "runs": {
+        "merged": {
+          "arrangement": "merged",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8491,
+            "dishes": 26,
+            "distinct_dishes_excluding_staples": 21,
+            "purchase_total_sgd": 306.08,
+            "energy_attainment_by_member": {
+              "Ann": 1.448,
+              "Ben": 1.448,
+              "Mei": 1.455
+            },
+            "lowest_energy_attainment": 1.448
+          }
+        },
+        "shared": {
+          "arrangement": "shared",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8967,
+            "dishes": 25,
+            "distinct_dishes_excluding_staples": 21,
+            "purchase_total_sgd": 322.19,
+            "energy_attainment_by_member": {
+              "Ann": 1.437,
+              "Ben": 1.437,
+              "Mei": 1.443
+            },
+            "lowest_energy_attainment": 1.437
+          }
+        }
+      }
+    },
+    {
+      "case": "weekday-lunch-away",
+      "about": "Four, one vegetarian; the child eats lunch at school on weekdays, so those lunches are for three.",
+      "passed": true,
+      "runs": {
+        "merged": {
+          "arrangement": "merged",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 3088,
+            "dishes": 23,
+            "distinct_dishes_excluding_staples": 20,
+            "purchase_total_sgd": 279.46,
+            "energy_attainment_by_member": {
+              "Ann": 1.585,
+              "Ben": 1.585,
+              "Kai": 1.586,
+              "Mei": 1.834
+            },
+            "lowest_energy_attainment": 1.585
+          }
+        },
+        "shared": {
+          "arrangement": "shared",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8967,
+            "dishes": 25,
+            "distinct_dishes_excluding_staples": 21,
+            "purchase_total_sgd": 296.23,
+            "energy_attainment_by_member": {
+              "Ann": 1.353,
+              "Ben": 1.481,
+              "Kai": 1.482,
+              "Mei": 1.723
+            },
+            "lowest_energy_attainment": 1.353
+          }
+        }
+      }
+    },
+    {
+      "case": "weekend-guest",
+      "about": "Four, one vegetarian; a grandparent who is vegetarian too joins weekend dinners.",
+      "passed": true,
+      "runs": {
+        "merged": {
+          "arrangement": "merged",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 3088,
+            "dishes": 24,
+            "distinct_dishes_excluding_staples": 21,
+            "purchase_total_sgd": 269.37,
+            "energy_attainment_by_member": {
+              "Ann": 1.522,
+              "Ben": 1.522,
+              "Grandma": 1.158,
+              "Kai": 1.523,
+              "Mei": 1.53
+            },
+            "lowest_energy_attainment": 1.158
+          }
+        },
+        "shared": {
+          "arrangement": "shared",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8967,
+            "dishes": 25,
+            "distinct_dishes_excluding_staples": 21,
+            "purchase_total_sgd": 294.66,
+            "energy_attainment_by_member": {
+              "Ann": 1.418,
+              "Ben": 1.546,
+              "Grandma": 1.182,
+              "Kai": 1.547,
+              "Mei": 1.553
+            },
+            "lowest_energy_attainment": 1.182
+          }
+        }
+      }
+    },
+    {
+      "case": "peanut-whole-household",
+      "about": "Four; Mei is allergic to peanut and the whole household avoids it, which is the default.",
+      "passed": true,
+      "runs": {
+        "merged": {
+          "arrangement": "merged",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8499,
+            "dishes": 25,
+            "distinct_dishes_excluding_staples": 21,
+            "purchase_total_sgd": 320.83,
+            "energy_attainment_by_member": {
+              "Ann": 1.407,
+              "Ben": 1.407,
+              "Kai": 1.408,
+              "Mei": 1.414
+            },
+            "lowest_energy_attainment": 1.407
+          }
+        },
+        "shared": {
+          "arrangement": "shared",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8499,
+            "dishes": 25,
+            "distinct_dishes_excluding_staples": 21,
+            "purchase_total_sgd": 320.83,
+            "energy_attainment_by_member": {
+              "Ann": 1.407,
+              "Ben": 1.407,
+              "Kai": 1.408,
+              "Mei": 1.414
+            },
+            "lowest_energy_attainment": 1.407
+          }
+        }
+      }
+    },
+    {
+      "case": "peanut-only-mei-avoids",
+      "about": "The same household with \"only Mei avoids it\" on, so peanut is left out of Mei's dishes and the others may have it. The merged baseline is the same week as the case above: the union cannot tell the two apart.",
+      "passed": true,
+      "runs": {
+        "merged": {
+          "arrangement": "merged",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8499,
+            "dishes": 25,
+            "distinct_dishes_excluding_staples": 21,
+            "purchase_total_sgd": 320.83,
+            "energy_attainment_by_member": {
+              "Ann": 1.407,
+              "Ben": 1.407,
+              "Kai": 1.408,
+              "Mei": 1.414
+            },
+            "lowest_energy_attainment": 1.407
+          }
+        },
+        "shared": {
+          "arrangement": "shared",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8967,
+            "dishes": 25,
+            "distinct_dishes_excluding_staples": 21,
+            "purchase_total_sgd": 365.09,
+            "energy_attainment_by_member": {
+              "Ann": 1.437,
+              "Ben": 1.437,
+              "Kai": 1.437,
+              "Mei": 1.443
+            },
+            "lowest_energy_attainment": 1.437
+          }
+        }
+      }
+    },
+    {
+      "case": "mixed-diets",
+      "about": "Four with two different diets: Ann vegetarian, Kai dairy-free.",
+      "passed": true,
+      "runs": {
+        "merged": {
+          "arrangement": "merged",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 1406,
+            "dishes": 22,
+            "distinct_dishes_excluding_staples": 21,
+            "purchase_total_sgd": 197.64,
+            "energy_attainment_by_member": {
+              "Ann": 1.333,
+              "Ben": 1.333,
+              "Kai": 1.334,
+              "Mei": 1.339
+            },
+            "lowest_energy_attainment": 1.333
+          }
+        },
+        "shared": {
+          "arrangement": "shared",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8967,
+            "dishes": 26,
+            "distinct_dishes_excluding_staples": 19,
+            "purchase_total_sgd": 249.23,
+            "energy_attainment_by_member": {
+              "Ann": 1.428,
+              "Ben": 1.577,
+              "Kai": 1.106,
+              "Mei": 1.585
+            },
+            "lowest_energy_attainment": 1.106
+          }
+        }
+      }
+    },
+    {
+      "case": "six-one-vegetarian",
+      "about": "Six adults, one of them vegetarian: dinner is the 5-6 row of the ADR-0070 table.",
+      "passed": true,
+      "runs": {
+        "merged": {
+          "arrangement": "merged",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 3088,
+            "dishes": 27,
+            "distinct_dishes_excluding_staples": 23,
+            "purchase_total_sgd": 340.05,
+            "energy_attainment_by_member": {
+              "Adult 1": 1.456,
+              "Adult 2": 1.456,
+              "Adult 3": 1.456,
+              "Adult 4": 1.456,
+              "Adult 5": 1.456,
+              "Adult 6": 1.456
+            },
+            "lowest_energy_attainment": 1.456
+          }
+        },
+        "shared": {
+          "arrangement": "shared",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8967,
+            "dishes": 28,
+            "distinct_dishes_excluding_staples": 24,
+            "purchase_total_sgd": 366.64,
+            "energy_attainment_by_member": {
+              "Adult 1": 1.382,
+              "Adult 2": 1.533,
+              "Adult 3": 1.533,
+              "Adult 4": 1.533,
+              "Adult 5": 1.533,
+              "Adult 6": 1.533
+            },
+            "lowest_energy_attainment": 1.382
+          }
+        }
+      }
+    },
+    {
+      "case": "tight-budget",
+      "about": "Four, one vegetarian, on a tight weekly budget for three days (S$120, chosen once on developer runs).",
+      "passed": true,
+      "runs": {
+        "merged": {
+          "arrangement": "merged",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 3088,
+            "dishes": 26,
+            "distinct_dishes_excluding_staples": 21,
+            "purchase_total_sgd": 116.38,
+            "energy_attainment_by_member": {
+              "Ann": 1.265,
+              "Ben": 1.265,
+              "Kai": 1.266,
+              "Mei": 1.271
+            },
+            "lowest_energy_attainment": 1.265
+          }
+        },
+        "shared": {
+          "arrangement": "shared",
+          "outcome": "planned",
+          "passed": true,
+          "checks": {
+            "every_dish_has_an_eater": true,
+            "servings_follow_the_eaters": true,
+            "no_household_allergen_on_the_table": true,
+            "every_member_has_a_filling_core": true,
+            "every_member_has_a_vegetable": true,
+            "every_member_meets_their_energy_floor": true
+          },
+          "safety_violations": 0,
+          "failures": {},
+          "uncovered": [],
+          "metrics": {
+            "recipe_pool": 8967,
+            "dishes": 27,
+            "distinct_dishes_excluding_staples": 20,
+            "purchase_total_sgd": 108.49,
+            "energy_attainment_by_member": {
+              "Ann": 1.239,
+              "Ben": 1.533,
+              "Kai": 1.534,
+              "Mei": 1.54
+            },
+            "lowest_energy_attainment": 1.239
+          }
+        }
+      }
+    }
+  ]
+}

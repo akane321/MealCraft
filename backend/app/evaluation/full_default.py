@@ -62,13 +62,13 @@ CASES = [
     {
         "case": "four-with-vegetarian",
         "about": (
-            "Two adults, a teen and a child, one of them vegetarian (the household plans vegetarian, PR-1's union); "
-            "a grandparent joins weekend dinners, so those dinners are for five."
+            "Two adults, a teen and a child, Ann vegetarian (her own diet, not the household's: ADR-0071's "
+            "shared-dish model); a grandparent joins weekend dinners, so those dinners are for five."
         ),
-        "request": {"household_size": 4, "day_count": 7, "dietary_preferences": ["vegetarian"]},
+        "request": {"household_size": 4, "day_count": 7},
         "household": {
             "members": [
-                {"name": "Ann", "servings": 0.88},
+                {"name": "Ann", "servings": 0.88, "dietary_preferences": ["vegetarian"]},
                 {"name": "Ben", "servings": 1.12},
                 {"name": "Kai", "servings": 1.35},
                 {"name": "Mei", "servings": 0.73},
