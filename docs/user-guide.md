@@ -42,7 +42,17 @@ Each member has an age group, sex, activity and goal. **Portions a meal** is
 either **Auto**, which is that member's daily energy need from HPB's Recommended
 Dietary Allowances over an adult reference, or a number you set (0.25 to 3).
 Untick **Usually eats at home** for someone who joins only sometimes, such as
-grandparents on weekends.
+grandparents on weekends. Allergies, diets and foods a member will not eat are
+kept per member.
+
+An allergen is avoided in every dish by the whole household, because one
+kitchen can cross-contact. If an allergy is only one person's and cooking it for
+the others is safe, tick **Only {name} avoids {allergen}** under that member's
+allergens on the profile page. It warns that cooking in the same kitchen can
+cause cross-contact, and asks you to turn it on only if that is safe for them.
+Then only that member's dishes leave it out. This switch is on the profile page
+only: an allergy you name in the conversation is still the whole household's.
+Diets and foods a member will not eat always apply to that member's dishes only.
 
 Under **Who's home and cooking time**, write one sentence in English or Chinese:
 for example "The kids have lunch at school on weekdays", "我周三晚上加班不回来" or
@@ -105,9 +115,19 @@ them.
 
 Important semantics:
 
-- member allergens, prohibited ingredients, and diet requirements are merged
-  into the safety boundary for the shared plan, for every meal, even one that
-  member is away for;
+- a dish is served when at least one member home for that meal can eat it, and
+  every member home for a lunch or dinner gets a filling meal of dishes they
+  can eat (a protein main with the staple, or a one-bowl dish, and a vegetable
+  dish they can eat whenever the meal has one) that reaches their own share of
+  their daily energy; each dish is cooked and bought for the members who can eat
+  it;
+- allergens are avoided by the whole household, for every meal, even one that
+  member is away for, unless the member marked one as "only I avoid it"; diets
+  and foods a member will not eat apply to that member's dishes only;
+- when no plan can cover every member, MealCraft says who could not be covered
+  and offers a larger budget, more cooking time or more dishes a meal. It never
+  relaxes an allergen, diet or excluded food, and never cooks an extra dish for
+  one person;
 - an allergen MealCraft cannot check for excludes every recipe rather than
   none, and allergen labels come from ingredient data, so check product labels;
 - saving an edit creates a new profile version, and a plan records the exact
@@ -145,13 +165,16 @@ answer in time, the reply says so and the rule parser reads it instead.
 
 The right panel shows the next meal to cook ("Tonight", "Today's lunch" or
 "Next up"), then the **Meals** tab: every day and meal with its dishes, time and
-calories. Choosing a dish, or **Recipe & steps**, opens its ingredients,
-allergen labels, steps and a how-to video when a key for YouTube is configured.
+calories. A dish some of the people at the meal cannot eat shows small text
+beside it, for example "Not for Mei". Choosing a dish, or **Recipe & steps**,
+opens its ingredients, allergen labels, steps and a how-to video when a key for
+YouTube is configured.
 **Mark as cooked** records a whole meal.
 
 Each dish still to cook offers **Swap**, **Keep**, **Skip** and **Can't buy…**.
 Each fills the conversation with a sentence the assistant understands, so the
-change is previewed before anything happens.
+change is previewed before anything happens. A swap keeps every member covered,
+and the new dish is cooked for the people who can eat it.
 
 ### 4. Nutrition and the shopping list
 

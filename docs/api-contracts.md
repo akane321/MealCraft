@@ -292,9 +292,10 @@ artifact has `total: null`, which is distinct from a valid empty file with
 
 The current implementation maintains one profile per authenticated household.
 Each member supplies a name, portions a meal, allergens, prohibited ingredient
-IDs, and dietary requirements. The backend merges every member's safety
-constraints into the shared-plan hard constraints (allergens, exclusions and
-diets stay household-wide in this version).
+IDs, and dietary requirements. Planning reads each member's limits (decision
+ADR-0071): a dish may be served when at least one member home can eat it, and
+the plan covers every member home. Allergens are still avoided by the whole
+household unless a member marks one as only their own (`self_only_allergens`).
 
 **Member fields (layer 08).** Each member may also give:
 
@@ -318,7 +319,18 @@ Reads return each member with `resolved_servings_per_meal` and
 no researched value). The resolved portions of all members are at most 12.
 `planning_household_size` is still an integer: the usually-home members'
 portions, rounded up. Each meal of a plan is cooked for the exact sum of the
-members home for it. Member-only allergens are not accepted yet.
+members home for it.
+
+**Shared dish (layer 08 PR-4, ADR-0071 sections 1 and 2).** Each member may also
+give `self_only_allergens`: a list of allergens, a subset of that member's own
+`allergens` (default `[]`; anything else is rejected). Such an allergen is
+handled like a diet: only that member's dishes leave it out. An allergen named
+in the conversation is still the whole household's. A saved profile still writes
+the household-wide union columns `excluded_ingredients` and `dietary_preferences`
+for compatibility, but planning no longer reads them; the `allergens` column
+holds only what the whole household avoids (every member's allergens, less those
+their own member marked `self_only_allergens`). A request with no `household`
+block, or whose members carry no limits of their own, plans as before.
 
 **Kitchen equipment (layer 08 PR-3).** The body and every version read add
 `missing_equipment`: up to five of `oven`, `air_fryer`, `steamer`, `microwave`,
@@ -575,7 +587,10 @@ The response holds the week as days × meals: one persisted entry per dish, each
 with its `day_index`, `meal_type`, `role_id`, `portion_share` and `servings`
 (the servings the dish is cooked for when the request had a `household`; null is
 `household_size` at `portion_share`; cost follows the servings, nutrition per
-person stays at the portion share), plus the
+person stays at the portion share), `not_for` (a list of the names of the
+members at that meal who cannot eat the dish; empty when everyone can and for
+any plan made without a `household` block; field of `WeeklyPlanDayResponse`, on
+`GET` and `POST` meal-plan responses), plus the
 `plan_shape` it was planned with, per-person weekly nutrition totals, an
 aggregated shopping list, package checkout cost, ingredient-use cost, weekly
 budget status, and explicit warnings. Each grocery line may carry
