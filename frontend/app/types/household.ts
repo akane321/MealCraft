@@ -25,6 +25,8 @@ export interface HouseholdMemberInput {
   /** False is an occasional guest, who eats only at the meals a presence rule adds them to. */
   default_present?: boolean;
   allergens: string[];
+  /** Allergens of this member's own that only this member avoids: a subset of `allergens`, empty by default. */
+  self_only_allergens?: string[];
   excluded_ingredients: string[];
   dietary_preferences: DietaryPreference[];
 }
