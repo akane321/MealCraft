@@ -85,7 +85,7 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 | equipment ('steamer',) | 100 |
 | no equipment (`[]`) | 5506 |
 
-Hearty salads (`salad`, not vegetable-led, with a main protein): 162. As salads they fill only the vegetable side, which their vegetable-led check refuses, so they fill no slot until the owner decides; the sample packet carries them as their own stratum, as it does the model's protein answers. The planner reads no model-decided value before its batch sample is reviewed.
+Hearty salads (`salad`, not vegetable-led, with a main protein): 162. As salads they fill only the vegetable side, which their vegetable-led check refuses, so they fill no slot: the owner decided on 2026-10-19 that a salad with meat is not a main. The sample packet carries them as their own stratum, as it does the model's protein answers. The planner reads no model-decided value before its batch sample is reviewed.
 
 ## Ingredients
 
