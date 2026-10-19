@@ -11,6 +11,9 @@ const week = computed(() => mealsByDay(props.days));
 const next = computed(() => nextMeal(props.days, todayIsoDate()));
 // A dinner-only week reads as before, one row a day; with several meals each day gets a heading.
 const severalMeals = computed(() => week.value.some(day => day.meals.length > 1));
+// The overview line of a day of several meals names each meal's main (in meal order), as the whole day of a full
+// structure cannot fit one line; its tooltip lists every dish.
+const dayText = (day: { meals: PlannedMeal[] }) => day.meals.map(meal => `${MEAL_LABEL[meal.mealType]}: ${meal.dishes.map(dish => dish.recipe.title).join(", ")}`).join("; ");
 
 const STATE: Record<string, string> = { completed: "Cooked", skipped: "Skipped", partial: "Part cooked" };
 const CHIP_TONE: Record<string, string> = { next: "warn", tomorrow: "info" };
@@ -41,9 +44,7 @@ const ACTIONS = [
     <ol class="overview" aria-label="Week overview">
       <li v-for="day in week" :key="day.dayIndex">
         <span>{{ formatPlanDate(day.date, { weekday: "short" }) }}</span>
-        <span class="overview-dishes" :title="day.meals.map(meal => `${MEAL_LABEL[meal.mealType]}: ${meal.dishes.map(dish => dish.recipe.title).join(', ')}`).join('; ')">
-          {{ day.meals.map(meal => `${MEAL_LABEL[meal.mealType]}: ${meal.dishes.map(dish => dish.recipe.title).join(', ')}`).join('; ') }}
-        </span>
+        <span class="overview-dishes" :title="dayText(day)">{{ day.meals.length > 1 ? day.meals.map(meal => meal.dishes[0]!.recipe.title).join(" · ") : dayText(day) }}</span>
       </li>
     </ol>
     <ol class="days">
