@@ -1505,8 +1505,8 @@
       ],
       "steps": "Let rice cool a bit.\nMeanwhile, mix the rice with the vinegar, soy sauce, and sesame oil.\nFry eggs as if it were a pancake.\nCut egg into strips.\nMix spinach with sesame oil and soy sauce.\nTo assemble, put rice on a bamboo roller (I do not have one and it works fine, just not as pretty).\nSpread rice over 2/3 of the sheet, lay carrots, spinach, and egg on top.\nSprinkle with sesame seeds and roll like a jelly roll.\nCut into 1/2 inch rounds.\nYou can adapt this to your own tastes, some people put imitation crab meat in them, I put marinated soy bean sprouts and cucumbers in mine, etc.",
       "verdict": {
-        "meal_role": null,
-        "note": ""
+        "meal_role": true,
+        "note": "【owner已确认】2026-10-20 对话复核第三组第11项；owner回复：全部同意。确认本次meal_role新值one_bowl：熟饭搭配鸡蛋、菠菜和胡萝卜卷成饭卷，是自带主食的完整餐食。不代表其他未展示字段已核验。"
       }
     },
     {
@@ -1640,10 +1640,10 @@
       ],
       "steps": "Saute onion, apple, oleo, mushrooms and water chestnuts until tender.\nAdd\nthe remaining ingredients in order (flour, curry powder, sugar, ginger, salt, chicken broth and evaporated milk). Cook\nabout\n15 minutes on medium heat until thickened.\nAdd 3 cups diced, cooked chicken.\nLet set for 24 hours in refrigerator. Heat and serve over hot rice.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第三组第12项；owner回复：全部同意。步骤要求3杯熟鸡肉但原料未列，确认资料不完整并暂不用于规划；鸡汤不能代替缺失鸡肉，同意本次三个新值保留未知。"
       }
     },
     {
@@ -1785,8 +1785,8 @@
       ],
       "steps": "Dried shrimp gives this Chinese dish a punch of salty umami flavor. You can find it at an Asian grocery store in the frozen or refrigerated section. Look for small-sized dried shrimp, about a 1/4-inch in size. If you use medium or large dried shrimp, hydrate the shrimp with more water (1 cup for medium-sized shrimp, 1 1/4 cup for large) and for longer time (45 to 60 minutes), then chop it up into smaller 1/4-inch chunks. To make this recipe vegetarian, omit the dried shrimp and use four or five dried shiitake mushrooms, rehydrated, and sliced thin.\nRehydrate the dried shrimp:\nPlace the dried shrimp in a small bowl and pour the boiling water over it. Cover with a small plate and let sit for 30 minutes so the shrimp can rehydrate. The shrimp will be lighter in color and plump up slightly.\nPrep the cabbage:\nMeanwhile, split the napa cabbage in half lengthwise. Rinse the cabbage and shake it dry. Cut out the core of the cabbage and discard.\nSet out two large bowls. Cut the remaining cabbage into 1-inch pieces, putting the thicker white pieces at the bottom of the cabbage into one bowl and the top thinner leafy green pieces into the other bowl.\nDrain the shrimp:\nOnce the shrimp has rehydrated, drain it and discard the liquid.\nCook the shrimp and cabbage:\nIn a large wok or skillet over high heat add the peanut oil, swirling it around to coat the pan.\nHeat until the oil looks shimmering hot, then carefully add the scallions, ginger, and rehydrated shrimp, paying specially attention as the wet ingredients may cause the hot oil to splatter. Toss with a spatula until the scallions are bright green and the entire mixture is fragrant, about 1 minute.\nAdd the thicker white part of the napa cabbage to the pan and lower the heat to medium high. Continue to cook and stir for 3 to 4 minutes, or until the edges of the cabbage pieces start to look slightly translucent but the center of the cabbage pieces are still opaque white.\nReduce the heat to medium low and add the leafy green pieces of cabbage into the pan. Cook until the leaves are wilted, about 2 minutes.\nMake a cornstarch slurry:\nIn a small bowl, combine the soy sauce, cold water, and cornstarch, stirring to make a slurry. Then pour over the cabbage and continue to cook and stir until a sauce has thickened slightly to the consistency of whole milk.\nSeason the stir fry:\nSeason the stir fry with salt and pepper, then taste and add more salt and pepper if you wish. The cabbage will be translucent and silky looking, with specks of dried shrimp all over.",
       "verdict": {
-        "protein_sources": null,
-        "note": ""
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第三组第13项；owner回复：全部同意。约908克白菜搭配21克虾米，确认本次主要蛋白来源新值为空列表，虾米只是少量配料；仍含虾，虾过敏必须排除。本轮不认可冻结的旧模型主食角色，模型门禁不变。"
       }
     },
     {
@@ -1899,10 +1899,10 @@
       ],
       "steps": "Combine first 7 ingredients in a medium bowl; toss well. Warm tortillas according to package directions. Spoon 1/4 cup Beef Carnitas onto each tortilla; top each with about 3 tablespoons avocado mixture. Fold in half; serve with lime wedges.\nThis recipe was updated for the November, 2012 25th anniversary issue.\nMyRecipes is working with\n, the Partnership for a Healthier America, and USDA's MyPlate to give anyone looking for healthier options access to a trove of recipes that will help them create healthy, tasty plates. For more information about creating a healthy plate, visit\n.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第三组第14项；owner回复：全部同意。饼皮等原料已列但步骤要求的牛肉馅及用量缺失，确认资料不完整并暂不用于规划；同意本次三个新值保留未知，不凭标题补肉。"
       }
     },
     {
@@ -2038,8 +2038,8 @@
       ],
       "steps": "Blend salsa and sour cream.\nSet aside.\nChop lettuce, olives, onions, tomatoes and crab meat.\nToss together.\nAdd cheese and chips.\nToss with the sour cream mixture.\nChill.\nEnjoy!",
       "verdict": {
-        "protein_sources": null,
-        "note": ""
+        "protein_sources": false,
+        "note": "【owner已确认纠正】2026-10-20 对话复核第三组第15项；owner回复：全部同意。原料是imitation crab meat，不能凭crab一词改判真蟹。人工正确值按现有食材库仿蟹制品归属为{\"protein_sources\":[\"fish\"]}，不同意本次规则的shellfish。具体产品全部过敏原仍须单独核实。保留生成快照，不把纠正算成规则原本判对；正式规则和标签修正待本轮复核后实施。"
       }
     },
     {

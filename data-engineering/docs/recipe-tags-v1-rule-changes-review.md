@@ -6,7 +6,7 @@
 
 变动菜谱：206；本次抽取：25；未审核模型门禁：422 → 422。
 
-人工确认进度：10 / 25。2026-10-19，owner在第一组回复“这5项全部同意”，确认第1–5项；在第二组回复“西班牙米饭可判定为主食，其他全部同意”，确认第6–9项的新值并纠正第10项。其余15项仍待确认。JSON的`verdict=true`表示同意本次新值，包括“应保留未知”；`false`表示不同意本次新值，人工正确值写入该条note。两者均不表示整道菜所有字段已核验。整包`owner_confirmed`仍为false。不计算总体准确率，不执行模型批次放行。
+人工确认进度：15 / 25。2026-10-19，owner在第一组回复“这5项全部同意”，确认第1–5项；在第二组回复“西班牙米饭可判定为主食，其他全部同意”，确认第6–9项的新值并纠正第10项。2026-10-20，第三组回复“全部同意”，确认第11–14项的新值并同意纠正第15项仿蟹肉误判。其余10项仍待确认。JSON的`verdict=true`表示同意本次新值，包括“应保留未知”；`false`表示不同意本次新值，人工正确值写入该条note。两者均不表示整道菜所有字段已核验。整包`owner_confirmed`仍为false。不计算总体准确率，不执行模型批次放行。
 
 ## 1. Marilyn'S English Pasties (RCP2_CB386B8363E1)
 
@@ -359,7 +359,7 @@ Sprinkle with sesame seeds and roll like a jelly roll.
 Cut into 1/2 inch rounds.
 You can adapt this to your own tastes, some people put imitation crab meat in them, I put marinated soy bean sprouts and cucumbers in mine, etc.
 
-人工意见：待确认。
+人工意见：owner已确认本次meal_role新值one_bowl；熟饭、鸡蛋和蔬菜组成完整饭卷餐食，不只是单纯主食。不代表其余字段已核验。
 
 ## 12. Chicken Curry (RCP2_0447589B2FD3)
 
@@ -398,7 +398,7 @@ about
 Add 3 cups diced, cooked chicken.
 Let set for 24 hours in refrigerator. Heat and serve over hot rice.
 
-人工意见：待确认。
+人工意见：owner已确认本次三个新值应保留未知；步骤要求3杯熟鸡肉但原料未列，资料不完整，暂不用于规划，鸡汤不能代替缺失鸡肉。
 
 ## 13. Napa Cabbage with Dried Shrimp (RCP2_66CDC4D02656)
 
@@ -444,7 +444,7 @@ In a small bowl, combine the soy sauce, cold water, and cornstarch, stirring to 
 Season the stir fry:
 Season the stir fry with salt and pepper, then taste and add more salt and pepper if you wish. The cabbage will be translucent and silky looking, with specks of dried shrimp all over.
 
-人工意见：待确认。
+人工意见：owner已确认本次主要蛋白来源新值为空列表；虾米只作少量配料，仍含虾，虾过敏必须排除。本轮不认可冻结的旧模型主食角色，也不改变其模型门禁。
 
 ## 14. Beef Carnitas Tacos (RCP2_28626CFF47A0)
 
@@ -478,7 +478,7 @@ MyRecipes is working with
 , the Partnership for a Healthier America, and USDA's MyPlate to give anyone looking for healthier options access to a trove of recipes that will help them create healthy, tasty plates. For more information about creating a healthy plate, visit
 .
 
-人工意见：待确认。
+人工意见：owner已确认本次三个新值应保留未知；步骤要求的牛肉馅及用量缺失，资料不完整，暂不用于规划，不凭标题补肉。
 
 ## 15. Mexican Crab Salad (RCP2_010D47D8B41A)
 
@@ -511,7 +511,7 @@ Toss with the sour cream mixture.
 Chill.
 Enjoy!
 
-人工意见：待确认。
+人工意见：owner同意纠正规则误判，不接受本次shellfish新值。原料明确为仿蟹肉，按现有食材库归鱼类，人工正确值为protein_sources=["fish"]；不能凭crab一词当成真蟹，也不能据此保证具体产品的全部过敏原已核实。上表保留当时规则输出；正式规则和标签修正待本轮复核后实施。
 
 ## 16. Stuffed Green Peppers (RCP2_FAC00DA2B400)
 
