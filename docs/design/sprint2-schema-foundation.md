@@ -25,11 +25,18 @@ their behaviour and the [API Contracts](../api-contracts.md):
 - the types `AgeBand`, `Sex`, `PersonalGoal`, `Weekday`, `PresenceRule`,
   `CookingTimeRule` and `NutritionLimit`, with the new `HouseholdPlanning`.
 
-The basic seasonings are a data file, `data/ingredients/basic-seasonings-v1.json`;
-`ingredients.basic_seasoning` stays unwritten until the first tagging PR copies
-the file into it with importer version `6`. Still unwired:
-`self_only_allergens`, `missing_equipment` and every `recipes` tag column,
-`FlavorBoost` and `PlanningPreferences`, and the other columns below. The
+Layer 08 PR-2 (recipe and ingredient tags) **writes** the `recipes` columns
+`meal_role`, `contains_staple`, `protein_sources`, `cooking_methods`,
+`equipment`, `flavor_tags` and `estimated`, and the `ingredients` columns
+`food_group`, `perishable` and `basic_seasoning` (from
+`data/ingredients/basic-seasonings-v1.json`). Both importers copy them from the
+tag files `data/recipes/recipe-tags-v1.json` and
+`data/ingredients/ingredient-tags-v1.json`, made by
+`python -m app.data.recipe_tags`, at importer version `6`. Nothing in planning
+reads them yet, so plans and the evaluation reports did not change. Still
+unwired: `self_only_allergens`, `missing_equipment`, the halal and
+`unknown_safety` columns, `FlavorBoost` and `PlanningPreferences`, and the other
+columns below. The
 evaluation reports did not change: their requests carry no household block.
 `python -m app.evaluation.household_rules` (in CI) measures the rules instead:
 `docs/evaluation/household-rules/latest.md`.
@@ -45,8 +52,8 @@ evaluation reports did not change: their requests carry no household block.
   JSON `null` when it copies a row; readers treat both as "not set".
 - **Constraints were only widened.** Plans may hold 1 to 14 days; requests still
   ask for 7.
-- **No data was backfilled**, and the importer version stays `5`, so a compose
-  start does not re-import the catalog.
+- **No data was backfilled**, and the importer version stayed `5`, so a compose
+  start did not re-import the catalog. The first tagging PR moved it to `6`.
 - **Safety fields take effect only when enforced.** A halal or member-level
   allergen or diet option becomes selectable only in the PR that makes the
   planner and validator enforce it.

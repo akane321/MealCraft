@@ -25,6 +25,10 @@ What the mapping decides, and why:
   ever grows.
 - A recipe with fewer than two ingredient lines or no instruction is skipped,
   matching the curated catalog's own floor.
+- Tags. An ingredient's `food_group` is the release's; the tag files
+  (`app.data.tag_files`) then fill the recipe tag columns and `estimated`, and an
+  ingredient's `food_group`, `perishable` and `basic_seasoning`. A recipe missing
+  from them keeps NULL tags.
 
 `catalog_imports` holds the digest of the release files. Importing a release whose
 digest is already recorded does nothing, so the command is cheap to run at every
@@ -48,6 +52,7 @@ from app.core.paths import repository_root
 from app.data.allergens import checked_allergens
 from app.data.alternatives import options as alternative_options
 from app.data.catalog import mark_catalog_changed
+from app.data.tag_files import apply_ingredient_tags, apply_recipe_tags, tag_file_bytes
 from app.models.meal_plan import MealPlanEntry, MealPlanEvent
 from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 
@@ -57,7 +62,7 @@ RELEASE_FILES = ("release_manifest.json", "ingredients.jsonl", "recipes.jsonl")
 
 # Importer logic is part of the digest, so a change here re-imports an
 # already-recorded release instead of being skipped as unchanged.
-IMPORTER_VERSION = "5"  # 5: recipe lines the release mapped wrongly are corrected (line-corrections.json)
+IMPORTER_VERSION = "6"  # 6: recipe and ingredient tag files (app/data/tag_files.py) fill the tag columns
 
 # Release allergen name -> runtime checked allergen, or None when the runtime has no name for it.
 ALLERGEN_MAP: dict[str, str | None] = {
@@ -91,6 +96,8 @@ def release_digest(directory: Path) -> str:
     # them must re-run the import like a change to the release itself.
     digest.update((repository_root() / "data/ingredients/alternatives.json").read_bytes())
     digest.update((repository_root() / LINE_CORRECTIONS).read_bytes())
+    # The tag columns are copied from the tag files, so a re-tagged catalog re-imports too.
+    digest.update(tag_file_bytes())
     return digest.hexdigest()
 
 
@@ -204,6 +211,7 @@ def _import_ingredients(session: Session, directory: Path, recipes: list[dict], 
         else:
             row.allergens = sorted(set(row.allergens or []).union(allergens))
             report.ingredients_reused += 1
+        apply_ingredient_tags(row, record["food_group"])
         rows[release_id] = row
 
     missing = sorted(set(line_allergens).difference(rows))
@@ -267,6 +275,7 @@ def _line_corrections(session: Session, recipes: list[dict]) -> dict[tuple[str, 
                 display_name=target["display_name"],
                 allergens=map_allergens(target["allergens"]),
             )
+            apply_ingredient_tags(row)
             session.add(row)
             session.flush()
         corrected[(correction["recipe_id"], correction["original_text"])] = row.id
@@ -386,6 +395,7 @@ def _fill_recipe(recipe: Recipe, record: dict) -> None:
         "license": source["license"],
     }
     recipe.video_url = record.get("video_url")
+    apply_recipe_tags(recipe, record["recipe_id"])
     if recipe.nutrition is None:
         recipe.nutrition = RecipeNutrition()
     recipe.nutrition.calories_kcal = nutrition["energy_kcal"]

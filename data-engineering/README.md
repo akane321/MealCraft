@@ -78,6 +78,33 @@ python scripts/fairprice_mapping.py export                 # 写运行时快照 
 `docs/v2-sampled-audit.json`。抽查是 `ADR-0024` 第 2 节的要求：AI 富化允许，
 条件是事后抽样审计。抽查可以在 A/B/C 没交齐时就先跑，工作表会记录当时包含了哪几份。
 
+## 菜谱与食材标签 v1 的抽检（Reviewing recipe and ingredient tags）
+
+```bash
+uv run --project backend python -m app.data.recipe_tags          # 只用规则；之前模型给的答案保留并复用
+uv run --project backend python -m app.data.recipe_tags --llm    # 规则定不了的再问模型，默认花费上限约 US$5
+```
+
+规则在 `backend/app/data/recipe_tags.py`，产出 `data/recipes/recipe-tags-v1.json` 和
+`data/ingredients/ingredient-tags-v1.json`，导入器（版本 6）按 release < 标签文件 < 运行时写入的顺序
+写进数据库。覆盖率和模型花费见 `docs/recipe-tags-v1-report.md`。`--reask` 丢掉之前模型的答案重新问。
+运行时写入的菜谱标签会在重新导入时保留，前提是写入方把它标出来：删掉该字段在 `estimated` 里的条目（人定的值不是估计），
+或把条目的 `reviewed` 设为 `true`。
+
+抽检包是 `docs/recipe-tags-v1-sample.json`（种子固定）：按正餐角色和判定方式（rule、llm、未定）分层抽了
+100 多道菜，另有全部"易坏"食材、全部基础调料和一些随机食材。owner 的做法：
+
+1. 每道菜看 `tags`，在 `verdict` 里逐项填 `true`（对）或 `false`（错）；错的在 `note` 写正确值。
+   值为 `null` 的项（规则和模型都没定）可以只在 `note` 里写应该是什么。
+2. 每个食材填 `verdict.perishable` 和 `verdict.basic_seasoning`。按 `ADR-0068`，"易坏"为 `true` 的
+   每一项都要人工确认，所以抽检包收录了全部易坏食材。
+3. 每道菜的 `why` 说明它为什么被抽中。两个必审分层在规划器读这些值之前要先审完：`llm protein_sources`
+   （模型给的蛋白来源，它会喂给"同一餐蛋白不重复"的硬规则）和 `hearty salad`（不是蔬菜主导、带主蛋白的沙拉；
+   标成 `salad` 后它只能当蔬菜菜，而蔬菜主导检查又不让它当，所以哪个位置都填不了。owner 2026-10-19 决定：带肉的沙拉不算主菜，
+   保持这样）。模型定的值（`estimated` 里 `method` 为 `llm`）在本批抽检审完前，规划器不读。
+4. 提交填好的文件。重跑标签命令时，已有判定的抽检包不会被覆盖。正餐角色的准确率按
+   `meal_role` 判定为 `true` 的比例计算，写进报告（`08-household.md` 第 0.9 节）。
+
 ## 目录
 
 ```text
