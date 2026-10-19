@@ -168,9 +168,9 @@
       ],
       "steps": "For dough, mix first 3 ingredients.\nMix well.\nAdd water and mix as little as necessary and use as little flour as you can when rolling out the dough.\nBake at 400° for 10 minutes, then at 350° for 40 to 45 minutes until crust is golden brown.\nMake a small slit in the top of each pastie.\nWhen you remove from oven, put a little water oleo mixture into slit (1 teaspoon oleo and 1/2 teaspoon water for each pastie).\nLet sit for a few minutes.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "note": "【owner已确认】2026-10-19 对话复核第一组第1项；owner回复：这5项全部同意。仅确认本次新值：有完整面皮载体的餐食、自带主食；历史模型蛋白来源未被确认，仍受原模型门禁拦截。"
       }
     },
     {
@@ -296,10 +296,10 @@
       ],
       "steps": "Marinate 8 to 10 pork chops in sauce overnight.\nPlace pork chops in shallow roasting pan and pour sauce over them.\nBake 1 1/2 hours at 325°.\nServe over hot buttered rice.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-19 对话复核第一组第2项；owner回复：这5项全部同意。原料缺少步骤要求的猪排，确认资料不完整并暂不用于规划；同意新值保留未知，不是确认猪肉或主食已存在。"
       }
     },
     {
@@ -418,10 +418,10 @@
       ],
       "steps": "Mix all ingredients in a small bowl, set aside. Place boneless, skinless chicken breasts between sheets of plastic wrap or in large plastic bags and pound thin. Chicken breasts should be 1/2 thick or less. Rub chicken with olive oil on both sides. Sprinkle on seasoning. Place in skillet that has been pre-heated to medium-high and sprayed with non-stick cooking oil. Cook for 4 to 5 minutes per side or until done. Slice into 1/4 cubes or strips or leave whole as desired.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-19 对话复核第一组第3项；owner回复：这5项全部同意。原料缺少步骤要求的鸡胸肉，确认资料不完整并暂不用于规划；同意新值保留未知，不凭标题补出鸡肉。"
       }
     },
     {
@@ -541,10 +541,10 @@
       ],
       "steps": "Season and brown roast.\nCook until done. Shred roast into small pieces.\nAdd remaining ingredients. Simmer 30 minutes or until mixture is thick.\nServe over toasted buns.\nYields 12 servings.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-19 对话复核第一组第4项；owner回复：这5项全部同意。原料只有酱料和牛高汤，没有步骤要求的烤肉，确认资料不完整并暂不用于规划；牛高汤不等于已列出牛肉，同意新值保留未知。"
       }
     },
     {
@@ -719,9 +719,9 @@
       ],
       "steps": "Drain pineapple.\nReserve 1/3 cup of juice.\nSlice chicken in strips.\nStir-fry with garlic and ginger in oil.\nAdd pineapple, carrots, onions and pepper.\nSteam for 2 to 3 minutes.\nStir in spaghetti.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "note": "【owner已确认】2026-10-19 对话复核第一组第5项；owner回复：这5项全部同意。确认本次新值为肉类主菜、不自带足量主食：约454克鸡肉和大量蔬果，只有约113克熟意面；按既定占比规则判断，不更改阈值。不代表其他未展示字段已获确认。"
       }
     },
     {

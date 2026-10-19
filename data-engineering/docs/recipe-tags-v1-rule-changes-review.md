@@ -1,10 +1,12 @@
-# 规则修复后的小范围复核（待人工确认）
+# 规则修复后的小范围复核（部分人工确认）
 
 本表只核对变动后的标签，不复写上一轮审查，也不宣称总体准确率。优先包含已知回归案例，其余由固定种子从变动菜谱中抽取。
 
 同意某个新标签不表示原标签正确。未审核模型字段继续冻结；fresh_rule_proposal只是新规则建议，不是已放行的模型值。原料克重是release数据，不是另行实测。
 
 变动菜谱：206；本次抽取：25；未审核模型门禁：422 → 422。
+
+人工确认进度：5 / 25。2026-10-19，owner在对话中回复“这5项全部同意”，确认下列第1–5项展示的本次变动字段；其余20项仍待确认。JSON的`verdict=true`表示同意本次新值，包括“应保留未知”，不表示原标签正确、原料已经补全或整道菜所有字段已核验。整包`owner_confirmed`仍为false。不计算总体准确率，不执行模型批次放行。
 
 ## 1. Marilyn'S English Pasties (RCP2_CB386B8363E1)
 
@@ -40,7 +42,7 @@ Make a small slit in the top of each pastie.
 When you remove from oven, put a little water oleo mixture into slit (1 teaspoon oleo and 1/2 teaspoon water for each pastie).
 Let sit for a few minutes.
 
-人工意见：待确认。
+人工意见：owner已确认本次meal_role、contains_staple新值；完整面皮载体的餐食、自带主食。历史模型蛋白来源未获确认，模型门禁不变。
 
 ## 2. Chinese Pork Chops (RCP2_AA52264E15D0)
 
@@ -72,7 +74,7 @@ Place pork chops in shallow roasting pan and pour sauce over them.
 Bake 1 1/2 hours at 325°.
 Serve over hot buttered rice.
 
-人工意见：待确认。
+人工意见：owner已确认本次三个新值应保留未知；猪排缺项、资料不完整，暂不用于规划，不凭标题补肉。
 
 ## 3. Kid Friendly Jamaican Chicken (RCP2_631314414D3C)
 
@@ -102,7 +104,7 @@ Serve over hot buttered rice.
 
 Mix all ingredients in a small bowl, set aside. Place boneless, skinless chicken breasts between sheets of plastic wrap or in large plastic bags and pound thin. Chicken breasts should be 1/2 thick or less. Rub chicken with olive oil on both sides. Sprinkle on seasoning. Place in skillet that has been pre-heated to medium-high and sprayed with non-stick cooking oil. Cook for 4 to 5 minutes per side or until done. Slice into 1/4 cubes or strips or leave whole as desired.
 
-人工意见：待确认。
+人工意见：owner已确认本次三个新值应保留未知；鸡胸肉缺项、资料不完整，暂不用于规划，不凭标题补肉。
 
 ## 4. Barbecue Beef (RCP2_DA28B246E699)
 
@@ -135,7 +137,7 @@ Add remaining ingredients. Simmer 30 minutes or until mixture is thick.
 Serve over toasted buns.
 Yields 12 servings.
 
-人工意见：待确认。
+人工意见：owner已确认本次三个新值应保留未知；烤肉缺项、资料不完整，暂不用于规划，牛高汤不等于已列出牛肉。
 
 ## 5. Chicken Stir-Fry (RCP2_1D97F9CF9C30)
 
@@ -172,7 +174,7 @@ Add pineapple, carrots, onions and pepper.
 Steam for 2 to 3 minutes.
 Stir in spaghetti.
 
-人工意见：待确认。
+人工意见：owner已确认本次meal_role、contains_staple新值；按既定占比规则，约113克熟意面不足以让鸡肉蔬果菜承担主食，归肉类主菜。不代表其余字段已核验。
 
 ## 6. Baked Macaroni And Cheese (RCP2_3B3606EBC933)
 
