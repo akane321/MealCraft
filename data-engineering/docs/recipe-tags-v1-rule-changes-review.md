@@ -6,7 +6,7 @@
 
 变动菜谱：206；本次抽取：25；未审核模型门禁：422 → 422。
 
-人工确认进度：15 / 25。2026-10-19，owner在第一组回复“这5项全部同意”，确认第1–5项；在第二组回复“西班牙米饭可判定为主食，其他全部同意”，确认第6–9项的新值并纠正第10项。2026-10-20，第三组回复“全部同意”，确认第11–14项的新值并同意纠正第15项仿蟹肉误判。其余10项仍待确认。JSON的`verdict=true`表示同意本次新值，包括“应保留未知”；`false`表示不同意本次新值，人工正确值写入该条note。两者均不表示整道菜所有字段已核验。整包`owner_confirmed`仍为false。不计算总体准确率，不执行模型批次放行。
+人工确认进度：20 / 25。2026-10-19，owner在第一组回复“这5项全部同意”，确认第1–5项；在第二组回复“西班牙米饭可判定为主食，其他全部同意”，确认第6–9项的新值并纠正第10项。2026-10-20，第三组回复“全部同意”，确认第11–14项的新值并同意纠正第15项仿蟹肉误判；第四组回复“全部同意”，确认第16、17、19、20项并纠正第18项南瓜蛋炒饭。其余5项仍待确认。JSON的`verdict=true`表示同意本次新值，包括“应保留未知”；`false`表示不同意本次新值，人工正确值写入该条note。两者均不表示整道菜所有字段已核验。整包`owner_confirmed`仍为false。不计算总体准确率，不执行模型批次放行。
 
 ## 1. Marilyn'S English Pasties (RCP2_CB386B8363E1)
 
@@ -544,7 +544,7 @@ Pressure cook at 15 pounds pressure for 10 minutes.
 Reduce pressure.
 Serves 4.
 
-人工意见：待确认。
+人工意见：owner已确认本次meal_role、contains_staple新值；牛肉酿青椒的79克熟饭只是少量填馅，归需另配主食的肉类主菜。不代表其余字段已核验。
 
 ## 17. Chicken Teriyaki (RCP2_975C4431AA56)
 
@@ -572,7 +572,7 @@ Mix all ingredients and pour over chicken.
 Marinate in refrigerator at least 1 hour.
 Grill over medium hot grill.
 
-人工意见：待确认。
+人工意见：owner已确认本次三个新值应保留未知；原料只有腌料而缺鸡肉，资料不完整，暂不用于规划，不凭菜名补肉。
 
 ## 18. Pumpkin Fried Rice (RCP2_586E24DE73A6)
 
@@ -601,7 +601,7 @@ Grill over medium hot grill.
 6. Stir rice mixture into eggs and sprinkle with soy. Stir and let cook a few more minutes.
 7. Remove from heat and enjoy!
 
-人工意见：待确认。
+人工意见：owner同意纠正本次两个null值。316克熟饭、245克南瓜和100克鸡蛋混炒，可作为自带主食的完整餐食；人工正确值为meal_role=one_bowl、contains_staple=true。上表保留当时的规则输出，不把纠正算成规则原本判对；正式修正待本轮复核后实施，不因此调整全局阈值。
 
 ## 19. Parmesan Chicken (RCP2_7B87DB0F6AFE)
 
@@ -634,7 +634,7 @@ Place in pan.
 Pour 1/2 stick melted butter over.
 Bake at 350° for 1 hour uncovered.
 
-人工意见：待确认。
+人工意见：owner已确认本次三个新值应保留未知；步骤所需鸡肉缺项、资料不完整，暂不用于规划，裹料里的鸡蛋不能代替缺失鸡肉。
 
 ## 20. Lo Mein (RCP2_C4333C1C5043)
 
@@ -663,7 +663,7 @@ Cook noodles in boiling salt water until al dente. Rinse under cold water. Drain
 Mix 2 T soy sauce with noodles and set aside. (You can use Oyster Sauce)
 Stir any of the beef, pork or chicken in 1 T oil. Mix 1/2 t salt and 1 t cornstarch. Add this to the stir-fry. Remove it from the pan and set it aside. Add 3 T oil to wok and stir-fry cabbage ,and bamboo shoots. Add meat mixture to wok. Mix well. Beat egg and add it slowly to wok on top of everything. Add noodles. Toss until noodles are blended in with everything. Add 3 T Oyster sauce or soy sauce. You can add the scallions as garnish or throw them into the stir fry to cook them.
 
-人工意见：待确认。
+人工意见：owner已确认本次protein_sources新值应保留未知；“熟牛肉、猪肉或鸡肉”未确定选哪一种，不能直接认定牛肉，也不据此保证适合忌口家庭。
 
 ## 21. Taco Meat Filling (RCP2_4FBC8094CB72)
 

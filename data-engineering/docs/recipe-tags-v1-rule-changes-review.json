@@ -2176,9 +2176,9 @@
       ],
       "steps": "Wash and clean peppers.\nCombine remaining ingredients except tomato soup and mix thoroughly.\nFill pepper shells lightly with meat mixture.\nPlace on rack in cooker; add soup.\nPressure cook at 15 pounds pressure for 10 minutes.\nReduce pressure.\nServes 4.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "note": "【owner已确认】2026-10-20 对话复核第四组第16项；owner回复：全部同意。480克青椒、340克牛肉而熟饭只有79克，确认本次新值为需另配主食的肉类主菜；少量填馅米饭不足以承担主食。不代表其余未展示字段已核验。"
       }
     },
     {
@@ -2277,10 +2277,10 @@
       ],
       "steps": "Mix all ingredients and pour over chicken.\nMarinate in refrigerator at least 1 hour.\nGrill over medium hot grill.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第四组第17项；owner回复：全部同意。原料只有酱油、油、糖浆等而缺步骤要求的鸡肉，确认资料不完整并暂不用于规划；同意本次三个新值保留未知，不凭菜名补肉。"
       }
     },
     {
@@ -2387,9 +2387,9 @@
       ],
       "steps": "1. Spray a medium to large size skillet with oil and heat over medium-high.\n2. Cook onion in oil until slightly softened.\n3. Add pumpkin and rice and stir well.\n4. Push rice to one side of the pan and pour beaten eggs onto exposed skillet surface.\n5. Let cook slightly and stir in such a way that the eggs are scrambled.\n6. Stir rice mixture into eggs and sprinkle with soy. Stir and let cook a few more minutes.\n7. Remove from heat and enjoy!",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "note": ""
+        "meal_role": false,
+        "contains_staple": false,
+        "note": "【owner已确认纠正】2026-10-20 对话复核第四组第18项；owner回复：全部同意。316克熟饭、245克南瓜、100克鸡蛋混炒，确认可作为自带主食的完整餐食。人工正确值：{\"meal_role\":\"one_bowl\",\"contains_staple\":true}，不同意本次两个null值。保留规则输出快照，不把人工纠正算成规则原本判对；正式修正待本轮复核后实施，不据此调整全局阈值。"
       }
     },
     {
@@ -2505,10 +2505,10 @@
       ],
       "steps": "Mix dry ingredients in plastic baggie.\nMix egg and milk.\nDip chicken in egg and milk, then place in baggie; shake well.\nPlace in pan.\nPour 1/2 stick melted butter over.\nBake at 350° for 1 hour uncovered.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第四组第19项；owner回复：全部同意。原料只有鸡蛋、奶酪、面粉等裹料而缺鸡肉，确认资料不完整并暂不用于规划；同意本次三个新值保留未知，裹料鸡蛋不能代替缺失鸡肉。"
       }
     },
     {
@@ -2637,8 +2637,8 @@
       ],
       "steps": "Cook noodles in boiling salt water until al dente. Rinse under cold water. Drain.\nMix 2 T soy sauce with noodles and set aside. (You can use Oyster Sauce)\nStir any of the beef, pork or chicken in 1 T oil. Mix 1/2 t salt and 1 t cornstarch. Add this to the stir-fry. Remove it from the pan and set it aside. Add 3 T oil to wok and stir-fry cabbage ,and bamboo shoots. Add meat mixture to wok. Mix well. Beat egg and add it slowly to wok on top of everything. Add noodles. Toss until noodles are blended in with everything. Add 3 T Oyster sauce or soy sauce. You can add the scallions as garnish or throw them into the stir fry to cook them.",
       "verdict": {
-        "protein_sources": null,
-        "note": ""
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第四组第20项；owner回复：全部同意。原文为熟牛肉、猪肉或鸡肉而未确定选择，确认本次主要肉类来源应保留未知，不再直接认定牛肉，也不据此保证适合忌口家庭。本轮不重审其他字段。"
       }
     },
     {
