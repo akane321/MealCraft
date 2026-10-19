@@ -858,8 +858,8 @@
       ],
       "steps": "In saucepan, melt margarine. Blend in flour, salt and mustard. Add milk and heat, stirring constantly. The sauce will thicken a little.\nAdd 1 1/2 cups cheese, stirring often. Add macaroni with sauce. Top with remaining cheese, bread crumbs and a pinch of paprika.\nBake at 350° for 1/2 hour.\nMakes 4 to 6 servings.",
       "verdict": {
-        "meal_role": null,
-        "note": ""
+        "meal_role": true,
+        "note": "【owner已确认】2026-10-19 对话复核第二组第6项；owner回复：西班牙米饭可判定为主食，其他全部同意。确认本次meal_role新值one_bowl，奶酪焗通心粉是自带主食的完整餐食；其他未展示字段不算本轮核验。"
       }
     },
     {
@@ -986,10 +986,10 @@
       ],
       "steps": "Combine all ingredients except ribs in a 1 gallon ziplock bag. add flank steak and seal bag, squeezing out excess air. Work sauce into ribs by kneading bag\nMarinate for 8 hours. Remove from zip lock and grill for 6 minutes each side.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "protein_sources": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-19 对话复核第二组第7项；owner回复：西班牙米饭可判定为主食，其他全部同意。牛排只在步骤出现，原料未列肉及其用量，确认资料不完整并暂不用于规划；同意本次新值保留未知，不是确认牛肉已存在。"
       }
     },
     {
@@ -1120,9 +1120,9 @@
       ],
       "steps": "Preheat the oven to 350 degrees F.\nSeason the squash with olive oil, salt and pepper. Place on a baking sheet, flesh side up and add 1/2 cup water to the pan. Cover with alluminum foil and bake until tender, about 1 hour. Remove from the oven and cool completely.\nIn a large saute pan, over medium heat, brown the sausage and onions, about 6 to 8 minutes.\nIn a large mixing bowl, toss the sausage and onions with the pasta sauce, pasta, and cheese. Season with salt and pepper. Mix well.\nSpoon the pasta mixture into the cavity of each squash. Place the filled squashes on a baking sheet and place in the oven.\nBake until the squash is heated through and the cheese melts, about 20 minutes.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "note": ""
+        "meal_role": true,
+        "contains_staple": true,
+        "note": "【owner已确认】2026-10-19 对话复核第二组第8项；owner回复：西班牙米饭可判定为主食，其他全部同意。约900克南瓜、227克香肠、227克熟意面及其他配料，按既定占比规则确认本次新值为需另配主食的主菜。不代表其他未展示字段已核验。"
       }
     },
     {
@@ -1253,8 +1253,8 @@
       ],
       "steps": "Brown meat, onions and mushrooms in 2 tablespoons sesame seed oil.\nSeason according to taste with soy sauce and garlic powder. Place a small amount into the middle of egg roll wrapper.\nRoll and seal wrapper by wetting finger with a little water (egg roll wrappers will seal tight).\nFry egg rolls in sesame seed oil or deep fry.\nCan be frozen and microwaved when needed.",
       "verdict": {
-        "protein_sources": null,
-        "note": ""
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-19 对话复核第二组第9项；owner回复：西班牙米饭可判定为主食，其他全部同意。原文为猪肉或牛肉，确认本次蛋白来源新值应保留未知；不能认定一定是猪肉，也不能认定两种肉都存在，不能据此保证适合忌口家庭。"
       }
     },
     {
@@ -1358,9 +1358,9 @@
       ],
       "steps": "Cook green pepper, tomato and onion in hot butter until tender.\nStir in cooked rice, water, salt and pepper.\nHeat through, stirring occasionally.\nServes 6.",
       "verdict": {
-        "meal_role": null,
-        "contains_staple": null,
-        "note": ""
+        "meal_role": false,
+        "contains_staple": false,
+        "note": "【owner已确认纠正】2026-10-19 对话复核第二组第10项；owner回复：西班牙米饭可判定为主食，其他全部同意。人工正确值：{\"meal_role\":\"staple\",\"contains_staple\":true}。不同意本次规则生成的两个null值；保留before、after及规则来源作为审查快照，不把纠正记为规则原本判对，也不为此调整全局阈值。正式标签修正待本轮复核后实施。"
       }
     },
     {

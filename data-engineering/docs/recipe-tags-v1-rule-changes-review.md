@@ -6,7 +6,7 @@
 
 变动菜谱：206；本次抽取：25；未审核模型门禁：422 → 422。
 
-人工确认进度：5 / 25。2026-10-19，owner在对话中回复“这5项全部同意”，确认下列第1–5项展示的本次变动字段；其余20项仍待确认。JSON的`verdict=true`表示同意本次新值，包括“应保留未知”，不表示原标签正确、原料已经补全或整道菜所有字段已核验。整包`owner_confirmed`仍为false。不计算总体准确率，不执行模型批次放行。
+人工确认进度：10 / 25。2026-10-19，owner在第一组回复“这5项全部同意”，确认第1–5项；在第二组回复“西班牙米饭可判定为主食，其他全部同意”，确认第6–9项的新值并纠正第10项。其余15项仍待确认。JSON的`verdict=true`表示同意本次新值，包括“应保留未知”；`false`表示不同意本次新值，人工正确值写入该条note。两者均不表示整道菜所有字段已核验。整包`owner_confirmed`仍为false。不计算总体准确率，不执行模型批次放行。
 
 ## 1. Marilyn'S English Pasties (RCP2_CB386B8363E1)
 
@@ -202,7 +202,7 @@ Add 1 1/2 cups cheese, stirring often. Add macaroni with sauce. Top with remaini
 Bake at 350° for 1/2 hour.
 Makes 4 to 6 servings.
 
-人工意见：待确认。
+人工意见：owner已确认本次meal_role新值；奶酪焗通心粉是自带主食的完整餐食。不代表其余字段已核验。
 
 ## 7. Kalbi Beef Marinate (Flank Steak) (RCP2_80E876686DA8)
 
@@ -234,7 +234,7 @@ Makes 4 to 6 servings.
 Combine all ingredients except ribs in a 1 gallon ziplock bag. add flank steak and seal bag, squeezing out excess air. Work sauce into ribs by kneading bag
 Marinate for 8 hours. Remove from zip lock and grill for 6 minutes each side.
 
-人工意见：待确认。
+人工意见：owner已确认本次三个新值应保留未知；原料未列出牛排及其用量，资料不完整，暂不用于规划。
 
 ## 8. Acorn Squash Stuffed With Italian Sausage & Penne (RCP2_961449012D5D)
 
@@ -263,7 +263,7 @@ In a large mixing bowl, toss the sausage and onions with the pasta sauce, pasta,
 Spoon the pasta mixture into the cavity of each squash. Place the filled squashes on a baking sheet and place in the oven.
 Bake until the squash is heated through and the cheese melts, about 20 minutes.
 
-人工意见：待确认。
+人工意见：owner已确认本次meal_role、contains_staple新值；按既定占比规则，227克熟意面不足以让这道香肠酿南瓜承担主食，归需另配主食的主菜。不代表其余字段已核验。
 
 ## 9. Mon-Doo(Korean Egg Rolls) (RCP2_557753E022A8)
 
@@ -292,7 +292,7 @@ Roll and seal wrapper by wetting finger with a little water (egg roll wrappers w
 Fry egg rolls in sesame seed oil or deep fry.
 Can be frozen and microwaved when needed.
 
-人工意见：待确认。
+人工意见：owner已确认本次protein_sources新值应保留未知；“猪肉或牛肉”不等于已确定选择，也不等于两者都存在，不据此保证适合忌口家庭。
 
 ## 10. Spanish Rice (RCP2_4F1F492DB38E)
 
@@ -321,7 +321,7 @@ Stir in cooked rice, water, salt and pepper.
 Heat through, stirring occasionally.
 Serves 6.
 
-人工意见：待确认。
+人工意见：owner不同意本次两个null值，明确判为主食。人工正确值为meal_role=staple、contains_staple=true。上表保留当时的规则输出，不能把人工纠正算成规则原本判对；正式标签修正待本轮复核后实施，不因此调整全局阈值。
 
 ## 11. Kim Bap (Korean Rice Rolls) (RCP2_D666EF442FE4)
 
