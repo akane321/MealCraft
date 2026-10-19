@@ -74,8 +74,11 @@ that grows with the people at it, each lunch and dinner with its staple:
 
 "People at dinner" counts who is home that evening, so a weekend dinner with
 grandparents gets more dishes. It counts people, not portions: two adults and
-three small children are five at dinner, however little the children eat. A protein main may be a meat, fish, tofu, egg or
-bean dish. The **staple** is rice by default, or noodles, bread or flatbread to
+three small children are five at dinner, however little the children eat (the
+portions still decide how much of each dish is cooked and bought). The editor
+shows each meal's dish count for the people usually home, and a dish marked
+"From N people" only from that many on. A protein main may be a meat, fish,
+tofu, egg or bean dish. The **staple** is rice by default, or noodles, bread or flatbread to
 suit the meal's cuisine; it is on the shopping list, in the price, the nutrition
 and the cooking time (cooking unattended, like a rice cooker). A one-bowl dish
 such as fried rice, laksa or chicken rice carries its own staple, and may come
@@ -120,7 +123,13 @@ missing; some questions offer buttons. When the details are complete, **Plan my
 week** plans every chosen meal of the seven days. A plan from the household
 profile may be 1 to 14 days long (**Days to plan**, beside the plan button on
 the Household page). A plan longer than a week shops twice: before
-day 1 and before day 8, with the weekly budget holding on each trip.
+day 1 and before day 8, with the weekly budget holding on each trip. Fresh
+meat, fish and greens are cooked within 3 days of the trip they are bought on,
+and the shopping list marks them "Use within 3 days".
+
+Most plans take a few seconds. A large household on a tight budget takes longer,
+up to about half a minute, while the planner searches for a week that fits the
+budget; the button says "Planning…" until the plan is ready.
 
 MealCraft handles meal planning, recipes, groceries, budgets and explicit
 dietary constraints. Social, unrelated, disease-treatment and
