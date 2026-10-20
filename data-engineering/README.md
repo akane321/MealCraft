@@ -141,6 +141,9 @@ uv run --project backend python -m app.data.recipe_tags --llm    # 规则定不�
 抽检包是 `docs/recipe-tags-v1-sample.json`（种子固定）：按正餐角色和判定方式（rule、llm、未定）分层抽了
 100 多道菜，另有全部"易坏"食材、全部基础调料和一些随机食材。owner 的做法：
 
+逐条审查可使用 [标签审查表](docs/recipe-tags-v1-review.md)。表中标为 AI 建议的判定只是人工复核的起点，
+不是已完成的人审或批次放行；确认时保留建议出处，并记录人工确认的条目、字段及修改。
+
 1. 每道菜看 `tags`，在 `verdict` 里逐项填 `true`（对）或 `false`（错）；错的在 `note` 写正确值。
    值为 `null` 的项（规则和模型都没定）可以只在 `note` 里写应该是什么。
 2. 每个食材填 `verdict.perishable` 和 `verdict.basic_seasoning`。按 `ADR-0068`，"易坏"为 `true` 的
