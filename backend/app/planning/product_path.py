@@ -289,12 +289,27 @@ def families_first(recommendations, seen=()) -> list:
     return first + again
 
 
-# Dishes of each kind the packet holds for each member a meal has to cover (`_packet_covering`), counting the
-# ones the ranking already kept. Four was too few: a member whose diet is narrow then had a handful of cores to
-# choose from all week, and the week repeated one of them - `four-with-vegetarian` served the same lunch four
-# times of seven. That reads as a cost of the shared-dish model and is not one, it is this number. At 40 the
-# same week serves 48 different dishes instead of 44 and costs S$589.27 instead of S$596.62, with no material
-# change in time, so a member's own choice is kept at least as wide as what the ranking keeps for the table.
+# Dishes of each kind the packet adds for a group of alike members the ranking kept nothing of this kind for
+# (`_packet_covering`). Four was too few: with no dish of this kind that suits them among the ranked picks, a
+# member whose diet is narrow had four cores for a whole week.
+#
+# The second-round review asked for the top-up to run even when the ranking already keeps a dish for the group.
+# Measured on this catalog over `four-with-vegetarian` (distinct dishes, purchase total) and `mixed-diets`
+# (whether it can be planned at all):
+#
+#     only when none suits,  4   plans      44   S$596.62   <- before this change
+#     only when none suits, 40   plans      43   S$582.17   <- here
+#     always,                6   REFUSED    43   S$582.17
+#     always,               10   plans      43   S$582.17
+#     always,               14   plans      44   S$585.26
+#     always,               40   REFUSED    48   S$589.27   <- the review's own setting and figures
+#
+# The review's measurement reproduces exactly, and it buys the variety it reported. It also costs `mixed-diets`
+# its plan, which that measurement did not cover, and the refusal is not monotonic in the number, so a value
+# chosen to keep that one case passing would be fitting the search path rather than fixing anything. A week
+# that repeats a lunch is a worse week; a household that can no longer be planned is a broken one. So the
+# top-up stays conditional and only its size grows. The repeated lunch belongs to the objective's weighting
+# (ADR-0075) or to the beam's expansion budget, not to this number.
 PACKET_COVERAGE_CANDIDATES = 40
 
 
@@ -360,10 +375,10 @@ def _packet_covering(ranked: list, best: list, members, by_id: dict, limit: int)
     """Recommendations added to one kind of dish so every member a meal has to cover has a real choice of it
     (ADR-0071 section 1).
 
-    Each group of members who are alike (`covering_groups`) ends up with at least as many dishes of this kind as
-    the ranking keeps for the table, and never fewer than `PACKET_COVERAGE_CANDIDATES`, counting the ones
-    already kept. One dish is not a choice: with only that, a meal is coverable but the week has nothing to
-    vary with, and the member with the narrowest diet eats the same core again and again.
+    A group the ranking keeps nothing of this kind for gets `PACKET_COVERAGE_CANDIDATES` of them, or as many as
+    the ranking keeps for the table where that is more: without them no meal of this kind can cover that group,
+    and with one of them the week has nothing to vary with. Where the ranking already keeps one, the packet is
+    left as ranked; the measurements beside the constant say what topping it up anyway costs.
 
     Empty without members and for a household whose members are all alike, so a packet that is not a
     shared-dish household's is exactly the packet it was before.
@@ -379,11 +394,12 @@ def _packet_covering(ranked: list, best: list, members, by_id: dict, limit: int)
             recipe = by_id.get(recommendation.recipe.id)
             return recipe is not None and all(catalog_can_eat(member, recipe) for member in group)
 
-        have = sum(1 for r in best if suits(r))
-        if have >= want:
+        if any(suits(r) for r in best):
+            # The ranking already keeps one of this kind for the group, so the packet is not the reason the week
+            # has nothing to vary with. Topping it up anyway was tried and cost a plan: see the note above.
             continue
         more = [r for r in ranked if suits(r) and r not in best and r not in added]
-        added += more[: want - have]
+        added += more[:want]
     return added
 
 

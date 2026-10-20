@@ -683,11 +683,10 @@ def test_a_members_exclusions_may_hold_every_name_the_hierarchy_expands_to():
 # --- The fixes nothing else guards (second-round review item 7) ------------------------------------------------
 
 
-def test_each_member_keeps_a_real_choice_of_every_kind_of_dish():
-    """One dish a member can eat makes a meal coverable, but a week of them repeats it. The packet holds at
-    least as many dishes of each kind for every group of alike members as the ranking keeps for the table, so
-    the narrow diet has something to vary with - the variety the first version lost was this number, not the
-    shared-dish model."""
+def test_a_group_the_ranking_left_nothing_for_gets_a_real_choice_not_a_handful():
+    """Where the ranked picks hold no dish of this kind that suits a group, the packet has to supply them, and
+    four was not a week's worth. Where the ranking does keep one, the packet is left alone: topping it up there
+    was measured and cost `mixed-diets` its plan (the note beside `PACKET_COVERAGE_CANDIDATES`)."""
     ranked = [
         SimpleNamespace(recipe=SimpleNamespace(id=index, title=f"dish-{index}", slug=f"dish-{index}"))
         for index in range(150)
@@ -706,12 +705,16 @@ def test_each_member_keeps_a_real_choice_of_every_kind_of_dish():
         name="Ann", allergens=frozenset(), excluded_ingredients=frozenset(), dietary_requirements=("vegetarian",)
     )
     ben = MemberLimits(name="Ben", allergens=frozenset(), excluded_ingredients=frozenset(), dietary_requirements=())
-    best = [ranked[0], ranked[1], ranked[2]]  # dish-0 is the one vegetarian dish kept by rank
-    added = _packet_covering(ranked, best, [ann, ben], by_recipe, 14)
-    vegetarian = [item for item in [*best, *added] if by_recipe[item.recipe.id].dietary_tags]
-    assert len(vegetarian) >= PACKET_COVERAGE_CANDIDATES
+    # The ranking kept nothing for Ann: the packet owes her a choice, not one dish.
+    nothing_for_ann = [ranked[1], ranked[2], ranked[4]]  # ids 1, 2, 4 - none divisible by three
+    added = _packet_covering(ranked, nothing_for_ann, [ann, ben], by_recipe, 14)
+    assert len([item for item in added if by_recipe[item.recipe.id].dietary_tags]) >= PACKET_COVERAGE_CANDIDATES
+    # It keeps the ranking's own order, so the dishes it adds are the best that suit her, not the cheapest.
+    assert [item.recipe.id for item in added][:3] == [0, 3, 6]
+    # The ranking already keeps one for her: left as ranked, deliberately.
+    assert _packet_covering(ranked, [ranked[0], ranked[1]], [ann, ben], by_recipe, 14) == []
     # Without members the packet is exactly what it was.
-    assert _packet_covering(ranked, best, [], by_recipe, 14) == []
+    assert _packet_covering(ranked, nothing_for_ann, [], by_recipe, 14) == []
 
 
 def test_the_week_floor_asks_for_coverage_only_at_the_meals_a_member_is_home_for():
