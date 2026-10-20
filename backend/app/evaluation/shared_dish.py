@@ -49,10 +49,15 @@ from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.schemas.meal_plan import MEAL_ORDER, WeeklyMealPlanRequest, default_plan_shape
 
 START = "2027-01-03"  # a Sunday
-DAYS = 3  # three days is nine meals a household, which exercises every rule within a bounded run time
+# Three days is nine meals, enough to exercise every rule at a bounded run time; the scenarios that need a
+# whole week (a weekend guest) or a second shopping trip (ADR-0072: a plan past day 7) say so for themselves.
+DAYS = 3
 WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday"]
 WEEKEND = ["saturday", "sunday"]
 IMPLICATIONS_FILE = "data/recipes/dietary-tag-implications.json"
+ALLERGEN_VOCABULARY_FILE = "data/ingredients/allergen-vocabulary.json"
+# Meal-role tags a planned meal can hold (ADR-0070 section 3); anything else never reaches a lunch or dinner.
+PLANNED_ROLES = frozenset({"protein_main", "one_bowl", "vegetable", "salad", "soup", "staple", "breakfast"})
 
 
 def _rule(text: str, **fields) -> dict:
@@ -79,8 +84,8 @@ def member(name: str, age_band: str = "adult", sex: str | None = None, **limits)
 CASES = [
     {
         "case": "four-one-vegetarian",
-        "about": "Two adults, a teen and a child; Ann is vegetarian.",
-        "request": {"household_size": 4},
+        "about": "Two adults, a teen and a child; Ann is vegetarian. A whole week, the product's own default.",
+        "request": {"household_size": 4, "day_count": 7},
         "household": {
             "members": [
                 member("Ann", "adult", "female", dietary_preferences=["vegetarian"]),
@@ -92,8 +97,11 @@ CASES = [
     },
     {
         "case": "two-one-vegetarian",
-        "about": "Two adults, one of them vegetarian: the smallest household the model has to serve.",
-        "request": {"household_size": 2},
+        "about": (
+            "Two adults, one of them vegetarian: the smallest household the model has to serve. Ten days, so "
+            "the plan shops twice (ADR-0072) and the second trip's meals are bought on their own."
+        ),
+        "request": {"household_size": 2, "day_count": 10},
         "household": {
             "members": [
                 member("Lin", "adult", "female", dietary_preferences=["vegetarian"]),
@@ -115,8 +123,11 @@ CASES = [
     },
     {
         "case": "weekday-lunch-away",
-        "about": "Four, one vegetarian; the child eats lunch at school on weekdays, so those lunches are for three.",
-        "request": {"household_size": 4},
+        "about": (
+            "Four, one vegetarian; the child eats lunch at school on weekdays, so those lunches are for three. "
+            "A whole week, so five of its lunches are the smaller ones."
+        ),
+        "request": {"household_size": 4, "day_count": 7},
         "household": {
             "members": [
                 member("Ann", "adult", "female", dietary_preferences=["vegetarian"]),
@@ -137,8 +148,11 @@ CASES = [
     },
     {
         "case": "weekend-guest",
-        "about": "Four, one vegetarian; a grandparent who is vegetarian too joins weekend dinners.",
-        "request": {"household_size": 4},
+        "about": (
+            "Four, one vegetarian; a grandparent who is vegetarian too joins weekend dinners. A whole week, so "
+            "both weekend days are planned and the weekday dinners beside them are not."
+        ),
+        "request": {"household_size": 4, "day_count": 7},
         "household": {
             "members": [
                 member("Ann", "adult", "female", dietary_preferences=["vegetarian"]),
@@ -262,7 +276,7 @@ def _request(case: dict, arrangement: str) -> WeeklyMealPlanRequest:
         {
             "start_date": START,
             "day_count": DAYS,
-            "pricing_mode": "fixture",
+            "pricing_mode": "fixture",  # `case["request"]` below may set its own day_count
             "max_cooking_time_minutes": 240,
             "plan_shape": default_plan_shape().model_dump(mode="json"),
             **case["request"],
@@ -297,6 +311,17 @@ def _implications() -> dict[str, list[str]]:
     return _TABLE
 
 
+_CHECKED: set[str] = set()
+
+
+def _checked_allergen_names() -> set[str]:
+    """The allergens every recipe was checked for, read from the vocabulary file."""
+    if not _CHECKED:
+        payload = json.loads((repository_root() / ALLERGEN_VOCABULARY_FILE).read_text(encoding="utf-8"))
+        _CHECKED.update(payload["checked"])
+    return _CHECKED
+
+
 def _recipe_facts(recipe: Recipe) -> dict:
     """What the checks need of one catalog recipe, read from the row rather than from a planner helper."""
     lines = recipe.recipe_ingredients
@@ -315,7 +340,13 @@ def _can_eat(limits: dict, facts: dict) -> bool:
     Exclusions are matched as the household states them. A member who says "no pork" and a recipe whose line is
     bacon is not caught here, where the planner expands the hierarchy; the scenarios name ingredients directly,
     so the check stays independent without repeating that expansion.
+
+    An allergen the recipes were never checked for excludes every dish (ADR-0024 section 3), read here from the
+    vocabulary file rather than through the planner, so a scenario naming one would fail this report rather
+    than pass it on a check that silently matched nothing.
     """
+    if set(limits.get("allergens", ())) - _checked_allergen_names():
+        return False
     if facts["allergens"] & set(limits.get("allergens", ())):
         return False
     if facts["ingredients"] & set(limits.get("excluded_ingredients", ())):
@@ -336,9 +367,22 @@ def _present(household: dict, day: date, meal: str) -> list[dict]:
     return [m for m in household["members"] if home[m["name"]]]
 
 
-def pool_size(case: dict, arrangement: str, facts: dict[str, dict]) -> int:
-    """How many catalog recipes this household may choose from: those no household-wide limit removes and, in
-    the shared arrangement, that at least one usually-home member can eat."""
+def pool_sizes(case: dict, arrangement: str, facts: dict[str, dict]) -> dict:
+    """How wide the choice is, counted two ways, over the recipes a meal could ever hold.
+
+    The count is over catalog recipes carrying a meal-role tag the structured meals can fill, since an
+    untagged recipe is never planned into one; it does not apply the planner's own time, equipment or shelf-life
+    filters, nor its per-role candidate caps, so it is a measure of what the limits allow, not of what the
+    search looks at.
+
+    - `servable` is what may reach the table: no household-wide limit removes it and, in the shared
+      arrangement, at least one usually-home member can eat it. With a member who has no limits of their own
+      this is every tagged recipe, and that is the point rather than a gap: the shared-dish model stops one
+      member's diet from deciding what the others may be served.
+    - `by_member` is each member's own choice, which is the number that says whether a member is well served.
+      A member's own figure does not grow when the model changes - their diet is their diet - so the two
+      together show where the gain actually lands.
+    """
     request = _request(case, arrangement)
     household_limits = {
         "allergens": list(request.allergens),
@@ -346,14 +390,17 @@ def pool_size(case: dict, arrangement: str, facts: dict[str, dict]) -> int:
         "dietary_preferences": list(request.dietary_preferences),
     }
     members = [m for m in case["household"]["members"] if m.get("default_present", True)]
-    count = 0
-    for recipe in facts.values():
-        if not _can_eat(household_limits, recipe):
-            continue
-        if arrangement == "shared" and not any(_can_eat(m, recipe) for m in members):
-            continue
-        count += 1
-    return count
+    plannable = [r for r in facts.values() if r["meal_role"] in PLANNED_ROLES and _can_eat(household_limits, r)]
+    # In the merged arrangement the household-wide limits already hold every member's, so each member's own
+    # choice is whatever the union left; in the shared arrangement it is that member's own limits.
+    by_member = {
+        member["name"]: sum(_can_eat(member if arrangement == "shared" else {}, recipe) for recipe in plannable)
+        for member in members
+    }
+    servable = sum(
+        1 for recipe in plannable if arrangement != "shared" or any(_can_eat(member, recipe) for member in members)
+    )
+    return {"servable": servable, "by_member": dict(sorted(by_member.items()))}
 
 
 def check_week(week: dict, case: dict, arrangement: str, facts: dict[str, dict]) -> dict:
@@ -438,7 +485,12 @@ def check_week(week: dict, case: dict, arrangement: str, facts: dict[str, dict])
         "failures": dict(sorted((k, v) for k, v in failures.items() if v)),
         "uncovered": uncovered[:12],
         "metrics": {
-            "recipe_pool": pool_size(case, arrangement, facts),
+            **{f"recipe_pool_{key}": value for key, value in pool_sizes(case, arrangement, facts).items()},
+            # Portions actually cooked across the plan: who is home changes this even where whole packages
+            # round the money back to the same total.
+            "servings_cooked": round(sum(d["servings"] or 0 for d in week["days"]), 2),
+            # How many shopping trips the list is split over (ADR-0072): 2 for a plan past day 7.
+            "shopping_trips": len({line.get("shopping_trip") for line in week["grocery_estimate"]["items"]} or {None}),
             "dishes": len(week["days"]),
             "distinct_dishes_excluding_staples": len(set(titles)),
             "purchase_total_sgd": week["grocery_estimate"]["purchase_total_sgd"],
@@ -499,6 +551,7 @@ def evaluate() -> tuple[dict, dict]:
                 {
                     "case": case["case"],
                     "about": case["about"],
+                    "days": _request(case, "shared").day_count,
                     # Only the shared arrangement is held to the model's rules; merged is the baseline it replaces.
                     "passed": shared["outcome"] == "planned" and shared["passed"],
                     "runs": {run["arrangement"]: run for run in runs},
@@ -521,6 +574,14 @@ def evaluate() -> tuple[dict, dict]:
         "cases": results,
     }
     return report, seconds
+
+
+def _narrowest(run: dict) -> str:
+    """The smallest of a run's per-member recipe counts: how much choice the most restricted member has."""
+    if run["outcome"] != "planned":
+        return "refused"
+    counts = run["metrics"]["recipe_pool_by_member"].values()
+    return str(min(counts)) if counts else "-"
 
 
 def _row(run: dict, key: str) -> str:
@@ -546,27 +607,42 @@ def markdown(report: dict) -> str:
         f"**Overall result: {'PASS' if report['passed'] else 'FAIL'}** "
         f"(safety violations: {report['safety_violations']})",
         "",
-        f"Each household plans {report['day_count']} days of breakfast, lunch and dinner from {report['start_date']}"
-        " (a Sunday). Energy floor share: "
+        f"Each household plans breakfast, lunch and dinner from {report['start_date']} (a Sunday) for the days "
+        f"its row gives: {report['day_count']} unless the case needs a whole week or a second shopping trip. "
+        "Energy floor share: "
         + ", ".join(f"{meal} {share:.0%}" for meal, share in report["energy_floor_share"].items())
         + " of each member's own daily target.",
         "",
-        "| Case | Recipe pool | Dishes | Different dishes | Purchase total (SGD) | Lowest attainment | Covered |",
-        "|---|---|---|---|---|---|:---:|",
+        "| Case | Days | Servable recipes | Narrowest member's own | Dishes | Different dishes "
+        "| Portions cooked | Trips | Purchase total (SGD) | Lowest attainment | Covered |",
+        "|---|---:|---|---|---|---|---|---|---|---|:---:|",
     ]
     for case in report["cases"]:
         merged, shared = case["runs"]["merged"], case["runs"]["shared"]
         covered = "PASS" if case["passed"] else "FAIL"
         lines.append(
-            f"| `{case['case']}` | {_row(merged, 'recipe_pool')} → {_row(shared, 'recipe_pool')} "
+            f"| `{case['case']}` | {case['days']} "
+            f"| {_row(merged, 'recipe_pool_servable')} → {_row(shared, 'recipe_pool_servable')} "
+            f"| {_narrowest(merged)} → {_narrowest(shared)} "
             f"| {_row(merged, 'dishes')} → {_row(shared, 'dishes')} "
             f"| {_row(merged, 'distinct_dishes_excluding_staples')} → "
             f"{_row(shared, 'distinct_dishes_excluding_staples')} "
+            f"| {_row(merged, 'servings_cooked')} → {_row(shared, 'servings_cooked')} "
+            f"| {_row(merged, 'shopping_trips')} → {_row(shared, 'shopping_trips')} "
             f"| {_row(merged, 'purchase_total_sgd')} → {_row(shared, 'purchase_total_sgd')} "
             f"| {_row(merged, 'lowest_energy_attainment')} → {_row(shared, 'lowest_energy_attainment')} "
             f"| {covered} |"
         )
-    lines += ["", "Each cell reads `merged → shared`.", ""]
+    lines += [
+        "",
+        "Each cell reads `merged → shared`. **Servable recipes** are the tagged catalog recipes that may reach "
+        "the table; **the narrowest member's own** is the smallest of the per-member counts, which is the one "
+        "that says whether the most restricted person is well served. A household holding one member with no "
+        "limits of their own makes every tagged recipe servable, which is the model working rather than a "
+        "filter missing: it is the others who stop being narrowed by that member's diet. Neither count applies "
+        "the planner's time, equipment or shelf-life filters or its per-role caps.",
+        "",
+    ]
     for case in report["cases"]:
         shared = case["runs"]["shared"]
         lines += [f"## {case['case']}", "", case["about"], ""]
@@ -578,10 +654,12 @@ def markdown(report: dict) -> str:
             "|---|:---:|",
             *[f"| `{name}` | {'PASS' if ok else 'FAIL'} |" for name, ok in shared["checks"].items()],
             "",
-            "| Member | Energy attainment |",
-            "|---|---:|",
+            "| Member | Energy attainment | Recipes they can eat (merged → shared) |",
+            "|---|---:|---|",
             *[
-                f"| {name} | {value if value is not None else '-'} |"
+                f"| {name} | {value if value is not None else '-'} "
+                f"| {case['runs']['merged']['metrics']['recipe_pool_by_member'].get(name, '-')} → "
+                f"{shared['metrics']['recipe_pool_by_member'].get(name, '-')} |"
                 for name, value in shared["metrics"]["energy_attainment_by_member"].items()
             ],
             "",

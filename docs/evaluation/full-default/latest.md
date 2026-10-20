@@ -69,12 +69,12 @@ Two adults, a teen and a child, Ann vegetarian (her own diet, not the household'
 |---|---:|
 | Meals | 21 |
 | Dishes | 61 |
-| Distinct dishes (staples aside) | 46 |
+| Distinct dishes (staples aside) | 47 |
 | Cuisine groups per lunch or dinner | 1.71 |
 | Meals with two deep-fried dishes | 0 |
 | Energy floor pass rate | 1.0 |
-| Grocery lines by trip | {'None': 91} |
-| Purchase total (SGD) | 533.69 |
+| Grocery lines by trip | {'None': 93} |
+| Purchase total (SGD) | 573.58 |
 
 Staples: Assyrian Rice, Indian Restaurant Style Basmati Rice, Super Easy Naan Bread.
 
@@ -82,10 +82,10 @@ Moves: none.
 
 | Day | Breakfast | Lunch | Dinner |
 |---|---|---|---|
-| 1 Sun | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Greek Grilled Cheese + Sweet And Sour Cucumbers | Great Chicken + Teriyaki Tofu + Korean Bean Sprout Salad + Japanese Cucumber Salad + Quick gazpacho + Assyrian Rice (staple) |
-| 2 Mon | Sunrise Taco | Chinese Fried Rice + Seared Wheels Of Sweet Corn In Indonesian Kecap | Pizza Cheesy Chicken + Korean Barbecue Tofu + Grilled Parmesan Tomatoes + Martha's Gazpacho + Assyrian Rice (staple) |
-| 3 Tue | Feta Omelet | Greek Grilled Cheese + English Pea Salad | Primary Taco Meat + Teriyaki Tofu + Sauteed Zucchini With Oregano And Feta (Ww 1 Point) + Gazpacho (Spanish Cold Soup) + Assyrian Rice (staple) |
-| 4 Wed | Thai Omelette | Spanish Omelette + Fresh Pesto And Tomato Salad + Assyrian Rice (staple) | Teriyaki Fried Rice + Teriyaki Pork Skewers + Moroccan Carrots + Iranian Yogurt Soup |
+| 1 Sun | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Greek Grilled Cheese + Sweet And Sour Cucumbers | Great Chicken + Teriyaki Tofu + Grilled Parmesan Tomatoes + Korean Bean Sprout Salad + Quick gazpacho + Assyrian Rice (staple) |
+| 2 Mon | Sunrise Taco | Chinese Fried Rice + Seared Wheels Of Sweet Corn In Indonesian Kecap | Pizza Cheesy Chicken + Tofu Egg Foo Young + Tex Mex Salad + Martha's Gazpacho + Assyrian Rice (staple) |
+| 3 Tue | Feta Omelet | Greek Grilled Cheese + English Pea Salad | Primary Taco Meat + Korean Barbecue Tofu + Sauteed Zucchini With Oregano And Feta (Ww 1 Point) + Gazpacho (Spanish Cold Soup) + Assyrian Rice (staple) |
+| 4 Wed | Maple Yogurt | Spanish Omelette + Fresh Pesto And Tomato Salad + Assyrian Rice (staple) | Teriyaki Fried Rice + Teriyaki Pork Skewers + Moroccan Carrots + Iranian Yogurt Soup |
 | 5 Thu | The Egyptian Eye | Marinated Teriyaki Tofu + Sautéed Miso Cucumber Salad + Super Easy Naan Bread (staple) | Mexican Chicken (Low-Fat) + Egyptian Omelet (Eggah) + Broccoli Salad + Gazpacho Soup + Super Easy Naan Bread (staple) |
 | 6 Fri | Banana Couscous | Teriyaki Grilled Tofu + English Pea Salad + Assyrian Rice (staple) | Thai-Style Omelet (Khai Jiao) + Teriyaki Tofu + Tsukemono (Japanese Pickles) + Thai Ginger Soup + Assyrian Rice (staple) |
 | 7 Sat | Easy Mexican Omelet | Teriyaki Tofu + Cucumber Namasu + Assyrian Rice (staple) | Korean Beef + Korean Barbecue Tofu + Wafu Salad (Japanese Style Onion Salad) + Saute Zucchini + Tomato Dumplings + Indian Restaurant Style Basmati Rice (staple) |

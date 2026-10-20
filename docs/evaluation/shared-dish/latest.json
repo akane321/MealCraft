@@ -12,7 +12,8 @@
   "cases": [
     {
       "case": "four-one-vegetarian",
-      "about": "Two adults, a teen and a child; Ann is vegetarian.",
+      "about": "Two adults, a teen and a child; Ann is vegetarian. A whole week, the product's own default.",
+      "days": 7,
       "passed": true,
       "runs": {
         "merged": {
@@ -31,17 +32,25 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 3088,
-            "dishes": 23,
-            "distinct_dishes_excluding_staples": 20,
-            "purchase_total_sgd": 282.34,
-            "energy_attainment_by_member": {
-              "Ann": 1.585,
-              "Ben": 1.585,
-              "Kai": 1.586,
-              "Mei": 1.592
+            "recipe_pool_servable": 2042,
+            "recipe_pool_by_member": {
+              "Ann": 2042,
+              "Ben": 2042,
+              "Kai": 2042,
+              "Mei": 2042
             },
-            "lowest_energy_attainment": 1.585
+            "servings_cooked": 162.18,
+            "shopping_trips": 1,
+            "dishes": 56,
+            "distinct_dishes_excluding_staples": 49,
+            "purchase_total_sgd": 659.08,
+            "energy_attainment_by_member": {
+              "Ann": 1.559,
+              "Ben": 1.559,
+              "Kai": 1.56,
+              "Mei": 1.567
+            },
+            "lowest_energy_attainment": 1.559
           }
         },
         "shared": {
@@ -60,24 +69,33 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8967,
-            "dishes": 25,
-            "distinct_dishes_excluding_staples": 21,
-            "purchase_total_sgd": 296.23,
-            "energy_attainment_by_member": {
-              "Ann": 1.353,
-              "Ben": 1.481,
-              "Kai": 1.482,
-              "Mei": 1.488
+            "recipe_pool_servable": 7591,
+            "recipe_pool_by_member": {
+              "Ann": 2042,
+              "Ben": 7591,
+              "Kai": 7591,
+              "Mei": 7591
             },
-            "lowest_energy_attainment": 1.353
+            "servings_cooked": 161.28,
+            "shopping_trips": 1,
+            "dishes": 58,
+            "distinct_dishes_excluding_staples": 44,
+            "purchase_total_sgd": 557.44,
+            "energy_attainment_by_member": {
+              "Ann": 1.42,
+              "Ben": 1.609,
+              "Kai": 1.61,
+              "Mei": 1.617
+            },
+            "lowest_energy_attainment": 1.42
           }
         }
       }
     },
     {
       "case": "two-one-vegetarian",
-      "about": "Two adults, one of them vegetarian: the smallest household the model has to serve.",
+      "about": "Two adults, one of them vegetarian: the smallest household the model has to serve. Ten days, so the plan shops twice (ADR-0072) and the second trip's meals are bought on their own.",
+      "days": 10,
       "passed": true,
       "runs": {
         "merged": {
@@ -96,15 +114,21 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 3088,
-            "dishes": 21,
-            "distinct_dishes_excluding_staples": 17,
-            "purchase_total_sgd": 189.25,
-            "energy_attainment_by_member": {
-              "Lin": 1.438,
-              "Raj": 1.438
+            "recipe_pool_servable": 2042,
+            "recipe_pool_by_member": {
+              "Lin": 2042,
+              "Raj": 2042
             },
-            "lowest_energy_attainment": 1.438
+            "servings_cooked": 109.5,
+            "shopping_trips": 2,
+            "dishes": 73,
+            "distinct_dishes_excluding_staples": 59,
+            "purchase_total_sgd": 695.45,
+            "energy_attainment_by_member": {
+              "Lin": 1.476,
+              "Raj": 1.476
+            },
+            "lowest_energy_attainment": 1.476
           }
         },
         "shared": {
@@ -123,15 +147,21 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8967,
-            "dishes": 20,
-            "distinct_dishes_excluding_staples": 15,
-            "purchase_total_sgd": 172.01,
-            "energy_attainment_by_member": {
-              "Lin": 1.399,
-              "Raj": 1.399
+            "recipe_pool_servable": 7591,
+            "recipe_pool_by_member": {
+              "Lin": 2042,
+              "Raj": 7591
             },
-            "lowest_energy_attainment": 1.399
+            "servings_cooked": 91.5,
+            "shopping_trips": 2,
+            "dishes": 61,
+            "distinct_dishes_excluding_staples": 40,
+            "purchase_total_sgd": 508.96,
+            "energy_attainment_by_member": {
+              "Lin": 1.326,
+              "Raj": 1.326
+            },
+            "lowest_energy_attainment": 1.326
           }
         }
       }
@@ -139,6 +169,7 @@
     {
       "case": "with-a-child",
       "about": "Two adults and a child who will not eat mushroom; the child's exclusion is the child's own.",
+      "days": 3,
       "passed": true,
       "runs": {
         "merged": {
@@ -157,7 +188,14 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8491,
+            "recipe_pool_servable": 7129,
+            "recipe_pool_by_member": {
+              "Ann": 7129,
+              "Ben": 7129,
+              "Mei": 7129
+            },
+            "servings_cooked": 49.82,
+            "shopping_trips": 1,
             "dishes": 26,
             "distinct_dishes_excluding_staples": 21,
             "purchase_total_sgd": 306.08,
@@ -185,7 +223,14 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8967,
+            "recipe_pool_servable": 7591,
+            "recipe_pool_by_member": {
+              "Ann": 7591,
+              "Ben": 7591,
+              "Mei": 7129
+            },
+            "servings_cooked": 47.77,
+            "shopping_trips": 1,
             "dishes": 25,
             "distinct_dishes_excluding_staples": 21,
             "purchase_total_sgd": 322.19,
@@ -201,7 +246,8 @@
     },
     {
       "case": "weekday-lunch-away",
-      "about": "Four, one vegetarian; the child eats lunch at school on weekdays, so those lunches are for three.",
+      "about": "Four, one vegetarian; the child eats lunch at school on weekdays, so those lunches are for three. A whole week, so five of its lunches are the smaller ones.",
+      "days": 7,
       "passed": true,
       "runs": {
         "merged": {
@@ -220,17 +266,25 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 3088,
-            "dishes": 23,
-            "distinct_dishes_excluding_staples": 20,
-            "purchase_total_sgd": 279.46,
-            "energy_attainment_by_member": {
-              "Ann": 1.585,
-              "Ben": 1.585,
-              "Kai": 1.586,
-              "Mei": 1.834
+            "recipe_pool_servable": 2042,
+            "recipe_pool_by_member": {
+              "Ann": 2042,
+              "Ben": 2042,
+              "Kai": 2042,
+              "Mei": 2042
             },
-            "lowest_energy_attainment": 1.585
+            "servings_cooked": 154.52,
+            "shopping_trips": 1,
+            "dishes": 56,
+            "distinct_dishes_excluding_staples": 49,
+            "purchase_total_sgd": 651.81,
+            "energy_attainment_by_member": {
+              "Ann": 1.559,
+              "Ben": 1.559,
+              "Kai": 1.56,
+              "Mei": 1.815
+            },
+            "lowest_energy_attainment": 1.559
           }
         },
         "shared": {
@@ -249,24 +303,33 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8967,
-            "dishes": 25,
-            "distinct_dishes_excluding_staples": 21,
-            "purchase_total_sgd": 296.23,
-            "energy_attainment_by_member": {
-              "Ann": 1.353,
-              "Ben": 1.481,
-              "Kai": 1.482,
-              "Mei": 1.723
+            "recipe_pool_servable": 7591,
+            "recipe_pool_by_member": {
+              "Ann": 2042,
+              "Ben": 7591,
+              "Kai": 7591,
+              "Mei": 7591
             },
-            "lowest_energy_attainment": 1.353
+            "servings_cooked": 154.16,
+            "shopping_trips": 1,
+            "dishes": 58,
+            "distinct_dishes_excluding_staples": 44,
+            "purchase_total_sgd": 545.82,
+            "energy_attainment_by_member": {
+              "Ann": 1.42,
+              "Ben": 1.609,
+              "Kai": 1.61,
+              "Mei": 1.917
+            },
+            "lowest_energy_attainment": 1.42
           }
         }
       }
     },
     {
       "case": "weekend-guest",
-      "about": "Four, one vegetarian; a grandparent who is vegetarian too joins weekend dinners.",
+      "about": "Four, one vegetarian; a grandparent who is vegetarian too joins weekend dinners. A whole week, so both weekend days are planned and the weekday dinners beside them are not.",
+      "days": 7,
       "passed": true,
       "runs": {
         "merged": {
@@ -285,18 +348,26 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 3088,
-            "dishes": 24,
-            "distinct_dishes_excluding_staples": 21,
-            "purchase_total_sgd": 269.37,
-            "energy_attainment_by_member": {
-              "Ann": 1.522,
-              "Ben": 1.522,
-              "Grandma": 1.158,
-              "Kai": 1.523,
-              "Mei": 1.53
+            "recipe_pool_servable": 2042,
+            "recipe_pool_by_member": {
+              "Ann": 2042,
+              "Ben": 2042,
+              "Kai": 2042,
+              "Mei": 2042
             },
-            "lowest_energy_attainment": 1.158
+            "servings_cooked": 169.61,
+            "shopping_trips": 1,
+            "dishes": 58,
+            "distinct_dishes_excluding_staples": 50,
+            "purchase_total_sgd": 606.29,
+            "energy_attainment_by_member": {
+              "Ann": 1.539,
+              "Ben": 1.539,
+              "Grandma": 1.317,
+              "Kai": 1.54,
+              "Mei": 1.547
+            },
+            "lowest_energy_attainment": 1.317
           }
         },
         "shared": {
@@ -315,18 +386,26 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8967,
-            "dishes": 25,
-            "distinct_dishes_excluding_staples": 21,
-            "purchase_total_sgd": 294.66,
-            "energy_attainment_by_member": {
-              "Ann": 1.418,
-              "Ben": 1.546,
-              "Grandma": 1.182,
-              "Kai": 1.547,
-              "Mei": 1.553
+            "recipe_pool_servable": 7591,
+            "recipe_pool_by_member": {
+              "Ann": 2042,
+              "Ben": 7591,
+              "Kai": 7591,
+              "Mei": 7591
             },
-            "lowest_energy_attainment": 1.182
+            "servings_cooked": 163.47,
+            "shopping_trips": 1,
+            "dishes": 58,
+            "distinct_dishes_excluding_staples": 44,
+            "purchase_total_sgd": 546.79,
+            "energy_attainment_by_member": {
+              "Ann": 1.405,
+              "Ben": 1.58,
+              "Grandma": 1.07,
+              "Kai": 1.581,
+              "Mei": 1.588
+            },
+            "lowest_energy_attainment": 1.07
           }
         }
       }
@@ -334,6 +413,7 @@
     {
       "case": "peanut-whole-household",
       "about": "Four; Mei is allergic to peanut and the whole household avoids it, which is the default.",
+      "days": 3,
       "passed": true,
       "runs": {
         "merged": {
@@ -352,7 +432,15 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8499,
+            "recipe_pool_servable": 7165,
+            "recipe_pool_by_member": {
+              "Ann": 7165,
+              "Ben": 7165,
+              "Kai": 7165,
+              "Mei": 7165
+            },
+            "servings_cooked": 71.4,
+            "shopping_trips": 1,
             "dishes": 25,
             "distinct_dishes_excluding_staples": 21,
             "purchase_total_sgd": 320.83,
@@ -381,7 +469,15 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8499,
+            "recipe_pool_servable": 7165,
+            "recipe_pool_by_member": {
+              "Ann": 7165,
+              "Ben": 7165,
+              "Kai": 7165,
+              "Mei": 7165
+            },
+            "servings_cooked": 71.4,
+            "shopping_trips": 1,
             "dishes": 25,
             "distinct_dishes_excluding_staples": 21,
             "purchase_total_sgd": 320.83,
@@ -399,6 +495,7 @@
     {
       "case": "peanut-only-mei-avoids",
       "about": "The same household with \"only Mei avoids it\" on, so peanut is left out of Mei's dishes and the others may have it. The merged baseline is the same week as the case above: the union cannot tell the two apart.",
+      "days": 3,
       "passed": true,
       "runs": {
         "merged": {
@@ -417,7 +514,15 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8499,
+            "recipe_pool_servable": 7165,
+            "recipe_pool_by_member": {
+              "Ann": 7165,
+              "Ben": 7165,
+              "Kai": 7165,
+              "Mei": 7165
+            },
+            "servings_cooked": 71.4,
+            "shopping_trips": 1,
             "dishes": 25,
             "distinct_dishes_excluding_staples": 21,
             "purchase_total_sgd": 320.83,
@@ -446,7 +551,15 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8967,
+            "recipe_pool_servable": 7591,
+            "recipe_pool_by_member": {
+              "Ann": 7591,
+              "Ben": 7591,
+              "Kai": 7591,
+              "Mei": 7165
+            },
+            "servings_cooked": 71.4,
+            "shopping_trips": 1,
             "dishes": 25,
             "distinct_dishes_excluding_staples": 21,
             "purchase_total_sgd": 365.09,
@@ -464,6 +577,7 @@
     {
       "case": "mixed-diets",
       "about": "Four with two different diets: Ann vegetarian, Kai dairy-free.",
+      "days": 3,
       "passed": true,
       "runs": {
         "merged": {
@@ -482,7 +596,15 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 1406,
+            "recipe_pool_servable": 998,
+            "recipe_pool_by_member": {
+              "Ann": 998,
+              "Ben": 998,
+              "Kai": 998,
+              "Mei": 998
+            },
+            "servings_cooked": 64.26,
+            "shopping_trips": 1,
             "dishes": 22,
             "distinct_dishes_excluding_staples": 21,
             "purchase_total_sgd": 197.64,
@@ -511,17 +633,25 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8967,
-            "dishes": 26,
-            "distinct_dishes_excluding_staples": 19,
-            "purchase_total_sgd": 249.23,
-            "energy_attainment_by_member": {
-              "Ann": 1.428,
-              "Ben": 1.577,
-              "Kai": 1.106,
-              "Mei": 1.585
+            "recipe_pool_servable": 7591,
+            "recipe_pool_by_member": {
+              "Ann": 2042,
+              "Ben": 7591,
+              "Kai": 4746,
+              "Mei": 7591
             },
-            "lowest_energy_attainment": 1.106
+            "servings_cooked": 71.11,
+            "shopping_trips": 1,
+            "dishes": 26,
+            "distinct_dishes_excluding_staples": 20,
+            "purchase_total_sgd": 225.28,
+            "energy_attainment_by_member": {
+              "Ann": 1.236,
+              "Ben": 1.385,
+              "Kai": 1.231,
+              "Mei": 1.392
+            },
+            "lowest_energy_attainment": 1.231
           }
         }
       }
@@ -529,6 +659,7 @@
     {
       "case": "six-one-vegetarian",
       "about": "Six adults, one of them vegetarian: dinner is the 5-6 row of the ADR-0070 table.",
+      "days": 3,
       "passed": true,
       "runs": {
         "merged": {
@@ -547,7 +678,17 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 3088,
+            "recipe_pool_servable": 2042,
+            "recipe_pool_by_member": {
+              "Adult 1": 2042,
+              "Adult 2": 2042,
+              "Adult 3": 2042,
+              "Adult 4": 2042,
+              "Adult 5": 2042,
+              "Adult 6": 2042
+            },
+            "servings_cooked": 101.66,
+            "shopping_trips": 1,
             "dishes": 27,
             "distinct_dishes_excluding_staples": 23,
             "purchase_total_sgd": 340.05,
@@ -578,19 +719,29 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8967,
+            "recipe_pool_servable": 7591,
+            "recipe_pool_by_member": {
+              "Adult 1": 2042,
+              "Adult 2": 7591,
+              "Adult 3": 7591,
+              "Adult 4": 7591,
+              "Adult 5": 7591,
+              "Adult 6": 7591
+            },
+            "servings_cooked": 104.66,
+            "shopping_trips": 1,
             "dishes": 28,
             "distinct_dishes_excluding_staples": 24,
-            "purchase_total_sgd": 366.64,
+            "purchase_total_sgd": 361.35,
             "energy_attainment_by_member": {
-              "Adult 1": 1.382,
-              "Adult 2": 1.533,
-              "Adult 3": 1.533,
-              "Adult 4": 1.533,
-              "Adult 5": 1.533,
-              "Adult 6": 1.533
+              "Adult 1": 1.399,
+              "Adult 2": 1.55,
+              "Adult 3": 1.55,
+              "Adult 4": 1.55,
+              "Adult 5": 1.55,
+              "Adult 6": 1.55
             },
-            "lowest_energy_attainment": 1.382
+            "lowest_energy_attainment": 1.399
           }
         }
       }
@@ -598,6 +749,7 @@
     {
       "case": "tight-budget",
       "about": "Four, one vegetarian, on a tight weekly budget for three days (S$120, chosen once on developer runs).",
+      "days": 3,
       "passed": true,
       "runs": {
         "merged": {
@@ -616,7 +768,15 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 3088,
+            "recipe_pool_servable": 2042,
+            "recipe_pool_by_member": {
+              "Ann": 2042,
+              "Ben": 2042,
+              "Kai": 2042,
+              "Mei": 2042
+            },
+            "servings_cooked": 74.46,
+            "shopping_trips": 1,
             "dishes": 26,
             "distinct_dishes_excluding_staples": 21,
             "purchase_total_sgd": 116.38,
@@ -645,17 +805,25 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool": 8967,
+            "recipe_pool_servable": 7591,
+            "recipe_pool_by_member": {
+              "Ann": 2042,
+              "Ben": 7591,
+              "Kai": 7591,
+              "Mei": 7591
+            },
+            "servings_cooked": 75.18,
+            "shopping_trips": 1,
             "dishes": 27,
             "distinct_dishes_excluding_staples": 20,
-            "purchase_total_sgd": 108.49,
+            "purchase_total_sgd": 110.2,
             "energy_attainment_by_member": {
-              "Ann": 1.239,
-              "Ben": 1.533,
-              "Kai": 1.534,
-              "Mei": 1.54
+              "Ann": 1.222,
+              "Ben": 1.516,
+              "Kai": 1.517,
+              "Mei": 1.523
             },
-            "lowest_energy_attainment": 1.239
+            "lowest_energy_attainment": 1.222
           }
         }
       }

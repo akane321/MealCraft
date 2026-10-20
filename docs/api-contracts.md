@@ -332,6 +332,15 @@ holds only what the whole household avoids (every member's allergens, less those
 their own member marked `self_only_allergens`). A request with no `household`
 block, or whose members carry no limits of their own, plans as before.
 
+A profile is refused (422) when two members share a name, since a presence
+rule, the coverage rules and the plan's `not_for` all identify a member by it,
+and when any member's allergen is outside the checked vocabulary
+(`data/ingredients/allergen-vocabulary.json`), which no recipe was checked for
+and so cannot be planned around (decision ADR-0024 section 3). Should such an
+allergen reach the planner by another route, that member is treated as able to
+eat nothing, and the plan is refused for leaving them uncovered rather than
+served a dish that may hold it.
+
 **Kitchen equipment (layer 08 PR-3).** The body and every version read add
 `missing_equipment`: up to five of `oven`, `air_fryer`, `steamer`, `microwave`,
 `blender`, sorted and unique, empty by default (stored as NULL). A recipe whose

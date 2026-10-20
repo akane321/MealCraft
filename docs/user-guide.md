@@ -45,6 +45,11 @@ Untick **Usually eats at home** for someone who joins only sometimes, such as
 grandparents on weekends. Allergies, diets and foods a member will not eat are
 kept per member.
 
+MealCraft plans around the allergens it can check recipes for, so it only offers
+those and turns down any other name: one it cannot check it cannot plan around.
+Give each person their own name as well, since a rule, a warning and the plan
+all say who they mean by it.
+
 An allergen is avoided in every dish by the whole household, because one
 kitchen can cross-contact. If an allergy is only one person's and cooking it for
 the others is safe, tick **Only {name} avoids {allergen}** under that member's
@@ -121,6 +126,9 @@ Important semantics:
   dish they can eat whenever the meal has one) that reaches their own share of
   their daily energy; each dish is cooked and bought for the members who can eat
   it;
+- at every other meal, breakfast included, and at a meal you have cut down to a
+  single dish, the rule still holds in its simplest form: nobody at that table
+  is left with nothing they can eat;
 - allergens are avoided by the whole household, for every meal, even one that
   member is away for, unless the member marked one as "only I avoid it"; diets
   and foods a member will not eat apply to that member's dishes only;

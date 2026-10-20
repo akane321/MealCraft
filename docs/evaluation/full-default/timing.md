@@ -6,11 +6,11 @@ Machine: x86_64 (Linux). The code commit is in `timing.json` beside this file.
 
 | Case | Report run (s) | Warm median (s) | Warm max (s) | Against ~4 s |
 |---|---:|---:|---:|---|
-| one-adult | 11.82 | 6.39 | 6.46 | over target |
-| four-with-vegetarian | 18.87 | 18.54 | 18.8 | over target |
-| six-tight-budget | 120.98 | 90.68 | 92.29 | over target |
-| two-no-oven-ten-days | 7.84 | 8.69 | 8.87 | over target |
-| seven-with-young-children | 12.83 | 9.98 | 11.4 | over target |
+| one-adult | 8.67 | 5.32 | 6.12 | over target |
+| four-with-vegetarian | 16.17 | 16.11 | 16.82 | over target |
+| six-tight-budget | 178.85 | 84.0 | 87.92 | over target |
+| two-no-oven-ten-days | 6.97 | 7.52 | 7.98 | over target |
+| seven-with-young-children | 10.8 | 10.2 | 10.96 | over target |
 
 Over target: one-adult, four-with-vegetarian, six-tight-budget, two-no-oven-ten-days, seven-with-young-children.
 

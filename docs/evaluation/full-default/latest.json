@@ -497,7 +497,7 @@
       "metrics": {
         "meals": 21,
         "dishes": 61,
-        "distinct_dishes_excluding_staples": 46,
+        "distinct_dishes_excluding_staples": 47,
         "staples": [
           "Assyrian Rice",
           "Indian Restaurant Style Basmati Rice",
@@ -508,9 +508,9 @@
         "energy_floor_pass_rate": 1.0,
         "moves": [],
         "grocery_lines_by_trip": {
-          "None": 91
+          "None": 93
         },
-        "purchase_total_sgd": 533.69
+        "purchase_total_sgd": 573.58
       },
       "meals": [
         {
@@ -558,7 +558,7 @@
           "weekday": "Sun",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Korean Bean Sprout Salad",
+          "recipe": "Grilled Parmesan Tomatoes",
           "servings": 1.956
         },
         {
@@ -566,7 +566,7 @@
           "weekday": "Sun",
           "meal": "dinner",
           "role": "vegetable-2",
-          "recipe": "Japanese Cucumber Salad",
+          "recipe": "Korean Bean Sprout Salad",
           "servings": 1.956
         },
         {
@@ -622,7 +622,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "main-2",
-          "recipe": "Korean Barbecue Tofu",
+          "recipe": "Tofu Egg Foo Young",
           "servings": 2.04
         },
         {
@@ -630,7 +630,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Grilled Parmesan Tomatoes",
+          "recipe": "Tex Mex Salad",
           "servings": 2.04
         },
         {
@@ -686,7 +686,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "main-2",
-          "recipe": "Teriyaki Tofu",
+          "recipe": "Korean Barbecue Tofu",
           "servings": 2.04
         },
         {
@@ -718,8 +718,8 @@
           "weekday": "Wed",
           "meal": "breakfast",
           "role": "main",
-          "recipe": "Thai Omelette",
-          "servings": 3.2
+          "recipe": "Maple Yogurt",
+          "servings": 4.08
         },
         {
           "day": 4,
