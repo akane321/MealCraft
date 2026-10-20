@@ -1,3 +1,4 @@
+import hashlib
 import importlib.util
 import json
 
@@ -79,6 +80,9 @@ def test_owner_application_check_keeps_rejected_outputs_and_requires_actual_corr
     )
     result = module.verify_owner_review()
     assert result["all_current_expectations_applied"] and result["owner_reviewed_cases"] == 2
+    assert (
+        result["review_packet_sha256"] == hashlib.sha256(review_path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    )
     assert result["cases"][0]["corrected"] == {"meal_role": "staple"}
     assert json.loads(review_path.read_text(encoding="utf-8")) == packet
     original_tag_bytes = tags.read_bytes()

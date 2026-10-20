@@ -1,98 +1,158 @@
 {
   "scope": "owner-assisted changed-case regression review; not independent population accuracy or model release",
-  "review_packet_sha256": "c226a90f2be82dc81dea13ad93b813a426d25a71a2db7884eaf4623db58ec751",
+  "hash_encoding": "UTF-8 with LF line endings (repository canonical text)",
+  "review_packet_sha256": "5bb6d7566ac666f2b88f5f071b4e6e5fa9c10d1cf012417140de7894db52cc8c",
   "reviewed_tag_snapshot_sha256": "5f2cd930482555445acd753acb2618b9549d645b269d40f76d934032beae19a9",
-  "applied_tag_file_sha256": "046629cf82a096d00e3d83acb53b708bafab98f9db479251fba6713dee66d1fc",
+  "applied_tag_file_sha256": "4c09faf8a604dc4453f5dd16e984c11a5c19a976992b887bd31dce2ace92956a",
   "owner_reviewed_cases": 25,
   "unreviewed_model_gate": 422,
-  "all_reviewed_fields_applied": true,
+  "all_current_expectations_applied": true,
+  "all_original_owner_values_unchanged": false,
+  "policy_revision_basis": "Owner follow-up 2026-10-20: mass-unit pasta uses dry-to-cooked yield; old review remains historical, not new human verification.",
   "cases": [
     {
       "key": "RCP2_CB386B8363E1",
       "title": "Marilyn'S English Pasties",
+      "original_owner_values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      },
       "verified_values": {
         "meal_role": "one_bowl",
         "contains_staple": true
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_AA52264E15D0",
       "title": "Chinese Pork Chops",
+      "original_owner_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
       "verified_values": {
         "meal_role": null,
         "contains_staple": null,
         "protein_sources": null
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_631314414D3C",
       "title": "Kid Friendly Jamaican Chicken",
+      "original_owner_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
       "verified_values": {
         "meal_role": null,
         "contains_staple": null,
         "protein_sources": null
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_DA28B246E699",
       "title": "Barbecue Beef",
+      "original_owner_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
       "verified_values": {
         "meal_role": null,
         "contains_staple": null,
         "protein_sources": null
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_1D97F9CF9C30",
       "title": "Chicken Stir-Fry",
-      "verified_values": {
+      "original_owner_values": {
         "meal_role": "protein_main",
         "contains_staple": false
       },
-      "corrected": {}
+      "verified_values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      },
+      "corrected": {},
+      "later_measurement_policy": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
     },
     {
       "key": "RCP2_3B3606EBC933",
       "title": "Baked Macaroni And Cheese",
+      "original_owner_values": {
+        "meal_role": "one_bowl"
+      },
       "verified_values": {
         "meal_role": "one_bowl"
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_80E876686DA8",
       "title": "Kalbi Beef Marinate (Flank Steak)",
+      "original_owner_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
       "verified_values": {
         "meal_role": null,
         "contains_staple": null,
         "protein_sources": null
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_961449012D5D",
       "title": "Acorn Squash Stuffed With Italian Sausage & Penne",
-      "verified_values": {
+      "original_owner_values": {
         "meal_role": "protein_main",
         "contains_staple": false
       },
-      "corrected": {}
+      "verified_values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      },
+      "corrected": {},
+      "later_measurement_policy": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
     },
     {
       "key": "RCP2_557753E022A8",
       "title": "Mon-Doo(Korean Egg Rolls)",
+      "original_owner_values": {
+        "protein_sources": null
+      },
       "verified_values": {
         "protein_sources": null
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_4F1F492DB38E",
       "title": "Spanish Rice",
+      "original_owner_values": {
+        "meal_role": "staple",
+        "contains_staple": true
+      },
       "verified_values": {
         "meal_role": "staple",
         "contains_staple": true
@@ -100,47 +160,73 @@
       "corrected": {
         "meal_role": "staple",
         "contains_staple": true
-      }
+      },
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_D666EF442FE4",
       "title": "Kim Bap (Korean Rice Rolls)",
+      "original_owner_values": {
+        "meal_role": "one_bowl"
+      },
       "verified_values": {
         "meal_role": "one_bowl"
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_0447589B2FD3",
       "title": "Chicken Curry",
+      "original_owner_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
       "verified_values": {
         "meal_role": null,
         "contains_staple": null,
         "protein_sources": null
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_66CDC4D02656",
       "title": "Napa Cabbage with Dried Shrimp",
+      "original_owner_values": {
+        "protein_sources": []
+      },
       "verified_values": {
         "protein_sources": []
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_28626CFF47A0",
       "title": "Beef Carnitas Tacos",
+      "original_owner_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
       "verified_values": {
         "meal_role": null,
         "contains_staple": null,
         "protein_sources": null
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_010D47D8B41A",
       "title": "Mexican Crab Salad",
+      "original_owner_values": {
+        "protein_sources": [
+          "fish"
+        ]
+      },
       "verified_values": {
         "protein_sources": [
           "fish"
@@ -150,30 +236,46 @@
         "protein_sources": [
           "fish"
         ]
-      }
+      },
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_FAC00DA2B400",
       "title": "Stuffed Green Peppers",
+      "original_owner_values": {
+        "meal_role": "protein_main",
+        "contains_staple": false
+      },
       "verified_values": {
         "meal_role": "protein_main",
         "contains_staple": false
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_975C4431AA56",
       "title": "Chicken Teriyaki",
+      "original_owner_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
       "verified_values": {
         "meal_role": null,
         "contains_staple": null,
         "protein_sources": null
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_586E24DE73A6",
       "title": "Pumpkin Fried Rice",
+      "original_owner_values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      },
       "verified_values": {
         "meal_role": "one_bowl",
         "contains_staple": true
@@ -181,72 +283,108 @@
       "corrected": {
         "meal_role": "one_bowl",
         "contains_staple": true
-      }
+      },
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_7B87DB0F6AFE",
       "title": "Parmesan Chicken",
+      "original_owner_values": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null
+      },
       "verified_values": {
         "meal_role": null,
         "contains_staple": null,
         "protein_sources": null
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_C4333C1C5043",
       "title": "Lo Mein",
+      "original_owner_values": {
+        "protein_sources": null
+      },
       "verified_values": {
         "protein_sources": null
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_4FBC8094CB72",
       "title": "Taco Meat Filling",
+      "original_owner_values": {
+        "meal_role": "sauce",
+        "protein_sources": [],
+        "flavor_tags": []
+      },
       "verified_values": {
         "meal_role": "sauce",
         "protein_sources": [],
         "flavor_tags": []
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_9E72C3378CDE",
       "title": "Chicken Adobo",
+      "original_owner_values": {
+        "protein_sources": null
+      },
       "verified_values": {
         "protein_sources": null
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_616F0B3CE6CC",
       "title": "Ravioli Bolognese",
+      "original_owner_values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      },
       "verified_values": {
         "meal_role": "one_bowl",
         "contains_staple": true
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_0DA06DF48EDB",
       "title": "Korean Fusion Butternut Squash Soup",
+      "original_owner_values": {
+        "protein_sources": null
+      },
       "verified_values": {
         "protein_sources": null
       },
       "corrected": {
         "protein_sources": null
-      }
+      },
+      "later_measurement_policy": {}
     },
     {
       "key": "RCP2_0FFB8C985C34",
       "title": "Taco Filling (Ground Beef)",
+      "original_owner_values": {
+        "meal_role": "sauce",
+        "protein_sources": [],
+        "flavor_tags": []
+      },
       "verified_values": {
         "meal_role": "sauce",
         "protein_sources": [],
         "flavor_tags": []
       },
-      "corrected": {}
+      "corrected": {},
+      "later_measurement_policy": {}
     }
   ]
 }

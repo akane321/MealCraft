@@ -141,12 +141,12 @@ def compare_default(base: str) -> None:
 
 def verify_owner_review() -> dict:
     """Check the applied values without rewriting the owner's original rule-output snapshot."""
-    review_bytes = OUT.with_suffix(".json").read_bytes()
+    review_bytes = OUT.with_suffix(".json").read_bytes().replace(b"\r\n", b"\n")
     packet = json.loads(review_bytes)
     assert packet["owner_confirmed"] is True, "Owner review is not complete."
     records = packet["records"]
     assert len(records) == len({row["key"] for row in records}) == packet["sample_count"]
-    current_bytes = (ROOT / RECIPE_TAGS).read_bytes()
+    current_bytes = (ROOT / RECIPE_TAGS).read_bytes().replace(b"\r\n", b"\n")
     current = json.loads(current_bytes)["recipes"]
     checked = []
     for row in records:
@@ -174,6 +174,7 @@ def verify_owner_review() -> dict:
         )
     payload = {
         "scope": "owner-assisted changed-case regression review; not independent population accuracy or model release",
+        "hash_encoding": "UTF-8 with LF line endings (repository canonical text)",
         "review_packet_sha256": hashlib.sha256(review_bytes).hexdigest(),
         "reviewed_tag_snapshot_sha256": packet["tag_file_sha256"],
         "applied_tag_file_sha256": hashlib.sha256(current_bytes).hexdigest(),
@@ -205,7 +206,9 @@ def verify_owner_review() -> dict:
         "|---|---|---|---|",
     ]
     for row in checked:
-        revision = json.dumps(row["later_measurement_policy"], ensure_ascii=False) if row["later_measurement_policy"] else "—"
+        revision = (
+            json.dumps(row["later_measurement_policy"], ensure_ascii=False) if row["later_measurement_policy"] else "—"
+        )
         lines.append(
             f"| {row['title']} | {json.dumps(row['verified_values'], ensure_ascii=False)} | "
             f"{', '.join(row['corrected']) or '—'} | {revision} |"
