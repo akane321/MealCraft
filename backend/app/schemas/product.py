@@ -87,6 +87,10 @@ class GroceryLineEstimate(BaseModel):
     excess_quantity: float | None
     note: str | None
     evidence: PriceEvidence | None = None
+    # The shopping trip of a plan longer than a week (ADR-0072: before day 1, before day 8); None is its only trip.
+    shopping_trip: int | None = Field(default=None, ge=1, le=2)
+    # A perishable ingredient (layer 08): used within 3 days of its trip; None is not marked.
+    perishable: bool | None = None
 
 
 class GroceryEstimateResponse(BaseModel):

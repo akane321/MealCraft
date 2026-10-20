@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, packageLabel, perDinner, previewChoices, priceSourceLabel, productSourceLabel, sameDishChange, tonightEntry } from "../app/lib/home-surface";
+import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, groceryTrips, isStapleDish, packageLabel, perDinner, previewChoices, priceSourceLabel, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
 import type { MealPlanEntrySnapshot, MealPlanShapeChange, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
@@ -125,6 +125,20 @@ describe("grocery helpers", () => {
     expect(groups[1]!.lines.map(item => item.ingredient_display_name)).toEqual(["Broccoli", "Spinach"]);
   });
 
+  it("splits a plan longer than a week into its two shopping trips", () => {
+    const trip = (name: string, cost: number, shopping_trip: number | null, perishable: boolean | null = null) => ({ ...line(name, cost, "Fresh"), ingredient_name: name, shopping_trip, perishable });
+    const items = [trip("salmon", 9, 1, true), trip("rice", 4, 1), trip("salmon", 8, 2, true), trip("bok choy", 2, 2, true)];
+    const trips = groceryTrips(items);
+    expect(trips.map(item => item.label)).toEqual(["Shop before day 1", "Shop before day 8"]);
+    expect(trips[1]!.groups[0]!.lines.map(item => item.ingredient_name)).toEqual(["salmon", "bok choy"]);
+    expect(shoppingTrips({ items } as WeeklyGroceryEstimate)).toBe(2);
+    // A plan of a week or less is one list, as before.
+    const single = groceryTrips([line("Rice", 4, "Dry"), line("Egg", 3, "Dairy")]);
+    expect(single).toHaveLength(1);
+    expect(single[0]).toMatchObject({ trip: null, label: null });
+    expect(shoppingTrips({ items: [line("Rice", 4, "Dry")] } as WeeklyGroceryEstimate)).toBe(1);
+  });
+
   it("labels packages from the matched product", () => {
     expect(packageLabel(line("Broccoli", 5.8, "Vegetables", 2))).toBe("2 × 500 g");
     expect(packageLabel(line("Loose", 1, null))).toBe("300 g");
@@ -150,6 +164,17 @@ describe("meals by day", () => {
     expect(week).toHaveLength(1);
     expect(week[0]!.meals.map(m => m.mealType)).toEqual(["lunch", "dinner"]);
     expect(week[0]!.meals[1]!.dishes.map(d => d.role_id)).toEqual(["main", "vegetable"]);
+  });
+
+  it("orders a full meal main, mains, vegetables, soup, then the staple, and keeps days 8 to 14", async () => {
+    const { mealsByDay } = await import("../app/lib/home-surface");
+    const roles = ["staple", "soup", "vegetable-2", "main-2", "vegetable", "main-3", "main"];
+    const dinner = roles.map((role, index) => ({ ...dish(1, "dinner", role, 100), entry_id: index }));
+    const dishes = mealsByDay(dinner)[0]!.meals[0]!.dishes;
+    expect(dishes.map(d => d.role_id)).toEqual(["main", "main-2", "main-3", "vegetable", "vegetable-2", "soup", "staple"]);
+    expect(dishes.map(isStapleDish)).toEqual([false, false, false, false, false, false, true]);
+    const fortnight = Array.from({ length: 14 }, (_, index) => ({ ...dish(1, "dinner", "main", 400), entry_id: index, day_index: index + 1, planned_date: `2027-01-${String(index + 3).padStart(2, "0")}` }));
+    expect(mealsByDay(fortnight).map(day => day.dayIndex)).toEqual(Array.from({ length: 14 }, (_, index) => index + 1));
   });
 
   it("finds the next meal still to cook and averages per meal and per day", async () => {

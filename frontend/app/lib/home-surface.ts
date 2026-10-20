@@ -58,6 +58,28 @@ export function groceryGroups(items: GroceryLineEstimate[]): Array<{ name: strin
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+export interface GroceryTrip {
+  /** 1 before day 1, 2 before day 8; null for a plan's only trip. */
+  trip: number | null;
+  /** "Shop before day 8"; null for a plan's only trip. */
+  label: string | null;
+  groups: Array<{ name: string; lines: GroceryLineEstimate[] }>;
+}
+
+/** A plan longer than a week shops twice (ADR-0072): its lines by trip, each grouped as groceryGroups; one trip otherwise. */
+export function groceryTrips(items: GroceryLineEstimate[], tripDays = 7): GroceryTrip[] {
+  if (!items.some(line => line.shopping_trip)) return [{ trip: null, label: null, groups: groceryGroups(items) }];
+  const trips = [...new Set(items.map(line => line.shopping_trip ?? 1))].sort((a, b) => a - b);
+  return trips
+    .map(trip => ({ trip, label: `Shop before day ${1 + (trip - 1) * tripDays}`, groups: groceryGroups(items.filter(line => (line.shopping_trip ?? 1) === trip)) }))
+    .filter(trip => trip.groups.length);
+}
+
+/** How many shopping trips a plan's list has: two for a plan longer than a week. */
+export function shoppingTrips(estimate: WeeklyGroceryEstimate): number {
+  return Math.max(1, ...estimate.items.map(line => line.shopping_trip ?? 1));
+}
+
 type PriceKind = "live" | "saved" | "sample";
 
 /**
@@ -184,7 +206,7 @@ export interface PlannedMeal {
   dayIndex: number;
   date: string;
   mealType: MealType;
-  /** The main dish first, then the others in role order. */
+  /** The main dish first, then the other mains, the vegetable dishes, the soup and the staple last. */
   dishes: NutritionDashboardDay[];
   status: "planned" | "completed" | "skipped" | "partial";
 }
@@ -193,6 +215,20 @@ export interface PlannedDay {
   dayIndex: number;
   date: string;
   meals: PlannedMeal[];
+}
+
+// A meal's dishes as a table reads them: main, other mains, vegetables, soup, anything else, then the staple.
+const ROLE_ORDER = ["main", "vegetable", "soup", "", "staple"];
+
+function roleRank(roleId: string | undefined): number {
+  const [, base = "main", copy] = /^(.*?)(?:-(\d+))?$/.exec(roleId ?? "main") ?? [];
+  const rank = ROLE_ORDER.indexOf(base);
+  return (rank < 0 ? ROLE_ORDER.indexOf("") : rank) * 100 + Number(copy ?? 1);
+}
+
+/** The staple of a full meal (ADR-0070): rice, noodles or bread, shown as such. */
+export function isStapleDish(dish: Pick<NutritionDashboardDay, "role_id">): boolean {
+  return dish.role_id === "staple";
 }
 
 function mealStatus(dishes: NutritionDashboardDay[]): PlannedMeal["status"] {
@@ -219,7 +255,7 @@ export function mealsByDay(days: NutritionDashboardDay[]): PlannedDay[] {
   for (const day of ordered) {
     day.meals.sort((a, b) => MEAL_ORDER.indexOf(a.mealType) - MEAL_ORDER.indexOf(b.mealType));
     for (const meal of day.meals) {
-      meal.dishes.sort((a, b) => Number((b.role_id ?? "main") === "main") - Number((a.role_id ?? "main") === "main"));
+      meal.dishes.sort((a, b) => roleRank(a.role_id) - roleRank(b.role_id));
       meal.status = mealStatus(meal.dishes);
     }
   }

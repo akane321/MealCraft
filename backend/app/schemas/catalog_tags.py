@@ -11,7 +11,8 @@ from typing import Annotated, Literal
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 # What a dish can be in a meal (recipes.meal_role). One-bowl dishes fill the main and the staple at once;
-# snack, dessert, sauce and drink never fill a lunch or dinner.
+# snack, dessert, sauce and drink never fill a lunch or dinner. `sauce` is every part of a dish that is not a dish
+# (a sauce, dough, crust, batter, marinade, dressing, stock ...).
 MealRole = Literal[
     "protein_main",
     "vegetable",

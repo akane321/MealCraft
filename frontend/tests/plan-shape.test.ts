@@ -1,18 +1,84 @@
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_SHAPE, MEAL_PRESETS, describeShape, dishLabel, nextRoleId, planDayLabel, presetName, shapeChangeSummary } from "../app/lib/plan-shape";
+import {
+  DEFAULT_SHAPE,
+  MEAL_PRESETS,
+  describeShape,
+  dishCounts,
+  dishLabel,
+  isFullDefault,
+  isStructured,
+  newDish,
+  nextRoleId,
+  planDayLabel,
+  plannedRoles,
+  presetName,
+  removable,
+  shapeChangeSummary,
+} from "../app/lib/plan-shape";
 import type { MealRole } from "../app/types/household";
 import type { MealPlanShapeChange } from "../app/types/meal-plan";
 
 describe("plan shape", () => {
   it("names presets and says a shape in plain words", () => {
-    expect(presetName("dinner", MEAL_PRESETS.dinner["One meat, one veg"]!)).toBe("One meat, one veg");
-    expect(presetName("dinner", [{ role_id: "main", courses: ["main"], required: true }, { role_id: "main-2", courses: ["main"], required: true }])).toBe("Custom");
-    expect(describeShape({ meals: { lunch: MEAL_PRESETS.lunch["One dish"]!, ...DEFAULT_SHAPE.meals } })).toBe("Lunch: one dish · Dinner: one meat, one veg");
+    expect(presetName("dinner", MEAL_PRESETS.dinner["Main, vegetable and staple"]!)).toBe("Main, vegetable and staple");
+    expect(describeShape(DEFAULT_SHAPE)).toBe("Breakfast: one dish · Lunch: full meal · Dinner: full meal (grows with the household)");
+    // A saved shape of the older course form is kept and read as such.
+    const older = [{ role_id: "main", courses: ["main"], required: true }, { role_id: "vegetable", courses: ["side", "salad"], required: false }] as MealRole[];
+    expect(isStructured(older)).toBe(false);
+    expect(presetName("dinner", older)).toBe("Custom (older format)");
+    expect(describeShape({ meals: { dinner: older } })).toBe("Dinner: 2 dishes (older format)");
+    const extra = [...MEAL_PRESETS.lunch["Full meal"]!, newDish("lunch", MEAL_PRESETS.lunch["Full meal"]!, "soup")];
+    expect(presetName("lunch", extra)).toBe("Custom");
+    expect(describeShape({ meals: { lunch: extra } })).toBe("Lunch: 4 dishes");
+  });
+
+  it("mirrors the backend's full default (ADR-0070)", () => {
+    expect(Object.keys(DEFAULT_SHAPE.meals)).toEqual(["breakfast", "lunch", "dinner"]);
+    expect(isFullDefault(DEFAULT_SHAPE)).toBe(true);
+    expect(isFullDefault({ meals: { dinner: DEFAULT_SHAPE.meals.dinner } })).toBe(false);
+    expect(DEFAULT_SHAPE.meals.lunch).toEqual([
+      { role_id: "main", courses: [], required: true, meal_roles: ["protein_main", "one_bowl"] },
+      { role_id: "vegetable", courses: [], required: true, meal_roles: ["vegetable", "salad"] },
+      { role_id: "staple", courses: [], required: true, meal_roles: ["staple"] },
+    ]);
+    expect(DEFAULT_SHAPE.meals.dinner!.map(item => [item.role_id, item.min_people ?? null, item.required])).toEqual([
+      ["main", null, true],
+      ["main-2", 3, false],
+      ["main-3", 7, false],
+      ["vegetable", null, true],
+      ["vegetable-2", 5, false],
+      ["soup", null, false],
+      ["staple", null, true],
+    ]);
+  });
+
+  it("counts the dinner's dishes by the people at it, as the backend's table", () => {
+    const dinner = DEFAULT_SHAPE.meals.dinner!;
+    expect(dishCounts(dinner, 1)).toBe("1 protein main, 1 vegetable dish, soup and a staple");
+    expect(dishCounts(dinner, 2)).toBe("1 protein main, 1 vegetable dish, soup and a staple");
+    expect(dishCounts(dinner, 3)).toBe("2 protein mains, 1 vegetable dish, soup and a staple");
+    expect(dishCounts(dinner, 5)).toBe("2 protein mains, 2 vegetable dishes, soup and a staple");
+    expect(dishCounts(dinner, 7)).toBe("3 protein mains, 2 vegetable dishes, soup and a staple");
+    expect(plannedRoles(dinner, 4).map(item => item.role_id)).toEqual(["main", "main-2", "vegetable", "soup", "staple"]);
+    expect(dishCounts(DEFAULT_SHAPE.meals.breakfast!, 4)).toBe("1 breakfast dish");
+    expect(dishCounts(MEAL_PRESETS.lunch["One-bowl meal"]!, 2)).toBe("1 one-bowl dish");
+  });
+
+  it("adds meal-role dishes and keeps a real meal's core and staple", () => {
+    const lunch = MEAL_PRESETS.lunch["Full meal"]!;
+    expect(newDish("lunch", lunch, "main")).toEqual({ role_id: "main-2", courses: [], required: true, meal_roles: ["protein_main"] });
+    expect(newDish("lunch", lunch, "vegetable")).toMatchObject({ role_id: "vegetable-2", meal_roles: ["vegetable", "salad"] });
+    expect(newDish("breakfast", DEFAULT_SHAPE.meals.breakfast!, "main")).toMatchObject({ role_id: "main-2", meal_roles: ["breakfast"] });
+    expect(lunch.map((_, index) => removable("lunch", lunch, index))).toEqual([false, true, false]);
+    // A one-bowl core brings its own staple, so the staple may go.
+    const oneBowl = [...MEAL_PRESETS.lunch["One-bowl meal"]!, newDish("lunch", MEAL_PRESETS.lunch["One-bowl meal"]!, "staple")];
+    expect(removable("lunch", oneBowl, 1)).toBe(true);
+    expect(removable("lunch", MEAL_PRESETS.lunch["One-bowl meal"]!, 0)).toBe(false);
   });
 
   it("keeps the first main as main and numbers the others", () => {
-    const roles = MEAL_PRESETS.dinner["Meat, veg and soup"]!;
+    const roles = [{ role_id: "main", courses: ["main"], required: true }, { role_id: "vegetable", courses: ["side"], required: true }] as MealRole[];
     expect(nextRoleId(roles, ["main"])).toBe("main-2");
     expect(nextRoleId([], ["main"])).toBe("main");
     expect(nextRoleId(roles, ["side", "salad"])).toBe("vegetable-2");
@@ -30,11 +96,18 @@ describe("plan shape", () => {
     expect(dishLabel(row("soup", ["soup"]))).toBe("Soup");
     expect(dishLabel(row("main", ["breakfast", "baked_good"]))).toBe("Breakfast dish");
     expect(dishLabel(row("main-3", ["dessert"]))).toBe("Another dish");
+    // Meal-role dishes by what they take.
+    const labels = [...DEFAULT_SHAPE.meals.dinner!, ...MEAL_PRESETS.lunch["One-bowl meal"]!, ...DEFAULT_SHAPE.meals.breakfast!].map(dishLabel);
+    expect(labels).toEqual(["Protein main", "Another protein main", "Another protein main", "Vegetable dish", "Vegetable dish", "Soup", "Staple", "One-bowl dish", "Breakfast dish"]);
   });
 
-  it("names the lunch preset after its vegetable", () => {
-    expect(Object.keys(MEAL_PRESETS.lunch)).toEqual(["One dish", "Main and a veg"]);
-    expect(MEAL_PRESETS.lunch["Main and a veg"]!.map(item => item.role_id)).toEqual(["main", "vegetable"]);
+  it("offers the full meal first, then the fixed counts", () => {
+    expect(Object.keys(MEAL_PRESETS.lunch)).toEqual(["Full meal", "One-bowl meal"]);
+    expect(Object.keys(MEAL_PRESETS.dinner)).toEqual(["Full meal (grows with the household)", "Main, vegetable and staple", "Main, vegetable, soup and staple"]);
+    // A count the household chose is fixed: no dish "from N people", none left out.
+    for (const name of ["Main, vegetable and staple", "Main, vegetable, soup and staple"]) {
+      expect(MEAL_PRESETS.dinner[name]!.every(item => item.required && !item.min_people)).toBe(true);
+    }
   });
 });
 
