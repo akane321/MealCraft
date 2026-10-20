@@ -39,15 +39,19 @@ def unreviewed(recipe) -> bool:
 
 
 def meal_role_of(recipe) -> str | None:
-    """A catalog recipe's meal role as the structured planner reads it: None while it is `unreviewed`."""
-    return None if unreviewed(recipe) else getattr(recipe, "meal_role", None)
+    """Admissible role: retain catalog facts, but unknown main sources cannot satisfy no-repeat constraints."""
+    role = getattr(recipe, "meal_role", None)
+    unknown_sources = (
+        role in {"protein_main", "one_bowl"} and hasattr(recipe, "protein_sources") and recipe.protein_sources is None
+    )
+    return None if unreviewed(recipe) or unknown_sources else role
 
 
 def role_admits(role: PlanningMealRole, recipe: PlanningRecipeCandidate) -> bool:
     """A role takes a recipe of one of its courses, or for a structured role of one of its meal roles; a vegetable
     role only one led by vegetables (ADR-0054). A recipe with no meal-role tag fills no structured role."""
     if role.meal_roles:
-        admitted = recipe.meal_role in role.meal_roles
+        admitted = meal_role_of(recipe) in role.meal_roles
     else:
         admitted = recipe.course in role.courses
     return admitted and (not vegetable_role(role.role_id) or candidate_vegetable_led(recipe))
@@ -155,7 +159,7 @@ def real_meal_issues(
     by_id = {role.role_id: role for role in roles}
     for role_id, recipe in filled.items():
         role = by_id.get(role_id)
-        if role is not None and recipe.meal_role not in (role.meal_roles or ()):
+        if role is not None and meal_role_of(recipe) not in (role.meal_roles or ()):
             issues.append(
                 ("meal_role_tag", f"A {recipe.meal_role or 'untagged'} dish cannot fill {role_id}.", None, None)
             )
@@ -185,7 +189,7 @@ def real_meal_issues(
         issues.append(("meal_filling_core", "The meal has no filling core.", None, None))
     elif bowl and has_staple:
         issues.append(("meal_filling_core", "A dish that carries its staple takes no second staple.", None, None))
-    elif not bowl and not (has_staple and dish.meal_role == "protein_main"):
+    elif not bowl and not (has_staple and meal_role_of(dish) == "protein_main"):
         issues.append(("meal_filling_core", "A protein main needs a staple.", None, None))
     # The planner may move one dish from the default (section 0.2): an optional dish left out, or the vegetable
     # dish beside a dish that carries its staple (section 0.4). That staple left out is no move.
@@ -193,9 +197,10 @@ def real_meal_issues(
     moved += bool(vegetable is not None and vegetable.required and vegetable.role_id not in filled)
     if moved > 1:
         issues.append(("meal_dish_count", f"{moved} dishes moved from the meal's default; one may be.", moved, 1))
-    sources = [
-        set(recipe.protein_sources or ()) for role_id, recipe in filled.items() if role_base(role_id) == MAIN_ROLE
-    ]
+    mains = [recipe for role_id, recipe in filled.items() if role_base(role_id) == MAIN_ROLE]
+    if any(recipe.protein_sources is None for recipe in mains):
+        issues.append(("meal_protein_unknown", "A protein main has unknown protein sources.", None, None))
+    sources = [set(recipe.protein_sources) for recipe in mains if recipe.protein_sources is not None]
     if sum(len(group) for group in sources) != len(set().union(*sources)):
         issues.append(("meal_protein_repeat", "Two protein mains share a protein source.", None, None))
     if slot.min_energy_kcal is not None and shares is not None:

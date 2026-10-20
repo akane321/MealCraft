@@ -1154,7 +1154,7 @@ def recipe_tags(recipe, candidate) -> dict:
     )
     held = not unreviewed(recipe)
     return {
-        "meal_role": recipe.meal_role if held else None,
+        "meal_role": meal_role_of(recipe),
         "contains_staple": recipe.contains_staple if held else None,
         "protein_sources": recipe.protein_sources if held else None,
         "cooking_methods": recipe.cooking_methods,
