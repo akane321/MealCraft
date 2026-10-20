@@ -349,8 +349,12 @@ def _entry(role_id: str, recipe, *, share=Fraction(1, 2), servings=Fraction("3.2
     )
 
 
-def _catalog(recipe_id, role, *, calories, tags=(), allergens=(), ingredient=None, staple=False):
-    """A catalog recipe as a swap reads one: its lines, tags and meal-role tag."""
+def _catalog(recipe_id, role, *, calories, tags=(), allergens=(), ingredient=None, staple=False, protein=()):
+    """A catalog recipe as a swap reads one: its lines, tags and meal-role tag.
+
+    A reviewed main names its protein sources, so a main here does too, its own by default: an unknown source
+    makes a recipe fill no main role at all (`meal_role_of`), which would be a different case than these test.
+    """
     line = SimpleNamespace(
         ingredient=SimpleNamespace(normalized_name=ingredient or f"{recipe_id}-base", allergens=list(allergens))
     )
@@ -363,7 +367,7 @@ def _catalog(recipe_id, role, *, calories, tags=(), allergens=(), ingredient=Non
         allergens=list(allergens),
         meal_role=role,
         contains_staple=True if staple else None,
-        protein_sources=None,
+        protein_sources=list(protein) or ([recipe_id] if role in ("protein_main", "one_bowl") else None),
         nutrition=SimpleNamespace(calories_kcal=calories),
         equipment=None,
     )
