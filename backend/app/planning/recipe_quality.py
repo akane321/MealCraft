@@ -19,7 +19,23 @@ TITLE_PROTEINS = {
     "pork": ("pork", "bacon", "ham", "sausage", "chorizo"),
     "chicken": ("chicken",),
     "beef": ("beef", "steak"),
-    "steak": ("steak", "beef"),
+    "steak": (
+        "steak",
+        "beef",
+        "pork",
+        "ham",
+        "chicken",
+        "turkey",
+        "duck",
+        "lamb",
+        "mutton",
+        "fish",
+        "salmon",
+        "tuna",
+        "tofu",
+        "tempeh",
+        "soy protein",
+    ),
     "salmon": ("salmon",),
     "shrimp": ("shrimp", "prawn"),
     "lamb": ("lamb",),
@@ -81,12 +97,21 @@ def missing_named_protein(title: str, lines: list[tuple[str, str | None]]) -> st
         if name not in SEASONING_FROM_FLESH and not BROTH.search(name)
     )
     title = title.lower()
-    for word, sources in TITLE_PROTEINS.items():
-        if word == "chicken" and "chicken fried steak" in title:
-            continue  # This names the coating style, not a chicken ingredient.
-        if re.search(rf"\b{word}s?\b", title) and not any(
-            re.search(rf"\b{source}s?\b", evidence) for source in sources
-        ):
+    required = [
+        (word, sources)
+        for word, sources in TITLE_PROTEINS.items()
+        if re.search(rf"\b{word}s?\b", title) and not (word == "chicken" and "chicken fried steak" in title)
+    ]
+
+    def supported(sources):
+        return any(re.search(rf"\b{source}s?\b", evidence) for source in sources)
+
+    if re.search(r"\bor\b|\balso good with\b|\bcan be made with\b", title) and any(
+        supported(sources) for word, sources in required if word != "steak" or len(required) == 1
+    ):
+        return None
+    for word, sources in required:
+        if not supported(sources):
             return f"named {word} but lists none"
     return None
 

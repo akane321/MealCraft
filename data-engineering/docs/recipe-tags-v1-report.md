@@ -7,9 +7,9 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Field | rule | llm | open (null) |
 | --- | ---: | ---: | ---: |
-| `meal_role` | 8519 | 369 | 109 |
-| `contains_staple` | 8519 | 369 | 109 |
-| `protein_sources` | 8812 | 77 | 108 |
+| `meal_role` | 8531 | 369 | 97 |
+| `contains_staple` | 8531 | 369 | 97 |
+| `protein_sources` | 8814 | 77 | 106 |
 | `cooking_methods` | 8997 | 0 | 0 |
 | `equipment` | 8997 | 0 | 0 |
 | `flavor_tags` | 8997 | 0 | 0 |
@@ -18,11 +18,11 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Meal role | rule | llm |
 | --- | ---: | ---: |
-| protein_main | 3621 | 27 |
+| protein_main | 3622 | 27 |
 | vegetable | 560 | 1 |
 | soup | 213 | 14 |
-| staple | 564 | 107 |
-| one_bowl | 1471 | 93 |
+| staple | 571 | 107 |
+| one_bowl | 1475 | 93 |
 | breakfast | 390 | 13 |
 | salad | 484 | 0 |
 | snack | 240 | 90 |
@@ -35,17 +35,17 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Value | Recipes |
 | --- | ---: |
-| chicken | 2154 |
+| chicken | 2160 |
 | duck | 4 |
-| pork | 1226 |
+| pork | 1230 |
 | beef | 1276 |
 | lamb | 33 |
-| fish | 232 |
-| shellfish | 479 |
-| soy | 141 |
-| egg | 1050 |
+| fish | 231 |
+| shellfish | 481 |
+| soy | 142 |
+| egg | 1048 |
 | legume | 215 |
-| none (`[]`) | 2868 |
+| none (`[]`) | 2861 |
 
 ## `cooking_methods` values (recipes carrying each)
 
@@ -76,16 +76,16 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Value | Recipes |
 | --- | ---: |
-| contains_staple True | 2235 |
-| contains_staple False | 6653 |
-| contains_staple None | 109 |
+| contains_staple True | 2246 |
+| contains_staple False | 6654 |
+| contains_staple None | 97 |
 | equipment ('blender',) | 532 |
 | equipment ('microwave',) | 218 |
 | equipment ('oven',) | 2921 |
 | equipment ('steamer',) | 100 |
 | no equipment (`[]`) | 5506 |
 
-Hearty salads (`salad`, not vegetable-led, with a main protein): 160. As salads they fill only the vegetable side, which their vegetable-led check refuses, so they fill no slot: the owner decided on 2026-10-19 that a salad with meat is not a main. The sample packet carries them as their own stratum, as it does the model's protein answers. The planner reads no model-decided value before its batch sample is reviewed.
+Hearty salads (`salad`, not vegetable-led, with a main protein): 161. As salads they fill only the vegetable side, which their vegetable-led check refuses, so they fill no slot: the owner decided on 2026-10-19 that a salad with meat is not a main. The sample packet carries them as their own stratum, as it does the model's protein answers. The planner reads no model-decided value before its batch sample is reviewed.
 
 ## Incomplete recipe evidence
 
@@ -97,7 +97,6 @@ A meat-bearing title with no matching ingredient line is incomplete, not a prote
 | RCP2_0447589B2FD3 | Chicken Curry | named chicken but lists none |
 | RCP2_0ACA3701E911 | Cilantro Thai Grilled Chicken (Serves 4) | named chicken but lists none |
 | RCP2_0DA06DF48EDB | Korean Fusion Butternut Squash Soup | ingredient/step conflict: turkey or vegan sausage listed, but steps cook pork |
-| RCP2_1A6624DD03C8 | Tofu Teriyaki Steak | named steak but lists none |
 | RCP2_2473ECA0B2C4 | Chicken Teriyaki | named chicken but lists none |
 | RCP2_28626CFF47A0 | Beef Carnitas Tacos | named beef but lists none |
 | RCP2_2F4D9146A0AC | California Chicken Pie | named chicken but lists none |
@@ -108,24 +107,19 @@ A meat-bearing title with no matching ingredient line is incomplete, not a prote
 | RCP2_6610D06E720B | Mongolian Chicken | named chicken but lists none |
 | RCP2_662AC6F5B889 | Awesome Spicy Thai Boneless Pork Loin | named pork but lists none |
 | RCP2_6D9CCD0FE247 | Teriyaki Chicken | named chicken but lists none |
-| RCP2_6E5ED2EC60ED | Hoisin Pork Steak | named steak but lists none |
 | RCP2_6FAE6504059C | Chinese Chicken Fingers | named chicken but lists none |
 | RCP2_70D8AAD0B6F9 | Chicken Satay | named chicken but lists none |
 | RCP2_76242A5D4715 | Stir-Fry Beef, Pork Or Chicken | named pork but lists none |
 | RCP2_7A6E4D3424E3 | Chicken Teriyaki | named chicken but lists none |
 | RCP2_7B87DB0F6AFE | Parmesan Chicken | named chicken but lists none |
 | RCP2_80E876686DA8 | Kalbi Beef Marinate (Flank Steak) | named beef but lists none |
-| RCP2_87A352F495FE | Pork Fried Rice Or Shrimp | named shrimp but lists none |
 | RCP2_891E239F355E | Sweet And Sour Chicken | named chicken but lists none |
-| RCP2_89234AD990EF | Indonesian Spice Chicken(Also Good With Pork Chops) | named pork but lists none |
 | RCP2_9188A516BC16 | Tandoori Chicken | named chicken but lists none |
 | RCP2_924B35AE9485 | Budget Beef Stroganoff | named beef but lists none |
-| RCP2_9277E0948E95 | Chicken Or Turkey Caruso | named chicken but lists none |
 | RCP2_938CA091118F | Chinese Smoked Ribs Or Chicken | named chicken but lists none |
 | RCP2_975C4431AA56 | Chicken Teriyaki | named chicken but lists none |
 | RCP2_982D9B8872AF | Korean Pork Chops | named pork but lists none |
 | RCP2_9A17BED1B115 | Satay Chicken | named chicken but lists none |
-| RCP2_A13B832B08AC | Chicken Or Pork Adobo | named pork but lists none |
 | RCP2_A4F190258049 | Mama Carrol'S Fried Rice(Great With Chicken Adobo) | named chicken but lists none |
 | RCP2_A700CAE2EDB3 | Parmesan Chicken | named chicken but lists none |
 | RCP2_AA52264E15D0 | Chinese Pork Chops | named pork but lists none |
@@ -134,8 +128,6 @@ A meat-bearing title with no matching ingredient line is incomplete, not a prote
 | RCP2_B2843B21CE46 | Steak Teriyaki | named steak but lists none |
 | RCP2_B98485DEE65E | Chicken Crepes | named chicken but lists none |
 | RCP2_C1787CCCA459 | Chicken Fried Pork With Milk Gravy | named chicken but lists none |
-| RCP2_C2167A5301C3 | T'S Ham Steak | named steak but lists none |
-| RCP2_C288EFCF2A64 | Lamb Or Chicken Kabobs | named lamb but lists none |
 | RCP2_C44177132C68 | Sweet And Sour Chicken Or Ribs | named chicken but lists none |
 | RCP2_C88265BE2243 | Indian-Spiced Sweet Potato Steak Fries | named steak but lists none |
 | RCP2_C9BF3D866397 | Irish Glazed Corned Beef Brisket | named beef but lists none |
@@ -145,7 +137,6 @@ A meat-bearing title with no matching ingredient line is incomplete, not a prote
 | RCP2_DD3CDE775EDC | Chinese Chicken | named chicken but lists none |
 | RCP2_E3B3B3009341 | Teriyaki Steak | named steak but lists none |
 | RCP2_F506726018EA | Teriyaki Chicken | named chicken but lists none |
-| RCP2_F5A97F6A48C9 | Chicken Adobo(Can Be Made With Pork Too) | named pork but lists none |
 
 ## Ingredients
 

@@ -5,6 +5,11 @@ import pytest
 
 from app.core.paths import repository_root
 
+pytestmark = pytest.mark.skipif(
+    not (repository_root() / "data-engineering/scripts/review_tag_rule_changes.py").is_file(),
+    reason="Repository-only review script is not shipped in the backend image.",
+)
+
 
 def test_changed_case_sampling_is_reproducible_unique_and_bounded():
     path = repository_root() / "data-engineering/scripts/review_tag_rule_changes.py"
@@ -73,9 +78,21 @@ def test_owner_application_check_keeps_rejected_outputs_and_requires_actual_corr
         encoding="utf-8",
     )
     result = module.verify_owner_review()
-    assert result["all_reviewed_fields_applied"] and result["owner_reviewed_cases"] == 2
+    assert result["all_current_expectations_applied"] and result["owner_reviewed_cases"] == 2
     assert result["cases"][0]["corrected"] == {"meal_role": "staple"}
     assert json.loads(review_path.read_text(encoding="utf-8")) == packet
+    original_tag_bytes = tags.read_bytes()
+    with monkeypatch.context() as revised_policy:
+        revised_policy.setattr(module, "MEASUREMENT_POLICY_REVISIONS", {"rice": {"meal_role": "one_bowl"}})
+        tags.write_text(
+            json.dumps({"recipes": {"rice": {"meal_role": "one_bowl"}, "missing": {"protein_sources": None}}}),
+            encoding="utf-8",
+        )
+        revised = module.verify_owner_review()
+        assert revised["all_current_expectations_applied"] and not revised["all_original_owner_values_unchanged"]
+        assert revised["cases"][0]["original_owner_values"] == {"meal_role": "staple"}
+        assert json.loads(review_path.read_text(encoding="utf-8")) == packet
+    tags.write_bytes(original_tag_bytes)
     current = json.loads(tags.read_text(encoding="utf-8"))
     current["recipes"]["rice"]["meal_role"] = None
     tags.write_text(json.dumps(current), encoding="utf-8")

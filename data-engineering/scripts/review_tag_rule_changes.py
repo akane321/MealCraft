@@ -18,6 +18,11 @@ from app.data.recipe_tags import CRITICAL_MODEL_FIELDS, curated_dishes, release_
 from app.data.tag_files import RECIPE_TAG_FIELDS, RECIPE_TAGS  # noqa: E402
 
 OUT = ROOT / "data-engineering/docs/recipe-tags-v1-rule-changes-review"
+# Later owner policy: mass-unit pasta is dry even with cooked wording. Do not rewrite the old human verdicts.
+MEASUREMENT_POLICY_REVISIONS = {
+    "RCP2_1D97F9CF9C30": {"meal_role": "one_bowl", "contains_staple": True},
+    "RCP2_961449012D5D": {"meal_role": "one_bowl", "contains_staple": True},
+}
 KNOWN_CASES = {
     "RCP2_CB88A5A0DF4C",
     "RCP2_1C43BC6CC166",
@@ -148,13 +153,25 @@ def verify_owner_review() -> dict:
         corrected = row.get("corrected_values", {})
         rejected = {field for field in row["changed_fields"] if row["verdict"][field] is False}
         assert set(corrected) == rejected, f"Missing or excessive owner corrections: {row['key']}"
+        original_expected = {}
         expected = {}
+        revised = MEASUREMENT_POLICY_REVISIONS.get(row["key"], {})
         for field in row["changed_fields"]:
             assert type(row["verdict"][field]) is bool, f"Unreviewed field: {row['key']} / {field}"
-            expected[field] = corrected[field] if field in corrected else row["after"][field]
+            original_expected[field] = corrected[field] if field in corrected else row["after"][field]
+            expected[field] = revised.get(field, original_expected[field])
             assert current[row["key"]][field] == expected[field], f"Not applied: {row['key']} / {field}"
         assert not row["model_batch_still_gated"] or row["key"] in gated(current)
-        checked.append({"key": row["key"], "title": row["title"], "verified_values": expected, "corrected": corrected})
+        checked.append(
+            {
+                "key": row["key"],
+                "title": row["title"],
+                "original_owner_values": original_expected,
+                "verified_values": expected,
+                "corrected": corrected,
+                "later_measurement_policy": revised,
+            }
+        )
     payload = {
         "scope": "owner-assisted changed-case regression review; not independent population accuracy or model release",
         "review_packet_sha256": hashlib.sha256(review_bytes).hexdigest(),
@@ -162,7 +179,12 @@ def verify_owner_review() -> dict:
         "applied_tag_file_sha256": hashlib.sha256(current_bytes).hexdigest(),
         "owner_reviewed_cases": len(checked),
         "unreviewed_model_gate": len(gated(current)),
-        "all_reviewed_fields_applied": True,
+        "all_current_expectations_applied": True,
+        "all_original_owner_values_unchanged": not any(row["later_measurement_policy"] for row in checked),
+        "policy_revision_basis": (
+            "Owner follow-up 2026-10-20: mass-unit pasta uses dry-to-cooked yield; "
+            "old review remains historical, not new human verification."
+        ),
         "cases": checked,
     }
     target = OUT.with_name(OUT.name + "-applied")
@@ -172,17 +194,21 @@ def verify_owner_review() -> dict:
         "",
         "由脚本核对当前标签与原审查包中人工确认的展示字段。原包的before/after仍是当时快照，"
         "不同意的字段使用corrected_values；不把修正算成规则原本判对。"
+        "后续owner计量口径将质量单位面食按干重换算；受影响条目单列修订，不能声称原人工意见在新口径下仍全部一致。"
         "这不是独立盲审、总体准确率或模型批次放行。",
         "",
-        f"已核验并落实：{len(checked)}项；未审核模型门禁：{len(gated(current))}项。",
+        f"已按当前口径核对：{len(checked)}项；"
+        f"其中{sum(bool(row['later_measurement_policy']) for row in checked)}项按后续计量口径修订，"
+        f"不是新增人工盲审；未审核模型门禁：{len(gated(current))}项。",
         "",
-        "| 菜谱 | 已核对字段的新值 | 人工纠正字段 |",
-        "|---|---|---|",
+        "| 菜谱 | 当前口径的新值 | 原人工纠正字段 | 后续计量口径修订 |",
+        "|---|---|---|---|",
     ]
     for row in checked:
+        revision = json.dumps(row["later_measurement_policy"], ensure_ascii=False) if row["later_measurement_policy"] else "—"
         lines.append(
             f"| {row['title']} | {json.dumps(row['verified_values'], ensure_ascii=False)} | "
-            f"{', '.join(row['corrected']) or '—'} |"
+            f"{', '.join(row['corrected']) or '—'} | {revision} |"
         )
     lines += ["", f"当前标签SHA256：`{payload['applied_tag_file_sha256']}`", ""]
     target.with_suffix(".md").write_text("\n".join(lines), encoding="utf-8")
@@ -203,7 +229,14 @@ def main() -> None:
         compare_default(args.base_ref)
         print(
             json.dumps(
-                {key: payload[key] for key in ("owner_reviewed_cases", "all_reviewed_fields_applied")},
+                {
+                    key: payload[key]
+                    for key in (
+                        "owner_reviewed_cases",
+                        "all_current_expectations_applied",
+                        "all_original_owner_values_unchanged",
+                    )
+                },
                 ensure_ascii=False,
             )
         )

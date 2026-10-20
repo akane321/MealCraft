@@ -36,6 +36,24 @@ def test_complete_dishes_soups_and_curated_recipes_are_kept():
     assert incomplete(recipe("Lemon Chicken", 90, ["lemon"], release=None)) is None
 
 
+@pytest.mark.parametrize(
+    ("title", "names"),
+    [
+        ("Hoisin Pork Steak", ["pork"]),
+        ("Tofu Teriyaki Steak", ["tofu"]),
+        ("T'S Ham Steak", ["ham"]),
+        ("Lamb Or Chicken Kabobs", ["lamb"]),
+        ("Chicken Or Pork Adobo", ["pork"]),
+        ("Chicken Or Turkey Caruso", ["turkey"]),
+        ("Chicken (also good with pork)", ["pork"]),
+        ("Chicken (can be made with turkey)", ["turkey"]),
+    ],
+)
+def test_steak_is_a_cut_and_named_alternative_titles_need_only_one_supported_option(title, names):
+    assert missing_named_protein(title, [(name, name) for name in names]) is None
+    assert missing_named_protein(title, [("onion", "onion")]) is not None
+
+
 def test_owner_reviewed_ingredient_step_conflict_stays_out_of_planning():
     soup = recipe("Korean Fusion Butternut Squash Soup", 300, ["sausage", "butternut_squash"], course="soup")
     soup.external_id = "RCP2_0DA06DF48EDB"

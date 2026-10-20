@@ -167,6 +167,15 @@ TITLE_TAIL = re.compile(r"\s+-\s.*$|\s+for\b.*$")  # "Spaghetti Sauce - Slow Coo
 TITLE_SUFFIX = re.compile(r"(?:\s+(?:recipe|i{1,3}))+$")
 WRAPPED_MEAL = re.compile(r"\b(?:pasties|pasty|empanadas?|pierogi|ravioli|tortellini|wontons?|meat pies?)\b")
 SANDWICH = re.compile(r"\b(?:sandwich(?:es)?|banh mi|burgers?)\b")
+BREAD_CARRIERS = frozenset(
+    {"bread", "baguette", "hamburger_bun", "hot_dog_bun", "dinner_roll", "pita_bread", "english_muffin"}
+)
+COOKED_WORD = re.compile(r"\b(?:cooked|prepared|leftover|boiled|steamed)\b", re.I)
+MASS_UNIT = re.compile(r"(?<![a-z])(?:oz|ounces?|lbs?|pounds?|g|grams?|kg|kilograms?)\b", re.I)
+VOLUME_UNIT = re.compile(
+    r"(?<![a-z])(?:cups?|c\.?|tbsp|tsp|tablespoons?|teaspoons?|pints?|quarts?|gallons?|ml|litres?|liters?)\b", re.I
+)
+SUBSTITUTION_NOTE = re.compile(r"\b(?:substitut\w*|instead|may|alternativ\w*)\b", re.I)
 DOUGH_FLOUR = frozenset({"flour", "bread_flour", "whole_wheat_flour", "self_rising_flour", "semolina"})
 BAKED_SIDE = re.compile(r"\b(?:au gratin|gratins?|bakes?|casseroles?|roasts?)\b")
 SOUP_TITLE = re.compile(r"\b(?:soups?|broths?|chowders?|bisques?|stews?)\b")
@@ -423,10 +432,17 @@ def line_sources(line: Line) -> set[str]:
         return set()
     if release_name(line.name) == "imitation_crab":
         return {"fish"}  # The catalog's surimi product, not real crab just because its wording contains "crab".
-    named = title_sources(line.text or "")
+    text = re.sub(r"\([^)]*\b(?:substitut\w*|instead|may|alternativ\w*)\b[^)]*\)", " ", line.text or "", flags=re.I)
+    named = title_sources(text)
+    if (
+        source in FLESH_SOURCES
+        and SUBSTITUTION_NOTE.search(text)
+        and not (len(named) > 1 and re.search(r"\bor\b", text, re.I))
+    ):
+        return {source}  # A stated alternative is not a second animal in a concrete ingredient.
     if named and (source == "?" or source in FLESH_SOURCES):
         # Alternatives are not two animals known to be present.
-        if len(named) > 1 and re.search(r"\bor\b", line.text or "", re.I):
+        if len(named) > 1 and re.search(r"\bor\b", text, re.I):
             return {"?"}
         return named
     return {source} if source is not None else set()
@@ -456,6 +472,10 @@ def protein_sources(dish: Dish) -> list[str] | None:
             found.add(source)
     if "?" in found:
         return None
+    # The owner keeps tiny seafood garnishes known, but a named land-meat main below its threshold is uncertain.
+    named_meat = title_sources(dish.title) & {"chicken", "duck", "pork", "beef", "lamb"}
+    if any(0 < grams[source] < total * FLESH_SHARE for source in named_meat):
+        return None
     return [source for source in PROTEIN_SOURCES if source in found]
 
 
@@ -482,7 +502,23 @@ def staple_share(dish: Dish, names: frozenset[str] | set[str] = STAPLES) -> floa
         if not line.grams or not counted(line):
             continue
         name = release_name(line.name)
-        already_cooked = re.search(r"\b(?:cooked|prepared|leftover|boiled|steamed)\b", line.text or "", re.I)
+        text = line.text or ""
+        # Mass-unit recipes usually weigh dry noodles then instruct "cooked and drained". Unit wins over wording.
+        mass, volume = MASS_UNIT.search(text), VOLUME_UNIT.search(text)
+        primary_mass = mass is not None and (volume is None or mass.start() < volume.start())
+        already_cooked = (
+            COOKED_WORD.search(text)
+            and not primary_mass
+            and (
+                volume
+                or re.search(
+                    r"\b(?:cooked|prepared|leftover|boiled|steamed)\s+(?:white\s+|brown\s+)?"
+                    r"(?:rice|pasta|noodles|macaroni|spaghetti|fettuccine|ziti|basmati)\b",
+                    text,
+                    re.I,
+                )
+            )
+        )
         weight = line.grams * (COOKED_YIELD if name in COOKED_STAPLES and not already_cooked else 1.0)
         total += weight
         # Flour is a carrier in a complete wrapped meal, not every fried coating or meatloaf binder.
@@ -540,7 +576,7 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
     share = staple_share(dish)
     if share == 0:
         open_roles = tuple(role for role in open_roles if role not in {"one_bowl", "staple"})
-    if sources and SANDWICH.search(title) and share >= GREY_SHARE:
+    if SANDWICH.search(title) and any(release_name(line.name) in BREAD_CARRIERS for line in dish.lines):
         return "one_bowl", ()
     if dish.course == "soup":
         # A noodle soup by its title, a soup this much staple, or one whose noodles or rice are a tenth of it.

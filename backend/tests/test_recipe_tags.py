@@ -188,7 +188,7 @@ def test_missing_meat_is_not_fabricated_from_a_title_or_asked_of_a_model() -> No
     assert missing.values["protein_sources"] is None and missing.values["meal_role"] is None
     assert missing.incomplete_reason == "named mutton but lists none" and missing.open == []
     lost = tags("Chicken Fried Rice", "main", [("rice", 300), ("egg", 150), ("chicken", 10), ("soy_sauce", 20)])
-    assert lost["protein_sources"] == ["egg"]  # The real chicken line is below the main-source threshold.
+    assert lost["protein_sources"] is None  # A title-named land meat below its threshold is now explicitly unknown.
     assert tags("Turkey Banh Mi", "main", [("baguette", 200), ("carrot", 100)])["protein_sources"] is None
     assert tags("Meat Loaf (Beef)", "main", [("meat", 900), ("breadcrumbs", 60)])["protein_sources"] is None
     # Lines holding meat win over the title; mock meat and what a dish is served with do not count.
@@ -243,10 +243,75 @@ def test_cooked_rice_is_not_multiplied_by_the_dry_rice_yield_again() -> None:
     from app.data.recipe_tags import staple_share
 
     cooked = dish("Rice", "main", [("rice", 100), ("egg", 100)])
-    cooked.lines[0].text = "100 g cooked rice"
+    cooked.lines[0].text = "cooked rice 2 cups"
     assert staple_share(cooked) == 0.5
     cooked.lines[0].text = "100 g dry rice"
     assert staple_share(cooked) == pytest.approx(250 / 350)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "8 oz. noodles, cooked and drained",
+        "1 lb. pasta, prepared",
+        "400.0g basmati rice, cooked following pack instructions",
+    ],
+)
+def test_cooking_instructions_do_not_turn_mass_measures_into_cooked_weight(text):
+    from app.data.recipe_tags import staple_share
+
+    item = dish("Noodles", "main", [("pasta", 100), ("egg", 100)])
+    item.lines[0].text = text
+    assert staple_share(item) == pytest.approx(250 / 350)
+
+
+@pytest.mark.parametrize("text", ["2 cups cooked rice (about 400 g)", "cooked rice 2 cups"])
+def test_volume_is_the_primary_measure_even_with_a_later_mass_equivalent(text):
+    item = dish("Rice", "main", [("rice", 100), ("egg", 100)])
+    item.lines[0].text = text
+    assert staple_share(item) == 0.5
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        "RCP2_27A89BE4BFE2",
+        "RCP2_1D58559E6D5A",
+        "RCP2_C6BBE2E7221F",
+        "RCP2_0D8ADB1F9215",
+        "RCP2_F39B4601868D",
+        "RCP2_B8A5190E72FB",
+        "RCP2_7C8F0E835E9F",
+        "RCP2_7A30D0B4F7ED",
+    ],
+)
+def test_named_release_pasta_and_rice_regressions_keep_their_staple(key):
+    # Mac & Cheese, two Baked Ziti, Alfredo, Lasagna, Pad Thai, Singapore noodles and Curry Chicken Bake.
+    assert rule_tags(dishes()[key]).values["contains_staple"] is True
+
+
+def test_secondary_seafood_is_known_but_small_title_named_land_meat_is_unknown():
+    assert tags("Pork Stir Fry", "main", [("pork", 10), ("carrot", 500)])["protein_sources"] is None
+    assert tags("Chinese Chicken Dinner", "main", [("chicken", 10), ("rice", 500)])["protein_sources"] is None
+    assert tags("Napa Cabbage with Dried Shrimp", "side", [("shrimp", 21), ("cabbage", 908)])["protein_sources"] == []
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["1 lb beef (chicken may be substituted)", "1 lb beef (use pork instead)", "1 lb beef; chicken may be substituted"],
+)
+def test_a_concrete_ingredient_does_not_acquire_its_optional_substitute(text):
+    item = dish("Beef Dinner", "main", [("beef", 454), ("onion", 100)])
+    item.lines[0].text = text
+    assert rule_tags(item).values["protein_sources"] == ["beef"]
+
+
+@pytest.mark.parametrize("title", ["Prawn Banh Mi", "Dominican Chimichurri Burgers"])
+def test_a_listed_bread_carrier_does_not_need_five_percent_share(title):
+    item = dish(title, "main", [("shrimp" if title.startswith("Prawn") else "beef", 1000), ("baguette", 10)])
+    assert rule_tags(item).values["meal_role"] == "one_bowl"
+    item.lines.pop()
+    assert rule_tags(item).values["contains_staple"] is False
 
 
 def test_rice_meals_filed_as_sides_keep_their_real_staple_without_lowering_thresholds() -> None:
