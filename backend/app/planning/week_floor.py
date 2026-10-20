@@ -13,8 +13,9 @@ from dataclasses import dataclass
 from itertools import accumulate, combinations
 from math import inf
 
+from app.data import meal_structure
 from app.data.units import in_grams
-from app.planning.meal_composition import MAIN_ROLE, portion_shares
+from app.planning.meal_composition import MAIN_ROLE, meal_role_of, portion_shares, role_base
 from app.planning.product_path import meals_of_the_day, normalized
 from app.schemas.planning_v2 import PlanningCompositionPolicy
 
@@ -44,6 +45,7 @@ class WeekFloor:
 def week_floor(constraints, recommendations, recipes) -> WeekFloor:
     shape = meals_of_the_day(constraints) or [("dinner", ONE_DISH)]
     course = {recipe.id: getattr(recipe, "course", None) or "main" for recipe in recipes}
+    tag = {recipe.id: meal_role_of(recipe) for recipe in recipes}
     lines = [
         (item.recipe.id, line)
         for item in recommendations
@@ -72,9 +74,13 @@ def week_floor(constraints, recommendations, recipes) -> WeekFloor:
     total, meal_sgd, empty, stats = 0.0, {}, [], {}
     for meal, composition in shape:
         roles = [role if isinstance(role, dict) else role.model_dump() for role in composition]
+        tagged = bool(roles and roles[0].get("meal_roles"))
         week_paid, cheapest_bought = {}, {}
         for role in roles:
-            fits = [item for item in recommendations if course.get(item.recipe.id, "main") in role["courses"]]
+            if tagged:
+                fits = [item for item in recommendations if tag.get(item.recipe.id) in role["meal_roles"]]
+            else:
+                fits = [item for item in recommendations if course.get(item.recipe.id, "main") in role["courses"]]
             known = [item.grocery_estimate.consumed_total_sgd for item in fits if item.grocery_estimate]
             stats[meal, role["role_id"]] = RoleCandidates(
                 count=len({item.recipe.id for item in fits}),
@@ -89,12 +95,30 @@ def week_floor(constraints, recommendations, recipes) -> WeekFloor:
                 uses = constraints.max_uses_per_recipe or constraints.day_count
                 week_paid[role["role_id"]] = [cost for cost in dishes for _ in range(uses)][: constraints.day_count]
                 cheapest_bought[role["role_id"]] = min(bought.get(item.recipe.id, 0.0) for item in fits)
-            elif role.get("required", True):
+            elif role.get("required", True) and not (tagged and role_base(role["role_id"]) in ("staple", "vegetable")):
+                # A structured meal's staple and vegetable may stay empty beside a one-bowl dish (ADR-0070).
                 empty.append((meal, role["role_id"]))
         if not any(name == meal for name, _ in empty):
-            total += _cheapest_days(roles, week_paid, policy, constraints.day_count)
-            meal_sgd[meal] = _cheapest_meal(roles, cheapest_bought, policy)
+            if tagged:
+                total += _structured_floor(roles, week_paid, constraints.day_count)
+                meal_sgd[meal] = _structured_floor(roles, {r: [c] for r, c in cheapest_bought.items()}, 1)
+            else:
+                total += _cheapest_days(roles, week_paid, policy, constraints.day_count)
+                meal_sgd[meal] = _cheapest_meal(roles, cheapest_bought, policy)
     return WeekFloor(constraints.day_count, constraints.day_count * len(shape), total, meal_sgd, empty, stats)
+
+
+def _structured_floor(roles: list[dict], prices: dict[str, list[float]], days: int) -> float:
+    """A structured meal's floor: its filling core alone, at the smallest share a core dish takes (three protein
+    mains), on each day. Every other dish of a full meal may move or carry its staple, so only the core is sure.
+    ponytail: a loose bound; count the staple and vegetable when no one-bowl dish fits, to tighten it."""
+    core = next((role for role in roles if set(role.get("meal_roles") or ()) & {"protein_main", "one_bowl"}), None)
+    if core is None or core["role_id"] not in prices:
+        return 0.0
+    table = meal_structure.portion_shares()
+    smallest = min([*table["protein_main"], table["one_bowl"]])
+    cheapest = sorted(prices[core["role_id"]])[:days]
+    return smallest * sum(cheapest) if len(cheapest) == days else 0.0
 
 
 def _meals(roles: list[dict], filled: dict, policy) -> list[dict[str, float]]:

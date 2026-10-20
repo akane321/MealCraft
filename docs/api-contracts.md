@@ -318,8 +318,14 @@ Reads return each member with `resolved_servings_per_meal` and
 no researched value). The resolved portions of all members are at most 12.
 `planning_household_size` is still an integer: the usually-home members'
 portions, rounded up. Each meal of a plan is cooked for the exact sum of the
-members home for it. Missing equipment and member-only allergens are not
-accepted yet.
+members home for it. Member-only allergens are not accepted yet.
+
+**Kitchen equipment (layer 08 PR-3).** The body and every version read add
+`missing_equipment`: up to five of `oven`, `air_fryer`, `steamer`, `microwave`,
+`blender`, sorted and unique, empty by default (stored as NULL). A recipe whose
+`equipment` (a list of any-of groups) cannot be met without them is never
+planned or swapped in; a recipe with no equipment tag needs nothing. The plan
+request's `household` block carries the same `missing_equipment`.
 
 **Household rules (layer 08).** The body and every version read add four lists,
 each empty by default (stored as NULL):
@@ -353,7 +359,16 @@ The server writes each rule's `restatement` itself, from a fixed template.
 `sodium_limit_mg[age_band]` (null where HPB gives none), `basics`
 (`normalized_name`, `display_name`, `allergens`), `meal_shares` and the
 `sources` (title, URL, retrieved date). The profile page looks values up here
-and never repeats the formula.
+and never repeats the formula. It also returns `meal_structure` (ADR-0070):
+`presets` (meal -> preset name -> roles of `meal_roles`; the first preset of each
+meal is the full default), `dinner_counts` (rows of `min_people`, `max_people`
+(null is no upper bound), `protein_mains`, `vegetables`, `soup`, `staple`),
+`energy_floor_share` (`{"lunch": 0.25, "dinner": 0.25}`), `equipment` (the
+five values above), `perishable_days` (3) and `trip_days` (7).
+
+`POST /api/household-profiles/{id}/plans` (and the replan route) accept
+`day_count` from 1 to 14 (default 7). A profile with neither `plan_shape` nor
+`meal_composition` plans the full default; a saved shape plans as saved.
 
 `POST /api/household-profiles/parse-rule` stores nothing. It takes
 `{kind: "presence" | "cooking_time", text, members: [{name, age_band,
@@ -503,11 +518,15 @@ for bounds, compatibility, examples and the Agent handoff.
 
 `POST /api/plans/generate` extends the recipe-constraint request with:
 
-- `start_date` and a currently fixed `day_count` of 7
+- `start_date` and `day_count` from 1 to 14 (default 7). A plan longer than 7
+  days shops twice, before day 1 and before day 8 (ADR-0072): each grocery line
+  carries `shopping_trip` (1 or 2; null in a plan of one trip) and the
+  `weekly_budget_sgd` holds on each trip (validator checks `purchase_budget`
+  with `scope_id` `trip-1` and `trip-2`).
 - an optional `weekly_budget_sgd`
 - the existing optional per-meal budget and fixture/live pricing mode
 - `planner_strategy`: `beam` (default) or the explicit `greedy-baseline`
-- an optional `max_uses_per_recipe` (1–7): how often one dish may appear in the
+- an optional `max_uses_per_recipe` (1–14): how often one dish may appear in the
   week, a hard rule the search holds and the validator checks; 1 is no dish
   twice. Unstated, repeating stays a soft cost the planner avoids by itself.
 - an optional `avoid_recipe_ids` (up to 200): recipes a new week leaves out,
@@ -532,6 +551,26 @@ for bounds, compatibility, examples and the Agent handoff.
   one leaves the meal without a plan. Other roles take any dish of their
   courses.
 
+  **Roles of meal roles (ADR-0070).** A role gives either `courses` (the older
+  form, unchanged) or `meal_roles` (`protein_main`, `vegetable`, `soup`,
+  `staple`, `one_bowl`, `breakfast`, `salad`, ...), never both, and every role of
+  one meal is of one form; `courses` is `[]` on a role of meal roles. Such a
+  role admits a recipe by its meal-role tag. `min_people` (1 to 12, only on such
+  roles) plans the role only when that many people eat the meal (servings
+  rounded half up). A meal of meal roles has up to 8 roles (course roles stay at
+  6). A lunch or dinner of meal roles needs a required core role (one admitting
+  `protein_main` or `one_bowl`), a `staple` role unless the core admits only
+  `one_bowl`, no role admitting `snack`, `dessert`, `sauce`, `drink` or
+  `breakfast`, `salad` only in `vegetable*` roles and `soup` only in `soup*`
+  roles. Role ids are `main`, `main-2`, `main-3`, `vegetable`, `vegetable-2`,
+  `soup` and `staple`. Its plan holds the real-meal rules (a protein main with
+  a staple, or a dish that carries its staple and no staple; at most one dish
+  moved from the default, the vegetable beside a one-bowl dish counting as the
+  move; distinct protein sources across `main*`; per-serving energy of at least
+  `energy_floor_share` × 2313 kcal), and its staple repeats freely, outside
+  `max_uses_per_recipe` and the repeat costs. A request of course roles only,
+  with no `household`, plans and dumps exactly as before.
+
 The response holds the week as days × meals: one persisted entry per dish, each
 with its `day_index`, `meal_type`, `role_id`, `portion_share` and `servings`
 (the servings the dish is cooked for when the request had a `household`; null is
@@ -539,7 +578,11 @@ with its `day_index`, `meal_type`, `role_id`, `portion_share` and `servings`
 person stays at the portion share), plus the
 `plan_shape` it was planned with, per-person weekly nutrition totals, an
 aggregated shopping list, package checkout cost, ingredient-use cost, weekly
-budget status, and explicit warnings. Known pantry quantities are deducted once
+budget status, and explicit warnings. Each grocery line may carry
+`shopping_trip` (above) and `perishable: true` (a perishable ingredient: with
+a `household` or meal-role shape, its dishes are cooked within 3 days after the
+trip that buys it); both are null otherwise. Each day's `recipe` carries its
+`meal_role` (null when untagged), for the plan views' "Staple" label. Known pantry quantities are deducted once
 after every planned dish's requirements are combined.
 
 Candidate pricing, affordability checks, refusal amounts and replanning previews

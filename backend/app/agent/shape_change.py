@@ -13,6 +13,7 @@ from types import SimpleNamespace
 from app.agent.replies import listed, say, word
 from app.schemas.meal_plan import (
     MEAL_PRESETS,
+    STRUCTURED_PRESETS,
     MealPlanShape,
     MealPlanShapeChangeRequest,
     PlannedMeal,
@@ -29,6 +30,24 @@ DISHES = {
     "vegetable": (("vegetable", "veg", "side", "salad", "蔬菜", "素菜", "配菜", "沙拉"), ["side", "salad"]),
     "main": (("main", "another main", "meat dish", "second main", "荤菜", "主菜", "肉菜"), ["main"]),
 }
+# The meal roles each kind of dish takes in a meal of meal roles (ADR-0070): a main added is a protein main.
+STRUCTURED_DISHES = {"soup": ["soup"], "vegetable": ["vegetable", "salad"], "main": ["protein_main"]}
+STRUCTURED_LIMIT = 8
+
+
+def _structured(roles: list[dict]) -> bool:
+    return bool(roles) and bool(roles[0].get("meal_roles"))
+
+
+def _kinds(role: dict) -> set[str]:
+    """What a role takes: its courses, or its meal roles."""
+    return set(role.get("meal_roles") or role["courses"])
+
+
+def _first_preset(meal: str, structured: bool) -> list[dict]:
+    return list((STRUCTURED_PRESETS if structured else MEAL_PRESETS)[meal].values())[0]
+
+
 # Chinese verbs also come after the thing: "汤加上", "早饭就不做了", "午饭也帮我们安排上".
 ADD_ZH = ("加上", "加", "也要", "安排", "排上", "排", "煮", "做", "多")
 DROP_ZH = (
@@ -189,14 +208,23 @@ def _day_roles(plan: WeeklyMealPlanResponse, meal: str, days: list[int] | None, 
         return planned
     # The week's roles, then the presets' in order: a meal the week lacks is added for a day with its first
     # preset, so a lunch "main" added for Friday takes a main, a salad or a soup ("one dish").
+    structured = _structured(planned)
     known = {role["role_id"]: role for role in planned}
-    for preset in MEAL_PRESETS[meal].values():
+    for preset in (STRUCTURED_PRESETS if structured else MEAL_PRESETS)[meal].values():
         for role in preset:
             known.setdefault(role["role_id"], role)
     roles = []
     for role_id in next(iter(by_day.values())):
         # A dish added in the conversation is "soup", "soup-2", "main-2" (see _next_id).
-        base = DISHES.get(role_id.split("-")[0])
+        kind = role_id.split("-")[0]
+        base = DISHES.get(kind)
+        if structured:
+            made = STRUCTURED_DISHES.get(kind) and {"role_id": role_id, "meal_roles": STRUCTURED_DISHES[kind]}
+            role = known.get(role_id) or made
+            if not role:
+                return planned
+            roles.append(role)  # a role of meal roles takes the dish by its tag, whatever its course
+            continue
         role = known.get(role_id) or (base and {"role_id": role_id, "courses": base[1], "required": True})
         if not role:
             return planned
@@ -252,42 +280,70 @@ def read_shape_change(
     shape = plan.plan_shape.meals if plan.plan_shape is not None else {}
     days = day_indexes or None
     current = _day_roles(plan, meal, days, [role.model_dump() for role in shape.get(meal, [])])
+    # A week of meal roles (the full default, ADR-0070) changes in meal roles; an older week as before.
+    structured = _structured(current) or any(_structured([r.model_dump() for r in roles]) for roles in shape.values())
 
     # What the assistant says it understood, in the household's language (agent/replies.py).
     named = {"when": _when(plan, days, lang), "meal": word(meal, lang), "Meal": word(meal, lang).capitalize()}
 
+    real = structured and meal in ("lunch", "dinner")
     if only:
-        roles = [{"role_id": only, "courses": DISHES[only][1], "required": True}]
+        if real and only == "main":
+            # "Just a main" is a main and its staple: a lunch or dinner stays a real meal.
+            roles = [
+                {"role_id": "main", "meal_roles": ["protein_main", "one_bowl"]},
+                {"role_id": "staple", "meal_roles": ["staple"]},
+            ]
+        else:
+            roles = [{"role_id": only, "courses": DISHES[only][1], "required": True}]
         summary = say("shape_only", lang, dish=word(only, lang) if lang == "zh" else only, **named)
     elif dish is None:
         if _has(text, ONE_DISH):
-            roles = list(MEAL_PRESETS[meal].values())[0] if meal != "dinner" else MEAL_PRESETS["dinner"]["one main"]
+            if real:
+                roles = STRUCTURED_PRESETS["lunch"]["One-bowl meal"]  # one dish that carries its staple
+            elif structured:
+                roles = _first_preset(meal, True)
+            else:
+                roles = _first_preset(meal, False) if meal != "dinner" else MEAL_PRESETS["dinner"]["one main"]
             summary = say("shape_one_dish", lang, **named)
         elif drops:
             roles, summary = None, say("shape_no_meal", lang, **named)
         elif meal not in shape:
-            roles, summary = list(MEAL_PRESETS[meal].values())[0], say("shape_add_meal", lang, **named)
+            roles, summary = _first_preset(meal, structured), say("shape_add_meal", lang, **named)
         else:
             return None  # "plan dinner" when dinner is planned: nothing to change
     else:
         if not current:
-            current = list(MEAL_PRESETS[meal].values())[0]
-        base, courses = dish, DISHES[dish][1]
+            current = _first_preset(meal, structured)
+        base = dish
+        courses = STRUCTURED_DISHES[dish] if _structured(current) else DISHES[dish][1]
         if drops:
-            kept = [role for role in current if not set(role["courses"]) & set(courses) or role["role_id"] == "main"]
+            kept = [role for role in current if not _kinds(role) & set(courses) or role["role_id"] == "main"]
             if dish == "main":
-                kept = [role for role in current if role["role_id"] != "main" or len(current) == 1]
+                if _structured(current):
+                    # The core stays: "no meat dish" takes the extra mains off, the meal keeps its protein main.
+                    kept = [
+                        role for role in current if role["role_id"].split("-")[0] != "main" or role["role_id"] == "main"
+                    ]
+                else:
+                    kept = [role for role in current if role["role_id"] != "main" or len(current) == 1]
             if len(kept) == len(current) or not kept:
                 return None
             if not any(role.get("required", True) for role in kept):
                 kept[0] = {**kept[0], "required": True}
             roles = kept
             summary = say("shape_without", lang, dish=word(dish, lang) if lang == "zh" else dish, **named)
-        elif len(current) >= 6:
+        elif len(current) >= (STRUCTURED_LIMIT if _structured(current) else 6):
             return None
         else:
             role_id = _next_id(current, base)
-            roles = [*current, {"role_id": role_id, "courses": courses, "required": True}]
+            if _structured(current):
+                added = {"role_id": role_id, "meal_roles": courses, "required": True}
+                # A dish added goes before the staple, which the meal keeps last.
+                at = next((i for i, role in enumerate(current) if role["role_id"] == "staple"), len(current))
+                roles = [*current[:at], added, *current[at:]]
+            else:
+                roles = [*current, {"role_id": role_id, "courses": courses, "required": True}]
             key = "shape_with_another" if role_id != base else "shape_with"
             summary = say(key, lang, dish=word(dish, lang) if lang == "zh" else dish, **named)
             if role_id != base and not ANOTHER.search(text):

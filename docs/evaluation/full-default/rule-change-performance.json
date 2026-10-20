@@ -1,0 +1,164 @@
+{
+  "scope": "Developer six-tight-budget only; same-machine sequential replay, not capability evaluation or speed acceptance.",
+  "method": "Replay the four changed app modules and matching tag file from ce4fbef, 45133a7 and corrected sources. Hold other app code, fixtures and six-person request fixed. One unbounded-variety report run warms caches; three warm product runs restore the two-second variety limit. No concurrent task-owned heavy test was run during replay. Wall and process CPU are measured separately. Exact source hashes identify uncommitted corrected code.",
+  "runs": [
+    {
+      "scope": "same-machine sequential developer six-person replay; four changed application modules and recipe tags replayed from named revision; other code and fixture data held fixed",
+      "revision": "ce4fbef",
+      "machine": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel (Windows)",
+      "source_hashes": {
+        "backend/app/data/recipe_tags.py": "1bff76e20160cde4c436e16d85bc0f36573a6c1f90cc5ce0a9f91e2dfddd89a6",
+        "backend/app/planning/recipe_quality.py": "fa50a1f75dbc312e140b60486445b64705ca53f65dc0df48cb11eea7a7284d14",
+        "backend/app/planning/meal_composition.py": "649821284872c1a17ced182f58d743ebba74ecfcb7c847f48a834c72a5e37848",
+        "backend/app/planning/product_path.py": "b6f3cef3edb4cb43f682393768ecd3ebaf29fe626c141b50a67e22a52f6e113c"
+      },
+      "tag_file_sha256": "860be62f0744a301b8dd8fbf9cac856e014fbdacd3b45351a9f75429b1bf8a12",
+      "warm_runs": 3,
+      "measurements": [
+        {
+          "kind": "cold-complete",
+          "wall_seconds": 39.581,
+          "process_cpu_seconds": 39.094
+        },
+        {
+          "kind": "warm-product",
+          "wall_seconds": 24.539,
+          "process_cpu_seconds": 23.469
+        },
+        {
+          "kind": "warm-product",
+          "wall_seconds": 22.426,
+          "process_cpu_seconds": 22.141
+        },
+        {
+          "kind": "warm-product",
+          "wall_seconds": 24.088,
+          "process_cpu_seconds": 23.312
+        }
+      ],
+      "warm_median_seconds": 24.088,
+      "catalog_role_counts": {
+        "breakfast": 402,
+        "dessert": 542,
+        "drink": 78,
+        "one_bowl": 1522,
+        "protein_main": 3674,
+        "salad": 484,
+        "sauce": 373,
+        "snack": 330,
+        "soup": 227,
+        "staple": 713,
+        "unknown": 53,
+        "vegetable": 569
+      },
+      "all_runs_passed": true
+    },
+    {
+      "scope": "same-machine sequential developer six-person replay; four changed application modules and recipe tags replayed from named revision; other code and fixture data held fixed",
+      "revision": "45133a7",
+      "machine": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel (Windows)",
+      "source_hashes": {
+        "backend/app/data/recipe_tags.py": "2ba401049486d5872e31b147f28f6f24c6c295e6519b834e1cf1bae0716f03e8",
+        "backend/app/planning/recipe_quality.py": "dfbbb9c6d0a664f59a41107e1445595201786c6ab8fb842ed41d113c4eef835b",
+        "backend/app/planning/meal_composition.py": "86129360b252b9b8d0025eded7a9472a8259be7b7816ecb2931593fc6a88fe01",
+        "backend/app/planning/product_path.py": "b6f3cef3edb4cb43f682393768ecd3ebaf29fe626c141b50a67e22a52f6e113c"
+      },
+      "tag_file_sha256": "046629cf82a096d00e3d83acb53b708bafab98f9db479251fba6713dee66d1fc",
+      "warm_runs": 3,
+      "measurements": [
+        {
+          "kind": "cold-complete",
+          "wall_seconds": 36.384,
+          "process_cpu_seconds": 35.453
+        },
+        {
+          "kind": "warm-product",
+          "wall_seconds": 21.923,
+          "process_cpu_seconds": 21.438
+        },
+        {
+          "kind": "warm-product",
+          "wall_seconds": 21.41,
+          "process_cpu_seconds": 21.188
+        },
+        {
+          "kind": "warm-product",
+          "wall_seconds": 21.438,
+          "process_cpu_seconds": 21.0
+        }
+      ],
+      "warm_median_seconds": 21.438,
+      "catalog_role_counts": {
+        "breakfast": 402,
+        "dessert": 542,
+        "drink": 78,
+        "one_bowl": 1541,
+        "protein_main": 3642,
+        "salad": 484,
+        "sauce": 380,
+        "snack": 330,
+        "soup": 227,
+        "staple": 671,
+        "unknown": 109,
+        "vegetable": 561
+      },
+      "all_runs_passed": true
+    },
+    {
+      "scope": "same-machine sequential developer six-person replay; four changed application modules and recipe tags replayed from named revision; other code and fixture data held fixed",
+      "revision": "current",
+      "machine": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel (Windows)",
+      "source_hashes": {
+        "backend/app/data/recipe_tags.py": "1274630f3347be4a43776c56cbae61c462acc518ae5219fe579d5fbaae24cd1f",
+        "backend/app/planning/recipe_quality.py": "106a45c29152c5a2d6c15e3c82c6589e9ce8b677b9c291ad509c432cc1459280",
+        "backend/app/planning/meal_composition.py": "e35e34e7d17d337bc522618d419d701083163d34e64e4b9e0ab8070dcb1d6bc1",
+        "backend/app/planning/product_path.py": "2575b7dbe79c57fdc63eddaf0ed6e5a6dfad23062513378679c6bd6aeed29cc2"
+      },
+      "tag_file_sha256": "4c09faf8a604dc4453f5dd16e984c11a5c19a976992b887bd31dce2ace92956a",
+      "warm_runs": 3,
+      "measurements": [
+        {
+          "kind": "cold-complete",
+          "wall_seconds": 41.388,
+          "process_cpu_seconds": 40.141
+        },
+        {
+          "kind": "warm-product",
+          "wall_seconds": 28.32,
+          "process_cpu_seconds": 27.906
+        },
+        {
+          "kind": "warm-product",
+          "wall_seconds": 27.905,
+          "process_cpu_seconds": 27.609
+        },
+        {
+          "kind": "warm-product",
+          "wall_seconds": 29.437,
+          "process_cpu_seconds": 28.812
+        }
+      ],
+      "warm_median_seconds": 28.32,
+      "catalog_role_counts": {
+        "breakfast": 402,
+        "dessert": 542,
+        "drink": 78,
+        "one_bowl": 1545,
+        "protein_main": 3643,
+        "salad": 484,
+        "sauce": 380,
+        "snack": 330,
+        "soup": 227,
+        "staple": 678,
+        "unknown": 97,
+        "vegetable": 561
+      },
+      "all_runs_passed": true
+    }
+  ],
+  "interpretation": [
+    "The earlier roughly 38-second single warm run is not reproduced by the submitted-version three-run median. Historical machine load and CPU data were not recorded, so its exact cause cannot be established.",
+    "Corrected sources are slower than the submitted version in this replay; process CPU also increases, so it is not justified to attribute the complete increase to waiting or machine noise. Rules, admissible roles and resulting search/plan choices changed together; this replay does not isolate their individual contributions.",
+    "Every replayed plan passes. The six-person request remains over the four-second target. This correctness repair does not claim or implement the separate speed task."
+  ]
+}

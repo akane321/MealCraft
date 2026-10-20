@@ -56,6 +56,7 @@ def household_planning(version: HouseholdProfileVersion) -> HouseholdPlanning:
         missing_basics=version.missing_basics or [],
         nutrition_limits=[limit for limit in limits if limit.max_value is not None],
         protein_priority=any(member.goal == "muscle_gain" for member in members),
+        missing_equipment=getattr(version, "missing_equipment", None) or [],
     )
 
 
@@ -221,6 +222,7 @@ class HouseholdProfileService:
             cooking_time_rules=version.cooking_time_rules or [],
             missing_basics=version.missing_basics or [],
             nutrition_limits=version.nutrition_limits or [],
+            missing_equipment=version.missing_equipment or [],
             created_at=version.created_at,
         )
 
@@ -231,7 +233,7 @@ class HouseholdProfileService:
     ) -> WeeklyMealPlanRequest:
         values = {
             "start_date": request.start_date,
-            "day_count": 7,
+            "day_count": request.day_count,
             "household_size": version.planning_household_size,
             "max_cooking_time_minutes": version.max_cooking_time_minutes,
             "budget_per_meal_sgd": (
@@ -249,7 +251,7 @@ class HouseholdProfileService:
             "available_ingredients": version.available_ingredients,
             "pricing_mode": version.pricing_mode,
             "meal_composition": version.meal_composition if version.plan_shape is None else None,
-            # A household that set neither plans the default week: dinner, one main and one vegetable.
+            # A household that set neither plans the full default (ADR-0070); a saved shape is used as stored.
             "plan_shape": version.plan_shape
             or (default_plan_shape().model_dump(mode="json") if version.meal_composition is None else None),
             "household": household_planning(version),
@@ -281,6 +283,8 @@ class HouseholdProfileService:
             "household.cooking_time_rules": "Cooking-time rules",
             "household.missing_basics": "Basics to buy",
             "household.nutrition_limits": "Nutrition limits",
+            "household.missing_equipment": "Kitchen equipment",
+            "day_count": "Days planned",
         }
 
         def value(constraints: dict, key: str):
