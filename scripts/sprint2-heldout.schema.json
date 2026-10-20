@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:mealcraft:sprint2-authoring-v1",
+  "title": "Sprint 2 isolated authoring interchange, not a runtime episode",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "purpose", "author_id", "reviewer_id", "quota_manifest", "cases"],
+  "properties": {
+    "schema_version": {"const": "sprint2-authoring-v1"},
+    "purpose": {"enum": ["format_demo", "author_draft", "freeze_candidate"]},
+    "author_id": {"type": ["string", "null"], "minLength": 1},
+    "reviewer_id": {"type": ["string", "null"], "minLength": 1},
+    "quota_manifest": {"$ref": "#/$defs/manifest"},
+    "cases": {"type": "array", "items": {"$ref": "#/$defs/case"}}
+  },
+  "$defs": {
+    "text": {"type": "string", "minLength": 1},
+    "texts": {"type": "array", "items": {"$ref": "#/$defs/text"}, "uniqueItems": true},
+    "nullable_count": {"type": ["integer", "null"], "minimum": 0},
+    "counts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["planning", "intent", "multi_turn", "adversarial"],
+      "properties": {
+        "planning": {"$ref": "#/$defs/nullable_count"}, "intent": {"$ref": "#/$defs/nullable_count"},
+        "multi_turn": {"$ref": "#/$defs/nullable_count"}, "adversarial": {"$ref": "#/$defs/nullable_count"}
+      }
+    },
+    "manifest": {
+      "type": "object", "additionalProperties": false,
+      "required": ["declared_on", "approved_by", "counts", "minimum_chinese", "forum_count", "subtype_minima", "feature_minima"],
+      "properties": {
+        "declared_on": {"type": ["string", "null"], "format": "date"},
+        "approved_by": {"type": ["string", "null"], "minLength": 1},
+        "counts": {"$ref": "#/$defs/counts"},
+        "minimum_chinese": {"$ref": "#/$defs/counts"},
+        "forum_count": {"$ref": "#/$defs/nullable_count"},
+        "subtype_minima": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 1}},
+        "feature_minima": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 1}}
+      }
+    },
+    "constraint": {
+      "type": "object", "additionalProperties": false,
+      "required": ["field", "operator", "value", "unit", "scope", "evidence"],
+      "properties": {
+        "field": {"$ref": "#/$defs/text"},
+        "operator": {"enum": ["eq", "le", "ge", "exclude", "include"]},
+        "value": {"type": ["string", "number", "boolean", "array", "object"]},
+        "unit": {"$ref": "#/$defs/text"},
+        "scope": {"$ref": "#/$defs/text"},
+        "evidence": {"$ref": "#/$defs/text"}
+      }
+    },
+    "gold": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "disposition", "hard_constraints", "expected_fields", "clarification_fields", "reference_answer", "rubric", "preserve", "proof_basis", "facts_version", "review_status", "reviewer_id"],
+      "properties": {
+        "kind": {"enum": ["plan", "intent", "qa", "replan", "refusal"]},
+        "disposition": {"enum": ["feasible", "infeasible", "clarify", "answer", "refuse"]},
+        "hard_constraints": {"type": "array", "items": {"$ref": "#/$defs/constraint"}},
+        "expected_fields": {"type": "object"},
+        "clarification_fields": {"$ref": "#/$defs/texts"},
+        "reference_answer": {"type": "string"},
+        "rubric": {"$ref": "#/$defs/texts"},
+        "preserve": {"$ref": "#/$defs/texts"},
+        "proof_basis": {"$ref": "#/$defs/text"},
+        "facts_version": {"$ref": "#/$defs/text"},
+        "review_status": {"enum": ["pending", "independently_checked"]},
+        "reviewer_id": {"type": ["string", "null"], "minLength": 1}
+      }
+    },
+    "quote": {
+      "type": "object", "additionalProperties": false,
+      "required": ["turn_index", "text", "url", "collected_on", "redactions"],
+      "properties": {
+        "turn_index": {"type": "integer", "minimum": 0},
+        "text": {"$ref": "#/$defs/text"},
+        "url": {"type": "string", "format": "uri"},
+        "collected_on": {"type": "string", "format": "date"},
+        "redactions": {"$ref": "#/$defs/texts"}
+      }
+    },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "quotes", "pii_reviewed"],
+      "properties": {
+        "kind": {"enum": ["authored", "forum"]},
+        "quotes": {"type": "array", "items": {"$ref": "#/$defs/quote"}},
+        "pii_reviewed": {"type": "boolean"}
+      }
+    },
+    "case": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "category", "language", "subtype", "features", "horizon_days", "turns", "gold", "source"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$"},
+        "category": {"enum": ["planning", "intent", "multi_turn", "adversarial"]},
+        "language": {"enum": ["en", "zh"]},
+        "subtype": {"$ref": "#/$defs/text"},
+        "features": {"$ref": "#/$defs/texts"},
+        "horizon_days": {"type": ["integer", "null"], "minimum": 1, "maximum": 14},
+        "turns": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}},
+        "gold": {"$ref": "#/$defs/gold"},
+        "source": {"$ref": "#/$defs/source"}
+      }
+    }
+  }
+}
