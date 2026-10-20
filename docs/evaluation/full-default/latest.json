@@ -28,19 +28,20 @@
       "metrics": {
         "meals": 21,
         "dishes": 54,
-        "distinct_dishes_excluding_staples": 41,
+        "distinct_dishes_excluding_staples": 42,
         "staples": [
           "Assyrian Rice",
-          "Claudia Roden's Basic Couscous"
+          "Easy Round Italian Bread",
+          "Super Easy Naan Bread"
         ],
         "cuisine_groups_per_meal": 1.21,
         "meals_with_two_deep_fried": 0,
         "energy_floor_pass_rate": 1.0,
         "moves": [],
         "grocery_lines_by_trip": {
-          "None": 85
+          "None": 87
         },
-        "purchase_total_sgd": 374.93
+        "purchase_total_sgd": 405.82
       },
       "meals": [
         {
@@ -80,7 +81,7 @@
           "weekday": "Sun",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Pizza Cheesy Chicken",
+          "recipe": "Anitas Lemon Chicken",
           "servings": 0.75
         },
         {
@@ -144,7 +145,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Anitas Lemon Chicken",
+          "recipe": "Pizza Cheesy Chicken",
           "servings": 0.75
         },
         {
@@ -208,7 +209,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Salmon Yakitori",
+          "recipe": "Microwave Shrimp Scampi",
           "servings": 0.75
         },
         {
@@ -216,7 +217,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Edamame Salad",
+          "recipe": "English Pea Salad",
           "servings": 0.5
         },
         {
@@ -224,7 +225,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Eunah's Korean-Style Seaweed Soup",
+          "recipe": "Martha's Gazpacho",
           "servings": 0.5
         },
         {
@@ -304,7 +305,7 @@
           "weekday": "Thu",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Pizza Cheesy Chicken",
+          "recipe": "Thai Beef",
           "servings": 0.75
         },
         {
@@ -312,7 +313,7 @@
           "weekday": "Thu",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Broccoli Salad",
+          "recipe": "Jim's Raita",
           "servings": 0.5
         },
         {
@@ -320,7 +321,7 @@
           "weekday": "Thu",
           "meal": "lunch",
           "role": "staple",
-          "recipe": "Assyrian Rice",
+          "recipe": "Super Easy Naan Bread",
           "servings": 1.0
         },
         {
@@ -336,7 +337,7 @@
           "weekday": "Thu",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Cuban Cucumber Salad",
+          "recipe": "Broccoli Salad",
           "servings": 0.5
         },
         {
@@ -344,7 +345,7 @@
           "weekday": "Thu",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Martha's Gazpacho",
+          "recipe": "Gazpacho",
           "servings": 0.5
         },
         {
@@ -376,7 +377,7 @@
           "weekday": "Fri",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Feta Cucumber Salad",
+          "recipe": "Fried Green Tomatoes",
           "servings": 0.5
         },
         {
@@ -392,7 +393,7 @@
           "weekday": "Fri",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Fried Green Tomatoes",
+          "recipe": "Cuban Cucumber Salad",
           "servings": 0.5
         },
         {
@@ -424,7 +425,7 @@
           "weekday": "Sat",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Bento Chicken Teriyaki",
+          "recipe": "Beef Stir Fry With Tri-Colored Peppers",
           "servings": 0.75
         },
         {
@@ -432,7 +433,7 @@
           "weekday": "Sat",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Jim's Raita",
+          "recipe": "Szechuan Broccoli (Chinese)",
           "servings": 0.5
         },
         {
@@ -448,7 +449,7 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Flank Steak Teriyaki",
+          "recipe": "Primary Taco Meat",
           "servings": 0.75
         },
         {
@@ -456,7 +457,7 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Singapore Cucumber Salad",
+          "recipe": "Sauerkraut With Caraway",
           "servings": 0.5
         },
         {
@@ -464,7 +465,7 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Thai Ginger Soup",
+          "recipe": "Iranian Yogurt Soup",
           "servings": 0.5
         },
         {
@@ -472,14 +473,14 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "staple",
-          "recipe": "Claudia Roden's Basic Couscous",
+          "recipe": "Easy Round Italian Bread",
           "servings": 1.0
         }
       ]
     },
     {
       "case": "four-with-vegetarian",
-      "about": "Two adults, a teen and a child, Ann vegetarian (her own diet, not the household's: ADR-0071's shared-dish model); a grandparent joins weekend dinners, so those dinners are for five.",
+      "about": "Two adults, a teen and a child, one of them vegetarian (the household plans vegetarian, PR-1's union); a grandparent joins weekend dinners, so those dinners are for five.",
       "outcome": "planned",
       "passed": true,
       "checks": {
@@ -496,21 +497,20 @@
       "failures": {},
       "metrics": {
         "meals": 21,
-        "dishes": 61,
-        "distinct_dishes_excluding_staples": 47,
+        "dishes": 59,
+        "distinct_dishes_excluding_staples": 51,
         "staples": [
           "Assyrian Rice",
-          "Indian Restaurant Style Basmati Rice",
-          "Super Easy Naan Bread"
+          "Brazilian Rice"
         ],
-        "cuisine_groups_per_meal": 1.71,
+        "cuisine_groups_per_meal": 1.64,
         "meals_with_two_deep_fried": 0,
         "energy_floor_pass_rate": 1.0,
         "moves": [],
         "grocery_lines_by_trip": {
-          "None": 93
+          "None": 107
         },
-        "purchase_total_sgd": 573.58
+        "purchase_total_sgd": 635.41
       },
       "meals": [
         {
@@ -534,7 +534,7 @@
           "weekday": "Sun",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Sweet And Sour Cucumbers",
+          "recipe": "Broccoli Salad",
           "servings": 2.04
         },
         {
@@ -542,8 +542,8 @@
           "weekday": "Sun",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Great Chicken",
-          "servings": 2.005
+          "recipe": "Mexican Couscous",
+          "servings": 4.89
         },
         {
           "day": 1,
@@ -566,7 +566,7 @@
           "weekday": "Sun",
           "meal": "dinner",
           "role": "vegetable-2",
-          "recipe": "Korean Bean Sprout Salad",
+          "recipe": "Japanese Cucumber Salad",
           "servings": 1.956
         },
         {
@@ -576,14 +576,6 @@
           "role": "soup",
           "recipe": "Quick gazpacho",
           "servings": 2.445
-        },
-        {
-          "day": 1,
-          "weekday": "Sun",
-          "meal": "dinner",
-          "role": "staple",
-          "recipe": "Assyrian Rice",
-          "servings": 4.89
         },
         {
           "day": 2,
@@ -598,7 +590,7 @@
           "weekday": "Mon",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Chinese Fried Rice",
+          "recipe": "Ramen With A Twist",
           "servings": 4.08
         },
         {
@@ -606,7 +598,7 @@
           "weekday": "Mon",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Seared Wheels Of Sweet Corn In Indonesian Kecap",
+          "recipe": "Korean Bean Sprout Salad",
           "servings": 2.04
         },
         {
@@ -614,15 +606,15 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Pizza Cheesy Chicken",
-          "servings": 1.6
+          "recipe": "Korean Barbecue Tofu",
+          "servings": 2.04
         },
         {
           "day": 2,
           "weekday": "Mon",
           "meal": "dinner",
           "role": "main-2",
-          "recipe": "Tofu Egg Foo Young",
+          "recipe": "Cauliflower Crust Pizza (Hcg P3)",
           "servings": 2.04
         },
         {
@@ -630,7 +622,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Tex Mex Salad",
+          "recipe": "Taco Slaw",
           "servings": 2.04
         },
         {
@@ -638,7 +630,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Martha's Gazpacho",
+          "recipe": "Gazpacho (Spanish Cold Soup)",
           "servings": 2.04
         },
         {
@@ -654,7 +646,7 @@
           "weekday": "Tue",
           "meal": "breakfast",
           "role": "main",
-          "recipe": "Feta Omelet",
+          "recipe": "Tony's Breakfast Couscous",
           "servings": 4.08
         },
         {
@@ -662,7 +654,7 @@
           "weekday": "Tue",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Greek Grilled Cheese",
+          "recipe": "Egg And Cheese Tostadas",
           "servings": 4.08
         },
         {
@@ -678,15 +670,15 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Primary Taco Meat",
-          "servings": 1.6
+          "recipe": "Teriyaki Fried Rice",
+          "servings": 4.08
         },
         {
           "day": 3,
           "weekday": "Tue",
           "meal": "dinner",
           "role": "main-2",
-          "recipe": "Korean Barbecue Tofu",
+          "recipe": "Falafel Patties",
           "servings": 2.04
         },
         {
@@ -694,7 +686,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Sauteed Zucchini With Oregano And Feta (Ww 1 Point)",
+          "recipe": "Japanese Cucumber Sesame Salad",
           "servings": 2.04
         },
         {
@@ -702,23 +694,15 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Gazpacho (Spanish Cold Soup)",
+          "recipe": "Iranian Yogurt Soup",
           "servings": 2.04
-        },
-        {
-          "day": 3,
-          "weekday": "Tue",
-          "meal": "dinner",
-          "role": "staple",
-          "recipe": "Assyrian Rice",
-          "servings": 4.08
         },
         {
           "day": 4,
           "weekday": "Wed",
           "meal": "breakfast",
           "role": "main",
-          "recipe": "Maple Yogurt",
+          "recipe": "Feta Omelet",
           "servings": 4.08
         },
         {
@@ -726,7 +710,7 @@
           "weekday": "Wed",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Spanish Omelette",
+          "recipe": "Greek Salad Omelette",
           "servings": 3.06
         },
         {
@@ -750,119 +734,119 @@
           "weekday": "Wed",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Teriyaki Fried Rice",
-          "servings": 4.08
-        },
-        {
-          "day": 4,
-          "weekday": "Wed",
-          "meal": "dinner",
-          "role": "main-2",
-          "recipe": "Teriyaki Pork Skewers",
-          "servings": 1.6
-        },
-        {
-          "day": 4,
-          "weekday": "Wed",
-          "meal": "dinner",
-          "role": "vegetable",
-          "recipe": "Moroccan Carrots",
+          "recipe": "Japanese Mom's Tofu Stir-Fry",
           "servings": 2.04
         },
         {
           "day": 4,
           "weekday": "Wed",
-          "meal": "dinner",
-          "role": "soup",
-          "recipe": "Iranian Yogurt Soup",
-          "servings": 2.04
-        },
-        {
-          "day": 5,
-          "weekday": "Thu",
-          "meal": "breakfast",
-          "role": "main",
-          "recipe": "The Egyptian Eye",
-          "servings": 4.08
-        },
-        {
-          "day": 5,
-          "weekday": "Thu",
-          "meal": "lunch",
-          "role": "main",
-          "recipe": "Marinated Teriyaki Tofu",
-          "servings": 3.06
-        },
-        {
-          "day": 5,
-          "weekday": "Thu",
-          "meal": "lunch",
-          "role": "vegetable",
-          "recipe": "Sautéed Miso Cucumber Salad",
-          "servings": 2.04
-        },
-        {
-          "day": 5,
-          "weekday": "Thu",
-          "meal": "lunch",
-          "role": "staple",
-          "recipe": "Super Easy Naan Bread",
-          "servings": 4.08
-        },
-        {
-          "day": 5,
-          "weekday": "Thu",
-          "meal": "dinner",
-          "role": "main",
-          "recipe": "Mexican Chicken (Low-Fat)",
-          "servings": 1.6
-        },
-        {
-          "day": 5,
-          "weekday": "Thu",
           "meal": "dinner",
           "role": "main-2",
           "recipe": "Egyptian Omelet (Eggah)",
           "servings": 2.04
         },
         {
-          "day": 5,
-          "weekday": "Thu",
+          "day": 4,
+          "weekday": "Wed",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Broccoli Salad",
+          "recipe": "Kimchi",
           "servings": 2.04
         },
         {
-          "day": 5,
-          "weekday": "Thu",
+          "day": 4,
+          "weekday": "Wed",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Gazpacho Soup",
+          "recipe": "Egyptian Edamame Stew",
           "servings": 2.04
         },
         {
-          "day": 5,
-          "weekday": "Thu",
+          "day": 4,
+          "weekday": "Wed",
           "meal": "dinner",
           "role": "staple",
-          "recipe": "Super Easy Naan Bread",
+          "recipe": "Assyrian Rice",
           "servings": 4.08
         },
         {
-          "day": 6,
-          "weekday": "Fri",
+          "day": 5,
+          "weekday": "Thu",
           "meal": "breakfast",
           "role": "main",
           "recipe": "Banana Couscous",
           "servings": 4.08
         },
         {
+          "day": 5,
+          "weekday": "Thu",
+          "meal": "lunch",
+          "role": "main",
+          "recipe": "Madras Egg Curry",
+          "servings": 3.06
+        },
+        {
+          "day": 5,
+          "weekday": "Thu",
+          "meal": "lunch",
+          "role": "vegetable",
+          "recipe": "Carrot Raita",
+          "servings": 2.04
+        },
+        {
+          "day": 5,
+          "weekday": "Thu",
+          "meal": "lunch",
+          "role": "staple",
+          "recipe": "Assyrian Rice",
+          "servings": 4.08
+        },
+        {
+          "day": 5,
+          "weekday": "Thu",
+          "meal": "dinner",
+          "role": "main",
+          "recipe": "Chinese Style Fried Rice",
+          "servings": 4.08
+        },
+        {
+          "day": 5,
+          "weekday": "Thu",
+          "meal": "dinner",
+          "role": "main-2",
+          "recipe": "Tarka Dhall",
+          "servings": 2.04
+        },
+        {
+          "day": 5,
+          "weekday": "Thu",
+          "meal": "dinner",
+          "role": "vegetable",
+          "recipe": "Jim's Raita",
+          "servings": 2.04
+        },
+        {
+          "day": 5,
+          "weekday": "Thu",
+          "meal": "dinner",
+          "role": "soup",
+          "recipe": "Lentil Potato Dal",
+          "servings": 2.04
+        },
+        {
+          "day": 6,
+          "weekday": "Fri",
+          "meal": "breakfast",
+          "role": "main",
+          "recipe": "Cherry-Walnut Breakfast Couscous",
+          "servings": 4.08
+        },
+        {
           "day": 6,
           "weekday": "Fri",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Teriyaki Grilled Tofu",
+          "recipe": "Spanish Omelet",
           "servings": 3.06
         },
         {
@@ -870,7 +854,7 @@
           "weekday": "Fri",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "English Pea Salad",
+          "recipe": "Cuban Cucumber Salad",
           "servings": 2.04
         },
         {
@@ -886,15 +870,15 @@
           "weekday": "Fri",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Thai-Style Omelet (Khai Jiao)",
-          "servings": 1.6
+          "recipe": "Daal Curry",
+          "servings": 2.04
         },
         {
           "day": 6,
           "weekday": "Fri",
           "meal": "dinner",
           "role": "main-2",
-          "recipe": "Teriyaki Tofu",
+          "recipe": "Quiche With Self-Forming Crust",
           "servings": 2.04
         },
         {
@@ -902,7 +886,7 @@
           "weekday": "Fri",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Tsukemono (Japanese Pickles)",
+          "recipe": "Thai Sweet And Sour Fresh Cucumber",
           "servings": 2.04
         },
         {
@@ -910,15 +894,15 @@
           "weekday": "Fri",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Thai Ginger Soup",
-          "servings": 1.6
+          "recipe": "Cheese And Corn Chowder",
+          "servings": 2.04
         },
         {
           "day": 6,
           "weekday": "Fri",
           "meal": "dinner",
           "role": "staple",
-          "recipe": "Assyrian Rice",
+          "recipe": "Brazilian Rice",
           "servings": 4.08
         },
         {
@@ -926,7 +910,7 @@
           "weekday": "Sat",
           "meal": "breakfast",
           "role": "main",
-          "recipe": "Easy Mexican Omelet",
+          "recipe": "Maple Yogurt",
           "servings": 4.08
         },
         {
@@ -934,7 +918,7 @@
           "weekday": "Sat",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Teriyaki Tofu",
+          "recipe": "Maple-Marinated Tempeh",
           "servings": 3.06
         },
         {
@@ -942,7 +926,7 @@
           "weekday": "Sat",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Cucumber Namasu",
+          "recipe": "Saute Zucchini",
           "servings": 2.04
         },
         {
@@ -958,15 +942,15 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Korean Beef",
-          "servings": 2.005
+          "recipe": "Crispy Tofu Stir Fry",
+          "servings": 2.445
         },
         {
           "day": 7,
           "weekday": "Sat",
           "meal": "dinner",
           "role": "main-2",
-          "recipe": "Korean Barbecue Tofu",
+          "recipe": "South African Curried Eggs",
           "servings": 2.445
         },
         {
@@ -974,7 +958,7 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Wafu Salad (Japanese Style Onion Salad)",
+          "recipe": "Black Bean Garlic Edamame",
           "servings": 1.956
         },
         {
@@ -982,7 +966,7 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "vegetable-2",
-          "recipe": "Saute Zucchini",
+          "recipe": "Sauerkraut Salad",
           "servings": 1.956
         },
         {
@@ -990,7 +974,7 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Tomato Dumplings",
+          "recipe": "Hungarian Potato Soup",
           "servings": 2.445
         },
         {
@@ -998,7 +982,7 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "staple",
-          "recipe": "Indian Restaurant Style Basmati Rice",
+          "recipe": "Assyrian Rice",
           "servings": 4.89
         }
       ]
@@ -1022,21 +1006,23 @@
       "failures": {},
       "metrics": {
         "meals": 21,
-        "dishes": 64,
+        "dishes": 69,
         "distinct_dishes_excluding_staples": 56,
         "staples": [
           "Assyrian Rice",
+          "Easy Round Italian Bread",
           "Indian Restaurant Style Basmati Rice",
+          "Mama D's Italian Bread",
           "Super Easy Naan Bread"
         ],
-        "cuisine_groups_per_meal": 2.21,
+        "cuisine_groups_per_meal": 2.43,
         "meals_with_two_deep_fried": 0,
         "energy_floor_pass_rate": 1.0,
         "moves": [],
         "grocery_lines_by_trip": {
-          "None": 64
+          "None": 59
         },
-        "purchase_total_sgd": 264.32
+        "purchase_total_sgd": 270.4
       },
       "meals": [
         {
@@ -1044,7 +1030,7 @@
           "weekday": "Sun",
           "meal": "breakfast",
           "role": "main",
-          "recipe": "Irish Porridge",
+          "recipe": "Chinese Black Sesame Seed Porridge (Geema Woo)",
           "servings": 6.0
         },
         {
@@ -1052,8 +1038,8 @@
           "weekday": "Sun",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Thai-Style Omelet (Khai Jiao)",
-          "servings": 4.5
+          "recipe": "Egg Fried Rice",
+          "servings": 6.0
         },
         {
           "day": 1,
@@ -1066,25 +1052,17 @@
         {
           "day": 1,
           "weekday": "Sun",
-          "meal": "lunch",
-          "role": "staple",
-          "recipe": "Assyrian Rice",
-          "servings": 6.0
-        },
-        {
-          "day": 1,
-          "weekday": "Sun",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Chinese Style Fried Rice",
-          "servings": 6.0
+          "recipe": "Quick Shake Pizza",
+          "servings": 3.0
         },
         {
           "day": 1,
           "weekday": "Sun",
           "meal": "dinner",
           "role": "main-2",
-          "recipe": "Moroccon Spiced Chicken Kabobs",
+          "recipe": "Japanese Grilled Chicken",
           "servings": 3.0
         },
         {
@@ -1092,7 +1070,7 @@
           "weekday": "Sun",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Broccoli Ginger Stir-Fry",
+          "recipe": "Hot And Sour Cabbage Salad",
           "servings": 2.4
         },
         {
@@ -1100,7 +1078,7 @@
           "weekday": "Sun",
           "meal": "dinner",
           "role": "vegetable-2",
-          "recipe": "Cantonese Family Stir Fried Vegetables",
+          "recipe": "Korean Bean Spouts",
           "servings": 2.4
         },
         {
@@ -1108,8 +1086,16 @@
           "weekday": "Sun",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Cream Of Potato Soup",
+          "recipe": "Thai Ginger Soup",
           "servings": 3.0
+        },
+        {
+          "day": 1,
+          "weekday": "Sun",
+          "meal": "dinner",
+          "role": "staple",
+          "recipe": "Mama D's Italian Bread",
+          "servings": 6.0
         },
         {
           "day": 2,
@@ -1124,7 +1110,7 @@
           "weekday": "Mon",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Korean Barbecue Tofu",
+          "recipe": "Teriyaki Tofu",
           "servings": 4.5
         },
         {
@@ -1132,7 +1118,7 @@
           "weekday": "Mon",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "German Coleslaw",
+          "recipe": "Thai Sweet-Garlicky Cauliflower With Red Pepper Strips",
           "servings": 3.0
         },
         {
@@ -1148,7 +1134,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Golden Chicken Nuggets",
+          "recipe": "Great Chicken",
           "servings": 3.0
         },
         {
@@ -1156,7 +1142,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "main-2",
-          "recipe": "Egg Foo Young",
+          "recipe": "Honey Teriyaki Salmon",
           "servings": 3.0
         },
         {
@@ -1164,7 +1150,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Sliced Cabbage Kimchi",
+          "recipe": "Broccoli Ginger Stir-Fry",
           "servings": 2.4
         },
         {
@@ -1172,7 +1158,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "vegetable-2",
-          "recipe": "Kimchi Salad Aka Quick Kimchi",
+          "recipe": "Seasoned Power Greens",
           "servings": 2.4
         },
         {
@@ -1180,7 +1166,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Irish Potato Soup",
+          "recipe": "Broccoli Soup",
           "servings": 3.0
         },
         {
@@ -1188,7 +1174,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "staple",
-          "recipe": "Indian Restaurant Style Basmati Rice",
+          "recipe": "Easy Round Italian Bread",
           "servings": 6.0
         },
         {
@@ -1204,7 +1190,7 @@
           "weekday": "Tue",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Tofu Egg Foo Young",
+          "recipe": "Vietnamese Pie]",
           "servings": 4.5
         },
         {
@@ -1220,7 +1206,7 @@
           "weekday": "Tue",
           "meal": "lunch",
           "role": "staple",
-          "recipe": "Super Easy Naan Bread",
+          "recipe": "Assyrian Rice",
           "servings": 6.0
         },
         {
@@ -1228,15 +1214,15 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Easy Pad Thai",
-          "servings": 6.0
+          "recipe": "Golden Chicken Nuggets",
+          "servings": 3.0
         },
         {
           "day": 3,
           "weekday": "Tue",
           "meal": "dinner",
           "role": "main-2",
-          "recipe": "Vietnamese Grilled Lemongrass Chicken",
+          "recipe": "Egg Foo Young",
           "servings": 3.0
         },
         {
@@ -1244,7 +1230,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Grilled Parmesan Tomatoes",
+          "recipe": "Carrot And Spinach Stirfry",
           "servings": 2.4
         },
         {
@@ -1252,7 +1238,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "vegetable-2",
-          "recipe": "Easy Vietnamese Cauliflower",
+          "recipe": "Stir-Fried Cabbage",
           "servings": 2.4
         },
         {
@@ -1260,15 +1246,23 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Chicken And Dumplings",
+          "recipe": "Chinese Egg Drop Soup",
           "servings": 3.0
+        },
+        {
+          "day": 3,
+          "weekday": "Tue",
+          "meal": "dinner",
+          "role": "staple",
+          "recipe": "Indian Restaurant Style Basmati Rice",
+          "servings": 6.0
         },
         {
           "day": 4,
           "weekday": "Wed",
           "meal": "breakfast",
           "role": "main",
-          "recipe": "Crepes",
+          "recipe": "Irish Porridge",
           "servings": 6.0
         },
         {
@@ -1276,7 +1270,7 @@
           "weekday": "Wed",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Bento Chicken Teriyaki",
+          "recipe": "Microwave Sweet And Sour Chicken",
           "servings": 4.5
         },
         {
@@ -1284,7 +1278,7 @@
           "weekday": "Wed",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Sesame-Carrot Edamame Salad",
+          "recipe": "Cantonese Family Stir Fried Vegetables",
           "servings": 3.0
         },
         {
@@ -1292,7 +1286,7 @@
           "weekday": "Wed",
           "meal": "lunch",
           "role": "staple",
-          "recipe": "Super Easy Naan Bread",
+          "recipe": "Assyrian Rice",
           "servings": 6.0
         },
         {
@@ -1300,15 +1294,15 @@
           "weekday": "Wed",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Ramen Korean-Style",
-          "servings": 6.0
+          "recipe": "Teriyaki Grilled Tofu",
+          "servings": 3.0
         },
         {
           "day": 4,
           "weekday": "Wed",
           "meal": "dinner",
           "role": "main-2",
-          "recipe": "Great Chicken",
+          "recipe": "Hurry Curry",
           "servings": 3.0
         },
         {
@@ -1316,7 +1310,7 @@
           "weekday": "Wed",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Gingered Zucchini",
+          "recipe": "Kimchi",
           "servings": 2.4
         },
         {
@@ -1324,7 +1318,7 @@
           "weekday": "Wed",
           "meal": "dinner",
           "role": "vegetable-2",
-          "recipe": "Japanese Salad",
+          "recipe": "Kimchi Salad Aka Quick Kimchi",
           "servings": 2.4
         },
         {
@@ -1332,8 +1326,16 @@
           "weekday": "Wed",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Chinese Egg Drop Soup",
+          "recipe": "Hearty Potato Soup",
           "servings": 3.0
+        },
+        {
+          "day": 4,
+          "weekday": "Wed",
+          "meal": "dinner",
+          "role": "staple",
+          "recipe": "Indian Restaurant Style Basmati Rice",
+          "servings": 6.0
         },
         {
           "day": 5,
@@ -1356,7 +1358,7 @@
           "weekday": "Thu",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Fried Cabbage",
+          "recipe": "Calico Cauliflower Salad",
           "servings": 3.0
         },
         {
@@ -1364,7 +1366,7 @@
           "weekday": "Thu",
           "meal": "lunch",
           "role": "staple",
-          "recipe": "Indian Restaurant Style Basmati Rice",
+          "recipe": "Super Easy Naan Bread",
           "servings": 6.0
         },
         {
@@ -1372,15 +1374,15 @@
           "weekday": "Thu",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Teriyaki Fried Rice",
-          "servings": 6.0
+          "recipe": "Korean Barbecue Tofu",
+          "servings": 3.0
         },
         {
           "day": 5,
           "weekday": "Thu",
           "meal": "dinner",
           "role": "main-2",
-          "recipe": "Hurry Curry",
+          "recipe": "Vietnamese Grilled Lemongrass Chicken",
           "servings": 3.0
         },
         {
@@ -1388,103 +1390,119 @@
           "weekday": "Thu",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Hot And Sour Cabbage Salad",
-          "servings": 2.4
-        },
-        {
-          "day": 5,
-          "weekday": "Thu",
-          "meal": "dinner",
-          "role": "vegetable-2",
-          "recipe": "Easy Carrot Salad (Indian-Style)",
-          "servings": 2.4
-        },
-        {
-          "day": 5,
-          "weekday": "Thu",
-          "meal": "dinner",
-          "role": "soup",
-          "recipe": "Hearty Potato Soup",
-          "servings": 3.0
-        },
-        {
-          "day": 6,
-          "weekday": "Fri",
-          "meal": "breakfast",
-          "role": "main",
-          "recipe": "Chinese Black Sesame Seed Porridge (Geema Woo)",
-          "servings": 6.0
-        },
-        {
-          "day": 6,
-          "weekday": "Fri",
-          "meal": "lunch",
-          "role": "main",
-          "recipe": "Teriyaki Tofu",
-          "servings": 4.5
-        },
-        {
-          "day": 6,
-          "weekday": "Fri",
-          "meal": "lunch",
-          "role": "vegetable",
-          "recipe": "Colombian Coleslaw",
-          "servings": 3.0
-        },
-        {
-          "day": 6,
-          "weekday": "Fri",
-          "meal": "lunch",
-          "role": "staple",
-          "recipe": "Indian Restaurant Style Basmati Rice",
-          "servings": 6.0
-        },
-        {
-          "day": 6,
-          "weekday": "Fri",
-          "meal": "dinner",
-          "role": "main",
-          "recipe": "Chinese New Year Rice",
-          "servings": 6.0
-        },
-        {
-          "day": 6,
-          "weekday": "Fri",
-          "meal": "dinner",
-          "role": "main-2",
-          "recipe": "Quick Shake Pizza",
-          "servings": 3.0
-        },
-        {
-          "day": 6,
-          "weekday": "Fri",
-          "meal": "dinner",
-          "role": "vegetable",
-          "recipe": "Moroccan Carrot And Cinnamon Salad",
-          "servings": 2.4
-        },
-        {
-          "day": 6,
-          "weekday": "Fri",
-          "meal": "dinner",
-          "role": "vegetable-2",
           "recipe": "Cho Na-Mool (Korean Cabbage Salad)",
           "servings": 2.4
         },
         {
+          "day": 5,
+          "weekday": "Thu",
+          "meal": "dinner",
+          "role": "vegetable-2",
+          "recipe": "Gingered Zucchini",
+          "servings": 2.4
+        },
+        {
+          "day": 5,
+          "weekday": "Thu",
+          "meal": "dinner",
+          "role": "soup",
+          "recipe": "Irish Potato Soup",
+          "servings": 3.0
+        },
+        {
+          "day": 5,
+          "weekday": "Thu",
+          "meal": "dinner",
+          "role": "staple",
+          "recipe": "Mama D's Italian Bread",
+          "servings": 6.0
+        },
+        {
+          "day": 6,
+          "weekday": "Fri",
+          "meal": "breakfast",
+          "role": "main",
+          "recipe": "Scrambled Eggs",
+          "servings": 6.0
+        },
+        {
+          "day": 6,
+          "weekday": "Fri",
+          "meal": "lunch",
+          "role": "main",
+          "recipe": "Chinese Sesame Chicken Kabobs",
+          "servings": 4.5
+        },
+        {
+          "day": 6,
+          "weekday": "Fri",
+          "meal": "lunch",
+          "role": "vegetable",
+          "recipe": "German Coleslaw",
+          "servings": 3.0
+        },
+        {
+          "day": 6,
+          "weekday": "Fri",
+          "meal": "lunch",
+          "role": "staple",
+          "recipe": "Super Easy Naan Bread",
+          "servings": 6.0
+        },
+        {
+          "day": 6,
+          "weekday": "Fri",
+          "meal": "dinner",
+          "role": "main",
+          "recipe": "Thai-Style Omelet (Khai Jiao)",
+          "servings": 3.0
+        },
+        {
+          "day": 6,
+          "weekday": "Fri",
+          "meal": "dinner",
+          "role": "main-2",
+          "recipe": "Tandoori Chicken Thighs",
+          "servings": 3.0
+        },
+        {
+          "day": 6,
+          "weekday": "Fri",
+          "meal": "dinner",
+          "role": "vegetable",
+          "recipe": "Grilled Parmesan Tomatoes",
+          "servings": 2.4
+        },
+        {
+          "day": 6,
+          "weekday": "Fri",
+          "meal": "dinner",
+          "role": "vegetable-2",
+          "recipe": "Sweet And Sour Cabbage",
+          "servings": 2.4
+        },
+        {
           "day": 6,
           "weekday": "Fri",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Lean Sweet And Sour Cabbage Borscht",
+          "recipe": "Chicken And Dumplings",
           "servings": 3.0
+        },
+        {
+          "day": 6,
+          "weekday": "Fri",
+          "meal": "dinner",
+          "role": "staple",
+          "recipe": "Indian Restaurant Style Basmati Rice",
+          "servings": 6.0
         },
         {
           "day": 7,
           "weekday": "Sat",
           "meal": "breakfast",
           "role": "main",
-          "recipe": "Tamagoyaki (Japanese Omelet)",
+          "recipe": "Crepes",
           "servings": 6.0
         },
         {
@@ -1492,7 +1510,7 @@
           "weekday": "Sat",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Vietnamese Pie]",
+          "recipe": "Creamed Chicken Curry",
           "servings": 4.5
         },
         {
@@ -1500,7 +1518,7 @@
           "weekday": "Sat",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Thai-Style Beet Salad",
+          "recipe": "Fried Cabbage",
           "servings": 3.0
         },
         {
@@ -1516,8 +1534,8 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Hawaiian Curry",
-          "servings": 6.0
+          "recipe": "Chicken Burgers",
+          "servings": 3.0
         },
         {
           "day": 7,
@@ -1532,14 +1550,6 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Calico Cauliflower Salad",
-          "servings": 2.4
-        },
-        {
-          "day": 7,
-          "weekday": "Sat",
-          "meal": "dinner",
-          "role": "vegetable-2",
           "recipe": "Shish Kabobs",
           "servings": 2.4
         },
@@ -1547,9 +1557,25 @@
           "day": 7,
           "weekday": "Sat",
           "meal": "dinner",
+          "role": "vegetable-2",
+          "recipe": "Easy Vietnamese Cauliflower",
+          "servings": 2.4
+        },
+        {
+          "day": 7,
+          "weekday": "Sat",
+          "meal": "dinner",
           "role": "soup",
-          "recipe": "Broccoli Soup",
+          "recipe": "Cream Of Potato Soup",
           "servings": 3.0
+        },
+        {
+          "day": 7,
+          "weekday": "Sat",
+          "meal": "dinner",
+          "role": "staple",
+          "recipe": "Mama D's Italian Bread",
+          "servings": 6.0
         }
       ]
     },
@@ -1572,21 +1598,20 @@
       "failures": {},
       "metrics": {
         "meals": 30,
-        "dishes": 76,
-        "distinct_dishes_excluding_staples": 60,
+        "dishes": 74,
+        "distinct_dishes_excluding_staples": 59,
         "staples": [
-          "Assyrian Rice",
-          "Super Easy Naan Bread"
+          "Assyrian Rice"
         ],
-        "cuisine_groups_per_meal": 1.4,
+        "cuisine_groups_per_meal": 1.45,
         "meals_with_two_deep_fried": 0,
         "energy_floor_pass_rate": 1.0,
         "moves": [],
         "grocery_lines_by_trip": {
-          "1": 89,
-          "2": 60
+          "1": 78,
+          "2": 51
         },
-        "purchase_total_sgd": 705.74
+        "purchase_total_sgd": 642.77
       },
       "meals": [
         {
@@ -1666,7 +1691,7 @@
           "weekday": "Mon",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Scallops Portuguese",
+          "recipe": "Primary Taco Meat",
           "servings": 1.5
         },
         {
@@ -1722,7 +1747,7 @@
           "weekday": "Tue",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Chicken Skewers With Satay Salad",
+          "recipe": "Bento Chicken Teriyaki",
           "servings": 1.5
         },
         {
@@ -1730,7 +1755,7 @@
           "weekday": "Tue",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Fresh Pesto And Tomato Salad",
+          "recipe": "Korean Bean Spouts",
           "servings": 1.0
         },
         {
@@ -1738,7 +1763,7 @@
           "weekday": "Tue",
           "meal": "lunch",
           "role": "staple",
-          "recipe": "Super Easy Naan Bread",
+          "recipe": "Assyrian Rice",
           "servings": 2.0
         },
         {
@@ -1778,7 +1803,7 @@
           "weekday": "Wed",
           "meal": "breakfast",
           "role": "main",
-          "recipe": "Thai Omelette",
+          "recipe": "Breakfast Burrito (Like Mc Donald's!)",
           "servings": 2.0
         },
         {
@@ -1786,24 +1811,16 @@
           "weekday": "Wed",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Pizza Chicken Melts",
-          "servings": 1.5
+          "recipe": "Grilled Milkimcheeze Sandwich From 'The Kimchi Cookbook'",
+          "servings": 2.0
         },
         {
           "day": 4,
           "weekday": "Wed",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Tomato And Cucumber Salad With Feta",
+          "recipe": "Wafu Salad (Japanese Style Onion Salad)",
           "servings": 1.0
-        },
-        {
-          "day": 4,
-          "weekday": "Wed",
-          "meal": "lunch",
-          "role": "staple",
-          "recipe": "Assyrian Rice",
-          "servings": 2.0
         },
         {
           "day": 4,
@@ -1842,7 +1859,7 @@
           "weekday": "Thu",
           "meal": "breakfast",
           "role": "main",
-          "recipe": "Jerica's French Toast",
+          "recipe": "Thai Omelette",
           "servings": 2.0
         },
         {
@@ -1850,39 +1867,31 @@
           "weekday": "Thu",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Kung Pao Pork",
-          "servings": 1.5
+          "recipe": "Lemon And Feta Pasta",
+          "servings": 2.0
         },
         {
           "day": 5,
           "weekday": "Thu",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Asparagus & Mushroom Stir Fry",
+          "recipe": "Fresh Pesto And Tomato Salad",
           "servings": 1.0
         },
         {
           "day": 5,
           "weekday": "Thu",
-          "meal": "lunch",
-          "role": "staple",
-          "recipe": "Assyrian Rice",
+          "meal": "dinner",
+          "role": "main",
+          "recipe": "Korean Ground Beef And Rice Bowls",
           "servings": 2.0
         },
         {
           "day": 5,
           "weekday": "Thu",
           "meal": "dinner",
-          "role": "main",
-          "recipe": "Easy Slow Cooker Sweet And Sour Pork Chops",
-          "servings": 1.5
-        },
-        {
-          "day": 5,
-          "weekday": "Thu",
-          "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Cuban Cucumber Salad",
+          "recipe": "Cucumber Namasu",
           "servings": 1.0
         },
         {
@@ -1890,16 +1899,8 @@
           "weekday": "Thu",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Martha's Gazpacho",
+          "recipe": "Gazpacho (Spanish Cold Soup)",
           "servings": 1.0
-        },
-        {
-          "day": 5,
-          "weekday": "Thu",
-          "meal": "dinner",
-          "role": "staple",
-          "recipe": "Assyrian Rice",
-          "servings": 2.0
         },
         {
           "day": 6,
@@ -1930,7 +1931,7 @@
           "weekday": "Fri",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Teriyaki Burger",
+          "recipe": "Sloppy Joes",
           "servings": 1.5
         },
         {
@@ -1938,7 +1939,7 @@
           "weekday": "Fri",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Easy, Dynamite Cauliflower Curry",
+          "recipe": "Cuban Cucumber Salad",
           "servings": 1.0
         },
         {
@@ -1946,7 +1947,7 @@
           "weekday": "Fri",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Gazpacho (Spanish Cold Soup)",
+          "recipe": "Martha's Gazpacho",
           "servings": 1.0
         },
         {
@@ -1970,8 +1971,8 @@
           "weekday": "Sat",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Primary Taco Meat",
-          "servings": 1.5
+          "recipe": "Indonesian Fried Rice",
+          "servings": 2.0
         },
         {
           "day": 7,
@@ -1984,17 +1985,9 @@
         {
           "day": 7,
           "weekday": "Sat",
-          "meal": "lunch",
-          "role": "staple",
-          "recipe": "Assyrian Rice",
-          "servings": 2.0
-        },
-        {
-          "day": 7,
-          "weekday": "Sat",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Korean Barbecued Beef",
+          "recipe": "Bul-Ko-Kee (Korean Barbecue Beef)",
           "servings": 1.5
         },
         {
@@ -2002,7 +1995,7 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Cucumber Namasu",
+          "recipe": "Kimchi",
           "servings": 1.0
         },
         {
@@ -2034,23 +2027,31 @@
           "weekday": "Sun",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Ramen With A Twist",
-          "servings": 2.0
+          "recipe": "Orange Chicken",
+          "servings": 1.5
         },
         {
           "day": 8,
           "weekday": "Sun",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Sautéed Miso Cucumber Salad",
+          "recipe": "Mediterranean Kale With Feta",
           "servings": 1.0
+        },
+        {
+          "day": 8,
+          "weekday": "Sun",
+          "meal": "lunch",
+          "role": "staple",
+          "recipe": "Assyrian Rice",
+          "servings": 2.0
         },
         {
           "day": 8,
           "weekday": "Sun",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Easy Teriyaki Chops",
+          "recipe": "Stir-Fry Cashew Chicken",
           "servings": 1.5
         },
         {
@@ -2090,7 +2091,7 @@
           "weekday": "Mon",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Marinated Velveted Chicken For Stir-Fry",
+          "recipe": "Thai-Style Omelet (Khai Jiao)",
           "servings": 1.5
         },
         {
@@ -2098,7 +2099,7 @@
           "weekday": "Mon",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Cucumber-Onion Salad",
+          "recipe": "Jim's Raita",
           "servings": 1.0
         },
         {
@@ -2106,7 +2107,7 @@
           "weekday": "Mon",
           "meal": "lunch",
           "role": "staple",
-          "recipe": "Super Easy Naan Bread",
+          "recipe": "Assyrian Rice",
           "servings": 2.0
         },
         {
@@ -2114,7 +2115,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Shrimp Curry In A Hurry",
+          "recipe": "Moroccan Tuna Steaks",
           "servings": 1.5
         },
         {
@@ -2122,7 +2123,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Elotes",
+          "recipe": "Egyptian Tomato Salad",
           "servings": 1.0
         },
         {
@@ -2130,7 +2131,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Tomato Dumplings",
+          "recipe": "Nigerian Peanut Soup",
           "servings": 1.0
         },
         {
@@ -2154,8 +2155,8 @@
           "weekday": "Tue",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Indonesian Fried Rice",
-          "servings": 2.0
+          "recipe": "Korean Barbecued Beef",
+          "servings": 1.5
         },
         {
           "day": 10,
@@ -2164,6 +2165,14 @@
           "role": "vegetable",
           "recipe": "Greek Vegetable Salad",
           "servings": 1.0
+        },
+        {
+          "day": 10,
+          "weekday": "Tue",
+          "meal": "lunch",
+          "role": "staple",
+          "recipe": "Assyrian Rice",
+          "servings": 2.0
         },
         {
           "day": 10,
@@ -2219,20 +2228,26 @@
       "metrics": {
         "meals": 21,
         "dishes": 74,
-        "distinct_dishes_excluding_staples": 53,
+        "distinct_dishes_excluding_staples": 57,
         "staples": [
-          "Assyrian Rice"
+          "Assyrian Rice",
+          "Brazilian Rice",
+          "Claudia Roden's Basic Couscous",
+          "Easy Round Italian Bread",
+          "Indian Restaurant Style Basmati Rice",
+          "Mama D's Italian Bread",
+          "Super Easy Naan Bread"
         ],
-        "cuisine_groups_per_meal": 2.21,
+        "cuisine_groups_per_meal": 2.14,
         "meals_with_two_deep_fried": 0,
         "energy_floor_pass_rate": 1.0,
         "moves": [
           "day 5 dinner: main left out"
         ],
         "grocery_lines_by_trip": {
-          "None": 109
+          "None": 110
         },
-        "purchase_total_sgd": 689.56
+        "purchase_total_sgd": 739.2
       },
       "meals": [
         {
@@ -2280,7 +2295,7 @@
           "weekday": "Sun",
           "meal": "dinner",
           "role": "main-2",
-          "recipe": "Pizza Cheesy Chicken",
+          "recipe": "Honey Teriyaki Salmon",
           "servings": 1.912
         },
         {
@@ -2288,7 +2303,7 @@
           "weekday": "Sun",
           "meal": "dinner",
           "role": "main-3",
-          "recipe": "Thai-Style Omelet (Khai Jiao)",
+          "recipe": "Pizza Cheesy Chicken",
           "servings": 1.912
         },
         {
@@ -2304,7 +2319,7 @@
           "weekday": "Sun",
           "meal": "dinner",
           "role": "vegetable-2",
-          "recipe": "Sauerkraut With Caraway",
+          "recipe": "Korean Bean Sprout Salad",
           "servings": 1.912
         },
         {
@@ -2328,7 +2343,7 @@
           "weekday": "Mon",
           "meal": "breakfast",
           "role": "main",
-          "recipe": "Feta Omelet",
+          "recipe": "Sunrise Taco",
           "servings": 4.78
         },
         {
@@ -2336,24 +2351,16 @@
           "weekday": "Mon",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Miso Beef",
-          "servings": 3.585
+          "recipe": "Indonesian Fried Rice",
+          "servings": 4.78
         },
         {
           "day": 2,
           "weekday": "Mon",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Korean Bean Sprout Salad",
+          "recipe": "Fresh Pesto And Tomato Salad",
           "servings": 2.39
-        },
-        {
-          "day": 2,
-          "weekday": "Mon",
-          "meal": "lunch",
-          "role": "staple",
-          "recipe": "Assyrian Rice",
-          "servings": 4.78
         },
         {
           "day": 2,
@@ -2408,7 +2415,7 @@
           "weekday": "Mon",
           "meal": "dinner",
           "role": "staple",
-          "recipe": "Assyrian Rice",
+          "recipe": "Brazilian Rice",
           "servings": 4.78
         },
         {
@@ -2416,7 +2423,7 @@
           "weekday": "Tue",
           "meal": "breakfast",
           "role": "main",
-          "recipe": "Sunrise Taco",
+          "recipe": "Feta Omelet",
           "servings": 4.78
         },
         {
@@ -2424,7 +2431,7 @@
           "weekday": "Tue",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Teriyaki Chicken",
+          "recipe": "Microwave Shrimp Scampi",
           "servings": 3.585
         },
         {
@@ -2432,7 +2439,7 @@
           "weekday": "Tue",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Edamame Salad",
+          "recipe": "English Pea Salad",
           "servings": 2.39
         },
         {
@@ -2464,7 +2471,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "main-3",
-          "recipe": "Thai-Style Omelet (Khai Jiao)",
+          "recipe": "Steamed Thai Mussels",
           "servings": 1.912
         },
         {
@@ -2496,7 +2503,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "staple",
-          "recipe": "Assyrian Rice",
+          "recipe": "Easy Round Italian Bread",
           "servings": 4.78
         },
         {
@@ -2520,7 +2527,7 @@
           "weekday": "Wed",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Fresh Pesto And Tomato Salad",
+          "recipe": "Cuban Cucumber Salad",
           "servings": 2.39
         },
         {
@@ -2552,7 +2559,7 @@
           "weekday": "Wed",
           "meal": "dinner",
           "role": "main-3",
-          "recipe": "Hoisin Eggplant Chicken",
+          "recipe": "Japanese Ginger Pork (Shogayaki)",
           "servings": 1.912
         },
         {
@@ -2584,7 +2591,7 @@
           "weekday": "Wed",
           "meal": "dinner",
           "role": "staple",
-          "recipe": "Assyrian Rice",
+          "recipe": "Indian Restaurant Style Basmati Rice",
           "servings": 4.78
         },
         {
@@ -2600,7 +2607,7 @@
           "weekday": "Thu",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Thai-Style Omelet (Khai Jiao)",
+          "recipe": "Thai Beef",
           "servings": 3.585
         },
         {
@@ -2608,7 +2615,7 @@
           "weekday": "Thu",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Cuban Cucumber Salad",
+          "recipe": "Chinese Ginger Garlic Asparagus",
           "servings": 2.39
         },
         {
@@ -2616,7 +2623,7 @@
           "weekday": "Thu",
           "meal": "lunch",
           "role": "staple",
-          "recipe": "Assyrian Rice",
+          "recipe": "Super Easy Naan Bread",
           "servings": 4.78
         },
         {
@@ -2632,7 +2639,7 @@
           "weekday": "Thu",
           "meal": "dinner",
           "role": "main-3",
-          "recipe": "Microwaved Parmesan Chicken",
+          "recipe": "Slow Cooker Chicken Tikka Masala (Weight Watchers)",
           "servings": 2.39
         },
         {
@@ -2672,8 +2679,8 @@
           "weekday": "Fri",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Indonesian Fried Rice",
-          "servings": 4.78
+          "recipe": "Bul-Ko-Kee (Korean Barbecue Beef)",
+          "servings": 3.585
         },
         {
           "day": 6,
@@ -2682,6 +2689,14 @@
           "role": "vegetable",
           "recipe": "Greek Salad Iv",
           "servings": 2.39
+        },
+        {
+          "day": 6,
+          "weekday": "Fri",
+          "meal": "lunch",
+          "role": "staple",
+          "recipe": "Assyrian Rice",
+          "servings": 4.78
         },
         {
           "day": 6,
@@ -2736,7 +2751,7 @@
           "weekday": "Fri",
           "meal": "dinner",
           "role": "staple",
-          "recipe": "Assyrian Rice",
+          "recipe": "Mama D's Italian Bread",
           "servings": 4.78
         },
         {
@@ -2752,7 +2767,7 @@
           "weekday": "Sat",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Bento Chicken Teriyaki",
+          "recipe": "Beef Stir Fry With Tri-Colored Peppers",
           "servings": 3.585
         },
         {
@@ -2792,7 +2807,7 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "main-3",
-          "recipe": "Korean Barbecued Beef",
+          "recipe": "Miso Beef",
           "servings": 1.912
         },
         {
@@ -2824,7 +2839,7 @@
           "weekday": "Sat",
           "meal": "dinner",
           "role": "staple",
-          "recipe": "Assyrian Rice",
+          "recipe": "Claudia Roden's Basic Couscous",
           "servings": 4.78
         }
       ]

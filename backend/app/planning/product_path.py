@@ -181,13 +181,13 @@ def uncoverable_members(problem) -> list[str]:
         mains = [
             r
             for r in eligible
-            if any(r.meal_role in (role.meal_roles or ()) for role in roles if role_base(role.role_id) == "main")
+            if any(meal_role_of(r) in (role.meal_roles or ()) for role in roles if role_base(role.role_id) == "main")
         ]
-        staples = [r for r in eligible if r.meal_role == STAPLE_ROLE]
+        staples = [r for r in eligible if meal_role_of(r) == STAPLE_ROLE]
         for member in slot.members:
             mine = [r for r in mains if member_can_eat(member, r)]
             covered = any(fills_staple(r) for r in mine) or (
-                any(member_can_eat(member, r) for r in staples) and any(r.meal_role == "protein_main" for r in mine)
+                any(member_can_eat(member, r) for r in staples) and any(meal_role_of(r) == "protein_main" for r in mine)
             )
             if not covered and member.name not in names:
                 names.append(member.name)
@@ -1247,7 +1247,7 @@ def recipe_tags(recipe, candidate) -> dict:
     )
     held = not unreviewed(recipe)
     return {
-        "meal_role": recipe.meal_role if held else None,
+        "meal_role": meal_role_of(recipe),
         "contains_staple": recipe.contains_staple if held else None,
         "protein_sources": recipe.protein_sources if held else None,
         "cooking_methods": recipe.cooking_methods,

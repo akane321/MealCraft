@@ -230,8 +230,10 @@ def coverage_issues(slot: PlanningSlot, dishes, recipes: dict, shares) -> list[t
     if not slot.members or shares is None:
         return []
     # Imported here, not above: `meal_composition` reads this module's rules, and the dish that carries its
-    # staple has one definition (ADR-0070 section 2), which lives beside the meal's own structure.
-    from app.planning.meal_composition import fills_staple
+    # staple and the role a dish may fill have one definition each (ADR-0070 section 2), which live beside the
+    # meal's own structure. `meal_role_of` is the admissible role, so a main whose protein sources are unknown
+    # is no filling core for anyone.
+    from app.planning.meal_composition import fills_staple, meal_role_of
 
     read = []
     for role, recipe_id in dishes:
@@ -239,7 +241,7 @@ def coverage_issues(slot: PlanningSlot, dishes, recipes: dict, shares) -> list[t
         read.append(
             CoverageDish(
                 role_id=role or MAIN_ROLE,
-                protein_main=recipe.meal_role == "protein_main",
+                protein_main=meal_role_of(recipe) == "protein_main",
                 carries_staple=fills_staple(recipe),
                 calories_kcal=recipe.nutrients_per_serving.calories_kcal,
                 share=float(shares[role or MAIN_ROLE]),

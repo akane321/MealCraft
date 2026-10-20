@@ -1,31 +1,31 @@
 {
-  "machine": "x86_64 (Linux)",
-  "commit": "0d103abe10b2395b609bb87e8e2fa8be3193fa68",
+  "machine": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel (Windows)",
+  "commit": "019bf02166eb5915f4d59bd8cdda854e5b547622",
   "cases": {
     "one-adult": {
-      "first": 8.67,
-      "median": 5.32,
-      "max": 6.12
+      "first": 7.43,
+      "median": 4.11,
+      "max": 4.37
     },
     "four-with-vegetarian": {
-      "first": 16.17,
-      "median": 16.11,
-      "max": 16.82
+      "first": 4.23,
+      "median": 4.67,
+      "max": 4.75
     },
     "six-tight-budget": {
-      "first": 178.85,
-      "median": 84.0,
-      "max": 87.92
+      "first": 52.67,
+      "median": 37.15,
+      "max": 37.6
     },
     "two-no-oven-ten-days": {
-      "first": 6.97,
-      "median": 7.52,
-      "max": 7.98
+      "first": 5.47,
+      "median": 5.56,
+      "max": 6.16
     },
     "seven-with-young-children": {
-      "first": 10.8,
-      "median": 10.2,
-      "max": 10.96
+      "first": 5.19,
+      "median": 4.99,
+      "max": 5.56
     }
   }
 }
