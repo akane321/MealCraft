@@ -1,7 +1,10 @@
 from datetime import date
+from functools import cached_property
 from typing import Annotated, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
+
+from app.schemas.catalog_tags import CookingMethod, Equipment, EquipmentNeeds, MealRole, ProteinSource
 
 MealType = Literal["breakfast", "lunch", "dinner", "snack"]
 NutrientMetric = Literal[
@@ -27,6 +30,21 @@ PlanningStatus = Literal[
 ]
 
 
+def _unset(value) -> bool:
+    return value is None or value == []
+
+
+# A newer optional key is left out of a dump while unset (None or []): stored constraints, packet digests and the
+# protocol reports stay byte-identical for requests that never set it.
+LEAN = {"exclude_if": _unset}
+
+
+# Meal roles a lunch or dinner never takes (ADR-0070 section 3); breakfast dishes stay at breakfast.
+NON_MEAL_ROLES = frozenset({"snack", "dessert", "sauce", "drink", "breakfast"})
+CORE_MEAL_ROLES = frozenset({"protein_main", "one_bowl"})
+STAPLE_ROLE = "staple"
+
+
 class PlanningNutrients(BaseModel):
     calories_kcal: float = Field(ge=0)
     protein_g: float = Field(ge=0)
@@ -37,12 +55,38 @@ class PlanningNutrients(BaseModel):
 
 
 class PlanningMealRole(BaseModel):
-    """One dish position in a meal, filled by a recipe of one of its courses."""
+    """One dish position in a meal, filled by a recipe of one of its courses, or of one of its meal roles.
+
+    A role of `courses` is the older form (ADR-0036, ADR-0046): protocol episodes and saved shapes keep it and
+    plan exactly as before. A role of `meal_roles` (ADR-0070) admits recipes by their meal-role tag; its meal is
+    then a real meal (filling core, staple, energy floor), and `min_people` plans it only when that many people
+    eat the meal (the dinner that grows with the household).
+    """
 
     model_config = ConfigDict(extra="forbid")
     role_id: str = Field(min_length=1, max_length=40)
-    courses: list[DishCourse] = Field(min_length=1)
+    courses: list[DishCourse] = Field(default_factory=list)
     required: bool = True
+    meal_roles: list[MealRole] | None = Field(default=None, min_length=1, **LEAN)
+    min_people: int | None = Field(default=None, ge=1, le=12, **LEAN)
+
+    @model_validator(mode="after")
+    def one_way_to_admit(self) -> "PlanningMealRole":
+        if bool(self.courses) == bool(self.meal_roles):
+            raise ValueError("a meal role admits courses or meal roles: one of the two")
+        if self.min_people is not None and not self.meal_roles:
+            raise ValueError("only a meal-role role is planned by how many people are present")
+        return self
+
+
+def structured(roles) -> bool:
+    """A meal of meal-role roles (ADR-0070); a meal's roles are all of one kind (`_composition_roles`)."""
+    return bool(roles) and bool(getattr(roles[0], "meal_roles", None))
+
+
+def core_role(roles) -> "PlanningMealRole | None":
+    """A structured meal's filling core: its first role that takes a protein main or a one-bowl dish."""
+    return next((role for role in roles or () if set(role.meal_roles or ()) & CORE_MEAL_ROLES), None)
 
 
 def _composition_roles(roles: list[PlanningMealRole]) -> list[PlanningMealRole]:
@@ -51,13 +95,42 @@ def _composition_roles(roles: list[PlanningMealRole]) -> list[PlanningMealRole]:
         raise ValueError("meal role IDs must be unique within a composition")
     if not any(role.required for role in roles):
         raise ValueError("a meal composition needs at least one required role")
+    kinds = {bool(role.meal_roles) for role in roles}
+    if len(kinds) > 1:
+        raise ValueError("a meal's roles admit courses or meal roles, not a mix of both")
+    if kinds == {False} and len(roles) > 6:
+        raise ValueError("a meal of course roles holds at most six dishes")
+    return roles
+
+
+def real_meal_roles(meal: str, roles: list[PlanningMealRole]) -> list[PlanningMealRole]:
+    """A structured lunch or dinner is a real meal (ADR-0070 section 3): a required filling core, a staple role
+    unless the core takes only one-bowl dishes, no role that takes a non-meal dish, a salad only as the vegetable
+    dish and a soup only as the soup. Returns the roles; raises ValueError for a shape that breaks one."""
+    if meal not in ("lunch", "dinner") or not structured(roles):
+        return roles
+    core = core_role(roles)
+    if core is None or not core.required:
+        raise ValueError(f"a {meal} needs a required protein main or one-bowl dish")
+    if set(core.meal_roles or ()) != {"one_bowl"} and not any(role.role_id == STAPLE_ROLE for role in roles):
+        raise ValueError(f"a {meal} with a protein main needs a staple role")
+    for role in roles:
+        admitted = set(role.meal_roles or ())
+        base = role.role_id.split("-")[0]
+        if admitted & NON_MEAL_ROLES:
+            raise ValueError(f"a {meal} never takes {', '.join(sorted(admitted & NON_MEAL_ROLES))} dishes")
+        if "salad" in admitted and base != "vegetable":
+            raise ValueError("a salad fills only a vegetable role")
+        if "soup" in admitted and base != "soup":
+            raise ValueError("a soup fills only a soup role")
     return roles
 
 
 # A household's dish roles for a meal, as a profile or a request states them.
 MealComposition = Annotated[
-    # Up to six dishes: several meat and vegetable dishes and a soup (ADR-0046 raised ADR-0036's four).
-    list[PlanningMealRole], Field(min_length=1, max_length=6), AfterValidator(_composition_roles)
+    # Up to six dishes of courses (ADR-0046 raised ADR-0036's four); up to eight of meal roles: the full
+    # default's dinner for seven and more is seven roles (ADR-0070).
+    list[PlanningMealRole], Field(min_length=1, max_length=8), AfterValidator(_composition_roles)
 ]
 
 
@@ -75,9 +148,15 @@ class PlanningSlot(BaseModel):
     required: bool = True
     locked_recipe_id: str | None = Field(default=None, max_length=120)
     # None is one dish per meal, as before. Role `main` takes the main share.
-    composition: list[PlanningMealRole] | None = Field(default=None, min_length=1, max_length=6)
+    composition: list[PlanningMealRole] | None = Field(default=None, min_length=1, max_length=8)
     # A composed meal's dishes that stay while one is added to it: role id -> recipe id.
     locked_roles: dict[str, str] | None = None
+    # A structured lunch or dinner's energy floor per serving (ADR-0070 section 3): its dishes at their shares.
+    min_energy_kcal: float | None = Field(default=None, ge=0, **LEAN)
+    # The shopping trip that buys this meal's food (ADR-0072): 1 or 2 in a plan longer than a week, else None.
+    trip: int | None = Field(default=None, ge=1, le=2, **LEAN)
+    # Days since that trip, the trip's own day being 1 (layer 08 shelf life); None when the rule is off.
+    days_after_shopping: int | None = Field(default=None, ge=1, le=14, **LEAN)
 
     @model_validator(mode="after")
     def validate_composition(self) -> "PlanningSlot":
@@ -105,6 +184,7 @@ class PlanningIngredientRequirement(BaseModel):
 
 
 class PlanningRecipeCandidate(BaseModel):
+    # Layer 08 tags (PR-2), set only when the household's rules are on: a request without them keeps its packet.
     recipe_id: str = Field(min_length=1, max_length=120)
     title: str = Field(min_length=1, max_length=240)
     servings: int = Field(ge=1, le=24)
@@ -123,6 +203,15 @@ class PlanningRecipeCandidate(BaseModel):
     prep_minutes: int | None = Field(default=None, ge=0, le=720)
     cook_minutes: int | None = Field(default=None, ge=0, le=720)
     passive_minutes: int | None = Field(default=None, ge=0, le=720)
+    meal_role: MealRole | None = Field(default=None, **LEAN)
+    contains_staple: bool | None = Field(default=None, **LEAN)
+    protein_sources: list[ProteinSource] | None = Field(default=None, **LEAN)
+    cooking_methods: list[CookingMethod] | None = Field(default=None, **LEAN)
+    # Every inner group is needed, one item of a group will do; None or [] needs nothing.
+    equipment: EquipmentNeeds | None = Field(default=None, **LEAN)
+    cuisine_group: str | None = Field(default=None, max_length=40, **LEAN)
+    # A bought line is perishable: the dish is cooked within `FinalPlanningProblem.perishable_days` of its trip.
+    perishable: bool | None = Field(default=None, **LEAN)
 
     @model_validator(mode="after")
     def validate_time_split(self) -> "PlanningRecipeCandidate":
@@ -232,6 +321,10 @@ class PlanningCompositionPolicy(BaseModel):
     hands_on_cook_fraction: float = Field(default=0.5, ge=0, le=1, allow_inf_nan=False)
     switch_minutes: int = Field(default=5, ge=0, le=60)
     round_to_minutes: int = Field(default=5, ge=1, le=15)
+    # Structured meals' shares (data/planning/meal-structure-v1.json `portion_shares`), recorded with the packet.
+    structured_shares: dict[str, list[float] | float] | None = Field(default=None, **LEAN)
+    # A staple dish cooks unattended (the rice cooker): its cook time is waiting, not hands-on.
+    staple_hands_off_cook: bool | None = Field(default=None, **LEAN)
 
     @model_validator(mode="after")
     def validate_shares(self) -> "PlanningCompositionPolicy":
@@ -302,6 +395,10 @@ class FinalPlanningProblem(BaseModel):
     diversity_policy: PlanningDiversityPolicy | None = None
     composition_policy: PlanningCompositionPolicy = Field(default_factory=PlanningCompositionPolicy)
     repetition_rules: PlanningRepetitionRules | None = None
+    # Equipment the household lacks (layer 08): a recipe whose equipment cannot be met is never planned.
+    missing_equipment: list[Equipment] = Field(default_factory=list, **LEAN)
+    # A perishable dish is planned within this many days of its shopping trip (ADR-0072); None is no rule.
+    perishable_days: int | None = Field(default=None, ge=1, le=14, **LEAN)
     catalog_version: str
     product_snapshot_version: str
     policy_version: str
@@ -334,6 +431,12 @@ class FinalPlanningProblem(BaseModel):
             raise ValueError(f"locked recipes are missing from candidates: {unknown_locks}")
         return self
 
+    @cached_property
+    def uncounted_roles(self) -> frozenset[str]:
+        """Roles whose repeats are by design (ADR-0070: rice by default at every meal), the staple of a structured
+        meal: they pay no repeat cost and count towards no cap on uses."""
+        return frozenset({STAPLE_ROLE}) if any(structured(slot.composition) for slot in self.slots) else frozenset()
+
 
 class PlanningAssignment(BaseModel):
     slot_id: str
@@ -353,6 +456,8 @@ class PlanningShoppingSelection(BaseModel):
     purchase_cost_sgd: float = Field(ge=0)
     surplus_quantity: float | None
     note: str | None = None
+    # The shopping trip of a plan longer than a week (ADR-0072); None is the plan's only trip.
+    trip: int | None = Field(default=None, ge=1, le=2, **LEAN)
 
 
 class PlanningConstraintCheck(BaseModel):

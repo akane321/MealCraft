@@ -60,13 +60,48 @@ them: a dish with soy sauce is never planned for a soy allergy.
 It defaults to HPB's 2,000 mg for adults. The meals you plan keep within their
 share of it: dinner only is 35% of the day.
 
-Under **Meals and dishes**, tick the meals each day plans (breakfast, lunch,
-dinner; dinner only by default) and pick each meal's dishes: a preset (dinner
-defaults to one main and one vegetable) or your own mix of mains, vegetables and
-a soup, up to six dishes. A vegetable dish is a side dish or salad made mostly
-of vegetables, with no meat or fish (eggs, cheese and sauces such as fish sauce
-are fine); a pasta, rice or bean side does not count as one, and neither does a
-chicken salad. A dish marked "if one fits" is left out when nothing suits it.
+Under **Meals and dishes**, tick the meals each day plans and pick each meal's
+dishes. A household that has not chosen gets the **full default**: breakfast
+(one dish), lunch (a protein main, a vegetable dish and a staple) and a dinner
+that grows with the people at it, each lunch and dinner with its staple:
+
+| People at dinner | Dinner |
+|---|---|
+| 1 to 2 | 1 protein main, 1 vegetable dish, soup |
+| 3 to 4 | 2 protein mains, 1 vegetable dish, soup |
+| 5 to 6 | 2 protein mains, 2 vegetable dishes, soup |
+| 7 or more | 3 protein mains, 2 vegetable dishes, soup |
+
+"People at dinner" counts who is home that evening, so a weekend dinner with
+grandparents gets more dishes. It counts people, not portions: two adults and
+three small children are five at dinner, however little the children eat (the
+portions still decide how much of each dish is cooked and bought). The editor
+shows each meal's dish count for the people usually home, and a dish marked
+"From N people" only from that many on. A protein main may be a meat, fish,
+tofu, egg or bean dish. The **staple** is rice by default, or noodles, bread or flatbread to
+suit the meal's cuisine; it is on the shopping list, in the price, the nutrition
+and the cooking time (cooking unattended, like a rice cooker). A one-bowl dish
+such as fried rice, laksa or chicken rice carries its own staple, and may come
+without a vegetable dish. A household that saved its own dishes keeps them; the
+editor offers the full default as the recommended preset.
+
+Every lunch and dinner is a real meal: a protein main with its staple or a
+one-bowl dish, never a snack, dessert, sauce or drink, a salad only as the
+vegetable dish and a soup only as the soup, no protein twice among the mains
+(chicken and duck count as different), and at least a quarter of each person's
+daily energy. Dishes of one cuisine group, and at most one deep-fried dish, are
+preferred. The counts are defaults: the planner may leave out one dish when the
+budget, the time or the dishes cannot fit it. A count you choose yourself is
+kept as chosen.
+
+A vegetable dish is a side dish or salad made mostly of vegetables, with no
+meat or fish (eggs, cheese and sauces such as fish sauce are fine); a pasta,
+rice or bean side does not count as one, and neither does a chicken salad.
+
+Under **Kitchen**, tick the equipment you do not have (oven, air fryer,
+steamer, microwave, blender); a recipe that needs it is never planned. A recipe
+that works in an oven or an air fryer is still planned while you have one of
+them.
 
 Important semantics:
 
@@ -85,7 +120,16 @@ Important semantics:
 Type what the week should look like, in English or Chinese. The assistant
 extracts structured constraints and asks a focused question when something is
 missing; some questions offer buttons. When the details are complete, **Plan my
-week** plans every chosen meal of the seven days.
+week** plans every chosen meal of the seven days. A plan from the household
+profile may be 1 to 14 days long (**Days to plan**, beside the plan button on
+the Household page). A plan longer than a week shops twice: before
+day 1 and before day 8, with the weekly budget holding on each trip. Fresh
+meat, fish and greens are cooked within 3 days of the trip they are bought on,
+and the shopping list marks them "Use within 3 days".
+
+Most plans take a few seconds. A large household on a tight budget takes longer,
+up to about half a minute, while the planner searches for a week that fits the
+budget; the button says "Planning…" until the plan is ready.
 
 MealCraft handles meal planning, recipes, groceries, budgets and explicit
 dietary constraints. Social, unrelated, disease-treatment and
@@ -111,7 +155,12 @@ change is previewed before anything happens.
 
 ### 4. Nutrition and the shopping list
 
-The **Groceries** tab shows the total against the weekly budget. The price label
+The **Groceries** tab shows the total against the weekly budget. Perishable
+items (leafy greens, fresh fish and seafood, bean sprouts) are marked **Use
+within 3 days**: the planner cooks them within three days of the shopping trip
+that buys them, and assumes everything else keeps until its day. In a plan
+longer than a week the list is split by trip, under **Shop before day 1** and
+**Shop before day 8**. The price label
 says where each item's price came from: a current FairPrice check, a saved
 FairPrice observation with its date, or a sample price. A sample item with no
 matching FairPrice product is explicitly marked as not checked; that is different

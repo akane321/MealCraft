@@ -9,7 +9,7 @@ import type {
 
 export interface WeeklyMealPlanRequest extends RecipeRecommendationRequest {
   start_date: string;
-  day_count: 7;
+  day_count: number;
   weekly_budget_sgd: number | null;
 }
 

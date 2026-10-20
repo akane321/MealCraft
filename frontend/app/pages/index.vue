@@ -651,6 +651,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <button type="button" class="mc-btn primary" :disabled="isLoading" @click="agent.confirm()">
                   {{ isLoading ? "Planning your week…" : "Plan my week" }}
                 </button>
+                <p v-if="isLoading" class="mc-small foot-note" role="status">A large household on a tight budget can take up to half a minute to plan.</p>
               </div>
             </div>
 
@@ -960,6 +961,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .card-body { display: flex; flex-direction: column; gap: 12px; padding: 16px 20px; }
 .card-body p { margin: 0; }
 .card-foot { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--c-line-soft); }
+.card-foot .foot-note { flex-basis: 100%; margin: 0; }
 
 /* Swap preview (Panels artboard): before struck and faded, after with a green inset ring. */
 .swap-card { align-self: stretch; max-width: 560px; }

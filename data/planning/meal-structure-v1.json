@@ -1,0 +1,96 @@
+{
+  "version": "meal-structure-v1",
+  "decision": "ADR-0070 (the full meal structure); operations/sprint2-plan/08-household.md section 0",
+  "note": "Read by the planner (app/data/meal_structure.py), not the importer. Every value below is a design value MealCraft chose, tunable on developer data only; none is an HPB or protocol figure.",
+  "presets": {
+    "note": "The full default per meal (ADR-0070 section 1). A role with min_people is planned only when at least that many people eat the meal; a role with required false is the one dish the planner may leave out when the budget, time, energy floor or dishes cannot fit it.",
+    "breakfast": [
+      {"role_id": "main", "meal_roles": ["breakfast"]}
+    ],
+    "lunch": [
+      {"role_id": "main", "meal_roles": ["protein_main", "one_bowl"]},
+      {"role_id": "vegetable", "meal_roles": ["vegetable", "salad"]},
+      {"role_id": "staple", "meal_roles": ["staple"]}
+    ],
+    "dinner": [
+      {"role_id": "main", "meal_roles": ["protein_main", "one_bowl"]},
+      {"role_id": "main-2", "meal_roles": ["protein_main"], "min_people": 3, "required": false},
+      {"role_id": "main-3", "meal_roles": ["protein_main"], "min_people": 7, "required": false},
+      {"role_id": "vegetable", "meal_roles": ["vegetable", "salad"]},
+      {"role_id": "vegetable-2", "meal_roles": ["vegetable", "salad"], "min_people": 5, "required": false},
+      {"role_id": "soup", "meal_roles": ["soup"], "required": false},
+      {"role_id": "staple", "meal_roles": ["staple"]}
+    ]
+  },
+  "portion_shares": {
+    "note": "Servings of each dish per person at the meal. protein_main and vegetable list the share for 1, 2, 3 ... such dishes; a one-bowl core (or any meal of one dish) is a whole serving.",
+    "protein_main": [0.75, 0.5, 0.4],
+    "one_bowl": 1.0,
+    "vegetable": [0.5, 0.4],
+    "soup": 0.5,
+    "staple": 1.0
+  },
+  "energy_floor_share": {
+    "note": "A lunch or dinner gives every member at it at least this share of that member's daily energy target (ADR-0070 section 3). Member targets are the HPB energy times the goal factor, and a member's servings are that target over the adult reference, so the floor per serving is the share times the adult reference energy.",
+    "lunch": 0.25,
+    "dinner": 0.25
+  },
+  "soft": {
+    "note": "Meal-level terms added to a meal's rank loss (ADR-0075 order: variety, nutrition, rank, price). Small next to a dish's rank loss (0 to 1.5).",
+    "cuisine_group_weight": 0.1,
+    "deep_fry_weight": 0.1,
+    "staple_kind": {"usual": 0.0, "other_kind": 0.1, "not_plain": 0.5}
+  },
+  "staple_defaults": {
+    "note": "Plain staples (release recipe ids): the grain or dough with water, salt, oil or butter only, chosen by a title and ingredient rule over the staple-tagged release recipes and reviewed by hand on 2026-10-19. 'Rice by default' means these come first; any other staple-tagged recipe (a dish of its own, such as a cheese pasta) costs not_plain. The release has no plain Chinese steamed rice; a curated staple file would add one (a data-layer change).",
+    "rice": [
+      "RCP2_06A2B0D5A203",
+      "RCP2_3964049BB1DB",
+      "RCP2_89106D95751D",
+      "RCP2_792108E6B953",
+      "RCP2_4331925E5A21",
+      "RCP2_1AF82E8E2D57",
+      "RCP2_D78B793EBA03",
+      "RCP2_3949937ECE0B",
+      "RCP2_755C7B429183"
+    ],
+    "noodles": [
+      "RCP2_16BF42FD100D",
+      "RCP2_23DCDA368745",
+      "RCP2_5F632D436B4E",
+      "RCP2_70B47600544A",
+      "RCP2_E34384C91EB9",
+      "RCP2_A986B63ED3FF",
+      "RCP2_9CD7CD0DA72B"
+    ],
+    "flatbread": [
+      "RCP2_FF625F2850F5",
+      "RCP2_BEF2F95F5326",
+      "RCP2_A118A49508BE",
+      "RCP2_2445137F4C6B",
+      "RCP2_1B637907E6FA",
+      "RCP2_7EF820296206",
+      "RCP2_BC0BF5975B89",
+      "RCP2_6D9B39CCD991",
+      "RCP2_101AB5C2826E",
+      "RCP2_E154DFB24A79"
+    ],
+    "bread": ["RCP2_B591882FB101", "RCP2_7A6B03F1BF29"],
+    "grain": ["RCP2_26EA76812B5F", "RCP2_90E65379013C"]
+  },
+  "staple_kind_by_group": {
+    "note": "The plain staple kinds a meal of each cuisine group usually has (data/recipes/cuisine-groups.json); 'none' is a meal whose core dish has no group.",
+    "chinese": ["rice", "noodles"],
+    "southeast_asian": ["rice", "noodles"],
+    "japanese_korean": ["rice", "noodles"],
+    "south_asian": ["rice", "flatbread"],
+    "western": ["bread", "potato", "noodles", "rice"],
+    "middle_eastern_african": ["flatbread", "rice", "grain"],
+    "none": ["rice"]
+  },
+  "staple_candidates_per_kind": 3,
+  "staple_candidates": 12,
+  "staple_hands_off_cook": true,
+  "perishable_days": 3,
+  "trip_days": 7
+}

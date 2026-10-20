@@ -13,7 +13,13 @@ from app.planning.conflict_explanation import explain_infeasibility, product_exp
 from app.planning.household_slots import limit_targets, widest_time_limit
 from app.planning.meal_beam import EMPTY_OPTIONAL_ROLE_LOSS
 from app.planning.nutrition_scope import nutrition_scope_notes
-from app.planning.product_path import ProductPlanningEngine, ProductPlanningError, meals_of_the_day
+from app.planning.product_path import (
+    ProductPlanningEngine,
+    ProductPlanningError,
+    meals_of_the_day,
+    pool_courses,
+    pool_for,
+)
 from app.planning.week_floor import WeekFloor, week_floor
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
@@ -136,9 +142,10 @@ class WeeklyMealPlanService:
             warnings.append("Only one eligible recipe was available, so consecutive repetition could not be avoided.")
         if eligible_count < constraints.day_count:
             recipe_label = "recipe" if eligible_count == 1 else "recipes"
+            days = "seven" if constraints.day_count == 7 else str(constraints.day_count)
             warnings.append(
                 f"The current eligible catalog contains {eligible_count} {recipe_label}; "
-                "recipes are rotated across the seven days."
+                f"recipes are rotated across the {days} days."
             )
         warnings = self._deduplicate(warnings)
         placements = result.placements or [(index, "dinner", "main", 1, None) for index in range(len(selected))]
@@ -306,8 +313,7 @@ class WeeklyMealPlanService:
         constraints = constraints.model_copy(update={"pricing_mode": "fixture"})
         # Every course a planned meal's roles may take enters the pool (ADR-0046), not only dinner's.
         meals = meals_of_the_day(constraints)
-        courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
-        recipes = self.recipe_repository.list_for_planning(courses=courses)
+        recipes = pool_for(meals, self.recipe_repository.list_for_planning(courses=pool_courses(meals)))
         result = self.recommendation_service.recommend(
             pool_constraints(constraints),
             deduct_pantry_from_cost=False,
@@ -391,15 +397,14 @@ class WeeklyMealPlanService:
             or not planned_days
             or planned_days[0] != first_day
             or planned_days[0] < 1
-            or planned_days[-1] > 7
+            or planned_days[-1] > constraints.day_count
         ):
             raise ValueError("day_indices must contain day_count distinct, ordered days from the week")
         start = constraints.start_date + timedelta(days=first_day - 1)
         # Compress selected calendar days for the planner, then map its placements back to the saved week.
         partial = constraints.model_copy(update={"start_date": start, "day_count": day_count})
         meals = meals_of_the_day(partial)
-        courses = sorted({c for _, roles in meals for role in roles for c in role.courses}) if meals else None
-        recipes = self.recipe_repository.list_for_planning(courses=courses)
+        recipes = pool_for(meals, self.recipe_repository.list_for_planning(courses=pool_courses(meals)))
         recommendations = self.recommendation_service.recommend(
             pool_constraints(partial), deduct_pantry_from_cost=False, recipes=recipes, priced_release_only=True
         ).recommendations
@@ -464,6 +469,8 @@ class WeeklyMealPlanService:
                             locked=locked,
                             used=Counter(recipe.slug for recipe, _ in rest),
                             dates=[constraints.start_date + timedelta(days=day - 1) for day in planned_days],
+                            plan_days=planned_days,
+                            plan_day_count=constraints.day_count,
                         )
                     )
                 except ProductPlanningError as error:
@@ -754,6 +761,8 @@ class WeeklyMealPlanService:
             excess_quantity=(float(item.excess_quantity) if item.excess_quantity is not None else None),
             note=item.note,
             evidence=PriceEvidence.model_validate(item.price_evidence) if item.price_evidence else None,
+            shopping_trip=item.shopping_trip,
+            perishable=item.perishable,
         )
 
     @staticmethod

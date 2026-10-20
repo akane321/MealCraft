@@ -9,6 +9,8 @@ serves a sauce as a dinner and counts it as one. Curated recipes are exempt; the
 import re
 from functools import cache
 
+from app.planning.vegetable_led import SEASONING_FROM_FLESH
+
 # A main under this is a sauce, a marinade or a dish that lost its main line, not a dinner.
 MAIN_KCAL_FLOOR = 150
 
@@ -17,10 +19,27 @@ TITLE_PROTEINS = {
     "pork": ("pork", "bacon", "ham", "sausage", "chorizo"),
     "chicken": ("chicken",),
     "beef": ("beef", "steak"),
-    "steak": ("steak", "beef"),
+    "steak": (
+        "steak",
+        "beef",
+        "pork",
+        "ham",
+        "chicken",
+        "turkey",
+        "duck",
+        "lamb",
+        "mutton",
+        "fish",
+        "salmon",
+        "tuna",
+        "tofu",
+        "tempeh",
+        "soy protein",
+    ),
     "salmon": ("salmon",),
     "shrimp": ("shrimp", "prawn"),
     "lamb": ("lamb",),
+    "mutton": ("lamb", "mutton"),
     "turkey": ("turkey",),
     "tofu": ("tofu",),
 }
@@ -60,11 +79,49 @@ DOUGH_ONLY_INGREDIENTS = frozenset(
 
 BROTH = re.compile(r"(?:broth|stock|bouillon)$")
 
+# Owner-reviewed source conflict (changed-case review 24). Remove only after the recipe is corrected and reviewed.
+REVIEWED_CONFLICTS = {
+    "RCP2_0DA06DF48EDB": "ingredient/step conflict: turkey or vegan sausage listed, but steps cook pork",
+}
+
+
+def reviewed_source_conflict(recipe_key: str | None) -> str | None:
+    return REVIEWED_CONFLICTS.get(recipe_key)
+
+
+def missing_named_protein(title: str, lines: list[tuple[str, str | None]]) -> str | None:
+    """A title is a completeness check, never evidence that an absent ingredient exists."""
+    evidence = " ".join(
+        f"{name.replace('_', ' ')} {text or ''}".lower()
+        for name, text in lines
+        if name not in SEASONING_FROM_FLESH and not BROTH.search(name)
+    )
+    title = title.lower()
+    required = [
+        (word, sources)
+        for word, sources in TITLE_PROTEINS.items()
+        if re.search(rf"\b{word}s?\b", title) and not (word == "chicken" and "chicken fried steak" in title)
+    ]
+
+    def supported(sources):
+        return any(re.search(rf"\b{source}s?\b", evidence) for source in sources)
+
+    if re.search(r"\bor\b|\balso good with\b|\bcan be made with\b", title) and any(
+        supported(sources) for word, sources in required if word != "steak" or len(required) == 1
+    ):
+        return None
+    for word, sources in required:
+        if not supported(sources):
+            return f"named {word} but lists none"
+    return None
+
 
 def incomplete(recipe) -> str | None:
     """Why a release recipe cannot be trusted as a planned dinner, or None."""
     if recipe.release_version is None:
         return None
+    if conflict := reviewed_source_conflict(getattr(recipe, "external_id", None)):
+        return conflict
     title = recipe.title.lower()
     if recipe.course in {"main", "side", "soup"} and WRAPPER_TITLE.search(title):
         ingredients = [
@@ -75,11 +132,10 @@ def incomplete(recipe) -> str | None:
     kcal = float(recipe.nutrition.calories_kcal) if recipe.nutrition is not None else 0.0
     if recipe.course == "main" and kcal < MAIN_KCAL_FLOOR:
         return f"{kcal:.0f} kcal a serving is not a dinner"
-    lines = " ".join(item.ingredient.normalized_name.replace("_", " ") for item in recipe.recipe_ingredients)
-    for word, sources in TITLE_PROTEINS.items():
-        if re.search(rf"\b{word}s?\b", title) and not any(source in lines for source in sources):
-            return f"named {word} but lists none"
-    return None
+    return missing_named_protein(
+        title,
+        [(item.ingredient.normalized_name, getattr(item, "original_text", None)) for item in recipe.recipe_ingredients],
+    )
 
 
 # Words that describe a recipe rather than the dish: "Basic Chinese-Style Fried Rice" is fried rice.

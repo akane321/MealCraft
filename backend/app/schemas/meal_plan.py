@@ -5,10 +5,11 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator, model_serializer, model_validator
 
 from app.core.clock import today as local_today
+from app.data import meal_structure
 from app.schemas.display import ShownTitle
 from app.schemas.household_rules import HouseholdPlanning
 from app.schemas.planning_nutrition import ProductNutritionTarget
-from app.schemas.planning_v2 import MealComposition
+from app.schemas.planning_v2 import MealComposition, real_meal_roles
 from app.schemas.product import GroceryLineEstimate, PricingMode
 from app.schemas.recipe import RecipeListItemResponse, RecipeNutritionResponse
 from app.schemas.recommendation import NutritionTargets, RecipeRecommendationRequest
@@ -48,18 +49,57 @@ MEAL_PRESETS: dict[PlannedMeal, dict[str, list[dict]]] = {
 }
 
 
+def _structured_role(role_id: str, *meal_roles: str, required: bool = True, min_people: int | None = None) -> dict:
+    role = {"role_id": role_id, "courses": [], "required": required, "meal_roles": list(meal_roles)}
+    return {**role, "min_people": min_people} if min_people is not None else role
+
+
+# The presets of ADR-0070 in meal roles; the first of each meal is the full default
+# (data/planning/meal-structure-v1.json). Fixed presets have every role required: a count the household chose.
+STRUCTURED_PRESETS: dict[PlannedMeal, dict[str, list[dict]]] = {
+    "breakfast": {"One dish": meal_structure.presets()["breakfast"]},
+    "lunch": {
+        "Full meal": meal_structure.presets()["lunch"],
+        "One-bowl meal": [_structured_role("main", "one_bowl")],
+    },
+    "dinner": {
+        "Full meal (grows with the household)": meal_structure.presets()["dinner"],
+        "Main, vegetable and staple": [
+            _structured_role("main", "protein_main", "one_bowl"),
+            _structured_role("vegetable", "vegetable", "salad"),
+            _structured_role("staple", "staple"),
+        ],
+        "Main, vegetable, soup and staple": [
+            _structured_role("main", "protein_main", "one_bowl"),
+            _structured_role("vegetable", "vegetable", "salad"),
+            _structured_role("soup", "soup"),
+            _structured_role("staple", "staple"),
+        ],
+    },
+}
+
+
 class MealPlanShape(BaseModel):
-    """Which meals of each day are planned, and the dish roles of each (ADR-0046)."""
+    """Which meals of each day are planned, and the dish roles of each (ADR-0046, ADR-0070)."""
 
     meals: dict[PlannedMeal, MealComposition] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def real_meals(self) -> "MealPlanShape":
+        for meal, roles in self.meals.items():
+            real_meal_roles(meal, roles)
+        return self
 
     def ordered(self) -> list[tuple[PlannedMeal, list]]:
         return [(meal, self.meals[meal]) for meal in MEAL_ORDER if meal in self.meals]
 
 
 def default_plan_shape() -> MealPlanShape:
-    """Dinner only, one main and one vegetable: the household default (owner, 2026-09-26)."""
-    return MealPlanShape.model_validate({"meals": {"dinner": MEAL_PRESETS["dinner"]["main and vegetable"]}})
+    """The full default (ADR-0070): breakfast, lunch and a dinner that grows with the people at it, each lunch and
+    dinner with its staple. A household's saved shape is kept as it chose it; this is for one that chose none."""
+    return MealPlanShape.model_validate(
+        {"meals": {meal: list(STRUCTURED_PRESETS[meal].values())[0] for meal in MEAL_ORDER}}
+    )
 
 
 def week_shape(constraints: dict) -> MealPlanShape:
@@ -75,7 +115,8 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     nutrition_guard_band: float = Field(default=0.25, ge=0, le=1, allow_inf_nan=False)
     planner_strategy: Literal["beam", "greedy-baseline"] = "beam"
     start_date: date = Field(default_factory=local_today)
-    day_count: int = Field(default=7, ge=7, le=7)
+    # A plan is 1 to 14 days (ADR-0070 section 5); a longer one shops twice, before day 1 and day 8 (ADR-0072).
+    day_count: int = Field(default=7, ge=1, le=14)
     weekly_budget_sgd: float | None = Field(default=None, gt=0, le=7000)
     # Dish roles of every dinner (ADR-0036); None is one dish, the MVP.
     meal_composition: MealComposition | None = None
@@ -83,7 +124,7 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     plan_shape: MealPlanShape | None = None
     # How often one dish may appear in the week, a hard rule when stated: 1 is "no dish twice".
     # None leaves repeating a soft cost the planner avoids by itself.
-    max_uses_per_recipe: int | None = Field(default=None, ge=1, le=7)
+    max_uses_per_recipe: int | None = Field(default=None, ge=1, le=14)
     # Recipes a new week leaves out, each course only while a week's worth of its other dishes remain
     # ("plan a new week with different dishes" after one found monotonous).
     avoid_recipe_ids: list[int] = Field(default_factory=list, max_length=200)
@@ -114,7 +155,7 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
 
 class WeeklyPlanDayResponse(BaseModel):
     entry_id: int
-    day_index: int = Field(ge=1, le=7)
+    day_index: int = Field(ge=1, le=14)
     planned_date: date
     meal_type: str = "dinner"
     role_id: str = "main"
@@ -206,7 +247,7 @@ class MealPlanStatusCounts(BaseModel):
 
 class NutritionDashboardDayResponse(BaseModel):
     entry_id: int
-    day_index: int = Field(ge=1, le=7)
+    day_index: int = Field(ge=1, le=14)
     planned_date: date
     recipe: RecipeListItemResponse
     status: MealPlanEntryStatus
@@ -283,14 +324,15 @@ class MealPlanShapeChangeRequest(BaseModel):
     # None drops the meal on those days.
     roles: MealComposition | None = None
     # None is every day still ahead; otherwise one meal's exception on the named days.
-    day_indexes: list[int] | None = Field(default=None, min_length=1, max_length=7)
+    day_indexes: list[int] | None = Field(default=None, min_length=1, max_length=14)
     reason: str | None = Field(default=None, max_length=500)
 
     @field_validator("day_indexes")
     @classmethod
     def valid_days(cls, value: list[int] | None) -> list[int] | None:
-        if value is not None and any(day < 1 or day > 7 for day in value):
-            raise ValueError("day indexes run from 1 to 7")
+        # Checked against the plan's own length when the change is previewed.
+        if value is not None and any(day < 1 or day > 14 for day in value):
+            raise ValueError("day indexes run from 1 to 14")
         return sorted(set(value)) if value is not None else None
 
 

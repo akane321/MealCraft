@@ -281,10 +281,10 @@
       {
         "day": "monday",
         "meal": "dinner",
-        "recipe": "egg-vegetable-rice",
+        "recipe": "tuna-spinach-pasta",
         "servings": 2.73,
         "minutes": 30,
-        "sodium_mg_per_person": 590.0
+        "sodium_mg_per_person": 610.0
       },
       {
         "day": "tuesday",
@@ -305,21 +305,37 @@
       {
         "day": "wednesday",
         "meal": "lunch",
-        "recipe": "tuna-cucumber-rice-bowl",
+        "recipe": "egg-vegetable-rice",
         "servings": 2.0,
         "minutes": 30,
-        "sodium_mg_per_person": 570.0
+        "sodium_mg_per_person": 590.0
       },
       {
         "day": "wednesday",
         "meal": "dinner",
-        "recipe": "tuna-spinach-pasta",
+        "recipe": "tuna-cucumber-rice-bowl",
         "servings": 1.85,
         "minutes": 30,
-        "sodium_mg_per_person": 610.0
+        "sodium_mg_per_person": 570.0
       },
       {
         "day": "thursday",
+        "meal": "lunch",
+        "recipe": "black-bean-quinoa-skillet",
+        "servings": 2.0,
+        "minutes": 35,
+        "sodium_mg_per_person": 540.0
+      },
+      {
+        "day": "thursday",
+        "meal": "dinner",
+        "recipe": "yogurt-oat-bowl",
+        "servings": 2.73,
+        "minutes": 10,
+        "sodium_mg_per_person": 210.0
+      },
+      {
+        "day": "friday",
         "meal": "lunch",
         "recipe": "chicken-quinoa-pepper",
         "servings": 2.0,
@@ -327,41 +343,25 @@
         "sodium_mg_per_person": 420.0
       },
       {
-        "day": "thursday",
+        "day": "friday",
         "meal": "dinner",
-        "recipe": "tuna-tomato-pasta",
+        "recipe": "chickpea-quinoa-salad",
         "servings": 2.73,
         "minutes": 30,
-        "sodium_mg_per_person": 650.0
-      },
-      {
-        "day": "friday",
-        "meal": "lunch",
-        "recipe": "salmon-sweet-potato-tray",
-        "servings": 2.0,
-        "minutes": 40,
-        "sodium_mg_per_person": 390.0
-      },
-      {
-        "day": "friday",
-        "meal": "dinner",
-        "recipe": "savoury-vegan-oats",
-        "servings": 2.73,
-        "minutes": 25,
-        "sodium_mg_per_person": 430.0
+        "sodium_mg_per_person": 360.0
       },
       {
         "day": "saturday",
         "meal": "lunch",
-        "recipe": "lentil-sweet-potato-curry",
+        "recipe": "chickpea-sweet-potato-curry",
         "servings": 2.73,
-        "minutes": 50,
-        "sodium_mg_per_person": 480.0
+        "minutes": 45,
+        "sodium_mg_per_person": 500.0
       },
       {
         "day": "saturday",
         "meal": "dinner",
-        "recipe": "black-bean-quinoa-skillet",
+        "recipe": "chicken-broccoli-rice",
         "servings": 3.54,
         "minutes": 35,
         "sodium_mg_per_person": 540.0
@@ -373,7 +373,7 @@
     ],
     "basics_on_list": [],
     "grocery_lines": 26,
-    "purchase_total_sgd": 186.2,
+    "purchase_total_sgd": 171.75,
     "warnings": [
       "Stable fixture prices are shown for reproducible planning; select live pricing to query FairPrice.",
       "Basic seasonings are assumed at home and left off this list: garlic, ginger. Mark one as run out on your profile to buy it.",
