@@ -7,6 +7,7 @@ import {
   hpbSodiumLimit,
   NO_TIME_LIMIT_MINUTES,
   noGoals,
+  ownSelfOnlyAllergens,
   statedTimeLimit,
   summarizeHouseholdMembers,
   totalServings as totalOf,
@@ -254,7 +255,7 @@ function memberPayload(member: MemberForm): HouseholdMemberInput {
     default_present: member.defaultPresent,
     allergens: member.allergens,
     // Only an allergen this member still has: unticking the allergen drops its "only I avoid it" with it.
-    self_only_allergens: member.selfOnlyAllergens.filter(allergen => member.allergens.includes(allergen)),
+    self_only_allergens: ownSelfOnlyAllergens(member.allergens, member.selfOnlyAllergens),
     excluded_ingredients: parseExcludedIngredients(member.excludedIngredients),
     dietary_preferences: member.dietaryPreferences,
   };
@@ -572,7 +573,7 @@ onMounted(async () => {
           <p>An allergen is left out for everyone, unless someone marks it "only I avoid it". A diet and the foods someone won't eat are that person's own: every meal still gives each person a main dish, a staple and a vegetable they can eat. Meals with someone away or a guest over are cooked for who's home.</p>
           <dl v-if="current" class="profile-summary-list">
             <div><dt>Whole household avoids</dt><dd>{{ current.current.allergens.join(", ") || "None" }}</dd></div>
-            <div v-for="member in savedSummary?.members ?? []" :key="member.name">
+            <div v-for="(member, index) in savedSummary?.members ?? []" :key="index">
               <dt>{{ member.name }}</dt>
               <dd>{{ memberLimitText(member) }}</dd>
             </div>
@@ -582,7 +583,7 @@ onMounted(async () => {
           </dl>
           <dl v-else class="profile-summary-list">
             <div><dt>Whole household avoids</dt><dd>{{ draftSummary.allergens.join(", ") || "None" }}</dd></div>
-            <div v-for="member in draftSummary.members" :key="member.name">
+            <div v-for="(member, index) in draftSummary.members" :key="index">
               <dt>{{ member.name }}</dt>
               <dd>{{ memberLimitText(member) }}</dd>
             </div>

@@ -18,6 +18,12 @@ export interface HouseholdConstraintSummary {
   members: MemberLimitSummary[];
 }
 
+/** The "only I avoid it" marks a member still has: unticking an allergen drops its mark with it, so a mark
+ * can never outlive the allergen it belongs to and quietly narrow nothing. */
+export function ownSelfOnlyAllergens(allergens: string[], selfOnly: string[]): string[] {
+  return selfOnly.filter(allergen => allergens.includes(allergen));
+}
+
 type MemberBasis = Pick<HouseholdMemberInput, "age_band" | "sex" | "activity" | "goal">;
 
 /** The HPB default portions for a member (backend reference table), or null before it loads. */

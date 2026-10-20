@@ -10,6 +10,7 @@ import {
   noGoals,
   statedTimeLimit,
   householdAllergens,
+  ownSelfOnlyAllergens,
   summarizeHouseholdMembers,
   totalServings,
 } from "../app/lib/household-profile";
@@ -56,6 +57,13 @@ describe("household profile constraints", () => {
         { name: "Guest", allergens: ["sesame", "soy"], selfOnlyAllergens: [], excludedIngredients: ["yellow_onion"], dietaryPreferences: ["vegetarian"] },
       ],
     });
+  });
+
+  it("drops an \"only I avoid it\" mark when its allergen is unticked", () => {
+    expect(ownSelfOnlyAllergens(["peanut", "sesame"], ["peanut"])).toEqual(["peanut"]);
+    // The allergen is gone, so the mark that narrowed it to one member goes with it.
+    expect(ownSelfOnlyAllergens(["sesame"], ["peanut"])).toEqual([]);
+    expect(ownSelfOnlyAllergens([], [])).toEqual([]);
   });
 
   it("leaves an allergen only its own member avoids out of the household-wide list", () => {
