@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import re
@@ -12,6 +13,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from jsonschema import Draft202012Validator, FormatChecker
+from jsonschema.exceptions import SchemaError
 
 CATEGORIES = ("planning", "intent", "multi_turn", "adversarial")
 SUBTYPES = {
@@ -41,11 +43,27 @@ FEATURES = {
     "sodium_limit",
     "horizon_1",
     "horizon_14",
+    "two_trips",
+    "perishable_window",
 }
 PROTECTED_PARTS = {"heldout", "held-out", "held_out", "holdout", "hold-out", "hold_out"}
 EMAIL = re.compile(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}")
 PHONE = re.compile(r"(?<!\w)(?:\+\d[\d ()-]{6,}\d|\d{8,})(?!\w)")
 PROFILE = re.compile(r"https?://[^\s/]+/(?:u|user|users|profile|profiles)/", re.I)
+HANDLE = re.compile(r"(?<![\w/])(?:/?u/[A-Za-z0-9_-]+|@[A-Za-z0-9_][A-Za-z0-9_.-]*)", re.I)
+KINDS = {
+    "planning": {"plan"},
+    "multi_turn": {"replan"},
+    "intent:planning": {"intent"},
+    "intent:food_qa": {"intent", "qa"},
+    "intent:out_of_scope": {"intent", "refusal"},
+    "intent:injection": {"intent", "refusal"},
+    "intent:preference": {"intent"},
+    "adversarial:infeasible": {"plan", "replan"},
+    "adversarial:contradiction": {"plan", "replan", "intent"},
+    "adversarial:hidden_allergen": {"plan", "intent", "qa"},
+    "adversarial:local_name": {"plan", "intent", "qa"},
+}
 
 
 def reject_constant(_value: str) -> None:
@@ -81,7 +99,7 @@ def string_leaves(value, path=()):
             yield from string_leaves(item, (*path, key))
 
 
-def check(data: dict, *, format_only: bool = False) -> tuple[list[str], dict]:
+def check(data: dict, *, format_only: bool = False, fields_path: Path | None = None) -> tuple[list[str], dict]:
     if not finite_numbers(data):
         return ["Non-finite numeric value rejected"], {}
     schema = json.loads(Path(__file__).with_name("sprint2-heldout.schema.json").read_text(encoding="utf-8"))
@@ -93,6 +111,41 @@ def check(data: dict, *, format_only: bool = False) -> tuple[list[str], dict]:
         errors.append(f"schema:{error.validator} at /{location}")
     if errors:
         return errors, {}
+    fields_path = fields_path or Path(__file__).with_name("sprint2-heldout-fields.json")
+    dictionary = load_author_file(fields_path)
+    digest = hashlib.sha256(fields_path.read_bytes()).hexdigest()
+    if (
+        not isinstance(dictionary, dict)
+        or not isinstance(dictionary.get("fields"), dict)
+        or not isinstance(dictionary.get("scopes"), dict)
+    ):
+        return ["Invalid field dictionary structure"], {}
+    if "action" not in dictionary["fields"] or not dictionary["scopes"]:
+        return ["Dictionary needs action and named scopes"], {}
+    # Dictionary extensions are inline schemas, never references that can fetch URLs.
+    if any(key in {"$ref", "$dynamicRef"} for path, _text in string_leaves(dictionary) for key in path):
+        return ["Dictionary references are forbidden; inline field types"], {}
+    for definition in dictionary["fields"].values():
+        if (
+            not isinstance(definition, dict)
+            or not isinstance(definition.get("units"), list)
+            or not definition["units"]
+            or "schema" not in definition
+        ):
+            return ["Dictionary field needs inline schema and nonempty units"], {}
+        Draft202012Validator.check_schema(definition["schema"])
+    expected_validator = Draft202012Validator(
+        {
+            "type": "object",
+            "required": ["action"],
+            "additionalProperties": False,
+            "properties": {key: definition["schema"] for key, definition in dictionary["fields"].items()},
+        },
+        format_checker=FormatChecker(),
+    )
+    recorded_digest = data["quota_manifest"]["fields_sha256"]
+    if recorded_digest != digest and (recorded_digest is not None or not format_only):
+        errors.append("Field dictionary SHA-256 missing or mismatched")
     cases = data["cases"]
     counts = Counter(c["category"] for c in cases)
     chinese = Counter(c["category"] for c in cases if c["language"] == "zh")
@@ -120,7 +173,7 @@ def check(data: dict, *, format_only: bool = False) -> tuple[list[str], dict]:
             # needs human review; never erase provenance to satisfy a regex.
             if field_path[-1] in {"id", "url", "collected_on", "facts_version"}:
                 continue
-            if EMAIL.search(text) or PHONE.search(text) or PROFILE.search(text):
+            if EMAIL.search(text) or PHONE.search(text) or PROFILE.search(text) or HANDLE.search(text):
                 errors.append(f"{prefix}: possible personal information; human review required")
                 break
         source = case["source"]
@@ -141,7 +194,32 @@ def check(data: dict, *, format_only: bool = False) -> tuple[list[str], dict]:
                     errors.append(f"{prefix}: use canonical public URL without tracking query or fragment")
                 if PROFILE.search(quote["url"]):
                     errors.append(f"{prefix}: use a thread/comment source, not a personal profile")
+                if bool(quote["redactions"]) != ("[REDACTED]" in quote["text"]):
+                    errors.append(f"{prefix}: redaction notes and [REDACTED] marker must correspond")
         gold = case["gold"]
+        if any(expected_validator.iter_errors(gold["expected_fields"])):
+            errors.append(f"{prefix}: expected_fields violate the frozen dictionary")
+        for constraint in gold["hard_constraints"]:
+            definition = dictionary["fields"].get(constraint["field"])
+            if definition is None or constraint["scope"] not in dictionary["scopes"]:
+                errors.append(f"{prefix}: constraint field/scope missing from dictionary")
+            elif constraint["unit"] not in definition["units"] or not Draft202012Validator(
+                definition["schema"], format_checker=FormatChecker()
+            ).is_valid(constraint["value"]):
+                errors.append(f"{prefix}: constraint unit/value violate dictionary")
+            if constraint["scope"] == "member" and not constraint.get("target_member_ids"):
+                errors.append(f"{prefix}: member-scoped constraint needs target_member_ids")
+        kind_key = (
+            case["category"]
+            if case["category"] in {"planning", "multi_turn"}
+            else f"{case['category']}:{case['subtype']}"
+        )
+        if gold["kind"] not in KINDS.get(kind_key, set()):
+            errors.append(f"{prefix}: subtype and gold.kind mismatch")
+        if gold["reviewer_id"] is not None and gold["reviewer_id"] == data["author_id"]:
+            errors.append(f"{prefix}: author cannot review own gold")
+        if gold["disposition"] == "catalog_dependent" and gold["kind"] not in {"plan", "replan"}:
+            errors.append(f"{prefix}: catalog_dependent is a pending planning label only")
         if f"{case['category']}:{case['subtype']}" not in SUBTYPES:
             errors.append(f"{prefix}: unknown category/subtype combination")
         if case["category"] == "planning" and gold["kind"] != "plan":
@@ -154,11 +232,24 @@ def check(data: dict, *, format_only: bool = False) -> tuple[list[str], dict]:
             errors.append(f"{prefix}: structured expected fields required")
         if gold["kind"] == "qa" and (not gold["reference_answer"] or not gold["rubric"]):
             errors.append(f"{prefix}: QA needs reference answer and scoring rubric")
-        if gold["kind"] in {"plan", "replan"} and gold["disposition"] in {"feasible", "infeasible"}:
+        if gold["kind"] in {"plan", "replan"} and gold["disposition"] in {
+            "feasible",
+            "infeasible",
+            "catalog_dependent",
+        }:
             if not gold["hard_constraints"] or case["horizon_days"] is None:
                 errors.append(f"{prefix}: planning gold needs constraints and explicit horizon")
         if case["category"] == "multi_turn" and not gold["preserve"]:
             errors.append(f"{prefix}: declare what edits must preserve, or explicitly declare none")
+        if case["horizon_days"] is not None and case["horizon_days"] > 7:
+            if not {"two_trips", "perishable_window"}.issubset(case["features"]):
+                errors.append(f"{prefix}: long horizon needs two-trip and freshness coverage")
+            if (
+                gold["expected_fields"].get("shopping_trip_days") != [1, 8]
+                or gold["expected_fields"].get("budget_basis") != "per_shopping_trip"
+                or gold["expected_fields"].get("perishable_window_days") != 3
+            ):
+                errors.append(f"{prefix}: long horizon needs explicit two-trip, per-trip budget and 3-day window facts")
         if not format_only:
             if not source["pii_reviewed"]:
                 errors.append(f"{prefix}: human anonymisation review missing")
@@ -173,6 +264,10 @@ def check(data: dict, *, format_only: bool = False) -> tuple[list[str], dict]:
     manifest = data["quota_manifest"]
     if not manifest["declared_on"] or not manifest["approved_by"]:
         errors.append("Quota declaration date and approver are required")
+    if manifest["approved_by"] in {data["author_id"], data["reviewer_id"]}:
+        errors.append("Quota approver must differ from author and reviewer")
+    if sum(c["category"] == "planning" and c["horizon_days"] is not None and c["horizon_days"] > 7 for c in cases) < 2:
+        errors.append("At least two planning cases must cover 8-14 days")
     for category in CATEGORIES:
         required = manifest["counts"][category]
         minimum = manifest["minimum_chinese"][category]
@@ -213,10 +308,13 @@ def main() -> int:
         "--input", required=True, type=Path, help="Explicit author-owned JSON, outside protected directories"
     )
     parser.add_argument("--format-only", action="store_true", help="No freeze-readiness claim")
+    parser.add_argument(
+        "--fields", type=Path, help="Author-owned field dictionary; defaults to the adjacent dictionary"
+    )
     args = parser.parse_args()
     try:
-        errors, summary = check(load_author_file(args.input), format_only=args.format_only)
-    except (OSError, ValueError, RecursionError):
+        errors, summary = check(load_author_file(args.input), format_only=args.format_only, fields_path=args.fields)
+    except (OSError, ValueError, RecursionError, SchemaError):
         print("Input rejected (path, encoding or JSON); no input content logged", file=sys.stderr)
         return 2
     print(

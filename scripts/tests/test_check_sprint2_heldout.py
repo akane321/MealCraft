@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import importlib.util
 import json
 import subprocess
@@ -32,15 +33,15 @@ def demo_case(index=0, category="planning", language="en"):
             "disposition": "feasible",
             "hard_constraints": [
                 {
-                    "field": "robot_count",
+                    "field": "household_size",
                     "operator": "eq",
                     "value": 9,
-                    "unit": "imaginary robots",
-                    "scope": "fiction",
+                    "unit": "people",
+                    "scope": "household",
                     "evidence": "format only",
                 }
             ],
-            "expected_fields": {"imaginary_robot_count": 9},
+            "expected_fields": {"action": "plan", "household_size": 9},
             "clarification_fields": [],
             "reference_answer": "FORMAT DEMO ONLY",
             "rubric": ["format only"],
@@ -73,9 +74,15 @@ def ready_format_fixture():
             elif category == "intent":
                 case["gold"]["kind"] = "intent"
             cases.append(case)
-    cases[0]["features"] = sorted(checker.FEATURES - {"horizon_14"})
-    cases[1]["features"] = ["horizon_14"]
+    cases[0]["features"] = sorted(checker.FEATURES - {"horizon_14", "two_trips"})
+    cases[1]["features"] = ["horizon_14", "two_trips", "perishable_window"]
     cases[1]["horizon_days"] = 14
+    cases[2]["features"] = ["two_trips", "perishable_window"]
+    cases[2]["horizon_days"] = 8
+    for case in cases[1:3]:
+        case["gold"]["expected_fields"].update(
+            shopping_trip_days=[1, 8], budget_basis="per_shopping_trip", perishable_window_days=3
+        )
     for case in cases[: len(cases) // 3]:
         case["source"]["kind"] = "forum"
         case["source"]["quotes"] = [
@@ -84,7 +91,7 @@ def ready_format_fixture():
                 "text": text,
                 "url": f"https://example.invalid/thread/{case['id']}",
                 "collected_on": "2026-01-01",
-                "redactions": ["format only"],
+                "redactions": [],
             }
             for i, text in enumerate(case["turns"])
         ]
@@ -93,6 +100,7 @@ def ready_format_fixture():
     result["quota_manifest"] = {
         "declared_on": "2026-01-01",
         "approved_by": "SYN_COORDINATOR",
+        "fields_sha256": hashlib.sha256(SCRIPT.with_name("sprint2-heldout-fields.json").read_bytes()).hexdigest(),
         "counts": {c: sum(x["category"] == c for x in cases) for c in checker.CATEGORIES},
         "minimum_chinese": {c: 1 if c != "intent" else 34 for c in checker.CATEGORIES},
         "forum_count": len(cases) // 3,
@@ -219,3 +227,69 @@ def test_numeric_public_thread_id_is_not_a_phone_number():
     data = ready_format_fixture()
     data["cases"][0]["source"]["quotes"][0]["url"] = "https://example.invalid/thread/123456789"
     assert checker.check(data)[0] == []
+
+
+def test_dictionary_rejects_unknown_fields_scopes_types_and_missing_action():
+    for change in ("unknown_field", "unknown_scope", "wrong_type", "missing_action", "wrong_unit"):
+        case = demo_case()
+        if change == "unknown_field":
+            case["gold"]["expected_fields"]["fictional_unknown"] = 9
+        elif change == "unknown_scope":
+            case["gold"]["hard_constraints"][0]["scope"] = "fictional_unknown"
+        elif change == "wrong_type":
+            case["gold"]["expected_fields"]["household_size"] = "nine imaginary robots"
+        elif change == "missing_action":
+            del case["gold"]["expected_fields"]["action"]
+        else:
+            case["gold"]["hard_constraints"][0]["unit"] = "fictional_robot_units"
+        assert checker.check(bundle([case]), format_only=True)[0]
+
+
+def test_dictionary_digest_and_reviewed_extension(tmp_path):
+    data = ready_format_fixture()
+    dictionary = json.loads(SCRIPT.with_name("sprint2-heldout-fields.json").read_text(encoding="utf-8"))
+    dictionary["dictionary_version"] = "FORMAT_ONLY_EXTENSION"
+    dictionary["fields"]["fictional_robot_units"] = {"units": ["fictional"], "schema": {"type": "integer"}}
+    target = tmp_path / "robot-field-dictionary.json"
+    target.write_text(json.dumps(dictionary), encoding="utf-8")
+    assert any("SHA-256" in e for e in checker.check(data, fields_path=target)[0])
+    data["quota_manifest"]["fields_sha256"] = hashlib.sha256(target.read_bytes()).hexdigest()
+    data["cases"][0]["gold"]["expected_fields"]["fictional_robot_units"] = 9
+    assert checker.check(data, fields_path=target)[0] == []
+    dictionary["fields"]["fictional_robot_units"]["schema"] = {"$ref": "https://example.invalid/never-fetch"}
+    target.write_text(json.dumps(dictionary), encoding="utf-8")
+    assert any("references" in e for e in checker.check(data, fields_path=target)[0])
+
+
+def test_handle_screen_and_redaction_markers():
+    for handle in ("u/fictional_robot", "@fictional_robot", "/u/fictional_robot"):
+        case = demo_case()
+        case["turns"][0] += " " + handle
+        assert any("personal information" in e for e in checker.check(bundle([case]), format_only=True)[0])
+    data = ready_format_fixture()
+    data["cases"][0]["source"]["quotes"][0]["redactions"] = ["fictional robot handle"]
+    assert any("redaction notes" in e for e in checker.check(data)[0])
+    data["cases"][0]["turns"][0] += " [REDACTED]"
+    data["cases"][0]["source"]["quotes"][0]["text"] = data["cases"][0]["turns"][0]
+    assert checker.check(data)[0] == []
+
+
+def test_subtype_and_personnel_independence():
+    data = ready_format_fixture()
+    data["cases"][0]["gold"]["kind"] = "qa"
+    data["cases"][1]["gold"]["reviewer_id"] = data["author_id"]
+    data["quota_manifest"]["approved_by"] = data["reviewer_id"]
+    errors, _ = checker.check(data)
+    assert any("gold.kind mismatch" in e for e in errors)
+    assert any("author cannot review" in e for e in errors)
+    assert any("approver must differ" in e for e in errors)
+
+
+def test_catalog_dependent_and_two_trip_rules():
+    data = ready_format_fixture()
+    data["cases"][0]["gold"]["disposition"] = "catalog_dependent"
+    assert checker.check(data)[0] == []
+    del data["cases"][1]["gold"]["expected_fields"]["budget_basis"]
+    assert any("per-trip budget" in e for e in checker.check(data)[0])
+    data["cases"][2]["horizon_days"] = 1
+    assert any("At least two planning" in e for e in checker.check(data)[0])
