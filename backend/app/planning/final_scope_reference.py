@@ -119,7 +119,8 @@ class FinalScopeReferencePlanner:
     ) -> list[PlanningShoppingSelection]:
         slots = {slot.slot_id: slot for slot in problem.slots}
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
-        quantities: dict[tuple[str, str | None], float | None] = {}
+        # By ingredient, unit and the shopping trip that buys it (None: the plan's only trip, ADR-0072).
+        quantities: dict[tuple[str, str | None, int | None], float | None] = {}
         servings = dish_servings(problem, assignments)
         for index, assignment in enumerate(assignments):
             slot = slots[assignment.slot_id]
@@ -128,7 +129,7 @@ class FinalScopeReferencePlanner:
             share = servings.get(index, slot.servings)
             scale = slot.servings / recipe.servings if share == slot.servings else float(share) / recipe.servings
             for item in recipe.ingredients:
-                key = (item.ingredient_id, item.unit)
+                key = (item.ingredient_id, item.unit, slot.trip)
                 quantity = item.quantity * scale if item.quantity is not None else None
                 if key not in quantities:
                     quantities[key] = quantity
@@ -144,7 +145,10 @@ class FinalScopeReferencePlanner:
                 products_by_ingredient[product.ingredient_id].append(product)
 
         shopping: list[PlanningShoppingSelection] = []
-        for (ingredient_id, unit), required in sorted(quantities.items()):
+        drawn: dict[tuple[str, str | None], float] = {}  # pantry the first trip used
+        for (ingredient_id, unit, trip), required in sorted(
+            quantities.items(), key=lambda item: (item[0][0], item[0][1] or "", item[0][2] or 0)
+        ):
             pantry_item = pantry.get(ingredient_id)
             deduction = 0.0
             if (
@@ -153,18 +157,19 @@ class FinalScopeReferencePlanner:
                 and pantry_item.unit == unit
                 and required is not None
             ):
-                deduction = min(required, pantry_item.quantity)
+                # The pantry goes to the first trip first; the second takes what is left.
+                deduction = min(required, pantry_item.quantity - drawn.get((ingredient_id, unit), 0.0))
+                drawn[ingredient_id, unit] = drawn.get((ingredient_id, unit), 0.0) + deduction
             remaining = max(0.0, required - deduction) if required is not None else None
-            shopping.append(
-                self._choose_product(
-                    ingredient_id=ingredient_id,
-                    required=required,
-                    unit=unit,
-                    deduction=deduction,
-                    remaining=remaining,
-                    products=products_by_ingredient[ingredient_id],
-                )
+            line = self._choose_product(
+                ingredient_id=ingredient_id,
+                required=required,
+                unit=unit,
+                deduction=deduction,
+                remaining=remaining,
+                products=products_by_ingredient[ingredient_id],
             )
+            shopping.append(line.model_copy(update={"trip": trip}) if trip is not None else line)
         return shopping
 
     @staticmethod

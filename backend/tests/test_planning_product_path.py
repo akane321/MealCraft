@@ -320,8 +320,9 @@ def test_budget_packet_does_not_turn_a_normal_request_into_cheapest_mode(recipe_
     assert trace["validation"]["status"] == "passed"
 
 
-def test_the_default_household_week_is_dinner_with_a_main_and_a_vegetable(recipe_client):
-    """A profile that sets no shape plans ADR-0046's default; lunch added by shape plans lunches too."""
+@pytest.mark.full_default
+def test_the_default_household_week_is_the_full_meal_structure(recipe_client):
+    """A profile that sets no shape plans ADR-0070's full default; a shape of course roles still plans as asked."""
     from app.core.paths import repository_root
     from app.data.catalog import import_catalog, load_catalog
     from app.schemas.meal_plan import MEAL_PRESETS, default_plan_shape
@@ -331,8 +332,17 @@ def test_the_default_household_week_is_dinner_with_a_main_and_a_vegetable(recipe
     with database() as session:
         import_catalog(session, catalog)
     shape = default_plan_shape().model_dump(mode="json")
-    assert list(shape["meals"]) == ["dinner"]
-    assert [role["role_id"] for role in shape["meals"]["dinner"]] == ["main", "vegetable"]
+    assert list(shape["meals"]) == ["breakfast", "lunch", "dinner"]
+    assert [role["role_id"] for role in shape["meals"]["lunch"]] == ["main", "vegetable", "staple"]
+    assert [role["role_id"] for role in shape["meals"]["dinner"]] == [
+        "main",
+        "main-2",
+        "main-3",
+        "vegetable",
+        "vegetable-2",
+        "soup",
+        "staple",
+    ]
 
     both = {"meals": {"lunch": MEAL_PRESETS["lunch"]["one dish"], "dinner": [{"role_id": "main", "courses": ["main"]}]}}
     response = recipe_client.post("/api/plans/generate", json={**REQUEST, "plan_shape": both})

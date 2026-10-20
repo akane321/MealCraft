@@ -93,14 +93,42 @@ export interface HouseholdReference {
   basics: BasicSeasoning[];
   meal_shares: Record<string, number>;
   sources: { title: string; url: string; retrieved_on: string }[];
+  /** The full meal structure (ADR-0070); older servers send none. */
+  meal_structure?: {
+    presets: Record<PlannedMealType, Record<string, MealRole[]>>;
+    dinner_counts: DinnerCount[];
+    energy_floor_share: Record<string, number>;
+    equipment: Equipment[];
+    perishable_days: number;
+    trip_days: number;
+  };
 }
 export type DishCourse = "main" | "side" | "salad" | "soup" | "breakfast" | "dessert" | "snack_appetizer" | "baked_good";
+/** What a dish can be in a meal (backend MealRole, the recipe's meal-role tag). */
+export type DishMealRole = "protein_main" | "vegetable" | "soup" | "staple" | "one_bowl" | "breakfast" | "salad" | "snack" | "dessert" | "sauce" | "drink";
+export type Equipment = "oven" | "air_fryer" | "steamer" | "microwave" | "blender";
 
-/** One dish position in a meal (ADR-0036). */
+/**
+ * One dish position in a meal (ADR-0036). A role admits recipes by `courses` (the older form, kept as saved)
+ * or by `meal_roles` (ADR-0070, the full meal structure); never both. `min_people` plans it only when that
+ * many people eat the meal (the dinner that grows with the household).
+ */
 export interface MealRole {
   role_id: string;
   courses: DishCourse[];
   required: boolean;
+  meal_roles?: DishMealRole[];
+  min_people?: number;
+}
+
+/** The full default's dinner for a run of people at it (backend DinnerCount). */
+export interface DinnerCount {
+  min_people: number;
+  max_people: number | null;
+  protein_mains: number;
+  vegetables: number;
+  soup: number;
+  staple: number;
 }
 
 /** Which meals of each day are planned, and each one's dishes (ADR-0046). */
@@ -124,6 +152,8 @@ export interface HouseholdProfileInput {
   cooking_time_rules: CookingTimeRule[];
   missing_basics: string[];
   nutrition_limits: NutritionLimit[];
+  /** Equipment the kitchen lacks; a recipe that needs it is never planned. Empty: all at home. */
+  missing_equipment?: Equipment[];
 }
 
 export interface HouseholdProfileUpdate extends HouseholdProfileInput {
@@ -164,6 +194,8 @@ export interface HouseholdPlanningOverrides {
 
 export interface HouseholdProfilePlanRequest {
   start_date: string;
+  /** 1 to 14 days; longer than a week shops twice, before day 1 and day 8 (ADR-0072). */
+  day_count?: number;
   profile_version?: number | null;
   overrides?: HouseholdPlanningOverrides;
 }

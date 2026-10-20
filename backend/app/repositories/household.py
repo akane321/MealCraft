@@ -152,4 +152,5 @@ class HouseholdProfileRepository:
             cooking_time_rules=[rule.model_dump(mode="json") for rule in payload.cooking_time_rules] or None,
             missing_basics=list(payload.missing_basics) or None,
             nutrition_limits=[limit.model_dump(mode="json") for limit in payload.nutrition_limits] or None,
+            missing_equipment=list(payload.missing_equipment) or None,
         )

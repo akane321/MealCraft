@@ -261,7 +261,7 @@ def test_swap_budget_preview_keeps_the_saved_weight_price_for_liquids(monkeypatc
     weighed_names = set()
 
     class BoundaryAggregator:
-        def estimate(self, recipes, constraints, *, shares, by_weight=()):
+        def estimate(self, recipes, constraints, *, shares, by_weight=(), **_):
             weighed_names.update(by_weight)
             # The same 100 ml of milk costs S$1.60 by the saved 100 g packs, or S$2.80 by the litre bottle.
             total = 1.60 if "milk" in by_weight else 2.80

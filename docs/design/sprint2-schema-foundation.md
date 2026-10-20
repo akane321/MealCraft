@@ -25,11 +25,42 @@ their behaviour and the [API Contracts](../api-contracts.md):
 - the types `AgeBand`, `Sex`, `PersonalGoal`, `Weekday`, `PresenceRule`,
   `CookingTimeRule` and `NutritionLimit`, with the new `HouseholdPlanning`.
 
-The basic seasonings are a data file, `data/ingredients/basic-seasonings-v1.json`;
-`ingredients.basic_seasoning` stays unwritten until the first tagging PR copies
-the file into it with importer version `6`. Still unwired:
-`self_only_allergens`, `missing_equipment` and every `recipes` tag column,
-`FlavorBoost` and `PlanningPreferences`, and the other columns below. The
+Layer 08 PR-2 (recipe and ingredient tags) **writes** the `recipes` columns
+`meal_role`, `contains_staple`, `protein_sources`, `cooking_methods`,
+`equipment`, `flavor_tags` and `estimated`, and the `ingredients` columns
+`food_group`, `perishable` and `basic_seasoning` (from
+`data/ingredients/basic-seasonings-v1.json`). Both importers copy them from the
+tag files `data/recipes/recipe-tags-v1.json` and
+`data/ingredients/ingredient-tags-v1.json`, made by
+`python -m app.data.recipe_tags`, at importer version `6`.
+
+Layer 08 PR-3 (the full meal structure, ADR-0070) **reads** `meal_role`,
+`contains_staple`, `protein_sources`, `cooking_methods`, `equipment` and
+`ingredients.perishable` when it plans a household or a shape of meal roles;
+wires `household_profile_versions.missing_equipment` (`HouseholdProfileWrite`,
+the version read and `HouseholdPlanning`); and plans 1 to 14 days. It adds the
+planner's data files `data/planning/meal-structure-v1.json` and
+`data/recipes/cuisine-groups.json`, which are not importer inputs (the importer
+stays at version `6`), and migration `20261019_0031`:
+`meal_plan_grocery_items.shopping_trip` (SMALLINT, NULL or 1 or 2, CHECK
+`meal_plan_grocery_shopping_trip_valid`; NULL is the plan's only trip) and
+`perishable` (boolean; NULL is not marked). The key
+`meal_plan_grocery_plan_ingredient_unit_key` becomes the unique index
+`meal_plan_grocery_plan_trip_ingredient_unit_key` on (`plan_id`,
+`COALESCE(shopping_trip, 1)`, `ingredient_name`, `unit`). Its report is
+`docs/evaluation/full-default/latest.md`. A recipe whose `meal_role`,
+`contains_staple` or `protein_sources` the model decided (`estimated[field]`
+`method` `llm`) and that is not `reviewed` is untagged to a structured meal: it
+fills no meal-role role until the owner has spot-checked its batch's sample and
+run `python -m app.data.recipe_tags --accept-batch recipe-tags-v1/llm`, which
+sets `reviewed` on that batch's model-decided entries in the tag file for the
+importer to carry (`app.planning.meal_composition.unreviewed`). Roles of
+courses are unaffected. A recipe that is a part of a dish (a dough, crust,
+batter, sauce, marinade, stock and the like) is `meal_role` `sauce`, the
+non-meal role of every such part. Still
+unwired: `self_only_allergens`, the halal and
+`unknown_safety` columns, `FlavorBoost` and `PlanningPreferences`, and the other
+columns below. The
 evaluation reports did not change: their requests carry no household block.
 `python -m app.evaluation.household_rules` (in CI) measures the rules instead:
 `docs/evaluation/household-rules/latest.md`.
@@ -43,10 +74,10 @@ evaluation reports did not change: their requests carry no household block.
   below says what NULL means.
 - **A JSON column's `null` and SQL `NULL` mean the same.** The ORM may write a
   JSON `null` when it copies a row; readers treat both as "not set".
-- **Constraints were only widened.** Plans may hold 1 to 14 days; requests still
-  ask for 7.
-- **No data was backfilled**, and the importer version stays `5`, so a compose
-  start does not re-import the catalog.
+- **Constraints were only widened.** Plans may hold 1 to 14 days; requests
+  asked for 7 until layer 08 PR-3 allowed 1 to 14.
+- **No data was backfilled**, and the importer version stayed `5`, so a compose
+  start did not re-import the catalog. The first tagging PR moved it to `6`.
 - **Safety fields take effect only when enforced.** A halal or member-level
   allergen or diet option becomes selectable only in the PR that makes the
   planner and validator enforce it.
@@ -93,7 +124,9 @@ are derived.
 `servings` is how many servings the dish is cooked for: the sum of the servings
 of the present members who can eat it. NULL is the existing rule (the plan's
 household servings at `portion_share`). Several meat dishes in one meal use the
-existing `role_id`, such as `protein_main_1`, `protein_main_2` and `staple`.
+existing `role_id`: the full default names them `main`, `main-2`, `main-3`,
+`vegetable`, `vegetable-2`, `soup` and `staple` (layer 08 PR-3), the ids the
+conversation and the profile editor already use.
 
 ### `recipes`
 
@@ -114,7 +147,8 @@ it does today.
 | `owner_household_id` | foreign key `recipes_owner_household_id_fkey` to `households.id`, `ON DELETE RESTRICT`; index `recipes_owner_household_id_idx` | NULL is a shared catalog recipe; a household's id makes it that household's provisional recipe |
 
 Passive time already has `passive_time_minutes`. Cuisine groups need no column:
-they are derived from `cuisine` through a planned small mapping file, data/recipes/cuisine-groups.json. An
+they are derived from `cuisine` through the small mapping file
+`data/recipes/cuisine-groups.json` (six groups, layer 08 PR-3). An
 external recipe's source link goes in the existing `source` JSON.
 
 ### `recipe_ingredients`

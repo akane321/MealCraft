@@ -7,6 +7,7 @@ with a check per value) and `data/ingredients/basic-seasonings-v1.json` (ADR-006
 import json
 from fractions import Fraction
 from functools import lru_cache
+from typing import get_args
 
 from app.core.paths import data_root
 
@@ -100,4 +101,23 @@ def reference_table() -> dict:
         "sources": [
             {key: table[part][key] for key in ("title", "url", "retrieved_on")} for part in ("source", "sodium_source")
         ],
+        "meal_structure": structure_reference(),
+    }
+
+
+def structure_reference() -> dict:
+    """The full meal structure the profile editor offers (ADR-0070): presets, the dinner table, energy floors,
+    the equipment a kitchen may lack, and the shelf-life and shopping-trip days."""
+    from app.data import meal_structure
+    from app.schemas.catalog_tags import Equipment
+    from app.schemas.meal_plan import STRUCTURED_PRESETS
+
+    floors = meal_structure.meal_structure()["energy_floor_share"]
+    return {
+        "presets": STRUCTURED_PRESETS,
+        "dinner_counts": meal_structure.dinner_counts(),
+        "energy_floor_share": {meal: share for meal, share in floors.items() if meal != "note"},
+        "equipment": list(get_args(Equipment)),
+        "perishable_days": meal_structure.perishable_days(),
+        "trip_days": meal_structure.trip_days(),
     }
