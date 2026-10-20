@@ -156,8 +156,10 @@ meat, fish and greens are cooked within 3 days of the trip they are bought on,
 and the shopping list marks them "Use within 3 days".
 
 Most plans take a few seconds. A large household on a tight budget takes longer,
-up to about half a minute, while the planner searches for a week that fits the
-budget; the button says "Planning…" until the plan is ready.
+up to about a minute, while the planner searches for a week that fits the
+budget; the button says "Planning…" until the plan is ready. How long is
+acceptable follows how hard the request is: a simple week comes back quickly, a
+complex one is allowed the longer wait rather than being cut short.
 
 MealCraft handles meal planning, recipes, groceries, budgets and explicit
 dietary constraints. Social, unrelated, disease-treatment and

@@ -605,7 +605,7 @@ onMounted(async () => {
           <button class="primary-button" type="button" :disabled="!current || isPlanning" @click="generateFromProfile">
             {{ isPlanning ? "Planning…" : planWord }}
           </button>
-          <p v-if="isPlanning" class="field-help" role="status">A large household on a tight budget can take up to half a minute to plan.</p>
+          <p v-if="isPlanning" class="field-help" role="status">A large household on a tight budget can take up to a minute to plan.</p>
           <button v-if="hasCurrentPlan" class="secondary-button profile-replan-button" type="button" :disabled="isPlanning" @click="rebuildLatestPlan">
             Replan with these details
           </button>

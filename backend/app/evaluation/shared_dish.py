@@ -41,6 +41,7 @@ from app.core.paths import repository_root
 from app.data import meal_structure
 from app.data.household_reference import hpb
 from app.data.release_v2 import release_dir
+from app.evaluation.full_default import BAND_LABEL, OVER_SECONDS, QUICK_SECONDS, timing_band
 from app.evaluation.meal_day_week_runner import HOUSEHOLD as HOUSEHOLD_ID
 from app.evaluation.meal_day_week_runner import product_database
 from app.models.recipe import Recipe, RecipeIngredient
@@ -670,27 +671,32 @@ def markdown(report: dict) -> str:
 
 
 def timing_markdown(seconds: dict[str, dict[str, float]]) -> str:
-    target = 4.0
     rows = [
-        f"| `{case}` | {taken['merged']} | {taken['shared']} | {'over' if taken['shared'] > target else 'within'} |"
+        f"| `{case}` | {taken['merged']} | {taken['shared']} | {BAND_LABEL[timing_band(taken['shared'])]} |"
         for case, taken in seconds.items()
     ]
     shared = [taken["shared"] for taken in seconds.values()]
+    over = [case for case, taken in seconds.items() if timing_band(taken["shared"]) == "over"]
     return "\n".join(
         [
             "# Shared dishes: wall time",
             "",
             "> Wall time on the machine that generated it, so it differs by machine and is kept out of "
             "`latest.*`. These runs let the variety pass finish instead of cutting it at its two seconds, so "
-            "the plans do not depend on the machine; the product cuts it, and takes correspondingly less. The "
-            "target is about 4 seconds for a common request (ADR-0075); a case over it is marked, and the "
-            "`merged` column shows how much of that the shared-dish model added. Speed is the algorithm "
-            "layer's to fix, never by dropping a rule or relaxing a limit (section 0.8).",
+            "the plans do not depend on the machine; the product cuts it, and takes correspondingly less. "
+            "ADR-0079 sets how long is acceptable by how hard the request is: a simple request should still "
+            f"come back within about {QUICK_SECONDS:g} s, and every household here has members with their own "
+            f"limits, so these are the complex requests it allows up to about {OVER_SECONDS:g} s. Only past "
+            "that is a case marked over. The `merged` column shows how much of the time the shared-dish model "
+            "added. A request is never cut short to meet either figure, and speed is the algorithm layer's to "
+            "fix, never by dropping a rule or relaxing a limit (section 0.8).",
             "",
             f"Median of the shared arrangement: {statistics.median(shared):.2f} s. Slowest: {max(shared):.2f} s.",
             "",
-            "| Case | merged (s) | shared (s) | Against the 4 s target |",
-            "|---|---:|---:|:---:|",
+            f"Over ~{OVER_SECONDS:g} s: {', '.join(over) or 'none'}.",
+            "",
+            "| Case | merged (s) | shared (s) | Against the ADR-0079 guidance |",
+            "|---|---:|---:|:---|",
             *rows,
             "",
         ]
