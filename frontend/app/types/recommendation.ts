@@ -55,6 +55,10 @@ export interface GroceryLineEstimate {
   consumed_cost_sgd: number | null;
   excess_quantity: number | null;
   note: string | null;
+  /** The shopping trip of a plan longer than a week: 1 before day 1, 2 before day 8; null is its only trip. */
+  shopping_trip?: number | null;
+  /** Perishable: used within 3 days of its trip. */
+  perishable?: boolean | null;
 }
 
 export interface GroceryEstimate {

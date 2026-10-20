@@ -94,6 +94,9 @@ jobs:
       - name: Household rules evaluation
         run: uv run --project backend python -m app.evaluation.household_rules
 
+      - name: Full default evaluation
+        run: uv run --project backend python -m app.evaluation.full_default
+
   migrations:
     name: migrations
     runs-on: ubuntu-latest
@@ -255,6 +258,9 @@ jobs:
 
       - name: Household rules evaluation
         run: docker compose exec -T backend uv run --no-sync python -m app.evaluation.household_rules
+
+      - name: Full default evaluation
+        run: docker compose exec -T backend uv run --no-sync python -m app.evaluation.full_default
 
       - name: Generated evaluation reports are reproducible
         # The workbench writes into the bind-mounted `docs/evaluation`. Regenerating

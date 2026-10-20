@@ -32,3 +32,24 @@ def rule_parser_unless_asked(monkeypatch):
     monkeypatch.setattr(get_settings(), "agent_parser_provider", "fixture")
     # Each test has its own catalog; a pool kept from another test would plan with its recipes.
     monkeypatch.setattr(get_settings(), "planning_pool_cache_seconds", 0)
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "full_default: plan a household that chose no shape with the full default")
+
+
+@pytest.fixture(autouse=True)
+def curated_default_shape(request, monkeypatch):
+    """The curated test catalog holds dinner mains and one-bowl dishes only: no breakfast, staple, vegetable or soup
+    for the full default (ADR-0070). Its tests plan a household that chose no shape with the dinner of a main and a
+    vegetable they were written for, as ADR-0070's consequences allow; a test marked `full_default` keeps it."""
+    if request.node.get_closest_marker("full_default"):
+        return
+    from app.schemas.meal_plan import MEAL_PRESETS, MealPlanShape
+
+    def older_default() -> MealPlanShape:
+        return MealPlanShape.model_validate({"meals": {"dinner": MEAL_PRESETS["dinner"]["main and vegetable"]}})
+
+    for module in ("app.schemas.meal_plan", "app.agent.limits", "app.agent.workflow", "app.services.agent"):
+        monkeypatch.setattr(f"{module}.default_plan_shape", older_default)
+    monkeypatch.setattr("app.services.household.default_plan_shape", older_default)

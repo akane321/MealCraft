@@ -13,10 +13,12 @@ from sqlalchemy import (
     Index,
     Integer,
     Numeric,
+    SmallInteger,
     String,
     Text,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -180,8 +182,19 @@ class MealPlanGroceryItem(Base):
             "product_regular_price_sgd IS NULL OR product_regular_price_sgd >= 0",
             name="meal_plan_grocery_regular_price_nonnegative",
         ),
-        # One line per ingredient and unit: whole eggs and grams of egg cannot be added up.
-        UniqueConstraint("plan_id", "ingredient_name", "unit", name="meal_plan_grocery_plan_ingredient_unit_key"),
+        CheckConstraint(
+            "shopping_trip IS NULL OR shopping_trip IN (1, 2)", name="meal_plan_grocery_shopping_trip_valid"
+        ),
+        # One line per trip, ingredient and unit: whole eggs and grams of egg cannot be added up. NULL is the
+        # plan's only trip, read as the first (migration 20261019_0031).
+        Index(
+            "meal_plan_grocery_plan_trip_ingredient_unit_key",
+            "plan_id",
+            func.coalesce(text("shopping_trip"), 1),
+            "ingredient_name",
+            "unit",
+            unique=True,
+        ),
         Index("meal_plan_grocery_plan_id_idx", "plan_id"),
     )
 
@@ -217,6 +230,10 @@ class MealPlanGroceryItem(Base):
     retailer: Mapped[str | None] = mapped_column(String(40), nullable=True)
     # The price before any promotion; savings are computed, not stored.
     product_regular_price_sgd: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+    # The shopping trip of a plan longer than a week (ADR-0072): 1 before day 1, 2 before day 8; NULL its only.
+    shopping_trip: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    # A perishable line, used within 3 days of its trip (layer 08); NULL is not marked.
+    perishable: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     plan: Mapped[MealPlan] = relationship(back_populates="grocery_items")
 

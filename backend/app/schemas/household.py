@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.core.clock import today as local_today
 from app.data.household_reference import basic_seasonings, default_servings, sodium_limit
+from app.schemas.catalog_tags import Equipment
 from app.schemas.household_rules import (
     ActivityLevel,
     AgeBand,
@@ -104,13 +105,20 @@ class HouseholdProfileWrite(BaseModel):
     pricing_mode: PricingMode = "fixture"
     # Dish roles of every meal (ADR-0036); None is one dish a meal.
     meal_composition: MealComposition | None = None
-    # Which meals are planned and each one's dishes (ADR-0046); None is the default shape.
+    # Which meals are planned and each one's dishes (ADR-0046); None is the full default (ADR-0070).
     plan_shape: MealPlanShape | None = None
     # Layer 08: confirmed sentences as rules, the basics run out, and the limits switched on.
     presence_rules: list[PresenceRule] = Field(default_factory=list, max_length=20)
     cooking_time_rules: list[CookingTimeRule] = Field(default_factory=list, max_length=20)
     missing_basics: list[str] = Field(default_factory=list, max_length=20)
     nutrition_limits: list[NutritionLimit] = Field(default_factory=list, max_length=1)
+    # Equipment the kitchen lacks (section 4.3); a recipe that needs it is never planned. Empty: all at home.
+    missing_equipment: list[Equipment] = Field(default_factory=list, max_length=5)
+
+    @field_validator("missing_equipment")
+    @classmethod
+    def sorted_equipment(cls, values: list[str]) -> list[str]:
+        return sorted(set(values))
 
     @field_validator("name")
     @classmethod
@@ -183,6 +191,7 @@ class HouseholdProfileVersionResponse(BaseModel):
     cooking_time_rules: list[CookingTimeRule] = Field(default_factory=list)
     missing_basics: list[str] = Field(default_factory=list)
     nutrition_limits: list[NutritionLimit] = Field(default_factory=list)
+    missing_equipment: list[Equipment] = Field(default_factory=list)
     created_at: datetime
 
 
@@ -214,6 +223,8 @@ class HouseholdPlanningOverrides(BaseModel):
 
 class HouseholdProfilePlanRequest(BaseModel):
     start_date: date = Field(default_factory=local_today)
+    # Days to plan from start_date (ADR-0070 section 5); a plan longer than a week shops twice (ADR-0072).
+    day_count: int = Field(default=7, ge=1, le=14)
     profile_version: int | None = Field(default=None, ge=1)
     overrides: HouseholdPlanningOverrides = Field(default_factory=HouseholdPlanningOverrides)
 
@@ -280,3 +291,30 @@ class HouseholdReferenceResponse(BaseModel):
     basics: list[BasicSeasoning]
     meal_shares: dict[str, float]
     sources: list[ReferenceSource]
+    # The full meal structure (ADR-0070) the profile editor offers and explains.
+    meal_structure: "MealStructureReference"
+
+
+class DinnerCount(BaseModel):
+    """The full default's dinner for a number of people at it: dishes of each kind."""
+
+    min_people: int
+    max_people: int | None
+    protein_mains: int
+    vegetables: int
+    soup: int
+    staple: int
+
+
+class MealStructureReference(BaseModel):
+    # meal -> preset name -> roles; the first preset of each meal is the full default.
+    presets: dict[str, dict[str, list[PlanningMealRole]]]
+    dinner_counts: list[DinnerCount]
+    # meal -> share of each member's daily energy a lunch or dinner gives at least.
+    energy_floor_share: dict[str, float]
+    equipment: list[Equipment]
+    perishable_days: int
+    trip_days: int
+
+
+HouseholdReferenceResponse.model_rebuild()
