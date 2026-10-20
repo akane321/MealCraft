@@ -1,9 +1,11 @@
+from collections import Counter
 from datetime import date, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.core.clock import today as local_today
+from app.data.allergens import checked_allergens
 from app.data.household_reference import basic_seasonings, default_servings, sodium_limit
 from app.schemas.catalog_tags import Equipment
 from app.schemas.household_rules import (
@@ -163,6 +165,33 @@ class HouseholdProfileWrite(BaseModel):
         if any(limit.nutrient != "sodium_mg" for limit in values):
             raise ValueError("Only a sodium limit is supported")
         return values
+
+    @model_validator(mode="after")
+    def members_have_distinct_names(self) -> "HouseholdProfileWrite":
+        """Names tell members apart everywhere that matters: a presence rule names one, the coverage rules
+        report one, and the plan says a dish is not for one. Two members called the same cannot be told
+        apart by any of them, so the profile refuses it rather than covering one and calling it both."""
+        seen = Counter(member.name.casefold() for member in self.members)
+        repeated = sorted({member.name for member in self.members if seen[member.name.casefold()] > 1})
+        if repeated:
+            raise ValueError(f"Give each person their own name: {', '.join(repeated)} is used more than once.")
+        return self
+
+    @model_validator(mode="after")
+    def allergens_the_catalog_can_check(self) -> "HouseholdProfileWrite":
+        """A member's own allergens meet the same rule as the household's (ADR-0024 section 3): one the recipes
+        were never checked for cannot be honoured, so it is refused here rather than silently ignored.
+
+        Without this, marking an unchecked name "only I avoid it" would take it out of the household-wide list,
+        where the planner rejects every dish for it, and leave it only on the member, where nothing matched it.
+        """
+        unchecked = sorted({item for member in self.members for item in member.allergens} - checked_allergens())
+        if unchecked:
+            raise ValueError(
+                f"MealCraft cannot check recipes for {', '.join(unchecked)}, so it cannot plan around it. "
+                f"Choose from the allergens it checks: {', '.join(sorted(checked_allergens()))}."
+            )
+        return self
 
     @model_validator(mode="after")
     def validate_total_servings(self) -> "HouseholdProfileWrite":

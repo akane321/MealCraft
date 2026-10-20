@@ -18,6 +18,7 @@ every dish on top of a member's own, so an allergen nobody marked "only I avoid 
 from dataclasses import dataclass
 from fractions import Fraction
 
+from app.data.allergens import checked_allergens
 from app.data.ingredient_hierarchy import expand_exclusions
 from app.planning.dietary_tags import satisfies
 from app.schemas.planning_v2 import PlanningSlot, PlanningSlotMember
@@ -81,12 +82,26 @@ def covering_groups(members) -> list[tuple]:
     return groups
 
 
+def unverifiable_for(member) -> list[str]:
+    """This member's own allergens that no recipe was checked for (ADR-0024 section 3).
+
+    The household-wide list is held to the same rule by the planner, which rejects every dish when one of its
+    allergens is outside the checked vocabulary. A member's own allergens have to meet it too, or marking an
+    allergen "only I avoid it" would turn a name nobody can verify - a misspelling, a plural, a food outside
+    the vocabulary - into a member who may eat anything. Here it goes the other way: unverifiable means this
+    member can eat nothing, and the plan is refused for leaving them uncovered rather than quietly fed.
+    """
+    return sorted(set(member.allergens) - checked_allergens())
+
+
 def member_can_eat(member, recipe) -> bool:
     """Whether this dish is this member's food: their own allergens, exclusions and diet.
 
     `recipe` is a planning candidate. The household-wide limits are checked once for the dish itself
     (`dish_eligible`, the validator's dish checks); this is only what differs between members at one table.
     """
+    if unverifiable_for(member):
+        return False
     if set(recipe.allergens) & set(member.allergens):
         return False
     if {item.ingredient_id for item in recipe.ingredients} & set(member.excluded_ingredients):
@@ -96,6 +111,8 @@ def member_can_eat(member, recipe) -> bool:
 
 def catalog_can_eat(member, recipe) -> bool:
     """`member_can_eat` for a catalog recipe (`app.models.recipe.Recipe`), as the pool and a swap read it."""
+    if unverifiable_for(member):
+        return False
     lines = recipe.recipe_ingredients
     allergens = {*(recipe.allergens or ()), *(a for item in lines for a in (item.ingredient.allergens or ()))}
     if allergens & set(member.allergens):
@@ -182,6 +199,29 @@ def coverage_failures(members, dishes: list[CoverageDish]) -> list[tuple[str, st
                 detail = f"The dishes {member.name} can eat give less than {member.name}'s energy floor."
                 failures.append(("member_energy_floor", detail, round(energy, 1), floor))
     return failures
+
+
+def member_has_a_dish(slot: PlanningSlot, dishes, recipes: dict) -> list[tuple[str, str, float | None, float]]:
+    """Every present member this meal gives nothing at all to eat, as (code, detail, actual, limit).
+
+    The weakest form of the shared-dish rule, and the only one a meal outside the full structure can be held
+    to: a breakfast is one dish, and a meal of the older course roles carries no meal-role tags to judge a
+    filling core by. Serving a dish because one member can eat it still has to leave nobody at that table with
+    an empty plate (ADR-0071 section 1), so this is checked wherever the full coverage rules cannot be.
+    """
+    if not slot.members:
+        return []
+    served = [recipes[recipe_id] for _, recipe_id in dishes]
+    return [
+        (
+            "member_no_dish",
+            f"Nothing at this {slot.meal_type} is a dish {member.name} can eat.",
+            None,
+            1,
+        )
+        for member in slot.members
+        if not any(member_can_eat(member, recipe) for recipe in served)
+    ]
 
 
 def coverage_issues(slot: PlanningSlot, dishes, recipes: dict, shares) -> list[tuple[str, str, float | None, float]]:

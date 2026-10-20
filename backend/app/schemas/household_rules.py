@@ -123,6 +123,23 @@ class HouseholdPlanning(BaseModel):
     missing_equipment: MissingEquipment = Field(default_factory=list, max_length=5)
 
 
+def limits_of_every_member(household: HouseholdPlanning | None) -> dict[str, list[str]]:
+    """Every member's own limits as one household-wide set, for the moment the members are dropped.
+
+    A request that keeps its members holds each limit against its own member (ADR-0071 section 1). When the
+    members go - a size the conversation states replaces them - nothing is left to hold those limits, so they
+    have to become the whole household's or they vanish. Allergens marked "only I avoid it" are folded in with
+    the rest: once the member they belong to is gone, there is nobody left to keep them for, and the safe
+    reading of an allergen with no owner is that the household avoids it.
+    """
+    members = household.members if household is not None else None
+    return {
+        "allergens": sorted({item for member in members or [] for item in member.allergens}),
+        "excluded_ingredients": sorted({item for member in members or [] for item in member.excluded_ingredients}),
+        "dietary_preferences": sorted({item for member in members or [] for item in member.dietary_preferences}),
+    }
+
+
 WEEKDAYS: tuple[Weekday, ...] = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 
 
