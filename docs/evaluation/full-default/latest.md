@@ -51,7 +51,7 @@ Moves: none.
 
 ## four-with-vegetarian
 
-Two adults, a teen and a child, one of them vegetarian (the household plans vegetarian, PR-1's union); a grandparent joins weekend dinners, so those dinners are for five.
+Two adults, a teen and a child, Ann vegetarian (her own diet, not the household's: ADR-0071's shared-dish model); a grandparent joins weekend dinners, so those dinners are for five.
 
 | Check | Result |
 |---|:---:|
@@ -68,27 +68,27 @@ Two adults, a teen and a child, one of them vegetarian (the household plans vege
 | Metric | Value |
 |---|---:|
 | Meals | 21 |
-| Dishes | 59 |
-| Distinct dishes (staples aside) | 51 |
-| Cuisine groups per lunch or dinner | 1.64 |
+| Dishes | 58 |
+| Distinct dishes (staples aside) | 44 |
+| Cuisine groups per lunch or dinner | 1.71 |
 | Meals with two deep-fried dishes | 0 |
 | Energy floor pass rate | 1.0 |
-| Grocery lines by trip | {'None': 107} |
-| Purchase total (SGD) | 635.41 |
+| Grocery lines by trip | {'None': 96} |
+| Purchase total (SGD) | 596.62 |
 
-Staples: Assyrian Rice, Brazilian Rice.
+Staples: Assyrian Rice, Ramen With Peas And Parmesan.
 
 Moves: none.
 
 | Day | Breakfast | Lunch | Dinner |
 |---|---|---|---|
-| 1 Sun | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Greek Grilled Cheese + Broccoli Salad | Mexican Couscous + Teriyaki Tofu + Grilled Parmesan Tomatoes + Japanese Cucumber Salad + Quick gazpacho |
-| 2 Mon | Sunrise Taco | Ramen With A Twist + Korean Bean Sprout Salad | Korean Barbecue Tofu + Cauliflower Crust Pizza (Hcg P3) + Taco Slaw + Gazpacho (Spanish Cold Soup) + Assyrian Rice (staple) |
-| 3 Tue | Tony's Breakfast Couscous | Egg And Cheese Tostadas + English Pea Salad | Teriyaki Fried Rice + Falafel Patties + Japanese Cucumber Sesame Salad + Iranian Yogurt Soup |
-| 4 Wed | Feta Omelet | Greek Salad Omelette + Fresh Pesto And Tomato Salad + Assyrian Rice (staple) | Japanese Mom's Tofu Stir-Fry + Egyptian Omelet (Eggah) + Kimchi + Egyptian Edamame Stew + Assyrian Rice (staple) |
-| 5 Thu | Banana Couscous | Madras Egg Curry + Carrot Raita + Assyrian Rice (staple) | Chinese Style Fried Rice + Tarka Dhall + Jim's Raita + Lentil Potato Dal |
-| 6 Fri | Cherry-Walnut Breakfast Couscous | Spanish Omelet + Cuban Cucumber Salad + Assyrian Rice (staple) | Daal Curry + Quiche With Self-Forming Crust + Thai Sweet And Sour Fresh Cucumber + Cheese And Corn Chowder + Brazilian Rice (staple) |
-| 7 Sat | Maple Yogurt | Maple-Marinated Tempeh + Saute Zucchini + Assyrian Rice (staple) | Crispy Tofu Stir Fry + South African Curried Eggs + Black Bean Garlic Edamame + Sauerkraut Salad + Hungarian Potato Soup + Assyrian Rice (staple) |
+| 1 Sun | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Greek Grilled Cheese + Sweet And Sour Cucumbers | Teriyaki Fried Rice + Salmon Steaks Teriyaki + Sigumchi Namul (Korean Spinach Salad Kimchi) + Korean Bean Sprout Salad + Iranian Yogurt Soup |
+| 2 Mon | Feta Omelet | Chinese Fried Rice + Seared Wheels Of Sweet Corn In Indonesian Kecap | Pizza Cheesy Chicken + Teriyaki Tofu + Grilled Parmesan Tomatoes + Quick gazpacho + Assyrian Rice (staple) |
+| 3 Tue | Sunrise Taco | Greek Grilled Cheese + Broccoli Salad | Primary Taco Meat + Korean Barbecue Tofu + Sauteed Zucchini With Oregano And Feta (Ww 1 Point) + Gazpacho (Spanish Cold Soup) + Assyrian Rice (staple) |
+| 4 Wed | Maple Yogurt | Greek Grilled Cheese + English Pea Salad | Fried Rice + Anitas Lemon Chicken + Moroccan Carrots + Martha's Gazpacho |
+| 5 Thu | The Egyptian Eye | Spanish Omelette + Fresh Pesto And Tomato Salad + Assyrian Rice (staple) | Thai-Style Omelet (Khai Jiao) + Teriyaki Grilled Tofu + Singapore Cucumber Salad + Eunah's Korean-Style Seaweed Soup + Ramen With Peas And Parmesan (staple) |
+| 6 Fri | Banana Couscous | Greek Grilled Cheese + Broccoli Salad | Thai Sesame Beef + Teriyaki Tofu + Tsukemono (Japanese Pickles) + Thai Ginger Soup + Assyrian Rice (staple) |
+| 7 Sat | Easy Mexican Omelet | Teriyaki Tofu + Cucumber Namasu + Assyrian Rice (staple) | Korean Beef + Korean Barbecue Tofu + Tomato And Cucumber Salad With Feta + Sauerkraut With Caraway + Tomato Dumplings + Assyrian Rice (staple) |
 
 ## six-tight-budget
 
