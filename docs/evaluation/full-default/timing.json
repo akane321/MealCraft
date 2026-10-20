@@ -1,31 +1,31 @@
 {
   "machine": "x86_64 (Linux)",
-  "commit": "db102a97d435e109398f9d5c8d17ca6644008cba",
+  "commit": "3d24351c3a30a63194af5b829e139ca115c19982",
   "cases": {
     "one-adult": {
-      "first": 13.84,
-      "median": 8.64,
-      "max": 8.76
+      "first": 10.82,
+      "median": 7.45,
+      "max": 7.73
     },
     "four-with-vegetarian": {
-      "first": 25.21,
-      "median": 24.8,
-      "max": 27.36
+      "first": 32.72,
+      "median": 29.59,
+      "max": 30.58
     },
     "six-tight-budget": {
-      "first": 259.11,
-      "median": 134.75,
-      "max": 144.7
+      "first": 269.01,
+      "median": 147.46,
+      "max": 151.42
     },
     "two-no-oven-ten-days": {
-      "first": 15.12,
-      "median": 10.09,
-      "max": 10.22
+      "first": 15.51,
+      "median": 10.2,
+      "max": 10.36
     },
     "seven-with-young-children": {
-      "first": 13.8,
-      "median": 14.53,
-      "max": 15.78
+      "first": 14.86,
+      "median": 14.66,
+      "max": 16.64
     }
   }
 }
