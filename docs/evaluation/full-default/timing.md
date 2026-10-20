@@ -6,11 +6,11 @@ Machine: x86_64 (Linux). The code commit is in `timing.json` beside this file.
 
 | Case | Report run (s) | Warm median (s) | Warm max (s) | Against the ADR-0079 guidance |
 |---|---:|---:|---:|---|
-| one-adult | 10.82 | 7.45 | 7.73 | within the guidance for a complex request |
-| four-with-vegetarian | 32.72 | 29.59 | 30.58 | within the guidance for a complex request |
-| six-tight-budget | 269.01 | 147.46 | 151.42 | over ~60 s |
-| two-no-oven-ten-days | 15.51 | 10.2 | 10.36 | within the guidance for a complex request |
-| seven-with-young-children | 14.86 | 14.66 | 16.64 | within the guidance for a complex request |
+| one-adult | 10.64 | 7.41 | 7.93 | within the guidance for a complex request |
+| four-with-vegetarian | 24.74 | 27.42 | 27.61 | within the guidance for a complex request |
+| six-tight-budget | 261.72 | 143.26 | 148.2 | over ~60 s |
+| two-no-oven-ten-days | 15.84 | 10.11 | 10.54 | within the guidance for a complex request |
+| seven-with-young-children | 14.0 | 14.01 | 15.65 | within the guidance for a complex request |
 
 Over ~60 s: six-tight-budget.
 
