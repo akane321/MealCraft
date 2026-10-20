@@ -9,7 +9,7 @@ from fractions import Fraction
 from math import ceil
 
 from app.data import meal_structure
-from app.planning.member_coverage import coverage_issues, dish_base_servings
+from app.planning.member_coverage import coverage_issues, dish_base_servings, member_has_a_dish
 from app.planning.vegetable_led import candidate_vegetable_led, catalog_vegetable_led, vegetable_role
 from app.schemas.planning_v2 import (
     NON_MEAL_ROLES,
@@ -150,9 +150,14 @@ def real_meal_issues(
     floor; a structured breakfast only fills its roles with dishes of their tags. With members home for the slot,
     each one's own coverage and energy floor are checked instead of the table's one floor (`member_coverage`)."""
     roles = slot.composition or []
-    if not structured(roles):
-        return []
+    covered = structured(roles) and slot.meal_type in ("lunch", "dinner")
     issues: list[tuple[str, str, float | None, float | None]] = []
+    if slot.members and not covered:
+        # A meal the full coverage rules cannot judge - a breakfast, a one-dish slot, a meal of course roles -
+        # still may not leave a member at it with nothing to eat (ADR-0071 section 1).
+        issues.extend(member_has_a_dish(slot, dishes, recipes))
+    if not structured(roles):
+        return issues
     filled = {role: recipes[recipe_id] for role, recipe_id in dishes}
     by_id = {role.role_id: role for role in roles}
     for role_id, recipe in filled.items():

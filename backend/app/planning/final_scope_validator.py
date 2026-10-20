@@ -230,6 +230,11 @@ class FinalPlanningValidator:
                 known.append(assignment)
             if slot.composition is not None:
                 checks.extend(self._meal_checks(problem, slot, known))
+            elif slot.members and known:
+                # A one-dish slot has no composition to check, but a member at it still needs something to
+                # eat (ADR-0071 section 1); `real_meal_issues` reports only that rule for such a slot.
+                pairs = [(dish.role_id, dish.recipe_id) for dish in known]
+                checks.extend(self._real_meal_checks(slot, pairs, recipes, None))
             meals[slot.slot_id] = known
         return checks, meals
 
@@ -324,12 +329,14 @@ class FinalPlanningValidator:
         if len(chosen) != len(set(chosen)):
             checks.append(self._failed("meal_duplicate_dish", "A meal holds the same recipe twice.", slot.slot_id))
         if not dishes:
-            if structured:
+            if structured or slot.members:
                 checks.extend(self._real_meal_checks(slot, [], recipes, None))
             return checks
         pairs = [(dish.role_id, dish.recipe_id) for dish in dishes]
         shares = meal_shares(problem, slot, pairs, recipes)
-        if structured:
+        if structured or slot.members:
+            # Without the full structure only the "everyone has something to eat" rule applies; with it, all
+            # of the real-meal and coverage rules do (`real_meal_issues`).
             checks.extend(self._real_meal_checks(slot, pairs, recipes, shares))
         if shares is None:
             checks.append(

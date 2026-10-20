@@ -145,7 +145,9 @@ class PlanningSlotMember(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     servings: float = Field(gt=0, le=3)
     allergens: list[str] = Field(default_factory=list, max_length=20)
-    excluded_ingredients: list[str] = Field(default_factory=list, max_length=200)
+    # Expanded over the ingredient hierarchy, so one stated exclusion can become dozens of ids ("meat"
+    # alone is 59): the cap is on what the expansion can produce, not on what the member wrote.
+    excluded_ingredients: list[str] = Field(default_factory=list, max_length=4000)
     dietary_requirements: list[str] = Field(default_factory=list, max_length=4)
     # The kcal this member needs from the meal: the HPB daily target times the meal's share (ADR-0070 section 3,
     # ADR-0071 section 3), measured against this member's portions of the dishes they can eat. None is no floor.

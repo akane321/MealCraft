@@ -13,7 +13,7 @@ import pytest
 
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_validator import FinalPlanningValidator
-from app.planning.meal_beam import dish_eligible
+from app.planning.meal_beam import dish_cost, dish_eligible, dish_grams
 from app.planning.meal_composition import dish_servings, real_meal_issues
 from app.planning.member_coverage import (
     coverage_issues,
@@ -21,6 +21,7 @@ from app.planning.member_coverage import (
     eaters,
     member_can_eat,
     servable,
+    unverifiable_for,
 )
 from app.planning.product_path import uncoverable_members
 from app.schemas.meal_plan import WeeklyMealPlanRequest
@@ -206,13 +207,29 @@ def test_a_member_is_measured_against_their_own_energy_floor_from_their_own_dish
     assert all("Ben" not in detail for _, detail, *_ in coverage_issues(at_table, meal, dishes, shares(meal)))
 
 
-def test_coverage_is_checked_at_lunch_and_dinner_only():
-    """A breakfast is one dish (ADR-0070): nobody needs a core and a vegetable at it."""
+def test_a_breakfast_needs_no_core_but_still_feeds_everyone_at_it():
+    """A breakfast is one dish (ADR-0070), so nobody needs a core and a vegetable at it. The weakest form of
+    the shared-dish rule still holds: a member at that table may not be left with nothing to eat."""
     one_dish = [{"role_id": "main", "meal_roles": ["protein_main", "one_bowl", "breakfast"]}]
     payload = slot(roles=one_dish).model_dump(mode="json") | {"meal_type": "breakfast"}
     prob = problem(slots=[payload])
     at_table, dishes = prob.slots[0], by_id(prob)
-    assert real_meal_issues(at_table, [("main", "chicken")], dishes, {"main": Fraction(1)}) == []
+    # A vegetarian main feeds everyone; no core or vegetable is demanded.
+    assert real_meal_issues(at_table, [("main", "tofu")], dishes, {"main": Fraction(1)}) == []
+    # A meat-only breakfast leaves Ann with nothing, and only that is reported.
+    issues = real_meal_issues(at_table, [("main", "chicken")], dishes, {"main": Fraction(1)})
+    assert [code for code, *_ in issues] == ["member_no_dish"]
+    assert "Ann" in issues[0][1]
+
+
+def test_a_one_dish_meal_with_members_still_feeds_everyone_at_it():
+    """A slot with no composition at all (the oldest shape) is checked by the same weakest rule."""
+    payload = slot().model_dump(mode="json") | {"composition": None}
+    prob = problem(slots=[payload])
+    at_table, dishes = prob.slots[0], by_id(prob)
+    assert real_meal_issues(at_table, [(None, "tofu")], dishes, {"main": Fraction(1)}) == []
+    codes = [code for code, *_ in real_meal_issues(at_table, [(None, "chicken")], dishes, {"main": Fraction(1)})]
+    assert codes == ["member_no_dish"]
 
 
 # --- Servings and cost follow the members who can eat the dish ---------------------------------------------
@@ -420,3 +437,55 @@ def test_a_member_no_meal_can_cover_is_named_rather_than_having_their_limits_rel
     assert uncoverable_members(prob) == ["Ann"]
     # With one vegetarian main she is coverable again, and no limit was touched to get there.
     assert uncoverable_members(problem()) == []
+
+
+# --- The budget sees the same servings the validator does ---------------------------------------------------
+
+
+def test_the_search_prices_a_dish_for_the_members_who_can_eat_it():
+    """The beam's budget pruning and the validator have to agree on what a dish costs, or the search throws
+    away weeks that fit. Both scale by the members who can eat the dish (ADR-0071 section 1)."""
+    prob = problem()
+    at_table, dishes = prob.slots[0], by_id(prob)
+    assignments = [
+        PlanningAssignment(slot_id="d1", role_id="main", recipe_id="chicken"),
+        PlanningAssignment(slot_id="d1", role_id="main-2", recipe_id="tofu"),
+    ]
+    servings = dish_servings(prob, assignments)
+    prices = {"chicken-base": 0.01, "tofu-base": 0.01}
+    meat, vegetarian = dishes["chicken"], dishes["tofu"]
+    share = Fraction(1, 2)
+    # Grams and cost both follow the eaters: the meat main for 3.2 portions, the vegetarian one for 4.08.
+    grams = dict(dish_grams(at_table, meat, share))
+    expected = 400 * float(Fraction("3.2") * share) / meat.servings
+    assert grams["chicken-base"] == pytest.approx(expected)
+    assert dish_cost(prob, at_table, meat, "main", prices, share) == pytest.approx(expected * 0.01)
+    # ... and the ratio between the two dishes is the ratio the validator's servings have.
+    meat_cost = dish_cost(prob, at_table, meat, "main", prices, share)
+    veg_cost = dish_cost(prob, at_table, vegetarian, "main-2", prices, share)
+    assert meat_cost / veg_cost == pytest.approx(float(servings[0] / servings[1]))
+
+
+def test_without_members_the_search_prices_a_dish_for_the_whole_table_as_before():
+    prob = problem(slots=[slot(members=[]).model_dump(mode="json")])
+    at_table, dishes = prob.slots[0], by_id(prob)
+    grams = dict(dish_grams(at_table, dishes["chicken"], Fraction(1, 2)))
+    assert grams["chicken-base"] == pytest.approx(400 * 4.08 * 0.5 / 4)
+
+
+# --- An allergen the recipes were never checked for ----------------------------------------------------------
+
+
+def test_a_member_whose_allergen_cannot_be_checked_can_eat_nothing():
+    """ADR-0024 section 3 for a member's own allergens: a name outside the checked vocabulary cannot be
+    honoured, so it must not quietly become "this member may eat anything"."""
+    unchecked = [{"name": "Ann", "servings": 1.0, "allergens": ["peanuts"]}]  # the plural is not the vocabulary
+    prob = problem(slots=[slot(members=unchecked, servings=1.0).model_dump(mode="json")])
+    at_table, dishes = prob.slots[0], by_id(prob)
+    assert unverifiable_for(at_table.members[0]) == ["peanuts"]
+    assert not any(member_can_eat(at_table.members[0], recipe) for recipe in dishes.values())
+    assert not servable(at_table, dishes["rice"])
+    # Spelled as the vocabulary has it, the member eats what does not hold it.
+    checked = [{"name": "Ann", "servings": 1.0, "allergens": ["peanut"]}]
+    ok = problem(slots=[slot(members=checked, servings=1.0).model_dump(mode="json")])
+    assert servable(ok.slots[0], by_id(ok)["rice"])

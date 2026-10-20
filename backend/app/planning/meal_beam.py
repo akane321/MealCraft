@@ -28,7 +28,7 @@ from app.planning.meal_composition import (
     role_base,
     structured_slot,
 )
-from app.planning.member_coverage import covering_groups, member_can_eat, servable
+from app.planning.member_coverage import covering_groups, dish_base_servings, member_can_eat, servable
 from app.planning.nutrition_scope import nutrition_guard_loss
 from app.planning.recipe_quality import dish_kind
 from app.schemas.planning_v2 import (
@@ -780,7 +780,8 @@ def meal_permitted(problem, slot, dishes, recipes, shares=None) -> bool:
         shares = meal_shares(problem, slot, [(role or MAIN_ROLE, recipe_id) for role, recipe_id in dishes], recipes)
     if shares is None or sum(shares.values()) < 1:
         return False
-    if structured_slot(slot) and real_meal_issues(slot, dishes, recipes, shares):
+    # With members at the table even an unstructured meal is checked: everyone needs something to eat.
+    if (structured_slot(slot) or slot.members) and real_meal_issues(slot, dishes, recipes, shares):
         return False
     chosen = [recipes[recipe_id] for recipe_id in ids]
     if slot.max_time_minutes is not None and meal_minutes(chosen, problem.composition_policy) > slot.max_time_minutes:
@@ -837,8 +838,13 @@ def meal_grams(problem, slot, dishes, recipes) -> list[tuple[str, float]]:
 
 
 def dish_grams(slot, recipe, share) -> list[tuple[str, float]]:
-    """What one dish needs of each ingredient at its share of the meal."""
-    scale = slot.servings * float(share) / recipe.servings
+    """What one dish needs of each ingredient at its share of the meal.
+
+    Cooked for the members who can eat it (ADR-0071 section 1), as the validator and the shopping list buy it:
+    costing the whole table here priced a dish above what the week would actually spend, and the budget pruning
+    then threw away weeks that fit.
+    """
+    scale = float(dish_base_servings(slot, recipe)) * float(share) / recipe.servings
     return [(item.ingredient_id, item.quantity * scale) for item in recipe.ingredients if item.quantity is not None]
 
 
@@ -864,12 +870,14 @@ def dish_cost(
     """What one dish's ingredients cost at those prices, at the share it is cooked for.
 
     Before the meal's size is known, the share of a full meal is used, which orders
-    dishes the same way for every size.
+    dishes the same way for every size. The servings are the members who can eat the dish (ADR-0071 section 1),
+    the same number the validator and the shopping list use.
     """
     if share is None:
         share = 1.0
+    servings = float(dish_base_servings(slot, recipe)) * float(share)
     return sum(
-        (item.quantity or 0) * slot.servings * float(share) / recipe.servings * prices.get(item.ingredient_id, 0.0)
+        (item.quantity or 0) * servings / recipe.servings * prices.get(item.ingredient_id, 0.0)
         for item in recipe.ingredients
     )
 
