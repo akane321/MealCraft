@@ -95,6 +95,10 @@ class MealCpSatPlanner(FinalScopeReferencePlanner):
             raise ValueError("The CP-SAT meal planner does not model a diversity policy")
         if any(b.hard and b.scope in {"per_slot", "per_day", "horizon_average"} for b in problem.nutrition_bands):
             raise ValueError("The CP-SAT meal planner does not model meal, day or horizon nutrition bands")
+        # ponytail: a gap against ADR-0075 section 1 (one objective for every planner); model the real-meal rules,
+        # the staple's shares and the two shopping trips here before CP-SAT compares the full default.
+        if problem.uncounted_roles or problem.perishable_days is not None or problem.missing_equipment:
+            raise ValueError("Structured meals and household shopping rules are not modelled by the CP-SAT reference")
 
         started = time.perf_counter()
         model = cp_model.CpModel()

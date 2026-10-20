@@ -1,0 +1,35 @@
+{
+  "version": "cuisine-groups-v1",
+  "decision": "ADR-0070 section 4 and ADR-0068: cuisine coherence is idealized into six groups; no pairwise table is kept.",
+  "note": "Recipe cuisine (release values and the curated catalog's labels) -> group. A cuisine not listed has no group and is left out of the coherence term. Read by app/data/meal_structure.py.",
+  "groups": {
+    "chinese": ["chinese", "Chinese-inspired"],
+    "southeast_asian": ["thai", "vietnamese", "filipino", "indonesian", "malaysian_singaporean"],
+    "south_asian": ["indian", "Indian-inspired"],
+    "japanese_korean": ["japanese", "korean", "Japanese-inspired"],
+    "western": [
+      "american",
+      "southern_us",
+      "cajun_creole",
+      "tex_mex",
+      "mexican",
+      "latin_american",
+      "caribbean",
+      "italian",
+      "greek",
+      "french",
+      "british_irish",
+      "german",
+      "eastern_european",
+      "spanish_portuguese",
+      "scandinavian",
+      "dutch_belgian",
+      "Contemporary",
+      "Mediterranean-inspired",
+      "Italian-inspired",
+      "Mexican-inspired",
+      "Latin-inspired"
+    ],
+    "middle_eastern_african": ["middle_eastern", "north_african", "turkish", "african", "Middle Eastern-inspired"]
+  }
+}

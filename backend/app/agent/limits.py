@@ -242,7 +242,7 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
     """A weekly budget under the cheapest week the search found: what it is a person a meal, that week's
     cost, and the budgets a real week backs."""
     weekly, size = constraints.weekly_budget_sgd, constraints.household_size or 1
-    meals = 7 * len((constraints.plan_shape or default_plan_shape()).meals)
+    meals = getattr(constraints, "day_count", 7) * len((constraints.plan_shape or default_plan_shape()).meals)
     text = say(
         "budget_short",
         lang,

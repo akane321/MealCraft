@@ -19,6 +19,8 @@ export interface RecipeListItem {
   dietary_tags: string[];
   nutrition: RecipeNutrition;
   course?: string | null;
+  /** The meal-role tag: "staple", "protein_main", "one_bowl"…; null when untagged. */
+  meal_role?: string | null;
 }
 
 export interface RecipeCollection {

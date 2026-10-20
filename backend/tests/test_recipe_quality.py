@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.planning.recipe_quality import incomplete
+from app.planning.recipe_quality import incomplete, missing_named_protein
 
 
 def recipe(title, kcal, ingredients, course="main", release="v2.1"):
@@ -20,10 +20,47 @@ def test_a_main_that_lost_its_main_line_is_not_planned():
     assert incomplete(recipe("Korean Pork Chops", 420, ["soy_sauce", "sesame_seed"])) == "named pork but lists none"
 
 
+def test_title_evidence_checks_use_real_ingredient_lines_not_broth_or_guessed_meat():
+    assert missing_named_protein("Steak Teriyaki", [("soy_sauce", "2 Tbsp soy sauce")]) == "named steak but lists none"
+    assert (
+        missing_named_protein("Chicken Dinner", [("chicken_broth", "1 cup chicken broth")])
+        == "named chicken but lists none"
+    )
+    assert missing_named_protein("Beef Pasties", [("meat", "5 lb meat (beef stew or chuck roast)")]) is None
+    assert missing_named_protein("Chicken Fried Steak", [("beef_steak", "1 lb beef steak")]) is None
+
+
 def test_complete_dishes_soups_and_curated_recipes_are_kept():
     assert incomplete(recipe("Korean Pork Chops", 387, ["pork_chop", "soy_sauce"])) is None
     assert incomplete(recipe("Gazpacho", 109, ["tomato", "cucumber"], course="soup")) is None
     assert incomplete(recipe("Lemon Chicken", 90, ["lemon"], release=None)) is None
+
+
+@pytest.mark.parametrize(
+    ("title", "names"),
+    [
+        ("Hoisin Pork Steak", ["pork"]),
+        ("Tofu Teriyaki Steak", ["tofu"]),
+        ("T'S Ham Steak", ["ham"]),
+        ("Lamb Or Chicken Kabobs", ["lamb"]),
+        ("Chicken Or Pork Adobo", ["pork"]),
+        ("Chicken Or Turkey Caruso", ["turkey"]),
+        ("Chicken (also good with pork)", ["pork"]),
+        ("Chicken (can be made with turkey)", ["turkey"]),
+    ],
+)
+def test_steak_is_a_cut_and_named_alternative_titles_need_only_one_supported_option(title, names):
+    assert missing_named_protein(title, [(name, name) for name in names]) is None
+    assert missing_named_protein(title, [("onion", "onion")]) is not None
+
+
+def test_owner_reviewed_ingredient_step_conflict_stays_out_of_planning():
+    soup = recipe("Korean Fusion Butternut Squash Soup", 300, ["sausage", "butternut_squash"], course="soup")
+    soup.external_id = "RCP2_0DA06DF48EDB"
+    assert incomplete(soup).startswith("ingredient/step conflict")
+    # The exclusion is evidence for one reviewed record, not a blanket ban on sausage soups.
+    soup.external_id = "another-recipe"
+    assert incomplete(soup) is None
 
 
 @pytest.mark.parametrize(
@@ -126,6 +163,10 @@ def test_planning_repository_drops_dough_only_recipes_but_keeps_filled_dishes():
         )
 
     with Session(engine) as session:
+        conflicted = release_recipe(
+            "conflicted-soup", "Korean Fusion Butternut Squash Soup", "soup", ["sausage", "butternut_squash"]
+        )
+        conflicted.external_id = "RCP2_0DA06DF48EDB"
         session.add_all(
             [
                 release_recipe("wrapper", "Magdalena's Empanadas", "main", ["flour", "water", "butter", "salt"]),
@@ -133,6 +174,7 @@ def test_planning_repository_drops_dough_only_recipes_but_keeps_filled_dishes():
                     "filled", "Beef Empanadas", "main", ["flour", "water", "butter", "salt", "beef", "onion"]
                 ),
                 release_recipe("dough-side", "Rolled Dumplings", "side", ["flour", "salt", "shortening", "milk"]),
+                conflicted,
             ]
         )
         session.commit()

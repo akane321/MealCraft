@@ -7,10 +7,15 @@ import pytest
 
 from app.agent.replanning import AgentReplanInterpreter
 from app.agent.shape_change import read_shape_change
-from app.schemas.meal_plan import MEAL_PRESETS, MealPlanShape, default_plan_shape
+from app.schemas.meal_plan import MEAL_PRESETS, MealPlanShape
 
 # The course of the dish each role holds in these weeks.
-COURSES = {"main": "main", "vegetable": "side", "soup": "soup"}
+COURSES = {"main": "main", "vegetable": "side", "soup": "soup", "staple": "side"}
+
+
+def default_plan_shape() -> MealPlanShape:
+    """The older default these weeks were written for: dinner, a main and a vegetable (ADR-0046)."""
+    return MealPlanShape.model_validate({"meals": {"dinner": MEAL_PRESETS["dinner"]["main and vegetable"]}})
 
 
 def week(shape: MealPlanShape, **extra: list[str]) -> SimpleNamespace:

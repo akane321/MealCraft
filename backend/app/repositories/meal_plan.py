@@ -454,5 +454,7 @@ class MealPlanRepository:
                     excess_quantity=line.excess_quantity,
                     note=line.note,
                     price_evidence=line.evidence.model_dump(mode="json") if line.evidence else None,
+                    shopping_trip=line.shopping_trip,
+                    perishable=line.perishable,
                 )
             )

@@ -11,12 +11,23 @@ from dataclasses import asdict, dataclass
 from itertools import product
 from math import ceil, prod
 
+from app.data import meal_structure
 from app.planning.dietary_tags import satisfies
 from app.planning.diversity import diversity_loss
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.input_audit import require_finite_problem
-from app.planning.meal_composition import MAIN_ROLE, meal_minutes, portion_shares, role_admits
+from app.planning.meal_composition import (
+    MAIN_ROLE,
+    equipment_met,
+    fills_staple,
+    meal_minutes,
+    meal_shares,
+    real_meal_issues,
+    role_admits,
+    role_base,
+    structured_slot,
+)
 from app.planning.nutrition_scope import nutrition_guard_loss
 from app.planning.recipe_quality import dish_kind
 from app.schemas.planning_v2 import (
@@ -27,6 +38,7 @@ from app.schemas.planning_v2 import (
     PlanningRecipeCandidate,
     PlanningSlot,
     PlanningTrace,
+    core_role,
 )
 
 # A one-dish slot is a single role that admits any course, as before course labels.
@@ -130,6 +142,13 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         more = False
         per_role: list[list[tuple[str | None, str] | None]] = []
         position = [s.slot_id for s in sorted(problem.slots, key=self._slot_key)].index(slot.slot_id)
+        structured = structured_slot(slot)
+        # A structured lunch or dinner may leave its staple, and its first vegetable dish, beside a dish that
+        # carries its staple (ADR-0070 section 2); `meal_permitted` keeps only the meals where that holds.
+        skippable: set[str] = set()
+        if structured and slot.meal_type in ("lunch", "dinner"):
+            skippable = {role.role_id for role in roles if role.role_id == "staple"}
+            skippable |= {next((r.role_id for r in roles if role_base(r.role_id) == "vegetable"), None)} - {None}
         for role_index, (role, role_limit) in enumerate(zip(roles, role_limits, strict=True)):
             turn = position + role_index * len(problem.slots)
             eligible = self.role_dishes(problem, slot, role, recipes)
@@ -155,7 +174,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 )
             more = more or len(ranked) > len(kept)
             options: list[tuple[str | None, str] | None] = [(key, r.recipe_id) for r in kept]
-            if not role.required and locked is None:
+            if (not role.required or role.role_id in skippable) and locked is None:
                 options.append(None)
             per_role.append(options)
         by_id = {r.recipe_id: r for r in recipes}
@@ -164,17 +183,22 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         dish_losses = {
             dish[1]: self._dish_loss(problem, slot, by_id[dish[1]]) for options in per_role for dish in options if dish
         }
+        facts = meal_facts(by_id, {dish[1] for options in per_role for dish in options if dish}) if structured else {}
         shares_of: dict[tuple, dict | None] = {}
         costs: dict[tuple, float] = {}
         meals = []
         spread: dict[tuple, int] = {}
-        for combination in product(*per_role):
+        for combination in core_combinations(per_role, roles, by_id, slot.meal_type if structured else None):
             dishes = tuple(dish for dish in combination if dish is not None)
             if not dishes:
                 continue
             roles_key = tuple(role or MAIN_ROLE for role, _ in dishes)
+            if structured:
+                # A structured meal's shares also depend on whether its main carries the staple.
+                roles_key = (roles_key, "staple" not in roles_key and fills_staple(by_id[dishes[0][1]]))
             if roles_key not in shares_of:
-                shares_of[roles_key] = portion_shares(problem.composition_policy, list(roles_key))
+                pairs = [(role or MAIN_ROLE, recipe_id) for role, recipe_id in dishes]
+                shares_of[roles_key] = meal_shares(problem, slot, pairs, by_id)
             shares = shares_of[roles_key]
             if not meal_permitted(problem, slot, dishes, by_id, shares):
                 continue
@@ -182,9 +206,19 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 kinds = [dish_kind(by_id[recipe_id].title) for _, recipe_id in dishes]
                 if len(kinds) != len(set(kinds)):
                     continue
-            loss = sum(
-                float(shares[role or MAIN_ROLE]) * dish_losses[recipe_id] for role, recipe_id in dishes
-            ) + EMPTY_OPTIONAL_ROLE_LOSS * combination.count(None)
+            if structured:
+                # The staple left beside a dish that carries it is no empty dish (meal_permitted held the rest).
+                empties = sum(
+                    dish is None and role.role_id != "staple" for role, dish in zip(roles, combination, strict=True)
+                )
+            else:
+                empties = combination.count(None)
+            loss = (
+                sum(float(shares[role or MAIN_ROLE]) * dish_losses[recipe_id] for role, recipe_id in dishes)
+                + EMPTY_OPTIONAL_ROLE_LOSS * empties
+            )
+            if structured:
+                loss += soft_meal_loss(slot, dishes, facts)
             cost = 0.0
             if prices:
                 parts = []
@@ -281,6 +315,10 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         package_costs: dict[tuple[str, float], float] = {}
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
         roles_of = {slot.slot_id: len(slot.composition or [ANY_COURSE]) for slot in problem.slots}
+        staples = staple_slots(problem)
+        # A plan longer than a week shops twice (ADR-0072): each trip's lines are priced, and held to the
+        # budget, on their own. One trip keeps the ingredient keys, and so every sum, as before.
+        trips = 1 + any(slot.trip == 2 for slot in problem.slots)
         for slot in ordered:
             options = self.meal_options(problem, slot)
             must_assign = slot.required or slot.locked_recipe_id is not None
@@ -333,16 +371,27 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                         if key not in lines:
                             lines[key] = meal_grams(problem, slot, key[1], recipes)
                         for ingredient, grams in lines[key]:
-                            need[ingredient] = need.get(ingredient, 0.0) + grams
+                            line = ingredient if trips == 1 else (ingredient, slot.trip)
+                            need[line] = need.get(line, 0.0) + grams
                         for ingredient, _ in lines[key]:
-                            held = (ingredient, need[ingredient])
+                            line = ingredient if trips == 1 else (ingredient, slot.trip)
+                            held = (line, need[line])
                             if held not in package_costs:
-                                package_costs[held] = ingredient_cost(ingredient, held[1], pantry, packages)
-                            cost[ingredient] = package_costs[held]
+                                # ponytail: the second trip is priced without the pantry, which goes to the first;
+                                # an estimate above the checkout only prunes more, and the validator decides.
+                                at_home = pantry if trips == 1 or slot.trip == 1 else {}
+                                package_costs[held] = ingredient_cost(ingredient, held[1], at_home, packages)
+                            cost[line] = package_costs[held]
                         needs[s.choices] = need
                         priced[s.choices] = cost
                     # Summed in the needs' order, so the total is the same float however it was reached.
-                    spend[s.choices] = sum(priced[s.choices].values(), 0.0)
+                    if trips == 1:
+                        spend[s.choices] = sum(priced[s.choices].values(), 0.0)
+                    else:  # each trip is held to the budget: the dearer trip decides
+                        by_trip = [0.0, 0.0]
+                        for (_, trip), value in priced[s.choices].items():
+                            by_trip[trip - 1] += value
+                        spend[s.choices] = max(by_trip)
                 if problem.budget_is_hard:
                     within = [s for s in next_states if spend[s.choices] <= budget]
                     emptied_by = emptied_by or ("budget" if next_states and not within else None)
@@ -365,12 +414,12 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 # by a new dish if one fits and else by a repeat, and left empty only when neither fits (ADR-0050).
                 room = max(1, self.limits.width // 4)
                 best = next_states[: self.limits.width - room]
-                share = budget / len(problem.slots)
+                share = budget * trips / len(problem.slots)
                 rest = sorted(
                     next_states[self.limits.width - room :],
                     key=lambda s: (
                         spend[s.choices]
-                        + share * (repeats(problem, s) + EMPTY_OPTIONAL_ROLE_LOSS * empty_roles(s, roles_of)),
+                        + share * (repeats(problem, s) + EMPTY_OPTIONAL_ROLE_LOSS * empty_roles(s, roles_of, staples)),
                         s.choices,
                     ),
                 )
@@ -398,12 +447,15 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         budget = problem.purchase_budget_sgd
         if budget is None or problem.diversity_policy is not None:
             return state
+        if any(slot.trip == 2 for slot in problem.slots):
+            # ponytail: a plan of two shopping trips keeps its week as searched; price each trip here to vary it.
+            return state
         slots = {slot.slot_id: slot for slot in problem.slots}
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
         packages = packages_by_ingredient(problem)
         pantry = {item.ingredient_id: item.quantity for item in problem.pantry if item.quantity is not None}
         rules = problem.repetition_rules
-        free = set(rules.repeat_ok_roles) if rules else set()
+        free = (set(rules.repeat_ok_roles) if rules else set()) | problem.uncounted_roles
         caps = {c.recipe_id: c.max_uses for c in rules.recipe_counts if c.max_uses is not None} if rules else {}
         cap = rules.max_uses_per_recipe if rules else None
         banded = any(band.hard and band.scope == "per_day" for band in problem.nutrition_bands)
@@ -445,7 +497,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                         candidates[slot_id, role] = self.role_dishes(problem, slot, spec)
                     # The most uses of any dish once `old` is served one time less.
                     rest = counts[0] - 1 if uses[old] == counts[0] and counts[1] < counts[0] else counts[0]
-                    shares = portion_shares(problem.composition_policy, [r or MAIN_ROLE for r, _ in dishes]) or {}
+                    shares = meal_shares(problem, slot, [(r or MAIN_ROLE, d) for r, d in dishes], recipes) or {}
                     share = shares.get(role or MAIN_ROLE, 1)
                     removed = dish_grams(slot, recipes[old], share)
                     for recipe in candidates[slot_id, role]:
@@ -558,6 +610,10 @@ def dish_eligible(problem: FinalPlanningProblem, slot: PlanningSlot, recipe: Pla
         return False
     if not satisfies(problem.dietary_requirements, recipe.dietary_tags):
         return False
+    if problem.missing_equipment and not equipment_met(recipe.equipment, problem.missing_equipment):
+        return False
+    if perishable_late(problem, slot, recipe):
+        return False
     one_dish_meal = slot.composition is None
     for band in problem.nutrition_bands:
         if band.hard and (band.scope == "per_dish" or (one_dish_meal and band.scope == "per_slot")):
@@ -567,6 +623,62 @@ def dish_eligible(problem: FinalPlanningProblem, slot: PlanningSlot, recipe: Pla
             if band.upper is not None and band.upper - actual < -1e-6:
                 return False
     return True
+
+
+def perishable_late(problem, slot, recipe) -> bool:
+    """A perishable dish later than `perishable_days` after its shopping trip (ADR-0072: used within 3 days)."""
+    return bool(
+        problem.perishable_days is not None
+        and recipe.perishable
+        and slot.days_after_shopping is not None
+        and slot.days_after_shopping > problem.perishable_days
+    )
+
+
+def admits(role, other) -> bool:
+    """Whether `other` can take a dish `role` takes: shared courses, or shared meal roles."""
+    if role.meal_roles or other.meal_roles:
+        return bool(set(role.meal_roles or ()) & set(other.meal_roles or ()))
+    return bool(set(other.courses) & set(role.courses))
+
+
+@dataclass(frozen=True)
+class MealFacts:
+    group: str | None
+    deep_fried: bool
+    staple_kind: str | None
+
+
+def meal_facts(by_id: dict, recipe_ids) -> dict[str, MealFacts]:
+    """What the soft meal terms read of each dish, worked out once per slot."""
+    return {
+        recipe_id: MealFacts(
+            by_id[recipe_id].cuisine_group,
+            "deep_fry" in (by_id[recipe_id].cooking_methods or ()),
+            meal_structure.plain_staple_kind(recipe_id) if by_id[recipe_id].meal_role == "staple" else None,
+        )
+        for recipe_id in recipe_ids
+    }
+
+
+def soft_meal_loss(slot, dishes, facts: dict[str, MealFacts]) -> float:
+    """The soft rules within a meal (ADR-0070 section 4), kept small beside a dish's rank loss: one cuisine group
+    (each extra group costs), no two deep-fried dishes, and a plain staple of the kind the meal's cuisine usually
+    has (rice by default; a staple-tagged dish of its own, such as a cheese pasta, costs most)."""
+    weights = meal_structure.soft_weights()
+    groups = {facts[recipe_id].group for role, recipe_id in dishes if role_base(role) != "staple"} - {None}
+    loss = weights["cuisine_group_weight"] * max(0, len(groups) - 1)
+    fried = sum(facts[recipe_id].deep_fried for _, recipe_id in dishes)
+    loss += weights["deep_fry_weight"] * max(0, fried - 1)
+    staple = next((recipe_id for role, recipe_id in dishes if role == "staple"), None)
+    if staple is not None:
+        core = core_role(slot.composition)
+        main = next((recipe_id for role, recipe_id in dishes if core is not None and role == core.role_id), None)
+        kind = facts[staple].staple_kind
+        usual = meal_structure.usual_staple_kinds(facts[main].group if main else None)
+        fit = weights["staple_kind"]
+        loss += fit["usual"] if kind in usual else fit["other_kind"] if kind is not None else fit["not_plain"]
+    return loss
 
 
 def capped_role_limits(problem, roles, per_role_limit: int, max_combinations: int | None) -> list[int]:
@@ -583,8 +695,11 @@ def capped_role_limits(problem, roles, per_role_limit: int, max_combinations: in
         return [per_role_limit] * len(roles)
     needs = []
     for role in roles:
+        if role.role_id in problem.uncounted_roles:
+            needs.append(0)  # the staple repeats by design, outside the cap
+            continue
         dishes = sum(
-            other.composition is None or bool(set(r.courses) & set(role.courses))
+            other.composition is None or admits(role, r)
             for other in problem.slots
             for r in other.composition or [ANY_COURSE]
         )
@@ -599,6 +714,31 @@ def capped_role_limits(problem, roles, per_role_limit: int, max_combinations: in
     return limits
 
 
+def core_combinations(per_role, roles, recipes, meal_type):
+    """The combinations of each role's options (`product`), less those whose filling core `real_meal_issues` refuses
+    whatever else they hold: a structured lunch or dinner (`meal_type`; None for any other meal) has a protein main
+    beside its staple, or a dish that carries its staple and no second one (ADR-0070 section 3). About 60% of a
+    six-dish dinner's combinations fail there; skipping them leaves the same meals to `meal_permitted`, which still
+    checks every one (the order of the meals found is set by their sort)."""
+    core = core_role(roles) if meal_type in ("lunch", "dinner") else None
+    if core is None:
+        yield from product(*per_role)
+        return
+    at = roles.index(core)
+    staple = next((i for i, role in enumerate(roles) if role.role_id == "staple"), None)
+    for dish in per_role[at]:
+        if dish is None:
+            continue
+        recipe = recipes[dish[1]]
+        bowl = fills_staple(recipe)
+        if not bowl and (staple is None or recipe.meal_role != "protein_main"):
+            continue
+        options = [[dish] if i == at else choices for i, choices in enumerate(per_role)]
+        if staple is not None:
+            options[staple] = [choice for choice in per_role[staple] if (choice is None) == bowl]
+        yield from product(*options)
+
+
 def meal_permitted(problem, slot, dishes, recipes, shares=None) -> bool:
     """Meal-level hard rules: distinct dishes, portions, meal time, per-meal nutrition, one protein each.
 
@@ -607,8 +747,10 @@ def meal_permitted(problem, slot, dishes, recipes, shares=None) -> bool:
     if len(ids) != len(set(ids)):
         return False
     if shares is None:
-        shares = portion_shares(problem.composition_policy, [role or MAIN_ROLE for role, _ in dishes])
+        shares = meal_shares(problem, slot, [(role or MAIN_ROLE, recipe_id) for role, recipe_id in dishes], recipes)
     if shares is None or sum(shares.values()) < 1:
+        return False
+    if structured_slot(slot) and real_meal_issues(slot, dishes, recipes, shares):
         return False
     chosen = [recipes[recipe_id] for recipe_id in ids]
     if slot.max_time_minutes is not None and meal_minutes(chosen, problem.composition_policy) > slot.max_time_minutes:
@@ -656,7 +798,7 @@ def packages_by_ingredient(problem) -> dict[str, list[tuple[float, float]]]:
 
 def meal_grams(problem, slot, dishes, recipes) -> list[tuple[str, float]]:
     """What one meal needs of each ingredient, line by line, each dish at its share of the meal."""
-    shares = portion_shares(problem.composition_policy, [role or MAIN_ROLE for role, _ in dishes]) or {}
+    shares = meal_shares(problem, slot, [(role or MAIN_ROLE, recipe_id) for role, recipe_id in dishes], recipes) or {}
     return [
         line
         for role, recipe_id in dishes
@@ -719,6 +861,7 @@ def repetition_loss(problem, state: MealState, dishes, repeat_cost: float = 0.10
             previous.append(recipe_id)
         return loss / len(dishes) if dishes else 0.0
     free = set(problem.repetition_rules.repeat_ok_roles) if problem.repetition_rules else set()
+    free |= problem.uncounted_roles
     previous = [recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in free]
     last = {recipe_id for role, recipe_id in state.choices[-1][1] if role not in free} if state.choices else set()
     return sum(
@@ -732,13 +875,27 @@ def repetition_loss(problem, state: MealState, dishes, repeat_cost: float = 0.10
 def repeats(problem, state: MealState) -> int:
     """Dishes that repeat an earlier one in the plan, outside the roles the household lets repeat."""
     free = set(problem.repetition_rules.repeat_ok_roles) if problem.repetition_rules else set()
+    free |= problem.uncounted_roles
     dishes = [recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in free]
     return len(dishes) - len(set(dishes))
 
 
-def empty_roles(state: MealState, roles_of: dict[str, int]) -> int:
-    """Optional roles left empty in the plan's meals, given each slot's number of roles."""
-    return sum(roles_of[slot_id] - len(dishes) for slot_id, dishes in state.choices)
+def empty_roles(state: MealState, roles_of: dict[str, int], staples=frozenset()) -> int:
+    """Optional roles left empty in the plan's meals, given each slot's number of roles. `staples` are the slots
+    with a structured staple role: a staple left out beside a dish that carries it is no empty role."""
+    return sum(
+        roles_of[slot_id] - len(dishes) - (slot_id in staples and all(role != "staple" for role, _ in dishes))
+        for slot_id, dishes in state.choices
+    )
+
+
+def staple_slots(problem) -> frozenset[str]:
+    """The slots whose structured meal has a staple role (`empty_roles`)."""
+    return frozenset(
+        slot.slot_id
+        for slot in problem.slots
+        if structured_slot(slot) and any(role.role_id == "staple" for role in slot.composition)
+    )
 
 
 # Orders beam states by progress towards stated requests; larger than any meal's loss.
@@ -792,11 +949,16 @@ def day_permitted(problem, state: MealState, slot, day_closed: bool) -> bool:
         return True
     slots = {item.slot_id: item for item in problem.slots}
     recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
-    meals = [dishes for slot_id, dishes in state.choices if slots[slot_id].planned_date == slot.planned_date]
+    meals = [
+        (slots[slot_id], dishes)
+        for slot_id, dishes in state.choices
+        if slots[slot_id].planned_date == slot.planned_date
+    ]
     for band in bands:
         total = 0.0
-        for dishes in meals:
-            shares = portion_shares(problem.composition_policy, [role or MAIN_ROLE for role, _ in dishes]) or {}
+        for meal_slot, dishes in meals:
+            pairs = [(role or MAIN_ROLE, recipe_id) for role, recipe_id in dishes]
+            shares = meal_shares(problem, meal_slot, pairs, recipes) or {}
             total += sum(
                 float(shares.get(role or MAIN_ROLE, 1)) * getattr(recipes[recipe_id].nutrients_per_serving, band.metric)
                 for role, recipe_id in dishes
@@ -815,8 +977,15 @@ def horizon_permitted(problem, state: MealState, dishes) -> bool:
     rules = problem.repetition_rules
     if rules is not None:
         caps = {c.recipe_id: c.max_uses for c in rules.recipe_counts if c.max_uses is not None}
-        for recipe_id in set(ids):
-            used = previous.count(recipe_id) + ids.count(recipe_id)
+        counted_previous, counted = previous, ids
+        uncounted = problem.uncounted_roles
+        if uncounted:  # the staple repeats by design: no cap counts it (ADR-0070)
+            counted_previous = [
+                recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in uncounted
+            ]
+            counted = [recipe_id for role, recipe_id in dishes if role not in uncounted]
+        for recipe_id in set(counted):
+            used = counted_previous.count(recipe_id) + counted.count(recipe_id)
             cap = caps.get(recipe_id, rules.max_uses_per_recipe)
             if cap is not None and used > cap:
                 return False
