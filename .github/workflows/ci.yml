@@ -50,8 +50,11 @@ jobs:
   backend:
     name: backend
     runs-on: ubuntu-latest
-    # Raised with the shared-dish report, which plans ten households twice (layer 08 PR-4).
-    timeout-minutes: 20
+    # Raised with the shared-dish report, which plans ten households twice (layer 08 PR-4), and again when
+    # widening each member's candidates made both evaluations slower: this job ran out of its twenty minutes
+    # inside the shared-dish step with everything before it passing. Same budget as `compose`, which does the
+    # same work and finished in 23 minutes.
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
