@@ -15,6 +15,7 @@ member is checked on their own. The household-wide allergens, exclusions and die
 every dish on top of a member's own, so an allergen nobody marked "only I avoid it" keeps the dish off the table.
 """
 
+import re
 from dataclasses import dataclass
 from fractions import Fraction
 
@@ -82,6 +83,23 @@ def covering_groups(members) -> list[tuple]:
     return groups
 
 
+def title_mentions(title: str, avoided: list[str]) -> list[str]:
+    """The avoided words a recipe's name states outright (`pork` in "Pork Chops").
+
+    A dish whose name says what it is made of is taken at its word, whichever list the word came from. It lives
+    here because a member's own limits read it too: a recipe missing its main ingredient line would otherwise
+    count as food for a member who avoids exactly that.
+    """
+    lowered = title.lower()
+    words = {item.replace("_", " ") for item in avoided if not item.startswith("group:")}
+    return sorted(word for word in words if re.search(rf"\b{re.escape(word)}(?:e?s)?\b", lowered))
+
+
+def named_against(member, title: str) -> bool:
+    """Whether a dish's own name states something this member avoids: their exclusions or any of their allergens."""
+    return bool(title_mentions(title, [*member.excluded_ingredients, *member.allergens]))
+
+
 def unverifiable_for(member) -> list[str]:
     """This member's own allergens that no recipe was checked for (ADR-0024 section 3).
 
@@ -106,18 +124,28 @@ def member_can_eat(member, recipe) -> bool:
         return False
     if {item.ingredient_id for item in recipe.ingredients} & set(member.excluded_ingredients):
         return False
+    if named_against(member, recipe.title):
+        return False
     return satisfies(member.dietary_requirements, recipe.dietary_tags)
 
 
-def catalog_can_eat(member, recipe) -> bool:
-    """`member_can_eat` for a catalog recipe (`app.models.recipe.Recipe`), as the pool and a swap read it."""
+def catalog_can_eat(member, recipe, lines=None) -> bool:
+    """`member_can_eat` for a catalog recipe (`app.models.recipe.Recipe`), as the pool and a swap read it.
+
+    `lines` are the recipe's lines as this household cooks them (`alternatives.lines`), where the caller has
+    them: an "A or B" line is then judged by the option actually chosen, so two members excluding different
+    options are each answered about the one that reaches the table rather than about the combined line.
+    Without them the recipe's own lines are read, which is what the combined line used to mean.
+    """
     if unverifiable_for(member):
         return False
-    lines = recipe.recipe_ingredients
+    lines = recipe.recipe_ingredients if lines is None else lines
     allergens = {*(recipe.allergens or ()), *(a for item in lines for a in (item.ingredient.allergens or ()))}
     if allergens & set(member.allergens):
         return False
     if {item.ingredient.normalized_name for item in lines} & set(member.excluded_ingredients):
+        return False
+    if named_against(member, recipe.title):
         return False
     return satisfies(member.dietary_requirements, recipe.dietary_tags)
 

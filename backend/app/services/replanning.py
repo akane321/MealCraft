@@ -896,6 +896,16 @@ class MealPlanReplanningService:
                     for ingredient in alternatives.lines(recipes_by_id[item.recipe.id], constraints)
                 }
             ]
+        if self._slot_members(constraints, entry):
+            # Every meal, composed or not: a swap may not leave a member at the table with nothing to eat
+            # (ADR-0071 section 1). `_meal_still_holds` only runs for a dish of a composed meal, so a one-dish
+            # dinner would otherwise be swapped with no coverage check at all, while the planner refuses the
+            # same meal. Without members this is identity, so a request with no household block is untouched.
+            candidates = [
+                item
+                for item in candidates
+                if self._coverage_after_swap(constraints, entry, recipes_by_id[item.recipe.id], plan)
+            ]
         role = self._role(constraints, entry)
         if role is not None:
             # One dish of a composed meal: it fills the same role, and the meal must still hold
@@ -1013,7 +1023,13 @@ class MealPlanReplanningService:
             entry, candidate, others, roles, at_table
         ):
             return False
-        if structured(roles) and not MealPlanReplanningService._coverage_holds(constraints, entry, candidate, others):
+        # The filling core and the vegetable dish are a lunch-and-dinner rule (`meal_composition.real_meal_issues`
+        # returns before them for any other meal). A structured breakfast holds no protein main, staple or
+        # one-bowl dish, so applying them there refused every breakfast swap; `_coverage_after_swap` holds it to
+        # the weakest form instead, which is the one the planner uses for it.
+        if MealPlanReplanningService._fully_covered(roles, entry) and not MealPlanReplanningService._coverage_holds(
+            constraints, entry, candidate, others
+        ):
             return False
         if rules_on(constraints) and MealPlanReplanningService._perishable_late(plan, entry, candidate):
             return False
@@ -1055,7 +1071,8 @@ class MealPlanReplanningService:
         """
         kept = Fraction(str(entry.servings)) if entry.servings is not None else None
         members = MealPlanReplanningService._slot_members(constraints, entry)
-        able = [member for member in members if catalog_can_eat(member, candidate)]
+        cooked = alternatives.lines(candidate, constraints)
+        able = [member for member in members if catalog_can_eat(member, candidate, cooked)]
         if not able:
             return kept
         base = sum((Fraction(str(member.servings)) for member in able), Fraction(0))
@@ -1077,12 +1094,48 @@ class MealPlanReplanningService:
                 carries_staple=fills_staple(recipe),
                 calories_kcal=float(recipe.nutrition.calories_kcal) if recipe.nutrition is not None else 0.0,
                 share=float(share),
-                eaten_by=frozenset(m.name for m in members if catalog_can_eat(m, recipe)),
+                eaten_by=frozenset(
+                    m.name for m in members if catalog_can_eat(m, recipe, alternatives.lines(recipe, constraints))
+                ),
             )
 
         dishes = [dish(item.role_id, item.recipe, item.portion_share) for item in others]
         dishes.append(dish(entry.role_id, candidate, entry.portion_share))
         return not coverage_failures(members, dishes)
+
+    @staticmethod
+    def _fully_covered(roles, entry: MealPlanEntry) -> bool:
+        """Whether this meal is one the full coverage rules can judge: a structured lunch or dinner.
+
+        The same line `meal_composition.real_meal_issues` draws, so a swap is held to exactly what the planner
+        held the meal to when it made it.
+        """
+        return structured(roles) and entry.meal_type in ("lunch", "dinner")
+
+    @staticmethod
+    def _coverage_after_swap(
+        constraints: WeeklyMealPlanRequest, entry: MealPlanEntry, candidate: Recipe, plan: MealPlan
+    ) -> bool:
+        """Whether every member home for the meal still has a dish to eat once `candidate` replaces the entry.
+
+        A structured lunch or dinner is judged by the full rules in `_meal_still_holds`; this is the weakest
+        form (`member_coverage.member_has_a_dish`), which holds everywhere, so a breakfast, a one-dish dinner or
+        a meal of course roles cannot leave a member with an empty plate (ADR-0071 section 1).
+        """
+        members = MealPlanReplanningService._slot_members(constraints, entry)
+        if not members:
+            return True
+        others = [
+            item
+            for item in plan.entries
+            if item.day_index == entry.day_index
+            and item.meal_type == entry.meal_type
+            and item.id != entry.id
+            and item.status != "skipped"
+        ]
+        served = [item.recipe for item in others] + [candidate]
+        cooked = {recipe.id: alternatives.lines(recipe, constraints) for recipe in served}
+        return all(any(catalog_can_eat(member, recipe, cooked[recipe.id]) for recipe in served) for member in members)
 
     @staticmethod
     def _meal_roles(constraints: WeeklyMealPlanRequest, entry: MealPlanEntry) -> list:

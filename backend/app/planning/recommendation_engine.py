@@ -1,4 +1,3 @@
-import re
 from bisect import bisect_left
 from dataclasses import dataclass
 
@@ -7,7 +6,7 @@ from app.data.allergens import allergen_conflicts, conflict_reasons
 from app.models.recipe import Recipe
 from app.planning import alternatives
 from app.planning.dietary_tags import expand_tags
-from app.planning.member_coverage import MemberLimits, member_limits
+from app.planning.member_coverage import MemberLimits, member_limits, title_mentions
 from app.schemas.recipe import RecipeListItemResponse
 from app.schemas.recommendation import (
     ExcludedRecipeResponse,
@@ -25,13 +24,6 @@ LOWER_CALORIE_UPPER_RANGE_KCAL = 1000.0
 # The planner searches at most this many recommendations. They are the best
 # scored within budget across the whole catalog, not the first rows by id.
 CANDIDATE_LIMIT = 500
-
-
-def title_mentions(title: str, avoided: list[str]) -> list[str]:
-    """The household's avoided words that a recipe's name states outright (`pork` in "Pork Chops")."""
-    lowered = title.lower()
-    words = {item.replace("_", " ") for item in avoided if not item.startswith("group:")}
-    return sorted(word for word in words if re.search(rf"\b{re.escape(word)}(?:e?s)?\b", lowered))
 
 
 @dataclass(frozen=True)

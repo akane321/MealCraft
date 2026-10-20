@@ -5,17 +5,22 @@ present member can eat it, every present member has a filling core and a vegetab
 is cooked for the servings of the members who can eat it.
 """
 
+import inspect
 from datetime import date
 from fractions import Fraction
 from types import SimpleNamespace
 
 import pytest
+from pydantic import ValidationError
 
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.meal_beam import dish_cost, dish_eligible, dish_grams
 from app.planning.meal_composition import dish_servings, real_meal_issues
+from app.planning.meal_cp_sat import MealCpSatPlanner
 from app.planning.member_coverage import (
+    MemberLimits,
+    catalog_can_eat,
     coverage_issues,
     dish_base_servings,
     eaters,
@@ -23,9 +28,15 @@ from app.planning.member_coverage import (
     servable,
     unverifiable_for,
 )
-from app.planning.product_path import uncoverable_members
+from app.planning.product_path import PACKET_COVERAGE_CANDIDATES, _packet_covering, uncoverable_members
+from app.planning.week_floor import _meals_each_member_eats, _smallest_share
 from app.schemas.meal_plan import WeeklyMealPlanRequest
-from app.schemas.planning_v2 import FinalPlanningProblem, PlanningAssignment, PlanningSlot
+from app.schemas.planning_v2 import (
+    FinalPlanningProblem,
+    PlanningAssignment,
+    PlanningSlot,
+    PlanningSlotMember,
+)
 from app.services.replanning import MealPlanReplanningService
 
 NUTRIENTS = ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
@@ -341,6 +352,7 @@ def _entry(role_id: str, recipe, *, share=Fraction(1, 2), servings=Fraction("3.2
         role_id=role_id,
         recipe=recipe,
         recipe_id=recipe.id,
+        day_index=1,
         planned_date=date(2027, 1, 3),
         meal_type="dinner",
         portion_share=share,
@@ -493,3 +505,292 @@ def test_a_member_whose_allergen_cannot_be_checked_can_eat_nothing():
     checked = [{"name": "Ann", "servings": 1.0, "allergens": ["peanut"]}]
     ok = problem(slots=[slot(members=checked, servings=1.0).model_dump(mode="json")])
     assert servable(ok.slots[0], by_id(ok)["rice"])
+
+
+# --- Swaps outside the full meal structure (second-round review) ----------------------------------------------
+
+
+def _one_dish_request(members=MEMBERS):
+    """A plan with no composed shape at all: one dinner dish, the shape the MVP capability plans."""
+    return WeeklyMealPlanRequest.model_validate(
+        {
+            "start_date": date(2027, 1, 3).isoformat(),
+            "day_count": 1,
+            "household_size": 4,
+            "household": {
+                "members": [
+                    {
+                        "name": m["name"],
+                        "servings": m["servings"],
+                        "dietary_preferences": m.get("dietary_requirements", []),
+                        "excluded_ingredients": m.get("excluded_ingredients", []),
+                        "allergens": m.get("allergens", []),
+                    }
+                    for m in members
+                ]
+            },
+        }
+    )
+
+
+def _plan_of(entries):
+    return SimpleNamespace(entries=list(entries), household_size=4, constraints=None)
+
+
+def test_a_one_dish_dinner_cannot_be_swapped_to_a_dish_the_vegetarian_member_cannot_eat():
+    """The swap and the planner hold the same line (ADR-0071 section 1). A one-dish plan has no role and no
+    composition, so the composed-meal checks never run on it: without this, a vegetarian member could be swapped
+    out of their dinner entirely, which the planner would have refused to produce."""
+    request = _one_dish_request()
+    tofu = _catalog("tofu", "protein_main", calories=900, tags=["vegetarian"])
+    pork = _catalog("pork", "protein_main", calories=900)
+    entry = _entry("main", tofu)
+    plan = _plan_of([entry])
+    assert MealPlanReplanningService._coverage_after_swap(request, entry, tofu, plan)
+    assert not MealPlanReplanningService._coverage_after_swap(request, entry, pork, plan)
+    # A second dish the vegetarian member can eat makes the meat dish fine: she still has something.
+    beside = _entry("main-2", _catalog("greens", "vegetable", calories=120, tags=["vegetarian"]))
+    assert MealPlanReplanningService._coverage_after_swap(request, entry, pork, _plan_of([entry, beside]))
+
+
+def test_without_members_a_one_dish_swap_is_unchanged():
+    """A request with no household block keeps exactly its old behaviour: the new check is identity there."""
+    request = WeeklyMealPlanRequest.model_validate(
+        {"start_date": date(2027, 1, 3).isoformat(), "day_count": 1, "household_size": 4}
+    )
+    pork = _catalog("pork", "protein_main", calories=900)
+    entry = _entry("main", _catalog("tofu", "protein_main", calories=900, tags=["vegetarian"]))
+    assert MealPlanReplanningService._coverage_after_swap(request, entry, pork, _plan_of([entry]))
+
+
+def test_a_breakfast_swap_is_not_refused_for_having_no_filling_core():
+    """A structured breakfast holds no protein main, staple or one-bowl dish, so the lunch-and-dinner filling
+    core cannot be asked of it - `real_meal_issues` returns before that rule for any other meal. Asking anyway
+    refused every breakfast swap with members at the table."""
+    roles = [{"role_id": "breakfast", "meal_roles": ["breakfast"], "required": True}]
+    request = WeeklyMealPlanRequest.model_validate(
+        {
+            "start_date": date(2027, 1, 3).isoformat(),
+            "day_count": 1,
+            "household_size": 4,
+            "plan_shape": {"meals": {"breakfast": roles}},
+            "household": {"members": [{"name": m["name"], "servings": m["servings"]} for m in MEMBERS]},
+        }
+    )
+    yogurt = _catalog("yogurt", "breakfast", calories=400)
+    entry = _entry("breakfast", _catalog("omelette", "breakfast", calories=400))
+    entry.meal_type = "breakfast"
+    assert not MealPlanReplanningService._fully_covered(MealPlanReplanningService._meal_roles(request, entry), entry)
+    assert MealPlanReplanningService._coverage_after_swap(request, entry, yogurt, _plan_of([entry]))
+
+
+def test_a_breakfast_swap_still_cannot_leave_a_member_with_nothing():
+    """The weakest form of the rule does hold at breakfast: a dish the vegetarian member cannot eat, and no
+    other dish at that meal, is refused."""
+    roles = [{"role_id": "breakfast", "meal_roles": ["breakfast"], "required": True}]
+    request = WeeklyMealPlanRequest.model_validate(
+        {
+            "start_date": date(2027, 1, 3).isoformat(),
+            "day_count": 1,
+            "household_size": 4,
+            "plan_shape": {"meals": {"breakfast": roles}},
+            "household": {
+                "members": [
+                    {
+                        "name": m["name"],
+                        "servings": m["servings"],
+                        "dietary_preferences": m.get("dietary_requirements", []),
+                    }
+                    for m in MEMBERS
+                ]
+            },
+        }
+    )
+    entry = _entry("breakfast", _catalog("yogurt", "breakfast", calories=400, tags=["vegetarian"]))
+    entry.meal_type = "breakfast"
+    bacon = _catalog("bacon-roll", "breakfast", calories=400)
+    assert not MealPlanReplanningService._coverage_after_swap(request, entry, bacon, _plan_of([entry]))
+
+
+# --- A dish's own name, and the option an "A or B" line is cooked with ----------------------------------------
+
+
+def test_a_dish_whose_name_states_what_a_member_avoids_is_not_their_food():
+    """A recipe missing its main ingredient line would otherwise count as food for the member who avoids exactly
+    that: "Korean Pork Chops" with no pork line read as pork-free. The name is taken at its word, for a member's
+    own limits as for the household's."""
+    ann = MemberLimits(
+        name="Ann", allergens=frozenset(), excluded_ingredients=frozenset({"pork"}), dietary_requirements=()
+    )
+    missing_its_pork = _catalog("Korean Pork Chops", "protein_main", calories=600, ingredient="onion")
+    assert not catalog_can_eat(ann, missing_its_pork)
+    assert catalog_can_eat(ann, _catalog("Onion Omelette", "protein_main", calories=600, ingredient="onion"))
+    # An allergen of the member's own reads the same way.
+    mei = MemberLimits(
+        name="Mei", allergens=frozenset({"peanut"}), excluded_ingredients=frozenset(), dietary_requirements=()
+    )
+    assert not catalog_can_eat(mei, _catalog("Peanut Noodles", "one_bowl", calories=600, ingredient="noodle"))
+
+
+def test_an_a_or_b_line_is_judged_by_the_option_actually_cooked():
+    """Two members excluding different options of one combined line: each is answered about the option that
+    reaches the table, not about the combined line, which matched both of them."""
+    combined = _catalog("Weeknight Bake", "protein_main", calories=600, ingredient="beef_or_turkey")
+    chosen_turkey = [SimpleNamespace(ingredient=SimpleNamespace(normalized_name="turkey", allergens=[]))]
+    avoids_beef = MemberLimits(
+        name="Ann",
+        allergens=frozenset(),
+        excluded_ingredients=frozenset({"beef_or_turkey", "beef"}),
+        dietary_requirements=(),
+    )
+    avoids_turkey = MemberLimits(
+        name="Ben", allergens=frozenset(), excluded_ingredients=frozenset({"turkey"}), dietary_requirements=()
+    )
+    # Read raw, the combined line removes the dish for the member who avoids beef, though turkey is cooked.
+    assert not catalog_can_eat(avoids_beef, combined)
+    assert catalog_can_eat(avoids_beef, combined, chosen_turkey)
+    assert not catalog_can_eat(avoids_turkey, combined, chosen_turkey)
+
+
+def test_a_planning_request_refuses_two_members_with_the_same_name():
+    """Names tell members apart in the presence rules, the coverage failures and "Not for ..."; the profile
+    already refuses a repeat, and a request that arrives on its own has to as well."""
+    with pytest.raises(ValidationError) as refused:
+        WeeklyMealPlanRequest.model_validate(
+            {
+                "start_date": date(2027, 1, 3).isoformat(),
+                "day_count": 1,
+                "household_size": 2,
+                "household": {
+                    "members": [{"name": "Ann", "servings": 1.0}, {"name": "ann", "servings": 1.0}],
+                },
+            }
+        )
+    assert "Ann, ann is used more than once" in str(refused.value)
+
+
+def test_a_members_exclusions_may_hold_every_name_the_hierarchy_expands_to():
+    """One stated exclusion expands to many: "meat" alone becomes 59 names, so eight of them pass 200. The cap
+    is the schema's own, and it has to be wide enough for what the planner puts there."""
+    field = PlanningSlotMember.model_fields["excluded_ingredients"]
+    assert field.metadata and any(getattr(item, "max_length", None) == 4000 for item in field.metadata)
+    wide = PlanningSlotMember.model_validate(
+        {"name": "Ann", "servings": 1.0, "excluded_ingredients": [f"thing-{i}" for i in range(400)]}
+    )
+    assert len(wide.excluded_ingredients) == 400
+
+
+# --- The fixes nothing else guards (second-round review item 7) ------------------------------------------------
+
+
+def test_each_member_keeps_a_real_choice_of_every_kind_of_dish():
+    """One dish a member can eat makes a meal coverable, but a week of them repeats it. The packet holds at
+    least as many dishes of each kind for every group of alike members as the ranking keeps for the table, so
+    the narrow diet has something to vary with - the variety the first version lost was this number, not the
+    shared-dish model."""
+    ranked = [
+        SimpleNamespace(recipe=SimpleNamespace(id=index, title=f"dish-{index}", slug=f"dish-{index}"))
+        for index in range(150)
+    ]
+    # Every third dish suits the vegetarian member; the ranking's own pick holds just one of them.
+    by_recipe = {
+        item.recipe.id: _catalog(
+            f"dish-{item.recipe.id}",
+            "protein_main",
+            calories=600,
+            tags=["vegetarian"] if item.recipe.id % 3 == 0 else [],
+        )
+        for item in ranked
+    }
+    ann = MemberLimits(
+        name="Ann", allergens=frozenset(), excluded_ingredients=frozenset(), dietary_requirements=("vegetarian",)
+    )
+    ben = MemberLimits(name="Ben", allergens=frozenset(), excluded_ingredients=frozenset(), dietary_requirements=())
+    best = [ranked[0], ranked[1], ranked[2]]  # dish-0 is the one vegetarian dish kept by rank
+    added = _packet_covering(ranked, best, [ann, ben], by_recipe, 14)
+    vegetarian = [item for item in [*best, *added] if by_recipe[item.recipe.id].dietary_tags]
+    assert len(vegetarian) >= PACKET_COVERAGE_CANDIDATES
+    # Without members the packet is exactly what it was.
+    assert _packet_covering(ranked, best, [], by_recipe, 14) == []
+
+
+def test_the_week_floor_asks_for_coverage_only_at_the_meals_a_member_is_home_for():
+    """A child who eats lunch at school on weekdays is not owed a lunch they never sit down to: the floor would
+    otherwise refuse the week for a member it should not have been checking at that meal."""
+    request = WeeklyMealPlanRequest.model_validate(
+        {
+            "start_date": date(2027, 1, 4).isoformat(),  # a Monday
+            "day_count": 5,
+            "household_size": 4,
+            "household": {
+                "members": [{"name": "Ann", "servings": 1.0}, {"name": "Mei", "servings": 0.73}],
+                "presence_rules": [
+                    {
+                        "source_text": "Mei has lunch at school on weekdays",
+                        "restatement": "Monday to Friday, lunch: Mei is not at home.",
+                        "member_name": "Mei",
+                        "weekdays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                        "meal_types": ["lunch"],
+                        "present": False,
+                    }
+                ],
+            },
+        }
+    )
+    shape = [("lunch", None), ("dinner", None)]
+    at_meal = _meals_each_member_eats(request, shape)
+    assert at_meal["lunch"] == {"Ann"}
+    assert at_meal["dinner"] == {"Ann", "Mei"}
+
+
+def test_the_floor_scales_by_the_smallest_a_dish_can_be_cooked_for():
+    """The floor is a lower bound: priced for the whole table it sits above the cheapest real week and refuses
+    weeks that fit. The smallest share one dish can be cooked for is the smallest member's portions."""
+    request = WeeklyMealPlanRequest.model_validate(
+        {
+            "start_date": date(2027, 1, 3).isoformat(),
+            "day_count": 1,
+            "household_size": 4,
+            "household": {"members": [{"name": "Ann", "servings": 0.88}, {"name": "Ben", "servings": 1.12}]},
+        }
+    )
+    assert _smallest_share(request) == pytest.approx(0.88 / 4)
+    without = WeeklyMealPlanRequest.model_validate(
+        {"start_date": date(2027, 1, 3).isoformat(), "day_count": 1, "household_size": 4}
+    )
+    assert _smallest_share(without) == 1.0
+
+
+def test_the_cp_sat_budget_costs_a_dish_for_the_members_who_can_eat_it():
+    """The CP-SAT budget is a third costing path beside the beam's and the validator's; all three read the same
+    servings, or a budget means a different thing depending on which one answered."""
+    prob = problem()
+    at_table, dishes = prob.slots[0], by_id(prob)
+    assert dish_base_servings(at_table, dishes["chicken"]) == Fraction("3.2")
+    assert dish_base_servings(at_table, dishes["tofu"]) == Fraction("4.08")
+    source = inspect.getsource(MealCpSatPlanner._budget)
+    assert "dish_base_servings(slot, recipe)" in source
+
+
+def test_a_whole_weeks_search_price_is_the_price_the_validator_reads():
+    """Three costing paths have to agree over a whole week, not only one dish: the beam prunes on its own price,
+    and a week it priced above the budget is never offered even when the validator would have passed it. Summing
+    each dish's grams the way the search does must give what `dish_servings` gives the validator."""
+    prob = problem()
+    at_table = prob.slots[0]
+    assignments = [
+        PlanningAssignment(slot_id="d1", role_id="main", recipe_id="chicken"),
+        PlanningAssignment(slot_id="d1", role_id="main-2", recipe_id="tofu"),
+        PlanningAssignment(slot_id="d1", role_id="staple", recipe_id="rice"),
+    ]
+    validator = dish_servings(prob, assignments)
+    dishes = by_id(prob)
+    roles = shares([(a.role_id, a.recipe_id) for a in assignments])
+    for index, assignment in enumerate(assignments):
+        recipe = dishes[assignment.recipe_id]
+        share = roles[assignment.role_id]
+        # The search's own grams for this dish, divided by the per-serving amount, are its servings.
+        grams = dict(dish_grams(at_table, recipe, share))
+        line = recipe.ingredients[0]
+        search_servings = grams[line.ingredient_id] * recipe.servings / line.quantity
+        assert float(validator[index]) == pytest.approx(search_servings)

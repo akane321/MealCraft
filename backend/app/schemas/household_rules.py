@@ -6,9 +6,10 @@ request. Layer 08 PR-3 wires `MissingEquipment`. Still unwired: `FlavorBoost` an
 Meanings and NULL rules are in docs/design/sprint2-schema-foundation.md.
 """
 
+from collections import Counter
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.schemas.catalog_tags import Equipment, FlavorTag
 from app.schemas.planning_v2 import MealType, NutrientMetric
@@ -121,6 +122,20 @@ class HouseholdPlanning(BaseModel):
     protein_priority: bool = False
     # Equipment the kitchen lacks: a recipe whose equipment cannot be met is never planned (section 4.3).
     missing_equipment: MissingEquipment = Field(default_factory=list, max_length=5)
+
+    @model_validator(mode="after")
+    def members_have_distinct_names(self) -> "HouseholdPlanning":
+        """The same rule the profile holds (`HouseholdProfileWrite`), here for a request that arrives on its own.
+
+        Names tell members apart everywhere that matters: a presence rule names one, the coverage rules report
+        one, and the plan says a dish is not for one. Two members called the same are one member to all of them,
+        so a plan could cover one and be read as covering both.
+        """
+        seen = Counter(member.name.casefold() for member in self.members or [])
+        repeated = sorted({member.name for member in self.members or [] if seen[member.name.casefold()] > 1})
+        if repeated:
+            raise ValueError(f"Give each person their own name: {', '.join(repeated)} is used more than once.")
+        return self
 
 
 def limits_of_every_member(household: HouseholdPlanning | None) -> dict[str, list[str]]:

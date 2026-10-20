@@ -246,3 +246,28 @@ def test_a_size_stated_in_the_conversation_keeps_every_members_limits(recipe_cli
     assert after["allergens"] == ["peanut"]
     assert after["excluded_ingredients"] == ["pork"]
     assert after["dietary_preferences"] == ["vegetarian"]
+
+
+def test_a_members_allergen_outside_the_checked_vocabulary_is_refused_on_save(recipe_client):
+    """ADR-0024 section 3: an allergen no recipe was ever checked for cannot be honoured. Saving it would leave
+    a member whose limit silently does nothing, so the profile refuses it and names the words it does know."""
+    for word in ("kiwi", "peanuts"):  # unknown, and the plural of one it knows
+        body = payload(members=[{"name": "Ann", "servings_per_meal": 1, "allergens": [word]}], presence_rules=[])
+        refused = recipe_client.post("/api/household-profiles", json=body)
+        assert refused.status_code == 422, refused.text
+        assert word in refused.text and "peanut" in refused.text
+    # The vocabulary's own spelling saves.
+    body = payload(members=[{"name": "Ann", "servings_per_meal": 1, "allergens": ["peanut"]}], presence_rules=[])
+    assert recipe_client.post("/api/household-profiles", json=body).status_code == 201
+
+
+def test_a_profile_refuses_two_members_with_the_same_name(recipe_client):
+    """A presence rule names a member, a coverage failure names one and the plan says a dish is not for one;
+    two members called the same are one member to all three."""
+    body = payload(
+        members=[{"name": "Ann", "servings_per_meal": 1}, {"name": "ann", "servings_per_meal": 1}],
+        presence_rules=[],
+    )
+    refused = recipe_client.post("/api/household-profiles", json=body)
+    assert refused.status_code == 422, refused.text
+    assert "used more than once" in refused.text

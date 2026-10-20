@@ -168,11 +168,21 @@ def uncoverable_members(problem) -> list[str]:
 
     For each structured lunch or dinner and each member home for it: is there a filling core at all among the
     dishes eligible for that slot which the member can eat - a dish that carries its staple, or a protein main
-    beside a staple. It proves a member uncoverable; it does not prove the rest coverable together.
+    beside a staple. Every other meal is held to the weakest form instead: is there any eligible dish at all
+    that member can eat. It proves a member uncoverable; it does not prove the rest coverable together.
     """
     names: list[str] = []
     for slot in problem.slots:
-        if not slot.members or not structured_slot(slot) or slot.meal_type not in ("lunch", "dinner"):
+        if not slot.members:
+            continue
+        if not structured_slot(slot) or slot.meal_type not in ("lunch", "dinner"):
+            # A breakfast, a one-dish slot or a meal of course roles is held to the weakest form of the rule
+            # (`member_has_a_dish`), so the refusal names a member no eligible dish of that slot suits rather
+            # than leaving them inside a general "no week fits".
+            eligible = [recipe for recipe in problem.recipes if dish_eligible(problem, slot, recipe)]
+            for member in slot.members:
+                if not any(member_can_eat(member, recipe) for recipe in eligible) and member.name not in names:
+                    names.append(member.name)
             continue
         roles = slot.composition or []
         if not any(role.role_id == STAPLE_ROLE for role in roles):
@@ -279,8 +289,13 @@ def families_first(recommendations, seen=()) -> list:
     return first + again
 
 
-# Dishes of each kind the packet keeps for each member a meal has to cover (`_packet_covering`).
-PACKET_COVERAGE_CANDIDATES = 4
+# Dishes of each kind the packet holds for each member a meal has to cover (`_packet_covering`), counting the
+# ones the ranking already kept. Four was too few: a member whose diet is narrow then had a handful of cores to
+# choose from all week, and the week repeated one of them - `four-with-vegetarian` served the same lunch four
+# times of seven. That reads as a cost of the shared-dish model and is not one, it is this number. At 40 the
+# same week serves 48 different dishes instead of 44 and costs S$589.27 instead of S$596.62, with no material
+# change in time, so a member's own choice is kept at least as wide as what the ranking keeps for the table.
+PACKET_COVERAGE_CANDIDATES = 40
 
 
 def composed_packet(
@@ -337,19 +352,26 @@ def composed_packet(
             kept = {dish_family(r.recipe.title) for r in best}
             best += families_first(sorted(ranked[len(best) :], key=dish_cost), kept)[: limits[key] - len(best)]
         chosen |= {r.recipe.id for r in best}
-        chosen |= {r.recipe.id for r in _packet_covering(ranked, best, members, by_id)}
+        chosen |= {r.recipe.id for r in _packet_covering(ranked, best, members, by_id, limits[key])}
     return [r for r in recommendations if r.recipe.id in chosen or (keep and r.recipe.slug in keep)], limits
 
 
-def _packet_covering(ranked: list, best: list, members, by_id: dict) -> list:
-    """Recommendations added to one kind of dish so a meal of them can cover every member (ADR-0071 section 1).
+def _packet_covering(ranked: list, best: list, members, by_id: dict, limit: int) -> list:
+    """Recommendations added to one kind of dish so every member a meal has to cover has a real choice of it
+    (ADR-0071 section 1).
 
-    Empty without members and for a household whose members are all alike (`covering_groups`), so a packet that
-    is not a shared-dish household's is exactly the packet it was before.
+    Each group of members who are alike (`covering_groups`) ends up with at least as many dishes of this kind as
+    the ranking keeps for the table, and never fewer than `PACKET_COVERAGE_CANDIDATES`, counting the ones
+    already kept. One dish is not a choice: with only that, a meal is coverable but the week has nothing to
+    vary with, and the member with the narrowest diet eats the same core again and again.
+
+    Empty without members and for a household whose members are all alike, so a packet that is not a
+    shared-dish household's is exactly the packet it was before.
     """
     groups = covering_groups(members)
     if not groups:
         return []
+    want = max(limit, PACKET_COVERAGE_CANDIDATES)
     added: list = []
     for group in groups:
 
@@ -357,9 +379,11 @@ def _packet_covering(ranked: list, best: list, members, by_id: dict) -> list:
             recipe = by_id.get(recommendation.recipe.id)
             return recipe is not None and all(catalog_can_eat(member, recipe) for member in group)
 
-        if any(suits(r) for r in best):
+        have = sum(1 for r in best if suits(r))
+        if have >= want:
             continue
-        added += [r for r in ranked if suits(r) and r not in added][:PACKET_COVERAGE_CANDIDATES]
+        more = [r for r in ranked if suits(r) and r not in best and r not in added]
+        added += more[: want - have]
     return added
 
 
