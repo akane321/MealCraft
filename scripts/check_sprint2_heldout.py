@@ -50,7 +50,7 @@ PROTECTED_PARTS = {"heldout", "held-out", "held_out", "holdout", "hold-out", "ho
 EMAIL = re.compile(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}")
 PHONE = re.compile(r"(?<!\w)(?:\+\d[\d ()-]{6,}\d|\d{8,})(?!\w)")
 PROFILE = re.compile(r"https?://[^\s/]+/(?:u|user|users|profile|profiles)/", re.I)
-HANDLE = re.compile(r"(?<![\w/])(?:/?u/[A-Za-z0-9_-]+|@[A-Za-z0-9_][A-Za-z0-9_.-]*)", re.I)
+HANDLE = re.compile(r"(?<![\w/])(?:/?u/[\w-]+|@\w[\w.-]*)", re.I)
 KINDS = {
     "planning": {"plan"},
     "multi_turn": {"replan"},
@@ -70,12 +70,16 @@ def reject_constant(_value: str) -> None:
     raise ValueError("Non-finite JSON number")
 
 
-def load_author_file(path: Path) -> dict:
+def read_author_bytes(path: Path) -> bytes:
     # Check both the supplied path and resolved destination, before reading bytes.
     for candidate in (path.absolute(), path.resolve()):
         if PROTECTED_PARTS.intersection(part.casefold() for part in candidate.parts):
             raise ValueError("Protected directory rejected before read")
-    return json.loads(path.read_text(encoding="utf-8-sig"), parse_constant=reject_constant)
+    return path.read_bytes()
+
+
+def load_author_file(path: Path) -> dict:
+    return json.loads(read_author_bytes(path).decode("utf-8-sig"), parse_constant=reject_constant)
 
 
 def finite_numbers(value) -> bool:
@@ -112,8 +116,9 @@ def check(data: dict, *, format_only: bool = False, fields_path: Path | None = N
     if errors:
         return errors, {}
     fields_path = fields_path or Path(__file__).with_name("sprint2-heldout-fields.json")
-    dictionary = load_author_file(fields_path)
-    digest = hashlib.sha256(fields_path.read_bytes()).hexdigest()
+    raw_dictionary = read_author_bytes(fields_path)
+    dictionary = json.loads(raw_dictionary.decode("utf-8-sig"), parse_constant=reject_constant)
+    digest = hashlib.sha256(raw_dictionary).hexdigest()
     if (
         not isinstance(dictionary, dict)
         or not isinstance(dictionary.get("fields"), dict)
@@ -241,7 +246,7 @@ def check(data: dict, *, format_only: bool = False, fields_path: Path | None = N
                 errors.append(f"{prefix}: planning gold needs constraints and explicit horizon")
         if case["category"] == "multi_turn" and not gold["preserve"]:
             errors.append(f"{prefix}: declare what edits must preserve, or explicitly declare none")
-        if case["horizon_days"] is not None and case["horizon_days"] > 7:
+        if gold["kind"] in {"plan", "replan"} and case["horizon_days"] is not None and case["horizon_days"] > 7:
             if not {"two_trips", "perishable_window"}.issubset(case["features"]):
                 errors.append(f"{prefix}: long horizon needs two-trip and freshness coverage")
             if (

@@ -122,7 +122,7 @@ def test_explicit_input_required():
 
 
 def test_protected_path_rejected_before_read():
-    with patch.object(Path, "read_text", side_effect=AssertionError("Must not read")):
+    with patch.object(Path, "read_bytes", side_effect=AssertionError("Must not read")):
         for part in ("heldout", "HELD-OUT", "holdout", "held_out"):
             try:
                 checker.load_author_file(Path("fiction") / part / "never.json")
@@ -135,7 +135,7 @@ def test_protected_path_rejected_before_read():
 def test_resolved_alias_rejected_before_read():
     with (
         patch.object(Path, "resolve", return_value=Path("fiction/heldout/never.json")),
-        patch.object(Path, "read_text", side_effect=AssertionError("Must not read")),
+        patch.object(Path, "read_bytes", side_effect=AssertionError("Must not read")),
     ):
         try:
             checker.load_author_file(Path("fiction/alias.json"))
@@ -262,7 +262,7 @@ def test_dictionary_digest_and_reviewed_extension(tmp_path):
 
 
 def test_handle_screen_and_redaction_markers():
-    for handle in ("u/fictional_robot", "@fictional_robot", "/u/fictional_robot"):
+    for handle in ("u/fictional_robot", "@fictional_robot", "/u/fictional_robot", "u/虚构机器人", "@虚构机器人"):
         case = demo_case()
         case["turns"][0] += " " + handle
         assert any("personal information" in e for e in checker.check(bundle([case]), format_only=True)[0])
@@ -293,3 +293,22 @@ def test_catalog_dependent_and_two_trip_rules():
     assert any("per-trip budget" in e for e in checker.check(data)[0])
     data["cases"][2]["horizon_days"] = 1
     assert any("At least two planning" in e for e in checker.check(data)[0])
+
+
+def test_intent_gold_does_not_invent_procurement_defaults():
+    case = demo_case(category="intent")
+    case.update(subtype="planning", horizon_days=14)
+    case["gold"]["kind"] = "intent"
+    assert checker.check(bundle([case]), format_only=True)[0] == []
+
+
+def test_dictionary_digest_uses_the_same_bytes_as_parsing(tmp_path):
+    data = ready_format_fixture()
+    target = tmp_path / "robot-dictionary.json"
+    raw = SCRIPT.with_name("sprint2-heldout-fields.json").read_bytes()
+    target.write_bytes(raw)
+    with patch.object(Path, "read_bytes", wraps=Path.read_bytes, autospec=True) as read:
+        # A changed file cannot be parsed once and hashed a second time.
+        read.side_effect = lambda path: raw if path == target else Path.read_text(path, encoding="utf-8").encode()
+        assert checker.check(data, fields_path=target)[0] == []
+        assert sum(call.args[0] == target for call in read.call_args_list) == 1

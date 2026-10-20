@@ -224,10 +224,12 @@ minutes, occurrences, dishes, or none; consult the copied dictionary's units.
 Schema references (`$ref`, `$dynamicRef`) are forbidden in extensions; inline
 definitions only. For long horizons record shopping_trip_days=[1,8],
 budget_basis=per_shopping_trip and perishable_window_days=3.
+This applies to plan/replan gold, not extra extracted fields for intent-only gold.
 单位必须用字典规定值，扩展不允许 $ref 或 $dynamicRef，只能用内联定义；长周期明确记录
 1／8 日两次采购、每次周预算和三天窗口。规划 subtype 用 plan；多轮用 replan；理解分类用
 intent；food_qa 可用 qa；越界／注入可用 refusal。其他对抗题按任务本质用 plan、intent 或 qa，
 不能把改餐型标成问答等不匹配的 kind。
+派生采购规则写在 plan／replan 的答案中；只测意图抽取时不强加用户未说的采购字段。
 
 Multi-turn cases have at least two user turns, independently specified initial
 state facts where needed, final intended edits in `expected_fields`, and explicit

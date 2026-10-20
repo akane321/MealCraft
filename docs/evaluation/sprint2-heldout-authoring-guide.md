@@ -59,6 +59,8 @@ day 1 and day 8, each separately subject to the weekly budget. Fresh meat, fish,
 leafy greens (also seafood and bean sprouts where classified perishable) must
 be used within three days of the purchase supplying them. These are not one
 combined budget or one shopping trip; do not assume a mid-period fresh restock.
+These derived procurement facts belong to `plan`/`replan` gold. Intent-only
+extraction tests retain stated user facts rather than inventing service defaults.
 Include genuine 1-day and 14-day boundaries, arbitrary start days, and smaller
 explicitly requested shapes as well as full defaults. Counts are design targets,
 not a claim that a feature has passed acceptance.
