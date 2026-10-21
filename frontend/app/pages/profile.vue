@@ -156,6 +156,10 @@ function memberLimitText(member: MemberLimitSummary): string {
   const parts = [...own, ...member.dietaryPreferences, ...member.excludedIngredients];
   return parts.length ? parts.join(", ") : "No limits of their own";
 }
+/** The kitchen line: what is missing, in lower case, e.g. "No oven, steamer". */
+function kitchenText(missing: Equipment[]): string {
+  return `No ${missing.map(item => EQUIPMENT_LABEL[item].toLowerCase()).join(", ")}`;
+}
 // The editor's dish counts follow the draft: the people usually home as entered now, not their portions
 // (ADR-0070, backend slot_people): two adults and three small children are five at the table.
 const tablePeople = computed(() => Math.max(1, memberPayloads.value.filter(member => member.default_present !== false).length));
@@ -578,7 +582,7 @@ onMounted(async () => {
               <dd>{{ memberLimitText(member) }}</dd>
             </div>
             <div><dt>Rules</dt><dd>{{ current.current.presence_rules.length + current.current.cooking_time_rules.length || "None" }}</dd></div>
-            <div><dt>Kitchen</dt><dd>{{ current.current.missing_equipment?.length ? `No ${current.current.missing_equipment.map(item => EQUIPMENT_LABEL[item].toLowerCase()).join(", ")}` : "All equipment" }}</dd></div>
+            <div><dt>Kitchen</dt><dd>{{ current.current.missing_equipment?.length ? kitchenText(current.current.missing_equipment) : "All equipment" }}</dd></div>
             <div><dt>Latest plan</dt><dd>{{ current.latest_plan_id ? "Planned" : "Not planned yet" }}</dd></div>
           </dl>
           <dl v-else class="profile-summary-list">
