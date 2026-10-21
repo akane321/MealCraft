@@ -150,7 +150,7 @@ times, and the owner accepted that case's time on 2026-10-20, which makes its
 speed-up optional. The plan buttons on the home and household pages say a large
 household on a tight budget can take a few minutes; nothing on the way times
 out first (the browser request has no time limit and an agent run's wall budget
-is 120 s). Deferred: adding a vegetable dish when
+of 120 s is checked only before the planner starts, ADR-0080 section 3). Deferred: adding a vegetable dish when
 vegetables fall short (no vegetable measure yet), CP-SAT for structured meals, day references 8-14 in the
 conversation, and a curated plain Chinese steamed rice (the release has none). `PLANNING_CAPABILITY`
 defaults to `full`; `mvp` (one dinner dish a day) remains for reproducing the

@@ -7,6 +7,7 @@ of 21 within S$100 at the profile's 60 minutes (20 at 240 minutes), by an exact 
 whole catalog holds 21 for about S$53.
 """
 
+import inspect
 import time
 from collections import Counter
 from datetime import date
@@ -406,8 +407,13 @@ def test_a_heavy_week_varies_every_start_whatever_the_clock_says(product, monkey
     """Owner, 2026-10-21 (ADR-0080): no variety pass is cut by the clock. A heavy week (35 dish positions) tries
     every start although the clock passes the old two seconds at each reading; ordinary weeks and replanning with
     locked dishes try every start as before."""
+    # A clock bound as a default argument at import (the old `clock=time.perf_counter`) is out of reach of a
+    # patch, so the pass must also have neither a deadline name nor a time parameter.
+    assert not hasattr(product_path, "VARIETY_PASS_SECONDS")
+    assert list(inspect.signature(_vary_starts).parameters) == ["meal_beam", "problem", "starts", "seen", "is_best"]
     ticks = iter(range(0, 10**6, 3))
     monkeypatch.setattr(time, "perf_counter", lambda: float(next(ticks)))
+    monkeypatch.setattr(time, "monotonic", lambda: float(next(ticks)))
     plans = build_meal_plan_service(product, 1)
     passes = variety_passes(monkeypatch, never_best=True)
 

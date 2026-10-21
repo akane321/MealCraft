@@ -460,8 +460,8 @@ BAND_LABEL = {
 
 # Why a case takes as long as it does, from a cProfile of one warm product run of each case (task 14, 2026-10-21,
 # Windows, after the shared-dish candidate changes). Shares are of the profiled run, which the profiler slows about
-# twofold. Every case past the quick figure has one: ADR-0079 section 4 asks for the cause of each, not only of the
-# ones over a minute. Rewrite a case's entry whenever a change moves its time.
+# twofold (threefold for six-tight-budget, re-profiled the same day without the variety cutoff). Every case past the
+# quick figure has one: ADR-0079 section 4 asks for the cause of each, not only of the ones over a minute. Rewrite a case's entry whenever a change moves its time.
 MEAL_CHECKS = (
     "building each meal's dish combinations and checking every one as a real meal (`meal_beam._meal_options` -> "
     "`meal_permitted` -> `meal_composition.real_meal_issues`)"
@@ -484,13 +484,15 @@ SLOW_CAUSES = {
         "model."
     ),
     "six-tight-budget": (
-        "four whole-week beam searches instead of one, 94% of the run: the ranked search keeps no week filled with "
-        "no dish twice under the budget, so the three budget-led searches (`product_path.limit_led`, about 64%) run "
-        f"as well. Each builds every six-dish dinner of its candidates again; {MEAL_CHECKS} is about 78% of the run, "
-        f"and {MEMBER_CHECKS} is about 44%. The variety pass is about 5%. Upgrade path: share the meal checks "
-        "between the four searches (they do not depend on the ranking) and cache the member checks. The owner "
-        "accepted this case's time (ADR-0079 section 5, ADR-0080): over the line is a known exception, not a "
-        "failure."
+        "four whole-week beam searches instead of one, and a variety pass over 16 starts that no longer stops at two "
+        "seconds (ADR-0080). In a profiled warm run of 2026-10-21, after that cutoff was removed, the variety pass "
+        "(`product_path._vary_starts`) is about 50% of the run and the three budget-led searches "
+        "(`product_path.limit_led`, which run because the ranked search keeps no week filled with no dish twice "
+        f"under the budget) about 33%; the ranked search and the setup are the rest. Across the run {MEAL_CHECKS} "
+        f"is about 46%, and {MEMBER_CHECKS} is about 43%. Upgrade path, none of it changing a plan: make the variety "
+        "pass faster (now the largest single cost), share the meal checks between the four searches (they do not "
+        "depend on the ranking) and cache the member checks. The owner accepted this case's time (ADR-0079 section "
+        "5, ADR-0080): over the line is a known exception, not a failure."
     ),
     "two-no-oven-ten-days": (
         f"one beam search over ten days and two shopping trips, about two-thirds of the run; {MEAL_CHECKS} is about "
