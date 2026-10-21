@@ -148,8 +148,10 @@ deadline. The owner's latest direction forbids trading quality or simplifying
 the workflow for speed; a slow completed plan must not become an error. The
 home and household plan buttons already say a large household on a tight
 budget can take up to a minute; the browser request has no timeout. Agent
-confirmation-budget handling is a separate follow-up, not a guarantee supplied
-by these tag repairs. Deferred: adding a vegetable dish when
+confirmations check their wall-time budget before planning, not on records
+written after the planner returns, so a completed slow plan is not changed into
+a deadline error. That behaviour is already in main, not supplied by these tag
+repairs. Deferred: adding a vegetable dish when
 vegetables fall short (no vegetable measure yet), CP-SAT for structured meals, day references 8-14 in the
 conversation, and a curated plain Chinese steamed rice (the release has none). `PLANNING_CAPABILITY`
 defaults to `full`; `mvp` (one dinner dish a day) remains for reproducing the

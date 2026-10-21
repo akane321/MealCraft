@@ -12,6 +12,8 @@ from types import SimpleNamespace
 import pytest
 from pydantic import ValidationError
 
+from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition
+from app.planning import alternatives
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.meal_beam import dish_cost, dish_eligible, dish_grams
@@ -24,6 +26,7 @@ from app.planning.member_coverage import (
     dish_base_servings,
     eaters,
     member_can_eat,
+    member_limits,
     servable,
     unverifiable_for,
 )
@@ -32,8 +35,9 @@ from app.planning.product_path import (
     _packet_covering,
     uncoverable_by_rule,
     uncoverable_members,
+    uncovered_message,
 )
-from app.planning.week_floor import _meals_each_member_eats, _smallest_share
+from app.planning.week_floor import _meals_each_member_eats, _smallest_share, _uncovered
 from app.schemas.meal_plan import WeeklyMealPlanRequest
 from app.schemas.planning_v2 import (
     FinalPlanningProblem,
@@ -41,6 +45,7 @@ from app.schemas.planning_v2 import (
     PlanningSlot,
     PlanningSlotMember,
 )
+from app.services.meal_plan import WeeklyMealPlanService
 from app.services.replanning import MealPlanReplanningService
 
 NUTRIENTS = ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
@@ -712,10 +717,10 @@ def test_a_members_exclusions_may_hold_every_name_the_hierarchy_expands_to():
 # --- The fixes nothing else guards (second-round review item 7) ------------------------------------------------
 
 
-def test_a_group_the_ranking_left_nothing_for_gets_a_real_choice_not_a_handful():
+def test_every_group_gets_a_real_choice_not_a_handful():
     """Where the ranked picks hold no dish of this kind that suits a group, the packet has to supply them, and
-    four was not a week's worth. Where the ranking does keep one, the packet is left alone: topping it up there
-    was measured and cost `mixed-diets` its plan (the note beside `PACKET_COVERAGE_CANDIDATES`)."""
+    four was not a week's worth. Where the ranking keeps one, the packet still tops up (task 14): one dish is no
+    choice, and `two-one-vegetarian` served the vegetarian member's one suitable bowl eight times."""
     ranked = [
         SimpleNamespace(recipe=SimpleNamespace(id=index, title=f"dish-{index}", slug=f"dish-{index}"))
         for index in range(150)
@@ -740,8 +745,10 @@ def test_a_group_the_ranking_left_nothing_for_gets_a_real_choice_not_a_handful()
     assert len([item for item in added if by_recipe[item.recipe.id].dietary_tags]) >= PACKET_COVERAGE_CANDIDATES
     # It keeps the ranking's own order, so the dishes it adds are the best that suit her, not the cheapest.
     assert [item.recipe.id for item in added][:3] == [0, 3, 6]
-    # The ranking already keeps one for her: left as ranked, deliberately.
-    assert _packet_covering(ranked, [ranked[0], ranked[1]], [ann, ben], by_recipe, 14) == []
+    # The ranking already keeps one for her: she still gets a choice, the best that suit her after it.
+    topped = _packet_covering(ranked, [ranked[0], ranked[1]], [ann, ben], by_recipe, 14)
+    assert len([item for item in topped if by_recipe[item.recipe.id].dietary_tags]) >= PACKET_COVERAGE_CANDIDATES
+    assert [item.recipe.id for item in topped][:3] == [3, 6, 9]
     # Without members the packet is exactly what it was.
     assert _packet_covering(ranked, nothing_for_ann, [], by_recipe, 14) == []
 
@@ -984,3 +991,124 @@ def test_a_refusal_says_what_the_meal_could_not_give_rather_than_promising_a_mai
     assert uncoverable_by_rule(dinner) == {"core": ["Ann"], "any": []}
     # Both still report her once by name, which is what the trace carries.
     assert uncoverable_members(prob) == ["Ann"] and uncoverable_members(dinner) == ["Ann"]
+
+    # And what the household reads (task 14): the breakfast refusal promises no main dish and no staple.
+    breakfast_says = uncovered_message(uncoverable_by_rule(prob))
+    assert "main dish" not in breakfast_says and "staple" not in breakfast_says
+    assert breakfast_says.startswith("At one of the other meals there was nothing Ann can eat at all.")
+    assert uncovered_message(uncoverable_by_rule(dinner)).startswith(
+        "I couldn't give Ann a main dish and a staple at every lunch and dinner with what Ann can eat."
+    )
+
+
+def test_a_refusal_names_several_members_in_a_sentence():
+    """Task 14: one name or several, the sentence reads as English, and the "any" rule never borrows the
+    lunch-and-dinner promise."""
+    said = uncovered_message({"core": ["Ann", "Ben"], "any": ["Kai", "Mei", "Lin"]})
+    assert said.startswith(
+        "I couldn't give Ann and Ben a main dish and a staple at every lunch and dinner with what they can eat. "
+        "At one of the other meals there was nothing Kai, Mei and Lin can eat at all. "
+    )
+    assert said.endswith("no allergen, diet or excluded ingredient will be relaxed.")
+
+
+# --- "A or B" lines judged by the option cooked, wherever a member is judged (task 14 item 5) -------------------
+
+BUTTER_OR_OIL = [
+    {"normalized_name": "butter", "display_name": "butter", "allergens": ["dairy"]},
+    {"normalized_name": "vegetable_oil", "display_name": "vegetable oil", "allergens": []},
+]
+
+
+def _cooked_with_oil_or_butter(recipe_id=1, slug="noodle-bowl"):
+    """A one-bowl dish with a "butter or vegetable oil" line: the combined line carries dairy, the oil does not."""
+    combined = Ingredient(
+        normalized_name="butter_or_veg_oil",
+        display_name="butter or vegetable oil",
+        allergens=["dairy"],
+        alternatives=BUTTER_OR_OIL,
+    )
+    noodles = Ingredient(normalized_name="rice_noodles", display_name="rice noodles", allergens=[])
+    return Recipe(
+        id=recipe_id,
+        slug=slug,
+        title="Noodle Bowl",
+        servings=2,
+        prep_time_minutes=5,
+        cook_time_minutes=15,
+        dietary_tags=[],
+        meal_role="one_bowl",
+        protein_sources=["tofu"],
+        nutrition=RecipeNutrition(calories_kcal=600),
+        recipe_ingredients=[
+            RecipeIngredient(ingredient=combined, quantity=30, unit="g", sort_order=1),
+            RecipeIngredient(ingredient=noodles, quantity=200, unit="g", sort_order=2),
+        ],
+    )
+
+
+DAIRY_FREE_ANN = [
+    {"name": "Ann", "servings": 1.0, "allergens": ["dairy"]},
+    {"name": "Ben", "servings": 1.0},
+]
+
+
+def test_a_dish_cooked_with_the_option_a_member_can_eat_is_not_labelled_not_for_them():
+    """The planner counts Ann in the bowl's servings, because it is cooked with oil for her; the week's labels read
+    the combined line and said "Not for Ann" beside it."""
+    request = _one_dish_request(DAIRY_FREE_ANN)
+    bowl = _cooked_with_oil_or_butter()
+    assert alternatives.lines(bowl, request)[0].ingredient.normalized_name == "vegetable_oil"
+    ann = member_limits(request.household)[0]
+    assert not catalog_can_eat(ann, bowl), "read raw, the combined line carries dairy"
+    entry = _entry("main", bowl)
+    plan = _plan_of([entry], request.model_dump(mode="json"))
+    assert WeeklyMealPlanService._not_for(plan)(entry) == []
+    # A dish she really cannot eat is still labelled.
+    cheese = _catalog("cheese-bake", "one_bowl", calories=600, allergens=["dairy"])
+    assert WeeklyMealPlanService._not_for(plan)(_entry("main", cheese)) == ["Ann"]
+
+
+def test_the_packet_counts_a_dish_cooked_with_the_option_a_member_can_eat():
+    """Ben avoids the noodles, so only Ann can have the bowl: read raw, nobody can, and it never reaches the packet
+    as Ann's choice."""
+    request = _one_dish_request(
+        [DAIRY_FREE_ANN[0], {"name": "Ben", "servings": 1.0, "excluded_ingredients": ["rice_noodles"]}]
+    )
+    ann, ben = member_limits(request.household)
+    bowl = _cooked_with_oil_or_butter()
+    ranked = [SimpleNamespace(recipe=SimpleNamespace(id=bowl.id))]
+    by_id = {bowl.id: bowl}
+    assert _packet_covering(ranked, [], [ann, ben], by_id, 1) == []
+    cooked = _packet_covering(ranked, [], [ann, ben], by_id, 1, lambda r: alternatives.lines(r, request))
+    assert cooked == ranked
+
+
+def test_the_week_floor_counts_a_dish_cooked_with_the_option_a_member_can_eat():
+    request = _one_dish_request(DAIRY_FREE_ANN)
+    bowl = _cooked_with_oil_or_butter()
+    shape = [("dinner", [{"role_id": "main", "meal_roles": ["protein_main", "one_bowl"], "required": True}])]
+    assert _uncovered(request, shape, [SimpleNamespace(recipe=SimpleNamespace(id=bowl.id))], [bowl]) == []
+
+
+def test_the_week_floor_counts_a_staple_cooked_with_the_option_a_member_can_eat():
+    """Review of task 14: the staples line of the week floor, beside the mains line above. Ann's only filling core is
+    a protein main beside a staple cooked with oil; read raw, the staple's combined line carries dairy."""
+    request = _one_dish_request(DAIRY_FREE_ANN)
+    staple = _cooked_with_oil_or_butter(1, "buttered-rice")
+    staple.meal_role, staple.protein_sources = "staple", None
+    tofu = _cooked_with_oil_or_butter(2, "tofu")
+    tofu.meal_role = "protein_main"
+    tofu.recipe_ingredients = tofu.recipe_ingredients[1:]  # no "A or B" line: only the staple's decides
+    shape = [
+        (
+            "dinner",
+            [
+                {"role_id": "main", "meal_roles": ["protein_main"], "required": True},
+                {"role_id": "staple", "meal_roles": ["staple"], "required": True},
+            ],
+        )
+    ]
+    ranked = [SimpleNamespace(recipe=SimpleNamespace(id=r.id)) for r in (tofu, staple)]
+    assert not catalog_can_eat(member_limits(request.household)[0], staple), "read raw, the staple carries dairy"
+    assert _uncovered(request, shape, ranked, [tofu, staple]) == []
