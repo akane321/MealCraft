@@ -678,9 +678,9 @@ COMMON_CAUSE = (
 SLOW_CAUSES = {
     "tight-budget": (
         "four beam searches and sixteen variety starts: no week the ranked search keeps is filled with no dish twice "
-        "under its budget, so the three budget-led searches (`product_path.limit_led`, about 46% of the run) and "
-        "the variety pass (`meal_beam.vary_within_budget`, about 46%) both run. Every swap the variety pass tries "
-        "checks the meal's coverage again, so `member_can_eat` alone is about 38% (10.7 million calls). Upgrade "
+        "under its budget, so the three budget-led searches (`product_path.limit_led`, about 14% of the run) and "
+        "the variety pass (`meal_beam.vary_within_budget`, about 72%) both run. Every swap the variety pass tries "
+        "checks the meal's coverage again, so `member_can_eat` alone is about 35% (7.0 million calls). Upgrade "
         "path: cache the member checks per member and recipe, and share the meal checks between the four searches"
     ),
 }

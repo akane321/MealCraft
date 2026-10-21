@@ -6,13 +6,15 @@ Machine: Intel64 Family 6 Model 198 Stepping 2, GenuineIntel (Windows). The code
 
 | Case | Report run (s) | Warm median (s) | Warm max (s) | Against the ADR-0079 guidance |
 |---|---:|---:|---:|---|
-| one-adult | 6.35 | 3.99 | 4.46 | quick |
-| four-with-vegetarian | 18.52 | 18.75 | 19.53 | within the guidance for a complex request |
-| six-tight-budget | 146.35 | 146.43 | 146.98 | over ~60 s |
-| two-no-oven-ten-days | 5.64 | 5.48 | 8.74 | within the guidance for a complex request |
-| seven-with-young-children | 8.49 | 8.48 | 9.01 | within the guidance for a complex request |
+| one-adult | 6.45 | 4.15 | 4.62 | within the guidance for a complex request |
+| four-with-vegetarian | 19.39 | 19.22 | 19.27 | within the guidance for a complex request |
+| six-tight-budget | 136.07 | 136.98 | 138.35 | over ~60 s |
+| two-no-oven-ten-days | 5.62 | 5.2 | 5.57 | within the guidance for a complex request |
+| seven-with-young-children | 8.86 | 9.24 | 11.78 | within the guidance for a complex request |
 
 Over ~60 s: six-tight-budget.
+
+- `one-adult` (within the guidance for a complex request): one week-long beam search; building each meal's dish combinations and checking every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `meal_composition.real_meal_issues`) is about 40% of the run and reading the candidates (recipes and fixture prices) about 25%; at three meals a day for seven days that is 21 slots of combinations.
 
 - `four-with-vegetarian` (within the guidance for a complex request): one beam search, three-quarters of the run; building each meal's dish combinations and checking every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `meal_composition.real_meal_issues`) is about 63%, and a third of the run is `member_coverage.member_can_eat` (asked again for every member, dish and combination, with nothing cached per member and recipe). The vegetarian member's own candidates add up to 40 dishes a kind to the packet (`product_path._packet_covering`), so a meal has more combinations to check than before the shared-dish model.
 
