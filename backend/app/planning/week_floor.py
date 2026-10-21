@@ -9,13 +9,16 @@ candidates meets, and a per-meal budget below a meal's floor is one no meal meet
 or plans: it bounds what a search could find.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import timedelta
 from itertools import accumulate, combinations
 from math import inf
 
 from app.data import meal_structure
 from app.data.units import in_grams
-from app.planning.meal_composition import MAIN_ROLE, meal_role_of, portion_shares, role_base
+from app.planning.household_slots import present_members
+from app.planning.meal_composition import MAIN_ROLE, fills_staple, meal_role_of, portion_shares, role_base
+from app.planning.member_coverage import catalog_can_eat, member_limits
 from app.planning.product_path import meals_of_the_day, normalized
 from app.schemas.planning_v2 import PlanningCompositionPolicy
 
@@ -40,6 +43,8 @@ class WeekFloor:
     meal_sgd: dict[str, float]  # one meal's ingredient-use cost is at least this, per meal type
     empty_roles: list[tuple[str, str]]  # (meal type, role) a dish is required for and no candidate fills
     roles: dict[tuple[str, str], RoleCandidates]
+    # (meal type, member name) no meal of these candidates can cover (ADR-0071 section 1).
+    uncovered: list[tuple[str, str]] = field(default_factory=list)
 
 
 def week_floor(constraints, recommendations, recipes) -> WeekFloor:
@@ -64,9 +69,14 @@ def week_floor(constraints, recommendations, recipes) -> WeekFloor:
     held = {item.normalized_name for item in constraints.available_ingredients if item.quantity is not None}
     bought: dict[int, float] = {}  # per recipe, every ingredient bought (as the per-meal budget reads it)
     paid: dict[int, float] = {}  # per recipe, what the household holds left out (as the weekly budget reads it)
+    # The estimates are for the whole household. A dish is cooked for the members who can eat it (ADR-0071
+    # section 1), which can be as few as one, so the smallest member's share of the household is the least any
+    # dish could cost. A floor has to stay below every week the planner could build: scaling by the largest
+    # share instead would refuse budgets that a week actually fits into.
+    smallest = _smallest_share(constraints)
     for recipe_id, line in lines:
         quantity, unit = in_grams(*normalized(line.required_quantity, line.unit), line.ingredient_name)
-        price = quantity * unit_price.get((line.ingredient_name, unit), 0.0)
+        price = quantity * unit_price.get((line.ingredient_name, unit), 0.0) * smallest
         bought[recipe_id] = bought.get(recipe_id, 0.0) + price
         paid[recipe_id] = paid.get(recipe_id, 0.0) + (0.0 if line.ingredient_name in held else price)
 
@@ -105,7 +115,75 @@ def week_floor(constraints, recommendations, recipes) -> WeekFloor:
             else:
                 total += _cheapest_days(roles, week_paid, policy, constraints.day_count)
                 meal_sgd[meal] = _cheapest_meal(roles, cheapest_bought, policy)
-    return WeekFloor(constraints.day_count, constraints.day_count * len(shape), total, meal_sgd, empty, stats)
+    uncovered = _uncovered(constraints, shape, recommendations, recipes)
+    return WeekFloor(
+        constraints.day_count, constraints.day_count * len(shape), total, meal_sgd, empty, stats, uncovered
+    )
+
+
+def _smallest_share(constraints) -> float:
+    """The least of the household a single dish can be cooked for: 1 without members, else the smallest
+    member's portions over what the grocery estimates were priced for."""
+    household = getattr(constraints, "household", None)
+    members = household.members if household is not None else None
+    size = constraints.household_size or 1
+    if not members:
+        return 1.0
+    return min(1.0, min(member.servings for member in members) / size)
+
+
+def _meals_each_member_eats(constraints, shape) -> dict[str, set[str]]:
+    """Which members are ever home for each meal of the plan, by that meal's own presence rules.
+
+    The kids who eat lunch at school on weekdays are not owed a lunch they never sit down to, so the floor
+    asks for their coverage only at the meals they are actually at.
+    """
+    household = constraints.household
+    at_meal: dict[str, set[str]] = {meal: set() for meal, _ in shape}
+    for index in range(constraints.day_count):
+        day = constraints.start_date + timedelta(days=index)
+        for meal, _ in shape:
+            at_meal[meal].update(member.name for member in present_members(household, day, meal))
+    return at_meal
+
+
+def _uncovered(constraints, shape, recommendations, recipes) -> list[tuple[str, str]]:
+    """Members no lunch or dinner of these candidates can cover (ADR-0071 section 1), as (meal, member name).
+
+    Each member needs a filling core among the dishes that member can eat: a dish that carries its staple, or a
+    protein main beside a staple. This proves a member uncoverable from the candidate pool; it does not prove the
+    rest coverable together, which only a search can. Coverage is a safety rule (ADR-0068), so a refusal here
+    offers the budget, the time and the dish count, never a limit of the member's own.
+    """
+    members = member_limits(constraints.household)
+    if not members:
+        return []
+    at_meal = _meals_each_member_eats(constraints, shape)
+    by_id = {recipe.id: recipe for recipe in recipes}
+    uncovered = []
+    for meal, composition in shape:
+        roles = [role if isinstance(role, dict) else role.model_dump() for role in composition]
+        if meal not in ("lunch", "dinner") or not (roles and roles[0].get("meal_roles")):
+            continue
+        fitting = [by_id[item.recipe.id] for item in recommendations if item.recipe.id in by_id]
+        mains = [
+            recipe
+            for role in roles
+            if role_base(role["role_id"]) == MAIN_ROLE
+            for recipe in fitting
+            if meal_role_of(recipe) in role["meal_roles"]
+        ]
+        staples = [recipe for recipe in fitting if meal_role_of(recipe) == "staple"]
+        has_staple_role = any(role["role_id"] == "staple" for role in roles)
+        for member in members:
+            if member.name not in at_meal.get(meal, set()):
+                continue  # never home for this meal, so no plate is owed at it
+            mine = [recipe for recipe in mains if catalog_can_eat(member, recipe)]
+            bowl = any(fills_staple(recipe) for recipe in mine)
+            staple = has_staple_role and any(catalog_can_eat(member, recipe) for recipe in staples)
+            if not bowl and not (staple and any(meal_role_of(recipe) == "protein_main" for recipe in mine)):
+                uncovered.append((meal, member.name))
+    return uncovered
 
 
 def _structured_floor(roles: list[dict], prices: dict[str, list[float]], days: int) -> float:
