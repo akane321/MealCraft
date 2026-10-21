@@ -532,18 +532,13 @@ def evaluate() -> tuple[dict, dict]:
     catalog = {"scenario": {"recipe_candidate_slugs": slugs}}
     seconds: dict[str, dict[str, float]] = {}
     results = []
-    product_seconds = product_path.VARIETY_PASS_SECONDS
     with product_database(catalog) as factory, factory() as session:
         plans = build_meal_plan_service(session, HOUSEHOLD_ID)
         facts = _facts(session)
         for case in CASES:
             runs, timings = [], {}
             for arrangement in ("merged", "shared"):
-                product_path.VARIETY_PASS_SECONDS = float("inf")  # plans independent of the machine
-                try:
-                    run, taken = run_case(plans, case, arrangement, facts)
-                finally:
-                    product_path.VARIETY_PASS_SECONDS = product_seconds
+                run, taken = run_case(plans, case, arrangement, facts)
                 runs.append(run)
                 timings[arrangement] = round(taken, 2)
             seconds[case["case"]] = timings
@@ -716,8 +711,8 @@ def timing_markdown(seconds: dict[str, dict[str, float]]) -> str:
             "# Shared dishes: wall time",
             "",
             "> Wall time on the machine that generated it, so it differs by machine and is kept out of "
-            "`latest.*`. These runs let the variety pass finish instead of cutting it at its two seconds, so "
-            "the plans do not depend on the machine; the product cuts it, and takes correspondingly less. "
+            "`latest.*`. The variety pass always runs every start (ADR-0080), so the plans do not depend on "
+            "the machine. "
             "ADR-0079 sets how long is acceptable by how hard the request is: a simple request should still "
             f"come back within about {QUICK_SECONDS:g} s, and every household here has members with their own "
             f"limits, so these are the complex requests it allows up to about {OVER_SECONDS:g} s. Only past "

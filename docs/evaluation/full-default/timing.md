@@ -1,16 +1,16 @@
 # Full default: plan wall time
 
-> Scope: the cases of `latest.md`, one machine. The report's run lets the variety pass finish (and warms the candidate cache); the warm runs plan as the product does, the variety pass cut at its two seconds. Median and slowest of the warm runs. ADR-0079 sets how long is acceptable by how hard the request is: a simple request should still come back within about 4 s, a complex one may take up to about 60 s, and only past that is a case marked over. A case is never cut short to meet either figure, and no feature is dropped to make one faster.
+> Scope: the cases of `latest.md`, one machine. The report's run warms the candidate cache; the warm runs are the same plan again. Median and slowest of the warm runs. ADR-0079 sets how long is acceptable by how hard the request is: a simple request should still come back within about 4 s, a complex one may take up to about 60 s, and only past that is a case marked over. A case is never cut short to meet either figure, and no feature is dropped to make one faster.
 
 Machine: Intel64 Family 6 Model 198 Stepping 2, GenuineIntel (Windows). The code commit is in `timing.json` beside this file.
 
 | Case | Report run (s) | Warm median (s) | Warm max (s) | Against the ADR-0079 guidance |
 |---|---:|---:|---:|---|
-| one-adult | 6.5 | 4.1 | 4.87 | within the guidance for a complex request |
-| four-with-vegetarian | 18.86 | 19.04 | 19.16 | within the guidance for a complex request |
-| six-tight-budget | 149.24 | 82.52 | 84.86 | over ~60 s |
-| two-no-oven-ten-days | 5.55 | 5.71 | 5.84 | within the guidance for a complex request |
-| seven-with-young-children | 8.42 | 8.46 | 8.91 | within the guidance for a complex request |
+| one-adult | 7.66 | 5.15 | 5.47 | within the guidance for a complex request |
+| four-with-vegetarian | 22.68 | 22.73 | 22.78 | within the guidance for a complex request |
+| six-tight-budget | 180.92 | 189.51 | 190.71 | over ~60 s |
+| two-no-oven-ten-days | 10.93 | 7.24 | 7.25 | within the guidance for a complex request |
+| seven-with-young-children | 10.73 | 10.55 | 11.24 | within the guidance for a complex request |
 
 Over ~60 s: six-tight-budget.
 

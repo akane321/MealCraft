@@ -157,7 +157,7 @@ within 3 days of the trip they are bought on, and the shopping list marks them
 "Use within 3 days".
 
 Most plans take a few seconds. A large household on a tight budget takes longer,
-up to about a minute, while the planner searches for a week that fits the
+a few minutes, while the planner searches for a week that fits the
 budget; the button says "Planning…" until the plan is ready. How long is
 acceptable follows how hard the request is: a simple week comes back quickly, a
 complex one is allowed the longer wait rather than being cut short.

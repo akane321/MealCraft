@@ -651,7 +651,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <button type="button" class="mc-btn primary" :disabled="isLoading" @click="agent.confirm()">
                   {{ isLoading ? "Planning your week…" : "Plan my week" }}
                 </button>
-                <p v-if="isLoading" class="mc-small foot-note" role="status">A large household on a tight budget can take up to a minute to plan.</p>
+                <p v-if="isLoading" class="mc-small foot-note" role="status">A large household on a tight budget can take a few minutes to plan.</p>
               </div>
             </div>
 

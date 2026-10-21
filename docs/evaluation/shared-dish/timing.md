@@ -1,23 +1,23 @@
 # Shared dishes: wall time
 
-> Wall time on the machine that generated it, so it differs by machine and is kept out of `latest.*`. These runs let the variety pass finish instead of cutting it at its two seconds, so the plans do not depend on the machine; the product cuts it, and takes correspondingly less. ADR-0079 sets how long is acceptable by how hard the request is: a simple request should still come back within about 4 s, and every household here has members with their own limits, so these are the complex requests it allows up to about 60 s. Only past that is a case marked over. The `merged` column shows how much of the time the shared-dish model added. A request is never cut short to meet either figure, and speed is the algorithm layer's to fix, never by dropping a rule or relaxing a limit (section 0.8).
+> Wall time on the machine that generated it, so it differs by machine and is kept out of `latest.*`. The variety pass always runs every start (ADR-0080), so the plans do not depend on the machine. ADR-0079 sets how long is acceptable by how hard the request is: a simple request should still come back within about 4 s, and every household here has members with their own limits, so these are the complex requests it allows up to about 60 s. Only past that is a case marked over. The `merged` column shows how much of the time the shared-dish model added. A request is never cut short to meet either figure, and speed is the algorithm layer's to fix, never by dropping a rule or relaxing a limit (section 0.8).
 
-Median of the shared arrangement: 10.87 s. Slowest: 63.90 s.
+Median of the shared arrangement: 13.42 s. Slowest: 83.48 s.
 
 Over ~60 s: tight-budget.
 
 | Case | merged (s) | shared (s) | Against the ADR-0079 guidance |
 |---|---:|---:|:---|
-| `four-one-vegetarian` | 9.01 | 13.17 | within the guidance for a complex request |
-| `two-one-vegetarian` | 4.65 | 6.53 | within the guidance for a complex request |
-| `with-a-child` | 3.75 | 7.86 | within the guidance for a complex request |
-| `weekday-lunch-away` | 6.25 | 13.75 | within the guidance for a complex request |
-| `weekend-guest` | 7.99 | 18.03 | within the guidance for a complex request |
-| `peanut-whole-household` | 4.85 | 8.12 | within the guidance for a complex request |
-| `peanut-only-mei-avoids` | 4.87 | 7.85 | within the guidance for a complex request |
-| `mixed-diets` | 3.01 | 8.56 | within the guidance for a complex request |
-| `six-one-vegetarian` | 6.17 | 17.47 | within the guidance for a complex request |
-| `tight-budget` | 11.87 | 63.9 | over ~60 s |
+| `four-one-vegetarian` | 10.54 | 16.26 | within the guidance for a complex request |
+| `two-one-vegetarian` | 5.87 | 8.04 | within the guidance for a complex request |
+| `with-a-child` | 4.79 | 8.52 | within the guidance for a complex request |
+| `weekday-lunch-away` | 7.69 | 16.89 | within the guidance for a complex request |
+| `weekend-guest` | 9.87 | 22.21 | within the guidance for a complex request |
+| `peanut-whole-household` | 5.95 | 10.55 | within the guidance for a complex request |
+| `peanut-only-mei-avoids` | 6.34 | 9.94 | within the guidance for a complex request |
+| `mixed-diets` | 3.59 | 10.57 | within the guidance for a complex request |
+| `six-one-vegetarian` | 7.58 | 22.38 | within the guidance for a complex request |
+| `tight-budget` | 14.97 | 83.48 | over ~60 s |
 
 - `four-one-vegetarian` (within the guidance for a complex request): one beam search, which builds each meal's dish combinations and checks every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group (`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long.
 

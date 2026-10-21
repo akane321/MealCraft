@@ -148,7 +148,7 @@ past the quick figure: on the developer machine only the six-person S$420 week
 is over, where the budget-led searches build every six-dish dinner again, four
 times, and the owner accepted that case's time on 2026-10-20, which makes its
 speed-up optional. The plan buttons on the home and household pages say a large
-household on a tight budget can take up to a minute; nothing on the way times
+household on a tight budget can take a few minutes; nothing on the way times
 out first (the browser request has no time limit and an agent run's wall budget
 is 120 s). Deferred: adding a vegetable dish when
 vegetables fall short (no vegetable measure yet), CP-SAT for structured meals, day references 8-14 in the
