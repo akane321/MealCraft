@@ -474,18 +474,18 @@ MEAL_CHECKS = (
     "`meal_permitted` -> `meal_composition.real_meal_issues`)"
 )
 MEMBER_CHECKS = (
-    "`member_coverage.member_can_eat`, asked again for every member, dish and combination: nothing caches it per "
-    "member and recipe, which is the upgrade path"
+    "`member_coverage.member_can_eat` (asked again for every member, dish and combination, with nothing cached per "
+    "member and recipe)"
 )
 # Said honestly for a case nobody has profiled at its current time, rather than a guess.
 UNKNOWN_CAUSE = "cause unknown: this time has not been profiled; profile one warm run and add it to SLOW_CAUSES."
 SLOW_CAUSES = {
     "one-adult": (
-        f"one week-long beam search. {MEAL_CHECKS} is about 40% of the run and reading the candidates (recipes and "
+        f"one week-long beam search; {MEAL_CHECKS} is about 40% of the run and reading the candidates (recipes and "
         "fixture prices) about 25%; at three meals a day for seven days that is 21 slots of combinations."
     ),
     "four-with-vegetarian": (
-        f"one beam search, three-quarters of the run. {MEAL_CHECKS} is about 63%, and a third of the run is "
+        f"one beam search, three-quarters of the run; {MEAL_CHECKS} is about 63%, and a third of the run is "
         f"{MEMBER_CHECKS}. The vegetarian member's own candidates add up to 40 dishes a kind to the packet "
         "(`product_path._packet_covering`), so a meal has more combinations to check than before the shared-dish "
         "model."
@@ -500,11 +500,11 @@ SLOW_CAUSES = {
         "failure."
     ),
     "two-no-oven-ten-days": (
-        f"one beam search over ten days and two shopping trips, about two-thirds of the run. {MEAL_CHECKS} is about "
+        f"one beam search over ten days and two shopping trips, about two-thirds of the run; {MEAL_CHECKS} is about "
         "42%, and reading the candidates about 15%; the plan has 30 slots of combinations to build."
     ),
     "seven-with-young-children": (
-        f"one beam search, 80% of the run, over seven-dish dinners for a household of seven. {MEAL_CHECKS} is about "
+        f"one beam search, 80% of the run, over seven-dish dinners for a household of seven; {MEAL_CHECKS} is about "
         f"69%, and {MEMBER_CHECKS} about 37%."
     ),
 }
