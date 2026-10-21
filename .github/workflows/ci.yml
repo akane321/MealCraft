@@ -50,7 +50,11 @@ jobs:
   backend:
     name: backend
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Raised with the shared-dish report, which plans ten households twice (layer 08 PR-4), and again when
+    # widening each member's candidates made both evaluations slower: this job ran out of its twenty minutes
+    # inside the shared-dish step with everything before it passing. Same budget as `compose`, which does the
+    # same work and finished in 23 minutes.
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -96,6 +100,9 @@ jobs:
 
       - name: Full default evaluation
         run: uv run --project backend python -m app.evaluation.full_default
+
+      - name: Shared dish evaluation
+        run: uv run --project backend python -m app.evaluation.shared_dish
 
   migrations:
     name: migrations
@@ -196,7 +203,8 @@ jobs:
   compose:
     name: compose
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Raised with the shared-dish report, which plans ten households twice (layer 08 PR-4).
+    timeout-minutes: 30
 
     # The `backend` job runs the suite from a checkout: `<repo>/backend/tests`.
     # CONTRIBUTING.md and AGENTS.md tell contributors to verify through the
@@ -261,6 +269,9 @@ jobs:
 
       - name: Full default evaluation
         run: docker compose exec -T backend uv run --no-sync python -m app.evaluation.full_default
+
+      - name: Shared dish evaluation
+        run: docker compose exec -T backend uv run --no-sync python -m app.evaluation.shared_dish
 
       - name: Generated evaluation reports are reproducible
         # The workbench writes into the bind-mounted `docs/evaluation`. Regenerating

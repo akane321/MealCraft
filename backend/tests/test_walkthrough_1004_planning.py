@@ -46,7 +46,7 @@ from app.repositories.recipe import _reloading as reloading_binds
 from app.schemas.agent import AgentConstraintState
 from app.schemas.display import shown_title
 from app.schemas.meal_plan import MEAL_PRESETS, MealPlanReplanPreviewRequest, MealPlanShape, MealPlanShapeChangeRequest
-from app.services.agent import AgentSessionService
+from app.services.agent import CONFIRM_WALL_SECONDS, AgentSessionService
 from tests.test_planning_capability import _dish, dish_client
 
 
@@ -986,3 +986,57 @@ def test_the_api_loads_the_recipe_pool_at_startup(loads):
             waited(lambda: loads == ["warm-planning-pool"])
             RecipeRepository(session).list_for_planning(courses=["main", "side", "salad", "soup"])
         assert loads == ["warm-planning-pool"]
+
+
+def test_a_confirmation_slower_than_a_reply_turn_still_returns_its_plan(fixture_catalog):
+    """Layer 08 PR-4 review round 3. A confirmation runs the whole plan search inside its own run, and the full
+    meal structure can take minutes for a large household on a tight budget (the developer six-person S$420 week
+    measures about 143 s). On the ordinary 120 s turn budget the plan was saved and the run was then marked
+    failed, so the session was never marked planned, the household saw a 409, and a retry saved a second plan.
+    ADR-0079 accepts the wait; it does not accept turning the wait into a failure.
+
+    The search is not actually slowed here: the run's own clock is moved past 120 s while the plan is produced,
+    which is what a slow search looks like to the deadline.
+    """
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        service.starting_constraints = AgentConstraintState(
+            household_size=2,
+            weekly_budget_sgd=200,
+            pricing_mode="fixture",
+            plan_shape=MealPlanShape(meals={"dinner": MEAL_PRESETS["dinner"]["one main"]}),
+        )
+        ready = service.create("Plan dinners for 2 people this week, S$200 for the week")
+        assert ready.can_confirm, ready.messages[-1].content
+
+        generate = service.meal_plan_service.generate
+        runs = service.run_lifecycle.repository
+
+        def slow(request, *args, **kwargs):
+            """Produce the plan, then age the run by 121 s: inside 300 s, outside the old 120 s."""
+            plan = generate(request, *args, **kwargs)
+            for run in runs.list_for_session(ready.id):
+                if run.deadline_at is not None:
+                    runs.session.query(type(run)).filter_by(id=run.id).update(
+                        {
+                            "started_at": run.started_at - timedelta(seconds=121),
+                            "deadline_at": run.deadline_at - timedelta(seconds=121),
+                        }
+                    )
+            runs.session.flush()
+            return plan
+
+        service.meal_plan_service.generate = slow
+        confirmed = service.confirm(ready.id)
+        assert confirmed.plan is not None and confirmed.plan.days
+        assert confirmed.session.status == "planned"
+        # The reply turn's own run is there too; the confirmation is the newest one.
+        plans = sorted(
+            (run for run in runs.list_for_session(ready.id) if run.intent == "create_plan"), key=lambda run: run.id
+        )
+        confirmation = plans[-1]
+        assert confirmation.status == "committed", [run.status for run in plans]
+        assert confirmation.termination_reason_code != "WALL_TIME_BUDGET_EXCEEDED"
+        # The budget is the confirmation's own; a reply turn, which plans nothing, keeps the ordinary one.
+        assert confirmation.max_wall_seconds == CONFIRM_WALL_SECONDS
+        assert plans[0].max_wall_seconds == 120

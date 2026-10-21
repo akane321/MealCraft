@@ -73,6 +73,8 @@ const ACTIONS = [
               <span class="title-line">
                 <button type="button" class="name" :title="dish.recipe.title" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button>
                 <span v-if="isStapleDish(dish)" class="role-tag" title="Rice, noodles or bread with the meal">Staple</span>
+                <!-- Who at this meal cannot eat this dish: the meal's other dishes cover them (ADR-0071). -->
+                <span v-if="dish.not_for?.length" class="not-for" :title="`${dish.not_for.join(', ')} cannot eat this dish; other dishes at this meal are for them`">Not for {{ dish.not_for.join(", ") }}</span>
                 <!-- The meal's chip rides on its first dish's line, leaving the full width for each dish's changes. -->
                 <span v-if="index === 0" class="mc-chip" :class="CHIP_TONE[chip(meal).kind]">
                   <svg v-if="chip(meal).kind === 'completed'" class="ok-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
@@ -124,6 +126,7 @@ const ACTIONS = [
 .dish { min-width: 0; display: flex; flex-direction: column; }
 .title-line { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .title-line .name { flex: 0 1 auto; min-width: 0; }
+.not-for { flex: none; color: var(--c-muted); font-size: 11px; line-height: 18px; font-weight: 700; }
 .role-tag { flex: none; padding: 0 7px; border: 1px solid var(--c-line); border-radius: 999px; color: var(--c-muted); font-size: 11px; line-height: 18px; font-weight: 700; }
 .title-line .mc-chip { flex: none; margin-left: auto; }
 .name { max-width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 800; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

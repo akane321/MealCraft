@@ -67,6 +67,22 @@ def default_servings(
     return round(float(min(high, max(low, servings))), 2), "hpb_default"
 
 
+def daily_energy_kcal(
+    age_band: str | None, sex: str | None, goal: str | None, activity: str | None = None
+) -> float | None:
+    """One member's daily energy target in kcal: the HPB need for the band, sex and activity, less 10% for a
+    fat-loss goal (the table's `goal_factors`, ADR-0071 section 3). None where HPB has no researched energy.
+
+    A meal's own floor is this times that meal's share (`meal_shares`), which is the energy floor of ADR-0070
+    section 3 read per member instead of once for the table.
+    """
+    need = energy(age_band, sex, activity)
+    if need is None:
+        return None
+    factor = hpb()["goal_factors"].get(goal) if goal else None
+    return round(float(Fraction(str(need)) * Fraction(str(factor))) if factor else float(need), 1)
+
+
 def sodium_limit(age_band: str | None) -> float | None:
     """The HPB daily sodium limit in mg for the band, or None where HPB gives none (children)."""
     values = [row["sodium_mg_max"] for row in _rows(age_band, None) if row["sodium_mg_max"] is not None]

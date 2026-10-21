@@ -37,6 +37,7 @@ from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_lo
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_beam import ANY_COURSE, EMPTY_OPTIONAL_ROLE_LOSS, dish_eligible
 from app.planning.meal_composition import MAIN_ROLE, hands_on_and_waiting, role_admits
+from app.planning.member_coverage import dish_base_servings
 from app.planning.nutrition_scope import nutrition_guard_loss
 from app.schemas.planning_v2 import FinalPlanningProblem, FinalPlanningSolution, PlanningAssignment, PlanningTrace
 
@@ -346,7 +347,10 @@ class MealCpSatPlanner(FinalScopeReferencePlanner):
                 for item in recipe.ingredients:
                     if item.quantity is None:
                         raise ValueError("A budgeted CP-SAT plan needs every ingredient quantity")
-                    amount = ceil(item.quantity * slot.servings * share / recipe.servings * SCALE)
+                    # Cooked for the members who can eat it (ADR-0071 section 1), as every other
+                    # costing path does, so the budget here means the same as the validator's.
+                    servings = float(dish_base_servings(slot, recipe)) * share
+                    amount = ceil(item.quantity * servings / recipe.servings * SCALE)
                     demand.setdefault((item.ingredient_id, item.unit), []).append((amount, both))
         pantry = {p.ingredient_id: p for p in problem.pantry}
         costs = []
