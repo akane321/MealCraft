@@ -5,7 +5,6 @@ present member can eat it, every present member has a filling core and a vegetab
 is cooked for the servings of the members who can eat it.
 """
 
-import inspect
 from datetime import date
 from fractions import Fraction
 from types import SimpleNamespace
@@ -28,7 +27,12 @@ from app.planning.member_coverage import (
     servable,
     unverifiable_for,
 )
-from app.planning.product_path import PACKET_COVERAGE_CANDIDATES, _packet_covering, uncoverable_members
+from app.planning.product_path import (
+    PACKET_COVERAGE_CANDIDATES,
+    _packet_covering,
+    uncoverable_by_rule,
+    uncoverable_members,
+)
 from app.planning.week_floor import _meals_each_member_eats, _smallest_share
 from app.schemas.meal_plan import WeeklyMealPlanRequest
 from app.schemas.planning_v2 import (
@@ -378,6 +382,8 @@ def _catalog(recipe_id, role, *, calories, tags=(), allergens=(), ingredient=Non
         dietary_tags=list(tags),
         allergens=list(allergens),
         meal_role=role,
+        prep_time_minutes=10,
+        cook_time_minutes=20,
         contains_staple=True if staple else None,
         protein_sources=list(protein) or ([recipe_id] if role in ("protein_main", "one_bowl") else None),
         nutrition=SimpleNamespace(calories_kcal=calories),
@@ -533,8 +539,10 @@ def _one_dish_request(members=MEMBERS):
     )
 
 
-def _plan_of(entries):
-    return SimpleNamespace(entries=list(entries), household_size=4, constraints=None)
+def _plan_of(entries, constraints=None):
+    """A saved plan as the swap path reads one. `constraints` is the request it was planned with, as the row
+    holds it (a dict), which `week_shape` needs to know what shape the week has."""
+    return SimpleNamespace(entries=list(entries), household_size=4, constraints=constraints or {})
 
 
 def test_a_one_dish_dinner_cannot_be_swapped_to_a_dish_the_vegetarian_member_cannot_eat():
@@ -630,6 +638,27 @@ def test_a_dish_whose_name_states_what_a_member_avoids_is_not_their_food():
         name="Mei", allergens=frozenset({"peanut"}), excluded_ingredients=frozenset(), dietary_requirements=()
     )
     assert not catalog_can_eat(mei, _catalog("Peanut Noodles", "one_bowl", calories=600, ingredient="noodle"))
+
+
+def test_a_planning_candidate_is_read_by_its_name_too():
+    """The same rule on the planner's side of the eatability check (`member_can_eat`), which is the one the
+    search, the validator and the coverage rules all read. Without it a dish whose lines are incomplete reaches
+    the table of the member who avoids what its name says."""
+    named = recipe("Korean Pork Chops", "protein_main", calories=900, protein=["pork"], ingredient="onion")
+    plain = recipe("Onion Omelette", "protein_main", calories=900, protein=["egg"], ingredient="onion")
+    prob = problem(
+        recipes=[*RECIPES, named, plain],
+        slots=[
+            slot(members=[{"name": "Ann", "servings": 1.0, "excluded_ingredients": ["pork"]}], servings=1.0).model_dump(
+                mode="json"
+            )
+        ],
+    )
+    at_table, dishes = prob.slots[0], by_id(prob)
+    assert not member_can_eat(at_table.members[0], dishes["Korean Pork Chops"])
+    assert member_can_eat(at_table.members[0], dishes["Onion Omelette"])
+    # And so the dish may not be served at all, because no present member can eat it.
+    assert not servable(at_table, dishes["Korean Pork Chops"])
 
 
 def test_an_a_or_b_line_is_judged_by_the_option_actually_cooked():
@@ -764,36 +793,194 @@ def test_the_floor_scales_by_the_smallest_a_dish_can_be_cooked_for():
     assert _smallest_share(without) == 1.0
 
 
+def _priced_problem(members) -> FinalPlanningProblem:
+    """A one-dinner problem CP-SAT can price: course roles, since the CP-SAT reference does not model the full
+    meal structure, with each ingredient sold in S$1 packages. With members, the meat main is Ben's alone."""
+    dishes = [
+        recipe("meat-main", "protein_main", calories=900, protein=["beef"], ingredient="beef"),
+        recipe("greens", "vegetable", calories=120, tags=["vegetarian"], ingredient="spinach"),
+    ]
+    roles = [
+        {"role_id": "main", "courses": ["main"]},
+        {"role_id": "vegetable", "courses": ["side", "salad"]},
+    ]
+    at_table = slot(members=members, roles=roles, servings=2.0).model_dump(mode="json")
+    return FinalPlanningProblem.model_validate(
+        {
+            "problem_id": "shared-dish-budget",
+            "slots": [at_table],
+            "recipes": dishes,
+            "products": [
+                {
+                    "ingredient_id": dish["ingredients"][0]["ingredient_id"],
+                    "product_id": f"p-{dish['recipe_id']}",
+                    "package_quantity": 100,
+                    "package_unit": "g",
+                    "price_sgd": 1.0,
+                }
+                for dish in dishes
+            ],
+            "allergen_vocabulary": ["peanut", "shellfish"],
+            "catalog_version": "test",
+            "product_snapshot_version": "test",
+            "policy_version": "test",
+            "budget_is_hard": True,
+        }
+    )
+
+
+def _cheapest_plannable(members) -> int:
+    """The tightest whole-dollar budget CP-SAT can still plan this dinner under."""
+    from app.planning.meal_cp_sat import MealCpSatLimits
+
+    for budget in range(1, 40):
+        prob = _priced_problem(members).model_copy(update={"purchase_budget_sgd": float(budget)})
+        solved = MealCpSatPlanner(MealCpSatLimits(max_time_seconds=10, max_deterministic_time=10)).solve(prob)
+        if solved.assignments:
+            return budget
+    raise AssertionError("no budget in range planned this dinner")
+
+
 def test_the_cp_sat_budget_costs_a_dish_for_the_members_who_can_eat_it():
-    """The CP-SAT budget is a third costing path beside the beam's and the validator's; all three read the same
-    servings, or a budget means a different thing depending on which one answered."""
-    prob = problem()
-    at_table, dishes = prob.slots[0], by_id(prob)
-    assert dish_base_servings(at_table, dishes["chicken"]) == Fraction("3.2")
-    assert dish_base_servings(at_table, dishes["tofu"]) == Fraction("4.08")
-    source = inspect.getsource(MealCpSatPlanner._budget)
-    assert "dish_base_servings(slot, recipe)" in source
+    """The CP-SAT budget is a third costing path beside the beam's and the validator's, and it has to read the
+    same servings or a budget means a different thing depending on which path answered.
+
+    Behaviour, not source: the same dinner is priced with members and without them, and the tightest budget it
+    can still be planned under is lower with members, because the meat main is then bought for the one member
+    who eats it instead of for the table.
+    """
+    with_members = _cheapest_plannable(MEMBERS[:2])  # Ann is vegetarian, Ben is not
+    whole_table = _cheapest_plannable([])
+    assert with_members < whole_table, (with_members, whole_table)
 
 
 def test_a_whole_weeks_search_price_is_the_price_the_validator_reads():
-    """Three costing paths have to agree over a whole week, not only one dish: the beam prunes on its own price,
-    and a week it priced above the budget is never offered even when the validator would have passed it. Summing
-    each dish's grams the way the search does must give what `dish_servings` gives the validator."""
-    prob = problem()
-    at_table = prob.slots[0]
+    """Three costing paths have to agree over a whole week, not one day: the beam prunes on its own price, and a
+    week it priced above the budget is never offered even when the validator would have passed it.
+
+    Three days, each with a different set of eaters, and the whole week's money is compared both ways: the
+    search's grams at a per-gram price against `dish_servings` times the per-serving price.
+    """
+    # Day 2 is the dinner Kai is not home for, which is what a presence rule leaves behind by the time the
+    # problem is built: the same dishes, one fewer eater, so the week is not three identical days.
+    tables = {1: (MEMBERS, 4.08), 2: (MEMBERS[:3], 3.35), 3: (MEMBERS, 4.08)}
+    days = [
+        slot(members=members, servings=servings).model_dump(mode="json")
+        | {"slot_id": f"d{n}", "planned_date": date(2027, 1, 2 + n).isoformat()}
+        for n, (members, servings) in tables.items()
+    ]
+    prob = problem(slots=days)
     assignments = [
-        PlanningAssignment(slot_id="d1", role_id="main", recipe_id="chicken"),
-        PlanningAssignment(slot_id="d1", role_id="main-2", recipe_id="tofu"),
-        PlanningAssignment(slot_id="d1", role_id="staple", recipe_id="rice"),
+        PlanningAssignment(slot_id=f"d{n}", role_id=role, recipe_id=dish)
+        for n in (1, 2, 3)
+        for role, dish in (("main", "chicken"), ("main-2", "tofu"), ("staple", "rice"))
     ]
     validator = dish_servings(prob, assignments)
-    dishes = by_id(prob)
+    dishes, slots = by_id(prob), {s.slot_id: s for s in prob.slots}
     roles = shares([(a.role_id, a.recipe_id) for a in assignments])
+    price_per_gram = 0.01
+    searched = validated = 0.0
     for index, assignment in enumerate(assignments):
-        recipe = dishes[assignment.recipe_id]
-        share = roles[assignment.role_id]
-        # The search's own grams for this dish, divided by the per-serving amount, are its servings.
-        grams = dict(dish_grams(at_table, recipe, share))
-        line = recipe.ingredients[0]
-        search_servings = grams[line.ingredient_id] * recipe.servings / line.quantity
-        assert float(validator[index]) == pytest.approx(search_servings)
+        dish = dishes[assignment.recipe_id]
+        at_table, share = slots[assignment.slot_id], roles[assignment.role_id]
+        grams = dict(dish_grams(at_table, dish, share))
+        line = dish.ingredients[0]
+        searched += grams[line.ingredient_id] * price_per_gram
+        # The validator's servings at the same price: quantity per serving times servings, times the per-gram price.
+        validated += float(validator[index]) * line.quantity / dish.servings * price_per_gram
+    assert searched == pytest.approx(validated)
+    # The week is not three identical days: one dinner has one fewer eater, so its money differs.
+    assert searched > 0
+    per_day = {
+        slot_id: sum(
+            dict(dish_grams(slots[slot_id], dishes[a.recipe_id], roles[a.role_id]))[
+                dishes[a.recipe_id].ingredients[0].ingredient_id
+            ]
+            for a in assignments
+            if a.slot_id == slot_id
+        )
+        for slot_id in slots
+    }
+    assert len(set(per_day.values())) > 1, per_day
+
+
+# --- The same two rules through the code that actually calls them (review round 3) ---------------------------
+
+
+def _recommendation(recipe):
+    """A pool recommendation as `_replacements` reads one: it only needs the recipe's id and title."""
+    return SimpleNamespace(recipe=SimpleNamespace(id=recipe.id, title=recipe.title, slug=recipe.slug))
+
+
+def test_the_swap_path_itself_drops_a_dish_that_would_leave_a_member_unfed():
+    """Round 2 added `_coverage_after_swap`; its tests called it directly, so removing the call site would not
+    have failed any of them. This goes through `_replacements`, which is what a swap actually calls."""
+    request = _one_dish_request()
+    tofu = _catalog("tofu", "protein_main", calories=900, tags=["vegetarian"])
+    pork = _catalog("pork-roast", "protein_main", calories=900)
+    other_tofu = _catalog("other-tofu", "protein_main", calories=900, tags=["vegetarian"])
+    entry = _entry("main", tofu)
+    plan = _plan_of([entry])
+    by_id = {r.id: r for r in (tofu, pork, other_tofu)}
+    offered = MealPlanReplanningService._replacements(
+        MealPlanReplanningService,
+        plan,
+        entry,
+        request,
+        [_recommendation(pork), _recommendation(other_tofu)],
+        by_id,
+    )
+    titles = {item.recipe.title for item in offered}
+    assert "other-tofu" in titles, titles  # Ann can eat it, so it may replace her dinner
+    assert "pork-roast" not in titles, titles  # it would leave her with nothing at this one-dish meal
+
+
+def test_the_swap_path_itself_allows_a_breakfast_and_still_refuses_an_empty_plate():
+    """Round 2's `_fully_covered` was also only called directly in its tests. `_meal_still_holds` is the real
+    caller: a structured breakfast may be swapped, and may not be swapped to a dish nobody at it can eat."""
+    roles = [{"role_id": "breakfast", "meal_roles": ["breakfast"], "required": True}]
+    request = WeeklyMealPlanRequest.model_validate(
+        {
+            "start_date": date(2027, 1, 3).isoformat(),
+            "day_count": 1,
+            "household_size": 4,
+            "plan_shape": {"meals": {"breakfast": roles}},
+            "household": {
+                "members": [
+                    {
+                        "name": m["name"],
+                        "servings": m["servings"],
+                        "dietary_preferences": m.get("dietary_requirements", []),
+                    }
+                    for m in MEMBERS
+                ]
+            },
+        }
+    )
+    entry = _entry("breakfast", _catalog("omelette", "breakfast", calories=400, tags=["vegetarian"]))
+    entry.meal_type = "breakfast"
+    plan = _plan_of([entry], request.model_dump(mode="json"))
+    yogurt = _catalog("maple-yogurt", "breakfast", calories=400, tags=["vegetarian"])
+    bacon = _catalog("bacon-roll", "breakfast", calories=400)
+    assert MealPlanReplanningService._meal_still_holds(plan, entry, yogurt, request)
+    assert not MealPlanReplanningService._coverage_after_swap(request, entry, bacon, plan)
+
+
+def test_a_refusal_says_what_the_meal_could_not_give_rather_than_promising_a_main_and_a_staple():
+    """Review round 3. The branch that names a member for a breakfast or a one-dish meal reused the lunch-and-
+    dinner wording, so a household was told the plan could not give them "a main dish and a staple at every
+    lunch and dinner" about a breakfast, which is never owed one."""
+    nobody_can_eat = [r for r in RECIPES if r["recipe_id"] in ("chicken", "prawn-noodles")]
+    vegetarian = [{"name": "Ann", "servings": 1.0, "dietary_requirements": ["vegetarian"]}]
+    # A breakfast: the weakest rule, so the member is named under "any".
+    breakfast = slot(members=vegetarian, servings=1.0).model_dump(mode="json")
+    breakfast["meal_type"] = "breakfast"
+    breakfast["composition"] = None  # one dish, as a breakfast is planned
+    prob = problem(slots=[breakfast], recipes=nobody_can_eat)
+    assert uncoverable_by_rule(prob) == {"core": [], "any": ["Ann"]}
+
+    # A structured dinner with no vegetarian main: the full rule, so she is named under "core".
+    dinner = problem(slots=[slot(members=vegetarian, servings=1.0).model_dump(mode="json")], recipes=nobody_can_eat)
+    assert uncoverable_by_rule(dinner) == {"core": ["Ann"], "any": []}
+    # Both still report her once by name, which is what the trace carries.
+    assert uncoverable_members(prob) == ["Ann"] and uncoverable_members(dinner) == ["Ann"]

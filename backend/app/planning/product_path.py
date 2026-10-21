@@ -164,26 +164,32 @@ def meals_of_the_day(constraints) -> list[tuple[str, list]] | None:
 
 
 def uncoverable_members(problem) -> list[str]:
-    """Members of a slot that no meal of the frozen candidates can cover (ADR-0071 section 1).
+    """Members no meal of the frozen candidates can cover, by name (ADR-0071 section 1)."""
+    return [name for names in uncoverable_by_rule(problem).values() for name in names]
+
+
+def uncoverable_by_rule(problem) -> dict[str, list[str]]:
+    """Members no meal of the frozen candidates can cover, under `"core"` and under `"any"`.
 
     For each structured lunch or dinner and each member home for it: is there a filling core at all among the
     dishes eligible for that slot which the member can eat - a dish that carries its staple, or a protein main
-    beside a staple. Every other meal is held to the weakest form instead: is there any eligible dish at all
-    that member can eat. It proves a member uncoverable; it does not prove the rest coverable together.
+    beside a staple. That is `"core"`. Every other meal is held to the weakest form instead, `"any"`: is there
+    any eligible dish at all that member can eat. Keeping them apart lets the refusal say what the meal could
+    not give, because a breakfast was never owed a main and a staple. It proves a member uncoverable; it does
+    not prove the rest coverable together.
     """
-    names: list[str] = []
+    by_rule: dict[str, list[str]] = {"core": [], "any": []}
     for slot in problem.slots:
         if not slot.members:
             continue
         if not structured_slot(slot) or slot.meal_type not in ("lunch", "dinner"):
-            # A breakfast, a one-dish slot or a meal of course roles is held to the weakest form of the rule
-            # (`member_has_a_dish`), so the refusal names a member no eligible dish of that slot suits rather
-            # than leaving them inside a general "no week fits".
             eligible = [recipe for recipe in problem.recipes if dish_eligible(problem, slot, recipe)]
             for member in slot.members:
-                if not any(member_can_eat(member, recipe) for recipe in eligible) and member.name not in names:
-                    names.append(member.name)
+                if not any(member_can_eat(member, recipe) for recipe in eligible):
+                    if member.name not in by_rule["any"]:
+                        by_rule["any"].append(member.name)
             continue
+        names = by_rule["core"]
         roles = slot.composition or []
         if not any(role.role_id == STAPLE_ROLE for role in roles):
             continue
@@ -201,7 +207,9 @@ def uncoverable_members(problem) -> list[str]:
             )
             if not covered and member.name not in names:
                 names.append(member.name)
-    return names
+    # A member both rules name is reported once, by the stronger one.
+    by_rule["any"] = [name for name in by_rule["any"] if name not in by_rule["core"]]
+    return by_rule
 
 
 def pool_courses(meals) -> list[str] | None:
@@ -305,11 +313,15 @@ def families_first(recommendations, seen=()) -> list:
 #     always,               40   REFUSED    48   S$589.27   <- the review's own setting and figures
 #
 # The review's measurement reproduces exactly, and it buys the variety it reported. It also costs `mixed-diets`
-# its plan, which that measurement did not cover, and the refusal is not monotonic in the number, so a value
-# chosen to keep that one case passing would be fitting the search path rather than fixing anything. A week
-# that repeats a lunch is a worse week; a household that can no longer be planned is a broken one. So the
-# top-up stays conditional and only its size grows. The repeated lunch belongs to the objective's weighting
-# (ADR-0075) or to the beam's expansion budget, not to this number.
+# its plan, which that measurement did not cover, and the refusal is not monotonic in the number. A week that
+# repeats a lunch is a worse week; a household that can no longer be planned is a broken one. So the top-up
+# stays conditional and only its size grows.
+#
+# Review round 3 found what that refusal actually is, and it is not a beam that ran out of expansions, as this
+# note first said: `meal_beam.meal_options` widens each role's dish count by `MEAL_OPTION_WIDENING = (1, 2, 4)`
+# and stops there, returning an empty list at four times even when candidates are left. One lunch with no
+# option at all refuses the whole week. That is the cause, it is fixed in a pull request of its own, and this
+# number only moves which households happen to fall into it.
 PACKET_COVERAGE_CANDIDATES = 40
 
 
@@ -1182,17 +1194,32 @@ class ProductPlanningEngine:
                 )
             else:
                 message = "I couldn't find a week that meets every limit. Try relaxing one of them."
-            uncovered = uncoverable_members(problem)
+            by_rule = uncoverable_by_rule(problem)
+            uncovered = [name for names in by_rule.values() for name in names]
             if uncovered:
-                # Every member needs a plate of their own at every lunch and dinner (ADR-0071 section 1), which
-                # ADR-0068 keeps outside idealization: the plan is refused rather than leaving someone uncovered.
-                who = ", ".join(uncovered)
-                message = (
-                    f"I couldn't give {who} a main dish and a staple at every lunch and dinner with what "
-                    f"{'they' if len(uncovered) > 1 else who} can eat. Try a higher budget, more cooking time or "
-                    "fewer dishes a meal; no allergen, diet or excluded ingredient will be relaxed."
-                )
+                # Every member needs a plate of their own (ADR-0071 section 1), which ADR-0068 keeps outside
+                # idealization: the plan is refused rather than leaving someone uncovered. What the meal could
+                # not give differs by meal, so say that rather than promising every meal a main and a staple -
+                # a breakfast was never owed one.
+                asks = "Try a higher budget, more cooking time or fewer dishes a meal; no allergen, diet or "
+                asks += "excluded ingredient will be relaxed."
+                parts = []
+                if by_rule["core"]:
+                    who = ", ".join(by_rule["core"])
+                    parts.append(
+                        f"I couldn't give {who} a main dish and a staple at every lunch and dinner with what "
+                        f"{'they' if len(by_rule['core']) > 1 else who} can eat."
+                    )
+                if by_rule["any"]:
+                    who = ", ".join(by_rule["any"])
+                    parts.append(
+                        f"At one of the other meals there was nothing {who} can eat at all."
+                        if len(by_rule["any"]) == 1
+                        else f"At one of the other meals there was nothing {who} can eat at all."
+                    )
+                message = " ".join([*parts, asks])
                 trace["uncovered_members"] = uncovered
+                trace["uncovered_members_by_rule"] = by_rule
             raise ProductPlanningError(status, message, trace, problem=problem.model_copy(deep=True))
         assignments, shopping, report = result
         # A perishable line says "use within N days" on the list (layer 08); only with the household's rules on.

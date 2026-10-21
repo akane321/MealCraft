@@ -141,6 +141,14 @@ def _variety_decision(message: str) -> ScopeDecision:
 
 REPLAN_REFUSED = "REPLAN_REFUSED"
 
+# A confirmation runs the whole plan search inside its own run, and the full meal structure (ADR-0070) can take
+# minutes for a large household on a tight budget: the developer six-person S$420 week measures about 143 s.
+# The ordinary turn budget of 120 s would mark such a run failed after the plan was already saved, leaving the
+# plan an orphan and showing the household an error for work that had succeeded. ADR-0079 accepts the wait; it
+# does not accept turning the wait into a failure. A reply turn keeps the 120 s default, because it plans
+# nothing itself.
+CONFIRM_WALL_SECONDS = 300
+
 
 def _refused(decision: ScopeDecision) -> ScopeDecision:
     """The decision of a turn whose change the planner could not make: the reply says why and nothing changed."""
@@ -1155,6 +1163,7 @@ class AgentSessionService:
             input_payload={"operation": "confirm_plan", "context_version": snapshot.context_version},
             context_version=snapshot.context_version,
             idempotency_key=idempotency_key,
+            max_wall_seconds=CONFIRM_WALL_SECONDS,
         )
         if started.replayed:
             restored = self.get(session_id)
@@ -1252,6 +1261,7 @@ class AgentSessionService:
             context_version=snapshot.context_version,
             plan_revision=base_revision,
             idempotency_key=idempotency_key,
+            max_wall_seconds=CONFIRM_WALL_SECONDS,
         )
         if started.replayed:
             restored = self.get(session_id)
@@ -1442,11 +1452,13 @@ class AgentSessionService:
         idempotency_key: str | None,
         plan_revision: int | None = None,
         scope_decision: ScopeDecision | None = None,
+        max_wall_seconds: int | None = None,
         now: datetime | None = None,
     ) -> StartedRun:
         normalized_key = (idempotency_key or f"generated:{uuid4().hex}").strip()
         if not normalized_key or len(normalized_key) > 120:
             raise AgentRunLifecycleError("Idempotency-Key must contain 1 to 120 characters.")
+        budget = {} if max_wall_seconds is None else {"max_wall_seconds": max_wall_seconds}
         return self.run_lifecycle.start(
             agent_session_id=agent_session_id,
             idempotency_key=normalized_key,
@@ -1458,6 +1470,7 @@ class AgentSessionService:
             model_config=self.model_config(),
             actor_user_id=self.actor_user_id,
             household_id=self.household_id,
+            **budget,
             now=now,
         )
 
