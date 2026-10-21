@@ -109,21 +109,12 @@ COST_WEIGHTS = (1.0, 4.0, 16.0)
 # the fixture catalog's 2-person week offering S$43.25 at every refused budget where a S$31.70 week plans (main's
 # budget-scaled weights found it at budgets up to S$10); x64 finds it, and x256 or x1000 find none cheaper.
 ONE_DISH_COST_WEIGHTS = (*COST_WEIGHTS, 64.0)
-# The cheapest-week search (see `plan`): the first budget it tries, how close it bisects the least budget it
-# completes a week within (a share of that budget), and the beam it searches with. Lighter than the ranked
-# search's beam: on the release catalog it finds as cheap a week in a third of the time (PR #211); 32 meals a
-# slot find no week at all for three meals with no dish twice. Bisecting under the cheapest week found so far
-# rather than under the budget it was found within takes 3 to 7 probes instead of 6 to 9 there (48 shapes,
-# sizes and caps on uses), and finds the same week in 35 of them and one within 5% in 44 (PR #211 round 1).
+# The cheapest-week search (see `plan`): the first budget it tries. It searches with the ranked search's own meal
+# options and bisects to the whole dollar, the unit a budget is offered in, so the least budget it completes a week
+# within is exact to that dollar for the weeks it generates (owner, 2026-10-22; ADR-0080). Its earlier lighter beam
+# (64 meals a slot) and 5% stop saved time only. Bisecting under the cheapest week found so far rather than under
+# the budget it was found within takes fewer probes for the same week (PR #211 round 1).
 CHEAPEST_START_SGD = 64
-CHEAPEST_PRECISION = 0.05
-CHEAPEST_MEAL_OPTIONS = 64
-# Meals of at most this many dishes: the planner's searches answer within a chat reply. On the release catalog
-# a week of them is checked in at most 6.7 s and its cheapest week found in at most 4.5 s (1 or 4 people, up to
-# three meals a day, any cap on uses); for a meal of four to six dishes either takes 5 to 26 s, and the cheapest
-# week minutes with no dish twice (ADR-0046 section 3: a plan answers within 10 s). A plan of such meals that
-# no week fits under its budget ends without the cheapest-week search.
-QUICK_MEAL_DISHES = 3
 # A week of this many dish positions or more (and no locked dishes) is "heavy": its variety pass stops early at a
 # week no later start can make more varied (`is_best`). No pass is cut by the clock: planning time has no hard
 # limit and a slow plan never trades quality for speed (owner, 2026-10-21; ADR-0080).
@@ -908,7 +899,7 @@ class ProductPlanningEngine:
                     max_expansions=max(MealBeamLimits().max_expansions, 32 * 256 * len(slots) + 256),
                     repeat_cost=1.0,
                     flat_repeat=True,
-                    max_meal_combinations=16384,
+                    cheapest_share_places=True,
                     distinct_kinds=True,
                     rotate_candidates=True,
                 )
@@ -988,11 +979,7 @@ class ProductPlanningEngine:
                     """
                     cost = {r.recipe.slug: dish_cost(r) for r in recommendations}
                     weight = COST_WEIGHTS[-1]
-                    led = replace(
-                        meal_beam.limits,
-                        repeat_cost=meal_beam.limits.repeat_cost + weight,
-                        meal_options_per_slot=CHEAPEST_MEAL_OPTIONS,
-                    )
+                    led = replace(meal_beam.limits, repeat_cost=meal_beam.limits.repeat_cost + weight)
 
                     def within(limit: int) -> tuple:
                         share = len(slots) / limit
@@ -1015,8 +1002,9 @@ class ProductPlanningEngine:
                         )
 
                     # Up from a first guess until a week completes, then halve the gap between the last budget
-                    # that completed none and the cheapest week found so far: whole dollars, to within
-                    # CHEAPEST_PRECISION. Every week found is kept, so the cheapest of any probe is tried.
+                    # that completed none and the cheapest week found so far, to the whole dollar: no whole-dollar
+                    # budget under the one offered completes a week. Every week found is kept, so the cheapest of
+                    # any probe is tried.
                     kept: dict = {}
                     low, limit = 0, CHEAPEST_START_SGD
                     states = within(limit)
@@ -1028,7 +1016,7 @@ class ProductPlanningEngine:
                         kept.update((state.choices, state) for state in states)
                         high = min(limit, ceil(min(map(bought, states))))
                         states = ()
-                        while not states and high - low > max(1, high * CHEAPEST_PRECISION):
+                        while not states and high - low > 1:
                             limit = (low + high) // 2
                             states = within(limit)
                             low = low if states else limit
@@ -1085,12 +1073,9 @@ class ProductPlanningEngine:
                 assignments_list = most_varied_first(found)
                 if cheapest:
                     assignments_list, fallback, last_resort = [], None, cheapest_weeks
-                elif (
-                    cheapest_last
-                    and budget is not None
-                    and max(len(roles) for _, roles in composition) <= QUICK_MEAL_DISHES
-                ):
-                    # Every week above failed: the cheapest week the search can find, if it is within budget.
+                elif cheapest_last and budget is not None:
+                    # Every week above failed: the cheapest week the search can find, if it is within budget. Every
+                    # plan shape gets it, however many dishes a meal has (owner, 2026-10-22; ADR-0080).
                     last_resort = cheapest_weeks
             trace["search"] = {k: v for k, v in asdict(search).items() if k != "states"}
             trace["search"]["completed_candidates"] = len(search.states)
@@ -1201,8 +1186,13 @@ class ProductPlanningEngine:
                     f"I found costs S${min(totals):.2f}. Try a higher budget or fewer limits."
                 )
             elif trace.get("search", {}).get("exhausted"):
-                # A search that ran out of steps proves nothing about the limits themselves.
-                message = "Planning took longer than it should this time. Please try again."
+                # The search used every step it is allowed (`max_expansions`) and built no week. Said as that, not as
+                # a slow plan to try again: planning time has no limit (ADR-0080), and the same request searches the
+                # same way again.
+                message = (
+                    "I searched every combination of dishes the planner allows and found no week that fits. "
+                    "Try relaxing one of the limits."
+                )
             elif emptied_by == "repeats":
                 message = (
                     "I couldn't find enough different dishes for a week without repeats under these limits. "

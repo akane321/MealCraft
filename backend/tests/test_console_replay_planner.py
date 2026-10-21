@@ -75,7 +75,10 @@ def test_a_composed_replay_that_runs_out_of_steps_says_so_not_that_details_are_m
     replay = client.post(f"/api/ops/replay/planning/{run_id}", json={"max_expansions": 50}).json()["replay"]
     # As a one-dish search that ran out of steps says.
     assert (replay["status"], replay["evidence"]) == ("candidate_rejected", "bounded_search_exhausted")
-    assert replay["message"] == "Planning took longer than it should this time. Please try again."
+    assert replay["message"] == (
+        "I searched every combination of dishes the planner allows and found no week that fits. "
+        "Try relaxing one of the limits."
+    )
 
 
 def test_a_composed_week_refused_before_its_search_replays_with_its_own_step_budget(console, monkeypatch) -> None:

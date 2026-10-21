@@ -74,9 +74,7 @@ def test_the_last_step_gives_up_after_its_combination_budget():
     whole product (about 2e10 combinations for a real dinner, hours) before the slot was refused. It now checks
     `LAST_STEP_COMBINATIONS` and calls the slot empty, as the four-times step did before."""
     packet = five_salty_roles()
-    planner = MealBeamPlanner(
-        MealBeamLimits(max_meal_combinations=16384), local_losses={r.recipe_id: 0.0 for r in packet.recipes}
-    )
+    planner = MealBeamPlanner(MealBeamLimits(), local_losses={r.recipe_id: 0.0 for r in packet.recipes})
     started = time.perf_counter()
     # The last step alone: 45^5 (1.8e8) combinations, of which it checks its budget (about a second).
     assert planner._meal_options(packet, packet.slots[0], None) == ([], False)
@@ -87,9 +85,7 @@ def test_the_last_step_gives_up_after_its_combination_budget():
 def test_a_slot_the_last_step_gave_up_on_is_recorded_with_its_count(monkeypatch):
     packet = five_salty_roles()
     monkeypatch.setattr(meal_beam, "MEAL_OPTION_WIDENING", (None,))
-    planner = MealBeamPlanner(
-        MealBeamLimits(max_meal_combinations=16384), local_losses={r.recipe_id: 0.0 for r in packet.recipes}
-    )
+    planner = MealBeamPlanner(MealBeamLimits(), local_losses={r.recipe_id: 0.0 for r in packet.recipes})
     result = planner.search_candidates(packet)
     assert result.empty_slot_ids == ("d1",)
     assert result.capped_slots == (("d1", LAST_STEP_COMBINATIONS),)

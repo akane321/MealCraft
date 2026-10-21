@@ -81,7 +81,7 @@ class Provider:
 
     def search(self, query, *, limit, timeout_seconds):
         assert limit == 20
-        assert 0 < timeout_seconds <= 3
+        assert 0 < timeout_seconds <= 10  # a lookup never outwaits the basket (FINAL_PRICE_SECONDS)
         self.calls.append(query)
         return self.respond(query)
 

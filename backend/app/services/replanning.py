@@ -416,25 +416,18 @@ class MealPlanReplanningService:
         swaps: dict[int, RecipeRecommendationResponse] = {}
         short = None
         changed: set[tuple[int, str]] = set()
-        # The dishes that took the week over in place of one repeat of a dish are not tried for its next: the
-        # week differs only by the swaps made meanwhile, each within what it can spend.
-        # ponytail: a swap that freed room could let one fit; trying every dish again for every repeat took a
-        # week of seventeen repeats 15 s (ADR-0046 section 3: an answer within 10 s).
-        misfits: dict[tuple, set[int]] = {}
+        # Every repeat tries every dish again, also one that took the week over for an earlier repeat: a swap made
+        # meanwhile can free room, and a dish on another day can share or split packages differently (a plan of two
+        # trips buys each on its own trip). Skipping them saved time only (owner, 2026-10-22; ADR-0080).
         for entry in repeats:
             if (entry.day_index, entry.meal_type) in changed:
                 continue  # one dish a meal: a meal is checked with the dishes it keeps (`_meal_still_holds`)
             candidates = self._replacements(plan, entry, constraints, pool, recipes_by_id, avoid=served)
-            tried = misfits.setdefault((entry.meal_type, entry.role_id, dish_family(entry.recipe.title)), set())
-            ranked = sorted(
-                (c for c in candidates if c.recipe.id not in tried),
-                key=lambda c: (c.total_score, -c.recipe.id),
-                reverse=True,
-            )
+            ranked = sorted(candidates, key=lambda c: (c.total_score, -c.recipe.id), reverse=True)
             if not ranked:
                 continue
             made = {entry_id: choice.recipe.id for entry_id, choice in swaps.items()}
-            choice, extra = self._fitting(plan, constraints, recipes_by_id, made, entry, ranked, tried)
+            choice, extra = self._fitting(plan, constraints, recipes_by_id, made, entry, ranked)
             if extra is not None:
                 short = extra if short is None else min(short, extra)
                 continue
@@ -932,10 +925,9 @@ class MealPlanReplanningService:
             trips=entry_trips(plan, eaten),
         )
 
-    def _fitting(self, plan, constraints, recipes_by_id, swaps, entry, ranked, misfits=None) -> tuple:
+    def _fitting(self, plan, constraints, recipes_by_id, swaps, entry, ranked) -> tuple:
         """The first of `ranked` for `entry` that keeps the week within its budget, or no further over it than it
-        is, with `swaps` also made, and None; else the one that takes it over least, and by how much. Each one
-        that does not fit is added to `misfits`.
+        is, with `swaps` also made, and None; else the one that takes it over least, and by how much.
 
         Whole packages decide, given what the rest of the week buys: a dish sharing the week's cabbage costs
         less than its own estimate says (the walkthrough's swaps took the week S$9 to S$17 over its budget).
@@ -952,8 +944,6 @@ class MealPlanReplanningService:
             cents = drift + round(grocery.purchase_total_sgd * 100)
             if cents <= ceiling:
                 return candidate, None
-            if misfits is not None:
-                misfits.add(candidate.recipe.id)
             if least is None or cents < least[1]:
                 least = (candidate, cents)
         return least[0], (least[1] - ceiling) / 100

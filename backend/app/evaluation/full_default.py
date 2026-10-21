@@ -296,6 +296,8 @@ def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Re
             "meals": len(meals),
             "dishes": len(week["days"]),
             "distinct_dishes_excluding_staples": len(set(titles)),
+            # The worst repeat: how often the most served dish comes, staples aside (task 15).
+            "most_uses_of_one_dish": max(Counter(titles).values(), default=0),
             "staples": sorted({d["recipe"]["title"] for d in week["days"] if d["role_id"] == "staple"}),
             "cuisine_groups_per_meal": round(statistics.mean(groups), 2) if groups else None,
             "meals_with_two_deep_fried": fried_meals,

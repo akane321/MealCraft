@@ -9,7 +9,7 @@ beam, it proves neither optimality nor infeasibility.
 from collections import Counter
 from dataclasses import asdict, dataclass
 from itertools import product
-from math import ceil, prod
+from math import ceil
 
 from app.data import meal_structure
 from app.planning.dietary_tags import satisfies
@@ -48,15 +48,16 @@ ANY_COURSE = PlanningMealRole(role_id=MAIN_ROLE, courses=["main"])
 # the cost of an empty one exceeds any dish's share-weighted loss (at most 1.5).
 EMPTY_OPTIONAL_ROLE_LOSS = 2.0
 # How many times each role's usual number of dishes a slot tries before it has no meal (meal_options). None is the
-# last step: every eligible dish of every role, past `max_meal_combinations`, but at most `LAST_STEP_COMBINATIONS`
+# last step: every eligible dish of every role, but at most `LAST_STEP_COMBINATIONS`
 # combinations in loss-rank order. Stopping at four times returned no meal while eligible dishes were left, and one
 # lunch with no meal refused the whole week (layer 08 PR-4 review round 3: `mixed-diets`, 32,549 combinations, 2 s).
 # Unbounded, a five-role dinner with no meal at all (a hard per-meal band nothing meets) is a product of hundreds of
 # dishes per role, about 2e10 combinations at 3 µs each: hours, or out of memory, before the slot is refused.
 MEAL_OPTION_WIDENING = (1, 2, 4, None)
-# Combinations the last widening step checks before it calls the slot empty: 16 × the product's 16,384 cap, about
-# a second (docs/evaluation/shared-dish/timing.md). The search records the slots that used it all (`capped_slots`).
-LAST_STEP_COMBINATIONS = 16 * 16384
+# Combinations the last widening step checks before it calls the slot empty, about a second
+# (docs/evaluation/shared-dish/timing.md). A bound for termination, not speed: unbounded, that step is hours or out of
+# memory before an honest refusal (ADR-0080). The search records the slots that used it all (`capped_slots`).
+LAST_STEP_COMBINATIONS = 262_144
 # Dishes a role keeps for each member it must be able to cover (`_covering`). Ranked by loss alone, a role's
 # best dishes can all be food one member cannot have, and then no combination of them covers that member.
 COVERAGE_CANDIDATES = 2
@@ -74,9 +75,10 @@ class MealBeamLimits:
     # Charge a reused recipe once, however often it came before: a household that asked for a soup
     # would rather have a soup again than none, which a cost growing per use would buy.
     flat_repeat: bool = False
-    # Cap on dish combinations tried per meal: candidates per role shrink as roles are added, so a
-    # five-dish meal is searched in seconds, not a minute. None keeps every combination.
-    max_meal_combinations: int | None = None
+    # Under a budget the cheapest dishes share a role's `candidates_per_role` places with its best-ranked ones (the
+    # product path) instead of doubling them (the recorded multi-dish evaluations). Every role keeps its places
+    # however many roles a meal has: a cap on combinations that shrank them saved time only (owner, 2026-10-22).
+    cheapest_share_places: bool = False
     # No two dishes of one kind in a meal ("Indian Raita" and "Jim's Raita").
     distinct_kinds: bool = False
     # Each meal sees the best half of a role's candidates plus a window of the rest that moves
@@ -85,7 +87,7 @@ class MealBeamLimits:
 
     def __post_init__(self):
         counts = (self.width, self.candidates_per_role, self.meal_options_per_slot, self.max_expansions)
-        if min(counts) < 1 or self.repeat_cost < 0 or (self.max_meal_combinations or 1) < 1:
+        if min(counts) < 1 or self.repeat_cost < 0:
             raise ValueError("Meal beam limits must be positive")
 
 
@@ -151,12 +153,9 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         recipes = sorted(problem.recipes, key=lambda r: r.recipe_id)
         prices = cheapest_per_gram(problem) if problem.purchase_budget_sgd is not None else {}
         roles = slot.composition or [ANY_COURSE]
-        per_role_limit = self.limits.candidates_per_role
-        if self.limits.max_meal_combinations is not None:
-            per_role_limit = max(3, min(per_role_limit, int(self.limits.max_meal_combinations ** (1 / len(roles)))))
         role_limits = [
             limit * scale if scale is not None else len(recipes)
-            for limit in capped_role_limits(problem, roles, per_role_limit, self.limits.max_meal_combinations)
+            for limit in capped_role_limits(problem, roles, self.limits.candidates_per_role)
         ]
         more = False
         per_role: list[list[tuple[str | None, str] | None]] = []
@@ -190,7 +189,8 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             locked = (slot.locked_roles or {}).get(role.role_id)
             ranked = sorted(eligible, key=lambda r: (self._dish_loss(problem, slot, r), r.recipe_id))
             key = role.role_id if slot.composition is not None else None
-            best = role_limit if not (prices and self.limits.max_meal_combinations) else -(-role_limit // 2)
+            share = bool(prices) and self.limits.cheapest_share_places
+            best = -(-role_limit // 2) if share else role_limit
             kept = self._pick(ranked, best, turn)
             # A dish the household asked for is always a candidate, however it ranks.
             kept += [r for r in ranked[best:] if wanted(problem, r)]
@@ -201,12 +201,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                     (r for r in ranked if r not in kept),
                     key=lambda r: (dish_cost(problem, slot, r, role.role_id, prices), r.recipe_id),
                 )
-                # Under the combination cap the cheapest share the role's places instead of doubling them.
-                kept += self._pick(
-                    cheapest,
-                    role_limit if self.limits.max_meal_combinations is None else role_limit - best,
-                    turn,
-                )
+                kept += self._pick(cheapest, role_limit - best if share else role_limit, turn)
             kept += _covering(slot, ranked, kept, lambda suits, turn=turn: self._pick(suits, COVERAGE_CANDIDATES, turn))
             more = more or len(ranked) > len(kept)
             options: list[tuple[str | None, str] | None] = [(key, r.recipe_id) for r in kept]
@@ -492,13 +487,20 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         budget = problem.purchase_budget_sgd
         if budget is None or problem.diversity_policy is not None:
             return state
-        if any(slot.trip == 2 for slot in problem.slots):
-            # ponytail: a plan of two shopping trips keeps its week as searched; price each trip here to vary it.
-            return state
         slots = {slot.slot_id: slot for slot in problem.slots}
         recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
         packages = packages_by_ingredient(problem)
         pantry = {item.ingredient_id: item.quantity for item in problem.pantry if item.quantity is not None}
+        # A plan longer than a week shops twice (ADR-0072): each trip's lines are priced, and held to the budget, on
+        # their own, as the search prices them (the pantry goes to the first trip). One trip keeps every sum as before.
+        trips = 1 + any(slot.trip == 2 for slot in problem.slots)
+
+        def line_of(ingredient: str, slot) -> str | tuple[str, int]:
+            return ingredient if trips == 1 else (ingredient, slot.trip)
+
+        def trip_of(line) -> int:
+            return 1 if trips == 1 else line[1]
+
         rules = problem.repetition_rules
         free = (set(rules.repeat_ok_roles) if rules else set()) | problem.uncounted_roles
         caps = {c.recipe_id: c.max_uses for c in rules.recipe_counts if c.max_uses is not None} if rules else {}
@@ -506,17 +508,22 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         banded = any(band.hard and band.scope == "per_day" for band in problem.nutrition_bands)
         costs: dict[tuple[str, float], float] = {}
 
-        def bought(ingredient: str, grams: float) -> float:
-            if (ingredient, grams) not in costs:
-                costs[ingredient, grams] = ingredient_cost(ingredient, grams, pantry, packages)
-            return costs[ingredient, grams]
+        def bought(line, grams: float) -> float:
+            if (line, grams) not in costs:
+                ingredient = line if trips == 1 else line[0]
+                at_home = pantry if trip_of(line) == 1 else {}
+                costs[line, grams] = ingredient_cost(ingredient, grams, at_home, packages)
+            return costs[line, grams]
 
         choices = list(state.choices)
-        need: dict[str, float] = {}
+        need: dict = {}
         for slot_id, dishes in choices:
             for ingredient, grams in meal_grams(problem, slots[slot_id], dishes, recipes):
-                need[ingredient] = need.get(ingredient, 0.0) + grams
-        spend = sum(bought(ingredient, grams) for ingredient, grams in need.items())
+                line = line_of(ingredient, slots[slot_id])
+                need[line] = need.get(line, 0.0) + grams
+        spend = [0.0, 0.0]  # by trip
+        for line, grams in need.items():
+            spend[trip_of(line) - 1] += bought(line, grams)
         candidates: dict[tuple, list] = {}
 
         def uses_of(choices) -> Counter:
@@ -553,16 +560,20 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                         after = (len(uses) - (uses[old] == 1) + (uses[new] == 0), -max(rest, uses[new] + 1))
                         if after < now:
                             continue
-                        change: dict[str, float] = {}
+                        change: dict = {}
                         for ingredient, grams in removed:
-                            change[ingredient] = change.get(ingredient, 0.0) - grams
+                            line = line_of(ingredient, slot)
+                            change[line] = change.get(line, 0.0) - grams
                         for ingredient, grams in dish_grams(slot, recipe, share):
-                            change[ingredient] = change.get(ingredient, 0.0) + grams
+                            line = line_of(ingredient, slot)
+                            change[line] = change.get(line, 0.0) + grams
                         added = sum(
                             bought(i, need.get(i, 0.0) + grams) - bought(i, need.get(i, 0.0))
                             for i, grams in change.items()
                         )
-                        if spend + added > budget + 1e-9 or (after == now and added > -0.005):
+                        # A swap changes only its own slot's trip, which is held to the budget on its own.
+                        trip = (slot.trip if trips == 2 else 1) - 1
+                        if spend[trip] + added > budget + 1e-9 or (after == now and added > -0.005):
                             continue
                         key = (tuple(-x for x in after), added, new, index, position)
                         if best is not None and key >= best[0]:
@@ -577,11 +588,11 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                         trial = [*choices[:index], (slot_id, swapped), *choices[index + 1 :]]
                         if banded and not day_permitted(problem, MealState(tuple(trial)), slot, True):
                             continue
-                        best = (key, trial, change)
+                        best = (key, trial, change, trip)
             if best is None:
                 break
-            (_, added, *_), choices, change = best
-            spend += added
+            (_, added, *_), choices, change, trip = best
+            spend[trip] += added
             for ingredient, grams in change.items():
                 need[ingredient] = need.get(ingredient, 0.0) + grams
         if variety(uses_of(choices)) == variety(uses_of(state.choices)):
@@ -754,13 +765,12 @@ def soft_meal_loss(slot, dishes, facts: dict[str, MealFacts]) -> float:
     return loss
 
 
-def capped_role_limits(problem, roles, per_role_limit: int, max_combinations: int | None) -> list[int]:
+def capped_role_limits(problem, roles, per_role_limit: int) -> list[int]:
     """Candidates kept for each role: more under a cap on uses, so a week never runs out of them.
 
     A role's candidates are shared by every dish of the week whose role admits one of its courses;
     with each recipe used at most `cap` times, a slot keeping ceil(those dishes / cap) of them always
-    has one left. Kept at 8, a no-repeats lunch-and-dinner week used them up by Saturday. Other roles
-    narrow instead, so a slot's combinations stay within `max_combinations`.
+    has one left. Kept at 8, a no-repeats lunch-and-dinner week used them up by Saturday.
     """
     rules = problem.repetition_rules
     cap = rules.max_uses_per_recipe if rules is not None else None
@@ -777,14 +787,7 @@ def capped_role_limits(problem, roles, per_role_limit: int, max_combinations: in
             for r in other.composition or [ANY_COURSE]
         )
         needs.append(-(-dishes // cap))
-    limits = [max(per_role_limit, need) for need in needs]
-    while max_combinations is not None and prod(limits) > max_combinations:
-        # Narrow the role with the most to spare over its need, down to no fewer than three.
-        spare = max(range(len(limits)), key=lambda i: (limits[i] - needs[i], limits[i]))
-        if limits[spare] <= 3:
-            break
-        limits[spare] -= 1
-    return limits
+    return [max(per_role_limit, need) for need in needs]
 
 
 def core_combinations(per_role, roles, recipes, meal_type):

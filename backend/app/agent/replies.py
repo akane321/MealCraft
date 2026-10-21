@@ -116,7 +116,10 @@ PLANNER_ZH = {
     "I couldn't find a week that meets every limit. Try relaxing one of them.": (
         "我找不到满足所有限制的安排，放宽其中一个再试试。"
     ),
-    "Planning took longer than it should this time. Please try again.": "这次规划花的时间太长了，请再试一次。",
+    "I searched every combination of dishes the planner allows and found no week that fits. "
+    "Try relaxing one of the limits.": (
+        "规划允许的菜品组合我都搜索过了，没有找到符合要求的一周。放宽其中一个限制再试试。"
+    ),
     "I couldn't find enough different dishes for a week without repeats under these limits. "
     "Allow a dish twice, or relax one of the limits.": (
         "在这些限制下，找不到足够多不同的菜来排一周不重样的安排。可以允许一道菜出现两次，或者放宽一个限制。"
@@ -542,9 +545,10 @@ REPLIES: dict[str, tuple[str, str]] = {
         "I couldn't plan this week: the search found no week that meets every limit together ({limits}).",
         "这周没排出来：搜索没有找到同时满足所有限制的一周（{limits}）。",
     ),
-    "slow": (
-        "Planning took longer than it should this time. Please try again.",
-        "这次规划花的时间太长了，请再试一次。",
+    "exhausted": (
+        "I searched every combination of dishes the planner allows and found no week that fits. "
+        "Try relaxing one of the limits.",
+        "规划允许的菜品组合我都搜索过了，没有找到符合要求的一周。放宽其中一个限制再试试。",
     ),
     "weekly_limit": ("the S${amount:g} weekly budget", "每周 S${amount:g} 预算"),
     "meal_limit": ("the S${amount:.2f} a meal budget", "每餐 S${amount:.2f} 的预算"),
