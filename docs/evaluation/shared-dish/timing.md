@@ -2,19 +2,41 @@
 
 > Wall time on the machine that generated it, so it differs by machine and is kept out of `latest.*`. These runs let the variety pass finish instead of cutting it at its two seconds, so the plans do not depend on the machine; the product cuts it, and takes correspondingly less. ADR-0079 sets how long is acceptable by how hard the request is: a simple request should still come back within about 4 s, and every household here has members with their own limits, so these are the complex requests it allows up to about 60 s. Only past that is a case marked over. The `merged` column shows how much of the time the shared-dish model added. A request is never cut short to meet either figure, and speed is the algorithm layer's to fix, never by dropping a rule or relaxing a limit (section 0.8).
 
-Median of the shared arrangement: 18.23 s. Slowest: 26.79 s.
+Median of the shared arrangement: 10.87 s. Slowest: 63.90 s.
 
-Over ~60 s: none.
+Over ~60 s: tight-budget.
 
 | Case | merged (s) | shared (s) | Against the ADR-0079 guidance |
 |---|---:|---:|:---|
-| `four-one-vegetarian` | 14.8 | 18.66 | within the guidance for a complex request |
-| `two-one-vegetarian` | 7.47 | 22.57 | within the guidance for a complex request |
-| `with-a-child` | 7.2 | 12.72 | within the guidance for a complex request |
-| `weekday-lunch-away` | 10.88 | 17.81 | within the guidance for a complex request |
-| `weekend-guest` | 13.53 | 26.79 | within the guidance for a complex request |
-| `peanut-whole-household` | 9.54 | 9.36 | within the guidance for a complex request |
-| `peanut-only-mei-avoids` | 10.34 | 8.28 | within the guidance for a complex request |
-| `mixed-diets` | 5.39 | 11.89 | within the guidance for a complex request |
-| `six-one-vegetarian` | 10.63 | 24.87 | within the guidance for a complex request |
-| `tight-budget` | 17.91 | 26.6 | within the guidance for a complex request |
+| `four-one-vegetarian` | 9.01 | 13.17 | within the guidance for a complex request |
+| `two-one-vegetarian` | 4.65 | 6.53 | within the guidance for a complex request |
+| `with-a-child` | 3.75 | 7.86 | within the guidance for a complex request |
+| `weekday-lunch-away` | 6.25 | 13.75 | within the guidance for a complex request |
+| `weekend-guest` | 7.99 | 18.03 | within the guidance for a complex request |
+| `peanut-whole-household` | 4.85 | 8.12 | within the guidance for a complex request |
+| `peanut-only-mei-avoids` | 4.87 | 7.85 | within the guidance for a complex request |
+| `mixed-diets` | 3.01 | 8.56 | within the guidance for a complex request |
+| `six-one-vegetarian` | 6.17 | 17.47 | within the guidance for a complex request |
+| `tight-budget` | 11.87 | 63.9 | over ~60 s |
+
+- `four-one-vegetarian` (within the guidance for a complex request): one beam search, which builds each meal's dish combinations and checks every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group (`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long.
+
+- `two-one-vegetarian` (within the guidance for a complex request): one beam search, which builds each meal's dish combinations and checks every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group (`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long.
+
+- `with-a-child` (within the guidance for a complex request): one beam search, which builds each meal's dish combinations and checks every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group (`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long.
+
+- `weekday-lunch-away` (within the guidance for a complex request): one beam search, which builds each meal's dish combinations and checks every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group (`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long.
+
+- `weekend-guest` (within the guidance for a complex request): one beam search, which builds each meal's dish combinations and checks every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group (`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long.
+
+- `peanut-whole-household` (within the guidance for a complex request): one beam search, which builds each meal's dish combinations and checks every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group (`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long.
+
+- `peanut-only-mei-avoids` (within the guidance for a complex request): one beam search, which builds each meal's dish combinations and checks every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group (`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long.
+
+- `mixed-diets` (within the guidance for a complex request): one beam search, which builds each meal's dish combinations and checks every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group (`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long.
+
+- `six-one-vegetarian` (within the guidance for a complex request): one beam search, which builds each meal's dish combinations and checks every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group (`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long.
+
+- `tight-budget` (over ~60 s): four beam searches and sixteen variety starts: no week the ranked search keeps is filled with no dish twice under its budget, so the three budget-led searches (`product_path.limit_led`, about 46% of the run) and the variety pass (`meal_beam.vary_within_budget`, about 46%) both run. Every swap the variety pass tries checks the meal's coverage again, so `member_can_eat` alone is about 38% (10.7 million calls). Upgrade path: cache the member checks per member and recipe, and share the meal checks between the four searches.
+
+The last widening step of a meal's options (`meal_beam.MEAL_OPTION_WIDENING`, every eligible dish of every role) ran in no case above. Forced on every slot of `mixed-diets` (shared) it checked 177 combinations for a breakfast in 0.01 s and 32,549 for a three-role lunch in 2.1 s. A five-role dinner, a raw product of about 2e10 combinations (about 3 µs each, so hours unbounded), stopped at its budget of `meal_beam.LAST_STEP_COMBINATIONS` (262,144) in 0.35 s. Those were the top-ranked dishes of its first roles with every dish of the rest, and none made a meal, so forced alone that dinner would be refused, as the four-times step refused such a slot before.

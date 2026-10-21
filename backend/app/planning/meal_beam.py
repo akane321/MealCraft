@@ -47,8 +47,16 @@ ANY_COURSE = PlanningMealRole(role_id=MAIN_ROLE, courses=["main"])
 # An optional role the household asked for is left empty only when no dish fits:
 # the cost of an empty one exceeds any dish's share-weighted loss (at most 1.5).
 EMPTY_OPTIONAL_ROLE_LOSS = 2.0
-# How many times each role's usual number of dishes a slot tries before it has no meal (meal_options).
-MEAL_OPTION_WIDENING = (1, 2, 4)
+# How many times each role's usual number of dishes a slot tries before it has no meal (meal_options). None is the
+# last step: every eligible dish of every role, past `max_meal_combinations`, but at most `LAST_STEP_COMBINATIONS`
+# combinations in loss-rank order. Stopping at four times returned no meal while eligible dishes were left, and one
+# lunch with no meal refused the whole week (layer 08 PR-4 review round 3: `mixed-diets`, 32,549 combinations, 2 s).
+# Unbounded, a five-role dinner with no meal at all (a hard per-meal band nothing meets) is a product of hundreds of
+# dishes per role, about 2e10 combinations at 3 µs each: hours, or out of memory, before the slot is refused.
+MEAL_OPTION_WIDENING = (1, 2, 4, None)
+# Combinations the last widening step checks before it calls the slot empty: 16 × the product's 16,384 cap, about
+# a second (docs/evaluation/shared-dish/timing.md). The search records the slots that used it all (`capped_slots`).
+LAST_STEP_COMBINATIONS = 16 * 16384
 # Dishes a role keeps for each member it must be able to cover (`_covering`). Ranked by loss alone, a role's
 # best dishes can all be food one member cannot have, and then no combination of them covers that member.
 COVERAGE_CANDIDATES = 2
@@ -106,6 +114,8 @@ class MealBeamResult:
     # The check that dropped the last partial plans when the search kept none: "meal" (no meal fits a slot),
     # "repeats", "requests", "day_limits" or "budget". A record for explanations; it changes no search.
     emptied_by: str | None = None
+    # Slots with no meal after the last widening step checked all `LAST_STEP_COMBINATIONS`: (slot_id, combinations).
+    capped_slots: tuple[tuple[str, int], ...] = ()
 
 
 class MealBeamPlanner(FinalScopeReferencePlanner):
@@ -114,6 +124,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         super().__init__()
         self.limits = limits or MealBeamLimits()
         self.local_losses = dict(local_losses) if local_losses is not None else None
+        self.last_step_tried = 0
 
     def meal_options(self, problem: FinalPlanningProblem, slot: PlanningSlot) -> list[MealOption]:
         """The slot's best meals: dishes that pass on their own, combined into meals that pass as meals.
@@ -121,8 +132,11 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         Each role offers only its best few dishes, and every meal of those can fail a meal's own limit (its
         sodium, its time) while meals of lower-ranked dishes pass: the slot then had no meal, and the whole
         week failed although a stricter household, with a different few, planned. Before a slot is called
-        empty, more of each role's dishes are tried."""
+        empty, more of each role's dishes are tried, and at last every eligible dish, up to
+        `LAST_STEP_COMBINATIONS` combinations in loss-rank order: a slot is called empty when none of those
+        passes (`last_step_tried` then holds how many were checked)."""
         meals: list[MealOption] = []
+        self.last_step_tried = 0
         for scale in MEAL_OPTION_WIDENING:
             meals, more = self._meal_options(problem, slot, scale)
             if meals or not more:
@@ -130,9 +144,10 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         return meals
 
     def _meal_options(
-        self, problem: FinalPlanningProblem, slot: PlanningSlot, scale: int
+        self, problem: FinalPlanningProblem, slot: PlanningSlot, scale: int | None
     ) -> tuple[list[MealOption], bool]:
-        """The meals of each role's best `scale` × its usual number of dishes, and whether a role had more."""
+        """The meals of each role's best `scale` × its usual number of dishes (for None every dish, the first
+        `LAST_STEP_COMBINATIONS` combinations of them), and whether a role had more."""
         recipes = sorted(problem.recipes, key=lambda r: r.recipe_id)
         prices = cheapest_per_gram(problem) if problem.purchase_budget_sgd is not None else {}
         roles = slot.composition or [ANY_COURSE]
@@ -140,7 +155,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         if self.limits.max_meal_combinations is not None:
             per_role_limit = max(3, min(per_role_limit, int(self.limits.max_meal_combinations ** (1 / len(roles)))))
         role_limits = [
-            limit * scale
+            limit * scale if scale is not None else len(recipes)
             for limit in capped_role_limits(problem, roles, per_role_limit, self.limits.max_meal_combinations)
         ]
         more = False
@@ -153,9 +168,25 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         if structured and slot.meal_type in ("lunch", "dinner"):
             skippable = {role.role_id for role in roles if role.role_id == "staple"}
             skippable |= {next((r.role_id for r in roles if role_base(r.role_id) == "vegetable"), None)} - {None}
+        shared_by_all = (
+            {
+                role.role_id
+                for role in roles
+                if role_base(role.role_id) in ("main", "vegetable")
+                and sum(role_base(other.role_id) == role_base(role.role_id) for other in roles) == 1
+            }
+            if covering_groups(slot.members) and slot.meal_type in ("lunch", "dinner") and structured
+            else set()
+        )
         for role_index, (role, role_limit) in enumerate(zip(roles, role_limits, strict=True)):
             turn = position + role_index * len(problem.slots)
             eligible = self.role_dishes(problem, slot, role, recipes)
+            if role.role_id in shared_by_all:
+                # The meal's only main (or only vegetable dish) is every present member's core (or vegetable):
+                # a dish one of them cannot eat can fill it in no meal that passes (`coverage_failures`), and ranked
+                # among the rest it took the places of the dishes that can, so a two-person dinner had one or two
+                # meals to choose from and served the same bowl and soup all week (task 14).
+                eligible = [r for r in eligible if all(member_can_eat(member, r) for member in slot.members)]
             locked = (slot.locked_roles or {}).get(role.role_id)
             ranked = sorted(eligible, key=lambda r: (self._dish_loss(problem, slot, r), r.recipe_id))
             key = role.role_id if slot.composition is not None else None
@@ -176,7 +207,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                     role_limit if self.limits.max_meal_combinations is None else role_limit - best,
                     turn,
                 )
-            kept += _covering(slot, ranked, kept)
+            kept += _covering(slot, ranked, kept, lambda suits, turn=turn: self._pick(suits, COVERAGE_CANDIDATES, turn))
             more = more or len(ranked) > len(kept)
             options: list[tuple[str | None, str] | None] = [(key, r.recipe_id) for r in kept]
             if (not role.required or role.role_id in skippable) and locked is None:
@@ -193,7 +224,12 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         costs: dict[tuple, float] = {}
         meals = []
         spread: dict[tuple, int] = {}
+        tried = 0
         for combination in core_combinations(per_role, roles, by_id, slot.meal_type if structured else None):
+            if scale is None:
+                if tried == LAST_STEP_COMBINATIONS:
+                    break
+                tried += 1
             dishes = tuple(dish for dish in combination if dish is not None)
             if not dishes:
                 continue
@@ -237,6 +273,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             # Each dish's rank within its role; their sum spreads tied meals across every role's
             # choices, where ordering ties by id kept 64 meals sharing one main.
             spread[dishes] = sum(options.index(dish) for options, dish in zip(per_role, combination, strict=True))
+        self.last_step_tried = tried
         meals.sort(
             key=lambda meal: (
                 -sum(wanted(problem, by_id[r]) for _, r in meal.dishes),
@@ -301,6 +338,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         states = [MealState()]
         expansions, pruned, exhausted, empty = 0, False, False, []
         emptied_by = None
+        capped: list[tuple[str, int]] = []
         ordered = sorted(problem.slots, key=self._slot_key)
         day_closes = {
             slot.slot_id
@@ -329,6 +367,8 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             must_assign = slot.required or slot.locked_recipe_id is not None
             if not options and must_assign:
                 empty.append(slot.slot_id)
+                if self.last_step_tried == LAST_STEP_COMBINATIONS:
+                    capped.append((slot.slot_id, self.last_step_tried))
             candidates: list[MealOption | None] = [*options, *([] if must_assign else [None])]
             next_states = []
             for state in states:
@@ -438,7 +478,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                 priced = {s.choices: priced[s.choices] for s in states}
             if not states:
                 break
-        return MealBeamResult(tuple(states), expansions, pruned, exhausted, tuple(empty), emptied_by)
+        return MealBeamResult(tuple(states), expansions, pruned, exhausted, tuple(empty), emptied_by, tuple(capped))
 
     def vary_within_budget(self, problem: FinalPlanningProblem, state: MealState, max_swaps: int = 100) -> MealState:
         """`state` improved one dish at a time within the budget: more distinct dishes, then no dish as often,
@@ -633,14 +673,16 @@ def dish_eligible(problem: FinalPlanningProblem, slot: PlanningSlot, recipe: Pla
     return True
 
 
-def _covering(slot: PlanningSlot, ranked: list, kept: list) -> list:
+def _covering(slot: PlanningSlot, ranked: list, kept: list, pick=None) -> list:
     """Dishes added to a role so the meal can cover every member present (ADR-0071 section 1).
 
     A role's best dishes are its best by loss, which says nothing about whom they suit: for a household where
     one member is vegetarian and another dairy-free, every main the search liked can be food one of them cannot
     have, and the slot then has no meal at all. For each member on their own, and for the members together
     (a meal with one main has to suit everyone from that one dish), the role keeps its best few dishes that
-    those members can eat, when none of the dishes it already kept will do.
+    those members can eat, when none of the dishes it already kept will do. `pick(suits)` chooses them; the
+    planner passes its own rotation (`_pick`), so each meal of the week sees a different few rather than the same
+    two (task 14: `four-one-vegetarian` added Teriyaki Tofu and Korean Barbecue Tofu at every meal).
 
     Empty without members, and when every member has the same limits, so a request that is not a shared-dish
     household keeps exactly the dishes it kept before.
@@ -651,7 +693,8 @@ def _covering(slot: PlanningSlot, ranked: list, kept: list) -> list:
         if any(all(member_can_eat(member, r) for member in group) for r in kept):
             continue
         suits = [r for r in ranked if all(member_can_eat(member, r) for member in group)]
-        chosen += [r for r in suits[:COVERAGE_CANDIDATES] if r not in chosen]
+        picked = pick(suits) if pick is not None else suits[:COVERAGE_CANDIDATES]
+        chosen += [r for r in picked if r not in chosen]
     return [recipe for recipe in chosen if recipe not in kept]
 
 

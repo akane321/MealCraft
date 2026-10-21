@@ -16,6 +16,7 @@ from math import inf
 
 from app.data import meal_structure
 from app.data.units import in_grams
+from app.planning import alternatives
 from app.planning.household_slots import present_members
 from app.planning.meal_composition import MAIN_ROLE, fills_staple, meal_role_of, portion_shares, role_base
 from app.planning.member_coverage import catalog_can_eat, member_limits
@@ -175,12 +176,14 @@ def _uncovered(constraints, shape, recommendations, recipes) -> list[tuple[str, 
         ]
         staples = [recipe for recipe in fitting if meal_role_of(recipe) == "staple"]
         has_staple_role = any(role["role_id"] == "staple" for role in roles)
+        # An "A or B" line is judged by the option this household cooks, as the planner judges it.
+        cooked = {recipe.id: alternatives.lines(recipe, constraints) for recipe in {*mains, *staples}}
         for member in members:
             if member.name not in at_meal.get(meal, set()):
                 continue  # never home for this meal, so no plate is owed at it
-            mine = [recipe for recipe in mains if catalog_can_eat(member, recipe)]
+            mine = [recipe for recipe in mains if catalog_can_eat(member, recipe, cooked[recipe.id])]
             bowl = any(fills_staple(recipe) for recipe in mine)
-            staple = has_staple_role and any(catalog_can_eat(member, recipe) for recipe in staples)
+            staple = has_staple_role and any(catalog_can_eat(member, r, cooked[r.id]) for r in staples)
             if not bowl and not (staple and any(meal_role_of(recipe) == "protein_main" for recipe in mine)):
                 uncovered.append((meal, member.name))
     return uncovered
