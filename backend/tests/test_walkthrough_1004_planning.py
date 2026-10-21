@@ -1095,3 +1095,31 @@ def test_a_replan_confirmation_slower_than_any_deadline_still_saves_the_change(f
         )
         assert replan.status == "committed", replan.status
         assert replan.error_code is None
+
+
+def test_a_slow_replan_refusal_keeps_the_planners_reason(fixture_catalog):
+    """Review of task 14: a replan the planner refuses after the deadline passed records the planner's reason, not
+    WALL_TIME_BUDGET_EXCEEDED (`confirm_replan`'s failure record skips the deadline as its success record does)."""
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        ready = _ready_dinner_week(service)
+        planned = service.confirm(ready.id).plan
+        dish = planned.days[1]
+        asked = service.reply(
+            ready.id, f"Swap {dish.planned_date:%A}'s {shown_title(dish.recipe.title)} for something else"
+        )
+        assert asked.pending_replan is not None, asked.messages[-1].content
+        runs = service.run_lifecycle.repository
+
+        def refused(*args, **kwargs):
+            _aged(runs, ready.id, 601)
+            raise WeeklyPlanSelectionError("No week fits.")
+
+        service.replanning_service.confirm = refused
+        with pytest.raises(WeeklyPlanSelectionError):
+            service.confirm_replan(ready.id)
+        replan = max(
+            (run for run in runs.list_for_session(ready.id) if run.intent == "replan_meal"), key=lambda run: run.id
+        )
+        assert replan.status == "failed", replan.status
+        assert replan.error_code == "WeeklyPlanSelectionError", replan.error_code

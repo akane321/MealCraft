@@ -1089,3 +1089,26 @@ def test_the_week_floor_counts_a_dish_cooked_with_the_option_a_member_can_eat():
     bowl = _cooked_with_oil_or_butter()
     shape = [("dinner", [{"role_id": "main", "meal_roles": ["protein_main", "one_bowl"], "required": True}])]
     assert _uncovered(request, shape, [SimpleNamespace(recipe=SimpleNamespace(id=bowl.id))], [bowl]) == []
+
+
+def test_the_week_floor_counts_a_staple_cooked_with_the_option_a_member_can_eat():
+    """Review of task 14: the staples line of the week floor, beside the mains line above. Ann's only filling core is
+    a protein main beside a staple cooked with oil; read raw, the staple's combined line carries dairy."""
+    request = _one_dish_request(DAIRY_FREE_ANN)
+    staple = _cooked_with_oil_or_butter(1, "buttered-rice")
+    staple.meal_role, staple.protein_sources = "staple", None
+    tofu = _cooked_with_oil_or_butter(2, "tofu")
+    tofu.meal_role = "protein_main"
+    tofu.recipe_ingredients = tofu.recipe_ingredients[1:]  # no "A or B" line: only the staple's decides
+    shape = [
+        (
+            "dinner",
+            [
+                {"role_id": "main", "meal_roles": ["protein_main"], "required": True},
+                {"role_id": "staple", "meal_roles": ["staple"], "required": True},
+            ],
+        )
+    ]
+    ranked = [SimpleNamespace(recipe=SimpleNamespace(id=r.id)) for r in (tofu, staple)]
+    assert not catalog_can_eat(member_limits(request.household)[0], staple), "read raw, the staple carries dairy"
+    assert _uncovered(request, shape, ranked, [tofu, staple]) == []
