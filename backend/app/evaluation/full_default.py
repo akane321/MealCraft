@@ -465,20 +465,47 @@ BAND_LABEL = {
     "over": f"over ~{OVER_SECONDS:g} s",
 }
 
-# Why a case takes as long as it does, from a profile of one warm run (cProfile, 2026-10-19, after
-# `meal_beam.core_combinations` skipped the dinners whose filling core fails). Written by hand when a case is
-# profiled, so a case nobody has looked at reads "not profiled yet". ADR-0079 section 4 asks for the cause of
-# every case past the quick figure, not only the ones over a minute.
+# Why a case takes as long as it does, from a cProfile of one warm product run of each case (task 14, 2026-10-21,
+# Windows, after the shared-dish candidate changes). Shares are of the profiled run, which the profiler slows about
+# twofold. Every case past the quick figure has one: ADR-0079 section 4 asks for the cause of each, not only of the
+# ones over a minute. Rewrite a case's entry whenever a change moves its time.
+MEAL_CHECKS = (
+    "building each meal's dish combinations and checking every one as a real meal (`meal_beam._meal_options` -> "
+    "`meal_permitted` -> `meal_composition.real_meal_issues`)"
+)
+MEMBER_CHECKS = (
+    "`member_coverage.member_can_eat`, asked again for every member, dish and combination: nothing caches it per "
+    "member and recipe, which is the upgrade path"
+)
+# Said honestly for a case nobody has profiled at its current time, rather than a guess.
+UNKNOWN_CAUSE = "cause unknown: this time has not been profiled; profile one warm run and add it to SLOW_CAUSES."
 SLOW_CAUSES = {
+    "one-adult": (
+        f"one week-long beam search. {MEAL_CHECKS} is about 40% of the run and reading the candidates (recipes and "
+        "fixture prices) about 25%; at three meals a day for seven days that is 21 slots of combinations."
+    ),
+    "four-with-vegetarian": (
+        f"one beam search, three-quarters of the run. {MEAL_CHECKS} is about 63%, and a third of the run is "
+        f"{MEMBER_CHECKS}. The vegetarian member's own candidates add up to 40 dishes a kind to the packet "
+        "(`product_path._packet_covering`), so a meal has more combinations to check than before the shared-dish "
+        "model."
+    ),
     "six-tight-budget": (
-        "four whole-week beam searches instead of one: the ranked search keeps no week filled with no dish twice "
-        "under the budget, so the three budget-led searches (`product_path.limit_led`) run as well. Each builds "
-        "every six-dish dinner of its candidates again (about 90,000 combinations a search, 360,000 real-meal "
-        "checks in all, half the run) and expands 32 partial weeks by 256 meals a slot (the other half). "
-        "Upgrade path: share the meal checks between the four searches (they do not depend on the ranking) "
-        "and price beam states incrementally. The owner accepted this case's current time on 2026-10-20 and "
-        "made the speed-up optional (ADR-0079 section 5), so being over the line here is a known exception, "
-        "not a regression to fix before merging."
+        "four whole-week beam searches instead of one, 94% of the run: the ranked search keeps no week filled with "
+        "no dish twice under the budget, so the three budget-led searches (`product_path.limit_led`, about 64%) run "
+        f"as well. Each builds every six-dish dinner of its candidates again; {MEAL_CHECKS} is about 78% of the run, "
+        f"and {MEMBER_CHECKS} is about 44%. The variety pass is about 5%. Upgrade path: share the meal checks "
+        "between the four searches (they do not depend on the ranking) and cache the member checks. The owner "
+        "accepted this case's time (ADR-0079 section 5, ADR-0080): over the line is a known exception, not a "
+        "failure."
+    ),
+    "two-no-oven-ten-days": (
+        f"one beam search over ten days and two shopping trips, about two-thirds of the run. {MEAL_CHECKS} is about "
+        "42%, and reading the candidates about 15%; the plan has 30 slots of combinations to build."
+    ),
+    "seven-with-young-children": (
+        f"one beam search, 80% of the run, over seven-dish dinners for a household of seven. {MEAL_CHECKS} is about "
+        f"69%, and {MEMBER_CHECKS} about 37%."
     ),
 }
 
@@ -509,7 +536,10 @@ def timing_markdown(timing: dict) -> str:
         f"Over ~{OVER_SECONDS:g} s: {', '.join(over) or 'none'}.",
     ]
     for case in explained:
-        lines += ["", f"- `{case}` ({BAND_LABEL[bands[case]]}): {SLOW_CAUSES.get(case, 'not profiled yet.')}"]
+        lines += [
+            "",
+            f"- `{case}` ({BAND_LABEL[bands[case]]}): {SLOW_CAUSES.get(case, UNKNOWN_CAUSE)}",
+        ]
     return "\n".join(lines) + "\n"
 
 

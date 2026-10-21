@@ -1,6 +1,7 @@
 import math
 import re
 from collections.abc import Callable
+from contextlib import suppress
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -142,12 +143,10 @@ def _variety_decision(message: str) -> ScopeDecision:
 REPLAN_REFUSED = "REPLAN_REFUSED"
 
 # A confirmation runs the whole plan search inside its own run, and the full meal structure (ADR-0070) can take
-# minutes for a large household on a tight budget: the developer six-person S$420 week measures about 143 s.
-# The ordinary turn budget of 120 s would mark such a run failed after the plan was already saved, leaving the
-# plan an orphan and showing the household an error for work that had succeeded. ADR-0079 accepts the wait; it
-# does not accept turning the wait into a failure. A reply turn keeps the 120 s default, because it plans
-# nothing itself.
-CONFIRM_WALL_SECONDS = 300
+# minutes for a large household on a tight budget (the developer six-person S$420 week: `timing.md`). Planning time
+# has no hard limit and a slow plan never becomes an error (owner, 2026-10-21; ADR-0080): the run's wall-time budget
+# is checked before the planner starts, never on the records that follow it (`record_tool(check_deadline=False)`).
+# A fixed longer ceiling (300 s) only moved the error to a slower household.
 
 
 def _refused(decision: ScopeDecision) -> ScopeDecision:
@@ -1163,7 +1162,6 @@ class AgentSessionService:
             input_payload={"operation": "confirm_plan", "context_version": snapshot.context_version},
             context_version=snapshot.context_version,
             idempotency_key=idempotency_key,
-            max_wall_seconds=CONFIRM_WALL_SECONDS,
         )
         if started.replayed:
             restored = self.get(session_id)
@@ -1189,15 +1187,18 @@ class AgentSessionService:
         try:
             plan = self.meal_plan_service.generate(request)
         except Exception as error:
-            self.run_lifecycle.record_tool(
-                run,
-                tool_name="generate_plan_preview",
-                effect=ToolEffect.PREVIEW,
-                status=ToolRunStatus.FAILED,
-                arguments=request.model_dump(mode="json"),
-                provider_mode=constraints.pricing_mode,
-                error_code=type(error).__name__,
-            )
+            # Recording the failure must never replace it: the household is owed the planner's own reason.
+            with suppress(AgentRunLifecycleError):
+                self.run_lifecycle.record_tool(
+                    run,
+                    tool_name="generate_plan_preview",
+                    effect=ToolEffect.PREVIEW,
+                    status=ToolRunStatus.FAILED,
+                    arguments=request.model_dump(mode="json"),
+                    provider_mode=constraints.pricing_mode,
+                    error_code=type(error).__name__,
+                    check_deadline=False,
+                )
             self._fail_run(run, error)
             if isinstance(error, WeeklyPlanSelectionError):
                 raise WeeklyPlanSelectionError(self._explain_unplanned(snapshot, error, lang)) from error
@@ -1210,6 +1211,7 @@ class AgentSessionService:
             arguments=request.model_dump(mode="json"),
             result_reference=f"meal-plan:{plan.id}:revision:{plan.revision}",
             provider_mode=constraints.pricing_mode,
+            check_deadline=False,
         )
         updated = self.repository.mark_planned(session_id, plan_id=plan.id, assistant_message=say("planned", lang))
         if updated is None:
@@ -1223,6 +1225,7 @@ class AgentSessionService:
             arguments={"plan_id": plan.id, "revision": plan.revision},
             result_reference=f"meal-plan:{plan.id}:revision:{plan.revision}",
             provider_mode=constraints.pricing_mode,
+            check_deadline=False,
         )
         run = self.run_lifecycle.checkpoint(
             run,
@@ -1261,7 +1264,6 @@ class AgentSessionService:
             context_version=snapshot.context_version,
             plan_revision=base_revision,
             idempotency_key=idempotency_key,
-            max_wall_seconds=CONFIRM_WALL_SECONDS,
         )
         if started.replayed:
             restored = self.get(session_id)
@@ -1276,14 +1278,16 @@ class AgentSessionService:
         try:
             result = self.replanning_service.confirm(plan_id=plan_id, event_id=event_id)
         except Exception as error:
-            self.run_lifecycle.record_tool(
-                run,
-                tool_name="confirm_replan",
-                effect=ToolEffect.COMMIT,
-                status=ToolRunStatus.FAILED,
-                arguments={"plan_id": plan_id, "event_id": event_id, "base_revision": base_revision},
-                error_code=type(error).__name__,
-            )
+            with suppress(AgentRunLifecycleError):  # never in place of the planner's own reason
+                self.run_lifecycle.record_tool(
+                    run,
+                    tool_name="confirm_replan",
+                    effect=ToolEffect.COMMIT,
+                    status=ToolRunStatus.FAILED,
+                    arguments={"plan_id": plan_id, "event_id": event_id, "base_revision": base_revision},
+                    error_code=type(error).__name__,
+                    check_deadline=False,
+                )
             self._fail_run(run, error)
             raise
         run = self.run_lifecycle.record_tool(
@@ -1293,6 +1297,7 @@ class AgentSessionService:
             status=ToolRunStatus.SUCCEEDED,
             arguments={"plan_id": plan_id, "event_id": event_id, "base_revision": base_revision},
             result_reference=f"meal-plan:{plan_id}:revision:{result.plan.revision}",
+            check_deadline=False,
         )
         ask_keep = (
             result.event.shape_change is not None

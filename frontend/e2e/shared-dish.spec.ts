@@ -98,7 +98,9 @@ test("the week says who each dish is not for", async ({ page }) => {
 
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");
-  await page.waitForLoadState("networkidle");
+  // The household link renders once the page has hydrated and read the routed account, so the click is not lost.
+  // Waiting for the network to go idle timed out once on CI (task 14).
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: /Let.s plan my week/ }).click();
 
   await expect(page.getByText("Not for Ann")).toBeVisible();

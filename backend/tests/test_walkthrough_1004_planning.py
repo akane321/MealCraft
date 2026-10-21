@@ -39,6 +39,7 @@ from app.main import load_planning_pool, warm_planning_pool
 from app.planning.product_path import ProductPlanningEngine, meal_affinity
 from app.planning.recipe_quality import dish_family, incomplete
 from app.planning.recipe_similarity import wanted
+from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
 from app.repositories.recipe import RecipeRepository, _planning_pool, clear_planning_pool
@@ -46,7 +47,7 @@ from app.repositories.recipe import _reloading as reloading_binds
 from app.schemas.agent import AgentConstraintState
 from app.schemas.display import shown_title
 from app.schemas.meal_plan import MEAL_PRESETS, MealPlanReplanPreviewRequest, MealPlanShape, MealPlanShapeChangeRequest
-from app.services.agent import CONFIRM_WALL_SECONDS, AgentSessionService
+from app.services.agent import AgentSessionService
 from tests.test_planning_capability import _dish, dish_client
 
 
@@ -988,55 +989,109 @@ def test_the_api_loads_the_recipe_pool_at_startup(loads):
         assert loads == ["warm-planning-pool"]
 
 
-def test_a_confirmation_slower_than_a_reply_turn_still_returns_its_plan(fixture_catalog):
-    """Layer 08 PR-4 review round 3. A confirmation runs the whole plan search inside its own run, and the full
-    meal structure can take minutes for a large household on a tight budget (the developer six-person S$420 week
-    measures about 143 s). On the ordinary 120 s turn budget the plan was saved and the run was then marked
-    failed, so the session was never marked planned, the household saw a 409, and a retry saved a second plan.
-    ADR-0079 accepts the wait; it does not accept turning the wait into a failure.
+def _aged(runs, session_id: int, seconds: int) -> None:
+    """Every run of the session started `seconds` earlier, so its deadline is long past: what a slow search looks
+    like to the deadline, without slowing one."""
+    for run in runs.list_for_session(session_id):
+        runs.session.query(type(run)).filter_by(id=run.id).update(
+            {
+                "started_at": run.started_at - timedelta(seconds=seconds),
+                "deadline_at": run.deadline_at - timedelta(seconds=seconds),
+            }
+        )
+    runs.session.flush()
 
-    The search is not actually slowed here: the run's own clock is moved past 120 s while the plan is produced,
-    which is what a slow search looks like to the deadline.
-    """
+
+def _ready_dinner_week(service):
+    service.starting_constraints = AgentConstraintState(
+        household_size=2,
+        weekly_budget_sgd=200,
+        pricing_mode="fixture",
+        plan_shape=MealPlanShape(meals={"dinner": MEAL_PRESETS["dinner"]["one main"]}),
+    )
+    ready = service.create("Plan dinners for 2 people this week, S$200 for the week")
+    assert ready.can_confirm, ready.messages[-1].content
+    return ready
+
+
+def test_a_confirmation_slower_than_any_deadline_still_returns_its_plan(fixture_catalog):
+    """Layer 08 PR-4 review round 3, then task 14. A confirmation runs the whole plan search inside its own run, and
+    the full meal structure can take minutes (the developer six-person S$420 week: `timing.md`). On a 120 s turn
+    budget the plan was saved and the run then marked failed, so the household saw a 409 and a retry saved a second
+    plan. A 300 s ceiling only moved that to a slower household: planning time has no hard limit and a slow plan
+    never becomes an error (owner, 2026-10-21; ADR-0080).
+
+    The search is not actually slowed here: the run's own clock is moved 601 s back while the plan is produced."""
     with kept_for(300), fixture_catalog() as session:
         service = agent(session)
-        service.starting_constraints = AgentConstraintState(
-            household_size=2,
-            weekly_budget_sgd=200,
-            pricing_mode="fixture",
-            plan_shape=MealPlanShape(meals={"dinner": MEAL_PRESETS["dinner"]["one main"]}),
-        )
-        ready = service.create("Plan dinners for 2 people this week, S$200 for the week")
-        assert ready.can_confirm, ready.messages[-1].content
-
+        ready = _ready_dinner_week(service)
         generate = service.meal_plan_service.generate
         runs = service.run_lifecycle.repository
 
         def slow(request, *args, **kwargs):
-            """Produce the plan, then age the run by 121 s: inside 300 s, outside the old 120 s."""
             plan = generate(request, *args, **kwargs)
-            for run in runs.list_for_session(ready.id):
-                if run.deadline_at is not None:
-                    runs.session.query(type(run)).filter_by(id=run.id).update(
-                        {
-                            "started_at": run.started_at - timedelta(seconds=121),
-                            "deadline_at": run.deadline_at - timedelta(seconds=121),
-                        }
-                    )
-            runs.session.flush()
+            _aged(runs, ready.id, 601)
             return plan
 
         service.meal_plan_service.generate = slow
         confirmed = service.confirm(ready.id)
         assert confirmed.plan is not None and confirmed.plan.days
         assert confirmed.session.status == "planned"
-        # The reply turn's own run is there too; the confirmation is the newest one.
         plans = sorted(
             (run for run in runs.list_for_session(ready.id) if run.intent == "create_plan"), key=lambda run: run.id
         )
         confirmation = plans[-1]
         assert confirmation.status == "committed", [run.status for run in plans]
-        assert confirmation.termination_reason_code != "WALL_TIME_BUDGET_EXCEEDED"
-        # The budget is the confirmation's own; a reply turn, which plans nothing, keeps the ordinary one.
-        assert confirmation.max_wall_seconds == CONFIRM_WALL_SECONDS
-        assert plans[0].max_wall_seconds == 120
+        assert confirmation.termination_reason_code == "PLAN_SAVED"
+        assert confirmation.error_code is None
+
+
+def test_a_slow_refusal_reaches_the_household_as_the_planners_reason(fixture_catalog):
+    """Task 14. Recording a failed planner call went through the deadline too, so a refusal that came back after
+    it raised the run's budget error in place of the planner's own reason: the household was told nothing about
+    why the week could not be planned."""
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        ready = _ready_dinner_week(service)
+        runs = service.run_lifecycle.repository
+
+        def refused(request, *args, **kwargs):
+            _aged(runs, ready.id, 601)
+            raise WeeklyPlanSelectionError("No week fits.")
+
+        service.meal_plan_service.generate = refused
+        with pytest.raises(WeeklyPlanSelectionError):
+            service.confirm(ready.id)
+        confirmation = max(
+            (run for run in runs.list_for_session(ready.id) if run.intent == "create_plan"), key=lambda run: run.id
+        )
+        assert confirmation.status == "failed" and confirmation.error_code == "WeeklyPlanSelectionError"
+
+
+def test_a_replan_confirmation_slower_than_any_deadline_still_saves_the_change(fixture_catalog):
+    """Task 14: the same for `confirm_replan`, which runs a whole week's search when the change is to its shape."""
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        ready = _ready_dinner_week(service)
+        planned = service.confirm(ready.id).plan
+        dish = planned.days[1]
+        asked = service.reply(
+            ready.id, f"Swap {dish.planned_date:%A}'s {shown_title(dish.recipe.title)} for something else"
+        )
+        assert asked.pending_replan is not None, asked.messages[-1].content
+        runs = service.run_lifecycle.repository
+        confirm = service.replanning_service.confirm
+
+        def slow(*args, **kwargs):
+            result = confirm(*args, **kwargs)
+            _aged(runs, ready.id, 601)
+            return result
+
+        service.replanning_service.confirm = slow
+        applied = service.confirm_replan(ready.id)
+        assert applied.plan.revision > planned.revision
+        replan = max(
+            (run for run in runs.list_for_session(ready.id) if run.intent == "replan_meal"), key=lambda run: run.id
+        )
+        assert replan.status == "committed", replan.status
+        assert replan.error_code is None

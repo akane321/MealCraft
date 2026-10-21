@@ -670,6 +670,27 @@ def markdown(report: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+# Why the shared arrangement takes as long as it does, from a cProfile of one product run of each case (task 14,
+# 2026-10-21). Every case here is past the quick figure, so each gets a cause (ADR-0079 section 4); a case not named
+# in SLOW_CAUSES has the common one. Rewrite an entry whenever a change moves its time.
+COMMON_CAUSE = (
+    "one beam search, which builds each meal's dish combinations and checks every one as a real meal "
+    "(`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of "
+    "it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per "
+    "member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group "
+    "(`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long"
+)
+SLOW_CAUSES = {
+    "tight-budget": (
+        "four beam searches and sixteen variety starts: no week the ranked search keeps is filled with no dish twice "
+        "under the S$ budget, so the three budget-led searches (`product_path.limit_led`, about 46% of the run) and "
+        "the variety pass (`meal_beam.vary_within_budget`, about 46%) both run. Every swap the variety pass tries "
+        "checks the meal's coverage again, so `member_can_eat` alone is about 38% (10.7 million calls). Upgrade "
+        "path: cache the member checks per member and recipe, and share the meal checks between the four searches"
+    ),
+}
+
+
 def timing_markdown(seconds: dict[str, dict[str, float]]) -> str:
     rows = [
         f"| `{case}` | {taken['merged']} | {taken['shared']} | {BAND_LABEL[timing_band(taken['shared'])]} |"
@@ -699,6 +720,15 @@ def timing_markdown(seconds: dict[str, dict[str, float]]) -> str:
             "|---|---:|---:|:---|",
             *rows,
             "",
+            *[
+                line
+                for case, taken in seconds.items()
+                if timing_band(taken["shared"]) != "quick"
+                for line in (
+                    f"- `{case}` ({BAND_LABEL[timing_band(taken['shared'])]}): {SLOW_CAUSES.get(case, COMMON_CAUSE)}.",
+                    "",
+                )
+            ],
         ]
     )
 

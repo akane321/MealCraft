@@ -1,7 +1,7 @@
 import time
 from collections import Counter
 from collections.abc import Iterable
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from pydantic import ValidationError
@@ -11,6 +11,7 @@ from app.core.config import get_settings
 from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
 from app.models.recipe import Recipe
+from app.planning import alternatives
 from app.planning.conflict_explanation import explain_infeasibility, product_explanation
 from app.planning.household_slots import limit_targets, slot_members, widest_time_limit
 from app.planning.meal_beam import EMPTY_OPTIONAL_ROLE_LOSS
@@ -614,7 +615,7 @@ class WeeklyMealPlanService:
         # In the order they are eaten: by day, then breakfast, lunch, dinner. Entries are stored by day and
         # id, so a lunch added to a dinner week would otherwise come after that day's dinner.
         eaten = sorted(plan.entries, key=lambda entry: (entry.day_index, _meal_rank(entry.meal_type), entry.id))
-        at_meal = self._plan_members(plan)
+        not_for = self._not_for(plan)
         for entry in eaten:
             nutrition = self._entry_nutrition(entry)
             counts[entry.status] += 1
@@ -636,11 +637,7 @@ class WeeklyMealPlanService:
                     meal_type=entry.meal_type,
                     role_id=entry.role_id,
                     portion_share=float(entry.portion_share),
-                    not_for=[
-                        member.name
-                        for member in at_meal.get((entry.planned_date, entry.meal_type), ())
-                        if not catalog_can_eat(member, entry.recipe)
-                    ],
+                    not_for=not_for(entry),
                 )
             )
 
@@ -661,22 +658,36 @@ class WeeklyMealPlanService:
         )
 
     @staticmethod
-    def _plan_members(plan: MealPlan) -> dict[tuple[date, str], list]:
-        """The members home for each (date, meal) of a saved week, with their own limits, read from the week's
-        own household block. Empty for a week planned without one (ADR-0071 section 1)."""
+    def _not_for(plan: MealPlan):
+        """`not_for(entry)`: the members home for that entry's meal who cannot eat its dish, by name, read from the
+        week's own household block (ADR-0071 section 1). Nobody for a week planned without one.
+
+        An "A or B" line is judged by the option this household cooks (`alternatives.lines`), as the planner judged
+        it: a dish made with turkey for a member who avoids beef is counted in that member's servings, so it is not
+        labelled "Not for" them."""
         try:
-            household = WeeklyMealPlanRequest.model_validate(plan.constraints).household
+            request = WeeklyMealPlanRequest.model_validate(plan.constraints)
         except ValidationError:
-            return {}
+            return lambda entry: []
+        household = request.household
         if household is None or household.members is None:
-            return {}
+            return lambda entry: []
         keys = {(entry.planned_date, entry.meal_type) for entry in plan.entries}
-        return {key: slot_members(household, *key, None) for key in keys}
+        at_meal = {key: slot_members(household, *key, None) for key in keys}
+        cooked: dict[int, list] = {}
+
+        def not_for(entry) -> list[str]:
+            members = at_meal.get((entry.planned_date, entry.meal_type), ())
+            if members and entry.recipe.id not in cooked:
+                cooked[entry.recipe.id] = alternatives.lines(entry.recipe, request)
+            return [m.name for m in members if not catalog_can_eat(m, entry.recipe, cooked[entry.recipe.id])]
+
+        return not_for
 
     @staticmethod
     def _to_response(plan: MealPlan) -> WeeklyMealPlanResponse:
         days: list[WeeklyPlanDayResponse] = []
-        at_meal = WeeklyMealPlanService._plan_members(plan)
+        not_for = WeeklyMealPlanService._not_for(plan)
         totals = {
             "calories_kcal": 0.0,
             "protein_g": 0.0,
@@ -707,11 +718,7 @@ class WeeklyMealPlanService:
                     status=entry.status,
                     is_locked=entry.is_locked,
                     consumed_at=WeeklyMealPlanService._as_utc(entry.consumed_at),
-                    not_for=[
-                        member.name
-                        for member in at_meal.get((entry.planned_date, entry.meal_type), ())
-                        if not catalog_can_eat(member, entry.recipe)
-                    ],
+                    not_for=not_for(entry),
                 )
             )
 
