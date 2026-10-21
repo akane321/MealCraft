@@ -1,0 +1,5991 @@
+{
+  "scope": "Two- and seven-dinner developer fixtures, including real recipes with synthetic prices; 3 repeats; cold caches not controlled; no optimality or production latency claim",
+  "python": "3.12.14",
+  "rows": [
+    {
+      "case": "synthetic-feasible",
+      "budget": 2.0,
+      "algorithm": "diversity-aware-greedy",
+      "status": "feasible",
+      "score": [
+        0,
+        -2,
+        0,
+        0.0,
+        0.5,
+        200
+      ],
+      "checkout": 2.0,
+      "milliseconds": [
+        1.4727000016137026,
+        1.4700000028824434,
+        1.3729999991483055
+      ],
+      "median_ms": 1.4700000028824434,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          200
+        ],
+        "milliseconds": 3.130500001134351
+      },
+      "matches_reference": true,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 6,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          200
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1.253599999472499,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "c",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 0.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 5.623999997624196,
+        "total_ms": 7.11119999687071
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "synthetic-feasible",
+      "budget": 2.0,
+      "algorithm": "grasp",
+      "status": "feasible",
+      "score": [
+        0,
+        -2,
+        0,
+        0.0,
+        0.5,
+        200
+      ],
+      "checkout": 2.0,
+      "milliseconds": [
+        10.43520000166609,
+        10.917199997493299,
+        11.771999998018146
+      ],
+      "median_ms": 10.917199997493299,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          200
+        ],
+        "milliseconds": 3.130500001134351
+      },
+      "matches_reference": true,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 6,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          200
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1.253599999472499,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "c",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 0.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 5.623999997624196,
+        "total_ms": 7.11119999687071
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "synthetic-feasible",
+      "budget": 2.0,
+      "algorithm": "local-search",
+      "status": "feasible",
+      "score": [
+        0,
+        -2,
+        0,
+        0.0,
+        0.5,
+        200
+      ],
+      "checkout": 2.0,
+      "milliseconds": [
+        2.113200000167126,
+        2.199400001700269,
+        2.11699999999837
+      ],
+      "median_ms": 2.11699999999837,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          200
+        ],
+        "milliseconds": 3.130500001134351
+      },
+      "matches_reference": true,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 6,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          200
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1.253599999472499,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "c",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 0.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 5.623999997624196,
+        "total_ms": 7.11119999687071
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "synthetic-feasible",
+      "budget": 2.0,
+      "algorithm": "shared-objective-beam",
+      "status": "feasible",
+      "score": [
+        0,
+        -2,
+        0,
+        0.0,
+        0.5,
+        200
+      ],
+      "checkout": 2.0,
+      "milliseconds": [
+        2.931000002718065,
+        3.6962000012863427,
+        2.9035000006842893
+      ],
+      "median_ms": 2.931000002718065,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          200
+        ],
+        "milliseconds": 3.130500001134351
+      },
+      "matches_reference": true,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 6,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          200
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1.253599999472499,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "c",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 0.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 5.623999997624196,
+        "total_ms": 7.11119999687071
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "synthetic-feasible",
+      "budget": 2.0,
+      "algorithm": "simulated-annealing",
+      "status": "feasible",
+      "score": [
+        0,
+        -2,
+        0,
+        0.0,
+        0.5,
+        200
+      ],
+      "checkout": 2.0,
+      "milliseconds": [
+        27.662799999234267,
+        27.549800000997493,
+        28.466299998399336
+      ],
+      "median_ms": 27.662799999234267,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          200
+        ],
+        "milliseconds": 3.130500001134351
+      },
+      "matches_reference": true,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 6,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          200
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1.253599999472499,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "c",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 0.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 5.623999997624196,
+        "total_ms": 7.11119999687071
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "synthetic-budget-rejection",
+      "budget": 1.99,
+      "algorithm": "diversity-aware-greedy",
+      "status": "candidate_rejected",
+      "score": null,
+      "checkout": null,
+      "milliseconds": [
+        0.34130000130971894,
+        0.3183999979228247,
+        0.3400999994482845
+      ],
+      "median_ms": 0.3400999994482845,
+      "optimality_gap": null,
+      "reference": {
+        "status": "no_valid_generated_assignment",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": null,
+        "milliseconds": 1.3093999987177085
+      },
+      "matches_reference": null,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "no_valid_count_state",
+        "count_states": 6,
+        "score": null,
+        "scope": "canonical count states",
+        "table_ms": 0.7377000001724809,
+        "unknown_states": 0
+      },
+      "matches_cp_sat_count_table": null
+    },
+    {
+      "case": "synthetic-budget-rejection",
+      "budget": 1.99,
+      "algorithm": "grasp",
+      "status": "candidate_rejected",
+      "score": null,
+      "checkout": null,
+      "milliseconds": [
+        2.5711999987834133,
+        2.633599997352576,
+        2.4821999977575615
+      ],
+      "median_ms": 2.5711999987834133,
+      "optimality_gap": null,
+      "reference": {
+        "status": "no_valid_generated_assignment",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": null,
+        "milliseconds": 1.3093999987177085
+      },
+      "matches_reference": null,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "no_valid_count_state",
+        "count_states": 6,
+        "score": null,
+        "scope": "canonical count states",
+        "table_ms": 0.7377000001724809,
+        "unknown_states": 0
+      },
+      "matches_cp_sat_count_table": null
+    },
+    {
+      "case": "synthetic-budget-rejection",
+      "budget": 1.99,
+      "algorithm": "local-search",
+      "status": "candidate_rejected",
+      "score": null,
+      "checkout": null,
+      "milliseconds": [
+        0.3316000002087094,
+        0.3141000015602913,
+        0.2994999995280523
+      ],
+      "median_ms": 0.3141000015602913,
+      "optimality_gap": null,
+      "reference": {
+        "status": "no_valid_generated_assignment",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": null,
+        "milliseconds": 1.3093999987177085
+      },
+      "matches_reference": null,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "no_valid_count_state",
+        "count_states": 6,
+        "score": null,
+        "scope": "canonical count states",
+        "table_ms": 0.7377000001724809,
+        "unknown_states": 0
+      },
+      "matches_cp_sat_count_table": null
+    },
+    {
+      "case": "synthetic-budget-rejection",
+      "budget": 1.99,
+      "algorithm": "shared-objective-beam",
+      "status": "candidate_rejected",
+      "score": null,
+      "checkout": null,
+      "milliseconds": [
+        0.6976999975449871,
+        0.7436999985657167,
+        0.6954999989829957
+      ],
+      "median_ms": 0.6976999975449871,
+      "optimality_gap": null,
+      "reference": {
+        "status": "no_valid_generated_assignment",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": null,
+        "milliseconds": 1.3093999987177085
+      },
+      "matches_reference": null,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "no_valid_count_state",
+        "count_states": 6,
+        "score": null,
+        "scope": "canonical count states",
+        "table_ms": 0.7377000001724809,
+        "unknown_states": 0
+      },
+      "matches_cp_sat_count_table": null
+    },
+    {
+      "case": "synthetic-budget-rejection",
+      "budget": 1.99,
+      "algorithm": "simulated-annealing",
+      "status": "candidate_rejected",
+      "score": null,
+      "checkout": null,
+      "milliseconds": [
+        0.32270000156131573,
+        0.3176000027451664,
+        0.30220000189729035
+      ],
+      "median_ms": 0.3176000027451664,
+      "optimality_gap": null,
+      "reference": {
+        "status": "no_valid_generated_assignment",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": null,
+        "milliseconds": 1.3093999987177085
+      },
+      "matches_reference": null,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "no_valid_count_state",
+        "count_states": 6,
+        "score": null,
+        "scope": "canonical count states",
+        "table_ms": 0.7377000001724809,
+        "unknown_states": 0
+      },
+      "matches_cp_sat_count_table": null
+    },
+    {
+      "case": "real-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "diversity-aware-greedy",
+      "status": "feasible",
+      "score": [
+        0,
+        -2,
+        0,
+        0.0,
+        0.5,
+        1200
+      ],
+      "checkout": 12.0,
+      "milliseconds": [
+        2.4534000003768597,
+        2.3680000012973323,
+        2.3891999990155455
+      ],
+      "median_ms": 2.3891999990155455,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          1200
+        ],
+        "milliseconds": 2.5604000002203975
+      },
+      "matches_reference": true,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 6,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          1200
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1.4545999983965885,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 800.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 850.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 80.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 80.0,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 920.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 1.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-13",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          }
+        ],
+        "solver_ms": 4.22900000194204,
+        "total_ms": 5.84789999993518
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "real-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "grasp",
+      "status": "feasible",
+      "score": [
+        0,
+        -2,
+        0,
+        0.0,
+        0.5,
+        1200
+      ],
+      "checkout": 12.0,
+      "milliseconds": [
+        20.031600000947947,
+        19.737099999474594,
+        19.717999999556923
+      ],
+      "median_ms": 19.737099999474594,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          1200
+        ],
+        "milliseconds": 2.5604000002203975
+      },
+      "matches_reference": true,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 6,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          1200
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1.4545999983965885,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 800.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 850.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 80.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 80.0,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 920.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 1.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-13",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          }
+        ],
+        "solver_ms": 4.22900000194204,
+        "total_ms": 5.84789999993518
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "real-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "local-search",
+      "status": "feasible",
+      "score": [
+        0,
+        -2,
+        0,
+        0.0,
+        0.5,
+        1200
+      ],
+      "checkout": 12.0,
+      "milliseconds": [
+        3.7501999977394007,
+        3.953600000386359,
+        4.127399999561021
+      ],
+      "median_ms": 3.953600000386359,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          1200
+        ],
+        "milliseconds": 2.5604000002203975
+      },
+      "matches_reference": true,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 6,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          1200
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1.4545999983965885,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 800.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 850.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 80.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 80.0,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 920.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 1.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-13",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          }
+        ],
+        "solver_ms": 4.22900000194204,
+        "total_ms": 5.84789999993518
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "real-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "shared-objective-beam",
+      "status": "feasible",
+      "score": [
+        0,
+        -2,
+        0,
+        0.0,
+        0.5,
+        1200
+      ],
+      "checkout": 12.0,
+      "milliseconds": [
+        5.687000000762055,
+        5.479299998114584,
+        5.325699999957578
+      ],
+      "median_ms": 5.479299998114584,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          1200
+        ],
+        "milliseconds": 2.5604000002203975
+      },
+      "matches_reference": true,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 6,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          1200
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1.4545999983965885,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 800.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 850.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 80.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 80.0,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 920.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 1.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-13",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          }
+        ],
+        "solver_ms": 4.22900000194204,
+        "total_ms": 5.84789999993518
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "real-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "simulated-annealing",
+      "status": "feasible",
+      "score": [
+        0,
+        -2,
+        0,
+        0.0,
+        0.5,
+        1200
+      ],
+      "checkout": 12.0,
+      "milliseconds": [
+        57.887000002665445,
+        56.08280000160448,
+        56.66950000158977
+      ],
+      "median_ms": 56.66950000158977,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 9,
+        "checked": 9,
+        "unknown": 0,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          1200
+        ],
+        "milliseconds": 2.5604000002203975
+      },
+      "matches_reference": true,
+      "candidate_count": 3,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 6,
+        "score": [
+          0,
+          -2,
+          0,
+          0.0,
+          0.5,
+          1200
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1.4545999983965885,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 800.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 850.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 80.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 80.0,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 920.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 1.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-13",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          }
+        ],
+        "solver_ms": 4.22900000194204,
+        "total_ms": 5.84789999993518
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "seven-dinners-real-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "diversity-aware-greedy",
+      "status": "feasible",
+      "score": [
+        0,
+        -6,
+        1,
+        0.0,
+        2.59,
+        2300
+      ],
+      "checkout": 23.0,
+      "milliseconds": [
+        37.016400001448346,
+        36.61389999979292,
+        37.33749999810243
+      ],
+      "median_ms": 37.016400001448346,
+      "optimality_gap": null,
+      "reference": {
+        "status": "limit_exceeded",
+        "total": 2097152,
+        "checked": 0,
+        "unknown": 0,
+        "score": null,
+        "milliseconds": 1.1314000003039837
+      },
+      "matches_reference": null,
+      "candidate_count": 8,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 3432,
+        "score": [
+          0,
+          -6,
+          1,
+          0.0,
+          2.59,
+          2300
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1821.3288999977522,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "day-0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-1",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-2",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-3",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-4",
+            "recipe_id": "chicken-broccoli-rice",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-5",
+            "recipe_id": "chicken-quinoa-pepper",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-6",
+            "recipe_id": "chicken-zucchini-pasta",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 0.833,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.833,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.167,
+            "note": null
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 133.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 133.333,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 866.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 700.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "brown_rice",
+            "required_quantity": 75.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 75.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 925.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 483.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 483.333,
+            "selected_product_id": "synthetic-5",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 516.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 1.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "chicken_breast",
+            "required_quantity": 470.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 470.0,
+            "selected_product_id": "synthetic-7",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 530.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 700.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "garlic",
+            "required_quantity": 6.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 6.0,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 994.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ginger",
+            "required_quantity": 7.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 7.5,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 992.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 1.167,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.167,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.833,
+            "note": null
+          },
+          {
+            "ingredient_id": "lemon",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "olive_oil",
+            "required_quantity": 0.5,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-14",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 123.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 123.333,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 876.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 1.0,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-17",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 160.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 160.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 840.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 2.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-21",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "wholewheat_pasta",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-22",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          },
+          {
+            "ingredient_id": "zucchini",
+            "required_quantity": 225.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-24",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 2005.222899999353,
+        "total_ms": 3830.6792999974277
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "seven-dinners-real-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "grasp",
+      "status": "feasible",
+      "score": [
+        0,
+        -6,
+        1,
+        0.0,
+        2.59,
+        2300
+      ],
+      "checkout": 23.0,
+      "milliseconds": [
+        296.3326000026427,
+        298.6462999979267,
+        303.7770000009914
+      ],
+      "median_ms": 298.6462999979267,
+      "optimality_gap": null,
+      "reference": {
+        "status": "limit_exceeded",
+        "total": 2097152,
+        "checked": 0,
+        "unknown": 0,
+        "score": null,
+        "milliseconds": 1.1314000003039837
+      },
+      "matches_reference": null,
+      "candidate_count": 8,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 3432,
+        "score": [
+          0,
+          -6,
+          1,
+          0.0,
+          2.59,
+          2300
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1821.3288999977522,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "day-0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-1",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-2",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-3",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-4",
+            "recipe_id": "chicken-broccoli-rice",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-5",
+            "recipe_id": "chicken-quinoa-pepper",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-6",
+            "recipe_id": "chicken-zucchini-pasta",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 0.833,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.833,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.167,
+            "note": null
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 133.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 133.333,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 866.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 700.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "brown_rice",
+            "required_quantity": 75.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 75.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 925.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 483.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 483.333,
+            "selected_product_id": "synthetic-5",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 516.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 1.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "chicken_breast",
+            "required_quantity": 470.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 470.0,
+            "selected_product_id": "synthetic-7",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 530.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 700.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "garlic",
+            "required_quantity": 6.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 6.0,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 994.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ginger",
+            "required_quantity": 7.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 7.5,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 992.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 1.167,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.167,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.833,
+            "note": null
+          },
+          {
+            "ingredient_id": "lemon",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "olive_oil",
+            "required_quantity": 0.5,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-14",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 123.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 123.333,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 876.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 1.0,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-17",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 160.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 160.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 840.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 2.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-21",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "wholewheat_pasta",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-22",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          },
+          {
+            "ingredient_id": "zucchini",
+            "required_quantity": 225.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-24",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 2005.222899999353,
+        "total_ms": 3830.6792999974277
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "seven-dinners-real-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "local-search",
+      "status": "feasible",
+      "score": [
+        0,
+        -6,
+        1,
+        0.0,
+        2.59,
+        2300
+      ],
+      "checkout": 23.0,
+      "milliseconds": [
+        79.15019999927608,
+        78.71990000057849,
+        78.55660000132048
+      ],
+      "median_ms": 78.71990000057849,
+      "optimality_gap": null,
+      "reference": {
+        "status": "limit_exceeded",
+        "total": 2097152,
+        "checked": 0,
+        "unknown": 0,
+        "score": null,
+        "milliseconds": 1.1314000003039837
+      },
+      "matches_reference": null,
+      "candidate_count": 8,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 3432,
+        "score": [
+          0,
+          -6,
+          1,
+          0.0,
+          2.59,
+          2300
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1821.3288999977522,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "day-0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-1",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-2",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-3",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-4",
+            "recipe_id": "chicken-broccoli-rice",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-5",
+            "recipe_id": "chicken-quinoa-pepper",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-6",
+            "recipe_id": "chicken-zucchini-pasta",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 0.833,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.833,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.167,
+            "note": null
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 133.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 133.333,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 866.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 700.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "brown_rice",
+            "required_quantity": 75.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 75.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 925.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 483.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 483.333,
+            "selected_product_id": "synthetic-5",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 516.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 1.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "chicken_breast",
+            "required_quantity": 470.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 470.0,
+            "selected_product_id": "synthetic-7",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 530.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 700.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "garlic",
+            "required_quantity": 6.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 6.0,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 994.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ginger",
+            "required_quantity": 7.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 7.5,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 992.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 1.167,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.167,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.833,
+            "note": null
+          },
+          {
+            "ingredient_id": "lemon",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "olive_oil",
+            "required_quantity": 0.5,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-14",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 123.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 123.333,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 876.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 1.0,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-17",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 160.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 160.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 840.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 2.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-21",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "wholewheat_pasta",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-22",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          },
+          {
+            "ingredient_id": "zucchini",
+            "required_quantity": 225.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-24",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 2005.222899999353,
+        "total_ms": 3830.6792999974277
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "seven-dinners-real-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "shared-objective-beam",
+      "status": "feasible",
+      "score": [
+        0,
+        -6,
+        1,
+        0.0,
+        2.59,
+        2300
+      ],
+      "checkout": 23.0,
+      "milliseconds": [
+        220.63169999819365,
+        220.78659999897354,
+        219.69320000061998
+      ],
+      "median_ms": 220.63169999819365,
+      "optimality_gap": null,
+      "reference": {
+        "status": "limit_exceeded",
+        "total": 2097152,
+        "checked": 0,
+        "unknown": 0,
+        "score": null,
+        "milliseconds": 1.1314000003039837
+      },
+      "matches_reference": null,
+      "candidate_count": 8,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 3432,
+        "score": [
+          0,
+          -6,
+          1,
+          0.0,
+          2.59,
+          2300
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1821.3288999977522,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "day-0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-1",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-2",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-3",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-4",
+            "recipe_id": "chicken-broccoli-rice",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-5",
+            "recipe_id": "chicken-quinoa-pepper",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-6",
+            "recipe_id": "chicken-zucchini-pasta",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 0.833,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.833,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.167,
+            "note": null
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 133.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 133.333,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 866.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 700.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "brown_rice",
+            "required_quantity": 75.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 75.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 925.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 483.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 483.333,
+            "selected_product_id": "synthetic-5",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 516.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 1.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "chicken_breast",
+            "required_quantity": 470.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 470.0,
+            "selected_product_id": "synthetic-7",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 530.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 700.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "garlic",
+            "required_quantity": 6.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 6.0,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 994.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ginger",
+            "required_quantity": 7.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 7.5,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 992.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 1.167,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.167,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.833,
+            "note": null
+          },
+          {
+            "ingredient_id": "lemon",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "olive_oil",
+            "required_quantity": 0.5,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-14",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 123.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 123.333,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 876.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 1.0,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-17",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 160.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 160.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 840.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 2.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-21",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "wholewheat_pasta",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-22",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          },
+          {
+            "ingredient_id": "zucchini",
+            "required_quantity": 225.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-24",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 2005.222899999353,
+        "total_ms": 3830.6792999974277
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "seven-dinners-real-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "simulated-annealing",
+      "status": "feasible",
+      "score": [
+        0,
+        -6,
+        1,
+        0.0,
+        2.59,
+        2300
+      ],
+      "checkout": 23.0,
+      "milliseconds": [
+        153.0297999997856,
+        185.14090000098804,
+        156.7563999997219
+      ],
+      "median_ms": 156.7563999997219,
+      "optimality_gap": null,
+      "reference": {
+        "status": "limit_exceeded",
+        "total": 2097152,
+        "checked": 0,
+        "unknown": 0,
+        "score": null,
+        "milliseconds": 1.1314000003039837
+      },
+      "matches_reference": null,
+      "candidate_count": 8,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 3432,
+        "score": [
+          0,
+          -6,
+          1,
+          0.0,
+          2.59,
+          2300
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1821.3288999977522,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "day-0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-1",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-2",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-3",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-4",
+            "recipe_id": "chicken-broccoli-rice",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-5",
+            "recipe_id": "chicken-quinoa-pepper",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-6",
+            "recipe_id": "chicken-zucchini-pasta",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 0.833,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.833,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.167,
+            "note": null
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 133.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 133.333,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 866.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 700.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "brown_rice",
+            "required_quantity": 75.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 75.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 925.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 483.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 483.333,
+            "selected_product_id": "synthetic-5",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 516.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 1.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "chicken_breast",
+            "required_quantity": 470.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 470.0,
+            "selected_product_id": "synthetic-7",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 530.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 700.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "garlic",
+            "required_quantity": 6.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 6.0,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 994.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ginger",
+            "required_quantity": 7.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 7.5,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 992.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 1.167,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.167,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.833,
+            "note": null
+          },
+          {
+            "ingredient_id": "lemon",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "olive_oil",
+            "required_quantity": 0.5,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-14",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 123.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 123.333,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 876.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 1.0,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-17",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 160.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 160.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 840.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 2.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-21",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "wholewheat_pasta",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-22",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          },
+          {
+            "ingredient_id": "zucchini",
+            "required_quantity": 225.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-24",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 2005.222899999353,
+        "total_ms": 3830.6792999974277
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "three-dinners-eight-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "diversity-aware-greedy",
+      "status": "feasible",
+      "score": [
+        0,
+        -3,
+        0,
+        0.0,
+        1.0,
+        1500
+      ],
+      "checkout": 15.0,
+      "milliseconds": [
+        11.679399998683948,
+        11.61359999969136,
+        11.644199999864213
+      ],
+      "median_ms": 11.644199999864213,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 512,
+        "checked": 512,
+        "unknown": 0,
+        "score": [
+          0,
+          -3,
+          0,
+          0.0,
+          1.0,
+          1500
+        ],
+        "milliseconds": 193.61189999835915
+      },
+      "matches_reference": true,
+      "candidate_count": 8,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 120,
+        "score": [
+          0,
+          -3,
+          0,
+          0.0,
+          1.0,
+          1500
+        ],
+        "scope": "canonical count states",
+        "table_ms": 44.023700000252575,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "day-0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-1",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-2",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 0.333,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.333,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 133.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 133.333,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 866.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 333.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 333.333,
+            "selected_product_id": "synthetic-5",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 666.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 850.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 1.167,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.167,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.833,
+            "note": null
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 53.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 53.333,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 946.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-17",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 80.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 80.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 920.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 1.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-21",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          }
+        ],
+        "solver_ms": 29.51549999852432,
+        "total_ms": 73.83750000008149
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "three-dinners-eight-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "grasp",
+      "status": "feasible",
+      "score": [
+        0,
+        -3,
+        0,
+        0.0,
+        1.0,
+        1500
+      ],
+      "checkout": 15.0,
+      "milliseconds": [
+        97.16250000201399,
+        94.77240000342135,
+        95.62310000183061
+      ],
+      "median_ms": 95.62310000183061,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 512,
+        "checked": 512,
+        "unknown": 0,
+        "score": [
+          0,
+          -3,
+          0,
+          0.0,
+          1.0,
+          1500
+        ],
+        "milliseconds": 193.61189999835915
+      },
+      "matches_reference": true,
+      "candidate_count": 8,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 120,
+        "score": [
+          0,
+          -3,
+          0,
+          0.0,
+          1.0,
+          1500
+        ],
+        "scope": "canonical count states",
+        "table_ms": 44.023700000252575,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "day-0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-1",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-2",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 0.333,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.333,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 133.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 133.333,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 866.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 333.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 333.333,
+            "selected_product_id": "synthetic-5",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 666.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 850.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 1.167,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.167,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.833,
+            "note": null
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 53.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 53.333,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 946.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-17",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 80.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 80.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 920.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 1.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-21",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          }
+        ],
+        "solver_ms": 29.51549999852432,
+        "total_ms": 73.83750000008149
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "three-dinners-eight-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "local-search",
+      "status": "feasible",
+      "score": [
+        0,
+        -3,
+        0,
+        0.0,
+        1.0,
+        1500
+      ],
+      "checkout": 15.0,
+      "milliseconds": [
+        21.905400000832742,
+        21.86280000023544,
+        22.909600000275532
+      ],
+      "median_ms": 21.905400000832742,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 512,
+        "checked": 512,
+        "unknown": 0,
+        "score": [
+          0,
+          -3,
+          0,
+          0.0,
+          1.0,
+          1500
+        ],
+        "milliseconds": 193.61189999835915
+      },
+      "matches_reference": true,
+      "candidate_count": 8,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 120,
+        "score": [
+          0,
+          -3,
+          0,
+          0.0,
+          1.0,
+          1500
+        ],
+        "scope": "canonical count states",
+        "table_ms": 44.023700000252575,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "day-0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-1",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-2",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 0.333,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.333,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 133.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 133.333,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 866.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 333.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 333.333,
+            "selected_product_id": "synthetic-5",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 666.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 850.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 1.167,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.167,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.833,
+            "note": null
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 53.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 53.333,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 946.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-17",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 80.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 80.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 920.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 1.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-21",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          }
+        ],
+        "solver_ms": 29.51549999852432,
+        "total_ms": 73.83750000008149
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "three-dinners-eight-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "shared-objective-beam",
+      "status": "feasible",
+      "score": [
+        0,
+        -3,
+        0,
+        0.0,
+        1.0,
+        1500
+      ],
+      "checkout": 15.0,
+      "milliseconds": [
+        61.06730000101379,
+        60.22879999727593,
+        61.342100001638755
+      ],
+      "median_ms": 61.06730000101379,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 512,
+        "checked": 512,
+        "unknown": 0,
+        "score": [
+          0,
+          -3,
+          0,
+          0.0,
+          1.0,
+          1500
+        ],
+        "milliseconds": 193.61189999835915
+      },
+      "matches_reference": true,
+      "candidate_count": 8,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 120,
+        "score": [
+          0,
+          -3,
+          0,
+          0.0,
+          1.0,
+          1500
+        ],
+        "scope": "canonical count states",
+        "table_ms": 44.023700000252575,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "day-0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-1",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-2",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 0.333,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.333,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 133.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 133.333,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 866.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 333.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 333.333,
+            "selected_product_id": "synthetic-5",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 666.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 850.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 1.167,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.167,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.833,
+            "note": null
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 53.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 53.333,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 946.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-17",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 80.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 80.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 920.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 1.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-21",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          }
+        ],
+        "solver_ms": 29.51549999852432,
+        "total_ms": 73.83750000008149
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "three-dinners-eight-recipes-synthetic-prices",
+      "budget": 100.0,
+      "algorithm": "simulated-annealing",
+      "status": "feasible",
+      "score": [
+        0,
+        -3,
+        0,
+        0.0,
+        1.0,
+        1500
+      ],
+      "checkout": 15.0,
+      "milliseconds": [
+        93.66470000168192,
+        107.84399999829475,
+        99.64689999833354
+      ],
+      "median_ms": 99.64689999833354,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 512,
+        "checked": 512,
+        "unknown": 0,
+        "score": [
+          0,
+          -3,
+          0,
+          0.0,
+          1.0,
+          1500
+        ],
+        "milliseconds": 193.61189999835915
+      },
+      "matches_reference": true,
+      "candidate_count": 8,
+      "cp_sat_reference": {
+        "status": "optimal_for_count_table",
+        "count_states": 120,
+        "score": [
+          0,
+          -3,
+          0,
+          0.0,
+          1.0,
+          1500
+        ],
+        "scope": "canonical count states",
+        "table_ms": 44.023700000252575,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "day-0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-1",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "day-2",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 37.5,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 37.5,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 962.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 0.333,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.333,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 133.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 133.333,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 866.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 333.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 333.333,
+            "selected_product_id": "synthetic-5",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 666.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 850.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 1.167,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.167,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.833,
+            "note": null
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 53.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 53.333,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 946.667,
+            "note": null
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 60.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 60.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 940.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 0.5,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-17",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 80.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 80.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 920.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 1.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 225.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-21",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.25,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.25,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.75,
+            "note": null
+          }
+        ],
+        "solver_ms": 29.51549999852432,
+        "total_ms": 73.83750000008149
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "composed-week-nutrition-two-trips-synthetic",
+      "budget": null,
+      "algorithm": "diversity-aware-greedy",
+      "status": "feasible",
+      "score": [
+        0,
+        -3,
+        63,
+        0.0,
+        0,
+        3900
+      ],
+      "checkout": 39.0,
+      "milliseconds": [
+        12.543000000732718,
+        12.621500001841923,
+        13.13540000046487
+      ],
+      "median_ms": 12.621500001841923,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 128,
+        "checked": 128,
+        "unknown": 0,
+        "score": [
+          0,
+          -3,
+          63,
+          0.0,
+          0,
+          3900
+        ],
+        "milliseconds": 112.0666999995592
+      },
+      "matches_reference": true,
+      "candidate_count": 4,
+      "cp_sat_reference": {
+        "status": "optimal_for_generated_options",
+        "count_states": 128,
+        "score": [
+          0,
+          -3,
+          63,
+          0.0,
+          0,
+          3900
+        ],
+        "scope": "ordered generated meal options",
+        "table_ms": 105.86499999772059,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d0",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d0",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "broth-base",
+            "required_quantity": 640.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 640.0,
+            "selected_product_id": "p-broth",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "broth-base",
+            "required_quantity": 480.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 480.0,
+            "selected_product_id": "p-broth",
+            "packages": 5,
+            "purchase_cost_sgd": 5.0,
+            "surplus_quantity": 20.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "chicken-base",
+            "required_quantity": 960.0,
+            "unit": "g",
+            "pantry_deduction": 300.0,
+            "remaining_quantity": 660.0,
+            "selected_product_id": "p-chicken",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 40.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "chicken-base",
+            "required_quantity": 720.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 720.0,
+            "selected_product_id": "p-chicken",
+            "packages": 8,
+            "purchase_cost_sgd": 8.0,
+            "surplus_quantity": 80.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "spinach",
+            "required_quantity": 640.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 640.0,
+            "selected_product_id": "p-greens",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "spinach",
+            "required_quantity": 480.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 480.0,
+            "selected_product_id": "p-greens",
+            "packages": 5,
+            "purchase_cost_sgd": 5.0,
+            "surplus_quantity": 20.0,
+            "note": null,
+            "trip": 2
+          }
+        ],
+        "solver_ms": 9.659600000304636,
+        "total_ms": 115.83259999679285
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "composed-week-nutrition-two-trips-synthetic",
+      "budget": null,
+      "algorithm": "grasp",
+      "status": "feasible",
+      "score": [
+        0,
+        -3,
+        63,
+        0.0,
+        0,
+        3900
+      ],
+      "checkout": 39.0,
+      "milliseconds": [
+        97.38740000102553,
+        97.42560000086087,
+        97.81790000124602
+      ],
+      "median_ms": 97.42560000086087,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 128,
+        "checked": 128,
+        "unknown": 0,
+        "score": [
+          0,
+          -3,
+          63,
+          0.0,
+          0,
+          3900
+        ],
+        "milliseconds": 112.0666999995592
+      },
+      "matches_reference": true,
+      "candidate_count": 4,
+      "cp_sat_reference": {
+        "status": "optimal_for_generated_options",
+        "count_states": 128,
+        "score": [
+          0,
+          -3,
+          63,
+          0.0,
+          0,
+          3900
+        ],
+        "scope": "ordered generated meal options",
+        "table_ms": 105.86499999772059,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d0",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d0",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "broth-base",
+            "required_quantity": 640.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 640.0,
+            "selected_product_id": "p-broth",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "broth-base",
+            "required_quantity": 480.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 480.0,
+            "selected_product_id": "p-broth",
+            "packages": 5,
+            "purchase_cost_sgd": 5.0,
+            "surplus_quantity": 20.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "chicken-base",
+            "required_quantity": 960.0,
+            "unit": "g",
+            "pantry_deduction": 300.0,
+            "remaining_quantity": 660.0,
+            "selected_product_id": "p-chicken",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 40.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "chicken-base",
+            "required_quantity": 720.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 720.0,
+            "selected_product_id": "p-chicken",
+            "packages": 8,
+            "purchase_cost_sgd": 8.0,
+            "surplus_quantity": 80.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "spinach",
+            "required_quantity": 640.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 640.0,
+            "selected_product_id": "p-greens",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "spinach",
+            "required_quantity": 480.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 480.0,
+            "selected_product_id": "p-greens",
+            "packages": 5,
+            "purchase_cost_sgd": 5.0,
+            "surplus_quantity": 20.0,
+            "note": null,
+            "trip": 2
+          }
+        ],
+        "solver_ms": 9.659600000304636,
+        "total_ms": 115.83259999679285
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "composed-week-nutrition-two-trips-synthetic",
+      "budget": null,
+      "algorithm": "local-search",
+      "status": "feasible",
+      "score": [
+        0,
+        -3,
+        63,
+        0.0,
+        0,
+        3900
+      ],
+      "checkout": 39.0,
+      "milliseconds": [
+        18.993699999555247,
+        19.748200000321958,
+        19.228900000598514
+      ],
+      "median_ms": 19.228900000598514,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 128,
+        "checked": 128,
+        "unknown": 0,
+        "score": [
+          0,
+          -3,
+          63,
+          0.0,
+          0,
+          3900
+        ],
+        "milliseconds": 112.0666999995592
+      },
+      "matches_reference": true,
+      "candidate_count": 4,
+      "cp_sat_reference": {
+        "status": "optimal_for_generated_options",
+        "count_states": 128,
+        "score": [
+          0,
+          -3,
+          63,
+          0.0,
+          0,
+          3900
+        ],
+        "scope": "ordered generated meal options",
+        "table_ms": 105.86499999772059,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d0",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d0",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "broth-base",
+            "required_quantity": 640.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 640.0,
+            "selected_product_id": "p-broth",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "broth-base",
+            "required_quantity": 480.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 480.0,
+            "selected_product_id": "p-broth",
+            "packages": 5,
+            "purchase_cost_sgd": 5.0,
+            "surplus_quantity": 20.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "chicken-base",
+            "required_quantity": 960.0,
+            "unit": "g",
+            "pantry_deduction": 300.0,
+            "remaining_quantity": 660.0,
+            "selected_product_id": "p-chicken",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 40.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "chicken-base",
+            "required_quantity": 720.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 720.0,
+            "selected_product_id": "p-chicken",
+            "packages": 8,
+            "purchase_cost_sgd": 8.0,
+            "surplus_quantity": 80.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "spinach",
+            "required_quantity": 640.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 640.0,
+            "selected_product_id": "p-greens",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "spinach",
+            "required_quantity": 480.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 480.0,
+            "selected_product_id": "p-greens",
+            "packages": 5,
+            "purchase_cost_sgd": 5.0,
+            "surplus_quantity": 20.0,
+            "note": null,
+            "trip": 2
+          }
+        ],
+        "solver_ms": 9.659600000304636,
+        "total_ms": 115.83259999679285
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "composed-week-nutrition-two-trips-synthetic",
+      "budget": null,
+      "algorithm": "shared-objective-beam",
+      "status": "feasible",
+      "score": [
+        0,
+        -3,
+        63,
+        0.0,
+        0,
+        3900
+      ],
+      "checkout": 39.0,
+      "milliseconds": [
+        63.87969999923371,
+        65.32310000329744,
+        65.32150000202819
+      ],
+      "median_ms": 65.32150000202819,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 128,
+        "checked": 128,
+        "unknown": 0,
+        "score": [
+          0,
+          -3,
+          63,
+          0.0,
+          0,
+          3900
+        ],
+        "milliseconds": 112.0666999995592
+      },
+      "matches_reference": true,
+      "candidate_count": 4,
+      "cp_sat_reference": {
+        "status": "optimal_for_generated_options",
+        "count_states": 128,
+        "score": [
+          0,
+          -3,
+          63,
+          0.0,
+          0,
+          3900
+        ],
+        "scope": "ordered generated meal options",
+        "table_ms": 105.86499999772059,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d0",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d0",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "broth-base",
+            "required_quantity": 640.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 640.0,
+            "selected_product_id": "p-broth",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "broth-base",
+            "required_quantity": 480.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 480.0,
+            "selected_product_id": "p-broth",
+            "packages": 5,
+            "purchase_cost_sgd": 5.0,
+            "surplus_quantity": 20.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "chicken-base",
+            "required_quantity": 960.0,
+            "unit": "g",
+            "pantry_deduction": 300.0,
+            "remaining_quantity": 660.0,
+            "selected_product_id": "p-chicken",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 40.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "chicken-base",
+            "required_quantity": 720.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 720.0,
+            "selected_product_id": "p-chicken",
+            "packages": 8,
+            "purchase_cost_sgd": 8.0,
+            "surplus_quantity": 80.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "spinach",
+            "required_quantity": 640.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 640.0,
+            "selected_product_id": "p-greens",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "spinach",
+            "required_quantity": 480.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 480.0,
+            "selected_product_id": "p-greens",
+            "packages": 5,
+            "purchase_cost_sgd": 5.0,
+            "surplus_quantity": 20.0,
+            "note": null,
+            "trip": 2
+          }
+        ],
+        "solver_ms": 9.659600000304636,
+        "total_ms": 115.83259999679285
+      },
+      "matches_cp_sat_count_table": true
+    },
+    {
+      "case": "composed-week-nutrition-two-trips-synthetic",
+      "budget": null,
+      "algorithm": "simulated-annealing",
+      "status": "feasible",
+      "score": [
+        0,
+        -3,
+        63,
+        0.0,
+        0,
+        3900
+      ],
+      "checkout": 39.0,
+      "milliseconds": [
+        188.84199999956763,
+        194.6499000005133,
+        189.42729999980656
+      ],
+      "median_ms": 189.42729999980656,
+      "optimality_gap": null,
+      "reference": {
+        "status": "optimal_for_generated_options",
+        "total": 128,
+        "checked": 128,
+        "unknown": 0,
+        "score": [
+          0,
+          -3,
+          63,
+          0.0,
+          0,
+          3900
+        ],
+        "milliseconds": 112.0666999995592
+      },
+      "matches_reference": true,
+      "candidate_count": 4,
+      "cp_sat_reference": {
+        "status": "optimal_for_generated_options",
+        "count_states": 128,
+        "score": [
+          0,
+          -3,
+          63,
+          0.0,
+          0,
+          3900
+        ],
+        "scope": "ordered generated meal options",
+        "table_ms": 105.86499999772059,
+        "unknown_states": 0,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d0",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d0",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "chicken",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "greens",
+            "role_id": "vegetable"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "broth",
+            "role_id": "soup"
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "broth-base",
+            "required_quantity": 640.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 640.0,
+            "selected_product_id": "p-broth",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "broth-base",
+            "required_quantity": 480.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 480.0,
+            "selected_product_id": "p-broth",
+            "packages": 5,
+            "purchase_cost_sgd": 5.0,
+            "surplus_quantity": 20.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "chicken-base",
+            "required_quantity": 960.0,
+            "unit": "g",
+            "pantry_deduction": 300.0,
+            "remaining_quantity": 660.0,
+            "selected_product_id": "p-chicken",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 40.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "chicken-base",
+            "required_quantity": 720.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 720.0,
+            "selected_product_id": "p-chicken",
+            "packages": 8,
+            "purchase_cost_sgd": 8.0,
+            "surplus_quantity": 80.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "spinach",
+            "required_quantity": 640.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 640.0,
+            "selected_product_id": "p-greens",
+            "packages": 7,
+            "purchase_cost_sgd": 7.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "spinach",
+            "required_quantity": 480.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 480.0,
+            "selected_product_id": "p-greens",
+            "packages": 5,
+            "purchase_cost_sgd": 5.0,
+            "surplus_quantity": 20.0,
+            "note": null,
+            "trip": 2
+          }
+        ],
+        "solver_ms": 9.659600000304636,
+        "total_ms": 115.83259999679285
+      },
+      "matches_cp_sat_count_table": true
+    }
+  ]
+}

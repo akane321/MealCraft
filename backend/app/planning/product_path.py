@@ -1178,6 +1178,9 @@ class ProductPlanningEngine:
             uncertain = uncertain and emptied_by is None and not searched.get("exhausted")
             evidence = "needs_data" if uncertain else "bounded_search_exhausted"
             status = "needs_data" if uncertain else "candidate_rejected"
+            if not uncertain and constraints.planner_strategy == "greedy-baseline" and trace["validation_attempts"]:
+                # The baseline produced a candidate; its rejection is not a search-resource limit or a proof.
+                evidence = "candidate_validation_failed"
             if (
                 not uncertain
                 and only_budget_failures

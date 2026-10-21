@@ -76,6 +76,26 @@ def test_search_limit_is_not_infeasibility_and_does_not_save_a_plan(recipe_clien
         assert session.scalars(select(MealPlan)).all() == []
 
 
+def test_greedy_budget_rejection_is_validation_failure_not_search_exhaustion(recipe_client):
+    response = recipe_client.post(
+        "/api/plans/generate",
+        json={**REQUEST, "planner_strategy": "greedy-baseline", "weekly_budget_sgd": 0.01},
+    )
+    assert response.status_code == 422
+    run, trace = latest_trace()
+    assert run.status == "failed"
+    assert trace["status"] == "candidate_rejected"
+    assert trace["evidence"] == "candidate_validation_failed"
+    assert trace["search"] == {"baseline": True, "complete_proof": False}
+    assert len(trace["validation_attempts"]) == 1
+    assert any(
+        check["code"] == "purchase_budget" and check["hard"] and check["status"] == "failed"
+        for check in trace["validation"]["checks"]
+    )
+    with database() as session:
+        assert session.scalars(select(MealPlan)).all() == []
+
+
 @pytest.mark.parametrize("damage", ["packages", "cost", "demand", "source"])
 def test_independent_validator_rejects_corrupt_planner_output(recipe_client, monkeypatch, damage):
     original = FinalScopeReferencePlanner._build_shopping
