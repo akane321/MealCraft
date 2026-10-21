@@ -461,7 +461,8 @@ BAND_LABEL = {
 # Why a case takes as long as it does, from a cProfile of one warm product run of each case (task 14, 2026-10-21,
 # Windows, after the shared-dish candidate changes). Shares are of the profiled run, which the profiler slows about
 # twofold (threefold for six-tight-budget, re-profiled the same day without the variety cutoff). Every case past the
-# quick figure has one: ADR-0079 section 4 asks for the cause of each, not only of the ones over a minute. Rewrite a case's entry whenever a change moves its time.
+# quick figure has one: ADR-0079 section 4 asks for the cause of each, not only of the ones over a minute.
+# Rewrite a case's entry whenever a change moves its time.
 MEAL_CHECKS = (
     "building each meal's dish combinations and checking every one as a real meal (`meal_beam._meal_options` -> "
     "`meal_permitted` -> `meal_composition.real_meal_issues`)"
