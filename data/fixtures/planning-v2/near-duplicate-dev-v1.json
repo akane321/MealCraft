@@ -1,0 +1,23 @@
+{
+  "version": "near-duplicate-dev-v1",
+  "purpose": "Developer calibration only; agent-authored labels from titles, ingredients and preparation. Not human-reviewed, not held-out evidence.",
+  "definition": "Near means a variation of the same dish preparation, not nutritional interchangeability or safety equivalence. Different cooking forms remain distinct.",
+  "pairs": [
+    {"left":"RCP2_005EAE229052","right":"RCP2_01B6634501B9","near":true,"reason":"Both rice stir-fries with bacon; different seasoning and vegetables."},
+    {"left":"RCP2_021DAC915B58","right":"RCP2_02E364351DAC","near":true,"reason":"Fried-rice variations; changing the protein does not create another dish kind."},
+    {"left":"RCP2_02E364351DAC","right":"RCP2_0456562F4E31","near":true,"reason":"Fried-rice variations with egg, vegetables and soy sauce."},
+    {"left":"RCP2_001A0EFFC088","right":"RCP2_03473BF023A8","near":true,"reason":"Chicken curry variations; convenience sauce versus a cooked sauce."},
+    {"left":"slug:tofu-vegetable-soba","right":"slug:tofu-mushroom-soba","near":true,"reason":"Tofu and soba with vegetables; same noodle preparation."},
+    {"left":"slug:tuna-tomato-pasta","right":"slug:tuna-spinach-pasta","near":true,"reason":"Tuna pasta variations with different vegetables."},
+    {"left":"slug:lemon-herb-chicken-rice-bowl","right":"slug:chicken-broccoli-rice","near":true,"reason":"Chicken and rice meals with different vegetable and seasoning choices."},
+    {"left":"RCP2_001A0EFFC088","right":"RCP2_065E382526FC","near":false,"reason":"A curry dish and curry parcels use different dish forms."},
+    {"left":"RCP2_1169BCF135E1","right":"RCP2_94F5EFDCC3D8","near":false,"reason":"Fish-based broth versus creamy tomato vegetable soup; tomato soup words alone are insufficient."},
+    {"left":"slug:spinach-oat-egg-cakes","right":"slug:savoury-vegan-oats","near":false,"reason":"Pan-cooked cakes versus simmered oats, despite shared oats and vegetables."},
+    {"left":"slug:yogurt-oat-bowl","right":"slug:savoury-vegan-oats","near":false,"reason":"Cold yogurt bowl versus savory simmered oats."},
+    {"left":"slug:lemon-herb-chicken-rice-bowl","right":"slug:chicken-zucchini-pasta","near":false,"reason":"Shared chicken but rice bowl versus pasta."},
+    {"left":"slug:salmon-quinoa-bowl","right":"slug:ginger-salmon-soba","near":false,"reason":"Shared salmon but grain bowl versus noodles."},
+    {"left":"slug:tofu-mushroom-soba","right":"slug:tofu-chickpea-bowl","near":false,"reason":"Tofu noodles versus roasted tofu-chickpea grain bowl."},
+    {"left":"RCP2_021DAC915B58","right":"RCP2_001A0EFFC088","near":false,"reason":"Chicken fried rice versus chicken curry."},
+    {"left":"RCP2_07C1B49993CF","right":"RCP2_13B10ED8770B","near":false,"reason":"Sweet crisp pancakes versus seafood and scallion pancake."}
+  ]
+}
