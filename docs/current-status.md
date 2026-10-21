@@ -142,16 +142,17 @@ households (one of seven people on under five portions, whose dinners twice use
 the one allowed move) and lists every meal; it fails when any case refuses, and
 works out dish counts, people present and equipment itself rather than through
 the planner's helpers. Its [timing](evaluation/full-default/timing.md) records
-the machine, code revision and repeated warm timings. ADR-0079's ~4/~60-second
-bands are descriptive reporting guidance, not a pass/fail test or a planning
-deadline. The owner's latest direction forbids trading quality or simplifying
-the workflow for speed; a slow completed plan must not become an error. The
-home and household plan buttons already say a large household on a tight
-budget can take up to a minute; the browser request has no timeout. Agent
-confirmations check their wall-time budget before planning, not on records
-written after the planner returns, so a completed slow plan is not changed into
-a deadline error. That behaviour is already in main, not supplied by these tag
-repairs. Deferred: adding a vegetable dish when
+the machine, code revision and repeated warm timings, reads each case against
+the ADR-0079 guidance (a simple request within about 4 s, a complex one up to
+about 60 s) as descriptive reporting, not a pass/fail test or a planning
+deadline, and gives the cause of every case past the quick figure. The owner's
+direction (ADR-0080) forbids trading quality or simplifying the workflow for
+speed; a slow completed plan must not become an error. The plan buttons on the
+home and household pages say a large household on a tight budget can take a few
+minutes; nothing on the way times out first (the browser request has no time
+limit and an agent run's wall budget of 120 s is checked only before the
+planner starts, not on records written after it returns, ADR-0080 section 3).
+Deferred: adding a vegetable dish when
 vegetables fall short (no vegetable measure yet), CP-SAT for structured meals, day references 8-14 in the
 conversation, and a curated plain Chinese steamed rice (the release has none). `PLANNING_CAPABILITY`
 defaults to `full`; `mvp` (one dinner dish a day) remains for reproducing the

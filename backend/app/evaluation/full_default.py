@@ -9,8 +9,8 @@ perishables within their days after the trip, and the kitchen's equipment. A pla
 on the trip whose days use it.
 
 Wall time differs by machine, so it is printed and never written to `latest.*` (CI diffs them); `--timing-report`
-writes it beside them on request. The variety pass is run to completion here, not cut at its two seconds, so
-the plans do not depend on the machine either.
+writes it beside them on request. The variety pass always runs every start (ADR-0080), so the plans do not
+depend on the machine either.
 
     python -m app.evaluation.full_default [--timing-report]
 """
@@ -37,7 +37,6 @@ from app.data.release_v2 import release_dir
 from app.evaluation.meal_day_week_runner import HOUSEHOLD as HOUSEHOLD_ID
 from app.evaluation.meal_day_week_runner import product_database
 from app.models.recipe import Recipe, RecipeIngredient
-from app.planning import product_path
 from app.planning.grocery_estimator import not_purchased
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.schemas.meal_plan import MEAL_ORDER, WeeklyMealPlanRequest, default_plan_shape
@@ -353,20 +352,14 @@ def run_case(plans, session, case: dict) -> tuple[dict, float]:
 
 
 def evaluate(repeats: int = 0) -> tuple[dict, dict]:
-    """The report, and wall times per case: the report's own run (variety pass to completion), then `repeats` warm
-    runs as the product plans (its variety pass cut at `VARIETY_PASS_SECONDS`)."""
+    """The report, and wall times per case: the report's own run, then `repeats` warm runs."""
     lines = (release_dir() / "recipes.jsonl").read_text("utf-8").splitlines()
     catalog = {"scenario": {"recipe_candidate_slugs": [json.loads(line)["recipe_id"] for line in lines]}}
     seconds, results = {}, []
-    product_seconds = product_path.VARIETY_PASS_SECONDS
     with product_database(catalog) as factory, factory() as session:
         plans = build_meal_plan_service(session, HOUSEHOLD_ID)
         for case in CASES:
-            product_path.VARIETY_PASS_SECONDS = float("inf")  # the module docstring: plans independent of the machine
-            try:
-                result, first = run_case(plans, session, case)
-            finally:
-                product_path.VARIETY_PASS_SECONDS = product_seconds
+            result, first = run_case(plans, session, case)
             results.append(result)
             warm = [run_case(plans, session, case)[1] for _ in range(repeats)]
             seconds[case["case"]] = {"first": round(first, 2), "warm": [round(s, 2) for s in warm]}
@@ -470,8 +463,9 @@ BAND_LABEL = {
 
 # Why a case takes as long as it does, from a cProfile of one warm product run of each case (task 14, 2026-10-21,
 # Windows, after the shared-dish candidate changes). Shares are of the profiled run, which the profiler slows about
-# twofold. Every case past the quick figure has one: ADR-0079 section 4 asks for the cause of each, not only of the
-# ones over a minute. Rewrite a case's entry whenever a change moves its time.
+# twofold (threefold for six-tight-budget, re-profiled the same day without the variety cutoff). Every case past the
+# quick figure has one: ADR-0079 section 4 asks for the cause of each, not only of the ones over a minute.
+# Rewrite a case's entry whenever a change moves its time.
 MEAL_CHECKS = (
     "building each meal's dish combinations and checking every one as a real meal (`meal_beam._meal_options` -> "
     "`meal_permitted` -> `meal_composition.real_meal_issues`)"
@@ -494,13 +488,15 @@ SLOW_CAUSES = {
         "model."
     ),
     "six-tight-budget": (
-        "four whole-week beam searches instead of one, 94% of the run: the ranked search keeps no week filled with "
-        "no dish twice under the budget, so the three budget-led searches (`product_path.limit_led`, about 64%) run "
-        f"as well. Each builds every six-dish dinner of its candidates again; {MEAL_CHECKS} is about 78% of the run, "
-        f"and {MEMBER_CHECKS} is about 44%. The variety pass is about 5%. Upgrade path: share the meal checks "
-        "between the four searches (they do not depend on the ranking) and cache the member checks. The owner "
-        "accepted this case's time (ADR-0079 section 5, ADR-0080): over the line is a known exception, not a "
-        "failure."
+        "four whole-week beam searches instead of one, and a variety pass over 16 starts that no longer stops at two "
+        "seconds (ADR-0080). In a profiled warm run of 2026-10-21, after that cutoff was removed, the variety pass "
+        "(`product_path._vary_starts`) is about 50% of the run and the three budget-led searches "
+        "(`product_path.limit_led`, which run because the ranked search keeps no week filled with no dish twice "
+        f"under the budget) about 33%; the ranked search and the setup are the rest. Across the run {MEAL_CHECKS} "
+        f"is about 46%, and {MEMBER_CHECKS} is about 43%. Upgrade path, none of it changing a plan: make the variety "
+        "pass faster (now the largest single cost), share the meal checks between the four searches (they do not "
+        "depend on the ranking) and cache the member checks. The owner accepted this case's time (ADR-0079 section "
+        "5, ADR-0080): over the line is a known exception, not a failure."
     ),
     "two-no-oven-ten-days": (
         f"one beam search over ten days and two shopping trips, about two-thirds of the run; {MEAL_CHECKS} is about "
@@ -520,9 +516,9 @@ def timing_markdown(timing: dict) -> str:
     lines = [
         "# Full default: plan wall time",
         "",
-        "> Scope: the cases of `latest.md`, one machine. The report's run lets the variety pass finish (and "
-        "warms the candidate cache); the warm runs plan as the product does, the variety pass cut at its two "
-        "seconds. Median and slowest of the warm runs. ADR-0079 sets how long is acceptable by how hard the "
+        "> Scope: the cases of `latest.md`, one machine. The report's run warms the candidate cache; the warm "
+        "runs are the same plan again. Median and slowest of the warm runs. ADR-0079 sets how long is "
+        "acceptable by how hard the "
         f"request is: a simple request should still come back within about {QUICK_SECONDS:g} s, a complex one "
         f"may take up to about {OVER_SECONDS:g} s, and only past that is a case marked over. A case is never "
         "cut short to meet either figure, and no feature is dropped to make one faster.",

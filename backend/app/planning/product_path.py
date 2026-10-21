@@ -6,7 +6,6 @@ prices after validation, and never promotes a bounded miss into a global proof.
 
 import hashlib
 import json
-import time
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, replace
 from datetime import timedelta
@@ -125,24 +124,16 @@ CHEAPEST_MEAL_OPTIONS = 64
 # week minutes with no dish twice (ADR-0046 section 3: a plan answers within 10 s). A plan of such meals that
 # no week fits under its budget ends without the cheapest-week search.
 QUICK_MEAL_DISHES = 3
-# The budget applies only to the post-search variety pass. A start already in flight finishes so every
-# returned week still satisfies the same rules and validator; later starts are optional alternate routes.
-VARIETY_PASS_SECONDS = 2.0
+# A week of this many dish positions or more (and no locked dishes) is "heavy": its variety pass stops early at a
+# week no later start can make more varied (`is_best`). No pass is cut by the clock: planning time has no hard
+# limit and a slow plan never trades quality for speed (owner, 2026-10-21; ADR-0080).
 HEAVY_COMPOSITION_DISH_POSITIONS = 35
 
 
-def _vary_starts_within_time_budget(
-    meal_beam, problem, starts, seen, *, is_best, clock=time.perf_counter, seconds=None
-):
-    """Try ordered variety starts until time is spent or one varies into a week `is_best` says none can beat.
-
-    The time is read between starts, so a start in flight finishes: a pass can run over by one start.
-    """
-    deadline = clock() + (VARIETY_PASS_SECONDS if seconds is None else seconds)
+def _vary_starts(meal_beam, problem, starts, seen, *, is_best):
+    """Try every ordered variety start, or until one varies into a week `is_best` says none can beat."""
     added = []
     for weight, state in starts:
-        if clock() >= deadline:
-            break
         varied = meal_beam.vary_within_budget(problem, state)
         if varied.choices not in seen:
             seen.add(varied.choices)
@@ -1081,12 +1072,11 @@ class ProductPlanningEngine:
                         return heavy_composition and full_and_varied(state)
 
                     found.extend(
-                        _vary_starts_within_time_budget(
+                        _vary_starts(
                             meal_beam,
                             problem,
                             starts,
                             seen,
-                            seconds=(VARIETY_PASS_SECONDS if heavy_composition else float("inf")),
                             is_best=is_best,
                         )
                     )
