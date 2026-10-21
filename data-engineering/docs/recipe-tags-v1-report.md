@@ -18,16 +18,16 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Meal role | rule | llm |
 | --- | ---: | ---: |
-| protein_main | 3622 | 27 |
+| protein_main | 3623 | 27 |
 | vegetable | 560 | 1 |
 | soup | 213 | 14 |
 | staple | 571 | 107 |
-| one_bowl | 1475 | 93 |
+| one_bowl | 1478 | 93 |
 | breakfast | 390 | 13 |
 | salad | 484 | 0 |
 | snack | 240 | 90 |
 | dessert | 529 | 13 |
-| sauce | 369 | 11 |
+| sauce | 365 | 11 |
 | drink | 78 | 0 |
 | open (null) | 0 | 0 |
 
@@ -37,15 +37,15 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 | --- | ---: |
 | chicken | 2160 |
 | duck | 4 |
-| pork | 1230 |
-| beef | 1276 |
+| pork | 1231 |
+| beef | 1279 |
 | lamb | 33 |
 | fish | 231 |
 | shellfish | 481 |
-| soy | 142 |
-| egg | 1048 |
+| soy | 143 |
+| egg | 1047 |
 | legume | 215 |
-| none (`[]`) | 2861 |
+| none (`[]`) | 2857 |
 
 ## `cooking_methods` values (recipes carrying each)
 
@@ -69,15 +69,15 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 | fragrant | 1539 |
 | spicy | 1324 |
 | light | 1878 |
-| rich | 3489 |
-| none (`[]`) | 2625 |
+| rich | 3493 |
+| none (`[]`) | 2622 |
 
 ## `contains_staple` and `equipment`
 
 | Value | Recipes |
 | --- | ---: |
-| contains_staple True | 2246 |
-| contains_staple False | 6654 |
+| contains_staple True | 2249 |
+| contains_staple False | 6651 |
 | contains_staple None | 97 |
 | equipment ('blender',) | 532 |
 | equipment ('microwave',) | 218 |

@@ -93,9 +93,10 @@ unrelated requests should be declined, and ambiguous requests clarified.
 
 A plan longer than seven days shops before day 1 and day 8. The weekly budget
 applies **separately to each trip**, including a shorter final period. Leafy
-greens, bean sprouts and pea shoots, fresh fish and fresh shellfish must be used
-within three days of their supplying trip; fresh meat is not in this short-lived
-class. Do not assume one purchase for ten days or an extra fresh restock.
+greens and sprouts (including bean, pea and radish sprouts), fresh fish and fresh
+seafood (including shellfish, squid, octopus and seafood mixes) must be used within
+three days of their supplying trip. Frozen, dried, smoked and canned forms, and
+fresh meat, are not in this short-lived class. Do not assume one purchase for ten days or an extra fresh restock.
 Record these defaults even
 when the user has not repeated them.
 
@@ -106,8 +107,9 @@ when the user has not repeated them.
 用户可以问食物问题、表达偏好、换菜、改餐型或预算后重排；无关请求应拒绝，信息不明应追问。
 
 超过七天分两次采购，分别在第 1 天前和第 8 天前；**每次采购各自满足每周预算**，
-第二段不足七天也如此。绿叶菜、豆芽和豌豆苗、鲜鱼、鲜贝类在供应它们的那次购买后三天内
-做掉；鲜肉不属于这类短保食材。十天不能按一次采购算，也不暗加中途鲜品补货。
+第二段不足七天也如此。绿叶菜及芽苗菜（包括豆芽、豌豆苗、萝卜芽）、鲜鱼、鲜海鲜（包括
+贝类、鱿鱼、章鱼和混合海鲜）在供应它们的那次购买后三天内做掉。冷冻、干制、烟熏、罐装
+形态以及鲜肉不属于这类短保食材。十天不能按一次采购算，也不暗加中途鲜品补货。
 用户没重述这些默认规则，仍须写入约束。
 
 This is the intended evaluation scope, not a claim that a release has passed.

@@ -141,16 +141,15 @@ to the one before PR-3). The
 households (one of seven people on under five portions, whose dinners twice use
 the one allowed move) and lists every meal; it fails when any case refuses, and
 works out dish counts, people present and equipment itself rather than through
-the planner's helpers. Its [timing](evaluation/full-default/timing.md) reads
-each case against the ADR-0079 guidance - a simple request within about 4 s, a
-complex one up to about 60 s, over only past that - with the cause of every case
-past the quick figure: on the developer machine only the six-person S$420 week
-is over, where the budget-led searches build every six-dish dinner again, four
-times, and the owner accepted that case's time on 2026-10-20, which makes its
-speed-up optional. The plan buttons on the home and household pages say a large
-household on a tight budget can take up to a minute; nothing on the way times
-out first (the browser request has no time limit and an agent run's wall budget
-is 120 s). Deferred: adding a vegetable dish when
+the planner's helpers. Its [timing](evaluation/full-default/timing.md) records
+the machine, code revision and repeated warm timings. ADR-0079's ~4/~60-second
+bands are descriptive reporting guidance, not a pass/fail test or a planning
+deadline. The owner's latest direction forbids trading quality or simplifying
+the workflow for speed; a slow completed plan must not become an error. The
+home and household plan buttons already say a large household on a tight
+budget can take up to a minute; the browser request has no timeout. Agent
+confirmation-budget handling is a separate follow-up, not a guarantee supplied
+by these tag repairs. Deferred: adding a vegetable dish when
 vegetables fall short (no vegetable measure yet), CP-SAT for structured meals, day references 8-14 in the
 conversation, and a curated plain Chinese steamed rice (the release has none). `PLANNING_CAPABILITY`
 defaults to `full`; `mvp` (one dinner dish a day) remains for reproducing the
@@ -162,6 +161,21 @@ pool is current, and **Plan my week** saves it without searching again. Response
 the real stack are recorded in dated reports, the latest being the
 [2026-10-17 demo-path timing](evaluation/sprint1-demo-flow/2026-10-17/timing.md)
 (rule parser only); earlier local Docker timings are historical.
+
+### Tag-residual branch verification (pending merge)
+
+The follow-up rules recognise listed flatbread/wrap carriers, require both a
+grain/bowl title and corresponding listed grain in the existing 5–15% grey
+range, and distinguish protein-led fillings from cheese-led fillings and
+toppings. A pizza listing only batter is a component, not a completed main.
+No ingredient, amount or nutrition value is added. The generated
+[tag report](../data-engineering/docs/recipe-tags-v1-report.md) is the source
+for coverage; the original audit packet is unchanged. Unreviewed critical model
+fields retain their values, provenance and gate even if a new rule could
+classify the recipe. The swap no-repeat check and full-default diagnostic
+reject unknown sources rather than treating them as a known empty set.
+These are branch verification results, not a claim that remote main has already
+adopted this follow-up or that any model batch has passed human review.
 
 Of ADR-0033's packets, P1 (product path), P2 ([conflict explanations](design/planning-conflict-explanation.md))
 and P4 ([nutrition scope](design/planning-nutrition-scope.md)) are wired into the product.

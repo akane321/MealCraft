@@ -165,7 +165,8 @@ DISHES = (
 
 @pytest.mark.parametrize(("title", "course"), COMPONENTS)
 def test_a_component_recipe_is_a_sauce_and_fills_no_meal(title: str, course: str) -> None:
-    found = rule_tags(dish(title, course, [("chicken_thigh", 400), ("flour", 300), ("rice", 300)]))
+    # A filling's title alone does not establish meat; positive protein-led fillings have their own fixtures.
+    found = rule_tags(dish(title, course, [("flour", 300), ("rice", 300)]))
     assert found.values["meal_role"] == "sauce", title
     assert found.values["contains_staple"] is False and found.values["protein_sources"] == []
     assert found.methods["meal_role"] == "rule" and not found.open
