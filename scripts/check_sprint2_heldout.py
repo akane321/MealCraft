@@ -50,7 +50,7 @@ PROTECTED_PARTS = {"heldout", "held-out", "held_out", "holdout", "hold-out", "ho
 EMAIL = re.compile(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}")
 PHONE = re.compile(r"(?<!\w)(?:\+\d[\d ()-]{6,}\d|\d{8,})(?!\w)")
 PROFILE = re.compile(r"https?://[^\s/]+/(?:u|user|users|profile|profiles)/", re.I)
-HANDLE = re.compile(r"(?<![\w/])(?:/?u/[\w-]+|@\w[\w.-]*)", re.I)
+HANDLE = re.compile(r"(?<![A-Za-z0-9_/])(?:/?u/[\w-]+|@\w[\w.-]*)", re.I)
 KINDS = {
     "planning": {"plan"},
     "multi_turn": {"replan"},
@@ -63,6 +63,13 @@ KINDS = {
     "adversarial:contradiction": {"plan", "replan", "intent"},
     "adversarial:hidden_allergen": {"plan", "intent", "qa"},
     "adversarial:local_name": {"plan", "intent", "qa"},
+}
+DISPOSITIONS = {
+    "plan": {"feasible", "infeasible", "catalog_dependent", "clarify"},
+    "replan": {"feasible", "infeasible", "catalog_dependent", "clarify"},
+    "intent": {"answer", "clarify", "refuse"},
+    "qa": {"answer", "clarify", "refuse"},
+    "refusal": {"refuse"},
 }
 
 
@@ -205,6 +212,10 @@ def check(data: dict, *, format_only: bool = False, fields_path: Path | None = N
         if any(expected_validator.iter_errors(gold["expected_fields"])):
             errors.append(f"{prefix}: expected_fields violate the frozen dictionary")
         for constraint in gold["hard_constraints"]:
+            if constraint["operator"] in {"le", "ge"} and (
+                isinstance(constraint["value"], bool) or not isinstance(constraint["value"], (int, float))
+            ):
+                errors.append(f"{prefix}: le/ge require a numeric value, not boolean or structured data")
             definition = dictionary["fields"].get(constraint["field"])
             if definition is None or constraint["scope"] not in dictionary["scopes"]:
                 errors.append(f"{prefix}: constraint field/scope missing from dictionary")
@@ -221,10 +232,10 @@ def check(data: dict, *, format_only: bool = False, fields_path: Path | None = N
         )
         if gold["kind"] not in KINDS.get(kind_key, set()):
             errors.append(f"{prefix}: subtype and gold.kind mismatch")
+        if gold["disposition"] not in DISPOSITIONS[gold["kind"]]:
+            errors.append(f"{prefix}: gold.kind and disposition mismatch")
         if gold["reviewer_id"] is not None and gold["reviewer_id"] == data["author_id"]:
             errors.append(f"{prefix}: author cannot review own gold")
-        if gold["disposition"] == "catalog_dependent" and gold["kind"] not in {"plan", "replan"}:
-            errors.append(f"{prefix}: catalog_dependent is a pending planning label only")
         if f"{case['category']}:{case['subtype']}" not in SUBTYPES:
             errors.append(f"{prefix}: unknown category/subtype combination")
         if case["category"] == "planning" and gold["kind"] != "plan":
@@ -246,6 +257,12 @@ def check(data: dict, *, format_only: bool = False, fields_path: Path | None = N
                 errors.append(f"{prefix}: planning gold needs constraints and explicit horizon")
         if case["category"] == "multi_turn" and not gold["preserve"]:
             errors.append(f"{prefix}: declare what edits must preserve, or explicitly declare none")
+        days = case["horizon_days"]
+        if {"two_trips", "perishable_window"}.intersection(case["features"]) and (days is None or days <= 7):
+            errors.append(f"{prefix}: two_trips/perishable_window require horizon_days > 7")
+        for boundary in (1, 14):
+            if f"horizon_{boundary}" in case["features"] and days != boundary:
+                errors.append(f"{prefix}: horizon_{boundary} tag requires horizon_days == {boundary}")
         if gold["kind"] in {"plan", "replan"} and case["horizon_days"] is not None and case["horizon_days"] > 7:
             if not {"two_trips", "perishable_window"}.issubset(case["features"]):
                 errors.append(f"{prefix}: long horizon needs two-trip and freshness coverage")

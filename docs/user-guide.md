@@ -123,9 +123,10 @@ missing; some questions offer buttons. When the details are complete, **Plan my
 week** plans every chosen meal of the seven days. A plan from the household
 profile may be 1 to 14 days long (**Days to plan**, beside the plan button on
 the Household page). A plan longer than a week shops twice: before
-day 1 and before day 8, with the weekly budget holding on each trip. Fresh
-meat, fish and greens are cooked within 3 days of the trip they are bought on,
-and the shopping list marks them "Use within 3 days".
+day 1 and before day 8, with the weekly budget holding on each trip. Leafy
+greens, bean sprouts and pea shoots, fresh fish and fresh shellfish are cooked
+within 3 days of the trip they are bought on, and the shopping list marks them
+"Use within 3 days".
 
 Most plans take a few seconds. A large household on a tight budget takes longer,
 up to about half a minute, while the planner searches for a week that fits the
@@ -156,8 +157,8 @@ change is previewed before anything happens.
 ### 4. Nutrition and the shopping list
 
 The **Groceries** tab shows the total against the weekly budget. Perishable
-items (leafy greens, fresh fish and seafood, bean sprouts) are marked **Use
-within 3 days**: the planner cooks them within three days of the shopping trip
+items (leafy greens, bean sprouts and pea shoots, fresh fish and fresh shellfish)
+are marked **Use within 3 days**: the planner cooks them within three days of the shopping trip
 that buys them, and assumes everything else keeps until its day. In a plan
 longer than a week the list is split by trip, under **Shop before day 1** and
 **Shop before day 8**. The price label

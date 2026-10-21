@@ -92,10 +92,11 @@ state preferences, swap dishes, change meal structure or budget and replan;
 unrelated requests should be declined, and ambiguous requests clarified.
 
 A plan longer than seven days shops before day 1 and day 8. The weekly budget
-applies **separately to each trip**, including a shorter final period. Fresh
-meat, fish and leafy greens must be used within three days of their supplying
-trip (also seafood/bean sprouts when designated perishable). Do not assume one
-purchase for ten days or an extra fresh restock. Record these defaults even
+applies **separately to each trip**, including a shorter final period. Leafy
+greens, bean sprouts and pea shoots, fresh fish and fresh shellfish must be used
+within three days of their supplying trip; fresh meat is not in this short-lived
+class. Do not assume one purchase for ten days or an extra fresh restock.
+Record these defaults even
 when the user has not repeated them.
 
 预算按已知储藏室扣减后的整包购买计算，不只按用量计价；数量未知的在家食材不能扣减。
@@ -105,8 +106,8 @@ when the user has not repeated them.
 用户可以问食物问题、表达偏好、换菜、改餐型或预算后重排；无关请求应拒绝，信息不明应追问。
 
 超过七天分两次采购，分别在第 1 天前和第 8 天前；**每次采购各自满足每周预算**，
-第二段不足七天也如此。鲜肉、鱼、绿叶菜在供应它们的那次购买后三天内做掉；
-被列为易腐的海鲜、豆芽也同样处理。十天不能按一次采购算，也不暗加中途鲜品补货。
+第二段不足七天也如此。绿叶菜、豆芽和豌豆苗、鲜鱼、鲜贝类在供应它们的那次购买后三天内
+做掉；鲜肉不属于这类短保食材。十天不能按一次采购算，也不暗加中途鲜品补货。
 用户没重述这些默认规则，仍须写入约束。
 
 This is the intended evaluation scope, not a claim that a release has passed.
@@ -155,12 +156,16 @@ the set, declare positive `feature_minima` for `full_table`, `shared_dishes`,
 `member_rules`, `attendance`, `halal`, `basic_seasonings`, `sodium_limit`,
 `horizon_1`, `horizon_14`, `two_trips`, `perishable_window`. At least two planning
 cases must cover 8–14 days, with the exact long-horizon coverage predeclared.
+`two_trips` and `perishable_window` are allowed only with `horizon_days > 7`;
+`horizon_1` requires exactly 1 day and `horizon_14` exactly 14 days.
 Include actual 1-day and 14-day cases, arbitrary start
 days and explicitly smaller shapes. No realistic examples are provided here.
 
 每类都含中英文，事先写好中文最低数；混合语言按句子主体判断，不靠翻译重复题凑数。
 规划覆盖人数、不同松紧预算、过敏原组合、饮食／清真、餐型、时间、营养与在家食材。
 上述十一个 feature 都预登记正数最低覆盖；至少两道规划题为 8–14 天，预先登记具体数量。
+`two_trips`、`perishable_window` 只用于超过七天的题；`horizon_1` 必须恰为一天，
+`horizon_14` 必须恰为十四天。
 真实覆盖 1 天、14 天、任意起始日与缩小餐型。
 每个 subtype 的最低数也事先填写，键为 `category:subtype`。不根据系统成绩调整配额。
 
@@ -191,6 +196,22 @@ source 字段。只在允许处用 null；空列表用 []，空对象用 {}。
 | Each hard constraint / 硬约束 | `field`: dictionary field key; `operator`: `eq` / `le` / `ge` / `exclude` / `include`; `value`: matching dictionary type; `unit`: one of that field's units; `scope`: dictionary scope key; `evidence`: nonempty string; optional `target_member_ids`: nonempty unique string list, required for member scope |
 | `source` | `kind`: `authored` / `forum`; `quotes`: quote list (empty for authored); `pii_reviewed`: boolean |
 | Each quote / 每条原话 | `turn_index`: zero-based integer; `text`: exact redacted turn; `url`: canonical public http(s) thread/comment URL without tracking query/fragment; `collected_on`: YYYY-MM-DD; `redactions`: unique strings describing categories removed, never actual personal values |
+
+Only these kind/disposition pairs are allowed / 只允许以下题型与处置值搭配：
+
+| `gold.kind` | Allowed `disposition` / 允许的处置值 |
+|---|---|
+| `plan` | `feasible`, `infeasible`, `catalog_dependent`, `clarify` |
+| `replan` | `feasible`, `infeasible`, `catalog_dependent`, `clarify` |
+| `intent` | `answer`, `clarify`, `refuse` |
+| `qa` | `answer`, `clarify`, `refuse` |
+| `refusal` | `refuse` |
+
+For `intent`, `answer` is the structured classification/extraction answer, not
+planning feasibility. `le` and `ge` values must be numeric, not booleans,
+strings, arrays or objects; dictionary type/unit checks also apply.
+`intent` 的 `answer` 指结构化分类／抽取答案，不表示排餐可行。
+`le`、`ge` 的值必须是数字，不能是布尔、字符串、数组或对象，同时仍须符合字典类型和单位。
 
 `sprint2-heldout-fields.json` is the neutral dictionary, not the application's
 internal schema. Unknown fields or wrong types/units/scopes fail validation.

@@ -11,6 +11,8 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 SCRIPT = Path(__file__).resolve().parents[1] / "check_sprint2_heldout.py"
 SPEC = importlib.util.spec_from_file_location("author_check", SCRIPT)
 checker = importlib.util.module_from_spec(SPEC)
@@ -73,8 +75,9 @@ def ready_format_fixture():
                 case["gold"]["kind"] = "replan"
             elif category == "intent":
                 case["gold"]["kind"] = "intent"
+                case["gold"]["disposition"] = "answer"
             cases.append(case)
-    cases[0]["features"] = sorted(checker.FEATURES - {"horizon_14", "two_trips"})
+    cases[0]["features"] = sorted(checker.FEATURES - {"horizon_14", "two_trips", "perishable_window"})
     cases[1]["features"] = ["horizon_14", "two_trips", "perishable_window"]
     cases[1]["horizon_days"] = 14
     cases[2]["features"] = ["two_trips", "perishable_window"]
@@ -299,6 +302,7 @@ def test_intent_gold_does_not_invent_procurement_defaults():
     case = demo_case(category="intent")
     case.update(subtype="planning", horizon_days=14)
     case["gold"]["kind"] = "intent"
+    case["gold"]["disposition"] = "answer"
     assert checker.check(bundle([case]), format_only=True)[0] == []
 
 
@@ -312,3 +316,77 @@ def test_dictionary_digest_uses_the_same_bytes_as_parsing(tmp_path):
         read.side_effect = lambda path: raw if path == target else Path.read_text(path, encoding="utf-8").encode()
         assert checker.check(data, fields_path=target)[0] == []
         assert sum(call.args[0] == target for call in read.call_args_list) == 1
+
+
+@pytest.mark.parametrize("handle", ["回复@小明", "谢谢@zhangsan", "我是u/abc"])
+def test_chinese_adjacent_handle_rejected_without_echo(handle):
+    case = demo_case()
+    case["turns"][0] += " " + handle
+    errors, _ = checker.check(bundle([case]), format_only=True)
+    assert any("personal information" in error for error in errors)
+    assert handle not in json.dumps(errors, ensure_ascii=False)
+
+
+@pytest.mark.parametrize(
+    ("tag", "days", "valid"),
+    [
+        ("two_trips", None, False),
+        ("two_trips", 1, False),
+        ("two_trips", 7, False),
+        ("two_trips", 8, True),
+        ("perishable_window", None, False),
+        ("perishable_window", 7, False),
+        ("perishable_window", 14, True),
+        ("horizon_1", 1, True),
+        ("horizon_1", 14, False),
+        ("horizon_14", 1, False),
+        ("horizon_14", 14, True),
+    ],
+)
+def test_feature_tags_match_horizon(tag, days, valid):
+    # Intent-only placeholders isolate tag consistency from plan procurement facts.
+    case = demo_case(category="intent")
+    case.update(subtype="planning", horizon_days=days, features=[tag])
+    case["gold"].update(kind="intent", disposition="answer")
+    errors, _ = checker.check(bundle([case]), format_only=True)
+    assert (errors == []) == valid
+
+
+@pytest.mark.parametrize(
+    ("kind", "allowed"),
+    [
+        ("plan", {"feasible", "infeasible", "catalog_dependent", "clarify"}),
+        ("replan", {"feasible", "infeasible", "catalog_dependent", "clarify"}),
+        ("intent", {"answer", "clarify", "refuse"}),
+        ("qa", {"answer", "clarify", "refuse"}),
+        ("refusal", {"refuse"}),
+    ],
+)
+def test_disposition_matches_gold_kind(kind, allowed):
+    for disposition in ("feasible", "infeasible", "catalog_dependent", "clarify", "answer", "refuse"):
+        case = demo_case()
+        if kind == "replan":
+            case.update(category="multi_turn", subtype="swap")
+            case["turns"].append("FORMAT DEMO: robot edit")
+        elif kind in {"intent", "qa", "refusal"}:
+            case.update(category="intent", subtype="out_of_scope" if kind == "refusal" else "food_qa")
+        case["gold"].update(kind=kind, disposition=disposition, clarification_fields=["FORMAT_ONLY"])
+        errors, _ = checker.check(bundle([case]), format_only=True)
+        assert (errors == []) == (disposition in allowed), (kind, disposition, errors)
+
+
+@pytest.mark.parametrize("operator", ["le", "ge"])
+def test_ordered_constraints_require_numbers_not_bool_or_containers(operator):
+    for field, value, unit, valid in (
+        ("household_size", 9, "people", True),
+        ("weekly_budget_sgd", 9.5, "SGD", True),
+        ("halal_required", True, "none", False),
+        ("halal_required", False, "none", False),
+        ("allergens", ["FORMAT_ONLY"], "none", False),
+        ("budget_basis", "per_shopping_trip", "none", False),
+        ("meal_structure", {}, "dishes", False),
+    ):
+        case = demo_case()
+        case["gold"]["hard_constraints"][0].update(field=field, value=value, unit=unit, operator=operator)
+        errors, _ = checker.check(bundle([case]), format_only=True)
+        assert (errors == []) == valid, (operator, field, errors)

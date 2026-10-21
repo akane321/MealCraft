@@ -55,15 +55,19 @@ minima for these feature tags: `full_table`, `shared_dishes`, `member_rules`,
 `attendance`, `halal`, `basic_seasonings`, `sodium_limit`, `horizon_1`, `horizon_14`,
 `two_trips`, `perishable_window`. Include at least two planning cases lasting
 8–14 days; predeclare their exact count/coverage. They have purchases before
-day 1 and day 8, each separately subject to the weekly budget. Fresh meat, fish,
-leafy greens (also seafood and bean sprouts where classified perishable) must
-be used within three days of the purchase supplying them. These are not one
-combined budget or one shopping trip; do not assume a mid-period fresh restock.
+day 1 and day 8, each separately subject to the weekly budget. Leafy greens,
+bean sprouts and pea shoots, fresh fish and fresh shellfish must be used within
+three days of the purchase supplying them; fresh meat is not in this short-lived
+class. These are not one combined budget or one shopping trip; do not assume
+a mid-period fresh restock.
 These derived procurement facts belong to `plan`/`replan` gold. Intent-only
 extraction tests retain stated user facts rather than inventing service defaults.
 Include genuine 1-day and 14-day boundaries, arbitrary start days, and smaller
 explicitly requested shapes as well as full defaults. Counts are design targets,
 not a claim that a feature has passed acceptance.
+
+`two_trips` and `perishable_window` tags are allowed only when `horizon_days > 7`.
+`horizon_1` requires exactly 1 day; `horizon_14` requires exactly 14 days.
 
 ## Gold without asking the product
 
@@ -144,8 +148,23 @@ written from household needs, not copied from application schemas. Every
 `expected_fields` has `action`; unknown fields/types are rejected. Every
 constraint uses a dictionary `field`, allowed `unit`, correctly typed `value`
 and dictionary `scope`; member scope also requires `target_member_ids`.
+Ordered comparisons `le` and `ge` require numeric values (not booleans, strings,
+arrays or objects), in addition to the dictionary's field type and unit checks.
 An unknown value is omitted and identified in `clarification_fields`, not
 invented or set to an untyped null. Null pantry quantity is explicitly supported.
+
+Use only the following `gold.kind` / `disposition` combinations. For `intent`,
+`answer` means the structured classification/extraction answer, not a feasible
+plan or a completed food answer. `clarify` names missing/ambiguous fields;
+`refuse` records refusal. Catalog adjudication applies only to planning gold.
+
+| `gold.kind` | Allowed `disposition` |
+|---|---|
+| `plan` | `feasible`, `infeasible`, `catalog_dependent`, `clarify` |
+| `replan` | `feasible`, `infeasible`, `catalog_dependent`, `clarify` |
+| `intent` | `answer`, `clarify`, `refuse` |
+| `qa` | `answer`, `clarify`, `refuse` |
+| `refusal` | `refuse` |
 
 The author and reviewer may add neutral fields/scopes **before** freeze, with
 inline types/units, an updated dictionary version and review. `$ref` and dynamic
