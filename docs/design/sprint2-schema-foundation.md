@@ -58,7 +58,7 @@ importer to carry (`app.planning.meal_composition.unreviewed`). Roles of
 courses are unaffected. A recipe that is a part of a dish (a dough, crust,
 batter, sauce, marinade, stock and the like) is `meal_role` `sauce`, the
 non-meal role of every such part. Still
-unwired: `self_only_allergens`, the halal and
+unwired: the halal and
 `unknown_safety` columns, `FlavorBoost` and `PlanningPreferences`, and the other
 columns below. The
 evaluation reports did not change: their requests carry no household block.
@@ -96,12 +96,15 @@ evaluation reports did not change: their requests carry no household block.
 
 The household-wide union columns (`allergens`, `excluded_ingredients`,
 `dietary_preferences`, `planning_household_size`) stay and are still written,
-for compatibility. Shopping days are not stored: the plan's first day and day 8
+for compatibility, but planning reads each member's limits instead of the
+union; the `allergens` column holds only what the whole household avoids.
+Shopping days are not stored: the plan's first day and day 8
 are derived.
 
 **Member JSON keys** (no migration needed; a feature PR adds them to
 `HouseholdMemberInput`; layer 08 PR-1 wired all but
-`self_only_allergens`). Their names are fixed here:
+`self_only_allergens`, which layer 08 PR-4 wired; see `decisions/ADR-0071`).
+Their names are fixed here:
 
 | Key | Type | Default | Meaning |
 | --- | --- | --- | --- |

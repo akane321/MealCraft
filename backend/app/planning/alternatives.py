@@ -55,21 +55,48 @@ class ChosenLine:
 
 
 def choose(alternatives: Iterable[dict] | None, household: Household) -> Option | None:
-    """The first option this household can eat and the planner can buy, or None."""
+    """The option of a combined line this household cooks with, or None when none qualifies.
+
+    An option has to clear the household's own allergens and exclusions and be one the planner can buy. Among
+    those, the one the most members can eat is chosen (ADR-0071 section 1): "butter or margarine" cooked with
+    butter puts the dish out of reach of a dairy-free member for no reason, when margarine suits everyone.
+    Ties keep the order most recipes write them in, so a household whose members are all alike, or which has
+    none, cooks exactly what it cooked before.
+    """
     if not alternatives:
         return None
     from app.planning.grocery_estimator import priceable_ingredients  # grocery_estimator imports this module
 
     excluded = set(expand_exclusions(household.excluded_ingredients))
     buyable = priceable_ingredients()
-    for raw in alternatives:
+    members = _members_of(household)
+    best: tuple[int, int, Option] | None = None
+    for order, raw in enumerate(alternatives):
         option = Option(raw["normalized_name"], raw["display_name"], tuple(raw.get("allergens") or ()))
         if option.normalized_name in excluded or option.normalized_name not in buyable:
             continue
         present, _ = allergen_conflicts(household.allergens, option.allergens)
-        if not present:
-            return option
-    return None
+        if present:
+            continue
+        suited = sum(_member_suits(member, option) for member in members)
+        if best is None or (-suited, order) < (-best[0], best[1]):
+            best = (suited, order, option)
+    return best[2] if best is not None else None
+
+
+def _members_of(household: Household) -> list:
+    block = getattr(household, "household", None)
+    return list(getattr(block, "members", None) or []) if block is not None else []
+
+
+def _member_suits(member, option: Option) -> bool:
+    """Whether this one option is something this member could eat: their own allergens and exclusions.
+
+    Their diet is a property of the recipe's tags, not of one line, so it is not read here.
+    """
+    if set(option.allergens) & set(member.allergens):
+        return False
+    return option.normalized_name not in set(expand_exclusions(member.excluded_ingredients))
 
 
 def lines(recipe, household: Household) -> list:

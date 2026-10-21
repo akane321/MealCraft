@@ -7,10 +7,12 @@ import {
   hpbSodiumLimit,
   NO_TIME_LIMIT_MINUTES,
   noGoals,
+  ownSelfOnlyAllergens,
   statedTimeLimit,
   summarizeHouseholdMembers,
   totalServings as totalOf,
 } from "~/lib/household-profile";
+import type { MemberLimitSummary } from "~/lib/household-profile";
 import {
   cleanAvailableIngredients,
   parseExcludedIngredients,
@@ -49,6 +51,8 @@ interface MemberForm {
   goal: PersonalGoal | "";
   defaultPresent: boolean;
   allergens: string[];
+  // Allergens of this member's own that only this member avoids; a subset of `allergens`.
+  selfOnlyAllergens: string[];
   excludedIngredients: string;
   dietaryPreferences: DietaryPreference[];
 }
@@ -100,6 +104,7 @@ function newMember(number: number): MemberForm {
     goal: "",
     defaultPresent: true,
     allergens: [],
+    selfOnlyAllergens: [],
     excludedIngredients: "",
     dietaryPreferences: [],
   };
@@ -145,6 +150,12 @@ const savedSummary = computed(() => current.value
   ? summarizeHouseholdMembers(current.value.current.members.map(member => ({ ...member, servings_per_meal: member.resolved_servings_per_meal })))
   : null);
 const homePortions = computed(() => (savedSummary.value ?? draftSummary.value).planningHouseholdSize);
+/** One member's own limits in a line, or "No limits" when they have none. */
+function memberLimitText(member: MemberLimitSummary): string {
+  const own = member.selfOnlyAllergens.map(allergen => `${allergenLabel(allergen)} (only ${member.name})`);
+  const parts = [...own, ...member.dietaryPreferences, ...member.excludedIngredients];
+  return parts.length ? parts.join(", ") : "No limits of their own";
+}
 // The editor's dish counts follow the draft: the people usually home as entered now, not their portions
 // (ADR-0070, backend slot_people): two adults and three small children are five at the table.
 const tablePeople = computed(() => Math.max(1, memberPayloads.value.filter(member => member.default_present !== false).length));
@@ -154,6 +165,10 @@ const ruleMembers = computed(() => members.value.map(member => ({
   age_band: member.ageBand || null,
   default_present: member.defaultPresent,
 })));
+/** The name on this member's card; a card still being filled in reads as "this person". */
+function memberName(member: MemberForm): string {
+  return member.name.trim() || "this person";
+}
 const memberNames = computed(() => members.value.map(member => member.name.trim()));
 const orphanRules = computed(() => presenceRules.value.some(rule => !memberNames.value.includes(rule.member_name)));
 const hpbSodium = computed(() => hpbSodiumLimit(reference.value, memberPayloads.value));
@@ -192,6 +207,7 @@ function hydrateFromCurrent() {
     goal: member.goal ?? "",
     defaultPresent: member.default_present ?? true,
     allergens: [...member.allergens],
+    selfOnlyAllergens: [...(member.self_only_allergens ?? [])],
     excludedIngredients: member.excluded_ingredients.join(", "),
     dietaryPreferences: [...member.dietary_preferences],
   }));
@@ -238,6 +254,8 @@ function memberPayload(member: MemberForm): HouseholdMemberInput {
     goal: member.goal || null,
     default_present: member.defaultPresent,
     allergens: member.allergens,
+    // Only an allergen this member still has: unticking the allergen drops its "only I avoid it" with it.
+    self_only_allergens: ownSelfOnlyAllergens(member.allergens, member.selfOnlyAllergens),
     excluded_ingredients: parseExcludedIngredients(member.excludedIngredients),
     dietary_preferences: member.dietaryPreferences,
   };
@@ -306,7 +324,7 @@ onMounted(async () => {
         <h1>Tell us once who's eating. Every week follows it.</h1>
       </div>
       <p>
-        Everyone shares the same meals, so one person's allergy or dislike keeps it off the whole table. Targets are only the ones you set here; this isn't medical advice.
+        Everyone shares the same dishes, and every meal gives each person something they can eat. An allergy keeps a dish off the whole table; a diet and the foods someone won't eat are that person's own. Targets are only the ones you set here; this isn't medical advice.
       </p>
     </section>
 
@@ -398,6 +416,16 @@ onMounted(async () => {
                 <label v-for="allergen in allergenOptions" :key="allergen" class="choice-card">
                   <input v-model="member.allergens" type="checkbox" :value="allergen"><span>{{ allergenLabel(allergen) }}</span>
                 </label>
+              </div>
+              <div v-if="member.allergens.length" class="self-only-group">
+                <p class="field-help">An allergen is left out of every dish for everyone. Turn one of these on and only {{ memberName(member) }}'s dishes leave it out.</p>
+                <label v-for="allergen in member.allergens" :key="allergen" class="choice-card plain self-only">
+                  <input v-model="member.selfOnlyAllergens" type="checkbox" :value="allergen">
+                  <span>Only {{ memberName(member) }} avoids {{ allergenLabel(allergen) }}</span>
+                </label>
+                <p v-if="member.selfOnlyAllergens.length" class="inline-warning">
+                  Cooking in the same kitchen can cause cross-contact. Only turn this on if that is safe for {{ memberName(member) }}.
+                </p>
               </div>
             </div>
             <div class="member-constraint-group">
@@ -542,19 +570,23 @@ onMounted(async () => {
         <section class="profile-summary-card">
           <p class="form-kicker">At the table</p>
           <h2>{{ formatPortions(homePortions) }} {{ homePortions === 1 ? "portion" : "portions" }} a meal</h2>
-          <p>What anyone avoids is left out for everyone. Meals with someone away or a guest over are cooked for who's home.</p>
+          <p>An allergen is left out for everyone, unless someone marks it "only I avoid it". A diet and the foods someone won't eat are that person's own: every meal still gives each person a main dish, a staple and a vegetable they can eat. Meals with someone away or a guest over are cooked for who's home.</p>
           <dl v-if="current" class="profile-summary-list">
-            <div><dt>Allergens</dt><dd>{{ current.current.allergens.join(", ") || "None" }}</dd></div>
-            <div><dt>Won't eat</dt><dd>{{ current.current.excluded_ingredients.join(", ") || "None" }}</dd></div>
-            <div><dt>Diet</dt><dd>{{ current.current.dietary_preferences.join(", ") || "None" }}</dd></div>
+            <div><dt>Whole household avoids</dt><dd>{{ current.current.allergens.join(", ") || "None" }}</dd></div>
+            <div v-for="(member, index) in savedSummary?.members ?? []" :key="index">
+              <dt>{{ member.name }}</dt>
+              <dd>{{ memberLimitText(member) }}</dd>
+            </div>
             <div><dt>Rules</dt><dd>{{ current.current.presence_rules.length + current.current.cooking_time_rules.length || "None" }}</dd></div>
             <div><dt>Kitchen</dt><dd>{{ current.current.missing_equipment?.length ? `No ${current.current.missing_equipment.map(item => EQUIPMENT_LABEL[item].toLowerCase()).join(", ")}` : "All equipment" }}</dd></div>
             <div><dt>Latest plan</dt><dd>{{ current.latest_plan_id ? "Planned" : "Not planned yet" }}</dd></div>
           </dl>
           <dl v-else class="profile-summary-list">
-            <div><dt>Allergens</dt><dd>{{ draftSummary.allergens.join(", ") || "None" }}</dd></div>
-            <div><dt>Won't eat</dt><dd>{{ draftSummary.excludedIngredients.join(", ") || "None" }}</dd></div>
-            <div><dt>Diet</dt><dd>{{ draftSummary.dietaryPreferences.join(", ") || "None" }}</dd></div>
+            <div><dt>Whole household avoids</dt><dd>{{ draftSummary.allergens.join(", ") || "None" }}</dd></div>
+            <div v-for="(member, index) in draftSummary.members" :key="index">
+              <dt>{{ member.name }}</dt>
+              <dd>{{ memberLimitText(member) }}</dd>
+            </div>
           </dl>
         </section>
 
@@ -573,7 +605,7 @@ onMounted(async () => {
           <button class="primary-button" type="button" :disabled="!current || isPlanning" @click="generateFromProfile">
             {{ isPlanning ? "Planning…" : planWord }}
           </button>
-          <p v-if="isPlanning" class="field-help" role="status">A large household on a tight budget can take up to half a minute to plan.</p>
+          <p v-if="isPlanning" class="field-help" role="status">A large household on a tight budget can take up to a minute to plan.</p>
           <button v-if="hasCurrentPlan" class="secondary-button profile-replan-button" type="button" :disabled="isPlanning" @click="rebuildLatestPlan">
             Replan with these details
           </button>

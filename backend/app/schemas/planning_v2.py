@@ -134,6 +134,26 @@ MealComposition = Annotated[
 ]
 
 
+class PlanningSlotMember(BaseModel):
+    """A member home for this meal, with the limits that are this member's own (ADR-0071 section 1).
+
+    The household-wide allergens, exclusions and diets of the problem apply to every dish on top of these; these
+    decide which of those dishes are this member's food, how many servings each dish is cooked for, and whether
+    this member is covered.
+    """
+
+    name: str = Field(min_length=1, max_length=80)
+    servings: float = Field(gt=0, le=3)
+    allergens: list[str] = Field(default_factory=list, max_length=20)
+    # Expanded over the ingredient hierarchy, so one stated exclusion can become dozens of ids ("meat"
+    # alone is 59): the cap is on what the expansion can produce, not on what the member wrote.
+    excluded_ingredients: list[str] = Field(default_factory=list, max_length=4000)
+    dietary_requirements: list[str] = Field(default_factory=list, max_length=4)
+    # The kcal this member needs from the meal: the HPB daily target times the meal's share (ADR-0070 section 3,
+    # ADR-0071 section 3), measured against this member's portions of the dishes they can eat. None is no floor.
+    min_energy_kcal: float | None = Field(default=None, ge=0)
+
+
 class PlanningSlot(BaseModel):
     slot_id: str = Field(min_length=1, max_length=80)
     planned_date: date
@@ -157,6 +177,9 @@ class PlanningSlot(BaseModel):
     trip: int | None = Field(default=None, ge=1, le=2, **LEAN)
     # Days since that trip, the trip's own day being 1 (layer 08 shelf life); None when the rule is off.
     days_after_shopping: int | None = Field(default=None, ge=1, le=14, **LEAN)
+    # The members home for this meal and each one's own limits (ADR-0071 section 1); empty is the whole-table
+    # rule this replaces: every dish is for everyone, cooked for `servings`, and nobody is checked separately.
+    members: list[PlanningSlotMember] = Field(default_factory=list, max_length=12, **LEAN)
 
     @model_validator(mode="after")
     def validate_composition(self) -> "PlanningSlot":

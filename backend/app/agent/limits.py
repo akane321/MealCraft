@@ -71,6 +71,11 @@ def refusal(
     if floor.empty_roles:
         meal, role = floor.empty_roles[0]
         return _no_dish(constraints, floor_of, check, meal, role, lang)
+    if floor.uncovered:
+        # Every member needs a plate of their own at every lunch and dinner (ADR-0071 section 1). It is a safety
+        # rule, so what is offered is the budget, the time and the dish count; never a limit of the member's own.
+        meal, name = floor.uncovered[0]
+        return _uncovered(constraints, floor_of, meal, name, lang)
     cap = constraints.max_uses_per_recipe
     for (meal, role), found in floor.roles.items() if cap else ():
         # A dish served at most `cap` times fills a role every day only with enough different dishes.
@@ -167,6 +172,21 @@ def _no_dish(constraints, floor_of, check, meal: str, role: str, lang: str) -> R
     if constraints.allergens or constraints.excluded_ingredients:
         return Refusal("allergens", _no_dish_text(meal, role, say("limit_safety", lang), lang))
     return Refusal("plan_shape", say("no_role", lang, role=_role(role, lang), meal=word(meal, lang)))
+
+
+def _uncovered(constraints, floor_of, meal: str, name: str, lang: str) -> Refusal:
+    """No meal can cover one member: the first limit outside safety that, eased, lets a plate of their own in."""
+    probes = []
+    if constraints.budget_per_meal_sgd is not None:
+        probes.append(("budget_per_meal_sgd", None))
+    if constraints.max_cooking_time_minutes is not None and constraints.max_cooking_time_minutes < 240:
+        probes.append(("max_cooking_time_minutes", 240))
+    if constraints.max_sodium_mg_per_meal is not None:
+        probes.append(("max_sodium_mg_per_meal", None))
+    for field, eased in probes:
+        if (meal, name) not in floor_of(**{field: eased}).uncovered:
+            return Refusal(field, say("no_cover_limit", lang, name=name, meal=word(meal, lang)))
+    return Refusal("members", say("no_cover", lang, name=name, meal=word(meal, lang)))
 
 
 def _no_dish_text(meal: str, role: str, limit: str, lang: str) -> str:

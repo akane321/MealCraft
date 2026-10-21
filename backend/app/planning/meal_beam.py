@@ -28,6 +28,7 @@ from app.planning.meal_composition import (
     role_base,
     structured_slot,
 )
+from app.planning.member_coverage import covering_groups, dish_base_servings, member_can_eat, servable
 from app.planning.nutrition_scope import nutrition_guard_loss
 from app.planning.recipe_quality import dish_kind
 from app.schemas.planning_v2 import (
@@ -48,6 +49,9 @@ ANY_COURSE = PlanningMealRole(role_id=MAIN_ROLE, courses=["main"])
 EMPTY_OPTIONAL_ROLE_LOSS = 2.0
 # How many times each role's usual number of dishes a slot tries before it has no meal (meal_options).
 MEAL_OPTION_WIDENING = (1, 2, 4)
+# Dishes a role keeps for each member it must be able to cover (`_covering`). Ranked by loss alone, a role's
+# best dishes can all be food one member cannot have, and then no combination of them covers that member.
+COVERAGE_CANDIDATES = 2
 
 
 @dataclass(frozen=True)
@@ -172,6 +176,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                     role_limit if self.limits.max_meal_combinations is None else role_limit - best,
                     turn,
                 )
+            kept += _covering(slot, ranked, kept)
             more = more or len(ranked) > len(kept)
             options: list[tuple[str | None, str] | None] = [(key, r.recipe_id) for r in kept]
             if (not role.required or role.role_id in skippable) and locked is None:
@@ -610,6 +615,9 @@ def dish_eligible(problem: FinalPlanningProblem, slot: PlanningSlot, recipe: Pla
         return False
     if not satisfies(problem.dietary_requirements, recipe.dietary_tags):
         return False
+    # A dish reaches the table when at least one present member can eat it (ADR-0071 section 1).
+    if not servable(slot, recipe):
+        return False
     if problem.missing_equipment and not equipment_met(recipe.equipment, problem.missing_equipment):
         return False
     if perishable_late(problem, slot, recipe):
@@ -623,6 +631,28 @@ def dish_eligible(problem: FinalPlanningProblem, slot: PlanningSlot, recipe: Pla
             if band.upper is not None and band.upper - actual < -1e-6:
                 return False
     return True
+
+
+def _covering(slot: PlanningSlot, ranked: list, kept: list) -> list:
+    """Dishes added to a role so the meal can cover every member present (ADR-0071 section 1).
+
+    A role's best dishes are its best by loss, which says nothing about whom they suit: for a household where
+    one member is vegetarian and another dairy-free, every main the search liked can be food one of them cannot
+    have, and the slot then has no meal at all. For each member on their own, and for the members together
+    (a meal with one main has to suit everyone from that one dish), the role keeps its best few dishes that
+    those members can eat, when none of the dishes it already kept will do.
+
+    Empty without members, and when every member has the same limits, so a request that is not a shared-dish
+    household keeps exactly the dishes it kept before.
+    """
+    chosen: list = []
+    groups = covering_groups(slot.members)
+    for group in groups:
+        if any(all(member_can_eat(member, r) for member in group) for r in kept):
+            continue
+        suits = [r for r in ranked if all(member_can_eat(member, r) for member in group)]
+        chosen += [r for r in suits[:COVERAGE_CANDIDATES] if r not in chosen]
+    return [recipe for recipe in chosen if recipe not in kept]
 
 
 def perishable_late(problem, slot, recipe) -> bool:
@@ -750,7 +780,8 @@ def meal_permitted(problem, slot, dishes, recipes, shares=None) -> bool:
         shares = meal_shares(problem, slot, [(role or MAIN_ROLE, recipe_id) for role, recipe_id in dishes], recipes)
     if shares is None or sum(shares.values()) < 1:
         return False
-    if structured_slot(slot) and real_meal_issues(slot, dishes, recipes, shares):
+    # With members at the table even an unstructured meal is checked: everyone needs something to eat.
+    if (structured_slot(slot) or slot.members) and real_meal_issues(slot, dishes, recipes, shares):
         return False
     chosen = [recipes[recipe_id] for recipe_id in ids]
     if slot.max_time_minutes is not None and meal_minutes(chosen, problem.composition_policy) > slot.max_time_minutes:
@@ -807,8 +838,13 @@ def meal_grams(problem, slot, dishes, recipes) -> list[tuple[str, float]]:
 
 
 def dish_grams(slot, recipe, share) -> list[tuple[str, float]]:
-    """What one dish needs of each ingredient at its share of the meal."""
-    scale = slot.servings * float(share) / recipe.servings
+    """What one dish needs of each ingredient at its share of the meal.
+
+    Cooked for the members who can eat it (ADR-0071 section 1), as the validator and the shopping list buy it:
+    costing the whole table here priced a dish above what the week would actually spend, and the budget pruning
+    then threw away weeks that fit.
+    """
+    scale = float(dish_base_servings(slot, recipe)) * float(share) / recipe.servings
     return [(item.ingredient_id, item.quantity * scale) for item in recipe.ingredients if item.quantity is not None]
 
 
@@ -834,12 +870,14 @@ def dish_cost(
     """What one dish's ingredients cost at those prices, at the share it is cooked for.
 
     Before the meal's size is known, the share of a full meal is used, which orders
-    dishes the same way for every size.
+    dishes the same way for every size. The servings are the members who can eat the dish (ADR-0071 section 1),
+    the same number the validator and the shopping list use.
     """
     if share is None:
         share = 1.0
+    servings = float(dish_base_servings(slot, recipe)) * float(share)
     return sum(
-        (item.quantity or 0) * slot.servings * float(share) / recipe.servings * prices.get(item.ingredient_id, 0.0)
+        (item.quantity or 0) * servings / recipe.servings * prices.get(item.ingredient_id, 0.0)
         for item in recipe.ingredients
     )
 

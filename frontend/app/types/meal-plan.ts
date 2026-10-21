@@ -25,6 +25,8 @@ export interface WeeklyPlanDay {
   portion_share: number;
   /** Portions cooked of this dish (layer 08); null for a plan made without household rules. */
   servings?: number | null;
+  /** Members at this meal who cannot eat this dish (ADR-0071); empty when everyone at the meal can. */
+  not_for?: string[];
   recipe: RecipeListItem;
   recommendation_score: number;
   nutrition_per_person: RecipeNutrition;
@@ -108,6 +110,8 @@ export interface NutritionDashboardDay {
   meal_type?: "breakfast" | "lunch" | "dinner" | "snack";
   role_id?: string;
   portion_share?: number;
+  /** Members at this meal who cannot eat this dish (ADR-0071); empty when everyone at the meal can. */
+  not_for?: string[];
 }
 
 export interface WeeklyNutritionDashboard {

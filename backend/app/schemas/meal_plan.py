@@ -170,6 +170,9 @@ class WeeklyPlanDayResponse(BaseModel):
     status: MealPlanEntryStatus
     is_locked: bool
     consumed_at: datetime | None
+    # Members home for this meal who cannot eat this dish (ADR-0071 section 1), so the plan can say "Not for
+    # Mei" beside it. Empty when everyone at the meal can eat it, and for a plan with no members.
+    not_for: list[str] = Field(default_factory=list)
 
 
 class MealPlanEntryStatusUpdate(BaseModel):
@@ -258,6 +261,9 @@ class NutritionDashboardDayResponse(BaseModel):
     meal_type: str = "dinner"
     role_id: str = "main"
     portion_share: float = 1.0
+    # Members home for this meal who cannot eat this dish (ADR-0071 section 1), so the week can say
+    # "Not for Mei" beside it. Empty when everyone at the meal can, and for a plan with no members.
+    not_for: list[str] = Field(default_factory=list)
 
 
 class WeeklyNutritionDashboardResponse(BaseModel):
