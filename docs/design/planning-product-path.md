@@ -99,3 +99,24 @@ source data, missing prices, budget precision, budget recomputation, bounded
 search, deterministic replay of the same observations, redaction, atomic
 storage and the repository's runtime catalog. Existing profile and Agent
 request tests exercise the shared service through those entry points.
+
+## Partial-week checkout accounting
+
+For a plan with one shopping trip, meal additions reserve the unchanged dishes'
+known pantry use before searching. Their package surplus becomes temporary
+planning stock. This does not change the household's saved pantry. Unknown
+quantities do not provide a deduction. A zero remaining budget is valid for this
+internal search when the temporary stock covers the addition.
+
+Before accepting an in-budget candidate, the service recomputes the unchanged
+and new dishes together against the original pantry and checkout budget, in
+cents. Missing prices cannot establish that a candidate fits. Explicit additions
+that need more money retain the existing preview-and-confirm flow.
+
+For plans with two shopping trips, unchanged dishes carry their plan-day numbers.
+The service searches the trips in order with separate weekly budgets. Only the
+original pantry left after the first trip's complete menu passes to the second;
+package surplus stays within its trip, matching the canonical two-trip basket.
+Calendar dates, locked dishes and recipe-use caps across both weeks are retained.
+Preview does not save the additions. This sequential search does not prove a
+globally cheapest two-week revision or explore every possible allocation of stock.

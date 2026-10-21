@@ -612,7 +612,7 @@ class MealPlanReplanningService:
         recipes = {r.id: r for r in self.recipe_repository.list_by_ids(list({i.recipe_id for i in kept}))}
         rest = [(recipes[item.recipe_id], grocery_share(item, constraints.household_size)) for item in kept]
         left = None
-        if budget is not None:
+        if budget is not None and constraints.day_count <= meal_structure.trip_days():
             # What is left is what the rest of the week does not spend at the checkout, in whole packages:
             # what its dishes use leaves room the week has already paid for, and a plan made to fit that
             # room would go over the budget without trying the cheapest plans first.
@@ -624,7 +624,7 @@ class MealPlanReplanningService:
             update={
                 "plan_shape": MealPlanShape(meals={meal: roles}),
                 "meal_composition": None,
-                "weekly_budget_sgd": left,
+                "weekly_budget_sgd": budget if constraints.day_count > meal_structure.trip_days() else left,
             }
         )
         first = min(days)
@@ -643,6 +643,7 @@ class MealPlanReplanningService:
                 day_count=len(days),
                 day_indices=sorted(days),
                 rest=rest,
+                rest_days=[item.day_index for item in kept],
                 keep=self._dishes_kept_when_adding(roles, removed),
                 over_budget=over_budget,
                 by_weight=weighed,
