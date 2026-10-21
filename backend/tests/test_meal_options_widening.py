@@ -1,6 +1,10 @@
 """A slot whose best few dishes make no meal that passes still gets a meal from lower-ranked ones (2026-10-12)."""
 
-from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner
+import time
+
+from app.planning import meal_beam
+from app.planning.meal_beam import LAST_STEP_COMBINATIONS, MealBeamLimits, MealBeamPlanner
+from app.schemas.planning_v2 import PlanningMealRole
 from tests.test_planning_meal_composition import problem, recipe
 
 
@@ -50,3 +54,42 @@ def test_a_meal_whose_first_32_mains_all_fail_still_gets_the_33rd():
     assert planner.limits.candidates_per_role * 4 == len(many)
     meals = planner.meal_options(packet, packet.slots[0])
     assert {dict(meal.dishes)["main"] for meal in meals} == {"plain-main"}
+
+
+def five_salty_roles():
+    """Five roles of 45 dishes each, every meal of them over the meal's sodium limit."""
+    packet = salty_first()
+    salty = next(r for r in packet.recipes if r.recipe_id == "salty-main")
+    packet.recipes = [
+        salty.model_copy(update={"recipe_id": f"salty-{i:02d}", "title": f"salty-{i:02d}"}) for i in range(45)
+    ]
+    packet.slots[0].composition = [
+        PlanningMealRole(role_id=role, courses=["main"]) for role in ("main", "main-2", "main-3", "main-4", "main-5")
+    ]
+    return packet
+
+
+def test_the_last_step_gives_up_after_its_combination_budget():
+    """Review of task 14: the last step had no cap, and a five-role meal that no combination passes enumerated the
+    whole product (about 2e10 combinations for a real dinner, hours) before the slot was refused. It now checks
+    `LAST_STEP_COMBINATIONS` and calls the slot empty, as the four-times step did before."""
+    packet = five_salty_roles()
+    planner = MealBeamPlanner(
+        MealBeamLimits(max_meal_combinations=16384), local_losses={r.recipe_id: 0.0 for r in packet.recipes}
+    )
+    started = time.perf_counter()
+    # The last step alone: 45^5 (1.8e8) combinations, of which it checks its budget (about a second).
+    assert planner._meal_options(packet, packet.slots[0], None) == ([], False)
+    assert planner.last_step_tried == LAST_STEP_COMBINATIONS
+    assert time.perf_counter() - started < 30
+
+
+def test_a_slot_the_last_step_gave_up_on_is_recorded_with_its_count(monkeypatch):
+    packet = five_salty_roles()
+    monkeypatch.setattr(meal_beam, "MEAL_OPTION_WIDENING", (None,))
+    planner = MealBeamPlanner(
+        MealBeamLimits(max_meal_combinations=16384), local_losses={r.recipe_id: 0.0 for r in packet.recipes}
+    )
+    result = planner.search_candidates(packet)
+    assert result.empty_slot_ids == ("d1",)
+    assert result.capped_slots == (("d1", LAST_STEP_COMBINATIONS),)

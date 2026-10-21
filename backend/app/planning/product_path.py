@@ -335,9 +335,9 @@ def families_first(recommendations, seen=()) -> list:
 #
 # Layer 08 PR-4 kept the top-up conditional because topping up always refused `mixed-diets` at 6 and at 40. That
 # refusal was never the packet's: `meal_beam.meal_options` widened each role to four times its usual dishes and
-# then gave up, so one lunch had no meal at all although eligible dishes were left. The meal beam now keeps every
-# eligible dish before it calls a meal empty (`MEAL_OPTION_WIDENING`), and every setting plans; the measurements
-# are in the task 14 record.
+# then gave up, so one lunch had no meal at all although eligible dishes were left. The meal beam now tries every
+# eligible dish, up to `LAST_STEP_COMBINATIONS` combinations, before it calls a meal empty (`MEAL_OPTION_WIDENING`),
+# and every setting plans; the measurements are in the task 14 record.
 PACKET_COVERAGE_CANDIDATES = 40
 
 

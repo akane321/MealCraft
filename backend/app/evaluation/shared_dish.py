@@ -691,6 +691,19 @@ SLOW_CAUSES = {
 }
 
 
+# The last widening step of a meal's options (`meal_beam.MEAL_OPTION_WIDENING`, None) ran in no case above. Timed
+# alone by forcing it on every slot of `mixed-diets`, shared (task 14 review, 2026-10-21). Rewrite on a change to it.
+LAST_STEP_TIMING = (
+    "The last widening step of a meal's options (`meal_beam.MEAL_OPTION_WIDENING`, every eligible dish of every "
+    "role) ran in no case above. Forced on every slot of `mixed-diets` (shared) it checked 177 combinations for a "
+    "breakfast in 0.01 s and 32,549 for a three-role lunch in 2.1 s. A five-role dinner, a raw product of about "
+    "2e10 combinations (about 3 µs each, so hours unbounded), stopped at its budget of "
+    "`meal_beam.LAST_STEP_COMBINATIONS` (262,144) in 0.35 s. Those were the top-ranked dishes of its first roles "
+    "with every dish of the rest, and none made a meal, so forced alone that dinner would be refused, as the "
+    "four-times step refused such a slot before."
+)
+
+
 def timing_markdown(seconds: dict[str, dict[str, float]]) -> str:
     rows = [
         f"| `{case}` | {taken['merged']} | {taken['shared']} | {BAND_LABEL[timing_band(taken['shared'])]} |"
@@ -729,6 +742,8 @@ def timing_markdown(seconds: dict[str, dict[str, float]]) -> str:
                     "",
                 )
             ],
+            LAST_STEP_TIMING,
+            "",
         ]
     )
 
