@@ -83,6 +83,7 @@ replay packet or a new console interface.
 | `needs_clarification` / `needs_data` | The request needs a concrete correction, such as whole-cent budgets or unambiguous pantry quantities. |
 | `needs_data` / `needs_data` | Required facts cannot be verified. |
 | `candidate_rejected` / `bounded_search_exhausted` | No validated completion was retained; no infeasibility claim or relaxation follows. |
+| `candidate_rejected` / `candidate_validation_failed` | The greedy baseline produced a candidate that failed independent validation. The attempted checks record the reason, such as `purchase_budget`; this is neither a search-resource limit nor an infeasibility proof. |
 | `infeasible` / `exactly_infeasible` | A required slot has no eligible candidate in the supplied packet. |
 | `infeasible` / `exhaustively_infeasible` | Untruncated beam enumeration completed and every validated assignment failed only a budget check under the fixed shopping policy. |
 
