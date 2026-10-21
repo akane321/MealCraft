@@ -240,8 +240,11 @@ def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Re
             for role, recipe in tags.items()
         ):
             failures["no_non_meal_dish"] += 1
-        sources = [set(recipe.protein_sources or ()) for role, recipe in tags.items() if _kind(role) == "main"]
-        if sum(map(len, sources)) != len(set().union(*sources)):
+        mains = [recipe for role, recipe in tags.items() if _kind(role) == "main"]
+        sources = [set(recipe.protein_sources) for recipe in mains if recipe.protein_sources is not None]
+        if any(recipe.protein_sources is None for recipe in mains) or sum(map(len, sources)) != len(
+            set().union(*sources)
+        ):
             failures["protein_sources_distinct"] += 1
         per_serving = sum(d["nutrition_per_person"]["calories_kcal"] for d in dishes)
         energy.append(per_serving >= floor[meal] - 1e-6)

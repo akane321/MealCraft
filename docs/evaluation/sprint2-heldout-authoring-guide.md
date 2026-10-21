@@ -56,9 +56,10 @@ minima for these feature tags: `full_table`, `shared_dishes`, `member_rules`,
 `two_trips`, `perishable_window`. Include at least two planning cases lasting
 8–14 days; predeclare their exact count/coverage. They have purchases before
 day 1 and day 8, each separately subject to the weekly budget. Leafy greens,
-bean sprouts and pea shoots, fresh fish and fresh shellfish must be used within
-three days of the purchase supplying them; fresh meat is not in this short-lived
-class. These are not one combined budget or one shopping trip; do not assume
+sprouts (including bean, pea and radish sprouts), fresh fish and fresh seafood
+(including shellfish, squid, octopus and seafood mixes) must be used within three
+days of the purchase supplying them. Frozen, dried, smoked and canned forms, and
+fresh meat, are not in this short-lived class. These are not one combined budget or one shopping trip; do not assume
 a mid-period fresh restock.
 These derived procurement facts belong to `plan`/`replan` gold. Intent-only
 extraction tests retain stated user facts rather than inventing service defaults.

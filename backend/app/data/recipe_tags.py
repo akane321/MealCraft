@@ -22,8 +22,9 @@ The rules, and why:
 - **Meal role.** A fixed course decides it: breakfast, dessert, sauce, drink, snack, salad. A recipe that
   is a part of a dish, not a dish (a dough, crust, batter, filling, topping, sauce, marinade, rub, dressing,
   gravy, stock, broth, paste or seasoning by its title's final head noun: `component`) is a `sauce`, the role of every
-  such part, so it never fills a meal; "Chicken In Tarragon Sauce" and "Cauliflower Crust Pizza" stay
-  dishes. A salad
+  such part, so it never fills a meal; a listed meat/fish/soy-led filling is instead a protein main,
+  while cheese-led fillings and toppings remain components. "Chicken In Tarragon Sauce" and
+  "Cauliflower Crust Pizza" stay dishes. A salad
   stays a salad whatever it holds, since a salad only ever fills the vegetable side (ADR-0070); the
   planner's vegetable-led check still decides whether it may. A hearty salad (not vegetable-led, with a
   main protein) therefore fills no slot; the owner reviews them as their own stratum of the sample packet
@@ -166,10 +167,36 @@ AND_LINK = re.compile(r"\b(?:and|n)\b|&")
 TITLE_TAIL = re.compile(r"\s+-\s.*$|\s+for\b.*$")  # "Spaghetti Sauce - Slow Cooker", "Meatballs For Spaghetti Sauce"
 TITLE_SUFFIX = re.compile(r"(?:\s+(?:recipe|i{1,3}))+$")
 WRAPPED_MEAL = re.compile(r"\b(?:pasties|pasty|empanadas?|pierogi|ravioli|tortellini|wontons?|meat pies?)\b")
-SANDWICH = re.compile(r"\b(?:sandwich(?:es)?|banh mi|burgers?)\b")
+SANDWICH = re.compile(r"\b(?:sandwich(?:es)?|banh mi|burgers?|wraps?|burritos?|tacos?|quesadillas?)\b")
+SHELL_BOWL = re.compile(r"\b(?:tortilla|taco) bowls?\b")  # An edible shell/container is not an assembled wrap.
 BREAD_CARRIERS = frozenset(
-    {"bread", "baguette", "hamburger_bun", "hot_dog_bun", "dinner_roll", "pita_bread", "english_muffin"}
+    {
+        "bread",
+        "baguette",
+        "hamburger_bun",
+        "hot_dog_bun",
+        "dinner_roll",
+        "pita_bread",
+        "english_muffin",
+        "tortilla",
+        "wrap",
+        "bagel",
+        "naan",
+        "pita",
+        "flatbread",
+        "roti",
+        "chapati",
+        "paratha",
+        "taco_shell",
+    }
 )
+STAPLES |= BREAD_CARRIERS
+NAMED_RICE = re.compile(r"\b(?:rice|pilaf|risotto)\b")
+NAMED_NOODLES = re.compile(
+    r"\b(?:noodles?|pasta|macaroni|spaghetti|linguine|fettuccine|penne|lasagn[ae]|lo mein|chow mein)\b"
+)
+NAMED_BOWL = re.compile(r"\bbowls?\b")
+FILLING_TITLE = re.compile(r"\bfillings?(?:\s+for\b.*)?(?:\s*\([^)]*\))*\s*$", re.I)
 COOKED_WORD = re.compile(r"\b(?:cooked|prepared|leftover|boiled|steamed)\b", re.I)
 MASS_UNIT = re.compile(r"(?<![a-z])(?:oz|ounces?|lbs?|pounds?|g|grams?|kg|kilograms?)\b", re.I)
 VOLUME_UNIT = re.compile(
@@ -177,6 +204,22 @@ VOLUME_UNIT = re.compile(
 )
 SUBSTITUTION_NOTE = re.compile(r"\b(?:substitut\w*|instead|may|alternativ\w*)\b", re.I)
 DOUGH_FLOUR = frozenset({"flour", "bread_flour", "whole_wheat_flour", "self_rising_flour", "semolina"})
+PIZZA_BATTER = DOUGH_FLOUR | {
+    "milk",
+    "egg",
+    "salt",
+    "black_pepper",
+    "italian_seasoning",
+    "water",
+    "vegetable_oil",
+    "olive_oil",
+    "butter",
+    "margarine",
+    "yeast",
+    "sugar",
+    "baking_powder",
+    "baking_soda",
+}
 BAKED_SIDE = re.compile(r"\b(?:au gratin|gratins?|bakes?|casseroles?|roasts?)\b")
 SOUP_TITLE = re.compile(r"\b(?:soups?|broths?|chowders?|bisques?|stews?)\b")
 CRITICAL_MODEL_FIELDS = ("meal_role", "contains_staple", "protein_sources")
@@ -557,7 +600,15 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
     """The rule's role, or None with the roles the model may choose from."""
     title = dish.title.lower()
     open_roles = tuple(role for role in MEAL_ROLES if led or role not in {"vegetable", "salad"})
+    names = {release_name(line.name) for line in dish.lines}
+    if PIZZA_TITLE.search(title) and names & DOUGH_FLOUR and names <= PIZZA_BATTER:
+        return "sauce", ()  # Only a batter is listed; the title/steps cannot supply the missing pizza toppings.
     if component(dish.title, dish.course):
+        if FILLING_TITLE.search(title) and set(sources or ()) & (FLESH_SOURCES | {"soy"}):
+            protein = sum(line.grams or 0 for line in dish.lines if line_sources(line) & (FLESH_SOURCES | {"soy"}))
+            dairy = sum(line.grams or 0 for line in dish.lines if group_of(line.name) == "dairy")
+            if protein > dairy:
+                return "protein_main", ()
         return "sauce", ()  # `sauce` is every non-meal part of a dish, a dough or stock as much as a sauce
     if dish.course in FIXED_COURSE_ROLES:
         return FIXED_COURSE_ROLES[dish.course], ()
@@ -576,7 +627,7 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
     share = staple_share(dish)
     if share == 0:
         open_roles = tuple(role for role in open_roles if role not in {"one_bowl", "staple"})
-    if SANDWICH.search(title) and any(release_name(line.name) in BREAD_CARRIERS for line in dish.lines):
+    if dish.course != "soup" and SANDWICH.search(title) and not SHELL_BOWL.search(title) and names & BREAD_CARRIERS:
         return "one_bowl", ()
     if dish.course == "soup":
         # A noodle soup by its title, a soup this much staple, or one whose noodles or rice are a tenth of it.
@@ -606,6 +657,15 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
         return ("staple" if not has_protein and share >= STAPLE_ONLY_SHARE else "one_bowl"), ()
     if share >= GREY_SHARE and not sources:
         return None, ("staple", *(("vegetable",) if led else ()))
+    if share >= GREY_SHARE and has_protein:
+        rice = names & RICE_GRAINS
+        noodles = names & (SOUP_STAPLES - RICE_GRAINS)
+        if (
+            (NAMED_RICE.search(title) and rice)
+            or (NAMED_NOODLES.search(title) and noodles)
+            or (NAMED_BOWL.search(title) and (rice or noodles))
+        ):
+            return "one_bowl", ()
     if has_protein:
         return "protein_main", ()
     if led:
@@ -687,7 +747,11 @@ def rule_tags(dish: Dish) -> Tags:
     role, allowed = meal_role(dish, sources, led)
     if not dish.curated and (conflict := reviewed_source_conflict(dish.key)):
         tags.incomplete_reason, sources = conflict, None
-    elif not dish.curated and dish.course in {"main", "side", "soup"} and not component(dish.title, dish.course):
+    elif (
+        not dish.curated
+        and dish.course in {"main", "side", "soup"}
+        and (not component(dish.title, dish.course) or role == "protein_main")
+    ):
         tags.incomplete_reason = missing_named_protein(dish.title, [(line.name, line.text) for line in dish.lines])
         if tags.incomplete_reason:
             role, allowed, sources = None, (), None
