@@ -1,0 +1,17 @@
+{
+  "schema_version": "sprint2-authoring-v1",
+  "purpose": "format_demo",
+  "author_id": null,
+  "reviewer_id": null,
+  "quota_manifest": {
+    "declared_on": null,
+    "approved_by": null,
+    "fields_sha256": null,
+    "counts": {"planning": null, "intent": null, "multi_turn": null, "adversarial": null},
+    "minimum_chinese": {"planning": null, "intent": null, "multi_turn": null, "adversarial": null},
+    "forum_count": null,
+    "subtype_minima": {},
+    "feature_minima": {}
+  },
+  "cases": []
+}
