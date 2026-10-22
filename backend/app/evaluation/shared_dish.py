@@ -678,10 +678,10 @@ COMMON_CAUSE = (
     "meal's combinations (owner, 2026-10-22) it checks every combination of every role's usual candidates. Only "
     "`weekend-guest` (1.0 million combinations) and `six-one-vegetarian` (1.1 million) were profiled since: there "
     "that check was 97-98% of the run, and 46-51% of it `member_coverage.member_can_eat` asked again for every "
-    "member, dish and combination with nothing cached per member and recipe (26 and 38 million calls). Reading the candidates takes about 2.5 s, and topping "
-    "the packet up for every member group (`product_path._packet_covering`, each ranked dish judged by the option "
-    "this household cooks) about as long. Upgrade path, none of it changing a plan: cache the member checks per "
-    "member and recipe"
+    "member, dish and combination with nothing cached per member and recipe (26 and 38 million calls). Reading the "
+    "candidates takes about 2.5 s, and topping the packet up for every member group (`product_path._packet_covering`, "
+    "each ranked dish judged by the option this household cooks) about as long. Upgrade path, none of it changing a "
+    "plan: cache the member checks per member and recipe"
 )
 SLOW_CAUSES = {
     "tight-budget": (
