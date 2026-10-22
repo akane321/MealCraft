@@ -203,8 +203,9 @@ jobs:
   compose:
     name: compose
     runs-on: ubuntu-latest
-    # Raised with the shared-dish report, which plans ten households twice (layer 08 PR-4).
-    timeout-minutes: 30
+    # Includes the full backend suite and six evaluation commands inside Docker. The
+    # previous 30-minute cap cancelled shared-dish evaluation after every prior step passed.
+    timeout-minutes: 45
 
     # The `backend` job runs the suite from a checkout: `<repo>/backend/tests`.
     # CONTRIBUTING.md and AGENTS.md tell contributors to verify through the
