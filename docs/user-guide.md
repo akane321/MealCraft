@@ -158,9 +158,10 @@ seafood (including shellfish, squid, octopus and seafood mixes) are cooked withi
 are excluded from this short-lived class. The shopping list marks the fresh items
 "Use within 3 days".
 
-Most plans take a few seconds. A large household on a tight budget takes longer,
-a few minutes, while the planner searches for a week that fits the
-budget; the button says "Planning…" until the plan is ready. How long is
+Most plans take a few seconds. A large household, or one on a tight budget,
+takes longer, from a few minutes to about an hour for a household of seven,
+while the planner searches every allowed combination for the best week that
+fits; the button says "Planning…" until the plan is ready. How long is
 acceptable follows how hard the request is: a simple week comes back quickly, a
 complex one is allowed the longer wait rather than being cut short.
 
