@@ -2,7 +2,9 @@ from fastapi import APIRouter
 
 from app.api.routes.agent import router as agent_router
 from app.api.routes.auth import router as auth_router
+from app.api.routes.external_recipes import router as external_recipes_router
 from app.api.routes.household_profiles import router as household_profiles_router
+from app.api.routes.ingredient_substitutions import router as ingredient_substitutions_router
 from app.api.routes.meal_plans import router as meal_plans_router
 from app.api.routes.operations import router as operations_router
 from app.api.routes.operations_data_quality import router as operations_data_quality_router
@@ -15,6 +17,8 @@ api_router = APIRouter()
 api_router.include_router(system_router)
 api_router.include_router(auth_router)
 api_router.include_router(agent_router)
+api_router.include_router(external_recipes_router)
+api_router.include_router(ingredient_substitutions_router)
 api_router.include_router(household_profiles_router)
 api_router.include_router(meal_plans_router)
 api_router.include_router(operations_router)

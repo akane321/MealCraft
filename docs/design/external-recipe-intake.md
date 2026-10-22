@@ -17,7 +17,7 @@ improves as the product is used, without a second, looser path into it.
 ```text
 user asks
   -> catalog lookup            found -> plan with it
-  -> web search                        (tiered sources, robots-aware)
+  -> `/api/external-recipes/search-and-intake` (Responses `web_search`, source citation required)
   -> parse into the staging shape      ingredients, quantities, units, steps, servings
   -> duplicate check                   normalized title + ingredient set
   -> ingredient mapping                canonical vocabulary; unknown names enriched
@@ -26,8 +26,37 @@ user asks
   -> store and plan
 ```
 
-Each stage records what it did into the retrieval trace, so a recipe's origin
-stays inspectable in the operations console.
+The recipe record stores its source URL, tier, retrieval time and licence note.
+External intake calls also create an operations task with per-stage status and
+duration for search/extraction, ingredient mapping, household review and
+private persistence. The operations console shows these stages without saving
+the raw search query.
+
+Per-serving nutrition is calculated from the mapped ingredient grams and the
+released canonical nutrition-per-100-g records. Extracted macro totals are
+discarded. If any mapped ingredient has no released nutrition record, admission
+stops with `nutrition_per_serving` listed as missing; the candidate is not
+stored with model-invented totals.
+
+The search route asks the model to use hosted web search and return one typed
+candidate. The candidate's `source_url` must match a URL citation in the
+Responses output; otherwise the request stops before mapping or persistence.
+The endpoint then runs the same reviewed ingredient mapper and household
+admission gate as `/api/external-recipes/intake`. Search results and extracted
+safety labels are untrusted: catalog rules replace ingredient identity,
+allergen and halal facts. The model is instructed to paraphrase all steps.
+Search-generated candidates are currently tier 2 until a separate source-
+policy registry verifies page-level redistribution rights. The model cannot
+assign a licence or tier; the staged record marks the licence unverified and
+retains only structured facts and paraphrased steps.
+
+When admission blocks a candidate, the response includes the review reasons
+and up to three similar catalog recipes that pass the same household allergen,
+exclusion, dietary, time and halal filters as recommendations. If search is
+unavailable, has no usable cited result, or the server has no search key, the
+error response includes a reason and the same kind of safe catalog suggestions.
+Suggestions are ranked by local lexical similarity and do not trigger another
+model or network request.
 
 ### Parse
 
@@ -88,14 +117,30 @@ TheMealDB, USDA FoodData Central (public domain), Open Food Facts (ODbL),
 government and public-health publications whose terms allow non-commercial
 reuse, and licensed datasets already in use.
 
+These source names are candidate classes, not a domain-wide grant. TheMealDB's
+current [Terms of Use](https://www.themealdb.com/terms_of_use.php) permit copying
+content returned through its official API endpoints, prohibit scraping its
+website, and require permission or another legal basis for third-party content.
+Therefore a page found through hosted web search must remain tier 2 unless the
+specific record has separate, recorded rights evidence. The server-side
+source-policy registry distinguishes web-search pages from user-supplied
+provenance, ignores caller-claimed tiers and licence labels, and currently
+keeps every external intake at tier 2. It records a policy id/version and the
+TheMealDB terms reference when applicable; the reference is not a rights grant.
+No source is promoted until page-specific rights evidence is reviewed.
+
 **Tier 2 — everything else** (encyclopaedias, recipe portals, forums, blogs,
 social posts). Stored: our structured record, the source URL, the retrieval
 time, and **steps rewritten in our own words**. The source's own wording is not
 committed.
 
-Both tiers honour robots rules and a polite request rate. Every record carries
-`source.tier`, `source.url` and `source.retrieved_at`, so the report and the
-console can state where the catalog grew from.
+The current hosted-search adapter does not expose app-controlled robots
+checks or a per-domain request-rate policy; those controls remain pending for
+a direct retrieval adapter. Every record carries
+`source.tier`, `source.url`, `source.retrieved_at`, `source.license_status`,
+`source.source_policy_id` and `source.source_policy_version`, so reports and
+the console can state where the catalog grew from and what rights review was
+applied.
 
 ## Record shape
 

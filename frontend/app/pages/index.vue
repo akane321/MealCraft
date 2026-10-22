@@ -3,6 +3,7 @@ import { allergenLabel } from "~/lib/allergens";
 import { budgetGap, budgetLine, changedMealWhen, formatSgd, groceriesChange, groceryGroups, previewChoices, sameDishChange } from "~/lib/home-surface";
 import { statedTimeLimit } from "~/lib/household-profile";
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
+import { planningPreferenceLabels } from "~/lib/planning-preferences";
 import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
 import type { AgentMessage, AgentSession } from "~/types/agent";
 import type { MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection, WeeklyMealPlanListItem } from "~/types/meal-plan";
@@ -73,6 +74,7 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
     ...c.excluded_ingredients.map(value => ({ text: "No", value: value.replaceAll("_", " ") })),
     ...c.allergens.map(value => ({ text: "No", value: allergenLabel(value).toLowerCase(), alert: true })),
     ...(repeatLabel(c.max_uses_per_recipe) ? [{ text: "", value: repeatLabel(c.max_uses_per_recipe)! }] : []),
+    ...planningPreferenceLabels(c.planning_preferences).map(value => ({ text: "Preference", value })),
   ];
 });
 // The household's own name for the conversation, else its first message.
@@ -646,6 +648,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                   </label>
                 </div>
                 <p>Ready to plan your week with these details.</p>
+                <p v-if="planningPreferenceLabels(constraints?.planning_preferences).length" class="mc-small">
+                  You can change any preference in the chat before planning.
+                </p>
               </div>
               <div class="card-foot">
                 <button type="button" class="mc-btn primary" :disabled="isLoading" @click="agent.confirm()">

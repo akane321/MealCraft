@@ -48,7 +48,7 @@ DatabaseDependency = Annotated[Session, Depends(get_db_session)]
 def build_meal_plan_service(
     database: Session, household_id: int, actor_user_id: int | None = None
 ) -> WeeklyMealPlanService:
-    recipe_repository = RecipeRepository(database)
+    recipe_repository = RecipeRepository(database, household_id=household_id)
     product_service = create_product_search_service(ProductSnapshotRepository(database))
     recommendation_service = RecipeRecommendationService(
         recipe_repository,
@@ -76,7 +76,7 @@ MealPlanServiceDependency = Annotated[WeeklyMealPlanService, Depends(get_meal_pl
 def build_replanning_service(
     database: Session, household_id: int, actor_user_id: int | None = None
 ) -> MealPlanReplanningService:
-    recipe_repository = RecipeRepository(database)
+    recipe_repository = RecipeRepository(database, household_id=household_id)
     product_service = create_product_search_service(ProductSnapshotRepository(database))
     recommendation_service = RecipeRecommendationService(
         recipe_repository,

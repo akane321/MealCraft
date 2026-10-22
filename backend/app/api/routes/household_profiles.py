@@ -54,7 +54,7 @@ def get_household_profile_service(
 ) -> HouseholdProfileService:
     household_id = current.active_membership.household_id
     meal_plan_repository = MealPlanRepository(database, household_id=household_id)
-    recipe_repository = RecipeRepository(database)
+    recipe_repository = RecipeRepository(database, household_id=household_id)
     product_service = create_product_search_service(ProductSnapshotRepository(database))
     meal_plan_service = WeeklyMealPlanService(
         actor_user_id=current.user.id,

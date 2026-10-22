@@ -2,9 +2,9 @@ from datetime import date
 from functools import cached_property
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_serializer, model_validator
 
-from app.schemas.catalog_tags import CookingMethod, Equipment, EquipmentNeeds, MealRole, ProteinSource
+from app.schemas.catalog_tags import CookingMethod, Equipment, EquipmentNeeds, FlavorTag, MealRole, ProteinSource
 
 MealType = Literal["breakfast", "lunch", "dinner", "snack"]
 NutrientMetric = Literal[
@@ -180,6 +180,21 @@ class PlanningSlot(BaseModel):
     # The members home for this meal and each one's own limits (ADR-0071 section 1); empty is the whole-table
     # rule this replaces: every dish is for everyone, cooked for `servings`, and nobody is checked separately.
     members: list[PlanningSlotMember] = Field(default_factory=list, max_length=12, **LEAN)
+    preferred_flavors: list[FlavorTag] = Field(default_factory=list, max_length=20)
+    prefer_more_vegetables: bool = False
+    prefer_lighter: bool = False
+
+    @model_serializer(mode="wrap")
+    def _omit_default_preference_fields(self, handler):
+        data = handler(self)
+        if isinstance(data, dict):
+            if not self.preferred_flavors:
+                data.pop("preferred_flavors", None)
+            if not self.prefer_more_vegetables:
+                data.pop("prefer_more_vegetables", None)
+            if not self.prefer_lighter:
+                data.pop("prefer_lighter", None)
+        return data
 
     @model_validator(mode="after")
     def validate_composition(self) -> "PlanningSlot":
@@ -216,6 +231,8 @@ class PlanningRecipeCandidate(BaseModel):
     allowed_meal_types: list[MealType] = Field(min_length=1)
     total_time_minutes: int = Field(ge=0, le=720)
     dietary_tags: list[str] = Field(default_factory=list)
+    unknown_safety: list[str] = Field(default_factory=list)
+    halal_status: Literal["halal", "needs_certification", "not_halal", "uncertain"] | None = None
     allergens: list[str] = Field(default_factory=list)
     ingredients: list[PlanningIngredientRequirement] = Field(min_length=1)
     nutrients_per_serving: PlanningNutrients
@@ -235,6 +252,8 @@ class PlanningRecipeCandidate(BaseModel):
     cuisine_group: str | None = Field(default=None, max_length=40, **LEAN)
     # A bought line is perishable: the dish is cooked within `FinalPlanningProblem.perishable_days` of its trip.
     perishable: bool | None = Field(default=None, **LEAN)
+    flavor_tags: list[FlavorTag] | None = Field(default=None, max_length=4)
+    vegetable_share: float | None = Field(default=None, ge=0, le=1, allow_inf_nan=False)
 
     @model_validator(mode="after")
     def validate_time_split(self) -> "PlanningRecipeCandidate":
@@ -394,6 +413,7 @@ class PlanningRepetitionRules(BaseModel):
     recipe_counts: list[PlanningRecipeCount] = Field(default_factory=list)
     ingredient_meals: list[PlanningIngredientMeals] = Field(default_factory=list)
     repeat_ok_roles: list[str] = Field(default_factory=list)
+    repeat_allowed_meals: list[MealType] = Field(default_factory=list)
 
 
 class FinalPlanningProblem(BaseModel):
@@ -409,6 +429,7 @@ class FinalPlanningProblem(BaseModel):
     allergen_vocabulary: list[str] | None = None
     excluded_ingredients: list[str] = Field(default_factory=list)
     dietary_requirements: list[str] = Field(default_factory=list)
+    requires_halal: bool = False
     health_preferences: list[Literal["low-sodium", "low-sugar", "lower-calorie"]] = Field(default_factory=list)
     nutrition_bands: list[PlanningNutritionBand] = Field(default_factory=list)
     # A partial replan can have no money left while reserved stock covers every dish.

@@ -15,6 +15,7 @@ from app.schemas.agent import (
     AgentMessageResponse,
     UnmatchedTermSuggestion,
 )
+from app.schemas.household_rules import PlanningPreferences
 from app.schemas.recommendation import AvailableIngredientInput, NutritionTargets
 
 NUMBER_WORDS = {
@@ -35,7 +36,7 @@ CHINESE_NUMBERS = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "
 # "No pork", "we don't eat pork", "exclude mushrooms", "skip the onion".
 ENGLISH_EXCLUSION = (
     r"\b(?:no|without|avoid|exclude|excluding|skip|(?:don't|do not|doesn't|does not|can't|cannot|won't|never)"
-    r"\s+(?:eat|have|like|want))\s+(?:any\s+|the\s+)?"
+    r"\s+(?:eat|have|like|want|use|add|cook with))\s+(?:any\s+|the\s+)?"
 )
 # "No repeats", "don't repeat any dish", "no dish twice", "don't serve any dish twice", "each dish only once".
 ENGLISH_NO_REPEATS = (
@@ -70,12 +71,12 @@ WEEKLY_AFTER = re.compile(
     r"|\b(?:7|seven)\s+(?:dinners|lunches|breakfasts)\b|一周|每周|这周|本周|整周|总共|一共|合计|总计)"
 )
 WEEKLY_BEFORE = re.compile(
-    r"(?:\b(?:total|altogether|overall|week|weekly)\b|一共|总共|合计|总计|总预算|一周|每周|这周|本周|整周|周预算)[^\d]{0,24}$"
+    r"(?:\b(?:total|altogether|overall|week|weekly)\b|一共|总共|合计|总计|总预算|一周|每周|这周|本周|整周|周预算)[^\d]{0,48}$"
 )
 # A number after "for" that counts something other than who eats: "for 7 dinners", "for 10 dollars".
 NOT_EATERS = (
     r"(?!\s*(?:dollars?|bucks|sgd|新币|新元|块|元|dinners?|meals?|days?|lunch|lunches|breakfasts?"
-    r"|minutes?|mins?|hours?|分钟|%))"
+    r"|members?|minutes?|mins?|hours?|分钟|%|kcal|calories?|protein|carbs?|carbohydrates?|fat|sodium|mg|g\b|克))"
 )
 COUNT = rf"(?:\d+|{'|'.join(NUMBER_WORDS)})"
 # Who eats, said between a sum and what it is for ("a week for 4 for S$10", "S$40 for four people for the
@@ -201,6 +202,8 @@ class RuleBasedConstraintParser:
         "鸡胸肉": "chicken_breast",
         "brown rice": "brown_rice",
         "糙米": "brown_rice",
+        "milk": "milk",
+        "牛奶": "milk",
         "firm tofu": "firm_tofu",
         "tofu": "firm_tofu",
         "豆腐": "firm_tofu",
@@ -278,7 +281,7 @@ class RuleBasedConstraintParser:
         # "Two of us" or more can establish the size only when no saved/current size is known.
         people_patterns = [
             r"(\d+)\s*(?:people|persons?|\u4eba|\u4e2a\u4eba)",
-            rf"(?:for|serving|family of)\s*(\d+)(?![\d.]){NOT_EATERS}\s*(?:people|persons?)?",
+            rf"(?:for|serving|serves?|family of)\s*(\d+)(?![\d.]){NOT_EATERS}\s*(?:people|persons?)?",
             r"\b(?:we're|we are)\s+(\d+)(?=\s*(?:[,;:!?]|\.(?:\s|$)|$))",
         ]
         people_patterns.append(r"\bthe\s+(?!1\b)(\d+)\s+of us\b")
@@ -290,7 +293,7 @@ class RuleBasedConstraintParser:
             # "Dinners for two", "a family of four", "three people"; and, with no saved size, "two of us".
             words = "|".join(NUMBER_WORDS)
             match = (
-                re.search(rf"\b(?:for|serving|family of)\s+({words})\b{NOT_EATERS}", lower)
+                re.search(rf"\b(?:for|serving|serves?|family of)\s+({words})\b{NOT_EATERS}", lower)
                 or re.search(rf"\b({words})\s+(?:people|persons?|adults?)\b", lower)
                 or re.search(rf"\b(?:we're|we are)\s+({words})\b(?=\s*(?:[,.;:!?]|$))", lower)
             )
@@ -307,6 +310,11 @@ class RuleBasedConstraintParser:
                 r"([\u4e00\u4e8c\u4e24\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d\u5341])\s*(?:\u4e2a\u4eba|\u53e3\u4eba|\u4eba)",
                 text,
             )
+            if match is None:
+                match = re.search(
+                    r"(?:我们|我们一家|一家)([\u4e00\u4e8c\u4e24\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d\u5341])口",
+                    text,
+                )
             if match:
                 people = CHINESE_NUMBERS[match.group(1)]
         extraction.household_size = int(people) if people is not None else None
@@ -316,7 +324,7 @@ class RuleBasedConstraintParser:
         cooking_time = self._first_number(
             lower,
             [
-                r"(\d+)\s*(?:minutes?|mins?|分钟)[^\n]{0,10}(?:cook|cooking|做饭|烹饪)?",
+                r"(\d+)[ -]?(?:minutes?|mins?|分钟)[^\n]{0,24}(?:cook|cooking|做饭|烹饪)?",
                 r"(?:cook|cooking|做饭|烹饪)[^\d]{0,8}(\d+)\s*(?:minutes?|mins?|分钟)",
             ],
         )
@@ -331,27 +339,97 @@ class RuleBasedConstraintParser:
                     break
         extraction.max_cooking_time_minutes = int(cooking_time) if cooking_time is not None else None
 
-        if any(token in lower for token in ("low sodium", "lower sodium", "低盐", "少盐")):
+        if re.search(r"\blow(?:er)?[-\s]+sodium\b", lower) or any(token in lower for token in ("低盐", "少盐")):
             extraction.health_preferences = ["low-sodium"]
-        if any(token in lower for token in ("low sugar", "lower sugar", "低糖", "少糖")):
+        if re.search(r"\blow(?:er)?[-\s]+sugar\b", lower) or any(token in lower for token in ("低糖", "少糖")):
             extraction.health_preferences = [*(extraction.health_preferences or []), "low-sugar"]
-        if any(token in lower for token in ("lower calorie", "low calorie", "低热量", "低卡")):
+        if re.search(r"\blow(?:er)?[-\s]+calorie\b", lower) or any(token in lower for token in ("低热量", "低卡")):
             extraction.health_preferences = [*(extraction.health_preferences or []), "lower-calorie"]
+
+        preference_values: dict[str, object] = {}
+        repeat_breakfast = (
+            r"\b(?:same|repeat)\b.{0,24}\bbreakfast\b"
+            r"|\bbreakfast\b.{0,24}\b(?:same|repeat)\b|早餐.{0,12}(?:一样|重复|都吃同样)"
+        )
+        if re.search(repeat_breakfast, lower):
+            preference_values["repeat_allowed_meals"] = ["breakfast"]
+        if any(
+            token in lower
+            for token in ("more vegetables", "more veg", "多吃蔬菜", "多些蔬菜", "蔬菜多一点", "多来点蔬菜", "多点蔬菜")
+        ):
+            preference_values["more_vegetables"] = True
+        if any(token in lower for token in ("lighter", "light food", "清淡", "少油少盐")):
+            preference_values["lighter"] = True
+        flavor = next(
+            (
+                name
+                for tokens, name in (
+                    (("spicy", "hot", "辣"), "spicy"),
+                    (("fragrant", "aromatic", "香", "蒜香"), "fragrant"),
+                    (("rich", "浓郁"), "rich"),
+                    (("清淡",), "light"),
+                    (("light",), "light"),
+                )
+                if any(
+                    (re.search(r"\blight\b", lower) is not None if token == "light" else token in lower)
+                    for token in tokens
+                )
+            ),
+            None,
+        )
+        if flavor and any(token in lower for token in ("want", "prefer", "like", "想吃", "想要", "偏爱", "多来")):
+            boost: dict[str, object] = {"flavor": flavor}
+            weekday_aliases = {
+                "monday": ("monday", "周一", "星期一"),
+                "tuesday": ("tuesday", "周二", "星期二"),
+                "wednesday": ("wednesday", "周三", "星期三"),
+                "thursday": ("thursday", "周四", "星期四"),
+                "friday": ("friday", "周五", "星期五"),
+                "saturday": ("saturday", "周六", "星期六"),
+                "sunday": ("sunday", "周日", "周天", "星期日", "星期天"),
+            }
+            weekdays = [day for day, aliases in weekday_aliases.items() if any(alias in lower for alias in aliases)]
+            if weekdays:
+                boost["weekdays"] = weekdays
+            meals = [
+                meal
+                for meal, aliases in {
+                    "breakfast": ("breakfast", "早餐"),
+                    "lunch": ("lunch", "午餐", "中饭"),
+                    "dinner": ("dinner", "晚餐", "晚饭"),
+                    "snack": ("snack", "零食", "加餐"),
+                }.items()
+                if any(alias in lower for alias in aliases)
+            ]
+            if meals:
+                boost["meal_types"] = meals
+            preference_values["flavor_boosts"] = [boost]
+        if preference_values:
+            extraction.planning_preferences = PlanningPreferences.model_validate(preference_values)
 
         dietary: list[str] = []
         for token, value in (
             ("vegetarian", "vegetarian"),
             ("素食", "vegetarian"),
+            ("吃素", "vegetarian"),
             ("vegan", "vegan"),
             ("纯素", "vegan"),
             ("gluten-free", "gluten-free"),
             ("无麸质", "gluten-free"),
             ("dairy-free", "dairy-free"),
             ("无乳", "dairy-free"),
+            ("不吃乳制品", "dairy-free"),
+            ("不含乳制品", "dairy-free"),
+            ("无乳制品", "dairy-free"),
         ):
             if token in lower and value not in dietary:
                 dietary.append(value)
         extraction.dietary_preferences = dietary or None
+        halal_request = re.search(r"\bhalal\b|清真", lower) and not re.search(
+            r"\b(?:not|no need for|don't need|do not need)\s+(?:to be\s+)?halal\b|(?:不用|不需要|无需)清真", lower
+        )
+        if halal_request:
+            extraction.requires_halal = True
 
         allergy_context = any(token in lower for token in ("allerg", "过敏"))
         allergens = [
@@ -360,11 +438,24 @@ class RuleBasedConstraintParser:
         extraction.allergens = sorted(set(allergens)) or None
         excluded: list[str] = []
         named: list[tuple[int, int]] = []
-        aliases = {**self._ingredient_aliases, **self._allergen_aliases}
+        aliases = {**self._allergen_aliases, **self._ingredient_aliases}
         # Longest first, so "no chicken breast" does not also exclude every chicken.
         for alias in sorted(aliases, key=len, reverse=True):
+            if alias == "乳制品" and "dairy-free" in dietary:
+                continue
             english = re.search(rf"{ENGLISH_EXCLUSION}({re.escape(alias)})s?\b", lower)
             chinese = re.search(rf"(?:不吃|不要|避免|禁用|不放|不加)\s*({re.escape(alias)})", lower)
+            if english is None:
+                english_chain = re.search(rf"(?:,|and|or)\s*(?:any\s+|the\s+)?({re.escape(alias)})s?\b", lower)
+                if english_chain and re.search(ENGLISH_EXCLUSION, lower[: english_chain.start()]):
+                    english = english_chain
+            if chinese is None:
+                chinese_chain = re.search(rf"(?:和|、|及|与)\s*({re.escape(alias)})", lower)
+                if chinese_chain and re.search(
+                    r"(?:不吃|不要|避免|禁用|不放|不加)\s*[^，。；;!?！？]{1,16}$",
+                    lower[: chinese_chain.start()],
+                ):
+                    chinese = chinese_chain
             for match in (english, chinese):
                 if match and not any(start <= match.start(1) < end for start, end in named):
                     named.append(match.span(1))
@@ -384,8 +475,16 @@ class RuleBasedConstraintParser:
             extraction.max_sodium_mg_per_meal = sodium
 
         pending = [item for item in current.available_ingredients if item.quantity is None]
-        unknown_reply = bool(re.fullmatch(r"\s*(?:unknown|not sure|不知道|不清楚|不确定)[.!。！]?\s*", lower))
-        quantity_reply = re.fullmatch(r"\s*(\d+(?:\.\d+)?)\s*(g|kg|ml|l|克|千克|毫升|升)\s*", lower)
+        unknown_reply = bool(
+            re.fullmatch(
+                r"\s*(?:unknown|not sure|i don't know(?: the amount)?|不知道|不清楚|不确定)[.!。！]?\s*",
+                lower,
+            )
+        )
+        quantity_reply = re.fullmatch(
+            r"\s*(?:(?:还剩|剩下|大约|约)\s*)?(\d+(?:\.\d+)?)\s*(g|kg|ml|l|克|千克|毫升|升)[.!。！]?\s*",
+            lower,
+        )
         if unknown_reply and pending:
             extraction.acknowledged_unknown_quantities = [pending[0].normalized_name]
         elif quantity_reply and pending:
@@ -399,7 +498,18 @@ class RuleBasedConstraintParser:
         else:
             pantry_context = any(
                 token in lower
-                for token in ("i have", "already have", "on hand", "pantry", "已有", "现有", "家里有", "我有")
+                for token in (
+                    "i have",
+                    "already have",
+                    "on hand",
+                    "pantry",
+                    "in the fridge",
+                    "there is",
+                    "已有",
+                    "现有",
+                    "家里有",
+                    "我有",
+                )
             )
             if pantry_context:
                 ingredients: list[AvailableIngredientInput] = []
@@ -414,8 +524,16 @@ class RuleBasedConstraintParser:
                     if any(start <= at < end for start, end in held):
                         continue
                     held.append((at, at + len(alias)))
-                    nearby = lower[max(0, lower.index(alias) - 16) : lower.index(alias) + len(alias) + 16]
-                    quantity_match = re.search(r"(\d+(?:\.\d+)?)\s*(g|kg|ml|l|克|千克|毫升|升)", nearby)
+                    ingredient_at = lower.index(alias)
+                    nearby = lower[max(0, ingredient_at - 16) : ingredient_at + len(alias) + 16]
+                    alias_at = nearby.index(alias)
+                    separators = list(re.finditer(r",|，|、|\band\b|和|及", nearby))
+                    left = max((match.end() for match in separators if match.end() <= alias_at), default=0)
+                    right = min(
+                        (match.start() for match in separators if match.start() >= alias_at), default=len(nearby)
+                    )
+                    local_context = nearby[left:right]
+                    quantity_match = re.search(r"(\d+(?:\.\d+)?)\s*(g|kg|ml|l|克|千克|毫升|升)", local_context)
                     ingredients.append(
                         AvailableIngredientInput(
                             normalized_name=normalized_name,
@@ -583,6 +701,11 @@ the message or the current state, and leave it null when the household size is u
 ("S$50", 50新币) answering the assistant's question about a budget is that budget.
 General preferences such as low sodium or low sugar are allowed. Disease-specific requests must set
 medical_request_detected=true and must never be translated into medical treatment constraints.
+Extract soft planning preferences separately: repeat_allowed_meals only when the user allows a meal type
+to repeat; flavor_boosts for stated flavors (fragrant, spicy, light, rich); more_vegetables and lighter
+only when requested. These never relax allergies, exclusions, halal, budget, or nutrition limits.
+Set requires_halal=true only when the latest user message explicitly asks for halal food or 清真饮食.
+Use empty lists and false values when no soft preference is stated. Do not infer a preference from cuisine.
 Available ingredients with no explicit quantity must keep quantity=null and unit=null.
 An allergy is an allergen and nothing more: a dairy allergy is `dairy`, not also a list of dairy
 ingredients. Do not add ingredients, preferences or limits the user did not state. A religion or a
@@ -634,6 +757,7 @@ class FallbackConstraintParser:
         self.model = primary.model
         self.vocabulary = primary.vocabulary
         self.fell_back = False
+        self.scope_classifier = None
 
     def parse(self, message, *, current, acknowledged_unknowns, history) -> AgentConstraintExtraction:
         try:

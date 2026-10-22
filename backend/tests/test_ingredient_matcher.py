@@ -50,6 +50,13 @@ def test_fold_meets_accents_case_and_underscores():
     assert fold("葱") == "葱"
 
 
+def test_spelling_fallback_does_not_offer_unrelated_zero_or_low_score_items():
+    matcher = IngredientMatcher({"mango": "Mango", "daikon": "Daikon", "broccoli": "Broccoli"}, mode="spelling")
+
+    assert matcher.suggest("kangkong") == []
+    assert matcher.suggest("brocoli") == ["broccoli"]
+
+
 def test_the_committed_vectors_and_aliases_cover_the_same_ingredients():
     vectors, aliases = catalog_vectors(), catalog_aliases()
     assert len(vectors) > 700

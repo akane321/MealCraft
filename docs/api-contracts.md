@@ -70,6 +70,10 @@ Available endpoints:
 - GET /api/recipes?limit=20&after_id={recipe_id}
 - GET /api/recipes/{slug}
 - GET /api/recipes/{slug}/tutorial?live={boolean}&language={language}
+- POST /api/external-recipes/intake
+- POST /api/external-recipes/search-and-intake
+- POST /api/ingredient-substitutions/suggest
+- POST /api/ingredient-substitutions/review
 - POST /api/recommendations/recipes
 - GET /api/products/search?q={query}&live={boolean}&refresh={boolean}
 - POST /api/plans/generate
@@ -204,6 +208,34 @@ The tenancy migration preserves pre-authentication rows by assigning them to a
 reserved, suspended migration household with no login credential. Those rows
 remain inaccessible to normal users until an administrator explicitly reassigns
 them; they are never attached to the first account that logs in.
+
+## External recipe intake and ingredient substitutions
+
+`POST /api/external-recipes/intake` accepts a structured, sourced draft;
+`POST /api/external-recipes/search-and-intake` accepts a search query and uses
+the configured OpenAI Responses web-search adapter. Both routes require an
+authenticated household with permission to create a plan. Search results must
+include a provider citation matching the extracted source URL. External-source
+tier and licence claims from the request are ignored; stored external records
+remain private to the requesting household and tier 2 until source rights are
+reviewed.
+
+Ingredient names are resolved only through reviewed aliases. Household
+allergens, exclusions, dietary requirements and requested halal status are
+checked by deterministic admission logic. Per-serving nutrition is recomputed
+from mapped ingredient grams and released nutrition-per-100-g data; submitted
+or model-extracted nutrition totals are not used. A candidate with missing
+mapping, nutrition, safety or other required fields is not admitted. A blocked
+admission response includes `review.missing_fields`, `review.safety_conflicts`
+and up to three similar catalog recipes that pass household recommendation
+filters. A search/extraction error returns HTTP 422 or 503 with a `detail`
+object containing a reason code, user-facing message and the same safe
+catalog suggestions.
+
+`POST /api/ingredient-substitutions/suggest` returns only catalog alternatives
+that pass the active household's allergen, exclusion and requested halal
+filters. `/review` applies the same gate to a caller-supplied candidate list.
+Neither endpoint admits an unknown or unsafe candidate.
 
 ## Operations Console
 

@@ -21,6 +21,8 @@ from app.core.runtime_config import runtime_value
 from app.db.session import get_db_session
 from app.models.recipe import Ingredient
 from app.orchestration.run_lifecycle import AgentRunLifecycleError, AgentRunNotFoundError
+from app.orchestration.scope_classifier import OpenAIScopeClassifier
+from app.orchestration.tool_scheduler import ModelToolScheduler
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
@@ -43,6 +45,8 @@ from app.services.agent import (
     AgentSessionService,
     profile_constraints,
 )
+from app.services.food_questions import OpenAIWebFoodQuestionAnswerer
+from app.services.ingredient_substitutions import OpenAISubstituteGenerator
 from app.services.replanning import (
     MealPlanReplanConflictError,
     MealPlanReplanNotFoundError,
@@ -75,13 +79,36 @@ def create_constraint_parser(
                 names, vectors=catalog_vectors(), embed=catalog_embedder(api_key), aliases=catalog_aliases()
             ),
         )
-    return FallbackConstraintParser(
+    parser = FallbackConstraintParser(
         OpenAIConstraintParser(
             api_key=api_key,
             model=settings.openai_model,
             vocabulary=vocabulary,
             timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
         )
+    )
+    parser.scope_classifier = OpenAIScopeClassifier(
+        api_key=api_key,
+        model=settings.openai_model,
+        timeout_seconds=min(8.0, runtime_value("openai_timeout_seconds", settings, database)),
+        tool_scheduler=ModelToolScheduler(
+            api_key=api_key,
+            model=settings.openai_model,
+            timeout_seconds=min(8.0, runtime_value("openai_timeout_seconds", settings, database)),
+            max_steps=2,
+        ),
+    )
+    return parser
+
+
+def create_web_food_question_answerer(settings: Settings, database: Session | None = None):
+    """Keep web search behind the same explicit live-provider selection as the parser."""
+    if runtime_value("agent_parser_provider", settings, database) != "openai" or settings.openai_api_key is None:
+        return None
+    return OpenAIWebFoodQuestionAnswerer(
+        api_key=settings.openai_api_key.get_secret_value(),
+        model=settings.openai_model,
+        timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
     )
 
 
@@ -110,6 +137,15 @@ def get_agent_service(
             profile_constraints(HouseholdProfileRepository.current_version(profile)) if profile else None
         ),
         keep_plan_shape=(lambda shape: profiles.keep_plan_shape(shape.model_dump(mode="json"))) if profile else None,
+        substitute_generator=(
+            OpenAISubstituteGenerator(
+                api_key=settings.openai_api_key.get_secret_value(),
+                model=settings.openai_model,
+            )
+            if settings.openai_api_key is not None
+            else None
+        ),
+        web_food_question_answerer=create_web_food_question_answerer(settings, database),
     )
 
 

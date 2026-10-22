@@ -15,6 +15,11 @@ TOOL_SPECS: dict[str, ToolSpec] = {
             name="search_recipe_candidates", effect=ToolEffect.READ, description="Retrieve grounded recipe candidates."
         ),
         ToolSpec(
+            name="get_recipe_detail",
+            effect=ToolEffect.READ,
+            description="Read a catalog recipe and its ingredients.",
+        ),
+        ToolSpec(
             name="lookup_fairprice_products",
             effect=ToolEffect.READ,
             description="Retrieve timestamped product evidence.",
@@ -28,6 +33,23 @@ TOOL_SPECS: dict[str, ToolSpec] = {
         ToolSpec(name="confirm_replan", effect=ToolEffect.COMMIT, description="Commit a confirmed replanning event."),
         ToolSpec(name="find_top1_tutorial", effect=ToolEffect.READ, description="Return one ranked cooking tutorial."),
         ToolSpec(name="get_nutrition_dashboard", effect=ToolEffect.READ, description="Read plan-only dashboard facts."),
+        ToolSpec(
+            name="read_saved_plan",
+            effect=ToolEffect.READ,
+            description="Read the authorized saved plan and its facts.",
+        ),
+        ToolSpec(name="route_planning_request", effect=ToolEffect.READ, description="Route a meal-planning request."),
+        ToolSpec(name="route_food_question", effect=ToolEffect.READ, description="Route a food question."),
+        ToolSpec(name="route_social_message", effect=ToolEffect.READ, description="Route a social message."),
+        ToolSpec(
+            name="route_partial_request",
+            effect=ToolEffect.READ,
+            description="Route meal and unrelated segments.",
+        ),
+        ToolSpec(name="route_out_of_scope", effect=ToolEffect.READ, description="Route an unsupported request."),
+        ToolSpec(name="route_restricted_request", effect=ToolEffect.READ, description="Route a restricted request."),
+        ToolSpec(name="route_ambiguous_request", effect=ToolEffect.READ, description="Route an unclear request."),
+        ToolSpec(name="route_adversarial_request", effect=ToolEffect.READ, description="Route adversarial content."),
     )
 }
 
@@ -62,6 +84,25 @@ CAPABILITIES: dict[str, CapabilitySpec] = {
             intent="show_dashboard",
             description="Read plan-only nutrition and execution facts.",
             allowed_tools=["get_nutrition_dashboard"],
+        ),
+        CapabilitySpec(
+            intent="answer_food_question",
+            description="Answer supported questions from an authorized saved plan without changing it.",
+            allowed_tools=["read_saved_plan", "get_recipe_detail"],
+        ),
+        CapabilitySpec(
+            intent="classify_scope",
+            description="Select one application routing tool without mutating data.",
+            allowed_tools=[
+                "route_planning_request",
+                "route_food_question",
+                "route_social_message",
+                "route_partial_request",
+                "route_out_of_scope",
+                "route_restricted_request",
+                "route_ambiguous_request",
+                "route_adversarial_request",
+            ],
         ),
     )
 }

@@ -7,6 +7,7 @@ from app.models.recipe import Recipe
 from app.planning import alternatives
 from app.planning.dietary_tags import expand_tags
 from app.planning.member_coverage import MemberLimits, member_limits, title_mentions
+from app.planning.vegetable_led import vegetable_share, weighed
 from app.schemas.recipe import RecipeListItemResponse
 from app.schemas.recommendation import (
     ExcludedRecipeResponse,
@@ -96,6 +97,12 @@ class RecipeRecommendationEngine:
         ingredient_names = {item.ingredient.normalized_name for item in cooked}
         recipe_allergens = {allergen for item in cooked for allergen in item.ingredient.allergens}
         reasons.extend(conflict_reasons(*allergen_conflicts(constraints.allergens, recipe_allergens)))
+        if constraints.allergens and "allergens" in (recipe.unknown_safety or []):
+            reasons.append("allergen_status_unknown")
+        if constraints.dietary_preferences and "diet" in (recipe.unknown_safety or []):
+            reasons.append("dietary_status_unknown")
+        if constraints.requires_halal and recipe.halal_status != "halal":
+            reasons.append("halal_requirement")
 
         excluded_matches = sorted(ingredient_names.intersection(excluded_ingredients))
         if excluded_matches:
@@ -191,12 +198,15 @@ class RecipeRecommendationEngine:
         time_score = self._time_score(recipe.total_time_minutes, constraints.max_cooking_time_minutes)
         nutrition_score = self._nutrition_score(recipe, constraints, reasons, protein_rank)
         pantry_score = self._pantry_score(recipe, constraints, reasons)
+        preference_score = self._preference_score(recipe, constraints, reasons)
 
         weighted_scores = [(time_score, 25.0)]
         if nutrition_score is not None:
             weighted_scores.append((nutrition_score, 45.0))
         if pantry_score is not None:
             weighted_scores.append((pantry_score, 30.0))
+        if preference_score is not None:
+            weighted_scores.append((preference_score, 20.0))
 
         total_score = sum(score * weight for score, weight in weighted_scores) / sum(
             weight for _, weight in weighted_scores
@@ -212,6 +222,46 @@ class RecipeRecommendationEngine:
             ),
             reasons=reasons,
         )
+
+    def _preference_score(
+        self,
+        recipe: Recipe,
+        constraints: RecipeRecommendationRequest,
+        reasons: list[str],
+    ) -> float | None:
+        preferences = constraints.planning_preferences
+        scores: list[float] = []
+        if preferences.more_vegetables:
+            share = vegetable_share(
+                weighed(
+                    (
+                        line.ingredient.normalized_name,
+                        line.quantity,
+                        line.unit,
+                        line.original_text,
+                    )
+                    for line in alternatives.lines(recipe, constraints)
+                )
+            )
+            if share is not None:
+                scores.append(share * 100)
+                reasons.append(f"Vegetables make up {share:.0%} of the weighed ingredients.")
+        if preferences.lighter:
+            sodium = float(recipe.nutrition.sodium_mg)
+            fat = float(recipe.nutrition.fat_g)
+            scores.extend(
+                [
+                    self._flexible_upper_score(sodium, 500.0, 1000.0),
+                    self._flexible_upper_score(fat, 15.0, 30.0),
+                ]
+            )
+            reasons.append("Lighter meals are ranked using per-serving sodium and fat from the recipe catalog.")
+        flavor_boosts = [item.flavor for item in preferences.flavor_boosts if not item.weekdays and not item.meal_types]
+        if flavor_boosts and recipe.flavor_tags is not None:
+            matched = sum(flavor in recipe.flavor_tags for flavor in set(flavor_boosts))
+            scores.append(100.0 * matched / len(set(flavor_boosts)))
+            reasons.append("Flavor preferences are ranked against the recipe's catalog flavor tags.")
+        return sum(scores) / len(scores) if scores else None
 
     @staticmethod
     def _time_score(recipe_minutes: int, maximum_minutes: int) -> float:

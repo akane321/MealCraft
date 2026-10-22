@@ -13,7 +13,7 @@ from app.orchestration.contracts import (
     ToolEffect,
     ToolRunStatus,
 )
-from app.schemas.household_rules import HouseholdPlanning
+from app.schemas.household_rules import HouseholdPlanning, PlanningPreferences
 from app.schemas.meal_plan import (
     MealPlanEventType,
     MealPlanReplanEventResponse,
@@ -68,7 +68,9 @@ class AgentConstraintExtraction(BaseModel):
     allergens: list[str] | None = None
     excluded_ingredients: list[str] | None = None
     dietary_preferences: list[DietaryPreference] | None = None
+    requires_halal: bool | None = None
     health_preferences: list[HealthPreference] | None = None
+    planning_preferences: PlanningPreferences | None = None
     nutrition_targets: NutritionTargets | None = None
     max_sodium_mg_per_meal: float | None = Field(default=None, ge=100, le=5000)
     available_ingredients: list[AvailableIngredientInput] | None = None
@@ -102,7 +104,9 @@ class AgentConstraintState(BaseModel):
     allergens: list[str] = Field(default_factory=list)
     excluded_ingredients: list[str] = Field(default_factory=list)
     dietary_preferences: list[DietaryPreference] = Field(default_factory=list)
+    requires_halal: bool = False
     health_preferences: list[HealthPreference] = Field(default_factory=list)
+    planning_preferences: PlanningPreferences = Field(default_factory=PlanningPreferences)
     nutrition_targets: NutritionTargets = Field(default_factory=NutritionTargets)
     max_sodium_mg_per_meal: float | None = None
     available_ingredients: list[AvailableIngredientInput] = Field(default_factory=list)
@@ -126,6 +130,10 @@ class AgentConstraintState(BaseModel):
         data = handler(self)
         if self.household is None and isinstance(data, dict):
             data.pop("household", None)
+        if self.planning_preferences == PlanningPreferences() and isinstance(data, dict):
+            data.pop("planning_preferences", None)
+        if not self.requires_halal and isinstance(data, dict):
+            data.pop("requires_halal", None)
         return data
 
 

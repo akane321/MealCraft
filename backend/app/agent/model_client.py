@@ -20,6 +20,10 @@ from functools import lru_cache
 class Tally:
     requests: int = 0
     fell_back: bool = False
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cached_input_tokens: int = 0
+    embedding_tokens: int = 0
 
 
 _turn: ContextVar[Tally | None] = ContextVar("model_requests", default=None)
@@ -42,11 +46,45 @@ def note_fallback() -> None:
         tally.fell_back = True
 
 
+def note_usage(response) -> None:
+    """Accumulate provider-reported chat token usage for the current run, when exposed by LangChain."""
+    tally = _turn.get()
+    if tally is None:
+        return
+    usage = response if isinstance(response, dict) else getattr(response, "usage_metadata", None)
+    if not usage:
+        usage = getattr(response, "response_metadata", {}).get("token_usage", {})
+    if not usage:
+        return
+    details = (
+        usage.get("input_token_details", usage.get("prompt_tokens_details", {})) if isinstance(usage, dict) else {}
+    )
+    tally.input_tokens += int(usage.get("input_tokens", usage.get("prompt_tokens", 0)) or 0)
+    tally.output_tokens += int(usage.get("output_tokens", usage.get("completion_tokens", 0)) or 0)
+    tally.cached_input_tokens += int(details.get("cache_read", details.get("cached_tokens", 0)) or 0)
+
+
+def _count_response_usage(response) -> None:
+    """Read usage from non-streaming OpenAI responses, including embedding requests."""
+    tally = _turn.get()
+    if tally is None:
+        return
+    try:
+        payload = response.json()
+        usage = payload.get("usage") or {}
+        if response.request.url.path.rstrip("/").endswith("/embeddings"):
+            tally.embedding_tokens += int(usage.get("prompt_tokens", usage.get("total_tokens", 0)) or 0)
+        else:
+            note_usage(usage)
+    except Exception:  # noqa: BLE001 - usage accounting must never fail an otherwise valid model call
+        return
+
+
 @lru_cache(maxsize=1)
 def http_client():
     import openai
 
-    return openai.DefaultHttpxClient(event_hooks={"request": [_count]})
+    return openai.DefaultHttpxClient(event_hooks={"request": [_count], "response": [_count_response_usage]})
 
 
 @contextmanager
@@ -70,8 +108,20 @@ def take() -> Tally:
     if tally is None:
         return Tally()
     with _lock:
-        taken = Tally(tally.requests, tally.fell_back)
-        tally.requests, tally.fell_back = 0, False
+        taken = Tally(
+            requests=tally.requests,
+            fell_back=tally.fell_back,
+            input_tokens=tally.input_tokens,
+            output_tokens=tally.output_tokens,
+            cached_input_tokens=tally.cached_input_tokens,
+            embedding_tokens=tally.embedding_tokens,
+        )
+        tally.requests = 0
+        tally.input_tokens = 0
+        tally.output_tokens = 0
+        tally.cached_input_tokens = 0
+        tally.embedding_tokens = 0
+        tally.fell_back = False
     return taken
 
 

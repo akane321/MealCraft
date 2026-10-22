@@ -454,6 +454,8 @@ class FinalPlanningValidator:
                     slot_id,
                 )
             )
+        if problem.allergens and "allergens" in recipe.unknown_safety:
+            checks.append(self._failed("allergen_status_unknown", "Recipe allergen status is unknown.", slot_id))
         ingredient_ids = {item.ingredient_id for item in recipe.ingredients}
         excluded_hits = sorted(ingredient_ids.intersection(problem.excluded_ingredients))
         if excluded_hits:
@@ -470,6 +472,16 @@ class FinalPlanningValidator:
                 self._failed(
                     "dietary_requirement",
                     f"Recipe does not satisfy: {', '.join(missing_diets)}.",
+                    slot_id,
+                )
+            )
+        if problem.dietary_requirements and "diet" in recipe.unknown_safety:
+            checks.append(self._failed("dietary_status_unknown", "Recipe dietary tags are unverified.", slot_id))
+        if problem.requires_halal and recipe.halal_status != "halal":
+            checks.append(
+                self._failed(
+                    "halal_requirement",
+                    "Recipe halal status is not verified as halal.",
                     slot_id,
                 )
             )
