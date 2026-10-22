@@ -965,7 +965,12 @@ def repetition_loss(
             recipe_id
             for slot_id, meal in state.choices
             for _, recipe_id in meal
-            if not (meal_type in allowed_meals and slot_id in slots and slots[slot_id].meal_type == meal_type)
+            if not (
+                allowed_meals
+                and meal_type in allowed_meals
+                and slot_id in slots
+                and slots[slot_id].meal_type == meal_type
+            )
         ]
         loss = 0.0
         for _, recipe_id in dishes:
@@ -974,6 +979,15 @@ def repetition_loss(
         return loss / len(dishes) if dishes else 0.0
     free = set(problem.repetition_rules.repeat_ok_roles) if problem.repetition_rules else set()
     free |= problem.uncounted_roles
+    if not allowed_meals:
+        previous = [recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in free]
+        last = {recipe_id for role, recipe_id in state.choices[-1][1] if role not in free} if state.choices else set()
+        return sum(
+            (min(previous.count(recipe_id), 1) if flat_repeat else previous.count(recipe_id)) * repeat_cost
+            + (0.35 if recipe_id in last else 0.0)
+            for role, recipe_id in dishes
+            if role not in free
+        )
     loss = 0.0
     for role, recipe_id in dishes:
         if role in free:
@@ -1003,6 +1017,9 @@ def repeats(problem, state: MealState) -> int:
     free = set(problem.repetition_rules.repeat_ok_roles) if problem.repetition_rules else set()
     free |= problem.uncounted_roles
     allowed_meals = set(problem.repetition_rules.repeat_allowed_meals) if problem.repetition_rules else set()
+    if not allowed_meals:
+        dishes = [recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in free]
+        return len(dishes) - len(set(dishes))
     counts: dict[str, int] = {}
     slots = {slot.slot_id: slot for slot in problem.slots}
     repeats_count = 0
