@@ -12,13 +12,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_serializer
+from pydantic import Field, model_serializer
 
 from app.core.paths import repository_root
-
-
-class StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+from app.evaluation.common_output import StrictModel
 
 
 class PacketConversationTurn(StrictModel):
