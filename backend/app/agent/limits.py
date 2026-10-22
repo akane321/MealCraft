@@ -3,10 +3,10 @@
 Two moments. Before the assistant says it has everything, `refusal` compares the limits with the floor
 under any week's cost (planning/week_floor.py): a weekly budget under it is refused with what the cheapest
 week the search finds costs (the floor itself when it finds none), and any other is planned with the planner
-itself, so whatever the planner would answer at Plan is answered now. For meals too big for the planner to
-search within a reply, only what the floor proves is refused, and Plan answers the rest. After the planner
-found no week, `planning_failure` names the limit its trace shows the search kept running into; a search that
-found nothing proves nothing about every week, so it never says no week exists.
+itself, so whatever the planner would answer at Plan is answered now: for meals of any size, however long the
+search takes (owner, 2026-10-22; ADR-0080). After the planner found no week, `planning_failure` names the limit
+its trace shows the search kept running into; a search that found nothing proves nothing about every week, so it
+never says no week exists.
 
 A budget is offered only when a real week backs it. The suggestion's amount is checked through the
 same budgeted planning path used when the household accepts it, not inferred from an unbudgeted search.
@@ -21,7 +21,6 @@ from dataclasses import dataclass
 
 from app.agent.replies import details, joined, people, planner_message, say, word
 from app.data.allergens import checked_allergens
-from app.planning.product_path import QUICK_MEAL_DISHES
 from app.planning.week_floor import WeekFloor
 from app.schemas.meal_plan import default_plan_shape
 
@@ -66,11 +65,14 @@ def refusal(
     also takes `minimum_distinct_dishes`. `distinct_dishes` counts the different dishes of the week `check` kept.
     """
     floor = floor_of()
-    if max(_dishes(constraints)) > QUICK_MEAL_DISHES:
-        check = cheapest = None  # no search within the reply: what the floor proves is refused, Plan answers the rest
     if floor.empty_roles:
         meal, role = floor.empty_roles[0]
         return _no_dish(constraints, floor_of, check, meal, role, lang)
+    if floor.uncovered:
+        # Every member needs a plate of their own at every lunch and dinner (ADR-0071 section 1). It is a safety
+        # rule, so what is offered is the budget, the time and the dish count; never a limit of the member's own.
+        meal, name = floor.uncovered[0]
+        return _uncovered(constraints, floor_of, meal, name, lang)
     cap = constraints.max_uses_per_recipe
     for (meal, role), found in floor.roles.items() if cap else ():
         # A dish served at most `cap` times fills a role every day only with enough different dishes.
@@ -99,7 +101,7 @@ def refusal(
         cost = cheapest() if cheapest is not None else None
         if cost is not None:
             return _budget_short(cost, constraints, lang, cheapest)
-        # Not searched for, or the search found no week: the floor, with no amount a week backs to offer.
+        # The search found no week: the floor, with no amount a week backs to offer.
         size, meals = constraints.household_size or 1, floor.meals
         each, least = weekly / (size * meals), _cents_down(floor.total_sgd)
         text = say("floor_week", lang, budget=weekly, people=people(size, lang), each=each, meals=meals, floor=least)
@@ -110,7 +112,7 @@ def refusal(
         # and refuse what that refuses.
         error = check()
         failure = planning_failure(error, constraints, lang, cheapest=cheapest) if error is not None else None
-        if failure is not None and not failure.retry:  # a slow search or late data may plan at Plan
+        if failure is not None and not failure.retry:  # late data may plan at Plan
             return failure
         # The week plans. With fewer than four different dishes it still does, as the household asked (ADR-0044,
         # ADR-0056): a four-dish week within the budget is planned instead (the check keeps it for Plan), else the
@@ -169,6 +171,21 @@ def _no_dish(constraints, floor_of, check, meal: str, role: str, lang: str) -> R
     return Refusal("plan_shape", say("no_role", lang, role=_role(role, lang), meal=word(meal, lang)))
 
 
+def _uncovered(constraints, floor_of, meal: str, name: str, lang: str) -> Refusal:
+    """No meal can cover one member: the first limit outside safety that, eased, lets a plate of their own in."""
+    probes = []
+    if constraints.budget_per_meal_sgd is not None:
+        probes.append(("budget_per_meal_sgd", None))
+    if constraints.max_cooking_time_minutes is not None and constraints.max_cooking_time_minutes < 240:
+        probes.append(("max_cooking_time_minutes", 240))
+    if constraints.max_sodium_mg_per_meal is not None:
+        probes.append(("max_sodium_mg_per_meal", None))
+    for field, eased in probes:
+        if (meal, name) not in floor_of(**{field: eased}).uncovered:
+            return Refusal(field, say("no_cover_limit", lang, name=name, meal=word(meal, lang)))
+    return Refusal("members", say("no_cover", lang, name=name, meal=word(meal, lang)))
+
+
 def _no_dish_text(meal: str, role: str, limit: str, lang: str) -> str:
     return say("no_dish", lang, role=_role(role, lang), meal=word(meal, lang), limit=limit)
 
@@ -197,7 +214,9 @@ def planning_failure(error: Exception, constraints, lang: str, *, cheapest=None)
         return Refusal("plan", text, retry=status == "needs_data" and not lasting)
     search = trace.get("search") or {}
     if search.get("exhausted"):
-        return Refusal("plan", say("slow", lang), retry=True)
+        # Every allowed combination was searched: the same request searches the same way again, so a limit must
+        # change (ADR-0080; owner, 2026-10-22).
+        return Refusal("plan", say("exhausted", lang))
     attempts = trace.get("validation_attempts") or []
     failed = Counter(code for attempt in attempts for code in _failed(attempt))
     code = failed.most_common(1)[0][0] if failed else EMPTIED.get(search.get("emptied_by"))
@@ -255,11 +274,9 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
     whole = math.ceil(cost)
     options = [_option("use_weekly", lang, amount=whole)]
     fewer = size // 2
-    # Half the household at its own cheapest week takes a second search: offered for one meal a day of a quick
-    # size, where the two take at most 5 s; for more they would take the reply past its time limit (ADR-0046
-    # section 3).
-    quick = meals == 7 and max(_dishes(constraints)) <= QUICK_MEAL_DISHES and cheapest is not None and fewer >= 1
-    smaller = cheapest(household_size=fewer) if quick else None
+    # Half the household at its own cheapest week takes a second search, for every plan shape: planning time has no
+    # limit (owner, 2026-10-22; ADR-0080).
+    smaller = cheapest(household_size=fewer) if cheapest is not None and fewer >= 1 else None
     # The cheapest-week search is a heuristic, not monotonic in who eats: fewer people can come out dearer than
     # everyone (S$41 for 2 beside S$24 for 4). Offered only when a real week backs it and it costs less.
     if smaller is not None and math.ceil(smaller) < whole:
@@ -273,11 +290,6 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
     elif smaller is not None:
         text += " " + say("fewer_not_cheaper", lang)
     return Refusal("weekly_budget_sgd", text, tuple(options))
-
-
-def _dishes(constraints) -> list[int]:
-    """How many dishes each planned meal has."""
-    return [len(roles) for roles in (constraints.plan_shape or default_plan_shape()).meals.values()]
 
 
 def _option(key: str, lang: str, **values) -> tuple[str, str]:

@@ -1,11 +1,27 @@
 import type { HouseholdMemberInput, HouseholdReference } from "~/types/household";
 import type { HealthPreference } from "~/types/recommendation";
 
-export interface HouseholdConstraintSummary {
-  planningHouseholdSize: number;
+/** One member's own limits, as the profile page lists them beside their name. */
+export interface MemberLimitSummary {
+  name: string;
   allergens: string[];
+  selfOnlyAllergens: string[];
   excludedIngredients: string[];
   dietaryPreferences: string[];
+}
+
+export interface HouseholdConstraintSummary {
+  planningHouseholdSize: number;
+  /** Allergens the whole household avoids: every member's, less the ones only their own member avoids. */
+  allergens: string[];
+  /** Each member's own limits. Diets and foods someone won't eat are no longer merged into one household list. */
+  members: MemberLimitSummary[];
+}
+
+/** The "only I avoid it" marks a member still has: unticking an allergen drops its mark with it, so a mark
+ * can never outlive the allergen it belongs to and quietly narrow nothing. */
+export function ownSelfOnlyAllergens(allergens: string[], selfOnly: string[]): string[] {
+  return selfOnly.filter(allergen => allergens.includes(allergen));
 }
 
 type MemberBasis = Pick<HouseholdMemberInput, "age_band" | "sex" | "activity" | "goal">;
@@ -40,13 +56,28 @@ export function totalServings(members: HouseholdMemberInput[], reference: Househ
   return Math.round(members.reduce((sum, member) => sum + memberServings(member, reference), 0) * 100) / 100;
 }
 
-/** Portions a usual meal: the members usually home; guests join only through a presence rule. */
+/** Allergens the whole household avoids: every member's, less the ones that member marked "only I avoid it".
+ * One member keeping an allergen household-wide keeps it so, because one kitchen can cross-contact. */
+export function householdAllergens(members: HouseholdMemberInput[]): string[] {
+  const whole = members.flatMap(member =>
+    member.allergens.filter(allergen => !(member.self_only_allergens ?? []).includes(allergen)));
+  return [...new Set(whole)].sort();
+}
+
+/** Portions a usual meal (the members usually home; guests join only through a presence rule), the allergens
+ * the whole household avoids, and each member's own limits. A diet or a food one member won't eat is that
+ * member's own: a dish is served when at least one member at the meal can eat it. */
 export function summarizeHouseholdMembers(members: HouseholdMemberInput[], reference: HouseholdReference | null = null): HouseholdConstraintSummary {
   return {
     planningHouseholdSize: totalServings(members.filter(member => member.default_present !== false), reference),
-    allergens: [...new Set(members.flatMap(member => member.allergens))].sort(),
-    excludedIngredients: [...new Set(members.flatMap(member => member.excluded_ingredients))].sort(),
-    dietaryPreferences: [...new Set(members.flatMap(member => member.dietary_preferences))].sort(),
+    allergens: householdAllergens(members),
+    members: members.map(member => ({
+      name: member.name,
+      allergens: [...member.allergens].sort(),
+      selfOnlyAllergens: [...(member.self_only_allergens ?? [])].sort(),
+      excludedIngredients: [...member.excluded_ingredients].sort(),
+      dietaryPreferences: [...member.dietary_preferences].sort(),
+    })),
   };
 }
 

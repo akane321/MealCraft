@@ -1,0 +1,2 @@
+# Standalone author folder only; no application imports or evaluation runner.
+jsonschema==4.26.0

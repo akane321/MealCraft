@@ -7,6 +7,8 @@ of 21 within S$100 at the profile's 60 minutes (20 at 240 minutes), by an exact 
 whole catalog holds 21 for about S$53.
 """
 
+import inspect
+import time
 from collections import Counter
 from datetime import date
 from types import SimpleNamespace
@@ -23,7 +25,7 @@ from app.data.release_v2 import import_release_v2
 from app.db.base import Base
 from app.planning import product_path
 from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner, MealState
-from app.planning.product_path import _vary_starts_within_time_budget, composed_packet
+from app.planning.product_path import _vary_starts, composed_packet
 from app.planning.recipe_quality import dish_family, dish_kind
 from app.repositories.recipe import clear_planning_pool
 from app.schemas.meal_plan import MEAL_PRESETS, WeeklyMealPlanRequest
@@ -207,24 +209,21 @@ def test_a_repeat_is_swapped_for_the_dish_sharing_what_the_week_buys():
     assert MealBeamPlanner().vary_within_budget(tight, repeated) == repeated
 
 
-def test_variety_starts_stop_when_the_pass_spends_its_time_budget():
-    """The time is read between starts: the start begun before two seconds finishes, the next is not begun."""
-    state = repeated_week()
-    calls = []
-    planner = SimpleNamespace(vary_within_budget=lambda problem, state: calls.append(state) or state)
-    ticks = iter((0.0, 0.0, 1.0, 2.0))
+def two_trip_week(budget: float) -> FinalPlanningProblem:
+    """`week_problem` with each dinner bought on its own trip (ADR-0072), at `budget` a trip."""
+    problem = week_problem()
+    slots = [slot.model_copy(update={"trip": n}) for n, slot in enumerate(problem.slots, start=1)]
+    return problem.model_copy(update={"slots": slots, "purchase_budget_sgd": budget})
 
-    _vary_starts_within_time_budget(
-        planner,
-        week_problem(),
-        [(0.0, state)] * 3,
-        {state.choices},
-        is_best=lambda state: False,
-        clock=lambda: next(ticks),
-        seconds=2.0,
-    )
 
-    assert len(calls) == 2
+def test_a_plan_of_two_trips_is_varied_with_each_trip_priced_against_its_own_budget():
+    """Task 15: a plan of 8 to 14 days kept its week as searched. Each trip now buys its own chicken (S$10 a trip,
+    S$20 in all, over S$10 as one basket): chicken noodles fit a trip's S$10 (S$9), beef stew (S$11) does not."""
+    repeated = repeated_week()
+    varied = MealBeamPlanner(MealBeamLimits(distinct_kinds=True)).vary_within_budget(two_trip_week(10.0), repeated)
+    assert sorted(dict(dishes)["main"] for _, dishes in varied.choices) == ["chicken-noodles", "chicken-rice"]
+    # Under S$9 a trip the noodles' trip goes over its own budget: the week stays.
+    assert MealBeamPlanner().vary_within_budget(two_trip_week(8.99), repeated) == repeated
 
 
 @pytest.mark.parametrize(("best", "starts_tried"), [(True, 1), (False, 3)])
@@ -233,9 +232,7 @@ def test_variety_starts_stop_only_at_a_week_none_can_beat(best, starts_tried):
     calls = []
     planner = SimpleNamespace(vary_within_budget=lambda problem, state: calls.append(state) or state)
 
-    _vary_starts_within_time_budget(
-        planner, week_problem(), [(0.0, state)] * 3, set(), is_best=lambda state: best, clock=lambda: 0.0
-    )
+    _vary_starts(planner, week_problem(), [(0.0, state)] * 3, set(), is_best=lambda state: best)
 
     assert len(calls) == starts_tried
 
@@ -366,7 +363,7 @@ def test_the_walkthrough_week_varies_within_its_budget(product):
 
 
 # Breakfast, a lunch of a main and a vegetable dish and a dinner of a main and an optional vegetable dish:
-# 35 dish positions, the fewest the heavy-composition gate bounds.
+# 35 dish positions, the fewest the heavy-composition gate takes.
 THREE_MEALS_35 = {
     "breakfast": MEAL_PRESETS["breakfast"]["one dish"],
     "lunch": MEAL_PRESETS["lunch"]["main and vegetable"],
@@ -389,27 +386,27 @@ def three_meals(budget: float, meals=THREE_MEALS_35, **household) -> WeeklyMealP
     )
 
 
-def variety_passes(monkeypatch) -> list[dict]:
-    """Each variety pass `plan` runs: its time budget, its starts, and the starts it tried."""
+def variety_passes(monkeypatch, never_best=False) -> list[dict]:
+    """Each variety pass `plan` runs: its starts and the starts it tried. `never_best` ignores the early stop."""
     passes = []
-    real = product_path._vary_starts_within_time_budget
+    real = product_path._vary_starts
 
-    def spy(meal_beam, problem, starts, seen, *, is_best, seconds):
+    def spy(meal_beam, problem, starts, seen, *, is_best):
         tried = []
-        added = real(meal_beam, problem, starts, seen, is_best=lambda s: tried.append(s) or is_best(s), seconds=seconds)
-        passes.append({"seconds": seconds, "starts": len(starts), "tried": len(tried)})
+        stop = (lambda s: False) if never_best else is_best
+        added = real(meal_beam, problem, starts, seen, is_best=lambda s: tried.append(s) or stop(s))
+        passes.append({"starts": len(starts), "tried": len(tried)})
         return added
 
-    monkeypatch.setattr(product_path, "_vary_starts_within_time_budget", spy)
+    monkeypatch.setattr(product_path, "_vary_starts", spy)
     return passes
 
 
 def test_a_heavy_week_stops_varying_only_at_a_week_the_final_order_cannot_beat(product, monkeypatch):
     """PR #243 review: the early stop took a week with no dish or dish family twice as one no start could beat,
     but the order that picks the week also counts empty optional dishes and dish kinds. Here that stop ended
-    after one start with 33 dish kinds of 35; with the time budget lifted, a new heavy week is now as varied as
-    trying every start makes it (35 kinds)."""
-    monkeypatch.setattr(product_path, "VARIETY_PASS_SECONDS", float("inf"))
+    after one start with 33 dish kinds of 35; a heavy week is now as varied as trying every start makes it
+    (35 kinds)."""
     plans = build_meal_plan_service(product, 1)
     request = three_meals(150.0, **WALKTHROUGH)
 
@@ -423,20 +420,29 @@ def test_a_heavy_week_stops_varying_only_at_a_week_the_final_order_cannot_beat(p
     assert bounded == variety(plans.generate(request))
 
 
-def test_only_new_heavy_weeks_bound_their_variety_pass(product, monkeypatch):
-    """Ordinary weeks (under 35 dish positions) and replanning with locked dishes try every start, unbounded."""
+def test_a_heavy_week_varies_every_start_whatever_the_clock_says(product, monkeypatch):
+    """Owner, 2026-10-21 (ADR-0080): no variety pass is cut by the clock. A heavy week (35 dish positions) tries
+    every start although the clock passes the old two seconds at each reading; ordinary weeks and replanning with
+    locked dishes try every start as before."""
+    # A clock bound as a default argument at import (the old `clock=time.perf_counter`) is out of reach of a
+    # patch, so the pass must also have neither a deadline name nor a time parameter.
+    assert not hasattr(product_path, "VARIETY_PASS_SECONDS")
+    assert list(inspect.signature(_vary_starts).parameters) == ["meal_beam", "problem", "starts", "seen", "is_best"]
+    ticks = iter(range(0, 10**6, 3))
+    monkeypatch.setattr(time, "perf_counter", lambda: float(next(ticks)))
+    monkeypatch.setattr(time, "monotonic", lambda: float(next(ticks)))
     plans = build_meal_plan_service(product, 1)
-    passes = variety_passes(monkeypatch)
+    passes = variety_passes(monkeypatch, never_best=True)
 
     plans.generate(three_meals(200.0))
-    assert passes[-1]["seconds"] == product_path.VARIETY_PASS_SECONDS
+    assert passes[-1]["tried"] == passes[-1]["starts"] > 0
 
     plans.generate(three_meals(100.0, {"dinner": DINNER_WITH_SOUP}, **WALKTHROUGH))
-    assert passes[-1]["seconds"] == float("inf") and passes[-1]["tried"] == passes[-1]["starts"] > 0
+    assert passes[-1]["tried"] == passes[-1]["starts"] > 0
 
     request = three_meals(200.0)
     recipes, found = plans._candidates(request)
     course = {recipe.id: recipe.course for recipe in recipes}
     main = next(r.recipe.slug for r in found.recommendations if course.get(r.recipe.id) == "main")
     plans.planning_engine.plan(request, found.recommendations, recipes, locked={(0, "dinner"): {"main": main}})
-    assert passes[-1]["seconds"] == float("inf") and passes[-1]["tried"] == passes[-1]["starts"] > 0
+    assert passes[-1]["tried"] == passes[-1]["starts"] > 0

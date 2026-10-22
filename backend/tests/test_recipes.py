@@ -1569,7 +1569,13 @@ def test_a_new_conversation_starts_from_the_saved_household(recipe_client: TestC
     assert constraints["household_size"] == 2
     assert constraints["weekly_budget_sgd"] == 90
     assert constraints["allergens"] == ["peanut"]
-    assert set(constraints["excluded_ingredients"]) == {"pork", "mushroom"}
+    # A member's own exclusion travels with the member (ADR-0071 sections 1 and 2), so it no longer narrows the
+    # week for everyone; what the conversation itself says is still the whole household's.
+    assert constraints["excluded_ingredients"] == ["mushroom"]
+    members = {member["name"]: member for member in constraints["household"]["members"]}
+    assert members["A"]["excluded_ingredients"] == ["pork"]
+    assert members["A"]["allergens"] == ["peanut"]
+    assert members["B"]["excluded_ingredients"] == []
     assert "household_size" not in session["missing_fields"]
 
 

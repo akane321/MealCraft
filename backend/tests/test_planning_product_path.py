@@ -71,7 +71,28 @@ def test_search_limit_is_not_infeasibility_and_does_not_save_a_plan(recipe_clien
     assert trace["status"] == "candidate_rejected"
     assert trace["evidence"] == "bounded_search_exhausted"
     assert trace["search"]["exhausted"] is True
-    assert "relax" not in response.text
+    # It says what was searched, never a slow plan to try again (task 15; ADR-0080).
+    assert "searched as far as the planner goes" in response.text and "longer" not in response.text
+    with database() as session:
+        assert session.scalars(select(MealPlan)).all() == []
+
+
+def test_greedy_budget_rejection_is_validation_failure_not_search_exhaustion(recipe_client):
+    response = recipe_client.post(
+        "/api/plans/generate",
+        json={**REQUEST, "planner_strategy": "greedy-baseline", "weekly_budget_sgd": 0.01},
+    )
+    assert response.status_code == 422
+    run, trace = latest_trace()
+    assert run.status == "failed"
+    assert trace["status"] == "candidate_rejected"
+    assert trace["evidence"] == "candidate_validation_failed"
+    assert trace["search"] == {"baseline": True, "complete_proof": False}
+    assert len(trace["validation_attempts"]) == 1
+    assert any(
+        check["code"] == "purchase_budget" and check["hard"] and check["status"] == "failed"
+        for check in trace["validation"]["checks"]
+    )
     with database() as session:
         assert session.scalars(select(MealPlan)).all() == []
 

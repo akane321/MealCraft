@@ -292,9 +292,10 @@ artifact has `total: null`, which is distinct from a valid empty file with
 
 The current implementation maintains one profile per authenticated household.
 Each member supplies a name, portions a meal, allergens, prohibited ingredient
-IDs, and dietary requirements. The backend merges every member's safety
-constraints into the shared-plan hard constraints (allergens, exclusions and
-diets stay household-wide in this version).
+IDs, and dietary requirements. Planning reads each member's limits (decision
+ADR-0071): a dish may be served when at least one member home can eat it, and
+the plan covers every member home. Allergens are still avoided by the whole
+household unless a member marks one as only their own (`self_only_allergens`).
 
 **Member fields (layer 08).** Each member may also give:
 
@@ -318,7 +319,27 @@ Reads return each member with `resolved_servings_per_meal` and
 no researched value). The resolved portions of all members are at most 12.
 `planning_household_size` is still an integer: the usually-home members'
 portions, rounded up. Each meal of a plan is cooked for the exact sum of the
-members home for it. Member-only allergens are not accepted yet.
+members home for it.
+
+**Shared dish (layer 08 PR-4, ADR-0071 sections 1 and 2).** Each member may also
+give `self_only_allergens`: a list of allergens, a subset of that member's own
+`allergens` (default `[]`; anything else is rejected). Such an allergen is
+handled like a diet: only that member's dishes leave it out. An allergen named
+in the conversation is still the whole household's. A saved profile still writes
+the household-wide union columns `excluded_ingredients` and `dietary_preferences`
+for compatibility, but planning no longer reads them; the `allergens` column
+holds only what the whole household avoids (every member's allergens, less those
+their own member marked `self_only_allergens`). A request with no `household`
+block, or whose members carry no limits of their own, plans as before.
+
+A profile is refused (422) when two members share a name, since a presence
+rule, the coverage rules and the plan's `not_for` all identify a member by it,
+and when any member's allergen is outside the checked vocabulary
+(`data/ingredients/allergen-vocabulary.json`), which no recipe was checked for
+and so cannot be planned around (decision ADR-0024 section 3). Should such an
+allergen reach the planner by another route, that member is treated as able to
+eat nothing, and the plan is refused for leaving them uncovered rather than
+served a dish that may hold it.
 
 **Kitchen equipment (layer 08 PR-3).** The body and every version read add
 `missing_equipment`: up to five of `oven`, `air_fryer`, `steamer`, `microwave`,
@@ -545,9 +566,13 @@ for bounds, compatibility, examples and the Agent handoff.
   planned and each meal's dish roles; the older `meal_composition` (dinner only)
   is still accepted, but not both.
   A role whose id is `vegetable` (a second one `vegetable-2`, and so on) takes
-  only a dish of its courses that is led by vegetables and holds no meat or
-  fish, as `backend/app/planning/vegetable_led.py` defines it (owner,
-  2026-10-02); when none fits, an optional vegetable stays empty and a required
+  only a vegetable-led dish with measured cured/dried or minced flesh up to 20%
+  in total, and other meat/fish up to 5%; both limits apply to mixed dishes,
+  as `backend/app/planning/vegetable_led.py` defines it. This is a role, not a
+  vegetarian-diet claim: member limits and member vegetable coverage still bind.
+  The complete seasoning list and ingredient-wording requirements are in the
+  [user guide](user-guide.md); the role does not grant a member diet permission.
+  When none fits, an optional vegetable stays empty and a required
   one leaves the meal without a plan. Other roles take any dish of their
   courses.
 
@@ -575,7 +600,10 @@ The response holds the week as days × meals: one persisted entry per dish, each
 with its `day_index`, `meal_type`, `role_id`, `portion_share` and `servings`
 (the servings the dish is cooked for when the request had a `household`; null is
 `household_size` at `portion_share`; cost follows the servings, nutrition per
-person stays at the portion share), plus the
+person stays at the portion share), `not_for` (a list of the names of the
+members at that meal who cannot eat the dish; empty when everyone can and for
+any plan made without a `household` block; field of `WeeklyPlanDayResponse`, on
+`GET` and `POST` meal-plan responses), plus the
 `plan_shape` it was planned with, per-person weekly nutrition totals, an
 aggregated shopping list, package checkout cost, ingredient-use cost, weekly
 budget status, and explicit warnings. Each grocery line may carry

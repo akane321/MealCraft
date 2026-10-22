@@ -42,7 +42,22 @@ Each member has an age group, sex, activity and goal. **Portions a meal** is
 either **Auto**, which is that member's daily energy need from HPB's Recommended
 Dietary Allowances over an adult reference, or a number you set (0.25 to 3).
 Untick **Usually eats at home** for someone who joins only sometimes, such as
-grandparents on weekends.
+grandparents on weekends. Allergies, diets and foods a member will not eat are
+kept per member.
+
+MealCraft plans around the allergens it can check recipes for, so it only offers
+those and turns down any other name: one it cannot check it cannot plan around.
+Give each person their own name as well, since a rule, a warning and the plan
+all say who they mean by it.
+
+An allergen is avoided in every dish by the whole household, because one
+kitchen can cross-contact. If an allergy is only one person's and cooking it for
+the others is safe, tick **Only {name} avoids {allergen}** under that member's
+allergens on the profile page. It warns that cooking in the same kitchen can
+cause cross-contact, and asks you to turn it on only if that is safe for them.
+Then only that member's dishes leave it out. This switch is on the profile page
+only: an allergy you name in the conversation is still the whole household's.
+Diets and foods a member will not eat always apply to that member's dishes only.
 
 Under **Who's home and cooking time**, write one sentence in English or Chinese:
 for example "The kids have lunch at school on weekdays", "我周三晚上加班不回来" or
@@ -94,9 +109,28 @@ preferred. The counts are defaults: the planner may leave out one dish when the
 budget, the time or the dishes cannot fit it. A count you choose yourself is
 kept as chosen.
 
-A vegetable dish is a side dish or salad made mostly of vegetables, with no
-meat or fish (eggs, cheese and sauces such as fish sauce are fine); a pasta,
-rice or bean side does not count as one, and neither does a chicken salad.
+A vegetable dish is made at least half of vegetables by counted solid-food
+weight. Listed cured/dried meat or seafood and minced meat may season it, up to
+20% of counted weight in total. Other meat, poultry, fish or seafood may only be
+traces, up to 5%; with both types, both limits apply. Every flesh quantity must
+be known. This is a meal role, not a vegetarian label.
+The seasoning allowance covers bacon, turkey bacon, pancetta, ham, prosciutto,
+chorizo, salami, pepperoni, sausage (including lap cheong), corned beef,
+pastrami, salt cod, smoked haddock, dried shrimp, dried anchovy/ikan bilis and
+bonito flakes. Ground beef and ground pork are explicitly recognised, as is
+other land-animal meat whose ingredient line says ground or minced.
+Ingredient wording can also establish smoked, cured, salted or dried meat or
+fish. The preparation must be stated in the actual ingredient, not just in
+the dish's name; fresh or otherwise unqualified flesh keeps the 5% limit.
+Each person's diet, exclusions and allergens still apply: a vegetarian member
+does not eat the meat-seasoned dish and must have another vegetable dish they
+can eat. Pasta, rice and bean sides are not vegetable dishes merely because
+they are sides. A homemade staple such as noodles or gnocchi needs actual
+listed starch ingredients, not just a staple name. Egg-, tofu- or meat-led
+sides may fill a protein-main role, but not batters, puddings, pancakes or
+substantially starchy sides. Whole-bean-led sides, including edamame, do not
+become protein mains through this rule; edamame sides remain vegetables when
+they meet the vegetable definition.
 
 Under **Kitchen**, tick the equipment you do not have (oven, air fryer,
 steamer, microwave, blender); a recipe that needs it is never planned. A recipe
@@ -105,9 +139,22 @@ them.
 
 Important semantics:
 
-- member allergens, prohibited ingredients, and diet requirements are merged
-  into the safety boundary for the shared plan, for every meal, even one that
-  member is away for;
+- a dish is served when at least one member home for that meal can eat it, and
+  every member home for a lunch or dinner gets a filling meal of dishes they
+  can eat (a protein main with the staple, or a one-bowl dish, and a vegetable
+  dish they can eat whenever the meal has one) that reaches their own share of
+  their daily energy; each dish is cooked and bought for the members who can eat
+  it;
+- at every other meal, breakfast included, and at a meal you have cut down to a
+  single dish, the rule still holds in its simplest form: nobody at that table
+  is left with nothing they can eat;
+- allergens are avoided by the whole household, for every meal, even one that
+  member is away for, unless the member marked one as "only I avoid it"; diets
+  and foods a member will not eat apply to that member's dishes only;
+- when no plan can cover every member, MealCraft says who could not be covered
+  and offers a larger budget, more cooking time or more dishes a meal. It never
+  relaxes an allergen, diet or excluded food, and never cooks an extra dish for
+  one person;
 - an allergen MealCraft cannot check for excludes every recipe rather than
   none, and allergen labels come from ingredient data, so check product labels;
 - saving an edit creates a new profile version, and a plan records the exact
@@ -123,13 +170,18 @@ missing; some questions offer buttons. When the details are complete, **Plan my
 week** plans every chosen meal of the seven days. A plan from the household
 profile may be 1 to 14 days long (**Days to plan**, beside the plan button on
 the Household page). A plan longer than a week shops twice: before
-day 1 and before day 8, with the weekly budget holding on each trip. Fresh
-meat, fish and greens are cooked within 3 days of the trip they are bought on,
-and the shopping list marks them "Use within 3 days".
+day 1 and before day 8, with the weekly budget holding on each trip. Leafy
+greens and sprouts (including bean, pea and radish sprouts), fresh fish and fresh
+seafood (including shellfish, squid, octopus and seafood mixes) are cooked within
+3 days of the trip they are bought on. Frozen, dried, smoked and canned forms
+are excluded from this short-lived class. The shopping list marks the fresh items
+"Use within 3 days".
 
 Most plans take a few seconds. A large household on a tight budget takes longer,
-up to about half a minute, while the planner searches for a week that fits the
-budget; the button says "Planning…" until the plan is ready.
+a few minutes, while the planner searches for a week that fits the
+budget; the button says "Planning…" until the plan is ready. How long is
+acceptable follows how hard the request is: a simple week comes back quickly, a
+complex one is allowed the longer wait rather than being cut short.
 
 MealCraft handles meal planning, recipes, groceries, budgets and explicit
 dietary constraints. Social, unrelated, disease-treatment and
@@ -145,19 +197,23 @@ answer in time, the reply says so and the rule parser reads it instead.
 
 The right panel shows the next meal to cook ("Tonight", "Today's lunch" or
 "Next up"), then the **Meals** tab: every day and meal with its dishes, time and
-calories. Choosing a dish, or **Recipe & steps**, opens its ingredients,
-allergen labels, steps and a how-to video when a key for YouTube is configured.
+calories. A dish some of the people at the meal cannot eat shows small text
+beside it, for example "Not for Mei". Choosing a dish, or **Recipe & steps**,
+opens its ingredients, allergen labels, steps and a how-to video when a key for
+YouTube is configured.
 **Mark as cooked** records a whole meal.
 
 Each dish still to cook offers **Swap**, **Keep**, **Skip** and **Can't buy…**.
 Each fills the conversation with a sentence the assistant understands, so the
-change is previewed before anything happens.
+change is previewed before anything happens. A swap keeps every member covered,
+and the new dish is cooked for the people who can eat it.
 
 ### 4. Nutrition and the shopping list
 
 The **Groceries** tab shows the total against the weekly budget. Perishable
-items (leafy greens, fresh fish and seafood, bean sprouts) are marked **Use
-within 3 days**: the planner cooks them within three days of the shopping trip
+items (leafy greens and sprouts, fresh fish and seafood, including squid, octopus
+and seafood mixes; not frozen, dried, smoked or canned forms)
+are marked **Use within 3 days**: the planner cooks them within three days of the shopping trip
 that buys them, and assumes everything else keeps until its day. In a plan
 longer than a week the list is split by trip, under **Shop before day 1** and
 **Shop before day 8**. The price label

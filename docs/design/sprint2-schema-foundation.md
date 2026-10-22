@@ -4,13 +4,15 @@ Migration `20261018_0030` (after `20261012_0029`) adds every column and table th
 Sprint 2 layers need, in one revision, so that feature work does not have to
 write competing migrations. It changes no behaviour.
 
-**Status.** The columns, the table and the types below are a **verified
-baseline**: they are defined by migration `20261018_0030` and covered by
+**Status.** This page describes the **baseline at migration `20261018_0030`**.
+The columns, the table and the types below are a **verified baseline**: they
+are defined by that migration and covered by
 `backend/tests/test_sprint2_foundation_types.py` and
-`backend/tests/migrations/test_sprint2_foundation_migration.py`. What reads and
-writes them is an **accepted target**: nothing in the planner, the API or the
-importer uses them yet. A feature PR that starts using a column also wires its
-API field, its behaviour and any regenerated evaluation report.
+`backend/tests/migrations/test_sprint2_foundation_migration.py`. At the
+baseline nothing in the planner, the API or the importer used them; the
+feature PRs have wired many since, and "Wired so far" below and the `(wired)`
+markers say which. A feature PR that starts using a column also wires its API
+field, its behaviour and any regenerated evaluation report.
 
 **Wired so far.** Layer 08 PR-1 (household member fields and rules) wires, with
 their behaviour and the [API Contracts](../api-contracts.md):
@@ -58,7 +60,7 @@ importer to carry (`app.planning.meal_composition.unreviewed`). Roles of
 courses are unaffected. A recipe that is a part of a dish (a dough, crust,
 batter, sauce, marinade, stock and the like) is `meal_role` `sauce`, the
 non-meal role of every such part. Still
-unwired: `self_only_allergens`, the halal and
+unwired: the halal and
 `unknown_safety` columns, `FlavorBoost` and `PlanningPreferences`, and the other
 columns below. The
 evaluation reports did not change: their requests carry no household block.
@@ -67,8 +69,9 @@ evaluation reports did not change: their requests carry no household block.
 
 ## Rules of this foundation
 
-- **Nothing reads or writes the new columns.** The planner, the importer and
-  every endpoint behave as before. The generated OpenAPI document is identical
+- **At migration `20261018_0030` nothing read or wrote the new columns.** The
+  planner, the importer and every endpoint behaved as before; see "Wired so far"
+  for what the feature PRs changed since. The generated OpenAPI document is identical
   before and after the migration.
 - **Every new column is nullable, and NULL is today's behaviour.** Each column
   below says what NULL means.
@@ -96,12 +99,15 @@ evaluation reports did not change: their requests carry no household block.
 
 The household-wide union columns (`allergens`, `excluded_ingredients`,
 `dietary_preferences`, `planning_household_size`) stay and are still written,
-for compatibility. Shopping days are not stored: the plan's first day and day 8
+for compatibility, but planning reads each member's limits instead of the
+union; the `allergens` column holds only what the whole household avoids.
+Shopping days are not stored: the plan's first day and day 8
 are derived.
 
 **Member JSON keys** (no migration needed; a feature PR adds them to
 `HouseholdMemberInput`; layer 08 PR-1 wired all but
-`self_only_allergens`). Their names are fixed here:
+`self_only_allergens`, which layer 08 PR-4 wired; see `decisions/ADR-0071`).
+Their names are fixed here:
 
 | Key | Type | Default | Meaning |
 | --- | --- | --- | --- |

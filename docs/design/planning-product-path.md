@@ -83,6 +83,7 @@ replay packet or a new console interface.
 | `needs_clarification` / `needs_data` | The request needs a concrete correction, such as whole-cent budgets or unambiguous pantry quantities. |
 | `needs_data` / `needs_data` | Required facts cannot be verified. |
 | `candidate_rejected` / `bounded_search_exhausted` | No validated completion was retained; no infeasibility claim or relaxation follows. |
+| `candidate_rejected` / `candidate_validation_failed` | The greedy baseline produced a candidate that failed independent validation. The attempted checks record the reason, such as `purchase_budget`; this is neither a search-resource limit nor an infeasibility proof. |
 | `infeasible` / `exactly_infeasible` | A required slot has no eligible candidate in the supplied packet. |
 | `infeasible` / `exhaustively_infeasible` | Untruncated beam enumeration completed and every validated assignment failed only a budget check under the fixed shopping policy. |
 
@@ -98,3 +99,32 @@ source data, missing prices, budget precision, budget recomputation, bounded
 search, deterministic replay of the same observations, redaction, atomic
 storage and the repository's runtime catalog. Existing profile and Agent
 request tests exercise the shared service through those entry points.
+
+## Partial-week checkout accounting
+
+For a plan with one shopping trip, meal additions reserve the unchanged dishes'
+known pantry use before searching. Their package surplus becomes temporary
+planning stock. This does not change the household's saved pantry. Unknown
+quantities do not provide a deduction. A zero remaining budget is valid for this
+internal search when the temporary stock covers the addition.
+
+Before accepting an in-budget candidate, the service recomputes the unchanged
+and new dishes together against the original pantry and checkout budget, in
+cents. Missing prices cannot establish that a candidate fits. Explicit additions
+that need more money retain the existing preview-and-confirm flow.
+
+For plans with two shopping trips, unchanged dishes carry their plan-day numbers.
+The service searches the trips in order with separate weekly budgets. Only the
+original pantry left after the first trip's complete menu passes to the second;
+package surplus stays within its trip, matching the canonical two-trip basket.
+Calendar dates, locked dishes and recipe-use caps across both weeks are retained.
+Preview does not save the additions. This sequential search does not prove a
+globally cheapest two-week revision or explore every possible allocation of stock.
+
+Each hard candidate also checks the complete two-trip basket against the original
+pantry. An earlier addition can consume stock reserved for a later week, so every
+trip whose checkout cost increases must remain within its own budget. An untouched
+trip's existing overrun does not by itself reject the change. Incomplete prices
+cannot establish an in-budget result, even when the added dish needs no new package.
+The soft addition penalty uses the affected meals and total meals in each shopping
+week; a fourteen-day plan does not halve that week's penalty.
