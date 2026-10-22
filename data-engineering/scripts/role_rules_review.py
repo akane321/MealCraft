@@ -51,7 +51,7 @@ def compare_reports(base):
     markdown = [
         "# Developer-report comparison",
         "",
-        f"Base: `{base}`. No timing report was updated. "
+        "Baseline revision is recorded in review.json. No timing report was updated. "
         "These are developer regressions, not held-out capability or accuracy claims. "
         "The comparison uses archived base reports, not a newly run control baseline; changes cannot "
         "all be causally attributed to this rule repair when the archived reports predate other main changes.",

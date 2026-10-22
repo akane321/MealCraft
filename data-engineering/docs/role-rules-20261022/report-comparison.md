@@ -1,6 +1,6 @@
 # Developer-report comparison
 
-Base: `31ece86`. No timing report was updated. These are developer regressions, not held-out capability or accuracy claims. The comparison uses archived base reports, not a newly run control baseline; changes cannot all be causally attributed to this rule repair when the archived reports predate other main changes.
+Baseline revision is recorded in review.json. No timing report was updated. These are developer regressions, not held-out capability or accuracy claims. The comparison uses archived base reports, not a newly run control baseline; changes cannot all be causally attributed to this rule repair when the archived reports predate other main changes.
 
 ## full-default
 
