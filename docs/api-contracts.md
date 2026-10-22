@@ -569,6 +569,9 @@ for bounds, compatibility, examples and the Agent handoff.
   only a vegetable-led dish with measured cured/dried or minced flesh up to 20%
   in total, and other meat/fish up to 5%; both limits apply to mixed dishes,
   as `backend/app/planning/vegetable_led.py` defines it. This is a role, not a
+  dish-name check: starchy tubers count as vegetables only if non-tuber
+  vegetables already reach 40% of counted solids; the total still needs 50%.
+  The role is not a
   vegetarian-diet claim: member limits and member vegetable coverage still bind.
   The complete seasoning list and ingredient-wording requirements are in the
   [user guide](user-guide.md); the role does not grant a member diet permission.
