@@ -2,7 +2,7 @@
 
 Generated with `data-engineering/scripts/role_rules_review.py`. No row is human-verified by this tool. Frozen model values and review flags are unchanged.
 
-Baseline revision is recorded in review.json. Random sample seed: 20261022. Non-frozen rule-owned changes: 27. Rule-owned updates within the frozen batch: 14. Frozen suggestions: 422. Deferred bean sides: 15.
+Baseline revision is recorded in review.json. Random sample seed: 20261022. Non-frozen rule-owned changes: 23. Rule-owned updates within the frozen batch: 14. Frozen suggestions: 422. Whole-bean-led sides (no main promotion): 19.
 
 The specific 109 IDs have not been supplied; the complete frozen batch is included below. Do not interpret a suggested role or an allowed role as review/acceptance.
 
@@ -34,8 +34,8 @@ These are evidence/rule categories, not reviewed truth; missing-data reasons and
 | Rule | Frozen recipes | IDs |
 |---|---:|---|
 | homemade_staple | 38 | RCP2_0CA3F3F66929, RCP2_0DBC46FF845C, RCP2_143B82A4800E, RCP2_16BF42FD100D, RCP2_1A1BA06D6CB5, RCP2_23DCDA368745, RCP2_2AC94AA7906B, RCP2_2E3012F8BABC, RCP2_3314EF4C89E1, RCP2_38391F938210, RCP2_43F241E2C2FA, RCP2_45391BFD9020, RCP2_47186AAC9989, RCP2_4B3B02F3D728, RCP2_4E9F363F8876, RCP2_5C8F72777948, RCP2_5F632D436B4E, RCP2_5FFD99ABD34E, RCP2_646039848924, RCP2_6C1E6D9E70BE, RCP2_6D9B39CCD991, RCP2_70B47600544A, RCP2_7791CF2A7CDD, RCP2_7F94EA2E2036, RCP2_829671202485, RCP2_92D0966923D6, RCP2_9CD7CD0DA72B, RCP2_A986B63ED3FF, RCP2_B8238A4718B6, RCP2_BA95359C23B7, RCP2_BBD46E78E711, RCP2_C8B759477F8B, RCP2_D57A6F473637, RCP2_E20C08DE6172, RCP2_E34384C91EB9, RCP2_EC29565337D3, RCP2_F918B184F959, RCP2_FB5F31874C8A |
-| meat_seasoned_vegetable | 18 | RCP2_1087CA73F93D, RCP2_1106936B4750, RCP2_15BCD52E8739, RCP2_24B9AA68594B, RCP2_546DFF631ED4, RCP2_57E2F87CA748, RCP2_5ED49FFCF6D4, RCP2_5FDC54ED6B2B, RCP2_641ABD3FC590, RCP2_66CDC4D02656, RCP2_783368D92192, RCP2_7EC289C20A2A, RCP2_89F0058D53F5, RCP2_C81AEF8EF1AC, RCP2_D86FDF8D821E, RCP2_D8E98D9FFC37, RCP2_E091A77EFBE5, RCP2_F015BE03BD1C |
-| protein_led_side | 24 | RCP2_15F1AAB4C310, RCP2_1722D847EECE, RCP2_33B9F1AECB3E, RCP2_4539937C1F3A, RCP2_45BE0219D45D, RCP2_472B6677B22B, RCP2_4869C3AEA8AD, RCP2_486E1D6A70D8, RCP2_6336ACA2F9AE, RCP2_6B3C9AD9D6E0, RCP2_6E757674305D, RCP2_7DCEB197520A, RCP2_888730AE4624, RCP2_88FDB464A695, RCP2_8D376D61D13A, RCP2_9150197BEBD9, RCP2_920C40633EDD, RCP2_92F5CA7EC6D3, RCP2_958B37782112, RCP2_9E095D1F1FB4, RCP2_A268F28D4812, RCP2_A86E37A6C8F4, RCP2_E8D667BA918A, RCP2_ED8C37EACE4D |
+| meat_seasoned_vegetable | 17 | RCP2_1087CA73F93D, RCP2_1106936B4750, RCP2_15BCD52E8739, RCP2_24B9AA68594B, RCP2_546DFF631ED4, RCP2_57E2F87CA748, RCP2_5ED49FFCF6D4, RCP2_5FDC54ED6B2B, RCP2_641ABD3FC590, RCP2_66CDC4D02656, RCP2_7EC289C20A2A, RCP2_89F0058D53F5, RCP2_C81AEF8EF1AC, RCP2_D86FDF8D821E, RCP2_D8E98D9FFC37, RCP2_E091A77EFBE5, RCP2_F015BE03BD1C |
+| protein_led_side | 19 | RCP2_15F1AAB4C310, RCP2_45BE0219D45D, RCP2_472B6677B22B, RCP2_4869C3AEA8AD, RCP2_486E1D6A70D8, RCP2_6336ACA2F9AE, RCP2_6B3C9AD9D6E0, RCP2_7DCEB197520A, RCP2_888730AE4624, RCP2_88FDB464A695, RCP2_8D376D61D13A, RCP2_9150197BEBD9, RCP2_920C40633EDD, RCP2_92F5CA7EC6D3, RCP2_9E095D1F1FB4, RCP2_A268F28D4812, RCP2_A86E37A6C8F4, RCP2_E8D667BA918A, RCP2_ED8C37EACE4D |
 
 ## Meat-share distribution (vegetable-led sides/salads containing flesh)
 
@@ -51,143 +51,215 @@ These are evidence/rule categories, not reviewed truth; missing-data reasons and
 | (5,10%] | 13 |
 | unknown | 1 |
 
-The 20% default is a conservative, interpretable boundary before the sparse 20–25% bin, not a statistically proved universal divide. Unknown quantities are excluded. See review.json for every newly admitted content candidate and its weighed evidence.
+The owner narrowed the earlier 20% gate: total flesh <=20%, non-seasoning flesh <=5%. Only listed preserved/minced flesh qualifies for the seasoning allowance. Unknown quantities are excluded. See review.json for every newly admitted content candidate and its weighed evidence.
 
 ## Newly content-admitted vegetable candidates
 
 This list describes the flesh-share gate only. Frozen tags, missing ingredients, course/role, member restrictions and other planning gates may still exclude a recipe.
 
-| ID | Recipe | Flesh share | Frozen |
-|---|---|---:|---|
-| RCP2_010D47D8B41A | Mexican Crab Salad | 15.42% | False |
-| RCP2_0403B8D87889 | Turnip Greens | 13.37% | False |
-| RCP2_04FC6484009B | Mediterranean Tabbouleh | 15.29% | False |
-| RCP2_0537FFE83166 | Barbecued Green Beans | 15.97% | False |
-| RCP2_056FEB8B1C07 | Stewed Okra And Tomatoes | 3.40% | False |
-| RCP2_0724466545EF | Kimchi With Daikon Radish | 1.79% | False |
-| RCP2_081D6225586A | Daikon Kimchi | 0.93% | False |
-| RCP2_0C19BCC4EDA8 | Vietnamese Chicken Cabbage Salad | 19.89% | False |
-| RCP2_0DBD84E7C323 | Texas Okra And Tomatoes | 10.06% | False |
-| RCP2_0FC977DCA3B4 | Broccoli Raisin Salad | 4.00% | False |
-| RCP2_1087CA73F93D | Southern Smothered Green Beans | 17.53% | True |
-| RCP2_1106936B4750 | Sweet And Sour Cabbage | 7.99% | True |
-| RCP2_138C3FC46F0B | Cauliflower Salad(Make 24 Hours Ahead) | 5.36% | False |
-| RCP2_15BCD52E8739 | Sprouts, Chorizo & Almond Bowl | 8.21% | True |
-| RCP2_1A1EA8E63135 | Korean Salad | 16.79% | False |
-| RCP2_20375A8F16C9 | Mediterranean Vegetable Casserole | 2.41% | False |
-| RCP2_24B9AA68594B | Mushroom Supreme | 15.83% | True |
-| RCP2_24ED2AE8A798 | Sweet And Sour Greens | 12.90% | False |
-| RCP2_27674C5EEA07 | Italian Spinach Salad - Toh | 6.37% | False |
-| RCP2_294D48225815 | Fresh Broccoli Salad | 13.00% | False |
-| RCP2_29EADB2B9636 | Terry'S Feta-Bacon Zucchini | 3.40% | False |
-| RCP2_2B542AC009D4 | Favorite Broccoli Salad | 12.78% | False |
-| RCP2_2DA348FB447B | Curry Coleslaw | 4.35% | False |
-| RCP2_2F1C44136A22 | Korean Salad | 18.99% | False |
-| RCP2_305281DC4061 | Caesar Salad | 3.03% | False |
-| RCP2_31CA4DA49B46 | Creamy Fresh Corn | 11.68% | False |
-| RCP2_33D380525A75 | Cauliflower Salad | 18.73% | False |
-| RCP2_36D4A3CA2374 | Vietnamese Cabbage Salad | 18.77% | False |
-| RCP2_3A4F20CBF931 | Slata Tunisiya - Tunisian Salad | 7.76% | False |
-| RCP2_431BB9960EB2 | Baked Sauerkraut Wirth | 7.60% | False |
-| RCP2_4B90C8F8B8F7 | Korean Salad | 15.18% | False |
-| RCP2_546DFF631ED4 | Cauliflower Au Gratin | 12.70% | True |
-| RCP2_57E2F87CA748 | Grandma'S Sweet And Sauerkraut | 13.17% | True |
-| RCP2_5ED49FFCF6D4 | Spanish Rice | 10.27% | True |
-| RCP2_5FDC54ED6B2B | Sauerkraut | 18.05% | True |
-| RCP2_641ABD3FC590 | Bavarian Cabbage | 9.15% | True |
-| RCP2_66CDC4D02656 | Napa Cabbage with Dried Shrimp | 2.13% | True |
-| RCP2_6B7C34C7955A | Antipasto Salad(Six Main Course Servings Or 12 First Course Servings) | 5.70% | False |
-| RCP2_6C04EF417AF0 | German-Style Cabbage And Beans | 10.06% | False |
-| RCP2_783368D92192 | Tempura | 12.56% | True |
-| RCP2_7EC289C20A2A | Savory Sauerkraut Casserole | 14.78% | True |
-| RCP2_7FA1C2089917 | Curried Couscous Salad | 4.49% | False |
-| RCP2_84C25BF48AA5 | Bacon And Feta Green Beans | 10.21% | False |
-| RCP2_89F0058D53F5 | German Style Beans | 14.80% | True |
-| RCP2_8B2F4B847EE8 | Braised Celery (Irish) | 8.39% | False |
-| RCP2_8CA1A70205AB | Sweet-Sour Red Cabbage | 10.98% | False |
-| RCP2_9239A388BD64 | Korean Spinach Salad | 5.26% | False |
-| RCP2_96DC46181242 | Sweet And Sour Cabbage With Bacon | 16.41% | False |
-| RCP2_B26CCDD9EC11 | Teriyaki Mushroom Salad | 4.07% | False |
-| RCP2_B8BA70677774 | Ceviche With Cabbage | 10.84% | False |
-| RCP2_BB96EC674F08 | Baked Sauerkraut Wirth | 7.60% | False |
-| RCP2_BEF6AEB06ABA | Tabbouleh With Chicken And Red Pepper | 14.21% | False |
-| RCP2_C81AEF8EF1AC | Onion Creme Brulee | 10.57% | True |
-| RCP2_CAA027B54117 | Greek Salad | 1.62% | False |
-| RCP2_D190FCD7C0C1 | Sweet And Sour Red Cabbage | 16.41% | False |
-| RCP2_D86FDF8D821E | Sweet And Sour Cabbage | 16.41% | True |
-| RCP2_D8E98D9FFC37 | Tomatoes Provencale | 11.87% | True |
-| RCP2_E091A77EFBE5 | Sauerkraut Auf Bayische Art(Bavarian Style Sauerkraut) | 6.13% | True |
-| RCP2_F015BE03BD1C | Bubble And Squeak | 9.95% | True |
-| RCP2_F216A17B1A97 | Couscous Seafood Side Salad | 17.18% | False |
-| RCP2_F99CD39666E1 | Japanese Salad | 17.90% | False |
+| ID | Recipe | Total flesh | Other flesh | Frozen |
+|---|---|---:|---:|---|
+| RCP2_0403B8D87889 | Turnip Greens | 13.37% | 0.00% | False |
+| RCP2_0537FFE83166 | Barbecued Green Beans | 15.97% | 0.00% | False |
+| RCP2_056FEB8B1C07 | Stewed Okra And Tomatoes | 3.40% | 0.00% | False |
+| RCP2_0724466545EF | Kimchi With Daikon Radish | 1.79% | 1.79% | False |
+| RCP2_081D6225586A | Daikon Kimchi | 0.93% | 0.00% | False |
+| RCP2_0DBD84E7C323 | Texas Okra And Tomatoes | 10.06% | 0.00% | False |
+| RCP2_0FC977DCA3B4 | Broccoli Raisin Salad | 4.00% | 0.00% | False |
+| RCP2_1087CA73F93D | Southern Smothered Green Beans | 17.53% | 0.00% | True |
+| RCP2_1106936B4750 | Sweet And Sour Cabbage | 7.99% | 0.00% | True |
+| RCP2_138C3FC46F0B | Cauliflower Salad(Make 24 Hours Ahead) | 5.36% | 0.00% | False |
+| RCP2_15BCD52E8739 | Sprouts, Chorizo & Almond Bowl | 8.21% | 0.00% | True |
+| RCP2_1A1EA8E63135 | Korean Salad | 16.79% | 0.00% | False |
+| RCP2_20375A8F16C9 | Mediterranean Vegetable Casserole | 2.41% | 2.41% | False |
+| RCP2_24B9AA68594B | Mushroom Supreme | 15.83% | 0.00% | True |
+| RCP2_24ED2AE8A798 | Sweet And Sour Greens | 12.90% | 0.00% | False |
+| RCP2_27674C5EEA07 | Italian Spinach Salad - Toh | 6.37% | 0.00% | False |
+| RCP2_294D48225815 | Fresh Broccoli Salad | 13.00% | 0.00% | False |
+| RCP2_29EADB2B9636 | Terry'S Feta-Bacon Zucchini | 3.40% | 0.00% | False |
+| RCP2_2B542AC009D4 | Favorite Broccoli Salad | 12.78% | 0.00% | False |
+| RCP2_2DA348FB447B | Curry Coleslaw | 4.35% | 0.00% | False |
+| RCP2_2F1C44136A22 | Korean Salad | 18.99% | 0.00% | False |
+| RCP2_305281DC4061 | Caesar Salad | 3.03% | 3.03% | False |
+| RCP2_31CA4DA49B46 | Creamy Fresh Corn | 11.68% | 0.00% | False |
+| RCP2_33D380525A75 | Cauliflower Salad | 18.73% | 0.00% | False |
+| RCP2_431BB9960EB2 | Baked Sauerkraut Wirth | 7.60% | 0.00% | False |
+| RCP2_4B90C8F8B8F7 | Korean Salad | 15.18% | 0.00% | False |
+| RCP2_546DFF631ED4 | Cauliflower Au Gratin | 12.70% | 0.00% | True |
+| RCP2_57E2F87CA748 | Grandma'S Sweet And Sauerkraut | 13.17% | 0.00% | True |
+| RCP2_5ED49FFCF6D4 | Spanish Rice | 10.27% | 0.00% | True |
+| RCP2_5FDC54ED6B2B | Sauerkraut | 18.05% | 0.00% | True |
+| RCP2_641ABD3FC590 | Bavarian Cabbage | 9.15% | 0.00% | True |
+| RCP2_66CDC4D02656 | Napa Cabbage with Dried Shrimp | 2.13% | 0.00% | True |
+| RCP2_6B7C34C7955A | Antipasto Salad(Six Main Course Servings Or 12 First Course Servings) | 5.70% | 0.00% | False |
+| RCP2_6C04EF417AF0 | German-Style Cabbage And Beans | 10.06% | 0.00% | False |
+| RCP2_7EC289C20A2A | Savory Sauerkraut Casserole | 14.78% | 0.00% | True |
+| RCP2_7FA1C2089917 | Curried Couscous Salad | 4.49% | 0.00% | False |
+| RCP2_84C25BF48AA5 | Bacon And Feta Green Beans | 10.21% | 0.00% | False |
+| RCP2_89F0058D53F5 | German Style Beans | 14.80% | 0.00% | True |
+| RCP2_8B2F4B847EE8 | Braised Celery (Irish) | 8.39% | 0.00% | False |
+| RCP2_8CA1A70205AB | Sweet-Sour Red Cabbage | 10.98% | 0.00% | False |
+| RCP2_9239A388BD64 | Korean Spinach Salad | 5.26% | 0.00% | False |
+| RCP2_96DC46181242 | Sweet And Sour Cabbage With Bacon | 16.41% | 0.00% | False |
+| RCP2_B26CCDD9EC11 | Teriyaki Mushroom Salad | 4.07% | 0.00% | False |
+| RCP2_BB96EC674F08 | Baked Sauerkraut Wirth | 7.60% | 0.00% | False |
+| RCP2_C81AEF8EF1AC | Onion Creme Brulee | 10.57% | 0.00% | True |
+| RCP2_CAA027B54117 | Greek Salad | 1.62% | 1.62% | False |
+| RCP2_D190FCD7C0C1 | Sweet And Sour Red Cabbage | 16.41% | 0.00% | False |
+| RCP2_D86FDF8D821E | Sweet And Sour Cabbage | 16.41% | 0.00% | True |
+| RCP2_D8E98D9FFC37 | Tomatoes Provencale | 11.87% | 0.00% | True |
+| RCP2_E091A77EFBE5 | Sauerkraut Auf Bayische Art(Bavarian Style Sauerkraut) | 6.13% | 0.00% | True |
+| RCP2_F015BE03BD1C | Bubble And Squeak | 9.95% | 0.00% | True |
+
+## Vegetable admissions compared with round one
+
+Previous 61; current 51. This is the content gate only, not model-tag release or human acceptance.
+
+### removed (10)
+
+| ID | Recipe | Total flesh |
+|---|---|---:|
+| RCP2_010D47D8B41A | Mexican Crab Salad | 15.42% |
+| RCP2_04FC6484009B | Mediterranean Tabbouleh | 15.29% |
+| RCP2_0C19BCC4EDA8 | Vietnamese Chicken Cabbage Salad | 19.89% |
+| RCP2_36D4A3CA2374 | Vietnamese Cabbage Salad | 18.77% |
+| RCP2_3A4F20CBF931 | Slata Tunisiya - Tunisian Salad | 7.76% |
+| RCP2_783368D92192 | Tempura | 12.56% |
+| RCP2_B8BA70677774 | Ceviche With Cabbage | 10.84% |
+| RCP2_BEF6AEB06ABA | Tabbouleh With Chicken And Red Pepper | 14.21% |
+| RCP2_F216A17B1A97 | Couscous Seafood Side Salad | 17.18% |
+| RCP2_F99CD39666E1 | Japanese Salad | 17.90% |
+
+### retained (51)
+
+| ID | Recipe | Total flesh |
+|---|---|---:|
+| RCP2_0403B8D87889 | Turnip Greens | 13.37% |
+| RCP2_0537FFE83166 | Barbecued Green Beans | 15.97% |
+| RCP2_056FEB8B1C07 | Stewed Okra And Tomatoes | 3.40% |
+| RCP2_0724466545EF | Kimchi With Daikon Radish | 1.79% |
+| RCP2_081D6225586A | Daikon Kimchi | 0.93% |
+| RCP2_0DBD84E7C323 | Texas Okra And Tomatoes | 10.06% |
+| RCP2_0FC977DCA3B4 | Broccoli Raisin Salad | 4.00% |
+| RCP2_1087CA73F93D | Southern Smothered Green Beans | 17.53% |
+| RCP2_1106936B4750 | Sweet And Sour Cabbage | 7.99% |
+| RCP2_138C3FC46F0B | Cauliflower Salad(Make 24 Hours Ahead) | 5.36% |
+| RCP2_15BCD52E8739 | Sprouts, Chorizo & Almond Bowl | 8.21% |
+| RCP2_1A1EA8E63135 | Korean Salad | 16.79% |
+| RCP2_20375A8F16C9 | Mediterranean Vegetable Casserole | 2.41% |
+| RCP2_24B9AA68594B | Mushroom Supreme | 15.83% |
+| RCP2_24ED2AE8A798 | Sweet And Sour Greens | 12.90% |
+| RCP2_27674C5EEA07 | Italian Spinach Salad - Toh | 6.37% |
+| RCP2_294D48225815 | Fresh Broccoli Salad | 13.00% |
+| RCP2_29EADB2B9636 | Terry'S Feta-Bacon Zucchini | 3.40% |
+| RCP2_2B542AC009D4 | Favorite Broccoli Salad | 12.78% |
+| RCP2_2DA348FB447B | Curry Coleslaw | 4.35% |
+| RCP2_2F1C44136A22 | Korean Salad | 18.99% |
+| RCP2_305281DC4061 | Caesar Salad | 3.03% |
+| RCP2_31CA4DA49B46 | Creamy Fresh Corn | 11.68% |
+| RCP2_33D380525A75 | Cauliflower Salad | 18.73% |
+| RCP2_431BB9960EB2 | Baked Sauerkraut Wirth | 7.60% |
+| RCP2_4B90C8F8B8F7 | Korean Salad | 15.18% |
+| RCP2_546DFF631ED4 | Cauliflower Au Gratin | 12.70% |
+| RCP2_57E2F87CA748 | Grandma'S Sweet And Sauerkraut | 13.17% |
+| RCP2_5ED49FFCF6D4 | Spanish Rice | 10.27% |
+| RCP2_5FDC54ED6B2B | Sauerkraut | 18.05% |
+| RCP2_641ABD3FC590 | Bavarian Cabbage | 9.15% |
+| RCP2_66CDC4D02656 | Napa Cabbage with Dried Shrimp | 2.13% |
+| RCP2_6B7C34C7955A | Antipasto Salad(Six Main Course Servings Or 12 First Course Servings) | 5.70% |
+| RCP2_6C04EF417AF0 | German-Style Cabbage And Beans | 10.06% |
+| RCP2_7EC289C20A2A | Savory Sauerkraut Casserole | 14.78% |
+| RCP2_7FA1C2089917 | Curried Couscous Salad | 4.49% |
+| RCP2_84C25BF48AA5 | Bacon And Feta Green Beans | 10.21% |
+| RCP2_89F0058D53F5 | German Style Beans | 14.80% |
+| RCP2_8B2F4B847EE8 | Braised Celery (Irish) | 8.39% |
+| RCP2_8CA1A70205AB | Sweet-Sour Red Cabbage | 10.98% |
+| RCP2_9239A388BD64 | Korean Spinach Salad | 5.26% |
+| RCP2_96DC46181242 | Sweet And Sour Cabbage With Bacon | 16.41% |
+| RCP2_B26CCDD9EC11 | Teriyaki Mushroom Salad | 4.07% |
+| RCP2_BB96EC674F08 | Baked Sauerkraut Wirth | 7.60% |
+| RCP2_C81AEF8EF1AC | Onion Creme Brulee | 10.57% |
+| RCP2_CAA027B54117 | Greek Salad | 1.62% |
+| RCP2_D190FCD7C0C1 | Sweet And Sour Red Cabbage | 16.41% |
+| RCP2_D86FDF8D821E | Sweet And Sour Cabbage | 16.41% |
+| RCP2_D8E98D9FFC37 | Tomatoes Provencale | 11.87% |
+| RCP2_E091A77EFBE5 | Sauerkraut Auf Bayische Art(Bavarian Style Sauerkraut) | 6.13% |
+| RCP2_F015BE03BD1C | Bubble And Squeak | 9.95% |
+
+### added (0)
+
+| ID | Recipe | Total flesh |
+|---|---|---:|
 
 ## Fixed-seed random sample — human confirmation required
 
-### RCP2_96C115F8AE38 — Black Bean Garlic Edamame
-
-Changes: `{"meal_role": {"before": "vegetable", "after": "protein_main"}}`
-
-- 1 tablespoon peanut oil — 13.5 g
-- 4 cloves garlic, minced — 12.0 g
-- 2 pounds fresh edamame (in shell) — 907.2 g
-- 1/4 cup black bean sauce — 76.0 g
-
-Human decision: pending.
-
-### RCP2_29EADB2B9636 — Terry'S Feta-Bacon Zucchini
-
-Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
-
-- 4 medium zucchini, about 8-9-inch long — 784.0 g
-- 2 tablespoons olive oil — 27.0 g
-- 1 garlic clove, minced — 3.0 g
-- 2 tablespoons parsley, chopped fine — 7.5 g
-- 1/4 teaspoon pepper (no salt needed) — 0.6 g
-- 4 pieces bacon, cooked and crumbled — 32.4 g
-- 4 ounces feta cheese, crumbled — 113.4 g
-- 2 tablespoons parmesan cheese, grated — 12.5 g
-
-Human decision: pending.
-
-### RCP2_84C25BF48AA5 — Bacon And Feta Green Beans
+### RCP2_BB96EC674F08 — Baked Sauerkraut Wirth
 
 Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
 
-- 8 slices bacon, cooked, crumbled, and divided — 64.8 g
-- 1 lb fresh green beans, cooked al dente with still some crunch to them — 453.6 g
-- 1 teaspoon minced garlic — 2.8 g
-- 4 ounces feta cheese, crumbled and divided — 113.4 g
-- 1/2 teaspoon onion powder — 1.2 g
-- 1/8 teaspoon ground black pepper — 0.3 g
-- 2 tablespoons water — 29.6 g
+- 2 lb. sauerkraut, washed well and drained — 907.2 g
+- 1 lb. can tomatoes, drained and chopped (reserving the juice) — 453.6 g
+- 1 1/4 c. firmly packed dark brown sugar — 275.0 g
+- 4 slices lean bacon, halved crosswise — 112.0 g
 
 Human decision: pending.
 
-### RCP2_20375A8F16C9 — Mediterranean Vegetable Casserole
+### RCP2_31CA4DA49B46 — Creamy Fresh Corn
 
 Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
 
-- 1 None aubergine, sliced lengthwise — 300.0 g
-- 2 None courgettes, sliced legnthwise — 392.0 g
-- 4-5 None tomatoes, sliced — 553.5 g
-- 8 None anchovy fillets, chopped — 32.0 g
-- 8 None black olives — 32.0 g
-- 5 tbsp olive oil — 67.5 g
-- 100 ml vegetable stock — 101.0 g
-- 3 sprigs rosemary — 3.0 g
-- 1 clove garlic, finely chopped — 3.0 g
-- 1 None spring onion, very finely chopped — 15.0 g
+- 6 to 8 ears fresh corn — 630.0 g
+- 3 strips bacon — 84.0 g
+- 2/3 c. water — 158.0 g
+- 1 tsp. salt — 6.1 g
+- 1/2 tsp. sugar — 2.1 g
+- 2 tsp. flour — 5.2 g
+- 1/4 c. milk — 61.0 g
+- 1/8 tsp. pepper — 0.3 g
+- 1 Tbsp. butter — 14.2 g
 
 Human decision: pending.
 
-### RCP2_09178C4F96FC — Yorkshire Puddings
+### RCP2_96DC46181242 — Sweet And Sour Cabbage With Bacon
+
+Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
+
+- 4 bacon strips, diced — 112.0 g
+- 5 cups shredded cabbage — 445.0 g
+- 1 medium onion, chopped — 110.0 g
+- 1/2 cup water — 118.5 g
+- 1/3 cup vinegar — 80.0 g
+- 2 tablespoons all-purpose flour — 15.6 g
+- 2 tablespoons brown sugar — 27.5 g
+- 1/2 teaspoon salt — 3.0 g
+- 1/8 teaspoon pepper — 0.3 g
+
+Human decision: pending.
+
+### RCP2_24ED2AE8A798 — Sweet And Sour Greens
+
+Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
+
+- 6 slices bacon, chopped — 168.0 g
+- 1/2 cup water — 118.5 g
+- 1/4 cup vinegar — 60.0 g
+- 1/2 cup white sugar — 100.0 g
+- 1/8 teaspoon salt — 0.8 g
+- 1/8 teaspoon black pepper — 0.3 g
+- 2 1/2 pounds fresh collard greens, tough stems removed and leaves torn into bite-size pieces — 1134.0 g
+
+Human decision: pending.
+
+### RCP2_0AA904922C1B — Kona K'S Korean-Style Steamed Egg Casserole (Egg Jjim)
 
 Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "protein_main"}}`
 
-- 140g Flour — 140.0 g
-- 4 Egg — 200.0 g
-- 200ml Milk — 206.3 g
-- Drizzle Sunflower Oil — 13.6 g
+- 3 eggs — 150.0 g
+- 1 cup water — 237.0 g
+- 2 teaspoons salt — 12.2 g
+- 1 tablespoon sesame oil — 13.6 g
+- 1 tablespoon toasted sesame seeds — 9.0 g
+- 1 tablespoon green onion, finely chopped — 6.2 g
 
 Human decision: pending.
 
@@ -205,31 +277,17 @@ Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"b
 
 Human decision: pending.
 
-### RCP2_0C181842D295 — Chinese Salt And Pepper Tofu
-
-Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "protein_main"}}`
-
-- 1 lb firm tofu — 453.6 g
-- 2 teaspoons salt — 12.2 g
-- 2 teaspoons garlic powder — 5.3 g
-- 1 teaspoon fresh ground black pepper — 2.3 g
-- 3 tablespoons cornstarch — 24.0 g
-- 3 tablespoons vegetable oil — 40.9 g
-
-Human decision: pending.
-
-### RCP2_8CA1A70205AB — Sweet-Sour Red Cabbage
+### RCP2_0DBD84E7C323 — Texas Okra And Tomatoes
 
 Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
 
 - 4 slices bacon — 112.0 g
-- 3/4 c. chopped onion — 120.0 g
-- 3/4 c. chopped celery — 75.8 g
-- 3/4 c. cider vinegar — 179.2 g
-- 1/3 c. molasses — 106.7 g
-- 1 Tbsp. prepared mustard — 15.5 g
+- 1/4 c. onion, chopped — 40.0 g
+- 1 to 2 jalapeno peppers, chopped — 21.0 g
+- 4 c. okra, sliced — 400.0 g
+- 3 c. tomatoes, peeled and chopped — 540.0 g
 - 1 tsp. salt — 6.1 g
-- 8 c. shredded red cabbage — 712.0 g
+- 1/2 tsp. pepper — 1.1 g
 
 Human decision: pending.
 
@@ -244,52 +302,6 @@ Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"b
 - 10 ounces chicken stock — 283.5 g
 - salt and black pepper — 2.9 g
 - 1 ounce butter — 28.3 g
-
-Human decision: pending.
-
-### RCP2_0403B8D87889 — Turnip Greens
-
-Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
-
-- 2 lb. fresh turnip greens — 907.2 g
-- 5 slices bacon — 140.0 g
-- 4 c. water — 948.0 g
-- 1 Tbsp. white vinegar — 15.0 g
-- 1/4 to 1/2 tsp. red pepper flakes — 0.7 g
-- 1 tsp. salt — 6.1 g
-- 1/4 tsp. pepper — 0.6 g
-
-Human decision: pending.
-
-### RCP2_081D6225586A — Daikon Kimchi
-
-Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
-
-- 6 cups peeled daikon radishes, in chunks — 696.0 g
-- 2 tablespoons salt — 36.5 g
-- 1/2 cup plus 2 tablespoons sugar — 100.0 g
-- 1/2 cup korean chili powder (kochukaru, available at Korean markets or any good single-chili powder like ancho or New Mexican, bu) — 50.0 g
-- 20 slices ginger — 40.0 g
-- 20 garlic cloves — 60.0 g
-- 1/4 cup fish sauce (nam pla) — 72.0 g
-- 2 teaspoons salted shrimp (available at Korean markets) — 7.1 g
-- 1/4 cup soy sauce — 63.8 g
-
-Human decision: pending.
-
-### RCP2_D190FCD7C0C1 — Sweet And Sour Red Cabbage
-
-Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
-
-- 5 c. shredded red cabbage — 445.0 g
-- 1 tsp. salt — 6.1 g
-- 4 slices bacon — 112.0 g
-- 2 Tbsp. brown sugar — 27.5 g
-- 2 Tbsp. flour — 15.6 g
-- 1/2 c. water — 118.5 g
-- 1/3 c. vinegar — 80.0 g
-- 1/8 tsp. pepper — 0.3 g
-- 1 small sliced onion — 110.0 g
 
 Human decision: pending.
 
@@ -312,66 +324,64 @@ Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"b
 
 Human decision: pending.
 
-### RCP2_431BB9960EB2 — Baked Sauerkraut Wirth
+### RCP2_0403B8D87889 — Turnip Greens
 
 Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
 
-- 2 lb. sauerkraut, washed and well drained — 907.2 g
-- 1 lb. chopped tomatoes — 453.6 g
-- 1 1/4 c. dark brown sugar, firmly packed — 275.0 g
-- 4 slices lean bacon, cut in half — 112.0 g
+- 2 lb. fresh turnip greens — 907.2 g
+- 5 slices bacon — 140.0 g
+- 4 c. water — 948.0 g
+- 1 Tbsp. white vinegar — 15.0 g
+- 1/4 to 1/2 tsp. red pepper flakes — 0.7 g
+- 1 tsp. salt — 6.1 g
+- 1/4 tsp. pepper — 0.6 g
 
 Human decision: pending.
 
-### RCP2_6CA29419A1ED — Naan(Leaf-Shaped Bread)
-
-Changes: `{"protein_sources": {"before": ["egg"], "after": []}}`
-
-- 4 c. all-purpose flour — 500.0 g
-- 1 Tbsp. sugar — 12.5 g
-- 1 Tbsp. double-acting baking powder — 13.8 g
-- 1/4 tsp. baking soda — 1.2 g
-- 1/2 tsp. salt — 3.0 g
-- 2 eggs — 100.0 g
-- 1 c. milk — 244.0 g
-- 4 to 6 tsp. oil — 22.7 g
-
-Human decision: pending.
-
-### RCP2_24ED2AE8A798 — Sweet And Sour Greens
+### RCP2_D190FCD7C0C1 — Sweet And Sour Red Cabbage
 
 Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
 
-- 6 slices bacon, chopped — 168.0 g
-- 1/2 cup water — 118.5 g
-- 1/4 cup vinegar — 60.0 g
-- 1/2 cup white sugar — 100.0 g
-- 1/8 teaspoon salt — 0.8 g
-- 1/8 teaspoon black pepper — 0.3 g
-- 2 1/2 pounds fresh collard greens, tough stems removed and leaves torn into bite-size pieces — 1134.0 g
+- 5 c. shredded red cabbage — 445.0 g
+- 1 tsp. salt — 6.1 g
+- 4 slices bacon — 112.0 g
+- 2 Tbsp. brown sugar — 27.5 g
+- 2 Tbsp. flour — 15.6 g
+- 1/2 c. water — 118.5 g
+- 1/3 c. vinegar — 80.0 g
+- 1/8 tsp. pepper — 0.3 g
+- 1 small sliced onion — 110.0 g
 
 Human decision: pending.
 
-### RCP2_BB96EC674F08 — Baked Sauerkraut Wirth
+### RCP2_20375A8F16C9 — Mediterranean Vegetable Casserole
 
 Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
 
-- 2 lb. sauerkraut, washed well and drained — 907.2 g
-- 1 lb. can tomatoes, drained and chopped (reserving the juice) — 453.6 g
-- 1 1/4 c. firmly packed dark brown sugar — 275.0 g
-- 4 slices lean bacon, halved crosswise — 112.0 g
+- 1 None aubergine, sliced lengthwise — 300.0 g
+- 2 None courgettes, sliced legnthwise — 392.0 g
+- 4-5 None tomatoes, sliced — 553.5 g
+- 8 None anchovy fillets, chopped — 32.0 g
+- 8 None black olives — 32.0 g
+- 5 tbsp olive oil — 67.5 g
+- 100 ml vegetable stock — 101.0 g
+- 3 sprigs rosemary — 3.0 g
+- 1 clove garlic, finely chopped — 3.0 g
+- 1 None spring onion, very finely chopped — 15.0 g
 
 Human decision: pending.
 
-### RCP2_A6FB0E6E132E — Homemade Italian Egg Noodles
+### RCP2_056FEB8B1C07 — Stewed Okra And Tomatoes
 
-Changes: `{"contains_staple": {"before": false, "after": true}, "meal_role": {"before": "protein_main", "after": "staple"}, "protein_sources": {"before": ["egg"], "after": []}}`
+Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
 
-- 2 c. flour — 250.0 g
-- 3 egg yolks — 51.0 g
-- 1 egg — 50.0 g
-- 2 tsp. salt — 12.2 g
-- 1/4 to 1/2 c. water — 88.9 g
+- 2 slices bacon, cut up — 56.0 g
+- 1 large onion, chopped — 110.0 g
+- 1 medium green pepper, chopped — 120.0 g
+- 1 to 2 lb. okra, cut up — 680.4 g
+- 1 to 2 lb. tomatoes, peeled and chopped — 680.4 g
+- 1 tsp. salt — 6.1 g
+- 1/2 tsp. pepper — 1.1 g
 
 Human decision: pending.
 
@@ -390,70 +400,44 @@ Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"b
 
 Human decision: pending.
 
-### RCP2_3DC6485B1198 — Teriyaki Edamame
+### RCP2_6CA29419A1ED — Naan(Leaf-Shaped Bread)
 
-Changes: `{"meal_role": {"before": "vegetable", "after": "protein_main"}}`
+Changes: `{"protein_sources": {"before": ["egg"], "after": []}}`
 
-- 1/4 cup teriyaki sauce — 72.0 g
-- 2 tablespoons sesame oil — 27.2 g
-- 2 tablespoons rice vinegar — 32.1 g
-- 2 tablespoons dark brown sugar — 27.5 g
-- 1/4 cup water — 59.2 g
-- 16 ounces frozen edamame, in the pod — 453.6 g
-- 1 tablespoon sesame seeds — 9.0 g
-
-Human decision: pending.
-
-### RCP2_0AA904922C1B — Kona K'S Korean-Style Steamed Egg Casserole (Egg Jjim)
-
-Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "protein_main"}}`
-
-- 3 eggs — 150.0 g
-- 1 cup water — 237.0 g
-- 2 teaspoons salt — 12.2 g
-- 1 tablespoon sesame oil — 13.6 g
-- 1 tablespoon toasted sesame seeds — 9.0 g
-- 1 tablespoon green onion, finely chopped — 6.2 g
+- 4 c. all-purpose flour — 500.0 g
+- 1 Tbsp. sugar — 12.5 g
+- 1 Tbsp. double-acting baking powder — 13.8 g
+- 1/4 tsp. baking soda — 1.2 g
+- 1/2 tsp. salt — 3.0 g
+- 2 eggs — 100.0 g
+- 1 c. milk — 244.0 g
+- 4 to 6 tsp. oil — 22.7 g
 
 Human decision: pending.
 
-### RCP2_0DBD84E7C323 — Texas Okra And Tomatoes
+### RCP2_431BB9960EB2 — Baked Sauerkraut Wirth
 
 Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
 
-- 4 slices bacon — 112.0 g
-- 1/4 c. onion, chopped — 40.0 g
-- 1 to 2 jalapeno peppers, chopped — 21.0 g
-- 4 c. okra, sliced — 400.0 g
-- 3 c. tomatoes, peeled and chopped — 540.0 g
-- 1 tsp. salt — 6.1 g
-- 1/2 tsp. pepper — 1.1 g
+- 2 lb. sauerkraut, washed and well drained — 907.2 g
+- 1 lb. chopped tomatoes — 453.6 g
+- 1 1/4 c. dark brown sugar, firmly packed — 275.0 g
+- 4 slices lean bacon, cut in half — 112.0 g
 
 Human decision: pending.
 
-### RCP2_31CA4DA49B46 — Creamy Fresh Corn
+### RCP2_29EADB2B9636 — Terry'S Feta-Bacon Zucchini
 
-Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
+Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
 
-- 6 to 8 ears fresh corn — 630.0 g
-- 3 strips bacon — 84.0 g
-- 2/3 c. water — 158.0 g
-- 1 tsp. salt — 6.1 g
-- 1/2 tsp. sugar — 2.1 g
-- 2 tsp. flour — 5.2 g
-- 1/4 c. milk — 61.0 g
-- 1/8 tsp. pepper — 0.3 g
-- 1 Tbsp. butter — 14.2 g
-
-Human decision: pending.
-
-### RCP2_6F36672E582B — Edamame (Soy Beans) And Onions
-
-Changes: `{"meal_role": {"before": "vegetable", "after": "protein_main"}}`
-
-- 250 g shelled frozen edamame — 250.0 g
-- 1 cup sweet onion, Chopped — 160.0 g
-- cooking spray — 4.5 g
+- 4 medium zucchini, about 8-9-inch long — 784.0 g
+- 2 tablespoons olive oil — 27.0 g
+- 1 garlic clove, minced — 3.0 g
+- 2 tablespoons parsley, chopped fine — 7.5 g
+- 1/4 teaspoon pepper (no salt needed) — 0.6 g
+- 4 pieces bacon, cooked and crumbled — 32.4 g
+- 4 ounces feta cheese, crumbled — 113.4 g
+- 2 tablespoons parmesan cheese, grated — 12.5 g
 
 Human decision: pending.
 
@@ -471,39 +455,79 @@ Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"b
 
 Human decision: pending.
 
-### RCP2_96DC46181242 — Sweet And Sour Cabbage With Bacon
+### RCP2_081D6225586A — Daikon Kimchi
 
 Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
 
-- 4 bacon strips, diced — 112.0 g
-- 5 cups shredded cabbage — 445.0 g
-- 1 medium onion, chopped — 110.0 g
-- 1/2 cup water — 118.5 g
-- 1/3 cup vinegar — 80.0 g
-- 2 tablespoons all-purpose flour — 15.6 g
-- 2 tablespoons brown sugar — 27.5 g
-- 1/2 teaspoon salt — 3.0 g
-- 1/8 teaspoon pepper — 0.3 g
+- 6 cups peeled daikon radishes, in chunks — 696.0 g
+- 2 tablespoons salt — 36.5 g
+- 1/2 cup plus 2 tablespoons sugar — 100.0 g
+- 1/2 cup korean chili powder (kochukaru, available at Korean markets or any good single-chili powder like ancho or New Mexican, bu) — 50.0 g
+- 20 slices ginger — 40.0 g
+- 20 garlic cloves — 60.0 g
+- 1/4 cup fish sauce (nam pla) — 72.0 g
+- 2 teaspoons salted shrimp (available at Korean markets) — 7.1 g
+- 1/4 cup soy sauce — 63.8 g
 
 Human decision: pending.
 
-### RCP2_056FEB8B1C07 — Stewed Okra And Tomatoes
+### RCP2_A6FB0E6E132E — Homemade Italian Egg Noodles
+
+Changes: `{"contains_staple": {"before": false, "after": true}, "meal_role": {"before": "protein_main", "after": "staple"}, "protein_sources": {"before": ["egg"], "after": []}}`
+
+- 2 c. flour — 250.0 g
+- 3 egg yolks — 51.0 g
+- 1 egg — 50.0 g
+- 2 tsp. salt — 12.2 g
+- 1/4 to 1/2 c. water — 88.9 g
+
+Human decision: pending.
+
+### RCP2_0C181842D295 — Chinese Salt And Pepper Tofu
+
+Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "protein_main"}}`
+
+- 1 lb firm tofu — 453.6 g
+- 2 teaspoons salt — 12.2 g
+- 2 teaspoons garlic powder — 5.3 g
+- 1 teaspoon fresh ground black pepper — 2.3 g
+- 3 tablespoons cornstarch — 24.0 g
+- 3 tablespoons vegetable oil — 40.9 g
+
+Human decision: pending.
+
+### RCP2_84C25BF48AA5 — Bacon And Feta Green Beans
 
 Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
 
-- 2 slices bacon, cut up — 56.0 g
-- 1 large onion, chopped — 110.0 g
-- 1 medium green pepper, chopped — 120.0 g
-- 1 to 2 lb. okra, cut up — 680.4 g
-- 1 to 2 lb. tomatoes, peeled and chopped — 680.4 g
+- 8 slices bacon, cooked, crumbled, and divided — 64.8 g
+- 1 lb fresh green beans, cooked al dente with still some crunch to them — 453.6 g
+- 1 teaspoon minced garlic — 2.8 g
+- 4 ounces feta cheese, crumbled and divided — 113.4 g
+- 1/2 teaspoon onion powder — 1.2 g
+- 1/8 teaspoon ground black pepper — 0.3 g
+- 2 tablespoons water — 29.6 g
+
+Human decision: pending.
+
+### RCP2_8CA1A70205AB — Sweet-Sour Red Cabbage
+
+Changes: `{"contains_staple": {"before": null, "after": false}, "estimated": {"before": {"cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "after": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}}, "meal_role": {"before": null, "after": "vegetable"}}`
+
+- 4 slices bacon — 112.0 g
+- 3/4 c. chopped onion — 120.0 g
+- 3/4 c. chopped celery — 75.8 g
+- 3/4 c. cider vinegar — 179.2 g
+- 1/3 c. molasses — 106.7 g
+- 1 Tbsp. prepared mustard — 15.5 g
 - 1 tsp. salt — 6.1 g
-- 1/2 tsp. pepper — 1.1 g
+- 8 c. shredded red cabbage — 712.0 g
 
 Human decision: pending.
 
-## Deferred bean-led sides
+## Whole-bean-led sides — owner decided: no protein-main promotion
 
-No promotion is authorised. Potential benefit is an extra legume main for vegetarian/vegan or flesh-excluding members, subject to actual diets, allergens, pricing and review. This is not a claim that any household's plan changes.
+Owner 2026-10-22: bean-led sides are not protein mains, including edamame. Edamame keeps its vegetable role when eligible; tofu and tempeh are distinct processed soy foods.
 
 The existing catalog diets indicate which member restrictions might benefit; they are not newly audited safety labels. Members with no diet restriction may gain alternatives too.
 
@@ -514,14 +538,18 @@ The existing catalog diets indicate which member restrictions might benefit; the
 | RCP2_0F6692A9480A | Corn And Lima Beans | staple | True | gluten-free |
 | RCP2_1BBDFA22270A | Sweet And Sour Lentils | one_bowl | True | dairy-free, gluten-free, vegetarian |
 | RCP2_1D1DBCB06899 | Brazilian Black Beans | None | False | dairy-free, gluten-free, vegetarian, vegan |
+| RCP2_33B9F1AECB3E | Homemade Tempeh | snack | True | dairy-free, gluten-free, vegetarian, vegan |
 | RCP2_3465CC24E6FF | Pinto Beans For Burritos | snack | True | dairy-free, gluten-free |
+| RCP2_3DC6485B1198 | Teriyaki Edamame | vegetable | False | dairy-free, vegetarian, vegan |
 | RCP2_428E51829F1A | Korean Spiced Kidney Beans | snack | True | dairy-free, vegetarian, vegan |
 | RCP2_4808C28F01AE | Refried Beans | snack | True | dairy-free, gluten-free, vegetarian, vegan |
 | RCP2_5216E8F6555E | Refritos (Refried Beans) | sauce | True | dairy-free, gluten-free, vegetarian, vegan |
 | RCP2_561E7EDAC82C | Cuban Black Beans | sauce | True | dairy-free, gluten-free, vegetarian, vegan |
 | RCP2_634F7CFF5B86 | Mexican Low-Fat Pinto Beans | staple | True | dairy-free, gluten-free, vegetarian, vegan |
 | RCP2_66AD2CDBCB53 | Guatemalan Black Beans (Frijoles Parados) | staple | True | dairy-free, gluten-free, vegetarian, vegan |
+| RCP2_6F36672E582B | Edamame (Soy Beans) And Onions | vegetable | False | dairy-free, gluten-free, vegetarian, vegan |
 | RCP2_7767F8C932A9 | Frijoles Negros- Crock Pot Mexican Black Beans | staple | True | dairy-free, gluten-free, vegetarian, vegan |
+| RCP2_96C115F8AE38 | Black Bean Garlic Edamame | vegetable | False | dairy-free, vegetarian, vegan |
 | RCP2_B50E98C61A88 | Colombian Red Beans - Frijoles Colombianos | staple | True | dairy-free, gluten-free |
 | RCP2_BA25EE029647 | Brazilian Black Beans - Vegitarian | staple | True | dairy-free, gluten-free, vegetarian, vegan |
 
@@ -564,7 +592,7 @@ The existing catalog diets indicate which member restrictions might benefit; the
 | RCP2_15F1AAB4C310 | Korean Gaeran Mari (Stuffed Egg Omelette W Cheese) | breakfast | protein_main | protein_main |
 | RCP2_1656CB038FF4 | Chinese Wedding Rings | snack | None | breakfast, dessert, staple, snack, one_bowl |
 | RCP2_16BF42FD100D | Udon Noodles | staple | staple | staple |
-| RCP2_1722D847EECE | Southern Spoon Bread | staple | protein_main | protein_main |
+| RCP2_1722D847EECE | Southern Spoon Bread | staple | None | soup, breakfast, snack, dessert, sauce, drink |
 | RCP2_1729D7258E04 | Egg Filling For Sushi | snack | sauce | sauce |
 | RCP2_185C6CEAE1C2 | Enchiladas | one_bowl | None | breakfast, dessert, staple, snack, one_bowl, protein_main |
 | RCP2_192C01503365 | Lasagna | protein_main | protein_main | protein_main |
@@ -634,7 +662,7 @@ The existing catalog diets indicate which member restrictions might benefit; the
 | RCP2_3314EF4C89E1 | Potato Gnocchi From Scratch | staple | staple | staple |
 | RCP2_3330CF0BC620 | Korean Kimchi Burgers | one_bowl | one_bowl | one_bowl |
 | RCP2_3368D505CC40 | Vietnamese Sandwiches | one_bowl | one_bowl | one_bowl |
-| RCP2_33B9F1AECB3E | Homemade Tempeh | snack | protein_main | protein_main |
+| RCP2_33B9F1AECB3E | Homemade Tempeh | snack | None | soup, breakfast, snack, dessert, sauce, drink |
 | RCP2_3465CC24E6FF | Pinto Beans For Burritos | snack | None | soup, breakfast, snack, dessert, sauce, drink |
 | RCP2_35400FE238ED | Instant Pot® Smoky Korean Bbq Baked Beans | snack | None | soup, breakfast, snack, dessert, sauce, drink |
 | RCP2_355D74D12F4C | Vietnamese Spiced Paté | snack | snack | snack |
@@ -671,7 +699,7 @@ The existing catalog diets indicate which member restrictions might benefit; the
 | RCP2_44870004D5FB | Lasagna Style Bow Tie Dish | one_bowl | one_bowl | one_bowl |
 | RCP2_44C42897EBAD | Peruvian Alfajores | dessert | None | breakfast, dessert, staple, snack, one_bowl |
 | RCP2_45391BFD9020 | Roti Jala (Malaysian Lacy Pancakes) | snack | staple | staple |
-| RCP2_4539937C1F3A | Sauerkraut Dumplings | snack | protein_main | protein_main |
+| RCP2_4539937C1F3A | Sauerkraut Dumplings | snack | None | soup, breakfast, snack, dessert, sauce, drink |
 | RCP2_456CCADB7128 | Stuffed Green Peppers | protein_main | protein_main | protein_main |
 | RCP2_45BE0219D45D | Heart-Shaped Tamagoyaki (Japanese Omelet) | breakfast | protein_main | protein_main |
 | RCP2_45EBD2FEEEB0 | Paneer (Home Made) | snack | None | soup, breakfast, snack, dessert, sauce, drink |
@@ -753,7 +781,7 @@ The existing catalog diets indicate which member restrictions might benefit; the
 | RCP2_6CFCB11F79B9 | Thai Curry Pork Lettuce Wraps (Nam Prik Ong) | protein_main | protein_main | protein_main |
 | RCP2_6D9B39CCD991 | Malaysian Roti Canai (Kinda Like A Pancake) | staple | staple | staple |
 | RCP2_6E65362F51A9 | Beef Fajitas | protein_main | protein_main | protein_main |
-| RCP2_6E757674305D | Danish Dumplings | snack | protein_main | protein_main |
+| RCP2_6E757674305D | Danish Dumplings | snack | None | soup, breakfast, snack, dessert, sauce, drink |
 | RCP2_70B47600544A | Ramen Noodles | staple | staple | staple |
 | RCP2_7123F2300609 | Ethiopian Cheese | snack | None | soup, breakfast, snack, dessert, sauce, drink |
 | RCP2_722E5F335AD4 | Greek Shortbread | dessert | None | breakfast, dessert, staple, snack, one_bowl |
@@ -766,7 +794,7 @@ The existing catalog diets indicate which member restrictions might benefit; the
 | RCP2_778D3F74C3CF | Bohemian Bread Dumplings | staple | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink |
 | RCP2_7791CF2A7CDD | Polenta | staple | staple | staple |
 | RCP2_7803F1FEB333 | Shredded Beef Chimichangas | protein_main | protein_main | protein_main |
-| RCP2_783368D92192 | Tempura | snack | vegetable | vegetable |
+| RCP2_783368D92192 | Tempura | snack | None | soup, breakfast, snack, dessert, sauce, drink |
 | RCP2_7877BC0F4362 | Indian Fry Bread | staple | None | soup, breakfast, snack, dessert, sauce, drink |
 | RCP2_793CD2DF1D24 | 3 Cheese Lasagne(St. Rose Student Recipe) | one_bowl | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink |
 | RCP2_7B354C6F9480 | Sauerkraut Dumplings(Hungarian Recipe) | one_bowl | None | soup, breakfast, snack, dessert, sauce, drink |
@@ -806,7 +834,7 @@ The existing catalog diets indicate which member restrictions might benefit; the
 | RCP2_92F5CA7EC6D3 | Seven Hour Eggs - Korean Sauna | snack | protein_main | protein_main |
 | RCP2_92FA53DECB5E | Mediterranean Chicken | one_bowl | protein_main | protein_main |
 | RCP2_956FD7177508 | Ramen Hot And Sour Soup | one_bowl | one_bowl | one_bowl |
-| RCP2_958B37782112 | Basic Souffle Recipe | breakfast | protein_main | protein_main |
+| RCP2_958B37782112 | Basic Souffle Recipe | breakfast | None | soup, breakfast, snack, dessert, sauce, drink |
 | RCP2_9723078749EF | Thai Chicken Pizza With Carrots And Cilantro | one_bowl | protein_main | protein_main |
 | RCP2_97D659CE8E07 | Japchae (Korean Glass Noodles) | one_bowl | one_bowl | one_bowl |
 | RCP2_989AB5746A34 | Sage Polenta | staple | None | soup, breakfast, snack, dessert, sauce, drink |

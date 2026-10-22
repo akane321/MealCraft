@@ -209,3 +209,26 @@ reference were forced repetitions. It is therefore not pre-registered. Under
 section 3 and `ADR-0020` section 3, no reported condition is rescored in place:
 every v1 report keeps its numbers, the default evaluation run stays v1, and a
 v1.1 report is a separate condition, reported beside the v1 one.
+
+## 9. 2026-10-22 vegetable-definition amendment (ADR-0082)
+
+The composition vegetable check uses the product's definition in
+`backend/app/planning/vegetable_led.py`: at least half counted solids are
+vegetables; measured cured/dried flesh and minced meat may season them up to
+20% total flesh, while other flesh is limited to 5%. Both limits apply when
+mixed. Unknown flesh amounts cannot qualify. A vegetable role is not a
+vegetarian label; ingredient-based allergen and diet checks are unchanged.
+
+The strict scorer and label checker share this definition for every compared
+system, not a separate rule that favours the product. This is a disclosed
+scoring-definition change under ADR-0020 section 3, not label or threshold
+tuning against protected cases. Record this condition as
+`vegetable-role-2026-10-22` alongside the applicable protocol when producing
+new comparison evidence; preserve earlier conditions rather than silently
+rescoring them in place. Version-2 course-only composition checks are unchanged.
+
+The first-round CI regression found no changes in the existing generated
+evaluation reports. That observation does not make old and new scoring
+definitions identical in general. The tightened second-round definition must
+still pass its own CI; this task does not open protected episodes, labels or
+results, and reports no new held-out capability evidence.

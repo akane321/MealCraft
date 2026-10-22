@@ -29,14 +29,15 @@ The rules, and why:
   planner's vegetable-led check still decides whether it may. A hearty salad (not vegetable-led, with a
   main protein) therefore fills no slot; the owner reviews them as their own stratum of the sample packet
   before deciding whether one may be a main. A dish is `vegetable` only when it is
-  vegetable-led (`app.planning.vegetable_led`, ADR-0054), so the role and the planner's rule agree.
+  vegetable-led (`app.planning.vegetable_led`, ADR-0082 amends ADR-0054 and supplements ADR-0077/0081),
+  so the role and the planner's rule agree.
   A main or soup that carries its own staple (rice, noodles, pasta, bread or other grain staples:
   `staple_share`) is `one_bowl`; a main made mostly of a staple with no protein is a `staple`. A
   main with a main protein is a `protein_main`; one led by vegetables without one is a `vegetable`.
   A soup whose noodles, rice or pasta are a tenth of it is `one_bowl` too. Baked goods go by title words
   and sugar. A named homemade staple needs at least half listed raw starch; its binder eggs are not
-  main protein. An egg/soy/flesh-led side can be a protein main at half counted solids; bean-led sides
-  remain deferred. Grey zones go to the model, which may answer null when no allowed role fits.
+  main protein. An egg/tofu/flesh-led side can be a protein main at half counted solids; whole bean-led sides,
+  batters and starch-heavy sides do not gain this role. Grey zones may stay null.
 - **Contains staple** is true exactly for `one_bowl` and `staple` dishes, so it follows the role.
 - **Protein sources** are the sources whose ingredients make at least 5 % (meat, poultry, fish,
   seafood) or 10 % (egg, soy, legumes) of the dish's counted raw grams, so an egg that binds a
@@ -84,6 +85,7 @@ from app.planning.recipe_quality import missing_named_protein, reviewed_source_c
 from app.planning.vegetable_led import (
     COOKED_STAPLES,
     COOKED_YIELD,
+    FLESH_SHARE,
     MEAT_WORDS,
     SEASONING_FROM_FLESH,
     UNCOUNTED,
@@ -219,6 +221,9 @@ HOMEMADE_STARCH = DOUGH_FLOUR | {
     "brown_rice_flour",
     "semolina_flour",
 }
+BATTER_STARCH = HOMEMADE_STARCH | {"cornstarch", "potato_starch", "tapioca_starch"}
+WHOLE_SOYBEANS = frozenset({"edamame", "soybean", "fermented_soybeans"})
+BATTER_SIDE_TITLE = re.compile(r"\b(?:batters?|puddings?|pancakes?|crepes?)\b", re.I)
 PIZZA_BATTER = DOUGH_FLOUR | {
     "milk",
     "egg",
@@ -242,7 +247,6 @@ CRITICAL_MODEL_FIELDS = ("meal_role", "contains_staple", "protein_sources")
 PROTEIN_SOURCES: tuple[str, ...] = get_args(ProteinSource)
 FLESH_SOURCES = frozenset({"chicken", "duck", "pork", "beef", "lamb", "fish", "shellfish"})
 SWEET_OR_CONDIMENT = frozenset({"dessert", "drink", "sauce"})
-FLESH_SHARE = 0.05
 PLANT_EGG_SHARE = 0.10
 _SOURCE_IDS = {
     "chicken": "chicken chicken_breast chicken_thigh chicken_wings cooked_chicken cornish_hen chicken_or_turkey turkey"
@@ -604,7 +608,9 @@ def homemade_staple(dish: Dish) -> bool:
 
 
 def protein_side_share(dish: Dish) -> float:
-    """Egg/soy/flesh share of the same weighed solids as vegetable_share; pulses are deferred."""
+    """Egg/tofu/flesh share of weighed solids; whole beans and batter foods are not protein mains."""
+    if BATTER_SIDE_TITLE.search(dish.title) or staple_share(dish, BATTER_STARCH) >= ONE_BOWL_SHARE:
+        return 0.0  # Reuse the established 15% substantive-starch boundary, not a report-fitted threshold.
     eligible = FLESH_SOURCES | {"egg", "soy", "?"}
     if any(line_sources(line) & eligible and (line.grams is None or line.grams <= 0) for line in dish.lines):
         return 0.0
@@ -614,7 +620,7 @@ def protein_side_share(dish: Dish) -> float:
     protein = sum(
         weight
         for line in dish.lines
-        if line_sources(line) & eligible
+        if line_sources(line) & eligible and release_name(line.name) not in WHOLE_SOYBEANS
         for _, weight in counted_weights([(line.name, line.grams, line.text)])
     )
     return protein / total if total else 0.0
@@ -695,7 +701,7 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
             return "vegetable", ()
         if staple_share(dish, STAPLES | STARCHY) >= SIDE_STAPLE_SHARE:
             return "staple", ()
-        # A little meat does not make a main; pulses remain pending the owner's separate decision.
+        # A little meat does not make a main; the owner excludes bean-led sides from protein mains.
         return None, tuple(
             role
             for role in open_roles

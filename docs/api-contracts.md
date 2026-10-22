@@ -566,7 +566,8 @@ for bounds, compatibility, examples and the Agent handoff.
   planned and each meal's dish roles; the older `meal_composition` (dinner only)
   is still accepted, but not both.
   A role whose id is `vegetable` (a second one `vegetable-2`, and so on) takes
-  only a vegetable-led dish with at most a measured small meat/fish seasoning,
+  only a vegetable-led dish with measured cured/dried or minced flesh up to 20%
+  in total, and other meat/fish up to 5%; both limits apply to mixed dishes,
   as `backend/app/planning/vegetable_led.py` defines it. This is a role, not a
   vegetarian-diet claim: member limits and member vegetable coverage still bind.
   When none fits, an optional vegetable stays empty and a required

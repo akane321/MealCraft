@@ -16,11 +16,13 @@ sys.path.insert(0, str(ROOT / "backend"))
 
 from app.data.recipe_tags import (  # noqa: E402
     CRITICAL_MODEL_FIELDS,
+    WHOLE_SOYBEANS,
     curated_dishes,
     homemade_staple,
     line_sources,
     protein_side_share,
     release_dishes,
+    release_name,
     rule_tags,
 )
 from app.data.release_v2 import release_dir  # noqa: E402
@@ -31,6 +33,7 @@ from app.planning.vegetable_led import (  # noqa: E402
     counted_weights,
     meat_or_fish,
     meat_share,
+    vegetable_led,
     vegetable_share,
 )
 
@@ -138,12 +141,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", required=True)
     parser.add_argument("--reports-only", action="store_true")
+    parser.add_argument("--previous-review", default="0b3f056035993cae6cec5e8fd0736662548dcd74")
     args = parser.parse_args()
     if args.reports_only:
         compare_reports(args.base)
         return
     before = json.loads(subprocess.check_output(["git", "show", f"{args.base}:{RECIPE_TAGS}"], cwd=ROOT))
     after = json.loads((ROOT / RECIPE_TAGS).read_text(encoding="utf-8"))
+    prior_review = json.loads(
+        subprocess.check_output(
+            ["git", "show", f"{args.previous_review}:data-engineering/docs/role-rules-20261022/review.json"], cwd=ROOT
+        )
+    )
     assert before["llm_usage"] == after["llm_usage"]
     dishes = {d.key: d for d in curated_dishes() + release_dishes()}
     release_diets = {
@@ -165,7 +174,8 @@ def main():
             and veg is not None
             and veg >= 0.5
             and flesh is not None
-            and 0 < flesh <= MEAT_SEASONING_SHARE,
+            and flesh > 0
+            and vegetable_led(lines),
             "protein_led_side": dish.course == "side"
             and protein_side_share(dish) >= 0.5
             and proposal.values["meal_role"] == "protein_main",
@@ -228,7 +238,8 @@ def main():
                 | {
                     "vegetable_share": veg,
                     "meat_share": flesh,
-                    "content_admitted": flesh is not None and flesh <= MEAT_SEASONING_SHARE,
+                    "fresh_meat_share": meat_share(lines, fresh_only=True),
+                    "content_admitted": vegetable_led(lines),
                     "frozen": frozen(old),
                 }
             )
@@ -241,7 +252,7 @@ def main():
         legume = sum(
             weight
             for line in dish.lines
-            if "legume" in line_sources(line)
+            if "legume" in line_sources(line) or release_name(line.name) in WHOLE_SOYBEANS
             for _, weight in counted_weights([(line.name, line.grams, line.text)])
         )
         if dish.course == "side" and total and legume / total >= 0.5:
@@ -251,7 +262,7 @@ def main():
                     "legume_share": legume / total,
                     "stored_role": new["meal_role"],
                     "frozen": frozen(old),
-                    "review_status": "owner_decision_pending",
+                    "review_status": "owner_decided_not_protein_main",
                     "existing_dietary_tags": release_diets.get(key, []),
                 }
             )
@@ -275,6 +286,16 @@ def main():
         for x in meat
     )
     impacts["new_vegetable_content_admissions"] = sum(x["content_admitted"] for x in meat)
+    old_admitted = {row["id"]: row for row in prior_review["vegetable_candidates"] if row["content_admitted"]}
+    new_admitted = {row["id"]: row for row in meat if row["content_admitted"]}
+    admission_comparison = {
+        "previous_review_revision": args.previous_review,
+        "previous_count": len(old_admitted),
+        "current_count": len(new_admitted),
+        "retained": [new_admitted[key] for key in sorted(old_admitted.keys() & new_admitted.keys())],
+        "removed": [old_admitted[key] for key in sorted(old_admitted.keys() - new_admitted.keys())],
+        "added": [new_admitted[key] for key in sorted(new_admitted.keys() - old_admitted.keys())],
+    }
     sample = random.Random(SEED).sample(changed, min(30, len(changed)))
     frozen_by_rule = {
         category: [row["id"] for row in suggestions if row["rule_categories"][category]]
@@ -293,10 +314,12 @@ def main():
         "meat_cap": MEAT_SEASONING_SHARE,
         "meat_distribution": dict(bins),
         "vegetable_candidates": meat,
+        "vegetable_admission_comparison": admission_comparison,
         "rule_owned_changes": changed,
         "human_sample": sample,
         "frozen_suggestions": suggestions,
         "deferred_bean_sides": beans,
+        "bean_side_decision": "owner 2026-10-22: whole-bean-led sides, including edamame, are not protein mains",
         "liu_ub_109_ids": "not supplied; all frozen recipes covered, subset match pending",
     }
     OUT.mkdir(exist_ok=True)
@@ -312,7 +335,7 @@ def main():
         f"Baseline revision is recorded in review.json. Random sample seed: {SEED}. "
         f"Non-frozen rule-owned changes: {len(changed)}. "
         f"Rule-owned updates within the frozen batch: {len(frozen_rule_changes)}. "
-        f"Frozen suggestions: {len(suggestions)}. Deferred bean sides: {len(beans)}.",
+        f"Frozen suggestions: {len(suggestions)}. Whole-bean-led sides (no main promotion): {len(beans)}.",
         "",
         "The specific 109 IDs have not been supplied; the complete frozen batch is included below. "
         "Do not interpret a suggested role or an allowed role as review/acceptance.",
@@ -344,8 +367,8 @@ def main():
         "|---|---:|",
         *[f"| {label} | {count} |" for label, count in sorted(bins.items())],
         "",
-        "The 20% default is a conservative, interpretable boundary before the sparse 20–25% bin, "
-        "not a statistically proved universal divide. Unknown quantities are excluded. "
+        "The owner narrowed the earlier 20% gate: total flesh <=20%, non-seasoning flesh <=5%. "
+        "Only listed preserved/minced flesh qualifies for the seasoning allowance. Unknown quantities are excluded. "
         "See review.json for every newly admitted content candidate and its weighed evidence.",
         "",
         "## Newly content-admitted vegetable candidates",
@@ -353,17 +376,31 @@ def main():
         "This list describes the flesh-share gate only. Frozen tags, missing ingredients, course/role, "
         "member restrictions and other planning gates may still exclude a recipe.",
         "",
-        "| ID | Recipe | Flesh share | Frozen |",
-        "|---|---|---:|---|",
+        "| ID | Recipe | Total flesh | Other flesh | Frozen |",
+        "|---|---|---:|---:|---|",
         *[
-            f"| {r['id']} | {r['title']} | {100 * r['meat_share']:.2f}% | {r['frozen']} |"
+            f"| {r['id']} | {r['title']} | {100 * r['meat_share']:.2f}% | "
+            f"{100 * r['fresh_meat_share']:.2f}% | {r['frozen']} |"
             for r in meat
             if r["content_admitted"]
         ],
         "",
-        "## Fixed-seed random sample — human confirmation required",
+        "## Vegetable admissions compared with round one",
+        "",
+        f"Previous {len(old_admitted)}; current {len(new_admitted)}. "
+        "This is the content gate only, not model-tag release or human acceptance.",
         "",
     ]
+    for status in ("removed", "retained", "added"):
+        md += [
+            f"### {status} ({len(admission_comparison[status])})",
+            "",
+            "| ID | Recipe | Total flesh |",
+            "|---|---|---:|",
+        ]
+        md += [f"| {r['id']} | {r['title']} | {100 * r['meat_share']:.2f}% |" for r in admission_comparison[status]]
+        md += [""]
+    md += ["## Fixed-seed random sample — human confirmation required", ""]
     for row in sample:
         md += [
             f"### {row['id']} — {row['title']}",
@@ -376,11 +413,10 @@ def main():
             "",
         ]
     md += [
-        "## Deferred bean-led sides",
+        "## Whole-bean-led sides — owner decided: no protein-main promotion",
         "",
-        "No promotion is authorised. Potential benefit is an extra "
-        "legume main for vegetarian/vegan or flesh-excluding members, subject to actual diets, allergens, "
-        "pricing and review. This is not a claim that any household's plan changes.",
+        "Owner 2026-10-22: bean-led sides are not protein mains, including edamame. "
+        "Edamame keeps its vegetable role when eligible; tofu and tempeh are distinct processed soy foods.",
         "",
         "The existing catalog diets indicate which member restrictions might benefit; they are "
         "not newly audited safety labels. Members with no diet restriction may gain alternatives too.",
@@ -415,6 +451,11 @@ def main():
                 "frozen_by_rule": {category: len(ids) for category, ids in frozen_by_rule.items()},
                 "beans": len(beans),
                 "distribution": dict(bins),
+                "vegetable_admissions": {
+                    "previous": len(old_admitted),
+                    "current": len(new_admitted),
+                    **{key: len(admission_comparison[key]) for key in ("retained", "removed", "added")},
+                },
             },
             ensure_ascii=False,
         )

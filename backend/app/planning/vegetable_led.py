@@ -30,7 +30,10 @@ mostly vegetable dishes. Their shares are bimodal, most under 0.1 or over 0.9; o
 those under one half are mostly rice, couscous, potato, bean and meat dishes, those over it mostly
 vegetable dishes. Yogurt raitas and tomato-heavy rice dishes still reach it.
 
-Meat and fish may be at most 20% of counted weight; an unweighed flesh line cannot qualify as a little.
+Listed cured/dried flesh and minced land-animal meat may season a vegetable dish up to 20% of counted
+weight. Other flesh is limited to 5%; when both occur, total flesh must still be at most 20%.
+An unweighed flesh line cannot qualify as a little. Bonito flakes are weighed flesh for this role;
+the older stock/sauce/fat exemptions otherwise remain (ADR-0082 supplements ADR-0054).
 This role is not a vegetarian-diet claim: each member's ingredient and diet checks still apply.
 Meat or fish is an ingredient of animal flesh (the release's
 `dietary_origin`), except the seasonings, stocks and cooking fats made from it (`SEASONING_FROM_FLESH`):
@@ -54,7 +57,46 @@ from app.data.ingredient_hierarchy import runtime
 VEGETABLE_ROLE = "vegetable"
 VEGETABLE_LED_SHARE = 0.5
 MEAT_SEASONING_SHARE = 0.2
+FLESH_SHARE = 0.05
 COOKED_YIELD = 2.5
+SEASONING_MEAT_IDS = frozenset(
+    {
+        "bacon",
+        "turkey_bacon",
+        "pancetta",
+        "ham",
+        "prosciutto",
+        "chorizo",
+        "salami",
+        "pepperoni",
+        "sausage",
+        "lap_cheong",
+        "ground_beef",
+        "ground_pork",
+        "corned_beef",
+        "pastrami",
+        "salt_cod",
+        "smoked_haddock",
+        "bonito_flakes",
+        "dried_shrimp",
+        "dried_anchovy",
+        "ikan_bilis",
+    }
+)
+LAND_MEAT = r"(?:meat|beef|pork|chicken|turkey|lamb|mutton|veal|duck)"
+MINCED_MEAT = re.compile(
+    rf"\b(?:ground|minced)\s+(?:(?:lean|fresh|boneless|skinless)\s+)*{LAND_MEAT}\b"
+    rf"|\b{LAND_MEAT}(?:\s+(?:breasts?|thighs?|meat))?\s*[,;]?\s*(?:finely\s+)?"
+    r"(?:ground|minced)\b(?!\s+[a-z])",
+    re.I,
+)
+PRESERVED_MEAT = re.compile(
+    rf"\b(?:dried|smoked|cured|salted)\s+(?:(?:small|baby)\s+)*"
+    rf"(?:{LAND_MEAT}|fish|salmon|cod|shrimps?|prawns?|anchov(?:y|ies)|bonito)\b"
+    r"|\b(?:shrimps?|prawns?|anchov(?:y|ies))\s*,?\s*dried\b"
+    r"|\b(?:lap[\s-]+cheong|ikan[\s-]+bilis|bonito[\s-]+flakes?)\b",
+    re.I,
+)
 
 VEGETABLE_GROUPS = frozenset({"vegetable", "herb"})
 UNCOUNTED_GROUPS = frozenset(
@@ -279,7 +321,7 @@ def counted_weights(lines: Iterable[tuple]) -> list[tuple[str, float]]:
     for name, grams, *text in lines:
         release, group, _ = groups.get(name, (name, None, None))
         grams = whole_grams(release, grams, text[0] if text else None)
-        if not grams or release in UNCOUNTED or group in UNCOUNTED_GROUPS:
+        if not grams or release in UNCOUNTED or (group in UNCOUNTED_GROUPS and release != "bonito_flakes"):
             continue
         weights.append((name, float(grams) * (COOKED_YIELD if release in COOKED_STAPLES else 1.0)))
     return weights
@@ -301,18 +343,37 @@ def meat_or_fish(name: str, text: str | None = None) -> bool:
     """Meat, poultry, fish or seafood: animal flesh that is not a seasoning, stock or fat made from it, or a line
     whose wording names one (`MEAT_WORDS`) that the release mapped to something else."""
     release, _, origin = food_groups().get(name, (name, None, None))
-    return release not in SEASONING_FROM_FLESH and (origin == "flesh" or bool(text and MEAT_WORDS.search(text)))
+    return release == "bonito_flakes" or (
+        release not in SEASONING_FROM_FLESH and (origin == "flesh" or bool(text and MEAT_WORDS.search(text)))
+    )
+
+
+def seasoning_meat(name: str, text: str | None = None) -> bool:
+    """Only the actual ingredient id/wording establishes preserved or minced meat, never the recipe title."""
+    release = food_groups().get(name, (name, None, None))[0]
+    text = re.split(r"\b(?:with|plus)\b", text or "", maxsplit=1, flags=re.I)[0]
+    if re.search(r"\b(?:and|or)\b", text, re.I) and len(MEAT_WORDS.findall(text)) > 1:
+        return False  # One combined amount cannot establish separate preserved/fresh shares.
+    return release in SEASONING_MEAT_IDS or bool(text and (MINCED_MEAT.search(text) or PRESERVED_MEAT.search(text)))
 
 
 def vegetable_led(lines: Iterable[tuple]) -> bool:
-    """At least half vegetables, with at most MEAT_SEASONING_SHARE measured flesh; never a diet claim."""
+    """Half vegetables, total measured flesh <=20%, other flesh <=5%; never a diet claim."""
     lines = list(lines)
     share = vegetable_share(lines)
     flesh = meat_share(lines)
-    return share is not None and share >= VEGETABLE_LED_SHARE and flesh is not None and flesh <= MEAT_SEASONING_SHARE
+    fresh = meat_share(lines, fresh_only=True)
+    return (
+        share is not None
+        and share >= VEGETABLE_LED_SHARE
+        and flesh is not None
+        and flesh <= MEAT_SEASONING_SHARE
+        and fresh is not None
+        and fresh <= FLESH_SHARE
+    )
 
 
-def meat_share(lines: Iterable[tuple]) -> float | None:
+def meat_share(lines: Iterable[tuple], *, fresh_only: bool = False) -> float | None:
     """Flesh over counted food; unknown/invalid flesh quantity is not a small seasoning."""
     lines = list(lines)
     if any(
@@ -322,7 +383,11 @@ def meat_share(lines: Iterable[tuple]) -> float | None:
     ):
         return None
     total = sum(weight for _, weight in counted_weights(lines))
-    meat = sum(float(grams) for name, grams, *text in lines if meat_or_fish(name, *text))
+    meat = sum(
+        float(grams)
+        for name, grams, *text in lines
+        if meat_or_fish(name, *text) and (not fresh_only or not seasoning_meat(name, *text))
+    )
     return meat / total if total else (0.0 if not meat else None)
 
 

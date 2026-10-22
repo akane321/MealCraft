@@ -7,8 +7,8 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Field | rule | llm | open (null) |
 | --- | ---: | ---: | ---: |
-| `meal_role` | 8553 | 369 | 75 |
-| `contains_staple` | 8553 | 369 | 75 |
+| `meal_role` | 8552 | 369 | 76 |
+| `contains_staple` | 8552 | 369 | 76 |
 | `protein_sources` | 8814 | 77 | 106 |
 | `cooking_methods` | 8997 | 0 | 0 |
 | `equipment` | 8997 | 0 | 0 |
@@ -18,8 +18,8 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Meal role | rule | llm |
 | --- | ---: | ---: |
-| protein_main | 3629 | 27 |
-| vegetable | 575 | 1 |
+| protein_main | 3625 | 27 |
+| vegetable | 578 | 1 |
 | soup | 213 | 14 |
 | staple | 572 | 107 |
 | one_bowl | 1478 | 93 |
@@ -77,15 +77,15 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 | Value | Recipes |
 | --- | ---: |
 | contains_staple True | 2250 |
-| contains_staple False | 6672 |
-| contains_staple None | 75 |
+| contains_staple False | 6671 |
+| contains_staple None | 76 |
 | equipment ('blender',) | 532 |
 | equipment ('microwave',) | 218 |
 | equipment ('oven',) | 2921 |
 | equipment ('steamer',) | 100 |
 | no equipment (`[]`) | 5506 |
 
-Hearty salads (`salad`, not vegetable-led, with a main protein): 141. As salads they fill only the vegetable side, which their vegetable-led check refuses, so they fill no slot: the owner decided on 2026-10-19 that a salad with meat is not a main. The sample packet carries them as their own stratum, as it does the model's protein answers. The planner reads no model-decided value before its batch sample is reviewed.
+Hearty salads (`salad`, not vegetable-led, with a main protein): 150. As salads they fill only the vegetable side, which their vegetable-led check refuses, so they fill no slot: the owner decided on 2026-10-19 that a salad with meat is not a main. The sample packet carries them as their own stratum, as it does the model's protein answers. The planner reads no model-decided value before its batch sample is reviewed.
 
 ## Incomplete recipe evidence
 

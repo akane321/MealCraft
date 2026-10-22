@@ -111,7 +111,8 @@ def test_generic_meat_can_establish_a_main_role_but_not_its_species_or_admission
 
 
 def test_measured_flesh_threshold_is_combined_and_dressing_does_not_dilute_it():
-    assert vegetable_led([("cabbage", 800), ("bacon", 100), ("shrimp", 100)])
+    assert vegetable_led([("cabbage", 800), ("bacon", 150), ("shrimp", 50)])
+    assert not vegetable_led([("cabbage", 800), ("bacon", 100), ("shrimp", 100)])
     assert not vegetable_led([("cabbage", 799), ("bacon", 100), ("shrimp", 101), ("water", 5000)])
     assert meat_share([("cabbage", 800), ("bacon", 200)]) == 0.2
     for grams in (None, 0, -1):
@@ -119,3 +120,21 @@ def test_measured_flesh_threshold_is_combined_and_dressing_does_not_dilute_it():
         assert not vegetable_led([("cabbage", 800), ("bacon", grams)])
     assert meat_share([("cabbage", 800), ("garlic", 3, "garlic or 4 ounces cooked chicken")]) is None
     assert tags("Bacon cabbage", [("cabbage", 800), ("bacon", 200)]).values["meal_role"] == "vegetable"
+
+
+@pytest.mark.parametrize("bean", ["edamame", "soybean", "fermented_soybeans"])
+def test_whole_soybean_sides_do_not_gain_a_protein_main_role(bean):
+    assert tags("Soybean side", [(bean, 500), ("onion", 30)]).values["meal_role"] != "protein_main"
+    if bean == "edamame":
+        assert tags("Teriyaki Edamame", [(bean, 500), ("onion", 30)]).values["meal_role"] == "vegetable"
+
+
+@pytest.mark.parametrize("title", ["Yorkshire Puddings", "Egg Pancakes", "Crepes", "Savory Batter"])
+def test_batter_side_names_are_not_protein_mains(title):
+    assert tags(title, [("egg", 590), ("flour", 410)]).values["meal_role"] != "protein_main"
+
+
+@pytest.mark.parametrize("starch", ["flour", "cornstarch", "potato_starch"])
+def test_substantive_batter_starch_cannot_make_a_protein_main(starch):
+    assert tags("Savory side", [("egg", 850), (starch, 150)]).values["meal_role"] != "protein_main"
+    assert tags("Savory side", [("egg", 851), (starch, 149)]).values["meal_role"] == "protein_main"
