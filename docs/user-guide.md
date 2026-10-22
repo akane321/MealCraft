@@ -109,9 +109,28 @@ preferred. The counts are defaults: the planner may leave out one dish when the
 budget, the time or the dishes cannot fit it. A count you choose yourself is
 kept as chosen.
 
-A vegetable dish is a side dish or salad made mostly of vegetables, with no
-meat or fish (eggs, cheese and sauces such as fish sauce are fine); a pasta,
-rice or bean side does not count as one, and neither does a chicken salad.
+A vegetable dish is made at least half of vegetables by counted solid-food
+weight. Listed cured/dried meat or seafood and minced meat may season it, up to
+20% of counted weight in total. Other meat, poultry, fish or seafood may only be
+traces, up to 5%; with both types, both limits apply. Every flesh quantity must
+be known. This is a meal role, not a vegetarian label.
+The seasoning allowance covers bacon, turkey bacon, pancetta, ham, prosciutto,
+chorizo, salami, pepperoni, sausage (including lap cheong), corned beef,
+pastrami, salt cod, smoked haddock, dried shrimp, dried anchovy/ikan bilis and
+bonito flakes. Ground beef and ground pork are explicitly recognised, as is
+other land-animal meat whose ingredient line says ground or minced.
+Ingredient wording can also establish smoked, cured, salted or dried meat or
+fish. The preparation must be stated in the actual ingredient, not just in
+the dish's name; fresh or otherwise unqualified flesh keeps the 5% limit.
+Each person's diet, exclusions and allergens still apply: a vegetarian member
+does not eat the meat-seasoned dish and must have another vegetable dish they
+can eat. Pasta, rice and bean sides are not vegetable dishes merely because
+they are sides. A homemade staple such as noodles or gnocchi needs actual
+listed starch ingredients, not just a staple name. Egg-, tofu- or meat-led
+sides may fill a protein-main role, but not batters, puddings, pancakes or
+substantially starchy sides. Whole-bean-led sides, including edamame, do not
+become protein mains through this rule; edamame sides remain vegetables when
+they meet the vegetable definition.
 
 Under **Kitchen**, tick the equipment you do not have (oven, air fryer,
 steamer, microwave, blender); a recipe that needs it is never planned. A recipe

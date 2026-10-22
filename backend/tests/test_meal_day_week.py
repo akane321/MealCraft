@@ -252,7 +252,7 @@ def test_every_vegetable_the_product_plans_is_led_by_vegetables(monkeypatch):
     """Owner, 2026-10-02: the walkthrough's vegetables were "Fettuccine Noodles" and "Refried Beans"; five of
     this week's seven were potato, chicken and rice salads and sides, and then "Saigon Chicken Cole Slaw"."""
     from app.evaluation.release_catalog import load_release_catalog
-    from app.planning.vegetable_led import meat_or_fish
+    from app.planning.vegetable_led import MEAT_SEASONING_SHARE, meat_share
 
     episode = load("mdw-dev-007")
     response, extra = run_episode(episode)
@@ -260,8 +260,10 @@ def test_every_vegetable_the_product_plans_is_led_by_vegetables(monkeypatch):
     vegetables = [a["recipe_id"] for a in response["plan"]["assignments"] if a["role_id"] == "vegetable"]
     assert len(vegetables) == 7
     assert all(_led(recipes[slug]) for slug in vegetables), [recipes[s]["title"] for s in vegetables]
-    assert not any(
-        meat_or_fish(line["ingredient"], line["text"]) for slug in vegetables for line in recipes[slug]["ingredients"]
+    assert all(
+        meat_share((line["ingredient"], line["quantity"], line["text"]) for line in recipes[slug]["ingredients"])
+        <= MEAT_SEASONING_SHARE
+        for slug in vegetables
     )
 
     # Protocol v3.1 scores the rule too: the same week with "Fettuccine Noodles" as one vegetable fails it.
