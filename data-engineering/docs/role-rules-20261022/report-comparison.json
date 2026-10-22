@@ -3,27 +3,27 @@
     "report": "docs/evaluation/full-default/latest.json",
     "changed": true,
     "before_sha256": "4115894e8b51ff8287ecae30a2a1d0afbf28a1296d28629fa38704271420deb0",
-    "after_sha256": "327138509e32a663f667dbe1dbf35e8ea7ed14fad44577470c3f734f094e17df",
+    "after_sha256": "74fb34a0c20534c2d975db339abde775a50ed3c324ae3695c6d556b5a7f2d31a",
     "cases": [
       {
         "case": "one-adult",
         "changed": true,
         "metric_changes": {
-          "dishes": {
-            "before": 54,
-            "after": 51
+          "cuisine_groups_per_meal": {
+            "before": 1.21,
+            "after": 1.07
           },
           "grocery_lines_by_trip": {
             "before": {
               "None": 87
             },
             "after": {
-              "None": 93
+              "None": 86
             }
           },
           "purchase_total_sgd": {
             "before": 405.82,
-            "after": 439.09
+            "after": 383.01
           },
           "staples": {
             "before": [
@@ -38,32 +38,19 @@
         },
         "new_selected_titles": [
           "Bul-Ko-Kee (Korean Barbecue Beef)",
-          "Couscous Tabbouleh",
-          "Ham And Cheese Quesadillas",
-          "Indian-Spiced Shrimp Wrap",
-          "Italian-Style Lima Beans",
-          "Kimchi",
-          "Kimchi Chahan (Fried Rice)",
-          "Mediterranean Green Beans (Lo-Fat)",
-          "Moroccan Spiced Beef",
-          "Teriyaki Snow Peas And Mushrooms",
-          "Thai Cucumber Toss",
+          "Chinese Ginger Garlic Asparagus",
+          "Singapore Cucumber Salad",
+          "Stir-Fry Cashew Chicken",
           "Thai Ginger Soup"
         ],
         "removed_selected_titles": [
-          "Beef Stir Fry With Tri-Colored Peppers",
           "Easy Round Italian Bread",
           "Fried Green Tomatoes",
-          "Korean Bean Sprout Salad",
-          "Marinated Velveted Chicken For Stir-Fry",
-          "Mexican Chicken (Low-Fat)",
+          "Iranian Yogurt Soup",
           "Primary Taco Meat",
           "Sauerkraut With Caraway",
           "Super Easy Naan Bread",
-          "Szechuan Broccoli (Chinese)",
-          "Tangy Cole Slaw",
-          "Thai Beef",
-          "Vietnamese Style Pickled Carrots"
+          "Thai Beef"
         ]
       },
       {
@@ -72,23 +59,27 @@
         "metric_changes": {
           "cuisine_groups_per_meal": {
             "before": 1.93,
-            "after": 2
+            "after": 1.71
           },
           "dishes": {
             "before": 57,
-            "after": 58
+            "after": 59
+          },
+          "distinct_dishes_excluding_staples": {
+            "before": 50,
+            "after": 48
           },
           "grocery_lines_by_trip": {
             "before": {
               "None": 111
             },
             "after": {
-              "None": 113
+              "None": 96
             }
           },
           "purchase_total_sgd": {
             "before": 567.89,
-            "after": 665.38
+            "after": 501.04
           },
           "staples": {
             "before": [
@@ -96,64 +87,50 @@
               "Ramen With Peas And Parmesan"
             ],
             "after": [
-              "Assyrian Rice"
+              "Assyrian Rice",
+              "Ramen With Peas And Parmesan",
+              "Super Easy Naan Bread"
             ]
           }
         },
         "new_selected_titles": [
-          "Black Bean Garlic Edamame",
+          "Carrot And Broccoli Stir-Fry",
+          "Chinese Egg Flower Soup",
           "Chinese Salt And Pepper Tofu",
-          "Confetti Couscous",
-          "Easy Keto Korean Beef With Cauli Rice",
-          "Green Bean And Red Bell Pepper Stir-Fry",
+          "Chinese-Style Zucchini",
           "Hearty Potato Soup",
           "Hungarian Potato Soup",
-          "Italian-Style Lima Beans",
-          "Lebanese Cabbage Salad",
+          "Japanese Ginger Salad",
+          "Japanese-Style Sesame Green Beans",
           "Lemon And Feta Pasta",
-          "Lou's German Slaw",
-          "Marinated Teriyaki Tofu",
-          "Mediterranean Pizza",
+          "Mexican Chicken (Low-Fat)",
           "Mexican Scrambled Eggs",
-          "Miso Beef",
-          "Pad Thai (Vegan)",
-          "Pasta Primavera",
-          "Scrambled Egg And Noodle Stir-Fry",
-          "Shredded Beef For Tacos Or Burritos",
-          "Simple Fried Rice",
-          "Sliced Cabbage Kimchi",
-          "Sweet And Sour Cucumbers",
-          "Teriyaki Edamame",
-          "Teriyaki Grilled Tofu",
-          "Tom Yum Soup With Vegetables"
+          "Moroccan Chicken",
+          "Primary Taco Meat",
+          "Sigumchi Namul (Korean Spinach Salad Kimchi)",
+          "Super Easy Naan Bread",
+          "Teriyaki Beef Stew",
+          "Teriyaki Grilled Tofu"
         ],
         "removed_selected_titles": [
-          "Baked Veggie Quesadillas",
           "Banana Couscous",
           "Cheese And Corn Chowder",
+          "Chilean Salad",
           "Chinese Fried Rice",
           "Crunchy Szechuan Green Beans",
-          "Cuban Corn On The Cob",
           "Egyptian Omelet (Eggah)",
-          "Elote (Mexican Corn On The Cob)",
-          "Fried Rice",
+          "Great Chicken",
           "Japanese Ginger Pork",
-          "Korean Barbecue Tofu",
           "Korean Beef",
+          "Korean Coleslaw",
           "Martha's Gazpacho",
           "Mexican Couscous",
           "Nilaga (Filipino Chicken Stew)",
-          "Quick And Easy Mexican Pizza",
           "Ramen Noodle Salad (Serve Lots)",
           "Ramen With A Twist",
-          "Ramen With Peas And Parmesan",
           "Raw Cauliflower Korma",
-          "Spicy Nasi Goreng",
-          "Spicy Sweet And Sour Cabbage",
-          "Spinach Stir Fry With Garlic",
-          "Tofu Egg Foo Young",
-          "Tofu Omelet Indonesia",
-          "Tomato Dumplings"
+          "Teriyaki Tofu",
+          "Tofu Omelet Indonesia"
         ]
       },
       {
@@ -162,23 +139,23 @@
         "metric_changes": {
           "cuisine_groups_per_meal": {
             "before": 2.57,
-            "after": 2.43
+            "after": 2.64
           },
           "dishes": {
             "before": 64,
-            "after": 62
+            "after": 65
           },
           "grocery_lines_by_trip": {
             "before": {
               "None": 57
             },
             "after": {
-              "None": 54
+              "None": 58
             }
           },
           "purchase_total_sgd": {
             "before": 240.27,
-            "after": 254.54
+            "after": 253.92
           },
           "staples": {
             "before": [
@@ -188,7 +165,10 @@
               "Super Easy Naan Bread"
             ],
             "after": [
+              "Assyrian Rice",
+              "Easy Round Italian Bread",
               "Indian Restaurant Style Basmati Rice",
+              "Mama D's Italian Bread",
               "Super Easy Naan Bread"
             ]
           }
@@ -196,49 +176,44 @@
         "new_selected_titles": [
           "Calico Cauliflower Salad",
           "Chicken Fried Rice",
-          "China Fried Rice",
-          "Chinese Egg Flower Soup",
           "Chinese Salt And Pepper Tofu",
-          "Chinese-Style Vegetables",
-          "Cuban Cucumber Salad",
+          "Creamed Chicken Curry",
+          "Danish Cucumbers",
           "Easy Carrot Salad (Indian-Style)",
           "Easy Vietnamese Cauliflower",
-          "Fat-Free Vegie Stir-Fry",
-          "Indian Crepes",
-          "Indian Cucumber Salad",
-          "Japanese Pickled Cucumber",
+          "Egg Foo Young",
+          "Hot And Sour Cabbage Salad",
+          "Hurry Curry",
+          "Japanese Salad",
           "Korean Bean Spouts",
           "Lean Sweet And Sour Cabbage Borscht",
-          "Microwaved Parmesan Chicken",
+          "Mama D's Italian Bread",
+          "Scrambled Eggs",
           "Shish Kabobs",
           "Teriyaki Chicken",
           "Teriyaki Tilapia (My Mock Unagi)",
-          "Vegetable Fried Rice",
-          "“Banquet” Fried Rice"
+          "Thai Ginger Soup",
+          "Vietnamese Grilled Lemongrass Chicken"
         ],
         "removed_selected_titles": [
-          "Assyrian Rice",
-          "Broccoli Ginger Stir-Fry",
-          "Broccoli Soup",
           "Chinese Cucumber Salad",
           "Chinese Egg Drop Soup",
-          "Chinese Sesame Chicken Kabobs",
           "Cinnamon Crepes",
           "Cucumber Namasu",
-          "Easy Round Italian Bread",
-          "Egyptian Omelet (Eggah)",
+          "Gingered Zucchini",
+          "Great Chicken",
           "Grilled Parmesan Tomatoes",
           "Hawaiian Curry",
-          "Kimchi",
-          "Kimchi Salad Aka Quick Kimchi",
+          "Kimchi And Tofu Soup",
+          "Kimchi Chahan (Fried Rice)",
           "Korean Bean Sprout Salad",
-          "Korean Style Namasu",
-          "Mock Fried Rice",
+          "Menma (Braised Bamboo Ramen Topping)",
+          "Microwave Sweet And Sour Chicken",
+          "Potato-Broccoli Frittata",
+          "Spicy Sweet And Sour Cabbage",
           "Stir-Fried Cabbage",
-          "Tandoori Chicken Thighs",
           "Teriyaki Grilled Tofu",
           "Teriyaki Tofu",
-          "Tsukemono (Japanese Cabbage Salad)",
           "Vietnamese Caramel Chicken"
         ]
       },
@@ -246,13 +221,9 @@
         "case": "two-no-oven-ten-days",
         "changed": true,
         "metric_changes": {
-          "cuisine_groups_per_meal": {
-            "before": 1.45,
-            "after": 1.4
-          },
           "dishes": {
             "before": 74,
-            "after": 73
+            "after": 72
           },
           "grocery_lines_by_trip": {
             "before": {
@@ -260,80 +231,34 @@
               "2": 51
             },
             "after": {
-              "1": 90,
-              "2": 58
+              "1": 86,
+              "2": 52
             }
           },
           "purchase_total_sgd": {
             "before": 642.77,
-            "after": 682.65
-          },
-          "staples": {
-            "before": [
-              "Assyrian Rice"
-            ],
-            "after": [
-              "Assyrian Rice",
-              "Brazilian Rice",
-              "Super Easy Naan Bread"
-            ]
+            "after": 680.04
           }
         },
         "new_selected_titles": [
-          "Banana Couscous",
-          "Beef Stir Fry With Tri-Colored Peppers",
-          "Bibimbap",
-          "Brazilian Rice",
           "Chicken Laksa",
-          "Chinese Cabbage",
-          "Chinese Chilled Asparagus",
-          "Cucumber-Onion Salad",
-          "Egg Fried Rice",
-          "Elotes",
-          "Galbi (Kalbi) Grilled Korean Short Ribs (Flanken Cut)",
-          "Gazpacho",
-          "Greek Grilled Cheese",
-          "Hoisin Eggplant Chicken",
-          "Indonesian Cucumber Salad",
+          "Couscous Tabbouleh",
+          "Ensalada Chilena (Chilean Salad)",
+          "Greek Salad Iv",
+          "Indian-Spiced Shrimp Wrap",
           "Instant Kimchi Ramyun (Spicy Kimchi Noodles)",
           "Japanese Style Cucumber Salad",
-          "Korean Barbecued Beef (4 Servings)",
-          "Sautéed Miso Cucumber Salad",
-          "Savory Italian Asparagus",
-          "Seared Baby Bok Choy",
-          "Seviche-Style Shrimp And Avocado Tacos",
-          "Slow Cooker Chicken Tikka Masala (Weight Watchers)",
-          "Super Easy Naan Bread",
-          "Teriyaki Burger",
-          "Vietnamese Cabbage",
-          "Vietnamese Fish And Tomato Soup"
+          "Jerica's French Toast"
         ],
         "removed_selected_titles": [
-          "Bento Chicken Teriyaki",
           "Breakfast Burrito (Like Mc Donald's!)",
-          "Chinese Egg Flower Soup",
           "Easy Keto Korean Beef With Cauli Rice",
-          "Egyptian Tomato Salad",
           "German Coleslaw",
           "Greek Vegetable Salad",
-          "Grilled Milkimcheeze Sandwich From 'The Kimchi Cookbook'",
-          "Indonesian Fried Rice",
-          "Japanese Ginger Pork (Shogayaki)",
           "Kimchi",
           "Korean Barbecued Beef",
-          "Korean Bean Spouts",
-          "Korean Bean Sprouts",
           "Korean Ground Beef And Rice Bowls",
-          "Korean Krunch Quesadilla",
-          "Lemon And Feta Pasta",
-          "Mediterranean Kale With Feta",
-          "Orange Chicken",
-          "Sloppy Joes",
-          "Spinach With Sesame And Miso",
-          "Stir-Fry Cashew Chicken",
-          "Vietnamese Beef And Spinach Soup",
-          "Vietnamese Style Pickled Carrots",
-          "Wafu Salad (Japanese Style Onion Salad)"
+          "Spinach With Sesame And Miso"
         ]
       },
       {
@@ -342,18 +267,22 @@
         "metric_changes": {
           "cuisine_groups_per_meal": {
             "before": 2.14,
-            "after": 2.36
+            "after": 2.29
           },
           "dishes": {
             "before": 74,
-            "after": 72
+            "after": 75
+          },
+          "distinct_dishes_excluding_staples": {
+            "before": 57,
+            "after": 55
           },
           "grocery_lines_by_trip": {
             "before": {
               "None": 110
             },
             "after": {
-              "None": 109
+              "None": 107
             }
           },
           "moves": {
@@ -364,7 +293,7 @@
           },
           "purchase_total_sgd": {
             "before": 739.2,
-            "after": 810.41
+            "after": 720.86
           },
           "staples": {
             "before": [
@@ -382,54 +311,25 @@
               "Claudia Roden's Basic Couscous",
               "Easy Round Italian Bread",
               "Indian Restaurant Style Basmati Rice",
-              "Super Easy Naan Bread"
+              "Mama D's Italian Bread"
             ]
           }
         },
         "new_selected_titles": [
-          "Beef Bulgogi",
-          "Chicken And Snow Peas Stir-Fry",
-          "Chinese Style Fried Rice",
-          "Easy Carrot Salad (Indian-Style)",
-          "Fresh Broccoli Salad",
-          "Ham And Cheese Quesadillas",
+          "Grilled Orange Chicken On The George Foreman Grill",
           "Hoisin Eggplant Chicken",
-          "Indian-Spiced Shrimp Wrap",
-          "Japanese Sesame Spinach",
-          "Kalbi-Style Short Ribs",
-          "Kimchi",
           "Microwaved Parmesan Chicken",
-          "Pizza Chicken Melts",
-          "Primary Taco Meat",
-          "Salmon Steaks Teriyaki",
-          "Szechuan Shrimp",
-          "Tangy Cole Slaw",
-          "Teriyaki Edamame",
-          "Thai Cucumber Toss",
-          "Thai Sweet And Sour Fresh Cucumber",
-          "Vietnamese Cucumber Salad"
+          "Stir-Fry Cashew Chicken",
+          "Thai Sesame Beef"
         ],
         "removed_selected_titles": [
-          "Beef Stir Fry With Tri-Colored Peppers",
-          "Broiled Tuna Teriyaki",
-          "Cucumber Raita",
-          "Easy Kimchi Slaw",
-          "French Vinaigrette Slaw",
-          "Greek Salad Iv",
-          "Honey Teriyaki Salmon",
+          "Jamaican Rubbed Chops",
           "Japanese Ginger Pork (Shogayaki)",
-          "Kimchi Chahan (Fried Rice)",
-          "Korean Barbecued Beef",
-          "Mama D's Italian Bread",
-          "Mexican Chicken (Low-Fat)",
-          "Microwave Shrimp Scampi",
           "Miso Beef",
-          "Salmon Yakitori",
-          "Salsa Chicken",
-          "Sigumchi Namul (Korean Spinach Salad Kimchi)",
+          "Shredded Beef For Tacos Or Burritos",
           "Slow Cooker Chicken Tikka Masala (Weight Watchers)",
           "Steamed Thai Mussels",
-          "Szechuan Broccoli (Chinese)",
+          "Super Easy Naan Bread",
           "Thai Beef"
         ]
       }
@@ -439,7 +339,7 @@
     "report": "docs/evaluation/shared-dish/latest.json",
     "changed": true,
     "before_sha256": "ceca3fa46596de006438d9d00fc40d819da9b6f8f29384d3866e7e8b15e8f6ea",
-    "after_sha256": "8048591b43ffd4aa278e14033731a4f79f724ce58633c9fe4a6484e0ac64271e",
+    "after_sha256": "3bc84494759a9e7bfc5cb9df02cfa6d5a15001614444ae0c90f5eef0eeb6abd5",
     "cases": [
       {
         "case": "four-one-vegetarian",
@@ -451,7 +351,7 @@
           },
           "distinct_dishes_excluding_staples": {
             "before": 47,
-            "after": 48
+            "after": 46
           },
           "energy_attainment_by_member": {
             "before": {
@@ -461,19 +361,19 @@
               "Mei": 1.681
             },
             "after": {
-              "Ann": 1.507,
-              "Ben": 1.662,
-              "Kai": 1.663,
-              "Mei": 1.67
+              "Ann": 1.466,
+              "Ben": 1.589,
+              "Kai": 1.59,
+              "Mei": 1.597
             }
           },
           "lowest_energy_attainment": {
             "before": 1.5,
-            "after": 1.507
+            "after": 1.466
           },
           "purchase_total_sgd": {
             "before": 535.59,
-            "after": 664.17
+            "after": 517.41
           },
           "recipe_pool_by_member": {
             "before": {
@@ -483,19 +383,19 @@
               "Mei": 7544
             },
             "after": {
-              "Ann": 2041,
-              "Ben": 7566,
-              "Kai": 7566,
-              "Mei": 7566
+              "Ann": 2040,
+              "Ben": 7565,
+              "Kai": 7565,
+              "Mei": 7565
             }
           },
           "recipe_pool_servable": {
             "before": 7544,
-            "after": 7566
+            "after": 7565
           },
           "servings_cooked": {
             "before": 154.0,
-            "after": 155.02
+            "after": 157.5
           }
         },
         "new_selected_titles": [],
@@ -505,13 +405,9 @@
         "case": "two-one-vegetarian",
         "changed": true,
         "metric_changes": {
-          "dishes": {
-            "before": 64,
-            "after": 67
-          },
           "distinct_dishes_excluding_staples": {
             "before": 60,
-            "after": 59
+            "after": 58
           },
           "energy_attainment_by_member": {
             "before": {
@@ -519,17 +415,17 @@
               "Raj": 1.54
             },
             "after": {
-              "Lin": 1.487,
-              "Raj": 1.522
+              "Lin": 1.457,
+              "Raj": 1.506
             }
           },
           "lowest_energy_attainment": {
             "before": 1.509,
-            "after": 1.487
+            "after": 1.457
           },
           "purchase_total_sgd": {
             "before": 644.5,
-            "after": 625.39
+            "after": 669.81
           },
           "recipe_pool_by_member": {
             "before": {
@@ -537,17 +433,13 @@
               "Raj": 7544
             },
             "after": {
-              "Lin": 2041,
-              "Raj": 7566
+              "Lin": 2040,
+              "Raj": 7565
             }
           },
           "recipe_pool_servable": {
             "before": 7544,
-            "after": 7566
-          },
-          "servings_cooked": {
-            "before": 94.68,
-            "after": 98.74
+            "after": 7565
           }
         },
         "new_selected_titles": [],
@@ -557,10 +449,6 @@
         "case": "with-a-child",
         "changed": true,
         "metric_changes": {
-          "dishes": {
-            "before": 26,
-            "after": 24
-          },
           "energy_attainment_by_member": {
             "before": {
               "Ann": 1.424,
@@ -568,18 +456,18 @@
               "Mei": 1.431
             },
             "after": {
-              "Ann": 1.446,
-              "Ben": 1.446,
-              "Mei": 1.453
+              "Ann": 1.472,
+              "Ben": 1.472,
+              "Mei": 1.479
             }
           },
           "lowest_energy_attainment": {
             "before": 1.424,
-            "after": 1.446
+            "after": 1.472
           },
           "purchase_total_sgd": {
             "before": 276.49,
-            "after": 322.41
+            "after": 276.27
           },
           "recipe_pool_by_member": {
             "before": {
@@ -588,18 +476,14 @@
               "Mei": 7087
             },
             "after": {
-              "Ann": 7566,
-              "Ben": 7566,
-              "Mei": 7109
+              "Ann": 7565,
+              "Ben": 7565,
+              "Mei": 7108
             }
           },
           "recipe_pool_servable": {
             "before": 7544,
-            "after": 7566
-          },
-          "servings_cooked": {
-            "before": 49.82,
-            "after": 45.73
+            "after": 7565
           }
         },
         "new_selected_titles": [],
@@ -615,7 +499,7 @@
           },
           "distinct_dishes_excluding_staples": {
             "before": 47,
-            "after": 48
+            "after": 46
           },
           "energy_attainment_by_member": {
             "before": {
@@ -625,19 +509,19 @@
               "Mei": 1.833
             },
             "after": {
-              "Ann": 1.507,
-              "Ben": 1.662,
-              "Kai": 1.663,
-              "Mei": 1.916
+              "Ann": 1.466,
+              "Ben": 1.589,
+              "Kai": 1.59,
+              "Mei": 1.748
             }
           },
           "lowest_energy_attainment": {
             "before": 1.5,
-            "after": 1.507
+            "after": 1.466
           },
           "purchase_total_sgd": {
             "before": 527.27,
-            "after": 660.99
+            "after": 507.92
           },
           "recipe_pool_by_member": {
             "before": {
@@ -647,19 +531,19 @@
               "Mei": 7544
             },
             "after": {
-              "Ann": 2041,
-              "Ben": 7566,
-              "Kai": 7566,
-              "Mei": 7566
+              "Ann": 2040,
+              "Ben": 7565,
+              "Kai": 7565,
+              "Mei": 7565
             }
           },
           "recipe_pool_servable": {
             "before": 7544,
-            "after": 7566
+            "after": 7565
           },
           "servings_cooked": {
             "before": 147.43,
-            "after": 149.55
+            "after": 150.93
           }
         },
         "new_selected_titles": [],
@@ -671,7 +555,11 @@
         "metric_changes": {
           "dishes": {
             "before": 57,
-            "after": 58
+            "after": 59
+          },
+          "distinct_dishes_excluding_staples": {
+            "before": 50,
+            "after": 48
           },
           "energy_attainment_by_member": {
             "before": {
@@ -682,20 +570,20 @@
               "Mei": 1.707
             },
             "after": {
-              "Ann": 1.49,
-              "Ben": 1.653,
-              "Grandma": 1.019,
-              "Kai": 1.654,
-              "Mei": 1.661
+              "Ann": 1.482,
+              "Ben": 1.635,
+              "Grandma": 1.276,
+              "Kai": 1.636,
+              "Mei": 1.643
             }
           },
           "lowest_energy_attainment": {
             "before": 1.318,
-            "after": 1.019
+            "after": 1.276
           },
           "purchase_total_sgd": {
             "before": 567.2,
-            "after": 661.43
+            "after": 500.09
           },
           "recipe_pool_by_member": {
             "before": {
@@ -705,19 +593,19 @@
               "Mei": 7544
             },
             "after": {
-              "Ann": 2041,
-              "Ben": 7566,
-              "Kai": 7566,
-              "Mei": 7566
+              "Ann": 2040,
+              "Ben": 7565,
+              "Kai": 7565,
+              "Mei": 7565
             }
           },
           "recipe_pool_servable": {
             "before": 7544,
-            "after": 7566
+            "after": 7565
           },
           "servings_cooked": {
             "before": 161.43,
-            "after": 161.57
+            "after": 164.49
           }
         },
         "new_selected_titles": [],
@@ -727,10 +615,6 @@
         "case": "peanut-whole-household",
         "changed": true,
         "metric_changes": {
-          "dishes": {
-            "before": 23,
-            "after": 22
-          },
           "energy_attainment_by_member": {
             "before": {
               "Ann": 1.461,
@@ -739,19 +623,19 @@
               "Mei": 1.468
             },
             "after": {
-              "Ann": 1.496,
-              "Ben": 1.496,
-              "Kai": 1.497,
-              "Mei": 1.503
+              "Ann": 1.502,
+              "Ben": 1.502,
+              "Kai": 1.503,
+              "Mei": 1.509
             }
           },
           "lowest_energy_attainment": {
             "before": 1.461,
-            "after": 1.496
+            "after": 1.502
           },
           "purchase_total_sgd": {
             "before": 296.25,
-            "after": 366.28
+            "after": 317.11
           },
           "recipe_pool_by_member": {
             "before": {
@@ -761,19 +645,15 @@
               "Mei": 7119
             },
             "after": {
-              "Ann": 7141,
-              "Ben": 7141,
-              "Kai": 7141,
-              "Mei": 7141
+              "Ann": 7140,
+              "Ben": 7140,
+              "Kai": 7140,
+              "Mei": 7140
             }
           },
           "recipe_pool_servable": {
             "before": 7119,
-            "after": 7141
-          },
-          "servings_cooked": {
-            "before": 66.3,
-            "after": 63.24
+            "after": 7140
           }
         },
         "new_selected_titles": [],
@@ -783,6 +663,10 @@
         "case": "peanut-only-mei-avoids",
         "changed": true,
         "metric_changes": {
+          "dishes": {
+            "before": 23,
+            "after": 24
+          },
           "energy_attainment_by_member": {
             "before": {
               "Ann": 1.473,
@@ -791,19 +675,19 @@
               "Mei": 1.481
             },
             "after": {
-              "Ann": 1.397,
-              "Ben": 1.397,
-              "Kai": 1.398,
-              "Mei": 1.404
+              "Ann": 1.425,
+              "Ben": 1.425,
+              "Kai": 1.426,
+              "Mei": 1.432
             }
           },
           "lowest_energy_attainment": {
             "before": 1.473,
-            "after": 1.397
+            "after": 1.425
           },
           "purchase_total_sgd": {
             "before": 316.58,
-            "after": 357.4
+            "after": 301.3
           },
           "recipe_pool_by_member": {
             "before": {
@@ -813,19 +697,19 @@
               "Mei": 7119
             },
             "after": {
-              "Ann": 7566,
-              "Ben": 7566,
-              "Kai": 7566,
-              "Mei": 7141
+              "Ann": 7565,
+              "Ben": 7565,
+              "Kai": 7565,
+              "Mei": 7140
             }
           },
           "recipe_pool_servable": {
             "before": 7544,
-            "after": 7566
+            "after": 7565
           },
           "servings_cooked": {
             "before": 66.3,
-            "after": 65.28
+            "after": 68.34
           }
         },
         "new_selected_titles": [],
@@ -837,11 +721,7 @@
         "metric_changes": {
           "dishes": {
             "before": 24,
-            "after": 25
-          },
-          "distinct_dishes_excluding_staples": {
-            "before": 20,
-            "after": 21
+            "after": 26
           },
           "energy_attainment_by_member": {
             "before": {
@@ -851,19 +731,19 @@
               "Mei": 1.533
             },
             "after": {
-              "Ann": 1.307,
-              "Ben": 1.467,
-              "Kai": 1.334,
-              "Mei": 1.474
+              "Ann": 1.36,
+              "Ben": 1.519,
+              "Kai": 1.386,
+              "Mei": 1.526
             }
           },
           "lowest_energy_attainment": {
             "before": 1.392,
-            "after": 1.307
+            "after": 1.36
           },
           "purchase_total_sgd": {
             "before": 246.51,
-            "after": 247.84
+            "after": 219.26
           },
           "recipe_pool_by_member": {
             "before": {
@@ -873,19 +753,19 @@
               "Mei": 7544
             },
             "after": {
-              "Ann": 2041,
-              "Ben": 7566,
+              "Ann": 2040,
+              "Ben": 7565,
               "Kai": 4735,
-              "Mei": 7566
+              "Mei": 7565
             }
           },
           "recipe_pool_servable": {
             "before": 7544,
-            "after": 7566
+            "after": 7565
           },
           "servings_cooked": {
             "before": 65.0,
-            "after": 68.06
+            "after": 71.11
           }
         },
         "new_selected_titles": [],
@@ -913,21 +793,21 @@
               "Adult 6": 1.531
             },
             "after": {
-              "Adult 1": 1.392,
-              "Adult 2": 1.543,
-              "Adult 3": 1.543,
-              "Adult 4": 1.543,
-              "Adult 5": 1.543,
-              "Adult 6": 1.543
+              "Adult 1": 1.406,
+              "Adult 2": 1.561,
+              "Adult 3": 1.561,
+              "Adult 4": 1.561,
+              "Adult 5": 1.561,
+              "Adult 6": 1.561
             }
           },
           "lowest_energy_attainment": {
             "before": 1.364,
-            "after": 1.392
+            "after": 1.406
           },
           "purchase_total_sgd": {
             "before": 330.92,
-            "after": 328.76
+            "after": 333.15
           },
           "recipe_pool_by_member": {
             "before": {
@@ -939,21 +819,21 @@
               "Adult 6": 7544
             },
             "after": {
-              "Adult 1": 2041,
-              "Adult 2": 7566,
-              "Adult 3": 7566,
-              "Adult 4": 7566,
-              "Adult 5": 7566,
-              "Adult 6": 7566
+              "Adult 1": 2040,
+              "Adult 2": 7565,
+              "Adult 3": 7565,
+              "Adult 4": 7565,
+              "Adult 5": 7565,
+              "Adult 6": 7565
             }
           },
           "recipe_pool_servable": {
             "before": 7544,
-            "after": 7566
+            "after": 7565
           },
           "servings_cooked": {
             "before": 100.34,
-            "after": 104.66
+            "after": 104.31
           }
         },
         "new_selected_titles": [],
@@ -963,10 +843,6 @@
         "case": "tight-budget",
         "changed": true,
         "metric_changes": {
-          "dishes": {
-            "before": 22,
-            "after": 23
-          },
           "energy_attainment_by_member": {
             "before": {
               "Ann": 1.323,
@@ -975,19 +851,19 @@
               "Mei": 1.377
             },
             "after": {
-              "Ann": 1.3,
-              "Ben": 1.393,
-              "Kai": 1.394,
-              "Mei": 1.4
+              "Ann": 1.275,
+              "Ben": 1.328,
+              "Kai": 1.329,
+              "Mei": 1.335
             }
           },
           "lowest_energy_attainment": {
             "before": 1.323,
-            "after": 1.3
+            "after": 1.275
           },
           "purchase_total_sgd": {
             "before": 84.33,
-            "after": 105.01
+            "after": 94.86
           },
           "recipe_pool_by_member": {
             "before": {
@@ -997,19 +873,15 @@
               "Mei": 7544
             },
             "after": {
-              "Ann": 2041,
-              "Ben": 7566,
-              "Kai": 7566,
-              "Mei": 7566
+              "Ann": 2040,
+              "Ben": 7565,
+              "Kai": 7565,
+              "Mei": 7565
             }
           },
           "recipe_pool_servable": {
             "before": 7544,
-            "after": 7566
-          },
-          "servings_cooked": {
-            "before": 63.38,
-            "after": 64.98
+            "after": 7565
           }
         },
         "new_selected_titles": [],

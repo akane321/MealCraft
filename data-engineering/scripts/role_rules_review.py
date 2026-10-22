@@ -56,8 +56,9 @@ def compare_reports(base):
         "",
         "Baseline revision is recorded in review.json. No timing report was updated. "
         "These are developer regressions, not held-out capability or accuracy claims. "
-        "The comparison uses archived base reports, not a newly run control baseline; changes cannot "
-        "all be causally attributed to this rule repair when the archived reports predate other main changes.",
+        "This compares archived base reports. For weekday-lunch-away, demo-cost-comparison.json/md additionally "
+        "records fresh main/round-one/round-two replays with an identical request; the main replay reproduces "
+        "its archive. Other cases here are archive comparisons, not separate new control runs.",
         "",
     ]
     for name in ("full-default", "shared-dish", "household-rules", "legacy-dev"):
@@ -318,7 +319,7 @@ def main():
         "rule_owned_changes": changed,
         "human_sample": sample,
         "frozen_suggestions": suggestions,
-        "deferred_bean_sides": beans,
+        "bean_led_sides": beans,
         "bean_side_decision": "owner 2026-10-22: whole-bean-led sides, including edamame, are not protein mains",
         "liu_ub_109_ids": "not supplied; all frozen recipes covered, subset match pending",
     }
