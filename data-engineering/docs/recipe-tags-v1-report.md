@@ -43,9 +43,9 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 | fish | 231 |
 | shellfish | 481 |
 | soy | 143 |
-| egg | 1045 |
+| egg | 1031 |
 | legume | 215 |
-| none (`[]`) | 2859 |
+| none (`[]`) | 2873 |
 
 ## `cooking_methods` values (recipes carrying each)
 

@@ -2,9 +2,30 @@
 
 Generated with `data-engineering/scripts/role_rules_review.py`. No row is human-verified by this tool. Frozen model values and review flags are unchanged.
 
-Base: `31ece86`. Random sample seed: 20261022. Rule-owned changes: 27. Frozen suggestions: 422. Deferred bean sides: 15.
+Base: `31ece866beaf4bef0c53b53def07b7e8aaf16917`. Random sample seed: 20261022. Non-frozen rule-owned changes: 27. Rule-owned updates within the frozen batch: 14. Frozen suggestions: 422. Deferred bean sides: 15.
 
 The specific 109 IDs have not been supplied; the complete frozen batch is included below. Do not interpret a suggested role or an allowed role as review/acceptance.
+
+## Rule-owned updates inside the frozen batch — liu-ub review required
+
+Only rule-owned fields update. Model values, their provenance/review flags and the gate remain unchanged; all these recipes are still excluded from planning. Egg allergens and diet restrictions still follow ingredients.
+
+| ID | Recipe | Rule-owned changes | Human review |
+|---|---|---|---|
+| RCP2_0CA3F3F66929 | Roti Jala (Malaysian Net Crepe) | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_143B82A4800E | Spaetzle Noodles | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_1A1BA06D6CB5 | Never Fail Noodles | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_2E3012F8BABC | Gran'S Noodles | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_43F241E2C2FA | Homemade Pasta | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_45391BFD9020 | Roti Jala (Malaysian Lacy Pancakes) | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_5C8F72777948 | Spatzle | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_5F632D436B4E | Ramen Noodles | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_646039848924 | Crumb-Coated Spaetzle | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_9CD7CD0DA72B | Whole Wheat Egg Noodles Or Spaghetti Noodles | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_A986B63ED3FF | Lo Mein Noodles | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_EC29565337D3 | Dumpling Noodles | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_F918B184F959 | Spaetzle | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
+| RCP2_FB5F31874C8A | Fresh Ramen Egg Noodles From Scratch | `{"protein_sources": {"before": ["egg"], "after": []}}` | pending liu-ub |
 
 ## Frozen recipes reached by each new rule
 

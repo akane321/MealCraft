@@ -152,7 +152,7 @@ def main():
         if line.strip()
         for row in [json.loads(line)]
     }
-    suggestions, changed, beans, meat = [], [], [], []
+    suggestions, changed, frozen_rule_changes, beans, meat = [], [], [], [], []
     impacts = Counter()
     for key, dish in sorted(dishes.items()):
         old, new = before["recipes"][key], after["recipes"][key]
@@ -183,12 +183,18 @@ def main():
         if frozen(old):
             from types import SimpleNamespace
 
-            assert new == old, f"Frozen record changed: {key}"
             assert meal_role_of(SimpleNamespace(**new)) is None
+            changes = {
+                field: {"before": old[field], "after": new[field]}
+                for field, provenance in old["estimated"].items()
+                if provenance["method"] == "rule" and old[field] != new[field]
+            }
+            if changes:
+                frozen_rule_changes.append(entry | {"changes": changes, "review_status": "pending_liu_ub"})
             suggestions.append(
                 entry
                 | {
-                    "stored": {f: old[f] for f in CRITICAL_MODEL_FIELDS},
+                    "stored": {f: new[f] for f in CRITICAL_MODEL_FIELDS},
                     "rule_suggestion": {f: proposal.values[f] for f in CRITICAL_MODEL_FIELDS},
                     "allowed_roles": [proposal.values["meal_role"]]
                     if proposal.values["meal_role"] is not None
@@ -278,7 +284,8 @@ def main():
         "base": args.base,
         "seed": SEED,
         "scope": "release/curated ingredients only; no evaluation episodes",
-        "frozen_values_provenance_and_usage_unchanged": True,
+        "frozen_model_values_provenance_and_usage_unchanged": True,
+        "frozen_rule_owned_changes": frozen_rule_changes,
         "frozen_count": len(suggestions),
         "frozen_by_rule": frozen_by_rule,
         "frozen_rule_counts": {category: len(ids) for category, ids in frozen_by_rule.items()},
@@ -302,11 +309,25 @@ def main():
         "Generated with `data-engineering/scripts/role_rules_review.py`. "
         "No row is human-verified by this tool. Frozen model values and review flags are unchanged.",
         "",
-        f"Base: `{args.base}`. Random sample seed: {SEED}. Rule-owned changes: {len(changed)}. "
+        f"Base: `{args.base}`. Random sample seed: {SEED}. Non-frozen rule-owned changes: {len(changed)}. "
+        f"Rule-owned updates within the frozen batch: {len(frozen_rule_changes)}. "
         f"Frozen suggestions: {len(suggestions)}. Deferred bean sides: {len(beans)}.",
         "",
         "The specific 109 IDs have not been supplied; the complete frozen batch is included below. "
         "Do not interpret a suggested role or an allowed role as review/acceptance.",
+        "",
+        "## Rule-owned updates inside the frozen batch — liu-ub review required",
+        "",
+        "Only rule-owned fields update. Model values, their provenance/review flags and the gate remain unchanged; "
+        "all these recipes are still excluded from planning. "
+        "Egg allergens and diet restrictions still follow ingredients.",
+        "",
+        "| ID | Recipe | Rule-owned changes | Human review |",
+        "|---|---|---|---|",
+        *[
+            f"| {row['id']} | {row['title']} | `{json.dumps(row['changes'], ensure_ascii=False)}` | pending liu-ub |"
+            for row in frozen_rule_changes
+        ],
         "",
         "## Frozen recipes reached by each new rule",
         "",
@@ -389,6 +410,7 @@ def main():
                 "impacts": dict(impacts),
                 "changed": len(changed),
                 "frozen": len(suggestions),
+                "frozen_rule_owned_changes": len(frozen_rule_changes),
                 "frozen_by_rule": {category: len(ids) for category, ids in frozen_by_rule.items()},
                 "beans": len(beans),
                 "distribution": dict(bins),

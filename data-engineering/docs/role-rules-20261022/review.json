@@ -1,8 +1,634 @@
 {
-  "base": "31ece86",
+  "base": "31ece866beaf4bef0c53b53def07b7e8aaf16917",
   "seed": 20261022,
   "scope": "release/curated ingredients only; no evaluation episodes",
-  "frozen_values_provenance_and_usage_unchanged": true,
+  "frozen_model_values_provenance_and_usage_unchanged": true,
+  "frozen_rule_owned_changes": [
+    {
+      "id": "RCP2_0CA3F3F66929",
+      "title": "Roti Jala (Malaysian Net Crepe)",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "flour",
+          "grams": 187.5,
+          "text": "1 1/2 cups all-purpose flour"
+        },
+        {
+          "name": "salt",
+          "grams": 3.0,
+          "text": "1/2 teaspoon salt"
+        },
+        {
+          "name": "turmeric",
+          "grams": 0.6,
+          "text": "1/4 teaspoon turmeric powder"
+        },
+        {
+          "name": "egg",
+          "grams": 100.0,
+          "text": "2 eggs"
+        },
+        {
+          "name": "water",
+          "grams": 296.2,
+          "text": "1 1/4 cups water"
+        },
+        {
+          "name": "coconut_milk",
+          "grams": 169.5,
+          "text": "3/4 cup coconut milk"
+        },
+        {
+          "name": "vegetable_oil",
+          "grams": 13.6,
+          "text": "1 tablespoon vegetable oil, plus more for greasing pan"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_143B82A4800E",
+      "title": "Spaetzle Noodles",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "flour",
+          "grams": 375.0,
+          "text": "3 cups of flour"
+        },
+        {
+          "name": "salt",
+          "grams": 6.1,
+          "text": "1 tsp salt"
+        },
+        {
+          "name": "nutmeg",
+          "grams": 0.6,
+          "text": "1/4 tsp nutmeg"
+        },
+        {
+          "name": "egg",
+          "grams": 200.0,
+          "text": "4 eggs, beaten"
+        },
+        {
+          "name": "water",
+          "grams": 118.5,
+          "text": "1/2 cup water (or more)"
+        },
+        {
+          "name": "butter",
+          "grams": 56.8,
+          "text": "1/4 cup butter"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_1A1BA06D6CB5",
+      "title": "Never Fail Noodles",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "egg",
+          "grams": 150.0,
+          "text": "3 eggs"
+        },
+        {
+          "name": "water",
+          "grams": 44.4,
+          "text": "3 Tbsp. water"
+        },
+        {
+          "name": "flour",
+          "grams": 375.0,
+          "text": "3 c. flour"
+        },
+        {
+          "name": "salt",
+          "grams": 9.1,
+          "text": "1 1/2 tsp. salt"
+        },
+        {
+          "name": "baking_powder",
+          "grams": 1.1,
+          "text": "1/4 tsp. baking powder"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_2E3012F8BABC",
+      "title": "Gran'S Noodles",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "flour",
+          "grams": 250.0,
+          "text": "2 c. all-purpose flour"
+        },
+        {
+          "name": "egg",
+          "grams": 50.0,
+          "text": "1 egg"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_43F241E2C2FA",
+      "title": "Homemade Pasta",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "flour",
+          "grams": 281.2,
+          "text": "2 1/4 c. flour"
+        },
+        {
+          "name": "egg",
+          "grams": 150.0,
+          "text": "3 eggs"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_45391BFD9020",
+      "title": "Roti Jala (Malaysian Lacy Pancakes)",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "whole_wheat_flour",
+          "grams": 480.0,
+          "text": "4 cups wheat flour"
+        },
+        {
+          "name": "water",
+          "grams": 711.0,
+          "text": "3 cups water"
+        },
+        {
+          "name": "egg",
+          "grams": 100.0,
+          "text": "2 standard eggs"
+        },
+        {
+          "name": "salt",
+          "grams": 12.2,
+          "text": "2 tsp fine salt"
+        },
+        {
+          "name": "food_coloring",
+          "grams": 0.1,
+          "text": "A few drops of food coloring (desired color; optional)"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_5C8F72777948",
+      "title": "Spatzle",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "egg",
+          "grams": 200.0,
+          "text": "4 large eggs"
+        },
+        {
+          "name": "milk",
+          "grams": 122.0,
+          "text": "1/2 cup milk"
+        },
+        {
+          "name": "flour",
+          "grams": 250.0,
+          "text": "2 cups all-purpose flour"
+        },
+        {
+          "name": "salt",
+          "grams": 3.0,
+          "text": "1/2 teaspoon salt"
+        },
+        {
+          "name": "butter",
+          "grams": 28.4,
+          "text": "2 tablespoons butter"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_5F632D436B4E",
+      "title": "Ramen Noodles",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "flour",
+          "grams": 93.8,
+          "text": "3/4 cup all purpose flour"
+        },
+        {
+          "name": "egg",
+          "grams": 50.0,
+          "text": "1 egg"
+        },
+        {
+          "name": "salt",
+          "grams": 4.6,
+          "text": "3/4 teaspoon salt"
+        },
+        {
+          "name": "water",
+          "grams": 14.8,
+          "text": "1 tablespoon water"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_646039848924",
+      "title": "Crumb-Coated Spaetzle",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "flour",
+          "grams": 250.0,
+          "text": "2 cups all-purpose flour"
+        },
+        {
+          "name": "salt",
+          "grams": 6.1,
+          "text": "1 teaspoon salt"
+        },
+        {
+          "name": "egg",
+          "grams": 100.0,
+          "text": "2 eggs, lightly beaten"
+        },
+        {
+          "name": "milk",
+          "grams": 183.0,
+          "text": "3/4 cup 2% milk"
+        },
+        {
+          "name": "breadcrumbs",
+          "grams": 54.0,
+          "text": "1/2 cup dry bread crumbs"
+        },
+        {
+          "name": "butter",
+          "grams": 113.5,
+          "text": "1/2 cup butter, melted"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_9CD7CD0DA72B",
+      "title": "Whole Wheat Egg Noodles Or Spaghetti Noodles",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "egg",
+          "grams": 300.0,
+          "text": "6 eggs, warmed 5 min in warm tap water"
+        },
+        {
+          "name": "whole_wheat_flour",
+          "grams": 60.0,
+          "text": "1/2 cup whole wheat flour"
+        },
+        {
+          "name": "flour",
+          "grams": 250.0,
+          "text": "2 cups all-purpose flour"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_A986B63ED3FF",
+      "title": "Lo Mein Noodles",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "egg",
+          "grams": 100.0,
+          "text": "2 eggs (Well Beaten)"
+        },
+        {
+          "name": "milk",
+          "grams": 122.0,
+          "text": "1/2 cup milk"
+        },
+        {
+          "name": "flour",
+          "grams": 312.5,
+          "text": "2 1/2 cups flour"
+        },
+        {
+          "name": "salt",
+          "grams": 6.1,
+          "text": "1 teaspoon salt"
+        },
+        {
+          "name": "baking_soda",
+          "grams": 4.6,
+          "text": "1 teaspoon baking soda"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_EC29565337D3",
+      "title": "Dumpling Noodles",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "flour",
+          "grams": 250.0,
+          "text": "2 c. flour"
+        },
+        {
+          "name": "salt",
+          "grams": 3.0,
+          "text": "1/2 tsp. salt"
+        },
+        {
+          "name": "egg",
+          "grams": 150.0,
+          "text": "3 eggs, beaten"
+        },
+        {
+          "name": "water",
+          "grams": 118.5,
+          "text": "1/2 c. water"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_F918B184F959",
+      "title": "Spaetzle",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "flour",
+          "grams": 312.5,
+          "text": "2 1/2 cups flour"
+        },
+        {
+          "name": "egg",
+          "grams": 150.0,
+          "text": "3 eggs"
+        },
+        {
+          "name": "salt",
+          "grams": 6.1,
+          "text": "1 tsp salt"
+        },
+        {
+          "name": "milk",
+          "grams": 122.0,
+          "text": "1/2 cup milk"
+        },
+        {
+          "name": "water",
+          "grams": 118.5,
+          "text": "1/2 cup water"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    },
+    {
+      "id": "RCP2_FB5F31874C8A",
+      "title": "Fresh Ramen Egg Noodles From Scratch",
+      "course": "side",
+      "ingredients": [
+        {
+          "name": "flour",
+          "grams": 62.5,
+          "text": "1/2 cup unbleached all-purpose flour"
+        },
+        {
+          "name": "semolina_flour",
+          "grams": 83.5,
+          "text": "1/2 cup semolina flour"
+        },
+        {
+          "name": "salt",
+          "grams": 1.5,
+          "text": "1/4 teaspoon fine sea salt"
+        },
+        {
+          "name": "garlic_powder",
+          "grams": 0.7,
+          "text": "1/4 teaspoon garlic powder"
+        },
+        {
+          "name": "egg",
+          "grams": 50.0,
+          "text": "1 egg, beaten"
+        },
+        {
+          "name": "sesame_oil",
+          "grams": 13.6,
+          "text": "1 tablespoon sesame oil"
+        },
+        {
+          "name": "water",
+          "grams": 118.5,
+          "text": "1/2 cup water, or as needed"
+        }
+      ],
+      "rule_categories": {
+        "homemade_staple": true,
+        "meat_seasoned_vegetable": false,
+        "protein_led_side": false
+      },
+      "changes": {
+        "protein_sources": {
+          "before": [
+            "egg"
+          ],
+          "after": []
+        }
+      },
+      "review_status": "pending_liu_ub"
+    }
+  ],
   "frozen_count": 422,
   "frozen_by_rule": {
     "homemade_staple": [
@@ -12471,9 +13097,7 @@
       "stored": {
         "meal_role": "breakfast",
         "contains_staple": false,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -13347,9 +13971,7 @@
       "stored": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -14138,9 +14760,7 @@
       "stored": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -17692,9 +18312,7 @@
       "stored": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -20987,9 +21605,7 @@
       "stored": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -21246,9 +21862,7 @@
       "stored": {
         "meal_role": "snack",
         "contains_staple": false,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -24296,9 +24910,7 @@
       "stored": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -24663,9 +25275,7 @@
       "stored": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -25567,9 +26177,7 @@
       "stored": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -31202,9 +31810,7 @@
       "stored": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -32299,9 +32905,7 @@
       "stored": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -39026,9 +39630,7 @@
       "stored": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -40576,9 +41178,7 @@
       "stored": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",
@@ -40950,9 +41550,7 @@
       "stored": {
         "meal_role": "staple",
         "contains_staple": true,
-        "protein_sources": [
-          "egg"
-        ]
+        "protein_sources": []
       },
       "rule_suggestion": {
         "meal_role": "staple",

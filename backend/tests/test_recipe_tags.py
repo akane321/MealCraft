@@ -370,9 +370,36 @@ def test_rule_regeneration_keeps_the_unreviewed_model_batch_frozen(monkeypatch) 
     assert fresh.values["meal_role"] == "protein_main"
     frozen = recipe_tags.build(False, 0)["tagged"][0][1]
     assert frozen.values["meal_role"] == "one_bowl" and frozen.methods["meal_role"] == "llm"
-    assert frozen.values["protein_sources"] == ["egg"]  # rule-owned fields in the same frozen record stay put too
+    assert frozen.values["protein_sources"] == fresh.values["protein_sources"]  # Only model decisions are frozen.
     entry = recipe_tags.recipe_entry(frozen, old)
-    assert entry["estimated"]["meal_role"]["reviewed"] is False
+    for name in ("meal_role", "contains_staple"):
+        assert entry[name] == old[name]
+        assert entry["estimated"][name] == old["estimated"][name]
+    assert entry["estimated"]["protein_sources"]["method"] == "rule"
+
+
+def test_a_frozen_homemade_staple_updates_only_its_rule_owned_sources(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    from app.data import recipe_tags
+    from app.planning.meal_composition import meal_role_of
+
+    item = dish("Homemade Pasta", "side", [("flour", 281.2), ("egg", 150)])
+    old = recipe_tags.recipe_entry(rule_tags(item))
+    old.update(meal_role="protein_main", contains_staple=False, protein_sources=["egg"])
+    for name in ("meal_role", "contains_staple"):
+        old["estimated"][name] = {"method": "llm", "batch": recipe_tags.LLM_BATCH, "reviewed": False}
+    monkeypatch.setattr(recipe_tags, "curated_dishes", lambda: [])
+    monkeypatch.setattr(recipe_tags, "release_dishes", lambda: [item])
+    monkeypatch.setattr(recipe_tags, "previous_file", lambda: {"recipes": {item.key: old}})
+    monkeypatch.setattr(recipe_tags, "ask_model", lambda *a: pytest.fail("No model call authorized"))
+    regenerated = recipe_tags.recipe_entry(recipe_tags.build(False, 0)["tagged"][0][1], old)
+    for name in ("meal_role", "contains_staple"):
+        assert regenerated[name] == old[name]
+        assert regenerated["estimated"][name] == old["estimated"][name]
+    assert regenerated["protein_sources"] == []
+    assert regenerated["estimated"]["protein_sources"]["method"] == "rule"
+    assert meal_role_of(SimpleNamespace(**regenerated)) is None
 
 
 def test_a_known_role_is_not_erased_but_unknown_main_sources_are_not_structured_candidates() -> None:
@@ -517,12 +544,6 @@ def test_the_tag_files_are_current_with_the_rules() -> None:
     entries = committed(tag_files.RECIPE_TAGS, "recipes")
     stale = []
     for key, item in dishes().items():
-        from types import SimpleNamespace
-
-        from app.planning.meal_composition import unreviewed
-
-        if unreviewed(SimpleNamespace(**entries[key])):
-            continue  # Fresh rule proposals live separately; the entire gated record remains as reviewed later.
         found = rule_tags(item)
         for field, estimate in entries[key]["estimated"].items():
             if estimate["method"] == "rule" and found.values[field] != entries[key][field]:
@@ -589,6 +610,31 @@ def test_the_importers_copy_the_tag_files_onto_the_rows(session: Session, releas
             entry["perishable"],
             entry["basic_seasoning"],
         )
+
+
+def test_binder_egg_sources_do_not_remove_ingredient_allergens_or_diet_limits(session: Session, release: Path) -> None:
+    from app.planning.member_coverage import MemberLimits, catalog_can_eat
+
+    key = "RCP2_43F241E2C2FA"  # The released flour-and-egg Homemade Pasta, one of the 14 rule updates.
+    with (release_dir() / "recipes.jsonl").open(encoding="utf-8") as handle:
+        record = next(json.loads(line) for line in handle if json.loads(line)["recipe_id"] == key)
+    (release / "recipes.jsonl").write_text(json.dumps(record) + "\n", encoding="utf-8")
+    _curated(session)
+    import_release_v2(session, release)
+    pasta = session.scalars(select(Recipe).where(Recipe.external_id == key)).one()
+    assert pasta.protein_sources == []
+    egg = next(line.ingredient for line in pasta.recipe_ingredients if line.ingredient.normalized_name == "egg")
+    assert "egg" in egg.allergens and "egg" in pasta.allergens
+    assert pasta.dietary_tags == record["dietary_tags"]
+    assert "vegetarian" in pasta.dietary_tags and "vegan" not in pasta.dietary_tags
+
+    def member(*, allergens=(), excluded=(), diets=()):
+        return MemberLimits("Ann", frozenset(allergens), frozenset(excluded), diets)
+
+    assert not catalog_can_eat(member(allergens=["egg"]), pasta)
+    assert not catalog_can_eat(member(excluded=["egg"]), pasta)
+    assert not catalog_can_eat(member(diets=("vegan",)), pasta)
+    assert catalog_can_eat(member(diets=("vegetarian",)), pasta)
 
 
 def test_a_missing_entry_is_null_and_a_runtime_write_wins(

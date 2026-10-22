@@ -1124,15 +1124,11 @@ def build(use_llm: bool, max_usd: float, log=print, reask: bool = False) -> dict
         # Keep the failed, unreviewed model batch frozen. Better rules do not silently release those recipes.
         if not reask:
             entry = previous.get("recipes", {}).get(dish.key, {})
-            if any(
-                (estimate := entry.get("estimated", {}).get(name, {})).get("method") == "llm"
-                and not estimate.get("reviewed")
-                for name in CRITICAL_MODEL_FIELDS
-            ):
-                # A frozen role and fresh rule-owned sources can contradict each other. Keep its whole
-                # stored record; fresh proposals/allowed roles come from rule_tags in the review generator.
-                tags.values.update({name: entry[name] for name in tags.values if name in entry})
-                tags.methods = {name: estimate["method"] for name, estimate in entry.get("estimated", {}).items()}
+            for name in CRITICAL_MODEL_FIELDS:
+                estimate = entry.get("estimated", {}).get(name, {})
+                if estimate.get("method") == "llm" and not estimate.get("reviewed"):
+                    tags.values[name] = entry[name]
+                    tags.methods[name] = "llm"
     still_open = [(dish, tags) for dish, tags in tagged if any(tags.values[name] is None for name in tags.open)]
     # The model's spend over every run, kept in the tag file's header.
     usage = dict(NO_USAGE) | previous.get("llm_usage", {})
