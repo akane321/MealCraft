@@ -386,6 +386,7 @@ class WeeklyMealPlanService:
         by_weight: Iterable[str] = (),
         day_indices: list[int] | None = None,
         rest_days: list[int] | None = None,
+        over_budget_by_trip: dict[int, float] | None = None,
         _used_elsewhere: Iterable[Recipe] = (),
         _check_whole_plan=None,
     ) -> list[ScheduledDish]:
@@ -415,7 +416,7 @@ class WeeklyMealPlanService:
             raise ValueError("day_indices must contain day_count distinct, ordered days from the week")
         if constraints.day_count > meal_structure.trip_days():
             return self._plan_dishes_by_trip(
-                constraints, planned_days, rest, rest_days, keep, over_budget, tuple(by_weight)
+                constraints, planned_days, rest, rest_days, keep, over_budget, tuple(by_weight), over_budget_by_trip
             )
         start = constraints.start_date + timedelta(days=first_day - 1)
         # Compress selected calendar days for the planner, then map its placements back to the saved week.
@@ -552,7 +553,9 @@ class WeeklyMealPlanService:
             )
         ]
 
-    def _plan_dishes_by_trip(self, constraints, days, rest, rest_days, keep, over_budget, by_weight):
+    def _plan_dishes_by_trip(
+        self, constraints, days, rest, rest_days, keep, over_budget, by_weight, over_budget_by_trip
+    ):
         """Search each shopping week with its own budget and the original pantry left by earlier meals.
 
         Package surplus is temporary stock within its own trip. As in the canonical
@@ -591,7 +594,8 @@ class WeeklyMealPlanService:
                 if left is not None and left < 0 and over_budget is None:
                     raise ProductPlanningError("no_feasible_plan", "This shopping week already exceeds its budget.", {})
                 elsewhere = prior_recipes + [r for (r, _), day in zip(rest, rest_days, strict=True) if day > end]
-                def estimate_whole(candidate=None):
+
+                def estimate_whole(candidate=None, *, changed=tuple(changed), offset=offset):
                     ids = [dish.recommendation.recipe.id for dish in output]
                     if candidate is not None:
                         ids += [item.recipe.id for item in candidate.selected]
@@ -604,11 +608,16 @@ class WeeklyMealPlanService:
                     all_days = list(rest_days) + [d.day_index for d in output]
                     if candidate is not None:
                         all_recipes += [catalog[item.recipe.id] for item in candidate.selected]
-                        all_shares += [float(p[3] if p[4] is None else p[4] / constraints.household_size)
-                                       for p in candidate.placements]
+                        all_shares += [
+                            float(p[3] if p[4] is None else p[4] / constraints.household_size)
+                            for p in candidate.placements
+                        ]
                         all_days += [changed[p[0]] + offset for p in candidate.placements]
                     return self.grocery_aggregator.estimate(
-                        all_recipes, constraints, shares=all_shares, by_weight=by_weight,
+                        all_recipes,
+                        constraints,
+                        shares=all_shares,
+                        by_weight=by_weight,
                         trips=[1 + (day - 1) // interval for day in all_days],
                     )
 
@@ -620,7 +629,9 @@ class WeeklyMealPlanService:
 
                 baseline = trip_costs(estimate_whole())
 
-                def check_whole_plan(candidate):
+                def check_whole_plan(
+                    candidate, *, budget=budget, offset=offset, baseline=baseline, estimate_whole=estimate_whole
+                ):
                     if budget is None:
                         return True
                     basket = estimate_whole(candidate)
@@ -641,7 +652,13 @@ class WeeklyMealPlanService:
                         for (day, meal), roles in (keep or {}).items()
                         if offset < day <= end
                     },
-                    over_budget=(None if over_budget is None else round(over_budget * len(changed) / len(days), 2)),
+                    over_budget=(
+                        over_budget_by_trip[1 + offset // interval]
+                        if over_budget_by_trip is not None
+                        else None
+                        if over_budget is None
+                        else round(over_budget * len(changed) / len(days), 2)
+                    ),
                     by_weight=by_weight,
                     _used_elsewhere=elsewhere,
                     _check_whole_plan=check_whole_plan,

@@ -199,14 +199,21 @@ def test_two_trips_reserve_stock_once_and_keep_calendar_days(monkeypatch, days, 
                 trips=[1, 2] + [1 if d <= 7 else 2 for d in days],
             )
             assert full.complete and full.within_weekly_budget
-            if pantry_grams == 80 and 9 in days:
-                # Day 1 and day 2 consume all original stock; trip 2 gets only its own package surplus.
-                if 2 in days:
-                    second = [row for row in observed if (row[0] - request.start_date).days >= 7]
-                    reserved = service.grocery_aggregator.estimate(
-                        [recipe], request.model_copy(update={"available_ingredients": []}), shares=[1]
-                    )
-                    assert second[-1][1][0][0] == reserved.items[0].excess_quantity
+            # Every observed search must use only the original stock left by earlier meals
+            # plus this trip's own package surplus, for every parameter combination.
+            stock = request.available_ingredients
+            expected = {}
+            for offset in (0, 7):
+                week_request = request.model_copy(update={"available_ingredients": stock})
+                reserved = service.grocery_aggregator.estimate([recipe], week_request, shares=[1])
+                available = remaining_stock(stock, reserved)
+                expected[offset] = [(p.quantity, p.unit) for p in available]
+                count = 1 + sum(offset < day <= offset + 7 for day in days)
+                full_week = service.grocery_aggregator.estimate([recipe] * count, week_request, shares=[1] * count)
+                stock = remaining_stock(stock, full_week, include_surplus=False)
+            for start, inventory, _ in observed:
+                offset = 7 if (start - request.start_date).days >= 7 else 0
+                assert inventory == expected[offset]
         finally:
             database.close()
 
@@ -234,6 +241,17 @@ def test_second_trip_surplus_cannot_pay_for_first_trip(monkeypatch):
 
 
 def test_two_trip_shape_preview_reaches_trip_cost_path(monkeypatch):
+    from app.services.meal_plan import WeeklyMealPlanService
+
+    penalties = []
+    original = WeeklyMealPlanService.plan_dishes
+
+    def capture(self, *args, **kwargs):
+        if kwargs.get("over_budget_by_trip"):
+            penalties.append(kwargs["over_budget_by_trip"])
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(WeeklyMealPlanService, "plan_dishes", capture)
     dish = _dish("tofu-dinner", "main", "firm_tofu", 100, calories=400)
     with dish_client(monkeypatch, [dish]) as client:
         generated = client.post(
@@ -253,6 +271,7 @@ def test_two_trip_shape_preview_reaches_trip_cost_path(monkeypatch):
         )
         assert response.status_code == 201, response.text
         assert response.json()["shape_change"]["day_indexes"] == [2, 9]
+        assert penalties == [{1: 12.5, 2: 12.5}]
         # Preview never saves its additional meals.
         saved = client.get(f"/api/plans/{plan['id']}")
         assert saved.status_code == 200
@@ -297,5 +316,115 @@ def test_each_trip_has_its_own_exact_checkout_limit(monkeypatch, cents_short):
                 full = service.grocery_aggregator.estimate([recipe] * 4, request, shares=[1] * 4, trips=[1, 1, 2, 2])
                 assert full.purchase_total_sgd == 2 * one
                 assert full.within_weekly_budget
+        finally:
+            database.close()
+
+
+@pytest.mark.parametrize("budget", [1.0, 0.98])
+@pytest.mark.parametrize("allow_over", [False, True])
+def test_first_week_cannot_silently_spend_second_weeks_pantry(monkeypatch, budget, allow_over):
+    from app.planning.product_path import ProductPlanningError
+
+    dish = _dish("tofu-dinner", "main", "firm_tofu", 100, calories=400)
+    with dish_client(monkeypatch, [dish]):
+        database = app.dependency_overrides[get_db_session]()
+        session = next(database)
+        try:
+            service = build_meal_plan_service(session, household_id=0)
+            recipe = service.recipe_repository.list_by_ids([dish.id])[0]
+            request = WeeklyMealPlanRequest(
+                household_size=2,
+                day_count=14,
+                weekly_budget_sgd=budget,
+                meal_composition=[{"role_id": "main", "courses": ["main"]}],
+                available_ingredients=[{"normalized_name": "firm_tofu", "quantity": 50, "unit": "g"}],
+            )
+            modes = []
+            original = service.planning_engine.plan
+
+            def record(*args, **kwargs):
+                modes.append(kwargs["budget_is_hard"])
+                return original(*args, **kwargs)
+
+            monkeypatch.setattr(service.planning_engine, "plan", record)
+
+            def run():
+                return service.plan_dishes(
+                    request,
+                    first_day=2,
+                    day_count=1,
+                    rest=[(recipe, 1)],
+                    rest_days=[9],
+                    over_budget=1 if allow_over else None,
+                )
+
+            if allow_over:
+                assert [d.day_index for d in run()] == [2]
+                assert False in modes  # must reject the hard candidate before offering an over-budget preview
+                basket = service.grocery_aggregator.estimate([recipe, recipe], request, shares=[1, 1], trips=[2, 1])
+                assert basket.within_weekly_budget is False
+            else:
+                with pytest.raises(ProductPlanningError, match="another shopping week"):
+                    run()
+        finally:
+            database.close()
+
+
+def test_unconvertible_reservation_preserves_original_stock():
+    pantry = [AvailableIngredientInput(normalized_name="firm_tofu", quantity=50, unit="g")]
+    assert remaining_stock(pantry, NS(items=[line(used=1, unit="unknown")]), include_surplus=False) == pantry
+
+
+def test_unchanged_second_trip_overrun_does_not_block_first_trip(monkeypatch):
+    small = _dish("small", "main", "firm_tofu", 100, calories=400)
+    large = _dish("large", "main", "firm_tofu", 10000, calories=400)
+    large.recipe_ingredients[0].ingredient = small.recipe_ingredients[0].ingredient
+    with dish_client(monkeypatch, [small, large]):
+        database = app.dependency_overrides[get_db_session]()
+        session = next(database)
+        try:
+            service = build_meal_plan_service(session, household_id=0)
+            recipe = service.recipe_repository.list_by_ids([large.id])[0]
+            request = WeeklyMealPlanRequest(
+                household_size=2,
+                day_count=14,
+                weekly_budget_sgd=2,
+                meal_composition=[{"role_id": "main", "courses": ["main"]}],
+            )
+            baseline = service.grocery_aggregator.estimate([recipe], request, shares=[1], trips=[2])
+            assert baseline.within_weekly_budget is False
+            result = service.plan_dishes(request, first_day=2, day_count=1, rest=[(recipe, 1)], rest_days=[9])
+            assert len(result) == 1
+        finally:
+            database.close()
+
+
+def test_two_trip_replan_prices_member_servings(monkeypatch):
+    dish = _dish("tofu-dinner", "main", "firm_tofu", 100, calories=400)
+    with dish_client(monkeypatch, [dish]):
+        database = app.dependency_overrides[get_db_session]()
+        session = next(database)
+        try:
+            service = build_meal_plan_service(session, household_id=0)
+            recipe = service.recipe_repository.list_by_ids([dish.id])[0]
+            request = WeeklyMealPlanRequest(
+                household_size=2,
+                day_count=14,
+                weekly_budget_sgd=100,
+                meal_composition=[{"role_id": "main", "courses": ["main"]}],
+                household={"members": [{"name": "Ann", "servings": 0.88}, {"name": "Mei", "servings": 0.73}]},
+            )
+            result = service.plan_dishes(
+                request,
+                first_day=2,
+                day_count=2,
+                day_indices=[2, 9],
+                rest=[(recipe, 0.805), (recipe, 0.805)],
+                rest_days=[1, 8],
+            )
+            assert [float(d.servings) for d in result] == [1.61, 1.61]
+            basket = service.grocery_aggregator.estimate([recipe] * 4, request, shares=[0.805] * 4, trips=[1, 1, 2, 2])
+            assert basket.complete and basket.within_weekly_budget
+            assert [row.required_quantity for row in basket.items] == pytest.approx([80.5, 80.5])
         finally:
             database.close()

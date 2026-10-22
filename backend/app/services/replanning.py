@@ -636,6 +636,16 @@ class MealPlanReplanningService:
             # of it, made a repeat up to twice as dear on two meals a day: dear varied changes beat the cheapest.
             meals = len({(item.day_index, item.meal_type) for item in kept} | {(day, meal) for day in days})
             over_budget = round(budget * len(days) / meals, 2)
+        trip_penalties = None
+        if budget is not None and constraints.day_count > meal_structure.trip_days():
+            interval = meal_structure.trip_days()
+            trip_penalties = {}
+            for trip in {1 + (day - 1) // interval for day in days}:
+                trip_days = {day for day in days if 1 + (day - 1) // interval == trip}
+                trip_meals = {
+                    (item.day_index, item.meal_type) for item in kept if 1 + (item.day_index - 1) // interval == trip
+                } | {(day, meal) for day in trip_days}
+                trip_penalties[trip] = round(budget * len(trip_days) / len(trip_meals), 2)
         try:
             dishes = self.meal_plan_service.plan_dishes(
                 partial,
@@ -644,6 +654,7 @@ class MealPlanReplanningService:
                 day_indices=sorted(days),
                 rest=rest,
                 rest_days=[item.day_index for item in kept],
+                over_budget_by_trip=trip_penalties,
                 keep=self._dishes_kept_when_adding(roles, removed),
                 over_budget=over_budget,
                 by_weight=weighed,

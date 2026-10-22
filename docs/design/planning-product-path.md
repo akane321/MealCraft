@@ -120,3 +120,11 @@ package surplus stays within its trip, matching the canonical two-trip basket.
 Calendar dates, locked dishes and recipe-use caps across both weeks are retained.
 Preview does not save the additions. This sequential search does not prove a
 globally cheapest two-week revision or explore every possible allocation of stock.
+
+Each hard candidate also checks the complete two-trip basket against the original
+pantry. An earlier addition can consume stock reserved for a later week, so every
+trip whose checkout cost increases must remain within its own budget. An untouched
+trip's existing overrun does not by itself reject the change. Incomplete prices
+cannot establish an in-budget result, even when the added dish needs no new package.
+The soft addition penalty uses the affected meals and total meals in each shopping
+week; a fourteen-day plan does not halve that week's penalty.

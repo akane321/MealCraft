@@ -15,8 +15,8 @@ def remaining_stock(pantry, grocery, *, include_surplus=True):
         if item is not None and item.quantity is not None:
             used = convert_quantity(line.pantry_deduction, line.unit, item.unit, line.ingredient_name)
             if used is None:
-                # Cannot safely reserve this amount: do not offer it again.
-                stock.pop(line.ingredient_name)
+                # Match the canonical basket: an unconvertible deduction consumes nothing.
+                continue
             else:
                 item.quantity = max(0, item.quantity - used)
     for line in grocery.items if include_surplus else ():
