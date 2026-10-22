@@ -33,7 +33,7 @@ class AlgorithmObjective:
         self.near = set(groups.near_pairs)
         self.unknown = set(groups.unknown_pairs)
 
-    def terms(self, problem, assignments, report) -> tuple:
+    def terms(self, problem, assignments, report, *, partial=False) -> tuple:
         """Ordering only. Unknown similarity is conservatively penalized as a repeat.
 
         Pair counts grow quadratically for repeated dishes. Ignore staple repeats
@@ -64,6 +64,18 @@ class AlgorithmObjective:
         nutrition = 0.0
         for check in report.checks:
             if check.code.startswith("nutrition_") and not check.hard:
+                if (
+                    partial
+                    and not assignments
+                    and any(
+                        b.scope == "horizon_average"
+                        and b.average_basis == "selected_slots"
+                        and check.code == f"nutrition_{b.metric}_{b.scope}"
+                        and not b.hard
+                        for b in problem.nutrition_bands
+                    )
+                ):
+                    continue
                 if check.status == "indeterminate" or check.margin is None:
                     raise ValueError("Nutrition evidence is incomplete")
                 if check.code not in self.scales:

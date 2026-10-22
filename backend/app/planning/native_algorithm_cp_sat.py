@@ -17,7 +17,7 @@ from app.planning.meal_composition import dish_servings, meal_shares
 
 def integer(value, scale=1000):
     scaled = value * scale
-    if not isfinite(scaled) or abs(scaled - round(scaled)) > 1e-7:
+    if not isfinite(scaled) or abs(scaled - round(scaled)) > 1e-7 + 1e-12 * abs(scaled):
         raise ValueError("Coefficient precision exceeds the native model's declared grid")
     return round(scaled)
 
@@ -208,6 +208,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
                 divisors[ingredient] = max(1, gcd(*coefficients))
         stock = {}
         costs = []
+        trip_costs = defaultdict(list)
         for key in sorted(demand, key=lambda k: (k[0], k[1], k[2] or 0)):
             ingredient, unit, _ = key
             divisor = divisors.get(ingredient, 1)
@@ -216,14 +217,18 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
             model.Add(qty == sum((amount // divisor) * var for amount, var in demand[key]))
             if ingredient not in stock:
                 p = pantry.get(ingredient)
-                if p and p.quantity is None:
-                    raise ValueError("Unknown pantry quantity")
-                stock[ingredient] = integer(p.quantity, quantity_scale) // divisor if p and p.unit == unit else 0
+                stock[ingredient] = (
+                    integer(p.quantity, quantity_scale) // divisor
+                    if p and p.quantity is not None and p.unit == unit
+                    else 0
+                )
             remaining = model.NewIntVar(0, cap, "remaining")
             model.AddMaxEquality(remaining, [0, qty - stock[ingredient]])
             stock_next = model.NewIntVar(
                 0,
-                integer(pantry[ingredient].quantity, quantity_scale) // divisor if ingredient in pantry else 0,
+                integer(pantry[ingredient].quantity, quantity_scale) // divisor
+                if ingredient in pantry and pantry[ingredient].quantity is not None and pantry[ingredient].unit == unit
+                else 0,
                 "stock",
             )
             model.AddMaxEquality(stock_next, [0, stock[ingredient] - qty])
@@ -244,9 +249,11 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
                 )
                 model.AddMinEquality(cost, choices)
                 costs.append(cost)
+                trip_costs[key[2]].append(cost)
         checkout = sum(costs)
         if problem.budget_is_hard and problem.purchase_budget_sgd is not None:
-            model.Add(checkout <= integer(problem.purchase_budget_sgd, 100))
+            for values in trip_costs.values():
+                model.Add(sum(values) <= integer(problem.purchase_budget_sgd, 100))
         for band in problem.nutrition_bands:
             if band.scope in {"per_dish", "per_slot"}:
                 continue  # Already independently checked while creating options.
