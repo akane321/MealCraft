@@ -465,11 +465,9 @@ BAND_LABEL = {
 
 # Why a case takes as long as it does, from a cProfile of one warm product run of each case (task 14, 2026-10-21,
 # Windows, after the shared-dish candidate changes). Shares are of the profiled run, which the profiler slows about
-# twofold (threefold for six-tight-budget, re-profiled the same day without the variety cutoff). The three cases
-# that task 15 (2026-10-22, no cap on a meal's combinations) made much slower were profiled again for their first
-# 400 to 1,200 s only (the profiler slows them about threefold, so their whole runs would take hours), which is the
-# meal search and nothing else. Every case past the quick figure has one: ADR-0079 section 4 asks for the cause of
-# each, not only of the ones over a minute.
+# twofold (threefold for six-tight-budget, re-profiled the same day without the variety cutoff). Every case past the
+# quick figure has one: ADR-0079 section 4 asks for the cause of each, not only of the ones over a minute.
+# seven-with-young-children was profiled again on 2026-10-22 (task 15), when the exact root raised its time.
 # Rewrite a case's entry whenever a change moves its time.
 MEAL_CHECKS = (
     "building each meal's dish combinations and checking every one as a real meal (`meal_beam._meal_options` -> "
@@ -487,38 +485,33 @@ SLOW_CAUSES = {
         "fixture prices) about 25%; at three meals a day for seven days that is 21 slots of combinations."
     ),
     "four-with-vegetarian": (
-        f"one beam search over every combination of every role's usual candidates: since task 15 removed the cap of "
-        f"16,384 combinations a meal (owner, 2026-10-22), a meal checks every one of them, about 0.9 million "
-        f"in the first 400 s of a profiled run, and the time went from about 19 s to about 2 min. {MEAL_CHECKS} is "
-        f"essentially the whole profiled window, and {MEMBER_CHECKS} about a quarter of it (21 million calls). Upgrade "
-        "path, none of it changing a plan: cache the member checks per member and recipe, and a recipe's meal role."
+        f"one beam search, three-quarters of the run; {MEAL_CHECKS} is about 63%, and a third of the run is "
+        f"{MEMBER_CHECKS}. The vegetarian member's own candidates add up to 40 dishes a kind to the packet "
+        "(`product_path._packet_covering`), so a meal has more combinations to check than before the shared-dish "
+        "model."
     ),
     "six-tight-budget": (
-        "four whole-week beam searches instead of one (the ranked search keeps no week filled with no dish twice under "
-        "the budget, so the three budget-led searches of `product_path.limit_led` run too), and a variety pass over "
-        "16 starts that no longer stops at two seconds (ADR-0080). Since task 15 removed the cap on a meal's "
-        "combinations (owner, 2026-10-22) every one of the four searches checks every combination of every role's "
-        "usual candidates, and the time went from about 2 min to about 15 min. In the first 1,200 s of a profiled "
-        f"run (two searches), {MEAL_CHECKS} is essentially all of it (2.3 million combinations) and {MEMBER_CHECKS} "
-        "about 28% (68 million calls); the variety pass was not reached, so its share since 2026-10-21 (about 50% of "
-        "the run when each search was capped) is not re-measured. Upgrade path, none of it changing a plan: share "
-        "the meal checks between the four searches (they do not depend on the ranking), cache the member checks "
-        "per member and recipe, and make the variety pass faster. The owner accepted this case's time (ADR-0079 "
-        "section 5, ADR-0080): over the line is a known exception, not a failure."
+        "four whole-week beam searches instead of one, and a variety pass over 16 starts that no longer stops at two "
+        "seconds (ADR-0080). In a profiled warm run of 2026-10-21, after that cutoff was removed, the variety pass "
+        "(`product_path._vary_starts`) is about 50% of the run and the three budget-led searches "
+        "(`product_path.limit_led`, which run because the ranked search keeps no week filled with no dish twice "
+        f"under the budget) about 33%; the ranked search and the setup are the rest. Across the run {MEAL_CHECKS} "
+        f"is about 46%, and {MEMBER_CHECKS} is about 43%. Upgrade path, none of it changing a plan: make the variety "
+        "pass faster (now the largest single cost), share the meal checks between the four searches (they do not "
+        "depend on the ranking) and cache the member checks. The owner accepted this case's time (ADR-0079 section "
+        "5, ADR-0080): over the line is a known exception, not a failure."
     ),
     "two-no-oven-ten-days": (
         f"one beam search over ten days and two shopping trips, about two-thirds of the run; {MEAL_CHECKS} is about "
         "42%, and reading the candidates about 15%; the plan has 30 slots of combinations to build."
     ),
     "seven-with-young-children": (
-        f"one beam search over seven-dish dinners for a household of seven. Since task 15 removed the cap of 16,384 "
-        "combinations a meal (owner, 2026-10-22) each dinner checks every combination of every role's usual "
-        "candidates, 1.4 million in the first 600 s of a profiled run, and the time went from about 9 s to about 48 "
-        f"min. {MEAL_CHECKS} is essentially the whole profiled window; in it {MEMBER_CHECKS} is about a quarter "
-        "(44 million calls) and the recipe's meal role (`meal_composition.meal_role_of` -> `unreviewed`, asked again "
-        "for every dish of every combination) more than half. Upgrade path, none of it changing a plan: cache a "
-        "recipe's meal role and the member checks per member and recipe, and prune a role's candidates against the "
-        "meal's hard limits before taking their product."
+        "one beam search, about 97% of the run, over seven-dish dinners for a household of seven. Since task 15 "
+        "(2026-10-22) the combination cap's root per role is exact, so each of a dinner's seven roles keeps four "
+        "dishes instead of three (`int(16384 ** (1 / 7))` gave three; 4^7 is 16,384): up to 16,384 combinations a "
+        "dinner instead of 2,187, and the run went from about 9 s to about 36 s. In a profiled warm run of "
+        f"2026-10-22 {MEAL_CHECKS} is about 96%, and {MEMBER_CHECKS} about 49% (8.5 million calls). Upgrade path, "
+        "none of it changing a plan: cache the member checks per member and recipe, and a recipe's meal role."
     ),
 }
 

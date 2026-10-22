@@ -668,30 +668,22 @@ def markdown(report: dict) -> str:
 
 
 # Why the shared arrangement takes as long as it does, from a cProfile of one product run of each case (task 14,
-# 2026-10-21; weekend-guest, six-one-vegetarian and tight-budget again on 2026-10-22, after task 15 removed the cap
-# on a meal's combinations, when their times rose about sevenfold, tenfold and 1.4-fold). Every case here is past
-# the quick figure, so each gets a cause (ADR-0079 section 4); a case not named in SLOW_CAUSES has the common one.
-# Rewrite an entry whenever a change moves its time.
+# 2026-10-21). Every case here is past the quick figure, so each gets a cause (ADR-0079 section 4); a case not named
+# in SLOW_CAUSES has the common one. Rewrite an entry whenever a change moves its time.
 COMMON_CAUSE = (
     "one beam search, which builds each meal's dish combinations and checks every one as a real meal "
-    "(`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`). Since task 15 removed the cap on a "
-    "meal's combinations (owner, 2026-10-22) it checks every combination of every role's usual candidates. Only "
-    "`weekend-guest` (1.0 million combinations) and `six-one-vegetarian` (1.1 million) were profiled since: there "
-    "that check was 97-98% of the run, and 46-51% of it `member_coverage.member_can_eat` asked again for every "
-    "member, dish and combination with nothing cached per member and recipe (26 and 38 million calls). Reading the "
-    "candidates takes about 2.5 s, and topping the packet up for every member group (`product_path._packet_covering`, "
-    "each ranked dish judged by the option this household cooks) about as long. Upgrade path, none of it changing a "
-    "plan: cache the member checks per member and recipe"
+    "(`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of "
+    "it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per "
+    "member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group "
+    "(`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long"
 )
 SLOW_CAUSES = {
     "tight-budget": (
         "four beam searches and sixteen variety starts: no week the ranked search keeps is filled with no dish twice "
-        "under its budget, so the three budget-led searches (`product_path.limit_led`, about 28% of a profiled run "
-        "on 2026-10-22) and the variety pass (`meal_beam.vary_within_budget`, about 52%) both run; the four searches "
-        "together are about 44%. Every combination of every role's usual candidates is checked since task 15 (no cap "
-        "on a meal's combinations, owner 2026-10-22), and `member_can_eat` alone is about 38% (9.4 million calls). "
-        "Upgrade path: cache the member checks per member and recipe, and share the meal checks between the four "
-        "searches"
+        "under its budget, so the three budget-led searches (`product_path.limit_led`, about 14% of the run) and "
+        "the variety pass (`meal_beam.vary_within_budget`, about 72%) both run. Every swap the variety pass tries "
+        "checks the meal's coverage again, so `member_can_eat` alone is about 35% (7.0 million calls). Upgrade "
+        "path: cache the member checks per member and recipe, and share the meal checks between the four searches"
     ),
 }
 

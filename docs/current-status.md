@@ -148,14 +148,10 @@ about 60 s) as descriptive reporting, not a pass/fail test or a planning
 deadline, and gives the cause of every case past the quick figure. The owner's
 direction (ADR-0080) forbids trading quality or simplifying the workflow for
 speed; a slow completed plan must not become an error. The plan buttons on the
-home and household pages say a large household, or one on a tight budget, can
-take from a few minutes to about an hour (task 15, 2026-10-22: with no cap on a
-meal's combinations the seven-person case takes about 48 minutes and the six-person
-tight-budget case about 15 on the development machine). Nothing in MealCraft
-times out first (the browser request has no time limit and an agent run's wall
-budget of 120 s is checked only before the planner starts, not on records written
-after it returns, ADR-0080 section 3). Whether a browser, proxy or gateway in
-front of a real deployment keeps a request open that long is not verified.
+home and household pages say a large household on a tight budget can take a few
+minutes; nothing on the way times out first (the browser request has no time
+limit and an agent run's wall budget of 120 s is checked only before the
+planner starts, not on records written after it returns, ADR-0080 section 3).
 Deferred: adding a vegetable dish when
 vegetables fall short (no vegetable measure yet), CP-SAT for structured meals, day references 8-14 in the
 conversation, and a curated plain Chinese steamed rice (the release has none). `PLANNING_CAPABILITY`

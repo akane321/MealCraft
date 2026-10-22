@@ -142,7 +142,7 @@ def run(cap: int, out: Path) -> None:
     part.parent.mkdir(parents=True, exist_ok=True)
     revision = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False).stdout
     meta = {"cap": cap, "code_commit": revision.strip(), "machine": platform.processor(), "rows": rows}
-    part.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+    part.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8", newline="\n")
 
 
 def compare(rows: list[dict], reference: list[dict]) -> list[str]:
@@ -216,8 +216,8 @@ def report(out: Path) -> None:
         "summary": summaries,
         "rows": {cap: parts[cap]["rows"] for cap in caps},
     }
-    (out / "latest.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
-    (out / "README.md").write_text(markdown(result), encoding="utf-8")
+    (out / "latest.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8", newline="\n")
+    (out / "README.md").write_text(markdown(result), encoding="utf-8", newline="\n")
     print(f"chosen cap {chosen}")
 
 
@@ -248,6 +248,12 @@ def markdown(result: dict) -> str:
         *(f"- {c};" for c in result["criterion"]),
         "",
         f"**Chosen cap: {result['chosen_cap']:,}**, the smallest that passes every one.",
+        "",
+        "A cap matters only through the dishes each role keeps: at most `candidates_per_role` (8), else the integer "
+        "root. Up to 8,192 every smaller cap loses on some scenario. Between 8,192 and 16,384 only six-role meals "
+        "(4 dishes a role, 5 from 15,625) and seven-role meals change, and a seven-role meal keeps 3 dishes a role "
+        "at any cap below 16,384 = 4^7, as at 8,192, where `seven-with-young-children` repeats a dish three times and "
+        "costs 7% more. So no value between them was swept.",
         "",
         "## Summary",
         "",
