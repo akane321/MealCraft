@@ -115,6 +115,11 @@ ONE_DISH_COST_WEIGHTS = (*COST_WEIGHTS, 64.0)
 # (64 meals a slot) and 5% stop saved time only. Bisecting under the cheapest week found so far rather than under
 # the budget it was found within takes fewer probes for the same week (PR #211 round 1).
 CHEAPEST_START_SGD = 64
+# Search breadth of a meal (`MealBeamLimits.max_meal_combinations`): the most dish combinations its first widening
+# step builds, which sets how many dishes each of its roles keeps. A parameter of the search, set by plan quality: the
+# smallest value at which no developer-set plan gets worse than at 16,384 (owner, 2026-10-22; ADR-0083;
+# docs/evaluation/combination-cap-sweep). Removing it planned no better and took up to hours (task 15).
+MEAL_COMBINATIONS = 16384
 # A week of this many dish positions or more (and no locked dishes) is "heavy": its variety pass stops early at a
 # week no later start can make more varied (`is_best`). No pass is cut by the clock: planning time has no hard
 # limit and a slow plan never trades quality for speed (owner, 2026-10-21; ADR-0080).
@@ -899,7 +904,7 @@ class ProductPlanningEngine:
                     max_expansions=max(MealBeamLimits().max_expansions, 32 * 256 * len(slots) + 256),
                     repeat_cost=1.0,
                     flat_repeat=True,
-                    cheapest_share_places=True,
+                    max_meal_combinations=MEAL_COMBINATIONS,
                     distinct_kinds=True,
                     rotate_candidates=True,
                 )
