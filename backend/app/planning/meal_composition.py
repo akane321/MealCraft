@@ -50,7 +50,8 @@ def meal_role_of(recipe) -> str | None:
 
 def role_admits(role: PlanningMealRole, recipe: PlanningRecipeCandidate) -> bool:
     """A role takes a recipe of one of its courses, or for a structured role of one of its meal roles; a vegetable
-    role only one led by vegetables (ADR-0054). A recipe with no meal-role tag fills no structured role."""
+    role only one led by vegetables, with measured minor flesh seasoning at most (ADR-0082 amends ADR-0054).
+    A recipe with no meal-role tag fills no structured role. Member diet checks are separate."""
     if role.meal_roles:
         admitted = meal_role_of(recipe) in role.meal_roles
     else:
