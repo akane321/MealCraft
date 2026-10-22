@@ -114,6 +114,14 @@ weight. Listed cured/dried meat or seafood and minced meat may season it, up to
 20% of counted weight in total. Other meat, poultry, fish or seafood may only be
 traces, up to 5%; with both types, both limits apply. Every flesh quantity must
 be known. This is a meal role, not a vegetarian label.
+The seasoning allowance covers bacon, turkey bacon, pancetta, ham, prosciutto,
+chorizo, salami, pepperoni, sausage (including lap cheong), corned beef,
+pastrami, salt cod, smoked haddock, dried shrimp, dried anchovy/ikan bilis and
+bonito flakes. Ground beef and ground pork are explicitly recognised, as is
+other land-animal meat whose ingredient line says ground or minced.
+Ingredient wording can also establish smoked, cured, salted or dried meat or
+fish. The preparation must be stated in the actual ingredient, not just in
+the dish's name; fresh or otherwise unqualified flesh keeps the 5% limit.
 Each person's diet, exclusions and allergens still apply: a vegetarian member
 does not eat the meat-seasoned dish and must have another vegetable dish they
 can eat. Pasta, rice and bean sides are not vegetable dishes merely because

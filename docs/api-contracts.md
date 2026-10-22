@@ -570,6 +570,8 @@ for bounds, compatibility, examples and the Agent handoff.
   in total, and other meat/fish up to 5%; both limits apply to mixed dishes,
   as `backend/app/planning/vegetable_led.py` defines it. This is a role, not a
   vegetarian-diet claim: member limits and member vegetable coverage still bind.
+  The complete seasoning list and ingredient-wording requirements are in the
+  [user guide](user-guide.md); the role does not grant a member diet permission.
   When none fits, an optional vegetable stays empty and a required
   one leaves the meal without a plan. Other roles take any dish of their
   courses.

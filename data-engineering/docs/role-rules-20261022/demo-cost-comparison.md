@@ -2,6 +2,30 @@
 
 Source revisions, request, checks, meal choices and package lines are in demo-cost-comparison.json. These are fresh replays, not merely archived reports. No timing artifacts were produced.
 
+## Review explanation (2026-10-22)
+
+The conditions below refer to the source revisions recorded in the JSON, not
+whichever revision is now on main. These replays were completed during the
+second-round rule repair; the documentation-only third round does not rerun
+them after synchronising the newer main.
+
+The principal role error behind the first-round increase was promoting
+**Teriyaki Edamame** and **Black Bean Garlic Edamame** to protein mains.
+Teriyaki Edamame replaced Chinese Fried Rice at day 1 lunch, with Assyrian Rice
+added as the staple; Black Bean Garlic Edamame replaced Tofu Omelet Indonesia
+at day 2 dinner. The second round removes that whole-bean-side promotion.
+These changes also alter other choices across the week and whole-package
+reuse. The basket deltas below explain the resulting checkout difference;
+they are not a single-rule ablation attributing every dollar to edamame.
+
+**Neither round selected a flesh-containing vegetable, including a bacon
+vegetable.** This was checked against the actual ingredient lines of every
+selected vegetable in both recorded plans, not just their titles or the
+newly admitted candidates. Flesh uses the shared role predicate and its
+existing stock/sauce/fat exemptions; this statement is not a vegetarian-diet
+certification. In particular, the second-round cost is not evidence of buying
+cheaper bacon vegetables. The full changed-slot and package lists remain below.
+
 | Condition | Checkout S$ | Dishes | Distinct non-staples |
 |---|---:|---:|---:|
 | main | 527.27 | 55 | 47 |
