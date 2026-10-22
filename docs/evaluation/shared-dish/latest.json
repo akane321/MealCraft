@@ -39,19 +39,19 @@
               "Kai": 2037,
               "Mei": 2037
             },
-            "servings_cooked": 157.08,
+            "servings_cooked": 168.3,
             "shopping_trips": 1,
-            "dishes": 54,
+            "dishes": 59,
             "distinct_dishes_excluding_staples": 49,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 577.88,
+            "purchase_total_sgd": 559.57,
             "energy_attainment_by_member": {
-              "Ann": 1.545,
-              "Ben": 1.545,
-              "Kai": 1.546,
-              "Mei": 1.553
+              "Ann": 1.499,
+              "Ben": 1.499,
+              "Kai": 1.5,
+              "Mei": 1.506
             },
-            "lowest_energy_attainment": 1.545
+            "lowest_energy_attainment": 1.499
           }
         },
         "shared": {
@@ -77,19 +77,19 @@
               "Kai": 7544,
               "Mei": 7544
             },
-            "servings_cooked": 158.08,
+            "servings_cooked": 154.0,
             "shopping_trips": 1,
-            "dishes": 57,
-            "distinct_dishes_excluding_staples": 48,
+            "dishes": 55,
+            "distinct_dishes_excluding_staples": 47,
             "most_uses_of_one_dish": 2,
-            "purchase_total_sgd": 526.55,
+            "purchase_total_sgd": 535.59,
             "energy_attainment_by_member": {
-              "Ann": 1.494,
-              "Ben": 1.637,
-              "Kai": 1.638,
-              "Mei": 1.645
+              "Ann": 1.5,
+              "Ben": 1.673,
+              "Kai": 1.674,
+              "Mei": 1.681
             },
-            "lowest_energy_attainment": 1.494
+            "lowest_energy_attainment": 1.5
           }
         }
       }
@@ -203,13 +203,13 @@
             "dishes": 26,
             "distinct_dishes_excluding_staples": 21,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 297.62,
+            "purchase_total_sgd": 306.08,
             "energy_attainment_by_member": {
-              "Ann": 1.453,
-              "Ben": 1.453,
-              "Mei": 1.46
+              "Ann": 1.448,
+              "Ben": 1.448,
+              "Mei": 1.455
             },
-            "lowest_energy_attainment": 1.453
+            "lowest_energy_attainment": 1.448
           }
         },
         "shared": {
@@ -239,13 +239,13 @@
             "dishes": 26,
             "distinct_dishes_excluding_staples": 21,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 294.67,
+            "purchase_total_sgd": 276.49,
             "energy_attainment_by_member": {
-              "Ann": 1.4,
-              "Ben": 1.4,
-              "Mei": 1.406
+              "Ann": 1.424,
+              "Ben": 1.424,
+              "Mei": 1.431
             },
-            "lowest_energy_attainment": 1.4
+            "lowest_energy_attainment": 1.424
           }
         }
       }
@@ -279,19 +279,19 @@
               "Kai": 2037,
               "Mei": 2037
             },
-            "servings_cooked": 149.96,
+            "servings_cooked": 160.64,
             "shopping_trips": 1,
-            "dishes": 54,
+            "dishes": 59,
             "distinct_dishes_excluding_staples": 49,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 572.88,
+            "purchase_total_sgd": 536.55,
             "energy_attainment_by_member": {
-              "Ann": 1.545,
-              "Ben": 1.545,
-              "Kai": 1.546,
-              "Mei": 1.804
+              "Ann": 1.499,
+              "Ben": 1.499,
+              "Kai": 1.5,
+              "Mei": 1.734
             },
-            "lowest_energy_attainment": 1.545
+            "lowest_energy_attainment": 1.499
           }
         },
         "shared": {
@@ -317,19 +317,19 @@
               "Kai": 7544,
               "Mei": 7544
             },
-            "servings_cooked": 151.51,
+            "servings_cooked": 147.43,
             "shopping_trips": 1,
-            "dishes": 57,
-            "distinct_dishes_excluding_staples": 48,
+            "dishes": 55,
+            "distinct_dishes_excluding_staples": 47,
             "most_uses_of_one_dish": 2,
-            "purchase_total_sgd": 522.74,
+            "purchase_total_sgd": 527.27,
             "energy_attainment_by_member": {
-              "Ann": 1.494,
-              "Ben": 1.637,
-              "Kai": 1.638,
-              "Mei": 1.777
+              "Ann": 1.5,
+              "Ben": 1.673,
+              "Kai": 1.674,
+              "Mei": 1.833
             },
-            "lowest_energy_attainment": 1.494
+            "lowest_energy_attainment": 1.5
           }
         }
       }
@@ -363,20 +363,20 @@
               "Kai": 2037,
               "Mei": 2037
             },
-            "servings_cooked": 164.51,
+            "servings_cooked": 171.65,
             "shopping_trips": 1,
-            "dishes": 56,
-            "distinct_dishes_excluding_staples": 51,
-            "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 602.07,
+            "dishes": 59,
+            "distinct_dishes_excluding_staples": 50,
+            "most_uses_of_one_dish": 2,
+            "purchase_total_sgd": 622.51,
             "energy_attainment_by_member": {
-              "Ann": 1.505,
-              "Ben": 1.505,
-              "Grandma": 1.193,
-              "Kai": 1.506,
-              "Mei": 1.512
+              "Ann": 1.507,
+              "Ben": 1.507,
+              "Grandma": 1.295,
+              "Kai": 1.508,
+              "Mei": 1.515
             },
-            "lowest_energy_attainment": 1.193
+            "lowest_energy_attainment": 1.295
           }
         },
         "shared": {
@@ -402,20 +402,20 @@
               "Kai": 7544,
               "Mei": 7544
             },
-            "servings_cooked": 164.36,
+            "servings_cooked": 161.43,
             "shopping_trips": 1,
-            "dishes": 59,
-            "distinct_dishes_excluding_staples": 48,
+            "dishes": 57,
+            "distinct_dishes_excluding_staples": 50,
             "most_uses_of_one_dish": 2,
-            "purchase_total_sgd": 546.87,
+            "purchase_total_sgd": 567.2,
             "energy_attainment_by_member": {
-              "Ann": 1.495,
-              "Ben": 1.652,
-              "Grandma": 1.033,
-              "Kai": 1.653,
-              "Mei": 1.66
+              "Ann": 1.546,
+              "Ben": 1.699,
+              "Grandma": 1.318,
+              "Kai": 1.7,
+              "Mei": 1.707
             },
-            "lowest_energy_attainment": 1.033
+            "lowest_energy_attainment": 1.318
           }
         }
       }
@@ -449,19 +449,19 @@
               "Kai": 7119,
               "Mei": 7119
             },
-            "servings_cooked": 66.3,
+            "servings_cooked": 68.34,
             "shopping_trips": 1,
-            "dishes": 23,
+            "dishes": 24,
             "distinct_dishes_excluding_staples": 21,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 326.54,
+            "purchase_total_sgd": 310.51,
             "energy_attainment_by_member": {
-              "Ann": 1.418,
-              "Ben": 1.418,
-              "Kai": 1.419,
-              "Mei": 1.425
+              "Ann": 1.404,
+              "Ben": 1.404,
+              "Kai": 1.405,
+              "Mei": 1.411
             },
-            "lowest_energy_attainment": 1.418
+            "lowest_energy_attainment": 1.404
           }
         },
         "shared": {
@@ -487,19 +487,19 @@
               "Kai": 7119,
               "Mei": 7119
             },
-            "servings_cooked": 68.34,
+            "servings_cooked": 66.3,
             "shopping_trips": 1,
-            "dishes": 24,
+            "dishes": 23,
             "distinct_dishes_excluding_staples": 21,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 325.99,
+            "purchase_total_sgd": 296.25,
             "energy_attainment_by_member": {
-              "Ann": 1.394,
-              "Ben": 1.394,
-              "Kai": 1.395,
-              "Mei": 1.401
+              "Ann": 1.461,
+              "Ben": 1.461,
+              "Kai": 1.461,
+              "Mei": 1.468
             },
-            "lowest_energy_attainment": 1.394
+            "lowest_energy_attainment": 1.461
           }
         }
       }
@@ -533,19 +533,19 @@
               "Kai": 7119,
               "Mei": 7119
             },
-            "servings_cooked": 66.3,
+            "servings_cooked": 68.34,
             "shopping_trips": 1,
-            "dishes": 23,
+            "dishes": 24,
             "distinct_dishes_excluding_staples": 21,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 326.54,
+            "purchase_total_sgd": 310.51,
             "energy_attainment_by_member": {
-              "Ann": 1.418,
-              "Ben": 1.418,
-              "Kai": 1.419,
-              "Mei": 1.425
+              "Ann": 1.404,
+              "Ben": 1.404,
+              "Kai": 1.405,
+              "Mei": 1.411
             },
-            "lowest_energy_attainment": 1.418
+            "lowest_energy_attainment": 1.404
           }
         },
         "shared": {
@@ -571,19 +571,19 @@
               "Kai": 7544,
               "Mei": 7119
             },
-            "servings_cooked": 68.34,
+            "servings_cooked": 66.3,
             "shopping_trips": 1,
-            "dishes": 24,
+            "dishes": 23,
             "distinct_dishes_excluding_staples": 21,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 312.5,
+            "purchase_total_sgd": 316.58,
             "energy_attainment_by_member": {
-              "Ann": 1.359,
-              "Ben": 1.359,
-              "Kai": 1.36,
-              "Mei": 1.366
+              "Ann": 1.473,
+              "Ben": 1.473,
+              "Kai": 1.474,
+              "Mei": 1.481
             },
-            "lowest_energy_attainment": 1.359
+            "lowest_energy_attainment": 1.473
           }
         }
       }
@@ -622,14 +622,14 @@
             "dishes": 24,
             "distinct_dishes_excluding_staples": 21,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 232.18,
+            "purchase_total_sgd": 185.92,
             "energy_attainment_by_member": {
-              "Ann": 1.365,
-              "Ben": 1.365,
-              "Kai": 1.366,
-              "Mei": 1.372
+              "Ann": 1.413,
+              "Ben": 1.413,
+              "Kai": 1.414,
+              "Mei": 1.42
             },
-            "lowest_energy_attainment": 1.365
+            "lowest_energy_attainment": 1.413
           }
         },
         "shared": {
@@ -655,19 +655,19 @@
               "Kai": 4718,
               "Mei": 7544
             },
-            "servings_cooked": 65.23,
+            "servings_cooked": 65.0,
             "shopping_trips": 1,
             "dishes": 24,
-            "distinct_dishes_excluding_staples": 21,
-            "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 253.52,
+            "distinct_dishes_excluding_staples": 20,
+            "most_uses_of_one_dish": 2,
+            "purchase_total_sgd": 246.51,
             "energy_attainment_by_member": {
-              "Ann": 1.396,
-              "Ben": 1.58,
-              "Kai": 1.49,
-              "Mei": 1.588
+              "Ann": 1.392,
+              "Ben": 1.526,
+              "Kai": 1.393,
+              "Mei": 1.533
             },
-            "lowest_energy_attainment": 1.396
+            "lowest_energy_attainment": 1.392
           }
         }
       }
@@ -708,16 +708,16 @@
             "dishes": 26,
             "distinct_dishes_excluding_staples": 24,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 347.85,
+            "purchase_total_sgd": 362.24,
             "energy_attainment_by_member": {
-              "Adult 1": 1.501,
-              "Adult 2": 1.501,
-              "Adult 3": 1.501,
-              "Adult 4": 1.501,
-              "Adult 5": 1.501,
-              "Adult 6": 1.501
+              "Adult 1": 1.483,
+              "Adult 2": 1.483,
+              "Adult 3": 1.483,
+              "Adult 4": 1.483,
+              "Adult 5": 1.483,
+              "Adult 6": 1.483
             },
-            "lowest_energy_attainment": 1.501
+            "lowest_energy_attainment": 1.483
           }
         },
         "shared": {
@@ -750,16 +750,16 @@
             "dishes": 27,
             "distinct_dishes_excluding_staples": 24,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 342.38,
+            "purchase_total_sgd": 330.92,
             "energy_attainment_by_member": {
-              "Adult 1": 1.366,
-              "Adult 2": 1.487,
-              "Adult 3": 1.487,
-              "Adult 4": 1.487,
-              "Adult 5": 1.487,
-              "Adult 6": 1.487
+              "Adult 1": 1.364,
+              "Adult 2": 1.531,
+              "Adult 3": 1.531,
+              "Adult 4": 1.531,
+              "Adult 5": 1.531,
+              "Adult 6": 1.531
             },
-            "lowest_energy_attainment": 1.366
+            "lowest_energy_attainment": 1.364
           }
         }
       }
@@ -793,19 +793,19 @@
               "Kai": 2037,
               "Mei": 2037
             },
-            "servings_cooked": 74.46,
+            "servings_cooked": 72.42,
             "shopping_trips": 1,
-            "dishes": 26,
+            "dishes": 25,
             "distinct_dishes_excluding_staples": 21,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 92.41,
+            "purchase_total_sgd": 96.67,
             "energy_attainment_by_member": {
-              "Ann": 1.172,
-              "Ben": 1.172,
-              "Kai": 1.173,
-              "Mei": 1.178
+              "Ann": 1.194,
+              "Ben": 1.194,
+              "Kai": 1.194,
+              "Mei": 1.199
             },
-            "lowest_energy_attainment": 1.172
+            "lowest_energy_attainment": 1.194
           }
         },
         "shared": {
@@ -831,19 +831,19 @@
               "Kai": 7544,
               "Mei": 7544
             },
-            "servings_cooked": 66.58,
+            "servings_cooked": 63.38,
             "shopping_trips": 1,
-            "dishes": 24,
+            "dishes": 22,
             "distinct_dishes_excluding_staples": 21,
             "most_uses_of_one_dish": 1,
-            "purchase_total_sgd": 98.67,
+            "purchase_total_sgd": 84.33,
             "energy_attainment_by_member": {
-              "Ann": 1.32,
-              "Ben": 1.454,
-              "Kai": 1.455,
-              "Mei": 1.461
+              "Ann": 1.323,
+              "Ben": 1.371,
+              "Kai": 1.371,
+              "Mei": 1.377
             },
-            "lowest_energy_attainment": 1.32
+            "lowest_energy_attainment": 1.323
           }
         }
       }
