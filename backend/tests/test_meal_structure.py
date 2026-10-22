@@ -26,6 +26,11 @@ def test_a_longest_plan_needs_at_most_two_shopping_trips(monkeypatch):
         meal_structure.trip_days()
 
 
+def test_max_plan_days_is_the_day_count_limit_of_the_request():
+    limit = next(m.le for m in WeeklyMealPlanRequest.model_fields["day_count"].metadata if hasattr(m, "le"))
+    assert meal_structure.MAX_PLAN_DAYS == limit
+
+
 @pytest.mark.parametrize(("days", "ok"), [(1, True), (14, True), (15, False), (0, False)])
 def test_a_plan_is_one_to_fourteen_days(days, ok):
     for model in (WeeklyMealPlanRequest, HouseholdProfilePlanRequest):

@@ -50,7 +50,7 @@ Closes #
 
 <!-- 与本 PR 同时在 MealCraft-Knowledge 开配对 PR，在下一行写出它的完整链接。没有链接，CI 的 knowledge-record 检查会失败。只有 Dependabot 和原样回退豁免。 -->
 
-Paired knowledge PR: <link>（知识库 PR：）
+知识库 PR：https://github.com/akane321/MealCraft-Knowledge/pull/<编号>
 
 - [ ] 配对的知识库 PR 与本 PR 同时开出，两边互相链接
 - [ ] 任务记录写了思路（Approach and reasoning）：做法、理由、没采用的其他做法
