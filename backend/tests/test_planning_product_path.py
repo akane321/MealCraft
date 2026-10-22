@@ -72,7 +72,7 @@ def test_search_limit_is_not_infeasibility_and_does_not_save_a_plan(recipe_clien
     assert trace["evidence"] == "bounded_search_exhausted"
     assert trace["search"]["exhausted"] is True
     # It says what was searched, never a slow plan to try again (task 15; ADR-0080).
-    assert "searched every combination" in response.text and "longer" not in response.text
+    assert "searched as far as the planner goes" in response.text and "longer" not in response.text
     with database() as session:
         assert session.scalars(select(MealPlan)).all() == []
 

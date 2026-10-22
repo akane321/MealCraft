@@ -53,11 +53,9 @@ jobs:
     # Raised with the shared-dish report, which plans ten households twice (layer 08 PR-4), and again when
     # widening each member's candidates made both evaluations slower: this job ran out of its twenty minutes
     # inside the shared-dish step with everything before it passing. Same budget as `compose`, which does the
-    # same work and finished in 23 minutes. Raised again by task 15: with no cap on a meal's combinations the
-    # full-default report run alone is about 65 minutes on the development machine (seven-with-young-children about
-    # 48, six-tight-budget about 15) and shared-dish about 10 more, and a runner is slower. Planning time has no hard
-    # limit (ADR-0080), so the job gets the time the reports take; 300 stays under GitHub's 360-minute job limit.
-    timeout-minutes: 300
+    # same work and finished in 23 minutes. Kept at 30 after task 15 (2026-10-22): with the combination cap
+    # restored the two reports take about 8 minutes on the development machine (shared-dish 4, full-default 4).
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -206,9 +204,8 @@ jobs:
   compose:
     name: compose
     runs-on: ubuntu-latest
-    # Raised with the shared-dish report, which plans ten households twice (layer 08 PR-4), and by task 15 for the
-    # same reason as `backend` above.
-    timeout-minutes: 300
+    # Raised with the shared-dish report, which plans ten households twice (layer 08 PR-4).
+    timeout-minutes: 30
 
     # The `backend` job runs the suite from a checkout: `<repo>/backend/tests`.
     # CONTRIBUTING.md and AGENTS.md tell contributors to verify through the

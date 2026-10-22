@@ -106,9 +106,7 @@ def test_the_combination_cap_shapes_every_widening_step_but_the_last(monkeypatch
     """Owner, 2026-10-22: the cap is restored as a search-breadth parameter (removing it planned no better and took
     up to hours). A five-role meal under 16,384 keeps 6 dishes a role (6^5 = 7,776), its wider steps two and four
     times that, and the last step every eligible dish, bounded by `LAST_STEP_COMBINATIONS` instead."""
-    sizes, first = role_sizes(
-        monkeypatch, salty_roles(5), MealBeamLimits(max_meal_combinations=16384), (1, 2, 4, None)
-    )
+    sizes, first = role_sizes(monkeypatch, salty_roles(5), MealBeamLimits(max_meal_combinations=16384), (1, 2, 4, None))
     assert sizes == [[6] * 5, [12] * 5, [24] * 5, [45] * 5]
     assert first == 6**5
 
