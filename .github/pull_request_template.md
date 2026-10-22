@@ -10,12 +10,12 @@
 
 <!-- 列出本 PR 包含的内容，以及明确不包含的内容。 -->
 
-## 安全与租户边界
+## 租户边界与凭据
 
-- [ ] 不涉及认证、授权、租户隔离或敏感数据
-- [ ] 涉及上述边界，已说明威胁、权限规则、拒绝行为与测试证据
-- [ ] 私有资源查询在 Repository 层包含 `household_id`
-- [ ] 未记录密码、原始 Token、Cookie、密钥或真实健康数据
+安全与隐私方面不做新增工作（decision ADR-0051），这里只保留已合并行为的底线：
+
+- [ ] 私有资源查询在 Repository 层仍包含 `household_id`（沿用现有做法）
+- [ ] 未提交密码、原始 Token、Cookie、密钥或真实健康数据
 
 ## 迁移、兼容性与回滚
 
@@ -50,7 +50,7 @@ Closes #
 
 <!-- 与本 PR 同时在 MealCraft-Knowledge 开配对 PR，在下一行写出它的完整链接。没有链接，CI 的 knowledge-record 检查会失败。只有 Dependabot 和原样回退豁免。 -->
 
-知识库 PR：
+Paired knowledge PR: <link>（知识库 PR：）
 
 - [ ] 配对的知识库 PR 与本 PR 同时开出，两边互相链接
 - [ ] 任务记录写了思路（Approach and reasoning）：做法、理由、没采用的其他做法

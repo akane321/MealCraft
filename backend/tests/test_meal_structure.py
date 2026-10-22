@@ -11,10 +11,19 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.agent.shape_change import read_shape_change
+from app.data import meal_structure
 from app.data.household_reference import reference_table
 from app.schemas.household import HouseholdProfilePlanRequest, HouseholdReferenceResponse
 from app.schemas.meal_plan import MealPlanShapeChangeRequest, WeeklyMealPlanRequest, default_plan_shape
 from app.services.household import household_planning
+
+
+def test_a_longest_plan_needs_at_most_two_shopping_trips(monkeypatch):
+    # Pricing and budgeting hold two trips (ADR-0072): trip_days must cover half of the longest plan.
+    assert meal_structure.trip_days() >= -(-meal_structure.MAX_PLAN_DAYS // 2)
+    monkeypatch.setattr(meal_structure, "meal_structure", lambda: {"trip_days": 6})
+    with pytest.raises(ValueError, match="third shopping trip"):
+        meal_structure.trip_days()
 
 
 @pytest.mark.parametrize(("days", "ok"), [(1, True), (14, True), (15, False), (0, False)])

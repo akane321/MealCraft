@@ -14,7 +14,7 @@ remaining design gaps.
 
 1. The user saves a versioned household profile containing member servings and
    safety constraints plus shared budget, time, nutrition, and pantry defaults.
-2. The system generates a seven-day meal plan.
+2. The system generates a meal plan of 1 to 14 days (seven by default).
 3. Recipe ingredients are mapped to FairPrice products.
 4. The system produces a grocery list with package quantities and prices.
 5. The user marks planned dishes as consumed.
@@ -25,9 +25,9 @@ remaining design gaps.
 
 ## Included
 
-- Seven-day meal planning
+- Meal planning for 1 to 14 days (the baseline floor was seven days of dinners)
 - Versioned household profile and profile-linked planning
-- Validated 30-recipe reference catalog with normalized ingredients
+- Validated release catalog (v2.1) with normalized ingredients (the baseline floor was a 30-recipe reference catalog)
 - Allergen and prohibited-ingredient constraints
 - Low-sodium, low-sugar, and similar general health preferences
 - Optional user-provided calorie and macronutrient targets
@@ -81,9 +81,12 @@ remaining design gaps.
   affects (decision ADR-0046 section 2). The deterministic planner chooses
   eligible alternatives; the Agent may interpret intent but does not directly
   mutate a plan.
-- Member allergens, prohibited ingredients, and dietary requirements are merged
-  into one shared-plan safety boundary. The current implementation does not generate a separate
-  menu for each member.
+- Planning follows the shared-dish model (decision ADR-0071): a dish is shared,
+  each member keeps their own limits, and every present member has a covered
+  plate at every meal. Allergens stay household-wide by default. See the
+  [User Guide](user-guide.md) for how diets apply to a member's dishes. The
+  earlier baseline merged all member limits into one shared-plan safety
+  boundary.
 - Every profile edit appends an immutable version. Profile-driven plans store the
   exact version and retain the complete effective-constraint snapshot.
 - Replanning after a profile edit creates a new linked replacement week and
