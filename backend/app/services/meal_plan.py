@@ -2,7 +2,7 @@ import time
 from collections import Counter
 from collections.abc import Iterable
 from dataclasses import replace
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from pydantic import ValidationError
@@ -13,6 +13,7 @@ from app.data import meal_structure
 from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
 from app.models.recipe import Recipe
+from app.planning import alternatives
 from app.planning.conflict_explanation import explain_infeasibility, product_explanation
 from app.planning.household_slots import limit_targets, slot_members, widest_time_limit
 from app.planning.meal_beam import EMPTY_OPTIONAL_ROLE_LOSS
@@ -386,6 +387,7 @@ class WeeklyMealPlanService:
         day_indices: list[int] | None = None,
         rest_days: list[int] | None = None,
         _used_elsewhere: Iterable[Recipe] = (),
+        _check_whole_plan=None,
     ) -> list[ScheduledDish]:
         """Dishes for selected days from a saved week, nothing saved (ADR-0046 section 2).
 
@@ -419,17 +421,15 @@ class WeeklyMealPlanService:
         # Compress selected calendar days for the planner, then map its placements back to the saved week.
         partial = constraints.model_copy(update={"start_date": start, "day_count": day_count})
         by_weight = tuple(by_weight)
-        single_trip = constraints.day_count <= meal_structure.trip_days()
         reserved = self.grocery_aggregator.estimate(
             [recipe for recipe, _ in rest],
             constraints,
             shares=[share for _, share in rest],
             by_weight=by_weight,
         )
-        if single_trip:
-            partial = partial.model_copy(
-                update={"available_ingredients": remaining_stock(constraints.available_ingredients, reserved)}
-            )
+        partial = partial.model_copy(
+            update={"available_ingredients": remaining_stock(constraints.available_ingredients, reserved)}
+        )
         meals = meals_of_the_day(partial)
         recipes = pool_for(meals, self.recipe_repository.list_for_planning(courses=pool_courses(meals)))
         recommendations = self.recommendation_service.recommend(
@@ -448,7 +448,7 @@ class WeeklyMealPlanService:
         used = Counter(recipe.id for recipe, _ in rest) + Counter(recipe.id for recipe in _used_elsewhere)
         fresh = [item for item in recommendations if item.recipe.id in keep_ids or item.recipe.id not in used]
         budget = partial.weekly_budget_sgd
-        within = budget is None or budget > 0 or (single_trip and budget == 0) or over_budget is None
+        within = budget is None or budget > 0 or budget == 0 or over_budget is None
         over = partial.model_copy(update={"weekly_budget_sgd": over_budget}) if over_budget is not None else None
         pools = [fresh] + ([recommendations] if len(fresh) < len(recommendations) else [])
         # Each step in turn; the first that finds a plan gives it. Within the budget, dishes the week does not
@@ -503,7 +503,7 @@ class WeeklyMealPlanService:
                         plan_days=planned_days,
                         plan_day_count=constraints.day_count,
                     )
-                    if hard and budget is not None and single_trip:
+                    if hard and budget is not None:
                         whole = basket(candidate)
                         ceiling = round(reserved.purchase_total_sgd * 100) + round(budget * 100)
                         if (
@@ -516,6 +516,10 @@ class WeeklyMealPlanService:
                                 "The changed dishes do not fit the whole week's checkout budget.",
                                 {},
                             )
+                    if hard and _check_whole_plan is not None and not _check_whole_plan(candidate):
+                        raise ProductPlanningError(
+                            "no_feasible_plan", "The change increases another shopping week beyond its budget.", {}
+                        )
                     found.append(candidate)
                 except ProductPlanningError as error:
                     failure = error
@@ -587,6 +591,45 @@ class WeeklyMealPlanService:
                 if left is not None and left < 0 and over_budget is None:
                     raise ProductPlanningError("no_feasible_plan", "This shopping week already exceeds its budget.", {})
                 elsewhere = prior_recipes + [r for (r, _), day in zip(rest, rest_days, strict=True) if day > end]
+                def estimate_whole(candidate=None):
+                    ids = [dish.recommendation.recipe.id for dish in output]
+                    if candidate is not None:
+                        ids += [item.recipe.id for item in candidate.selected]
+                    catalog = {r.id: r for r in self.recipe_repository.list_by_ids(ids)}
+                    all_recipes = [r for r, _ in rest] + [catalog[d.recommendation.recipe.id] for d in output]
+                    all_shares = [share for _, share in rest] + [
+                        float(d.portion_share if d.servings is None else d.servings / constraints.household_size)
+                        for d in output
+                    ]
+                    all_days = list(rest_days) + [d.day_index for d in output]
+                    if candidate is not None:
+                        all_recipes += [catalog[item.recipe.id] for item in candidate.selected]
+                        all_shares += [float(p[3] if p[4] is None else p[4] / constraints.household_size)
+                                       for p in candidate.placements]
+                        all_days += [changed[p[0]] + offset for p in candidate.placements]
+                    return self.grocery_aggregator.estimate(
+                        all_recipes, constraints, shares=all_shares, by_weight=by_weight,
+                        trips=[1 + (day - 1) // interval for day in all_days],
+                    )
+
+                def trip_costs(basket):
+                    costs = Counter()
+                    for line in basket.items:
+                        costs[line.shopping_trip or 1] += round(line.purchase_cost_sgd * 100)
+                    return costs
+
+                baseline = trip_costs(estimate_whole())
+
+                def check_whole_plan(candidate):
+                    if budget is None:
+                        return True
+                    basket = estimate_whole(candidate)
+                    costs = trip_costs(basket)
+                    # Do not blame an untouched pre-existing overrun. But an indirect increase
+                    # caused by spending its stock must pass the same budget check as an edit.
+                    affected = {1 + offset // interval} | {t for t in costs if costs[t] > baseline[t]}
+                    return basket.complete and all(costs[t] <= round(budget * 100) for t in affected)
+
                 selected = self.plan_dishes(
                     request.model_copy(update={"weekly_budget_sgd": left}),
                     first_day=min(changed),
@@ -601,6 +644,7 @@ class WeeklyMealPlanService:
                     over_budget=(None if over_budget is None else round(over_budget * len(changed) / len(days), 2)),
                     by_weight=by_weight,
                     _used_elsewhere=elsewhere,
+                    _check_whole_plan=check_whole_plan,
                 )
                 output.extend(replace(dish, day_index=dish.day_index + offset) for dish in selected)
             added = self.recipe_repository.list_by_ids([dish.recommendation.recipe.id for dish in selected])
@@ -611,7 +655,7 @@ class WeeklyMealPlanService:
                 for dish in selected
             ]
             full = self.grocery_aggregator.estimate(recipes, request, shares=shares, by_weight=by_weight)
-            if over_budget is None and request.weekly_budget_sgd is not None:
+            if changed and over_budget is None and request.weekly_budget_sgd is not None:
                 if not full.complete or round(full.purchase_total_sgd * 100) > round(request.weekly_budget_sgd * 100):
                     raise ProductPlanningError(
                         "no_feasible_plan", "The changed plan does not fit each shopping week's checkout budget.", {}
@@ -727,7 +771,7 @@ class WeeklyMealPlanService:
         # In the order they are eaten: by day, then breakfast, lunch, dinner. Entries are stored by day and
         # id, so a lunch added to a dinner week would otherwise come after that day's dinner.
         eaten = sorted(plan.entries, key=lambda entry: (entry.day_index, _meal_rank(entry.meal_type), entry.id))
-        at_meal = self._plan_members(plan)
+        not_for = self._not_for(plan)
         for entry in eaten:
             nutrition = self._entry_nutrition(entry)
             counts[entry.status] += 1
@@ -749,11 +793,7 @@ class WeeklyMealPlanService:
                     meal_type=entry.meal_type,
                     role_id=entry.role_id,
                     portion_share=float(entry.portion_share),
-                    not_for=[
-                        member.name
-                        for member in at_meal.get((entry.planned_date, entry.meal_type), ())
-                        if not catalog_can_eat(member, entry.recipe)
-                    ],
+                    not_for=not_for(entry),
                 )
             )
 
@@ -774,22 +814,36 @@ class WeeklyMealPlanService:
         )
 
     @staticmethod
-    def _plan_members(plan: MealPlan) -> dict[tuple[date, str], list]:
-        """The members home for each (date, meal) of a saved week, with their own limits, read from the week's
-        own household block. Empty for a week planned without one (ADR-0071 section 1)."""
+    def _not_for(plan: MealPlan):
+        """`not_for(entry)`: the members home for that entry's meal who cannot eat its dish, by name, read from the
+        week's own household block (ADR-0071 section 1). Nobody for a week planned without one.
+
+        An "A or B" line is judged by the option this household cooks (`alternatives.lines`), as the planner judged
+        it: a dish made with turkey for a member who avoids beef is counted in that member's servings, so it is not
+        labelled "Not for" them."""
         try:
-            household = WeeklyMealPlanRequest.model_validate(plan.constraints).household
+            request = WeeklyMealPlanRequest.model_validate(plan.constraints)
         except ValidationError:
-            return {}
+            return lambda entry: []
+        household = request.household
         if household is None or household.members is None:
-            return {}
+            return lambda entry: []
         keys = {(entry.planned_date, entry.meal_type) for entry in plan.entries}
-        return {key: slot_members(household, *key, None) for key in keys}
+        at_meal = {key: slot_members(household, *key, None) for key in keys}
+        cooked: dict[int, list] = {}
+
+        def not_for(entry) -> list[str]:
+            members = at_meal.get((entry.planned_date, entry.meal_type), ())
+            if members and entry.recipe.id not in cooked:
+                cooked[entry.recipe.id] = alternatives.lines(entry.recipe, request)
+            return [m.name for m in members if not catalog_can_eat(m, entry.recipe, cooked[entry.recipe.id])]
+
+        return not_for
 
     @staticmethod
     def _to_response(plan: MealPlan) -> WeeklyMealPlanResponse:
         days: list[WeeklyPlanDayResponse] = []
-        at_meal = WeeklyMealPlanService._plan_members(plan)
+        not_for = WeeklyMealPlanService._not_for(plan)
         totals = {
             "calories_kcal": 0.0,
             "protein_g": 0.0,
@@ -820,11 +874,7 @@ class WeeklyMealPlanService:
                     status=entry.status,
                     is_locked=entry.is_locked,
                     consumed_at=WeeklyMealPlanService._as_utc(entry.consumed_at),
-                    not_for=[
-                        member.name
-                        for member in at_meal.get((entry.planned_date, entry.meal_type), ())
-                        if not catalog_can_eat(member, entry.recipe)
-                    ],
+                    not_for=not_for(entry),
                 )
             )
 

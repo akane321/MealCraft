@@ -1157,15 +1157,15 @@ class MealPlanReplanningService:
         core = core_role(roles)
         if core is not None and entry.role_id == core.role_id and fills_staple(candidate) != fills_staple(entry.recipe):
             return False
+        mains = [item.recipe for item in others if role_base(item.role_id) == "main"]
         if role_base(entry.role_id) == "main":
-            taken = {
-                source
-                for item in others
-                if role_base(item.role_id) == "main"
-                for source in getattr(item.recipe, "protein_sources", None) or []
-            }
-            if taken & set(getattr(candidate, "protein_sources", None) or []):
+            mains.append(candidate)
+        taken = set()
+        for main in mains:
+            sources = getattr(main, "protein_sources", None)
+            if sources is None or taken.intersection(sources):
                 return False
+            taken.update(sources)
         # With members at the table each one's own floor is checked instead (`_coverage_holds`).
         share = None if members_present else meal_structure.energy_floor_share(entry.meal_type)
         if share and candidate.nutrition is not None:

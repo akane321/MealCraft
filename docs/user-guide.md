@@ -152,12 +152,14 @@ week** plans every chosen meal of the seven days. A plan from the household
 profile may be 1 to 14 days long (**Days to plan**, beside the plan button on
 the Household page). A plan longer than a week shops twice: before
 day 1 and before day 8, with the weekly budget holding on each trip. Leafy
-greens, bean sprouts and pea shoots, fresh fish and fresh shellfish are cooked
-within 3 days of the trip they are bought on, and the shopping list marks them
+greens and sprouts (including bean, pea and radish sprouts), fresh fish and fresh
+seafood (including shellfish, squid, octopus and seafood mixes) are cooked within
+3 days of the trip they are bought on. Frozen, dried, smoked and canned forms
+are excluded from this short-lived class. The shopping list marks the fresh items
 "Use within 3 days".
 
 Most plans take a few seconds. A large household on a tight budget takes longer,
-up to about a minute, while the planner searches for a week that fits the
+a few minutes, while the planner searches for a week that fits the
 budget; the button says "Planning…" until the plan is ready. How long is
 acceptable follows how hard the request is: a simple week comes back quickly, a
 complex one is allowed the longer wait rather than being cut short.
@@ -190,7 +192,8 @@ and the new dish is cooked for the people who can eat it.
 ### 4. Nutrition and the shopping list
 
 The **Groceries** tab shows the total against the weekly budget. Perishable
-items (leafy greens, bean sprouts and pea shoots, fresh fish and fresh shellfish)
+items (leafy greens and sprouts, fresh fish and seafood, including squid, octopus
+and seafood mixes; not frozen, dried, smoked or canned forms)
 are marked **Use within 3 days**: the planner cooks them within three days of the shopping trip
 that buys them, and assumes everything else keeps until its day. In a plan
 longer than a week the list is split by trip, under **Shop before day 1** and

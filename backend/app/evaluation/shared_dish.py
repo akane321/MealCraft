@@ -532,18 +532,13 @@ def evaluate() -> tuple[dict, dict]:
     catalog = {"scenario": {"recipe_candidate_slugs": slugs}}
     seconds: dict[str, dict[str, float]] = {}
     results = []
-    product_seconds = product_path.VARIETY_PASS_SECONDS
     with product_database(catalog) as factory, factory() as session:
         plans = build_meal_plan_service(session, HOUSEHOLD_ID)
         facts = _facts(session)
         for case in CASES:
             runs, timings = [], {}
             for arrangement in ("merged", "shared"):
-                product_path.VARIETY_PASS_SECONDS = float("inf")  # plans independent of the machine
-                try:
-                    run, taken = run_case(plans, case, arrangement, facts)
-                finally:
-                    product_path.VARIETY_PASS_SECONDS = product_seconds
+                run, taken = run_case(plans, case, arrangement, facts)
                 runs.append(run)
                 timings[arrangement] = round(taken, 2)
             seconds[case["case"]] = timings
@@ -670,6 +665,40 @@ def markdown(report: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+# Why the shared arrangement takes as long as it does, from a cProfile of one product run of each case (task 14,
+# 2026-10-21). Every case here is past the quick figure, so each gets a cause (ADR-0079 section 4); a case not named
+# in SLOW_CAUSES has the common one. Rewrite an entry whenever a change moves its time.
+COMMON_CAUSE = (
+    "one beam search, which builds each meal's dish combinations and checks every one as a real meal "
+    "(`meal_beam._meal_options` -> `meal_permitted` -> `real_meal_issues`): 40-75% of the run, a third to a half of "
+    "it `member_coverage.member_can_eat` asked again for every member, dish and combination with nothing cached per "
+    "member and recipe. Reading the candidates takes about 2.5 s, and topping the packet up for every member group "
+    "(`product_path._packet_covering`, each ranked dish judged by the option this household cooks) about as long"
+)
+SLOW_CAUSES = {
+    "tight-budget": (
+        "four beam searches and sixteen variety starts: no week the ranked search keeps is filled with no dish twice "
+        "under its budget, so the three budget-led searches (`product_path.limit_led`, about 14% of the run) and "
+        "the variety pass (`meal_beam.vary_within_budget`, about 72%) both run. Every swap the variety pass tries "
+        "checks the meal's coverage again, so `member_can_eat` alone is about 35% (7.0 million calls). Upgrade "
+        "path: cache the member checks per member and recipe, and share the meal checks between the four searches"
+    ),
+}
+
+
+# The last widening step of a meal's options (`meal_beam.MEAL_OPTION_WIDENING`, None) ran in no case above. Timed
+# alone by forcing it on every slot of `mixed-diets`, shared (task 14 review, 2026-10-21). Rewrite on a change to it.
+LAST_STEP_TIMING = (
+    "The last widening step of a meal's options (`meal_beam.MEAL_OPTION_WIDENING`, every eligible dish of every "
+    "role) ran in no case above. Forced on every slot of `mixed-diets` (shared) it checked 177 combinations for a "
+    "breakfast in 0.01 s and 32,549 for a three-role lunch in 2.1 s. A five-role dinner, a raw product of about "
+    "2e10 combinations (about 3 µs each, so hours unbounded), stopped at its budget of "
+    "`meal_beam.LAST_STEP_COMBINATIONS` (262,144) in 0.35 s. Those were the top-ranked dishes of its first roles "
+    "with every dish of the rest, and none made a meal, so forced alone that dinner would be refused, as the "
+    "four-times step refused such a slot before."
+)
+
+
 def timing_markdown(seconds: dict[str, dict[str, float]]) -> str:
     rows = [
         f"| `{case}` | {taken['merged']} | {taken['shared']} | {BAND_LABEL[timing_band(taken['shared'])]} |"
@@ -682,8 +711,8 @@ def timing_markdown(seconds: dict[str, dict[str, float]]) -> str:
             "# Shared dishes: wall time",
             "",
             "> Wall time on the machine that generated it, so it differs by machine and is kept out of "
-            "`latest.*`. These runs let the variety pass finish instead of cutting it at its two seconds, so "
-            "the plans do not depend on the machine; the product cuts it, and takes correspondingly less. "
+            "`latest.*`. The variety pass always runs every start (ADR-0080), so the plans do not depend on "
+            "the machine. "
             "ADR-0079 sets how long is acceptable by how hard the request is: a simple request should still "
             f"come back within about {QUICK_SECONDS:g} s, and every household here has members with their own "
             f"limits, so these are the complex requests it allows up to about {OVER_SECONDS:g} s. Only past "
@@ -698,6 +727,17 @@ def timing_markdown(seconds: dict[str, dict[str, float]]) -> str:
             "| Case | merged (s) | shared (s) | Against the ADR-0079 guidance |",
             "|---|---:|---:|:---|",
             *rows,
+            "",
+            *[
+                line
+                for case, taken in seconds.items()
+                if timing_band(taken["shared"]) != "quick"
+                for line in (
+                    f"- `{case}` ({BAND_LABEL[timing_band(taken['shared'])]}): {SLOW_CAUSES.get(case, COMMON_CAUSE)}.",
+                    "",
+                )
+            ],
+            LAST_STEP_TIMING,
             "",
         ]
     )
