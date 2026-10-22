@@ -53,9 +53,10 @@ jobs:
     # Raised with the shared-dish report, which plans ten households twice (layer 08 PR-4), and again when
     # widening each member's candidates made both evaluations slower: this job ran out of its twenty minutes
     # inside the shared-dish step with everything before it passing. Same budget as `compose`, which does the
-    # same work and finished in 23 minutes. Kept at 30 after task 15 (2026-10-22): with the combination cap
-    # restored the two reports take about 8 minutes on the development machine (shared-dish 4, full-default 4).
-    timeout-minutes: 30
+    # same work and finished in 23 minutes. Kept at 30 after task 15 on the development machine's 8 minutes, but
+    # hosted runners are several times slower: on main after task 15 `compose` was cancelled at 30 minutes, and the
+    # backend job took 26. Planning time has no hard limit (ADR-0080), so the jobs get room to finish.
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
@@ -204,8 +205,9 @@ jobs:
   compose:
     name: compose
     runs-on: ubuntu-latest
-    # Raised with the shared-dish report, which plans ten households twice (layer 08 PR-4).
-    timeout-minutes: 30
+    # Raised with the shared-dish report, which plans ten households twice (layer 08 PR-4), and to 60 when main
+    # after task 15 was cancelled at 30 minutes inside the evaluation steps (see `backend`).
+    timeout-minutes: 60
 
     # The `backend` job runs the suite from a checkout: `<repo>/backend/tests`.
     # CONTRIBUTING.md and AGENTS.md tell contributors to verify through the
