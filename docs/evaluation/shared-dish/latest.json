@@ -43,6 +43,7 @@
             "shopping_trips": 1,
             "dishes": 59,
             "distinct_dishes_excluding_staples": 49,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 559.57,
             "energy_attainment_by_member": {
               "Ann": 1.499,
@@ -80,6 +81,7 @@
             "shopping_trips": 1,
             "dishes": 55,
             "distinct_dishes_excluding_staples": 47,
+            "most_uses_of_one_dish": 2,
             "purchase_total_sgd": 535.59,
             "energy_attainment_by_member": {
               "Ann": 1.5,
@@ -123,6 +125,7 @@
             "shopping_trips": 2,
             "dishes": 75,
             "distinct_dishes_excluding_staples": 60,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 680.49,
             "energy_attainment_by_member": {
               "Lin": 1.471,
@@ -156,6 +159,7 @@
             "shopping_trips": 2,
             "dishes": 64,
             "distinct_dishes_excluding_staples": 60,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 644.5,
             "energy_attainment_by_member": {
               "Lin": 1.509,
@@ -198,6 +202,7 @@
             "shopping_trips": 1,
             "dishes": 26,
             "distinct_dishes_excluding_staples": 21,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 306.08,
             "energy_attainment_by_member": {
               "Ann": 1.448,
@@ -233,6 +238,7 @@
             "shopping_trips": 1,
             "dishes": 26,
             "distinct_dishes_excluding_staples": 21,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 276.49,
             "energy_attainment_by_member": {
               "Ann": 1.424,
@@ -277,6 +283,7 @@
             "shopping_trips": 1,
             "dishes": 59,
             "distinct_dishes_excluding_staples": 49,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 536.55,
             "energy_attainment_by_member": {
               "Ann": 1.499,
@@ -314,6 +321,7 @@
             "shopping_trips": 1,
             "dishes": 55,
             "distinct_dishes_excluding_staples": 47,
+            "most_uses_of_one_dish": 2,
             "purchase_total_sgd": 527.27,
             "energy_attainment_by_member": {
               "Ann": 1.5,
@@ -359,6 +367,7 @@
             "shopping_trips": 1,
             "dishes": 59,
             "distinct_dishes_excluding_staples": 50,
+            "most_uses_of_one_dish": 2,
             "purchase_total_sgd": 622.51,
             "energy_attainment_by_member": {
               "Ann": 1.507,
@@ -397,6 +406,7 @@
             "shopping_trips": 1,
             "dishes": 57,
             "distinct_dishes_excluding_staples": 50,
+            "most_uses_of_one_dish": 2,
             "purchase_total_sgd": 567.2,
             "energy_attainment_by_member": {
               "Ann": 1.546,
@@ -443,6 +453,7 @@
             "shopping_trips": 1,
             "dishes": 24,
             "distinct_dishes_excluding_staples": 21,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 310.51,
             "energy_attainment_by_member": {
               "Ann": 1.404,
@@ -480,6 +491,7 @@
             "shopping_trips": 1,
             "dishes": 23,
             "distinct_dishes_excluding_staples": 21,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 296.25,
             "energy_attainment_by_member": {
               "Ann": 1.461,
@@ -525,6 +537,7 @@
             "shopping_trips": 1,
             "dishes": 24,
             "distinct_dishes_excluding_staples": 21,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 310.51,
             "energy_attainment_by_member": {
               "Ann": 1.404,
@@ -562,6 +575,7 @@
             "shopping_trips": 1,
             "dishes": 23,
             "distinct_dishes_excluding_staples": 21,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 316.58,
             "energy_attainment_by_member": {
               "Ann": 1.473,
@@ -607,6 +621,7 @@
             "shopping_trips": 1,
             "dishes": 24,
             "distinct_dishes_excluding_staples": 21,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 185.92,
             "energy_attainment_by_member": {
               "Ann": 1.413,
@@ -644,6 +659,7 @@
             "shopping_trips": 1,
             "dishes": 24,
             "distinct_dishes_excluding_staples": 20,
+            "most_uses_of_one_dish": 2,
             "purchase_total_sgd": 246.51,
             "energy_attainment_by_member": {
               "Ann": 1.392,
@@ -691,6 +707,7 @@
             "shopping_trips": 1,
             "dishes": 26,
             "distinct_dishes_excluding_staples": 24,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 362.24,
             "energy_attainment_by_member": {
               "Adult 1": 1.483,
@@ -732,6 +749,7 @@
             "shopping_trips": 1,
             "dishes": 27,
             "distinct_dishes_excluding_staples": 24,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 330.92,
             "energy_attainment_by_member": {
               "Adult 1": 1.364,
@@ -779,6 +797,7 @@
             "shopping_trips": 1,
             "dishes": 25,
             "distinct_dishes_excluding_staples": 21,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 96.67,
             "energy_attainment_by_member": {
               "Ann": 1.194,
@@ -816,6 +835,7 @@
             "shopping_trips": 1,
             "dishes": 22,
             "distinct_dishes_excluding_staples": 21,
+            "most_uses_of_one_dish": 1,
             "purchase_total_sgd": 84.33,
             "energy_attainment_by_member": {
               "Ann": 1.323,

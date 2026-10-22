@@ -6,11 +6,11 @@ Machine: Intel64 Family 6 Model 198 Stepping 2, GenuineIntel (Windows). The code
 
 | Case | Report run (s) | Warm median (s) | Warm max (s) | Against the ADR-0079 guidance |
 |---|---:|---:|---:|---|
-| one-adult | 6.45 | 4.15 | 4.62 | within the guidance for a complex request |
-| four-with-vegetarian | 19.39 | 19.22 | 19.27 | within the guidance for a complex request |
-| six-tight-budget | 136.07 | 136.98 | 138.35 | over ~60 s |
-| two-no-oven-ten-days | 5.62 | 5.2 | 5.57 | within the guidance for a complex request |
-| seven-with-young-children | 8.86 | 9.24 | 11.78 | within the guidance for a complex request |
+| one-adult | 6.44 | 4.3 | 4.73 | within the guidance for a complex request |
+| four-with-vegetarian | 19.21 | 19.15 | 19.28 | within the guidance for a complex request |
+| six-tight-budget | 136.78 | 136.13 | 138.51 | over ~60 s |
+| two-no-oven-ten-days | 5.7 | 5.65 | 5.92 | within the guidance for a complex request |
+| seven-with-young-children | 37.48 | 37.9 | 41.55 | within the guidance for a complex request |
 
 Over ~60 s: six-tight-budget.
 
@@ -22,4 +22,4 @@ Over ~60 s: six-tight-budget.
 
 - `two-no-oven-ten-days` (within the guidance for a complex request): one beam search over ten days and two shopping trips, about two-thirds of the run; building each meal's dish combinations and checking every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `meal_composition.real_meal_issues`) is about 42%, and reading the candidates about 15%; the plan has 30 slots of combinations to build.
 
-- `seven-with-young-children` (within the guidance for a complex request): one beam search, 80% of the run, over seven-dish dinners for a household of seven; building each meal's dish combinations and checking every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `meal_composition.real_meal_issues`) is about 69%, and `member_coverage.member_can_eat` (asked again for every member, dish and combination, with nothing cached per member and recipe) about 37%.
+- `seven-with-young-children` (within the guidance for a complex request): one beam search, about 97% of the run, over seven-dish dinners for a household of seven. Since task 15 (2026-10-22) the combination cap's root per role is exact, so each of a dinner's seven roles keeps four dishes instead of three (`int(16384 ** (1 / 7))` gave three; 4^7 is 16,384): up to 16,384 combinations a dinner instead of 2,187, and the run went from about 9 s to about 36 s. In a profiled warm run of 2026-10-22 building each meal's dish combinations and checking every one as a real meal (`meal_beam._meal_options` -> `meal_permitted` -> `meal_composition.real_meal_issues`) is about 96%, and `member_coverage.member_can_eat` (asked again for every member, dish and combination, with nothing cached per member and recipe) about 49% (8.5 million calls). Upgrade path, none of it changing a plan: cache the member checks per member and recipe, and a recipe's meal role.

@@ -195,24 +195,24 @@ Two adults, three toddlers and two children: seven at the table on about 4.8 por
 |---|---:|
 | Meals | 21 |
 | Dishes | 74 |
-| Distinct dishes (staples aside) | 57 |
-| Cuisine groups per lunch or dinner | 2.14 |
+| Distinct dishes (staples aside) | 58 |
+| Cuisine groups per lunch or dinner | 1.86 |
 | Meals with two deep-fried dishes | 0 |
 | Energy floor pass rate | 1.0 |
-| Grocery lines by trip | {'None': 110} |
-| Purchase total (SGD) | 739.2 |
+| Grocery lines by trip | {'None': 100} |
+| Purchase total (SGD) | 687.91 |
 
-Staples: Assyrian Rice, Brazilian Rice, Claudia Roden's Basic Couscous, Easy Round Italian Bread, Indian Restaurant Style Basmati Rice, Mama D's Italian Bread, Super Easy Naan Bread.
+Staples: Assyrian Rice, Brazilian Rice, Easy Round Italian Bread, Indian Chapati Bread, Super Easy Naan Bread.
 
-Moves: day 5 dinner: main left out.
+Moves: none.
 
 | Day | Breakfast | Lunch | Dinner |
 |---|---|---|---|
-| 1 Sun | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Marinated Velveted Chicken For Stir-Fry + Sweet And Sour Cucumbers + Assyrian Rice (staple) | Caribbean Barbecue + Honey Teriyaki Salmon + Pizza Cheesy Chicken + Grilled Parmesan Tomatoes + Korean Bean Sprout Salad + Quick gazpacho + Assyrian Rice (staple) |
-| 2 Mon | Sunrise Taco | Indonesian Fried Rice + Fresh Pesto And Tomato Salad | Great Chicken + Salmon Yakitori + Thai-Style Omelet (Khai Jiao) + Easy Kimchi Slaw + Sigumchi Namul (Korean Spinach Salad Kimchi) + Gazpacho (Spanish Cold Soup) + Brazilian Rice (staple) |
-| 3 Tue | Feta Omelet | Microwave Shrimp Scampi + English Pea Salad + Assyrian Rice (staple) | Pizza Cheesy Chicken + Vietnamese Garlic Beef + Steamed Thai Mussels + Fried Green Tomatoes + Stir-Fried Cabbage + Gazpacho + Easy Round Italian Bread (staple) |
-| 4 Wed | Thai Omelette | Mexican Chicken (Low-Fat) + Cuban Cucumber Salad + Assyrian Rice (staple) | Broiled Tuna Teriyaki + Shredded Beef For Tacos Or Burritos + Japanese Ginger Pork (Shogayaki) + Jim's Raita + Broccoli Salad + Instant Pot Curry Ginger Squash Soup + Indian Restaurant Style Basmati Rice (staple) |
-| 5 Thu | The Egyptian Eye | Thai Beef + Chinese Ginger Garlic Asparagus + Super Easy Naan Bread (staple) | Kimchi Chahan (Fried Rice) + Slow Cooker Chicken Tikka Masala (Weight Watchers) + Grilled Parmesan Tomatoes + Cucumber Raita + Tomato Dumplings |
-| 6 Fri | Banana Couscous | Bul-Ko-Kee (Korean Barbecue Beef) + Greek Salad Iv + Assyrian Rice (staple) | Korean Barbecued Beef + Jamaican Rubbed Chops + Pizza Cheesy Chicken + Teriyaki Snow Peas And Mushrooms + English Pea Salad + Chinese Egg Flower Soup + Mama D's Italian Bread (staple) |
-| 7 Sat | Easy Mexican Omelet | Beef Stir Fry With Tri-Colored Peppers + Szechuan Broccoli (Chinese) + Assyrian Rice (staple) | Salsa Chicken + Thai-Style Omelet (Khai Jiao) + Miso Beef + Thai Sweet-Garlicky Cauliflower With Red Pepper Strips + French Vinaigrette Slaw + Quick gazpacho + Claudia Roden's Basic Couscous (staple) |
+| 1 Sun | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Marinated Velveted Chicken For Stir-Fry + Sweet And Sour Cucumbers + Assyrian Rice (staple) | Great Chicken + Thai-Style Omelet (Khai Jiao) + Thai Barbecued Salmon + Italian Tomatoes + Grilled Parmesan Tomatoes + Quick gazpacho + Assyrian Rice (staple) |
+| 2 Mon | Feta Omelet | Indonesian Fried Rice + Fresh Pesto And Tomato Salad | Scallops Scampi + Pizza Cheesy Chicken + Flank Steak Teriyaki + Japanese Salad + Korean Bean Sprout Salad + Gazpacho (Spanish Cold Soup) + Easy Round Italian Bread (staple) |
+| 3 Tue | Sunrise Taco | Microwave Shrimp Scampi + English Pea Salad + Assyrian Rice (staple) | Broiled Tuna Teriyaki + Grilled Orange Chicken On The George Foreman Grill + Shrimp Teriyaki + Simple Mexican Coleslaw + Greek Salad Iv + Eunah's Korean-Style Seaweed Soup + Indian Chapati Bread (staple) |
+| 4 Wed | Thai Omelette | Mexican Chicken (Low-Fat) + Broccoli Salad + Assyrian Rice (staple) | Teriyaki Chicken + Kalbi-Style Short Ribs + Broiled Tuna Teriyaki + Creole Green Beans + Cuban Cucumber Salad + Korean Dumpling Soup + Brazilian Rice (staple) |
+| 5 Thu | The Egyptian Eye | Thai Beef + Jim's Raita + Super Easy Naan Bread (staple) | Chinese Fried Rice + Crock Pot Beef And Broccoli + Salsa Chicken + Elotes + English Pea Salad + Tomato Dumplings |
+| 6 Fri | Banana Couscous | Bul-Ko-Kee (Korean Barbecue Beef) + Feta Cucumber Salad + Assyrian Rice (staple) | Fried Rice + Mexican Chicken (Low-Fat) + Beef Stir Fry With Tri-Colored Peppers + Mediterranean Green Beans (Lo-Fat) + Indian Cucumber Salad + Gazpacho |
+| 7 Sat | Easy Mexican Omelet | Bento Chicken Teriyaki + Szechuan Broccoli (Chinese) + Assyrian Rice (staple) | Pizza Cheesy Chicken + Thai Sesame Beef + Thai-Style Omelet (Khai Jiao) + Sauerkraut Salad + Grilled Parmesan Tomatoes + Gazpacho Soup + Super Easy Naan Bread (staple) |
 
