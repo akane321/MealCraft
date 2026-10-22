@@ -411,7 +411,8 @@ class FinalPlanningProblem(BaseModel):
     dietary_requirements: list[str] = Field(default_factory=list)
     health_preferences: list[Literal["low-sodium", "low-sugar", "lower-calorie"]] = Field(default_factory=list)
     nutrition_bands: list[PlanningNutritionBand] = Field(default_factory=list)
-    purchase_budget_sgd: float | None = Field(default=None, gt=0)
+    # A partial replan can have no money left while reserved stock covers every dish.
+    purchase_budget_sgd: float | None = Field(default=None, ge=0)
     budget_is_hard: bool = True
     preference_weights: PlanningPreferenceWeights = Field(default_factory=PlanningPreferenceWeights)
     # None preserves legacy packets; it does not certify P3 diversity coverage.
