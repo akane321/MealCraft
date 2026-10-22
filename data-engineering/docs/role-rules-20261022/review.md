@@ -2,7 +2,7 @@
 
 Generated with `data-engineering/scripts/role_rules_review.py`. No row is human-verified by this tool. Frozen model values and review flags are unchanged.
 
-Base: `31ece866beaf4bef0c53b53def07b7e8aaf16917`. Random sample seed: 20261022. Non-frozen rule-owned changes: 27. Rule-owned updates within the frozen batch: 14. Frozen suggestions: 422. Deferred bean sides: 15.
+Baseline revision is recorded in review.json. Random sample seed: 20261022. Non-frozen rule-owned changes: 27. Rule-owned updates within the frozen batch: 14. Frozen suggestions: 422. Deferred bean sides: 15.
 
 The specific 109 IDs have not been supplied; the complete frozen batch is included below. Do not interpret a suggested role or an allowed role as review/acceptance.
 

@@ -309,7 +309,8 @@ def main():
         "Generated with `data-engineering/scripts/role_rules_review.py`. "
         "No row is human-verified by this tool. Frozen model values and review flags are unchanged.",
         "",
-        f"Base: `{args.base}`. Random sample seed: {SEED}. Non-frozen rule-owned changes: {len(changed)}. "
+        f"Baseline revision is recorded in review.json. Random sample seed: {SEED}. "
+        f"Non-frozen rule-owned changes: {len(changed)}. "
         f"Rule-owned updates within the frozen batch: {len(frozen_rule_changes)}. "
         f"Frozen suggestions: {len(suggestions)}. Deferred bean sides: {len(beans)}.",
         "",
