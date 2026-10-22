@@ -126,20 +126,6 @@ class AuthSessionPublic(BaseModel):
     user_agent: str | None
 
 
-class HouseholdCreateRequest(BaseModel):
-    name: str = Field(min_length=1, max_length=120)
-
-
-class HouseholdMembershipPublic(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    household_id: int
-    user_id: int
-    role: HouseholdRoleValue
-    status: MembershipStatus
-    joined_at: datetime
-
-
 class CurrentActor(BaseModel):
     user: AccountPublic
     active_household_id: int | None
@@ -154,32 +140,3 @@ class AuthenticationResponse(BaseModel):
 
 class AuthSessionCollectionResponse(BaseModel):
     items: list[AuthSessionPublic]
-
-
-class AuthenticationMessageResponse(BaseModel):
-    detail: str
-
-
-class OperationRunEnvelope(BaseModel):
-    trace_id: str = Field(min_length=1, max_length=80)
-    run_type: str = Field(min_length=1, max_length=60)
-    status: OperationStatus
-    input_digest: str | None = Field(default=None, min_length=64, max_length=64)
-    code_commit: str | None = Field(default=None, max_length=64)
-    catalog_version: str | None = Field(default=None, max_length=120)
-    product_snapshot_version: str | None = Field(default=None, max_length=120)
-    policy_version: str | None = Field(default=None, max_length=120)
-    algorithm_version: str | None = Field(default=None, max_length=120)
-    provider_mode: str | None = Field(default=None, max_length=30)
-    warnings: list[str] = Field(default_factory=list)
-    artifact_references: list[dict] = Field(default_factory=list)
-    error_code: str | None = Field(default=None, max_length=120)
-
-
-class AuditEventWrite(BaseModel):
-    action: str = Field(min_length=1, max_length=120)
-    target_type: str = Field(min_length=1, max_length=80)
-    target_id: str | None = Field(default=None, max_length=160)
-    before_digest: str | None = Field(default=None, min_length=64, max_length=64)
-    after_digest: str | None = Field(default=None, min_length=64, max_length=64)
-    metadata: dict = Field(default_factory=dict)

@@ -1,8 +1,8 @@
 # MealCraft Data Engineering
 
 本目录把大型但不完整的 RecipeNLG 原始食谱，转换成 MealCraft 可使用、可审计、可继续补充营养和
-超市商品信息的数据层，并切出版本化 release。Release 目前**尚未导入**运行时目录
-（`data/recipes/recipes.json`）；导入进度见 `docs/current-status.md`。
+超市商品信息的数据层，并切出版本化 release。Release v2.1 已于 2026-09-21 导入，与原有的策展目录并存（见
+`../docs/data/README.md` 第 2 节）；运行时目录文件仍是 `data/recipes/recipes.json`，当前进度见 `docs/current-status.md`。
 
 核心原则：
 

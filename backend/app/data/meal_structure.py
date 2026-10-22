@@ -71,8 +71,16 @@ def perishable_days() -> int:
     return meal_structure()["perishable_days"]
 
 
+MAX_PLAN_DAYS = 14  # the longest plan a request may ask for (day_count le=14)
+MIN_TRIP_DAYS = -(-MAX_PLAN_DAYS // 2)  # ceil(14 / 2): pricing and budgeting assume at most two shopping trips
+
+
 def trip_days() -> int:
-    return meal_structure()["trip_days"]
+    """Days of a plan bought in the first trip; below MIN_TRIP_DAYS a long plan would need a third trip."""
+    days = meal_structure()["trip_days"]
+    if days < MIN_TRIP_DAYS:
+        raise ValueError(f"trip_days {days} would plan a third shopping trip; it must be at least {MIN_TRIP_DAYS}")
+    return days
 
 
 def roles_for(roles: list[dict], people: int) -> list[dict]:
