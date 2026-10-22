@@ -18,7 +18,11 @@ A cap is materially worse than 16,384 when any of these fails:
 
 **Chosen cap: 16,384**, the smallest that passes every one.
 
-A cap matters only through the dishes each role keeps: at most `candidates_per_role` (8), else the integer root. Up to 8,192 every smaller cap loses on some scenario. Between 8,192 and 16,384 only six-role meals (4 dishes a role, 5 from 15,625) and seven-role meals change, and a seven-role meal keeps 3 dishes a role at any cap below 16,384 = 4^7, as at 8,192, where `seven-with-young-children` repeats a dish three times and costs 7% more. So no value between them was swept.
+A cap matters only through the dishes each role keeps: at most `candidates_per_role` (8), else the integer root. Every cap tried below 16,384 (1,024 to 8,192, doubling) loses on some scenario. Between 8,192 and 16,384 only six-role meals (4 dishes a role, 5 from 15,625) and seven-role meals change, and a seven-role meal keeps 3 dishes a role at any cap below 16,384 = 4^7, as at 8,192, where `seven-with-young-children` repeats a dish three times and costs 7% more. So no value between them was swept.
+
+The choice rests on that one scenario: `seven-with-young-children` is the only seven-role meal in the set. Without it, 8,192 fails only where two scenarios keep 2 fewer distinct dishes at a lower price (`full-default/four-with-vegetarian` S$22.88 and `shared-dish/weekend-guest` S$31.85 cheaper), and 4,096 only on five shared-dish prices; a developer set with no seven-role household could have chosen either.
+
+The criterion only guards against losses to 16,384; a smaller cap that plans cheaper is not credited. Scenarios planned cheaper than at 16,384: 1,024: 5, 2,048: 6, 4,096: 6, 8,192: 4.
 
 ## Summary
 

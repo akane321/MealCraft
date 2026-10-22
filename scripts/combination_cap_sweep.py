@@ -221,6 +221,15 @@ def report(out: Path) -> None:
     print(f"chosen cap {chosen}")
 
 
+def cheaper(result: dict, cap: int) -> int:
+    ref = {r["scenario"]: r for r in result["rows"][REFERENCE]}
+    return sum(
+        1
+        for r in result["rows"][cap]
+        if r["planned"] and ref[r["scenario"]]["planned"] and r["price_sgd"] < ref[r["scenario"]]["price_sgd"]
+    )
+
+
 def markdown(result: dict) -> str:
     caps = [s["cap"] for s in result["summary"]]
     lines = [
@@ -250,10 +259,20 @@ def markdown(result: dict) -> str:
         f"**Chosen cap: {result['chosen_cap']:,}**, the smallest that passes every one.",
         "",
         "A cap matters only through the dishes each role keeps: at most `candidates_per_role` (8), else the integer "
-        "root. Up to 8,192 every smaller cap loses on some scenario. Between 8,192 and 16,384 only six-role meals "
+        "root. Every cap tried below 16,384 (1,024 to 8,192, doubling) loses on some scenario. "
+        "Between 8,192 and 16,384 only six-role meals "
         "(4 dishes a role, 5 from 15,625) and seven-role meals change, and a seven-role meal keeps 3 dishes a role "
         "at any cap below 16,384 = 4^7, as at 8,192, where `seven-with-young-children` repeats a dish three times and "
         "costs 7% more. So no value between them was swept.",
+        "",
+        "The choice rests on that one scenario: `seven-with-young-children` is the only seven-role meal in the set. "
+        "Without it, 8,192 fails only where two scenarios keep 2 fewer distinct dishes at a lower price "
+        "(`full-default/four-with-vegetarian` S$22.88 and `shared-dish/weekend-guest` S$31.85 cheaper), and 4,096 "
+        "only on five shared-dish prices; a developer set with no seven-role household could have chosen either.",
+        "",
+        f"The criterion only guards against losses to {REFERENCE:,}; a smaller cap that plans cheaper is not "
+        "credited. Scenarios planned cheaper than at "
+        f"{REFERENCE:,}: " + ", ".join(f"{cap:,}: {cheaper(result, cap)}" for cap in caps if cap != REFERENCE) + ".",
         "",
         "## Summary",
         "",
