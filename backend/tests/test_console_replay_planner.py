@@ -76,8 +76,7 @@ def test_a_composed_replay_that_runs_out_of_steps_says_so_not_that_details_are_m
     # As a one-dish search that ran out of steps says.
     assert (replay["status"], replay["evidence"]) == ("candidate_rejected", "bounded_search_exhausted")
     assert replay["message"] == (
-        "I searched every combination of dishes the planner allows and found no week that fits. "
-        "Try relaxing one of the limits."
+        "I searched as far as the planner goes and found no week that fits. Try relaxing one of the limits."
     )
 
 

@@ -1167,6 +1167,38 @@ def test_a_change_preview_slower_than_any_deadline_still_reaches_the_household(f
         assert turn.error_code is None
 
 
+@pytest.mark.parametrize(
+    ("message", "owner", "method"),
+    [
+        ("Plan a new week with different dishes", "meal_plan_service", "generate"),
+        ("the dishes are boring", "replanning_service", "preview_variety"),
+    ],
+)
+def test_a_new_or_varied_week_slower_than_any_deadline_still_answers(fixture_catalog, message, owner, method):
+    """Task 15 review: the other two reply turns that run the planner's full searches, a new week and a varied one,
+    never fail on the run's wall-time budget either."""
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        ready = _ready_dinner_week(service)
+        service.confirm(ready.id)
+        runs = service.run_lifecycle.repository
+        target = getattr(service, owner)
+        real = getattr(target, method)
+        ran = []
+
+        def slow(*args, **kwargs):
+            result = real(*args, **kwargs)
+            _aged(runs, ready.id, 601)
+            ran.append(True)
+            return result
+
+        setattr(target, method, slow)
+        service.reply(ready.id, message)
+        turn = max(runs.list_for_session(ready.id), key=lambda run: run.id)
+        assert ran and turn.status != "failed", (turn.status, turn.error_code)
+        assert turn.error_code is None
+
+
 def test_a_slow_replan_refusal_keeps_the_planners_reason(fixture_catalog):
     """Review of task 14: a replan the planner refuses after the deadline passed records the planner's reason, not
     WALL_TIME_BUDGET_EXCEEDED (`confirm_replan`'s failure record skips the deadline as its success record does)."""

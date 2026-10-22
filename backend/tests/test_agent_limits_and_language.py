@@ -624,7 +624,7 @@ def test_a_search_that_used_every_step_it_may_says_so_and_asks_for_a_change():
 
     told = limits.refusal(constraints, lambda **_: floor, "en", check=lambda **_: used_up, cheapest=lambda **_: None)
     assert (told.field, told.retry) == ("plan", False)
-    assert told.text.startswith("I searched every combination of dishes the planner allows")
+    assert told.text.startswith("I searched as far as the planner goes")
     assert "longer" not in told.text and "try again" not in told.text.lower()
 
 

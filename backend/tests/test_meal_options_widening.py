@@ -2,6 +2,8 @@
 
 import time
 
+import pytest
+
 from app.planning import meal_beam
 from app.planning.meal_beam import LAST_STEP_COMBINATIONS, MealBeamLimits, MealBeamPlanner
 from app.schemas.planning_v2 import PlanningMealRole
@@ -69,22 +71,44 @@ def five_salty_roles():
     return packet
 
 
-def test_the_last_step_gives_up_after_its_combination_budget():
+def test_each_role_of_a_five_role_meal_keeps_its_usual_dishes_and_every_combination_is_checked(monkeypatch):
+    """Task 15 item 2: a cap of 16,384 combinations a meal shrank each role of a five-role meal from 8 dishes to 6,
+    to save time only (owner, 2026-10-22). The first step keeps `candidates_per_role` a role and checks all 8^5."""
+    packet = five_salty_roles()
+    sizes, checked = [], []
+    real = meal_beam.core_combinations
+
+    def counted(per_role, *args):
+        sizes.append([len(options) for options in per_role])
+        for combination in real(per_role, *args):
+            checked.append(combination)
+            yield combination
+
+    monkeypatch.setattr(meal_beam, "core_combinations", counted)
+    planner = MealBeamPlanner(MealBeamLimits(), local_losses={r.recipe_id: 0.0 for r in packet.recipes})
+    assert planner._meal_options(packet, packet.slots[0], 1) == ([], True)
+    assert sizes == [[8] * 5]
+    assert len(checked) == 8**5
+
+
+@pytest.mark.parametrize("scale", [2, 4, None])
+def test_a_wider_step_gives_up_after_its_combination_budget(scale):
     """Review of task 14: the last step had no cap, and a five-role meal that no combination passes enumerated the
-    whole product (about 2e10 combinations for a real dinner, hours) before the slot was refused. It now checks
-    `LAST_STEP_COMBINATIONS` and calls the slot empty, as the four-times step did before."""
+    whole product (about 2e10 combinations for a real dinner, hours) before the slot was refused. Review of task 15:
+    with no cap on a meal's combinations the two- and four-times steps grew the same way (about 3e10 for a
+    seven-role dinner at four times). Every step after the first checks `LAST_STEP_COMBINATIONS` and stops."""
     packet = five_salty_roles()
     planner = MealBeamPlanner(MealBeamLimits(), local_losses={r.recipe_id: 0.0 for r in packet.recipes})
     started = time.perf_counter()
-    # The last step alone: 45^5 (1.8e8) combinations, of which it checks its budget (about a second).
-    assert planner._meal_options(packet, packet.slots[0], None) == ([], False)
+    # 16^5 (1e6), 32^5 (3e7) and 45^5 (1.8e8) combinations, of which each checks its budget (about a second).
+    assert planner._meal_options(packet, packet.slots[0], scale) == ([], scale is not None)
     assert planner.last_step_tried == LAST_STEP_COMBINATIONS
     assert time.perf_counter() - started < 30
 
 
-def test_a_slot_the_last_step_gave_up_on_is_recorded_with_its_count(monkeypatch):
+def test_a_slot_the_last_step_gave_up_on_is_recorded_with_its_count():
+    """Every widening step, not the last alone: the slot is refused in seconds, not hours (task 15 review)."""
     packet = five_salty_roles()
-    monkeypatch.setattr(meal_beam, "MEAL_OPTION_WIDENING", (None,))
     planner = MealBeamPlanner(MealBeamLimits(), local_losses={r.recipe_id: 0.0 for r in packet.recipes})
     result = planner.search_candidates(packet)
     assert result.empty_slot_ids == ("d1",)

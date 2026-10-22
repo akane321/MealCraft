@@ -1190,8 +1190,7 @@ class ProductPlanningEngine:
                 # a slow plan to try again: planning time has no limit (ADR-0080), and the same request searches the
                 # same way again.
                 message = (
-                    "I searched every combination of dishes the planner allows and found no week that fits. "
-                    "Try relaxing one of the limits."
+                    "I searched as far as the planner goes and found no week that fits. Try relaxing one of the limits."
                 )
             elif emptied_by == "repeats":
                 message = (

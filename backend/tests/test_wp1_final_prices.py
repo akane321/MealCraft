@@ -350,3 +350,9 @@ def test_failed_refresh_preserves_existing_rounded_costs():
     result = WeeklyGroceryAggregator(service(Provider(lambda query: []))).refresh(grocery)
     assert result.consumed_total_sgd == 2.39
     assert result.purchase_total_sgd == 4
+
+
+def test_a_basket_waits_ten_seconds_for_its_final_prices():
+    """Task 15 item 7: 3 s gave a slow retailer site too little time, and the household its snapshot prices. The
+    lookup bound above only checks the upper limit, so a return to 3 s would pass it."""
+    assert prices.FINAL_PRICE_SECONDS == 10.0

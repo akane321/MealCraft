@@ -48,15 +48,17 @@ ANY_COURSE = PlanningMealRole(role_id=MAIN_ROLE, courses=["main"])
 # the cost of an empty one exceeds any dish's share-weighted loss (at most 1.5).
 EMPTY_OPTIONAL_ROLE_LOSS = 2.0
 # How many times each role's usual number of dishes a slot tries before it has no meal (meal_options). None is the
-# last step: every eligible dish of every role, but at most `LAST_STEP_COMBINATIONS`
-# combinations in loss-rank order. Stopping at four times returned no meal while eligible dishes were left, and one
-# lunch with no meal refused the whole week (layer 08 PR-4 review round 3: `mixed-diets`, 32,549 combinations, 2 s).
-# Unbounded, a five-role dinner with no meal at all (a hard per-meal band nothing meets) is a product of hundreds of
-# dishes per role, about 2e10 combinations at 3 µs each: hours, or out of memory, before the slot is refused.
+# last step: every eligible dish of every role. Stopping at four times returned no meal while eligible dishes were
+# left, and one lunch with no meal refused the whole week (layer 08 PR-4 review round 3: `mixed-diets`, 32,549
+# combinations, 2 s). The first step checks every combination of each role's usual dishes (owner, 2026-10-22); every
+# later step runs only when that found no meal, and checks at most `LAST_STEP_COMBINATIONS` combinations. Unbounded,
+# those steps grow with the power of the number of roles: four times the usual dishes of a seven-role dinner is about
+# 3e10 combinations, and every eligible dish of a five-role one about 2e10, hours or out of memory before the slot is
+# refused (task 15 review).
 MEAL_OPTION_WIDENING = (1, 2, 4, None)
-# Combinations the last widening step checks before it calls the slot empty, about a second
-# (docs/evaluation/shared-dish/timing.md). A bound for termination, not speed: unbounded, that step is hours or out of
-# memory before an honest refusal (ADR-0080). The search records the slots that used it all (`capped_slots`).
+# Combinations a widening step after the first checks before it stops, about a second
+# (docs/evaluation/shared-dish/timing.md). A bound for termination, not speed: unbounded, those steps are hours or out
+# of memory before an honest refusal (ADR-0080). The search records the slots left empty by it (`capped_slots`).
 LAST_STEP_COMBINATIONS = 262_144
 # Dishes a role keeps for each member it must be able to cover (`_covering`). Ranked by loss alone, a role's
 # best dishes can all be food one member cannot have, and then no combination of them covers that member.
@@ -116,7 +118,7 @@ class MealBeamResult:
     # The check that dropped the last partial plans when the search kept none: "meal" (no meal fits a slot),
     # "repeats", "requests", "day_limits" or "budget". A record for explanations; it changes no search.
     emptied_by: str | None = None
-    # Slots with no meal after the last widening step checked all `LAST_STEP_COMBINATIONS`: (slot_id, combinations).
+    # Slots with no meal after a widening step stopped at `LAST_STEP_COMBINATIONS`: (slot_id, combinations).
     capped_slots: tuple[tuple[str, int], ...] = ()
 
 
@@ -134,9 +136,9 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         Each role offers only its best few dishes, and every meal of those can fail a meal's own limit (its
         sodium, its time) while meals of lower-ranked dishes pass: the slot then had no meal, and the whole
         week failed although a stricter household, with a different few, planned. Before a slot is called
-        empty, more of each role's dishes are tried, and at last every eligible dish, up to
-        `LAST_STEP_COMBINATIONS` combinations in loss-rank order: a slot is called empty when none of those
-        passes (`last_step_tried` then holds how many were checked)."""
+        empty, more of each role's dishes are tried, and at last every eligible dish; each of those wider steps
+        checks up to `LAST_STEP_COMBINATIONS` combinations in loss-rank order. A slot is called empty when none
+        passes (`last_step_tried` then holds how many the last step run checked)."""
         meals: list[MealOption] = []
         self.last_step_tried = 0
         for scale in MEAL_OPTION_WIDENING:
@@ -148,8 +150,9 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
     def _meal_options(
         self, problem: FinalPlanningProblem, slot: PlanningSlot, scale: int | None
     ) -> tuple[list[MealOption], bool]:
-        """The meals of each role's best `scale` × its usual number of dishes (for None every dish, the first
-        `LAST_STEP_COMBINATIONS` combinations of them), and whether a role had more."""
+        """The meals of each role's best `scale` × its usual number of dishes (for None every dish), every
+        combination of them at scale 1 and the first `LAST_STEP_COMBINATIONS` at any wider step, and whether a
+        role had more."""
         recipes = sorted(problem.recipes, key=lambda r: r.recipe_id)
         prices = cheapest_per_gram(problem) if problem.purchase_budget_sgd is not None else {}
         roles = slot.composition or [ANY_COURSE]
@@ -221,7 +224,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
         spread: dict[tuple, int] = {}
         tried = 0
         for combination in core_combinations(per_role, roles, by_id, slot.meal_type if structured else None):
-            if scale is None:
+            if scale != 1:
                 if tried == LAST_STEP_COMBINATIONS:
                     break
                 tried += 1
