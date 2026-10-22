@@ -84,12 +84,10 @@ def test_the_vegetable_role_follows_the_vegetable_led_rule() -> None:
     assert rule_tags(greens).values["meal_role"] == "vegetable"
     assert rule_tags(greens).values["protein_sources"] == []
 
-    # Bacon makes it a dish with meat (owner, 2026-10-02): never a vegetable, and the rules leave it open.
+    # Measured minor bacon is a vegetable-role seasoning, not permission for a vegetarian to eat it.
     bacon = rule_tags(dish("Cabbage With Bacon", "side", [("cabbage", 400), ("bacon", 60)]))
-    assert bacon.values["meal_role"] is None
-    assert "vegetable" not in bacon.allowed_roles and "salad" not in bacon.allowed_roles
-    # A side is never the meal's main, and a dish with no main protein never a protein main.
-    assert "protein_main" not in bacon.allowed_roles
+    assert bacon.values["meal_role"] == "vegetable"
+    # A non-staple title and a dish with no main protein do not become a protein main.
     plain = rule_tags(dish("Cornmeal Bake", "main", [("cornmeal", 300), ("milk", 200)]))
     assert plain.values["meal_role"] is None and "protein_main" not in plain.allowed_roles
     assert bacon.values["protein_sources"] == ["pork"]
@@ -237,7 +235,7 @@ def test_complete_carriers_count_but_a_meatloaf_binder_and_legumes_are_not_stapl
     lentils = rule_tags(dish("Sweet And Sour Lentils", "side", [("lentil", 192), ("onion", 110)]))
     assert lentils.values["meal_role"] is None and "one_bowl" not in lentils.allowed_roles
     gratin = rule_tags(dish("Cauliflower Au Gratin", "side", [("cauliflower", 588), ("ham", 113)]))
-    assert gratin.values["meal_role"] is None and "soup" not in gratin.allowed_roles
+    assert gratin.values["meal_role"] == "vegetable"  # 16% measured ham, not a soup or protein main.
 
 
 def test_cooked_rice_is_not_multiplied_by_the_dry_rice_yield_again() -> None:
@@ -357,11 +355,13 @@ def test_rule_regeneration_keeps_the_unreviewed_model_batch_frozen(monkeypatch) 
     old = {
         "meal_role": "one_bowl",
         "contains_staple": True,
+        "protein_sources": ["egg"],
         "estimated": {
             name: {"method": "llm", "batch": recipe_tags.LLM_BATCH, "reviewed": False}
             for name in ("meal_role", "contains_staple")
         },
     }
+    old["estimated"]["protein_sources"] = {"method": "rule", "batch": recipe_tags.RULE_BATCH, "reviewed": False}
     monkeypatch.setattr(recipe_tags, "curated_dishes", lambda: [])
     monkeypatch.setattr(recipe_tags, "release_dishes", lambda: [item])
     monkeypatch.setattr(recipe_tags, "previous_file", lambda: {"recipes": {item.key: old}})
@@ -370,6 +370,7 @@ def test_rule_regeneration_keeps_the_unreviewed_model_batch_frozen(monkeypatch) 
     assert fresh.values["meal_role"] == "protein_main"
     frozen = recipe_tags.build(False, 0)["tagged"][0][1]
     assert frozen.values["meal_role"] == "one_bowl" and frozen.methods["meal_role"] == "llm"
+    assert frozen.values["protein_sources"] == ["egg"]  # rule-owned fields in the same frozen record stay put too
     entry = recipe_tags.recipe_entry(frozen, old)
     assert entry["estimated"]["meal_role"]["reviewed"] is False
 
@@ -483,11 +484,16 @@ def test_every_written_value_is_one_the_types_and_the_check_constraint_accept() 
 
 
 def test_the_vegetable_role_agrees_with_the_planners_vegetable_led_rule() -> None:
+    from types import SimpleNamespace
+
+    from app.data.recipe_tags import protein_side_share
+    from app.planning.meal_composition import unreviewed
+
     entries = committed(tag_files.RECIPE_TAGS, "recipes")
     for key, entry in entries.items():
         if entry["meal_role"] == "vegetable":
             assert dish_vegetable_led(dishes()[key]), key
-    # Every side the planner's rule admits as a vegetable dish is tagged one, unless it is a part of a dish (a batter).
+    # Content alone does not override a frozen model field, a rice staple, or a half-protein side.
     sides = [
         key
         for key, item in dishes().items()
@@ -495,6 +501,8 @@ def test_the_vegetable_role_agrees_with_the_planners_vegetable_led_rule() -> Non
     ]
     assert sides and all(
         entries[key]["meal_role"] == "vegetable"
+        or unreviewed(SimpleNamespace(**entries[key]))
+        or (entries[key]["meal_role"] == "protein_main" and protein_side_share(dishes()[key]) >= 0.5)
         or (
             entries[key]["meal_role"] in {"staple", "one_bowl"}
             and RICE_DISH.search(dishes()[key].title.lower())
@@ -509,6 +517,12 @@ def test_the_tag_files_are_current_with_the_rules() -> None:
     entries = committed(tag_files.RECIPE_TAGS, "recipes")
     stale = []
     for key, item in dishes().items():
+        from types import SimpleNamespace
+
+        from app.planning.meal_composition import unreviewed
+
+        if unreviewed(SimpleNamespace(**entries[key])):
+            continue  # Fresh rule proposals live separately; the entire gated record remains as reviewed later.
         found = rule_tags(item)
         for field, estimate in entries[key]["estimated"].items():
             if estimate["method"] == "rule" and found.values[field] != entries[key][field]:

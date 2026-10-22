@@ -1,6 +1,6 @@
 """Tag every catalog recipe and ingredient for the Sprint 2 planner (layer 08; ADR-0070, ADR-0076).
 
-`python -m app.data.recipe_tags` writes two reviewed data files, which the importers copy onto the
+`python -m app.data.recipe_tags` writes two versioned tag files, which the importers copy onto the
 catalog rows (`app.data.tag_files`):
 
 - `data/recipes/recipe-tags-v1.json`, keyed by release `external_id` or curated slug: `meal_role`,
@@ -34,8 +34,9 @@ The rules, and why:
   `staple_share`) is `one_bowl`; a main made mostly of a staple with no protein is a `staple`. A
   main with a main protein is a `protein_main`; one led by vegetables without one is a `vegetable`.
   A soup whose noodles, rice or pasta are a tenth of it is `one_bowl` too. Baked goods go by title words
-  and sugar. Grey zones go to the model, which may not make a side, or a dish with no main protein, a
-  `protein_main`, and may answer null when no allowed role fits.
+  and sugar. A named homemade staple needs at least half listed raw starch; its binder eggs are not
+  main protein. An egg/soy/flesh-led side can be a protein main at half counted solids; bean-led sides
+  remain deferred. Grey zones go to the model, which may answer null when no allowed role fits.
 - **Contains staple** is true exactly for `one_bowl` and `staple` dishes, so it follows the role.
 - **Protein sources** are the sources whose ingredients make at least 5 % (meat, poultry, fish,
   seafood) or 10 % (egg, soy, legumes) of the dish's counted raw grams, so an egg that binds a
@@ -87,6 +88,7 @@ from app.planning.vegetable_led import (
     SEASONING_FROM_FLESH,
     UNCOUNTED,
     UNCOUNTED_GROUPS,
+    counted_weights,
     food_groups,
     vegetable_led,
 )
@@ -204,6 +206,19 @@ VOLUME_UNIT = re.compile(
 )
 SUBSTITUTION_NOTE = re.compile(r"\b(?:substitut\w*|instead|may|alternativ\w*)\b", re.I)
 DOUGH_FLOUR = frozenset({"flour", "bread_flour", "whole_wheat_flour", "self_rising_flour", "semolina"})
+HOMEMADE_STAPLE_TITLE = re.compile(
+    r"\b(?:noodles?|pasta|gnocchi|polenta|roti|chapatis?|paratha|naan|flatbreads?|tortillas?|spaetzle|spatzle|mantou|bao)\b"
+)
+HOMEMADE_STARCH = DOUGH_FLOUR | {
+    "cornmeal",
+    "polenta",
+    "masa",
+    "masa_harina",
+    "corn_flour_masa",
+    "rice_flour",
+    "brown_rice_flour",
+    "semolina_flour",
+}
 PIZZA_BATTER = DOUGH_FLOUR | {
     "milk",
     "egg",
@@ -574,6 +589,37 @@ def dish_vegetable_led(dish: Dish) -> bool:
     return vegetable_led((line.name, line.grams, line.text) for line in dish.lines)
 
 
+def homemade_staple(dish: Dish) -> bool:
+    """A named staple made mostly from listed raw starch, not a component or a title-only invention."""
+    if dish.course in FIXED_COURSE_ROLES or dish.course == "soup" or component(dish.title, dish.course):
+        return False
+    if dish.course == "baked_good" and dish.carbohydrate_g and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.3:
+        return False  # Preserve the established sweet-baked-good rule, including sweet stuffed flatbreads.
+    if re.search(r"\b(?:cakes?|cookies?|desserts?|puddings?)\b", dish.title, re.I):
+        return False
+    if not HOMEMADE_STAPLE_TITLE.search(dish.title.lower()):
+        return False
+    names = HOMEMADE_STARCH | ({"potato"} if re.search(r"\bgnocchi\b", dish.title, re.I) else set())
+    return staple_share(dish, names) >= SIDE_STAPLE_SHARE
+
+
+def protein_side_share(dish: Dish) -> float:
+    """Egg/soy/flesh share of the same weighed solids as vegetable_share; pulses are deferred."""
+    eligible = FLESH_SOURCES | {"egg", "soy", "?"}
+    if any(line_sources(line) & eligible and (line.grams is None or line.grams <= 0) for line in dish.lines):
+        return 0.0
+    weights = counted_weights((line.name, line.grams, line.text) for line in dish.lines)
+    # Keep lines separate: the same ingredient can occur with different animal wording.
+    total = sum(weight for _, weight in weights)
+    protein = sum(
+        weight
+        for line in dish.lines
+        if line_sources(line) & eligible
+        for _, weight in counted_weights([(line.name, line.grams, line.text)])
+    )
+    return protein / total if total else 0.0
+
+
 def component(title: str, course: str) -> bool:
     """A recipe that is a part of a dish, not a dish: a dough, crust, batter, filling, topping, sauce, marinade,
     rub, dressing,
@@ -612,6 +658,8 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
         return "sauce", ()  # `sauce` is every non-meal part of a dish, a dough or stock as much as a sauce
     if dish.course in FIXED_COURSE_ROLES:
         return FIXED_COURSE_ROLES[dish.course], ()
+    if homemade_staple(dish):
+        return "staple", ()
     has_protein = sources is None or bool(sources)
     if dish.course == "baked_good":
         sweet = bool(dish.carbohydrate_g) and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.3
@@ -641,11 +689,13 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
         # A rice dish may have been filed as a side; its real rice carrier still fills the staple.
         if RICE_DISH.search(title) and staple_share(dish, RICE_GRAINS) >= ONE_BOWL_SHARE:
             return ("one_bowl" if has_protein else "staple"), ()
+        if has_protein and protein_side_share(dish) >= SIDE_STAPLE_SHARE:
+            return "protein_main", ()
         if led:
             return "vegetable", ()
         if staple_share(dish, STAPLES | STARCHY) >= SIDE_STAPLE_SHARE:
             return "staple", ()
-        # A side is never the meal's main, even with bacon in it; one that is not vegetable-led may stay null.
+        # A little meat does not make a main; pulses remain pending the owner's separate decision.
         return None, tuple(
             role
             for role in open_roles
@@ -757,7 +807,7 @@ def rule_tags(dish: Dish) -> Tags:
             role, allowed, sources = None, (), None
     if sources == []:  # a dish with no main protein is never a protein main, whatever the model would say
         allowed = tuple(name for name in allowed if name != "protein_main")
-    if role in SWEET_OR_CONDIMENT:
+    if role in SWEET_OR_CONDIMENT or (role == "staple" and homemade_staple(dish)):
         sources = []  # the eggs of a cake are not its main protein
     methods = cooking_methods(dish)
     decided = {
@@ -1074,11 +1124,15 @@ def build(use_llm: bool, max_usd: float, log=print, reask: bool = False) -> dict
         # Keep the failed, unreviewed model batch frozen. Better rules do not silently release those recipes.
         if not reask:
             entry = previous.get("recipes", {}).get(dish.key, {})
-            for name in CRITICAL_MODEL_FIELDS:
-                estimate = entry.get("estimated", {}).get(name, {})
-                if estimate.get("method") == "llm" and not estimate.get("reviewed"):
-                    tags.values[name] = entry[name]
-                    tags.methods[name] = "llm"
+            if any(
+                (estimate := entry.get("estimated", {}).get(name, {})).get("method") == "llm"
+                and not estimate.get("reviewed")
+                for name in CRITICAL_MODEL_FIELDS
+            ):
+                # A frozen role and fresh rule-owned sources can contradict each other. Keep its whole
+                # stored record; fresh proposals/allowed roles come from rule_tags in the review generator.
+                tags.values.update({name: entry[name] for name in tags.values if name in entry})
+                tags.methods = {name: estimate["method"] for name, estimate in entry.get("estimated", {}).items()}
     still_open = [(dish, tags) for dish, tags in tagged if any(tags.values[name] is None for name in tags.open)]
     # The model's spend over every run, kept in the tag file's header.
     usage = dict(NO_USAGE) | previous.get("llm_usage", {})

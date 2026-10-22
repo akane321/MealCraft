@@ -109,9 +109,15 @@ preferred. The counts are defaults: the planner may leave out one dish when the
 budget, the time or the dishes cannot fit it. A count you choose yourself is
 kept as chosen.
 
-A vegetable dish is a side dish or salad made mostly of vegetables, with no
-meat or fish (eggs, cheese and sauces such as fish sauce are fine); a pasta,
-rice or bean side does not count as one, and neither does a chicken salad.
+A vegetable dish is made at least half of vegetables by counted solid-food
+weight. It may contain a little meat or fish for seasoning (at most 20% of that
+weight, with known quantities); this is a meal role, not a vegetarian label.
+Each person's diet, exclusions and allergens still apply: a vegetarian member
+does not eat the meat-seasoned dish and must have another vegetable dish they
+can eat. Pasta, rice and bean sides are not vegetable dishes merely because
+they are sides. A homemade staple such as noodles or gnocchi needs actual
+listed starch ingredients, not just a staple name. Egg-, tofu- or meat-led
+sides may fill a protein-main role; bean-led sides await a separate decision.
 
 Under **Kitchen**, tick the equipment you do not have (oven, air fryer,
 steamer, microwave, blender); a recipe that needs it is never planned. A recipe

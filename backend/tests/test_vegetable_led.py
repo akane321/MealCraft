@@ -1,4 +1,4 @@
-"""The vegetable dish of a meal is a side or salad of vegetables without meat (owner, 2026-10-02)."""
+"""Vegetable-led dishes allow a measured little flesh seasoning, not a vegetarian claim."""
 
 import pytest
 
@@ -48,7 +48,7 @@ def test_the_vegetable_role_is_vegetable_and_its_numbered_copies():
     assert not any(vegetable_role(role) for role in ("main", "main-2", "soup", "side", "vegetables", "veg"))
 
 
-def test_a_dish_with_any_meat_or_fish_is_not_a_vegetable_dish():
+def test_a_meat_led_salad_and_unweighed_meat_are_not_vegetable_dishes():
     # "Saigon Chicken Cole Slaw" (release lines): 62% cabbage, onion and carrot, and 344 g of chicken. The
     # product planned it as the vegetable of mdw-dev-002 and mdw-dev-007 (review of #210).
     slaw = [
@@ -63,8 +63,8 @@ def test_a_dish_with_any_meat_or_fish_is_not_a_vegetable_dish():
         ("sugar", 37.5),
     ]
     assert vegetable_share(slaw) > 0.6 and not vegetable_led(slaw)
-    # However little of it: three anchovy fillets in a kimchi, or a line of bacon the release did not weigh.
-    assert not vegetable_led([("daikon", 453.6), ("cabbage", 113.4), ("anchovy", 12.0)])
+    # Small measured anchovies season the vegetable; unknown bacon cannot count as a little.
+    assert vegetable_led([("daikon", 453.6), ("cabbage", 113.4), ("anchovy", 12.0)])
     assert not vegetable_led([("green_beans", 450.0), ("bacon", None)])
 
 
