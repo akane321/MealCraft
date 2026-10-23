@@ -147,7 +147,8 @@ semantic retrieval remain targets; see [Current Status](current-status.md).
 - Rejects hard violations.
 - Scores eligible recipes using soft preferences.
 - Selects a week of breakfast, lunch and dinner slots chosen by the household,
-  with up to six dish roles per meal and explicit required/optional roles.
+  with up to six course roles (or eight meal roles) per meal and explicit
+  required/optional roles.
 - Keeps completed and locked dishes unchanged. For composed valid weeks, fills
   optional roles before maximizing distinct dishes, then reduces same-kind use.
 - Scales servings and aggregates per-person nutrition.

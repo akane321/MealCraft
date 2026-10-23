@@ -1,4 +1,5 @@
 import type {
+  FeedbackKind,
   MealPlanEntryStatus,
   WeeklyMealPlan,
   WeeklyMealPlanCollection,
@@ -14,6 +15,8 @@ export function useNutritionDashboard() {
   const errorMessage = ref<string | null>(null);
   const isLoading = ref(false);
   const updatingEntryId = ref<number | null>(null);
+  const feedbackRecipeId = ref<number | null>(null);
+  const feedbackError = ref<string | null>(null);
 
   async function loadPlans(preferredPlanId?: number | null) {
     isLoading.value = true;
@@ -86,13 +89,34 @@ export function useNutritionDashboard() {
     }
   }
 
+  /** Like, Dislike or Never again on a dish for the whole household (ADR-0087); null undoes it. */
+  async function setFeedback(recipeId: number, kind: FeedbackKind | null) {
+    if (!dashboard.value) return;
+    feedbackRecipeId.value = recipeId;
+    feedbackError.value = null;
+    try {
+      const url = `${config.public.apiBase}/api/feedback/recipes/${recipeId}`;
+      await (kind ? apiFetch(url, { method: "PUT", body: { kind } }) : apiFetch(url, { method: "DELETE" }));
+      await loadDashboard(dashboard.value.plan_id);
+    }
+    catch {
+      feedbackError.value = "Your feedback could not be saved.";
+    }
+    finally {
+      feedbackRecipeId.value = null;
+    }
+  }
+
   return {
     dashboard,
     errorMessage,
+    feedbackError,
+    feedbackRecipeId,
     isLoading,
     loadDashboard,
     loadPlans,
     plans,
+    setFeedback,
     updateMeal,
     updateStatus,
     updatingEntryId,

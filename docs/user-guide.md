@@ -100,6 +100,13 @@ such as fried rice, laksa or chicken rice carries its own staple, and may come
 without a vegetable dish. A household that saved its own dishes keeps them; the
 editor offers the full default as the recommended preset.
 
+Homemade noodles, flatbreads, polenta and qualifying potato dumplings can be
+staples when their listed starch ingredients make up at least half of counted
+weight. Sweet dough is not a staple at a sugar-to-carbohydrate ratio of 20% or
+more. Savoury Yorkshire pudding is the named exception: milk lactose does not
+make it a sweet dish, but the flour must still make up at least half. A recipe
+listing only a shell or dough and no filling is a component, not a meal.
+
 Every lunch and dinner is a real meal: a protein main with its staple or a
 one-bowl dish, never a snack, dessert, sauce or drink, a salad only as the
 vegetable dish and a soup only as the soup, no protein twice among the mains
@@ -109,9 +116,31 @@ preferred. The counts are defaults: the planner may leave out one dish when the
 budget, the time or the dishes cannot fit it. A count you choose yourself is
 kept as chosen.
 
-A vegetable dish is a side dish or salad made mostly of vegetables, with no
-meat or fish (eggs, cheese and sauces such as fish sauce are fine); a pasta,
-rice or bean side does not count as one, and neither does a chicken salad.
+A vegetable dish is made at least half of vegetables by counted solid-food
+weight. Potatoes and other starchy tubers count toward that half only when
+other vegetables already make up at least 40% of counted weight. Plain mashed
+potatoes, fries and almost-all-potato dishes do not qualify as vegetables.
+Listed cured/dried meat or seafood and minced meat may season it, up to
+20% of counted weight in total. Other meat, poultry, fish or seafood may only be
+traces, up to 5%; with both types, both limits apply. Every flesh quantity must
+be known. This is a meal role, not a vegetarian label.
+The seasoning allowance covers bacon, turkey bacon, pancetta, ham, prosciutto,
+chorizo, salami, pepperoni, sausage (including lap cheong), corned beef,
+pastrami, salt cod, smoked haddock, dried shrimp, dried anchovy/ikan bilis and
+bonito flakes. Ground beef and ground pork are explicitly recognised, as is
+other land-animal meat whose ingredient line says ground or minced.
+Ingredient wording can also establish smoked, cured, salted or dried meat or
+fish. The preparation must be stated in the actual ingredient, not just in
+the dish's name; fresh or otherwise unqualified flesh keeps the 5% limit.
+Each person's diet, exclusions and allergens still apply: a vegetarian member
+does not eat the meat-seasoned dish and must have another vegetable dish they
+can eat. Pasta, rice and bean sides are not vegetable dishes merely because
+they are sides. A homemade staple such as noodles or gnocchi needs actual
+listed starch ingredients, not just a staple name. Egg-, tofu- or meat-led
+sides may fill a protein-main role, but not batters, puddings, pancakes or
+substantially starchy sides. Whole-bean-led sides, including edamame, do not
+become protein mains through this rule; edamame sides remain vegetables when
+they meet the vegetable definition.
 
 Under **Kitchen**, tick the equipment you do not have (oven, air fryer,
 steamer, microwave, blender); a recipe that needs it is never planned. A recipe
@@ -188,6 +217,29 @@ Each dish still to cook offers **Swap**, **Keep**, **Skip** and **Can't buy…**
 Each fills the conversation with a sentence the assistant understands, so the
 change is previewed before anything happens. A swap keeps every member covered,
 and the new dish is cooked for the people who can eat it.
+
+Every dish not skipped, cooked ones included, also has **Like**, **Dislike** and
+**Never again**. They are the whole household's: anyone but a viewer may press
+or undo them, and pressing the pressed button again undoes it. **Never again**
+means the dish is never planned for anyone in the household until it is undone:
+not in a new week, a swap, a change to a meal or a cheaper-week offer. The week
+it is already in stays as it is, cooked and kept dishes included; if you change
+a meal that still holds it (for example add a soup to it), that whole meal is
+planned again without it. Pressing **Like** or **Dislike** on it replaces Never
+again. The profile page lists **Dishes you never want again**, each with
+**Undo**, so a dish that has left every week can still come back. Like and
+Dislike are only recorded for now; they do not change the ranking yet.
+
+Under a dish there may be up to two short tags, each a fact that is true of it:
+**Fits low-sodium** (or low-sugar, lower-calorie) on a main within that
+preference's benchmark, **One of the week's cheapest mains** when the week has
+at least four different mains and this one is among the cheapest quarter per
+serving (breakfast and skipped dishes are not counted), and **Ready in 15 min** for a dish ready in
+20 minutes or less. A dish with nothing to say, or a skipped dish, has no tag. Click a tag to see
+the dish's facts: cooking time, kcal and sodium per person, and cost to buy
+per serving. That cost is what the week buys for the dish after your pantry
+covered what it could, so it can be lower than the dish's full price. They describe the dish as planned; they are not the reasons the
+planner chose it.
 
 ### 4. Nutrition and the shopping list
 

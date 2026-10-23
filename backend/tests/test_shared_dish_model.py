@@ -135,6 +135,44 @@ def shares(dishes) -> dict[str, Fraction]:
     return {role: table[role] for role, _ in dishes}
 
 
+@pytest.mark.parametrize("meal_type", ["lunch", "dinner"])
+@pytest.mark.parametrize(
+    "restriction",
+    [
+        {"dietary_requirements": ["vegetarian"]},
+        {"excluded_ingredients": ["bacon"]},
+        {"dietary_requirements": ["halal"]},
+    ],
+)
+def test_small_meat_vegetable_never_covers_a_member_who_cannot_eat_it(meal_type, restriction):
+    """Role admission is not diet permission; every meal still needs that member's own vegetable."""
+    from app.planning.meal_composition import role_admits
+    from app.schemas.planning_v2 import PlanningMealRole
+
+    payload = slot(
+        members=[{"name": "Ann", "servings": 1, **restriction}, {"name": "Ben", "servings": 1}], servings=2
+    ).model_dump(mode="json")
+    payload["meal_type"] = meal_type
+    at_table = PlanningSlot.model_validate(payload)
+    bacon = recipe("bacon-cabbage", "vegetable", calories=120, ingredient="cabbage")
+    bacon["ingredients"] = [
+        {"ingredient_id": "cabbage", "quantity": 800, "unit": "g"},
+        {"ingredient_id": "bacon", "quantity": 200, "unit": "g"},
+    ]
+    vegan = recipe("plain-greens", "vegetable", calories=120, tags=["vegan", "halal"], ingredient="spinach")
+    main = recipe("tofu", "protein_main", calories=900, tags=["vegan", "halal"], protein=["soy"])
+    rice = recipe("rice", "staple", calories=500, tags=["vegan", "halal"])
+    prob = problem(slots=[payload], recipes=[bacon, vegan, main, rice])
+    recipes = by_id(prob)
+    assert role_admits(PlanningMealRole(role_id="vegetable", meal_roles=["vegetable"]), recipes["bacon-cabbage"])
+    assert not member_can_eat(at_table.members[0], recipes["bacon-cabbage"])
+    meal = [("main", "tofu"), ("staple", "rice"), ("vegetable", "bacon-cabbage")]
+    assert "member_vegetable" in [code for code, *_ in coverage_issues(at_table, meal, recipes, shares(meal))]
+    meal.append(("vegetable-2", "plain-greens"))
+    portion_shares = shares(meal[:-1]) | {"vegetable-2": Fraction(1, 2)}
+    assert coverage_issues(at_table, meal, recipes, portion_shares) == []
+
+
 # --- The eatability matrix ---------------------------------------------------------------------------------
 
 

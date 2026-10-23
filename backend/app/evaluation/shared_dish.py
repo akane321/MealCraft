@@ -494,6 +494,8 @@ def check_week(week: dict, case: dict, arrangement: str, facts: dict[str, dict])
             "shopping_trips": len({line.get("shopping_trip") for line in week["grocery_estimate"]["items"]} or {None}),
             "dishes": len(week["days"]),
             "distinct_dishes_excluding_staples": len(set(titles)),
+            # The worst repeat: how often the most served dish comes, staples aside (task 15).
+            "most_uses_of_one_dish": max(Counter(titles).values(), default=0),
             "purchase_total_sgd": week["grocery_estimate"]["purchase_total_sgd"],
             "energy_attainment_by_member": attainment,
             "lowest_energy_attainment": min((v for v in attainment.values() if v is not None), default=None),

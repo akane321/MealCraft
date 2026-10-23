@@ -32,9 +32,14 @@ Before reasoning about a material change, read:
 5. `docs/mvp-boundary.md` when minimum product semantics are involved;
 6. `docs/design/README.md` and the relevant module contract when changing a
    producer/consumer boundary or accepted target;
-7. `docs/evaluation/protocol-v1.md` for currently executable evidence and
-   `docs/design/comparative-evaluation-v2.md` for accepted next-stage evaluation
-   semantics.
+7. `docs/evaluation/protocol-v1.md` for the course-scope executable evidence,
+   `docs/evaluation/protocol-v2-multidish.md` and
+   `docs/evaluation/protocol-v3-meal-day-week.md` for the multi-dish and
+   meal-day-week product path, the Sprint 2 held-out docs
+   (`docs/evaluation/sprint2-heldout-authoring-guide.md`,
+   `docs/evaluation/sprint2-heldout-freeze.md`) when authoring or freezing a
+   held-out set, and `docs/design/comparative-evaluation-v2.md` for accepted
+   next-stage evaluation semantics.
 
 ## Triggered reading
 
@@ -44,7 +49,7 @@ against a contract that already said something different.
 
 | The task touches | Read first |
 | --- | --- |
-| evaluation metrics, baselines, datasets, held-out splits, capability claims | `docs/design/comparative-evaluation-v2.md`, `docs/evaluation/protocol-v1.md`, `docs/evaluation/heldout-authoring-guide.md` |
+| evaluation metrics, baselines, datasets, held-out splits, capability claims | `docs/design/comparative-evaluation-v2.md`, `docs/evaluation/protocol-v1.md`, `docs/evaluation/protocol-v2-multidish.md`, `docs/evaluation/protocol-v3-meal-day-week.md`, `docs/evaluation/heldout-authoring-guide.md`, `docs/evaluation/sprint2-heldout-authoring-guide.md` |
 | a cross-module field, schema, provenance or unknown-value semantics | `docs/design/README.md` and the owning module contract |
 | planning, validation, package or budget arithmetic | `docs/design/algorithm-engineering-handoff.md` |
 | accounts, household isolation, migrations, operations | `docs/design/backend-platform-engineering.md` |
@@ -188,8 +193,9 @@ docker compose run --rm frontend pnpm typecheck
 docker compose run --rm frontend pnpm build
 ```
 
-Run `python -m app.evaluation.workbench` for evaluation-affecting changes and
-Playwright for affected desktop user journeys. Do not claim visual quality from
+Run `python -m app.evaluation.workbench` for evaluation-affecting changes (its
+held-out sections are diagnostic only and never drive tuning, decisions ADR-0020
+and ADR-0049) and Playwright for affected desktop user journeys. Do not claim visual quality from
 a successful build alone. Mobile and tablet product design are out of scope.
 
 CI runs Ruff and pytest from a checkout in the `backend` job (Ruff over
@@ -207,6 +213,6 @@ contracts, setup, final direction, or evaluation semantics change.
 
 1. Run verification proportional to risk.
 2. Run `<knowledge-root>\scripts\memory-finalize.ps1` to generate a task record.
-3. Update `CURRENT_STATE.md` only for verified behavior merged to remote `main`; create an ADR for L2/L3 decisions.
+3. Update `CURRENT_STATE.md` and `docs/current-status.md` together, only for verified behavior merged to remote `main` (never one side alone); create an ADR for L2/L3 decisions.
 4. Validate and submit knowledge changes through a separate `memory/*` branch and PR, opened together with the code pull request and linked both ways (see the highest-priority rule above), not after the merge.
 5. Do not automatically push, merge, or rewrite Git history unless the user explicitly authorizes it.

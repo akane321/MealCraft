@@ -209,3 +209,5 @@ reference were forced repetitions. It is therefore not pre-registered. Under
 section 3 and `ADR-0020` section 3, no reported condition is rescored in place:
 every v1 report keeps its numbers, the default evaluation run stays v1, and a
 v1.1 report is a separate condition, reported beside the v1 one.
+
+The 2026-10-22 vegetable-definition amendment belongs to [protocol v3.1](protocol-v3-meal-day-week.md#vegetable-scoring-definition-2026-10-22), not this v1 protocol.

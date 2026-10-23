@@ -1,6 +1,9 @@
 # Task B (nutrition mapping) — progress report
 
-> Status: **in progress, not complete.** This is a checkpoint, not the task-B
+> Status: **superseded.** The v2.1 release finished this work (see
+> `../enrichment-work/README.md`); this file is kept as a 2026-09-18 checkpoint.
+>
+> Original status: **in progress, not complete.** This is a checkpoint, not the task-B
 > deliverable `enrichment-work-package.md` section 4 describes — that still
 > needs the quantity→mass conversion and nutrient-aggregation steps this
 > report explicitly flags as not started. Written 2026-09-18.
