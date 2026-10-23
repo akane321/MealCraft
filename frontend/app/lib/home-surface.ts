@@ -343,3 +343,14 @@ export const FEEDBACK_BUTTONS: Array<{ kind: FeedbackKind; label: string }> = [
 export function nextFeedback(current: FeedbackKind | null | undefined, clicked: FeedbackKind): FeedbackKind | null {
   return current === clicked ? null : clicked;
 }
+
+/** A dish's facts for the panel its reason tags open (layer 08 section 7.2): what is true of it as planned, never
+ * why it was chosen. Nutrition is per person at the dish's share of the meal. */
+export function dishFacts(dish: Pick<NutritionDashboardDay, "recipe" | "nutrition_per_person" | "cost_per_serving_sgd">): Array<{ label: string; value: string }> {
+  return [
+    { label: "Cooking time", value: `${dish.recipe.total_time_minutes} min` },
+    { label: "Energy", value: `${Math.round(dish.nutrition_per_person.calories_kcal)} kcal per person` },
+    { label: "Sodium", value: `${Math.round(dish.nutrition_per_person.sodium_mg)} mg per person` },
+    { label: "Cost to buy", value: dish.cost_per_serving_sgd == null ? "Not known" : `${formatSgd(dish.cost_per_serving_sgd)} per serving` },
+  ];
+}
