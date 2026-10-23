@@ -1,0 +1,1002 @@
+{
+  "scope": "Three synthetic two-dinner household fixtures; synthetic prices; one run per arm; whole-table and present-member counts; not held-out or product latency evidence",
+  "environment": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i9-12900H",
+    "logical_cpu_count": 20,
+    "physical_core_count": "not recorded",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.14",
+    "code_commit": "a88a41c1ebdf35b2fee9f22d1c24118d144e0f5b",
+    "working_tree_dirty": true
+  },
+  "rows": [
+    {
+      "case": "couple-different-diets-and-attendance",
+      "algorithm": "EnumeratedReference",
+      "elapsed_ms": 4.828800000268529,
+      "result": {
+        "status": "optimal_for_generated_options",
+        "total": 6,
+        "checked": 6,
+        "unknown": 0,
+        "score": [
+          0,
+          -1.5,
+          0,
+          0.0,
+          0.5,
+          400
+        ],
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "couple-different-diets-and-attendance",
+      "algorithm": "SharedScoreCpSat",
+      "elapsed_ms": 785.3985000001558,
+      "result": {
+        "status": "optimal_for_generated_options",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "count_states": 6,
+        "score": [
+          0,
+          -1.5,
+          0,
+          0.0,
+          0.5,
+          400
+        ],
+        "scope": "ordered generated meal options",
+        "table_ms": 2.3040999999466294,
+        "unknown_states": 0,
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "c",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "a",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "beans",
+            "required_quantity": 100.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 100.0,
+            "selected_product_id": "beans-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 100.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 0.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 7.126599999992322,
+        "total_ms": 9.68990000001213
+      }
+    },
+    {
+      "case": "couple-different-diets-and-attendance",
+      "algorithm": "NativeSharedScoreCpSat",
+      "elapsed_ms": 84.21750000024986,
+      "result": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 5,
+        "build_ms": 2.4009999997360865,
+        "symmetry_pairs": 0,
+        "workers": 4,
+        "stage_ms": [
+          17.740100000082748,
+          15.748099999655096,
+          15.791299999818875,
+          0.0,
+          14.231199999812816,
+          15.622500000063155
+        ],
+        "score": [
+          0,
+          -1.5,
+          0,
+          0.0,
+          0.5,
+          400
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "c",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "a",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "beans",
+            "required_quantity": 100.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 100.0,
+            "selected_product_id": "beans-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 100.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 0.0,
+            "note": null
+          }
+        ],
+        "total_ms": 83.99389999976847
+      }
+    },
+    {
+      "case": "couple-different-diets-and-attendance",
+      "algorithm": "DiversityAwareGreedyPlanner",
+      "elapsed_ms": 6.6790999999284395,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.0,
+          1,
+          0.0,
+          0,
+          400
+        ],
+        "diversity": {
+          "table_kinds": 1,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 1
+          },
+          "member_mean": 1.0,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "couple-different-diets-and-attendance",
+      "algorithm": "GraspPlanner",
+      "elapsed_ms": 18.092199999955483,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.5,
+          0,
+          0.0,
+          0.5,
+          400
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "couple-different-diets-and-attendance",
+      "algorithm": "LocalSearchPlanner",
+      "elapsed_ms": 3.2431999998152605,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.5,
+          0,
+          0.0,
+          0.5,
+          400
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "couple-different-diets-and-attendance",
+      "algorithm": "SharedObjectiveBeamPlanner",
+      "elapsed_ms": 4.076600000189501,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.5,
+          0,
+          0.0,
+          0.5,
+          400
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "couple-different-diets-and-attendance",
+      "algorithm": "AnnealingPlanner",
+      "elapsed_ms": 34.51249999989159,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.5,
+          0,
+          0.0,
+          0.5,
+          400
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "six-adults",
+      "algorithm": "EnumeratedReference",
+      "elapsed_ms": 1.9287999998596206,
+      "result": {
+        "status": "optimal_for_generated_options",
+        "total": 4,
+        "checked": 4,
+        "unknown": 0,
+        "score": [
+          0,
+          -1.0,
+          1,
+          0.0,
+          0,
+          1200
+        ],
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "diversity": {
+          "table_kinds": 1,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 1,
+            "adult-2": 1,
+            "adult-3": 1,
+            "adult-4": 1,
+            "adult-5": 1
+          },
+          "member_mean": 1.0,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "six-adults",
+      "algorithm": "SharedScoreCpSat",
+      "elapsed_ms": 4.7970999999051855,
+      "result": {
+        "status": "optimal_for_count_table",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "count_states": 3,
+        "score": [
+          0,
+          -1.0,
+          1,
+          0.0,
+          0,
+          1200
+        ],
+        "scope": "canonical count states",
+        "table_ms": 1.0698999999476655,
+        "unknown_states": 0,
+        "diversity": {
+          "table_kinds": 1,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 1,
+            "adult-2": 1,
+            "adult-3": 1,
+            "adult-4": 1,
+            "adult-5": 1
+          },
+          "member_mean": 1.0,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "a",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 1200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 6,
+            "purchase_cost_sgd": 12.0,
+            "surplus_quantity": 0.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 3.0689000000165834,
+        "total_ms": 4.294399999707821
+      }
+    },
+    {
+      "case": "six-adults",
+      "algorithm": "NativeSharedScoreCpSat",
+      "elapsed_ms": 83.14439999958267,
+      "result": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 4,
+        "build_ms": 3.157199999805016,
+        "symmetry_pairs": 1,
+        "workers": 4,
+        "stage_ms": [
+          14.423099999930855,
+          16.3167999999132,
+          15.737000000171975,
+          0.0,
+          16.91690000006929,
+          14.317200000277808
+        ],
+        "score": [
+          0,
+          -1.0,
+          1,
+          0.0,
+          0,
+          1200
+        ],
+        "diversity": {
+          "table_kinds": 1,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 1,
+            "adult-2": 1,
+            "adult-3": 1,
+            "adult-4": 1,
+            "adult-5": 1
+          },
+          "member_mean": 1.0,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "a",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 1200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 6,
+            "purchase_cost_sgd": 12.0,
+            "surplus_quantity": 0.0,
+            "note": null
+          }
+        ],
+        "total_ms": 82.94339999974909
+      }
+    },
+    {
+      "case": "six-adults",
+      "algorithm": "DiversityAwareGreedyPlanner",
+      "elapsed_ms": 5.144100000052276,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.0,
+          1,
+          0.0,
+          0,
+          1200
+        ],
+        "diversity": {
+          "table_kinds": 1,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 1,
+            "adult-2": 1,
+            "adult-3": 1,
+            "adult-4": 1,
+            "adult-5": 1
+          },
+          "member_mean": 1.0,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "six-adults",
+      "algorithm": "GraspPlanner",
+      "elapsed_ms": 28.31370000012612,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.0,
+          1,
+          0.0,
+          0,
+          1200
+        ],
+        "diversity": {
+          "table_kinds": 1,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 1,
+            "adult-2": 1,
+            "adult-3": 1,
+            "adult-4": 1,
+            "adult-5": 1
+          },
+          "member_mean": 1.0,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "six-adults",
+      "algorithm": "LocalSearchPlanner",
+      "elapsed_ms": 3.692899999805377,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.0,
+          1,
+          0.0,
+          0,
+          1200
+        ],
+        "diversity": {
+          "table_kinds": 1,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 1,
+            "adult-2": 1,
+            "adult-3": 1,
+            "adult-4": 1,
+            "adult-5": 1
+          },
+          "member_mean": 1.0,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "six-adults",
+      "algorithm": "SharedObjectiveBeamPlanner",
+      "elapsed_ms": 5.700700000033976,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.0,
+          1,
+          0.0,
+          0,
+          1200
+        ],
+        "diversity": {
+          "table_kinds": 1,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 1,
+            "adult-2": 1,
+            "adult-3": 1,
+            "adult-4": 1,
+            "adult-5": 1
+          },
+          "member_mean": 1.0,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "six-adults",
+      "algorithm": "AnnealingPlanner",
+      "elapsed_ms": 71.48229999984324,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.0,
+          1,
+          0.0,
+          0,
+          1200
+        ],
+        "diversity": {
+          "table_kinds": 1,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 1,
+            "adult-2": 1,
+            "adult-3": 1,
+            "adult-4": 1,
+            "adult-5": 1
+          },
+          "member_mean": 1.0,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "couple-shared-dishes",
+      "algorithm": "EnumeratedReference",
+      "elapsed_ms": 14.645199999904435,
+      "result": {
+        "status": "optimal_for_generated_options",
+        "total": 36,
+        "checked": 36,
+        "unknown": 0,
+        "score": [
+          0,
+          -1.5,
+          2,
+          0.0,
+          1.0,
+          400
+        ],
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "couple-shared-dishes",
+      "algorithm": "SharedScoreCpSat",
+      "elapsed_ms": 23.85450000019773,
+      "result": {
+        "status": "optimal_for_generated_options",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "count_states": 36,
+        "score": [
+          0,
+          -1.5,
+          2,
+          0.0,
+          1.0,
+          400
+        ],
+        "scope": "ordered generated meal options",
+        "table_ms": 13.492999999925814,
+        "unknown_states": 0,
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "s0",
+            "recipe_id": "a",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "a",
+            "role_id": "extra"
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "beans",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "beans-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 50.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 0.0,
+            "note": null
+          }
+        ],
+        "solver_ms": 9.540299999571289,
+        "total_ms": 23.244599999998172
+      }
+    },
+    {
+      "case": "couple-shared-dishes",
+      "algorithm": "NativeSharedScoreCpSat",
+      "elapsed_ms": 82.12360000015906,
+      "result": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 12,
+        "build_ms": 5.454699999972945,
+        "symmetry_pairs": 1,
+        "workers": 4,
+        "stage_ms": [
+          11.920800000098097,
+          15.404999999645952,
+          14.944300000024668,
+          0.0,
+          16.15089999995689,
+          15.41399999996429
+        ],
+        "score": [
+          0,
+          -1.5,
+          2,
+          0.0,
+          1.0,
+          400
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "s0",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "s0",
+            "recipe_id": "a",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "s1",
+            "recipe_id": "a",
+            "role_id": "extra"
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "beans",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "beans-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 50.0,
+            "note": null
+          },
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 1,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 0.0,
+            "note": null
+          }
+        ],
+        "total_ms": 81.93819999996776
+      }
+    },
+    {
+      "case": "couple-shared-dishes",
+      "algorithm": "DiversityAwareGreedyPlanner",
+      "elapsed_ms": 13.610500000140746,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.5,
+          2,
+          0.0,
+          1.0,
+          600
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "couple-shared-dishes",
+      "algorithm": "GraspPlanner",
+      "elapsed_ms": 53.901800000403455,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.5,
+          2,
+          0.0,
+          1.0,
+          600
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "couple-shared-dishes",
+      "algorithm": "LocalSearchPlanner",
+      "elapsed_ms": 10.528600000270671,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.5,
+          2,
+          0.0,
+          1.0,
+          600
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "couple-shared-dishes",
+      "algorithm": "SharedObjectiveBeamPlanner",
+      "elapsed_ms": 21.996599999965838,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.5,
+          2,
+          0.0,
+          1.0,
+          400
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    },
+    {
+      "case": "couple-shared-dishes",
+      "algorithm": "AnnealingPlanner",
+      "elapsed_ms": 85.0642999998854,
+      "result": {
+        "status": "feasible",
+        "validation": "passed",
+        "score": [
+          0,
+          -1.5,
+          2,
+          0.0,
+          1.0,
+          400
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        }
+      }
+    }
+  ]
+}

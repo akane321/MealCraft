@@ -155,11 +155,35 @@ solver workers and symmetry information. Recipe-count cases use developer
 recipes, synthetic prices and exactly one dish per dinner. They do not measure
 retail savings or end-to-end product latency.
 
-The existing fixtures have no `PlanningSlot.members`. Member eligibility and
+The historical native-scale and native-speed fixtures have no `PlanningSlot.members`. Member eligibility and
 coverage come from the shared candidate generator and validator (ADR-0071);
 these runs do not establish member-level algorithm quality. Nutrition bands
 in these packets describe the whole table. Member-specific tests and comparisons
 are a separate required delivery.
+
+## Member-level variety
+
+For packets with members, the variety component maximizes the mean count of
+distinct kinds across members present anywhere in the horizon. Each member only
+receives dishes they can eat in slots where they are present, using the same
+`member_can_eat` eligibility rules as shared-dish coverage. The minimum member
+count is reported, not a separate optimization stage. Table variety remains in
+the report; packets without member data retain the previous table objective and
+report member metrics as null. Names identify members across slots and must be
+unique within a slot. The denominator includes present members with zero counted
+dishes. Exempt roles and near/unknown pairs use the existing representative rule.
+
+This experimental near-duplicate grouping is not the product's `dish_kind`
+classification: it combines pair evidence over the candidate set. The grouping
+policy still needs the independent human review requested in issue #310.
+`min_dish_kinds` continues to constrain whole-table counts, not the member mean.
+
+`scripts/compare_member_algorithm.py` generates [member-smoke.json](member-smoke.json)
+for a couple with different diets/attendance, six adults, and a couple sharing
+multiple dishes. These are synthetic two-dinner fixtures with synthetic prices.
+Every heuristic result passes the independent validator; exhaustive and both
+CP-SAT references expose both member and table counts. This is regression evidence,
+not the full household benchmark or a product-planner rollout.
 
 ## Price-priority reference
 

@@ -13,6 +13,7 @@ from app.planning.diversity_greedy import DiversityAwareGreedyPlanner
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_beam import MealState, assignments_of
 from app.planning.meal_composition import dish_servings, meal_shares
+from app.planning.member_coverage import member_can_eat
 
 
 def integer(value, scale=1000):
@@ -50,6 +51,8 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
         options, selections = {}, {}
         demand = defaultdict(list)
         counts = defaultdict(list)
+        member_counts = defaultdict(list)
+        member_names = list(self.objective.diversity(problem, [])["member_kinds"])
         rule_counts, ingredient_meals = defaultdict(list), defaultdict(list)
         soft_terms = []
         nutrition = defaultdict(list)
@@ -95,6 +98,9 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
                         local_demand[key] += ingredient.quantity * share / recipe.servings
                     if assignment.role_id not in problem.uncounted_roles:
                         counts[assignment.recipe_id].append(x)
+                        for member in slot.members:
+                            if member_can_eat(member, recipe):
+                                member_counts[member.name, assignment.recipe_id].append(x)
                     if assignment.role_id not in problem.uncounted_roles:
                         rule_counts[assignment.recipe_id].append(x)
                     rank_terms.append(integer(self.objective.ranking[assignment.recipe_id], 10000) * x)
@@ -178,6 +184,22 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
             model.Add(rep >= used[rid] - sum(conflicts))
             representative[rid] = rep
         model.Add(sum(representative.values()) >= min_dish_kinds)
+        member_representatives = []
+        for name in member_names:
+            reps = {}
+            for rid in sorted(keys, key=keys.get):
+                present = model.NewBoolVar(f"member_used_{name}_{rid}")
+                occurrences = member_counts[name, rid]
+                model.Add(sum(occurrences) >= 1).OnlyEnforceIf(present)
+                model.Add(sum(occurrences) == 0).OnlyEnforceIf(present.Not())
+                conflicts = [v for other, v in reps.items() if tuple(sorted((keys[rid], keys[other]))) in related]
+                rep = model.NewBoolVar(f"member_rep_{name}_{rid}")
+                model.Add(rep <= present)
+                for conflict in conflicts:
+                    model.Add(rep + conflict <= 1)
+                model.Add(rep >= present - sum(conflicts))
+                reps[rid] = rep
+            member_representatives.extend(reps.values())
         repeat_terms = []
         for rid, count in recipe_counts.items():
             repeated = model.NewIntVar(0, max_dishes * max_dishes, f"repeat_{rid}")
@@ -307,7 +329,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
                     model.Add(value <= integer(band.upper) * divisor)
         terms = [
             sum(empty_terms),
-            -sum(representative.values()),
+            -sum(member_representatives) if member_names else -sum(representative.values()),
             sum(repeat_terms),
             sum(soft_terms),
             sum(rank_terms),
@@ -353,6 +375,8 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
         if report.status != "passed" or score is None:
             return {**output, "status": "validation_rejected"}
         modeled = [solver.Value(t) for t in terms]
+        if member_names:
+            modeled[1] /= len(member_names)
         modeled[3] /= soft_scale
         modeled[4] /= 10000
         modeled = self.objective.ordered(modeled)
@@ -362,6 +386,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
             **output,
             "status": "optimal_for_native_model",
             "score": score,
+            "diversity": self.objective.diversity(problem, assignments),
             "minimum_checkout_sgd": report.purchase_total_sgd if self.objective.priority == "price" else None,
             "assignments": [a.model_dump() for a in assignments],
             "shopping": [r.model_dump() for r in shopping],
