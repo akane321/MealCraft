@@ -91,6 +91,8 @@ def test_keyword_scan_skips_known_look_alikes():
     # A look-alike drops only its misleading word: the plant it is made of is still scanned.
     assert allergen_keywords("soy milk") == {"soy"}
     assert allergen_keywords("almond milk") == {"tree_nut"}
+    assert allergen_keywords("unsweetened soymilk") == {"soy"}
+    assert allergen_keywords("almondmilk") == {"tree_nut"}
     assert allergen_keywords("peanut butter") == {"peanut"}
     assert allergen_keywords("oyster mushrooms") == frozenset()
     assert allergen_keywords("egg noodles") == {"egg", "gluten"}

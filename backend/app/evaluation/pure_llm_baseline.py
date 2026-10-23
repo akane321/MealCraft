@@ -446,11 +446,20 @@ def summarise(records: list[dict[str, Any]], repeats: int) -> dict[str, Any]:
         values = [float(v) for v in (value(row) for row in rows) if v is not None]
         return sum(values) / len(values) if values else None
 
+    def crashed(row: dict) -> bool:
+        return "error" in row["scored"]
+
+    # A plan the scorer crashed on is unverified, so it fails the pass and safety rates instead of leaving them.
+    # A skipped validation (the episode has no gold problem) stays out of the pass rates but is counted below.
     metrics: dict[str, Callable[[dict], float | bool | None]] = {
         "valid_output_rate": lambda row: row["valid_output"],
-        "strict_pass_rate": lambda row: (row["scored"].get("validation") or {}).get("strict_passed"),
-        "adjusted_pass_rate": lambda row: (row["scored"].get("validation") or {}).get("adjusted_passed"),
-        "allergen_safe_rate": lambda row: row["scored"].get("allergen_safe"),
+        "strict_pass_rate": lambda row: (
+            False if crashed(row) else (row["scored"].get("validation") or {}).get("strict_passed")
+        ),
+        "adjusted_pass_rate": lambda row: (
+            False if crashed(row) else (row["scored"].get("validation") or {}).get("adjusted_passed")
+        ),
+        "allergen_safe_rate": lambda row: False if crashed(row) else row["scored"].get("allergen_safe"),
         "gram_coverage": lambda row: (row["scored"].get("verification") or {}).get("gram_coverage"),
         "verifiable_dish_share": lambda row: (row["scored"].get("verification") or {}).get("verifiable_dish_share"),
     }
@@ -458,7 +467,12 @@ def summarise(records: list[dict[str, Any]], repeats: int) -> dict[str, Any]:
     per_repeat = []
     for repeat in range(repeats):
         rows = [row for row in answered if row["repeat"] == repeat]
-        per_repeat.append({"repeat": repeat, "episodes": len(rows)} | {k: rate(rows, f) for k, f in metrics.items()})
+        counts = {
+            "episodes": len(rows),
+            "scoring_errors": sum(crashed(row) for row in rows),
+            "validation_skipped": sum("skipped" in (row["scored"].get("validation") or {}) for row in rows),
+        }
+        per_repeat.append({"repeat": repeat} | counts | {k: rate(rows, f) for k, f in metrics.items()})
     spread = {}
     for key in metrics:
         values = [row[key] for row in per_repeat if row[key] is not None]

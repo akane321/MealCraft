@@ -340,6 +340,29 @@ def test_resume_survives_a_half_written_line_and_refuses_another_fingerprint(tmp
         runner.main(args, model_factory=lambda _name: model, resource_loader=resources)
 
 
+def test_resume_refuses_another_model(tmp_path):
+    episodes = write_episodes(tmp_path / "episodes")
+    output = tmp_path / "pure.jsonl"
+    args = ["--episodes", str(episodes), "--output", str(output), "--live"]
+    runner.main(args, model_factory=lambda _name: FakeModel([reply(ANSWER)]), resource_loader=resources)
+    (row,) = runner.read_records(output)
+    output.write_text(json.dumps({**row, "model": "another-model"}) + "\n", encoding="utf-8")
+    with pytest.raises(SystemExit):
+        runner.main(args, model_factory=lambda _name: FakeModel([reply(ANSWER)]), resource_loader=resources)
+
+
+def test_a_crashed_score_fails_the_rates_and_skips_are_counted():
+    def row(scored):
+        return {"status": "answered", "repeat": 0, "valid_output": True, "scored": scored}
+
+    passed = {"allergen_safe": True, "validation": {"strict_passed": True, "adjusted_passed": True}}
+    skipped = {"allergen_safe": True, "validation": {"skipped": "episode lacks 'gold'"}}
+    (summary,) = runner.summarise([row(passed), row({"error": "RuntimeError: x"}), row(skipped)], 1)["per_repeat"]
+    assert summary["strict_pass_rate"] == summary["adjusted_pass_rate"] == 0.5
+    assert summary["allergen_safe_rate"] == pytest.approx(2 / 3)
+    assert (summary["scoring_errors"], summary["validation_skipped"]) == (1, 1)
+
+
 def test_dry_run_worst_case_counts_the_malformed_retry(tmp_path, capsys):
     episodes = write_episodes(tmp_path / "episodes")
     runner.main(["--episodes", str(episodes), "--output", str(tmp_path / "o.jsonl")])
