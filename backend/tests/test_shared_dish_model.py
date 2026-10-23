@@ -601,6 +601,9 @@ def test_a_one_dish_dinner_cannot_be_swapped_to_a_dish_the_vegetarian_member_can
     assert not MealPlanReplanningService._coverage_after_swap(request, entry, pork, plan)
     # A second dish the vegetarian member can eat makes the meat dish fine: she still has something.
     beside = _entry("main-2", _catalog("greens", "vegetable", calories=120, tags=["vegetarian"]))
+    # `_entry` uses hashed role names for fixture IDs; make this relationship explicit so a hash collision
+    # cannot make `_coverage_after_swap` mistake the other dish for the replaced entry.
+    beside.id = entry.id + 1
     assert MealPlanReplanningService._coverage_after_swap(request, entry, pork, _plan_of([entry, beside]))
 
 
