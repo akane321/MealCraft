@@ -80,18 +80,31 @@ MEAL_END = "(?:" + "|".join(pattern for _, pattern in MEALS) + r")\s*$"
 HOME = r"home\b(?!-| late\b)"
 PRESENT = (
     r"\bjoins? us\b|\bcomes? over\b|\bcome for\b|\beats? with us\b|\bvisits?\b|\bjoins?\b"
-    # Only a "home" that says where someone is: "is (at) home", "at home", "home for dinner", or a part starting
-    # "home on weekends". Never "home-cooked", "works from home", "goes home" or "home late", which say nothing sure.
-    rf"|(?:\b(?:is|are|am|be)|'s|'re|'m) (?:at )?{HOME}|\bat {HOME}|\bhome for\b"
-    # The part may start with its subject ("Mei home on weekdays"), never with a verb ("comes home on Fridays").
-    r"|^\s*(?:(?:the|my) )?(?:(?!(?:comes?|coming|goes|going|gets?|getting|works?|working|stays?|staying)\b)\w+ )?"
-    rf"{HOME}(?= (?:on|for|at|during|every|each|weekdays?|weekends?)\b)"
+    # Only a "home" that says where someone is: "is (at) home", "at home", "home for dinner". Never "home-cooked",
+    # "works from home", "goes home" or "home late", which say nothing sure.
+    rf"|\b(?:is|are) (?:at )?{HOME}|\bat {HOME}|\bhome for\b"
     # Not 在家办公 / 在家上课 / 在家加班: they say where someone works, not where they eat ("works from home").
     r"|过来吃|来吃|回来吃|在家吃|一起吃|过来|回家吃|在家(?!办公|上班|工作|上课|学习|加班)"
 )
-# "at Mei's home", "at his sister's place": someone else's home, so its 's is never "is home".
+WHEN = r"(?= (?:on|for|at|during|every|each|weekdays?|weekends?)\b)"
+# More home forms: "am / be home", "Ben's home on Fridays" (never "Ben's home cooking"), or a part starting with its
+# subject ("Mei home on weekdays"), never with a verb ("comes home on Fridays"). Like MEAL_OUT, they are not sure
+# when another and-part says something unread (see `_polarity`).
+PRESENT_MORE = (
+    rf"\b(?:am|be) (?:at )?{HOME}|(?:'s|'re|'m) (?:at )?{HOME}(?:{WHEN}|\s*$)"
+    r"|^\s*(?:(?:the|my) )?(?:(?!(?:comes?|coming|goes|going|gets?|getting|works?|working|stays?|staying)\b)\w+ )?"
+    rf"{HOME}{WHEN}"
+)
+# What an and-part may say and still only continue the part before ("and Thursday nights", "and Mei on Tuesdays"):
+# days, meals, names and these small words.
+CONTINUES = (
+    rf"\b(?:{EN_DAY_WORD}|weekdays?|weekends?|weeknights?|workdays?|every|each|on|at|for|the|to|through|during)\b|"
+    + "|".join(pattern for _, pattern in MEALS)
+)
+# "at Mei's home", "at his sister's place", "Ben's sister's home": someone else's home, so its 's is never "is home".
 POSSESSIVE = (
-    r"\b(?:at|to|in|from|near|by) (?:(?:the|my|his|her|their|our|your|a|an) )?[\w-]+'s(?: (?:home|house|place|flat))?\b"
+    r"\b(?:at|to|in|from|near|by|[\w-]+'s) (?:(?:the|my|his|her|their|our|your|a|an) )?[\w-]+'s"
+    r"(?: (?:home|house|place|flat))?\b"
 )
 DATES = (
     r"\b\d{1,2}(?:st|nd|rd|th)?\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b"
@@ -107,6 +120,7 @@ GRANDPARENT = r"\bgrand(?:ma|pa|mother|father)\b|爷爷|奶奶|外公|外婆|姥
 SUBJECT = (
     r"\s*(?!(?:He|She|They)\b)([A-Z][a-z]+) (?:eats?|is|are|has|have|joins?|comes?|works?|visits?|stays?|goes"
     r"|will|won'?t|doesn'?t|does|isn'?t|aren'?t|can'?t|skips?|travels?)\b"
+    r"|\s*([A-Z][a-z]+)(?=[一-鿿])"  # "Tilly周二回来吃"
 )
 SPOUSE = r"\bhusband\b|\bwife\b|\bpartner\b|老公|老婆|先生|太太|丈夫|妻子|爱人"
 NO_LIMIT = r"\bno (?:time )?limit\b|\bwhatever\b|\bany time\b|\bno rush\b|\bunlimited\b|无所谓|不限|随便|没限制|不赶"
@@ -198,9 +212,24 @@ def _polarity(clause: str) -> bool | None:
     lowered = clause.lower()
     if re.search(ABSENT, lowered):
         return False
-    if out := re.findall(MEAL_OUT, lowered):
-        return False if set(_meals(clause)) <= set(_meals(" ".join(out))) else None
-    return True if re.search(PRESENT, re.sub(POSSESSIVE, " ", lowered)) else None
+    home = re.sub(POSSESSIVE, " ", lowered)
+    out = re.findall(MEAL_OUT, lowered)
+    if not out and re.search(PRESENT, home):
+        return True
+    if out:
+        present = False if set(_meals(clause)) <= set(_meals(" ".join(out))) else None
+    else:
+        present = True if re.search(PRESENT_MORE, home) else None
+    # Never spread over an and-part with its own days that says something unread ("Ben is out for dinner on
+    # Fridays and stays in on Sundays", "I am home on weekends and out on Tuesdays"): not sure.
+    pieces = re.split(r"\band\b|以及|和|而|及", clause, flags=re.IGNORECASE)
+    if len(pieces) > 1 and any(_days(p) is not None and _polarity(p) is None and _says_more(p) for p in pieces):
+        return None
+    return present
+
+
+def _says_more(piece: str) -> bool:
+    return bool(re.search(r"\w", re.sub(CONTINUES, " ", re.sub(r"\b[A-Z][a-z]*\b", " ", piece).lower())))
 
 
 def _split_conflicts(clause: str, value) -> list[str]:
@@ -396,7 +425,7 @@ def _read_parts(request: RuleParseRequest, pairs, reading: _Reading, text: str, 
         if present is None:
             present = _polarity(part)  # A paired piece ("dinner on weekdays") takes its part's home or away.
         own = _members_named(clause, request.members, request.speaker, reading)
-        if not own and _unknown_subject(clause):
+        if (not own and _unknown_subject(clause)) or (len(own) > 1 and _name_between_days(clause, own)):
             reading.issue(NAME_THE_PERSON)
             continue
         named = own or people
@@ -430,7 +459,15 @@ def _unknown_subject(clause: str) -> bool:
     """A part that starts with its own subject who is no member ("Tilly eats at home"): it never takes the
     previous part's people."""
     match = re.match(SUBJECT, clause)
-    return bool(match) and _days(match.group(1)) is None and not _meals(match.group(1))
+    name = match and (match.group(1) or match.group(2))
+    return bool(name) and _days(name) is None and not _meals(name)
+
+
+def _name_between_days(clause: str, names: list[str]) -> bool:
+    """A name between two day phrases ("周一Mei不在家吃周二Ben不在家吃") could own either, so it is reported."""
+    text = clause.lower()
+    days = [m.start() for m in re.finditer(rf"\b{EN_DAY_WORD}\b|{ZH_PREFIX}[一二三四五六日天]|周末|工作日", text)]
+    return bool(days) and any(days[0] < text.find(n.lower()) < days[-1] for n in names if n.isascii())
 
 
 class ParsedRule(BaseModel):

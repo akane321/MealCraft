@@ -539,3 +539,44 @@ def test_school_on_weekdays_and_home_on_weekends():
         ("Kai", False, WEEKDAYS),
         ("Kai", True, WEEKEND),
     ]
+
+
+# Review round 5: a phrase this reader newly reads never spreads over an and-part it cannot read, a non-member's
+# Chinese part never goes to the member before, and "Ben's home <noun>" is not Ben being home.
+ROUND_5 = [
+    ("Ben goes out for dinner on Fridays and stays in on Sundays", [], [NO_POLARITY]),
+    ("Ben eats lunch out on Fridays and stays home on Saturdays", [], [NO_POLARITY]),
+    ("Ben eats dinner out on Fridays and eats in on Saturdays", [], [NO_POLARITY]),
+    ("Ben has dinner out on Fridays and is back on Saturdays", [], [NO_POLARITY]),
+    (
+        "Ben dinner out on Fridays and Mei dinner in on Saturdays",
+        [("Ben", False, ["friday"], ["dinner"])],
+        [NO_POLARITY],
+    ),
+    (
+        "Ben is out for dinner on Fridays and Mei is in on Saturdays",
+        [("Ben", False, ["friday"], ["dinner"])],
+        [NO_POLARITY],
+    ),
+    ("I am home on weekends and out on Tuesdays", [], [NO_POLARITY]),
+    ("I'm home on weekends and gone on Tuesdays", [], [NO_POLARITY]),
+    ("I am home on Tuesdays and Ben is out on Wednesdays", [("Ann", True, ["tuesday"], [])], [NO_POLARITY]),
+    ("Mei's home on weekends and out on Tuesdays", [], [NO_POLARITY]),
+    ("Mei home on weekdays and out on weekends", [], [NO_POLARITY]),
+    ("Ben周一不回来吃和Tilly周二回来吃", [("Ben", False, ["monday"], [])], [NAME_THE_PERSON]),
+    ("Ben周一不回来吃，Tilly周二回来吃", [("Ben", False, ["monday"], [])], [NAME_THE_PERSON]),
+    ("Ben周一不回来吃和Tom周二回来吃", [("Ben", False, ["monday"], [])], [NAME_THE_PERSON]),
+    ("周一Mei不在家吃周二Ben不在家吃", [], [NAME_THE_PERSON]),
+    ("Ben's home is far, he eats out on Fridays", [], [NO_POLARITY, NAME_THE_PERSON]),
+    ("Ben's home cooking is great on weekends", [], [NO_POLARITY]),
+    ("Ben's home office on weekdays", [], [NO_POLARITY]),
+    ("I love Ben's home cooking on Sundays", [], [NO_POLARITY]),
+    ("Ben's sister's home on Fridays", [], [NO_POLARITY]),
+]
+
+
+@pytest.mark.parametrize(("text", "expected", "issues"), ROUND_5)
+def test_an_unread_and_part_or_non_member_is_reported_not_taken(text, expected, issues):
+    result = read(text)
+    assert [(r.member_name, r.present, r.weekdays, r.meal_types) for r in result.rules] == expected
+    assert result.issues == issues
