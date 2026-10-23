@@ -140,7 +140,7 @@ STAPLES = COOKED_STAPLES | {
     "rice_paper",
 }
 # Starchy tubers and plantain: a side's staple when they are the dish (mashed potatoes, fufu), and a protein-less
-# main's staple at `STAPLE_ONLY_SHARE` (owner 2026-10-23). Derived from the vegetable rule's tubers so they cannot drift.
+# main's staple at `STAPLE_ONLY_SHARE` (owner 2026-10-23). Derived from the vegetable rule's tubers: no drift.
 STARCHY = STARCHY_TUBERS | {"french_fries", "plantain"}
 ONE_BOWL_SHARE = 0.15  # a main's staple share from which it carries its staple
 STAPLE_ONLY_SHARE = 0.6  # a protein-less main this much staple is the staple itself

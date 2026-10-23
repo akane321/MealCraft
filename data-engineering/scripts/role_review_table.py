@@ -27,6 +27,7 @@ OUT = ROOT / "data-engineering/docs/role-rules-20261023b"
 SEED = 20261023
 RULES = "backend/app/data/recipe_tags.py"
 VEGETABLES = "backend/app/planning/vegetable_led.py"
+FIELDS = ("meal_role", "model_allowed_roles", "protein_sources")
 
 
 def rules_at(revision: str, name: str):
@@ -86,8 +87,8 @@ def main() -> None:
                     "id": dish.key,
                     "title": dish.title,
                     "course": dish.course,
-                    "before": dict(zip(("meal_role", "model_allowed_roles", "protein_sources"), suggestion(base))),
-                    "after": dict(zip(("meal_role", "model_allowed_roles", "protein_sources"), suggestion(now))),
+                    "before": dict(zip(FIELDS, suggestion(base), strict=True)),
+                    "after": dict(zip(FIELDS, suggestion(now), strict=True)),
                     "frozen": frozen(entries[dish.key]),
                     "review_status": "pending_human",
                 }
@@ -172,7 +173,10 @@ def main() -> None:
         "",
         "| Stage | Consistent | Grey | Blocked | Incomplete |",
         "|---|---:|---:|---:|---:|",
-        *[f"| {label} | " + " | ".join(str(counts[stage][key]) for key in order) + " |" for stage, label in stages.items()],
+        *[
+            f"| {label} | " + " | ".join(str(counts[stage][key]) for key in order) + " |"
+            for stage, label in stages.items()
+        ],
         "",
         "## Frozen batch: suggestions for liu-ub",
         "",
