@@ -93,14 +93,18 @@ A who's-home rule is: who, on which weekdays and at which meals, away or home.
   **Usually eats at home**, then write a rule that brings them home for the meals
   they join. At least one member must keep **Usually eats at home** ticked, or
   the profile is not saved.
-- **One kind per sentence, one rule per clause.** A sentence is split into
-  clauses at commas, semicolons, full stops, "but", 但是 and 不过; "and" does not
-  split, so "weekday dinners within 30 minutes and weekends 90 minutes" becomes
-  one rule, every dinner within 30 minutes. A clause that names no person or
-  meal takes the previous clause's people and meals, but not its weekdays:
-  "weekday dinners within 30 minutes, weekends no limit" means weekend dinners. If any clause cannot be
-  read, the whole sentence is refused with no card, so a who's-home and a
-  cooking-time rule go in separate sentences, each in its own box.
+- **Keep sentences simple and check the card.** Who's-home rules go in the
+  who's-home box and cooking-time rules in the cooking-time box. One sentence
+  can hold several rules separated by commas or "but", and a later part reuses
+  the people or meals named before it: "Kai eats at school on weekday lunch,
+  Mei is home on Fridays" gives Mei Friday lunch. "And" does not start a new
+  rule, so "weekday dinners within 30 minutes and weekends 90 minutes" becomes
+  one rule, every day's dinner within 30 minutes; write "weekday dinners within
+  30 minutes, weekends 90 minutes" instead. Because commas split a sentence, write several
+  days as one phrase ("weekdays") or as separate rules, not as a comma list. A
+  part MealCraft cannot place is either refused with a message or left out, so
+  the card is the record of what was read: if it is not what you meant, write
+  one rule per sentence.
 
 Examples:
 
@@ -115,8 +119,8 @@ Examples:
 
 MealCraft shows what it understood as a card restating each rule, one per
 member, for example "Monday to Friday, lunch: Mei eats elsewhere." Nothing is
-added until you choose **Add this rule** (or **Change the sentence** to try
-again). Added rules are listed above the box, each with its own **Remove**
+added until you choose **Add this rule** (**Add these rules** when the sentence
+gives more than one), or **Change the sentence** to try again. Added rules are listed above the box, each with its own **Remove**
 button; adding or removing takes effect when you save the profile. Removing a
 member removes their rules too. Renaming a member does not carry their rules
 over: each shows "Not a member any more. Remove this rule to save." and the
