@@ -1,4 +1,4 @@
-import type { MealPlanReplanEvent, NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
+import type { FeedbackKind, MealPlanReplanEvent, NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "~/types/recommendation";
 import type { RecipeNutrition } from "~/types/recipe";
 import { formatPlanDate } from "./meal-plan-format";
@@ -331,4 +331,15 @@ export function conversationForPlan<T extends { plan_id: number | null; can_conf
   return (planId === null ? undefined : conversations.find(item => item.plan_id === planId))
     ?? conversations.find(item => item.can_confirm)
     ?? null;
+}
+
+export const FEEDBACK_BUTTONS: Array<{ kind: FeedbackKind; label: string }> = [
+  { kind: "like", label: "Like" },
+  { kind: "dislike", label: "Dislike" },
+  { kind: "never_again", label: "Never again" },
+];
+
+/** The dish's feedback after a button is clicked: the pressed one again undoes it (null), another replaces it. */
+export function nextFeedback(current: FeedbackKind | null | undefined, clicked: FeedbackKind): FeedbackKind | null {
+  return current === clicked ? null : clicked;
 }

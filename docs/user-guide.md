@@ -100,6 +100,13 @@ such as fried rice, laksa or chicken rice carries its own staple, and may come
 without a vegetable dish. A household that saved its own dishes keeps them; the
 editor offers the full default as the recommended preset.
 
+Homemade noodles, flatbreads, polenta and qualifying potato dumplings can be
+staples when their listed starch ingredients make up at least half of counted
+weight. Sweet dough is not a staple at a sugar-to-carbohydrate ratio of 20% or
+more. Savoury Yorkshire pudding is the named exception: milk lactose does not
+make it a sweet dish, but the flour must still make up at least half. A recipe
+listing only a shell or dough and no filling is a component, not a meal.
+
 Every lunch and dinner is a real meal: a protein main with its staple or a
 one-bowl dish, never a snack, dessert, sauce or drink, a salad only as the
 vegetable dish and a soup only as the soup, no protein twice among the mains
@@ -110,7 +117,10 @@ budget, the time or the dishes cannot fit it. A count you choose yourself is
 kept as chosen.
 
 A vegetable dish is made at least half of vegetables by counted solid-food
-weight. Listed cured/dried meat or seafood and minced meat may season it, up to
+weight. Potatoes and other starchy tubers count toward that half only when
+other vegetables already make up at least 40% of counted weight. Plain mashed
+potatoes, fries and almost-all-potato dishes do not qualify as vegetables.
+Listed cured/dried meat or seafood and minced meat may season it, up to
 20% of counted weight in total. Other meat, poultry, fish or seafood may only be
 traces, up to 5%; with both types, both limits apply. Every flesh quantity must
 be known. This is a meal role, not a vegetarian label.
@@ -207,6 +217,18 @@ Each dish still to cook offers **Swap**, **Keep**, **Skip** and **Can't buy…**
 Each fills the conversation with a sentence the assistant understands, so the
 change is previewed before anything happens. A swap keeps every member covered,
 and the new dish is cooked for the people who can eat it.
+
+Every dish not skipped, cooked ones included, also has **Like**, **Dislike** and
+**Never again**. They are the whole household's: anyone but a viewer may press
+or undo them, and pressing the pressed button again undoes it. **Never again**
+means the dish is never planned for anyone in the household until it is undone:
+not in a new week, a swap, a change to a meal or a cheaper-week offer. The week
+it is already in stays as it is, cooked and kept dishes included; if you change
+a meal that still holds it (for example add a soup to it), that whole meal is
+planned again without it. Pressing **Like** or **Dislike** on it replaces Never
+again. The profile page lists **Dishes you never want again**, each with
+**Undo**, so a dish that has left every week can still come back. Like and
+Dislike are only recorded for now; they do not change the ranking yet.
 
 ### 4. Nutrition and the shopping list
 

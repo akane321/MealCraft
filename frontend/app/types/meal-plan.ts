@@ -112,6 +112,19 @@ export interface NutritionDashboardDay {
   portion_share?: number;
   /** Members at this meal who cannot eat this dish (ADR-0071); empty when everyone at the meal can. */
   not_for?: string[];
+  /** The household's Like, Dislike or Never again on this dish (ADR-0087); null or absent when none. */
+  feedback?: FeedbackKind | null;
+}
+
+export type FeedbackKind = "like" | "dislike" | "never_again";
+
+/** One dish of the household's feedback, as `GET /api/feedback/recipes` lists it. */
+export interface RecipeFeedbackItem {
+  recipe_id: number;
+  slug: string;
+  title: string;
+  kind: FeedbackKind;
+  created_at: string;
 }
 
 export interface WeeklyNutritionDashboard {
