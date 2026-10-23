@@ -1,12 +1,50 @@
 # MealCraft Current Status
 
-> Last verified public snapshot: 2026-10-08
+> Last verified public snapshot: 2026-10-23
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `b01bff0` (integration through #245)
+> Verified remote `main`: `fbe9cbd` (integration through #320)
 
-### Latest-main integration and offline rehearsal (2026-10-08)
+### Sprint 2 integration (#302-#320, 2026-10-23)
+
+Merged since the last snapshot, each with its paired knowledge record:
+
+- #302: the shared-dish model (ADR-0071): each member's own allergens, diets and
+  foods they will not eat, a covered plate for every member home at every lunch
+  and dinner, and dish servings for the members home who can eat it.
+- #303: the isolated Sprint 2 held-out authoring toolkit (guide, author brief,
+  freeze procedure, schema and format checker); it holds no questions.
+- #304: offline planning algorithm comparisons (shared objective, greedy, GRASP,
+  local search, simulated annealing, experimental beam, exhaustive and CP-SAT
+  references) with developer reports; the product algorithm is unchanged.
+- #305: `vue-tsc` 3.3.13 and a typed kitchen summary.
+- #306: shared-dish variety restored, a last bounded widening step so no meal is
+  left empty while eligible dishes remain, and confirm runs that never fail on
+  the wall budget after planning (ADR-0080).
+- #307: replanning across shopping trips: retained dishes' stock first, package
+  surplus kept within its trip, the budget held per trip (ADR-0072).
+- #308: recipe-tag residual repair (task 6), described under
+  [Recipe-tag residual repair](#recipe-tag-residual-repair-task-6-308).
+- #309: the post-search variety pass has no wall-clock deadline, and the plan
+  buttons say a large household on a tight budget can take a few minutes.
+- #311: evidence-based homemade staples, seasoning-meat vegetable dishes and
+  protein-led sides (ADR-0082); CI timeouts raised to 60 minutes.
+- #313: speed-only planning cuts removed (ADR-0080): every plan shape gets the
+  readiness check, the cheapest-week search (exact to the dollar) and the
+  half-household offer; the meal-combination cap stays 16,384 after a
+  developer-data sweep.
+- #314: maintenance batch 1 (stale docs, agent guidance, parity tests,
+  owner-only CODEOWNERS).
+- #317 and #318: per-trip budgets and feasibility checks in the offline
+  algorithm arms, and timing comparisons qualified with their benchmark
+  environment.
+- #320: evidence-only role refinements for the 119-recipe review.
+
+The three dated blocks below are historical snapshots kept for their evidence
+links; their timing statements predate ADR-0079 and ADR-0080.
+
+### Historical: latest-main integration and offline rehearsal (2026-10-08)
 
 The owner merged #244 (result-preserving fixture-ranking reuse) and #245
 (demonstration workflow repairs); their paired knowledge records #102 and #103
@@ -33,7 +71,7 @@ team, not fixed or filtered here. The
 [earlier workflow report](evaluation/sprint1-demo-flow/2026-10-07/report.md)
 preserves the previous live-model results and their limits.
 
-### Earlier WP1 price and integration slices
+### Historical: earlier WP1 price and integration slices (to 2026-10-08)
 
 The owner merged the first WP1 price-strategy slice (#240). Candidate selection,
 affordability/refusal calculations and replanning previews now explicitly use
@@ -58,12 +96,11 @@ regression guards). Their required GitHub checks passed before merge. The
 paired knowledge records were merged; no frontend implementation, migration
 or search-policy change was added in this review.
 
-WP1 **chat-speed acceptance remains open**. These merged improvements do not
-establish that step 2 and step 6 meet the six-second end-to-end target under
-the required cold and warmed OpenAI demo conditions. Result-preserving reuse
-is a separate implementation checkpoint, not a completed demo acceptance.
+The six-second end-to-end figure for steps 2 and 6 was the Sprint 1 demo
+target (ADR-0059, amended by ADR-0061) and is historical: under ADR-0079 and
+ADR-0080 planning time is reported, never a cutoff or a pass/fail gate.
 
-### Previously verified walkthrough snapshot (2026-10-06)
+### Historical: walkthrough snapshot (2026-10-06)
 
 That snapshot added the fixes for what the 2026-10-04 real-stack walkthrough
 found: a typed instruction is no longer swallowed by an open question, a whole
@@ -156,7 +193,8 @@ in [the cap sweep](evaluation/combination-cap-sweep/README.md)); nothing on the 
 limit and an agent run's wall budget of 120 s is checked only before the
 planner starts, not on records written after it returns, ADR-0080 section 3).
 Deferred: adding a vegetable dish when
-vegetables fall short (no vegetable measure yet), CP-SAT for structured meals, day references 8-14 in the
+vegetables fall short (no per-meal or per-day vegetable intake measure yet; the
+dish-level vegetable-led share exists, ADR-0054/0082), CP-SAT for structured meals, day references 8-14 in the
 conversation, and a curated plain Chinese steamed rice (the release has none). `PLANNING_CAPABILITY`
 defaults to `full`; `mvp` (one dinner dish a day) remains for reproducing the
 recorded evaluations. The candidate recipes are kept in memory, loaded at
@@ -168,7 +206,7 @@ the real stack are recorded in dated reports, the latest being the
 [2026-10-17 demo-path timing](evaluation/sprint1-demo-flow/2026-10-17/timing.md)
 (rule parser only); earlier local Docker timings are historical.
 
-### Tag-residual branch verification (pending merge)
+### Recipe-tag residual repair (task 6, #308)
 
 The follow-up rules recognise listed flatbread/wrap carriers, require both a
 grain/bowl title and corresponding listed grain in the existing 5–15% grey
@@ -180,8 +218,7 @@ for coverage; the original audit packet is unchanged. Unreviewed critical model
 fields retain their values, provenance and gate even if a new rule could
 classify the recipe. The swap no-repeat check and full-default diagnostic
 reject unknown sources rather than treating them as a known empty set.
-These are branch verification results, not a claim that remote main has already
-adopted this follow-up or that any model batch has passed human review.
+No model batch is claimed to have passed human review.
 
 Of ADR-0033's packets, P1 (product path), P2 ([conflict explanations](design/planning-conflict-explanation.md))
 and P4 ([nutrition scope](design/planning-nutrition-scope.md)) are wired into the product.
@@ -447,10 +484,11 @@ the next incomplete control. It is a navigation aid, not a second status source.
    remaining mechanisms (a weekday-only shape request read as every day; a budget
    week and a no-repeat week refused although feasible) were fixed on new developer
    episodes (#201, #202) and are not measured on that set. A held-out score needs a
-   fresh set. Response budgets are the demo's (ADR-0059, amended by ADR-0061:
-   a response need only be reasonable); the latest real-stack measurement is the
+   fresh set. Planning time has no hard limit and a slow plan never becomes an
+   error (ADR-0079, ADR-0080): time is reported, never a cutoff; the latest
+   real-stack measurement is the
    [2026-10-17 demo-path timing](evaluation/sprint1-demo-flow/2026-10-17/timing.md),
-   rule parser only, in which the Chinese refusal (step 6) was over its budget.
+   rule parser only, against the earlier demo budgets (ADR-0059, ADR-0061).
 2. Prepare the Sprint 1 demonstration in OpenAI parser mode with rule fallback,
    following the owner-approved skeleton at
    `MealCraft-Knowledge/operations/sprint1-work-packages/demo-skeleton.md`.
@@ -469,7 +507,8 @@ the next incomplete control. It is a navigation aid, not a second status source.
 7. Expand dynamic-replanning stress cases and measure unnecessary disruption.
 8. Complete the real-environment gate for the owner-approved demonstration
    skeleton. The latest-main real-backend offline rehearsal is recorded above;
-   it does not establish the OpenAI/live-price/timing gate. The existing mocked
+   it does not establish the OpenAI/live-price gate (timing is reported only,
+   ADR-0080). The existing mocked
    Playwright suite also does not establish that gate.
 9. Raise the discriminating power of the held-out evaluation before the final
    comparison. Parameters may be tuned on developer data only, never on

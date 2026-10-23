@@ -59,12 +59,59 @@ Then only that member's dishes leave it out. This switch is on the profile page
 only: an allergy you name in the conversation is still the whole household's.
 Diets and foods a member will not eat always apply to that member's dishes only.
 
-Under **Who's home and cooking time**, write one sentence in English or Chinese:
-for example "The kids have lunch at school on weekdays", "我周三晚上加班不回来" or
-"Weekday dinners within 30 minutes". MealCraft shows what it understood, and
-nothing is added until you choose **Add this rule**. The rule is kept when you
-save. Each meal is then cooked for the people home at that meal, and each meal
-keeps its own time limit.
+#### Who's home and cooking time
+
+Under **Who's home and cooking time** there are two boxes, **Who's home** and
+**Cooking time on some days**. Write one sentence in English or Chinese in a box
+and choose **Read it**; a sentence goes in the box of its kind (a who's-home box
+does not read cooking times, and the other way round).
+
+A who's-home rule is: who, on which weekdays and at which meals, away or home.
+
+- **Weekdays and meals only, never dates.** A rule names weekdays ("on
+  Wednesdays", "weekdays", "weekends", 周三, 工作日) and the meals breakfast, lunch
+  and dinner ("evenings" is dinner). With no weekday it is every day; with no
+  meal it is every meal. A date ("tomorrow", "next week", "12 Nov", 明天, 下周) is
+  refused (the rule-based reader says "Rules name weekdays and meals, not
+  dates.").
+- **Who must be a household member.** A member is matched by name. "The kids"
+  means every member whose age group is toddler, child or teen, "my parents" or
+  "grandparents" every senior, "grandma" the one senior, "my husband" the one
+  other adult, and "I" the person chosen in **Who is writing?**. When the words
+  match nobody, the card asks you to name the person.
+- **Guests are members too.** Add an occasional guest as a member, untick
+  **Usually eats at home**, then write a rule that brings them home for the meals
+  they join.
+
+Examples:
+
+| Kind | Sentence |
+| --- | --- |
+| Away | "The kids have lunch at school on weekdays" |
+| Away | "Mei works late on Wednesday evenings" (or, with Mei as the writer, "我周三晚上加班不回来") |
+| Extra guest | "My parents come for dinner on weekends" (the parents are senior members with **Usually eats at home** unticked) |
+| Extra guest | "Ben joins us for lunch on Sundays" |
+| Cooking time | "Weekday dinners within 30 minutes" |
+| Cooking time | "Weekends: no limit" |
+
+MealCraft shows what it understood as a card restating each rule, one per
+member, for example "Monday to Friday, lunch: Mei eats elsewhere." Nothing is
+added until you choose **Add this rule** (or **Change the sentence** to try
+again). Added rules are listed above the box, each with its own **Remove**
+button; adding or removing takes effect when you save the profile.
+
+A who's-home rule overrides **Usually eats at home** for the weekdays and meals
+it names, and when two rules name the same member, weekday and meal, the one
+added later wins. For each meal, the cooking-time limit is the tightest rule
+naming that weekday and meal, else the household's maximum cooking time.
+
+A member away from a meal is left out of it: their portions are not cooked or
+bought, they are not counted in the number of dishes (the dish count follows the
+people at the table, not portions), and their own covered plate, diets, foods
+they will not eat and allergens they alone avoid do not apply to that meal. An
+allergen the whole household avoids still applies to every dish.
+
+#### Basics, limits, meals and kitchen
 
 Under **Basics at home**, salt, sugar, cooking oil, soy sauce, garlic, ginger
 and the other listed basics are assumed to be in your kitchen. They are left off
