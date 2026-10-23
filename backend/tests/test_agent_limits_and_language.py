@@ -306,7 +306,9 @@ def test_a_four_dish_check_searches_past_a_kept_week_of_fewer_and_keeps_its_own(
         ids = (1, 2, 3, 4) if minimum_distinct_dishes else (1, 1, 1, 1)
         return None, SimpleNamespace(selected=[SimpleNamespace(recipe=SimpleNamespace(id=i)) for i in ids], trace={})
 
-    service = SimpleNamespace(_found_key=lambda _: "week", _checked_candidates=lambda _: None, _search=search)
+    service = SimpleNamespace(
+        _live=lambda request: request, _found_key=lambda _: "week", _checked_candidates=lambda _: None, _search=search
+    )
     request = WeeklyMealPlanRequest(start_date="2026-10-07", household_size=2, weekly_budget_sgd=32)
     assert WeeklyMealPlanService.check(service, request) is None
     assert WeeklyMealPlanService.checked_distinct_dishes(service, request) == 1

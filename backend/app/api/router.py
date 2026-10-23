@@ -7,6 +7,7 @@ from app.api.routes.meal_plans import router as meal_plans_router
 from app.api.routes.operations import router as operations_router
 from app.api.routes.operations_data_quality import router as operations_data_quality_router
 from app.api.routes.products import router as products_router
+from app.api.routes.recipe_feedback import router as recipe_feedback_router
 from app.api.routes.recipes import router as recipes_router
 from app.api.routes.recommendations import router as recommendations_router
 from app.api.routes.system import router as system_router
@@ -20,5 +21,6 @@ api_router.include_router(meal_plans_router)
 api_router.include_router(operations_router)
 api_router.include_router(operations_data_quality_router)
 api_router.include_router(products_router)
+api_router.include_router(recipe_feedback_router)
 api_router.include_router(recipes_router)
 api_router.include_router(recommendations_router)

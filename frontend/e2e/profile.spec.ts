@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const SHOTS = process.env.HOME_SURFACE_SHOTS;
 
@@ -7,6 +7,26 @@ const ME = {
   active_household_id: 1,
   household_role: "owner",
 };
+
+// The sticky sidebar is capped at the window and scrolls inside itself: the button is in view once the sidebar
+// alone is scrolled to its end, at both desktop sizes (ADR-0010).
+async function expectSidebarReaches(page: Page, name: string) {
+  const aside = page.locator(".profile-sidebar");
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
+    await page.setViewportSize(viewport);
+    const box = await aside.evaluate((el) => {
+      el.scrollTop = el.scrollHeight;
+      const rect = el.getBoundingClientRect();
+      return { top: rect.top, bottom: rect.bottom, height: rect.height };
+    });
+    expect(box.height).toBeLessThanOrEqual(viewport.height - 40);
+    const button = (await page.getByRole("button", { name }).boundingBox())!;
+    expect(button.y).toBeGreaterThanOrEqual(box.top);
+    expect(button.y + button.height).toBeLessThanOrEqual(box.bottom);
+    await aside.evaluate((el) => { el.scrollTop = 0; });
+  }
+  await page.setViewportSize({ width: 1280, height: 720 });
+}
 
 test("a new household starts with the recommended full day, its dinner growing with who's home, and saves its kitchen", async ({ page }) => {
   const json = (body: unknown, status = 200) => ({ status, contentType: "application/json", body: JSON.stringify(body) });
@@ -35,6 +55,7 @@ test("a new household starts with the recommended full day, its dinner growing w
   await page.getByRole("button", { name: "+ Add person" }).click();
   await expect(page.getByText("Dinner for 3 at the table:")).toBeVisible();
   await expect(page.getByText("2 protein mains, 1 vegetable dish, soup and a staple")).toBeVisible();
+  await expectSidebarReaches(page, "Plan this week");
   // The header counts the dishes planned at this table, not every "from N people" row.
   await expect(page.getByText("5 dishes", { exact: true })).toBeVisible();
   if (SHOTS) {
@@ -62,7 +83,7 @@ test("a new household starts with the recommended full day, its dinner growing w
   expect(saved!.missing_equipment).toEqual(["oven"]);
 });
 
-test("a saved older shape is kept as it is, and a plan of 10 days is asked for", async ({ page }) => {
+test("a saved older shape is kept as it is, Replan stays reachable, and a plan of 10 days is asked for", async ({ page }) => {
   const json = (body: unknown, status = 200) => ({ status, contentType: "application/json", body: JSON.stringify(body) });
   await page.route("**/api/auth/me", route => route.fulfill(json(ME)));
   const member = { name: "Tan", servings_per_meal: null, resolved_servings_per_meal: 1, servings_source: "hpb_default", age_band: null, sex: null, activity: null, goal: null, default_present: true, allergens: [], excluded_ingredients: [], dietary_preferences: [] };
@@ -71,7 +92,7 @@ test("a saved older shape is kept as it is, and a plan of 10 days is asked for",
     id: 1,
     name: "Tan home",
     current_version: 2,
-    latest_plan_id: null,
+    latest_plan_id: 7,
     created_at: "2026-10-01T00:00:00Z",
     updated_at: "2026-10-01T00:00:00Z",
     current: {
@@ -95,6 +116,7 @@ test("a saved older shape is kept as it is, and a plan of 10 days is asked for",
   await expect(page.getByRole("radiogroup", { name: "Dinner dishes" }).getByText("Custom (older format)")).toBeVisible();
   await expect(page.getByRole("button", { name: "Use the recommended full day" })).toBeEnabled();
   await expect(page.getByRole("checkbox", { name: "Air fryer" })).toBeChecked();
+  await expectSidebarReaches(page, "Replan with these details");
 
   await page.getByLabel("Days to plan").selectOption("10");
   await expect(page.getByText("Two shopping trips: before day 1 and before day 8.", { exact: false })).toBeVisible();

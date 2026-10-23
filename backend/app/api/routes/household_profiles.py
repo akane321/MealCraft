@@ -65,6 +65,7 @@ def get_household_profile_service(
             grocery_estimator=GroceryEstimator(product_service),
         ),
         grocery_aggregator=WeeklyGroceryAggregator(product_service),
+        live_feedback=True,
     )
     return HouseholdProfileService(
         repository=HouseholdProfileRepository(database, household_id=household_id),

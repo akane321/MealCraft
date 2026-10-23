@@ -57,14 +57,99 @@ allergens on the profile page. It warns that cooking in the same kitchen can
 cause cross-contact, and asks you to turn it on only if that is safe for them.
 Then only that member's dishes leave it out. This switch is on the profile page
 only: an allergy you name in the conversation is still the whole household's.
-Diets and foods a member will not eat always apply to that member's dishes only.
+Diets and foods a member will not eat apply to that member's dishes only, unless
+a household size stated in the conversation replaces the members (see below).
 
-Under **Who's home and cooking time**, write one sentence in English or Chinese:
-for example "The kids have lunch at school on weekdays", "我周三晚上加班不回来" or
-"Weekday dinners within 30 minutes". MealCraft shows what it understood, and
-nothing is added until you choose **Add this rule**. The rule is kept when you
-save. Each meal is then cooked for the people home at that meal, and each meal
-keeps its own time limit.
+#### Who's home and cooking time
+
+Under **Who's home and cooking time** there are two boxes, **Who's home** and
+**Cooking time on some days**. Write one sentence in English or Chinese in a box
+and choose **Read it**; a sentence goes in the box of its kind (a who's-home box
+does not read cooking times, and the other way round).
+
+A who's-home rule is: who, on which weekdays and at which meals, away or home.
+
+- **Weekdays and meals only, never dates.** A rule names weekdays ("on
+  Wednesdays", "weekdays", "weekends", 周三, 工作日) and the meals breakfast, lunch
+  and dinner ("evenings" is dinner). With no weekday it is every day; with no
+  meal it is every meal. Common date forms ("today", "tonight", "tomorrow",
+  "next week", "12 Nov", "Nov 12", 2026-11-12, 明天, 今晚, 下周, 11月, 5号) are
+  refused (the rule-based reader says "Rules name weekdays and meals, not
+  dates."). Other date words are not: "on May 5", "next month" or "this
+  Saturday" are read as weekday rules, every day or every Saturday, so check the
+  card before adding it.
+- **Who must be a household member.** A member is matched by name. "The kids"
+  means every member whose age group is toddler, child or teen, "my parents" or
+  "grandparents" every senior, "grandma" the one senior, "my husband" or "my
+  wife" the one other adult, and "I" the person chosen in **Who is writing?**.
+  When the words match nobody, the card asks you to name the person.
+- **What the matching does not do.** There is no "everyone" or "all of us":
+  name each person. "I" needs **Who is writing?** chosen first. "My husband" or
+  "my wife" needs exactly one other adult, and a guest added as an adult counts,
+  so name the person then. A name anywhere in the sentence matches that member,
+  so "Mei's mum visits" is read as Mei. "Except" is not read: write the exception
+  as its own clause ("Kai eats at school on weekdays, but at home on Fridays").
+- **Guests are members too.** Add an occasional guest as a member, untick
+  **Usually eats at home**, then write a rule that brings them home for the meals
+  they join. At least one member must keep **Usually eats at home** ticked, or
+  the profile is not saved.
+- **Keep sentences simple and check the card.** Who's-home rules go in the
+  who's-home box and cooking-time rules in the cooking-time box. One sentence
+  can hold several rules separated by commas or "but", and a later part reuses
+  the people or meals named before it: "Kai eats at school on weekday lunch,
+  Mei is home on Fridays" gives Mei Friday lunch. "And" does not start a new
+  rule, so "weekday dinners within 30 minutes and weekends 90 minutes" becomes
+  one rule, every day's dinner within 30 minutes; write "weekday dinners within
+  30 minutes, weekends 90 minutes" instead. Because commas split a sentence, write several
+  days as one phrase ("weekdays") or as separate rules, not as a comma list. A
+  part MealCraft cannot place is either refused with a message or left out, so
+  the card is the record of what was read: if it is not what you meant, write
+  one rule per sentence.
+
+Examples:
+
+| Kind | Sentence |
+| --- | --- |
+| Away | "The kids have lunch at school on weekdays" |
+| Away | "Mei works late on Wednesday evenings" (or, with Mei as the writer, "我周三晚上加班不回来") |
+| Extra guest | "My parents come for dinner on weekends" (the parents are senior members with **Usually eats at home** unticked) |
+| Extra guest | "Ben joins us for lunch on Sundays" |
+| Cooking time | "Weekday dinners within 30 minutes" |
+| Cooking time | "Weekends: no limit" |
+
+MealCraft shows what it understood as a card restating each rule, one per
+member, for example "Monday to Friday, lunch: Mei eats elsewhere." Nothing is
+added until you choose **Add this rule** (**Add these rules** when the sentence
+gives more than one), or **Change the sentence** to try again. Added rules are listed above the box, each with its own **Remove**
+button; adding or removing takes effect when you save the profile. Removing a
+member removes their rules too. Renaming a member does not carry their rules
+over: each shows "Not a member any more. Remove this rule to save." and the
+profile cannot be saved until you remove it and write it again for the new name.
+
+A who's-home rule overrides **Usually eats at home** for the weekdays and meals
+it names, and when two rules name the same member, weekday and meal, the one
+added later wins. A rule already in the list is not added again, so to undo an
+opposing rule, **Remove** it rather than re-adding the first. For each meal,
+the cooking-time limit is the tightest rule naming that weekday and meal, else
+the household's maximum cooking time.
+
+A member away from a meal is left out of it: their portions are not cooked or
+bought, they are not counted in the number of dishes (for a meal of a main, a
+staple and a vegetable, the dish count follows the people at the table, not
+portions), and the meal no longer has to give them a main dish, a staple and a
+vegetable they can eat; their diets, foods they will not eat and allergens they
+alone avoid do not apply to that meal. An allergen the whole household avoids
+still applies to every dish. A meal nobody is home for is not planned, and the
+week's warnings say so ("Saturday dinner is not planned: nobody is home."); if
+that leaves no meal at all, planning stops with "Nobody is home for any planned
+meal this week."
+
+A household size you state in the conversation ("plan for 5"), when it differs
+from the profile's, replaces the members and every who's-home rule for that
+plan. Cooking-time rules, basics and limits still apply, and each member's own
+allergens, diets and foods they will not eat become the whole household's.
+
+#### Basics, limits, meals and kitchen
 
 Under **Basics at home**, salt, sugar, cooking oil, soy sauce, garlic, ginger
 and the other listed basics are assumed to be in your kitchen. They are left off
@@ -217,6 +302,29 @@ Each dish still to cook offers **Swap**, **Keep**, **Skip** and **Can't buy…**
 Each fills the conversation with a sentence the assistant understands, so the
 change is previewed before anything happens. A swap keeps every member covered,
 and the new dish is cooked for the people who can eat it.
+
+Every dish not skipped, cooked ones included, also has **Like**, **Dislike** and
+**Never again**. They are the whole household's: anyone but a viewer may press
+or undo them, and pressing the pressed button again undoes it. **Never again**
+means the dish is never planned for anyone in the household until it is undone:
+not in a new week, a swap, a change to a meal or a cheaper-week offer. The week
+it is already in stays as it is, cooked and kept dishes included; if you change
+a meal that still holds it (for example add a soup to it), that whole meal is
+planned again without it. Pressing **Like** or **Dislike** on it replaces Never
+again. The profile page lists **Dishes you never want again**, each with
+**Undo**, so a dish that has left every week can still come back. Like and
+Dislike are only recorded for now; they do not change the ranking yet.
+
+Under a dish there may be up to two short tags, each a fact that is true of it:
+**Fits low-sodium** (or low-sugar, lower-calorie) on a main within that
+preference's benchmark, **One of the week's cheapest mains** when the week has
+at least four different mains and this one is among the cheapest quarter per
+serving (breakfast and skipped dishes are not counted), and **Ready in 15 min** for a dish ready in
+20 minutes or less. A dish with nothing to say, or a skipped dish, has no tag. Click a tag to see
+the dish's facts: cooking time, kcal and sodium per person, and cost to buy
+per serving. That cost is what the week buys for the dish after your pantry
+covered what it could, so it can be lower than the dish's full price. They describe the dish as planned; they are not the reasons the
+planner chose it.
 
 ### 4. Nutrition and the shopping list
 

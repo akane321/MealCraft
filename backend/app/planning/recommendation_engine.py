@@ -91,6 +91,9 @@ class RecipeRecommendationEngine:
         allergen only one member avoids is that member's own and is checked here per member (section 2).
         """
         reasons: list[str] = []
+        # "Never again" is the whole household's, whoever pressed it (ADR-0087).
+        if recipe.slug in constraints.never_again_recipes:
+            reasons.append("You asked not to plan this dish again.")
         # An "A or B" line counts as the option this household can eat, if there is one.
         cooked = alternatives.lines(recipe, constraints)
         ingredient_names = {item.ingredient.normalized_name for item in cooked}

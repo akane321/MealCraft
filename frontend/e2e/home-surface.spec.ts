@@ -456,6 +456,112 @@ test("nutrition details show all six nutrients and let a dinner be skipped", asy
   await expect.poll(() => patched).toEqual({ status: "skipped" });
 });
 
+test("Never again is pressed, undone in the week, and listed with Undo on the profile (ADR-0087)", async ({ page }) => {
+  await planWeek(page);
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  let feedback: string | null = null;
+  const sent: Array<string> = [];
+  await page.route("**/api/feedback/recipes/4", async (route) => {
+    const request = route.request();
+    sent.push(request.method());
+    if (request.method() === "PUT") {
+      feedback = request.postDataJSON().kind;
+      return route.fulfill(json({ recipe_id: 4, kind: feedback }));
+    }
+    feedback = null;
+    return route.fulfill({ status: 204, body: "" });
+  });
+  await page.route("**/api/plans/9001/dashboard", route => route.fulfill(json({
+    ...dashboard,
+    days: days.map(day => ({ ...day, feedback: day.recipe.id === 4 ? feedback : null })),
+  })));
+
+  const week = page.getByRole("complementary", { name: "This week" });
+  const group = week.getByRole("group", { name: "Feedback on Tofu Brown Rice Stir-fry" });
+  const never = group.getByRole("button", { name: "Never again" });
+  await expect(group.getByRole("button")).toHaveCount(3);
+  await expect(never).toHaveAttribute("aria-pressed", "false");
+  // A dish cooked earlier in the week can be rated too.
+  await expect(week.getByRole("group", { name: "Feedback on Lemon Herb Chicken Rice Bowl" })).toBeVisible();
+
+  await never.click();
+  await expect(never).toHaveAttribute("aria-pressed", "true");
+  await expect(week.getByText("Won't be planned again")).toBeVisible();
+  expect(sent).toEqual(["PUT"]);
+  await never.click(); // the pressed button again undoes it
+  await expect(never).toHaveAttribute("aria-pressed", "false");
+  await expect(week.getByText("Won't be planned again")).toHaveCount(0);
+  expect(sent).toEqual(["PUT", "DELETE"]);
+  await never.click();
+  await week.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(never).toHaveAttribute("aria-pressed", "false");
+  expect(sent).toEqual(["PUT", "DELETE", "PUT", "DELETE"]);
+
+  // The three buttons stay on one row inside the panel at both desktop widths (ADR-0010).
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
+    await page.setViewportSize(viewport);
+    const boxes = await group.getByRole("button").evaluateAll(buttons => buttons.map((button) => {
+      const rect = button.getBoundingClientRect();
+      return { top: rect.top, right: rect.right };
+    }));
+    expect(new Set(boxes.map(box => Math.round(box.top))).size).toBe(1);
+    const panel = await week.boundingBox();
+    expect(Math.max(...boxes.map(box => box.right))).toBeLessThanOrEqual(panel!.x + panel!.width);
+  }
+
+  let listed = [{ recipe_id: 4, slug: "dinner-4", title: "Tofu Brown Rice Stir-fry", kind: "never_again", created_at: "2026-10-23T08:00:00Z" }];
+  await page.route("**/api/feedback/recipes?kind=never_again", route => route.fulfill(json({ items: listed })));
+  await page.route("**/api/feedback/recipes/4", (route) => {
+    listed = [];
+    return route.fulfill({ status: 204, body: "" });
+  });
+  await page.goto("/profile");
+  await page.waitForLoadState("networkidle");
+  const card = page.getByRole("region", { name: "Dishes you never want again" });
+  await expect(card.getByText("Tofu Brown Rice Stir-fry")).toBeVisible();
+  await card.getByRole("button", { name: "Undo Never again for Tofu Brown Rice Stir-fry" }).click();
+  await expect(card.getByText("None yet.", { exact: false })).toBeVisible();
+});
+
+test("a dish's reason tag opens its facts, labelled as facts, at both desktop widths (layer 08 section 7.2)", async ({ page }) => {
+  await stubApi(page);
+  await page.route("**/api/plans/9001/dashboard", route => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      ...dashboard,
+      days: days.map(day => day.recipe.id === 4
+        ? { ...day, reasons: [{ code: "preference", label: "Fits low-sodium" }, { code: "cheap_main", label: "One of the week's cheapest mains" }], cost_per_serving_sgd: 2.1 }
+        : { ...day, reasons: [], cost_per_serving_sgd: null }),
+    }),
+  }));
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week", exact: true }).click();
+
+  const week = page.getByRole("complementary", { name: "This week" });
+  const tag = week.getByRole("button", { name: "Fits low-sodium" });
+  await expect(week.getByRole("button", { name: "One of the week's cheapest mains" })).toBeVisible();
+  const facts = week.getByRole("region", { name: "Facts about Tofu Brown Rice Stir-fry" });
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
+    await page.setViewportSize(viewport);
+    await expect(tag).toHaveAttribute("aria-expanded", "false");
+    await tag.click();
+    await expect(tag).toHaveAttribute("aria-expanded", "true");
+    await expect(facts).toContainText("Dish facts");
+    await expect(facts).toContainText("Cooking time");
+    await expect(facts).toContainText("S$2.10 per serving");
+    await expect(facts).toContainText("mg per person");
+    await expect(facts).not.toContainText("chosen");
+    const panel = await week.boundingBox();
+    const box = await facts.boundingBox();
+    expect(box!.x + box!.width).toBeLessThanOrEqual(panel!.x + panel!.width);
+    await tag.click(); // the tag again closes it
+    await expect(facts).toHaveCount(0);
+  }
+});
+
 for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
   test(`week overview and composer have room at ${viewport.width}`, async ({ page }) => {
     await planWeek(page);
