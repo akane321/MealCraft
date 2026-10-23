@@ -22,13 +22,14 @@ group of the release ingredient it is a kind of (`baby_spinach` is `spinach`); o
 counted as not a vegetable, so it never makes a dish vegetable-led.
 
 A whole cabbage, cauliflower, lettuce or broccoli written without a unit ("1 small head cabbage",
-"1/2 cauliflower") is weighed by release v2.1 as one leaf or floret: 100 g, 25 g, 10 g, 20 g. Such a
+"1/2 cauliflower") was weighed by release v2.1 as one leaf or floret: 100 g, 25 g, 10 g, 20 g. Release v2.2
+weighs most such lines as a head (data-engineering/scripts/correct_release_v22.py); for any it leaves, a
 line is recognised by its grams being exactly its count times that piece weight, and is counted at the
 weight the line states for itself ("1 small head cabbage (about 1 lb.)" is 454 g), or else at the
 release's own weight for a head of that vegetable (`WHOLE`). Only the share reads this; shopping keeps
 the release's grams.
 
-The threshold of one half is where release v2.1's sides and salads turn from mostly other dishes into
+The threshold of one half is where release v2.1's (and v2.2's) sides and salads turn from mostly other dishes into
 mostly vegetable dishes. Their shares are bimodal, most under 0.1 or over 0.9; of the few in between,
 those under one half are mostly rice, couscous, potato, bean and meat dishes, those over it mostly
 vegetable dishes. Yogurt raitas and tomato-heavy rice dishes still reach it.
@@ -279,10 +280,10 @@ def food_groups() -> dict[str, tuple[str, str, str]]:
     """Each ingredient's release id, food group and dietary origin, by the normalized name the catalog and the
     planner use.
 
-    An ingredient release v2.1 does not hold (the curated `baby_spinach`) takes the release ingredient it is
+    An ingredient the release does not hold (the curated `baby_spinach`) takes the release ingredient it is
     the same as or a variety of in the ingredient hierarchy (`spinach`).
     """
-    path = repository_root() / "data-engineering/data/release/v2.1/ingredients.jsonl"
+    path = repository_root() / "data-engineering/data/release/v2.2/ingredients.jsonl"
     rows = (json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip())
     groups = {
         name: (name, row["food_group"], row["dietary_origin"])

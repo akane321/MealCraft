@@ -22,7 +22,7 @@ from app.schemas.operations_data_quality import (
     OpsDroppedCandidateCollection,
 )
 
-CURRENT_RELEASE = "v2.1"
+CURRENT_RELEASE = "v2.2"
 QUALITY_SUMMARY = "quality_summary.json"
 RELEASE_MANIFEST = "release_manifest.json"
 DROPPED_RECORDS = "dropped.jsonl"

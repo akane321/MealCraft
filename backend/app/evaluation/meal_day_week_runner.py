@@ -1,7 +1,7 @@
 """Run protocol v3-meal-day-week episodes through the product planner and score them.
 
 Each episode is planned the way the product plans a week: an in-memory database
-holds only the episode's drawn pool (release v2.1, imported by the product's own
+holds only the episode's drawn pool (release v2.2, imported by the product's own
 importer), `WeeklyMealPlanService.generate` plans the household's plan shape with
 fixture prices, and a shape-change episode then reads the household's words with
 the product's rules (`read_shape_change`), previews the change
@@ -500,8 +500,12 @@ def main() -> int:
         for path in files
     }
     for fixed in (
+        # Titles, courses and products come from v2.1 (`load_release_catalog`); the pool is imported by the product's
+        # importer, which reads the product's release (v2.2 since 2026-10-23).
         "data-engineering/data/release/v2.1/recipes.jsonl",
         "data-engineering/data/release/v2.1/ingredients.jsonl",
+        "data-engineering/data/release/v2.2/recipes.jsonl",
+        "data-engineering/data/release/v2.2/ingredients.jsonl",
         "data/products/fairprice-v2-snapshot.json",
         "data/fixtures/fairprice-products.json",
     ):
