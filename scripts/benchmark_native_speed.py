@@ -6,6 +6,7 @@ from pathlib import Path
 from statistics import median
 from time import perf_counter
 
+from app.evaluation.algorithm_environment import environment
 from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner
 from app.planning.native_algorithm_cp_sat import NativeSharedScoreCpSat
 from tests.test_diversity_greedy import real_recipe_problem
@@ -41,7 +42,7 @@ def run():
                 "repeat": repeat,
                 "optimized": optimize,
                 "wall_ms": (perf_counter() - start) * 1000,
-                **{k: result.get(k) for k in ("status", "score", "build_ms", "stage_ms", "symmetry_pairs")},
+                **{k: result.get(k) for k in ("status", "score", "build_ms", "stage_ms", "symmetry_pairs", "workers")},
             }
             rows.append(row)
             print(optimize, result["status"], round(row["wall_ms"], 2), flush=True)
@@ -49,7 +50,11 @@ def run():
     Path("docs/evaluation/algorithm-dev/native-speed.json").write_text(
         json.dumps(
             {
-                "scope": "16 real recipes; 14 dinners; synthetic prices; one machine; three alternating repeats",
+                "scope": (
+                    "16 developer recipes; 14 single-dish dinners; synthetic prices; "
+                    "no slot members; three alternating repeats"
+                ),
+                "environment": environment(),
                 "median_ms": summaries,
                 "rows": rows,
             },
