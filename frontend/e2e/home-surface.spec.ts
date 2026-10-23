@@ -521,6 +521,14 @@ test("Never again is pressed, undone in the week, and listed with Undo on the pr
   await expect(card.getByText("Tofu Brown Rice Stir-fry")).toBeVisible();
   await card.getByRole("button", { name: "Undo Never again for Tofu Brown Rice Stir-fry" }).click();
   await expect(card.getByText("None yet.", { exact: false })).toBeVisible();
+
+  // The card sits in the main column: stuck at top 20px, the sidebar's plan button stays on screen (ADR-0010 widths).
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
+    await page.setViewportSize(viewport);
+    const aside = await page.locator(".profile-sidebar").boundingBox();
+    const plan = await page.getByRole("button", { name: "Plan this week" }).boundingBox();
+    expect(20 + plan!.y + plan!.height - aside!.y).toBeLessThanOrEqual(viewport.height);
+  }
 });
 
 test("a dish's reason tag opens its facts, labelled as facts, at both desktop widths (layer 08 section 7.2)", async ({ page }) => {

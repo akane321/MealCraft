@@ -601,6 +601,23 @@ onMounted(async () => {
         </button>
         <p v-if="totalServings > 12" class="inline-error">MealCraft can plan for up to 12 portions a meal, guests included.</p>
         <p v-if="orphanRules" class="inline-error">A "who's home" rule names someone who is no longer a member. Remove it to save.</p>
+
+        <!-- In the main column, not the sticky sidebar: there it pushed "Plan your meals" below a 720-pixel window. -->
+        <section class="profile-form-section" aria-labelledby="never-again-title">
+          <p class="form-kicker">Never again</p>
+          <h2 id="never-again-title">Dishes you never want again</h2>
+          <p v-if="!neverAgain.length" class="field-help">None yet. Press "Never again" on a dish in your week and it is never planned again for anyone here.</p>
+          <template v-else>
+            <p class="field-help">Undo takes effect straight away; there is nothing to save.</p>
+            <ul class="never-list">
+              <li v-for="item in neverAgain" :key="item.recipe_id">
+                <span :title="item.title">{{ item.title }}</span>
+                <button v-if="canUndoNeverAgain" type="button" class="secondary-button" :disabled="undoingRecipeId === item.recipe_id" :aria-label="`Undo Never again for ${item.title}`" @click="undoNeverAgain(item.recipe_id)">Undo</button>
+              </li>
+            </ul>
+          </template>
+          <p v-if="neverAgainError" class="inline-error" role="alert">{{ neverAgainError }}</p>
+        </section>
       </section>
 
       <aside class="profile-sidebar">
@@ -625,18 +642,6 @@ onMounted(async () => {
               <dd>{{ memberLimitText(member) }}</dd>
             </div>
           </dl>
-        </section>
-
-        <section class="profile-never-card" aria-labelledby="never-again-title">
-          <h2 id="never-again-title" class="form-kicker">Dishes you never want again</h2>
-          <p v-if="!neverAgain.length">None yet. Press "Never again" on a dish in your week and it is never planned again for anyone here.</p>
-          <ul v-else class="never-list">
-            <li v-for="item in neverAgain" :key="item.recipe_id">
-              <span :title="item.title">{{ item.title }}</span>
-              <button v-if="canUndoNeverAgain" type="button" class="secondary-button" :disabled="undoingRecipeId === item.recipe_id" :aria-label="`Undo Never again for ${item.title}`" @click="undoNeverAgain(item.recipe_id)">Undo</button>
-            </li>
-          </ul>
-          <p v-if="neverAgainError" class="field-help" role="alert">{{ neverAgainError }}</p>
         </section>
 
         <section class="profile-planning-card">
@@ -676,11 +681,8 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.profile-never-card h2 { margin: 0; }
-.profile-never-card > p { color: var(--muted); font-size: 12px; line-height: 1.6; }
-/* A long list scrolls inside the card, so the sticky sidebar still fits a 720-pixel window. */
-.never-list { max-height: 180px; margin: 12px 0 0; padding: 0; overflow-y: auto; list-style: none; border-top: 1px solid var(--border); }
-.never-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-block: 6px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 650; }
+.never-list { margin: 14px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--border); }
+.never-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-block: 8px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 650; }
 .never-list span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .never-list .secondary-button { flex: none; min-height: 0; padding: 4px 10px; font-size: 12px; }
 .portion-field { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 9px; }
