@@ -55,10 +55,14 @@ powershell -ExecutionPolicy Bypass -File .\scripts\memory-finalize.ps1 `
   -Impact L1 `
   -ProjectPath "D:\your\path\MealCraft" `
   -PullRequestUrl "https://github.com/akane321/MealCraft/pull/123" `
+  -Approach "Why this approach, and the alternatives not taken" `
+  -DirectionCheck "Applicable ADRs, requirements and owner decisions; consistent or not; conflicts found" `
   -Verification "pytest passed","frontend tests passed" `
   -Risks "Known limitation or None" `
   -NextAction "Exact next step"
 ```
+
+`-PullRequestUrl`, `-Approach` and `-DirectionCheck` are mandatory (ADR-0053): the code PR and the knowledge PR are opened together and link each other; for a change to the knowledge repository only, pass `-PullRequestUrl knowledge-only`. The full steps are in section 7 of the knowledge repository's `AGENTS.md`.
 
 Review the generated `history/YYYY-MM/*.md` file. If an accepted decision changed, add or supersede an ADR and regenerate the index with `python scripts/build_decision_index.py`. If merged behaviour changed, update the private `CURRENT_STATE.md` and the public `docs/current-status.md` together - updating one side alone leaves two disagreeing records of the same fact. Then:
 
