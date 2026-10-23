@@ -32,6 +32,7 @@ from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
 from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
 from app.repositories.recipe import FOUND_WEEKS_KEPT, RecipeRepository, found_weeks
+from app.repositories.recipe_feedback import RecipeFeedbackRepository, with_never_again
 from app.schemas.meal_plan import (
     MEAL_ORDER,
     MealPlanEntryStatus,
@@ -82,6 +83,7 @@ class WeeklyMealPlanService:
         selector: WeeklyPlanSelector | None = None,
         planning_engine: ProductPlanningEngine | None = None,
         actor_user_id: int | None = None,
+        live_feedback: bool = False,
     ) -> None:
         self.repository = repository
         self.recipe_repository = recipe_repository
@@ -90,7 +92,15 @@ class WeeklyMealPlanService:
         self.selector = selector or WeeklyPlanSelector()
         self.planning_engine = planning_engine or ProductPlanningEngine()
         self.actor_user_id = actor_user_id
+        # Product requests plan without the household's "Never again" dishes, read live (ADR-0087). Evaluations
+        # and the console's replays leave it off: they plan their stored requests as stored.
+        self.live_feedback = live_feedback
         self._checked: dict[str, tuple] = {}
+
+    def _live(self, constraints: WeeklyMealPlanRequest) -> WeeklyMealPlanRequest:
+        if not self.live_feedback:
+            return constraints
+        return with_never_again(constraints, self.repository.session, self.repository.household_id)
 
     def generate(
         self,
@@ -101,6 +111,7 @@ class WeeklyMealPlanService:
         replaces_plan_id: int | None = None,
     ) -> WeeklyMealPlanResponse:
         """Plan a week and save it: the week `check` found for these constraints while it is kept, else a new one."""
+        constraints = self._live(constraints)
         started_at = datetime.now(UTC)
         found = found_weeks.pop(self._found_key(constraints, household_profile_version), None)
         fresh = found is not None and time.monotonic() - found[0] < get_settings().planning_pool_cache_seconds
@@ -268,6 +279,7 @@ class WeeklyMealPlanService:
         of constraints whose week is kept answers from it. A check for at least `minimum_distinct_dishes` different
         dishes searches past a kept week with fewer, and the week it finds is the one kept: Plan saves the varied week
         (ADR-0067)."""
+        constraints = self._live(constraints)
         seconds = get_settings().planning_pool_cache_seconds
         kept = found_weeks.get(self._found_key(constraints)) if seconds else None
         fresh = kept is not None and time.monotonic() - kept[0] < seconds
@@ -300,7 +312,7 @@ class WeeklyMealPlanService:
 
     def checked_distinct_dishes(self, constraints: WeeklyMealPlanRequest) -> int | None:
         """Distinct recipes in the week most recently checked for these constraints, if still cached."""
-        found = found_weeks.get(self._found_key(constraints))
+        found = found_weeks.get(self._found_key(self._live(constraints)))
         if found is None or time.monotonic() - found[0] >= get_settings().planning_pool_cache_seconds:
             return None
         return _distinct(found[1][1])
@@ -351,6 +363,7 @@ class WeeklyMealPlanService:
 
     def week_floor(self, constraints: WeeklyMealPlanRequest) -> WeekFloor:
         """What any week `generate` could plan for these constraints costs at least, without a search."""
+        constraints = self._live(constraints)
         recipes, candidates = self._checked_candidates(constraints)
         return week_floor(constraints, candidates.recommendations, recipes)
 
@@ -362,7 +375,7 @@ class WeeklyMealPlanService:
         With `minimum_distinct_dishes` the search bisects for the cheapest week it finds of that many different
         dishes. Raises ProductPlanningError when the search finds no week at all.
         """
-        unbudgeted = constraints.model_copy(update={"weekly_budget_sgd": None})
+        unbudgeted = self._live(constraints).model_copy(update={"weekly_budget_sgd": None})
         recipes, candidates = self._checked_candidates(unbudgeted)
         result = self.planning_engine.plan(
             unbudgeted.model_copy(update={"pricing_mode": "fixture"}),
@@ -402,7 +415,7 @@ class WeeklyMealPlanService:
         For two trips, `constraints` instead carries the full per-week budget and `rest_days` locates each
         unchanged dish. Each trip computes its own remaining budget before entering the single-trip search.
         """
-        constraints = constraints.model_copy(update={"pricing_mode": "fixture"})
+        constraints = self._live(constraints).model_copy(update={"pricing_mode": "fixture"})
         _used_elsewhere = tuple(_used_elsewhere)
         planned_days = day_indices or list(range(first_day, first_day + day_count))
         if (
@@ -789,6 +802,8 @@ class WeeklyMealPlanService:
         # id, so a lunch added to a dinner week would otherwise come after that day's dinner.
         eaten = sorted(plan.entries, key=lambda entry: (entry.day_index, _meal_rank(entry.meal_type), entry.id))
         not_for = self._not_for(plan)
+        # Each dish's Like, Dislike or Never again, so its buttons show pressed (ADR-0087).
+        feedback = RecipeFeedbackRepository(self.repository.session, household_id=self.repository.household_id).states()
         for entry in eaten:
             nutrition = self._entry_nutrition(entry)
             counts[entry.status] += 1
@@ -811,6 +826,7 @@ class WeeklyMealPlanService:
                     role_id=entry.role_id,
                     portion_share=float(entry.portion_share),
                     not_for=not_for(entry),
+                    feedback=feedback.get(entry.recipe.id),
                 )
             )
 

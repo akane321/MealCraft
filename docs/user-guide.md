@@ -218,6 +218,18 @@ Each fills the conversation with a sentence the assistant understands, so the
 change is previewed before anything happens. A swap keeps every member covered,
 and the new dish is cooked for the people who can eat it.
 
+Every dish not skipped, cooked ones included, also has **Like**, **Dislike** and
+**Never again**. They are the whole household's: anyone but a viewer may press
+or undo them, and pressing the pressed button again undoes it. **Never again**
+means the dish is never planned for anyone in the household until it is undone:
+not in a new week, a swap, a change to a meal or a cheaper-week offer. The week
+it is already in stays as it is, cooked and kept dishes included; if you change
+a meal that still holds it (for example add a soup to it), that whole meal is
+planned again without it. Pressing **Like** or **Dislike** on it replaces Never
+again. The profile page lists **Dishes you never want again**, each with
+**Undo**, so a dish that has left every week can still come back. Like and
+Dislike are only recorded for now; they do not change the ranking yet.
+
 ### 4. Nutrition and the shopping list
 
 The **Groceries** tab shows the total against the weekly budget. Perishable

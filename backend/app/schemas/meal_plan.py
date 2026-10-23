@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator, model_serializer, model_
 
 from app.core.clock import today as local_today
 from app.data import meal_structure
+from app.schemas.catalog_tags import FeedbackKind
 from app.schemas.display import ShownTitle
 from app.schemas.household_rules import HouseholdPlanning
 from app.schemas.planning_nutrition import ProductNutritionTarget
@@ -264,6 +265,8 @@ class NutritionDashboardDayResponse(BaseModel):
     # Members home for this meal who cannot eat this dish (ADR-0071 section 1), so the week can say
     # "Not for Mei" beside it. Empty when everyone at the meal can, and for a plan with no members.
     not_for: list[str] = Field(default_factory=list)
+    # The household's Like, Dislike or Never again on this dish (ADR-0087); None when it gave none.
+    feedback: FeedbackKind | None = None
 
 
 class WeeklyNutritionDashboardResponse(BaseModel):

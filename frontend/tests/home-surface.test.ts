@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, groceryTrips, isStapleDish, packageLabel, perDinner, previewChoices, priceSourceLabel, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
+import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, groceryTrips, isStapleDish, nextFeedback, packageLabel, perDinner, previewChoices, priceSourceLabel, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
 import type { MealPlanEntrySnapshot, MealPlanShapeChange, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
@@ -264,5 +264,19 @@ describe("conversationForPlan", () => {
   it("opens a fresh conversation when no conversation planned the current week or is ready to", () => {
     expect(conversationForPlan([offTopic, planner], 9002)).toBeNull();
     expect(conversationForPlan([offTopic, planner], null)).toBeNull();
+  });
+});
+
+describe("nextFeedback", () => {
+  it("presses the clicked button when none or another is pressed", () => {
+    expect(nextFeedback(null, "like")).toBe("like");
+    expect(nextFeedback(undefined, "never_again")).toBe("never_again");
+    expect(nextFeedback("never_again", "like")).toBe("like");
+    expect(nextFeedback("like", "dislike")).toBe("dislike");
+  });
+
+  it("undoes the pressed button when it is clicked again", () => {
+    expect(nextFeedback("like", "like")).toBeNull();
+    expect(nextFeedback("never_again", "never_again")).toBeNull();
   });
 });

@@ -763,6 +763,7 @@ class ProductPlanningEngine:
             allergen_vocabulary=sorted(checked_allergens()),
             # "No pork" also removes bacon: the checks downstream match ids exactly, so they get the expanded list.
             excluded_ingredients=expand_exclusions(constraints.excluded_ingredients),
+            never_again_recipes=sorted(constraints.never_again_recipes),
             dietary_requirements=constraints.dietary_preferences,
             health_preferences=constraints.health_preferences,
             nutrition_bands=bands,
