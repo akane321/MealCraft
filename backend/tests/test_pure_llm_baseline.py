@@ -268,3 +268,82 @@ def test_ingredient_facts_keep_unknown_and_add_curated_allergens(tmp_path):
     assert facts["pesto"].allergens is None  # unknown stays unknown, never "none"
     assert facts["bread"].allergens == ("gluten",)
     assert facts["bread"].nutrition_per_100g is None
+
+
+def test_hierarchy_parents_keep_only_one_same_or_variety_parent(tmp_path):
+    from app.data.ingredient_hierarchy import FILES
+    from app.evaluation.baseline_resources import hierarchy_parents
+
+    real = resources().parents
+    assert real["baby_spinach"] == "spinach"
+    assert "canned_tomato" not in real  # `same` as canned_tomatoes and a `variety` of tomato: two parents
+    directory = tmp_path / "data/ingredients/hierarchy"
+    directory.mkdir(parents=True)
+    entries = {
+        "kid": {"parents": [{"id": "tomato", "relation": "variety"}]},
+        "grouped": {"parents": [{"id": "tomato", "relation": "member"}]},
+    }
+    (directory / next(iter(FILES.values()))).write_text(json.dumps({"entries": entries}), encoding="utf-8")
+    assert hierarchy_parents({"tomato": "Tomato"}, tmp_path) == {"kid": "tomato"}
+
+
+def clarification_episode():
+    return json.loads((DEV_EPISODE.parent / "md-dev-009.json").read_text(encoding="utf-8"))
+
+
+def test_a_plan_for_an_episode_without_a_gold_problem_is_scored_not_crashed():
+    response = runner.BaselineResponse.model_validate({**ANSWER, "episode_id": "md-dev-009", "system_id": "x"})
+    scored = runner.score(clarification_episode(), response, resources())
+    assert "skipped" in scored["validation"]
+    assert scored["verification"]["gram_coverage"] < 1
+
+
+def test_a_scoring_failure_still_writes_the_paid_record(tmp_path, monkeypatch):
+    def broken(*_args):
+        raise RuntimeError("scorer bug")
+
+    monkeypatch.setattr(runner, "score", broken)
+    episodes = write_episodes(tmp_path / "episodes")
+    output = tmp_path / "pure.jsonl"
+    args = ["--episodes", str(episodes), "--output", str(output), "--live"]
+    assert runner.main(args, model_factory=lambda _name: FakeModel([reply(ANSWER)]), resource_loader=resources) == 0
+    (record,) = runner.read_records(output)
+    assert record["status"] == "answered" and record["cost_usd"] > 0
+    assert record["scored"] == {"error": "RuntimeError: scorer bug"}
+
+
+def test_a_call_without_usage_is_charged_its_worst_case():
+    no_usage = {"parsed": BaselineAnswer.model_validate(ANSWER), "raw": SimpleNamespace(), "parsing_error": None}
+    spend = budget()
+    result = runner.generate(episode(), FakeModel([no_usage]), spend)
+    worst_tokens, worst_usd = spend.worst_case(runner.estimate_tokens(runner.render_messages(episode())))
+    assert result.usage.total_tokens == worst_tokens
+    assert spend.spent_usd == pytest.approx(worst_usd)
+
+
+def test_resume_survives_a_half_written_line_and_refuses_another_fingerprint(tmp_path):
+    episodes = write_episodes(tmp_path / "episodes")
+    output = tmp_path / "pure.jsonl"
+    args = ["--episodes", str(episodes), "--output", str(output), "--live", "--repeats", "2"]
+    model = FakeModel([reply(ANSWER)])
+    runner.main(args, model_factory=lambda _name: model, resource_loader=resources)
+    first, second = output.read_text(encoding="utf-8").splitlines()
+    output.write_text(first + "\n" + second[: len(second) // 2], encoding="utf-8")  # killed mid-write
+    assert runner.main(args, model_factory=lambda _name: model, resource_loader=resources) == 0
+    assert [row["repeat"] for row in runner.read_records(output)] == [0, 1]
+    assert len(model.calls) == 3  # only the lost repeat was asked again
+
+    row = json.loads(first)
+    row["fingerprint"] = {**row["fingerprint"], "prompt_sha256": "an older prompt"}
+    output.write_text(json.dumps(row) + "\n", encoding="utf-8")
+    with pytest.raises(SystemExit):
+        runner.main(args, model_factory=lambda _name: model, resource_loader=resources)
+
+
+def test_dry_run_worst_case_counts_the_malformed_retry(tmp_path, capsys):
+    episodes = write_episodes(tmp_path / "episodes")
+    runner.main(["--episodes", str(episodes), "--output", str(tmp_path / "o.jsonl")])
+    summary = json.loads(capsys.readouterr().out)
+    tokens = summary["estimated_input_tokens"]
+    one_call = runner.price_usd("gpt-5.4-mini", runner.Usage(tokens, runner.MAX_OUTPUT_TOKENS))
+    assert summary["worst_case_usd"] == round(runner.MAX_ATTEMPTS * one_call, 4)

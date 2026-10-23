@@ -3,7 +3,8 @@ import json
 from functools import cache
 
 from app.core.paths import repository_root
-from app.evaluation.baseline_mapping import DishCoverage, IngredientMapping, PlanCoverage
+from app.evaluation.baseline_mapping import DishCoverage, IngredientMapping, PlanCoverage, map_ingredient
+from app.evaluation.baseline_recomputation import line_allergens
 from app.evaluation.baseline_resources import load_resources
 from app.evaluation.baseline_validation import validate_baseline_plan
 
@@ -28,10 +29,11 @@ def week(main_lines, vegetable_lines) -> PlanCoverage:
     return PlanCoverage(tuple(dishes))
 
 
-def validate(coverage: PlanCoverage, allergens=()):
+def validate(coverage: PlanCoverage, allergens=(), **hard):
     episode = json.loads(EPISODE.read_text(encoding="utf-8"))
     episode = copy.deepcopy(episode)
     episode["gold"]["applicable_hard_constraints"]["allergens_absent"] = list(allergens)
+    episode["gold"]["applicable_hard_constraints"].update(hard)
     return validate_baseline_plan(
         episode,
         coverage,
@@ -68,3 +70,32 @@ def test_a_dish_below_the_threshold_is_unverifiable():
     result = validate(week(MAIN, [line("broccoli", 100, "broccoli"), line("odd leaf", 400, None)]))
     assert any(code == "dish_coverage" for code, _ in result.unverified)
     assert result.strict_passed is False
+
+
+def check(result, code):
+    return next(item for item in result.report.checks if item.code == code)
+
+
+def test_a_passed_budget_with_unmapped_lines_is_indeterminate():
+    assert check(validate(week(MAIN, VEGETABLE), budget_sgd=1000), "purchase_budget").status == "passed"
+    result = validate(week([*MAIN, line("mystery sauce", 20, None)], VEGETABLE), budget_sgd=1000)
+    assert check(result, "purchase_budget").status == "indeterminate"
+    assert result.strict_passed is False
+
+
+def test_a_failed_diet_check_is_indeterminate_not_failed():
+    result = validate(week(MAIN, VEGETABLE), dietary_tags_required=["vegetarian"])
+    assert check(result, "dietary_requirement").status == "indeterminate"
+    assert result.strict_passed is False and result.adjusted_passed is True
+
+
+def test_a_hierarchy_mapped_soy_milk_keeps_soy():
+    # "soy milk" is not in the catalog and maps to milk (dairy only): the keyword scan must still add soy.
+    loaded = resources()
+    for name in ("soy milk", "unsweetened soy milk"):
+        mapping = map_ingredient(
+            name, 200, names=loaded.names, aliases=loaded.aliases, matcher=loaded.matcher, parents=loaded.parents
+        )
+        assert mapping.needs_review
+        found, _ = line_allergens(mapping, loaded.ingredient_facts)
+        assert "soy" in found, (name, mapping.ingredient_id, found)

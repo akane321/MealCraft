@@ -11,7 +11,7 @@ NAMES = {
     "spinach": "Spinach",
 }
 ALIASES = {"coriander": ["cilantro"]}
-PARENTS = {"baby_spinach": "spinach"}
+PARENTS = {"baby_spinach": "spinach", "kangkung": "spinach"}
 
 
 def map_one(name: str, grams: float = 100, **kwargs):
@@ -46,7 +46,18 @@ def test_hierarchy_parent_step():
     child = map_one("baby spinach")
     assert (child.ingredient_id, child.method, child.needs_review) == ("spinach", "hierarchy", True)
     longer = map_one("boneless chicken breast fillet")
-    assert (longer.ingredient_id, longer.method) == ("chicken_breast", "hierarchy")
+    assert (longer.ingredient_id, longer.method, longer.needs_review) == ("chicken_breast", "hierarchy", True)
+    # A longer line holding a hierarchy child, not a catalog name, maps to that child's parent.
+    held = map_one("fresh kangkung")
+    assert (held.ingredient_id, held.method, held.needs_review) == ("spinach", "hierarchy", True)
+
+
+def test_a_name_two_catalog_ingredients_share_is_unmatched():
+    names = {"shallot_red": "Shallot", "shallot_brown": "Shallot"}
+    matcher = IngredientMatcher(names, mode="spelling")
+    result = map_ingredient("shallot", 50, names=names, aliases={}, matcher=matcher)
+    assert (result.status, result.ingredient_id) == ("unmatched", None)
+    assert result.suggestions == ("shallot_brown", "shallot_red")
 
 
 def test_mixed_script_line_goes_to_review_even_when_it_maps():

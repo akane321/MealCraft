@@ -10,10 +10,13 @@ Cost and safety rules (ADR-0020 section 4; ADR-0085, the owner's US$5 cap on all
 - The default is a dry run: it renders every prompt, counts the calls and estimates tokens and the worst-case
   cost. Nothing touches the network. `--live` is required for a paid call.
 - `--max-usd` (default 5.0) and `--max-tokens` stop the run before a call that could pass either cap. Spend is
-  priced from the token counts with `PRICES`, recorded per call and summed across resumed runs.
+  priced from the token counts with `PRICES` (a call that reports no usage is charged its worst case), recorded
+  per call and summed across resumed runs into the same output. The cap holds per output file only: the US$5 is
+  one total, so each live run's `--max-usd` is set to what the earlier outputs left.
 - Held-out paths are refused unless `--allow-heldout` is given, and the flag is recorded.
-- Every finished episode is appended to the JSONL output at once; a rerun skips what is already answered, and an
-  episode whose call failed is tried again.
+- Every finished episode is appended to the JSONL output at once, scored or not; a rerun skips what is already
+  answered, and an episode whose call failed is tried again. A rerun into an output written by another model or
+  fingerprint is refused, so two arms never mix in one file.
 
     python -m app.evaluation.pure_llm_baseline --episodes data/evaluation/dev/v2-multidish/episodes \\
         --output docs/evaluation/baselines/dev/pure-llm.jsonl            # dry run
@@ -225,9 +228,11 @@ def create_model(model_name: str) -> StructuredModel:
     ).with_structured_output(BaselineAnswer, method="json_schema", strict=True, include_raw=True)
 
 
-def _usage(raw: Any) -> Usage:
+def _usage(raw: Any, input_estimate: int) -> Usage:
+    """The tokens the API reports; when it reports none, the call's worst case, so the caps never fail open."""
     metadata = getattr(raw, "usage_metadata", None) or {}
-    return Usage(int(metadata.get("input_tokens") or 0), int(metadata.get("output_tokens") or 0))
+    usage = Usage(int(metadata.get("input_tokens") or 0), int(metadata.get("output_tokens") or 0))
+    return usage if usage.total_tokens else Usage(input_estimate, MAX_OUTPUT_TOKENS)
 
 
 def generate(
@@ -270,7 +275,7 @@ def generate(
                 if isinstance(raw_result, dict)
                 else (raw_result, raw_result)
             )
-            usage = _usage(raw)
+            usage = _usage(raw, estimate)
             result.usage += usage
             result.cost_usd += budget.record(usage)
             try:
@@ -341,6 +346,8 @@ def score(episode: dict[str, Any], response: BaselineResponse, resources: Baseli
         )
     except KeyError as error:  # an episode without the multi-dish gold and packet cannot be validated
         scored["validation"] = {"skipped": f"episode lacks {error}"}
+    except ValueError as error:  # no gold problem to judge a plan by (a clarification episode has no size)
+        scored["validation"] = {"skipped": f"{type(error).__name__}: {error}"}
     else:
         scored["validation"] = {
             "strict_passed": validation.strict_passed,
@@ -362,10 +369,18 @@ def run_episode(
 ) -> dict[str, Any]:
     generated = generate(episode, model, budget, sleep=sleep)
     response = generated.response
+    scored: dict[str, Any] = {}
+    if response is not None:
+        try:
+            scored = score(episode, response, resources)
+        except Exception as error:  # a paid answer is kept and the run goes on; the record names the failure
+            scored = {"error": f"{type(error).__name__}: {error}"}
     return {
         "episode_id": episode_id_of(episode),
         "repeat": repeat,
         "system_id": SYSTEM_ID,
+        "model": budget.model,
+        "fingerprint": freeze_fingerprint(),
         "category": episode.get("category"),
         "language": episode.get("language"),
         "status": "call_failed" if generated.call_failed else "answered",
@@ -378,7 +393,7 @@ def run_episode(
         "elapsed_seconds": generated.elapsed_seconds,
         "prompt_sha256": _sha256(json.dumps(render_messages(episode), ensure_ascii=False)),
         "response": response.model_dump(mode="json") if response else None,
-        "scored": score(episode, response, resources) if response else {},
+        "scored": scored,
     }
 
 
@@ -411,9 +426,17 @@ def _json(value: Any) -> Any:
 
 
 def read_records(path: Path) -> list[dict[str, Any]]:
+    """The records, skipping a line a killed run left half written (its episode is then asked again)."""
     if not path.exists():
         return []
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    records = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            records.append(json.loads(line))
+        except json.JSONDecodeError:
+            if line.strip():
+                print(f"skipped an unreadable record line in {path}", file=sys.stderr)
+    return records
 
 
 def summarise(records: list[dict[str, Any]], repeats: int) -> dict[str, Any]:
@@ -486,7 +509,8 @@ def main(
     plan = [(episode, repeat) for repeat in range(args.repeats) for episode in episodes]
     if not args.live:
         estimates = [estimate_tokens(render_messages(episode)) for episode, _ in plan]
-        worst = sum(price_usd(args.model, Usage(tokens, MAX_OUTPUT_TOKENS)) for tokens in estimates)
+        # Every call may be retried once for a malformed answer, so each can be paid MAX_ATTEMPTS times.
+        worst = MAX_ATTEMPTS * sum(price_usd(args.model, Usage(tokens, MAX_OUTPUT_TOKENS)) for tokens in estimates)
         print(
             json.dumps(
                 {
@@ -505,6 +529,12 @@ def main(
         return 0
 
     previous = read_records(args.output)
+    fingerprint = freeze_fingerprint()
+    if any(row.get("model") != args.model or row.get("fingerprint") != fingerprint for row in previous):
+        parser.error(f"{args.output} holds records of another model, prompt, schema or runner; use a new --output")
+    if args.output.exists() and not args.output.read_bytes().endswith(b"\n"):
+        with args.output.open("a", encoding="utf-8") as stream:  # end a half-written line before appending
+            stream.write("\n")
     done = {(row["episode_id"], row["repeat"]) for row in previous if row["status"] == "answered"}
     budget = Budget(
         args.model,
@@ -531,7 +561,7 @@ def main(
         "system_id": SYSTEM_ID,
         "model": args.model,
         "run_date": datetime.now(UTC).isoformat(timespec="seconds"),
-        "fingerprint": freeze_fingerprint(),
+        "fingerprint": fingerprint,
         "release_version": resources.release_version,
         "data_digests": dict(resources.data_digests),
         "episodes_path": str(args.episodes),

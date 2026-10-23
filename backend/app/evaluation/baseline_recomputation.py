@@ -123,34 +123,35 @@ ALLERGEN_KEYWORDS: dict[str, tuple[str, ...]] = {
         "松子",
     ),
 }
-# Removed before the scan: common foods whose name holds an allergen word they do not carry.
+# Rewritten before the scan: common foods whose name holds an allergen word they do not carry. Only the
+# misleading word goes; the rest is still scanned, so "soy milk" keeps soy and "almond butter" keeps tree nut.
 # ponytail: a short list; extend it from the review list, never by guessing an allergen away.
-NOT_ALLERGEN_PHRASES = (
-    "coconut milk",
-    "coconut cream",
-    "almond milk",
-    "oat milk",
-    "rice milk",
-    "soy milk",
-    "peanut butter",
-    "almond butter",
-    "cashew butter",
-    "cocoa butter",
-    "butternut",
-    "apple butter",
-    "oyster mushroom",
-    "rice noodle",
-    "rice flour",
-    "rice vermicelli",
-    "glass noodle",
-    "cream of tartar",
-)
+NOT_ALLERGEN_PHRASES = {
+    "coconut milk": "coconut",
+    "coconut cream": "coconut",
+    "almond milk": "almond",
+    "oat milk": "oat",
+    "rice milk": "rice",
+    "soy milk": "soy",
+    "peanut butter": "peanut",
+    "almond butter": "almond",
+    "cashew butter": "cashew",
+    "cocoa butter": "cocoa",
+    "butternut": "",
+    "apple butter": "apple",
+    "oyster mushroom": "mushroom",
+    "rice noodle": "rice",
+    "rice flour": "rice",
+    "rice vermicelli": "rice",
+    "glass noodle": "",
+    "cream of tartar": "tartar",
+}
 
 
 def allergen_keywords(text: str) -> frozenset[str]:
     lowered = text.casefold()
-    for phrase in NOT_ALLERGEN_PHRASES:
-        lowered = re.sub(rf"\b{phrase}(e?s)?\b", " ", lowered)
+    for phrase, kept in NOT_ALLERGEN_PHRASES.items():
+        lowered = re.sub(rf"\b{phrase}(e?s)?\b", f" {kept} ", lowered)
     found = set()
     for allergen, words in ALLERGEN_KEYWORDS.items():
         for word in words:

@@ -88,6 +88,11 @@ def test_flagged_mapping_adds_keyword_allergens():
 
 def test_keyword_scan_skips_known_look_alikes():
     assert allergen_keywords("coconut milk") == frozenset()
+    # A look-alike drops only its misleading word: the plant it is made of is still scanned.
+    assert allergen_keywords("soy milk") == {"soy"}
+    assert allergen_keywords("almond milk") == {"tree_nut"}
+    assert allergen_keywords("peanut butter") == {"peanut"}
+    assert allergen_keywords("oyster mushrooms") == frozenset()
     assert allergen_keywords("egg noodles") == {"egg", "gluten"}
     assert allergen_keywords("虾仁") == {"shellfish"}
 
