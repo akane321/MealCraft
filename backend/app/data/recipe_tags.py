@@ -36,7 +36,9 @@ The rules, and why:
   main with a main protein is a `protein_main`; one led by vegetables without one is a `vegetable`.
   A soup whose noodles, rice or pasta are a tenth of it is `one_bowl` too. Baked goods go by title words
   and sugar. A named homemade staple needs at least half listed raw starch; its binder eggs are not
-  main protein. An egg/tofu/flesh-led side can be a protein main at half counted solids; whole bean-led sides,
+  main protein. ADR-0085 extends those names and dough-only shell evidence, keeps the 20% sugar/carbohydrate
+  ceiling except for savoury Yorkshire pudding, and counts a pizza's listed flour as its own carrier.
+  An egg/tofu/flesh-led side can be a protein main at half counted solids; whole bean-led sides,
   batters and starch-heavy sides do not gain this role. Grey zones may stay null.
 - **Contains staple** is true exactly for `one_bowl` and `staple` dishes, so it follows the role.
 - **Protein sources** are the sources whose ingredients make at least 5 % (meat, poultry, fish,
@@ -209,7 +211,9 @@ VOLUME_UNIT = re.compile(
 SUBSTITUTION_NOTE = re.compile(r"\b(?:substitut\w*|instead|may|alternativ\w*)\b", re.I)
 DOUGH_FLOUR = frozenset({"flour", "bread_flour", "whole_wheat_flour", "self_rising_flour", "semolina"})
 HOMEMADE_STAPLE_TITLE = re.compile(
-    r"\b(?:noodles?|pasta|gnocchi|polenta|roti|chapatis?|paratha|naan|flatbreads?|tortillas?|spaetzle|spatzle|mantou|bao)\b"
+    r"\b(?:noodles?|pasta|gnocchi|gnocches|polenta|roti|chapatis?|paratha|naan|flatbreads?|tortillas?"
+    r"|spaetzles?|spatzles?|mantou|bao|corn\s?bread|spoon bread|fry bread|(?:mealie )?pap|putupap"
+    r"|mandarin pancakes?|moo shu pancakes?|pupusas?|yorkshire puddings?)\b"
 )
 HOMEMADE_STARCH = DOUGH_FLOUR | {
     "cornmeal",
@@ -240,6 +244,8 @@ PIZZA_BATTER = DOUGH_FLOUR | {
     "baking_powder",
     "baking_soda",
 }
+SHELL_TITLE = re.compile(r"\b(?:tacos?|empanadas?|quiches?|wontons?|pies?|tarts?|[a-z]+(?:[ -][a-z]+)* shells?)\b")
+SHELL_DOUGH = PIZZA_BATTER | HOMEMADE_STARCH | {"shortening", "lard", "vinegar", "cornstarch"}
 BAKED_SIDE = re.compile(r"\b(?:au gratin|gratins?|bakes?|casseroles?|roasts?)\b")
 SOUP_TITLE = re.compile(r"\b(?:soups?|broths?|chowders?|bisques?|stews?)\b")
 CRITICAL_MODEL_FIELDS = ("meal_role", "contains_staple", "protein_sources")
@@ -584,7 +590,11 @@ def staple_share(dish: Dish, names: frozenset[str] | set[str] = STAPLES) -> floa
         weight = line.grams * (COOKED_YIELD if name in COOKED_STAPLES and not already_cooked else 1.0)
         total += weight
         # Flour is a carrier in a complete wrapped meal, not every fried coating or meatloaf binder.
-        if name in names or (names == STAPLES and WRAPPED_MEAL.search(dish.title.lower()) and name in DOUGH_FLOUR):
+        if name in names or (
+            names == STAPLES
+            and (WRAPPED_MEAL.search(dish.title.lower()) or PIZZA_TITLE.search(dish.title.lower()))
+            and name in DOUGH_FLOUR
+        ):
             part += weight
     return part / total if total else 0.0
 
@@ -597,13 +607,27 @@ def homemade_staple(dish: Dish) -> bool:
     """A named staple made mostly from listed raw starch, not a component or a title-only invention."""
     if dish.course in FIXED_COURSE_ROLES or dish.course == "soup" or component(dish.title, dish.course):
         return False
-    if dish.course == "baked_good" and dish.carbohydrate_g and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.3:
-        return False  # Preserve the established sweet-baked-good rule, including sweet stuffed flatbreads.
-    if re.search(r"\b(?:cakes?|cookies?|desserts?|puddings?)\b", dish.title, re.I):
+    title = dish.title.lower()
+    yorkshire = bool(re.search(r"\byorkshire puddings?\b", title))
+    if not yorkshire and dish.carbohydrate_g and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.2:
         return False
-    if not HOMEMADE_STAPLE_TITLE.search(dish.title.lower()):
+    # Yorkshire's milk lactose is not added sweetness (owner); the starch majority still applies.
+    if re.search(r"\b(?:cakes?|cookies?|desserts?|puddings?)\b", title) and not yorkshire:
         return False
-    names = HOMEMADE_STARCH | ({"potato"} if re.search(r"\bgnocchi\b", dish.title, re.I) else set())
+    dumpling = bool(re.search(r"\bdumplings?\b", title))
+    if dumpling:
+        sources = protein_sources(dish)
+        if sources is None or set(sources) - {"egg"} or WRAPPED_MEAL.search(title):
+            return False
+        if any(line_sources(line) - {"egg"} for line in dish.lines):
+            return False  # Even a small or unknown flesh/soy line cannot be erased as a binder.
+    elif not HOMEMADE_STAPLE_TITLE.search(title):
+        return False
+    names = HOMEMADE_STARCH
+    if dumpling:
+        names = DOUGH_FLOUR | {"potato", "instant_mashed_potato"}
+    elif re.search(r"\b(?:gnocchi|gnocches)\b", title):
+        names = names | {"potato", "sweet_potato"}
     return staple_share(dish, names) >= SIDE_STAPLE_SHARE
 
 
@@ -655,6 +679,8 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
     names = {release_name(line.name) for line in dish.lines}
     if PIZZA_TITLE.search(title) and names & DOUGH_FLOUR and names <= PIZZA_BATTER:
         return "sauce", ()  # Only a batter is listed; the title/steps cannot supply the missing pizza toppings.
+    if SHELL_TITLE.search(title) and names & (HOMEMADE_STARCH | {"pie_crust"}) and names <= SHELL_DOUGH | {"pie_crust"}:
+        return "sauce", ()  # Actual dough-only lines, not a wrapper/shell word alone.
     if component(dish.title, dish.course):
         if FILLING_TITLE.search(title) and set(sources or ()) & (FLESH_SOURCES | {"soy"}):
             protein = sum(line.grams or 0 for line in dish.lines if line_sources(line) & (FLESH_SOURCES | {"soy"}))
@@ -677,7 +703,10 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
             return "staple", ()
         if sweet:
             return "dessert", ()
-        return None, ("breakfast", "dessert", "staple", "snack", "one_bowl", "protein_main")
+        roles = ("breakfast", "dessert", "staple", "snack", "one_bowl", "protein_main")
+        if dish.carbohydrate_g and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.2:
+            roles = tuple(role for role in roles if role != "staple")
+        return None, roles
     share = staple_share(dish)
     if share == 0:
         open_roles = tuple(role for role in open_roles if role not in {"one_bowl", "staple"})

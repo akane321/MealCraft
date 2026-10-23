@@ -56,9 +56,8 @@ def compare_reports(base):
         "",
         "Baseline revision is recorded in review.json. No timing report was updated. "
         "These are developer regressions, not held-out capability or accuracy claims. "
-        "This compares archived base reports. For weekday-lunch-away, demo-cost-comparison.json/md additionally "
-        "records fresh main/round-one/round-two replays with an identical request; the main replay reproduces "
-        "its archive. Other cases here are archive comparisons, not separate new control runs.",
+        "This compares archived base reports with regenerated developer reports. "
+        "It is not a separate fresh baseline replay or a single-rule ablation.",
         "",
     ]
     for name in ("full-default", "shared-dish", "household-rules", "legacy-dev"):
@@ -139,11 +138,16 @@ def compare_reports(base):
 
 
 def main():
+    global OUT
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", required=True)
+    parser.add_argument("--output-dir", default=str(OUT), help="Repository-local dated review directory")
     parser.add_argument("--reports-only", action="store_true")
     parser.add_argument("--previous-review", default="0b3f056035993cae6cec5e8fd0736662548dcd74")
     args = parser.parse_args()
+    OUT = Path(args.output_dir).resolve()
+    if not OUT.is_relative_to(ROOT / "data-engineering/docs"):
+        parser.error("output directory must be inside data-engineering/docs")
     if args.reports_only:
         compare_reports(args.base)
         return
@@ -321,7 +325,7 @@ def main():
         "frozen_suggestions": suggestions,
         "bean_led_sides": beans,
         "bean_side_decision": "owner 2026-10-22: whole-bean-led sides, including edamame, are not protein mains",
-        "liu_ub_109_ids": "not supplied; all frozen recipes covered, subset match pending",
+        "subset_review": "Worksheet-ID comparisons are generated separately by role_rules_119_review.py when supplied.",
     }
     OUT.mkdir(exist_ok=True)
     (OUT / "review.json").write_text(

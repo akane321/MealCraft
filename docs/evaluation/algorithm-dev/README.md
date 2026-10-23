@@ -149,18 +149,17 @@ aggregate nutrition requires required meal slots. Those cases can still use
 bounded table references. This does not cover every household packet or replace
 the product path.
 
-`scripts/compare_native_algorithm.py` records a local scale run in
-`native-scale.json`. The 16-recipe, 14-dinner case uses 224 meal variables instead
-of enumerating 16^14 ordered plans. Its proven optimum has 10 conservative
-representatives and synthetic checkout S$34; greedy has 8 and S$51. Native
-elapsed time in an earlier run was approximately 6.14 s. The former universal
-4-second target was superseded by owner decision ADR-0079 on 2026-10-20:
-acceptable wait depends on request complexity, with about a minute guidance for
-complex requests. These offline timings do not measure that product experience.
-The 8-recipe/7-dinner and 16-recipe/7-dinner cases matched greedy, with native
-times around 0.13 s and 0.36 s. These are single local timings including model
-building and verification, excluding fixture/vector preparation. They do not
-measure real retail savings, LLM latency or end-to-end product performance.
+`scripts/compare_native_algorithm.py` records the current run in
+[native-scale.json](native-scale.json), including machine, source version,
+solver workers and symmetry information. Recipe-count cases use developer
+recipes, synthetic prices and exactly one dish per dinner. They do not measure
+retail savings or end-to-end product latency.
+
+The existing fixtures have no `PlanningSlot.members`. Member eligibility and
+coverage come from the shared candidate generator and validator (ADR-0071);
+these runs do not establish member-level algorithm quality. Nutrition bands
+in these packets describe the whole table. Member-specific tests and comparisons
+are a separate required delivery.
 
 ## Controlled speed comparison
 
@@ -172,14 +171,20 @@ are no nutrition bands, skips constant objective stages, and uses four solver
 workers instead of one. No objective component or hard constraint is dropped.
 An earlier partial-hint experiment did not reliably improve time and was removed.
 
-Baseline times were 5.93, 5.08 and 5.13 seconds; optimized times were 1.94, 3.20
-and 2.75 seconds. Medians were 5.13 and 2.75 seconds. All six runs proved the
-same score. This meets four seconds on this local offline case, with more CPU
-workers. It does not establish a product-wide latency target: fixture/vector
-preparation, model calls, network and UI time are excluded. Multiworker timings
-and selected equal-score assignments may vary across runs and machines.
+The historical observations remain in [native-speed.json](native-speed.json).
+The reported median comparison of 5.13 s to 2.75 s used **one worker versus
+four workers**, so it does not isolate the model changes. It used 16 developer
+recipes and 14 single-dish dinners with synthetic prices and no slot members.
+The original CPU model, core count and code version were not recorded; the JSON
+says so rather than assigning today's machine or commit to old measurements.
 
-These timing artifacts were collected before the 2026-10-21 synchronization to
-code main c33f615. They are historical developer measurements, not fresh timings
-of that revision. Regression checks after synchronization are recorded in the
-paired knowledge task record. No held-out data or paid model calls were used.
+Four seconds is not a pass threshold. ADR-0079 and its amendment ADR-0080 make
+timing descriptive; product planning must not reduce quality or fail because of
+a time limit. These offline solver comparisons retain an explicit diagnostic
+limit and do not call a time-limited result optimal. Multiworker timings and
+selected equal-score assignments may vary across runs and machines.
+
+The benchmark generator records machine details, code commit, dirty-tree status
+and each run's workers for future measurements. Fixture/vector preparation,
+model calls, network and UI time are outside its timer. No held-out data or paid
+model calls are used.
