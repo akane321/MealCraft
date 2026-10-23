@@ -67,6 +67,12 @@ evaluation reports did not change: their requests carry no household block.
 `python -m app.evaluation.household_rules` (in CI) measures the rules instead:
 `docs/evaluation/household-rules/latest.md`.
 
+Dish feedback (ADR-0087) **writes and reads** `recipe_feedback`: the Like,
+Dislike and Never again buttons append rows, undo deletes them, and every
+product plan and change leaves out the household's live Never again dishes (see
+the table's section below). The evaluation services do not read it, so their
+reports did not change.
+
 ## Rules of this foundation
 
 - **At migration `20261018_0030` nothing read or wrote the new columns.** The
@@ -195,7 +201,7 @@ The extension table is the `ingredients` rows whose `provenance.origin` is
 - `product_source` is not reused: it says how the product data was obtained
   (`fairprice` or `fixture`) and is validated when read back.
 
-### `recipe_feedback` (new)
+### `recipe_feedback` (new, wired)
 
 | Column | Content |
 | --- | --- |

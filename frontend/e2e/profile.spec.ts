@@ -22,6 +22,10 @@ test("a new household starts with the recommended full day, its dinner growing w
   await page.goto("/profile");
   await page.waitForLoadState("networkidle"); // clicks before hydration are lost
   await expect(page.getByText("Breakfast: one dish · Lunch: full meal · Dinner: full meal (grows with the household)")).toBeVisible();
+  // Stuck at top 20px, the sticky sidebar still shows the plan button inside a 720-pixel window.
+  const aside = await page.locator(".profile-sidebar").boundingBox();
+  const plan = await page.getByRole("button", { name: "Plan this week" }).boundingBox();
+  expect(20 + plan!.y + plan!.height - aside!.y).toBeLessThanOrEqual(720);
   await expect(page.getByRole("button", { name: "Using the recommended full day" })).toBeDisabled();
   await expect(page.getByText("Dinner for 1 at the table:")).toBeVisible();
   await expect(page.getByText("1 protein main, 1 vegetable dish, soup and a staple")).toBeVisible();

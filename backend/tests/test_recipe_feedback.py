@@ -311,6 +311,28 @@ def test_a_variety_preview_never_brings_a_never_again_dish(client):
     assert {dish.recipe_slug for dish in event.shape_change.added} == {"salmon-bake"}
 
 
+def test_a_preview_made_before_a_never_again_cannot_be_confirmed_after_it(client):
+    _never_again(client, "salmon-bake", "chicken-roast")
+    plan = client.post("/api/plans/generate", json={**WEEK, "start_date": local_today().isoformat()}).json()
+    client.delete(f"/api/feedback/recipes/{_ids()['salmon-bake']}")  # leaves the variety preview a dish to bring
+    entry = plan["days"][0]
+    swap = client.post(
+        f"/api/plans/{plan['id']}/replan/preview", json={"entry_id": entry["entry_id"], "event_type": "REPLACE_MEAL"}
+    ).json()
+    with _session() as session:
+        variety, _, _ = build_replanning_service(session, _household(), live_feedback=True).preview_variety(
+            plan_id=plan["id"]
+        )
+    assert variety is not None
+    # Pressed in another tab while both previews are open: neither may bring the dish in.
+    _never_again(client, swap["after_entry"]["recipe_slug"], *(dish.recipe_slug for dish in variety.shape_change.added))
+    for event_id in (swap["id"], variety.id):
+        refused = client.post(f"/api/plans/{plan['id']}/replan/{event_id}/confirm")
+        assert refused.status_code == 409, refused.text
+        assert "Generate a new preview" in refused.json()["detail"]
+    assert client.get(f"/api/plans/{plan['id']}").json()["days"] == plan["days"]
+
+
 def test_a_meal_change_replans_a_meal_holding_a_never_again_dish(composed_client):  # noqa: F811
     plan = _week_ahead(composed_client, COMPOSITION[:2])
     friday_main = next(d["recipe"] for d in plan["days"] if d["day_index"] == 5 and d["role_id"] == "main")

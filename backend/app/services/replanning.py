@@ -32,7 +32,7 @@ from app.repositories.meal_plan import (
     grocery_share,
 )
 from app.repositories.recipe import RecipeRepository
-from app.repositories.recipe_feedback import with_never_again
+from app.repositories.recipe_feedback import RecipeFeedbackRepository, with_never_again
 from app.schemas.display import shown_title
 from app.schemas.meal_plan import (
     MealPlanEntrySnapshot,
@@ -702,6 +702,11 @@ class MealPlanReplanningService:
             raise MealPlanReplanConflictError(
                 "This preview is stale because the meal plan has changed. Generate a new preview."
             )
+        if self.live_feedback and self._brings_never_again(event):
+            # A Never again pressed after the preview does not change the plan's revision (ADR-0087).
+            raise MealPlanReplanConflictError(
+                "This preview is stale because the meal plan has changed. Generate a new preview."
+            )
 
         proposed = self.recipe_repository.list_by_ids([event.proposed_recipe_id] if event.proposed_recipe_id else [])
         proposed_recipe = proposed[0] if proposed else None
@@ -741,6 +746,14 @@ class MealPlanReplanningService:
             event=self._event_response(applied_event),
             plan=WeeklyMealPlanService._to_response(applied_plan),
         )
+
+    def _brings_never_again(self, event: MealPlanEvent) -> bool:
+        """Whether confirming `event` would plan a dish the household now marks "Never again"."""
+        brought = {event.proposed_recipe_id} | {
+            values["recipe_id"] for values in (event.shape_change or {}).get("new_entries", [])
+        }
+        states = RecipeFeedbackRepository(self.repository.session, household_id=self.repository.household_id).states()
+        return any(states.get(recipe_id) == "never_again" for recipe_id in brought)
 
     def list_events(self, *, plan_id: int, limit: int) -> MealPlanReplanEventCollectionResponse:
         if self.repository.get(plan_id) is None:
