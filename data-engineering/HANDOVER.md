@@ -1,9 +1,9 @@
 # 交接说明：MealCraft 食谱/食材数据库
 
 > **历史交接文档（2026-09-11）。** 这里的第一步到第四步已经完成：全量运行、schema v1 冻结、
-> v1 与 v1.1 release 已发布在 `data/release/`。复核规则后来由 ADR-0024 改为"agent 或规则
-> 解决并记录证据、人工事后抽查"。现行做法看 `README.md`、`docs/enrichment-work-package.md`
-> 和 `docs/sources-and-licenses.md`；本文保留作为当时的背景。
+> v1 与 v1.1 release 已发布在 `data-engineering/data/release/`（后来还有 v2、v2.1）。复核规则后来由 ADR-0024 改为"agent 或规则
+> 解决并记录证据、人工事后抽查"。现行做法看 `README.md`、`enrichment-work/README.md`（`docs/enrichment-work-package.md`
+> 已被它取代）和 `docs/sources-and-licenses.md`；本文保留作为当时的背景。
 
 这份文档写给**从零接手这项工作的人**。它不重复仓库里已有的文档，只说三件事：
 现在是什么状态、接下来做什么、做完怎么交回。

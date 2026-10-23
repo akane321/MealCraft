@@ -26,7 +26,7 @@ test("a new household starts with the recommended full day, its dinner growing w
   await expect(page.getByText("Dinner for 1 at the table:")).toBeVisible();
   await expect(page.getByText("1 protein main, 1 vegetable dish, soup and a staple")).toBeVisible();
   // The vegetable row is named by its role, which the planner holds to vegetable dishes.
-  await expect(page.getByText("Vegetable dish", { exact: true }).first()).toHaveAttribute("title", /no meat or fish/);
+  await expect(page.getByText("Vegetable dish", { exact: true }).first()).toHaveAttribute("title", /cured\/minced meat up to 20%, other meat\/fish up to 5%/);
   await expect(page.getByText("Staple", { exact: true }).first()).toHaveAttribute("title", /Rice by default/);
 
   // Three at the table: the dinner takes a second protein main.

@@ -149,7 +149,10 @@ deadline, and gives the cause of every case past the quick figure. The owner's
 direction (ADR-0080) forbids trading quality or simplifying the workflow for
 speed; a slow completed plan must not become an error. The plan buttons on the
 home and household pages say a large household on a tight budget can take a few
-minutes; nothing on the way times out first (the browser request has no time
+minutes (the slowest report case, six-tight-budget, takes about 2.3 minutes on
+the development machine; the meal-combination cap that bounds a meal's search is
+a search-breadth parameter, 16,384, calibrated by plan quality on developer data
+in [the cap sweep](evaluation/combination-cap-sweep/README.md)); nothing on the way times out first (the browser request has no time
 limit and an agent run's wall budget of 120 s is checked only before the
 planner starts, not on records written after it returns, ADR-0080 section 3).
 Deferred: adding a vegetable dish when

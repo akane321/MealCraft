@@ -27,8 +27,9 @@ const MEAL_TITLE: Record<PlannedMealType, string> = { breakfast: "Breakfast", lu
 const COURSES: DishCourse[] = ["main", "side", "salad", "soup", "breakfast", "baked_good", "dessert", "snack_appetizer"];
 // Older course meals hold six dishes; meal-role meals eight (the dinner for seven and more has seven).
 const maxDishes = (list: MealRole[]) => (isStructured(list) ? 8 : 6);
-// The planner's rule for the vegetable role, whatever it is given (owner, 2026-10-02).
-const VEGETABLE_HINT = "Only a dish made mostly of vegetables, with no meat or fish";
+// A meal role, not permission to bypass any member's diet (owner, 2026-10-22).
+const VEGETABLE_HINT =
+  "At least half vegetables; cured/minced meat up to 20%, other meat/fish up to 5%. Each person's diet still applies";
 const HINT: Record<string, string> = {
   "Protein main": "A meat, fish, tofu, egg or bean dish, or a one-bowl dish that brings its own rice or noodles. No two mains of a meal share a protein.",
   "Another protein main": "A meat, fish, tofu, egg or bean dish with a different protein from the meal's other mains",
