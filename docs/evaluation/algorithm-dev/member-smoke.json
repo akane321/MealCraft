@@ -6,14 +6,14 @@
     "physical_core_count": "not recorded",
     "platform": "Windows-11-10.0.26200-SP0",
     "python": "3.12.14",
-    "code_commit": "a88a41c1ebdf35b2fee9f22d1c24118d144e0f5b",
-    "working_tree_dirty": true
+    "code_commit": "53a442553219d1ce3575a0c1ee173dbdef7fcb38",
+    "working_tree_dirty": false
   },
   "rows": [
     {
       "case": "couple-different-diets-and-attendance",
       "algorithm": "EnumeratedReference",
-      "elapsed_ms": 4.828800000268529,
+      "elapsed_ms": 19.381199999770615,
       "result": {
         "status": "optimal_for_generated_options",
         "total": 6,
@@ -44,7 +44,7 @@
     {
       "case": "couple-different-diets-and-attendance",
       "algorithm": "SharedScoreCpSat",
-      "elapsed_ms": 785.3985000001558,
+      "elapsed_ms": 2269.436400001723,
       "result": {
         "status": "optimal_for_generated_options",
         "objective_priority": "variety",
@@ -59,7 +59,7 @@
           400
         ],
         "scope": "ordered generated meal options",
-        "table_ms": 2.3040999999466294,
+        "table_ms": 6.391599999915343,
         "unknown_states": 0,
         "diversity": {
           "table_kinds": 2,
@@ -110,30 +110,30 @@
             "note": null
           }
         ],
-        "solver_ms": 7.126599999992322,
-        "total_ms": 9.68990000001213
+        "solver_ms": 52.228000000468455,
+        "total_ms": 61.516599998867605
       }
     },
     {
       "case": "couple-different-diets-and-attendance",
       "algorithm": "NativeSharedScoreCpSat",
-      "elapsed_ms": 84.21750000024986,
+      "elapsed_ms": 91.54290000151377,
       "result": {
         "status": "optimal_for_native_model",
         "objective_priority": "variety",
         "min_dish_kinds": 0,
         "scope": "native generated meal options",
         "meal_variables": 5,
-        "build_ms": 2.4009999997360865,
+        "build_ms": 9.55180000164546,
         "symmetry_pairs": 0,
         "workers": 4,
         "stage_ms": [
-          17.740100000082748,
-          15.748099999655096,
-          15.791299999818875,
+          18.61550000103307,
+          15.814999998838175,
+          15.332999999372987,
           0.0,
-          14.231199999812816,
-          15.622500000063155
+          15.930199999274919,
+          15.020800001366297
         ],
         "score": [
           0,
@@ -192,13 +192,13 @@
             "note": null
           }
         ],
-        "total_ms": 83.99389999976847
+        "total_ms": 91.20600000096601
       }
     },
     {
       "case": "couple-different-diets-and-attendance",
       "algorithm": "DiversityAwareGreedyPlanner",
-      "elapsed_ms": 6.6790999999284395,
+      "elapsed_ms": 2.0242999999027234,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -225,7 +225,7 @@
     {
       "case": "couple-different-diets-and-attendance",
       "algorithm": "GraspPlanner",
-      "elapsed_ms": 18.092199999955483,
+      "elapsed_ms": 40.02629999740748,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -252,7 +252,7 @@
     {
       "case": "couple-different-diets-and-attendance",
       "algorithm": "LocalSearchPlanner",
-      "elapsed_ms": 3.2431999998152605,
+      "elapsed_ms": 6.188600000314182,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -279,7 +279,7 @@
     {
       "case": "couple-different-diets-and-attendance",
       "algorithm": "SharedObjectiveBeamPlanner",
-      "elapsed_ms": 4.076600000189501,
+      "elapsed_ms": 10.667000002285931,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -306,7 +306,7 @@
     {
       "case": "couple-different-diets-and-attendance",
       "algorithm": "AnnealingPlanner",
-      "elapsed_ms": 34.51249999989159,
+      "elapsed_ms": 43.123499999637716,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -333,7 +333,7 @@
     {
       "case": "six-adults",
       "algorithm": "EnumeratedReference",
-      "elapsed_ms": 1.9287999998596206,
+      "elapsed_ms": 8.93989999894984,
       "result": {
         "status": "optimal_for_generated_options",
         "total": 4,
@@ -368,7 +368,7 @@
     {
       "case": "six-adults",
       "algorithm": "SharedScoreCpSat",
-      "elapsed_ms": 4.7970999999051855,
+      "elapsed_ms": 19.559899999876507,
       "result": {
         "status": "optimal_for_count_table",
         "objective_priority": "variety",
@@ -383,7 +383,7 @@
           1200
         ],
         "scope": "canonical count states",
-        "table_ms": 1.0698999999476655,
+        "table_ms": 4.893799999990733,
         "unknown_states": 0,
         "diversity": {
           "table_kinds": 1,
@@ -426,30 +426,30 @@
             "note": null
           }
         ],
-        "solver_ms": 3.0689000000165834,
-        "total_ms": 4.294399999707821
+        "solver_ms": 11.92810000065947,
+        "total_ms": 17.405099999450613
       }
     },
     {
       "case": "six-adults",
       "algorithm": "NativeSharedScoreCpSat",
-      "elapsed_ms": 83.14439999958267,
+      "elapsed_ms": 90.45360000163782,
       "result": {
         "status": "optimal_for_native_model",
         "objective_priority": "variety",
         "min_dish_kinds": 0,
         "scope": "native generated meal options",
         "meal_variables": 4,
-        "build_ms": 3.157199999805016,
+        "build_ms": 4.166999999142718,
         "symmetry_pairs": 1,
         "workers": 4,
         "stage_ms": [
-          14.423099999930855,
-          16.3167999999132,
-          15.737000000171975,
+          20.03089999925578,
+          15.895200001978083,
+          15.440099999977974,
           0.0,
-          16.91690000006929,
-          14.317200000277808
+          15.124500001547858,
+          15.86219999808236
         ],
         "score": [
           0,
@@ -500,13 +500,13 @@
             "note": null
           }
         ],
-        "total_ms": 82.94339999974909
+        "total_ms": 90.20819999932428
       }
     },
     {
       "case": "six-adults",
       "algorithm": "DiversityAwareGreedyPlanner",
-      "elapsed_ms": 5.144100000052276,
+      "elapsed_ms": 12.27400000061607,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -537,7 +537,7 @@
     {
       "case": "six-adults",
       "algorithm": "GraspPlanner",
-      "elapsed_ms": 28.31370000012612,
+      "elapsed_ms": 73.53480000165291,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -568,7 +568,7 @@
     {
       "case": "six-adults",
       "algorithm": "LocalSearchPlanner",
-      "elapsed_ms": 3.692899999805377,
+      "elapsed_ms": 22.671399998216657,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -599,7 +599,7 @@
     {
       "case": "six-adults",
       "algorithm": "SharedObjectiveBeamPlanner",
-      "elapsed_ms": 5.700700000033976,
+      "elapsed_ms": 27.84060000340105,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -630,7 +630,7 @@
     {
       "case": "six-adults",
       "algorithm": "AnnealingPlanner",
-      "elapsed_ms": 71.48229999984324,
+      "elapsed_ms": 157.83680000095046,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -661,7 +661,7 @@
     {
       "case": "couple-shared-dishes",
       "algorithm": "EnumeratedReference",
-      "elapsed_ms": 14.645199999904435,
+      "elapsed_ms": 17.356599997583544,
       "result": {
         "status": "optimal_for_generated_options",
         "total": 36,
@@ -692,7 +692,7 @@
     {
       "case": "couple-shared-dishes",
       "algorithm": "SharedScoreCpSat",
-      "elapsed_ms": 23.85450000019773,
+      "elapsed_ms": 28.926099999807775,
       "result": {
         "status": "optimal_for_generated_options",
         "objective_priority": "variety",
@@ -707,7 +707,7 @@
           400
         ],
         "scope": "ordered generated meal options",
-        "table_ms": 13.492999999925814,
+        "table_ms": 18.64170000044396,
         "unknown_states": 0,
         "diversity": {
           "table_kinds": 2,
@@ -768,30 +768,30 @@
             "note": null
           }
         ],
-        "solver_ms": 9.540299999571289,
-        "total_ms": 23.244599999998172
+        "solver_ms": 9.47230000019772,
+        "total_ms": 28.316500000073574
       }
     },
     {
       "case": "couple-shared-dishes",
       "algorithm": "NativeSharedScoreCpSat",
-      "elapsed_ms": 82.12360000015906,
+      "elapsed_ms": 113.53040000176406,
       "result": {
         "status": "optimal_for_native_model",
         "objective_priority": "variety",
         "min_dish_kinds": 0,
         "scope": "native generated meal options",
         "meal_variables": 12,
-        "build_ms": 5.454699999972945,
+        "build_ms": 5.099800000607502,
         "symmetry_pairs": 1,
         "workers": 4,
         "stage_ms": [
-          11.920800000098097,
-          15.404999999645952,
-          14.944300000024668,
+          10.09410000187927,
+          32.15289999934612,
+          31.347999996796716,
           0.0,
-          16.15089999995689,
-          15.41399999996429
+          14.317900000605732,
+          15.771599999425234
         ],
         "score": [
           0,
@@ -860,13 +860,13 @@
             "note": null
           }
         ],
-        "total_ms": 81.93819999996776
+        "total_ms": 113.22080000172718
       }
     },
     {
       "case": "couple-shared-dishes",
       "algorithm": "DiversityAwareGreedyPlanner",
-      "elapsed_ms": 13.610500000140746,
+      "elapsed_ms": 23.188899998785928,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -893,7 +893,7 @@
     {
       "case": "couple-shared-dishes",
       "algorithm": "GraspPlanner",
-      "elapsed_ms": 53.901800000403455,
+      "elapsed_ms": 124.76389999937965,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -920,7 +920,7 @@
     {
       "case": "couple-shared-dishes",
       "algorithm": "LocalSearchPlanner",
-      "elapsed_ms": 10.528600000270671,
+      "elapsed_ms": 19.52520000122604,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -947,7 +947,7 @@
     {
       "case": "couple-shared-dishes",
       "algorithm": "SharedObjectiveBeamPlanner",
-      "elapsed_ms": 21.996599999965838,
+      "elapsed_ms": 79.3043999983638,
       "result": {
         "status": "feasible",
         "validation": "passed",
@@ -974,7 +974,7 @@
     {
       "case": "couple-shared-dishes",
       "algorithm": "AnnealingPlanner",
-      "elapsed_ms": 85.0642999998854,
+      "elapsed_ms": 199.7750000009546,
       "result": {
         "status": "feasible",
         "validation": "passed",
