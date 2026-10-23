@@ -75,4 +75,17 @@ describe("switching agent conversations", () => {
     expect(agent.generatedPlan.value).toBeNull();
     expect(fetch).toHaveBeenCalledTimes(3);
   });
+
+  it("clears a stale preview's card on a 409 and keeps the message to ask again", async () => {
+    const { fetch, agent } = setup();
+    fetch.mockResolvedValueOnce({ id: 51, messages: [], pending_replan: { id: 7 } });
+    await agent.create("Swap Monday's dinner");
+    const stale = "This preview is stale because the meal plan has changed. Generate a new preview.";
+    fetch.mockRejectedValueOnce({ statusCode: 409, data: { detail: stale } })
+      .mockResolvedValueOnce({ id: 51, messages: [], pending_replan: null });
+    expect(await agent.confirmReplan()).toBeNull();
+    expect(fetch).toHaveBeenLastCalledWith("/api/agent/sessions/51/replan/discard", { method: "POST" });
+    expect(agent.session.value?.pending_replan).toBeNull();
+    expect(agent.errorMessage.value).toBe(stale);
+  });
 });
