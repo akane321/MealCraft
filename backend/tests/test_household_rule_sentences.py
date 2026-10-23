@@ -272,3 +272,90 @@ def test_a_part_without_days_between_different_days_is_reported_not_read_as_ever
     result = read("weekday dinners within 30 minutes and weekend lunch and dinner 90 minutes", kind="cooking_time")
     assert result.issues == [NO_DAYS, NO_TIME]
     assert [(r.weekdays, r.meal_types, r.max_minutes) for r in result.rules] == [(WEEKDAYS, ["dinner"], 30)]
+
+
+# Review round 2 of #328: never a confirmable rule wider than the sentence; unsure parts are reported.
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Grandma has a home-cooked dinner on Fridays",
+        "Ben works from home on Fridays",
+        "Ben has a home office on weekdays",
+        "Ben likes home cooking on weekends",
+        "Ben has home delivery on Fridays",
+        "Mei brought homework home on Fridays",
+        "Grandma brings home leftovers on Sundays",
+        "Grandma goes home on Sundays",
+    ],
+)
+def test_a_home_that_says_nothing_about_presence_is_reported(text):
+    result = read(text)
+    assert result.rules == [] and result.issues == [NO_POLARITY]
+
+
+ROUND_2 = [
+    # "<meal> out" is away, so the breakfast never joins the home part.
+    (
+        "Mei eats lunch at school and dinner at home and breakfast out on weekdays",
+        [
+            ("Mei", False, WEEKDAYS, ["lunch"]),
+            ("Mei", True, WEEKDAYS, ["dinner"]),
+            ("Mei", False, WEEKDAYS, ["breakfast"]),
+        ],
+        [],
+    ),
+    (
+        "Ben eats lunch out and dinner at home on Fridays",
+        [("Ben", False, ["friday"], ["lunch"]), ("Ben", True, ["friday"], ["dinner"])],
+        [],
+    ),
+    # A trailing meal with no home or away is reported, never joined to the part before it.
+    (
+        "Mei eats lunch at school and dinner at home and breakfast on weekdays",
+        [("Mei", False, WEEKDAYS, ["lunch"]), ("Mei", True, WEEKDAYS, ["dinner"])],
+        [NO_POLARITY],
+    ),
+    # ...but a meal list continues: "for lunch and dinner".
+    (
+        "Mei eats at school on weekdays and at home for lunch and dinner on weekends",
+        [("Mei", False, WEEKDAYS, []), ("Mei", True, WEEKEND, ["lunch", "dinner"])],
+        [],
+    ),
+    # A part whose subject is no member never takes the previous part's people.
+    ("Mei eats at school and Tilly eats at home on weekdays", [("Mei", False, WEEKDAYS, [])], [NAME_THE_PERSON]),
+    (
+        "Ben eats lunch at school and Mei eats dinner at home and Tilly eats breakfast out on weekdays",
+        [("Ben", False, WEEKDAYS, ["lunch"]), ("Mei", True, WEEKDAYS, ["dinner"])],
+        [NAME_THE_PERSON],
+    ),
+    (
+        "Ben is away on Mondays and Mei is away on Tuesdays and Tilly is away on Wednesdays",
+        [("Ben", False, ["monday"], []), ("Mei", False, ["tuesday"], [])],
+        [NAME_THE_PERSON],
+    ),
+    ("Ben eats out on Mondays, Tilly joins us on Tuesdays", [("Ben", False, ["monday"], [])], [NAME_THE_PERSON]),
+    # A name next to Chinese is still a name.
+    ("我周一在学校吃而Ben周二在家吃", [("Ann", False, ["monday"], []), ("Ben", True, ["tuesday"], [])], []),
+    # Home and away for the same days and meals cannot both hold.
+    ("Mei eats at school and home on weekdays", [], [NO_POLARITY]),
+    ("Mei is at home and at school on weekdays", [], [NO_POLARITY]),
+    # Another person's part does not take the meals said for someone else.
+    (
+        "Ben eats lunch at school and dinner at home and Mei eats out on Fridays",
+        [("Ben", False, ["friday"], ["lunch"]), ("Ben", True, ["friday"], ["dinner"]), ("Mei", False, ["friday"], [])],
+        [],
+    ),
+    # A pronoun still refers back.
+    (
+        "Mei eats at school on weekdays. She eats at home on weekends.",
+        [("Mei", False, WEEKDAYS, []), ("Mei", True, WEEKEND, [])],
+        [],
+    ),
+]
+
+
+@pytest.mark.parametrize(("text", "expected", "issues"), ROUND_2)
+def test_and_parts_never_read_wider_than_said(text, expected, issues):
+    result = read(text)
+    assert result.issues == issues
+    assert [(r.member_name, r.present, r.weekdays, r.meal_types) for r in result.rules] == expected

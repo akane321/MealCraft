@@ -60,7 +60,7 @@ MEALS = (
 ABSENT = (
     r"\bat school\b|\bat work\b|\bat the office\b|\beats? out\b|\beating out\b|\bnot (?:at )?home\b|\baway\b"
     r"|\bworks? late\b|\bworking late\b|\bwon'?t be (?:at )?home\b|\b(?:isn'?t|aren'?t) (?:at )?home\b"
-    r"|\bskips?\b|\btravel(?:s|ling)?\b|\beats? elsewhere\b"
+    r"|\bskips?\b|\btravel(?:s|ling)?\b|\beats? elsewhere\b|\b(?:breakfasts?|lunch(?:es)?|dinners?|suppers?) out\b"
     # A negated "eat / join / home": "Mei doesn't eat at home", "Ben won't join us", "Mei is not eating lunch".
     r"|\b(?:don'?t|doesn'?t|do not|does not|won'?t|will not|never|not)\b(?:\s+\w+){0,2}?"
     r"\s+(?:eat(?:s|ing)?|join(?:s|ing)?|home|have|having)\b"
@@ -68,10 +68,13 @@ ABSENT = (
     # 不吃 only before a meal word: "周三不吃晚饭" is away, "孩子不吃猪肉" is not a presence sentence.
     r"|在学校|在公司|不在家|不回来|不回家|加班|出去吃|在外面吃|在外吃|不吃(?=饭|早|午|中|晚)|出差"
 )
+HOME = r"home\b(?!-| late\b)"
 PRESENT = (
     r"\bjoins? us\b|\bcomes? over\b|\bcome for\b|\beats? with us\b|\bvisits?\b|\bjoins?\b"
-    # Any "home" the ABSENT check left: "at home", "home for dinner", bare "home on weekends"; "home late" is unclear.
-    r"|\bhome\b(?! late)"
+    # Only a "home" that says where someone is: "is (at) home", "at home", "home for dinner", or a part starting
+    # "home on weekends". Never "home-cooked", "works from home", "goes home" or "home late", which say nothing sure.
+    rf"|(?:\b(?:is|are|am|be)|'s|'re|'m) (?:at )?{HOME}|\bat {HOME}|\bhome for\b"
+    rf"|^\s*{HOME}(?= (?:on|for|at|during|every|each|weekdays?|weekends?)\b)"
     r"|过来吃|来吃|回来吃|在家吃|一起吃|过来|回家吃|在家"
 )
 DATES = (
@@ -85,6 +88,10 @@ KIDS = r"\bkids?\b|\bchild(?:ren)?\b|\bsons?\b|\bdaughters?\b|孩子|小孩|儿�
 PARENTS = r"\bparents\b|\bmum and dad\b|\bmom and dad\b|\bgrandparents\b|\bin-laws\b|爸妈|父母|爷爷奶奶|外公外婆|公婆"
 # One grandparent: the only older member, when no member is named.
 GRANDPARENT = r"\bgrand(?:ma|pa|mother|father)\b|爷爷|奶奶|外公|外婆|姥姥|姥爷"
+SUBJECT = (
+    r"\s*(?!(?:He|She|They)\b)([A-Z][a-z]+) (?:eats?|is|are|has|have|joins?|comes?|works?|visits?|stays?|goes"
+    r"|will|won'?t|doesn'?t|does|isn'?t|aren'?t|can'?t|skips?|travels?)\b"
+)
 SPOUSE = r"\bhusband\b|\bwife\b|\bpartner\b|老公|老婆|先生|太太|丈夫|妻子|爱人"
 NO_LIMIT = r"\bno (?:time )?limit\b|\bwhatever\b|\bany time\b|\bno rush\b|\bunlimited\b|无所谓|不限|随便|没限制|不赶"
 
@@ -181,7 +188,8 @@ def _split_conflicts(clause: str, value) -> list[str]:
     30 minutes and weekends 90 minutes", "at school on weekdays and at home on weekends"), so neither part's value
     spreads to the other's days. Otherwise the clause stays whole ("Ben eats out on Monday and Thursday nights").
     A piece without a value joins the next valued piece, or the last when none follows; one between two valued
-    pieces could belong to either, so it stays alone and is reported, never guessed."""
+    pieces could belong to either, so it stays alone and is reported, never guessed. So does a trailing piece that
+    names another meal ("dinner at home and breakfast"), unless it continues a meal list ("for lunch and dinner")."""
     parts = re.split(r"(\band\b|以及|和|而|及)", clause, flags=re.IGNORECASE)
     values = [value(piece) for piece in parts[::2]]
     valued = [i for i, v in enumerate(values) if v is not None]
@@ -190,6 +198,14 @@ def _split_conflicts(clause: str, value) -> list[str]:
     cuts = [0]
     for previous, current in pairwise(valued):
         cuts += [previous + 1, current] if current > previous + 1 else [current]
+    cuts += next(
+        (
+            [i]
+            for i in range(valued[-1] + 1, len(values))
+            if _meals(parts[2 * i]) and not _meals((parts[2 * i - 2].split() or [""])[-1])
+        ),
+        [],
+    )
     bounds = [*cuts, len(values)]
     return ["".join(parts[2 * a : 2 * b - 1]).strip() for a, b in pairwise(bounds)]
 
@@ -223,7 +239,12 @@ def _members_named(clause: str, members: list[RuleParseMember], speaker: str | N
     named = [
         m.name
         for m in members
-        if (re.search(rf"\b{re.escape(m.name.lower())}\b", text) if m.name.isascii() else m.name.lower() in text)
+        # ASCII edges, not \b, so "而Ben周二" names Ben.
+        if (
+            re.search(rf"(?<![a-z0-9]){re.escape(m.name.lower())}(?![a-z0-9])", text)
+            if m.name.isascii()
+            else m.name.lower() in text
+        )
     ]
     if re.search(KIDS, text):
         kids = [m.name for m in members if m.age_band in YOUNG]
@@ -265,7 +286,37 @@ def read_with_rules(request: RuleParseRequest) -> _Reading:
     people: list[str] = []
     meals: list[str] = []
     value = _minutes if request.kind == "cooking_time" else partial(_presence, request)
-    for clause, days in (pair for whole in _clauses(text) for pair in _split_days(whole, value, reading)):
+    for whole in _clauses(text):
+        start = len(reading.rules)
+        people, meals = _read_parts(request, _split_days(whole, value, reading), reading, text, people, meals)
+        if request.kind == "presence":
+            _drop_contradictions(reading, start)
+    if not reading.rules and not reading.issues:
+        reading.issue(NO_TIME if request.kind == "cooking_time" else NAME_THE_PERSON)
+    return reading
+
+
+def _drop_contradictions(reading: _Reading, start: int) -> None:
+    """Parts of one clause that put the same person home and away on the same days and meals ("Mei eats at school
+    and home on weekdays") cannot both hold: both are dropped and reported, never confirmed as a pair."""
+    rules = reading.rules[start:]
+    clash = [
+        a
+        for a in rules
+        for b in rules
+        if a.member_name == b.member_name
+        and a.present != b.present
+        and a.weekdays == b.weekdays
+        and (not a.meal_types or not b.meal_types or set(a.meal_types) & set(b.meal_types))
+    ]
+    if clash:
+        reading.issue(NO_POLARITY)
+        reading.rules[start:] = [rule for rule in rules if rule not in clash]
+
+
+def _read_parts(request: RuleParseRequest, pairs, reading: _Reading, text: str, people: list[str], meals: list[str]):
+    """The rules of one clause's parts; returns the people and meals a following part without its own takes."""
+    for clause, days in pairs:
         clause_meals = _meals(clause) or meals
         if request.kind == "cooking_time":
             minutes = _minutes(clause)
@@ -288,7 +339,13 @@ def read_with_rules(request: RuleParseRequest) -> _Reading:
             meals = clause_meals
             continue
         present = _polarity(clause)
-        named = _members_named(clause, request.members, request.speaker, reading) or people
+        own = _members_named(clause, request.members, request.speaker, reading)
+        if not own and _unknown_subject(clause):
+            reading.issue(NAME_THE_PERSON)
+            continue
+        named = own or people
+        if own and set(own) != set(people):
+            clause_meals = _meals(clause)  # Another person's part never takes the meals said for someone else.
         if present is None:
             if named or days is not None or _meals(clause):
                 reading.issue(NO_POLARITY)
@@ -308,9 +365,14 @@ def read_with_rules(request: RuleParseRequest) -> _Reading:
                 )
             )
         people, meals = named, clause_meals
-    if not reading.rules and not reading.issues:
-        reading.issue(NO_TIME if request.kind == "cooking_time" else NAME_THE_PERSON)
-    return reading
+    return people, meals
+
+
+def _unknown_subject(clause: str) -> bool:
+    """A part that starts with its own subject who is no member ("Tilly eats at home"): it never takes the
+    previous part's people."""
+    match = re.match(SUBJECT, clause)
+    return bool(match) and _days(match.group(1)) is None and not _meals(match.group(1))
 
 
 class ParsedRule(BaseModel):
