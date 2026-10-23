@@ -792,7 +792,8 @@ def review_roles(dish: Dish, tags: Tags) -> list[str]:
     dish's starch; a sweet tuber dish is never offered them. Only main and side courses widen: a baked good keeps
     its sugar ceiling and a soup its fixed roles. A bean-led side whose role the rule leaves open is thereby
     offered `staple` (with a staple share above 0 the model's options already hold it), never assigned it; one the
-    rule assigns (e.g. `vegetable`) shows only that role. The model prompt keeps `tags.allowed_roles`; an incomplete recipe offers none."""
+    rule assigns (e.g. `vegetable`) shows only that role. The model prompt keeps `tags.allowed_roles`; an
+    incomplete recipe offers none."""
     if "meal_role" not in tags.open:
         return [tags.values["meal_role"]] if tags.values["meal_role"] is not None else []
     roles = set(tags.allowed_roles)
