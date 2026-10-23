@@ -73,6 +73,10 @@ def entry(entry_id: int, day: int, meal: str):
         meal_type=meal,
         role_id="main",
         portion_share=1,
+        # What the reason tags read (layer 08 section 7.2).
+        recipe_id=entry_id,
+        servings=None,
+        consumed_cost_sgd=0,
         **NUTRITION,
     )
 
