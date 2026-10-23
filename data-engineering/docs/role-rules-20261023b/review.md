@@ -8,9 +8,9 @@ Consistent: the rule names the stored role. Grey: the rule leaves the role open 
 
 | Stage | Consistent | Grey | Blocked | Incomplete |
 |---|---:|---:|---:|---:|
-| Before (base rules, model options) | 155 | 117 | 147 | 3 |
-| After: these rules, model options | 162 | 112 | 145 | 3 |
-| After: these rules, reviewer options | 162 | 145 | 112 | 3 |
+| Before (base rules, model options) | 166 | 113 | 140 | 3 |
+| After: these rules, model options | 173 | 108 | 138 | 3 |
+| After: these rules, reviewer options | 173 | 142 | 104 | 3 |
 
 ## Frozen batch: suggestions for liu-ub
 
@@ -19,7 +19,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | ID | Recipe | Stored role | Rule suggestion | Reviewer roles | Before → after | Rule newer |
 |---|---|---|---|---|---|---|
 | RCP2_00100560483E | Swedish Crescents | dessert | None | one_bowl, breakfast, snack, dessert | grey → grey | ADR-0082/0085 |
-| RCP2_010100DDE2F6 | Cheesy Zucchini Lasagna | one_bowl | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
+| RCP2_010100DDE2F6 | Cheesy Zucchini Lasagna | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_011288A0DAAA | Hush Puppies | snack | staple | staple | grey → blocked | owner 2026-10-23 |
 | RCP2_011E8E50E3E6 | Feteer Meshaltet | staple | None | staple, one_bowl, breakfast, snack, dessert | grey → grey |  |
 | RCP2_01D48A672ACA | Sweet Potato Noodle Curry | one_bowl | staple | staple | blocked → blocked | owner 2026-10-23 |
@@ -29,7 +29,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_04FA63A313E5 | Dumplings | snack | staple | staple | blocked → blocked | ADR-0082/0085 |
 | RCP2_0537F95C51D2 | French Onion Soup | soup | None | soup, one_bowl | grey → grey |  |
 | RCP2_05ED759BF701 | Fried Rice | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
-| RCP2_062390916CFF | Garden Ranch Pizza-Pampered Chef | one_bowl | None | vegetable, staple | blocked → blocked |  |
+| RCP2_062390916CFF | Garden Ranch Pizza-Pampered Chef | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_06BA84D12D67 | Meat Loaf With Cheese Sauce | protein_main | protein_main | protein_main | consistent → consistent |  |
 | RCP2_0780C777C0AB | Stir Fry Rice | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_0B06E6177DA3 | Crunchy Chicken Casserole | protein_main | protein_main | protein_main | consistent → consistent |  |
@@ -45,7 +45,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_1106936B4750 | Sweet And Sour Cabbage | staple | vegetable | vegetable | blocked → blocked | ADR-0082/0085 |
 | RCP2_12D50BBDB52E | Eggplant A La Parmesan | vegetable | None | vegetable, staple | grey → grey |  |
 | RCP2_130F971CF821 | Ukrainian Bukovinian Nachynka (Cornbread Dressing) | staple | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | blocked → grey |  |
-| RCP2_140233207FB1 | Pizza Bianco | one_bowl | None | staple | blocked → blocked |  |
+| RCP2_140233207FB1 | Pizza Bianco | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_143B82A4800E | Spaetzle Noodles | staple | staple | staple | consistent → consistent | ADR-0082/0085 |
 | RCP2_1554F9789729 | Banh Mi Hotdog | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_15AF96C45EB8 | Paneer (Panir) | staple | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | blocked → grey |  |
@@ -100,7 +100,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_290971CF4730 | Mexican Wedding Rings | snack | None | one_bowl, breakfast, snack, dessert | grey → grey | ADR-0082/0085 |
 | RCP2_293417D0F5D5 | Koulouria -- Greek Sesame Galettes | snack | None | protein_main, staple, one_bowl, breakfast, snack, dessert | grey → grey |  |
 | RCP2_29BA89DD8246 | Trinidadian Coconut Bake | staple | None | staple, one_bowl, breakfast, snack, dessert | grey → grey |  |
-| RCP2_29EF8FF66D07 | Thai Chickpea Pizza | one_bowl | protein_main | protein_main | blocked → blocked |  |
+| RCP2_29EF8FF66D07 | Thai Chickpea Pizza | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_2AC94AA7906B | Cou Cou (Caribbean Polenta) | staple | staple | staple | consistent → consistent | ADR-0082/0085 |
 | RCP2_2BA45D5AB524 | Taco Shells | staple | sauce | sauce | blocked → blocked | ADR-0082/0085 |
 | RCP2_2BD9BFE7AE13 | My Mother Lillie'S Spinach Souffle | one_bowl | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | blocked → grey |  |
@@ -134,7 +134,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_382B6B7AF64D | Southern Spoon Bread | staple | staple | staple | consistent → consistent | ADR-0082/0085 |
 | RCP2_38391F938210 | Dreamy Polenta | staple | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | blocked → grey |  |
 | RCP2_38C9D74E8995 | Nif'S Easy Baking Powder Dumplings (Crock Pot Or Stove Top) | snack | staple | staple | blocked → blocked | ADR-0082/0085 |
-| RCP2_392DCD1CADCE | Shrimp Creole | one_bowl | protein_main | protein_main | blocked → blocked |  |
+| RCP2_392DCD1CADCE | Shrimp Creole | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_39B142C1E4E8 | Caribbean Rice | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_39BF39F7A6E4 | Banh Mi Hot Dogs | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_39C56A95E326 | Barbecue pork buns | snack | None | protein_main, one_bowl, breakfast, snack, dessert | grey → grey | ADR-0082/0085 |
@@ -183,7 +183,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_4E9F363F8876 | Gnocchi | staple | staple | staple | consistent → consistent | ADR-0082/0085 |
 | RCP2_4EC013060AE0 | Luscious Layers | one_bowl | None | vegetable, staple | blocked → blocked |  |
 | RCP2_4F7893458243 | Baked Sweet Potatoes With West African-Style Peanut Sauce | one_bowl | staple | staple | blocked → blocked | owner 2026-10-23 |
-| RCP2_50567B7B0B2C | Kumpir | one_bowl | staple | staple | blocked → blocked | owner 2026-10-23 |
+| RCP2_50567B7B0B2C | Kumpir | one_bowl | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | blocked → grey |  |
 | RCP2_507B9CC45AC6 | Spanish Rice | one_bowl | protein_main | protein_main | blocked → blocked |  |
 | RCP2_50FF85F5FDE0 | Breakfast Burritos | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_515EDCDA8064 | Cream Cheese Crescents(Hungarian Kifli) | snack | None | staple, one_bowl, breakfast, snack, dessert | grey → grey |  |
@@ -236,7 +236,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_67A66B53DE3C | Slow Cooker Chicken Curry With Quinoa | one_bowl | protein_main | protein_main | blocked → blocked |  |
 | RCP2_686557404CA1 | Tacos | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_6AD2450270A2 | Russian Wafers | snack | None | one_bowl, breakfast, snack, dessert | grey → grey | ADR-0082/0085 |
-| RCP2_6AE2F530BFEE | Microwave Quick Lasagna | protein_main | protein_main | protein_main | consistent → consistent |  |
+| RCP2_6AE2F530BFEE | Microwave Quick Lasagna | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_6B3C9AD9D6E0 | Chinese Eggs | breakfast | protein_main | protein_main | blocked → blocked | ADR-0082/0085 |
 | RCP2_6C1E6D9E70BE | Polenta(Microwave) | staple | staple | staple | consistent → consistent | ADR-0082/0085 |
 | RCP2_6CFCB11F79B9 | Thai Curry Pork Lettuce Wraps (Nam Prik Ong) | protein_main | protein_main | protein_main | consistent → consistent |  |
@@ -257,7 +257,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_7803F1FEB333 | Shredded Beef Chimichangas | protein_main | protein_main | protein_main | consistent → consistent |  |
 | RCP2_783368D92192 | Tempura | snack | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
 | RCP2_7877BC0F4362 | Indian Fry Bread | staple | staple | staple | consistent → consistent | ADR-0082/0085 |
-| RCP2_793CD2DF1D24 | 3 Cheese Lasagne(St. Rose Student Recipe) | one_bowl | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
+| RCP2_793CD2DF1D24 | 3 Cheese Lasagne(St. Rose Student Recipe) | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_7B354C6F9480 | Sauerkraut Dumplings(Hungarian Recipe) | one_bowl | staple | staple | blocked → blocked | ADR-0082/0085 |
 | RCP2_7DCEB197520A | Korean Steamed Egg Custard | snack | protein_main | protein_main | blocked → blocked | ADR-0082/0085 |
 | RCP2_7EC289C20A2A | Savory Sauerkraut Casserole | one_bowl | vegetable | vegetable | blocked → blocked | ADR-0082/0085 |
@@ -296,7 +296,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_92FA53DECB5E | Mediterranean Chicken | one_bowl | protein_main | protein_main | blocked → blocked |  |
 | RCP2_956FD7177508 | Ramen Hot And Sour Soup | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_958B37782112 | Basic Souffle Recipe | breakfast | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
-| RCP2_9723078749EF | Thai Chicken Pizza With Carrots And Cilantro | one_bowl | protein_main | protein_main | blocked → blocked |  |
+| RCP2_9723078749EF | Thai Chicken Pizza With Carrots And Cilantro | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_97D659CE8E07 | Japchae (Korean Glass Noodles) | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_989AB5746A34 | Sage Polenta | staple | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | blocked → grey |  |
 | RCP2_98B58258E3BD | Gnocches(Italian Potato Pasta) | staple | staple | staple | consistent → consistent | ADR-0082/0085 |
@@ -360,7 +360,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_C3B5C24F13AB | Tater Tot Beef Bake | one_bowl | protein_main | protein_main | blocked → blocked |  |
 | RCP2_C58164F6E689 | Cousin Judy'S Chow Mein | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_C7CFCE59ABE9 | Indian Potatoes With Cauliflower - Aloo Gobi | one_bowl | vegetable | vegetable | blocked → blocked | ADR-0082/0085 |
-| RCP2_C7D3BB6B2788 | Easy Lasagne | one_bowl | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
+| RCP2_C7D3BB6B2788 | Easy Lasagne | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_C81AEF8EF1AC | Onion Creme Brulee | snack | vegetable | vegetable | blocked → blocked | ADR-0082/0085 |
 | RCP2_C8B5EA27D62D | Thai Chicken Tacos | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_C8B759477F8B | Gözleme (Turkish Flatbread) | staple | staple | staple | consistent → consistent | ADR-0082/0085 |
@@ -385,15 +385,15 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_D57A6F473637 | Gnocchi | staple | staple | staple | consistent → consistent | ADR-0082/0085 |
 | RCP2_D698B2F5CB69 | French Onion Soup | soup | None | soup, one_bowl | grey → grey |  |
 | RCP2_D7BD0AAA0F99 | Greek-Style Couscous | staple | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
-| RCP2_D803B75A27D8 | Easy Cheese Lasagna | one_bowl | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
-| RCP2_D82148B9AE3C | Broccoli Pizza | one_bowl | protein_main | protein_main | blocked → blocked |  |
+| RCP2_D803B75A27D8 | Easy Cheese Lasagna | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
+| RCP2_D82148B9AE3C | Broccoli Pizza | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_D86FDF8D821E | Sweet And Sour Cabbage | snack | vegetable | vegetable | blocked → blocked | ADR-0082/0085 |
 | RCP2_D875F1D29484 | Kalbi Venison | protein_main | protein_main | protein_main | consistent → consistent |  |
 | RCP2_D8E98D9FFC37 | Tomatoes Provencale | snack | vegetable | vegetable | blocked → blocked | ADR-0082/0085 |
 | RCP2_DB61A80B71EF | Sinigang | soup | soup | soup | consistent → consistent |  |
 | RCP2_DBE7700244BE | Morrocan Couscous With Green Beans | staple | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
 | RCP2_DBF17212D390 | Easy Mexican Sopes | snack | staple | staple | grey → blocked | owner 2026-10-23 |
-| RCP2_DBFF4DB83EF2 | Butternut Squash Curry | one_bowl | staple | staple | blocked → blocked | owner 2026-10-23 |
+| RCP2_DBFF4DB83EF2 | Butternut Squash Curry | one_bowl | vegetable | vegetable | blocked → blocked |  |
 | RCP2_DC882B3F674A | Banana Raita With Coconut | dessert | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
 | RCP2_DD44C3D25E8E | Banh Mi Bo Kho | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_E091A77EFBE5 | Sauerkraut Auf Bayische Art(Bavarian Style Sauerkraut) | snack | vegetable | vegetable | blocked → blocked | ADR-0082/0085 |
@@ -422,7 +422,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_F14B2A2B76D7 | Teriyaki Rice Paper Salmon (Baked) | protein_main | protein_main | protein_main | consistent → consistent |  |
 | RCP2_F19948BC59AA | Hungarian Goulash(Serves 6 To 8) | soup | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
 | RCP2_F34E700C89B5 | Thai Red Curry | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
-| RCP2_F36753718C88 | Chicken Thai Pizza | one_bowl | protein_main | protein_main | blocked → blocked |  |
+| RCP2_F36753718C88 | Chicken Thai Pizza | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_F480AAE0C111 | Sweet Potato & Pea Curry | one_bowl | staple | staple | blocked → blocked | owner 2026-10-23 |
 | RCP2_F484CD172351 | Post Thanksgiving Turkey Casserole | one_bowl | protein_main | protein_main | blocked → blocked |  |
 | RCP2_F58B8FD2E4BB | Country Pâté Banh Mi | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
@@ -469,7 +469,6 @@ Rule-owned changes refresh the tag file; frozen rows keep their model values. Pe
 | RCP2_472B6677B22B | Tofu Feta | side | protein_main → None | soup, breakfast, snack, dessert, sauce, drink | True |
 | RCP2_4A7CC5A410F0 | Plantains In Coconut Milk | side | None → staple |  | True |
 | RCP2_4F7893458243 | Baked Sweet Potatoes With West African-Style Peanut Sauce | main | None → staple |  | True |
-| RCP2_50567B7B0B2C | Kumpir | main | None → staple |  | True |
 | RCP2_5A5EBBE90C92 | Injera | baked_good | None → staple |  | True |
 | RCP2_66540AABF0E0 | Thai Sweet Potato Stew | main | None → staple |  | True |
 | RCP2_720FC24A521E | Aloo Matar | main | None → staple |  | False |
@@ -480,7 +479,6 @@ Rule-owned changes refresh the tag file; frozen rows keep their model values. Pe
 | RCP2_D30FB234E549 | Rice And Sorghum Injera | side | None → staple |  | True |
 | RCP2_D63DBDEE3B0E | German Potato Salad | side | staple → None | soup, breakfast, snack, dessert, sauce, drink | False |
 | RCP2_DBF17212D390 | Easy Mexican Sopes | main | None → staple |  | True |
-| RCP2_DBFF4DB83EF2 | Butternut Squash Curry | main | None → staple |  | True |
 | RCP2_E5862A12458B | Potato Croquettes With Parmesan | main | None → staple |  | True |
 | RCP2_E8D667BA918A | Fake Feta | side | protein_main → None | soup, breakfast, snack, dessert, sauce, drink | True |
 | RCP2_ED8C37EACE4D | Mock Feta Cheese ( Vegan Substitute ) | side | protein_main → None | soup, breakfast, snack, dessert, sauce, drink | True |
@@ -491,30 +489,30 @@ Rule-owned changes refresh the tag file; frozen rows keep their model values. Pe
 - RCP2_35A9C8C1762C
 - RCP2_F480AAE0C111
 - RCP2_29A0BD36FF45
-- RCP2_E5862A12458B
-- RCP2_50567B7B0B2C
-- RCP2_34DA1997D05C
 - RCP2_5A5EBBE90C92
+- RCP2_34DA1997D05C
+- RCP2_4098E2E0D1B8
+- RCP2_2848D4DD38CE
 - RCP2_00A422F48FCC
 - RCP2_2C3763B662FD
 - RCP2_011288A0DAAA
-- RCP2_8F8576285D7F
 - RCP2_E8D667BA918A
-- RCP2_720FC24A521E
 - RCP2_0ABBD7482788
 - RCP2_1E290BC51413
-- RCP2_2848D4DD38CE
+- RCP2_D30FB234E549
+- RCP2_66540AABF0E0
 - RCP2_D63DBDEE3B0E
-- RCP2_4098E2E0D1B8
 - RCP2_1E114667D956
 - RCP2_4A7CC5A410F0
-- RCP2_DBFF4DB83EF2
+- RCP2_E5862A12458B
 - RCP2_011214D52B25
 - RCP2_74EFF106FE7B
-- RCP2_D30FB234E549
-- RCP2_9150197BEBD9
+- RCP2_B8E67A023CFD
+- RCP2_8F8576285D7F
 - RCP2_1770C1DCBF42
 - RCP2_4F7893458243
-- RCP2_66540AABF0E0
-- RCP2_B8E67A023CFD
+- RCP2_720FC24A521E
+- RCP2_9150197BEBD9
 - RCP2_03DEE14CDC60
+- RCP2_2F5D13FF1C1A
+- RCP2_402F11758D8C

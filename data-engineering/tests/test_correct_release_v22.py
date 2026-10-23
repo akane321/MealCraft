@@ -40,10 +40,18 @@ def corrected(item: dict) -> dict:
 
 
 class CorrectionTests(unittest.TestCase):
-    def test_a_stated_whole_bird_weighs_what_its_text_says(self) -> None:
+    def test_a_stated_whole_bird_is_weighed_as_its_edible_meat_and_skin(self) -> None:
+        # 5 1/2 lb ready-to-cook = 2,494.8 g, at FDC 171447's 276 g edible per 1 lb (owner 2026-10-23).
         chicken = corrected(line("1 (5 1/2-pound) whole chicken", "ING_CHICKEN", "piece", 1, 100.0))
-        self.assertAlmostEqual(chicken["grams"], 2494.8, delta=1)
-        self.assertEqual(chicken["grams_correction"], "stated_weight")
+        self.assertAlmostEqual(chicken["grams"], 1518.0, delta=1)
+        self.assertEqual(chicken["grams_correction"], "stated_weight+whole_bird_edible")
+        by_mass = corrected(line("2 1/2 lb. chicken, cut up", "ING_CHICKEN", "lb", 2.5, 1134.0))
+        self.assertAlmostEqual(by_mass["grams"], 690.0, delta=1)
+        # A bird with no stated mass already takes the edible 920 g; parts and a bare "lb chicken" are left.
+        self.assertEqual(corrected(line("1 fryer, cut up", "ING_CHICKEN", "piece", 1, 100.0))["grams"], 920.0)
+        breast = line("2 lb boneless chicken breast", "ING_CHICKEN", "lb", 2, 907.2)
+        self.assertIsNone(correct_line(breast, FORMS))
+        self.assertIsNone(correct_line(line("2 lb chicken", "ING_CHICKEN", "lb", 2, 907.2), FORMS))
 
     def test_a_parenthetical_total_is_not_multiplied_by_the_count(self) -> None:
         shrimp = line("20 shrimp (8 oz.)", "ING_SHRIMP", "piece", 20, 4535.9, "stated_package")

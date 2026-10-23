@@ -25,8 +25,10 @@ reference (`SOURCES`). The classes, applied to each line in this order:
    the mass is the line's total.
 4. `whole_bird`: "1 whole chicken" / "1 fryer, cut up" with no stated mass, weighed as one 100 g piece. One
    chicken's edible meat and skin (the entry's own basis, bones excluded) is USDA FDC 171447's "0.5 chicken,
-   bone removed" = 460 g, twice. A bird with a stated mass is class 2 and keeps that bone-in market mass: the
-   mixed basis is listed as open in the quality report.
+   bone removed" = 460 g, twice.
+8. `whole_bird_edible` (owner 2026-10-23): a whole bird with a stated mass ("1 (3 lb) whole chicken", "2 1/2 lb.
+   chicken, cut up") states its ready-to-cook, bone-in mass; it is weighed as its edible meat and skin at the same
+   record's "1 unit (yield from 1 lb ready-to-cook chicken)" = 276 g. Only explicit whole-bird words count.
 5. `whole_head`: a whole cabbage, cauliflower, lettuce or broccoli weighed as one leaf or floret (the same
    lines and test as `backend/app/planning/vegetable_led.py` `whole_grams`), at the entry's own `head` weight.
    A whole fresh pineapple weighed as one canned chunk (14 g) takes USDA FDC 169124's "1 fruit" = 905 g.
@@ -66,6 +68,9 @@ SOURCES = {
     "whole_bird": "USDA FoodData Central 171447, Chicken, broilers or fryers, meat and skin, raw: portion "
     "'0.5 chicken, bone removed' = 460 g (https://fdc.nal.usda.gov/food-details/171447/nutrients; "
     "record https://fdc.nal.usda.gov/portal-data/external/171447)",
+    "whole_bird_edible": "USDA FoodData Central 171447, Chicken, broilers or fryers, meat and skin, raw: portion "
+    "'1 unit (yield from 1 lb ready-to-cook chicken)' = 276 g, so 276/453.6 of a stated ready-to-cook mass "
+    "(https://fdc.nal.usda.gov/food-details/171447/nutrients; record https://fdc.nal.usda.gov/portal-data/external/171447)",
     "whole_pineapple": "USDA FoodData Central 169124, Pineapple, raw, all varieties: portion '1 fruit' = 905 g "
     "(https://fdc.nal.usda.gov/food-details/169124/nutrients; record https://fdc.nal.usda.gov/portal-data/external/169124)",
     "lasagna_sheet": "USDA FoodData Central 2495617 (branded), LASAGNA SEMOLINA, Flora's Distributors: serving "
@@ -73,6 +78,12 @@ SOURCES = {
     "record https://fdc.nal.usda.gov/portal-data/external/2495617)",
 }
 WHOLE_CHICKEN_G = 920.0
+# Owner 2026-10-23: a whole bird's stated mass is ready-to-cook (bone-in) and is weighed as its edible meat and
+# skin, the entry's own basis, at the same FDC record's yield. Only explicit whole-bird words count here: a bare
+# "2 lb chicken" may be boneless meat.
+CHICKEN_EDIBLE_SHARE = 276.0 / 453.59237
+WHOLE_BIRD_STATED = re.compile(r"\b(?:whole|fryers?|broilers?|roasters?|roasting|stewing|hens?)\b|\bcut[- ]up\b", re.I)
+MASS_UNITS = {"g", "kg", "lb", "oz"}
 WHOLE_PINEAPPLE_G = 905.0
 LASAGNA_SHEET_G = 18.0
 GUARD_PIECE_SHARE = 0.3
@@ -246,6 +257,11 @@ def correct_line(line: dict, forms: dict[str, dict]) -> tuple[dict, str, str] | 
         if counted_as(new, weights, "piece"):
             new["grams"] = round(count * LASAGNA_SHEET_G, 1)
             classes.append(("lasagna_sheet", SOURCES["lasagna_sheet"]))
+    if cid == "ING_CHICKEN" and form_key(new) == cid and WHOLE_BIRD_STATED.search(text) and not BIRD_PARTS.search(text):
+        bird = new["grams"] if new["unit"] in MASS_UNITS else stated_mass(new)
+        if bird:
+            new["grams"] = round(bird * CHICKEN_EDIBLE_SHARE, 1)
+            classes.append(("whole_bird_edible", SOURCES["whole_bird_edible"]))
     if not classes or (
         new["grams"] == line["grams"] and new["canonical_ingredient_id"] == line["canonical_ingredient_id"]
     ):
@@ -396,12 +412,11 @@ Sources beyond the line's own text and the entry's own units:
 | --- | ---: |
 {opened}
 
-Open question, mixed gram basis: a `whole_bird` line with no stated mass takes 920 g of edible meat and skin
-(bones excluded, the entry's own basis), but a `stated_weight` line keeps the stated market weight, which for a
-bird, a bone-in roast or shoulder, a lobster or a whole pineapple ("1 (4 lb) pineapple" = 1,814 g against the
-905 g edible fruit) includes bone, shell or rind. Those recipes' per-serving nutrition and cost-per-gram basis
-are therefore high. The owner's rule is stated weight first; an edible-yield factor needs a cited yield per food
-and is not applied in this round.
+Gram basis: whole birds are weighed as edible meat and skin whether or not their mass is stated (owner
+2026-10-23, `whole_bird` and `whole_bird_edible`). Still open: a `stated_weight` line for a bone-in roast or
+shoulder, a lobster or a whole pineapple ("1 (4 lb) pineapple" = 1,814 g against the 905 g edible fruit) keeps
+the stated market weight, which includes bone, shell or rind, so those recipes' per-serving nutrition and
+cost-per-gram basis are high. An edible-yield factor for them needs a cited yield per food and an owner decision.
 
 ### Guard: piece weight under 30% of the entry's own head or loaf weight
 

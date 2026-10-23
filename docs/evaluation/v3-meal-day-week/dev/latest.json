@@ -150,7 +150,7 @@
       "most_uses_of_a_recipe": 2,
       "most_uses_of_a_kind": 2,
       "meal_fit": "21/21",
-      "total_cost_sgd": 359.74
+      "total_cost_sgd": 363.02
     },
     {
       "episode_id": "mdw-dev-007",
@@ -553,7 +553,7 @@
     }
   ],
   "episode_set": "developer set",
-  "code_revision": "3966a3feec4d3ecc25ccf77353412aff3a7da0a9",
+  "code_revision": "dc411343bddc512330bb7f423bd7a46c12d79f86+dirty",
   "inputs": {
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",
@@ -578,7 +578,7 @@
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-021.json": "efe5b019c41eaf2cb8c422ae45704fb082db122490d0f5009702c8f85aa83eb7",
     "data-engineering/data/release/v2.1/recipes.jsonl": "df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db",
     "data-engineering/data/release/v2.1/ingredients.jsonl": "499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25",
-    "data-engineering/data/release/v2.2/recipes.jsonl": "136c3697d64455dbc51f58a237e3348c16c4efe36cff03a5dbb244ad39663450",
+    "data-engineering/data/release/v2.2/recipes.jsonl": "1f4f64f6156050290b256fd016495ebcec52377209170c659f0e831ca1ab44b2",
     "data-engineering/data/release/v2.2/ingredients.jsonl": "4c71b1a9f13e738d7c82d8a302ef11543d0d1705b614d3dc05150b86529eb95e",
     "data/products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91",
     "data/fixtures/fairprice-products.json": "19e760bd53e438fac44c77569724460cf6a69269690c302f3d1a59edb7a0323c"

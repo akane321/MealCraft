@@ -71,16 +71,18 @@
     "release_version": "v2.1",
     "step": "scripts/correct_release_v22.py",
     "decision": "owner 2026-10-23: unit-weight corrections",
-    "corrected_lines": 672,
-    "corrected_recipes": 652,
+    "corrected_lines": 752,
+    "corrected_recipes": 731,
     "corrected_lines_by_class": {
       "lasagna_sheet": 21,
       "n_times_total": 17,
       "pizza_crust": 9,
       "red_pepper_alias": 134,
       "red_pepper_alias+stated_weight": 1,
-      "stated_weight": 232,
+      "stated_weight": 192,
+      "stated_weight+whole_bird_edible": 40,
       "whole_bird": 125,
+      "whole_bird_edible": 80,
       "whole_head": 133
     },
     "v2_1_sha256": {

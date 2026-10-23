@@ -24,7 +24,7 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 | mdw-dev-003 | meals_per_day | en | feasible | plan | yes | - | 21 | 20 | 17 | 21/21 | 406.27 |
 | mdw-dev-004 | composition | en | feasible | plan | yes | - | 28 | 28 | 28 | 28/28 | 502.21 |
 | mdw-dev-005 | composition | zh | feasible | plan | yes | - | 28 | 28 | 24 | 28/28 | 486.93 |
-| mdw-dev-006 | nutrition_per_day | en | feasible | plan | yes | - | 21 | 20 | 20 | 21/21 | 359.74 |
+| mdw-dev-006 | nutrition_per_day | en | feasible | plan | yes | - | 21 | 20 | 20 | 21/21 | 363.02 |
 | mdw-dev-007 | nutrition_per_day | zh | feasible | plan | yes | - | 28 | 24 | 22 | 28/28 | 402.82 |
 | mdw-dev-008 | budget | en | feasible | plan | yes | - | 28 | 11 | 11 | 28/28 | 103.15 |
 | mdw-dev-009 | budget | en | infeasible | infeasible | yes | - | - | - | - | - | - |
@@ -58,7 +58,7 @@ Counts only, no rates (ADR-0028).
 - `data-engineering/data/release/v2.1/ingredients.jsonl`: `499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25`
 - `data-engineering/data/release/v2.1/recipes.jsonl`: `df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db`
 - `data-engineering/data/release/v2.2/ingredients.jsonl`: `4c71b1a9f13e738d7c82d8a302ef11543d0d1705b614d3dc05150b86529eb95e`
-- `data-engineering/data/release/v2.2/recipes.jsonl`: `136c3697d64455dbc51f58a237e3348c16c4efe36cff03a5dbb244ad39663450`
+- `data-engineering/data/release/v2.2/recipes.jsonl`: `1f4f64f6156050290b256fd016495ebcec52377209170c659f0e831ca1ab44b2`
 - `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json`: `cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284`
 - `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json`: `b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753`
 - `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-003.json`: `f2f5814e8434306b51fb182174db305a0e960c7626a1618983e998518ce887cc`

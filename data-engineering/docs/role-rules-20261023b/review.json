@@ -6,21 +6,21 @@
   "model_allowed_roles_note": "the model prompt's roles; the reviewer's wider list never reaches the model",
   "frozen_counts": {
     "before": {
-      "consistent": 155,
-      "grey": 117,
-      "blocked": 147,
+      "consistent": 166,
+      "grey": 113,
+      "blocked": 140,
       "incomplete": 3
     },
     "after_rules": {
-      "consistent": 162,
-      "grey": 112,
-      "blocked": 145,
+      "consistent": 173,
+      "grey": 108,
+      "blocked": 138,
       "incomplete": 3
     },
     "after_review_roles": {
-      "consistent": 162,
-      "grey": 145,
-      "blocked": 112,
+      "consistent": 173,
+      "grey": 142,
+      "blocked": 104,
       "incomplete": 3
     }
   },
@@ -107,36 +107,22 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": null,
-        "contains_staple": null,
+        "meal_role": "one_bowl",
+        "contains_staple": true,
         "protein_sources": []
       },
-      "previous_rule_suggestion": null,
+      "previous_rule_suggestion": "one_bowl",
       "model_allowed_roles": [
-        "soup",
-        "staple",
-        "one_bowl",
-        "breakfast",
-        "snack",
-        "dessert",
-        "sauce",
-        "drink"
+        "one_bowl"
       ],
       "review_allowed_roles": [
-        "soup",
-        "staple",
-        "one_bowl",
-        "breakfast",
-        "snack",
-        "dessert",
-        "sauce",
-        "drink"
+        "one_bowl"
       ],
       "rule_newer_than_batch": [],
       "status": {
-        "before": "grey",
-        "after_rules": "grey",
-        "after_review_roles": "grey"
+        "before": "consistent",
+        "after_rules": "consistent",
+        "after_review_roles": "consistent"
       },
       "incomplete_reason": null,
       "ingredients": [
@@ -167,7 +153,7 @@
         },
         {
           "name": "pasta",
-          "grams": 9.0,
+          "grams": 162.0,
           "text": "9 uncooked lasagna noodles"
         }
       ],
@@ -844,30 +830,28 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": null,
-        "contains_staple": null,
+        "meal_role": "one_bowl",
+        "contains_staple": true,
         "protein_sources": []
       },
-      "previous_rule_suggestion": null,
+      "previous_rule_suggestion": "one_bowl",
       "model_allowed_roles": [
-        "staple",
-        "vegetable"
+        "one_bowl"
       ],
       "review_allowed_roles": [
-        "vegetable",
-        "staple"
+        "one_bowl"
       ],
       "rule_newer_than_batch": [],
       "status": {
-        "before": "blocked",
-        "after_rules": "blocked",
-        "after_review_roles": "blocked"
+        "before": "consistent",
+        "after_rules": "consistent",
+        "after_review_roles": "consistent"
       },
       "incomplete_reason": null,
       "ingredients": [
         {
           "name": "pizza_crust",
-          "grams": 43.0,
+          "grams": 340.0,
           "text": "1 pizza crust"
         },
         {
@@ -896,8 +880,8 @@
           "text": "2 cups broccoli, finely chopped"
         },
         {
-          "name": "cayenne",
-          "grams": 43.0,
+          "name": "bell_pepper",
+          "grams": 74.5,
           "text": "1/2 cup red pepper, diced"
         },
         {
@@ -2066,28 +2050,28 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": null,
-        "contains_staple": null,
+        "meal_role": "one_bowl",
+        "contains_staple": true,
         "protein_sources": []
       },
-      "previous_rule_suggestion": null,
+      "previous_rule_suggestion": "one_bowl",
       "model_allowed_roles": [
-        "staple"
+        "one_bowl"
       ],
       "review_allowed_roles": [
-        "staple"
+        "one_bowl"
       ],
       "rule_newer_than_batch": [],
       "status": {
-        "before": "blocked",
-        "after_rules": "blocked",
-        "after_review_roles": "blocked"
+        "before": "consistent",
+        "after_rules": "consistent",
+        "after_review_roles": "consistent"
       },
       "incomplete_reason": null,
       "ingredients": [
         {
           "name": "pizza_crust",
-          "grams": 43.0,
+          "grams": 340.0,
           "text": "1 pizza crust"
         },
         {
@@ -4247,7 +4231,7 @@
       "ingredients": [
         {
           "name": "chicken",
-          "grams": 1587.6,
+          "grams": 966.0,
           "text": "3 -4 lbs fryer chickens, in pieces"
         },
         {
@@ -4334,7 +4318,7 @@
       "ingredients": [
         {
           "name": "cabbage",
-          "grams": 100.0,
+          "grams": 908.0,
           "text": "1 green cabbage"
         },
         {
@@ -6214,30 +6198,30 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": "protein_main",
-        "contains_staple": false,
+        "meal_role": "one_bowl",
+        "contains_staple": true,
         "protein_sources": [
           "legume"
         ]
       },
-      "previous_rule_suggestion": "protein_main",
+      "previous_rule_suggestion": "one_bowl",
       "model_allowed_roles": [
-        "protein_main"
+        "one_bowl"
       ],
       "review_allowed_roles": [
-        "protein_main"
+        "one_bowl"
       ],
       "rule_newer_than_batch": [],
       "status": {
-        "before": "blocked",
-        "after_rules": "blocked",
-        "after_review_roles": "blocked"
+        "before": "consistent",
+        "after_rules": "consistent",
+        "after_review_roles": "consistent"
       },
       "incomplete_reason": null,
       "ingredients": [
         {
           "name": "pizza_crust",
-          "grams": 43.0,
+          "grams": 340.0,
           "text": "1 prepared pizza crust, recipe"
         },
         {
@@ -6266,8 +6250,8 @@
           "text": "1/2 yellow pepper, thinly sliced"
         },
         {
-          "name": "cayenne",
-          "grams": 1.5,
+          "name": "bell_pepper",
+          "grams": 60.0,
           "text": "1/2 red pepper, thinly sliced"
         },
         {
@@ -8955,30 +8939,30 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": "protein_main",
-        "contains_staple": false,
+        "meal_role": "one_bowl",
+        "contains_staple": true,
         "protein_sources": [
           "shellfish"
         ]
       },
-      "previous_rule_suggestion": "protein_main",
+      "previous_rule_suggestion": "one_bowl",
       "model_allowed_roles": [
-        "protein_main"
+        "one_bowl"
       ],
       "review_allowed_roles": [
-        "protein_main"
+        "one_bowl"
       ],
       "rule_newer_than_batch": [],
       "status": {
-        "before": "blocked",
-        "after_rules": "blocked",
-        "after_review_roles": "blocked"
+        "before": "consistent",
+        "after_rules": "consistent",
+        "after_review_roles": "consistent"
       },
       "incomplete_reason": null,
       "ingredients": [
         {
           "name": "shrimp",
-          "grams": 4535.9,
+          "grams": 226.8,
           "text": "20 shrimp (8 oz.)"
         },
         {
@@ -12788,24 +12772,34 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": "staple",
-        "contains_staple": true,
+        "meal_role": null,
+        "contains_staple": null,
         "protein_sources": []
       },
       "previous_rule_suggestion": null,
       "model_allowed_roles": [
-        "staple"
+        "soup",
+        "breakfast",
+        "snack",
+        "dessert",
+        "sauce",
+        "drink"
       ],
       "review_allowed_roles": [
-        "staple"
+        "soup",
+        "staple",
+        "one_bowl",
+        "breakfast",
+        "snack",
+        "dessert",
+        "sauce",
+        "drink"
       ],
-      "rule_newer_than_batch": [
-        "owner 2026-10-23"
-      ],
+      "rule_newer_than_batch": [],
       "status": {
         "before": "blocked",
         "after_rules": "blocked",
-        "after_review_roles": "blocked"
+        "after_review_roles": "grey"
       },
       "incomplete_reason": null,
       "ingredients": [
@@ -12830,8 +12824,8 @@
           "text": "1 large Onion"
         },
         {
-          "name": "cayenne",
-          "grams": 3.0,
+          "name": "bell_pepper",
+          "grams": 120.0,
           "text": "1 large Red Pepper"
         },
         {
@@ -15109,7 +15103,7 @@
         },
         {
           "name": "lettuce",
-          "grams": 10.0,
+          "grams": 539.0,
           "text": "1 Lettuce"
         },
         {
@@ -16662,8 +16656,8 @@
       "title": "Microwave Quick Lasagna",
       "course": "main",
       "stored": {
-        "meal_role": "protein_main",
-        "contains_staple": false,
+        "meal_role": "one_bowl",
+        "contains_staple": true,
         "protein_sources": [
           "beef",
           "egg"
@@ -16671,16 +16665,16 @@
       },
       "stored_method": "rule",
       "rule_suggestion": {
-        "meal_role": "protein_main",
-        "contains_staple": false,
+        "meal_role": "one_bowl",
+        "contains_staple": true,
         "protein_sources": null
       },
-      "previous_rule_suggestion": "protein_main",
+      "previous_rule_suggestion": "one_bowl",
       "model_allowed_roles": [
-        "protein_main"
+        "one_bowl"
       ],
       "review_allowed_roles": [
-        "protein_main"
+        "one_bowl"
       ],
       "rule_newer_than_batch": [],
       "status": {
@@ -16702,7 +16696,7 @@
         },
         {
           "name": "pasta",
-          "grams": 8.0,
+          "grams": 144.0,
           "text": "8 lasagna noodles (uncooked)"
         },
         {
@@ -18162,36 +18156,22 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": null,
-        "contains_staple": null,
+        "meal_role": "one_bowl",
+        "contains_staple": true,
         "protein_sources": []
       },
-      "previous_rule_suggestion": null,
+      "previous_rule_suggestion": "one_bowl",
       "model_allowed_roles": [
-        "soup",
-        "staple",
-        "one_bowl",
-        "breakfast",
-        "snack",
-        "dessert",
-        "sauce",
-        "drink"
+        "one_bowl"
       ],
       "review_allowed_roles": [
-        "soup",
-        "staple",
-        "one_bowl",
-        "breakfast",
-        "snack",
-        "dessert",
-        "sauce",
-        "drink"
+        "one_bowl"
       ],
       "rule_newer_than_batch": [],
       "status": {
-        "before": "grey",
-        "after_rules": "grey",
-        "after_review_roles": "grey"
+        "before": "consistent",
+        "after_rules": "consistent",
+        "after_review_roles": "consistent"
       },
       "incomplete_reason": null,
       "ingredients": [
@@ -18227,7 +18207,7 @@
         },
         {
           "name": "pasta",
-          "grams": 8.0,
+          "grams": 144.0,
           "text": "8 lasagne noodles"
         },
         {
@@ -18477,7 +18457,7 @@
       "ingredients": [
         {
           "name": "pork_chop",
-          "grams": 600.0,
+          "grams": 453.6,
           "text": "4 boneless pork loin chops (4 ounces each)"
         },
         {
@@ -18654,7 +18634,7 @@
       "ingredients": [
         {
           "name": "pasta",
-          "grams": 9.0,
+          "grams": 162.0,
           "text": "9 lasagna noodles, prepared"
         },
         {
@@ -20790,7 +20770,7 @@
         },
         {
           "name": "cauliflower",
-          "grams": 12.5,
+          "grams": 294.0,
           "text": "1/2 small cauliflower, cut into florets"
         },
         {
@@ -21358,30 +21338,30 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": "protein_main",
-        "contains_staple": false,
+        "meal_role": "one_bowl",
+        "contains_staple": true,
         "protein_sources": [
           "chicken"
         ]
       },
-      "previous_rule_suggestion": "protein_main",
+      "previous_rule_suggestion": "one_bowl",
       "model_allowed_roles": [
-        "protein_main"
+        "one_bowl"
       ],
       "review_allowed_roles": [
-        "protein_main"
+        "one_bowl"
       ],
       "rule_newer_than_batch": [],
       "status": {
-        "before": "blocked",
-        "after_rules": "blocked",
-        "after_review_roles": "blocked"
+        "before": "consistent",
+        "after_rules": "consistent",
+        "after_review_roles": "consistent"
       },
       "incomplete_reason": null,
       "ingredients": [
         {
           "name": "pizza_crust",
-          "grams": 43.0,
+          "grams": 340.0,
           "text": "1 (12 inch) pre-baked Italian pizza crust"
         },
         {
@@ -26275,7 +26255,7 @@
       "ingredients": [
         {
           "name": "cabbage",
-          "grams": 100.0,
+          "grams": 908.0,
           "text": "1 small head cabbage"
         },
         {
@@ -26742,42 +26722,28 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": null,
-        "contains_staple": null,
+        "meal_role": "one_bowl",
+        "contains_staple": true,
         "protein_sources": []
       },
-      "previous_rule_suggestion": null,
+      "previous_rule_suggestion": "one_bowl",
       "model_allowed_roles": [
-        "soup",
-        "staple",
-        "one_bowl",
-        "breakfast",
-        "snack",
-        "dessert",
-        "sauce",
-        "drink"
+        "one_bowl"
       ],
       "review_allowed_roles": [
-        "soup",
-        "staple",
-        "one_bowl",
-        "breakfast",
-        "snack",
-        "dessert",
-        "sauce",
-        "drink"
+        "one_bowl"
       ],
       "rule_newer_than_batch": [],
       "status": {
-        "before": "grey",
-        "after_rules": "grey",
-        "after_review_roles": "grey"
+        "before": "consistent",
+        "after_rules": "consistent",
+        "after_review_roles": "consistent"
       },
       "incomplete_reason": null,
       "ingredients": [
         {
           "name": "pasta",
-          "grams": 9.0,
+          "grams": 162.0,
           "text": "9 lasagne noodles (uncooked)"
         },
         {
@@ -28073,7 +28039,7 @@
       "ingredients": [
         {
           "name": "pasta",
-          "grams": 9.0,
+          "grams": 162.0,
           "text": "9 lasagna noodles, prepared"
         },
         {
@@ -28750,36 +28716,22 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": null,
-        "contains_staple": null,
+        "meal_role": "one_bowl",
+        "contains_staple": true,
         "protein_sources": []
       },
-      "previous_rule_suggestion": null,
+      "previous_rule_suggestion": "one_bowl",
       "model_allowed_roles": [
-        "soup",
-        "staple",
-        "one_bowl",
-        "breakfast",
-        "snack",
-        "dessert",
-        "sauce",
-        "drink"
+        "one_bowl"
       ],
       "review_allowed_roles": [
-        "soup",
-        "staple",
-        "one_bowl",
-        "breakfast",
-        "snack",
-        "dessert",
-        "sauce",
-        "drink"
+        "one_bowl"
       ],
       "rule_newer_than_batch": [],
       "status": {
-        "before": "grey",
-        "after_rules": "grey",
-        "after_review_roles": "grey"
+        "before": "consistent",
+        "after_rules": "consistent",
+        "after_review_roles": "consistent"
       },
       "incomplete_reason": null,
       "ingredients": [
@@ -28800,7 +28752,7 @@
         },
         {
           "name": "pasta",
-          "grams": 9.0,
+          "grams": 162.0,
           "text": "9 lasagna noodles uncooked"
         },
         {
@@ -28823,36 +28775,32 @@
       "stored": {
         "meal_role": "one_bowl",
         "contains_staple": true,
-        "protein_sources": [
-          "pork"
-        ]
+        "protein_sources": []
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": "protein_main",
-        "contains_staple": false,
-        "protein_sources": [
-          "pork"
-        ]
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": []
       },
-      "previous_rule_suggestion": "protein_main",
+      "previous_rule_suggestion": "one_bowl",
       "model_allowed_roles": [
-        "protein_main"
+        "one_bowl"
       ],
       "review_allowed_roles": [
-        "protein_main"
+        "one_bowl"
       ],
       "rule_newer_than_batch": [],
       "status": {
-        "before": "blocked",
-        "after_rules": "blocked",
-        "after_review_roles": "blocked"
+        "before": "consistent",
+        "after_rules": "consistent",
+        "after_review_roles": "consistent"
       },
       "incomplete_reason": null,
       "ingredients": [
         {
           "name": "pizza_crust",
-          "grams": 43.0,
+          "grams": 340.0,
           "text": "1 large pizza dough (to fit 13-inch round pan)"
         },
         {
@@ -29350,20 +29298,18 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": "staple",
-        "contains_staple": true,
+        "meal_role": "vegetable",
+        "contains_staple": false,
         "protein_sources": []
       },
-      "previous_rule_suggestion": null,
+      "previous_rule_suggestion": "vegetable",
       "model_allowed_roles": [
-        "staple"
+        "vegetable"
       ],
       "review_allowed_roles": [
-        "staple"
+        "vegetable"
       ],
-      "rule_newer_than_batch": [
-        "owner 2026-10-23"
-      ],
+      "rule_newer_than_batch": [],
       "status": {
         "before": "blocked",
         "after_rules": "blocked",
@@ -29373,7 +29319,7 @@
       "ingredients": [
         {
           "name": "butternut_squash",
-          "grams": 800.0,
+          "grams": 1814.4,
           "text": "1 medium(approx.4lbs)butternut squash"
         },
         {
@@ -31560,8 +31506,8 @@
           "text": "1 zucchini"
         },
         {
-          "name": "cayenne",
-          "grams": 3.0,
+          "name": "bell_pepper",
+          "grams": 120.0,
           "text": "1 red pepper"
         },
         {
@@ -31605,30 +31551,30 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": "protein_main",
-        "contains_staple": false,
+        "meal_role": "one_bowl",
+        "contains_staple": true,
         "protein_sources": [
           "chicken"
         ]
       },
-      "previous_rule_suggestion": "protein_main",
+      "previous_rule_suggestion": "one_bowl",
       "model_allowed_roles": [
-        "protein_main"
+        "one_bowl"
       ],
       "review_allowed_roles": [
-        "protein_main"
+        "one_bowl"
       ],
       "rule_newer_than_batch": [],
       "status": {
-        "before": "blocked",
-        "after_rules": "blocked",
-        "after_review_roles": "blocked"
+        "before": "consistent",
+        "after_rules": "consistent",
+        "after_review_roles": "consistent"
       },
       "incomplete_reason": null,
       "ingredients": [
         {
           "name": "pizza_crust",
-          "grams": 43.0,
+          "grams": 340.0,
           "text": "1 prebaked 12-inch pizza crust"
         },
         {
@@ -32135,7 +32081,7 @@
         },
         {
           "name": "lettuce",
-          "grams": 2.5,
+          "grams": 134.8,
           "text": "1/4 Iceberg Lettuce"
         },
         {
@@ -33731,30 +33677,6 @@
       "review_status": "pending_human"
     },
     {
-      "id": "RCP2_50567B7B0B2C",
-      "title": "Kumpir",
-      "course": "main",
-      "before": {
-        "meal_role": null,
-        "model_allowed_roles": [
-          "soup",
-          "breakfast",
-          "snack",
-          "dessert",
-          "sauce",
-          "drink"
-        ],
-        "protein_sources": []
-      },
-      "after": {
-        "meal_role": "staple",
-        "model_allowed_roles": [],
-        "protein_sources": []
-      },
-      "frozen": true,
-      "review_status": "pending_human"
-    },
-    {
       "id": "RCP2_5A5EBBE90C92",
       "title": "Injera",
       "course": "baked_good",
@@ -34002,30 +33924,6 @@
       "review_status": "pending_human"
     },
     {
-      "id": "RCP2_DBFF4DB83EF2",
-      "title": "Butternut Squash Curry",
-      "course": "main",
-      "before": {
-        "meal_role": null,
-        "model_allowed_roles": [
-          "soup",
-          "breakfast",
-          "snack",
-          "dessert",
-          "sauce",
-          "drink"
-        ],
-        "protein_sources": []
-      },
-      "after": {
-        "meal_role": "staple",
-        "model_allowed_roles": [],
-        "protein_sources": []
-      },
-      "frozen": true,
-      "review_status": "pending_human"
-    },
-    {
       "id": "RCP2_E5862A12458B",
       "title": "Potato Croquettes With Parmesan",
       "course": "main",
@@ -34134,32 +34032,32 @@
     "RCP2_35A9C8C1762C",
     "RCP2_F480AAE0C111",
     "RCP2_29A0BD36FF45",
-    "RCP2_E5862A12458B",
-    "RCP2_50567B7B0B2C",
-    "RCP2_34DA1997D05C",
     "RCP2_5A5EBBE90C92",
+    "RCP2_34DA1997D05C",
+    "RCP2_4098E2E0D1B8",
+    "RCP2_2848D4DD38CE",
     "RCP2_00A422F48FCC",
     "RCP2_2C3763B662FD",
     "RCP2_011288A0DAAA",
-    "RCP2_8F8576285D7F",
     "RCP2_E8D667BA918A",
-    "RCP2_720FC24A521E",
     "RCP2_0ABBD7482788",
     "RCP2_1E290BC51413",
-    "RCP2_2848D4DD38CE",
+    "RCP2_D30FB234E549",
+    "RCP2_66540AABF0E0",
     "RCP2_D63DBDEE3B0E",
-    "RCP2_4098E2E0D1B8",
     "RCP2_1E114667D956",
     "RCP2_4A7CC5A410F0",
-    "RCP2_DBFF4DB83EF2",
+    "RCP2_E5862A12458B",
     "RCP2_011214D52B25",
     "RCP2_74EFF106FE7B",
-    "RCP2_D30FB234E549",
-    "RCP2_9150197BEBD9",
+    "RCP2_B8E67A023CFD",
+    "RCP2_8F8576285D7F",
     "RCP2_1770C1DCBF42",
     "RCP2_4F7893458243",
-    "RCP2_66540AABF0E0",
-    "RCP2_B8E67A023CFD",
-    "RCP2_03DEE14CDC60"
+    "RCP2_720FC24A521E",
+    "RCP2_9150197BEBD9",
+    "RCP2_03DEE14CDC60",
+    "RCP2_2F5D13FF1C1A",
+    "RCP2_402F11758D8C"
   ]
 }

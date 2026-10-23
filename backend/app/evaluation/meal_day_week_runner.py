@@ -351,8 +351,11 @@ def scorer_catalogs(episode: dict) -> Catalogs:
     An "A or B" line (`data/ingredients/alternatives.json`) is its first option the
     household can eat and buy, the rule the product states in `app.planning.alternatives`;
     this is the scorer's own copy of it. The frozen prices include the fixture file's.
+
+    The facts are the release the product imports (owner 2026-10-24): scoring a plan made from v2.2 grams
+    against v2.1 grams failed plans the product had right. Protocol v2-multidish keeps v2.1.
     """
-    catalog = load_release_catalog()
+    catalog = load_release_catalog(release=release_dir().relative_to(repository_root()))
     profile = episode["scenario"]["household_profile"]
     banned, excluded = set(profile["allergens"]), set(profile["excluded_ingredients"])
     allergens = {row["normalized_name"]: set(row["allergens"]) for row in catalog.ingredients}

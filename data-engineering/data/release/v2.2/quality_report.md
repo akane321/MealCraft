@@ -203,15 +203,18 @@ and its source. Size words (small, medium, large) are not part of this round.
 | `pizza_crust` | 9 | 9 |
 | `red_pepper_alias` | 134 | 134 |
 | `red_pepper_alias+stated_weight` | 1 | 1 |
-| `stated_weight` | 232 | 224 |
+| `stated_weight` | 192 | 185 |
+| `stated_weight+whole_bird_edible` | 40 | 40 |
 | `whole_bird` | 125 | 125 |
+| `whole_bird_edible` | 80 | 80 |
 | `whole_head` | 133 | 132 |
 
-672 lines in 652 recipes changed.
+752 lines in 731 recipes changed.
 
 Sources beyond the line's own text and the entry's own units:
 
 - `whole_bird`: USDA FoodData Central 171447, Chicken, broilers or fryers, meat and skin, raw: portion '0.5 chicken, bone removed' = 460 g (https://fdc.nal.usda.gov/food-details/171447/nutrients; record https://fdc.nal.usda.gov/portal-data/external/171447)
+- `whole_bird_edible`: USDA FoodData Central 171447, Chicken, broilers or fryers, meat and skin, raw: portion '1 unit (yield from 1 lb ready-to-cook chicken)' = 276 g, so 276/453.6 of a stated ready-to-cook mass (https://fdc.nal.usda.gov/food-details/171447/nutrients; record https://fdc.nal.usda.gov/portal-data/external/171447)
 - `whole_pineapple`: USDA FoodData Central 169124, Pineapple, raw, all varieties: portion '1 fruit' = 905 g (https://fdc.nal.usda.gov/food-details/169124/nutrients; record https://fdc.nal.usda.gov/portal-data/external/169124)
 - `lasagna_sheet`: USDA FoodData Central 2495617 (branded), LASAGNA SEMOLINA, Flora's Distributors: serving 54 g = '3 pieces' (https://fdc.nal.usda.gov/food-details/2495617/nutrients; record https://fdc.nal.usda.gov/portal-data/external/2495617)
 
@@ -225,12 +228,11 @@ Sources beyond the line's own text and the entry's own units:
 | bare 'red pepper' by teaspoon/tablespoon, kept cayenne | 34 |
 | cooked lasagna noodle | 6 |
 
-Open question, mixed gram basis: a `whole_bird` line with no stated mass takes 920 g of edible meat and skin
-(bones excluded, the entry's own basis), but a `stated_weight` line keeps the stated market weight, which for a
-bird, a bone-in roast or shoulder, a lobster or a whole pineapple ("1 (4 lb) pineapple" = 1,814 g against the
-905 g edible fruit) includes bone, shell or rind. Those recipes' per-serving nutrition and cost-per-gram basis
-are therefore high. The owner's rule is stated weight first; an edible-yield factor needs a cited yield per food
-and is not applied in this round.
+Gram basis: whole birds are weighed as edible meat and skin whether or not their mass is stated (owner
+2026-10-23, `whole_bird` and `whole_bird_edible`). Still open: a `stated_weight` line for a bone-in roast or
+shoulder, a lobster or a whole pineapple ("1 (4 lb) pineapple" = 1,814 g against the 905 g edible fruit) keeps
+the stated market weight, which includes bone, shell or rind, so those recipes' per-serving nutrition and
+cost-per-gram basis are high. An edible-yield factor for them needs a cited yield per food and an owner decision.
 
 ### Guard: piece weight under 30% of the entry's own head or loaf weight
 
@@ -260,5 +262,5 @@ and is not applied in this round.
 | File | v2.1 sha256 | v2.2 sha256 |
 | --- | --- | --- |
 | `ingredients.jsonl` | `499798b92e76994b` | `4c71b1a9f13e738d` |
-| `recipes.jsonl` | `df6b428714c74db6` | `136c3697d64455db` |
-| `release_manifest.json` | `7e81e661870b0fb1` | `1ec72391c52ac626` |
+| `recipes.jsonl` | `df6b428714c74db6` | `1f4f64f615605029` |
+| `release_manifest.json` | `7e81e661870b0fb1` | `4bc1e50629bc12e4` |
