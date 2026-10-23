@@ -30,6 +30,21 @@ retail savings, latency at production scale or comparative algorithm quality.
 
 ## Search-arm smoke comparison
 
+Budget checks apply separately to each shopping trip. The greedy arm also
+checks an optimistic fractional cost for the whole remaining horizon: each
+unfilled slot contributes its cheapest generated meal at unit prices, with
+known pantry credited. It does not add separately rounded packages for each
+future meal. The exact basket and independent validator still decide acceptance.
+This lower bound deliberately grants the original pantry to each trip, so it can
+miss a future shortage but cannot reject a plan by charging that pantry twice.
+The experimental beam reserves places for low-checkout and low-usage-cost states.
+Both searches track whether explicit recipe/ingredient minimums remain reachable;
+request progress affects search order, not the final common objective.
+
+An empty partial plan skips only soft selected-slot average nutrition while
+being ranked. Complete plans still undergo the unchanged nutrition checks.
+Unknown pantry quantities are never deducted, including in the native reference.
+
 `scripts/compare_algorithm_dev.py` runs diversity-aware greedy, seeded GRASP
 (8 total constructions, restricted list of 3) and first-improvement local
 search (100 evaluated neighbors maximum). Local moves replace one meal or swap
