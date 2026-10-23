@@ -18,7 +18,12 @@ class AlgorithmObjective:
         key_by_recipe: dict[str, str],
         ranking_losses: dict[str, float],
         nutrition_scales: dict[str, float] | None = None,
+        *,
+        priority: str = "variety",
     ):
+        if priority not in {"variety", "price"}:
+            raise ValueError("Unknown objective priority")
+        self.priority = priority
         self.groups = groups
         self.keys = dict(key_by_recipe)
         self.ranking = dict(ranking_losses)
@@ -32,6 +37,11 @@ class AlgorithmObjective:
             raise ValueError("Nutrition scales must be finite and positive")
         self.near = set(groups.near_pairs)
         self.unknown = set(groups.unknown_pairs)
+
+    def ordered(self, terms):
+        """Price requests minimize checkout first; ordinary planning is unchanged."""
+        values = tuple(terms)
+        return (values[-1], *values[:-1]) if self.priority == "price" else values
 
     def terms(self, problem, assignments, report, *, partial=False) -> tuple:
         """Ordering only. Unknown similarity is conservatively penalized as a repeat.
@@ -81,13 +91,15 @@ class AlgorithmObjective:
                 if check.code not in self.scales:
                     raise ValueError(f"Declare a nutrition normalization scale for {check.code}")
                 nutrition += max(0, -check.margin) / self.scales[check.code]
-        return (
-            empty,
-            -len(representatives),
-            repetition,
-            nutrition,
-            sum(self.ranking[a.recipe_id] for a in assignments),
-            round(report.purchase_total_sgd * 100),
+        return self.ordered(
+            (
+                empty,
+                -len(representatives),
+                repetition,
+                nutrition,
+                sum(self.ranking[a.recipe_id] for a in assignments),
+                round(report.purchase_total_sgd * 100),
+            )
         )
 
     def score_validated(self, problem, assignments, report) -> tuple:

@@ -39,7 +39,14 @@ class EnumeratedReference(DiversityAwareGreedyPlanner):
             raise ValueError("Objective candidates differ from the problem")
         slots, options = domains(self, problem)
         total = prod(map(len, options))
-        result = {"status": "limit_exceeded", "total": total, "checked": 0, "unknown": 0, "score": None}
+        result = {
+            "status": "limit_exceeded",
+            "total": total,
+            "checked": 0,
+            "unknown": 0,
+            "score": None,
+            "objective_priority": self.objective.priority,
+        }
         if total > max_combinations:
             return result
         for selection in product(*options):
@@ -56,6 +63,8 @@ class EnumeratedReference(DiversityAwareGreedyPlanner):
             if result["score"] is not None
             else "no_valid_generated_assignment"
         )
+        if self.objective.priority == "price" and result["status"] == "optimal_for_generated_options":
+            result["minimum_checkout_sgd"] = result["score"][0] / 100
         return result
 
 

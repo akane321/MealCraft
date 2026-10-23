@@ -316,6 +316,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
         solver.parameters.random_seed = 0
         output = {
             "status": "unknown",
+            "objective_priority": self.objective.priority,
             "scope": "native generated meal options",
             "meal_variables": len(selections),
             "build_ms": (perf_counter() - started) * 1000,
@@ -323,7 +324,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
             "workers": solver.parameters.num_search_workers,
             "stage_ms": [],
         }
-        for term in terms:
+        for term in self.objective.ordered(terms):
             if optimize and isinstance(term, int):
                 output["stage_ms"].append(0.0)
                 continue
@@ -351,12 +352,14 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
         modeled = [solver.Value(t) for t in terms]
         modeled[3] /= soft_scale
         modeled[4] /= 10000
+        modeled = self.objective.ordered(modeled)
         if any(abs(a - b) > 1e-7 for a, b in zip(score, modeled, strict=True)):
             return {**output, "status": "score_mismatch", "score": score, "modeled_score": modeled}
         return {
             **output,
             "status": "optimal_for_native_model",
             "score": score,
+            "minimum_checkout_sgd": report.purchase_total_sgd if self.objective.priority == "price" else None,
             "assignments": [a.model_dump() for a in assignments],
             "shopping": [r.model_dump() for r in shopping],
             "total_ms": (perf_counter() - started) * 1000,

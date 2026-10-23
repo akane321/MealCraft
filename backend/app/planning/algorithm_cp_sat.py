@@ -46,6 +46,7 @@ class SharedScoreCpSat(DiversityAwareGreedyPlanner):
         )
         output = {
             "status": "limit_exceeded",
+            "objective_priority": self.objective.priority,
             "count_states": total,
             "score": None,
             "scope": "canonical count states" if compressible else "ordered generated meal options",
@@ -108,6 +109,9 @@ class SharedScoreCpSat(DiversityAwareGreedyPlanner):
             if unknown
             else ("optimal_for_count_table" if compressible else "optimal_for_generated_options"),
             score=score,
+            minimum_checkout_sgd=report.purchase_total_sgd
+            if self.objective.priority == "price" and not unknown
+            else None,
             assignments=[a.model_dump() for a in assignments],
             shopping=[row.model_dump() for row in shopping],
             solver_ms=(perf_counter() - solve_start) * 1000,
