@@ -303,6 +303,29 @@ Each fills the conversation with a sentence the assistant understands, so the
 change is previewed before anything happens. A swap keeps every member covered,
 and the new dish is cooked for the people who can eat it.
 
+Every dish not skipped, cooked ones included, also has **Like**, **Dislike** and
+**Never again**. They are the whole household's: anyone but a viewer may press
+or undo them, and pressing the pressed button again undoes it. **Never again**
+means the dish is never planned for anyone in the household until it is undone:
+not in a new week, a swap, a change to a meal or a cheaper-week offer. The week
+it is already in stays as it is, cooked and kept dishes included; if you change
+a meal that still holds it (for example add a soup to it), that whole meal is
+planned again without it. Pressing **Like** or **Dislike** on it replaces Never
+again. The profile page lists **Dishes you never want again**, each with
+**Undo**, so a dish that has left every week can still come back. Like and
+Dislike are only recorded for now; they do not change the ranking yet.
+
+Under a dish there may be up to two short tags, each a fact that is true of it:
+**Fits low-sodium** (or low-sugar, lower-calorie) on a main within that
+preference's benchmark, **One of the week's cheapest mains** when the week has
+at least four different mains and this one is among the cheapest quarter per
+serving (breakfast and skipped dishes are not counted), and **Ready in 15 min** for a dish ready in
+20 minutes or less. A dish with nothing to say, or a skipped dish, has no tag. Click a tag to see
+the dish's facts: cooking time, kcal and sodium per person, and cost to buy
+per serving. That cost is what the week buys for the dish after your pantry
+covered what it could, so it can be lower than the dish's full price. They describe the dish as planned; they are not the reasons the
+planner chose it.
+
 ### 4. Nutrition and the shopping list
 
 The **Groceries** tab shows the total against the weekly budget. Perishable

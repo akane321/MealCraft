@@ -73,6 +73,10 @@ def entry(entry_id: int, day: int, meal: str):
         meal_type=meal,
         role_id="main",
         portion_share=1,
+        # What the reason tags read (layer 08 section 7.2).
+        recipe_id=entry_id,
+        servings=None,
+        consumed_cost_sgd=0,
         **NUTRITION,
     )
 
@@ -94,7 +98,11 @@ def test_the_dashboard_lists_a_day_breakfast_lunch_then_dinner_whatever_order_th
             entry(10, 2, "lunch"),
         ],
     )
-    dashboard = service(SimpleNamespace(get=lambda plan_id: week)).dashboard(9)
+    # A household with no feedback (ADR-0087): the stub session holds no rows.
+    repository = SimpleNamespace(
+        get=lambda plan_id: week, session=SimpleNamespace(scalars=lambda _: []), household_id=1
+    )
+    dashboard = service(repository).dashboard(9)
     assert [(day.day_index, day.meal_type) for day in dashboard.days] == [
         (1, "breakfast"),
         (1, "lunch"),

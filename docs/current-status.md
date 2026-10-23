@@ -4,9 +4,9 @@
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `fbe9cbd` (integration through #320)
+> Verified remote `main`: `779b502` (integration through #325)
 
-### Sprint 2 integration (#302-#320, 2026-10-23)
+### Sprint 2 integration (#302-#325, 2026-10-23)
 
 Merged since the last snapshot, each with its paired knowledge record:
 
@@ -42,6 +42,21 @@ Merged since the last snapshot, each with its paired knowledge record:
   environment.
 - #320: evidence-only role refinements for the 119-recipe review and mixed tuber
   vegetables (ADR-0085).
+- #321 and #322: price-first exact references in the offline algorithm arms, and
+  a minimum number of dish kinds enforced in the exact price search; the product
+  planner is unchanged.
+- #323: the baseline scoring layer (ingredient mapping with review flags, unknown
+  allergens never safe, per-dish coverage, the product's validator) and the
+  pure-LLM baseline runner (dry run by default, paid calls only with `--live`,
+  US$5 per arm, ADR-0086); it supersedes #312 and #319. No paid run has been
+  made.
+- #324: Like, Dislike and Never again on each planned dish (ADR-0087): Never
+  again is a whole-household hard filter in the planner and the validator until
+  undone, any member may set or undo it, and the profile lists the dishes with
+  Undo. Like and Dislike are stored only; ranking use is later work.
+- #325: up to two reason tags under a dish (fits a preference, one of the
+  week's cheapest mains, quick to cook), each shown only when its fact holds,
+  with a facts panel (time, kcal, sodium, cost to buy); no model call.
 
 The three dated blocks below are historical snapshots kept for their evidence
 links; their timing statements predate ADR-0079 and ADR-0080.
