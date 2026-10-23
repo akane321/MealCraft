@@ -5,14 +5,14 @@ calculator, web search or tool. Its structured answer (`BaselineAnswer`) is scor
 (`baseline_mapping`), per-dish coverage (`baseline_verification`), recomputation (`baseline_recomputation`) and
 the product's own validator (`baseline_validation`).
 
-Cost and safety rules (ADR-0020 section 4; ADR-0086, the US$5 cap on paid baseline runs):
+Cost and safety rules (ADR-0020 section 4; ADR-0086, the US$5 cap per paid baseline arm):
 
 - The default is a dry run: it renders every prompt, counts the calls and estimates tokens and the worst-case
   cost. Nothing touches the network. `--live` is required for a paid call.
 - `--max-usd` (default 5.0) and `--max-tokens` stop the run before a call that could pass either cap. Spend is
   priced from the token counts with `PRICES` (a call that reports no usage is charged its worst case), recorded
   per call and summed across resumed runs into the same output. The cap holds per output file only: the US$5 is
-  one total, so each live run's `--max-usd` is set to what the earlier outputs left.
+  this arm's total, so each live run's `--max-usd` is set to what this arm's earlier outputs left.
 - Held-out paths are refused unless `--allow-heldout` is given, and the flag is recorded.
 - Every finished episode is appended to the JSONL output at once, scored or not; a rerun skips what is already
   answered, and an episode whose call failed is tried again. A rerun into an output written by another model or
@@ -54,7 +54,7 @@ MAX_ATTEMPTS = 2  # one malformed answer is retried once (section 3.1 item 1)
 API_ATTEMPTS = 3  # a rate limit, timeout or server error is retried with backoff
 BACKOFF_SECONDS = (2.0, 8.0)
 MAX_OUTPUT_TOKENS = 8000  # bounds each call's worst case for the caps
-DEFAULT_MAX_USD = 5.0  # the US$5 cap on paid baseline runs, held as one shared total (ADR-0086)
+DEFAULT_MAX_USD = 5.0  # the US$5 cap for this arm's paid runs together (ADR-0086, per arm)
 DEFAULT_MAX_TOKENS = 3_000_000
 # USD per million (input, output) tokens: the upper estimate the recipe-tag run uses for the same model.
 PRICES = {"gpt-5.4-mini": (INPUT_USD_PER_M, OUTPUT_USD_PER_M)}
