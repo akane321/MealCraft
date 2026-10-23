@@ -9,6 +9,8 @@ changes its tags with it. Three kinds only, in this order, at most two a dish, n
   cheapest quarter per serving. The cost is what the week buys for it, after the pantry covered what it could.
 - `quick`: ready in 20 minutes or less.
 
+A skipped dish gets no tags.
+
 A main is a `main`, `main-2`, ... role outside breakfast. The tags say what is true of the dish, never why the
 planner chose it: they never repeat the engine's own reason strings."""
 
@@ -74,6 +76,8 @@ def dish_reasons(
 
     tags: dict[int, list[DishReason]] = {}
     for entry in entries:
+        if entry.status == "skipped":  # not cooked, so nothing is said about it
+            continue
         found: list[DishReason] = []
         if is_main(entry):
             nutrition = entry.recipe.nutrition

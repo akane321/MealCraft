@@ -71,6 +71,14 @@ def test_cheapest_main_needs_four_different_mains():
     assert codes([entry(1, cost=2, status="skipped"), *four[1:], entry(5, cost=16)]) == {2: ["cheap_main"]}
 
 
+def test_a_skipped_dish_gets_no_tags_while_its_planned_copy_keeps_them():
+    week = [entry(1, cost=2, minutes=15), *(entry(i, cost=float(i) * 5) for i in range(2, 5))]
+    skipped = entry(9, recipe_id=1, cost=2, minutes=15, status="skipped")  # quick, fits, cheapest recipe
+    tags = codes([*week, skipped], preferences=["low-sodium"])
+    assert 9 not in tags
+    assert tags[1] == ["preference", "cheap_main"]
+
+
 def test_cheapest_main_is_the_cheapest_quarter_per_serving_and_ties_count_against_it():
     eight = [entry(i, cost=float(i)) for i in range(1, 9)]
     assert codes(eight) == {1: ["cheap_main"], 2: ["cheap_main"]}  # 25% of 8: the 3rd is out

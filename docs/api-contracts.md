@@ -727,7 +727,8 @@ meal record or duplicate nutrition contribution is created.
   4 different priced mains in the week that are not skipped, a main in the
   cheapest quarter per serving, ties counting against it; "One of the week's cheapest mains") and
   `quick` (20 minutes or less; "Ready in 15 min"). A main is a `main`,
-  `main-2`, ... role outside breakfast. Empty when nothing holds. They are
+  `main-2`, ... role outside breakfast. Empty when nothing holds, and always
+  empty on a skipped dish. They are
   facts, not why the planner chose the dish, and never the engine's `reasons`
 - on each dish, `cost_per_serving_sgd`: its consumed cost over its saved
   servings, or over household size × portion share when no servings were
