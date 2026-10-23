@@ -1,6 +1,6 @@
 # Authoring held-out evaluation episodes
 
-This guide is for the six contributors writing the v2 held-out set. It covers
+This guide is for the contributors writing the v2 held-out set. It covers
 the format, the rules a program checks for you, and the judgement calls it
 cannot check.
 
