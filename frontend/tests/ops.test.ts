@@ -143,6 +143,7 @@ describe("ops console helpers", () => {
     expect(formatSeconds(4.21)).toBe("4.2 s");
     expect(formatSeconds(null)).toBe("—");
     expect(parseTaskKey("planning-12")).toEqual({ kind: "planning", id: 12 });
+    expect(parseTaskKey("intake-34")).toEqual({ kind: "intake", id: 34 });
     expect(parseTaskKey("evil-1")).toBeNull();
   });
 });
