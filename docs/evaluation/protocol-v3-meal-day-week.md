@@ -107,6 +107,11 @@ dry-grain weights and ingredient-wording checks remain. See the
 [dated scoring amendment](#vegetable-scoring-definition-2026-10-22) below.
 Protocol v2 labels keep their earlier course-only rule.
 
+The **2026-10-23** amendment below also admits starchy tubers into the vegetable
+numerator when other vegetables reach at least 40% of counted solids; the
+combined vegetable share must still reach 50%. It does not relax either flesh
+limit or any ingredient-based member restriction.
+
 ## 3. Categories
 
 | Category | What it tests |
@@ -157,6 +162,9 @@ The scorer uses the owner's culinary definition rather than inventing an
 independent definition for a baseline. This applies equally to developer and
 held-out v3.1 conditions; recorded earlier reports remain as recorded, not
 silently rescored under the amended definition.
+
+For newly run v3.1 conditions, the **2026-10-23** tuber amendment also applies
+through that same shared predicate, as disclosed below.
 Protocol v2-multidish scoring is unchanged. Added checks:
 
 | Check | Rule |
@@ -240,3 +248,27 @@ experiment was run. In contrast, the **full-default and shared-dish developer
 diagnostics were regenerated**, and their menus and checkout totals changed;
 see the [generated report comparison](../../data-engineering/docs/role-rules-20261022/report-comparison.md).
 No protected episode, label or report content was opened to make this amendment.
+
+### Vegetable scoring definition: 2026-10-23
+
+The owner amends ADR-0054 and ADR-0082: use the same counted solid-food weights
+as before, but starchy tubers may count toward the vegetable numerator only
+when **non-tuber vegetables are at least 40% of the full counted weight**.
+Vegetables including eligible tubers must still total at least **50%**.
+The denominator does not exclude the tubers. Total measured flesh stays at
+most 20%, non-seasoning flesh at most 5%, and unknown flesh quantity fails.
+A role remains distinct from a member's vegetarian or other dietary limits.
+
+The product, strict scorer and label checker all call the shared
+`row_vegetable_led` predicate. Apply this condition equally to every compared
+system and disclose it as `vegetable-role-2026-10-23` alongside protocol v3.1
+(ADR-0020). Previous scoring conditions and stored reports remain historical;
+do not overwrite them with a new interpretation or claim that unchanged old
+scores establish equivalent definitions. Version-1 and version-2 course-only
+scoring do not acquire this rule. The complete current user definition is in
+the [user guide](../user-guide.md).
+
+This rule was specified from catalog evidence and the owner decision, not
+protected evaluation content. The task regenerates only the authorised
+developer reports, with differences in the
+[dated comparison](../../data-engineering/docs/role-rules-119-20261023/report-comparison.md).
