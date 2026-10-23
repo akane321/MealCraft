@@ -1,7 +1,7 @@
 """Run protocol v3-meal-day-week episodes through the product planner and score them.
 
 Each episode is planned the way the product plans a week: an in-memory database
-holds only the episode's drawn pool (release v2.1, imported by the product's own
+holds only the episode's drawn pool (release v2.2, imported by the product's own
 importer), `WeeklyMealPlanService.generate` plans the household's plan shape with
 fixture prices, and a shape-change episode then reads the household's words with
 the product's rules (`read_shape_change`), previews the change
@@ -351,8 +351,11 @@ def scorer_catalogs(episode: dict) -> Catalogs:
     An "A or B" line (`data/ingredients/alternatives.json`) is its first option the
     household can eat and buy, the rule the product states in `app.planning.alternatives`;
     this is the scorer's own copy of it. The frozen prices include the fixture file's.
+
+    The facts are the release the product imports (owner 2026-10-24): scoring a plan made from v2.2 grams
+    against v2.1 grams failed plans the product had right. Protocol v2-multidish keeps v2.1.
     """
-    catalog = load_release_catalog()
+    catalog = load_release_catalog(release=release_dir().relative_to(repository_root()))
     profile = episode["scenario"]["household_profile"]
     banned, excluded = set(profile["allergens"]), set(profile["excluded_ingredients"])
     allergens = {row["normalized_name"]: set(row["allergens"]) for row in catalog.ingredients}
@@ -500,8 +503,12 @@ def main() -> int:
         for path in files
     }
     for fixed in (
+        # Titles, courses and products come from v2.1 (`load_release_catalog`); the pool is imported by the product's
+        # importer, which reads the product's release (v2.2 since 2026-10-23).
         "data-engineering/data/release/v2.1/recipes.jsonl",
         "data-engineering/data/release/v2.1/ingredients.jsonl",
+        "data-engineering/data/release/v2.2/recipes.jsonl",
+        "data-engineering/data/release/v2.2/ingredients.jsonl",
         "data/products/fairprice-v2-snapshot.json",
         "data/fixtures/fairprice-products.json",
     ):

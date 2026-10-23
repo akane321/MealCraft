@@ -323,7 +323,7 @@ def test_varying_defers_to_the_explicit_diversity_policy():
 
 @pytest.fixture(scope="module")
 def product():
-    """A product database as compose seeds it: the curated catalog, then release v2.1."""
+    """A product database as compose seeds it: the curated catalog, then the release (v2.2)."""
     root = repository_root()
     engine = create_engine("sqlite+pysqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     Base.metadata.create_all(engine)
@@ -342,7 +342,11 @@ def product():
 
 
 def test_the_walkthrough_week_varies_within_its_budget(product):
-    """12 distinct dishes of 21 and one soup five times before; the candidates hold at most 18 within S$100."""
+    """12 distinct dishes of 21 and one soup five times before; the candidates hold at most 18 within S$100.
+
+    Release v2.2 (2026-10-23) weighs whole chickens, heads and stated item weights in full, so this week costs more
+    (S$97.73 of S$100): it keeps 16 dish families but uses two of them three times (at most twice on v2.1, and twice
+    again from S$120)."""
     request = WeeklyMealPlanRequest.model_validate(
         {
             "start_date": "2026-09-28",
@@ -359,7 +363,7 @@ def test_the_walkthrough_week_varies_within_its_budget(product):
     assert plan.grocery_estimate.purchase_total_sgd <= 100.0
     assert sum(dishes.values()) == 21
     assert len(dishes) >= 16, dishes
-    assert max(dishes.values()) <= 2, dishes
+    assert max(dishes.values()) <= 3, dishes
 
 
 # Breakfast, a lunch of a main and a vegetable dish and a dinner of a main and an optional vegetable dish:
@@ -434,7 +438,8 @@ def test_a_heavy_week_varies_every_start_whatever_the_clock_says(product, monkey
     plans = build_meal_plan_service(product, 1)
     passes = variety_passes(monkeypatch, never_best=True)
 
-    plans.generate(three_meals(200.0))
+    # S$150: on release v2.2 a S$200 heavy week is already filled with no dish twice, so no variety pass runs.
+    plans.generate(three_meals(150.0))
     assert passes[-1]["tried"] == passes[-1]["starts"] > 0
 
     plans.generate(three_meals(100.0, {"dinner": DINNER_WITH_SOUP}, **WALKTHROUGH))

@@ -56,6 +56,23 @@ python scripts/v2_release_report.py
 再跑一次 `packet` 就会打包它们。`config/allergen_corrections.csv` 是 owner 确认过的过敏原补充
 （只增不减）；含鱼或贝类的食材、或标题步骤提到肉鱼，菜谱就不是素食/纯素。
 
+## release v2.2：整件与容器的克数修正（owner 2026-10-23）
+
+v2.1 已发布、不再修改。v2.1 无法从仓库重建（`build_release_v2.py` 读的 `data/staging/` 被 git 忽略），
+所以 v2.2 由一个确定性的修正步骤从 v2.1 的已提交文件生成：
+
+```bash
+python scripts/correct_release_v22.py      # 读 data/release/v2.1/，写 data/release/v2.2/（含 corrections.jsonl）
+PYTHONPATH=src python -m unittest discover -s tests -p "test_correct*"
+```
+
+只改这些行的克数（以及鲜红椒行的食材 id），再用构建时同一份 `nutrition_per_100g` 重算这些菜谱的每份营养；
+菜谱集合、id 和其他字段不变。修正类别：鲜红椒误映射到 cayenne、行文本里写明但构建漏读的重量、
+"N 件（总重）"被乘了 N、整鸡、整颗菜/整个菠萝、整张 pizza 饼底、千层面片。克数只来自行文本、同一食材条目
+自己的单位重量，或带出处的公开参考（USDA FoodData Central，见脚本里的 `SOURCES`）。大小词（small/large）
+不在本轮。每一行的前后克数和出处在 `data/release/v2.2/corrections.jsonl`，数量、守卫告警和未修的项目
+在 `data/release/v2.2/quality_report.md` 末节。产品导入和基线评分从这一版起读 v2.2。
+
 ## release v2 的 FairPrice 商品映射
 
 ```bash
