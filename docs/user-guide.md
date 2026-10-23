@@ -100,6 +100,13 @@ such as fried rice, laksa or chicken rice carries its own staple, and may come
 without a vegetable dish. A household that saved its own dishes keeps them; the
 editor offers the full default as the recommended preset.
 
+Homemade noodles, flatbreads, polenta and qualifying potato dumplings can be
+staples when their listed starch ingredients make up at least half of counted
+weight. Sweet dough is not a staple at a sugar-to-carbohydrate ratio of 20% or
+more. Savoury Yorkshire pudding is the named exception: milk lactose does not
+make it a sweet dish, but the flour must still make up at least half. A recipe
+listing only a shell or dough and no filling is a component, not a meal.
+
 Every lunch and dinner is a real meal: a protein main with its staple or a
 one-bowl dish, never a snack, dessert, sauce or drink, a salad only as the
 vegetable dish and a soup only as the soup, no protein twice among the mains
@@ -110,7 +117,10 @@ budget, the time or the dishes cannot fit it. A count you choose yourself is
 kept as chosen.
 
 A vegetable dish is made at least half of vegetables by counted solid-food
-weight. Listed cured/dried meat or seafood and minced meat may season it, up to
+weight. Potatoes and other starchy tubers count toward that half only when
+other vegetables already make up at least 40% of counted weight. Plain mashed
+potatoes, fries and almost-all-potato dishes do not qualify as vegetables.
+Listed cured/dried meat or seafood and minced meat may season it, up to
 20% of counted weight in total. Other meat, poultry, fish or seafood may only be
 traces, up to 5%; with both types, both limits apply. Every flesh quantity must
 be known. This is a meal role, not a vegetarian label.
