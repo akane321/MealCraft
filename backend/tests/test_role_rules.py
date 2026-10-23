@@ -28,7 +28,6 @@ def tags(title, lines, course="side"):
     "title,starch",
     [
         ("Homemade Noodles", "flour"),
-        ("Pasta", "semolina"),
         ("Polenta", "cornmeal"),
         ("Gnocchi", "potato"),
         ("Roti", "whole_wheat_flour"),
@@ -36,7 +35,6 @@ def tags(title, lines, course="side"):
         ("Paratha", "flour"),
         ("Naan", "flour"),
         ("Flatbread", "flour"),
-        ("Tortilla", "masa"),
         ("Tortilla", "corn_flour_masa"),
         ("Pasta", "semolina_flour"),
         ("Noodles", "brown_rice_flour"),

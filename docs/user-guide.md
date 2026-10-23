@@ -195,6 +195,13 @@ weight. Sweet dough is not a staple at a sugar-to-carbohydrate ratio of 20% or
 more. Savoury Yorkshire pudding is the named exception: milk lactose does not
 make it a sweet dish, but the flour must still make up at least half. A recipe
 listing only a shell or dough and no filling is a component, not a meal.
+Fufu, injera, arepas, sopes and hush puppies are named staples on the same
+terms; cornmeal and masa count as their starch only under such a staple name,
+so a cornmeal coating does not make fried chicken a staple. A side made at
+least half of potato, sweet potato, cassava, taro, ube or plantain is a
+staple, and so is a main with no main protein that is at least 60% of them.
+A dish whose sweeteners make 8% or more of it, such as candied yams, is not a
+staple.
 
 Every lunch and dinner is a real meal: a protein main with its staple or a
 one-bowl dish, never a snack, dessert, sauce or drink, a salad only as the
@@ -226,10 +233,13 @@ does not eat the meat-seasoned dish and must have another vegetable dish they
 can eat. Pasta, rice and bean sides are not vegetable dishes merely because
 they are sides. A homemade staple such as noodles or gnocchi needs actual
 listed starch ingredients, not just a staple name. Egg-, tofu- or meat-led
-sides may fill a protein-main role, but not batters, puddings, pancakes or
-substantially starchy sides. Whole-bean-led sides, including edamame, do not
-become protein mains through this rule; edamame sides remain vegetables when
-they meet the vegetable definition.
+sides may fill a protein-main role, but not batters, puddings, pancakes,
+substantially starchy sides, or condiment and topping-type sides: a cheese or
+cheese substitute such as tofu feta, a topping or garnish, a ramen egg, or a
+side whose name says it is for another dish. Whole-bean-led sides, including
+edamame, do not become protein mains through this rule; edamame sides remain
+vegetables when they meet the vegetable definition. A bean-led side may be
+reviewed as a staple, but the rules never assign it that role.
 
 Under **Kitchen**, tick the equipment you do not have (oven, air fryer,
 steamer, microwave, blender); a recipe that needs it is never planned. A recipe
