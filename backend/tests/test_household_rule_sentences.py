@@ -5,7 +5,9 @@ import pytest
 from app.agent.rule_sentences import (
     NAME_THE_PERSON,
     NO_DATES,
+    NO_DAYS,
     NO_POLARITY,
+    NO_TIME,
     TIME_RANGE,
     OpenAIRuleReader,
     ParsedRule,
@@ -188,6 +190,14 @@ AND_TIMES = [
         "weekday lunch and dinner within 30 minutes and weekends 90 minutes",
         [(WEEKDAYS, ["lunch", "dinner"], 30), (WEEKEND, ["lunch", "dinner"], 90)],
     ),
+    # A day phrase said once, before or after both parts, covers both; never every day for one of them.
+    (
+        "lunch within 20 minutes and dinner within 45 minutes on weekdays",
+        [(WEEKDAYS, ["lunch"], 20), (WEEKDAYS, ["dinner"], 45)],
+    ),
+    ("weekday lunch 20 minutes and dinner 45 minutes", [(WEEKDAYS, ["lunch"], 20), (WEEKDAYS, ["dinner"], 45)]),
+    ("weekday breakfast 10 minutes and dinner 45 minutes", [(WEEKDAYS, ["breakfast"], 10), (WEEKDAYS, ["dinner"], 45)]),
+    ("lunch within 20 minutes and dinner within 45 minutes", [([], ["lunch"], 20), ([], ["dinner"], 45)]),
 ]
 
 
@@ -205,6 +215,24 @@ AND_PRESENCE = [
     ),
     ("孩子工作日在学校吃和周末在家吃", [("Mei", False, WEEKDAYS, []), ("Mei", True, WEEKEND, [])]),
     ("孩子工作日午饭在学校吃而周末在家吃", [("Mei", False, WEEKDAYS, ["lunch"]), ("Mei", True, WEEKEND, ["lunch"])]),
+    # Bare "home" is home.
+    ("Mei is away on weekdays and home on weekends", [("Mei", False, WEEKDAYS, []), ("Mei", True, WEEKEND, [])]),
+    ("I am home on weekends and away on weekdays", [("Ann", True, WEEKEND, []), ("Ann", False, WEEKDAYS, [])]),
+    # Different people split too, even when both are away.
+    (
+        "Ben is away on weekdays and Mei is away on weekends",
+        [("Ben", False, WEEKDAYS, []), ("Mei", False, WEEKEND, [])],
+    ),
+    (
+        "Ben eats at work on weekdays and Mei eats at school on weekends",
+        [("Ben", False, WEEKDAYS, []), ("Mei", False, WEEKEND, [])],
+    ),
+    # One day phrase covers both parts: lunch keeps the weekdays it was said with.
+    (
+        "Mei eats lunch at school and dinner at home on weekdays",
+        [("Mei", False, WEEKDAYS, ["lunch"]), ("Mei", True, WEEKDAYS, ["dinner"])],
+    ),
+    ("孩子工作日午饭在学校吃和晚饭在家吃", [("Mei", False, WEEKDAYS, ["lunch"]), ("Mei", True, WEEKDAYS, ["dinner"])]),
     # Nothing conflicts: the clause stays whole, as before.
     ("Ben eats out on Monday and Thursday nights", [("Ben", False, ["monday", "thursday"], ["dinner"])]),
     ("Ben and Mei are away on Fridays", [("Ben", False, ["friday"], []), ("Mei", False, ["friday"], [])]),
@@ -214,7 +242,7 @@ AND_PRESENCE = [
 
 
 @pytest.mark.parametrize(("text", "expected"), AND_PRESENCE)
-def test_and_splits_presence_only_when_away_meets_home(text, expected):
+def test_and_splits_presence_only_when_the_parts_differ(text, expected):
     result = read(text)
     assert result.issues == []
     assert [(r.member_name, r.present, r.weekdays, r.meal_types) for r in result.rules] == expected
@@ -230,9 +258,17 @@ def test_and_splits_presence_only_when_away_meets_home(text, expected):
             "Mei eats at school on Mondays and Tuesdays and at home on weekends",
             [("Mei", False, ["monday"]), ("Mei", True, WEEKEND)],
         ),
+        # "Comes home late" could mean either.
+        ("Ben comes home late on Fridays", []),
     ],
 )
 def test_a_part_it_cannot_place_is_reported_not_widened(text, expected):
     result = read(text)
     assert result.issues == [NO_POLARITY]
     assert [(r.member_name, r.present, r.weekdays) for r in result.rules] == expected
+
+
+def test_a_part_without_days_between_different_days_is_reported_not_read_as_every_day():
+    result = read("weekday dinners within 30 minutes and weekend lunch and dinner 90 minutes", kind="cooking_time")
+    assert result.issues == [NO_DAYS, NO_TIME]
+    assert [(r.weekdays, r.meal_types, r.max_minutes) for r in result.rules] == [(WEEKDAYS, ["dinner"], 30)]

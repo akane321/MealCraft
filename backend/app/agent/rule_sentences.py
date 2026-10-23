@@ -8,6 +8,7 @@ household saves the profile with it.
 
 import re
 from dataclasses import dataclass, field
+from functools import partial
 from itertools import pairwise
 from typing import Literal
 
@@ -28,6 +29,7 @@ NO_DATES = "Rules name weekdays and meals, not dates."
 NO_SPEAKER = "Choose who is writing, so 'I' can be read."
 NO_TIME = "Couldn't find a cooking time, for example 'within 30 minutes'."
 TIME_RANGE = "A cooking time is between 5 and 240 minutes."
+NO_DAYS = "Couldn't tell which days part of the sentence is about."
 
 # English day names and their short forms; Chinese 周一..周日 (also 星期, 礼拜).
 EN_DAY = {
@@ -67,8 +69,9 @@ ABSENT = (
     r"|在学校|在公司|不在家|不回来|不回家|加班|出去吃|在外面吃|在外吃|不吃(?=饭|早|午|中|晚)|出差"
 )
 PRESENT = (
-    r"\bjoins? us\b|\bcomes? over\b|\bcome for\b|\beats? with us\b|\bvisits?\b|\b(?:is|are) (?:at )?home\b"
-    r"|\bat home\b|\bhome for\b|\bjoins?\b"
+    r"\bjoins? us\b|\bcomes? over\b|\bcome for\b|\beats? with us\b|\bvisits?\b|\bjoins?\b"
+    # Any "home" the ABSENT check left: "at home", "home for dinner", bare "home on weekends"; "home late" is unclear.
+    r"|\bhome\b(?! late)"
     r"|过来吃|来吃|回来吃|在家吃|一起吃|过来|回家吃|在家"
 )
 DATES = (
@@ -191,6 +194,30 @@ def _split_conflicts(clause: str, value) -> list[str]:
     return ["".join(parts[2 * a : 2 * b - 1]).strip() for a, b in pairwise(bounds)]
 
 
+def _presence(request: RuleParseRequest, piece: str) -> tuple | None:
+    """A piece's presence value: away or home, and who it names, so "Ben is away on weekdays and Mei is away on
+    weekends" splits as well as "away on weekdays and home on weekends"."""
+    present = _polarity(piece)
+    if present is None:
+        return None
+    return present, tuple(_members_named(piece, request.members, request.speaker, _Reading()))
+
+
+def _split_days(clause: str, value, reading: _Reading) -> list[tuple[str, list[Weekday] | None]]:
+    """The split parts of one clause with their days. A day phrase said once covers every part ("lunch at school
+    and dinner at home on weekdays"), so a part naming no days takes the days the others name; when they name
+    different days it could belong to either, so it is reported and dropped, never read as every day."""
+    parts = _split_conflicts(clause, value)
+    days = [_days(part) for part in parts]
+    stated = {tuple(d) for d in days if d is not None}
+    if None not in days or not stated:
+        return list(zip(parts, days, strict=True))
+    if len(stated) == 1:
+        return [(part, d if d is not None else list(*stated)) for part, d in zip(parts, days, strict=True)]
+    reading.issue(NO_DAYS)
+    return [(part, d) for part, d in zip(parts, days, strict=True) if d is not None]
+
+
 def _members_named(clause: str, members: list[RuleParseMember], speaker: str | None, reading: _Reading) -> list[str]:
     text = clause.lower()
     named = [
@@ -237,9 +264,8 @@ def read_with_rules(request: RuleParseRequest) -> _Reading:
         return reading
     people: list[str] = []
     meals: list[str] = []
-    value = _minutes if request.kind == "cooking_time" else _polarity
-    for clause in (part for whole in _clauses(text) for part in _split_conflicts(whole, value)):
-        days = _days(clause)
+    value = _minutes if request.kind == "cooking_time" else partial(_presence, request)
+    for clause, days in (pair for whole in _clauses(text) for pair in _split_days(whole, value, reading)):
         clause_meals = _meals(clause) or meals
         if request.kind == "cooking_time":
             minutes = _minutes(clause)
