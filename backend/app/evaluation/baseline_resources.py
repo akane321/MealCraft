@@ -3,6 +3,7 @@
 - Names, nutrition and allergens: release v2.1 `ingredients.jsonl` (the frozen data version), with the curated
   catalog's allergen lists (`data/ingredients/ingredients.json`) added for the ids both hold, as the product's
   import does: an allergen list only ever grows.
+- Hierarchy step: the `same` and `variety` links of `data/ingredients/hierarchy` whose parent the release names.
 - Allergen vocabulary: `checked_allergens()` (`data/ingredients/allergen-vocabulary.json`). An allergen outside
   it is unverifiable for every ingredient (`app.data.allergens`).
 - Prices: the frozen FairPrice v2 snapshot through `load_release_catalog`, whole packages only.
@@ -14,13 +15,14 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from app.agent.ingredient_matcher import IngredientMatcher, catalog_aliases
 from app.core.paths import repository_root
 from app.data.allergens import checked_allergens
 from app.data.household_reference import basic_seasonings
+from app.data.ingredient_hierarchy import read_links
 from app.data.release_v2 import map_allergens
 from app.evaluation.baseline_recomputation import IngredientEvaluationFacts
 from app.evaluation.release_catalog import CURATED, NOT_PURCHASED, RELEASE, SNAPSHOT, load_release_catalog
@@ -40,6 +42,7 @@ class BaselineResources:
     not_purchased: frozenset[str]
     checked_allergens: frozenset[str] = frozenset()
     basic_seasonings: frozenset[str] = frozenset()
+    parents: dict[str, str] = field(default_factory=dict)
     # Snapshot ingredient keys the release names nothing for: priced, but no line can ever map to them.
     unnamed_product_ingredients: tuple[str, ...] = ()
     release_version: str | None = None
@@ -77,6 +80,7 @@ def load_resources(root: Path | None = None) -> BaselineResources:
         not_purchased=frozenset(NOT_PURCHASED),
         checked_allergens=checked_allergens(),
         basic_seasonings=frozenset(basic_seasonings()),
+        parents=hierarchy_parents(names, root),
         unnamed_product_ingredients=tuple(sorted({p.ingredient_id for p in products} - set(names))),
         release_version=manifest.get("release_version"),
         data_digests=tuple(
@@ -84,6 +88,18 @@ def load_resources(root: Path | None = None) -> BaselineResources:
             for path in (RELEASE_INGREDIENTS, RELEASE_MANIFEST, SNAPSHOT, CURATED)
         ),
     )
+
+
+def hierarchy_parents(names: dict[str, str], root: Path | None = None) -> dict[str, str]:
+    """Hierarchy id -> the one release id it is (`same`) or is a kind of (`variety`); ids with several are left out."""
+    parents: dict[str, str] = {}
+    for child, entry in read_links(root).entries.items():
+        if child in names:
+            continue
+        ups = {link["id"] for link in entry.get("parents", []) if link["relation"] in {"same", "variety"}} & set(names)
+        if len(ups) == 1:
+            parents[child] = ups.pop()
+    return parents
 
 
 def _ingredient_facts(root: Path) -> dict[str, IngredientEvaluationFacts]:

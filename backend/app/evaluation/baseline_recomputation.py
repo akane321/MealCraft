@@ -6,18 +6,20 @@ not, and nothing missing is ever read as zero or safe (ADR-0069 section 3):
 - an unmapped line makes nutrition incomplete, the allergen status unknown and the price `needs_data`;
 - a line whose mapping is uncertain (flagged or unmapped) is scanned for allergen keywords, and an allergen
   found that way is added to what the catalog says;
-- a line whose allergen status is still unknown makes the plan's allergens incomplete, which every consumer
-  treats as unsafe.
+- a line whose allergen status is still unknown makes the plan's allergens incomplete, and `allergen_safety`
+  then calls the plan unsafe for a household with allergens, as it does for an allergen outside the checked
+  vocabulary (`app.data.allergens`).
 """
 
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Literal
 
+from app.data.allergens import allergen_conflicts, conflict_reasons
 from app.evaluation.baseline_mapping import DishCoverage, IngredientMapping, PlanCoverage
 from app.planning.package_optimizer import PackageAllocation, optimize_packages
 from app.schemas.planning_v2 import PlanningNutrients, PlanningProductOption
@@ -28,27 +30,120 @@ PricingStatus = Literal["complete", "needs_data", "limit_exceeded"]
 # Words that reveal an allergen of the runtime vocabulary (`data/ingredients/allergen-vocabulary.json`).
 # Latin words match whole (with a plural s); Chinese words match anywhere in the line.
 ALLERGEN_KEYWORDS: dict[str, tuple[str, ...]] = {
-    "dairy": ("milk", "cheese", "butter", "cream", "yogurt", "yoghurt", "ghee", "whey", "casein", "paneer",
-              "牛奶", "奶", "芝士", "奶酪", "黄油", "奶油", "酸奶"),
+    "dairy": (
+        "milk",
+        "cheese",
+        "butter",
+        "cream",
+        "yogurt",
+        "yoghurt",
+        "ghee",
+        "whey",
+        "casein",
+        "paneer",
+        "牛奶",
+        "奶",
+        "芝士",
+        "奶酪",
+        "黄油",
+        "奶油",
+        "酸奶",
+    ),
     "egg": ("egg", "mayonnaise", "mayo", "meringue", "蛋"),
-    "fish": ("fish", "salmon", "tuna", "cod", "anchovy", "anchovies", "sardine", "mackerel", "tilapia",
-             "snapper", "bonito", "鱼"),
-    "gluten": ("wheat", "flour", "bread", "breadcrumb", "pasta", "noodle", "barley", "rye", "seitan",
-               "couscous", "panko", "soy sauce", "面", "麦", "酱油"),
+    "fish": (
+        "fish",
+        "salmon",
+        "tuna",
+        "cod",
+        "anchovy",
+        "anchovies",
+        "sardine",
+        "mackerel",
+        "tilapia",
+        "snapper",
+        "bonito",
+        "鱼",
+    ),
+    "gluten": (
+        "wheat",
+        "flour",
+        "bread",
+        "breadcrumb",
+        "pasta",
+        "noodle",
+        "barley",
+        "rye",
+        "seitan",
+        "couscous",
+        "panko",
+        "soy sauce",
+        "面",
+        "麦",
+        "酱油",
+    ),
     "peanut": ("peanut", "groundnut", "花生"),
     "sesame": ("sesame", "tahini", "芝麻", "麻油"),
-    "shellfish": ("shrimp", "prawn", "crab", "lobster", "crayfish", "scallop", "clam", "mussel", "oyster",
-                  "squid", "octopus", "cuttlefish", "虾", "蟹", "贝", "蚝", "蛎", "鱿鱼", "章鱼", "蛤"),
+    "shellfish": (
+        "shrimp",
+        "prawn",
+        "crab",
+        "lobster",
+        "crayfish",
+        "scallop",
+        "clam",
+        "mussel",
+        "oyster",
+        "squid",
+        "octopus",
+        "cuttlefish",
+        "虾",
+        "蟹",
+        "贝",
+        "蚝",
+        "蛎",
+        "鱿鱼",
+        "章鱼",
+        "蛤",
+    ),
     "soy": ("soy", "soya", "tofu", "edamame", "miso", "tempeh", "豆腐", "酱油", "大豆", "黄豆", "味噌", "豆浆", "腐竹"),
-    "tree_nut": ("almond", "cashew", "walnut", "pecan", "hazelnut", "pistachio", "macadamia", "pine nut",
-                 "杏仁", "腰果", "核桃", "榛子", "开心果", "松子"),
+    "tree_nut": (
+        "almond",
+        "cashew",
+        "walnut",
+        "pecan",
+        "hazelnut",
+        "pistachio",
+        "macadamia",
+        "pine nut",
+        "杏仁",
+        "腰果",
+        "核桃",
+        "榛子",
+        "开心果",
+        "松子",
+    ),
 }
 # Removed before the scan: common foods whose name holds an allergen word they do not carry.
 # ponytail: a short list; extend it from the review list, never by guessing an allergen away.
 NOT_ALLERGEN_PHRASES = (
-    "coconut milk", "coconut cream", "almond milk", "oat milk", "rice milk", "soy milk", "peanut butter",
-    "almond butter", "cashew butter", "cocoa butter", "butternut", "apple butter", "oyster mushroom",
-    "rice noodle", "rice flour", "rice vermicelli", "glass noodle", "cream of tartar",
+    "coconut milk",
+    "coconut cream",
+    "almond milk",
+    "oat milk",
+    "rice milk",
+    "soy milk",
+    "peanut butter",
+    "almond butter",
+    "cashew butter",
+    "cocoa butter",
+    "butternut",
+    "apple butter",
+    "oyster mushroom",
+    "rice noodle",
+    "rice flour",
+    "rice vermicelli",
+    "glass noodle",
+    "cream of tartar",
 )
 
 
@@ -251,3 +346,15 @@ def _pricing_status(results: tuple[IngredientPriceResult, ...], *, has_unmapped:
     if has_unmapped or any(item.status == "needs_data" for item in results):
         return "needs_data"
     return "complete"
+
+
+def allergen_safety(
+    result: BaselineRecomputation, requested: Iterable[str], checked: Iterable[str] | None = None
+) -> tuple[bool, list[str]]:
+    """(safe, reasons) for a household avoiding `requested`: present, unverifiable and unknown are all unsafe."""
+    wanted = list(requested)
+    present, unverifiable = allergen_conflicts(wanted, result.allergens, checked)
+    reasons = conflict_reasons(present, unverifiable)
+    if wanted and not result.allergens_complete:
+        reasons.append(f"Allergen status unknown for: {', '.join(result.allergen_unknown_lines)}.")
+    return not reasons, reasons

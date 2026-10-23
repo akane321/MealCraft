@@ -6,8 +6,9 @@ in the ingredient hierarchy. Every line records which method mapped it and wheth
 - an id or a display name is accepted as it is;
 - an other name alone is flagged (the other-name lists are model-generated and unreviewed, ADR-0069 section 3);
 - a similarity match must clear `SIMILARITY_FLOOR` and is flagged;
-- a line that names a kind of a catalog ingredient ("baby spinach leaves") maps to that ingredient, its parent
-  in the hierarchy, and is flagged;
+- the hierarchy step, flagged: a line that is an id of the ingredient hierarchy the release does not hold
+  (`data/ingredients/hierarchy`, a `same` or `variety` link: "baby spinach" is spinach) maps to that parent; a
+  longer line holding a catalog name as whole words ("baby spinach leaves") maps to the name it holds;
 - a line mixing Chinese and Latin text is flagged whatever mapped it, because `fold` reads only the Latin part;
 - anything else is unmatched. It keeps its suggestions for the review list and its grams count against coverage.
 
@@ -18,7 +19,7 @@ map. The plan-wide figure is reported too, but never decides a dish.
 from __future__ import annotations
 
 import re
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from typing import Literal
 
@@ -103,9 +104,10 @@ class _Index:
     names: dict[str, str]
     by_name: dict[str, set[str]]
     by_alias: dict[str, set[str]]
+    by_child: dict[str, str]
 
 
-def _index(names: dict[str, str], aliases: dict[str, list[str]]) -> _Index:
+def _index(names: dict[str, str], aliases: dict[str, list[str]], parents: Mapping[str, str]) -> _Index:
     by_name: dict[str, set[str]] = {}
     by_alias: dict[str, set[str]] = {}
     for ingredient_id, display_name in names.items():
@@ -113,7 +115,8 @@ def _index(names: dict[str, str], aliases: dict[str, list[str]]) -> _Index:
             by_name.setdefault(word, set()).add(ingredient_id)
         for alias in aliases.get(ingredient_id, []):
             by_alias.setdefault(fold(alias), set()).add(ingredient_id)
-    return _Index(names, by_name, by_alias)
+    by_child = {fold(child): parent for child, parent in parents.items() if parent in names}
+    return _Index(names, by_name, by_alias, by_child)
 
 
 def _parent(query: str, index: _Index) -> str | None:
@@ -126,6 +129,8 @@ def _parent(query: str, index: _Index) -> str | None:
                 ids = index.by_name.get(candidate, set())
                 if len(ids) == 1:
                     return next(iter(ids))
+                if candidate in index.by_child:
+                    return index.by_child[candidate]
     # ponytail: Chinese text has no word breaks, so it gets no parent step; add a segmenter if Chinese lines
     # turn up unmatched in the review list.
     return None
@@ -173,6 +178,9 @@ def _map_line(name: str, grams: float, suggested: list[str], index: _Index, floo
     score, best = max(scored, default=(0.0, None))
     if best is not None and score >= floor:
         return mapped(best, "similarity", f"spelling similarity {score:.2f}")
+    if query in index.by_child:
+        parent = index.by_child[query]
+        return mapped(parent, "hierarchy", f"a kind of {parent} in the ingredient hierarchy")
     parent = _parent(query, index)
     if parent is not None:
         return mapped(parent, "hierarchy", f"names a kind of {parent}")
@@ -193,9 +201,12 @@ def map_lines(
     aliases: dict[str, list[str]],
     matcher: IngredientMatcher,
     floor: float = SIMILARITY_FLOOR,
+    parents: Mapping[str, str] | None = None,
 ) -> list[IngredientMapping]:
-    """Map every line in one matcher call (`suggest_all`: one embedding request, however many lines)."""
-    index = _index(names, aliases)
+    """Map every line with one matcher call (`suggest_all`: one embedding request, however many lines).
+
+    `parents` is the hierarchy step's table: a hierarchy id -> the release id it is a kind of."""
+    index = _index(names, aliases, parents or {})
     suggestions = matcher.suggest_all([name for name, _ in lines]) if lines else {}
     return [_map_line(name, grams, suggestions.get(name, []), index, floor) for name, grams in lines]
 
@@ -208,8 +219,11 @@ def map_ingredient(
     aliases: dict[str, list[str]],
     matcher: IngredientMatcher,
     floor: float = SIMILARITY_FLOOR,
+    parents: Mapping[str, str] | None = None,
 ) -> IngredientMapping:
-    return map_lines([(name, quantity_g)], names=names, aliases=aliases, matcher=matcher, floor=floor)[0]
+    return map_lines([(name, quantity_g)], names=names, aliases=aliases, matcher=matcher, floor=floor, parents=parents)[
+        0
+    ]
 
 
 def map_response_ingredients(
@@ -219,12 +233,13 @@ def map_response_ingredients(
     aliases: dict[str, list[str]],
     matcher: IngredientMatcher,
     floor: float = SIMILARITY_FLOOR,
+    parents: Mapping[str, str] | None = None,
 ) -> PlanCoverage:
     if response.plan is None:
         return PlanCoverage(())
     dishes = [(meal.slot_id, dish) for meal in response.plan.meals for dish in meal.dishes]
     lines = [(item.name, item.quantity_g) for _, dish in dishes for item in dish.ingredients]
-    mappings = iter(map_lines(lines, names=names, aliases=aliases, matcher=matcher, floor=floor))
+    mappings = iter(map_lines(lines, names=names, aliases=aliases, matcher=matcher, floor=floor, parents=parents))
     return PlanCoverage(
         tuple(
             DishCoverage(
