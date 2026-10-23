@@ -172,13 +172,6 @@ def valid_meals(
     return meals
 
 
-def valid_meal_exists(episode: dict) -> tuple[bool, dict[str, int]]:
-    gold, pool, eligible, _, _ = _context(episode)
-    roles = episode["scenario"]["household_profile"]["meal_composition"]
-    counts = {r["role_id"]: sum(x["course"] in r["courses"] and eligible(x) for x in pool) for r in roles}
-    return bool(valid_meals(episode)), counts
-
-
 def _names(recipe: dict) -> set[str]:
     return {line["ingredient"] for line in recipe["ingredients"]}
 

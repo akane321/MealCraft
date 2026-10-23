@@ -677,13 +677,12 @@ types is reported as a soft check and leaves the week's cost known. Under a
 weekly budget, when every ranked week fails, the planner tries last the weeks of
 its cost-led cheapest-week search: the strongest budget-led search, run under
 the least whole-dollar budget it still completes a week within, bisected under
-the cheapest week found so far to 5%, every week it found kept. That search
+the cheapest week found so far to the whole dollar, every week it found kept. That search
 never reads the requested budget, so a week it finds at S$C is tried again
 under any budget of S$C or more; failed attempts of it are marked
 `cheapest_search` in the trace. It is the cheapest week a search found, not a
-proof that no cheaper week exists. A shape with a meal of four or more dishes
-does without it: there that search takes 5 to 16 s on the release catalog, and
-minutes with no dish twice, past a plan's 10 s (ADR-0046).
+proof that no cheaper week exists. Every plan shape gets it, however many
+dishes a meal has, with no time cap (ADR-0080).
 
 Non-plans return HTTP 422 with one actionable `detail` sentence. Internal status
 and proof scope are recorded in `OperationRun`, not added to the product view.
@@ -899,18 +898,15 @@ week fits it, so it plans). The amount is first checked as accepting it plans it
 under that budget; a budget changes the candidate packet, so when that check finds
 no week, the cheapest week of its own cost-led search that only the budget turned
 down sets the amount instead, which plans under any budget of its cost or more,
-with no further search. A second choice, for one meal a day, is half the people at their own
+with no further search. A second choice is half the people at their own
 cheapest week when that week costs less than the whole household's ("2 people at
-S$18 a week", or "Plan for 2 people" when that fits the budget as it is); for more
-meals a day that second search would take the reply past its
-time limit, so it is not offered. A meal of four or more dishes takes the
-planner's searches 5 to 26 s on the release catalog, past the reply's time
-limit, so for such a shape nothing is searched before the session is ready:
-only what the floor proves is refused (a weekly budget under it names the floor,
-with no amount offered, since no week backs one yet), and **Plan my week**
-answers the rest. Plan does not run the cheapest-week search for such a shape
-either, so a budget its search runs into is named ("the search found no week
-that meets the S$20 weekly budget") with no amount offered. No amount is
+S$18 a week", or "Plan for 2 people" when that fits the budget as it is). Every
+plan shape, however many meals a day and dishes a meal, gets the readiness
+check, the cheapest-week search and this half-household offer, with no time cap
+(ADR-0080). What the floor itself proves (a role with no dish, a member with no
+plate, too few dishes for the cap on uses, a per-meal budget under the cheapest
+meal) is refused from the floor, and a weekly budget under the floor whose
+cheapest-week search finds no week names the floor with no amount offered. No amount is
 ever a guess. After a refusal, a bare amount ("S$50", 那就50新币吧) answers the
 budget it asked about. A per-meal amount is offered only when a week plans with
 it. When prices cannot be read, the check is skipped and Plan answers for itself.

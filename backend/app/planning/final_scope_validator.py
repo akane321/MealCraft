@@ -101,7 +101,7 @@ class FinalPlanningValidator:
             # now reports as a data problem rather than rounding into compliance.
             budget_cents = round(problem.purchase_budget_sgd * 100)
             trips = sorted({line.trip for line in shopping if line.trip is not None})
-            # A plan of two shopping trips holds the budget on each trip (ADR-0072); one trip, on the plan.
+            # A plan of two shopping trips holds the budget on each trip (ADR-0084); one trip, on the plan.
             spent = (
                 [(None, purchase_total)]
                 if not trips
