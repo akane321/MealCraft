@@ -523,6 +523,45 @@ test("Never again is pressed, undone in the week, and listed with Undo on the pr
   await expect(card.getByText("None yet.", { exact: false })).toBeVisible();
 });
 
+test("a dish's reason tag opens its facts, labelled as facts, at both desktop widths (layer 08 section 7.2)", async ({ page }) => {
+  await stubApi(page);
+  await page.route("**/api/plans/9001/dashboard", route => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      ...dashboard,
+      days: days.map(day => day.recipe.id === 4
+        ? { ...day, reasons: [{ code: "preference", label: "Fits low-sodium" }, { code: "cheap_main", label: "One of the week's cheapest mains" }], cost_per_serving_sgd: 2.1 }
+        : { ...day, reasons: [], cost_per_serving_sgd: null }),
+    }),
+  }));
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "Plan my week", exact: true }).click();
+
+  const week = page.getByRole("complementary", { name: "This week" });
+  const tag = week.getByRole("button", { name: "Fits low-sodium" });
+  await expect(week.getByRole("button", { name: "One of the week's cheapest mains" })).toBeVisible();
+  const facts = week.getByRole("region", { name: "Facts about Tofu Brown Rice Stir-fry" });
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
+    await page.setViewportSize(viewport);
+    await expect(tag).toHaveAttribute("aria-expanded", "false");
+    await tag.click();
+    await expect(tag).toHaveAttribute("aria-expanded", "true");
+    await expect(facts).toContainText("Dish facts");
+    await expect(facts).toContainText("Cooking time");
+    await expect(facts).toContainText("S$2.10 per serving");
+    await expect(facts).toContainText("mg per person");
+    await expect(facts).not.toContainText("chosen");
+    const panel = await week.boundingBox();
+    const box = await facts.boundingBox();
+    expect(box!.x + box!.width).toBeLessThanOrEqual(panel!.x + panel!.width);
+    await tag.click(); // the tag again closes it
+    await expect(facts).toHaveCount(0);
+  }
+});
+
 for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
   test(`week overview and composer have room at ${viewport.width}`, async ({ page }) => {
     await planWeek(page);

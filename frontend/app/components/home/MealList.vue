@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
-import { FEEDBACK_BUTTONS, MEAL_LABEL, isStapleDish, mealsByDay, nextFeedback, nextMeal, type PlannedMeal } from "~/lib/home-surface";
+import { FEEDBACK_BUTTONS, MEAL_LABEL, dishFacts, isStapleDish, mealsByDay, nextFeedback, nextMeal, type PlannedMeal } from "~/lib/home-surface";
 import type { FeedbackKind, NutritionDashboardDay } from "~/types/meal-plan";
 
 // A replaced week (readonly) is only read: its dishes offer no changes. Feedback is on the dish, not the week
@@ -18,6 +18,9 @@ const props = defineProps<{
 const emit = defineEmits<{ openRecipe: [slug: string]; ask: [text: string]; feedback: [recipeId: number, kind: FeedbackKind | null] }>();
 const changeable = (dish: NutritionDashboardDay) => !props.readonly && dish.status === "planned" && !dish.is_locked;
 const rated = (dish: NutritionDashboardDay) => Boolean(props.canGiveFeedback) && dish.status !== "skipped";
+// The dish whose facts panel is open: any of its reason tags opens or closes it.
+const factsOpen = ref<number | null>(null);
+const toggleFacts = (entryId: number) => { factsOpen.value = factsOpen.value === entryId ? null : entryId; };
 
 const week = computed(() => mealsByDay(props.days));
 const next = computed(() => nextMeal(props.days, todayIsoDate()));
@@ -95,9 +98,26 @@ const ACTIONS = [
                   {{ chip(meal).label }}
                 </span>
               </span>
+              <!-- Facts true of the dish, never why it was chosen; a tag opens the dish's facts. -->
+              <span v-if="dish.reasons?.length" class="reasons">
+                <button
+                  v-for="reason in dish.reasons"
+                  :key="reason.code"
+                  type="button"
+                  class="reason"
+                  :aria-expanded="factsOpen === dish.entry_id"
+                  @click="toggleFacts(dish.entry_id)"
+                >
+                  {{ reason.label }}
+                </button>
+              </span>
               <span v-if="meal.dishes.length === 1 || dish.is_locked" class="rest">
                 <template v-if="meal.dishes.length === 1">{{ dish.recipe.total_time_minutes }} min · {{ Math.round(dish.nutrition_per_person.calories_kcal) }} kcal</template>
                 <span v-if="dish.is_locked" class="kept"><template v-if="meal.dishes.length === 1"> · </template>Kept as is</span>
+              </span>
+              <span v-if="factsOpen === dish.entry_id" :id="`facts-${dish.entry_id}`" class="facts" role="region" :aria-label="`Facts about ${dish.recipe.title}`">
+                <span class="facts-head">Dish facts</span>
+                <span v-for="fact in dishFacts(dish)" :key="fact.label" class="fact"><b>{{ fact.label }}</b> {{ fact.value }}</span>
               </span>
               <span v-if="changeable(dish) || rated(dish)" class="act-row">
                 <span v-if="changeable(dish)" class="acts" role="group" :aria-label="`Change ${dish.recipe.title}`">
@@ -180,5 +200,11 @@ const ACTIONS = [
 .feedback button:disabled { opacity: 0.6; }
 .never { font-size: 12px; line-height: 24px; color: var(--c-muted); font-weight: 700; white-space: nowrap; }
 .never button { padding: 0; border: 0; background: none; color: var(--c-coral); font: inherit; text-decoration: underline; }
+.reasons { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.reason { height: 20px; padding: 0 8px; border: 1px solid var(--c-line); border-radius: 999px; background: none; color: var(--c-muted); font-size: 11px; font-weight: 700; white-space: nowrap; }
+.reason:hover, .reason[aria-expanded="true"] { border-color: var(--c-ink); color: var(--c-ink); }
+.facts { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 4px; padding: 6px 10px; border-radius: 8px; background: var(--c-canvas); font-size: 12px; line-height: 18px; }
+.facts-head { flex-basis: 100%; color: var(--c-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+.fact b { font-weight: 800; }
 .feedback-error { margin: 8px 16px 0; color: var(--c-coral); font-size: 12px; font-weight: 700; }
 </style>

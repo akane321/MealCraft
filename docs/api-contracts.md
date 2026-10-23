@@ -721,6 +721,23 @@ meal record or duplicate nutrition contribution is created.
 - the user-entered nutrition targets stored with the plan
 - on each dish, `feedback`: the household's `like`, `dislike` or `never_again`
   on that recipe, or null
+- on each dish, `reasons`: up to two facts true of the dish (layer 08 section
+  7.2), each `{code, label}`, worked out when the week is read from what it
+  saved, so a confirmed swap or meal change shows the new dish's own. Three
+  codes only, in this order: `preference` (a main within the benchmark the
+  recommendation score uses for each of the week's health preferences: sodium
+  700 mg, sugar 12 g, 600 kcal; "Fits low-sodium"), `cheap_main` (with at least
+  4 different priced mains in the week that are not skipped, a main in the
+  cheapest quarter per serving, ties counting against it; "One of the week's cheapest mains") and
+  `quick` (20 minutes or less; "Ready in 15 min"). A main is a `main`,
+  `main-2`, ... role outside breakfast. Empty when nothing holds, and always
+  empty on a skipped dish. They are
+  facts, not why the planner chose the dish, and never the engine's `reasons`
+- on each dish, `cost_per_serving_sgd`: its consumed cost over its saved
+  servings, or over household size × portion share when no servings were
+  saved; null when the week saved no grocery estimate for it. It is the cost
+  to buy after the pantry deduction, so a dish the pantry mostly covers
+  costs less here than the same dish bought from scratch
 
 Only completed dishes from the selected MealCraft plan contribute to completed
 nutrition. Plan-external foods are outside the current baseline and cannot be entered through
