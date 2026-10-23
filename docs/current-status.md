@@ -22,8 +22,9 @@ Merged since the last snapshot, each with its paired knowledge record:
 - #306: shared-dish variety restored, a last bounded widening step so no meal is
   left empty while eligible dishes remain, and confirm runs that never fail on
   the wall budget after planning (ADR-0080).
-- #307: replanning across shopping trips: retained dishes' stock first, package
-  surplus kept within its trip, the budget held per trip (ADR-0072).
+- #307: replanning across shopping trips (one a week, ADR-0072): retained
+  dishes' stock first, package surplus kept within its trip, the budget held per
+  trip (ADR-0084).
 - #308: recipe-tag residual repair (task 6), described under
   [Recipe-tag residual repair](#recipe-tag-residual-repair-task-6-308).
 - #309: the post-search variety pass has no wall-clock deadline, and the plan
@@ -39,7 +40,8 @@ Merged since the last snapshot, each with its paired knowledge record:
 - #317 and #318: per-trip budgets and feasibility checks in the offline
   algorithm arms, and timing comparisons qualified with their benchmark
   environment.
-- #320: evidence-only role refinements for the 119-recipe review.
+- #320: evidence-only role refinements for the 119-recipe review and mixed tuber
+  vegetables (ADR-0085).
 
 The three dated blocks below are historical snapshots kept for their evidence
 links; their timing statements predate ADR-0079 and ADR-0080.
@@ -117,8 +119,7 @@ five jobs.
 Each of these fixes has tests that fail without it. On the real demo stack at
 this snapshot (2026-10-06, demo build, sample prices), the reply that plans a week
 took 6.7–6.9 s in OpenAI mode and about 5 s in rule mode, and **Plan my week**
-then showed the week in about 1 s; the response-time boundary under
-[Planning product path](#planning-product-path) still holds. The held-out reports
+then showed the week in about 1 s. The held-out reports
 are unchanged.
 
 The earlier reviewed integration preserves dish locks in search and candidate packets,
