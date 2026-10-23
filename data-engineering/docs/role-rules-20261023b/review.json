@@ -13,14 +13,14 @@
     },
     "after_rules": {
       "consistent": 162,
-      "grey": 110,
-      "blocked": 147,
+      "grey": 112,
+      "blocked": 145,
       "incomplete": 3
     },
     "after_review_roles": {
       "consistent": 162,
-      "grey": 143,
-      "blocked": 114,
+      "grey": 145,
+      "blocked": 112,
       "incomplete": 3
     }
   },
@@ -9901,24 +9901,32 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": "staple",
-        "contains_staple": true,
+        "meal_role": null,
+        "contains_staple": null,
         "protein_sources": []
       },
       "previous_rule_suggestion": null,
       "model_allowed_roles": [
-        "staple"
+        "soup",
+        "breakfast",
+        "snack",
+        "dessert",
+        "sauce",
+        "drink"
       ],
       "review_allowed_roles": [
-        "staple"
+        "soup",
+        "breakfast",
+        "snack",
+        "dessert",
+        "sauce",
+        "drink"
       ],
-      "rule_newer_than_batch": [
-        "owner 2026-10-23"
-      ],
+      "rule_newer_than_batch": [],
       "status": {
         "before": "grey",
-        "after_rules": "blocked",
-        "after_review_roles": "blocked"
+        "after_rules": "grey",
+        "after_review_roles": "grey"
       },
       "incomplete_reason": null,
       "ingredients": [
@@ -14302,24 +14310,32 @@
       },
       "stored_method": "llm",
       "rule_suggestion": {
-        "meal_role": "staple",
-        "contains_staple": true,
+        "meal_role": null,
+        "contains_staple": null,
         "protein_sources": []
       },
       "previous_rule_suggestion": null,
       "model_allowed_roles": [
-        "staple"
+        "soup",
+        "breakfast",
+        "snack",
+        "dessert",
+        "sauce",
+        "drink"
       ],
       "review_allowed_roles": [
-        "staple"
+        "soup",
+        "breakfast",
+        "snack",
+        "dessert",
+        "sauce",
+        "drink"
       ],
-      "rule_newer_than_batch": [
-        "owner 2026-10-23"
-      ],
+      "rule_newer_than_batch": [],
       "status": {
         "before": "grey",
-        "after_rules": "blocked",
-        "after_review_roles": "blocked"
+        "after_rules": "grey",
+        "after_review_roles": "grey"
       },
       "incomplete_reason": null,
       "ingredients": [
@@ -33195,6 +33211,30 @@
       "review_status": "pending_human"
     },
     {
+      "id": "RCP2_011214D52B25",
+      "title": "Sweet Potato Souffle",
+      "course": "side",
+      "before": {
+        "meal_role": "staple",
+        "model_allowed_roles": [],
+        "protein_sources": []
+      },
+      "after": {
+        "meal_role": null,
+        "model_allowed_roles": [
+          "soup",
+          "breakfast",
+          "snack",
+          "dessert",
+          "sauce",
+          "drink"
+        ],
+        "protein_sources": []
+      },
+      "frozen": false,
+      "review_status": "pending_human"
+    },
+    {
       "id": "RCP2_011288A0DAAA",
       "title": "Hush Puppies",
       "course": "side",
@@ -33319,6 +33359,30 @@
       "review_status": "pending_human"
     },
     {
+      "id": "RCP2_1770C1DCBF42",
+      "title": "Candied Yams",
+      "course": "side",
+      "before": {
+        "meal_role": "staple",
+        "model_allowed_roles": [],
+        "protein_sources": []
+      },
+      "after": {
+        "meal_role": null,
+        "model_allowed_roles": [
+          "soup",
+          "breakfast",
+          "snack",
+          "dessert",
+          "sauce",
+          "drink"
+        ],
+        "protein_sources": []
+      },
+      "frozen": false,
+      "review_status": "pending_human"
+    },
+    {
       "id": "RCP2_1E114667D956",
       "title": "Cheesy Potato Lasagna",
       "course": "main",
@@ -33343,6 +33407,58 @@
       "review_status": "pending_human"
     },
     {
+      "id": "RCP2_1E290BC51413",
+      "title": "Candied Yams",
+      "course": "side",
+      "before": {
+        "meal_role": "staple",
+        "model_allowed_roles": [],
+        "protein_sources": []
+      },
+      "after": {
+        "meal_role": null,
+        "model_allowed_roles": [
+          "soup",
+          "breakfast",
+          "snack",
+          "dessert",
+          "sauce",
+          "drink"
+        ],
+        "protein_sources": []
+      },
+      "frozen": false,
+      "review_status": "pending_human"
+    },
+    {
+      "id": "RCP2_24CEEC832FB1",
+      "title": "Sweet Potato Souffle",
+      "course": "side",
+      "before": {
+        "meal_role": "staple",
+        "model_allowed_roles": [],
+        "protein_sources": [
+          "egg"
+        ]
+      },
+      "after": {
+        "meal_role": null,
+        "model_allowed_roles": [
+          "soup",
+          "breakfast",
+          "snack",
+          "dessert",
+          "sauce",
+          "drink"
+        ],
+        "protein_sources": [
+          "egg"
+        ]
+      },
+      "frozen": false,
+      "review_status": "pending_human"
+    },
+    {
       "id": "RCP2_2848D4DD38CE",
       "title": "Fufu",
       "course": "side",
@@ -33364,6 +33480,30 @@
         "protein_sources": []
       },
       "frozen": true,
+      "review_status": "pending_human"
+    },
+    {
+      "id": "RCP2_29A0BD36FF45",
+      "title": "Sweet Potato Praline",
+      "course": "side",
+      "before": {
+        "meal_role": "staple",
+        "model_allowed_roles": [],
+        "protein_sources": []
+      },
+      "after": {
+        "meal_role": null,
+        "model_allowed_roles": [
+          "soup",
+          "breakfast",
+          "snack",
+          "dessert",
+          "sauce",
+          "drink"
+        ],
+        "protein_sources": []
+      },
+      "frozen": false,
       "review_status": "pending_human"
     },
     {
@@ -33416,10 +33556,15 @@
       "review_status": "pending_human"
     },
     {
-      "id": "RCP2_3F422D8D65F9",
-      "title": "Baked Plantains (Cooking Bananas)",
+      "id": "RCP2_34DA1997D05C",
+      "title": "Candied Yams",
       "course": "side",
       "before": {
+        "meal_role": "staple",
+        "model_allowed_roles": [],
+        "protein_sources": []
+      },
+      "after": {
         "meal_role": null,
         "model_allowed_roles": [
           "soup",
@@ -33431,12 +33576,35 @@
         ],
         "protein_sources": []
       },
-      "after": {
+      "frozen": false,
+      "review_status": "pending_human"
+    },
+    {
+      "id": "RCP2_35A9C8C1762C",
+      "title": "Gourmet Sweet Potato Souffle",
+      "course": "side",
+      "before": {
         "meal_role": "staple",
         "model_allowed_roles": [],
-        "protein_sources": []
+        "protein_sources": [
+          "egg"
+        ]
       },
-      "frozen": true,
+      "after": {
+        "meal_role": null,
+        "model_allowed_roles": [
+          "soup",
+          "breakfast",
+          "snack",
+          "dessert",
+          "sauce",
+          "drink"
+        ],
+        "protein_sources": [
+          "egg"
+        ]
+      },
+      "frozen": false,
       "review_status": "pending_human"
     },
     {
@@ -33598,30 +33766,6 @@
           "staple",
           "snack",
           "one_bowl"
-        ],
-        "protein_sources": []
-      },
-      "after": {
-        "meal_role": "staple",
-        "model_allowed_roles": [],
-        "protein_sources": []
-      },
-      "frozen": true,
-      "review_status": "pending_human"
-    },
-    {
-      "id": "RCP2_5C1AF74A7B55",
-      "title": "Šúĺlance s Makom",
-      "course": "main",
-      "before": {
-        "meal_role": null,
-        "model_allowed_roles": [
-          "soup",
-          "breakfast",
-          "snack",
-          "dessert",
-          "sauce",
-          "drink"
         ],
         "protein_sources": []
       },
@@ -33806,6 +33950,34 @@
       "review_status": "pending_human"
     },
     {
+      "id": "RCP2_D63DBDEE3B0E",
+      "title": "German Potato Salad",
+      "course": "side",
+      "before": {
+        "meal_role": "staple",
+        "model_allowed_roles": [],
+        "protein_sources": [
+          "pork"
+        ]
+      },
+      "after": {
+        "meal_role": null,
+        "model_allowed_roles": [
+          "soup",
+          "breakfast",
+          "snack",
+          "dessert",
+          "sauce",
+          "drink"
+        ],
+        "protein_sources": [
+          "pork"
+        ]
+      },
+      "frozen": false,
+      "review_status": "pending_human"
+    },
+    {
       "id": "RCP2_DBF17212D390",
       "title": "Easy Mexican Sopes",
       "course": "main",
@@ -33959,35 +34131,35 @@
     }
   ],
   "human_sample": [
-    "RCP2_50567B7B0B2C",
-    "RCP2_2C3763B662FD",
-    "RCP2_B8E67A023CFD",
-    "RCP2_1E114667D956",
-    "RCP2_5A5EBBE90C92",
-    "RCP2_402F11758D8C",
-    "RCP2_2848D4DD38CE",
-    "RCP2_5C1AF74A7B55",
-    "RCP2_DBF17212D390",
-    "RCP2_00A422F48FCC",
-    "RCP2_472B6677B22B",
-    "RCP2_01D48A672ACA",
-    "RCP2_4098E2E0D1B8",
-    "RCP2_E5862A12458B",
-    "RCP2_2F5D13FF1C1A",
-    "RCP2_9150197BEBD9",
-    "RCP2_DBFF4DB83EF2",
-    "RCP2_4F7893458243",
-    "RCP2_09872DC5D6C3",
-    "RCP2_4A7CC5A410F0",
-    "RCP2_0ABBD7482788",
-    "RCP2_8F8576285D7F",
-    "RCP2_66540AABF0E0",
-    "RCP2_E8D667BA918A",
-    "RCP2_3F422D8D65F9",
-    "RCP2_011288A0DAAA",
-    "RCP2_03DEE14CDC60",
-    "RCP2_74EFF106FE7B",
+    "RCP2_35A9C8C1762C",
     "RCP2_F480AAE0C111",
-    "RCP2_D30FB234E549"
+    "RCP2_29A0BD36FF45",
+    "RCP2_E5862A12458B",
+    "RCP2_50567B7B0B2C",
+    "RCP2_34DA1997D05C",
+    "RCP2_5A5EBBE90C92",
+    "RCP2_00A422F48FCC",
+    "RCP2_2C3763B662FD",
+    "RCP2_011288A0DAAA",
+    "RCP2_8F8576285D7F",
+    "RCP2_E8D667BA918A",
+    "RCP2_720FC24A521E",
+    "RCP2_0ABBD7482788",
+    "RCP2_1E290BC51413",
+    "RCP2_2848D4DD38CE",
+    "RCP2_D63DBDEE3B0E",
+    "RCP2_4098E2E0D1B8",
+    "RCP2_1E114667D956",
+    "RCP2_4A7CC5A410F0",
+    "RCP2_DBFF4DB83EF2",
+    "RCP2_011214D52B25",
+    "RCP2_74EFF106FE7B",
+    "RCP2_D30FB234E549",
+    "RCP2_9150197BEBD9",
+    "RCP2_1770C1DCBF42",
+    "RCP2_4F7893458243",
+    "RCP2_66540AABF0E0",
+    "RCP2_B8E67A023CFD",
+    "RCP2_03DEE14CDC60"
   ]
 }

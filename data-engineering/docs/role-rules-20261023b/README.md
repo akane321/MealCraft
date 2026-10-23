@@ -21,6 +21,8 @@ with its values, provenance and review marks unchanged. No model was called.
 
 The reviewer's roles add `staple` and `one_bowl` when the rule's staple share
 is 0, because the rules' starch vocabulary may not know the dish's starch.
+A tuber or plantain dish whose sweeteners make 8% or more of it (candied
+yams, Šúľance s Makom) is not a staple and is not offered these roles.
 The roles the model prompt offers do not change
 (`backend/app/data/recipe_tags.py`, `review_roles`).
 

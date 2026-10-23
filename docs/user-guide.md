@@ -200,6 +200,8 @@ terms; cornmeal and masa count as their starch only under such a staple name,
 so a cornmeal coating does not make fried chicken a staple. A side made at
 least half of potato, sweet potato, cassava, taro, ube or plantain is a
 staple, and so is a main with no main protein that is at least 60% of them.
+A dish whose sweeteners make 8% or more of it, such as candied yams, is not a
+staple.
 
 Every lunch and dinner is a real meal: a protein main with its staple or a
 one-bowl dish, never a snack, dessert, sauce or drink, a salad only as the

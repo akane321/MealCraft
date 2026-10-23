@@ -74,6 +74,26 @@ def test_a_protein_less_tuber_main_is_a_staple_from_sixty_percent():
     assert role("Potato Stew", [("potato", 600), ("meat", 400)]) != "staple"
 
 
+def test_a_tuber_dish_with_eight_percent_sweetener_is_not_a_staple():
+    assert role("Candied Yams", [("sweet_potato", 920), ("brown_sugar", 80)], course="side") != "staple"
+    assert role("Candied Yams", [("sweet_potato", 930), ("brown_sugar", 70)], course="side") == "staple"
+    assert role("Sweet Potato Stew", [("sweet_potato", 600), ("onion", 300), ("sugar", 100)]) != "staple"
+    assert role("Sweet Potato Stew", [("sweet_potato", 600), ("onion", 380), ("sugar", 20)]) == "staple"
+    # The tubers' own sugar is not sweetener: the 20% sugar/carbohydrate ceiling would have dropped this.
+    mash = [("sweet_potato", 600), ("butter", 30)]
+    assert role("Mashed Sweet Potatoes", mash, course="side", sugar=12, carbs=40) == "staple"
+
+
+def test_a_sweet_tuber_dish_is_not_offered_staple_even_to_the_reviewer():
+    yams = dish("Candied Yams", [("sweet_potato", 600), ("brown_sugar", 200)], course="side")
+    tags = rule_tags(yams)
+    assert tags.values["meal_role"] is None and "staple" not in review_roles(yams, tags)
+    sulance = catalog()["RCP2_5C1AF74A7B55"]  # Šúľance s Makom, the owner's example
+    tags = rule_tags(sulance)
+    assert tags.values["meal_role"] is None
+    assert not {"staple", "one_bowl"} & set(review_roles(sulance, tags))
+
+
 @pytest.mark.parametrize("rice", [0, 100])
 def test_a_bean_led_side_is_offered_staple_but_not_assigned_it(rice):
     beans = dish("Black Beans", [("black_beans", 600), ("onion", 100), ("rice", rice)], course="side")

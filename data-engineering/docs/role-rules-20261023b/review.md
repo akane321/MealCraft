@@ -9,8 +9,8 @@ Consistent: the rule names the stored role. Grey: the rule leaves the role open 
 | Stage | Consistent | Grey | Blocked | Incomplete |
 |---|---:|---:|---:|---:|
 | Before (base rules, model options) | 155 | 117 | 147 | 3 |
-| After: these rules, model options | 162 | 110 | 147 | 3 |
-| After: these rules, reviewer options | 162 | 143 | 114 | 3 |
+| After: these rules, model options | 162 | 112 | 145 | 3 |
+| After: these rules, reviewer options | 162 | 145 | 112 | 3 |
 
 ## Frozen batch: suggestions for liu-ub
 
@@ -145,7 +145,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_3C310D373BB9 | Pupusas | snack | staple | staple | blocked → blocked | ADR-0082/0085 |
 | RCP2_3CC1354BC571 | Brazilian Arroz De Festa (Confetti Rice) | staple | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
 | RCP2_3D5ADFE023AB | Lamb & apricot meatballs | protein_main | protein_main | protein_main | consistent → consistent |  |
-| RCP2_3F422D8D65F9 | Baked Plantains (Cooking Bananas) | dessert | staple | staple | grey → blocked | owner 2026-10-23 |
+| RCP2_3F422D8D65F9 | Baked Plantains (Cooking Bananas) | dessert | None | soup, breakfast, snack, dessert, sauce, drink | grey → grey |  |
 | RCP2_402F11758D8C | Injera | staple | staple | staple | grey → consistent | owner 2026-10-23 |
 | RCP2_4070469D0041 | French Onion Soup | soup | None | soup, one_bowl | grey → grey |  |
 | RCP2_409262770DBA | Popovers(Portuguese) | breakfast | None | protein_main, staple, one_bowl, breakfast, snack, dessert | grey → grey |  |
@@ -204,7 +204,7 @@ Reviewer roles add `staple` and `one_bowl` when the rule's staple share is 0 (ow
 | RCP2_59D318263C91 | Mahshy Bandora (Stuffed Tomatoes)(Lebanese) | one_bowl | one_bowl | one_bowl | consistent → consistent |  |
 | RCP2_5A5EBBE90C92 | Injera | staple | staple | staple | grey → consistent | owner 2026-10-23 |
 | RCP2_5B8603D2B433 | Italian Cottage Cheese | snack | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
-| RCP2_5C1AF74A7B55 | Šúĺlance s Makom | snack | staple | staple | grey → blocked | owner 2026-10-23 |
+| RCP2_5C1AF74A7B55 | Šúĺlance s Makom | snack | None | soup, breakfast, snack, dessert, sauce, drink | grey → grey |  |
 | RCP2_5C8F72777948 | Spatzle | staple | staple | staple | consistent → consistent | ADR-0082/0085 |
 | RCP2_5CAF86FF5D5D | Potato Borek | snack | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | grey → grey |  |
 | RCP2_5D77EC59057C | Creamy Polenta With Parmesan And Mozzarella | staple | None | soup, staple, one_bowl, breakfast, snack, dessert, sauce, drink | blocked → grey |  |
@@ -448,16 +448,22 @@ Rule-owned changes refresh the tag file; frozen rows keep their model values. Pe
 | ID | Recipe | Course | Role before → after | Model options after | Frozen |
 |---|---|---|---|---|---|
 | RCP2_00A422F48FCC | Janssonin Kiusaus - Four Ingredient Finnish Potato Bake | main | None → staple |  | False |
+| RCP2_011214D52B25 | Sweet Potato Souffle | side | staple → None | soup, breakfast, snack, dessert, sauce, drink | False |
 | RCP2_011288A0DAAA | Hush Puppies | side | None → staple |  | True |
 | RCP2_01D48A672ACA | Sweet Potato Noodle Curry | main | None → staple |  | True |
 | RCP2_03DEE14CDC60 | Hush Puppies | side | None → staple |  | True |
 | RCP2_09872DC5D6C3 | Hush Puppies | side | None → staple |  | False |
 | RCP2_0ABBD7482788 | Platanos Fritos (Sauteed Plantains) | side | None → staple |  | False |
+| RCP2_1770C1DCBF42 | Candied Yams | side | staple → None | soup, breakfast, snack, dessert, sauce, drink | False |
 | RCP2_1E114667D956 | Cheesy Potato Lasagna | main | None → staple |  | True |
+| RCP2_1E290BC51413 | Candied Yams | side | staple → None | soup, breakfast, snack, dessert, sauce, drink | False |
+| RCP2_24CEEC832FB1 | Sweet Potato Souffle | side | staple → None | soup, breakfast, snack, dessert, sauce, drink | False |
 | RCP2_2848D4DD38CE | Fufu | side | None → staple |  | True |
+| RCP2_29A0BD36FF45 | Sweet Potato Praline | side | staple → None | soup, breakfast, snack, dessert, sauce, drink | False |
 | RCP2_2C3763B662FD | Venezuelan Arepas With Sesame, Chia, And Flaxseeds | baked_good | None → staple |  | True |
 | RCP2_2F5D13FF1C1A | Kentucky Hush Puppies | side | None → staple |  | True |
-| RCP2_3F422D8D65F9 | Baked Plantains (Cooking Bananas) | side | None → staple |  | True |
+| RCP2_34DA1997D05C | Candied Yams | side | staple → None | soup, breakfast, snack, dessert, sauce, drink | False |
+| RCP2_35A9C8C1762C | Gourmet Sweet Potato Souffle | side | staple → None | soup, breakfast, snack, dessert, sauce, drink | False |
 | RCP2_402F11758D8C | Injera | baked_good | None → staple |  | True |
 | RCP2_4098E2E0D1B8 | Yataklete Kilkil (Ethiopian Vegetable Stew) | main | None → staple |  | False |
 | RCP2_472B6677B22B | Tofu Feta | side | protein_main → None | soup, breakfast, snack, dessert, sauce, drink | True |
@@ -465,7 +471,6 @@ Rule-owned changes refresh the tag file; frozen rows keep their model values. Pe
 | RCP2_4F7893458243 | Baked Sweet Potatoes With West African-Style Peanut Sauce | main | None → staple |  | True |
 | RCP2_50567B7B0B2C | Kumpir | main | None → staple |  | True |
 | RCP2_5A5EBBE90C92 | Injera | baked_good | None → staple |  | True |
-| RCP2_5C1AF74A7B55 | Šúĺlance s Makom | main | None → staple |  | True |
 | RCP2_66540AABF0E0 | Thai Sweet Potato Stew | main | None → staple |  | True |
 | RCP2_720FC24A521E | Aloo Matar | main | None → staple |  | False |
 | RCP2_74EFF106FE7B | Pizza Stuffed Potatoes (Twice Baked) | main | None → staple |  | True |
@@ -473,6 +478,7 @@ Rule-owned changes refresh the tag file; frozen rows keep their model values. Pe
 | RCP2_9150197BEBD9 | Japanese Marinated Soft Boiled Egg For Ramen (Ajitsuke Tamago) Recipe | side | protein_main → None | soup, breakfast, snack, dessert, sauce, drink | True |
 | RCP2_B8E67A023CFD | Chtitha Batata (Algerian Potato Stew) | main | None → staple |  | True |
 | RCP2_D30FB234E549 | Rice And Sorghum Injera | side | None → staple |  | True |
+| RCP2_D63DBDEE3B0E | German Potato Salad | side | staple → None | soup, breakfast, snack, dessert, sauce, drink | False |
 | RCP2_DBF17212D390 | Easy Mexican Sopes | main | None → staple |  | True |
 | RCP2_DBFF4DB83EF2 | Butternut Squash Curry | main | None → staple |  | True |
 | RCP2_E5862A12458B | Potato Croquettes With Parmesan | main | None → staple |  | True |
@@ -482,33 +488,33 @@ Rule-owned changes refresh the tag file; frozen rows keep their model values. Pe
 
 ## Fixed-seed sample of the changes (seed 20261023): pending human review
 
-- RCP2_50567B7B0B2C
-- RCP2_2C3763B662FD
-- RCP2_B8E67A023CFD
-- RCP2_1E114667D956
-- RCP2_5A5EBBE90C92
-- RCP2_402F11758D8C
-- RCP2_2848D4DD38CE
-- RCP2_5C1AF74A7B55
-- RCP2_DBF17212D390
-- RCP2_00A422F48FCC
-- RCP2_472B6677B22B
-- RCP2_01D48A672ACA
-- RCP2_4098E2E0D1B8
-- RCP2_E5862A12458B
-- RCP2_2F5D13FF1C1A
-- RCP2_9150197BEBD9
-- RCP2_DBFF4DB83EF2
-- RCP2_4F7893458243
-- RCP2_09872DC5D6C3
-- RCP2_4A7CC5A410F0
-- RCP2_0ABBD7482788
-- RCP2_8F8576285D7F
-- RCP2_66540AABF0E0
-- RCP2_E8D667BA918A
-- RCP2_3F422D8D65F9
-- RCP2_011288A0DAAA
-- RCP2_03DEE14CDC60
-- RCP2_74EFF106FE7B
+- RCP2_35A9C8C1762C
 - RCP2_F480AAE0C111
+- RCP2_29A0BD36FF45
+- RCP2_E5862A12458B
+- RCP2_50567B7B0B2C
+- RCP2_34DA1997D05C
+- RCP2_5A5EBBE90C92
+- RCP2_00A422F48FCC
+- RCP2_2C3763B662FD
+- RCP2_011288A0DAAA
+- RCP2_8F8576285D7F
+- RCP2_E8D667BA918A
+- RCP2_720FC24A521E
+- RCP2_0ABBD7482788
+- RCP2_1E290BC51413
+- RCP2_2848D4DD38CE
+- RCP2_D63DBDEE3B0E
+- RCP2_4098E2E0D1B8
+- RCP2_1E114667D956
+- RCP2_4A7CC5A410F0
+- RCP2_DBFF4DB83EF2
+- RCP2_011214D52B25
+- RCP2_74EFF106FE7B
 - RCP2_D30FB234E549
+- RCP2_9150197BEBD9
+- RCP2_1770C1DCBF42
+- RCP2_4F7893458243
+- RCP2_66540AABF0E0
+- RCP2_B8E67A023CFD
+- RCP2_03DEE14CDC60
