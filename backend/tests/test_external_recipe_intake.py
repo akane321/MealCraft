@@ -201,15 +201,15 @@ def test_matching_shared_recipe_is_returned_without_changing_its_source() -> Non
             session,
             load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json"),
         )
-        shared, _ = persist_admitted_recipe(
-            session, draft(), review_external_recipe(draft()), household_id=12
-        )
+        shared, _ = persist_admitted_recipe(session, draft(), review_external_recipe(draft()), household_id=12)
         shared.owner_household_id = None
         original_source = dict(shared.source)
         session.commit()
 
         found, created = persist_admitted_recipe(
-            session, draft(source_url="https://example.test/second-source"), review_external_recipe(draft()),
+            session,
+            draft(source_url="https://example.test/second-source"),
+            review_external_recipe(draft()),
             household_id=99,
         )
 
