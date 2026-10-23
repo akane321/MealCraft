@@ -5,7 +5,7 @@ calculator, web search or tool. Its structured answer (`BaselineAnswer`) is scor
 (`baseline_mapping`), per-dish coverage (`baseline_verification`), recomputation (`baseline_recomputation`) and
 the product's own validator (`baseline_validation`).
 
-Cost and safety rules (ADR-0020 section 4; ADR-0085, the owner's US$5 cap on all paid baseline runs):
+Cost and safety rules (ADR-0020 section 4; ADR-0086, the US$5 cap on paid baseline runs):
 
 - The default is a dry run: it renders every prompt, counts the calls and estimates tokens and the worst-case
   cost. Nothing touches the network. `--live` is required for a paid call.
@@ -54,7 +54,7 @@ MAX_ATTEMPTS = 2  # one malformed answer is retried once (section 3.1 item 1)
 API_ATTEMPTS = 3  # a rate limit, timeout or server error is retried with backoff
 BACKOFF_SECONDS = (2.0, 8.0)
 MAX_OUTPUT_TOKENS = 8000  # bounds each call's worst case for the caps
-DEFAULT_MAX_USD = 5.0  # the owner's cap for every paid baseline run together (ADR-0085)
+DEFAULT_MAX_USD = 5.0  # the US$5 cap on paid baseline runs, held as one shared total (ADR-0086)
 DEFAULT_MAX_TOKENS = 3_000_000
 # USD per million (input, output) tokens: the upper estimate the recipe-tag run uses for the same model.
 PRICES = {"gpt-5.4-mini": (INPUT_USD_PER_M, OUTPUT_USD_PER_M)}
