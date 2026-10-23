@@ -129,7 +129,7 @@ def create_model() -> StructuredModel:
     """Build the same configured mini chat model and shared HTTP client as the product."""
     settings = get_settings()
     if settings.openai_api_key is None:
-        raise RuntimeError("pure LLM baseline requires OPENAI_API_KEY (unit tests inject a mocked model)")
+        raise RuntimeError("LLM baseline requires OPENAI_API_KEY (unit tests inject a mocked model)")
     return ChatOpenAI(
         api_key=settings.openai_api_key.get_secret_value(),
         model=settings.openai_model,
@@ -140,10 +140,15 @@ def create_model() -> StructuredModel:
     ).with_structured_output(BaselineResponse, method="json_schema", include_raw=True)
 
 
-def generate(episode: dict[str, Any], model: StructuredModel) -> GenerationResult:
-    """Call once, retry one malformed answer once, and never repair model content."""
+def generate_response(
+    episode: dict[str, Any],
+    model: StructuredModel,
+    *,
+    system_id: str,
+    prompt: str,
+) -> GenerationResult:
+    """Share retry, identifier validation, and usage accounting across LLM baselines."""
     episode_id = str(episode.get("episode_id") or episode.get("scenario_id") or episode.get("id") or "")
-    prompt = render_prompt(episode)
     errors: list[str] = []
     usages: list[ModelUsage] = []
     started = time.perf_counter()
@@ -153,7 +158,7 @@ def generate(episode: dict[str, Any], model: StructuredModel) -> GenerationResul
             parsed, raw = _parsed_and_raw(result)
             usages.append(_usage(raw))
             response = BaselineResponse.model_validate(parsed)
-            if response.episode_id != episode_id or response.system_id != SYSTEM_ID:
+            if response.episode_id != episode_id or response.system_id != system_id:
                 raise ValueError("response identifiers do not match the requested episode and system")
             return GenerationResult(
                 response=response,
@@ -173,6 +178,16 @@ def generate(episode: dict[str, Any], model: StructuredModel) -> GenerationResul
     )
 
 
+def generate(episode: dict[str, Any], model: StructuredModel) -> GenerationResult:
+    """Call once, retry one malformed answer once, and never repair model content."""
+    return generate_response(
+        episode,
+        model,
+        system_id=SYSTEM_ID,
+        prompt=render_prompt(episode),
+    )
+
+
 def run_episode(
     episode: dict[str, Any],
     *,
@@ -180,9 +195,20 @@ def run_episode(
     resources: BaselineResources,
 ) -> EpisodeResult:
     generated = generate(episode, model)
+    return score_generation(episode, generated, system_id=SYSTEM_ID, resources=resources)
+
+
+def score_generation(
+    episode: dict[str, Any],
+    generated: GenerationResult,
+    *,
+    system_id: str,
+    resources: BaselineResources,
+) -> EpisodeResult:
+    """Apply the one shared mapping, verification, and recomputation pipeline."""
     episode_id = str(episode.get("episode_id") or episode.get("scenario_id") or episode.get("id") or "")
     if generated.response is None:
-        return EpisodeResult(episode_id, SYSTEM_ID, False, generated)
+        return EpisodeResult(episode_id, system_id, False, generated)
     coverage = map_response_ingredients(
         generated.response,
         names=resources.names,
@@ -191,7 +217,7 @@ def run_episode(
     )
     return EpisodeResult(
         episode_id=episode_id,
-        system_id=SYSTEM_ID,
+        system_id=system_id,
         valid_output=True,
         generation=generated,
         coverage=coverage,
