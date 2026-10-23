@@ -94,7 +94,11 @@ def test_the_dashboard_lists_a_day_breakfast_lunch_then_dinner_whatever_order_th
             entry(10, 2, "lunch"),
         ],
     )
-    dashboard = service(SimpleNamespace(get=lambda plan_id: week)).dashboard(9)
+    # A household with no feedback (ADR-0087): the stub session holds no rows.
+    repository = SimpleNamespace(
+        get=lambda plan_id: week, session=SimpleNamespace(scalars=lambda _: []), household_id=1
+    )
+    dashboard = service(repository).dashboard(9)
     assert [(day.day_index, day.meal_type) for day in dashboard.days] == [
         (1, "breakfast"),
         (1, "lunch"),

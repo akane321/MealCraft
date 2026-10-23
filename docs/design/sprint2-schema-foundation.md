@@ -211,6 +211,16 @@ Indexes: `recipe_feedback_household_created_idx` (`household_id`, `created_at`,
 and "clear all" delete rows. Preference scores are not stored: they are computed
 from this table and the existing cooked, locked and swapped records.
 
+Writer and readers (decision ADR-0087), in `backend/app/repositories/recipe_feedback.py`:
+
+- a recipe's state is the `kind` of the household's latest row for it (highest
+  `id`); a press appends a `button` row unless the state already is that kind;
+- undo deletes every row of that household and recipe, so the state is none;
+- Never again is active while the state is `never_again`. The planning request
+  carries the live list as `never_again_recipes` (recipe slugs) and the
+  validator packet as `FinalPlanningProblem.never_again_recipes`; both are left
+  out of a dump while empty.
+
 ## Unwired types
 
 The types live in two modules and are imported by the layers that wire them:

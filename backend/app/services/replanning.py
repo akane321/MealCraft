@@ -32,6 +32,7 @@ from app.repositories.meal_plan import (
     grocery_share,
 )
 from app.repositories.recipe import RecipeRepository
+from app.repositories.recipe_feedback import with_never_again
 from app.schemas.display import shown_title
 from app.schemas.meal_plan import (
     MealPlanEntrySnapshot,
@@ -137,6 +138,7 @@ class MealPlanReplanningService:
         grocery_aggregator: WeeklyGroceryAggregator,
         request_similarity: RecipeSimilarity | None = None,
         meal_plan_service: WeeklyMealPlanService | None = None,
+        live_feedback: bool = False,
     ) -> None:
         self.repository = repository
         self.recipe_repository = recipe_repository
@@ -146,6 +148,17 @@ class MealPlanReplanningService:
         self.request_similarity = request_similarity
         # Plans the dishes of a shape change (ADR-0046 section 2).
         self.meal_plan_service = meal_plan_service
+        # A change plans without the household's "Never again" dishes as they are now (ADR-0087).
+        self.live_feedback = live_feedback
+
+    def _constraints(self, plan: MealPlan) -> WeeklyMealPlanRequest:
+        """The request a change to `plan` is planned with, priced at snapshot prices."""
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
+            update={"pricing_mode": "fixture"}
+        )
+        if not self.live_feedback:
+            return constraints
+        return with_never_again(constraints, self.repository.session, self.repository.household_id)
 
     def preview(
         self,
@@ -161,9 +174,7 @@ class MealPlanReplanningService:
             raise MealPlanReplanNotFoundError("Meal-plan entry not found")
         self._validate_target(entry, request)
 
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
-            update={"pricing_mode": "fixture"}
-        )
+        constraints = self._constraints(plan)
         role = self._role(constraints, entry)
         meals = [(entry.meal_type, [role])] if role is not None else None
         recipes = pool_for(meals, self.recipe_repository.list_for_planning(courses=pool_courses(meals)))
@@ -258,9 +269,7 @@ class MealPlanReplanningService:
         plan = self.repository.get(plan_id)
         if plan is None:
             raise MealPlanReplanNotFoundError("Meal plan not found")
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
-            update={"pricing_mode": "fixture"}
-        )
+        constraints = self._constraints(plan)
         meal = request.meal_type
         today = today or local_today()
         if any(day > plan.day_count for day in request.day_indexes or []):
@@ -385,9 +394,7 @@ class MealPlanReplanningService:
         plan = self.repository.get(plan_id)
         if plan is None:
             raise MealPlanReplanNotFoundError("Meal plan not found")
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
-            update={"pricing_mode": "fixture"}
-        )
+        constraints = self._constraints(plan)
         eaten = sorted((item for item in plan.entries if item.status != "skipped"), key=lambda e: (e.day_index, e.id))
         same: dict[str, list[MealPlanEntry]] = {}
         for item in eaten:

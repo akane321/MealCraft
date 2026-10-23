@@ -31,6 +31,7 @@ import type {
   PresenceRule,
   Sex,
 } from "~/types/household";
+import type { RecipeFeedbackItem } from "~/types/meal-plan";
 import type {
   AvailableIngredientInput,
   DietaryPreference,
@@ -142,6 +143,38 @@ const {
   replanLatest,
   save,
 } = useHouseholdProfile();
+
+// The dishes marked "Never again" (ADR-0087): the place to undo one that has left every week. A viewer only reads it.
+const config = useRuntimeConfig();
+const apiFetch = useApiFetch();
+const { actor } = useAuth();
+const neverAgain = ref<RecipeFeedbackItem[]>([]);
+const neverAgainError = ref<string | null>(null);
+const undoingRecipeId = ref<number | null>(null);
+const canUndoNeverAgain = computed(() => Boolean(actor.value?.household_role && actor.value.household_role !== "viewer"));
+async function loadNeverAgain() {
+  try {
+    const listed = await apiFetch<{ items: RecipeFeedbackItem[] }>(`${config.public.apiBase}/api/feedback/recipes`, { query: { kind: "never_again" } });
+    neverAgain.value = listed.items;
+  }
+  catch {
+    neverAgainError.value = "Your Never again dishes could not be loaded.";
+  }
+}
+async function undoNeverAgain(recipeId: number) {
+  undoingRecipeId.value = recipeId;
+  neverAgainError.value = null;
+  try {
+    await apiFetch(`${config.public.apiBase}/api/feedback/recipes/${recipeId}`, { method: "DELETE" });
+    await loadNeverAgain();
+  }
+  catch {
+    neverAgainError.value = "Your feedback could not be saved.";
+  }
+  finally {
+    undoingRecipeId.value = null;
+  }
+}
 
 const memberPayloads = computed(() => members.value.map(memberPayload));
 const totalServings = computed(() => totalOf(memberPayloads.value, reference.value));
@@ -315,7 +348,7 @@ async function rebuildLatestPlan() {
 }
 
 onMounted(async () => {
-  await Promise.all([loadCurrent(), loadReference()]);
+  await Promise.all([loadCurrent(), loadReference(), loadNeverAgain()]);
   hydrateFromCurrent();
 });
 </script>
@@ -594,6 +627,18 @@ onMounted(async () => {
           </dl>
         </section>
 
+        <section class="profile-never-card" aria-labelledby="never-again-title">
+          <h2 id="never-again-title" class="form-kicker">Dishes you never want again</h2>
+          <p v-if="!neverAgain.length">None yet. Press "Never again" on a dish in your week and it is never planned again for anyone here.</p>
+          <ul v-else class="never-list">
+            <li v-for="item in neverAgain" :key="item.recipe_id">
+              <span :title="item.title">{{ item.title }}</span>
+              <button v-if="canUndoNeverAgain" type="button" class="secondary-button" :disabled="undoingRecipeId === item.recipe_id" :aria-label="`Undo Never again for ${item.title}`" @click="undoNeverAgain(item.recipe_id)">Undo</button>
+            </li>
+          </ul>
+          <p v-if="neverAgainError" class="field-help" role="alert">{{ neverAgainError }}</p>
+        </section>
+
         <section class="profile-planning-card">
           <p class="form-kicker">Plan your meals</p>
           <div class="plan-when">
@@ -631,6 +676,13 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.profile-never-card h2 { margin: 0; }
+.profile-never-card > p { color: var(--muted); font-size: 12px; line-height: 1.6; }
+/* A long list scrolls inside the card, so the sticky sidebar still fits a 720-pixel window. */
+.never-list { max-height: 180px; margin: 12px 0 0; padding: 0; overflow-y: auto; list-style: none; border-top: 1px solid var(--border); }
+.never-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-block: 6px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 650; }
+.never-list span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.never-list .secondary-button { flex: none; min-height: 0; padding: 4px 10px; font-size: 12px; }
 .portion-field { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 9px; }
 .portion-field:has(select:only-child) { grid-template-columns: minmax(0, 1fr); }
 .member-basis { margin-top: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); }

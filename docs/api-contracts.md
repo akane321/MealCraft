@@ -82,6 +82,9 @@ Available endpoints:
 - POST /api/plans/{plan_id}/shape/preview
 - POST /api/plans/{plan_id}/replan/{event_id}/confirm
 - GET /api/plans/{plan_id}/events
+- GET /api/feedback/recipes?kind={kind}
+- PUT /api/feedback/recipes/{recipe_id}
+- DELETE /api/feedback/recipes/{recipe_id}
 - POST /api/agent/sessions
 - GET /api/agent/sessions
 - GET /api/agent/sessions/{session_id}
@@ -554,6 +557,13 @@ for bounds, compatibility, examples and the Agent handoff.
   each course only while a week's worth of its other dishes remain; the
   conversation sets it to last week's dishes when the household asks for a new,
   more varied week.
+- `never_again_recipes` (recipe slugs, up to 500; decision ADR-0087): dishes no
+  week, swap or change may plan, checked by the planner and again by the
+  validator (`excluded_recipe`). Every product request (plans, profile plans,
+  changes and the conversation) replaces it with the household's live "Never
+  again" list, so a client's own value is ignored; evaluations and console
+  replays plan their stored requests as stored. An empty list is left out of the
+  dump, so stored constraints and digests stay byte-identical.
 
 - an optional `household` (layer 08, default null): `members` (`name`,
   `servings` above 0 and at most 3, `default_present`; null cooks every meal for
@@ -706,10 +716,38 @@ meal record or duplicate nutrition contribution is created.
 - planned, completed, and skipped entry counts
 - weekly completion rate
 - the user-entered nutrition targets stored with the plan
+- on each dish, `feedback`: the household's `like`, `dislike` or `never_again`
+  on that recipe, or null
 
 Only completed dishes from the selected MealCraft plan contribute to completed
 nutrition. Plan-external foods are outside the current baseline and cannot be entered through
 this contract.
+
+## Dish Feedback
+
+Like, Dislike and Never again belong to the whole household (decision
+ADR-0087). Rows of `recipe_feedback` are only appended; a recipe's state is the
+kind of the household's latest row for it.
+
+- `PUT /api/feedback/recipes/{recipe_id}` with `{"kind": "like" | "dislike" |
+  "never_again"}` returns `{recipe_id, kind}`. It adds a `button` row unless the
+  state already is that kind, so repeating it is idempotent. Any member with the
+  check-in permission (owner, editor, member) may press any of the three and
+  replace another member's; a viewer gets 403, and the CSRF header is required.
+  An unknown recipe is 404. A household may mark up to 500 dishes Never again;
+  one more is 422.
+- `DELETE /api/feedback/recipes/{recipe_id}` (undo) deletes every row the
+  household has for that recipe and returns 204, also when there was none.
+- `GET /api/feedback/recipes?kind=never_again` (any member, viewers included)
+  returns `{"items": [{recipe_id, slug, title, kind, created_at}]}`, latest
+  first; without `kind` every recipe with feedback is listed.
+
+Never again is a hard filter while it is the state: the planner leaves the
+recipe out of every week, swap, meal change, variety change, cheapest-week and
+week-floor offer. Pressing Like or Dislike afterwards replaces it, and the dish
+can be planned again. A saved week is never rewritten; locked and cooked
+entries stay as they are. A meal being changed that still holds a Never-again
+dish is planned again as a whole.
 
 ## Event-driven Replanning
 

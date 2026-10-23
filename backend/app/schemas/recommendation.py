@@ -3,6 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.schemas.display import ShownTitle
+from app.schemas.planning_v2 import LEAN
 from app.schemas.product import GroceryEstimateResponse, PricingMode
 from app.schemas.recipe import RecipeListItemResponse
 
@@ -10,6 +11,8 @@ DietaryPreference = Literal["vegetarian", "vegan", "gluten-free", "dairy-free"]
 HealthPreference = Literal["low-sodium", "low-sugar", "lower-calorie"]
 # A household that states no cooking-time limit: the longest a planning request accepts.
 NO_COOKING_TIME_LIMIT = 240
+# The most dishes a household may mark "Never again" (ADR-0087); the planning request carries them all.
+NEVER_AGAIN_LIMIT = 500
 
 
 class NutritionTargets(BaseModel):
@@ -54,6 +57,10 @@ class RecipeRecommendationRequest(BaseModel):
     max_sodium_mg_per_meal: float | None = Field(default=None, ge=100, le=5000)
     available_ingredients: list[AvailableIngredientInput] = Field(default_factory=list, max_length=100)
     pricing_mode: PricingMode = "fixture"
+    # Recipe slugs the household marked "Never again" (ADR-0087): a hard filter, read live from its feedback
+    # when a product request is planned. Left out of a dump while empty, so stored constraints and digests of a
+    # household without any stay byte-identical.
+    never_again_recipes: list[str] = Field(default_factory=list, max_length=NEVER_AGAIN_LIMIT, **LEAN)
 
     @field_validator("allergens")
     @classmethod
