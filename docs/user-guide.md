@@ -220,6 +220,16 @@ again. The profile page lists **Dishes you never want again**, each with
 **Undo**, so a dish that has left every week can still come back. Like and
 Dislike are only recorded for now; they do not change the ranking yet.
 
+Under a dish there may be up to two short tags, each a fact that is true of it:
+**Fits low-sodium** (or low-sugar, lower-calorie) on a main within that
+preference's benchmark, **One of the week's cheapest mains** when the week has
+at least four different mains and this one is among the cheapest quarter per
+serving (breakfast is not counted), and **Ready in 15 min** for a dish ready in
+20 minutes or less. A dish with nothing to say has no tag. Click a tag to see
+the dish's facts: cooking time, kcal and sodium per person, and cost per
+serving. They describe the dish as planned; they are not the reasons the
+planner chose it.
+
 ### 4. Nutrition and the shopping list
 
 The **Groceries** tab shows the total against the weekly budget. Perishable

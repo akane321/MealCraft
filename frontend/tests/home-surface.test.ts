@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, groceryTrips, isStapleDish, nextFeedback, packageLabel, perDinner, previewChoices, priceSourceLabel, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
+import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, dishFacts, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, groceryTrips, isStapleDish, nextFeedback, packageLabel, perDinner, previewChoices, priceSourceLabel, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
 import type { MealPlanEntrySnapshot, MealPlanShapeChange, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
@@ -278,5 +278,27 @@ describe("nextFeedback", () => {
   it("undoes the pressed button when it is clicked again", () => {
     expect(nextFeedback("like", "like")).toBeNull();
     expect(nextFeedback("never_again", "never_again")).toBeNull();
+  });
+});
+
+describe("dishFacts", () => {
+  const dish = (cost: number | null | undefined) => ({
+    recipe: { total_time_minutes: 15 },
+    nutrition_per_person: { calories_kcal: 412.6, sodium_mg: 639.4 },
+    cost_per_serving_sgd: cost,
+  }) as unknown as NutritionDashboardDay;
+
+  it("lists the time, kcal and sodium per person, and the cost per serving", () => {
+    expect(dishFacts(dish(2.1))).toEqual([
+      { label: "Cooking time", value: "15 min" },
+      { label: "Energy", value: "413 kcal per person" },
+      { label: "Sodium", value: "639 mg per person" },
+      { label: "Cost", value: "S$2.10 per serving" },
+    ]);
+  });
+
+  it("says the cost is not known when the week saved none", () => {
+    expect(dishFacts(dish(null)).at(-1)).toEqual({ label: "Cost", value: "Not known" });
+    expect(dishFacts(dish(undefined)).at(-1)).toEqual({ label: "Cost", value: "Not known" });
   });
 });

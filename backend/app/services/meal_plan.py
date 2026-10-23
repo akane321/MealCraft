@@ -15,6 +15,7 @@ from app.models.platform import OperationRun
 from app.models.recipe import Recipe
 from app.planning import alternatives
 from app.planning.conflict_explanation import explain_infeasibility, product_explanation
+from app.planning.dish_reasons import cost_per_serving, dish_reasons
 from app.planning.household_slots import limit_targets, slot_members, widest_time_limit
 from app.planning.meal_beam import EMPTY_OPTIONAL_ROLE_LOSS
 from app.planning.member_coverage import catalog_can_eat
@@ -804,6 +805,11 @@ class WeeklyMealPlanService:
         not_for = self._not_for(plan)
         # Each dish's Like, Dislike or Never again, so its buttons show pressed (ADR-0087).
         feedback = RecipeFeedbackRepository(self.repository.session, household_id=self.repository.household_id).states()
+        constraints = plan.constraints if isinstance(plan.constraints, dict) else {}
+        # Facts true of each dish, from what the week saved (layer 08 section 7.2).
+        reasons = dish_reasons(
+            eaten, household_size=plan.household_size, health_preferences=constraints.get("health_preferences") or []
+        )
         for entry in eaten:
             nutrition = self._entry_nutrition(entry)
             counts[entry.status] += 1
@@ -827,10 +833,11 @@ class WeeklyMealPlanService:
                     portion_share=float(entry.portion_share),
                     not_for=not_for(entry),
                     feedback=feedback.get(entry.recipe.id),
+                    reasons=reasons.get(entry.id, []),
+                    cost_per_serving_sgd=cost_per_serving(entry, plan.household_size),
                 )
             )
 
-        constraints = plan.constraints if isinstance(plan.constraints, dict) else {}
         completed_count = counts["completed"]
         return WeeklyNutritionDashboardResponse(
             plan_id=plan.id,

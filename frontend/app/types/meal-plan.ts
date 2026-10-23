@@ -114,6 +114,15 @@ export interface NutritionDashboardDay {
   not_for?: string[];
   /** The household's Like, Dislike or Never again on this dish (ADR-0087); null or absent when none. */
   feedback?: FeedbackKind | null;
+  /** Up to two facts true of this dish (layer 08 section 7.2); empty or absent when none holds. */
+  reasons?: DishReason[];
+  /** What one serving cost, for the facts panel; null when the week saved no grocery estimate for it. */
+  cost_per_serving_sgd?: number | null;
+}
+
+export interface DishReason {
+  code: "preference" | "cheap_main" | "quick";
+  label: string;
 }
 
 export type FeedbackKind = "like" | "dislike" | "never_again";

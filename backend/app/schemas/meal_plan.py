@@ -249,6 +249,13 @@ class MealPlanStatusCounts(BaseModel):
     skipped: int
 
 
+class DishReason(BaseModel):
+    """A fact true of a saved dish (layer 08 section 7.2), never why the planner chose it."""
+
+    code: Literal["preference", "cheap_main", "quick"]
+    label: str
+
+
 class NutritionDashboardDayResponse(BaseModel):
     entry_id: int
     day_index: int = Field(ge=1, le=14)
@@ -267,6 +274,10 @@ class NutritionDashboardDayResponse(BaseModel):
     not_for: list[str] = Field(default_factory=list)
     # The household's Like, Dislike or Never again on this dish (ADR-0087); None when it gave none.
     feedback: FeedbackKind | None = None
+    # Up to two facts true of this dish (layer 08 section 7.2), and its cost per serving for the facts panel; None
+    # when the week saved no grocery estimate for it.
+    reasons: list[DishReason] = Field(default_factory=list)
+    cost_per_serving_sgd: float | None = None
 
 
 class WeeklyNutritionDashboardResponse(BaseModel):
