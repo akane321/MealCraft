@@ -161,6 +161,25 @@ these runs do not establish member-level algorithm quality. Nutrition bands
 in these packets describe the whole table. Member-specific tests and comparisons
 are a separate required delivery.
 
+## Price-priority reference
+
+`AlgorithmObjective(..., priority="price")` orders exact checkout cents first,
+then the existing empty-position, variety, repetition, nutrition and ranking
+terms. The default remains `priority="variety"`. Equal-price plans retain those
+tie-breakers; hard constraints and per-shopping-trip budgets are unchanged.
+The table CP-SAT, native CP-SAT and exhaustive reference use this same ordering.
+Outputs identify `objective_priority`. Only a completed proof in price mode
+returns `minimum_checkout_sgd`; a time or enumeration limit, incomplete evidence
+or rejected candidate does not certify a minimum.
+
+That minimum covers generated meal options and the current one-product-per-line
+shopping policy. It is not a catalog-wide or mixed-package optimum, and it is
+not wired into product replies. Optional positions may be omitted to lower
+price; required meals and roles remain required. Use fixed required structure
+when comparing prices for the same number of meals and dishes. A requested
+minimum number of distinct kinds needs a separate constraint; choosing price
+priority alone does not impose one.
+
 ## Controlled speed comparison
 
 `benchmark_native_speed.py` alternates three baseline/optimized runs on the
