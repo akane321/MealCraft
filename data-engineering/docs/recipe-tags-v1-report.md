@@ -7,8 +7,8 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Field | rule | llm | open (null) |
 | --- | ---: | ---: | ---: |
-| `meal_role` | 8559 | 369 | 69 |
-| `contains_staple` | 8559 | 369 | 69 |
+| `meal_role` | 8564 | 369 | 64 |
+| `contains_staple` | 8564 | 369 | 64 |
 | `protein_sources` | 8814 | 77 | 106 |
 | `cooking_methods` | 8997 | 0 | 0 |
 | `equipment` | 8997 | 0 | 0 |
@@ -21,7 +21,7 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 | protein_main | 3622 | 27 |
 | vegetable | 591 | 1 |
 | soup | 212 | 14 |
-| staple | 564 | 107 |
+| staple | 569 | 107 |
 | one_bowl | 1482 | 93 |
 | breakfast | 390 | 13 |
 | salad | 484 | 0 |
@@ -43,9 +43,9 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 | fish | 231 |
 | shellfish | 481 |
 | soy | 143 |
-| egg | 1010 |
+| egg | 1007 |
 | legume | 215 |
-| none (`[]`) | 2894 |
+| none (`[]`) | 2897 |
 
 ## `cooking_methods` values (recipes carrying each)
 
@@ -76,9 +76,9 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Value | Recipes |
 | --- | ---: |
-| contains_staple True | 2246 |
+| contains_staple True | 2251 |
 | contains_staple False | 6682 |
-| contains_staple None | 69 |
+| contains_staple None | 64 |
 | equipment ('blender',) | 532 |
 | equipment ('microwave',) | 218 |
 | equipment ('oven',) | 2921 |

@@ -39,7 +39,11 @@ The rules, and why:
   main protein. ADR-0085 extends those names and dough-only shell evidence, keeps the 20% sugar/carbohydrate
   ceiling except for savoury Yorkshire pudding, and counts a pizza's listed flour as its own carrier.
   An egg/tofu/flesh-led side can be a protein main at half counted solids; whole bean-led sides,
-  batters and starch-heavy sides do not gain this role. Grey zones may stay null.
+  batters, starch-heavy sides and condiment-type sides do not gain this role. Grey zones may stay null.
+  The owner's 2026-10-23 decisions add fufu, injera, arepas, sopes and hush puppies as staple names (cornmeal
+  and masa count only under them), and tubers and plantain as a side's staple and, at 60%, a protein-less
+  main's. `review_roles` gives the human reviewer `staple` and `one_bowl` where a zero staple share removes them
+  from the model's options, and `staple` for a bean-led side: options, never assignments.
 - **Contains staple** is true exactly for `one_bowl` and `staple` dishes, so it follows the role.
 - **Protein sources** are the sources whose ingredients make at least 5 % (meat, poultry, fish,
   seafood) or 10 % (egg, soy, legumes) of the dish's counted raw grams, so an egg that binds a
@@ -90,6 +94,7 @@ from app.planning.vegetable_led import (
     FLESH_SHARE,
     MEAT_WORDS,
     SEASONING_FROM_FLESH,
+    STARCHY_TUBERS,
     UNCOUNTED,
     UNCOUNTED_GROUPS,
     counted_weights,
@@ -134,10 +139,9 @@ STAPLES = COOKED_STAPLES | {
     "mac_and_cheese",
     "rice_paper",
 }
-# Starchy sides that serve as a meal's staple when they are the dish (mashed potatoes), never inside a main.
-STARCHY = frozenset(
-    {"potato", "sweet_potato", "mashed_potatoes", "instant_mashed_potato", "hash_brown", "tater_tots", "french_fries"}
-)
+# Starchy tubers and plantain: a side's staple when they are the dish (mashed potatoes, fufu), and a protein-less
+# main's staple at `STAPLE_ONLY_SHARE` (owner 2026-10-23). Derived from the vegetable rule's tubers so they cannot drift.
+STARCHY = STARCHY_TUBERS | {"french_fries", "plantain"}
 ONE_BOWL_SHARE = 0.15  # a main's staple share from which it carries its staple
 STAPLE_ONLY_SHARE = 0.6  # a protein-less main this much staple is the staple itself
 GREY_SHARE = 0.05  # below this a main holds no staple; between the two the model decides
@@ -185,14 +189,6 @@ BREAD_CARRIERS = frozenset(
         "pita_bread",
         "english_muffin",
         "tortilla",
-        "wrap",
-        "bagel",
-        "naan",
-        "pita",
-        "flatbread",
-        "roti",
-        "chapati",
-        "paratha",
         "taco_shell",
     }
 )
@@ -209,25 +205,35 @@ VOLUME_UNIT = re.compile(
     r"(?<![a-z])(?:cups?|c\.?|tbsp|tsp|tablespoons?|teaspoons?|pints?|quarts?|gallons?|ml|litres?|liters?)\b", re.I
 )
 SUBSTITUTION_NOTE = re.compile(r"\b(?:substitut\w*|instead|may|alternativ\w*)\b", re.I)
-DOUGH_FLOUR = frozenset({"flour", "bread_flour", "whole_wheat_flour", "self_rising_flour", "semolina"})
+DOUGH_FLOUR = frozenset({"flour", "bread_flour", "whole_wheat_flour", "self_rising_flour", "semolina_flour"})
 HOMEMADE_STAPLE_TITLE = re.compile(
     r"\b(?:noodles?|pasta|gnocchi|gnocches|polenta|roti|chapatis?|paratha|naan|flatbreads?|tortillas?"
     r"|spaetzles?|spatzles?|mantou|bao|corn\s?bread|spoon bread|fry bread|(?:mealie )?pap|putupap"
-    r"|mandarin pancakes?|moo shu pancakes?|pupusas?|yorkshire puddings?)\b"
+    r"|mandarin pancakes?|moo shu pancakes?|pupusas?|yorkshire puddings?"
+    r"|fufu|injera|arepas?|sopes|hush ?puppies)\b"  # the last five: owner 2026-10-23
 )
+FUFU = re.compile(r"\bfufu\b")
+# Cornmeal and masa count only here, under a staple title: a cornmeal coating does not make fried chicken a staple.
 HOMEMADE_STARCH = DOUGH_FLOUR | {
     "cornmeal",
-    "polenta",
-    "masa",
-    "masa_harina",
     "corn_flour_masa",
     "rice_flour",
     "brown_rice_flour",
-    "semolina_flour",
+    "teff_flour",
+    "millet_flour",
+    "sorghum_flour",
 }
-BATTER_STARCH = HOMEMADE_STARCH | {"cornstarch", "potato_starch", "tapioca_starch"}
+BATTER_STARCH = HOMEMADE_STARCH | {"cornstarch", "potato_starch", "tapioca_flour"}
 WHOLE_SOYBEANS = frozenset({"edamame", "soybean", "fermented_soybeans"})
 BATTER_SIDE_TITLE = re.compile(r"\b(?:batters?|puddings?|pancakes?|crepes?)\b", re.I)
+# A condiment or topping-type side (owner 2026-10-23): its title names a cheese or cheese substitute, a topping or
+# garnish, a ramen egg, or another dish it is made for. Its protein does not make it a protein main. A dish served
+# with cheese ("Omelette With Cheese") is not a cheese.
+CONDIMENT_SIDE_TITLE = re.compile(
+    r"\b(?:feta|ricotta|paneer|(?:mock|fake|vegan|imitation) cheese|toppings?|garnish(?:es)?|ajitsuke|ajitama)\b"
+    r"|\bfor (?:ramen|noodles?|soups?|salads?|sandwich(?:es)?|burgers?|pizzas?|tacos?)\b",
+    re.I,
+)
 PIZZA_BATTER = DOUGH_FLOUR | {
     "milk",
     "egg",
@@ -623,7 +629,7 @@ def homemade_staple(dish: Dish) -> bool:
             return False  # Even a small or unknown flesh/soy line cannot be erased as a binder.
     elif not HOMEMADE_STAPLE_TITLE.search(title):
         return False
-    names = HOMEMADE_STARCH
+    names = HOMEMADE_STARCH | (STARCHY if FUFU.search(title) else frozenset())
     if dumpling:
         names = DOUGH_FLOUR | {"potato", "instant_mashed_potato"}
     elif re.search(r"\b(?:gnocchi|gnocches)\b", title):
@@ -632,9 +638,12 @@ def homemade_staple(dish: Dish) -> bool:
 
 
 def protein_side_share(dish: Dish) -> float:
-    """Egg/tofu/flesh share of weighed solids; whole beans and batter foods are not protein mains."""
+    """Egg/tofu/flesh share of weighed solids; whole beans, batter foods and condiment-type sides are not
+    protein mains."""
     if BATTER_SIDE_TITLE.search(dish.title) or staple_share(dish, BATTER_STARCH) >= ONE_BOWL_SHARE:
         return 0.0  # Reuse the established 15% substantive-starch boundary, not a report-fitted threshold.
+    if CONDIMENT_SIDE_TITLE.search(dish.title):
+        return 0.0
     eligible = FLESH_SOURCES | {"egg", "soy", "?"}
     if any(line_sources(line) & eligible and (line.grams is None or line.grams <= 0) for line in dish.lines):
         return 0.0
@@ -738,6 +747,8 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
             and not (role == "soup" and BAKED_SIDE.search(title) and not SOUP_TITLE.search(title))
         )
     # main, and the curated catalog's mains
+    if sources == [] and staple_share(dish, STARCHY) >= STAPLE_ONLY_SHARE:
+        return "staple", ()  # a protein-less main led by tubers or plantain is the staple itself (owner 2026-10-23)
     if share >= ONE_BOWL_SHARE:
         return ("staple" if not has_protein and share >= STAPLE_ONLY_SHARE else "one_bowl"), ()
     if share >= GREY_SHARE and not sources:
@@ -756,6 +767,20 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
     if led:
         return "vegetable", ()
     return None, open_roles
+
+
+def review_roles(dish: Dish, tags: Tags) -> list[str]:
+    """The roles a human reviewer may choose (owner 2026-10-23): the rule's role, or the model's options plus
+    `staple` and `one_bowl` when a zero staple share stripped them, since the rules' vocabulary may not know the
+    dish's starch. A bean-led side is thereby always offered `staple` (with a staple share above 0 the model's
+    options already hold it), never assigned it. The model prompt keeps `tags.allowed_roles`; an incomplete
+    recipe offers none."""
+    if "meal_role" not in tags.open:
+        return [tags.values["meal_role"]] if tags.values["meal_role"] is not None else []
+    roles = set(tags.allowed_roles)
+    if dish.course in {"main", "side"} and staple_share(dish) == 0:
+        roles |= {"staple", "one_bowl"}
+    return [role for role in MEAL_ROLES if role in roles]
 
 
 def cooking_methods(dish: Dish) -> list[str]:
