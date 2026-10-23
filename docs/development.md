@@ -111,8 +111,10 @@ immutable versions are stored in `household_profiles` and
 `household_profile_versions`; linked plans preserve the exact profile version
 and optional replaced-plan ID. Agent replanning drafts and pending
 event links are stored on `agent_sessions`. Household likes, dislikes and
-"never again" choices go to `recipe_feedback`; it and the other Sprint 2
-columns from migration `20261018_0030` are not read or written yet (see
+"never again" choices go to `recipe_feedback`; it, the halal and
+`unknown_safety` columns, and the `FlavorBoost` and `PlanningPreferences` types
+from migration `20261018_0030` are not read or written yet. The other Sprint 2
+columns are wired (see "Wired so far" in
 [Sprint 2 Schema Foundation](design/sprint2-schema-foundation.md)).
 
 ## Code evidence for recorded worker experiments

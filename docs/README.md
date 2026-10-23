@@ -89,9 +89,9 @@ conclusions faster than a human does, because it has no colleague to correct it.
 | How does the finished planning engine reach a real request, and what happens when there is no plan? | [Planning and Validation v2](design/planning-validation-v2.md) |
 | What exactly must the internal console do, and how do experiments stay citable? | [Operations Console](design/operations-console.md) |
 | How does a recipe the catalog lacks get imported from the web? | [External Recipe Intake](design/external-recipe-intake.md) |
-| What evaluation is executable now? | [Evaluation Protocol v1](evaluation/protocol-v1.md) |
+| What evaluation is executable now? | [Evaluation Protocol v1](evaluation/protocol-v1.md) (course scope), [Protocol v2 multi-dish](evaluation/protocol-v2-multidish.md) and [Protocol v3 meal-day-week](evaluation/protocol-v3-meal-day-week.md) (the product path) |
 | What comparative capability evaluation are we building? | [Comparative Evaluation v2](design/comparative-evaluation-v2.md) |
-| How do I author a held-out episode? | [Held-out Authoring Guide](evaluation/heldout-authoring-guide.md) |
+| How do I author a held-out episode? | [Held-out Authoring Guide](evaluation/heldout-authoring-guide.md) (v2 set) and [Sprint 2 Held-out Authoring Guide](evaluation/sprint2-heldout-authoring-guide.md) with the [freeze procedure](evaluation/sprint2-heldout-freeze.md) |
 | What can the current catalog actually express? | [目录现状与选题建议](evaluation/heldout-catalog-reality.md) |
 
 ## Documentation Update Rules

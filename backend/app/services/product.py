@@ -31,10 +31,12 @@ def create_product_search_service(repository: ProductSnapshotRepository) -> "Pro
 
 # One planning request can price hundreds of ingredients. Live FairPrice gets at most this many lookups
 # per request, and none after this many failures in a row: the rest use the cache or sample prices, and
-# say so, rather than keeping the household waiting 12 s per ingredient.
+# say so. These two limit the requests sent to the retailer's site, not the wait, and stay.
 LIVE_LOOKUP_BUDGET = 60
 LIVE_FAILURE_LIMIT = 3
-FINAL_PRICE_SECONDS = 3.0
+# How long one basket's final price check waits for the retailer before the lines it has not heard back on keep
+# their snapshot prices. 10 s, not 3: a slow site still gives the household its real prices (owner, 2026-10-22).
+FINAL_PRICE_SECONDS = 10.0
 FINAL_PRICE_CONCURRENCY = 8
 # Shared per server process, including overlapping requests and late provider calls.
 _price_workers = ThreadPoolExecutor(max_workers=FINAL_PRICE_CONCURRENCY, thread_name_prefix="basket-price")

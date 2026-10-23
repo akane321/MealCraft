@@ -165,8 +165,9 @@ def _check_meal_composition(
     """Roles filled, each by a course it admits, with no dish twice in a meal.
 
     With `vegetable_rule` (protocol v3.1 since 2026-10-02) a vegetable role (`vegetable`, `vegetable-2`) also
-    admits only a dish led by vegetables with no meat or fish. The rule is the owner's definition, so the scorer
-    reads the one in `app.planning.vegetable_led` rather than keeping a copy that could drift from it.
+    uses the product's vegetable definition (ADR-0082, 2026-10-22): half vegetables, measured cured/dried
+    or minced flesh up to 20% in total and other flesh up to 5%. It is not a vegetarian-diet claim.
+    Every compared system uses `app.planning.vegetable_led`, not a separate baseline-specific definition.
     """
     unfilled, wrong_course, unknown_course, repeated = [], [], [], []
     for slot, dishes in sorted(_meals(response).items()):

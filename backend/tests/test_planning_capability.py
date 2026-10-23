@@ -195,6 +195,16 @@ def _composed_plan(client):
     return response.json()
 
 
+def test_a_composed_week_is_searched_under_the_calibrated_cap(composed_client):
+    """Review of task 15: with the product's cap set back to none, every test still passed."""
+    from app.planning.product_path import MEAL_COMBINATIONS
+    from tests.test_planning_product_path import latest_trace
+
+    _composed_plan(composed_client)
+    _, trace = latest_trace()
+    assert trace["settings"]["max_meal_combinations"] == MEAL_COMBINATIONS
+
+
 def test_a_whole_meal_is_checked_in_at_once_and_a_dish_on_its_own(composed_client):
     plan = _composed_plan(composed_client)
 

@@ -40,10 +40,11 @@ product's own rules, so a label never needs a week the product cannot plan:
   (`recommendation_engine.title_mentions`). A dish that merely ranks low, or
   falls outside the packet the product keeps per course, stays eligible: a label
   proves a week exists under the rules, not that the product's search finds it;
-- (2026-10-02) a vegetable role (`vegetable`, `vegetable-2`) takes only a dish
-  led by vegetables with no meat or fish (`app.planning.vegetable_led`), as the
-  product's `meal_composition.role_admits` does. Protocol v2 labels keep the old
-  rule.
+- (definition amended 2026-10-22, ADR-0082) a vegetable role (`vegetable`, `vegetable-2`)
+  uses the same vegetable-led, measured seasoning/trace-flesh limits as the product
+  (`app.planning.vegetable_led` and `meal_composition.role_admits`). It is not a
+  vegetarian label; allergen and diet constraints still apply. Every compared
+  system uses this definition. Protocol v2 labels keep the old course-only rule.
 
 Anything else is unproven, and the author must change the episode.
 

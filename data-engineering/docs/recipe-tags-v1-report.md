@@ -7,8 +7,8 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Field | rule | llm | open (null) |
 | --- | ---: | ---: | ---: |
-| `meal_role` | 8531 | 369 | 97 |
-| `contains_staple` | 8531 | 369 | 97 |
+| `meal_role` | 8552 | 369 | 76 |
+| `contains_staple` | 8552 | 369 | 76 |
 | `protein_sources` | 8814 | 77 | 106 |
 | `cooking_methods` | 8997 | 0 | 0 |
 | `equipment` | 8997 | 0 | 0 |
@@ -18,10 +18,10 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Meal role | rule | llm |
 | --- | ---: | ---: |
-| protein_main | 3623 | 27 |
-| vegetable | 560 | 1 |
+| protein_main | 3625 | 27 |
+| vegetable | 578 | 1 |
 | soup | 213 | 14 |
-| staple | 571 | 107 |
+| staple | 572 | 107 |
 | one_bowl | 1478 | 93 |
 | breakfast | 390 | 13 |
 | salad | 484 | 0 |
@@ -43,9 +43,9 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 | fish | 231 |
 | shellfish | 481 |
 | soy | 143 |
-| egg | 1047 |
+| egg | 1031 |
 | legume | 215 |
-| none (`[]`) | 2857 |
+| none (`[]`) | 2873 |
 
 ## `cooking_methods` values (recipes carrying each)
 
@@ -76,16 +76,16 @@ Recipes: 8997 (release v2.1 recipes the importer loads, and the curated catalog)
 
 | Value | Recipes |
 | --- | ---: |
-| contains_staple True | 2249 |
-| contains_staple False | 6651 |
-| contains_staple None | 97 |
+| contains_staple True | 2250 |
+| contains_staple False | 6671 |
+| contains_staple None | 76 |
 | equipment ('blender',) | 532 |
 | equipment ('microwave',) | 218 |
 | equipment ('oven',) | 2921 |
 | equipment ('steamer',) | 100 |
 | no equipment (`[]`) | 5506 |
 
-Hearty salads (`salad`, not vegetable-led, with a main protein): 161. As salads they fill only the vegetable side, which their vegetable-led check refuses, so they fill no slot: the owner decided on 2026-10-19 that a salad with meat is not a main. The sample packet carries them as their own stratum, as it does the model's protein answers. The planner reads no model-decided value before its batch sample is reviewed.
+Hearty salads (`salad`, not vegetable-led, with a main protein): 150. As salads they fill only the vegetable side, which their vegetable-led check refuses, so they fill no slot: the owner decided on 2026-10-19 that a salad with meat is not a main. The sample packet carries them as their own stratum, as it does the model's protein answers. The planner reads no model-decided value before its batch sample is reviewed.
 
 ## Incomplete recipe evidence
 

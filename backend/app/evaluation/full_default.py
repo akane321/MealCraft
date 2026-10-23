@@ -296,6 +296,8 @@ def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Re
             "meals": len(meals),
             "dishes": len(week["days"]),
             "distinct_dishes_excluding_staples": len(set(titles)),
+            # The worst repeat: how often the most served dish comes, staples aside (task 15).
+            "most_uses_of_one_dish": max(Counter(titles).values(), default=0),
             "staples": sorted({d["recipe"]["title"] for d in week["days"] if d["role_id"] == "staple"}),
             "cuisine_groups_per_meal": round(statistics.mean(groups), 2) if groups else None,
             "meals_with_two_deep_fried": fried_meals,
@@ -465,6 +467,7 @@ BAND_LABEL = {
 # Windows, after the shared-dish candidate changes). Shares are of the profiled run, which the profiler slows about
 # twofold (threefold for six-tight-budget, re-profiled the same day without the variety cutoff). Every case past the
 # quick figure has one: ADR-0079 section 4 asks for the cause of each, not only of the ones over a minute.
+# seven-with-young-children was profiled again on 2026-10-22 (task 15), when the exact root raised its time.
 # Rewrite a case's entry whenever a change moves its time.
 MEAL_CHECKS = (
     "building each meal's dish combinations and checking every one as a real meal (`meal_beam._meal_options` -> "
@@ -503,8 +506,12 @@ SLOW_CAUSES = {
         "42%, and reading the candidates about 15%; the plan has 30 slots of combinations to build."
     ),
     "seven-with-young-children": (
-        f"one beam search, 80% of the run, over seven-dish dinners for a household of seven; {MEAL_CHECKS} is about "
-        f"69%, and {MEMBER_CHECKS} about 37%."
+        "one beam search, about 97% of the run, over seven-dish dinners for a household of seven. Since task 15 "
+        "(2026-10-22) the combination cap's root per role is exact, so each of a dinner's seven roles keeps four "
+        "dishes instead of three (`int(16384 ** (1 / 7))` gave three; 4^7 is 16,384): up to 16,384 combinations a "
+        "dinner instead of 2,187, and the run went from about 9 s to about 36 s. In a profiled warm run of "
+        f"2026-10-22 {MEAL_CHECKS} is about 96%, and {MEMBER_CHECKS} about 49% (8.5 million calls). Upgrade path, "
+        "none of it changing a plan: cache the member checks per member and recipe, and a recipe's meal role."
     ),
 }
 
@@ -528,12 +535,19 @@ def timing_markdown(timing: dict) -> str:
         "| Case | Report run (s) | Warm median (s) | Warm max (s) | Against the ADR-0079 guidance |",
         "|---|---:|---:|---:|---|",
         *[
-            f"| {case} | {row['first']} | {row['median']} | {row['max']} | {BAND_LABEL[bands[case]]} |"
+            f"| {case} | {row['first']} | {row['median'] if row['median'] is not None else '-'} "
+            f"| {row['max'] if row['max'] is not None else '-'} | {BAND_LABEL[bands[case]]} |"
             for case, row in timing["cases"].items()
         ],
         "",
         f"Over ~{OVER_SECONDS:g} s: {', '.join(over) or 'none'}.",
     ]
+    if any(row["median"] is None for row in timing["cases"].values()):
+        lines += [
+            "",
+            "A case with `-` ran once, the report's run: a warm run of it takes as long again (some take almost an "
+            "hour), and the report run is read against the guidance in its place.",
+        ]
     for case in explained:
         lines += [
             "",

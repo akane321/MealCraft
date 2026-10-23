@@ -26,7 +26,7 @@ from app.agent.replies import language, planner_message
 from app.core.config import get_settings
 from app.planning import meal_beam
 from app.planning.meal_composition import portion_shares
-from app.planning.product_path import CHEAPEST_MEAL_OPTIONS, ProductPlanningEngine, ProductPlanningError
+from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
 from app.planning.week_floor import WeekFloor, _cheapest_days, _cheapest_meal, week_floor
 from app.products.provider import ProductProviderError
 from app.schemas.agent import AgentConstraintExtraction, AgentConstraintState
@@ -585,8 +585,8 @@ def test_a_failed_search_names_the_limit_it_ran_into_never_a_proof():
     assert "every limit together" in together.text
     emptied = planning_failure(failure({"search": {"emptied_by": "repeats"}}), constraints, "zh")
     assert emptied.text == "这周没排出来：搜索没有找到符合菜不重样的要求的一周。卡住它的就是这个限制。"
-    slow = planning_failure(failure({"search": {"exhausted": True}}), constraints, "en")
-    assert slow.retry  # nothing to change: the Plan card stays
+    used_up = planning_failure(failure({"search": {"exhausted": True}}), constraints, "en")
+    assert not used_up.retry  # the same request searches the same way again: a limit has to change (task 15)
 
     # A guess at a per-meal budget or a cooking time is not offered: no week backs it.
     limited = AgentConstraintState(household_size=4, budget_per_meal_sgd=5, max_cooking_time_minutes=20)
@@ -615,13 +615,17 @@ def test_a_per_meal_budget_is_offered_only_when_a_week_plans_with_it(monkeypatch
         plans(client, ready)
 
 
-def test_a_search_that_ran_out_of_steps_up_front_leaves_the_week_to_plan():
+def test_a_search_that_used_every_step_it_may_says_so_and_asks_for_a_change():
+    """Task 15: it said "took longer than it should, try again", but the same request searches the same way again;
+    the search used all it is allowed and found no week, so a limit has to change (ADR-0080)."""
     floor = WeekFloor(days=7, meals=7, total_sgd=9.0, meal_sgd={}, empty_roles=[], roles={})
-    slow = ProductPlanningError("candidate_rejected", "Planning took longer.", {"search": {"exhausted": True}})
+    used_up = ProductPlanningError("candidate_rejected", "No week.", {"search": {"exhausted": True}})
     constraints = AgentConstraintState(household_size=4, weekly_budget_sgd=20)
 
-    told = limits.refusal(constraints, lambda **_: floor, "en", check=lambda **_: slow, cheapest=lambda **_: None)
-    assert told is None  # nothing to change: Plan may well find the week
+    told = limits.refusal(constraints, lambda **_: floor, "en", check=lambda **_: used_up, cheapest=lambda **_: None)
+    assert (told.field, told.retry) == ("plan", False)
+    assert told.text.startswith("I searched as far as the planner goes")
+    assert "longer" not in told.text and "try again" not in told.text.lower()
 
 
 def unsearched(**changes):
@@ -644,31 +648,18 @@ def test_a_budget_under_the_floor_is_refused_with_the_floor_when_the_search_find
 
 
 @pytest.mark.parametrize("lang", ["en", "zh"])
-def test_a_meal_too_big_to_search_in_a_reply_is_refused_only_under_the_floor(lang):
-    """Four dishes or more: the planner's searches take 5 to 26 s, so the reply refuses what the floor proves."""
+def test_a_meal_of_any_size_is_searched_within_the_reply(lang):
+    """Task 15: a meal of four dishes or more, which includes the default dinner, was answered from the floor alone,
+    because the planner's searches took longer. Every shape is now searched within the reply (ADR-0080)."""
     dinner = [
         {"role_id": r, "courses": c} for r, c in (("main", ["main"]), ("vegetable", ["side"]), ("soup", ["soup"]))
     ]
     big = {"meals": {"dinner": [*dinner, {"role_id": "vegetable-2", "courses": ["side"]}]}}
     floor = WeekFloor(days=7, meals=7, total_sgd=30.0, meal_sgd={"dinner": 5.0}, empty_roles=[], roles={})
-    state = AgentConstraintState(household_size=4, weekly_budget_sgd=20, budget_per_meal_sgd=2, plan_shape=big)
-
-    def refused(**changes):
-        return limits.refusal(
-            state.model_copy(update=changes), lambda **_: floor, lang, check=unsearched, cheapest=unsearched
-        )
-
-    per_meal = refused()  # the per-meal raise is offered only when a week plans with it: unchecked, not offered
-    assert per_meal.field == "budget_per_meal_sgd" and per_meal.options == ()
-    told = refused(budget_per_meal_sgd=None)
-    assert told.field == "weekly_budget_sgd" and told.options == ()  # no amount a week backs to offer
-    assert ("S$30.00" in told.text) and (("at least" in told.text) if lang == "en" else ("至少" in told.text))
-    assert refused(budget_per_meal_sgd=None, weekly_budget_sgd=40) is None  # Plan answers the rest
-
-    # Three dishes a meal: searched within the reply as before.
-    small = AgentConstraintState(household_size=4, weekly_budget_sgd=20, plan_shape={"meals": {"dinner": dinner}})
-    with pytest.raises(AssertionError, match="searched"):
-        limits.refusal(small, lambda **_: floor, lang, check=unsearched, cheapest=unsearched)
+    for shape in (big, {"meals": {"dinner": dinner}}, None):
+        state = AgentConstraintState(household_size=4, weekly_budget_sgd=20, plan_shape=shape)
+        with pytest.raises(AssertionError, match="searched"):
+            limits.refusal(state, lambda **_: floor, lang, check=unsearched, cheapest=unsearched)
 
 
 @pytest.mark.parametrize(
@@ -676,19 +667,21 @@ def test_a_meal_too_big_to_search_in_a_reply_is_refused_only_under_the_floor(lan
     [
         (
             "Plan a week for 4 for S$10 total, no dish twice",
-            "I couldn't plan this week: the search found no week that meets the S$10 weekly budget. "
-            "That is the limit it kept running into.",
+            "That budget can't cover this week. S$10 a week for 4 people comes to about S$0.36 a person a meal "
+            "(7 meals). The cheapest week I could find costs S$20.60. Planning for fewer people would not lower "
+            "that budget.",
         ),
         (
             "我们4个人，一周一共10新币，菜不要重复",
-            "这周没排出来：搜索没有找到符合每周 S$10 预算的一周。卡住它的就是这个限制。",
+            "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 "
+            "S$20.60。 减少人数也不能降低这个预算。",
         ),
     ],
 )
-def test_a_meal_too_big_to_search_in_a_reply_is_told_at_plan_the_budget_it_ran_into(packaged, message, told):
-    """A main and three dishes "if one fits" (三菜一汤): the reply searches nothing, so S$10 with no dish twice is
-    ready over the floor. Plan, which skips the cheapest-week search for such a meal, then names the budget, with
-    no amount, since no week backs one."""
+def test_a_meal_of_four_dishes_is_refused_in_the_reply_as_any_other(packaged, message, told):
+    """A main and three dishes "if one fits" (三菜一汤). The reply searched nothing for such a meal, so S$10 with no
+    dish twice was ready and only Plan refused it (task 15). The reply now searches it, as it does a smaller meal,
+    and refuses it at once."""
     optional = [("vegetable", ["side", "salad"]), ("vegetable-2", ["side", "salad"]), ("soup", ["soup"])]
     dinner = [{"role_id": "main", "courses": ["main"]}]
     dinner += [{"role_id": role, "courses": courses, "required": False} for role, courses in optional]
@@ -700,12 +693,9 @@ def test_a_meal_too_big_to_search_in_a_reply_is_told_at_plan_the_budget_it_ran_i
     }
     assert packaged.post("/api/household-profiles", json=profile).status_code == 201
     session = packaged.post("/api/agent/sessions", json={"message": message}).json()
-    assert session["can_confirm"]  # the trade for the reply's time limit
-
-    failed = packaged.post(f"/api/agent/sessions/{session['id']}/confirm")
-    assert failed.status_code == 422 and failed.json()["detail"] == told
-    explained = packaged.get(f"/api/agent/sessions/{session['id']}").json()
-    assert explained["missing_fields"] == ["weekly_budget_sgd"] and labels(explained) == []
+    assert not session["can_confirm"] and session["missing_fields"] == ["weekly_budget_sgd"]
+    assert session["messages"][-1]["content"] == told, session["messages"][-1]["content"]
+    assert labels(session) == ["Use S$21 for the week"], labels(session)  # a week the search found backs it
 
 
 def test_a_request_the_planner_turned_down_before_searching_is_passed_on_as_it_said():
@@ -890,7 +880,8 @@ def test_a_budget_under_the_floor_skips_that_week_but_checks_offered_budgets(pac
     assert labels(session)[0] == f"Use S${math.ceil(cost)} for the week"
 
 
-def test_half_the_household_is_searched_for_only_for_one_meal_a_day():
+def test_half_the_household_is_searched_for_every_plan_shape():
+    """Task 15: it was searched only for one meal a day of at most three dishes, for time alone (ADR-0080)."""
     asked = []
 
     def cheapest(**changes):
@@ -899,19 +890,15 @@ def test_half_the_household_is_searched_for_only_for_one_meal_a_day():
 
     meals = {"lunch": MEAL_PRESETS["lunch"]["one dish"], "dinner": MEAL_PRESETS["dinner"]["one main"]}
     two_meals = AgentConstraintState(household_size=4, weekly_budget_sgd=10, plan_shape={"meals": meals})
-    use = ("Use S$30 for the week", "Make the weekly budget S$30")
-    assert _budget_short(30.0, two_meals, "en", cheapest).options == (use,)
-    assert not asked  # a second search for more meals a day would take the reply past its time limit
-
     dish = {"role_id": "main", "courses": ["main"]}
     four = [dish, *({"role_id": f"vegetable-{n}", "courses": ["side"]} for n in range(2, 5))]
     big = AgentConstraintState(household_size=4, weekly_budget_sgd=10, plan_shape={"meals": {"dinner": four}})
-    assert _budget_short(30.0, big, "en", cheapest).options == (use,)
-    assert not asked  # nor for one meal a day of four dishes or more
-
     dinners = AgentConstraintState(household_size=4, weekly_budget_sgd=10)
-    assert _budget_short(30.0, dinners, "en", cheapest).options[0] == use
-    assert asked == [{"household_size": 2}]
+    use = ("Use S$30 for the week", "Make the weekly budget S$30")
+    fewer = ("2 people at S$20 a week", "2 people, S$20 for the week")
+    for constraints in (two_meals, big, dinners):
+        assert _budget_short(30.0, constraints, "en", cheapest).options == (use, fewer)
+    assert asked == [{"household_size": 2}] * 3
 
 
 def test_the_cheapest_week_search_bisects_under_the_cheapest_week_it_found(packaged, monkeypatch):
@@ -920,7 +907,7 @@ def test_the_cheapest_week_search_bisects_under_the_cheapest_week_it_found(packa
 
     def search(self, problem):
         found = original(self, problem)
-        if self.limits.meal_options_per_slot == CHEAPEST_MEAL_OPTIONS:
+        if problem.purchase_budget_sgd not in (None, 1):  # a probe of the cheapest-week search, not the S$1 asked
             probes.append((problem.purchase_budget_sgd, bool(found.states)))
         return found
 
@@ -931,6 +918,8 @@ def test_the_cheapest_week_search_bisects_under_the_cheapest_week_it_found(packa
     first = next(index for index, (_, found) in enumerate(probes) if found)
     # Not halfway down to the budget the first week was found within: under what that week costs.
     assert probes[first + 1][0] < cost < probes[first][0] / 2
+    # To the whole dollar (task 15): the dollar under the week offered completes none.
+    assert (math.ceil(cost) - 1, False) in probes
 
 
 def test_the_cheapest_week_mode_returns_the_cheapest_validated_week_not_the_first(packaged, monkeypatch):
@@ -953,22 +942,15 @@ def test_the_cheapest_week_mode_returns_the_cheapest_validated_week_not_the_firs
     assert f"S${min(passed):.2f}" in session["messages"][-1]["content"]
 
 
-@pytest.mark.parametrize(
-    ("extra", "searched"), [([], True), ([{"role_id": "vegetable-2", "courses": ["side"]}], False)]
-)
-def test_a_plan_of_meals_too_big_to_search_quickly_ends_without_the_cheapest_week(
-    composed_client,  # noqa: F811
-    monkeypatch,
-    extra,
-    searched,
-):
-    """Under a budget no week fits, the cheapest-week search is tried last, but not for four dishes a meal: it
-    takes 5 to 16 s there on the release catalog, and minutes with no dish twice (a plan answers within 10 s)."""
+@pytest.mark.parametrize("extra", [[], [{"role_id": "vegetable-2", "courses": ["side"]}]])
+def test_every_plan_shape_ends_with_the_cheapest_week_search(composed_client, monkeypatch, extra):  # noqa: F811
+    """Under a budget no week fits, the cheapest-week search is tried last, for four dishes a meal too: it was
+    skipped there only because it takes longer (task 15; owner, 2026-10-22; ADR-0080)."""
     probes = []
     original = meal_beam.MealBeamPlanner.search_candidates
 
     def search(self, problem):
-        if self.limits.meal_options_per_slot == CHEAPEST_MEAL_OPTIONS:
+        if problem.purchase_budget_sgd not in (None, 1):  # a probe of the cheapest-week search, not the S$1 asked
             probes.append(problem.purchase_budget_sgd)
         return original(self, problem)
 
@@ -985,7 +967,7 @@ def test_a_plan_of_meals_too_big_to_search_quickly_ends_without_the_cheapest_wee
     response = composed_client.post("/api/plans/generate", json=request)
 
     assert response.status_code == 422, response.text
-    assert bool(probes) is searched
+    assert probes
 
 
 @pytest.mark.parametrize(

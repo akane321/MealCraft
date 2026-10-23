@@ -14,7 +14,6 @@ from app.core.paths import data_root
 HPB_FILE = "nutrition/hpb-reference-v1.json"
 BASICS_FILE = "ingredients/basic-seasonings-v1.json"
 AGE_BANDS = ("toddler", "child", "teen", "adult", "senior")
-SEXES = ("female", "male")
 ACTIVITIES = ("low", "moderate", "high")
 SERVINGS_RANGE = (Fraction(1, 4), Fraction(3))
 
@@ -73,8 +72,9 @@ def daily_energy_kcal(
     """One member's daily energy target in kcal: the HPB need for the band, sex and activity, less 10% for a
     fat-loss goal (the table's `goal_factors`, ADR-0071 section 3). None where HPB has no researched energy.
 
-    A meal's own floor is this times that meal's share (`meal_shares`), which is the energy floor of ADR-0070
-    section 3 read per member instead of once for the table.
+    A meal's own floor is this times that meal's `energy_floor_share` (data/planning/meal-structure-v1.json:
+    lunch and dinner 25%), the energy floor of ADR-0070 section 3 read per member instead of once for the table.
+    `meal_shares` (25/35/35) only pro-rates sodium and the other per-day limits.
     """
     need = energy(age_band, sex, activity)
     if need is None:

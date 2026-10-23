@@ -95,14 +95,17 @@ Developer episode `mdw-dev-020` (budget S$52.50) needs it: its earlier witness
 used a lost-line recipe, and without that recipe the consumed-cost week costs
 S$63.43, while the package-sharing week costs S$45.95.
 
-Since 2026-10-02 a vegetable role (`vegetable`, `vegetable-2`) takes only a
-dish led by vegetables with no meat or fish, as the product's does (owner
-decisions 2026-10-02; the definition is `backend/app/planning/vegetable_led.py`,
-which also weighs a whole cabbage, cauliflower, lettuce or broccoli the release
-weighed as one leaf at the weight its line states, or else at a head's weight,
-and counts a line whose wording names meat or fish as meat whatever the release
-mapped it to). Every developer label stayed proven
-under it. Protocol v2 labels keep the old rule.
+For protocol v3.1, a vegetable role (`vegetable`, `vegetable-2`) uses the
+product's shared definition, amended **2026-10-22** by ADR-0082: vegetables are
+at least half of counted solids, all measured flesh is at most 20%, and flesh
+other than listed cured/dried ingredients or minced land-animal meat is at
+most 5%. Both flesh limits apply when mixed; unknown flesh quantity cannot
+qualify. This is not a vegetarian-diet claim. Ingredient-based diet and
+allergen limits still apply. The definition is
+`backend/app/planning/vegetable_led.py`; its existing whole-head weights,
+dry-grain weights and ingredient-wording checks remain. See the
+[dated scoring amendment](#vegetable-scoring-definition-2026-10-22) below.
+Protocol v2 labels keep their earlier course-only rule.
 
 ## 3. Categories
 
@@ -145,13 +148,15 @@ Strict success over the final week, as in v2-multidish section 4. Roles,
 courses and meal time are checked per slot against that slot's roles after the
 change. Shares extend to five and six dishes (0.45 / 0.3 and 0.4 / 0.28). "A or
 B" lines are scored as the option the household can eat and buy, the rule the
-product states; the scorer holds its own copy of it. Since 2026-10-02,
-`meal_role_courses` also fails a dish in a vegetable role (`vegetable`,
-`vegetable-2`) that is not a vegetable dish: led by vegetables with no meat or
-fish, by the product's own definition (`app.planning.vegetable_led`), the
-owner's rule rather than arithmetic the scorer should check independently. This
-applies to protocol v3.1 runs from that date, developer and held-out alike;
-the recorded held-out reports were scored before it and stay as recorded.
+product states; the scorer holds its own copy of it. For **protocol v3.1**, the
+`meal_role_courses` check also rejects a vegetable role (`vegetable`,
+`vegetable-2`) that fails the product's shared definition
+(`app.planning.vegetable_led`): at least half vegetables, total measured flesh
+at most 20%, and other/non-seasoning flesh at most 5%, as amended **2026-10-22**.
+The scorer uses the owner's culinary definition rather than inventing an
+independent definition for a baseline. This applies equally to developer and
+held-out v3.1 conditions; recorded earlier reports remain as recorded, not
+silently rescored under the amended definition.
 Protocol v2-multidish scoring is unchanged. Added checks:
 
 | Check | Rule |
@@ -214,3 +219,24 @@ The other fixes were also chosen after reading run 1, so a v3.1 run on the held-
 is a **diagnostic** in every category, reported beside run 1 and never as a
 held-out score. A held-out score for this family needs a fresh set, drafted,
 reviewed and frozen before any system runs on it (ADR-0049 section 1).
+
+### Vegetable scoring definition: 2026-10-22
+
+ADR-0082 amends the v3.1 vegetable check described in sections 2 and 5.
+The strict scorer and label checker use the same product definition for every
+system compared under this condition. Its complete seasoning-ingredient list
+is in the [user guide](../user-guide.md); the executable definition remains
+`backend/app/planning/vegetable_led.py`.
+
+Under ADR-0020 section 3, identify the amended scoring condition as
+`vegetable-role-2026-10-22` alongside protocol v3.1. Preserve earlier
+conditions and their numbers; do not silently rescore them in place.
+Protocol v1 and protocol v2 course-only checks do not gain this rule.
+
+The stored **v3 developer scoring reports and held-out scoring reports are
+unchanged** in this change. This is a statement about the report files, not
+proof that the old and new definitions are equivalent or that a new held-out
+experiment was run. In contrast, the **full-default and shared-dish developer
+diagnostics were regenerated**, and their menus and checkout totals changed;
+see the [generated report comparison](../../data-engineering/docs/role-rules-20261022/report-comparison.md).
+No protected episode, label or report content was opened to make this amendment.
