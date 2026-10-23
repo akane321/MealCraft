@@ -56,11 +56,11 @@
       "details": {},
       "dishes": 21,
       "distinct_recipes": 21,
-      "distinct_dish_kinds": 20,
+      "distinct_dish_kinds": 19,
       "most_uses_of_a_recipe": 1,
       "most_uses_of_a_kind": 2,
       "meal_fit": "21/21",
-      "total_cost_sgd": 293.7
+      "total_cost_sgd": 301.01
     },
     {
       "episode_id": "mdw-dev-002",
@@ -78,7 +78,7 @@
       "most_uses_of_a_recipe": 1,
       "most_uses_of_a_kind": 3,
       "meal_fit": "28/28",
-      "total_cost_sgd": 470.13
+      "total_cost_sgd": 480.14
     },
     {
       "episode_id": "mdw-dev-003",
@@ -96,7 +96,7 @@
       "most_uses_of_a_recipe": 2,
       "most_uses_of_a_kind": 3,
       "meal_fit": "21/21",
-      "total_cost_sgd": 404.42
+      "total_cost_sgd": 406.27
     },
     {
       "episode_id": "mdw-dev-004",
@@ -114,7 +114,7 @@
       "most_uses_of_a_recipe": 1,
       "most_uses_of_a_kind": 1,
       "meal_fit": "28/28",
-      "total_cost_sgd": 486.4
+      "total_cost_sgd": 502.21
     },
     {
       "episode_id": "mdw-dev-005",
@@ -132,7 +132,7 @@
       "most_uses_of_a_recipe": 1,
       "most_uses_of_a_kind": 2,
       "meal_fit": "28/28",
-      "total_cost_sgd": 463.29
+      "total_cost_sgd": 486.93
     },
     {
       "episode_id": "mdw-dev-006",
@@ -150,7 +150,7 @@
       "most_uses_of_a_recipe": 2,
       "most_uses_of_a_kind": 2,
       "meal_fit": "21/21",
-      "total_cost_sgd": 380.9
+      "total_cost_sgd": 359.74
     },
     {
       "episode_id": "mdw-dev-007",
@@ -163,12 +163,12 @@
       "indeterminate": [],
       "details": {},
       "dishes": 28,
-      "distinct_recipes": 21,
-      "distinct_dish_kinds": 19,
-      "most_uses_of_a_recipe": 5,
-      "most_uses_of_a_kind": 5,
+      "distinct_recipes": 24,
+      "distinct_dish_kinds": 22,
+      "most_uses_of_a_recipe": 4,
+      "most_uses_of_a_kind": 4,
       "meal_fit": "28/28",
-      "total_cost_sgd": 415.16
+      "total_cost_sgd": 402.82
     },
     {
       "episode_id": "mdw-dev-008",
@@ -181,12 +181,12 @@
       "indeterminate": [],
       "details": {},
       "dishes": 28,
-      "distinct_recipes": 13,
-      "distinct_dish_kinds": 12,
+      "distinct_recipes": 11,
+      "distinct_dish_kinds": 11,
       "most_uses_of_a_recipe": 7,
       "most_uses_of_a_kind": 7,
       "meal_fit": "28/28",
-      "total_cost_sgd": 100.97
+      "total_cost_sgd": 103.15
     },
     {
       "episode_id": "mdw-dev-009",
@@ -226,7 +226,7 @@
       "most_uses_of_a_recipe": 1,
       "most_uses_of_a_kind": 3,
       "meal_fit": "26/28",
-      "total_cost_sgd": 387.35
+      "total_cost_sgd": 383.22
     },
     {
       "episode_id": "mdw-dev-011",
@@ -262,7 +262,7 @@
       "most_uses_of_a_recipe": 1,
       "most_uses_of_a_kind": 6,
       "meal_fit": "28/28",
-      "total_cost_sgd": 438.08
+      "total_cost_sgd": 463.52
     },
     {
       "episode_id": "mdw-dev-013",
@@ -291,11 +291,11 @@
       },
       "dishes": 21,
       "distinct_recipes": 21,
-      "distinct_dish_kinds": 19,
+      "distinct_dish_kinds": 20,
       "most_uses_of_a_recipe": 1,
-      "most_uses_of_a_kind": 3,
+      "most_uses_of_a_kind": 2,
       "meal_fit": "21/21",
-      "total_cost_sgd": 330.57
+      "total_cost_sgd": 306.25
     },
     {
       "episode_id": "mdw-dev-014",
@@ -314,11 +314,11 @@
       },
       "dishes": 14,
       "distinct_recipes": 14,
-      "distinct_dish_kinds": 14,
+      "distinct_dish_kinds": 13,
       "most_uses_of_a_recipe": 1,
-      "most_uses_of_a_kind": 1,
+      "most_uses_of_a_kind": 2,
       "meal_fit": "14/14",
-      "total_cost_sgd": 266.69
+      "total_cost_sgd": 275.96
     },
     {
       "episode_id": "mdw-dev-015",
@@ -362,11 +362,11 @@
       },
       "dishes": 15,
       "distinct_recipes": 15,
-      "distinct_dish_kinds": 15,
+      "distinct_dish_kinds": 14,
       "most_uses_of_a_recipe": 1,
-      "most_uses_of_a_kind": 1,
+      "most_uses_of_a_kind": 2,
       "meal_fit": "15/15",
-      "total_cost_sgd": 393.27
+      "total_cost_sgd": 383.58
     },
     {
       "episode_id": "mdw-dev-016",
@@ -406,7 +406,7 @@
       "most_uses_of_a_recipe": 1,
       "most_uses_of_a_kind": 1,
       "meal_fit": "20/20",
-      "total_cost_sgd": 333.48
+      "total_cost_sgd": 342.38
     },
     {
       "episode_id": "mdw-dev-017",
@@ -455,7 +455,7 @@
       "most_uses_of_a_recipe": 1,
       "most_uses_of_a_kind": 1,
       "meal_fit": "16/16",
-      "total_cost_sgd": 327.85
+      "total_cost_sgd": 321.02
     },
     {
       "episode_id": "mdw-dev-018",
@@ -484,7 +484,7 @@
       "most_uses_of_a_recipe": 1,
       "most_uses_of_a_kind": 1,
       "meal_fit": "16/16",
-      "total_cost_sgd": 242.96
+      "total_cost_sgd": 240.27
     },
     {
       "episode_id": "mdw-dev-019",
@@ -513,7 +513,7 @@
       "most_uses_of_a_recipe": 1,
       "most_uses_of_a_kind": 1,
       "meal_fit": "16/16",
-      "total_cost_sgd": 303.93
+      "total_cost_sgd": 335.06
     },
     {
       "episode_id": "mdw-dev-020",
@@ -553,7 +553,7 @@
     }
   ],
   "episode_set": "developer set",
-  "code_revision": "ddc15e672b144150405b1c03e84f58f159d780ce",
+  "code_revision": "3966a3feec4d3ecc25ccf77353412aff3a7da0a9",
   "inputs": {
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json": "cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284",
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json": "b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753",
@@ -578,6 +578,8 @@
     "data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-021.json": "efe5b019c41eaf2cb8c422ae45704fb082db122490d0f5009702c8f85aa83eb7",
     "data-engineering/data/release/v2.1/recipes.jsonl": "df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db",
     "data-engineering/data/release/v2.1/ingredients.jsonl": "499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25",
+    "data-engineering/data/release/v2.2/recipes.jsonl": "136c3697d64455dbc51f58a237e3348c16c4efe36cff03a5dbb244ad39663450",
+    "data-engineering/data/release/v2.2/ingredients.jsonl": "4c71b1a9f13e738d7c82d8a302ef11543d0d1705b614d3dc05150b86529eb95e",
     "data/products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91",
     "data/fixtures/fairprice-products.json": "19e760bd53e438fac44c77569724460cf6a69269690c302f3d1a59edb7a0323c"
   }

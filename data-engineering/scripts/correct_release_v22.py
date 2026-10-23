@@ -14,7 +14,8 @@ reference (`SOURCES`). The classes, applied to each line in this order:
 
 1. `red_pepper_alias`: "red pepper" was aliased to cayenne. A line that is fresh pepper (counted, measured in
    cups, or chopped/diced/sliced/seeded/cut) moves to bell pepper and is weighed with bell pepper's own units.
-   A count whose text names a spoon measure (typos included: "1/4 tespoon") is not a counted pepper. Flakes, crushed, ground, dried, powder and a bare "1 tsp. red pepper" stay cayenne.
+   A count whose text names a spoon measure (typos included: "1/4 tespoon") is not a counted pepper.
+   Flakes, crushed, ground, dried, powder and a bare "1 tsp. red pepper" stay cayenne.
 2. `stated_weight`: a counted line whose text states a mass the build's package pattern missed (mixed numbers,
    fractions, ranges, "about 2 lb", no parentheses). One item: the mass is the item's. Several items: only with
    "each", "total", or the mass in parentheses right after the count ("2 (1 1/2 pound) pork tenderloins");
