@@ -3,8 +3,8 @@
 A baseline without our catalog cannot name recipe or product ids, so it answers with dishes: name, steps,
 cooking time, servings and ingredient lines in grams. Everything else reuses the common output schema
 (`app.evaluation.common_output`): the statuses, clarification questions, the infeasible payload and the
-constraint claims. `baseline_validation` turns a scored answer into a `CommonEpisodeResponse` for the
-product's independent validator.
+constraint claims. Dishes stay dishes here: `baseline_validation` turns the mapped dishes into one-off recipe
+candidates for the product's independent validator.
 
 `BaselineAnswer` is what the model is asked for. `episode_id` and `system_id` are not in it: the harness
 fills them (`BaselineResponse`), so a model never pays for a retry because it miscopied an id.
