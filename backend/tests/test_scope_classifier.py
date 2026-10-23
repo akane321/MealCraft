@@ -6,6 +6,7 @@ from app.core.config import Settings
 from app.orchestration.contracts import ScopeClass
 from app.orchestration.runtime import BoundedAgentOrchestrator
 from app.orchestration.scope_classifier import OpenAIScopeClassifier, ScopePrediction
+from app.orchestration.scope_policy import ReferenceScopePolicy
 from app.orchestration.tool_scheduler import ToolLoopResult
 from app.schemas.agent import AgentConstraintState
 
@@ -117,6 +118,29 @@ def test_domain_action_can_only_request_preview_workflow() -> None:
 
     assert decision.should_mutate_state is True
     assert decision.should_call_tools is True
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "谢谢！对了我对花生过敏，帮我排一周。",
+        "谢谢，我对花生过敏。",
+        "Thanks! I have a peanut allergy; please plan dinners for four.",
+    ],
+)
+def test_thanks_does_not_hide_a_planning_request_or_allergy(message: str) -> None:
+    decision = ReferenceScopePolicy().classify(message)
+
+    assert decision.scope_class is ScopeClass.DOMAIN_ACTION
+    assert decision.should_mutate_state is True
+
+
+@pytest.mark.parametrize("message", ["Plan a trip to Malacca.", "Show me an itinerary for Tokyo."])
+def test_out_of_scope_travel_is_classified_by_intent_not_destination(message: str) -> None:
+    decision = ReferenceScopePolicy().classify(message)
+
+    assert decision.scope_class is ScopeClass.OUT_OF_SCOPE
+    assert decision.should_mutate_state is False
 
 
 def test_model_may_decline_a_request_but_cannot_mutate_for_off_topic_text() -> None:

@@ -1228,7 +1228,9 @@ def test_model_substitution_suggestion_route_filters_catalog_candidates_for_hous
     monkeypatch.setitem(
         app.dependency_overrides,
         get_settings,
-        lambda: config.Settings(openai_api_key=SecretStr("unused"), openai_model="test"),
+        lambda: config.Settings(
+            agent_parser_provider="openai", openai_api_key=SecretStr("unused"), openai_model="test"
+        ),
     )
 
     response = recipe_client.post(
@@ -1307,7 +1309,9 @@ def test_external_recipe_search_route_reviews_and_persists_candidate_privately(
     monkeypatch.setitem(
         app.dependency_overrides,
         get_settings,
-        lambda: config.Settings(openai_api_key=SecretStr("unused"), openai_model="test"),
+        lambda: config.Settings(
+            agent_parser_provider="openai", openai_api_key=SecretStr("unused"), openai_model="test"
+        ),
     )
 
     response = recipe_client.post(

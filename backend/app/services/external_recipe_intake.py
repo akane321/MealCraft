@@ -70,7 +70,36 @@ class ExternalRecipeDraft(BaseModel):
     difficulty: str | None = None
     nutrition_per_serving: dict[str, float] | None = None
     ingredients: list[ExternalIngredientLine] = Field(min_length=1)
-    steps: list[str] = Field(default_factory=list)
+    steps: list[str] = Field(default_factory=list, max_length=20)
+
+    @field_validator("steps", mode="before")
+    @classmethod
+    def sanitize_steps(cls, value):
+        if not isinstance(value, list):
+            return value
+        cleaned = []
+        unsafe = re.compile(
+            r"(?:ignore\s+(?:all\s+)?(?:previous|prior|above)\s+instructions|"
+            r"system\s+prompt|developer\s+message|reveal\s+(?:the\s+)?prompt|"
+            r"忽略.{0,12}(?:指令|提示)|系统提示|开发者消息)",
+            re.IGNORECASE,
+        )
+        url = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
+        for item in value:
+            if not isinstance(item, str):
+                cleaned.append(item)
+                continue
+            if unsafe.search(item):
+                continue
+            text = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", item)
+            text = url.sub("", text).strip()
+            if text:
+                if len(text) > 500:
+                    raise ValueError("a recipe step exceeds the length limit")
+                cleaned.append(text)
+        if sum(len(item) for item in cleaned if isinstance(item, str)) > 6000:
+            raise ValueError("recipe steps exceed the total length limit")
+        return cleaned
 
     @field_validator("nutrition_per_serving")
     @classmethod
@@ -370,6 +399,7 @@ def persist_admitted_recipe(
     policy = resolve_external_source_policy(str(draft.source_url), acquisition_method=acquisition_method)
     source = {
         "dataset": "web-intake",
+        "source_type": "web",
         "tier": policy.tier,
         "url": str(draft.source_url),
         "retrieved_at": draft.retrieved_at.isoformat(),
@@ -391,7 +421,9 @@ def persist_admitted_recipe(
         .unique()
         .all()
     )
-    duplicate = find_duplicate_recipe(draft, existing)
+    duplicate = find_duplicate_recipe(
+        draft, [recipe for recipe in existing if recipe.owner_household_id == household_id]
+    )
     if duplicate is not None:
         sources = [duplicate.source or {}]
         sources.extend((duplicate.source or {}).get("sources", []))
@@ -402,6 +434,11 @@ def persist_admitted_recipe(
         duplicate.source = primary
         session.flush()
         return duplicate, False
+    shared_duplicate = find_duplicate_recipe(
+        draft, [recipe for recipe in existing if recipe.owner_household_id is None]
+    )
+    if shared_duplicate is not None:
+        return shared_duplicate, False
 
     stem = normalize_recipe_title(draft.title).replace(" ", "-")[:90].strip("-") or "external-recipe"
     digest_input = f"{household_id}:{draft.source_url}:{normalize_recipe_title(draft.title)}"

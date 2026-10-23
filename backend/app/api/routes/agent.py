@@ -90,11 +90,11 @@ def create_constraint_parser(
     parser.scope_classifier = OpenAIScopeClassifier(
         api_key=api_key,
         model=settings.openai_model,
-        timeout_seconds=min(8.0, runtime_value("openai_timeout_seconds", settings, database)),
+        timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
         tool_scheduler=ModelToolScheduler(
             api_key=api_key,
             model=settings.openai_model,
-            timeout_seconds=min(8.0, runtime_value("openai_timeout_seconds", settings, database)),
+            timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
             max_steps=2,
         ),
     )
@@ -124,6 +124,9 @@ def get_agent_service(
     household_id = current.active_membership.household_id
     profiles = HouseholdProfileRepository(database, household_id=household_id)
     profile = profiles.get_current()
+    openai_enabled = (
+        runtime_value("agent_parser_provider", settings, database) == "openai" and settings.openai_api_key is not None
+    )
     return AgentSessionService(
         repository=AgentSessionRepository(database, household_id=household_id),
         run_repository=AgentRunRepository(database, household_id=household_id),
@@ -142,7 +145,7 @@ def get_agent_service(
                 api_key=settings.openai_api_key.get_secret_value(),
                 model=settings.openai_model,
             )
-            if settings.openai_api_key is not None
+            if openai_enabled
             else None
         ),
         web_food_question_answerer=create_web_food_question_answerer(settings, database),

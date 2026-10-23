@@ -14,6 +14,27 @@ from app.orchestration.scope_classifier import OpenAIScopeClassifier
 from app.orchestration.tool_scheduler import ModelToolScheduler
 from app.schemas.agent import AgentConstraintState
 
+MAX_BUDGET_USD = 5.0
+
+
+class EvaluationBudget:
+    """Track measured spend and prevent starting another paid request at the budget ceiling."""
+
+    def __init__(self, limit_usd: float = MAX_BUDGET_USD) -> None:
+        if limit_usd <= 0:
+            raise ValueError("budget limit must be positive")
+        self.limit_usd = limit_usd
+        self.spent_usd = 0.0
+
+    @property
+    def can_start_request(self) -> bool:
+        return self.spent_usd < self.limit_usd
+
+    def record(self, cost: float | None) -> None:
+        if cost is None:
+            raise ValueError("cannot continue a paid evaluation with unknown model pricing")
+        self.spent_usd += cost
+
 
 def cost_usd(tally, model: str) -> float | None:
     rates = CHAT_RATES.get(model)
@@ -40,6 +61,8 @@ def main() -> None:
     settings = get_settings()
     if settings.openai_api_key is None:
         raise SystemExit("OPENAI_API_KEY is not configured")
+    if settings.openai_model not in CHAT_RATES:
+        raise SystemExit(f"No published cost rate is configured for model {settings.openai_model!r}")
     root = repository_root()
     dataset_path = root / "data/evaluation/agent-orchestration/scope-developer-v2.json"
     cases = json.loads(dataset_path.read_text(encoding="utf-8"))
@@ -52,8 +75,13 @@ def main() -> None:
     results = []
     errors = 0
     partial_reason = None
+    budget = EvaluationBudget()
     for case in cases:
+        if not budget.can_start_request:
+            partial_reason = "budget_limit_reached"
+            break
         decision, tally, elapsed, cost = measured(classifier, case["message"], settings.openai_model)
+        budget.record(cost)
         fallback = tally.fell_back
         errors += int(fallback)
         results.append(
@@ -105,8 +133,12 @@ def main() -> None:
     for case in selected if partial_reason is None else []:
         repeated = []
         for _ in range(5):
+            if not budget.can_start_request:
+                partial_reason = "budget_limit_reached"
+                break
             sample = measured(classifier, case["message"], settings.openai_model)
             repeated.append(sample)
+            budget.record(sample[3])
             if sample[1].fell_back:
                 errors += 1
                 partial_reason = "model_fallback_or_api_unavailable_during_stability"
@@ -129,10 +161,17 @@ def main() -> None:
     parser = OpenAIConstraintParser(api_key=settings.openai_api_key.get_secret_value(), model=settings.openai_model)
     plan_turns = []
     for case in planning_cases if partial_reason is None else []:
+        if not budget.can_start_request:
+            partial_reason = "budget_limit_reached"
+            break
         decision, scope_tally, scope_latency, scope_cost = measured(classifier, case["message"], settings.openai_model)
+        budget.record(scope_cost)
         if scope_tally.fell_back:
             errors += 1
             partial_reason = "model_fallback_or_api_unavailable_during_plan_sample"
+            break
+        if not budget.can_start_request:
+            partial_reason = "budget_limit_reached"
             break
         try:
             with model_client.counting():
@@ -149,6 +188,7 @@ def main() -> None:
             partial_reason = f"parser_api_unavailable:{type(error).__name__}"
             break
         parser_cost = cost_usd(parser_tally, settings.openai_model)
+        budget.record(parser_cost)
         plan_turns.append(
             {
                 "id": case["id"],
@@ -171,6 +211,8 @@ def main() -> None:
         "evaluation_role": "developer_set_only",
         "partial": partial_reason is not None,
         "partial_reason": partial_reason,
+        "budget_limit_usd": budget.limit_usd,
+        "estimated_total_cost_usd": round(budget.spent_usd, 6),
         "created_at": datetime.now(UTC).isoformat(),
         "model": settings.openai_model,
         "pricing_checked_at": "2026-10-21",

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.routes.auth import CurrentHouseholdCreatePlanCsrfDependency
 from app.core.config import Settings, get_settings
+from app.core.runtime_config import runtime_value
 from app.data.ingredient_hierarchy import expand_exclusions
 from app.db.session import get_db_session
 from app.models.recipe import Ingredient
@@ -62,7 +63,7 @@ def suggest_safe_substitutes(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> SubstituteReviewResponse:
     """Generate possible ingredient swaps, then expose only catalog-verified safe options."""
-    if settings.openai_api_key is None:
+    if runtime_value("agent_parser_provider", settings, database) != "openai" or settings.openai_api_key is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Ingredient substitution suggestions require an OpenAI API key",

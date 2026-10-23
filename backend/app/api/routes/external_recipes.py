@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.api.routes.auth import CurrentHouseholdCreatePlanCsrfDependency
 from app.core.config import Settings, get_settings
 from app.core.paths import repository_root
+from app.core.runtime_config import runtime_value
 from app.data.external_ingredient_mapping import ReviewedIngredientMapper
 from app.data.external_source_policies import AcquisitionMethod
 from app.db.session import get_db_session
@@ -88,7 +89,8 @@ def search_and_intake_external_recipe(
     """Search for a cited candidate, extract it, then run the same deterministic admission review."""
     started = time.perf_counter()
     stages = []
-    if settings.openai_api_key is None:
+    live_provider = runtime_value("agent_parser_provider", settings, database) == "openai"
+    if not live_provider or settings.openai_api_key is None:
         suggestions = _similar_household_recipes(
             database,
             household_id=current.active_membership.household_id,
@@ -96,14 +98,15 @@ def search_and_intake_external_recipe(
             target=payload.query,
             requires_halal=payload.requires_halal,
         )
-        stages.append(_stage("search_and_extract", started, "failed", error="api_key_missing"))
+        failure = "api_key_missing" if settings.openai_api_key is None else "agent_parser_provider_not_openai"
+        stages.append(_stage("search_and_extract", started, "failed", error=failure))
         _record_intake_run(
             database,
             current,
             "web_search",
             stages,
             status="failed",
-            error="api_key_missing",
+            error=failure,
             started=started,
             input_digest=hashlib.sha256(" ".join(payload.query.split()).casefold().encode()).hexdigest(),
         )
@@ -111,7 +114,7 @@ def search_and_intake_external_recipe(
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail={
-                "reason": "api_key_missing",
+                "reason": failure,
                 "message": "无法联网搜索菜谱：服务尚未配置搜索密钥。",
                 "suggestions": [item.model_dump() for item in suggestions],
             },
