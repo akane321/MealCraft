@@ -5,6 +5,7 @@ from datetime import timedelta
 from pathlib import Path
 from time import perf_counter
 
+from app.evaluation.algorithm_environment import environment
 from app.planning.diversity_greedy import DiversityAwareGreedyPlanner
 from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner
 from app.planning.native_algorithm_cp_sat import NativeSharedScoreCpSat
@@ -74,7 +75,14 @@ def run():
         print(name, native["status"], round(native_wall, 2), "ms", flush=True)
     Path("docs/evaluation/algorithm-dev/native-scale.json").write_text(
         json.dumps(
-            {"scope": "Single local timing; synthetic prices; generated candidates; not product latency", "rows": rows},
+            {
+                "scope": (
+                    "Developer cases; synthetic prices; no slot members; "
+                    "recipe-count cases have one dish per dinner; not product latency"
+                ),
+                "environment": environment(),
+                "rows": rows,
+            },
             indent=2,
         )
         + "\n",

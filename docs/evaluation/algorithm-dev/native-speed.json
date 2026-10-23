@@ -1,5 +1,5 @@
 {
-  "scope": "16 real recipes; 14 dinners; synthetic prices; one machine; three alternating repeats",
+  "scope": "Historical developer timing; 16 real recipes; 14 single-dish dinners; synthetic prices; no slot members; three alternating repeats",
   "median_ms": {
     "False": 5130.3539000000455,
     "True": 2751.3235000005807
@@ -149,5 +149,12 @@
       ],
       "symmetry_pairs": 12
     }
-  ]
+  ],
+  "environment": {
+    "cpu_model": "not recorded",
+    "logical_cpu_count": "not recorded",
+    "physical_core_count": "not recorded",
+    "code_commit": "not recorded"
+  },
+  "worker_comparison": "Baseline used one solver worker; optimized used four. Per-run workers were not recorded in this historical artifact."
 }
