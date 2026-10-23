@@ -161,6 +161,28 @@ these runs do not establish member-level algorithm quality. Nutrition bands
 in these packets describe the whole table. Member-specific tests and comparisons
 are a separate required delivery.
 
+## Large-neighborhood search
+
+`LargeNeighborhoodPlanner` is an offline comparison arm. It starts from a
+validated greedy plan (or a supplied plan that it revalidates), releases several
+meals, and fixes all other meal choices in the native CP-SAT model. The model
+still sees the entire horizon, including shared packages, pantry, shopping trips,
+member attendance and nutrition. Only a strictly better independently validated
+result replaces the incumbent. Each repair records its released meals, status,
+acceptance and elapsed time in `planner.repairs`.
+
+`seed`, `iterations` and `destroy_size` define a reproducible neighborhood schedule.
+Repairs have no wall-clock cutoff. A whole-horizon optimal repair ends the loop;
+partial repairs run the configured iteration count. Unsupported native inputs or
+unsuccessful repairs keep the validated incumbent and are reported explicitly.
+The native model's precision and policy restrictions still apply. LNS does not
+claim global optimality, and this arm is not wired into the product planner.
+
+Tests cover a package-cost local minimum that requires changing two meals
+together, member households, shared dishes, separate shopping-trip budgets,
+locked meals, fixed empty optional meals, and unsuccessful repairs. These are
+synthetic regressions, not large-scale or real-price acceptance evidence.
+
 ## Member-level variety
 
 For packets with members, the variety component maximizes the mean count of
