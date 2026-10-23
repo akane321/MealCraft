@@ -14,7 +14,7 @@ reference (`SOURCES`). The classes, applied to each line in this order:
 
 1. `red_pepper_alias`: "red pepper" was aliased to cayenne. A line that is fresh pepper (counted, measured in
    cups, or chopped/diced/sliced/seeded/cut) moves to bell pepper and is weighed with bell pepper's own units.
-   Flakes, crushed, ground, dried, powder and a bare "1 tsp. red pepper" stay cayenne.
+   A count whose text names a spoon measure (typos included: "1/4 tespoon") is not a counted pepper. Flakes, crushed, ground, dried, powder and a bare "1 tsp. red pepper" stay cayenne.
 2. `stated_weight`: a counted line whose text states a mass the build's package pattern missed (mixed numbers,
    fractions, ranges, "about 2 lb", no parentheses). One item: the mass is the item's. Several items: only with
    "each", "total", or the mass in parentheses right after the count ("2 (1 1/2 pound) pork tenderloins");
@@ -24,7 +24,8 @@ reference (`SOURCES`). The classes, applied to each line in this order:
    the mass is the line's total.
 4. `whole_bird`: "1 whole chicken" / "1 fryer, cut up" with no stated mass, weighed as one 100 g piece. One
    chicken's edible meat and skin (the entry's own basis, bones excluded) is USDA FDC 171447's "0.5 chicken,
-   bone removed" = 460 g, twice.
+   bone removed" = 460 g, twice. A bird with a stated mass is class 2 and keeps that bone-in market mass: the
+   mixed basis is listed as open in the quality report.
 5. `whole_head`: a whole cabbage, cauliflower, lettuce or broccoli weighed as one leaf or floret (the same
    lines and test as `backend/app/planning/vegetable_led.py` `whole_grams`), at the entry's own `head` weight.
    A whole fresh pineapple weighed as one canned chunk (14 g) takes USDA FDC 169124's "1 fruit" = 905 g.
@@ -58,13 +59,17 @@ TARGET = ROOT / "data" / "release" / "v2.2"
 VERSION = "v2.2"
 CREATED_AT = "2026-10-23T00:00:00+00:00"  # fixed, so a rerun writes the same bytes
 
+# The food-details pages render in the browser; the record JSON behind each (portal-data/external/<id>) shows the
+# cited row as text (foodMeasures for SR Legacy, servingSize/householdServingFullText for branded).
 SOURCES = {
     "whole_bird": "USDA FoodData Central 171447, Chicken, broilers or fryers, meat and skin, raw: portion "
-    "'0.5 chicken, bone removed' = 460 g (https://fdc.nal.usda.gov/food-details/171447/nutrients)",
+    "'0.5 chicken, bone removed' = 460 g (https://fdc.nal.usda.gov/food-details/171447/nutrients; "
+    "record https://fdc.nal.usda.gov/portal-data/external/171447)",
     "whole_pineapple": "USDA FoodData Central 169124, Pineapple, raw, all varieties: portion '1 fruit' = 905 g "
-    "(https://fdc.nal.usda.gov/food-details/169124/nutrients)",
+    "(https://fdc.nal.usda.gov/food-details/169124/nutrients; record https://fdc.nal.usda.gov/portal-data/external/169124)",
     "lasagna_sheet": "USDA FoodData Central 2495617 (branded), LASAGNA SEMOLINA, Flora's Distributors: serving "
-    "54 g = '3 pieces' (https://fdc.nal.usda.gov/food-details/2495617/nutrients)",
+    "54 g = '3 pieces' (https://fdc.nal.usda.gov/food-details/2495617/nutrients; "
+    "record https://fdc.nal.usda.gov/portal-data/external/2495617)",
 }
 WHOLE_CHICKEN_G = 920.0
 WHOLE_PINEAPPLE_G = 905.0
@@ -90,6 +95,8 @@ ALTERNATIVE = re.compile(r"\bor\b", re.I)
 RED_PEPPER = re.compile(r"\bred\s+peppers?\b", re.I)
 NOT_FRESH = re.compile(r"cayenne|flake|crushed|ground|dried|powder|hot|chil|paprika", re.I)
 FRESH_PREP = re.compile(r"chop|dice|slic|minc|strip|seed|julienn|chunk|\bcut\b", re.I)
+# A spice measure, typos included ("1/4 tespoon of red pepper" parses as unit `piece`): not a counted pepper.
+SPICE_MEASURE = re.compile(r"spoon|\bt[be]?sp|\btbl", re.I)
 
 # The same whole-vegetable test as backend/app/planning/vegetable_led.py (`WHOLE`, `PARTS`, `COUNT`).
 WHOLE_HEADS = {"ING_CABBAGE", "ING_CAULIFLOWER", "ING_LETTUCE", "ING_BROCCOLI"}
@@ -173,7 +180,8 @@ def is_fresh_red_pepper(line: dict) -> bool:
     text = line["original_text"]
     if line["canonical_ingredient_id"] != "ING_CAYENNE" or not RED_PEPPER.search(text) or NOT_FRESH.search(text):
         return False
-    return line["unit"] in {"piece", "cup"} or bool(FRESH_PREP.search(text))
+    counted = line["unit"] in {"piece", "cup"} and not SPICE_MEASURE.search(text)
+    return counted or bool(FRESH_PREP.search(text))
 
 
 def counted_noun(text: str) -> str:
@@ -386,6 +394,13 @@ Sources beyond the line's own text and the entry's own units:
 | Reason | Lines |
 | --- | ---: |
 {opened}
+
+Open question, mixed gram basis: a `whole_bird` line with no stated mass takes 920 g of edible meat and skin
+(bones excluded, the entry's own basis), but a `stated_weight` line keeps the stated market weight, which for a
+bird, a bone-in roast or shoulder, a lobster or a whole pineapple ("1 (4 lb) pineapple" = 1,814 g against the
+905 g edible fruit) includes bone, shell or rind. Those recipes' per-serving nutrition and cost-per-gram basis
+are therefore high. The owner's rule is stated weight first; an edible-yield factor needs a cited yield per food
+and is not applied in this round.
 
 ### Guard: piece weight under 30% of the entry's own head or loaf weight
 

@@ -201,19 +201,19 @@ and its source. Size words (small, medium, large) are not part of this round.
 | `lasagna_sheet` | 21 | 21 |
 | `n_times_total` | 17 | 17 |
 | `pizza_crust` | 9 | 9 |
-| `red_pepper_alias` | 135 | 135 |
+| `red_pepper_alias` | 134 | 134 |
 | `red_pepper_alias+stated_weight` | 1 | 1 |
 | `stated_weight` | 232 | 224 |
 | `whole_bird` | 125 | 125 |
 | `whole_head` | 133 | 132 |
 
-673 lines in 653 recipes changed.
+672 lines in 652 recipes changed.
 
 Sources beyond the line's own text and the entry's own units:
 
-- `whole_bird`: USDA FoodData Central 171447, Chicken, broilers or fryers, meat and skin, raw: portion '0.5 chicken, bone removed' = 460 g (https://fdc.nal.usda.gov/food-details/171447/nutrients)
-- `whole_pineapple`: USDA FoodData Central 169124, Pineapple, raw, all varieties: portion '1 fruit' = 905 g (https://fdc.nal.usda.gov/food-details/169124/nutrients)
-- `lasagna_sheet`: USDA FoodData Central 2495617 (branded), LASAGNA SEMOLINA, Flora's Distributors: serving 54 g = '3 pieces' (https://fdc.nal.usda.gov/food-details/2495617/nutrients)
+- `whole_bird`: USDA FoodData Central 171447, Chicken, broilers or fryers, meat and skin, raw: portion '0.5 chicken, bone removed' = 460 g (https://fdc.nal.usda.gov/food-details/171447/nutrients; record https://fdc.nal.usda.gov/portal-data/external/171447)
+- `whole_pineapple`: USDA FoodData Central 169124, Pineapple, raw, all varieties: portion '1 fruit' = 905 g (https://fdc.nal.usda.gov/food-details/169124/nutrients; record https://fdc.nal.usda.gov/portal-data/external/169124)
+- `lasagna_sheet`: USDA FoodData Central 2495617 (branded), LASAGNA SEMOLINA, Flora's Distributors: serving 54 g = '3 pieces' (https://fdc.nal.usda.gov/food-details/2495617/nutrients; record https://fdc.nal.usda.gov/portal-data/external/2495617)
 
 ### Left open in this round
 
@@ -222,8 +222,15 @@ Sources beyond the line's own text and the entry's own units:
 | stated mass left (several items, no each/total, or an alternative) | 125 |
 | container counted as one piece, not re-weighed (a canned-only entry already weighs one can; the rest need a cited can weight) | 92 |
 | large cut with no stated mass | 65 |
-| bare 'red pepper' by teaspoon/tablespoon, kept cayenne | 33 |
+| bare 'red pepper' by teaspoon/tablespoon, kept cayenne | 34 |
 | cooked lasagna noodle | 6 |
+
+Open question, mixed gram basis: a `whole_bird` line with no stated mass takes 920 g of edible meat and skin
+(bones excluded, the entry's own basis), but a `stated_weight` line keeps the stated market weight, which for a
+bird, a bone-in roast or shoulder, a lobster or a whole pineapple ("1 (4 lb) pineapple" = 1,814 g against the
+905 g edible fruit) includes bone, shell or rind. Those recipes' per-serving nutrition and cost-per-gram basis
+are therefore high. The owner's rule is stated weight first; an edible-yield factor needs a cited yield per food
+and is not applied in this round.
 
 ### Guard: piece weight under 30% of the entry's own head or loaf weight
 
@@ -252,6 +259,6 @@ Sources beyond the line's own text and the entry's own units:
 
 | File | v2.1 sha256 | v2.2 sha256 |
 | --- | --- | --- |
-| `ingredients.jsonl` | `499798b92e76994b` | `acf189a1b1b19ea9` |
-| `recipes.jsonl` | `df6b428714c74db6` | `7f875beb6c44265a` |
-| `release_manifest.json` | `7e81e661870b0fb1` | `f2a00acf79167eb3` |
+| `ingredients.jsonl` | `499798b92e76994b` | `4c71b1a9f13e738d` |
+| `recipes.jsonl` | `df6b428714c74db6` | `136c3697d64455db` |
+| `release_manifest.json` | `7e81e661870b0fb1` | `1ec72391c52ac626` |

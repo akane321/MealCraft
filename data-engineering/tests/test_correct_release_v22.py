@@ -69,6 +69,7 @@ class CorrectionTests(unittest.TestCase):
             ("1 tsp. crushed red pepper", "tsp"),
             ("1/2 tsp. red pepper", "tsp"),
             ("1 dried red pepper", "piece"),
+            ("1/4 tespoon of red pepper.", "piece"),
         ):
             self.assertIsNone(correct_line(line(text, "ING_CAYENNE", unit, 1, 1.8), FORMS), text)
 
