@@ -8,7 +8,7 @@ from collections import defaultdict
 from math import gcd, isfinite, lcm
 from time import perf_counter
 
-from app.planning.algorithm_reference import domains, evaluate
+from app.planning.algorithm_reference import domains, evaluate, require_min_dish_kinds
 from app.planning.diversity_greedy import DiversityAwareGreedyPlanner
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_beam import MealState, assignments_of
@@ -23,10 +23,11 @@ def integer(value, scale=1000):
 
 
 class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
-    def solve_exact(self, problem, *, time_limit=15, optimize=True):
+    def solve_exact(self, problem, *, time_limit=15, optimize=True, min_dish_kinds=0):
         from ortools.sat.python import cp_model
 
         require_finite_problem(problem)
+        require_min_dish_kinds(min_dish_kinds)
         if not isfinite(time_limit) or time_limit <= 0:
             raise ValueError("Time limit must be finite and positive")
         if set(self.objective.keys) != {r.recipe_id for r in problem.recipes}:
@@ -176,6 +177,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
                 model.Add(rep + conflict <= 1)
             model.Add(rep >= used[rid] - sum(conflicts))
             representative[rid] = rep
+        model.Add(sum(representative.values()) >= min_dish_kinds)
         repeat_terms = []
         for rid, count in recipe_counts.items():
             repeated = model.NewIntVar(0, max_dishes * max_dishes, f"repeat_{rid}")
@@ -317,6 +319,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
         output = {
             "status": "unknown",
             "objective_priority": self.objective.priority,
+            "min_dish_kinds": min_dish_kinds,
             "scope": "native generated meal options",
             "meal_variables": len(selections),
             "build_ms": (perf_counter() - started) * 1000,
@@ -346,8 +349,8 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
             for key, var in selections.items()
             if key[0] == s.slot_id and solver.Value(var)
         )
-        score, assignments, shopping, report = evaluate(self, problem, choices)
-        if report.status != "passed":
+        score, assignments, shopping, report = evaluate(self, problem, choices, min_dish_kinds=min_dish_kinds)
+        if report.status != "passed" or score is None:
             return {**output, "status": "validation_rejected"}
         modeled = [solver.Value(t) for t in terms]
         modeled[3] /= soft_scale

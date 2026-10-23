@@ -10,16 +10,17 @@ from itertools import combinations_with_replacement, product
 from math import comb, prod
 from time import perf_counter
 
-from app.planning.algorithm_reference import domains, evaluate
+from app.planning.algorithm_reference import domains, evaluate, require_min_dish_kinds
 from app.planning.diversity_greedy import DiversityAwareGreedyPlanner
 from app.planning.input_audit import require_finite_problem
 
 
 class SharedScoreCpSat(DiversityAwareGreedyPlanner):
-    def solve_exact(self, problem, *, max_states=10000, time_limit=10):
+    def solve_exact(self, problem, *, max_states=10000, time_limit=10, min_dish_kinds=0):
         from ortools.sat.python import cp_model
 
         require_finite_problem(problem)
+        require_min_dish_kinds(min_dish_kinds)
         if max_states < 1 or time_limit <= 0:
             raise ValueError("Limits must be positive")
         if {r.recipe_id for r in problem.recipes} != set(self.objective.keys):
@@ -47,6 +48,7 @@ class SharedScoreCpSat(DiversityAwareGreedyPlanner):
         output = {
             "status": "limit_exceeded",
             "objective_priority": self.objective.priority,
+            "min_dish_kinds": min_dish_kinds,
             "count_states": total,
             "score": None,
             "scope": "canonical count states" if compressible else "ordered generated meal options",
@@ -64,7 +66,7 @@ class SharedScoreCpSat(DiversityAwareGreedyPlanner):
         )
         for selected in selections:
             choices = tuple((s.slot_id, option) for s, option in zip(slots, selected, strict=True))
-            score, _, _, report = evaluate(self, problem, choices)
+            score, _, _, report = evaluate(self, problem, choices, min_dish_kinds=min_dish_kinds)
             unknown += report.status == "indeterminate"
             if score is not None:
                 rows.append(score)
@@ -101,7 +103,9 @@ class SharedScoreCpSat(DiversityAwareGreedyPlanner):
                 output["status"] = solver.StatusName(status).lower()
                 return output
             model.Add(term == solver.Value(term))
-        score, assignments, shopping, report = evaluate(self, problem, choices_by_row[solver.Value(chosen)])
+        score, assignments, shopping, report = evaluate(
+            self, problem, choices_by_row[solver.Value(chosen)], min_dish_kinds=min_dish_kinds
+        )
         if report.status != "passed" or score != rows[solver.Value(chosen)]:
             raise RuntimeError("CP-SAT result failed independent score verification")
         output.update(

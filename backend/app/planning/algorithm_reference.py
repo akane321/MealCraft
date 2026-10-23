@@ -20,19 +20,29 @@ def domains(planner, problem):
     return slots, result
 
 
-def evaluate(planner, problem, choices):
+def require_min_dish_kinds(value):
+    if type(value) is not int or value < 0:
+        raise ValueError("min_dish_kinds must be a nonnegative integer")
+
+
+def evaluate(planner, problem, choices, *, min_dish_kinds=0):
     assignments = assignments_of(MealState(choices))
     shopping = planner.candidates._build_shopping(problem, assignments)
     report = planner.candidates.validator.validate(problem, assignments, shopping)
     score = planner.objective.score_validated(problem, assignments, report) if report.status == "passed" else None
+    if score is not None:
+        kind_index = 2 if planner.objective.priority == "price" else 1
+        if -score[kind_index] < min_dish_kinds:
+            score = None
     return score, assignments, shopping, report
 
 
 class EnumeratedReference(DiversityAwareGreedyPlanner):
     """Exact only over generated options and the fixed shopping policy."""
 
-    def solve_reference(self, problem, *, max_combinations=10000):
+    def solve_reference(self, problem, *, max_combinations=10000, min_dish_kinds=0):
         require_finite_problem(problem)
+        require_min_dish_kinds(min_dish_kinds)
         if max_combinations < 1:
             raise ValueError("Combination limit must be positive")
         if {r.recipe_id for r in problem.recipes} != set(self.objective.keys):
@@ -46,12 +56,13 @@ class EnumeratedReference(DiversityAwareGreedyPlanner):
             "unknown": 0,
             "score": None,
             "objective_priority": self.objective.priority,
+            "min_dish_kinds": min_dish_kinds,
         }
         if total > max_combinations:
             return result
         for selection in product(*options):
             choices = tuple((s.slot_id, dishes) for s, dishes in zip(slots, selection, strict=True))
-            score, _, _, report = evaluate(self, problem, choices)
+            score, _, _, report = evaluate(self, problem, choices, min_dish_kinds=min_dish_kinds)
             result["checked"] += 1
             result["unknown"] += report.status == "indeterminate"
             if score is not None and (result["score"] is None or score < result["score"]):
