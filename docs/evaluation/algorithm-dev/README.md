@@ -176,9 +176,20 @@ That minimum covers generated meal options and the current one-product-per-line
 shopping policy. It is not a catalog-wide or mixed-package optimum, and it is
 not wired into product replies. Optional positions may be omitted to lower
 price; required meals and roles remain required. Use fixed required structure
-when comparing prices for the same number of meals and dishes. A requested
-minimum number of distinct kinds needs a separate constraint; choosing price
-priority alone does not impose one.
+when comparing prices for the same number of meals and dishes.
+
+All three exact references accept `min_dish_kinds=N` (default zero). For example,
+price priority with `min_dish_kinds=4` finds the cheapest generated plan containing
+at least four counted kinds. This is a hard feasibility condition, not a price
+penalty: an impossible count or insufficient budget produces no certified price.
+The count uses the same ordered representative rule as the existing objective;
+near/unknown pairs cannot contribute separate representatives, repeated recipe
+IDs count once, and exempt roles do not contribute. It describes whole-table
+variety, not member-level coverage or a new product `dish_kind` definition.
+Native CP-SAT constrains the representative variables directly; the exhaustive
+and table references filter with the independently calculated score. Returned
+candidates are checked again against the requested count. Outputs record the
+minimum requested. Product request parsing and replies remain separate work.
 
 ## Controlled speed comparison
 
