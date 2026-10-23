@@ -5,7 +5,8 @@ changes its tags with it. Three kinds only, in this order, at most two a dish, n
 
 - `preference`: a main within the benchmark the recommendation score uses for each health preference the week
   was planned with ("Fits low-sodium").
-- `cheap_main`: with at least 4 different mains in the week, a main in the cheapest quarter per serving.
+- `cheap_main`: with at least 4 different mains still to be cooked (a skipped dish is not counted), a main in the
+  cheapest quarter per serving. The cost is what the week buys for it, after the pantry covered what it could.
 - `quick`: ready in 20 minutes or less.
 
 A main is a `main`, `main-2`, ... role outside breakfast. The tags say what is true of the dish, never why the
@@ -38,8 +39,9 @@ def is_main(entry) -> bool:
 
 
 def cost_per_serving(entry, household_size: int) -> float | None:
-    """What one serving of the dish cost: its consumed cost over the servings it was cooked for, which are the
-    household size at its portion share when no member servings were saved. None when the cost is not known."""
+    """What one serving of the dish costs to buy, after the pantry deduction: its consumed cost over the servings
+    it was cooked for, which are the household size at its portion share when no member servings were saved.
+    None when the cost is not known."""
     if entry.servings is not None:
         servings = Decimal(str(entry.servings))
     else:
@@ -60,7 +62,7 @@ def dish_reasons(
     # is one of the cheapest. Ties count against it, so a week of equal prices tags nobody.
     main_cost: dict[int, float] = {}
     for entry in entries:
-        cost = cost_per_serving(entry, household_size) if is_main(entry) else None
+        cost = cost_per_serving(entry, household_size) if is_main(entry) and entry.status != "skipped" else None
         if cost is not None:
             main_cost[entry.recipe_id] = min(cost, main_cost.get(entry.recipe_id, cost))
     cheap_count = len(main_cost) // 4 if len(main_cost) >= CHEAP_MIN_MAINS else 0

@@ -26,6 +26,7 @@ def entry(
     sodium=300.0,
     sugar=2.0,
     kcal=400.0,
+    status="planned",
 ):
     recipe = SimpleNamespace(
         total_time_minutes=minutes,
@@ -39,6 +40,7 @@ def entry(
         consumed_cost_sgd=cost,
         servings=servings,
         portion_share=share,
+        status=status,
         recipe=recipe,
     )
 
@@ -64,6 +66,9 @@ def test_cheapest_main_needs_four_different_mains():
     assert codes([*three, entry(4, recipe_id=3, cost=12)]) == {}
     four = [*three, entry(4, cost=14)]
     assert codes(four) == {1: ["cheap_main"]}
+    # A skipped (cancelled) main is not cooked, so it neither counts toward the four nor gets the tag.
+    assert codes([*three, entry(4, cost=14, status="skipped")]) == {}
+    assert codes([entry(1, cost=2, status="skipped"), *four[1:], entry(5, cost=16)]) == {2: ["cheap_main"]}
 
 
 def test_cheapest_main_is_the_cheapest_quarter_per_serving_and_ties_count_against_it():

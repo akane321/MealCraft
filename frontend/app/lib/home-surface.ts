@@ -351,6 +351,6 @@ export function dishFacts(dish: Pick<NutritionDashboardDay, "recipe" | "nutritio
     { label: "Cooking time", value: `${dish.recipe.total_time_minutes} min` },
     { label: "Energy", value: `${Math.round(dish.nutrition_per_person.calories_kcal)} kcal per person` },
     { label: "Sodium", value: `${Math.round(dish.nutrition_per_person.sodium_mg)} mg per person` },
-    { label: "Cost", value: dish.cost_per_serving_sgd == null ? "Not known" : `${formatSgd(dish.cost_per_serving_sgd)} per serving` },
+    { label: "Cost to buy", value: dish.cost_per_serving_sgd == null ? "Not known" : `${formatSgd(dish.cost_per_serving_sgd)} per serving` },
   ];
 }

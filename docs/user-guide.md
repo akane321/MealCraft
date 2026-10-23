@@ -224,10 +224,11 @@ Under a dish there may be up to two short tags, each a fact that is true of it:
 **Fits low-sodium** (or low-sugar, lower-calorie) on a main within that
 preference's benchmark, **One of the week's cheapest mains** when the week has
 at least four different mains and this one is among the cheapest quarter per
-serving (breakfast is not counted), and **Ready in 15 min** for a dish ready in
+serving (breakfast and skipped dishes are not counted), and **Ready in 15 min** for a dish ready in
 20 minutes or less. A dish with nothing to say has no tag. Click a tag to see
-the dish's facts: cooking time, kcal and sodium per person, and cost per
-serving. They describe the dish as planned; they are not the reasons the
+the dish's facts: cooking time, kcal and sodium per person, and cost to buy
+per serving. That cost is what the week buys for the dish after your pantry
+covered what it could, so it can be lower than the dish's full price. They describe the dish as planned; they are not the reasons the
 planner chose it.
 
 ### 4. Nutrition and the shopping list

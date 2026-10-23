@@ -106,7 +106,6 @@ const ACTIONS = [
                   type="button"
                   class="reason"
                   :aria-expanded="factsOpen === dish.entry_id"
-                  :aria-controls="`facts-${dish.entry_id}`"
                   @click="toggleFacts(dish.entry_id)"
                 >
                   {{ reason.label }}

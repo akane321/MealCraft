@@ -293,12 +293,12 @@ describe("dishFacts", () => {
       { label: "Cooking time", value: "15 min" },
       { label: "Energy", value: "413 kcal per person" },
       { label: "Sodium", value: "639 mg per person" },
-      { label: "Cost", value: "S$2.10 per serving" },
+      { label: "Cost to buy", value: "S$2.10 per serving" },
     ]);
   });
 
   it("says the cost is not known when the week saved none", () => {
-    expect(dishFacts(dish(null)).at(-1)).toEqual({ label: "Cost", value: "Not known" });
-    expect(dishFacts(dish(undefined)).at(-1)).toEqual({ label: "Cost", value: "Not known" });
+    expect(dishFacts(dish(null)).at(-1)).toEqual({ label: "Cost to buy", value: "Not known" });
+    expect(dishFacts(dish(undefined)).at(-1)).toEqual({ label: "Cost to buy", value: "Not known" });
   });
 });
