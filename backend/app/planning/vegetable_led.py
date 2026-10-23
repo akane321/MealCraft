@@ -401,8 +401,9 @@ def meat_share(lines: Iterable[tuple], *, fresh_only: bool = False) -> float | N
 
 
 def vegetable_role(role_id: str) -> bool:
-    """The vegetable role and its copies ("vegetable-2"), as the profile editor and the shape change name them."""
-    return re.sub(r"-\d+$", "", role_id) == VEGETABLE_ROLE
+    """The vegetable role and its copies ("vegetable-2"), read as every other gate reads a role id: the part before
+    the first hyphen (`meal_composition.role_base`), so "vegetable-side" is a vegetable role everywhere."""
+    return role_id.split("-")[0] == VEGETABLE_ROLE
 
 
 def weighed(lines: Iterable[tuple]) -> list[tuple]:
