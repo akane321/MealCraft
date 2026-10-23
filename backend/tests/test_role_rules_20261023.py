@@ -121,6 +121,9 @@ def test_the_condiment_criterion_is_the_title_not_every_protein_side():
     lines = [("egg", 300), ("salt", 3)]
     assert role("Rolled Omelette", lines, course="side") == "protein_main"
     assert role("Omelette With Cheese", lines, course="side") == "protein_main"
+    # A dish made with feta, ricotta or paneer is not that cheese.
+    assert role("Spinach And Feta Frittata", lines, course="side") == "protein_main"
+    assert role("Frittata With Ricotta", lines, course="side") == "protein_main"
     for title in ("Mock Cheese", "Tofu Feta", "Marinated Egg For Ramen", "Scrambled Egg Garnish"):
         assert role(title, lines, course="side") != "protein_main", title
 

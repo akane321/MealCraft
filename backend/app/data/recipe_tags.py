@@ -228,9 +228,11 @@ WHOLE_SOYBEANS = frozenset({"edamame", "soybean", "fermented_soybeans"})
 BATTER_SIDE_TITLE = re.compile(r"\b(?:batters?|puddings?|pancakes?|crepes?)\b", re.I)
 # A condiment or topping-type side (owner 2026-10-23): its title names a cheese or cheese substitute, a topping or
 # garnish, a ramen egg, or another dish it is made for. Its protein does not make it a protein main. A dish served
-# with cheese ("Omelette With Cheese") is not a cheese.
+# with cheese ("Omelette With Cheese", "Spinach And Feta Frittata") is not a cheese. The title criterion is an
+# implementer definition pending owner confirmation (ADR-0088).
 CONDIMENT_SIDE_TITLE = re.compile(
-    r"\b(?:feta|ricotta|paneer|(?:mock|fake|vegan|imitation) cheese|toppings?|garnish(?:es)?|ajitsuke|ajitama)\b"
+    r"(?<!\bwith )(?<!\band )\b(?:feta|ricotta|paneer)\b"
+    r"|\b(?:(?:mock|fake|vegan|imitation) cheese|toppings?|garnish(?:es)?|ajitsuke|ajitama)\b"
     r"|\bfor (?:ramen|noodles?|soups?|salads?|sandwich(?:es)?|burgers?|pizzas?|tacos?)\b",
     re.I,
 )
@@ -772,9 +774,10 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
 def review_roles(dish: Dish, tags: Tags) -> list[str]:
     """The roles a human reviewer may choose (owner 2026-10-23): the rule's role, or the model's options plus
     `staple` and `one_bowl` when a zero staple share stripped them, since the rules' vocabulary may not know the
-    dish's starch. A bean-led side is thereby always offered `staple` (with a staple share above 0 the model's
-    options already hold it), never assigned it. The model prompt keeps `tags.allowed_roles`; an incomplete
-    recipe offers none."""
+    dish's starch. Only main and side courses widen: a baked good keeps its sugar ceiling and a soup its fixed
+    roles. A bean-led side whose role the rule leaves open is thereby offered `staple` (with a staple share above 0
+    the model's options already hold it), never assigned it; one the rule assigns (e.g. `vegetable`) shows only
+    that role. The model prompt keeps `tags.allowed_roles`; an incomplete recipe offers none."""
     if "meal_role" not in tags.open:
         return [tags.values["meal_role"]] if tags.values["meal_role"] is not None else []
     roles = set(tags.allowed_roles)
