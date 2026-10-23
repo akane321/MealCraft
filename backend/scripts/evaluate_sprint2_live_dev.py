@@ -9,31 +9,11 @@ from app.agent import model_client
 from app.agent.parser import OpenAIConstraintParser
 from app.core.config import get_settings
 from app.core.paths import repository_root
+from app.evaluation.live_budget import EvaluationBudget
 from app.orchestration.model_pricing import CHAT_RATES
 from app.orchestration.scope_classifier import OpenAIScopeClassifier
 from app.orchestration.tool_scheduler import ModelToolScheduler
 from app.schemas.agent import AgentConstraintState
-
-MAX_BUDGET_USD = 5.0
-
-
-class EvaluationBudget:
-    """Track measured spend and prevent starting another paid request at the budget ceiling."""
-
-    def __init__(self, limit_usd: float = MAX_BUDGET_USD) -> None:
-        if limit_usd <= 0:
-            raise ValueError("budget limit must be positive")
-        self.limit_usd = limit_usd
-        self.spent_usd = 0.0
-
-    @property
-    def can_start_request(self) -> bool:
-        return self.spent_usd < self.limit_usd
-
-    def record(self, cost: float | None) -> None:
-        if cost is None:
-            raise ValueError("cannot continue a paid evaluation with unknown model pricing")
-        self.spent_usd += cost
 
 
 def cost_usd(tally, model: str) -> float | None:
