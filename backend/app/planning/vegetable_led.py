@@ -13,6 +13,9 @@ ingredient's release food group:
 - everything else is food that is not a vegetable: grains, pasta, bread, potatoes, beans and pulses,
   meat, fish, eggs, cheese, fruit, nuts.
 
+Owner amendment 2026-10-23: starchy tubers also count as vegetables only when other vegetables
+already reach 40% of counted food. Total vegetables must still reach 50%; the flesh caps do not change.
+
 Dry rice, pasta, noodles and grains count at 2.5 times their weight, about what they weigh cooked: by
 raw weight, Spanish rice and Mexican rice were more tomato than rice. A curated ingredient takes the
 group of the release ingredient it is a kind of (`baby_spinach` is `spinach`); one with no group at all is
@@ -56,6 +59,7 @@ from app.data.ingredient_hierarchy import runtime
 
 VEGETABLE_ROLE = "vegetable"
 VEGETABLE_LED_SHARE = 0.5
+NON_TUBER_VEGETABLE_SHARE = 0.4
 MEAT_SEASONING_SHARE = 0.2
 FLESH_SHARE = 0.05
 COOKED_YIELD = 2.5
@@ -118,6 +122,7 @@ NOT_VEGETABLES = frozenset(
         "french_fried_onions",
     }
 )
+STARCHY_TUBERS = NOT_VEGETABLES - {"french_fried_onions"}
 UNCOUNTED = frozenset(
     {
         # sauces, broths, soups and their mixes
@@ -330,12 +335,16 @@ def counted_weights(lines: Iterable[tuple]) -> list[tuple[str, float]]:
 def vegetable_share(lines: Iterable[tuple]) -> float | None:
     """Vegetables' share of counted grams; None when nothing counts."""
     groups = food_groups()
-    vegetables = total = 0.0
+    vegetables = tubers = total = 0.0
     for name, weight in counted_weights(lines):
         release, group, _ = groups.get(name, (name, None, None))
         total += weight
+        if release in STARCHY_TUBERS:
+            tubers += weight
         if release in VEGETABLES or (group in VEGETABLE_GROUPS and release not in NOT_VEGETABLES):
             vegetables += weight
+    if total and vegetables / total >= NON_TUBER_VEGETABLE_SHARE:
+        vegetables += tubers
     return vegetables / total if total else None
 
 
