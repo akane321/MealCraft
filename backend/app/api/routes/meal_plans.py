@@ -50,7 +50,7 @@ def build_meal_plan_service(
 ) -> WeeklyMealPlanService:
     """`live_feedback` plans without the household's "Never again" dishes (ADR-0087): product requests set it,
     evaluations leave it off so their reports never depend on a household's clicks."""
-    recipe_repository = RecipeRepository(database)
+    recipe_repository = RecipeRepository(database, household_id=household_id)
     product_service = create_product_search_service(ProductSnapshotRepository(database))
     recommendation_service = RecipeRecommendationService(
         recipe_repository,
@@ -81,7 +81,7 @@ MealPlanServiceDependency = Annotated[WeeklyMealPlanService, Depends(get_meal_pl
 def build_replanning_service(
     database: Session, household_id: int, actor_user_id: int | None = None, *, live_feedback: bool = False
 ) -> MealPlanReplanningService:
-    recipe_repository = RecipeRepository(database)
+    recipe_repository = RecipeRepository(database, household_id=household_id)
     product_service = create_product_search_service(ProductSnapshotRepository(database))
     recommendation_service = RecipeRecommendationService(
         recipe_repository,

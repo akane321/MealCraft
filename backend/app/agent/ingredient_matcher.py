@@ -78,7 +78,12 @@ class IngredientMatcher:
             ingredient: max(spelling_score(term, name), spelling_score(term, ingredient))
             for ingredient, name in self.names.items()
         }
-        return sorted(scored, key=lambda ingredient: (-scored[ingredient], ingredient))
+        # A nearest spelling is not automatically a useful match ("kangkong" -> "mango").
+        # Exact reviewed aliases are added separately in suggest_all and remain available at any score.
+        return sorted(
+            (ingredient for ingredient, score in scored.items() if score >= 0.65),
+            key=lambda ingredient: (-scored[ingredient], ingredient),
+        )
 
     def _by_embedding(self, terms: list[str]) -> dict[str, list[str]]:
         """Each term ranked by meaning, all from one embedding request; empty when that cannot run."""
