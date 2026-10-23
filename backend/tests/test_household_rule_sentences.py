@@ -359,3 +359,115 @@ def test_and_parts_never_read_wider_than_said(text, expected, issues):
     result = read(text)
     assert result.issues == issues
     assert [(r.member_name, r.present, r.weekdays, r.meal_types) for r in result.rules] == expected
+
+
+# Review round 3 of #328.
+@pytest.mark.parametrize(
+    "text",
+    [
+        # Someone else's home: the 's is a possessive, never "is home" (and never makes the owner home).
+        "Ben eats at Mei's home on Fridays",
+        "Ben is at his sister's home on Fridays",
+        "Ben has dinner at his sister's home",
+        "Ben is at his sister's home for dinner on Fridays",
+        "Ben eats at the neighbour's home",
+        "Mei eats at Grandma's home",
+        # Working from home says nothing about meals, in Chinese as in English; nor does "comes home".
+        "Ben在家办公",
+        "Ben周三在家办公",
+        "孩子周五在家上课",
+        "Ben周五晚上在家加班",
+        "Ben comes home on Fridays",
+    ],
+)
+def test_a_home_that_is_not_theirs_or_says_nothing_is_reported(text):
+    result = read(text)
+    assert result.rules == [] and result.issues == [NO_POLARITY]
+
+
+ROUND_3 = [
+    # The contraction "Ben's home" is still home.
+    ("Ben's home on Fridays", [("Ben", True, ["friday"], [])], []),
+    # Pieces that pair their own days with meals or people never cross into a wider rule.
+    (
+        "Ben joins us for lunch on weekends and dinner on weekdays",
+        [("Ben", True, WEEKEND, ["lunch"]), ("Ben", True, WEEKDAYS, ["dinner"])],
+        [],
+    ),
+    (
+        "Mei skips Monday lunch and Tuesday dinner",
+        [("Mei", False, ["monday"], ["lunch"]), ("Mei", False, ["tuesday"], ["dinner"])],
+        [],
+    ),
+    (
+        "Mei is home for lunch on Monday and dinner on Tuesday",
+        [("Mei", True, ["monday"], ["lunch"]), ("Mei", True, ["tuesday"], ["dinner"])],
+        [],
+    ),
+    (
+        "Ben is away on Mondays and Mei on Tuesdays",
+        [("Ben", False, ["monday"], []), ("Mei", False, ["tuesday"], [])],
+        [],
+    ),
+    ("I eat out on Mondays and Ben on Tuesdays", [("Ann", False, ["monday"], []), ("Ben", False, ["tuesday"], [])], []),
+    (
+        "Ben eats out on Mondays and Mei on Tuesdays and Ann on Wednesdays",
+        [("Ben", False, ["monday"], []), ("Mei", False, ["tuesday"], []), ("Ann", False, ["wednesday"], [])],
+        [],
+    ),
+    (
+        "Ben is away on Fridays and so is Mei on Saturdays",
+        [("Ben", False, ["friday"], []), ("Mei", False, ["saturday"], [])],
+        [],
+    ),
+    ("Mei visits us on weekends and Ben on weekdays", [("Mei", True, WEEKEND, []), ("Ben", True, WEEKDAYS, [])], []),
+    # A part that cannot be paired is reported, not guessed.
+    (
+        "Mei is home for lunch and dinner on Monday and breakfast on Tuesday",
+        [("Mei", True, ["monday"], ["dinner"]), ("Mei", True, ["tuesday"], ["breakfast"])],
+        [NO_DAYS],
+    ),
+    # A bare "<name> home on ..." is home.
+    ("Mei home on weekdays and away on weekends", [("Mei", True, WEEKDAYS, []), ("Mei", False, WEEKEND, [])], []),
+    (
+        "Ben home on Fridays and away on Saturdays",
+        [("Ben", True, ["friday"], []), ("Ben", False, ["saturday"], [])],
+        [],
+    ),
+    # "out for dinner" is away.
+    (
+        "Ben is at home for lunch and out for dinner on Fridays",
+        [("Ben", True, ["friday"], ["lunch"]), ("Ben", False, ["friday"], ["dinner"])],
+        [],
+    ),
+    # A later part with its own person and no days could mean every day: reported, never given the first part's.
+    ("Ben is home on Fridays and Mei is away", [("Ben", True, ["friday"], [])], [NO_DAYS]),
+    ("Ben is away on weekdays and Mei is home", [("Ben", False, WEEKDAYS, [])], [NO_DAYS]),
+]
+
+
+@pytest.mark.parametrize(("text", "expected", "issues"), ROUND_3)
+def test_paired_and_parts_read_as_said(text, expected, issues):
+    result = read(text)
+    assert result.issues == issues
+    assert [(r.member_name, r.present, r.weekdays, r.meal_types) for r in result.rules] == expected
+
+
+def test_paired_cooking_times_never_cross():
+    result = read("weekend lunch and weekday dinner within 30 minutes", kind="cooking_time")
+    assert result.issues == []
+    assert [(r.weekdays, r.meal_types, r.max_minutes) for r in result.rules] == [
+        (WEEKEND, ["lunch"], 30),
+        (WEEKDAYS, ["dinner"], 30),
+    ]
+
+
+def test_an_unplaced_part_still_passes_its_meal_on():
+    result = read(
+        "Weekday lunch within 20 minutes and dinner within 45 minutes and weekends 90 minutes", kind="cooking_time"
+    )
+    assert result.issues == [NO_DAYS]
+    assert [(r.weekdays, r.meal_types, r.max_minutes) for r in result.rules] == [
+        (WEEKDAYS, ["lunch"], 20),
+        (WEEKEND, ["dinner"], 90),
+    ]
