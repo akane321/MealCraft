@@ -8,6 +8,7 @@ household saves the profile with it.
 
 import re
 from dataclasses import dataclass, field
+from itertools import pairwise
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -167,6 +168,29 @@ def _clauses(text: str) -> list[str]:
     return [part.strip() for part in parts if part and part.strip()]
 
 
+def _polarity(clause: str) -> bool | None:
+    lowered = clause.lower()
+    return False if re.search(ABSENT, lowered) else True if re.search(PRESENT, lowered) else None
+
+
+def _split_conflicts(clause: str, value) -> list[str]:
+    """One clause split at "and" / 和 / 而 / 及 only where its pieces say different things ("weekday dinners within
+    30 minutes and weekends 90 minutes", "at school on weekdays and at home on weekends"), so neither part's value
+    spreads to the other's days. Otherwise the clause stays whole ("Ben eats out on Monday and Thursday nights").
+    A piece without a value joins the next valued piece, or the last when none follows; one between two valued
+    pieces could belong to either, so it stays alone and is reported, never guessed."""
+    parts = re.split(r"(\band\b|以及|和|而|及)", clause, flags=re.IGNORECASE)
+    values = [value(piece) for piece in parts[::2]]
+    valued = [i for i, v in enumerate(values) if v is not None]
+    if len({values[i] for i in valued}) < 2:
+        return [clause]
+    cuts = [0]
+    for previous, current in pairwise(valued):
+        cuts += [previous + 1, current] if current > previous + 1 else [current]
+    bounds = [*cuts, len(values)]
+    return ["".join(parts[2 * a : 2 * b - 1]).strip() for a, b in pairwise(bounds)]
+
+
 def _members_named(clause: str, members: list[RuleParseMember], speaker: str | None, reading: _Reading) -> list[str]:
     text = clause.lower()
     named = [
@@ -213,7 +237,8 @@ def read_with_rules(request: RuleParseRequest) -> _Reading:
         return reading
     people: list[str] = []
     meals: list[str] = []
-    for clause in _clauses(text):
+    value = _minutes if request.kind == "cooking_time" else _polarity
+    for clause in (part for whole in _clauses(text) for part in _split_conflicts(whole, value)):
         days = _days(clause)
         clause_meals = _meals(clause) or meals
         if request.kind == "cooking_time":
@@ -236,8 +261,7 @@ def read_with_rules(request: RuleParseRequest) -> _Reading:
             )
             meals = clause_meals
             continue
-        lowered = clause.lower()
-        present = False if re.search(ABSENT, lowered) else True if re.search(PRESENT, lowered) else None
+        present = _polarity(clause)
         named = _members_named(clause, request.members, request.speaker, reading) or people
         if present is None:
             if named or days is not None or _meals(clause):

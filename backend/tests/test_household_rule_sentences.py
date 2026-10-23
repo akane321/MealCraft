@@ -163,3 +163,76 @@ def test_a_failing_model_falls_back_to_the_rules():
     result = read("孩子工作日午饭在学校吃", reader=OpenAIRuleReader(FakeModel(error=TimeoutError("slow"))))
     assert result.provider == "rules" and result.fell_back is True
     assert [(r.member_name, r.present) for r in result.rules] == [("Mei", False)]
+
+
+# "And" splits a clause only where its parts say different things; otherwise one part's days would take the
+# other's value ("weekday dinners within 30 minutes and weekends 90 minutes" read as every day's dinner in 30).
+AND_TIMES = [
+    (
+        "weekday dinners within 30 minutes and weekends 90 minutes",
+        [(WEEKDAYS, ["dinner"], 30), (WEEKEND, ["dinner"], 90)],
+    ),
+    (
+        "weekday dinners within 30 minutes, weekends 90 minutes",
+        [(WEEKDAYS, ["dinner"], 30), (WEEKEND, ["dinner"], 90)],
+    ),
+    (
+        "weekday dinners within 30 minutes and weekends no limit",
+        [(WEEKDAYS, ["dinner"], 30), (WEEKEND, ["dinner"], 240)],
+    ),
+    ("工作日晚饭30分钟内和周末90分钟", [(WEEKDAYS, ["dinner"], 30), (WEEKEND, ["dinner"], 90)]),
+    ("工作日晚饭30分钟以内而周末无所谓", [(WEEKDAYS, ["dinner"], 30), (WEEKEND, ["dinner"], 240)]),
+    # Nothing conflicts: the clause stays whole.
+    ("weekday lunch and dinner within 30 minutes", [(WEEKDAYS, ["lunch", "dinner"], 30)]),
+    (
+        "weekday lunch and dinner within 30 minutes and weekends 90 minutes",
+        [(WEEKDAYS, ["lunch", "dinner"], 30), (WEEKEND, ["lunch", "dinner"], 90)],
+    ),
+]
+
+
+@pytest.mark.parametrize(("text", "expected"), AND_TIMES)
+def test_and_splits_cooking_times_only_when_they_differ(text, expected):
+    result = read(text, kind="cooking_time")
+    assert result.issues == []
+    assert [(r.weekdays, r.meal_types, r.max_minutes) for r in result.rules] == expected
+
+
+AND_PRESENCE = [
+    (
+        "Mei eats at school on weekdays and at home on weekends",
+        [("Mei", False, WEEKDAYS, []), ("Mei", True, WEEKEND, [])],
+    ),
+    ("孩子工作日在学校吃和周末在家吃", [("Mei", False, WEEKDAYS, []), ("Mei", True, WEEKEND, [])]),
+    ("孩子工作日午饭在学校吃而周末在家吃", [("Mei", False, WEEKDAYS, ["lunch"]), ("Mei", True, WEEKEND, ["lunch"])]),
+    # Nothing conflicts: the clause stays whole, as before.
+    ("Ben eats out on Monday and Thursday nights", [("Ben", False, ["monday", "thursday"], ["dinner"])]),
+    ("Ben and Mei are away on Fridays", [("Ben", False, ["friday"], []), ("Mei", False, ["friday"], [])]),
+    ("孩子和Tom工作日午饭在学校吃", [("Mei", False, WEEKDAYS, ["lunch"])]),
+    ("Ben works late and Mei eats at school on weekdays", [("Ben", False, WEEKDAYS, []), ("Mei", False, WEEKDAYS, [])]),
+]
+
+
+@pytest.mark.parametrize(("text", "expected"), AND_PRESENCE)
+def test_and_splits_presence_only_when_away_meets_home(text, expected):
+    result = read(text)
+    assert result.issues == []
+    assert [(r.member_name, r.present, r.weekdays, r.meal_types) for r in result.rules] == expected
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        # A comma list of days: the first day is read, the rest is reported, never a wider rule.
+        ("Mei works late on Mondays, Wednesdays and Fridays", [("Mei", False, ["monday"])]),
+        # A part between an away and a home part could be either: reported, never guessed.
+        (
+            "Mei eats at school on Mondays and Tuesdays and at home on weekends",
+            [("Mei", False, ["monday"]), ("Mei", True, WEEKEND)],
+        ),
+    ],
+)
+def test_a_part_it_cannot_place_is_reported_not_widened(text, expected):
+    result = read(text)
+    assert result.issues == [NO_POLARITY]
+    assert [(r.member_name, r.present, r.weekdays) for r in result.rules] == expected
