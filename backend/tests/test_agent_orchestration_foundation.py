@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 
 import pytest
 
+from app.agent.parser import RuleBasedConstraintParser
 from app.orchestration.capabilities import allowed_tools_for, authorize_tool_call
 from app.orchestration.contracts import (
     ActionReceipt,
@@ -10,6 +11,7 @@ from app.orchestration.contracts import (
     InteractionAnswer,
     ResponseClaim,
     ScopeClass,
+    ScopeDecision,
     ToolEffect,
     ToolRunStatus,
 )
@@ -19,7 +21,9 @@ from app.orchestration.interactions import (
     household_size_interaction,
     validate_interaction_answer,
 )
+from app.orchestration.runtime import BoundedAgentOrchestrator
 from app.orchestration.scope_policy import ReferenceScopePolicy
+from app.schemas.agent import AgentConstraintState
 
 
 def test_movie_request_is_out_of_scope_and_cannot_mutate_state() -> None:
@@ -62,6 +66,56 @@ def test_grounded_domain_question_does_not_mutate_plan_state() -> None:
     assert decision.reason_code == "GROUNDED_DOMAIN_QUESTION_DEFERRED"
 
 
+def test_saved_plan_nutrition_question_routes_to_read_only_tool() -> None:
+    decision = ReferenceScopePolicy().classify("How much protein is in my meal plan?")
+
+    assert decision.scope_class is ScopeClass.DOMAIN_QUESTION
+    assert decision.detected_intents == ["answer_food_question"]
+    assert decision.should_call_tools is True
+    assert decision.should_mutate_state is False
+    assert decision.reason_code == "GROUNDED_SAVED_PLAN_QUESTION"
+
+
+def test_food_question_context_handler_receives_current_hard_constraints() -> None:
+    current = AgentConstraintState(allergens=["peanut"], excluded_ingredients=["pork"], requires_halal=True)
+    seen = {}
+    decision = ScopeDecision(
+        scope_class=ScopeClass.DOMAIN_QUESTION,
+        detected_intents=["answer_food_question"],
+        supported_segments=["What can I use instead of butter?"],
+        should_call_tools=True,
+        reason_code="GROUNDED_DOMAIN_QUESTION",
+    )
+
+    def answer(message, lang, constraints):
+        seen.update(message=message, lang=lang, constraints=constraints)
+        return "Filtered substitute answer"
+
+    orchestrator = BoundedAgentOrchestrator(
+        RuleBasedConstraintParser(),
+        scope_classifier=type("Classifier", (), {"classify": lambda _self, _message, history: decision})(),
+        food_question_context_handler=answer,
+    )
+    outcome = orchestrator.process(
+        "What can I use instead of butter?",
+        current=current,
+        acknowledged_unknowns=[],
+        history=[],
+        current_status="collecting",
+        current_missing_fields=[],
+        current_questions=[],
+        context_version=1,
+    )
+
+    assert outcome.assistant_message == "Filtered substitute answer"
+    assert seen == {
+        "message": "What can I use instead of butter?",
+        "lang": "en",
+        "constraints": current,
+    }
+    assert outcome.state_mutated is False
+
+
 def test_unconfirmed_capability_cannot_call_commit_tool() -> None:
     preview_tools = allowed_tools_for("create_plan", confirmed=False)
     confirmed_tools = allowed_tools_for("create_plan", confirmed=True)
@@ -80,6 +134,40 @@ def test_unconfirmed_capability_cannot_call_commit_tool() -> None:
     assert allowed.reason_code == "AUTHORIZED"
     assert cross_capability.allowed is False
     assert cross_capability.reason_code == "TOOL_NOT_ALLOWED_FOR_CAPABILITY"
+
+
+def test_food_question_capability_is_read_only() -> None:
+    allowed = allowed_tools_for("answer_food_question")
+    read = authorize_tool_call("answer_food_question", "read_saved_plan")
+    commit = authorize_tool_call("answer_food_question", "save_plan_revision", confirmed=True)
+
+    assert allowed == {"read_saved_plan", "get_recipe_detail"}
+    assert read.allowed is True
+    assert read.confirmation_present is False
+    assert commit.allowed is False
+
+
+@pytest.mark.parametrize("message", ["Plan halal meals for this week.", "这周吃清真餐。"])
+def test_explicit_halal_request_becomes_a_hard_planning_constraint(message: str) -> None:
+    parser = RuleBasedConstraintParser()
+    extraction = parser.parse(message, current=AgentConstraintState(), acknowledged_unknowns=[], history=[])
+    assert extraction.requires_halal is True
+
+
+def test_halal_is_not_inferred_without_an_explicit_request() -> None:
+    parser = RuleBasedConstraintParser()
+    extraction = parser.parse(
+        "Plan Malaysian dinners.", current=AgentConstraintState(), acknowledged_unknowns=[], history=[]
+    )
+    assert extraction.requires_halal is None
+
+
+def test_negated_halal_mention_does_not_create_a_halal_requirement() -> None:
+    parser = RuleBasedConstraintParser()
+    extraction = parser.parse(
+        "I don't need halal meals.", current=AgentConstraintState(), acknowledged_unknowns=[], history=[]
+    )
+    assert extraction.requires_halal is None
 
 
 def test_structured_interaction_uses_stable_option_value() -> None:

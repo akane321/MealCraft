@@ -1,0 +1,22 @@
+[
+  {"id":"msc-001","language":"en","category":"add-meal","base":"dinner","message":"Also plan lunch.","expected":{"breakfast":null,"dinner":["main","vegetable"],"lunch":["main"]}},
+  {"id":"msc-002","language":"zh","category":"add-meal","base":"dinner","message":"也安排午餐。","expected":{"breakfast":null,"dinner":["main","vegetable"],"lunch":["main"]}},
+  {"id":"msc-003","language":"en","category":"add-meal","base":"dinner","message":"Please add breakfast too.","expected":{"breakfast":["main"],"dinner":["main","vegetable"],"lunch":null}},
+  {"id":"msc-004","language":"zh","category":"add-meal","base":"dinner","message":"请加上早餐。","expected":{"breakfast":["main"],"dinner":["main","vegetable"],"lunch":null}},
+  {"id":"msc-005","language":"en","category":"drop-meal","base":"breakfast-dinner","message":"No breakfast, please.","expected":{"breakfast":null,"dinner":["main","vegetable"],"lunch":null}},
+  {"id":"msc-006","language":"zh","category":"drop-meal","base":"breakfast-dinner","message":"不要安排早餐。","expected":{"breakfast":null,"dinner":["main","vegetable"],"lunch":null}},
+  {"id":"msc-007","language":"en","category":"drop-meal","base":"breakfast-dinner","message":"Take dinner off the plan.","expected":{"breakfast":["main"],"dinner":null,"lunch":null}},
+  {"id":"msc-008","language":"zh","category":"drop-meal","base":"breakfast-dinner","message":"晚餐就不做了。","expected":{"breakfast":["main"],"dinner":null,"lunch":null}},
+  {"id":"msc-009","language":"en","category":"meal-roles","base":"dinner","message":"Dinners with a soup.","expected":{"breakfast":null,"dinner":["main","vegetable","soup"],"lunch":null}},
+  {"id":"msc-010","language":"zh","category":"meal-roles","base":"dinner","message":"晚餐加个汤。","expected":{"breakfast":null,"dinner":["main","vegetable","soup"],"lunch":null}},
+  {"id":"msc-011","language":"en","category":"meal-roles","base":"dinner","message":"Remove the side dish from dinner.","expected":{"breakfast":null,"dinner":["main"],"lunch":null}},
+  {"id":"msc-012","language":"zh","category":"meal-roles","base":"dinner","message":"晚饭不要配菜。","expected":{"breakfast":null,"dinner":["main"],"lunch":null}},
+  {"id":"msc-013","language":"en","category":"one-dish","base":"dinner","message":"Lunch can be just one dish.","expected":{"breakfast":null,"dinner":["main","vegetable"],"lunch":["main"]}},
+  {"id":"msc-014","language":"zh","category":"one-dish","base":"dinner","message":"午餐只做一道菜就好。","expected":{"breakfast":null,"dinner":["main","vegetable"],"lunch":["main"]}},
+  {"id":"msc-015","language":"en","category":"no-change","base":"dinner","message":"Plan dinner.","expected":null},
+  {"id":"msc-016","language":"zh","category":"no-change","base":"dinner","message":"安排晚餐。","expected":null},
+  {"id":"msc-017","language":"en","category":"not-shape-change","base":"dinner","message":"No pork for dinner.","expected":null},
+  {"id":"msc-018","language":"zh","category":"not-shape-change","base":"dinner","message":"晚餐不要猪肉。","expected":null},
+  {"id":"msc-019","language":"mixed","category":"add-meal","base":"dinner","message":"For the week, 也安排午餐.","expected":{"breakfast":null,"dinner":["main","vegetable"],"lunch":["main"]}},
+  {"id":"msc-020","language":"mixed","category":"meal-roles","base":"dinner","message":"Dinner 加个汤, please.","expected":{"breakfast":null,"dinner":["main","vegetable","soup"],"lunch":null}}
+]

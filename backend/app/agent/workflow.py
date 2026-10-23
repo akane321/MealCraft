@@ -202,6 +202,8 @@ class AgentConstraintWorkflow:
             value = getattr(extraction, field)
             if value is not None:
                 state[field] = value
+        if extraction.requires_halal:
+            state["requires_halal"] = True
         if (
             extraction.household_size is not None
             and extraction.household_size != current.household_size
@@ -235,5 +237,23 @@ class AgentConstraintWorkflow:
             for item in extraction.available_ingredients:
                 by_name[item.normalized_name] = AvailableIngredientInput.model_validate(item)
             state["available_ingredients"] = [item.model_dump(mode="json") for item in by_name.values()]
+
+        if extraction.planning_preferences is not None:
+            current_preferences = AgentConstraintState.model_validate(state).planning_preferences
+            incoming = extraction.planning_preferences
+            merged_preferences = current_preferences.model_copy(
+                update={
+                    "repeat_allowed_meals": list(
+                        dict.fromkeys([*current_preferences.repeat_allowed_meals, *incoming.repeat_allowed_meals])
+                    ),
+                    "flavor_boosts": [
+                        *current_preferences.flavor_boosts,
+                        *[item for item in incoming.flavor_boosts if item not in current_preferences.flavor_boosts],
+                    ],
+                    "more_vegetables": current_preferences.more_vegetables or incoming.more_vegetables,
+                    "lighter": current_preferences.lighter or incoming.lighter,
+                }
+            )
+            state["planning_preferences"] = merged_preferences.model_dump(mode="json")
 
         return AgentConstraintState.model_validate(state)

@@ -252,7 +252,8 @@
     "bok_choy": [
       "小白菜",
       "白菜仔",
-      "上海青"
+      "上海青",
+      "白菜"
     ],
     "bonito_flakes": [
       "柴鱼片",
@@ -344,7 +345,8 @@
       "包菜",
       "椰菜",
       "卷心菜",
-      "高丽菜"
+      "高丽菜",
+      "白菜"
     ],
     "cajun_seasoning": [
       "卡真香料",
@@ -2538,5 +2540,15 @@
   "generated_at": "2026-09-26",
   "model": "claude-opus-5-5",
   "note": "Model-generated Chinese names for catalog ingredients: suggestions only, like aliases-v1.json. A household always chooses; nothing here is applied without them. After the developer check, 鸡腿, 粿条/河粉 and 肉末/猪肉末 were added by hand.",
-  "schema_version": "ingredient-aliases-zh-v1"
+  "schema_version": "ingredient-aliases-zh-v1",
+  "reviewed_additions": {
+    "date": "2026-10-22",
+    "note": "Manually reviewed Chinese names; suggestions only and never applied without household confirmation.",
+    "terms": {
+      "白菜": [
+        "bok_choy",
+        "cabbage"
+      ]
+    }
+  }
 }

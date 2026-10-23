@@ -1,0 +1,1950 @@
+{
+  "schema_version": "1.0",
+  "evaluation_role": "developer_set",
+  "provider": "local-spelling-and-alias",
+  "live_api_used": false,
+  "embedding_retrieval_measured": false,
+  "limit": 4,
+  "dataset_sha256": {
+    "en": "96bb5212a9ac1fdd52d45f4d4b813cc3061cc22ff3828cbd399124a6f08b5246",
+    "zh": "16abe455add4f0fc3f734d9f5d50aa03367de6e1ea296086fdda637ca1b5810e"
+  },
+  "metrics": {
+    "case_count": 122,
+    "positive_case_count": 120,
+    "recall_at_1": 0.975,
+    "recall_at_4": 1.0,
+    "none_case_count": 2,
+    "none_cases_returning_candidates": 0
+  },
+  "dataset_metrics": {
+    "en": {
+      "case_count": 63,
+      "positive_case_count": 62,
+      "recall_at_1": 0.9516,
+      "recall_at_4": 1.0,
+      "none_case_count": 1,
+      "none_cases_returning_candidates": 0
+    },
+    "zh": {
+      "case_count": 59,
+      "positive_case_count": 58,
+      "recall_at_1": 1.0,
+      "recall_at_4": 1.0,
+      "none_case_count": 1,
+      "none_cases_returning_candidates": 0
+    }
+  },
+  "kind_metrics": {
+    "abbreviation": {
+      "case_count": 1,
+      "positive_case_count": 1,
+      "recall_at_1": 1.0,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    },
+    "accent": {
+      "case_count": 1,
+      "positive_case_count": 1,
+      "recall_at_1": 1.0,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    },
+    "british": {
+      "case_count": 17,
+      "positive_case_count": 17,
+      "recall_at_1": 0.9412,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    },
+    "chinese": {
+      "case_count": 64,
+      "positive_case_count": 64,
+      "recall_at_1": 1.0,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    },
+    "cut": {
+      "case_count": 1,
+      "positive_case_count": 1,
+      "recall_at_1": 1.0,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    },
+    "family": {
+      "case_count": 1,
+      "positive_case_count": 1,
+      "recall_at_1": 1.0,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    },
+    "none": {
+      "case_count": 2,
+      "positive_case_count": 0,
+      "recall_at_1": 0.0,
+      "recall_at_4": 0.0,
+      "none_case_count": 2,
+      "none_cases_returning_candidates": 0
+    },
+    "observed failure": {
+      "case_count": 1,
+      "positive_case_count": 1,
+      "recall_at_1": 1.0,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    },
+    "regional": {
+      "case_count": 17,
+      "positive_case_count": 17,
+      "recall_at_1": 0.9412,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    },
+    "short": {
+      "case_count": 2,
+      "positive_case_count": 2,
+      "recall_at_1": 0.5,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    },
+    "spelling": {
+      "case_count": 2,
+      "positive_case_count": 2,
+      "recall_at_1": 1.0,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    },
+    "synonym": {
+      "case_count": 5,
+      "positive_case_count": 5,
+      "recall_at_1": 1.0,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    },
+    "typo": {
+      "case_count": 3,
+      "positive_case_count": 3,
+      "recall_at_1": 1.0,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    },
+    "variant": {
+      "case_count": 5,
+      "positive_case_count": 5,
+      "recall_at_1": 1.0,
+      "recall_at_4": 1.0,
+      "none_case_count": 0,
+      "none_cases_returning_candidates": 0
+    }
+  },
+  "failure_cases": [],
+  "cases": [
+    {
+      "dataset": "en",
+      "term": "cooking wine",
+      "kind": "observed failure",
+      "accepted": [
+        "rice_wine",
+        "wine_cooking"
+      ],
+      "candidates": [
+        "wine_cooking"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "shaoxing wine",
+      "kind": "regional",
+      "accepted": [
+        "rice_wine",
+        "wine_cooking"
+      ],
+      "candidates": [
+        "rice_wine",
+        "wine_cooking"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "scallion",
+      "kind": "synonym",
+      "accepted": [
+        "green_onion"
+      ],
+      "candidates": [
+        "green_onion",
+        "leek",
+        "scallop",
+        "salmon"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "spring onion",
+      "kind": "british",
+      "accepted": [
+        "green_onion"
+      ],
+      "candidates": [
+        "green_onion",
+        "leek",
+        "red_onion"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "coriander leaves",
+      "kind": "british",
+      "accepted": [
+        "cilantro"
+      ],
+      "candidates": [
+        "cilantro",
+        "coriander",
+        "grape_leaves"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "aubergine",
+      "kind": "british",
+      "accepted": [
+        "eggplant"
+      ],
+      "candidates": [
+        "eggplant",
+        "margarine"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "brinjal",
+      "kind": "regional",
+      "accepted": [
+        "eggplant"
+      ],
+      "candidates": [
+        "eggplant"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "capsicum",
+      "kind": "regional",
+      "accepted": [
+        "bell_pepper"
+      ],
+      "candidates": [
+        "bell_pepper"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "prawns",
+      "kind": "british",
+      "accepted": [
+        "shrimp"
+      ],
+      "candidates": [
+        "shrimp"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "courgette",
+      "kind": "british",
+      "accepted": [
+        "zucchini"
+      ],
+      "candidates": [
+        "squash",
+        "zucchini"
+      ],
+      "top1_hit": false,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "taugeh",
+      "kind": "regional",
+      "accepted": [
+        "bean_sprouts"
+      ],
+      "candidates": [
+        "bean_sprouts"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "ikan bilis",
+      "kind": "regional",
+      "accepted": [
+        "anchovy"
+      ],
+      "candidates": [
+        "anchovy"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "belacan",
+      "kind": "regional",
+      "accepted": [
+        "shrimp_paste"
+      ],
+      "candidates": [
+        "shrimp_paste",
+        "black_bean",
+        "bacon",
+        "black_beans"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "soya sauce",
+      "kind": "spelling",
+      "accepted": [
+        "soy_sauce",
+        "tamari"
+      ],
+      "candidates": [
+        "soy_sauce",
+        "steak_sauce",
+        "hot_sauce",
+        "oyster_sauce"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "light soy sauce",
+      "kind": "variant",
+      "accepted": [
+        "soy_sauce"
+      ],
+      "candidates": [
+        "soy_sauce",
+        "hot_sauce"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "sweet soy sauce",
+      "kind": "variant",
+      "accepted": [
+        "kecap_manis"
+      ],
+      "candidates": [
+        "kecap_manis",
+        "sweet_sour_sauce",
+        "soy_sauce",
+        "sweet_chili_sauce"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "ladies fingers",
+      "kind": "regional",
+      "accepted": [
+        "okra"
+      ],
+      "candidates": [
+        "okra"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "bitter gourd",
+      "kind": "regional",
+      "accepted": [
+        "bitter_melon"
+      ],
+      "candidates": [
+        "bitter_melon"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "kailan",
+      "kind": "regional",
+      "accepted": [
+        "gai_lan"
+      ],
+      "candidates": [
+        "gai_lan",
+        "kahlua"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "chinese broccoli",
+      "kind": "synonym",
+      "accepted": [
+        "gai_lan"
+      ],
+      "candidates": [
+        "gai_lan",
+        "broccoli"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "pak choi",
+      "kind": "spelling",
+      "accepted": [
+        "bok_choy"
+      ],
+      "candidates": [
+        "bok_choy",
+        "pork_chop"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "beancurd",
+      "kind": "regional",
+      "accepted": [
+        "tofu"
+      ],
+      "candidates": [
+        "tofu"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "minced beef",
+      "kind": "british",
+      "accepted": [
+        "ground_beef"
+      ],
+      "candidates": [
+        "ground_beef",
+        "corned_beef",
+        "chipped_beef"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "pork mince",
+      "kind": "british",
+      "accepted": [
+        "ground_pork"
+      ],
+      "candidates": [
+        "ground_pork"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "streaky bacon",
+      "kind": "british",
+      "accepted": [
+        "bacon"
+      ],
+      "candidates": [
+        "bacon",
+        "turkey_bacon",
+        "steak_sauce"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "three layer pork",
+      "kind": "regional",
+      "accepted": [
+        "pork_belly"
+      ],
+      "candidates": [
+        "pork_belly"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "chicken fillet",
+      "kind": "variant",
+      "accepted": [
+        "chicken_breast"
+      ],
+      "candidates": [
+        "chicken_breast",
+        "chicken",
+        "chicken_broth",
+        "chicken_thigh"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "rocket",
+      "kind": "british",
+      "accepted": [
+        "arugula"
+      ],
+      "candidates": [
+        "arugula",
+        "crickets"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "cornflour",
+      "kind": "british",
+      "accepted": [
+        "cornstarch"
+      ],
+      "candidates": [
+        "cornstarch",
+        "corn_flour_masa",
+        "coconut_flour",
+        "flour"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "icing sugar",
+      "kind": "british",
+      "accepted": [
+        "powdered_sugar"
+      ],
+      "candidates": [
+        "powdered_sugar",
+        "coconut_sugar"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "caster sugar",
+      "kind": "british",
+      "accepted": [
+        "sugar"
+      ],
+      "candidates": [
+        "sugar"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "double cream",
+      "kind": "british",
+      "accepted": [
+        "cream"
+      ],
+      "candidates": [
+        "cream",
+        "sour_cream",
+        "ice_cream"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "plain flour",
+      "kind": "british",
+      "accepted": [
+        "flour"
+      ],
+      "candidates": [
+        "flour",
+        "semolina_flour",
+        "almond_flour",
+        "cake_flour"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "self raising flour",
+      "kind": "british",
+      "accepted": [
+        "self_rising_flour"
+      ],
+      "candidates": [
+        "self_rising_flour",
+        "semolina_flour"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "bicarbonate of soda",
+      "kind": "british",
+      "accepted": [
+        "baking_soda"
+      ],
+      "candidates": [
+        "baking_soda"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "mayonnaise",
+      "kind": "abbreviation",
+      "accepted": [
+        "mayo"
+      ],
+      "candidates": [
+        "mayo",
+        "mayo_or_dressing",
+        "vegan_mayonnaise",
+        "anise"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "chilli padi",
+      "kind": "regional",
+      "accepted": [
+        "chili_pepper",
+        "green_chili"
+      ],
+      "candidates": [
+        "chili_pepper",
+        "green_chili",
+        "chili_paste",
+        "chili_oil"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "tamarind paste",
+      "kind": "variant",
+      "accepted": [
+        "tamarind"
+      ],
+      "candidates": [
+        "tamarind",
+        "tamarind_soup_base",
+        "almond_paste",
+        "tandoori_paste"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "blue ginger",
+      "kind": "regional",
+      "accepted": [
+        "galangal"
+      ],
+      "candidates": [
+        "galangal",
+        "pickled_ginger",
+        "ginger"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "pandan",
+      "kind": "short",
+      "accepted": [
+        "pandan_extract",
+        "pandan_juice",
+        "pandan_leaf",
+        "pandan_paste"
+      ],
+      "candidates": [
+        "plantain",
+        "pandan_leaf",
+        "banana",
+        "pandan_juice"
+      ],
+      "top1_hit": false,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "sticky rice",
+      "kind": "synonym",
+      "accepted": [
+        "glutinous_rice"
+      ],
+      "candidates": [
+        "glutinous_rice"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "bee hoon",
+      "kind": "regional",
+      "accepted": [
+        "cellophane_noodles",
+        "rice_noodles"
+      ],
+      "candidates": [
+        "rice_noodles"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "glass noodles",
+      "kind": "synonym",
+      "accepted": [
+        "cellophane_noodles",
+        "sweet_potato_noodles"
+      ],
+      "candidates": [
+        "cellophane_noodles",
+        "sweet_potato_noodles",
+        "egg_noodles",
+        "soba_noodle"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "kway teow",
+      "kind": "regional",
+      "accepted": [
+        "rice_noodles"
+      ],
+      "candidates": [
+        "rice_noodles"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "yellow noodles",
+      "kind": "regional",
+      "accepted": [
+        "egg_noodles"
+      ],
+      "candidates": [
+        "cellophane_noodles",
+        "egg_noodles",
+        "rice_noodles",
+        "soba_noodle"
+      ],
+      "top1_hit": false,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "garbanzo beans",
+      "kind": "synonym",
+      "accepted": [
+        "chickpea"
+      ],
+      "candidates": [
+        "chickpea",
+        "green_beans"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "groundnuts",
+      "kind": "british",
+      "accepted": [
+        "peanut"
+      ],
+      "candidates": [
+        "peanut"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "button mushrooms",
+      "kind": "variant",
+      "accepted": [
+        "mushroom"
+      ],
+      "candidates": [
+        "mushroom"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "tahini",
+      "kind": "short",
+      "accepted": [
+        "sesame_tahini"
+      ],
+      "candidates": [
+        "sesame_tahini"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "sotong",
+      "kind": "regional",
+      "accepted": [
+        "squid"
+      ],
+      "candidates": [
+        "squid"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "sirloin",
+      "kind": "cut",
+      "accepted": [
+        "beef",
+        "beef_steak"
+      ],
+      "candidates": [
+        "beef",
+        "beef_steak",
+        "mirin"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "white fish",
+      "kind": "family",
+      "accepted": [
+        "cod",
+        "fish_fillet",
+        "hake",
+        "halibut"
+      ],
+      "candidates": [
+        "cod",
+        "fish_fillet",
+        "hake",
+        "halibut"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "葱",
+      "kind": "chinese",
+      "accepted": [
+        "green_onion"
+      ],
+      "candidates": [
+        "green_onion"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "香菜",
+      "kind": "chinese",
+      "accepted": [
+        "cilantro"
+      ],
+      "candidates": [
+        "cilantro"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "豆腐",
+      "kind": "chinese",
+      "accepted": [
+        "tofu"
+      ],
+      "candidates": [
+        "tofu"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "虾",
+      "kind": "chinese",
+      "accepted": [
+        "shrimp"
+      ],
+      "candidates": [
+        "shrimp"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "料酒",
+      "kind": "chinese",
+      "accepted": [
+        "rice_wine",
+        "wine_cooking"
+      ],
+      "candidates": [
+        "wine_cooking"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "花生",
+      "kind": "chinese",
+      "accepted": [
+        "peanut"
+      ],
+      "candidates": [
+        "peanut"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "brocoli",
+      "kind": "typo",
+      "accepted": [
+        "broccoli"
+      ],
+      "candidates": [
+        "broccoli",
+        "broccoli_slaw"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "tumeric",
+      "kind": "typo",
+      "accepted": [
+        "turmeric"
+      ],
+      "candidates": [
+        "turmeric"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "zuchini",
+      "kind": "typo",
+      "accepted": [
+        "zucchini"
+      ],
+      "candidates": [
+        "zucchini"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "jalapeño",
+      "kind": "accent",
+      "accepted": [
+        "jalapeno"
+      ],
+      "candidates": [
+        "jalapeno"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "en",
+      "term": "kangkong",
+      "kind": "none",
+      "accepted": [],
+      "candidates": [],
+      "top1_hit": null,
+      "top4_hit": null,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "茄子",
+      "kind": "chinese",
+      "accepted": [
+        "eggplant"
+      ],
+      "candidates": [
+        "eggplant"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "西兰花",
+      "kind": "chinese",
+      "accepted": [
+        "broccoli"
+      ],
+      "candidates": [
+        "broccoli"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "糯米",
+      "kind": "chinese",
+      "accepted": [
+        "glutinous_rice"
+      ],
+      "candidates": [
+        "glutinous_rice"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "米粉",
+      "kind": "chinese",
+      "accepted": [
+        "rice_noodles"
+      ],
+      "candidates": [
+        "rice_noodles"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "生抽",
+      "kind": "chinese",
+      "accepted": [
+        "soy_sauce"
+      ],
+      "candidates": [
+        "soy_sauce"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "叁巴",
+      "kind": "chinese",
+      "accepted": [
+        "sambal_oelek"
+      ],
+      "candidates": [
+        "sambal_oelek"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "香菜",
+      "kind": "chinese",
+      "accepted": [
+        "cilantro"
+      ],
+      "candidates": [
+        "cilantro"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "葱",
+      "kind": "chinese",
+      "accepted": [
+        "green_onion"
+      ],
+      "candidates": [
+        "green_onion"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "小葱",
+      "kind": "chinese",
+      "accepted": [
+        "green_onion"
+      ],
+      "candidates": [
+        "green_onion"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "姜",
+      "kind": "chinese",
+      "accepted": [
+        "ginger"
+      ],
+      "candidates": [
+        "ginger"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "蒜",
+      "kind": "chinese",
+      "accepted": [
+        "garlic"
+      ],
+      "candidates": [
+        "garlic"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "辣椒",
+      "kind": "chinese",
+      "accepted": [
+        "chili_pepper",
+        "green_chili"
+      ],
+      "candidates": [
+        "chili_pepper"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "豆腐",
+      "kind": "chinese",
+      "accepted": [
+        "firm_tofu",
+        "tofu"
+      ],
+      "candidates": [
+        "tofu"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "五花肉",
+      "kind": "chinese",
+      "accepted": [
+        "pork_belly"
+      ],
+      "candidates": [
+        "pork_belly"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "肉末",
+      "kind": "chinese",
+      "accepted": [
+        "ground_beef",
+        "ground_pork"
+      ],
+      "candidates": [
+        "ground_pork"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "牛肉",
+      "kind": "chinese",
+      "accepted": [
+        "beef",
+        "beef_steak"
+      ],
+      "candidates": [
+        "beef"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "鸡翅",
+      "kind": "chinese",
+      "accepted": [
+        "chicken_wings"
+      ],
+      "candidates": [
+        "chicken_wings"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "鸡腿",
+      "kind": "chinese",
+      "accepted": [
+        "chicken_thigh"
+      ],
+      "candidates": [
+        "chicken_thigh"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "虾",
+      "kind": "chinese",
+      "accepted": [
+        "shrimp"
+      ],
+      "candidates": [
+        "shrimp"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "鱿鱼",
+      "kind": "chinese",
+      "accepted": [
+        "squid"
+      ],
+      "candidates": [
+        "squid"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "鳕鱼",
+      "kind": "chinese",
+      "accepted": [
+        "cod"
+      ],
+      "candidates": [
+        "cod"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "三文鱼",
+      "kind": "chinese",
+      "accepted": [
+        "salmon",
+        "salmon_fillet"
+      ],
+      "candidates": [
+        "salmon"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "鸡蛋",
+      "kind": "chinese",
+      "accepted": [
+        "egg"
+      ],
+      "candidates": [
+        "egg"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "蚝油",
+      "kind": "chinese",
+      "accepted": [
+        "oyster_sauce"
+      ],
+      "candidates": [
+        "oyster_sauce"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "麻油",
+      "kind": "chinese",
+      "accepted": [
+        "sesame_oil"
+      ],
+      "candidates": [
+        "sesame_oil"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "豆芽",
+      "kind": "chinese",
+      "accepted": [
+        "bean_sprouts"
+      ],
+      "candidates": [
+        "bean_sprouts"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "白菜",
+      "kind": "chinese",
+      "accepted": [
+        "bok_choy",
+        "cabbage"
+      ],
+      "candidates": [
+        "bok_choy",
+        "cabbage"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "菠菜",
+      "kind": "chinese",
+      "accepted": [
+        "baby_spinach",
+        "spinach"
+      ],
+      "candidates": [
+        "spinach"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "胡萝卜",
+      "kind": "chinese",
+      "accepted": [
+        "carrot"
+      ],
+      "candidates": [
+        "carrot"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "土豆",
+      "kind": "chinese",
+      "accepted": [
+        "potato"
+      ],
+      "candidates": [
+        "potato"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "香菇",
+      "kind": "chinese",
+      "accepted": [
+        "dried_shiitake",
+        "mushroom"
+      ],
+      "candidates": [
+        "dried_shiitake"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "苦瓜",
+      "kind": "chinese",
+      "accepted": [
+        "bitter_melon"
+      ],
+      "candidates": [
+        "bitter_melon"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "南瓜",
+      "kind": "chinese",
+      "accepted": [
+        "pumpkin"
+      ],
+      "candidates": [
+        "pumpkin"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "地瓜",
+      "kind": "chinese",
+      "accepted": [
+        "sweet_potato"
+      ],
+      "candidates": [
+        "sweet_potato"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "芋头",
+      "kind": "chinese",
+      "accepted": [
+        "taro"
+      ],
+      "candidates": [
+        "taro"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "玉米",
+      "kind": "chinese",
+      "accepted": [
+        "corn"
+      ],
+      "candidates": [
+        "corn"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "花生",
+      "kind": "chinese",
+      "accepted": [
+        "peanut"
+      ],
+      "candidates": [
+        "peanut"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "椰浆",
+      "kind": "chinese",
+      "accepted": [
+        "coconut_cream",
+        "coconut_milk"
+      ],
+      "candidates": [
+        "coconut_milk"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "香茅",
+      "kind": "chinese",
+      "accepted": [
+        "lemongrass"
+      ],
+      "candidates": [
+        "lemongrass"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "南姜",
+      "kind": "chinese",
+      "accepted": [
+        "galangal"
+      ],
+      "candidates": [
+        "galangal"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "青柠",
+      "kind": "chinese",
+      "accepted": [
+        "lime"
+      ],
+      "candidates": [
+        "lime"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "亚参",
+      "kind": "chinese",
+      "accepted": [
+        "tamarind"
+      ],
+      "candidates": [
+        "tamarind"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "峇拉煎",
+      "kind": "chinese",
+      "accepted": [
+        "shrimp_paste"
+      ],
+      "candidates": [
+        "shrimp_paste"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "鱼露",
+      "kind": "chinese",
+      "accepted": [
+        "fish_sauce"
+      ],
+      "candidates": [
+        "fish_sauce"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "海鲜酱",
+      "kind": "chinese",
+      "accepted": [
+        "hoisin"
+      ],
+      "candidates": [
+        "hoisin"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "辣椒油",
+      "kind": "chinese",
+      "accepted": [
+        "chili_oil"
+      ],
+      "candidates": [
+        "chili_oil"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "料酒",
+      "kind": "chinese",
+      "accepted": [
+        "rice_wine",
+        "wine_cooking"
+      ],
+      "candidates": [
+        "wine_cooking"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "米醋",
+      "kind": "chinese",
+      "accepted": [
+        "rice_vinegar"
+      ],
+      "candidates": [
+        "rice_vinegar"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "黑醋",
+      "kind": "chinese",
+      "accepted": [
+        "black_vinegar"
+      ],
+      "candidates": [
+        "black_vinegar"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "五香粉",
+      "kind": "chinese",
+      "accepted": [
+        "chinese_five_spice"
+      ],
+      "candidates": [
+        "chinese_five_spice"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "生粉",
+      "kind": "chinese",
+      "accepted": [
+        "cornstarch",
+        "potato_starch"
+      ],
+      "candidates": [
+        "cornstarch"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "粿条",
+      "kind": "chinese",
+      "accepted": [
+        "rice_noodles"
+      ],
+      "candidates": [
+        "rice_noodles"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "乌冬面",
+      "kind": "chinese",
+      "accepted": [
+        "udon_noodles"
+      ],
+      "candidates": [
+        "udon_noodles"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "云吞皮",
+      "kind": "chinese",
+      "accepted": [
+        "wonton_wrapper"
+      ],
+      "candidates": [
+        "wonton_wrapper"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "天贝",
+      "kind": "chinese",
+      "accepted": [
+        "tempeh"
+      ],
+      "candidates": [
+        "tempeh"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "江鱼仔",
+      "kind": "chinese",
+      "accepted": [
+        "anchovy"
+      ],
+      "candidates": [
+        "anchovy"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "粉丝",
+      "kind": "chinese",
+      "accepted": [
+        "cellophane_noodles",
+        "mung_bean_starch"
+      ],
+      "candidates": [
+        "cellophane_noodles"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "腐乳",
+      "kind": "none",
+      "accepted": [],
+      "candidates": [],
+      "top1_hit": null,
+      "top4_hit": null,
+      "empty_accept_returned_candidates": false
+    },
+    {
+      "dataset": "zh",
+      "term": "榴莲",
+      "kind": "chinese",
+      "accepted": [
+        "durian"
+      ],
+      "candidates": [
+        "durian"
+      ],
+      "top1_hit": true,
+      "top4_hit": true,
+      "empty_accept_returned_candidates": false
+    }
+  ]
+}\n
