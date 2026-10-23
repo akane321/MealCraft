@@ -21,7 +21,8 @@ export interface OpsSeries {
   provider_modes: Record<string, number>;
 }
 
-export type OpsTaskKind = "agent" | "planning";
+export type OpsTaskKind = "agent" | "planning" | "intake";
+export type OpsReplayKind = "agent" | "planning";
 
 export interface OpsTaskSummary {
   kind: OpsTaskKind;
@@ -134,7 +135,7 @@ export interface OpsReplayOutcome {
 
 export interface OpsReplay {
   id: number;
-  kind: OpsTaskKind;
+  kind: OpsReplayKind;
   source_id: number;
   overrides: Record<string, unknown>;
   original: OpsReplayOutcome | null;
@@ -145,7 +146,7 @@ export interface OpsReplay {
 
 export interface OpsReplaySummary {
   id: number;
-  kind: OpsTaskKind;
+  kind: OpsReplayKind;
   source_id: number;
   overrides: Record<string, unknown>;
   original_status: string | null;
