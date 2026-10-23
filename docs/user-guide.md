@@ -97,10 +97,14 @@ A who's-home rule is: who, on which weekdays and at which meals, away or home.
   who's-home box and cooking-time rules in the cooking-time box. One sentence
   can hold several rules separated by commas or "but", and a later part reuses
   the people or meals named before it: "Kai eats at school on weekday lunch,
-  Mei is home on Fridays" gives Mei Friday lunch. "And" does not start a new
-  rule, so "weekday dinners within 30 minutes and weekends 90 minutes" becomes
-  one rule, every day's dinner within 30 minutes; write "weekday dinners within
-  30 minutes, weekends 90 minutes" instead. Because commas split a sentence, write several
+  Mei is home on Fridays" gives Mei Friday lunch. "And" joining days, meals or
+  people with one answer stays one rule ("weekday lunch and dinner within 30
+  minutes"). When "and" joins parts that say different things, two different
+  times or an away and a home part ("weekday dinners within 30 minutes and
+  weekends 90 minutes"), the sentence is refused with a message asking for a
+  comma; "weekday dinners within 30 minutes, weekends 90 minutes" reads as two
+  rules. Write a time such as 75 minutes as "75 minutes", not "1 hour and 15
+  minutes". Because commas split a sentence, write several
   days as one phrase ("weekdays") or as separate rules, not as a comma list. A
   part MealCraft cannot place is either refused with a message or left out, so
   the card is the record of what was read: if it is not what you meant, write
