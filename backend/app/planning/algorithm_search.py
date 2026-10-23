@@ -2,8 +2,17 @@
 
 from random import Random
 
+from app.planning.algorithm_budget import CompletionBudget
 from app.planning.diversity_greedy import DiversityAwareGreedyPlanner
-from app.planning.meal_beam import MealOption, MealState, assignments_of, day_permitted, horizon_permitted
+from app.planning.meal_beam import (
+    MealOption,
+    MealState,
+    assignments_of,
+    day_permitted,
+    horizon_permitted,
+    request_progress,
+    requests_reachable,
+)
 
 
 class SharedObjectiveBeamPlanner(DiversityAwareGreedyPlanner):
@@ -25,12 +34,15 @@ class SharedObjectiveBeamPlanner(DiversityAwareGreedyPlanner):
             else None
         )
         slots = sorted(problem.slots, key=self.candidates._slot_key)
+        pools = {s.slot_id: self.candidates.meal_options(problem, s) for s in slots}
+        for s in slots:
+            if not s.required and s.locked_recipe_id is None and not s.locked_roles:
+                pools[s.slot_id].append(MealOption((), 0))
+        completion = CompletionBudget(problem, slots, pools)
         states = [MealState()]
         expanded = 0
         for position, slot in enumerate(slots):
-            options = self.candidates.meal_options(problem, slot)
-            if not slot.required and slot.locked_recipe_id is None and not slot.locked_roles:
-                options.append(MealOption((), 0))
+            options = pools[slot.slot_id]
             trials = []
             prefix = problem.model_copy(update={"slots": slots[: position + 1]})
             for state in states:
@@ -41,6 +53,10 @@ class SharedObjectiveBeamPlanner(DiversityAwareGreedyPlanner):
                     if not horizon_permitted(problem, state, option.dishes):
                         continue
                     trial = MealState(state.choices + ((slot.slot_id, option.dishes),))
+                    if not requests_reachable(problem, trial, len(slots) - position - 1) or not completion.permits(
+                        trial
+                    ):
+                        continue
                     closed = position == len(slots) - 1 or slots[position + 1].planned_date != slot.planned_date
                     if not day_permitted(problem, trial, slot, closed):
                         continue
@@ -53,17 +69,27 @@ class SharedObjectiveBeamPlanner(DiversityAwareGreedyPlanner):
                         for row in shopping
                     ):
                         continue
-                    if problem.budget_is_hard and problem.purchase_budget_sgd is not None:
-                        if round(report.purchase_total_sgd * 100) > round(problem.purchase_budget_sgd * 100):
-                            continue
-                    score = self.objective.terms(prefix, assignments, report)
+                    if any(c.code == "purchase_budget" and c.hard and c.status != "passed" for c in report.checks):
+                        continue
+                    score = self.objective.terms(prefix, assignments, report, partial=True)
                     if position == len(slots) - 1:
                         if report.status == "passed" and (best_score is None or score < best_score):
                             best_score = score
                             best.status = "feasible"
                             best.assignments, best.shopping, best.validation = assignments, shopping, report
-                    trials.append((score, trial.choices, trial))
-            states = [t[2] for t in sorted(trials, key=lambda t: (t[0], t[1]))[: self.width]]
+                    trials.append(
+                        ((-request_progress(problem, trial), score), trial.choices, trial, report.purchase_total_sgd)
+                    )
+            ordered = sorted(trials, key=lambda t: (t[0], t[1]))
+            if problem.purchase_budget_sgd is not None and len(ordered) > self.width:
+                room = max(1, self.width // 4)
+                selected = ordered[: self.width - room]
+                rest = sorted(ordered[self.width - room :], key=lambda t: (t[3], t[0], t[1]))
+                cheap = rest[: room // 2]
+                rest = sorted(rest[room // 2 :], key=lambda t: (sum(completion.costs(t[2])), t[3], t[0], t[1]))
+                states = [t[2] for t in selected + cheap + rest[: room - len(cheap)]]
+            else:
+                states = [t[2] for t in ordered[: self.width]]
             if not states or expanded >= self.max_expansions:
                 break
         best.trace.warnings.append(

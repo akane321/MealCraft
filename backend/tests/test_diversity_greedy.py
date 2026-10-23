@@ -127,10 +127,10 @@ def test_nutrition_precedes_rank_when_variety_ties():
 
 def real_recipe_problem(candidate_count=3):
     root = repository_root()
-    calibration = json.loads((root / "docs/evaluation/algorithm-dev/near-duplicates.json").read_text())
+    calibration = json.loads((root / "docs/evaluation/algorithm-dev/near-duplicates.json").read_text(encoding="utf-8"))
     policy = NearDuplicatePolicy(**calibration["policy"])
     slugs = ["tofu-vegetable-soba", "tofu-mushroom-soba", "tomato-lentil-stew"]
-    catalog = {r["slug"]: r for r in json.loads((root / "data/recipes/recipes.json").read_text())}
+    catalog = {r["slug"]: r for r in json.loads((root / "data/recipes/recipes.json").read_text(encoding="utf-8"))}
     slugs += [slug for slug in sorted(catalog) if slug not in slugs][: max(0, candidate_count - 3)]
     sources = [catalog[slug] for slug in slugs]
     projected = [
