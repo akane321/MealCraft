@@ -45,6 +45,8 @@ def test_potatoes_and_ungrouped_ingredients_never_lead_and_a_curated_id_takes_it
 
 def test_the_vegetable_role_is_vegetable_and_its_numbered_copies():
     assert vegetable_role("vegetable") and vegetable_role("vegetable-2")
+    # The same reading as role_base, so the vegetable-led gate and the portion, salad and coverage rules agree.
+    assert vegetable_role("vegetable-side")
     assert not any(vegetable_role(role) for role in ("main", "main-2", "soup", "side", "vegetables", "veg"))
 
 
