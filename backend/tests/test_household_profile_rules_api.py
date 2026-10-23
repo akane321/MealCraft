@@ -201,7 +201,9 @@ def test_a_one_dish_dinner_nobody_can_share_is_refused_rather_than_leaving_a_mem
     )
     created = recipe_client.post("/api/household-profiles", json=body)
     assert created.status_code == 201, created.text
-    refused = recipe_client.post(f"/api/household-profiles/{created.json()['id']}/plans", json={"day_count": 1})
+    # A Wednesday, so the weekday 30-minute dinner rule applies whatever day the suite runs on.
+    plan = {"day_count": 1, "start_date": "2027-01-06"}
+    refused = recipe_client.post(f"/api/household-profiles/{created.json()['id']}/plans", json=plan)
     assert refused.status_code == 422, refused.text
 
 
