@@ -471,3 +471,71 @@ def test_an_unplaced_part_still_passes_its_meal_on():
         (WEEKDAYS, ["lunch"], 20),
         (WEEKEND, ["dinner"], 90),
     ]
+
+
+# Review round 4 of #328: confirmed regressions against main.
+@pytest.mark.parametrize(
+    "text",
+    [
+        # "out for lunch" is away for lunch only; "in / back / here for dinner" says nothing sure, so never away.
+        "Ben is out for lunch on weekdays and in for dinner",
+        "Ben is out for lunch on weekdays and back for dinner",
+        "Ben is out for lunch on weekdays and here for dinner",
+        "Ben eats lunch out and dinner in",
+        "Ben is out for lunch and in for dinner on weekdays",
+        "Ben is out for lunch and in for dinner on Fridays",
+        "Ben is out for breakfast and in for dinner on weekends",
+    ],
+)
+def test_out_for_one_meal_never_covers_another(text):
+    result = read(text)
+    assert result.rules == [] and result.issues == [NO_POLARITY]
+
+
+@pytest.mark.parametrize(
+    ("text", "meals"),
+    [
+        ("Ben is out for lunch on weekdays", ["lunch"]),
+        ("Ben is out for lunch and dinner on weekdays", ["lunch", "dinner"]),
+    ],
+)
+def test_out_for_the_meals_said_is_away(text, meals):
+    result = read(text)
+    assert result.issues == []
+    assert [(r.member_name, r.present, r.weekdays, r.meal_types) for r in result.rules] == [
+        ("Ben", False, WEEKDAYS, meals)
+    ]
+
+
+KIDS_HOUSE = [{"name": "Ann", "age_band": "adult"}, {"name": "Kai", "age_band": "child"}, {"name": "Mei"}]
+
+
+def read_kids(text):
+    return read_rule_sentence(RuleParseRequest(kind="presence", text=text, members=KIDS_HOUSE, speaker="Ann"), None)
+
+
+def test_a_later_clause_still_takes_the_meals_said_before():
+    result = read_kids("Kai eats at school on weekday lunch, Mei is home on Fridays")
+    assert result.issues == []
+    assert [(r.member_name, r.present, r.weekdays, r.meal_types) for r in result.rules] == [
+        ("Kai", False, WEEKDAYS, ["lunch"]),
+        ("Mei", True, ["friday"], ["lunch"]),
+    ]
+
+
+def test_a_trailing_chinese_meal_is_reported_not_joined():
+    result = read_kids("Kai午饭在学校吃和晚饭在家吃和早饭")
+    assert result.issues == [NO_POLARITY]
+    assert [(r.member_name, r.present, r.weekdays, r.meal_types) for r in result.rules] == [
+        ("Kai", False, [], ["lunch"]),
+        ("Kai", True, [], ["dinner"]),
+    ]
+
+
+def test_school_on_weekdays_and_home_on_weekends():
+    result = read_kids("Kai eats at school on weekdays and at home on weekends")
+    assert result.issues == []
+    assert [(r.member_name, r.present, r.weekdays) for r in result.rules] == [
+        ("Kai", False, WEEKDAYS),
+        ("Kai", True, WEEKEND),
+    ]

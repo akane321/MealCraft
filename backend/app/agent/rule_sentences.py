@@ -61,8 +61,7 @@ MEALS = (
 ABSENT = (
     r"\bat school\b|\bat work\b|\bat the office\b|\beats? out\b|\beating out\b|\bnot (?:at )?home\b|\baway\b"
     r"|\bworks? late\b|\bworking late\b|\bwon'?t be (?:at )?home\b|\b(?:isn'?t|aren'?t) (?:at )?home\b"
-    r"|\bskips?\b|\btravel(?:s|ling)?\b|\beats? elsewhere\b|\b(?:breakfasts?|lunch(?:es)?|dinners?|suppers?) out\b"
-    r"|\bout for (?:breakfast|lunch|dinner|supper)\b"
+    r"|\bskips?\b|\btravel(?:s|ling)?\b|\beats? elsewhere\b"
     # A negated "eat / join / home": "Mei doesn't eat at home", "Ben won't join us", "Mei is not eating lunch".
     r"|\b(?:don'?t|doesn'?t|do not|does not|won'?t|will not|never|not)\b(?:\s+\w+){0,2}?"
     r"\s+(?:eat(?:s|ing)?|join(?:s|ing)?|home|have|having)\b"
@@ -70,6 +69,14 @@ ABSENT = (
     # 不吃 only before a meal word: "周三不吃晚饭" is away, "孩子不吃猪肉" is not a presence sentence.
     r"|在学校|在公司|不在家|不回来|不回家|(?<!在家)加班|出去吃|在外面吃|在外吃|不吃(?=饭|早|午|中|晚)|出差"
 )
+# "lunch out" / "out for dinner" is away for the meals it names only, so a clause naming another meal ("out for lunch
+# and in for dinner") is not sure (see `_polarity`).
+MEAL_OUT = (
+    r"\b(?:(?:breakfasts?|lunch(?:es)?|dinners?|suppers?) out"
+    r"|out for (?:breakfast|lunch|dinner|supper)(?: and (?:breakfast|lunch|dinner|supper))*)\b"
+)
+# A piece ending in a meal word ("for lunch"), so "and dinner" after it continues a meal list; "晚饭在家吃" does not.
+MEAL_END = "(?:" + "|".join(pattern for _, pattern in MEALS) + r")\s*$"
 HOME = r"home\b(?!-| late\b)"
 PRESENT = (
     r"\bjoins? us\b|\bcomes? over\b|\bcome for\b|\beats? with us\b|\bvisits?\b|\bjoins?\b"
@@ -191,6 +198,8 @@ def _polarity(clause: str) -> bool | None:
     lowered = clause.lower()
     if re.search(ABSENT, lowered):
         return False
+    if out := re.findall(MEAL_OUT, lowered):
+        return False if set(_meals(clause)) <= set(_meals(" ".join(out))) else None
     return True if re.search(PRESENT, re.sub(POSSESSIVE, " ", lowered)) else None
 
 
@@ -213,7 +222,7 @@ def _split_conflicts(clause: str, value) -> list[str]:
         (
             [i]
             for i in range(valued[-1] + 1, len(values))
-            if _meals(parts[2 * i]) and not _meals((parts[2 * i - 2].split() or [""])[-1])
+            if _meals(parts[2 * i]) and not re.search(MEAL_END, parts[2 * i - 2].lower())
         ),
         [],
     )
@@ -357,7 +366,7 @@ def _drop_contradictions(reading: _Reading, start: int) -> None:
 
 def _read_parts(request: RuleParseRequest, pairs, reading: _Reading, text: str, people: list[str], meals: list[str]):
     """The rules of one clause's parts; returns the people and meals a following part without its own takes."""
-    for clause, days, part in pairs:
+    for i, (clause, days, part) in enumerate(pairs):
         clause_meals = _meals(clause) or meals
         if days is UNPLACED:
             people = _members_named(clause, request.members, request.speaker, _Reading()) or people
@@ -391,8 +400,10 @@ def _read_parts(request: RuleParseRequest, pairs, reading: _Reading, text: str, 
             reading.issue(NAME_THE_PERSON)
             continue
         named = own or people
-        if own and set(own) != set(people):
-            clause_meals = _meals(clause)  # Another person's part never takes the meals said for someone else.
+        if i and own and set(own) != set(people):
+            # Another person's and-part never takes the meals said for someone else; a later clause still
+            # does ("Kai eats at school on weekday lunch, Mei is home on Fridays" gives Mei Friday lunch).
+            clause_meals = _meals(clause)
         if present is None:
             if named or days is not None or _meals(clause):
                 reading.issue(NO_POLARITY)
