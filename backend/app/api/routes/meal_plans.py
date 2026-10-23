@@ -46,8 +46,10 @@ DatabaseDependency = Annotated[Session, Depends(get_db_session)]
 
 
 def build_meal_plan_service(
-    database: Session, household_id: int, actor_user_id: int | None = None
+    database: Session, household_id: int, actor_user_id: int | None = None, *, live_feedback: bool = False
 ) -> WeeklyMealPlanService:
+    """`live_feedback` plans without the household's "Never again" dishes (ADR-0087): product requests set it,
+    evaluations leave it off so their reports never depend on a household's clicks."""
     recipe_repository = RecipeRepository(database, household_id=household_id)
     product_service = create_product_search_service(ProductSnapshotRepository(database))
     recommendation_service = RecipeRecommendationService(
@@ -60,6 +62,7 @@ def build_meal_plan_service(
         recipe_repository=recipe_repository,
         recommendation_service=recommendation_service,
         grocery_aggregator=WeeklyGroceryAggregator(product_service),
+        live_feedback=live_feedback,
     )
 
 
@@ -67,14 +70,16 @@ def get_meal_plan_service(
     database: DatabaseDependency,
     current: CurrentHouseholdViewDependency,
 ) -> WeeklyMealPlanService:
-    return build_meal_plan_service(database, current.active_membership.household_id, current.user.id)
+    return build_meal_plan_service(
+        database, current.active_membership.household_id, current.user.id, live_feedback=True
+    )
 
 
 MealPlanServiceDependency = Annotated[WeeklyMealPlanService, Depends(get_meal_plan_service)]
 
 
 def build_replanning_service(
-    database: Session, household_id: int, actor_user_id: int | None = None
+    database: Session, household_id: int, actor_user_id: int | None = None, *, live_feedback: bool = False
 ) -> MealPlanReplanningService:
     recipe_repository = RecipeRepository(database, household_id=household_id)
     product_service = create_product_search_service(ProductSnapshotRepository(database))
@@ -94,7 +99,8 @@ def build_replanning_service(
         grocery_aggregator=WeeklyGroceryAggregator(product_service),
         # Without the live model the swap still follows the request, by shared words.
         request_similarity=RecipeSimilarity(catalog_embedder(key.get_secret_value()) if key else None),
-        meal_plan_service=build_meal_plan_service(database, household_id, actor_user_id),
+        meal_plan_service=build_meal_plan_service(database, household_id, actor_user_id, live_feedback=live_feedback),
+        live_feedback=live_feedback,
     )
 
 
@@ -102,7 +108,9 @@ def get_replanning_service(
     database: DatabaseDependency,
     current: CurrentHouseholdViewDependency,
 ) -> MealPlanReplanningService:
-    return build_replanning_service(database, current.active_membership.household_id, current.user.id)
+    return build_replanning_service(
+        database, current.active_membership.household_id, current.user.id, live_feedback=True
+    )
 
 
 ReplanningServiceDependency = Annotated[MealPlanReplanningService, Depends(get_replanning_service)]

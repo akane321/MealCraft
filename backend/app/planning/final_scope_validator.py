@@ -466,6 +466,9 @@ class FinalPlanningValidator:
                     slot_id,
                 )
             )
+        if recipe_id in problem.never_again_recipes:
+            # A hard filter in both places (ADR-0033), with no exemption: the planner never offers such a dish.
+            checks.append(self._failed("excluded_recipe", "The household asked not to plan this dish again.", slot_id))
         missing_diets = sorted(set(problem.dietary_requirements).difference(expand_tags(recipe.dietary_tags)))
         if missing_diets:
             checks.append(

@@ -32,6 +32,7 @@ from app.repositories.meal_plan import (
     grocery_share,
 )
 from app.repositories.recipe import RecipeRepository
+from app.repositories.recipe_feedback import RecipeFeedbackRepository, with_never_again
 from app.schemas.display import shown_title
 from app.schemas.meal_plan import (
     MealPlanEntrySnapshot,
@@ -137,6 +138,7 @@ class MealPlanReplanningService:
         grocery_aggregator: WeeklyGroceryAggregator,
         request_similarity: RecipeSimilarity | None = None,
         meal_plan_service: WeeklyMealPlanService | None = None,
+        live_feedback: bool = False,
     ) -> None:
         self.repository = repository
         self.recipe_repository = recipe_repository
@@ -146,6 +148,17 @@ class MealPlanReplanningService:
         self.request_similarity = request_similarity
         # Plans the dishes of a shape change (ADR-0046 section 2).
         self.meal_plan_service = meal_plan_service
+        # A change plans without the household's "Never again" dishes as they are now (ADR-0087).
+        self.live_feedback = live_feedback
+
+    def _constraints(self, plan: MealPlan) -> WeeklyMealPlanRequest:
+        """The request a change to `plan` is planned with, priced at snapshot prices."""
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
+            update={"pricing_mode": "fixture"}
+        )
+        if not self.live_feedback:
+            return constraints
+        return with_never_again(constraints, self.repository.session, self.repository.household_id)
 
     def preview(
         self,
@@ -161,9 +174,7 @@ class MealPlanReplanningService:
             raise MealPlanReplanNotFoundError("Meal-plan entry not found")
         self._validate_target(entry, request)
 
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
-            update={"pricing_mode": "fixture"}
-        )
+        constraints = self._constraints(plan)
         role = self._role(constraints, entry)
         meals = [(entry.meal_type, [role])] if role is not None else None
         recipes = pool_for(meals, self.recipe_repository.list_for_planning(courses=pool_courses(meals)))
@@ -258,9 +269,7 @@ class MealPlanReplanningService:
         plan = self.repository.get(plan_id)
         if plan is None:
             raise MealPlanReplanNotFoundError("Meal plan not found")
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
-            update={"pricing_mode": "fixture"}
-        )
+        constraints = self._constraints(plan)
         meal = request.meal_type
         today = today or local_today()
         if any(day > plan.day_count for day in request.day_indexes or []):
@@ -385,9 +394,7 @@ class MealPlanReplanningService:
         plan = self.repository.get(plan_id)
         if plan is None:
             raise MealPlanReplanNotFoundError("Meal plan not found")
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
-            update={"pricing_mode": "fixture"}
-        )
+        constraints = self._constraints(plan)
         eaten = sorted((item for item in plan.entries if item.status != "skipped"), key=lambda e: (e.day_index, e.id))
         same: dict[str, list[MealPlanEntry]] = {}
         for item in eaten:
@@ -416,25 +423,18 @@ class MealPlanReplanningService:
         swaps: dict[int, RecipeRecommendationResponse] = {}
         short = None
         changed: set[tuple[int, str]] = set()
-        # The dishes that took the week over in place of one repeat of a dish are not tried for its next: the
-        # week differs only by the swaps made meanwhile, each within what it can spend.
-        # ponytail: a swap that freed room could let one fit; trying every dish again for every repeat took a
-        # week of seventeen repeats 15 s (ADR-0046 section 3: an answer within 10 s).
-        misfits: dict[tuple, set[int]] = {}
+        # Every repeat tries every dish again, also one that took the week over for an earlier repeat: a swap made
+        # meanwhile can free room, and a dish on another day can share or split packages differently (a plan of two
+        # trips buys each on its own trip). Skipping them saved time only (owner, 2026-10-22; ADR-0080).
         for entry in repeats:
             if (entry.day_index, entry.meal_type) in changed:
                 continue  # one dish a meal: a meal is checked with the dishes it keeps (`_meal_still_holds`)
             candidates = self._replacements(plan, entry, constraints, pool, recipes_by_id, avoid=served)
-            tried = misfits.setdefault((entry.meal_type, entry.role_id, dish_family(entry.recipe.title)), set())
-            ranked = sorted(
-                (c for c in candidates if c.recipe.id not in tried),
-                key=lambda c: (c.total_score, -c.recipe.id),
-                reverse=True,
-            )
+            ranked = sorted(candidates, key=lambda c: (c.total_score, -c.recipe.id), reverse=True)
             if not ranked:
                 continue
             made = {entry_id: choice.recipe.id for entry_id, choice in swaps.items()}
-            choice, extra = self._fitting(plan, constraints, recipes_by_id, made, entry, ranked, tried)
+            choice, extra = self._fitting(plan, constraints, recipes_by_id, made, entry, ranked)
             if extra is not None:
                 short = extra if short is None else min(short, extra)
                 continue
@@ -702,6 +702,11 @@ class MealPlanReplanningService:
             raise MealPlanReplanConflictError(
                 "This preview is stale because the meal plan has changed. Generate a new preview."
             )
+        if self.live_feedback and self._brings_never_again(event):
+            # A Never again pressed after the preview does not change the plan's revision (ADR-0087).
+            raise MealPlanReplanConflictError(
+                "This preview is stale because the meal plan has changed. Generate a new preview."
+            )
 
         proposed = self.recipe_repository.list_by_ids([event.proposed_recipe_id] if event.proposed_recipe_id else [])
         proposed_recipe = proposed[0] if proposed else None
@@ -741,6 +746,14 @@ class MealPlanReplanningService:
             event=self._event_response(applied_event),
             plan=WeeklyMealPlanService._to_response(applied_plan),
         )
+
+    def _brings_never_again(self, event: MealPlanEvent) -> bool:
+        """Whether confirming `event` would plan a dish the household now marks "Never again"."""
+        brought = {event.proposed_recipe_id} | {
+            values["recipe_id"] for values in (event.shape_change or {}).get("new_entries", [])
+        }
+        states = RecipeFeedbackRepository(self.repository.session, household_id=self.repository.household_id).states()
+        return any(states.get(recipe_id) == "never_again" for recipe_id in brought)
 
     def list_events(self, *, plan_id: int, limit: int) -> MealPlanReplanEventCollectionResponse:
         if self.repository.get(plan_id) is None:
@@ -944,10 +957,9 @@ class MealPlanReplanningService:
             trips=entry_trips(plan, eaten),
         )
 
-    def _fitting(self, plan, constraints, recipes_by_id, swaps, entry, ranked, misfits=None) -> tuple:
+    def _fitting(self, plan, constraints, recipes_by_id, swaps, entry, ranked) -> tuple:
         """The first of `ranked` for `entry` that keeps the week within its budget, or no further over it than it
-        is, with `swaps` also made, and None; else the one that takes it over least, and by how much. Each one
-        that does not fit is added to `misfits`.
+        is, with `swaps` also made, and None; else the one that takes it over least, and by how much.
 
         Whole packages decide, given what the rest of the week buys: a dish sharing the week's cabbage costs
         less than its own estimate says (the walkthrough's swaps took the week S$9 to S$17 over its budget).
@@ -964,8 +976,6 @@ class MealPlanReplanningService:
             cents = drift + round(grocery.purchase_total_sgd * 100)
             if cents <= ceiling:
                 return candidate, None
-            if misfits is not None:
-                misfits.add(candidate.recipe.id)
             if least is None or cents < least[1]:
                 least = (candidate, cents)
         return least[0], (least[1] - ceiling) / 100

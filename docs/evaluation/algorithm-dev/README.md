@@ -30,6 +30,21 @@ retail savings, latency at production scale or comparative algorithm quality.
 
 ## Search-arm smoke comparison
 
+Budget checks apply separately to each shopping trip. The greedy arm also
+checks an optimistic fractional cost for the whole remaining horizon: each
+unfilled slot contributes its cheapest generated meal at unit prices, with
+known pantry credited. It does not add separately rounded packages for each
+future meal. The exact basket and independent validator still decide acceptance.
+This lower bound deliberately grants the original pantry to each trip, so it can
+miss a future shortage but cannot reject a plan by charging that pantry twice.
+The experimental beam reserves places for low-checkout and low-usage-cost states.
+Both searches track whether explicit recipe/ingredient minimums remain reachable;
+request progress affects search order, not the final common objective.
+
+An empty partial plan skips only soft selected-slot average nutrition while
+being ranked. Complete plans still undergo the unchanged nutrition checks.
+Unknown pantry quantities are never deducted, including in the native reference.
+
 `scripts/compare_algorithm_dev.py` runs diversity-aware greedy, seeded GRASP
 (8 total constructions, restricted list of 3) and first-improvement local
 search (100 evaluated neighbors maximum). Local moves replace one meal or swap
@@ -134,18 +149,47 @@ aggregate nutrition requires required meal slots. Those cases can still use
 bounded table references. This does not cover every household packet or replace
 the product path.
 
-`scripts/compare_native_algorithm.py` records a local scale run in
-`native-scale.json`. The 16-recipe, 14-dinner case uses 224 meal variables instead
-of enumerating 16^14 ordered plans. Its proven optimum has 10 conservative
-representatives and synthetic checkout S$34; greedy has 8 and S$51. Native
-elapsed time in an earlier run was approximately 6.14 s. The former universal
-4-second target was superseded by owner decision ADR-0079 on 2026-10-20:
-acceptable wait depends on request complexity, with about a minute guidance for
-complex requests. These offline timings do not measure that product experience.
-The 8-recipe/7-dinner and 16-recipe/7-dinner cases matched greedy, with native
-times around 0.13 s and 0.36 s. These are single local timings including model
-building and verification, excluding fixture/vector preparation. They do not
-measure real retail savings, LLM latency or end-to-end product performance.
+`scripts/compare_native_algorithm.py` records the current run in
+[native-scale.json](native-scale.json), including machine, source version,
+solver workers and symmetry information. Recipe-count cases use developer
+recipes, synthetic prices and exactly one dish per dinner. They do not measure
+retail savings or end-to-end product latency.
+
+The existing fixtures have no `PlanningSlot.members`. Member eligibility and
+coverage come from the shared candidate generator and validator (ADR-0071);
+these runs do not establish member-level algorithm quality. Nutrition bands
+in these packets describe the whole table. Member-specific tests and comparisons
+are a separate required delivery.
+
+## Price-priority reference
+
+`AlgorithmObjective(..., priority="price")` orders exact checkout cents first,
+then the existing empty-position, variety, repetition, nutrition and ranking
+terms. The default remains `priority="variety"`. Equal-price plans retain those
+tie-breakers; hard constraints and per-shopping-trip budgets are unchanged.
+The table CP-SAT, native CP-SAT and exhaustive reference use this same ordering.
+Outputs identify `objective_priority`. Only a completed proof in price mode
+returns `minimum_checkout_sgd`; a time or enumeration limit, incomplete evidence
+or rejected candidate does not certify a minimum.
+
+That minimum covers generated meal options and the current one-product-per-line
+shopping policy. It is not a catalog-wide or mixed-package optimum, and it is
+not wired into product replies. Optional positions may be omitted to lower
+price; required meals and roles remain required. Use fixed required structure
+when comparing prices for the same number of meals and dishes.
+
+All three exact references accept `min_dish_kinds=N` (default zero). For example,
+price priority with `min_dish_kinds=4` finds the cheapest generated plan containing
+at least four counted kinds. This is a hard feasibility condition, not a price
+penalty: an impossible count or insufficient budget produces no certified price.
+The count uses the same ordered representative rule as the existing objective;
+near/unknown pairs cannot contribute separate representatives, repeated recipe
+IDs count once, and exempt roles do not contribute. It describes whole-table
+variety, not member-level coverage or a new product `dish_kind` definition.
+Native CP-SAT constrains the representative variables directly; the exhaustive
+and table references filter with the independently calculated score. Returned
+candidates are checked again against the requested count. Outputs record the
+minimum requested. Product request parsing and replies remain separate work.
 
 ## Controlled speed comparison
 
@@ -157,14 +201,20 @@ are no nutrition bands, skips constant objective stages, and uses four solver
 workers instead of one. No objective component or hard constraint is dropped.
 An earlier partial-hint experiment did not reliably improve time and was removed.
 
-Baseline times were 5.93, 5.08 and 5.13 seconds; optimized times were 1.94, 3.20
-and 2.75 seconds. Medians were 5.13 and 2.75 seconds. All six runs proved the
-same score. This meets four seconds on this local offline case, with more CPU
-workers. It does not establish a product-wide latency target: fixture/vector
-preparation, model calls, network and UI time are excluded. Multiworker timings
-and selected equal-score assignments may vary across runs and machines.
+The historical observations remain in [native-speed.json](native-speed.json).
+The reported median comparison of 5.13 s to 2.75 s used **one worker versus
+four workers**, so it does not isolate the model changes. It used 16 developer
+recipes and 14 single-dish dinners with synthetic prices and no slot members.
+The original CPU model, core count and code version were not recorded; the JSON
+says so rather than assigning today's machine or commit to old measurements.
 
-These timing artifacts were collected before the 2026-10-21 synchronization to
-code main c33f615. They are historical developer measurements, not fresh timings
-of that revision. Regression checks after synchronization are recorded in the
-paired knowledge task record. No held-out data or paid model calls were used.
+Four seconds is not a pass threshold. ADR-0079 and its amendment ADR-0080 make
+timing descriptive; product planning must not reduce quality or fail because of
+a time limit. These offline solver comparisons retain an explicit diagnostic
+limit and do not call a time-limited result optimal. Multiworker timings and
+selected equal-score assignments may vary across runs and machines.
+
+The benchmark generator records machine details, code commit, dirty-tree status
+and each run's workers for future measurements. Fixture/vector preparation,
+model calls, network and UI time are outside its timer. No held-out data or paid
+model calls are used.

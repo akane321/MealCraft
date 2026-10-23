@@ -116,7 +116,9 @@ PLANNER_ZH = {
     "I couldn't find a week that meets every limit. Try relaxing one of them.": (
         "我找不到满足所有限制的安排，放宽其中一个再试试。"
     ),
-    "Planning took longer than it should this time. Please try again.": "这次规划花的时间太长了，请再试一次。",
+    "I searched as far as the planner goes and found no week that fits. Try relaxing one of the limits.": (
+        "规划能搜索的范围我都搜索过了，没有找到符合要求的一周。放宽其中一个限制再试试。"
+    ),
     "I couldn't find enough different dishes for a week without repeats under these limits. "
     "Allow a dish twice, or relax one of the limits.": (
         "在这些限制下，找不到足够多不同的菜来排一周不重样的安排。可以允许一道菜出现两次，或者放宽一个限制。"
@@ -508,7 +510,7 @@ REPLIES: dict[str, tuple[str, str]] = {
     ),
     "no_repeats_rule": ("No dish twice", "菜不重样"),
     "cap_rule": ("Each dish at most {count} times", "每道菜最多 {count} 次"),
-    # A budget under the floor, for meals too big to search for the cheapest week within a reply (agent/limits.py).
+    # A budget under the floor, when the cheapest-week search found no week (agent/limits.py).
     "floor_week": (
         "That budget can't cover this week. S${budget:g} for {people} is S${each:.2f} a person a meal over "
         "{meals} meals: what this week's dishes use costs at least S${floor:.2f}, before buying whole packages.",
@@ -556,9 +558,9 @@ REPLIES: dict[str, tuple[str, str]] = {
         "I couldn't plan this week: the search found no week that meets every limit together ({limits}).",
         "这周没排出来：搜索没有找到同时满足所有限制的一周（{limits}）。",
     ),
-    "slow": (
-        "Planning took longer than it should this time. Please try again.",
-        "这次规划花的时间太长了，请再试一次。",
+    "exhausted": (
+        "I searched as far as the planner goes and found no week that fits. Try relaxing one of the limits.",
+        "规划能搜索的范围我都搜索过了，没有找到符合要求的一周。放宽其中一个限制再试试。",
     ),
     "weekly_limit": ("the S${amount:g} weekly budget", "每周 S${amount:g} 预算"),
     "meal_limit": ("the S${amount:.2f} a meal budget", "每餐 S${amount:.2f} 的预算"),

@@ -428,6 +428,8 @@ class FinalPlanningProblem(BaseModel):
     # (ADR-0024 section 3); None means nothing was checked.
     allergen_vocabulary: list[str] | None = None
     excluded_ingredients: list[str] = Field(default_factory=list)
+    # Recipes the household marked "Never again" (ADR-0087): no slot may hold one, locked or not.
+    never_again_recipes: list[str] = Field(default_factory=list, **LEAN)
     dietary_requirements: list[str] = Field(default_factory=list)
     requires_halal: bool = False
     health_preferences: list[Literal["low-sodium", "low-sugar", "lower-calorie"]] = Field(default_factory=list)

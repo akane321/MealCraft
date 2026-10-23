@@ -8,7 +8,7 @@ from collections import defaultdict
 from math import gcd, isfinite, lcm
 from time import perf_counter
 
-from app.planning.algorithm_reference import domains, evaluate
+from app.planning.algorithm_reference import domains, evaluate, require_min_dish_kinds
 from app.planning.diversity_greedy import DiversityAwareGreedyPlanner
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_beam import MealState, assignments_of
@@ -17,16 +17,17 @@ from app.planning.meal_composition import dish_servings, meal_shares
 
 def integer(value, scale=1000):
     scaled = value * scale
-    if not isfinite(scaled) or abs(scaled - round(scaled)) > 1e-7:
+    if not isfinite(scaled) or abs(scaled - round(scaled)) > 1e-7 + 1e-12 * abs(scaled):
         raise ValueError("Coefficient precision exceeds the native model's declared grid")
     return round(scaled)
 
 
 class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
-    def solve_exact(self, problem, *, time_limit=15, optimize=True):
+    def solve_exact(self, problem, *, time_limit=15, optimize=True, min_dish_kinds=0):
         from ortools.sat.python import cp_model
 
         require_finite_problem(problem)
+        require_min_dish_kinds(min_dish_kinds)
         if not isfinite(time_limit) or time_limit <= 0:
             raise ValueError("Time limit must be finite and positive")
         if set(self.objective.keys) != {r.recipe_id for r in problem.recipes}:
@@ -176,6 +177,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
                 model.Add(rep + conflict <= 1)
             model.Add(rep >= used[rid] - sum(conflicts))
             representative[rid] = rep
+        model.Add(sum(representative.values()) >= min_dish_kinds)
         repeat_terms = []
         for rid, count in recipe_counts.items():
             repeated = model.NewIntVar(0, max_dishes * max_dishes, f"repeat_{rid}")
@@ -208,6 +210,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
                 divisors[ingredient] = max(1, gcd(*coefficients))
         stock = {}
         costs = []
+        trip_costs = defaultdict(list)
         for key in sorted(demand, key=lambda k: (k[0], k[1], k[2] or 0)):
             ingredient, unit, _ = key
             divisor = divisors.get(ingredient, 1)
@@ -216,14 +219,18 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
             model.Add(qty == sum((amount // divisor) * var for amount, var in demand[key]))
             if ingredient not in stock:
                 p = pantry.get(ingredient)
-                if p and p.quantity is None:
-                    raise ValueError("Unknown pantry quantity")
-                stock[ingredient] = integer(p.quantity, quantity_scale) // divisor if p and p.unit == unit else 0
+                stock[ingredient] = (
+                    integer(p.quantity, quantity_scale) // divisor
+                    if p and p.quantity is not None and p.unit == unit
+                    else 0
+                )
             remaining = model.NewIntVar(0, cap, "remaining")
             model.AddMaxEquality(remaining, [0, qty - stock[ingredient]])
             stock_next = model.NewIntVar(
                 0,
-                integer(pantry[ingredient].quantity, quantity_scale) // divisor if ingredient in pantry else 0,
+                integer(pantry[ingredient].quantity, quantity_scale) // divisor
+                if ingredient in pantry and pantry[ingredient].quantity is not None and pantry[ingredient].unit == unit
+                else 0,
                 "stock",
             )
             model.AddMaxEquality(stock_next, [0, stock[ingredient] - qty])
@@ -244,9 +251,11 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
                 )
                 model.AddMinEquality(cost, choices)
                 costs.append(cost)
+                trip_costs[key[2]].append(cost)
         checkout = sum(costs)
         if problem.budget_is_hard and problem.purchase_budget_sgd is not None:
-            model.Add(checkout <= integer(problem.purchase_budget_sgd, 100))
+            for values in trip_costs.values():
+                model.Add(sum(values) <= integer(problem.purchase_budget_sgd, 100))
         for band in problem.nutrition_bands:
             if band.scope in {"per_dish", "per_slot"}:
                 continue  # Already independently checked while creating options.
@@ -309,6 +318,8 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
         solver.parameters.random_seed = 0
         output = {
             "status": "unknown",
+            "objective_priority": self.objective.priority,
+            "min_dish_kinds": min_dish_kinds,
             "scope": "native generated meal options",
             "meal_variables": len(selections),
             "build_ms": (perf_counter() - started) * 1000,
@@ -316,7 +327,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
             "workers": solver.parameters.num_search_workers,
             "stage_ms": [],
         }
-        for term in terms:
+        for term in self.objective.ordered(terms):
             if optimize and isinstance(term, int):
                 output["stage_ms"].append(0.0)
                 continue
@@ -338,18 +349,20 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
             for key, var in selections.items()
             if key[0] == s.slot_id and solver.Value(var)
         )
-        score, assignments, shopping, report = evaluate(self, problem, choices)
-        if report.status != "passed":
+        score, assignments, shopping, report = evaluate(self, problem, choices, min_dish_kinds=min_dish_kinds)
+        if report.status != "passed" or score is None:
             return {**output, "status": "validation_rejected"}
         modeled = [solver.Value(t) for t in terms]
         modeled[3] /= soft_scale
         modeled[4] /= 10000
+        modeled = self.objective.ordered(modeled)
         if any(abs(a - b) > 1e-7 for a, b in zip(score, modeled, strict=True)):
             return {**output, "status": "score_mismatch", "score": score, "modeled_score": modeled}
         return {
             **output,
             "status": "optimal_for_native_model",
             "score": score,
+            "minimum_checkout_sgd": report.purchase_total_sgd if self.objective.priority == "price" else None,
             "assignments": [a.model_dump() for a in assignments],
             "shopping": [r.model_dump() for r in shopping],
             "total_ms": (perf_counter() - started) * 1000,

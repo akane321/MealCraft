@@ -356,3 +356,24 @@ def test_asking_for_a_food_swaps_the_main_dish_of_the_meal() -> None:
     assert interpreter._dish_entry("can tomorrow be fish instead?", plan, 2) == (2, False)  # dinner's main
     assert interpreter._dish_entry("tomorrow's lunch, something with fish", plan, 2) == (1, False)
     assert interpreter._dish_entry("change tomorrow", plan, 2) == (None, False)  # nothing asked for: still ask
+
+
+def test_the_model_gets_a_minute_to_read_a_turn_and_never_longer(monkeypatch) -> None:
+    """Task 15 (owner, 2026-10-22): 60 s, not 15, before the rule parser reads the turn instead; still a timeout,
+    because an external call can hang. No model is called: the client is replaced before it is built."""
+    from app.agent import parser as parser_module
+    from app.core.config import Settings
+
+    built = {}
+
+    class Recorded:
+        def __init__(self, **kwargs):
+            built.update(kwargs)
+
+        def with_structured_output(self, *args, **kwargs):
+            return self
+
+    monkeypatch.setattr(parser_module, "ChatOpenAI", Recorded)
+    parser_module.OpenAIConstraintParser(api_key="test", model="test-model")
+    assert Settings().openai_timeout_seconds == 60.0
+    assert built["timeout"] == 60.0

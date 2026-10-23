@@ -29,8 +29,9 @@ class Settings(BaseSettings):
     agent_max_history_messages: int = 20
     openai_api_key: SecretStr | None = None
     openai_model: str = "gpt-5.4-mini"
-    # A slow model must not hang the chat: past this the turn is read with the rule parser instead.
-    openai_timeout_seconds: float = Field(default=15.0, gt=0, le=300)
+    # An external call can hang, so the chat never waits on one for ever: past this the turn is read with the rule
+    # parser instead. 60 s, not 15: a slow answer is still the model's reading, worth the wait (owner, 2026-10-22).
+    openai_timeout_seconds: float = Field(default=60.0, gt=0, le=300)
     # The oldest recipes the planner plans from; the API loads them again in the background at half this age.
     # 0 loads them for every plan (tests).
     planning_pool_cache_seconds: int = 300

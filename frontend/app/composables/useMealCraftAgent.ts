@@ -93,13 +93,27 @@ export function useMealCraftAgent() {
 
   async function confirmReplan() {
     if (!session.value) return null;
+    const current = generation;
+    let conflict = false;
     const result = await run(() => apiFetch<AgentReplanConfirmation>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/replan/confirm`,
       { method: "POST" },
-    ));
+    ).catch((error: { statusCode?: number }) => {
+      conflict = error.statusCode === 409;
+      throw error;
+    }));
     if (result) {
       session.value = result.session;
       generatedPlan.value = result.plan;
+    }
+    else if (conflict && current === generation) {
+      // A stale preview (the week changed, or a dish in it was marked Never again) can never be confirmed:
+      // clear its card as Discard does and keep the 409's message, which says to ask for a new one.
+      const discarded = await apiFetch<AgentSession>(
+        `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/replan/discard`,
+        { method: "POST" },
+      ).catch(() => null);
+      if (discarded && current === generation) session.value = discarded;
     }
     return result;
   }

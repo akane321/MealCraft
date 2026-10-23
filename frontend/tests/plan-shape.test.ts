@@ -1,8 +1,11 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import {
   DEFAULT_SHAPE,
   MEAL_PRESETS,
+  PLANNED_MEALS,
   describeShape,
   dishCounts,
   dishLabel,
@@ -51,6 +54,16 @@ describe("plan shape", () => {
       ["soup", null, false],
       ["staple", null, true],
     ]);
+  });
+
+  it("keeps the full default equal to data/planning/meal-structure-v1.json presets", () => {
+    const file = new URL("../../data/planning/meal-structure-v1.json", import.meta.url);
+    const presets = JSON.parse(readFileSync(file, "utf-8")).presets as Record<string, unknown>;
+    for (const meal of PLANNED_MEALS) {
+      // The backend adds courses [] and required true to a role the file leaves bare.
+      const expected = (presets[meal] as Array<Record<string, unknown>>).map(role => ({ courses: [], required: true, ...role }));
+      expect(DEFAULT_SHAPE.meals[meal]).toEqual(expected);
+    }
   });
 
   it("counts the dinner's dishes by the people at it, as the backend's table", () => {

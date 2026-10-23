@@ -1,9 +1,13 @@
 """A slot whose best few dishes make no meal that passes still gets a meal from lower-ranked ones (2026-10-12)."""
 
+import json
 import time
 
-from app.planning import meal_beam
-from app.planning.meal_beam import LAST_STEP_COMBINATIONS, MealBeamLimits, MealBeamPlanner
+import pytest
+
+from app.core.paths import repository_root
+from app.planning import meal_beam, product_path
+from app.planning.meal_beam import LAST_STEP_COMBINATIONS, MealBeamLimits, MealBeamPlanner, integer_root
 from app.schemas.planning_v2 import PlanningMealRole
 from tests.test_planning_meal_composition import problem, recipe
 
@@ -69,27 +73,90 @@ def five_salty_roles():
     return packet
 
 
-def test_the_last_step_gives_up_after_its_combination_budget():
-    """Review of task 14: the last step had no cap, and a five-role meal that no combination passes enumerated the
-    whole product (about 2e10 combinations for a real dinner, hours) before the slot was refused. It now checks
-    `LAST_STEP_COMBINATIONS` and calls the slot empty, as the four-times step did before."""
+def salty_roles(count: int):
+    """`count` roles over the same 45 salty dishes, so every meal of them is over the meal's sodium limit."""
     packet = five_salty_roles()
-    planner = MealBeamPlanner(
-        MealBeamLimits(max_meal_combinations=16384), local_losses={r.recipe_id: 0.0 for r in packet.recipes}
-    )
+    packet.slots[0].composition = [
+        PlanningMealRole(role_id="main" if i == 0 else f"main-{i + 1}", courses=["main"]) for i in range(count)
+    ]
+    return packet
+
+
+def role_sizes(monkeypatch, packet, limits, scales):
+    """Each role's options at each widening step, and the combinations the first step checked."""
+    sizes, checked = [], []
+    real = meal_beam.core_combinations
+
+    def counted(per_role, *args):
+        sizes.append([len(options) for options in per_role])
+        for combination in real(per_role, *args):
+            checked.append(combination)
+            yield combination
+
+    monkeypatch.setattr(meal_beam, "core_combinations", counted)
+    planner = MealBeamPlanner(limits, local_losses={r.recipe_id: 0.0 for r in packet.recipes})
+    for scale in scales:
+        assert planner._meal_options(packet, packet.slots[0], scale)[0] == []
+        if scale == 1:
+            first = len(checked)
+    return sizes, first
+
+
+def test_the_combination_cap_shapes_every_widening_step_but_the_last(monkeypatch):
+    """Owner, 2026-10-22: the cap is restored as a search-breadth parameter (removing it planned no better and took
+    up to hours). A five-role meal under 16,384 keeps 6 dishes a role (6^5 = 7,776), its wider steps two and four
+    times that, and the last step every eligible dish, bounded by `LAST_STEP_COMBINATIONS` instead."""
+    sizes, first = role_sizes(monkeypatch, salty_roles(5), MealBeamLimits(max_meal_combinations=16384), (1, 2, 4, None))
+    assert sizes == [[6] * 5, [12] * 5, [24] * 5, [45] * 5]
+    assert first == 6**5
+
+
+def test_no_cap_keeps_every_role_its_usual_dishes(monkeypatch):
+    sizes, first = role_sizes(monkeypatch, salty_roles(5), MealBeamLimits(), (1,))
+    assert sizes == [[8] * 5]
+    assert first == 8**5
+
+
+def test_a_seven_role_meal_keeps_four_dishes_a_role_under_16384(monkeypatch):
+    """`int(16384 ** (1 / 7))` is 3, since the float root is 3.9999...; 4^7 is exactly 16,384."""
+    sizes, first = role_sizes(monkeypatch, salty_roles(7), MealBeamLimits(max_meal_combinations=16384), (1,))
+    assert sizes == [[4] * 7]
+    assert first == 4**7
+
+
+@pytest.mark.parametrize("power", range(1, 9))
+def test_integer_root_is_exact(power):
+    for root in range(1, 13):
+        assert integer_root(root**power, power) == root
+        assert integer_root(root**power - 1, power) == root - 1
+        assert integer_root((root + 1) ** power - 1, power) == root
+
+
+def test_the_product_cap_is_the_calibrated_one():
+    """The product's cap is the sweep's chosen value (docs/evaluation/combination-cap-sweep, developer data)."""
+    sweep = repository_root() / "docs/evaluation/combination-cap-sweep/latest.json"
+    assert json.loads(sweep.read_text(encoding="utf-8"))["chosen_cap"] == product_path.MEAL_COMBINATIONS
+
+
+@pytest.mark.parametrize("scale", [2, 4, None])
+def test_a_wider_step_gives_up_after_its_combination_budget(scale):
+    """Review of task 14: the last step had no cap, and a five-role meal that no combination passes enumerated the
+    whole product (about 2e10 combinations for a real dinner, hours) before the slot was refused. Review of task 15:
+    the two- and four-times steps grow the same way with the number of roles. Every step after the first checks
+    `LAST_STEP_COMBINATIONS` and stops."""
+    packet = five_salty_roles()
+    planner = MealBeamPlanner(MealBeamLimits(), local_losses={r.recipe_id: 0.0 for r in packet.recipes})
     started = time.perf_counter()
-    # The last step alone: 45^5 (1.8e8) combinations, of which it checks its budget (about a second).
-    assert planner._meal_options(packet, packet.slots[0], None) == ([], False)
+    # 16^5 (1e6), 32^5 (3e7) and 45^5 (1.8e8) combinations, of which each checks its budget (about a second).
+    assert planner._meal_options(packet, packet.slots[0], scale) == ([], scale is not None)
     assert planner.last_step_tried == LAST_STEP_COMBINATIONS
     assert time.perf_counter() - started < 30
 
 
-def test_a_slot_the_last_step_gave_up_on_is_recorded_with_its_count(monkeypatch):
+def test_a_slot_the_last_step_gave_up_on_is_recorded_with_its_count():
+    """Every widening step, not the last alone: the slot is refused in seconds, not hours (task 15 review)."""
     packet = five_salty_roles()
-    monkeypatch.setattr(meal_beam, "MEAL_OPTION_WIDENING", (None,))
-    planner = MealBeamPlanner(
-        MealBeamLimits(max_meal_combinations=16384), local_losses={r.recipe_id: 0.0 for r in packet.recipes}
-    )
+    planner = MealBeamPlanner(MealBeamLimits(), local_losses={r.recipe_id: 0.0 for r in packet.recipes})
     result = planner.search_candidates(packet)
     assert result.empty_slot_ids == ("d1",)
     assert result.capped_slots == (("d1", LAST_STEP_COMBINATIONS),)

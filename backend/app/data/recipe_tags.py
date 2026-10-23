@@ -1,6 +1,6 @@
 """Tag every catalog recipe and ingredient for the Sprint 2 planner (layer 08; ADR-0070, ADR-0076).
 
-`python -m app.data.recipe_tags` writes two reviewed data files, which the importers copy onto the
+`python -m app.data.recipe_tags` writes two versioned tag files, which the importers copy onto the
 catalog rows (`app.data.tag_files`):
 
 - `data/recipes/recipe-tags-v1.json`, keyed by release `external_id` or curated slug: `meal_role`,
@@ -29,13 +29,17 @@ The rules, and why:
   planner's vegetable-led check still decides whether it may. A hearty salad (not vegetable-led, with a
   main protein) therefore fills no slot; the owner reviews them as their own stratum of the sample packet
   before deciding whether one may be a main. A dish is `vegetable` only when it is
-  vegetable-led (`app.planning.vegetable_led`, ADR-0054), so the role and the planner's rule agree.
+  vegetable-led (`app.planning.vegetable_led`, ADR-0082 amends ADR-0054 and supplements ADR-0077/0081),
+  so the role and the planner's rule agree.
   A main or soup that carries its own staple (rice, noodles, pasta, bread or other grain staples:
   `staple_share`) is `one_bowl`; a main made mostly of a staple with no protein is a `staple`. A
   main with a main protein is a `protein_main`; one led by vegetables without one is a `vegetable`.
   A soup whose noodles, rice or pasta are a tenth of it is `one_bowl` too. Baked goods go by title words
-  and sugar. Grey zones go to the model, which may not make a side, or a dish with no main protein, a
-  `protein_main`, and may answer null when no allowed role fits.
+  and sugar. A named homemade staple needs at least half listed raw starch; its binder eggs are not
+  main protein. ADR-0085 extends those names and dough-only shell evidence, keeps the 20% sugar/carbohydrate
+  ceiling except for savoury Yorkshire pudding, and counts a pizza's listed flour as its own carrier.
+  An egg/tofu/flesh-led side can be a protein main at half counted solids; whole bean-led sides,
+  batters and starch-heavy sides do not gain this role. Grey zones may stay null.
 - **Contains staple** is true exactly for `one_bowl` and `staple` dishes, so it follows the role.
 - **Protein sources** are the sources whose ingredients make at least 5 % (meat, poultry, fish,
   seafood) or 10 % (egg, soy, legumes) of the dish's counted raw grams, so an egg that binds a
@@ -83,10 +87,12 @@ from app.planning.recipe_quality import missing_named_protein, reviewed_source_c
 from app.planning.vegetable_led import (
     COOKED_STAPLES,
     COOKED_YIELD,
+    FLESH_SHARE,
     MEAT_WORDS,
     SEASONING_FROM_FLESH,
     UNCOUNTED,
     UNCOUNTED_GROUPS,
+    counted_weights,
     food_groups,
     vegetable_led,
 )
@@ -204,6 +210,24 @@ VOLUME_UNIT = re.compile(
 )
 SUBSTITUTION_NOTE = re.compile(r"\b(?:substitut\w*|instead|may|alternativ\w*)\b", re.I)
 DOUGH_FLOUR = frozenset({"flour", "bread_flour", "whole_wheat_flour", "self_rising_flour", "semolina"})
+HOMEMADE_STAPLE_TITLE = re.compile(
+    r"\b(?:noodles?|pasta|gnocchi|gnocches|polenta|roti|chapatis?|paratha|naan|flatbreads?|tortillas?"
+    r"|spaetzles?|spatzles?|mantou|bao|corn\s?bread|spoon bread|fry bread|(?:mealie )?pap|putupap"
+    r"|mandarin pancakes?|moo shu pancakes?|pupusas?|yorkshire puddings?)\b"
+)
+HOMEMADE_STARCH = DOUGH_FLOUR | {
+    "cornmeal",
+    "polenta",
+    "masa",
+    "masa_harina",
+    "corn_flour_masa",
+    "rice_flour",
+    "brown_rice_flour",
+    "semolina_flour",
+}
+BATTER_STARCH = HOMEMADE_STARCH | {"cornstarch", "potato_starch", "tapioca_starch"}
+WHOLE_SOYBEANS = frozenset({"edamame", "soybean", "fermented_soybeans"})
+BATTER_SIDE_TITLE = re.compile(r"\b(?:batters?|puddings?|pancakes?|crepes?)\b", re.I)
 PIZZA_BATTER = DOUGH_FLOUR | {
     "milk",
     "egg",
@@ -220,6 +244,8 @@ PIZZA_BATTER = DOUGH_FLOUR | {
     "baking_powder",
     "baking_soda",
 }
+SHELL_TITLE = re.compile(r"\b(?:tacos?|empanadas?|quiches?|wontons?|pies?|tarts?|[a-z]+(?:[ -][a-z]+)* shells?)\b")
+SHELL_DOUGH = PIZZA_BATTER | HOMEMADE_STARCH | {"shortening", "lard", "vinegar", "cornstarch"}
 BAKED_SIDE = re.compile(r"\b(?:au gratin|gratins?|bakes?|casseroles?|roasts?)\b")
 SOUP_TITLE = re.compile(r"\b(?:soups?|broths?|chowders?|bisques?|stews?)\b")
 CRITICAL_MODEL_FIELDS = ("meal_role", "contains_staple", "protein_sources")
@@ -227,7 +253,6 @@ CRITICAL_MODEL_FIELDS = ("meal_role", "contains_staple", "protein_sources")
 PROTEIN_SOURCES: tuple[str, ...] = get_args(ProteinSource)
 FLESH_SOURCES = frozenset({"chicken", "duck", "pork", "beef", "lamb", "fish", "shellfish"})
 SWEET_OR_CONDIMENT = frozenset({"dessert", "drink", "sauce"})
-FLESH_SHARE = 0.05
 PLANT_EGG_SHARE = 0.10
 _SOURCE_IDS = {
     "chicken": "chicken chicken_breast chicken_thigh chicken_wings cooked_chicken cornish_hen chicken_or_turkey turkey"
@@ -565,13 +590,64 @@ def staple_share(dish: Dish, names: frozenset[str] | set[str] = STAPLES) -> floa
         weight = line.grams * (COOKED_YIELD if name in COOKED_STAPLES and not already_cooked else 1.0)
         total += weight
         # Flour is a carrier in a complete wrapped meal, not every fried coating or meatloaf binder.
-        if name in names or (names == STAPLES and WRAPPED_MEAL.search(dish.title.lower()) and name in DOUGH_FLOUR):
+        if name in names or (
+            names == STAPLES
+            and (WRAPPED_MEAL.search(dish.title.lower()) or PIZZA_TITLE.search(dish.title.lower()))
+            and name in DOUGH_FLOUR
+        ):
             part += weight
     return part / total if total else 0.0
 
 
 def dish_vegetable_led(dish: Dish) -> bool:
     return vegetable_led((line.name, line.grams, line.text) for line in dish.lines)
+
+
+def homemade_staple(dish: Dish) -> bool:
+    """A named staple made mostly from listed raw starch, not a component or a title-only invention."""
+    if dish.course in FIXED_COURSE_ROLES or dish.course == "soup" or component(dish.title, dish.course):
+        return False
+    title = dish.title.lower()
+    yorkshire = bool(re.search(r"\byorkshire puddings?\b", title))
+    if not yorkshire and dish.carbohydrate_g and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.2:
+        return False
+    # Yorkshire's milk lactose is not added sweetness (owner); the starch majority still applies.
+    if re.search(r"\b(?:cakes?|cookies?|desserts?|puddings?)\b", title) and not yorkshire:
+        return False
+    dumpling = bool(re.search(r"\bdumplings?\b", title))
+    if dumpling:
+        sources = protein_sources(dish)
+        if sources is None or set(sources) - {"egg"} or WRAPPED_MEAL.search(title):
+            return False
+        if any(line_sources(line) - {"egg"} for line in dish.lines):
+            return False  # Even a small or unknown flesh/soy line cannot be erased as a binder.
+    elif not HOMEMADE_STAPLE_TITLE.search(title):
+        return False
+    names = HOMEMADE_STARCH
+    if dumpling:
+        names = DOUGH_FLOUR | {"potato", "instant_mashed_potato"}
+    elif re.search(r"\b(?:gnocchi|gnocches)\b", title):
+        names = names | {"potato", "sweet_potato"}
+    return staple_share(dish, names) >= SIDE_STAPLE_SHARE
+
+
+def protein_side_share(dish: Dish) -> float:
+    """Egg/tofu/flesh share of weighed solids; whole beans and batter foods are not protein mains."""
+    if BATTER_SIDE_TITLE.search(dish.title) or staple_share(dish, BATTER_STARCH) >= ONE_BOWL_SHARE:
+        return 0.0  # Reuse the established 15% substantive-starch boundary, not a report-fitted threshold.
+    eligible = FLESH_SOURCES | {"egg", "soy", "?"}
+    if any(line_sources(line) & eligible and (line.grams is None or line.grams <= 0) for line in dish.lines):
+        return 0.0
+    weights = counted_weights((line.name, line.grams, line.text) for line in dish.lines)
+    # Keep lines separate: the same ingredient can occur with different animal wording.
+    total = sum(weight for _, weight in weights)
+    protein = sum(
+        weight
+        for line in dish.lines
+        if line_sources(line) & eligible and release_name(line.name) not in WHOLE_SOYBEANS
+        for _, weight in counted_weights([(line.name, line.grams, line.text)])
+    )
+    return protein / total if total else 0.0
 
 
 def component(title: str, course: str) -> bool:
@@ -603,6 +679,8 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
     names = {release_name(line.name) for line in dish.lines}
     if PIZZA_TITLE.search(title) and names & DOUGH_FLOUR and names <= PIZZA_BATTER:
         return "sauce", ()  # Only a batter is listed; the title/steps cannot supply the missing pizza toppings.
+    if SHELL_TITLE.search(title) and names & (HOMEMADE_STARCH | {"pie_crust"}) and names <= SHELL_DOUGH | {"pie_crust"}:
+        return "sauce", ()  # Actual dough-only lines, not a wrapper/shell word alone.
     if component(dish.title, dish.course):
         if FILLING_TITLE.search(title) and set(sources or ()) & (FLESH_SOURCES | {"soy"}):
             protein = sum(line.grams or 0 for line in dish.lines if line_sources(line) & (FLESH_SOURCES | {"soy"}))
@@ -612,6 +690,8 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
         return "sauce", ()  # `sauce` is every non-meal part of a dish, a dough or stock as much as a sauce
     if dish.course in FIXED_COURSE_ROLES:
         return FIXED_COURSE_ROLES[dish.course], ()
+    if homemade_staple(dish):
+        return "staple", ()
     has_protein = sources is None or bool(sources)
     if dish.course == "baked_good":
         sweet = bool(dish.carbohydrate_g) and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.3
@@ -623,7 +703,10 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
             return "staple", ()
         if sweet:
             return "dessert", ()
-        return None, ("breakfast", "dessert", "staple", "snack", "one_bowl", "protein_main")
+        roles = ("breakfast", "dessert", "staple", "snack", "one_bowl", "protein_main")
+        if dish.carbohydrate_g and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.2:
+            roles = tuple(role for role in roles if role != "staple")
+        return None, roles
     share = staple_share(dish)
     if share == 0:
         open_roles = tuple(role for role in open_roles if role not in {"one_bowl", "staple"})
@@ -641,11 +724,13 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
         # A rice dish may have been filed as a side; its real rice carrier still fills the staple.
         if RICE_DISH.search(title) and staple_share(dish, RICE_GRAINS) >= ONE_BOWL_SHARE:
             return ("one_bowl" if has_protein else "staple"), ()
+        if has_protein and protein_side_share(dish) >= SIDE_STAPLE_SHARE:
+            return "protein_main", ()
         if led:
             return "vegetable", ()
         if staple_share(dish, STAPLES | STARCHY) >= SIDE_STAPLE_SHARE:
             return "staple", ()
-        # A side is never the meal's main, even with bacon in it; one that is not vegetable-led may stay null.
+        # A little meat does not make a main; the owner excludes bean-led sides from protein mains.
         return None, tuple(
             role
             for role in open_roles
@@ -757,7 +842,7 @@ def rule_tags(dish: Dish) -> Tags:
             role, allowed, sources = None, (), None
     if sources == []:  # a dish with no main protein is never a protein main, whatever the model would say
         allowed = tuple(name for name in allowed if name != "protein_main")
-    if role in SWEET_OR_CONDIMENT:
+    if role in SWEET_OR_CONDIMENT or (role == "staple" and homemade_staple(dish)):
         sources = []  # the eggs of a cake are not its main protein
     methods = cooking_methods(dish)
     decided = {
