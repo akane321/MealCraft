@@ -7,27 +7,29 @@ Recipes: 8997 (release v2.2 recipes the importer loads, and the curated catalog)
 
 | Field | rule | llm | open (null) |
 | --- | ---: | ---: | ---: |
-| `meal_role` | 8556 | 369 | 72 |
-| `contains_staple` | 8556 | 369 | 72 |
+| `meal_role` | 8558 | 367 | 72 |
+| `contains_staple` | 8558 | 367 | 72 |
 | `protein_sources` | 8815 | 77 | 105 |
 | `cooking_methods` | 8997 | 0 | 0 |
 | `equipment` | 8997 | 0 | 0 |
 | `flavor_tags` | 8997 | 0 | 0 |
+
+Of these, 214 `llm` values are the human reviewer's table (`recipe-tags-v1/review-table-20261024`: prefilled by AI, not checked row by row, unreviewed until the owner accepts the batch) and 4 `rule` values are the owner's own decisions dish by dish (`recipe-tags-v1/owner-20261024`).
 
 ## Meal role by method
 
 | Meal role | rule | llm |
 | --- | ---: | ---: |
 | protein_main | 3610 | 27 |
-| vegetable | 589 | 1 |
+| vegetable | 589 | 2 |
 | soup | 212 | 14 |
-| staple | 560 | 107 |
-| one_bowl | 1497 | 93 |
-| breakfast | 390 | 13 |
+| staple | 560 | 113 |
+| one_bowl | 1497 | 82 |
+| breakfast | 390 | 10 |
 | salad | 484 | 0 |
-| snack | 240 | 90 |
-| dessert | 529 | 13 |
-| sauce | 367 | 11 |
+| snack | 242 | 68 |
+| dessert | 529 | 21 |
+| sauce | 367 | 30 |
 | drink | 78 | 0 |
 | open (null) | 0 | 0 |
 
@@ -37,11 +39,11 @@ Recipes: 8997 (release v2.2 recipes the importer loads, and the curated catalog)
 | --- | ---: |
 | chicken | 2161 |
 | duck | 4 |
-| pork | 1229 |
-| beef | 1279 |
+| pork | 1228 |
+| beef | 1278 |
 | lamb | 33 |
 | fish | 231 |
-| shellfish | 481 |
+| shellfish | 480 |
 | soy | 143 |
 | egg | 995 |
 | legume | 214 |
@@ -76,8 +78,8 @@ Recipes: 8997 (release v2.2 recipes the importer loads, and the curated catalog)
 
 | Value | Recipes |
 | --- | ---: |
-| contains_staple True | 2257 |
-| contains_staple False | 6668 |
+| contains_staple True | 2252 |
+| contains_staple False | 6673 |
 | contains_staple None | 72 |
 | equipment ('blender',) | 532 |
 | equipment ('microwave',) | 218 |

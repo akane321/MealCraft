@@ -696,7 +696,11 @@ def test_accepting_a_batch_marks_its_model_values_reviewed_and_a_re_run_keeps_th
     shutil.copy(repository_root() / tag_files.RECIPE_TAGS, target)
     monkeypatch.setattr(recipe_tags, "repository_root", lambda: tmp_path)
     before = json.loads(target.read_text(encoding="utf-8"))
-    model = sum(e["method"] == "llm" for entry in before["recipes"].values() for e in entry["estimated"].values())
+    model = sum(
+        e["method"] == "llm" and e["batch"] == recipe_tags.LLM_BATCH
+        for entry in before["recipes"].values()
+        for e in entry["estimated"].values()
+    )
     assert model and recipe_tags.accept_batch("recipe-tags-v1/other") == 0
 
     assert recipe_tags.accept_batch(recipe_tags.LLM_BATCH) == model
@@ -704,12 +708,17 @@ def test_accepting_a_batch_marks_its_model_values_reviewed_and_a_re_run_keeps_th
     assert {k: v for k, v in after.items() if k != "recipes"} == {k: v for k, v in before.items() if k != "recipes"}
     for key, entry in after["recipes"].items():
         for name, estimate in entry["estimated"].items():
-            assert estimate["reviewed"] is (estimate["method"] == "llm"), (key, name)
+            # The review table's batch waits for its own acceptance; the owner's decisions were reviewed already.
+            assert estimate["reviewed"] is (estimate["batch"] in {recipe_tags.LLM_BATCH, recipe_tags.OWNER_BATCH})
             assert entry[name] == before["recipes"][key][name]
     assert recipe_tags.accept_batch(recipe_tags.LLM_BATCH) == 0
 
     # A re-run keeps an accepted value reviewed while it is unchanged, and a changed one goes back to review.
-    key, entry = next((k, e) for k, e in after["recipes"].items() if e["estimated"]["meal_role"]["method"] == "llm")
+    key, entry = next(
+        (k, e)
+        for k, e in after["recipes"].items()
+        if e["estimated"].get("meal_role", {}).get("batch") == recipe_tags.LLM_BATCH
+    )
     tags = recipe_tags.Tags(values={name: entry[name] for name in tag_files.RECIPE_TAG_FIELDS})
     tags.methods = {name: e["method"] for name, e in entry["estimated"].items()}
     assert recipe_tags.recipe_entry(tags, entry)["estimated"]["meal_role"]["reviewed"] is True

@@ -182,6 +182,11 @@ uv run --project backend python -m app.data.recipe_tags --llm    # 规则定不�
    结构化规划（按 `meal_roles` 的餐）当它没打标签，哪个正餐角色都不填；按菜类（courses）的旧规划不受影响。
    重跑标签命令时，值没变的条目保持 `reviewed`，值变了的回到待审。
 
+复核人为冻结批次填的复核表按 owner 2026-10-24 的决定另成一批 `recipe-tags-v1/review-table-20261024`：
+只导入规则留空的字段，仍是未复核的 AI 估计；复核人亲自核对 30 道抽样、公开准确率后，owner 才决定是否
+`--accept-batch recipe-tags-v1/review-table-20261024`。owner 逐道决定的两处角色例外（`OWNER_ROLES`）覆盖规则。
+见 [复核表导入批次](docs/review-table-20261024/README.md)。
+
 面团、饼底、面糊、酱、腌料、干料、沙拉汁、肉汁、高汤、酱料膏和调味料这类"菜的一部分"由规则判成 `sauce`
 （`sauce` 即所有不能单独成菜的部分），永远不填一餐：标题去掉括号、结尾的 `Recipe`/`I`/`II` 和 ` - ...`、
 ` for ...` 之后，最后一个名词是这类词，且它前面没有 `with`、`in`、`on`、`over`（酱汁类还要没有 `and`/`&`/`'n`）；

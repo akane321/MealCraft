@@ -16,6 +16,9 @@ origin, the ingredient hierarchy, gram shares, title words and step keywords. Th
 (`--llm`) may decide an allowed meal role; unknown animal identity and missing quantities are not
 sent to it to guess. A value the rules and the model both leave open stays null,
 which the planner reads as untagged. Allergen, halal and diet labels are never estimated here.
+The human reviewer's table (`REVIEW_TABLE`) replaces a frozen model value only in a field the rules leave open,
+as its own unreviewed model-decided batch; the owner's dish-by-dish role decisions (`OWNER_ROLES`) override the
+rules (data-engineering/docs/review-table-20261024).
 
 The rules, and why:
 
@@ -108,6 +111,19 @@ VERSION = "recipe-tags-v1"
 INGREDIENT_VERSION = "ingredient-tags-v1"
 RULE_BATCH = f"{VERSION}/rules"
 LLM_BATCH = f"{VERSION}/llm"
+# The human reviewer's table for the frozen model batch (owner 2026-10-24, ADR-0076's route). Its values were
+# prefilled by AI and confirmed in chat by dish type, not checked row by row, so they are model-decided (`llm`)
+# and unreviewed until the owner accepts the batch after the reviewer's in-person sample check. Only fields the
+# rules leave open are imported (data-engineering/scripts/import_review_table.py).
+REVIEW_TABLE_BATCH = f"{VERSION}/review-table-20261024"
+REVIEW_TABLE = "data-engineering/docs/review-table-20261024/decisions.json"
+# The owner's own role decisions, dish by dish (owner 2026-10-24, in chat): they override the rules. A person's
+# decision, not an estimate, so written as `rule` in their own batch and reviewed. Protein sources stay the rules'.
+OWNER_BATCH = f"{VERSION}/owner-20261024"
+OWNER_ROLES = {
+    "RCP2_A84B4E56257C": "snack",  # Asian Wraps: rice-paper chicken rolls, a spring-roll snack (rule: protein_main)
+    "RCP2_E5862A12458B": "snack",  # Potato Croquettes With Parmesan: fried croquettes (rule: staple)
+}
 SAMPLE = "data-engineering/docs/recipe-tags-v1-sample.json"
 REPORT = "data-engineering/docs/recipe-tags-v1-report.md"
 BASIC_SEASONINGS = "data/ingredients/basic-seasonings-v1.json"
@@ -475,6 +491,8 @@ class Tags:
     # Only protein sources supported by ingredient lines; a title is not ingredient evidence.
     allowed_sources: frozenset[str] = frozenset(PROTEIN_SOURCES)
     incomplete_reason: str | None = None
+    # A field's batch when it is not its method's own (`RULE_BATCH`, `LLM_BATCH`): the owner's or the review table's.
+    batches: dict = field(default_factory=dict)
 
 
 def release_name(name: str) -> str:
@@ -888,6 +906,9 @@ def rule_tags(dish: Dish) -> Tags:
         allowed = tuple(name for name in allowed if name != "protein_main")
     if role in SWEET_OR_CONDIMENT or (role == "staple" and homemade_staple(dish)):
         sources = []  # the eggs of a cake are not its main protein
+    if dish.key in OWNER_ROLES:  # the owner's decision overrides the rules' role; the sources stay the rules'
+        role, allowed = OWNER_ROLES[dish.key], ()
+        tags.batches |= {"meal_role": OWNER_BATCH, "contains_staple": OWNER_BATCH}
     methods = cooking_methods(dish)
     decided = {
         "meal_role": role,
@@ -1131,19 +1152,45 @@ def merge_answer(tags: Tags, answer: dict) -> None:
         tags.methods["protein_sources"] = "llm"
 
 
+def review_table_values() -> dict[str, dict]:
+    """The review table's imported values by recipe key, or none before it is imported."""
+    path = repository_root() / REVIEW_TABLE
+    return json.loads(path.read_text(encoding="utf-8"))["accepted"] if path.exists() else {}
+
+
+def merge_review_table(tags: Tags, values: dict, ruled: dict, roles: list[str]) -> None:
+    """Take the review table's values for the fields the rules (`ruled`, before any model value) leave open: a role
+    the human reviewer may choose (`roles`, `review_roles`) with its staple, and protein sources of the vocabulary.
+
+    They are model-decided in `REVIEW_TABLE_BATCH` and unreviewed until the owner accepts the batch, so the planner
+    reads none of them before; a field the rules decide keeps the rules' value.
+    """
+    role = values.get("meal_role")
+    if ruled["meal_role"] is None and role in roles:
+        tags.values |= {"meal_role": role, "contains_staple": role in {"one_bowl", "staple"}}
+        for name in ("meal_role", "contains_staple"):
+            tags.methods[name], tags.batches[name] = "llm", REVIEW_TABLE_BATCH
+    sources = values.get("protein_sources")
+    if ruled["protein_sources"] is None and sources is not None and set(sources) <= set(PROTEIN_SOURCES):
+        tags.values["protein_sources"] = [source for source in PROTEIN_SOURCES if source in sources]
+        tags.methods["protein_sources"], tags.batches["protein_sources"] = "llm", REVIEW_TABLE_BATCH
+
+
 # --- writing -----------------------------------------------------------------------------------------------
 
 
 def recipe_entry(tags: Tags, previous: dict | None = None) -> dict:
-    """The tag file's entry; a value the owner accepted (`--accept-batch`) stays reviewed while it is unchanged."""
+    """The tag file's entry; a value the owner accepted (`--accept-batch`) stays reviewed while it is unchanged, and
+    the owner's own decisions (`OWNER_BATCH`) are reviewed."""
     previous = previous or {}
     entry = {name: tags.values[name] for name in tags.values}
     entry["estimated"] = {}
     for name, method in tags.methods.items():
-        batch = RULE_BATCH if method == "rule" else LLM_BATCH
+        batch = tags.batches.get(name) or (RULE_BATCH if method == "rule" else LLM_BATCH)
         held = previous.get("estimated", {}).get(name, {})
         same = held.get("batch") == batch and held.get("method") == method and previous.get(name) == entry[name]
-        entry["estimated"][name] = {"method": method, "batch": batch, "reviewed": bool(same and held.get("reviewed"))}
+        reviewed = batch == OWNER_BATCH or bool(same and held.get("reviewed"))
+        entry["estimated"][name] = {"method": method, "batch": batch, "reviewed": reviewed}
     return entry
 
 
@@ -1183,10 +1230,15 @@ def previous_file() -> dict:
 
 
 def previous_answers(previous: dict) -> dict[str, dict]:
-    """The model's earlier decisions, so a re-run asks only for what is still open."""
+    """The model's earlier decisions, so a re-run asks only for what is still open. The review table's values are
+    read again from their own file, not taken for the model's answers."""
     kept = {}
     for key, entry in previous.get("recipes", {}).items():
-        llm = [name for name, estimate in entry.get("estimated", {}).items() if estimate["method"] == "llm"]
+        llm = [
+            name
+            for name, estimate in entry.get("estimated", {}).items()
+            if estimate["method"] == "llm" and estimate.get("batch", LLM_BATCH) == LLM_BATCH
+        ]
         if llm:
             kept[key] = {name: entry[name] for name in llm}
     return kept
@@ -1197,17 +1249,24 @@ def build(use_llm: bool, max_usd: float, log=print, reask: bool = False) -> dict
     tagged = [(dish, rule_tags(dish)) for dish in dishes]
     previous = previous_file()
     earlier = {} if reask else previous_answers(previous)
+    review_table = review_table_values()
     for dish, tags in tagged:
+        ruled = {name: tags.values[name] for name in CRITICAL_MODEL_FIELDS}
+        roles = review_roles(dish, tags)
         if dish.key in earlier and tags.open:
             merge_answer(tags, earlier[dish.key])
-        # Keep the failed, unreviewed model batch frozen. Better rules do not silently release those recipes.
+        # Keep the failed, unreviewed model batch frozen. Better rules do not silently release those recipes; the
+        # owner's own decisions do.
         if not reask:
             entry = previous.get("recipes", {}).get(dish.key, {})
             for name in CRITICAL_MODEL_FIELDS:
                 estimate = entry.get("estimated", {}).get(name, {})
-                if estimate.get("method") == "llm" and not estimate.get("reviewed"):
+                if estimate.get("method") == "llm" and not estimate.get("reviewed") and name not in tags.batches:
                     tags.values[name] = entry[name]
                     tags.methods[name] = "llm"
+                    if estimate.get("batch", LLM_BATCH) != LLM_BATCH:
+                        tags.batches[name] = estimate["batch"]
+        merge_review_table(tags, review_table.get(dish.key, {}), ruled, roles)
     still_open = [(dish, tags) for dish, tags in tagged if any(tags.values[name] is None for name in tags.open)]
     # The model's spend over every run, kept in the tag file's header.
     usage = dict(NO_USAGE) | previous.get("llm_usage", {})
@@ -1319,6 +1378,13 @@ def report(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict], usage:
     for name in fields:
         methods = Counter(tags.methods.get(name, "open") for _, tags in tagged)
         lines.append(f"| `{name}` | {methods['rule']} | {methods['llm']} | {methods['open']} |")
+    batches = Counter(batch for _, tags in tagged for batch in tags.batches.values())
+    lines += [
+        "",
+        f"Of these, {batches[REVIEW_TABLE_BATCH]} `llm` values are the human reviewer's table (`{REVIEW_TABLE_BATCH}`: "
+        "prefilled by AI, not checked row by row, unreviewed until the owner accepts the batch) and "
+        f"{batches[OWNER_BATCH]} `rule` values are the owner's own decisions dish by dish (`{OWNER_BATCH}`).",
+    ]
     lines += ["", "## Meal role by method", "", "| Meal role | rule | llm |", "| --- | ---: | ---: |"]
     roles = Counter((tags.values["meal_role"], tags.methods.get("meal_role", "open")) for _, tags in tagged)
     for role in (*MEAL_ROLES, None):
@@ -1402,7 +1468,8 @@ def main() -> None:
     parser.add_argument(
         "--accept-batch",
         metavar="BATCH",
-        help=f"mark the model's values of a reviewed batch ({LLM_BATCH}) reviewed in the tag file, and stop",
+        help=f"mark the model's values of a reviewed batch ({LLM_BATCH}, {REVIEW_TABLE_BATCH}) reviewed in the tag "
+        "file, and stop",
     )
     args = parser.parse_args()
 

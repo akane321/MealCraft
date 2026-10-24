@@ -1,0 +1,348 @@
+{
+  "batch": "recipe-tags-v1/review-table-20261024",
+  "seed": 20261024,
+  "size": 30,
+  "drawn_from": 108,
+  "strata": {
+    "breakfast": {
+      "recipes": 1,
+      "drawn": 1
+    },
+    "dessert": {
+      "recipes": 20,
+      "drawn": 5
+    },
+    "one_bowl": {
+      "recipes": 1,
+      "drawn": 1
+    },
+    "protein_sources only": {
+      "recipes": 2,
+      "drawn": 1
+    },
+    "sauce": {
+      "recipes": 24,
+      "drawn": 6
+    },
+    "snack": {
+      "recipes": 24,
+      "drawn": 6
+    },
+    "soup": {
+      "recipes": 10,
+      "drawn": 3
+    },
+    "staple": {
+      "recipes": 24,
+      "drawn": 6
+    },
+    "vegetable": {
+      "recipes": 2,
+      "drawn": 1
+    }
+  },
+  "how_to_check": "data-engineering/docs/review-table-20261024/README.md; fill sample.xlsx in person",
+  "recipes": [
+    {
+      "id": "RCP2_5D84F859E558",
+      "title": "English Popovers",
+      "course": "baked_good",
+      "stratum": "breakfast",
+      "imported": {
+        "meal_role": "breakfast",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_00100560483E",
+      "title": "Swedish Crescents",
+      "course": "baked_good",
+      "stratum": "dessert",
+      "imported": {
+        "meal_role": "dessert",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_02ED221BB8C3",
+      "title": "Snowballs(Swedish)",
+      "course": "baked_good",
+      "stratum": "dessert",
+      "imported": {
+        "meal_role": "dessert",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_0CFF755F4ED0",
+      "title": "Mexican Wedding Cakes",
+      "course": "baked_good",
+      "stratum": "dessert",
+      "imported": {
+        "meal_role": "dessert",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_229B831CE6C7",
+      "title": "Mexican Wedding Bells",
+      "course": "baked_good",
+      "stratum": "dessert",
+      "imported": {
+        "meal_role": "dessert",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_44C42897EBAD",
+      "title": "Peruvian Alfajores",
+      "course": "baked_good",
+      "stratum": "dessert",
+      "imported": {
+        "meal_role": "dessert",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_A96FC949077E",
+      "title": "Moroccan Lentils And Couscous",
+      "course": "side",
+      "stratum": "one_bowl",
+      "imported": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_956FD7177508",
+      "title": "Ramen Hot And Sour Soup",
+      "course": "soup",
+      "stratum": "protein_sources only",
+      "imported": {
+        "protein_sources": [
+          "egg"
+        ]
+      }
+    },
+    {
+      "id": "RCP2_75BFE1C39E34",
+      "title": "Taco Casserole",
+      "course": "main",
+      "stratum": "sauce",
+      "imported": {
+        "meal_role": "sauce",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_8F83C05E5E00",
+      "title": "Siopao (Filipino Steamed Buns)",
+      "course": "main",
+      "stratum": "sauce",
+      "imported": {
+        "meal_role": "sauce",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_DC882B3F674A",
+      "title": "Banana Raita With Coconut",
+      "course": "side",
+      "stratum": "sauce",
+      "imported": {
+        "meal_role": "sauce",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_E8D667BA918A",
+      "title": "Fake Feta",
+      "course": "side",
+      "stratum": "sauce",
+      "imported": {
+        "meal_role": "sauce",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_ED8C37EACE4D",
+      "title": "Mock Feta Cheese ( Vegan Substitute )",
+      "course": "side",
+      "stratum": "sauce",
+      "imported": {
+        "meal_role": "sauce",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_F9AC64939A2C",
+      "title": "Welsh Rarebit",
+      "course": "main",
+      "stratum": "sauce",
+      "imported": {
+        "meal_role": "sauce",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_290971CF4730",
+      "title": "Mexican Wedding Rings",
+      "course": "baked_good",
+      "stratum": "snack",
+      "imported": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_49CA27EAC641",
+      "title": "Alfajores De Maizena",
+      "course": "baked_good",
+      "stratum": "snack",
+      "imported": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_59209F8AE7D0",
+      "title": "South African Vetkoek",
+      "course": "baked_good",
+      "stratum": "snack",
+      "imported": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_5954131C04AC",
+      "title": "Scrumpets",
+      "course": "baked_good",
+      "stratum": "snack",
+      "imported": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_81C30294D91B",
+      "title": "Turkish Pogaca",
+      "course": "baked_good",
+      "stratum": "snack",
+      "imported": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_A887D44E2FC0",
+      "title": "Sauerkraut pierogii",
+      "course": "main",
+      "stratum": "snack",
+      "imported": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_806075FC7BF8",
+      "title": "French Onion Soup",
+      "course": "soup",
+      "stratum": "soup",
+      "imported": {
+        "meal_role": "soup",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_EAAD839F9258",
+      "title": "Mushroom-Barley Soup",
+      "course": "soup",
+      "stratum": "soup",
+      "imported": {
+        "meal_role": "soup",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_F0A2E3140892",
+      "title": "Hearty French Onion Soup",
+      "course": "soup",
+      "stratum": "soup",
+      "imported": {
+        "meal_role": "soup",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_130F971CF821",
+      "title": "Ukrainian Bukovinian Nachynka (Cornbread Dressing)",
+      "course": "side",
+      "stratum": "staple",
+      "imported": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_1722D847EECE",
+      "title": "Southern Spoon Bread",
+      "course": "side",
+      "stratum": "staple",
+      "imported": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_310A97E81CC3",
+      "title": "Taco Baked Potatoes",
+      "course": "main",
+      "stratum": "staple",
+      "imported": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_3CC1354BC571",
+      "title": "Brazilian Arroz De Festa (Confetti Rice)",
+      "course": "side",
+      "stratum": "staple",
+      "imported": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_409262770DBA",
+      "title": "Popovers(Portuguese)",
+      "course": "baked_good",
+      "stratum": "staple",
+      "imported": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_50567B7B0B2C",
+      "title": "Kumpir",
+      "course": "main",
+      "stratum": "staple",
+      "imported": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_12D50BBDB52E",
+      "title": "Eggplant A La Parmesan",
+      "course": "main",
+      "stratum": "vegetable",
+      "imported": {
+        "meal_role": "vegetable",
+        "contains_staple": false
+      }
+    }
+  ]
+}
