@@ -5,8 +5,8 @@
     "physical_core_count": "not recorded",
     "platform": "Windows-11-10.0.26200-SP0",
     "python": "3.12.14",
-    "code_commit": "bd84d0655774cd66d884b1cf985efdcdedd13a62",
-    "working_tree_dirty": true
+    "code_commit": "8a3341253e91ebdeda3dd01c2a14bdce16f1c6a0",
+    "working_tree_dirty": false
   },
   "scope": "Developer catalog recipes; synthetic products/prices; single-dish dinners; no held-out data. LNS starts from the same greedy seed. Native reference has a 30-second diagnostic limit; LNS repairs have no wall-clock cutoff. Member grouping uses existing unreviewed similarity policy.",
   "rows": [
@@ -14,24 +14,24 @@
       "recipes": 8,
       "days": 7,
       "members": 2,
-      "seed_ms": 68.02390000029845,
-      "reference_ms": 625.1748000004227,
+      "seed_ms": 109.2454999999859,
+      "reference_ms": 6027.737200000019,
       "reference": {
         "status": "optimal_for_native_model",
         "objective_priority": "variety",
         "min_dish_kinds": 0,
         "scope": "native generated meal options",
         "meal_variables": 56,
-        "build_ms": 30.13120000014169,
+        "build_ms": 30.071600000013632,
         "symmetry_pairs": 6,
         "workers": 4,
         "stage_ms": [
-          41.53740000037942,
-          30.709800000295218,
-          31.87900000011723,
+          67.13510000000156,
+          31.37430000001018,
+          30.292099999996935,
           0.0,
-          14.416899999559973,
-          8.207100000618084
+          14.367599999985714,
+          19.858800000008614
         ],
         "score": [
           0,
@@ -390,7 +390,7 @@
             "trip": 1
           }
         ],
-        "total_ms": 159.12010000010923
+        "total_ms": 196.69120000000362
       },
       "runs": [
         {
@@ -417,8 +417,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 23.0,
-          "solve_ms": 68.02390000029845,
-          "total_with_seed_ms": 68.02390000029845,
+          "solve_ms": 109.2454999999859,
+          "total_with_seed_ms": 109.2454999999859,
           "matches_reference": true,
           "repairs": []
         },
@@ -448,8 +448,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 23.0,
-          "solve_ms": 376.5824000001885,
-          "total_with_seed_ms": 376.5824000001885,
+          "solve_ms": 384.18329999998946,
+          "total_with_seed_ms": 384.18329999998946,
           "matches_reference": true,
           "repairs": []
         },
@@ -480,8 +480,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 23.0,
-          "solve_ms": 135.1212999998097,
-          "total_with_seed_ms": 135.1212999998097,
+          "solve_ms": 110.13460000000919,
+          "total_with_seed_ms": 110.13460000000919,
           "matches_reference": true,
           "repairs": []
         },
@@ -513,8 +513,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 23.0,
-          "solve_ms": 231.7600999995193,
-          "total_with_seed_ms": 299.78399999981775,
+          "solve_ms": 185.35660000000576,
+          "total_with_seed_ms": 294.60209999999165,
           "matches_reference": true,
           "repairs": [
             {
@@ -524,7 +524,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 117.27350000001024,
+              "elapsed_ms": 88.33160000000362,
               "accepted": false
             },
             {
@@ -534,7 +534,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 107.7382999992551,
+              "elapsed_ms": 93.15820000000485,
               "accepted": false
             }
           ]
@@ -567,8 +567,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 23.0,
-          "solve_ms": 216.24450000035722,
-          "total_with_seed_ms": 284.2684000006557,
+          "solve_ms": 238.8832999999977,
+          "total_with_seed_ms": 348.1287999999836,
           "matches_reference": true,
           "repairs": [
             {
@@ -578,7 +578,7 @@
                 "d4"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 100.84310000002006,
+              "elapsed_ms": 105.96590000000106,
               "accepted": false
             },
             {
@@ -588,7 +588,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 107.75910000029398,
+              "elapsed_ms": 128.09760000001802,
               "accepted": false
             }
           ]
@@ -621,8 +621,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 23.0,
-          "solve_ms": 416.21179999947344,
-          "total_with_seed_ms": 484.2356999997719,
+          "solve_ms": 462.6545000000135,
+          "total_with_seed_ms": 571.8999999999994,
           "matches_reference": true,
           "repairs": [
             {
@@ -632,7 +632,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 100.34009999981208,
+              "elapsed_ms": 101.31509999999366,
               "accepted": false
             },
             {
@@ -642,7 +642,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 94.64630000002217,
+              "elapsed_ms": 105.48909999999978,
               "accepted": false
             },
             {
@@ -652,7 +652,7 @@
                 "d2"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 102.15599999992264,
+              "elapsed_ms": 152.67810000000281,
               "accepted": false
             },
             {
@@ -662,7 +662,7 @@
                 "d4"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 107.60120000031748,
+              "elapsed_ms": 89.1832000000079,
               "accepted": false
             }
           ]
@@ -695,8 +695,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 23.0,
-          "solve_ms": 480.2935999996407,
-          "total_with_seed_ms": 548.3174999999392,
+          "solve_ms": 449.6071000000086,
+          "total_with_seed_ms": 558.8525999999945,
           "matches_reference": true,
           "repairs": [
             {
@@ -706,7 +706,7 @@
                 "d4"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 101.85860000001412,
+              "elapsed_ms": 122.4307999999894,
               "accepted": false
             },
             {
@@ -716,7 +716,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 140.6635000003007,
+              "elapsed_ms": 105.19620000002305,
               "accepted": false
             },
             {
@@ -726,7 +726,7 @@
                 "d2"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 117.8885999997874,
+              "elapsed_ms": 107.70130000000222,
               "accepted": false
             },
             {
@@ -736,7 +736,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 106.53929999989487,
+              "elapsed_ms": 103.39700000000107,
               "accepted": false
             }
           ]
@@ -769,8 +769,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 23.0,
-          "solve_ms": 231.02259999996022,
-          "total_with_seed_ms": 299.0465000002587,
+          "solve_ms": 250.64589999999498,
+          "total_with_seed_ms": 359.8913999999809,
           "matches_reference": true,
           "repairs": [
             {
@@ -782,7 +782,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 134.1403000005812,
+              "elapsed_ms": 126.28300000000081,
               "accepted": false
             },
             {
@@ -794,7 +794,7 @@
                 "d5"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 92.3371999997471,
+              "elapsed_ms": 118.46719999999777,
               "accepted": false
             }
           ]
@@ -827,8 +827,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 23.0,
-          "solve_ms": 295.8228000006784,
-          "total_with_seed_ms": 363.84670000097685,
+          "solve_ms": 205.3432000000157,
+          "total_with_seed_ms": 314.5887000000016,
           "matches_reference": true,
           "repairs": [
             {
@@ -840,7 +840,7 @@
                 "d4"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 184.58600000030856,
+              "elapsed_ms": 107.37119999998868,
               "accepted": false
             },
             {
@@ -852,7 +852,7 @@
                 "d5"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 104.5364999999947,
+              "elapsed_ms": 93.13290000000052,
               "accepted": false
             }
           ]
@@ -885,8 +885,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 23.0,
-          "solve_ms": 654.5826000001398,
-          "total_with_seed_ms": 722.6065000004382,
+          "solve_ms": 658.1204999999954,
+          "total_with_seed_ms": 767.3659999999813,
           "matches_reference": true,
           "repairs": [
             {
@@ -898,7 +898,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 167.42290000001958,
+              "elapsed_ms": 195.49489999999992,
               "accepted": false
             },
             {
@@ -910,7 +910,7 @@
                 "d5"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 138.1319000001895,
+              "elapsed_ms": 161.68210000000727,
               "accepted": false
             },
             {
@@ -922,7 +922,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 139.27870000043185,
+              "elapsed_ms": 126.32229999999822,
               "accepted": false
             },
             {
@@ -934,7 +934,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 195.85399999959918,
+              "elapsed_ms": 165.2811000000156,
               "accepted": false
             }
           ]
@@ -967,8 +967,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 23.0,
-          "solve_ms": 561.1761000000115,
-          "total_with_seed_ms": 629.20000000031,
+          "solve_ms": 578.503100000006,
+          "total_with_seed_ms": 687.7485999999919,
           "matches_reference": true,
           "repairs": [
             {
@@ -980,7 +980,7 @@
                 "d4"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 165.33290000006673,
+              "elapsed_ms": 172.46359999998617,
               "accepted": false
             },
             {
@@ -992,7 +992,7 @@
                 "d5"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 127.63790000008157,
+              "elapsed_ms": 123.52559999999357,
               "accepted": false
             },
             {
@@ -1004,7 +1004,7 @@
                 "d5"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 137.10489999994024,
+              "elapsed_ms": 136.42790000000105,
               "accepted": false
             },
             {
@@ -1016,7 +1016,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 121.09229999987292,
+              "elapsed_ms": 135.90030000000297,
               "accepted": false
             }
           ]
@@ -1027,24 +1027,24 @@
       "recipes": 16,
       "days": 7,
       "members": 6,
-      "seed_ms": 184.99040000006062,
-      "reference_ms": 475.32180000052904,
+      "seed_ms": 182.32069999999112,
+      "reference_ms": 416.55619999997384,
       "reference": {
         "status": "optimal_for_native_model",
         "objective_priority": "variety",
         "min_dish_kinds": 0,
         "scope": "native generated meal options",
         "meal_variables": 112,
-        "build_ms": 86.75920000041515,
+        "build_ms": 86.81920000000787,
         "symmetry_pairs": 6,
         "workers": 4,
         "stage_ms": [
-          63.97500000002765,
-          173.25110000001587,
-          76.9798000001174,
+          64.69610000002035,
+          155.02480000000673,
+          60.001700000015035,
           0.0,
-          45.475599999917904,
-          24.23019999969256
+          29.838699999999108,
+          15.965200000010782
         ],
         "score": [
           0,
@@ -1446,7 +1446,7 @@
             "trip": 1
           }
         ],
-        "total_ms": 474.6021999999357
+        "total_ms": 415.9081000000242
       },
       "runs": [
         {
@@ -1477,8 +1477,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 34.0,
-          "solve_ms": 184.99040000006062,
-          "total_with_seed_ms": 184.99040000006062,
+          "solve_ms": 182.32069999999112,
+          "total_with_seed_ms": 182.32069999999112,
           "matches_reference": true,
           "repairs": []
         },
@@ -1512,8 +1512,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 34.0,
-          "solve_ms": 1100.2129999997123,
-          "total_with_seed_ms": 1100.2129999997123,
+          "solve_ms": 1108.9111000000003,
+          "total_with_seed_ms": 1108.9111000000003,
           "matches_reference": true,
           "repairs": []
         },
@@ -1548,8 +1548,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 34.0,
-          "solve_ms": 310.9282000004896,
-          "total_with_seed_ms": 310.9282000004896,
+          "solve_ms": 266.26430000001733,
+          "total_with_seed_ms": 266.26430000001733,
           "matches_reference": true,
           "repairs": []
         },
@@ -1585,8 +1585,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 34.0,
-          "solve_ms": 332.28260000032606,
-          "total_with_seed_ms": 517.2730000003867,
+          "solve_ms": 367.9109999999923,
+          "total_with_seed_ms": 550.2316999999834,
           "matches_reference": true,
           "repairs": [
             {
@@ -1596,7 +1596,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 165.0220999999874,
+              "elapsed_ms": 183.4775000000093,
               "accepted": false
             },
             {
@@ -1606,7 +1606,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 160.67460000067513,
+              "elapsed_ms": 179.02780000000007,
               "accepted": false
             }
           ]
@@ -1643,8 +1643,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 34.0,
-          "solve_ms": 346.8939999993381,
-          "total_with_seed_ms": 531.8843999993987,
+          "solve_ms": 469.2684999999983,
+          "total_with_seed_ms": 651.5891999999894,
           "matches_reference": true,
           "repairs": [
             {
@@ -1654,7 +1654,7 @@
                 "d4"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 156.93830000054731,
+              "elapsed_ms": 176.08740000000012,
               "accepted": false
             },
             {
@@ -1664,7 +1664,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 180.21940000016912,
+              "elapsed_ms": 286.6537999999821,
               "accepted": false
             }
           ]
@@ -1701,8 +1701,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 34.0,
-          "solve_ms": 807.1006000000125,
-          "total_with_seed_ms": 992.0910000000731,
+          "solve_ms": 715.6199000000072,
+          "total_with_seed_ms": 897.9405999999983,
           "matches_reference": true,
           "repairs": [
             {
@@ -1712,7 +1712,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 191.41829999989568,
+              "elapsed_ms": 187.0924000000116,
               "accepted": false
             },
             {
@@ -1722,7 +1722,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 262.50180000079126,
+              "elapsed_ms": 159.45279999999684,
               "accepted": false
             },
             {
@@ -1732,7 +1732,7 @@
                 "d2"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 172.79060000055324,
+              "elapsed_ms": 173.29899999998588,
               "accepted": false
             },
             {
@@ -1742,7 +1742,7 @@
                 "d4"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 167.9652000002534,
+              "elapsed_ms": 185.20689999999718,
               "accepted": false
             }
           ]
@@ -1779,8 +1779,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 34.0,
-          "solve_ms": 707.9378999997061,
-          "total_with_seed_ms": 892.9282999997668,
+          "solve_ms": 777.0703000000196,
+          "total_with_seed_ms": 959.3910000000108,
           "matches_reference": true,
           "repairs": [
             {
@@ -1790,7 +1790,7 @@
                 "d4"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 160.29770000022836,
+              "elapsed_ms": 163.07939999998666,
               "accepted": false
             },
             {
@@ -1800,7 +1800,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 163.60710000026302,
+              "elapsed_ms": 264.45889999999395,
               "accepted": false
             },
             {
@@ -1810,7 +1810,7 @@
                 "d2"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 153.0481999998301,
+              "elapsed_ms": 169.29009999998357,
               "accepted": false
             },
             {
@@ -1820,7 +1820,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 218.6529000000519,
+              "elapsed_ms": 168.00040000001104,
               "accepted": false
             }
           ]
@@ -1857,8 +1857,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 34.0,
-          "solve_ms": 610.7385000004797,
-          "total_with_seed_ms": 795.7289000005403,
+          "solve_ms": 517.7015000000154,
+          "total_with_seed_ms": 700.0222000000065,
           "matches_reference": true,
           "repairs": [
             {
@@ -1870,7 +1870,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 309.5051999998759,
+              "elapsed_ms": 258.1844999999987,
               "accepted": false
             },
             {
@@ -1882,7 +1882,7 @@
                 "d5"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 292.17289999996865,
+              "elapsed_ms": 253.52029999999104,
               "accepted": false
             }
           ]
@@ -1919,8 +1919,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 34.0,
-          "solve_ms": 535.7590000003256,
-          "total_with_seed_ms": 720.7494000003862,
+          "solve_ms": 573.3498000000168,
+          "total_with_seed_ms": 755.6705000000079,
           "matches_reference": true,
           "repairs": [
             {
@@ -1932,7 +1932,7 @@
                 "d4"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 245.96889999975247,
+              "elapsed_ms": 274.06120000000556,
               "accepted": false
             },
             {
@@ -1944,7 +1944,7 @@
                 "d5"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 283.0874999999651,
+              "elapsed_ms": 293.5578000000021,
               "accepted": false
             }
           ]
@@ -1981,8 +1981,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 34.0,
-          "solve_ms": 1140.6048999997438,
-          "total_with_seed_ms": 1325.5952999998044,
+          "solve_ms": 1062.470100000013,
+          "total_with_seed_ms": 1244.790800000004,
           "matches_reference": true,
           "repairs": [
             {
@@ -1994,7 +1994,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 328.99040000029345,
+              "elapsed_ms": 252.35000000000696,
               "accepted": false
             },
             {
@@ -2006,7 +2006,7 @@
                 "d5"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 234.02719999921828,
+              "elapsed_ms": 202.50469999999154,
               "accepted": false
             },
             {
@@ -2018,7 +2018,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 281.89569999995,
+              "elapsed_ms": 281.6784000000041,
               "accepted": false
             },
             {
@@ -2030,7 +2030,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 282.1342999995977,
+              "elapsed_ms": 313.0947999999876,
               "accepted": false
             }
           ]
@@ -2067,8 +2067,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 34.0,
-          "solve_ms": 1123.461000000134,
-          "total_with_seed_ms": 1308.4514000001946,
+          "solve_ms": 1038.9412000000107,
+          "total_with_seed_ms": 1221.2619000000018,
           "matches_reference": true,
           "repairs": [
             {
@@ -2080,7 +2080,7 @@
                 "d4"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 309.4066000003295,
+              "elapsed_ms": 231.94979999999532,
               "accepted": false
             },
             {
@@ -2092,7 +2092,7 @@
                 "d5"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 282.8309000005902,
+              "elapsed_ms": 261.69859999998835,
               "accepted": false
             },
             {
@@ -2104,7 +2104,7 @@
                 "d5"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 268.24260000012146,
+              "elapsed_ms": 249.2131999999856,
               "accepted": false
             },
             {
@@ -2116,7 +2116,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 248.50379999952565,
+              "elapsed_ms": 284.2397999999946,
               "accepted": false
             }
           ]
@@ -2127,24 +2127,24 @@
       "recipes": 16,
       "days": 14,
       "members": 2,
-      "seed_ms": 443.6017999996693,
-      "reference_ms": 3483.928599999672,
+      "seed_ms": 437.3203000000103,
+      "reference_ms": 3066.1490999999896,
       "reference": {
         "status": "optimal_for_native_model",
         "objective_priority": "variety",
         "min_dish_kinds": 0,
         "scope": "native generated meal options",
         "meal_variables": 224,
-        "build_ms": 137.52870000007533,
+        "build_ms": 129.69279999998662,
         "symmetry_pairs": 12,
         "workers": 4,
         "stage_ms": [
-          100.97709999990911,
-          106.96740000003047,
-          266.3744999999835,
+          91.1705999999981,
+          108.32150000001661,
+          473.47239999999147,
           0.0,
-          636.4960999999312,
-          2223.214999999982
+          489.3814000000134,
+          1769.0861000000098
         ],
         "score": [
           0,
@@ -2681,7 +2681,7 @@
             "trip": 2
           }
         ],
-        "total_ms": 3482.241800000338
+        "total_ms": 3065.3739999999916
       },
       "runs": [
         {
@@ -2708,8 +2708,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 52.0,
-          "solve_ms": 443.6017999996693,
-          "total_with_seed_ms": 443.6017999996693,
+          "solve_ms": 437.3203000000103,
+          "total_with_seed_ms": 437.3203000000103,
           "matches_reference": false,
           "repairs": []
         },
@@ -2739,8 +2739,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 52.0,
-          "solve_ms": 1466.2152999999307,
-          "total_with_seed_ms": 1466.2152999999307,
+          "solve_ms": 1412.3237999999958,
+          "total_with_seed_ms": 1412.3237999999958,
           "matches_reference": false,
           "repairs": []
         },
@@ -2771,8 +2771,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 50.0,
-          "solve_ms": 511.1833000000843,
-          "total_with_seed_ms": 511.1833000000843,
+          "solve_ms": 514.5645999999999,
+          "total_with_seed_ms": 514.5645999999999,
           "matches_reference": false,
           "repairs": []
         },
@@ -2804,8 +2804,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 50.0,
-          "solve_ms": 338.9745000004041,
-          "total_with_seed_ms": 782.5763000000734,
+          "solve_ms": 404.91389999999683,
+          "total_with_seed_ms": 842.2342000000071,
           "matches_reference": false,
           "repairs": [
             {
@@ -2815,7 +2815,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 162.43759999997565,
+              "elapsed_ms": 183.83339999999748,
               "accepted": true
             },
             {
@@ -2825,7 +2825,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 167.6206000001912,
+              "elapsed_ms": 212.5686999999914,
               "accepted": false
             }
           ]
@@ -2858,8 +2858,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 47.0,
-          "solve_ms": 384.54709999950865,
-          "total_with_seed_ms": 828.148899999178,
+          "solve_ms": 373.46900000000005,
+          "total_with_seed_ms": 810.7893000000104,
           "matches_reference": false,
           "repairs": [
             {
@@ -2869,7 +2869,7 @@
                 "d9"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 207.4333000000479,
+              "elapsed_ms": 207.59240000001,
               "accepted": true
             },
             {
@@ -2879,7 +2879,7 @@
                 "d13"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 168.92250000000786,
+              "elapsed_ms": 157.89100000000644,
               "accepted": false
             }
           ]
@@ -2912,8 +2912,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 50.0,
-          "solve_ms": 645.7780999999159,
-          "total_with_seed_ms": 1089.3798999995852,
+          "solve_ms": 772.2295999999744,
+          "total_with_seed_ms": 1209.5498999999847,
           "matches_reference": false,
           "repairs": [
             {
@@ -2923,7 +2923,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 150.99719999943773,
+              "elapsed_ms": 184.4408000000044,
               "accepted": true
             },
             {
@@ -2933,7 +2933,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 172.12319999998726,
+              "elapsed_ms": 191.0067999999967,
               "accepted": false
             },
             {
@@ -2943,7 +2943,7 @@
                 "d4"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 166.91200000059325,
+              "elapsed_ms": 200.22119999998722,
               "accepted": false
             },
             {
@@ -2953,7 +2953,7 @@
                 "d8"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 143.12430000063614,
+              "elapsed_ms": 178.29129999998372,
               "accepted": false
             }
           ]
@@ -2986,8 +2986,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 47.0,
-          "solve_ms": 729.6446999998807,
-          "total_with_seed_ms": 1173.24649999955,
+          "solve_ms": 748.4024000000034,
+          "total_with_seed_ms": 1185.7227000000137,
           "matches_reference": false,
           "repairs": [
             {
@@ -2997,7 +2997,7 @@
                 "d9"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 161.35209999993094,
+              "elapsed_ms": 167.29020000002492,
               "accepted": true
             },
             {
@@ -3007,7 +3007,7 @@
                 "d13"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 198.69019999987358,
+              "elapsed_ms": 224.51910000000908,
               "accepted": false
             },
             {
@@ -3017,7 +3017,7 @@
                 "d12"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 183.1117000001541,
+              "elapsed_ms": 173.48799999999187,
               "accepted": false
             },
             {
@@ -3027,7 +3027,7 @@
                 "d4"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 170.57239999940066,
+              "elapsed_ms": 170.2739000000122,
               "accepted": false
             }
           ]
@@ -3060,8 +3060,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 42.0,
-          "solve_ms": 453.60170000003563,
-          "total_with_seed_ms": 897.203499999705,
+          "solve_ms": 494.2260999999917,
+          "total_with_seed_ms": 931.546400000002,
           "matches_reference": false,
           "repairs": [
             {
@@ -3073,7 +3073,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 237.6918999998452,
+              "elapsed_ms": 259.0834000000086,
               "accepted": true
             },
             {
@@ -3085,7 +3085,7 @@
                 "d8"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 208.3615000001373,
+              "elapsed_ms": 225.56449999999018,
               "accepted": true
             }
           ]
@@ -3118,8 +3118,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 46.0,
-          "solve_ms": 514.4610000006651,
-          "total_with_seed_ms": 958.0628000003344,
+          "solve_ms": 562.3377999999946,
+          "total_with_seed_ms": 999.6581000000049,
           "matches_reference": false,
           "repairs": [
             {
@@ -3131,7 +3131,7 @@
                 "d9"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 229.09749999962514,
+              "elapsed_ms": 227.78310000001056,
               "accepted": true
             },
             {
@@ -3143,7 +3143,7 @@
                 "d7"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 278.24210000017047,
+              "elapsed_ms": 327.9143999999974,
               "accepted": true
             }
           ]
@@ -3176,8 +3176,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 34.0,
-          "solve_ms": 878.3192999999301,
-          "total_with_seed_ms": 1321.9210999995994,
+          "solve_ms": 930.9557999999925,
+          "total_with_seed_ms": 1368.2761000000028,
           "matches_reference": false,
           "repairs": [
             {
@@ -3189,7 +3189,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 228.1155000000581,
+              "elapsed_ms": 212.3429000000101,
               "accepted": true
             },
             {
@@ -3201,7 +3201,7 @@
                 "d8"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 218.46029999960592,
+              "elapsed_ms": 279.2015999999933,
               "accepted": true
             },
             {
@@ -3213,7 +3213,7 @@
                 "d7"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 185.6329000002006,
+              "elapsed_ms": 181.5870000000075,
               "accepted": false
             },
             {
@@ -3225,7 +3225,7 @@
                 "d9"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 235.35139999967214,
+              "elapsed_ms": 239.46949999998424,
               "accepted": true
             }
           ]
@@ -3258,8 +3258,8 @@
             "primary_basis": "member_mean"
           },
           "price_sgd": 41.0,
-          "solve_ms": 1073.3728000004703,
-          "total_with_seed_ms": 1516.9746000001396,
+          "solve_ms": 987.7255000000105,
+          "total_with_seed_ms": 1425.0458000000208,
           "matches_reference": false,
           "repairs": [
             {
@@ -3271,7 +3271,7 @@
                 "d9"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 272.476000000097,
+              "elapsed_ms": 280.87469999999826,
               "accepted": true
             },
             {
@@ -3283,7 +3283,7 @@
                 "d7"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 325.11739999972633,
+              "elapsed_ms": 231.6849999999988,
               "accepted": true
             },
             {
@@ -3295,7 +3295,7 @@
                 "d6"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 230.52410000036616,
+              "elapsed_ms": 216.98710000001142,
               "accepted": true
             },
             {
@@ -3307,7 +3307,7 @@
                 "d7"
               ],
               "status": "optimal_for_native_model",
-              "elapsed_ms": 232.7147000005425,
+              "elapsed_ms": 244.52920000001654,
               "accepted": true
             }
           ]
