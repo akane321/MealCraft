@@ -1,5 +1,6 @@
 """Synthetic household horizon comparison; no held-out data or paid calls."""
 
+import argparse
 import json
 from datetime import timedelta
 from pathlib import Path
@@ -10,11 +11,13 @@ from app.planning.algorithm_lns import LargeNeighborhoodPlanner
 from app.planning.algorithm_reference import AnnealingPlanner
 from app.planning.algorithm_search import GraspPlanner, LocalSearchPlanner, SharedObjectiveBeamPlanner
 from app.planning.diversity_greedy import DiversityAwareGreedyPlanner
+from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner
 from app.planning.native_algorithm_cp_sat import NativeSharedScoreCpSat
 from tests.test_algorithm_member_diversity import family, shared_family
+from tests.test_diversity_greedy import real_recipe_problem
 
 
-def household_case(kind, days):
+def household_case(kind, days, catalog_count=None):
     problem, objective = shared_family() if kind == "shared" else family(6 if kind == "six" else 2)
     templates = problem.slots
     first = templates[0].planned_date
@@ -25,10 +28,18 @@ def household_case(kind, days):
         )
         for i in range(days)
     ]
+    if catalog_count is not None:
+        catalog, objective = real_recipe_problem(catalog_count)
+        if len(catalog.recipes) != catalog_count:
+            raise ValueError("Requested catalog count exceeds available developer recipes")
+        # Preserve the household structure; use catalog quantities, diets and nutrients.
+        # The existing developer projection treats every recipe as a dinner/main.
+        catalog.slots = problem.slots
+        problem = catalog
     return problem, objective
 
 
-def run():
+def run(catalog_count=None):
     output = {
         "environment": environment(),
         "scope": "Synthetic three-recipe households, synthetic packages/prices, 7/14 dinners; "
@@ -37,15 +48,32 @@ def run():
         "No held-out inputs; no product latency or real-price acceptance claim.",
         "rows": [],
     }
-    target = Path("docs/evaluation/algorithm-dev/member-lns.json")
+    stem = "member-lns" if catalog_count is None else f"member-catalog-{catalog_count}"
+    if catalog_count is not None:
+        output["scope"] = (
+            f"{catalog_count} developer catalog recipes with real quantities, diets and nutrients; synthetic prices. "
+            "The developer projection treats all recipes as dinner/main, not their product meal roles. "
+            "7/14 dinners; different diets and alternating attendance; two-dish and six-adult scenarios. "
+            "One run per configuration; unreviewed near-duplicate grouping, not product dish_kind. "
+            "No held-out inputs or product acceptance claim."
+        )
+    target = Path(f"docs/evaluation/algorithm-dev/{stem}.json")
     for kind in ("couple", "six", "shared"):
         for days in (7, 14):
-            problem, objective = household_case(kind, days)
+            problem, objective = household_case(kind, days, catalog_count)
+            candidates = MealBeamPlanner(
+                MealBeamLimits(candidates_per_role=len(problem.recipes), meal_options_per_slot=64),
+                local_losses=objective.ranking,
+            )
             start = perf_counter()
-            reference = NativeSharedScoreCpSat(objective).solve_exact(problem, time_limit=30)
+            reference = NativeSharedScoreCpSat(objective, candidates).solve_exact(problem, time_limit=30)
             case = {
                 "case": kind,
                 "days": days,
+                "recipe_ids": [r.recipe_id for r in problem.recipes],
+                "candidates_per_role": len(problem.recipes),
+                "meal_options_per_slot": 64,
+                "generated_options": {s.slot_id: len(candidates.meal_options(problem, s)) for s in problem.slots},
                 "reference": reference,
                 "reference_ms": (perf_counter() - start) * 1000,
                 "runs": [],
@@ -59,7 +87,7 @@ def run():
                 (AnnealingPlanner, {"steps": 50, "seed": 0}),
             ] + [(LargeNeighborhoodPlanner, {"iterations": 4, "destroy_size": 4, "seed": seed}) for seed in (0, 1, 2)]
             for engine, parameters in configurations:
-                planner = engine(objective, **parameters)
+                planner = engine(objective, candidates, **parameters)
                 start = perf_counter()
                 solution = planner.solve(problem)
                 elapsed = (perf_counter() - start) * 1000
@@ -92,7 +120,8 @@ def run():
         "",
         "Times include seed construction. Native reference uses a 30-second diagnostic limit; "
         "LNS repairs have no wall-clock cutoff. Only proven references are compared. "
-        "This small recipe pool tests household semantics, not catalog-scale performance.",
+        "The reference proves optimality only within the same generated meal options. "
+        "Meal options are capped at 64 per slot; this is not a full-catalog optimum.",
         "",
         "| Household | Dinners | Algorithm | Parameters | Member mean/min | Table kinds | S$ | ms | Full score match |",
         "|---|---|---|---|---|---|---|---|---|",
@@ -105,9 +134,11 @@ def run():
                 f"{d['member_mean']}/{d['member_min']} | {d['table_kinds']} | {row['price_sgd']} | "
                 f"{row['elapsed_ms']:.1f} | {row['matches_reference']} |"
             )
-    lines += ["", "Machine, source, exact scores and repair outcomes: [JSON](member-lns.json).", ""]
+    lines += ["", f"Machine, source, exact scores and repair outcomes: [JSON]({stem}.json).", ""]
     target.with_suffix(".md").write_text("\n".join(lines), encoding="utf-8")
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--catalog-count", type=int, choices=range(3, 31))
+    run(parser.parse_args().catalog_count)
