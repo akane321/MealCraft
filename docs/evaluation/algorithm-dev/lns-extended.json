@@ -1,0 +1,3021 @@
+{
+  "environment": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i9-12900H",
+    "logical_cpu_count": 20,
+    "physical_core_count": "not recorded",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.14",
+    "code_commit": "32cfc4d2c9e9530bf46a436ae9acb6aa9ab78832",
+    "working_tree_dirty": false
+  },
+  "scope": "Developer catalog recipes; synthetic products/prices; single-dish dinners; no held-out data. LNS starts from the same greedy seed. Native reference has a 30-second diagnostic limit; LNS repairs have no wall-clock cutoff. Member grouping uses existing unreviewed similarity policy.",
+  "rows": [
+    {
+      "recipes": 16,
+      "days": 14,
+      "members": 2,
+      "seed_ms": 454.5386000000917,
+      "reference_ms": 3930.9024000000363,
+      "reference": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 224,
+        "build_ms": 132.7860999999757,
+        "symmetry_pairs": 12,
+        "workers": 4,
+        "stage_ms": [
+          102.16049999996812,
+          109.15080000006583,
+          314.4030999999359,
+          0.0,
+          534.205199999974,
+          2183.2504999999855
+        ],
+        "score": [
+          0,
+          -10.0,
+          4,
+          0.0,
+          6.67,
+          3500
+        ],
+        "diversity": {
+          "table_kinds": 10,
+          "member_kinds": {
+            "adult-0": 10,
+            "adult-1": 10
+          },
+          "member_mean": 10.0,
+          "member_min": 10,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "chicken-zucchini-pasta",
+            "role_id": null
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "chicken-zucchini-pasta",
+            "role_id": null
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "chickpea-sweet-potato-curry",
+            "role_id": null
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "chickpea-tomato-stew",
+            "role_id": null
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "lentil-quinoa-soup",
+            "role_id": null
+          },
+          {
+            "slot_id": "d7",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "d8",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "d9",
+            "recipe_id": "chicken-quinoa-pepper",
+            "role_id": null
+          },
+          {
+            "slot_id": "d10",
+            "recipe_id": "chicken-quinoa-pepper",
+            "role_id": null
+          },
+          {
+            "slot_id": "d11",
+            "recipe_id": "egg-tomato-quinoa",
+            "role_id": null
+          },
+          {
+            "slot_id": "d12",
+            "recipe_id": "egg-vegetable-rice",
+            "role_id": null
+          },
+          {
+            "slot_id": "d13",
+            "recipe_id": "lemon-herb-chicken-rice-bowl",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 100.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 100.0,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 900.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 100.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 100.0,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 900.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 1.333,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.333,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.667,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 2.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 533.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 533.333,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 466.667,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 520.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 520.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 480.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "brown_rice",
+            "required_quantity": 290.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 290.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 710.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 1866.667,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1866.667,
+            "selected_product_id": "synthetic-5",
+            "packages": 2,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 133.333,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 1.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 3.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 3.0,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 997.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "cherry_tomato",
+            "required_quantity": 330.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 330.0,
+            "selected_product_id": "synthetic-7",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 670.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "chicken_breast",
+            "required_quantity": 600.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 600.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 400.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "chicken_breast",
+            "required_quantity": 940.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 940.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "chickpea",
+            "required_quantity": 633.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 633.333,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 366.667,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "cucumber",
+            "required_quantity": 120.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 120.0,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 880.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "egg",
+            "required_quantity": 8.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 8.0,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 992.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 600.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 600.0,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 400.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "garlic",
+            "required_quantity": 32.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 32.0,
+            "selected_product_id": "synthetic-13",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 968.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "ginger",
+            "required_quantity": 10.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 10.0,
+            "selected_product_id": "synthetic-14",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 990.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 4.0,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 4.0,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 996.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "lemon",
+            "required_quantity": 3.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 3.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 997.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "olive_oil",
+            "required_quantity": 2.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 273.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 273.333,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 726.667,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 420.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 420.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 580.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-20",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 2.0,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-22",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 320.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 320.0,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 680.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 4.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 4.0,
+            "selected_product_id": "synthetic-24",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 996.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "sweet_potato",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "synthetic-25",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 700.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 500.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 500.0,
+            "selected_product_id": "synthetic-26",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 500.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "wholewheat_pasta",
+            "required_quantity": 360.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 360.0,
+            "selected_product_id": "synthetic-27",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 640.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 1.333,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.333,
+            "selected_product_id": "synthetic-28",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.667,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "zucchini",
+            "required_quantity": 500.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 500.0,
+            "selected_product_id": "synthetic-29",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 500.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "zucchini",
+            "required_quantity": 400.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 400.0,
+            "selected_product_id": "synthetic-29",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 600.0,
+            "note": null,
+            "trip": 2
+          }
+        ],
+        "total_ms": 3381.4020999999457
+      },
+      "runs": [
+        {
+          "algorithm": "greedy",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -8.0,
+            6,
+            0.0,
+            6.29,
+            5200
+          ],
+          "diversity": {
+            "table_kinds": 8,
+            "member_kinds": {
+              "adult-0": 8,
+              "adult-1": 8
+            },
+            "member_mean": 8.0,
+            "member_min": 8,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 52.0,
+          "solve_ms": 454.5386000000917,
+          "total_with_seed_ms": 454.5386000000917,
+          "matches_reference": false,
+          "repairs": []
+        },
+        {
+          "algorithm": "beam",
+          "parameters": {
+            "width": 8
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -8.0,
+            6,
+            0.0,
+            6.29,
+            5200
+          ],
+          "diversity": {
+            "table_kinds": 8,
+            "member_kinds": {
+              "adult-0": 8,
+              "adult-1": 8
+            },
+            "member_mean": 8.0,
+            "member_min": 8,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 52.0,
+          "solve_ms": 1435.868400000004,
+          "total_with_seed_ms": 1435.868400000004,
+          "matches_reference": false,
+          "repairs": []
+        },
+        {
+          "algorithm": "annealing",
+          "parameters": {
+            "steps": 50,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -8.0,
+            6,
+            0.0,
+            6.29,
+            5000
+          ],
+          "diversity": {
+            "table_kinds": 8,
+            "member_kinds": {
+              "adult-0": 8,
+              "adult-1": 8
+            },
+            "member_mean": 8.0,
+            "member_min": 8,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 50.0,
+          "solve_ms": 503.39950000000044,
+          "total_with_seed_ms": 503.39950000000044,
+          "matches_reference": false,
+          "repairs": []
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 8,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -9.0,
+            5,
+            0.0,
+            6.51,
+            3500
+          ],
+          "diversity": {
+            "table_kinds": 9,
+            "member_kinds": {
+              "adult-0": 9,
+              "adult-1": 9
+            },
+            "member_mean": 9.0,
+            "member_min": 9,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 35.0,
+          "solve_ms": 2042.5963999999794,
+          "total_with_seed_ms": 2497.135000000071,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d12",
+                "d13",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 336.8265000000292,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d4",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 216.7329000000109,
+              "accepted": true
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d12",
+                "d4",
+                "d5",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 233.88760000000275,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d2",
+                "d3",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 227.92010000000573,
+              "accepted": true
+            },
+            {
+              "iteration": 4,
+              "released": [
+                "d1",
+                "d2",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 234.7964000000502,
+              "accepted": false
+            },
+            {
+              "iteration": 5,
+              "released": [
+                "d12",
+                "d4",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 321.25189999999293,
+              "accepted": false
+            },
+            {
+              "iteration": 6,
+              "released": [
+                "d1",
+                "d11",
+                "d2",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 232.44639999995798,
+              "accepted": false
+            },
+            {
+              "iteration": 7,
+              "released": [
+                "d10",
+                "d13",
+                "d5",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 218.11700000000656,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 8,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -10.0,
+            5,
+            0.0,
+            6.63,
+            4100
+          ],
+          "diversity": {
+            "table_kinds": 10,
+            "member_kinds": {
+              "adult-0": 10,
+              "adult-1": 10
+            },
+            "member_mean": 10.0,
+            "member_min": 10,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 41.0,
+          "solve_ms": 1976.8585000000485,
+          "total_with_seed_ms": 2431.39710000014,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d2",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 214.1477999999779,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d1",
+                "d11",
+                "d12",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 229.51829999999518,
+              "accepted": true
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d1",
+                "d10",
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 310.52490000001853,
+              "accepted": true
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d11",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 204.5163999999886,
+              "accepted": true
+            },
+            {
+              "iteration": 4,
+              "released": [
+                "d0",
+                "d12",
+                "d7",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 229.8372999999856,
+              "accepted": false
+            },
+            {
+              "iteration": 5,
+              "released": [
+                "d11",
+                "d3",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 215.87539999995897,
+              "accepted": true
+            },
+            {
+              "iteration": 6,
+              "released": [
+                "d0",
+                "d1",
+                "d11",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 285.88780000006864,
+              "accepted": true
+            },
+            {
+              "iteration": 7,
+              "released": [
+                "d0",
+                "d10",
+                "d13",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 265.1121999999759,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 8,
+            "seed": 2
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -10.0,
+            4,
+            0.0,
+            6.67,
+            3600
+          ],
+          "diversity": {
+            "table_kinds": 10,
+            "member_kinds": {
+              "adult-0": 10,
+              "adult-1": 10
+            },
+            "member_mean": 10.0,
+            "member_min": 10,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 36.0,
+          "solve_ms": 1980.626099999995,
+          "total_with_seed_ms": 2435.1647000000867,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d11",
+                "d13"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 261.3415000000714,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d10",
+                "d11",
+                "d2",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 228.33170000001246,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d12",
+                "d13",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 216.10309999994115,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d12",
+                "d3",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 266.466400000013,
+              "accepted": true
+            },
+            {
+              "iteration": 4,
+              "released": [
+                "d10",
+                "d13",
+                "d2",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 319.5663000000195,
+              "accepted": true
+            },
+            {
+              "iteration": 5,
+              "released": [
+                "d11",
+                "d12",
+                "d6",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 213.7359999999262,
+              "accepted": false
+            },
+            {
+              "iteration": 6,
+              "released": [
+                "d12",
+                "d5",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 233.15389999993386,
+              "accepted": false
+            },
+            {
+              "iteration": 7,
+              "released": [
+                "d0",
+                "d12",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 218.01939999988917,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 16,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -9.0,
+            5,
+            0.0,
+            6.51,
+            3500
+          ],
+          "diversity": {
+            "table_kinds": 9,
+            "member_kinds": {
+              "adult-0": 9,
+              "adult-1": 9
+            },
+            "member_mean": 9.0,
+            "member_min": 9,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 35.0,
+          "solve_ms": 4016.21810000006,
+          "total_with_seed_ms": 4470.756700000152,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d12",
+                "d13",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 237.74349999996502,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d4",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 304.0710999999874,
+              "accepted": true
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d12",
+                "d4",
+                "d5",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 182.07810000001245,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d2",
+                "d3",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 217.56859999993594,
+              "accepted": true
+            },
+            {
+              "iteration": 4,
+              "released": [
+                "d1",
+                "d2",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 213.9959999999519,
+              "accepted": false
+            },
+            {
+              "iteration": 5,
+              "released": [
+                "d12",
+                "d4",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 230.13920000005328,
+              "accepted": false
+            },
+            {
+              "iteration": 6,
+              "released": [
+                "d1",
+                "d11",
+                "d2",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 303.3497000000125,
+              "accepted": false
+            },
+            {
+              "iteration": 7,
+              "released": [
+                "d10",
+                "d13",
+                "d5",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 248.30640000004678,
+              "accepted": true
+            },
+            {
+              "iteration": 8,
+              "released": [
+                "d1",
+                "d5",
+                "d6",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 221.69110000004366,
+              "accepted": false
+            },
+            {
+              "iteration": 9,
+              "released": [
+                "d10",
+                "d3",
+                "d5",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 221.69670000005226,
+              "accepted": false
+            },
+            {
+              "iteration": 10,
+              "released": [
+                "d12",
+                "d13",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 226.15359999997509,
+              "accepted": false
+            },
+            {
+              "iteration": 11,
+              "released": [
+                "d0",
+                "d12",
+                "d4",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 313.05840000004537,
+              "accepted": false
+            },
+            {
+              "iteration": 12,
+              "released": [
+                "d1",
+                "d10",
+                "d11",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 244.91039999998065,
+              "accepted": false
+            },
+            {
+              "iteration": 13,
+              "released": [
+                "d0",
+                "d10",
+                "d7",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 248.17259999997532,
+              "accepted": false
+            },
+            {
+              "iteration": 14,
+              "released": [
+                "d12",
+                "d13",
+                "d3",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 290.6377000000475,
+              "accepted": false
+            },
+            {
+              "iteration": 15,
+              "released": [
+                "d1",
+                "d11",
+                "d3",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 276.46839999999884,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 16,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -10.0,
+            5,
+            0.0,
+            6.63,
+            3700
+          ],
+          "diversity": {
+            "table_kinds": 10,
+            "member_kinds": {
+              "adult-0": 10,
+              "adult-1": 10
+            },
+            "member_mean": 10.0,
+            "member_min": 10,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 37.0,
+          "solve_ms": 4119.502200000056,
+          "total_with_seed_ms": 4574.040800000148,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d2",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 242.5949999999375,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d1",
+                "d11",
+                "d12",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 260.5641000000105,
+              "accepted": true
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d1",
+                "d10",
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 243.21499999996377,
+              "accepted": true
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d11",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 245.05310000006375,
+              "accepted": true
+            },
+            {
+              "iteration": 4,
+              "released": [
+                "d0",
+                "d12",
+                "d7",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 250.70529999993596,
+              "accepted": false
+            },
+            {
+              "iteration": 5,
+              "released": [
+                "d11",
+                "d3",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 259.12270000003446,
+              "accepted": true
+            },
+            {
+              "iteration": 6,
+              "released": [
+                "d0",
+                "d1",
+                "d11",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 230.67030000004252,
+              "accepted": true
+            },
+            {
+              "iteration": 7,
+              "released": [
+                "d0",
+                "d10",
+                "d13",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 248.04630000005545,
+              "accepted": true
+            },
+            {
+              "iteration": 8,
+              "released": [
+                "d10",
+                "d13",
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 266.82820000007723,
+              "accepted": false
+            },
+            {
+              "iteration": 9,
+              "released": [
+                "d0",
+                "d11",
+                "d3",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 334.975800000052,
+              "accepted": false
+            },
+            {
+              "iteration": 10,
+              "released": [
+                "d12",
+                "d13",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 230.33599999996568,
+              "accepted": false
+            },
+            {
+              "iteration": 11,
+              "released": [
+                "d10",
+                "d13",
+                "d3",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 296.18950000008226,
+              "accepted": true
+            },
+            {
+              "iteration": 12,
+              "released": [
+                "d12",
+                "d3",
+                "d4",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 233.7175999999772,
+              "accepted": false
+            },
+            {
+              "iteration": 13,
+              "released": [
+                "d0",
+                "d10",
+                "d6",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 246.4251000000104,
+              "accepted": false
+            },
+            {
+              "iteration": 14,
+              "released": [
+                "d1",
+                "d10",
+                "d2",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 261.8979000000081,
+              "accepted": false
+            },
+            {
+              "iteration": 15,
+              "released": [
+                "d1",
+                "d11",
+                "d5",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 229.13320000009207,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 16,
+            "seed": 2
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -10.0,
+            4,
+            0.0,
+            6.67,
+            3600
+          ],
+          "diversity": {
+            "table_kinds": 10,
+            "member_kinds": {
+              "adult-0": 10,
+              "adult-1": 10
+            },
+            "member_mean": 10.0,
+            "member_min": 10,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 36.0,
+          "solve_ms": 4052.9655000000275,
+          "total_with_seed_ms": 4507.504100000119,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d11",
+                "d13"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 318.30600000000686,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d10",
+                "d11",
+                "d2",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 274.90769999997156,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d12",
+                "d13",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 215.54269999990083,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d12",
+                "d3",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 296.8149999999241,
+              "accepted": true
+            },
+            {
+              "iteration": 4,
+              "released": [
+                "d10",
+                "d13",
+                "d2",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 212.90410000005977,
+              "accepted": true
+            },
+            {
+              "iteration": 5,
+              "released": [
+                "d11",
+                "d12",
+                "d6",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 212.41010000005645,
+              "accepted": false
+            },
+            {
+              "iteration": 6,
+              "released": [
+                "d12",
+                "d5",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 236.75940000009632,
+              "accepted": false
+            },
+            {
+              "iteration": 7,
+              "released": [
+                "d0",
+                "d12",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 299.1621999999552,
+              "accepted": false
+            },
+            {
+              "iteration": 8,
+              "released": [
+                "d11",
+                "d5",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 280.7204000000638,
+              "accepted": false
+            },
+            {
+              "iteration": 9,
+              "released": [
+                "d12",
+                "d13",
+                "d2",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 238.0520000000388,
+              "accepted": false
+            },
+            {
+              "iteration": 10,
+              "released": [
+                "d0",
+                "d13",
+                "d2",
+                "d3"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 207.71820000004482,
+              "accepted": false
+            },
+            {
+              "iteration": 11,
+              "released": [
+                "d12",
+                "d2",
+                "d5",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 233.11499999999796,
+              "accepted": false
+            },
+            {
+              "iteration": 12,
+              "released": [
+                "d10",
+                "d13",
+                "d5",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 277.260100000035,
+              "accepted": false
+            },
+            {
+              "iteration": 13,
+              "released": [
+                "d2",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 263.8235000000577,
+              "accepted": false
+            },
+            {
+              "iteration": 14,
+              "released": [
+                "d11",
+                "d5",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 243.93250000002809,
+              "accepted": false
+            },
+            {
+              "iteration": 15,
+              "released": [
+                "d13",
+                "d2",
+                "d5",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 197.53060000005007,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 7,
+            "iterations": 8,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -9.0,
+            5,
+            0.0,
+            6.51,
+            3500
+          ],
+          "diversity": {
+            "table_kinds": 9,
+            "member_kinds": {
+              "adult-0": 9,
+              "adult-1": 9
+            },
+            "member_mean": 9.0,
+            "member_min": 9,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 35.0,
+          "solve_ms": 3902.645399999983,
+          "total_with_seed_ms": 4357.184000000075,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d12",
+                "d13",
+                "d4",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 381.7619999999806,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d12",
+                "d2",
+                "d3",
+                "d4",
+                "d5",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 478.52929999999105,
+              "accepted": true
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d1",
+                "d12",
+                "d13",
+                "d2",
+                "d4",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 451.2657999999874,
+              "accepted": true
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d1",
+                "d10",
+                "d11",
+                "d12",
+                "d4",
+                "d5",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 606.4436999999998,
+              "accepted": true
+            },
+            {
+              "iteration": 4,
+              "released": [
+                "d13",
+                "d3",
+                "d5",
+                "d6",
+                "d7",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 442.4421999999595,
+              "accepted": true
+            },
+            {
+              "iteration": 5,
+              "released": [
+                "d0",
+                "d1",
+                "d10",
+                "d12",
+                "d4",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 576.7187999999805,
+              "accepted": false
+            },
+            {
+              "iteration": 6,
+              "released": [
+                "d0",
+                "d10",
+                "d11",
+                "d13",
+                "d5",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 480.82830000009835,
+              "accepted": false
+            },
+            {
+              "iteration": 7,
+              "released": [
+                "d1",
+                "d11",
+                "d13",
+                "d3",
+                "d5",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 464.31239999992613,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 7,
+            "iterations": 8,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -9.0,
+            5,
+            0.0,
+            6.51,
+            3500
+          ],
+          "diversity": {
+            "table_kinds": 9,
+            "member_kinds": {
+              "adult-0": 9,
+              "adult-1": 9
+            },
+            "member_mean": 9.0,
+            "member_min": 9,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 35.0,
+          "solve_ms": 4282.249699999966,
+          "total_with_seed_ms": 4736.7883000000575,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d11",
+                "d2",
+                "d4",
+                "d7",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 803.4577999999328,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d1",
+                "d10",
+                "d13",
+                "d3",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 448.30050000007304,
+              "accepted": true
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d12",
+                "d13",
+                "d4",
+                "d6",
+                "d7",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 527.9797000000599,
+              "accepted": true
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d1",
+                "d11",
+                "d12",
+                "d3",
+                "d5",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 590.1540999999497,
+              "accepted": false
+            },
+            {
+              "iteration": 4,
+              "released": [
+                "d0",
+                "d10",
+                "d12",
+                "d13",
+                "d3",
+                "d6",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 449.1094999999632,
+              "accepted": false
+            },
+            {
+              "iteration": 5,
+              "released": [
+                "d0",
+                "d10",
+                "d11",
+                "d3",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 513.6589999999615,
+              "accepted": false
+            },
+            {
+              "iteration": 6,
+              "released": [
+                "d10",
+                "d12",
+                "d3",
+                "d4",
+                "d5",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 417.7139000000807,
+              "accepted": false
+            },
+            {
+              "iteration": 7,
+              "released": [
+                "d0",
+                "d1",
+                "d10",
+                "d2",
+                "d4",
+                "d6",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 513.107899999909,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 7,
+            "iterations": 8,
+            "seed": 2
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -9.0,
+            5,
+            0.0,
+            6.51,
+            3500
+          ],
+          "diversity": {
+            "table_kinds": 9,
+            "member_kinds": {
+              "adult-0": 9,
+              "adult-1": 9
+            },
+            "member_mean": 9.0,
+            "member_min": 9,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 35.0,
+          "solve_ms": 4507.287099999985,
+          "total_with_seed_ms": 4961.825700000077,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d11",
+                "d13",
+                "d2",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 1056.7690999999968,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d12",
+                "d2",
+                "d3",
+                "d4",
+                "d6",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 387.380099999973,
+              "accepted": true
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d10",
+                "d11",
+                "d13",
+                "d5",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 417.9421999999704,
+              "accepted": true
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d11",
+                "d4",
+                "d5",
+                "d7",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 545.6841000000168,
+              "accepted": false
+            },
+            {
+              "iteration": 4,
+              "released": [
+                "d10",
+                "d11",
+                "d13",
+                "d2",
+                "d3",
+                "d6",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 449.9131000000034,
+              "accepted": false
+            },
+            {
+              "iteration": 5,
+              "released": [
+                "d0",
+                "d10",
+                "d11",
+                "d2",
+                "d3",
+                "d5",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 541.6665000000194,
+              "accepted": true
+            },
+            {
+              "iteration": 6,
+              "released": [
+                "d10",
+                "d13",
+                "d2",
+                "d5",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 572.3917999999912,
+              "accepted": false
+            },
+            {
+              "iteration": 7,
+              "released": [
+                "d11",
+                "d12",
+                "d2",
+                "d5",
+                "d6",
+                "d7",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 515.7401000000164,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 7,
+            "iterations": 16,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -10.0,
+            4,
+            0.0,
+            6.67,
+            3700
+          ],
+          "diversity": {
+            "table_kinds": 10,
+            "member_kinds": {
+              "adult-0": 10,
+              "adult-1": 10
+            },
+            "member_mean": 10.0,
+            "member_min": 10,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 37.0,
+          "solve_ms": 8204.718899999989,
+          "total_with_seed_ms": 8659.25750000008,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d12",
+                "d13",
+                "d4",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 346.92470000004505,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d12",
+                "d2",
+                "d3",
+                "d4",
+                "d5",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 356.4943000000085,
+              "accepted": true
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d1",
+                "d12",
+                "d13",
+                "d2",
+                "d4",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 449.7119999999768,
+              "accepted": true
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d1",
+                "d10",
+                "d11",
+                "d12",
+                "d4",
+                "d5",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 713.0111999999826,
+              "accepted": true
+            },
+            {
+              "iteration": 4,
+              "released": [
+                "d13",
+                "d3",
+                "d5",
+                "d6",
+                "d7",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 483.37979999996605,
+              "accepted": true
+            },
+            {
+              "iteration": 5,
+              "released": [
+                "d0",
+                "d1",
+                "d10",
+                "d12",
+                "d4",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 570.0667999999496,
+              "accepted": false
+            },
+            {
+              "iteration": 6,
+              "released": [
+                "d0",
+                "d10",
+                "d11",
+                "d13",
+                "d5",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 467.38170000003265,
+              "accepted": false
+            },
+            {
+              "iteration": 7,
+              "released": [
+                "d1",
+                "d11",
+                "d13",
+                "d3",
+                "d5",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 500.238999999965,
+              "accepted": false
+            },
+            {
+              "iteration": 8,
+              "released": [
+                "d1",
+                "d12",
+                "d2",
+                "d5",
+                "d7",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 733.8591999999835,
+              "accepted": false
+            },
+            {
+              "iteration": 9,
+              "released": [
+                "d1",
+                "d10",
+                "d11",
+                "d13",
+                "d4",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 546.2306000000581,
+              "accepted": false
+            },
+            {
+              "iteration": 10,
+              "released": [
+                "d11",
+                "d13",
+                "d3",
+                "d4",
+                "d5",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 437.1553999999378,
+              "accepted": false
+            },
+            {
+              "iteration": 11,
+              "released": [
+                "d1",
+                "d3",
+                "d4",
+                "d5",
+                "d6",
+                "d7",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 575.6000999999742,
+              "accepted": false
+            },
+            {
+              "iteration": 12,
+              "released": [
+                "d0",
+                "d13",
+                "d2",
+                "d3",
+                "d4",
+                "d7",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 670.4548000000159,
+              "accepted": false
+            },
+            {
+              "iteration": 13,
+              "released": [
+                "d0",
+                "d1",
+                "d10",
+                "d11",
+                "d12",
+                "d13",
+                "d2"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 418.91900000007354,
+              "accepted": false
+            },
+            {
+              "iteration": 14,
+              "released": [
+                "d10",
+                "d11",
+                "d12",
+                "d3",
+                "d4",
+                "d6",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 512.8092999999581,
+              "accepted": false
+            },
+            {
+              "iteration": 15,
+              "released": [
+                "d10",
+                "d13",
+                "d3",
+                "d4",
+                "d6",
+                "d7",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 386.27530000007937,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 7,
+            "iterations": 16,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -10.0,
+            4,
+            0.0,
+            6.67,
+            3500
+          ],
+          "diversity": {
+            "table_kinds": 10,
+            "member_kinds": {
+              "adult-0": 10,
+              "adult-1": 10
+            },
+            "member_mean": 10.0,
+            "member_min": 10,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 35.0,
+          "solve_ms": 7952.961400000049,
+          "total_with_seed_ms": 8407.500000000142,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d11",
+                "d2",
+                "d4",
+                "d7",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 773.0068999999276,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d1",
+                "d10",
+                "d13",
+                "d3",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 421.9127999999728,
+              "accepted": true
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d12",
+                "d13",
+                "d4",
+                "d6",
+                "d7",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 514.9390999999923,
+              "accepted": true
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d1",
+                "d11",
+                "d12",
+                "d3",
+                "d5",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 545.9950999999137,
+              "accepted": false
+            },
+            {
+              "iteration": 4,
+              "released": [
+                "d0",
+                "d10",
+                "d12",
+                "d13",
+                "d3",
+                "d6",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 404.53519999994114,
+              "accepted": false
+            },
+            {
+              "iteration": 5,
+              "released": [
+                "d0",
+                "d10",
+                "d11",
+                "d3",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 511.5397000000712,
+              "accepted": false
+            },
+            {
+              "iteration": 6,
+              "released": [
+                "d10",
+                "d12",
+                "d3",
+                "d4",
+                "d5",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 421.38600000009774,
+              "accepted": false
+            },
+            {
+              "iteration": 7,
+              "released": [
+                "d0",
+                "d1",
+                "d10",
+                "d2",
+                "d4",
+                "d6",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 528.5520999999562,
+              "accepted": false
+            },
+            {
+              "iteration": 8,
+              "released": [
+                "d1",
+                "d10",
+                "d11",
+                "d3",
+                "d5",
+                "d6",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 682.8967999999804,
+              "accepted": false
+            },
+            {
+              "iteration": 9,
+              "released": [
+                "d0",
+                "d13",
+                "d4",
+                "d6",
+                "d7",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 523.8926999999194,
+              "accepted": false
+            },
+            {
+              "iteration": 10,
+              "released": [
+                "d10",
+                "d11",
+                "d2",
+                "d3",
+                "d5",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 401.8399000000272,
+              "accepted": true
+            },
+            {
+              "iteration": 11,
+              "released": [
+                "d1",
+                "d10",
+                "d11",
+                "d5",
+                "d7",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 428.8857999999891,
+              "accepted": false
+            },
+            {
+              "iteration": 12,
+              "released": [
+                "d0",
+                "d12",
+                "d2",
+                "d5",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 403.6518000000342,
+              "accepted": false
+            },
+            {
+              "iteration": 13,
+              "released": [
+                "d0",
+                "d10",
+                "d2",
+                "d4",
+                "d6",
+                "d7",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 445.7351999999446,
+              "accepted": true
+            },
+            {
+              "iteration": 14,
+              "released": [
+                "d0",
+                "d11",
+                "d12",
+                "d2",
+                "d3",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 416.22449999999844,
+              "accepted": false
+            },
+            {
+              "iteration": 15,
+              "released": [
+                "d11",
+                "d4",
+                "d5",
+                "d6",
+                "d7",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 495.3469000000723,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 7,
+            "iterations": 16,
+            "seed": 2
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -10.0,
+            4,
+            0.0,
+            6.67,
+            3600
+          ],
+          "diversity": {
+            "table_kinds": 10,
+            "member_kinds": {
+              "adult-0": 10,
+              "adult-1": 10
+            },
+            "member_mean": 10.0,
+            "member_min": 10,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 36.0,
+          "solve_ms": 7840.975200000003,
+          "total_with_seed_ms": 8295.513800000095,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d11",
+                "d13",
+                "d2",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 917.7301999999372,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d12",
+                "d2",
+                "d3",
+                "d4",
+                "d6",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 398.38689999999133,
+              "accepted": true
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d10",
+                "d11",
+                "d13",
+                "d5",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 401.94880000001376,
+              "accepted": true
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d11",
+                "d4",
+                "d5",
+                "d7",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 533.6899999999787,
+              "accepted": false
+            },
+            {
+              "iteration": 4,
+              "released": [
+                "d10",
+                "d11",
+                "d13",
+                "d2",
+                "d3",
+                "d6",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 446.8564000000015,
+              "accepted": false
+            },
+            {
+              "iteration": 5,
+              "released": [
+                "d0",
+                "d10",
+                "d11",
+                "d2",
+                "d3",
+                "d5",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 463.1117000000131,
+              "accepted": true
+            },
+            {
+              "iteration": 6,
+              "released": [
+                "d10",
+                "d13",
+                "d2",
+                "d5",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 577.7632999999014,
+              "accepted": false
+            },
+            {
+              "iteration": 7,
+              "released": [
+                "d11",
+                "d12",
+                "d2",
+                "d5",
+                "d6",
+                "d7",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 464.7279000000708,
+              "accepted": false
+            },
+            {
+              "iteration": 8,
+              "released": [
+                "d10",
+                "d11",
+                "d12",
+                "d13",
+                "d3",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 375.03349999997226,
+              "accepted": false
+            },
+            {
+              "iteration": 9,
+              "released": [
+                "d10",
+                "d11",
+                "d12",
+                "d4",
+                "d5",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 559.7872999999254,
+              "accepted": false
+            },
+            {
+              "iteration": 10,
+              "released": [
+                "d11",
+                "d12",
+                "d3",
+                "d5",
+                "d7",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 401.7370999999912,
+              "accepted": false
+            },
+            {
+              "iteration": 11,
+              "released": [
+                "d10",
+                "d11",
+                "d2",
+                "d4",
+                "d5",
+                "d7",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 554.8671999999897,
+              "accepted": false
+            },
+            {
+              "iteration": 12,
+              "released": [
+                "d10",
+                "d11",
+                "d12",
+                "d4",
+                "d6",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 384.1683999999077,
+              "accepted": false
+            },
+            {
+              "iteration": 13,
+              "released": [
+                "d1",
+                "d11",
+                "d3",
+                "d4",
+                "d5",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 557.2156999999152,
+              "accepted": false
+            },
+            {
+              "iteration": 14,
+              "released": [
+                "d0",
+                "d1",
+                "d10",
+                "d11",
+                "d12",
+                "d3",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 353.5918999999694,
+              "accepted": true
+            },
+            {
+              "iteration": 15,
+              "released": [
+                "d0",
+                "d1",
+                "d10",
+                "d13",
+                "d3",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 413.6500000000751,
+              "accepted": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
