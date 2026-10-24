@@ -104,8 +104,7 @@ def run(extended=False):
         ]
         grid = product((4, 7), (8, 16), (0, 1, 2)) if extended else product((2, 4), (2, 4), (0, 1))
         configurations += [
-            ("lns", {"destroy_size": d, "iterations": n, "seed": s}, LargeNeighborhoodPlanner)
-            for d, n, s in grid
+            ("lns", {"destroy_size": d, "iterations": n, "seed": s}, LargeNeighborhoodPlanner) for d, n, s in grid
         ]
         for name, params, engine in configurations:
             start = perf_counter()
