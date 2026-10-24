@@ -212,6 +212,19 @@ Every heuristic result passes the independent validator; exhaustive and both
 CP-SAT references expose both member and table counts. This is regression evidence,
 not the full household benchmark or a product-planner rollout.
 
+## Household catalog comparison
+
+The household horizon runner also accepts `--catalog-count 30`:
+`python scripts/compare_member_lns.py --catalog-count 30`. It writes separate
+`member-catalog-30.json` and `.md` artifacts without replacing `member-lns`.
+It uses catalog quantities, diet tags and nutrients with synthetic packages and
+prices. The developer fixture projects every recipe as a dinner/main; it does
+not reproduce product meal-role classification. Every arm uses the same candidate
+generator, with all input recipes allowed per role and at most 64 meal options
+per slot. Reports include recipe IDs and actual option counts. A proven native
+result is optimal only over those options; an unproven reference leaves score
+matching null. These are developer comparisons, not real-price acceptance.
+
 ## Price-priority reference
 
 `AlgorithmObjective(..., priority="price")` orders exact checkout cents first,
