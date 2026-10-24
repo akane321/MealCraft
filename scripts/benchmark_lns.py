@@ -1,5 +1,6 @@
 """Developer-only LNS sweep: catalog recipes, synthetic prices, no model calls."""
 
+import argparse
 import json
 from datetime import timedelta
 from itertools import product
@@ -17,7 +18,7 @@ from app.schemas.planning_v2 import PlanningSlotMember
 from tests.test_diversity_greedy import real_recipe_problem
 
 
-def write_summary(output):
+def write_summary(output, stem="lns-sweep"):
     lines = [
         "# LNS developer sweep",
         "",
@@ -46,10 +47,11 @@ def write_summary(output):
         "No production default is selected from these three cases.",
         "",
     ]
-    Path("docs/evaluation/algorithm-dev/lns-sweep.md").write_text("\n".join(lines), encoding="utf-8")
+    text = "\n".join(lines).replace("(lns-sweep.json)", f"({stem}.json)")
+    Path(f"docs/evaluation/algorithm-dev/{stem}.md").write_text(text, encoding="utf-8")
 
 
-def run():
+def run(extended=False):
     output = {
         "environment": environment(),
         "scope": "Developer catalog recipes; synthetic products/prices; single-dish dinners; no held-out data. "
@@ -57,8 +59,10 @@ def run():
         "LNS repairs have no wall-clock cutoff. Member grouping uses existing unreviewed similarity policy.",
         "rows": [],
     }
-    target = Path("docs/evaluation/algorithm-dev/lns-sweep.json")
-    for count, days, size in ((8, 7, 2), (16, 7, 6), (16, 14, 2)):
+    stem = "lns-extended" if extended else "lns-sweep"
+    target = Path(f"docs/evaluation/algorithm-dev/{stem}.json")
+    cases = ((16, 14, 2),) if extended else ((8, 7, 2), (16, 7, 6), (16, 14, 2))
+    for count, days, size in cases:
         problem, objective = real_recipe_problem(count)
         first = problem.slots[0]
         members = [PlanningSlotMember(name=f"adult-{i}", servings=1) for i in range(size)]
@@ -98,9 +102,9 @@ def run():
             ("beam", {"width": 8}, SharedObjectiveBeamPlanner),
             ("annealing", {"steps": 50, "seed": 0}, AnnealingPlanner),
         ]
+        grid = product((4, 7), (8, 16), (0, 1, 2)) if extended else product((2, 4), (2, 4), (0, 1))
         configurations += [
-            ("lns", {"destroy_size": d, "iterations": n, "seed": s}, LargeNeighborhoodPlanner)
-            for d, n, s in product((2, 4), (2, 4), (0, 1))
+            ("lns", {"destroy_size": d, "iterations": n, "seed": s}, LargeNeighborhoodPlanner) for d, n, s in grid
         ]
         for name, params, engine in configurations:
             start = perf_counter()
@@ -131,8 +135,10 @@ def run():
             print(count, days, size, name, params, result.status, round(elapsed), flush=True)
             if not valid:
                 raise RuntimeError("Scenario failed validation; partial evidence saved")
-    write_summary(output)
+    write_summary(output, stem)
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--extended", action="store_true", help="Expand the 14-dinner developer sweep")
+    run(parser.parse_args().extended)
