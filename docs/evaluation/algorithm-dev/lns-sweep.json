@@ -1,0 +1,3318 @@
+{
+  "environment": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i9-12900H",
+    "logical_cpu_count": 20,
+    "physical_core_count": "not recorded",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.14",
+    "code_commit": "bd84d0655774cd66d884b1cf985efdcdedd13a62",
+    "working_tree_dirty": true
+  },
+  "scope": "Developer catalog recipes; synthetic products/prices; single-dish dinners; no held-out data. LNS starts from the same greedy seed. Native reference has a 30-second diagnostic limit; LNS repairs have no wall-clock cutoff. Member grouping uses existing unreviewed similarity policy.",
+  "rows": [
+    {
+      "recipes": 8,
+      "days": 7,
+      "members": 2,
+      "seed_ms": 68.02390000029845,
+      "reference_ms": 625.1748000004227,
+      "reference": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 56,
+        "build_ms": 30.13120000014169,
+        "symmetry_pairs": 6,
+        "workers": 4,
+        "stage_ms": [
+          41.53740000037942,
+          30.709800000295218,
+          31.87900000011723,
+          0.0,
+          14.416899999559973,
+          8.207100000618084
+        ],
+        "score": [
+          0,
+          -6.0,
+          1,
+          0.0,
+          2.59,
+          2300
+        ],
+        "diversity": {
+          "table_kinds": 6,
+          "member_kinds": {
+            "adult-0": 6,
+            "adult-1": 6
+          },
+          "member_mean": 6.0,
+          "member_min": 6,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "chicken-broccoli-rice",
+            "role_id": null
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "chicken-quinoa-pepper",
+            "role_id": null
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "chicken-zucchini-pasta",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 75.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 75.0,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 925.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 1.667,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.667,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.333,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 266.667,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 266.667,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 733.333,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 600.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 600.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 400.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "brown_rice",
+            "required_quantity": 150.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 150.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 850.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 966.667,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 966.667,
+            "selected_product_id": "synthetic-5",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 33.333,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 2.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "chicken_breast",
+            "required_quantity": 940.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 940.0,
+            "selected_product_id": "synthetic-7",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 600.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 600.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 400.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "garlic",
+            "required_quantity": 12.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 12.0,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 988.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "ginger",
+            "required_quantity": 15.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 15.0,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 985.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 2.333,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.333,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 997.667,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "lemon",
+            "required_quantity": 1.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "olive_oil",
+            "required_quantity": 1.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-14",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 246.667,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 246.667,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 753.333,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 120.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 120.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 880.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 2.0,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-17",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 320.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 320.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 680.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 4.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 4.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 996.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 450.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 450.0,
+            "selected_product_id": "synthetic-21",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 550.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "wholewheat_pasta",
+            "required_quantity": 180.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 180.0,
+            "selected_product_id": "synthetic-22",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 820.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 0.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 0.5,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.5,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "zucchini",
+            "required_quantity": 450.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 450.0,
+            "selected_product_id": "synthetic-24",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 550.0,
+            "note": null,
+            "trip": 1
+          }
+        ],
+        "total_ms": 159.12010000010923
+      },
+      "runs": [
+        {
+          "algorithm": "greedy",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -6.0,
+            1,
+            0.0,
+            2.59,
+            2300
+          ],
+          "diversity": {
+            "table_kinds": 6,
+            "member_kinds": {
+              "adult-0": 6,
+              "adult-1": 6
+            },
+            "member_mean": 6.0,
+            "member_min": 6,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 23.0,
+          "solve_ms": 68.02390000029845,
+          "total_with_seed_ms": 68.02390000029845,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "beam",
+          "parameters": {
+            "width": 8
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -6.0,
+            1,
+            0.0,
+            2.59,
+            2300
+          ],
+          "diversity": {
+            "table_kinds": 6,
+            "member_kinds": {
+              "adult-0": 6,
+              "adult-1": 6
+            },
+            "member_mean": 6.0,
+            "member_min": 6,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 23.0,
+          "solve_ms": 376.5824000001885,
+          "total_with_seed_ms": 376.5824000001885,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "annealing",
+          "parameters": {
+            "steps": 50,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -6.0,
+            1,
+            0.0,
+            2.59,
+            2300
+          ],
+          "diversity": {
+            "table_kinds": 6,
+            "member_kinds": {
+              "adult-0": 6,
+              "adult-1": 6
+            },
+            "member_mean": 6.0,
+            "member_min": 6,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 23.0,
+          "solve_ms": 135.1212999998097,
+          "total_with_seed_ms": 135.1212999998097,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 2,
+            "iterations": 2,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -6.0,
+            1,
+            0.0,
+            2.59,
+            2300
+          ],
+          "diversity": {
+            "table_kinds": 6,
+            "member_kinds": {
+              "adult-0": 6,
+              "adult-1": 6
+            },
+            "member_mean": 6.0,
+            "member_min": 6,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 23.0,
+          "solve_ms": 231.7600999995193,
+          "total_with_seed_ms": 299.78399999981775,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 117.27350000001024,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 107.7382999992551,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 2,
+            "iterations": 2,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -6.0,
+            1,
+            0.0,
+            2.59,
+            2300
+          ],
+          "diversity": {
+            "table_kinds": 6,
+            "member_kinds": {
+              "adult-0": 6,
+              "adult-1": 6
+            },
+            "member_mean": 6.0,
+            "member_min": 6,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 23.0,
+          "solve_ms": 216.24450000035722,
+          "total_with_seed_ms": 284.2684000006557,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 100.84310000002006,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 107.75910000029398,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 2,
+            "iterations": 4,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -6.0,
+            1,
+            0.0,
+            2.59,
+            2300
+          ],
+          "diversity": {
+            "table_kinds": 6,
+            "member_kinds": {
+              "adult-0": 6,
+              "adult-1": 6
+            },
+            "member_mean": 6.0,
+            "member_min": 6,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 23.0,
+          "solve_ms": 416.21179999947344,
+          "total_with_seed_ms": 484.2356999997719,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 100.34009999981208,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 94.64630000002217,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d2"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 102.15599999992264,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d3",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 107.60120000031748,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 2,
+            "iterations": 4,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -6.0,
+            1,
+            0.0,
+            2.59,
+            2300
+          ],
+          "diversity": {
+            "table_kinds": 6,
+            "member_kinds": {
+              "adult-0": 6,
+              "adult-1": 6
+            },
+            "member_mean": 6.0,
+            "member_min": 6,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 23.0,
+          "solve_ms": 480.2935999996407,
+          "total_with_seed_ms": 548.3174999999392,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 101.85860000001412,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 140.6635000003007,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d2"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 117.8885999997874,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 106.53929999989487,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 2,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -6.0,
+            1,
+            0.0,
+            2.59,
+            2300
+          ],
+          "diversity": {
+            "table_kinds": 6,
+            "member_kinds": {
+              "adult-0": 6,
+              "adult-1": 6
+            },
+            "member_mean": 6.0,
+            "member_min": 6,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 23.0,
+          "solve_ms": 231.02259999996022,
+          "total_with_seed_ms": 299.0465000002587,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d3",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 134.1403000005812,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d2",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 92.3371999997471,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 2,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -6.0,
+            1,
+            0.0,
+            2.59,
+            2300
+          ],
+          "diversity": {
+            "table_kinds": 6,
+            "member_kinds": {
+              "adult-0": 6,
+              "adult-1": 6
+            },
+            "member_mean": 6.0,
+            "member_min": 6,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 23.0,
+          "solve_ms": 295.8228000006784,
+          "total_with_seed_ms": 363.84670000097685,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d2",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 184.58600000030856,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 104.5364999999947,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 4,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -6.0,
+            1,
+            0.0,
+            2.59,
+            2300
+          ],
+          "diversity": {
+            "table_kinds": 6,
+            "member_kinds": {
+              "adult-0": 6,
+              "adult-1": 6
+            },
+            "member_mean": 6.0,
+            "member_min": 6,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 23.0,
+          "solve_ms": 654.5826000001398,
+          "total_with_seed_ms": 722.6065000004382,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d3",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 167.42290000001958,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d2",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 138.1319000001895,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d2",
+                "d3",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 139.27870000043185,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d1",
+                "d4",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 195.85399999959918,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 4,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -6.0,
+            1,
+            0.0,
+            2.59,
+            2300
+          ],
+          "diversity": {
+            "table_kinds": 6,
+            "member_kinds": {
+              "adult-0": 6,
+              "adult-1": 6
+            },
+            "member_mean": 6.0,
+            "member_min": 6,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 23.0,
+          "solve_ms": 561.1761000000115,
+          "total_with_seed_ms": 629.20000000031,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d2",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 165.33290000006673,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 127.63790000008157,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d1",
+                "d3",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 137.10489999994024,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d3",
+                "d4",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 121.09229999987292,
+              "accepted": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "recipes": 16,
+      "days": 7,
+      "members": 6,
+      "seed_ms": 184.99040000006062,
+      "reference_ms": 475.32180000052904,
+      "reference": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 112,
+        "build_ms": 86.75920000041515,
+        "symmetry_pairs": 6,
+        "workers": 4,
+        "stage_ms": [
+          63.97500000002765,
+          173.25110000001587,
+          76.9798000001174,
+          0.0,
+          45.475599999917904,
+          24.23019999969256
+        ],
+        "score": [
+          0,
+          -7.0,
+          0,
+          0.0,
+          3.14,
+          3400
+        ],
+        "diversity": {
+          "table_kinds": 7,
+          "member_kinds": {
+            "adult-0": 7,
+            "adult-1": 7,
+            "adult-2": 7,
+            "adult-3": 7,
+            "adult-4": 7,
+            "adult-5": 7
+          },
+          "member_mean": 7.0,
+          "member_min": 7,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "tomato-lentil-stew",
+            "role_id": null
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "chicken-broccoli-rice",
+            "role_id": null
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "chicken-quinoa-pepper",
+            "role_id": null
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "chicken-zucchini-pasta",
+            "role_id": null
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "chickpea-quinoa-salad",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 225.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 225.0,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 775.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 5.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 5.0,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 995.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 800.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 800.0,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 200.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 1260.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1260.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 2,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 740.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "brown_rice",
+            "required_quantity": 450.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 450.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 550.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 2900.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2900.0,
+            "selected_product_id": "synthetic-5",
+            "packages": 3,
+            "purchase_cost_sgd": 3.0,
+            "surplus_quantity": 100.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 3.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 3.0,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 997.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "cherry_tomato",
+            "required_quantity": 480.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 480.0,
+            "selected_product_id": "synthetic-7",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 520.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "chicken_breast",
+            "required_quantity": 2820.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2820.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 3,
+            "purchase_cost_sgd": 3.0,
+            "surplus_quantity": 180.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "chickpea",
+            "required_quantity": 900.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 900.0,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 100.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "cucumber",
+            "required_quantity": 450.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 450.0,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 550.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 900.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 900.0,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 100.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "garlic",
+            "required_quantity": 36.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 36.0,
+            "selected_product_id": "synthetic-13",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 964.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "ginger",
+            "required_quantity": 45.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 45.0,
+            "selected_product_id": "synthetic-14",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 955.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 7.0,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 7.0,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 993.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "lemon",
+            "required_quantity": 6.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 6.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 994.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "olive_oil",
+            "required_quantity": 6.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 6.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 994.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 1100.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1100.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 2,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 900.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 360.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 360.0,
+            "selected_product_id": "synthetic-20",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 640.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 3.0,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 3.0,
+            "selected_product_id": "synthetic-22",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 997.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 480.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 480.0,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 520.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 6.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 6.0,
+            "selected_product_id": "synthetic-24",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 994.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 1350.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1350.0,
+            "selected_product_id": "synthetic-26",
+            "packages": 2,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 650.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "wholewheat_pasta",
+            "required_quantity": 540.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 540.0,
+            "selected_product_id": "synthetic-27",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 460.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 1.5,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.5,
+            "selected_product_id": "synthetic-28",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.5,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "zucchini",
+            "required_quantity": 1350.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1350.0,
+            "selected_product_id": "synthetic-29",
+            "packages": 2,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 650.0,
+            "note": null,
+            "trip": 1
+          }
+        ],
+        "total_ms": 474.6021999999357
+      },
+      "runs": [
+        {
+          "algorithm": "greedy",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -7.0,
+            0,
+            0.0,
+            3.14,
+            3400
+          ],
+          "diversity": {
+            "table_kinds": 7,
+            "member_kinds": {
+              "adult-0": 7,
+              "adult-1": 7,
+              "adult-2": 7,
+              "adult-3": 7,
+              "adult-4": 7,
+              "adult-5": 7
+            },
+            "member_mean": 7.0,
+            "member_min": 7,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 34.0,
+          "solve_ms": 184.99040000006062,
+          "total_with_seed_ms": 184.99040000006062,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "beam",
+          "parameters": {
+            "width": 8
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -7.0,
+            0,
+            0.0,
+            3.14,
+            3400
+          ],
+          "diversity": {
+            "table_kinds": 7,
+            "member_kinds": {
+              "adult-0": 7,
+              "adult-1": 7,
+              "adult-2": 7,
+              "adult-3": 7,
+              "adult-4": 7,
+              "adult-5": 7
+            },
+            "member_mean": 7.0,
+            "member_min": 7,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 34.0,
+          "solve_ms": 1100.2129999997123,
+          "total_with_seed_ms": 1100.2129999997123,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "annealing",
+          "parameters": {
+            "steps": 50,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -7.0,
+            0,
+            0.0,
+            3.14,
+            3400
+          ],
+          "diversity": {
+            "table_kinds": 7,
+            "member_kinds": {
+              "adult-0": 7,
+              "adult-1": 7,
+              "adult-2": 7,
+              "adult-3": 7,
+              "adult-4": 7,
+              "adult-5": 7
+            },
+            "member_mean": 7.0,
+            "member_min": 7,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 34.0,
+          "solve_ms": 310.9282000004896,
+          "total_with_seed_ms": 310.9282000004896,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 2,
+            "iterations": 2,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -7.0,
+            0,
+            0.0,
+            3.14,
+            3400
+          ],
+          "diversity": {
+            "table_kinds": 7,
+            "member_kinds": {
+              "adult-0": 7,
+              "adult-1": 7,
+              "adult-2": 7,
+              "adult-3": 7,
+              "adult-4": 7,
+              "adult-5": 7
+            },
+            "member_mean": 7.0,
+            "member_min": 7,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 34.0,
+          "solve_ms": 332.28260000032606,
+          "total_with_seed_ms": 517.2730000003867,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 165.0220999999874,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 160.67460000067513,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 2,
+            "iterations": 2,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -7.0,
+            0,
+            0.0,
+            3.14,
+            3400
+          ],
+          "diversity": {
+            "table_kinds": 7,
+            "member_kinds": {
+              "adult-0": 7,
+              "adult-1": 7,
+              "adult-2": 7,
+              "adult-3": 7,
+              "adult-4": 7,
+              "adult-5": 7
+            },
+            "member_mean": 7.0,
+            "member_min": 7,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 34.0,
+          "solve_ms": 346.8939999993381,
+          "total_with_seed_ms": 531.8843999993987,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 156.93830000054731,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 180.21940000016912,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 2,
+            "iterations": 4,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -7.0,
+            0,
+            0.0,
+            3.14,
+            3400
+          ],
+          "diversity": {
+            "table_kinds": 7,
+            "member_kinds": {
+              "adult-0": 7,
+              "adult-1": 7,
+              "adult-2": 7,
+              "adult-3": 7,
+              "adult-4": 7,
+              "adult-5": 7
+            },
+            "member_mean": 7.0,
+            "member_min": 7,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 34.0,
+          "solve_ms": 807.1006000000125,
+          "total_with_seed_ms": 992.0910000000731,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 191.41829999989568,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 262.50180000079126,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d2"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 172.79060000055324,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d3",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 167.9652000002534,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 2,
+            "iterations": 4,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -7.0,
+            0,
+            0.0,
+            3.14,
+            3400
+          ],
+          "diversity": {
+            "table_kinds": 7,
+            "member_kinds": {
+              "adult-0": 7,
+              "adult-1": 7,
+              "adult-2": 7,
+              "adult-3": 7,
+              "adult-4": 7,
+              "adult-5": 7
+            },
+            "member_mean": 7.0,
+            "member_min": 7,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 34.0,
+          "solve_ms": 707.9378999997061,
+          "total_with_seed_ms": 892.9282999997668,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 160.29770000022836,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 163.60710000026302,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d2"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 153.0481999998301,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 218.6529000000519,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 2,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -7.0,
+            0,
+            0.0,
+            3.14,
+            3400
+          ],
+          "diversity": {
+            "table_kinds": 7,
+            "member_kinds": {
+              "adult-0": 7,
+              "adult-1": 7,
+              "adult-2": 7,
+              "adult-3": 7,
+              "adult-4": 7,
+              "adult-5": 7
+            },
+            "member_mean": 7.0,
+            "member_min": 7,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 34.0,
+          "solve_ms": 610.7385000004797,
+          "total_with_seed_ms": 795.7289000005403,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d3",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 309.5051999998759,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d2",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 292.17289999996865,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 2,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -7.0,
+            0,
+            0.0,
+            3.14,
+            3400
+          ],
+          "diversity": {
+            "table_kinds": 7,
+            "member_kinds": {
+              "adult-0": 7,
+              "adult-1": 7,
+              "adult-2": 7,
+              "adult-3": 7,
+              "adult-4": 7,
+              "adult-5": 7
+            },
+            "member_mean": 7.0,
+            "member_min": 7,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 34.0,
+          "solve_ms": 535.7590000003256,
+          "total_with_seed_ms": 720.7494000003862,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d2",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 245.96889999975247,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 283.0874999999651,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 4,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -7.0,
+            0,
+            0.0,
+            3.14,
+            3400
+          ],
+          "diversity": {
+            "table_kinds": 7,
+            "member_kinds": {
+              "adult-0": 7,
+              "adult-1": 7,
+              "adult-2": 7,
+              "adult-3": 7,
+              "adult-4": 7,
+              "adult-5": 7
+            },
+            "member_mean": 7.0,
+            "member_min": 7,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 34.0,
+          "solve_ms": 1140.6048999997438,
+          "total_with_seed_ms": 1325.5952999998044,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d3",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 328.99040000029345,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d2",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 234.02719999921828,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d2",
+                "d3",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 281.89569999995,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d1",
+                "d4",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 282.1342999995977,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 4,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -7.0,
+            0,
+            0.0,
+            3.14,
+            3400
+          ],
+          "diversity": {
+            "table_kinds": 7,
+            "member_kinds": {
+              "adult-0": 7,
+              "adult-1": 7,
+              "adult-2": 7,
+              "adult-3": 7,
+              "adult-4": 7,
+              "adult-5": 7
+            },
+            "member_mean": 7.0,
+            "member_min": 7,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 34.0,
+          "solve_ms": 1123.461000000134,
+          "total_with_seed_ms": 1308.4514000001946,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d2",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 309.4066000003295,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 282.8309000005902,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d1",
+                "d3",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 268.24260000012146,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d3",
+                "d4",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 248.50379999952565,
+              "accepted": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "recipes": 16,
+      "days": 14,
+      "members": 2,
+      "seed_ms": 443.6017999996693,
+      "reference_ms": 3483.928599999672,
+      "reference": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 224,
+        "build_ms": 137.52870000007533,
+        "symmetry_pairs": 12,
+        "workers": 4,
+        "stage_ms": [
+          100.97709999990911,
+          106.96740000003047,
+          266.3744999999835,
+          0.0,
+          636.4960999999312,
+          2223.214999999982
+        ],
+        "score": [
+          0,
+          -10.0,
+          4,
+          0.0,
+          6.67,
+          3500
+        ],
+        "diversity": {
+          "table_kinds": 10,
+          "member_kinds": {
+            "adult-0": 10,
+            "adult-1": 10
+          },
+          "member_mean": 10.0,
+          "member_min": 10,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "black-bean-quinoa-skillet",
+            "role_id": null
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "chicken-zucchini-pasta",
+            "role_id": null
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "chicken-zucchini-pasta",
+            "role_id": null
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "chickpea-sweet-potato-curry",
+            "role_id": null
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "chickpea-tomato-stew",
+            "role_id": null
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "lentil-quinoa-soup",
+            "role_id": null
+          },
+          {
+            "slot_id": "d7",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "d8",
+            "recipe_id": "tofu-vegetable-soba",
+            "role_id": null
+          },
+          {
+            "slot_id": "d9",
+            "recipe_id": "chicken-quinoa-pepper",
+            "role_id": null
+          },
+          {
+            "slot_id": "d10",
+            "recipe_id": "chicken-quinoa-pepper",
+            "role_id": null
+          },
+          {
+            "slot_id": "d11",
+            "recipe_id": "egg-tomato-quinoa",
+            "role_id": null
+          },
+          {
+            "slot_id": "d12",
+            "recipe_id": "egg-vegetable-rice",
+            "role_id": null
+          },
+          {
+            "slot_id": "d13",
+            "recipe_id": "lemon-herb-chicken-rice-bowl",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 100.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 100.0,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 900.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "baby_spinach",
+            "required_quantity": 100.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 100.0,
+            "selected_product_id": "synthetic-0",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 900.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 1.333,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.333,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.667,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "bell_pepper",
+            "required_quantity": 2.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-1",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "black_bean",
+            "required_quantity": 533.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 533.333,
+            "selected_product_id": "synthetic-2",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 466.667,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "broccoli",
+            "required_quantity": 520.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 520.0,
+            "selected_product_id": "synthetic-3",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 480.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "brown_rice",
+            "required_quantity": 290.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 290.0,
+            "selected_product_id": "synthetic-4",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 710.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "canned_tomato",
+            "required_quantity": 1866.667,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1866.667,
+            "selected_product_id": "synthetic-5",
+            "packages": 2,
+            "purchase_cost_sgd": 2.0,
+            "surplus_quantity": 133.333,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 1.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.0,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 999.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "carrot",
+            "required_quantity": 3.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 3.0,
+            "selected_product_id": "synthetic-6",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 997.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "cherry_tomato",
+            "required_quantity": 330.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 330.0,
+            "selected_product_id": "synthetic-7",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 670.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "chicken_breast",
+            "required_quantity": 600.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 600.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 400.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "chicken_breast",
+            "required_quantity": 940.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 940.0,
+            "selected_product_id": "synthetic-8",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 60.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "chickpea",
+            "required_quantity": 633.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 633.333,
+            "selected_product_id": "synthetic-9",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 366.667,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "cucumber",
+            "required_quantity": 120.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 120.0,
+            "selected_product_id": "synthetic-10",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 880.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "egg",
+            "required_quantity": 8.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 8.0,
+            "selected_product_id": "synthetic-11",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 992.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "firm_tofu",
+            "required_quantity": 600.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 600.0,
+            "selected_product_id": "synthetic-12",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 400.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "garlic",
+            "required_quantity": 32.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 32.0,
+            "selected_product_id": "synthetic-13",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 968.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "ginger",
+            "required_quantity": 10.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 10.0,
+            "selected_product_id": "synthetic-14",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 990.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "ground_cumin",
+            "required_quantity": 4.0,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 4.0,
+            "selected_product_id": "synthetic-15",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 996.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "lemon",
+            "required_quantity": 3.0,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 3.0,
+            "selected_product_id": "synthetic-16",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 997.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "olive_oil",
+            "required_quantity": 2.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-18",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 273.333,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 273.333,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 726.667,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "quinoa",
+            "required_quantity": 420.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 420.0,
+            "selected_product_id": "synthetic-19",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 580.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "red_lentil",
+            "required_quantity": 90.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 90.0,
+            "selected_product_id": "synthetic-20",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 910.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "sesame_oil",
+            "required_quantity": 2.0,
+            "unit": "tsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 2.0,
+            "selected_product_id": "synthetic-22",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "soba_noodle",
+            "required_quantity": 320.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 320.0,
+            "selected_product_id": "synthetic-23",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 680.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "soy_sauce",
+            "required_quantity": 4.0,
+            "unit": "tbsp",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 4.0,
+            "selected_product_id": "synthetic-24",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 996.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "sweet_potato",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "synthetic-25",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 700.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "vegetable_stock",
+            "required_quantity": 500.0,
+            "unit": "ml",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 500.0,
+            "selected_product_id": "synthetic-26",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 500.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "wholewheat_pasta",
+            "required_quantity": 360.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 360.0,
+            "selected_product_id": "synthetic-27",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 640.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "yellow_onion",
+            "required_quantity": 1.333,
+            "unit": "whole",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 1.333,
+            "selected_product_id": "synthetic-28",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 998.667,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "zucchini",
+            "required_quantity": 500.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 500.0,
+            "selected_product_id": "synthetic-29",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 500.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "zucchini",
+            "required_quantity": 400.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 400.0,
+            "selected_product_id": "synthetic-29",
+            "packages": 1,
+            "purchase_cost_sgd": 1.0,
+            "surplus_quantity": 600.0,
+            "note": null,
+            "trip": 2
+          }
+        ],
+        "total_ms": 3482.241800000338
+      },
+      "runs": [
+        {
+          "algorithm": "greedy",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -8.0,
+            6,
+            0.0,
+            6.29,
+            5200
+          ],
+          "diversity": {
+            "table_kinds": 8,
+            "member_kinds": {
+              "adult-0": 8,
+              "adult-1": 8
+            },
+            "member_mean": 8.0,
+            "member_min": 8,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 52.0,
+          "solve_ms": 443.6017999996693,
+          "total_with_seed_ms": 443.6017999996693,
+          "matches_reference": false,
+          "repairs": []
+        },
+        {
+          "algorithm": "beam",
+          "parameters": {
+            "width": 8
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -8.0,
+            6,
+            0.0,
+            6.29,
+            5200
+          ],
+          "diversity": {
+            "table_kinds": 8,
+            "member_kinds": {
+              "adult-0": 8,
+              "adult-1": 8
+            },
+            "member_mean": 8.0,
+            "member_min": 8,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 52.0,
+          "solve_ms": 1466.2152999999307,
+          "total_with_seed_ms": 1466.2152999999307,
+          "matches_reference": false,
+          "repairs": []
+        },
+        {
+          "algorithm": "annealing",
+          "parameters": {
+            "steps": 50,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -8.0,
+            6,
+            0.0,
+            6.29,
+            5000
+          ],
+          "diversity": {
+            "table_kinds": 8,
+            "member_kinds": {
+              "adult-0": 8,
+              "adult-1": 8
+            },
+            "member_mean": 8.0,
+            "member_min": 8,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 50.0,
+          "solve_ms": 511.1833000000843,
+          "total_with_seed_ms": 511.1833000000843,
+          "matches_reference": false,
+          "repairs": []
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 2,
+            "iterations": 2,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -8.0,
+            6,
+            0.0,
+            6.29,
+            5000
+          ],
+          "diversity": {
+            "table_kinds": 8,
+            "member_kinds": {
+              "adult-0": 8,
+              "adult-1": 8
+            },
+            "member_mean": 8.0,
+            "member_min": 8,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 50.0,
+          "solve_ms": 338.9745000004041,
+          "total_with_seed_ms": 782.5763000000734,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d13",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 162.43759999997565,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d12",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 167.6206000001912,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 2,
+            "iterations": 2,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -8.0,
+            6,
+            0.0,
+            6.29,
+            4700
+          ],
+          "diversity": {
+            "table_kinds": 8,
+            "member_kinds": {
+              "adult-0": 8,
+              "adult-1": 8
+            },
+            "member_mean": 8.0,
+            "member_min": 8,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 47.0,
+          "solve_ms": 384.54709999950865,
+          "total_with_seed_ms": 828.148899999178,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d2",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 207.4333000000479,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d12",
+                "d13"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 168.92250000000786,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 2,
+            "iterations": 4,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -8.0,
+            6,
+            0.0,
+            6.29,
+            5000
+          ],
+          "diversity": {
+            "table_kinds": 8,
+            "member_kinds": {
+              "adult-0": 8,
+              "adult-1": 8
+            },
+            "member_mean": 8.0,
+            "member_min": 8,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 50.0,
+          "solve_ms": 645.7780999999159,
+          "total_with_seed_ms": 1089.3798999995852,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d13",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 150.99719999943773,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d12",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 172.12319999998726,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 166.91200000059325,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 143.12430000063614,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 2,
+            "iterations": 4,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -8.0,
+            6,
+            0.0,
+            6.29,
+            4700
+          ],
+          "diversity": {
+            "table_kinds": 8,
+            "member_kinds": {
+              "adult-0": 8,
+              "adult-1": 8
+            },
+            "member_mean": 8.0,
+            "member_min": 8,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 47.0,
+          "solve_ms": 729.6446999998807,
+          "total_with_seed_ms": 1173.24649999955,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d2",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 161.35209999993094,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d12",
+                "d13"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 198.69019999987358,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d1",
+                "d12"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 183.1117000001541,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d1",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 170.57239999940066,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 2,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -9.0,
+            8,
+            0.0,
+            6.44,
+            4200
+          ],
+          "diversity": {
+            "table_kinds": 9,
+            "member_kinds": {
+              "adult-0": 9,
+              "adult-1": 9
+            },
+            "member_mean": 9.0,
+            "member_min": 9,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 42.0,
+          "solve_ms": 453.60170000003563,
+          "total_with_seed_ms": 897.203499999705,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d12",
+                "d13",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 237.6918999998452,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d4",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 208.3615000001373,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 2,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -8.0,
+            6,
+            0.0,
+            6.29,
+            4600
+          ],
+          "diversity": {
+            "table_kinds": 8,
+            "member_kinds": {
+              "adult-0": 8,
+              "adult-1": 8
+            },
+            "member_mean": 8.0,
+            "member_min": 8,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 46.0,
+          "solve_ms": 514.4610000006651,
+          "total_with_seed_ms": 958.0628000003344,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d2",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 229.09749999962514,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d1",
+                "d11",
+                "d12",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 278.24210000017047,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 4,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -9.0,
+            6,
+            0.0,
+            6.470000000000001,
+            3400
+          ],
+          "diversity": {
+            "table_kinds": 9,
+            "member_kinds": {
+              "adult-0": 9,
+              "adult-1": 9
+            },
+            "member_mean": 9.0,
+            "member_min": 9,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 34.0,
+          "solve_ms": 878.3192999999301,
+          "total_with_seed_ms": 1321.9210999995994,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d12",
+                "d13",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 228.1155000000581,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d4",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 218.46029999960592,
+              "accepted": true
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d12",
+                "d4",
+                "d5",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 185.6329000002006,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d2",
+                "d3",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 235.35139999967214,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "algorithm": "lns",
+          "parameters": {
+            "destroy_size": 4,
+            "iterations": 4,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -9.0,
+            5,
+            0.0,
+            6.45,
+            4100
+          ],
+          "diversity": {
+            "table_kinds": 9,
+            "member_kinds": {
+              "adult-0": 9,
+              "adult-1": 9
+            },
+            "member_mean": 9.0,
+            "member_min": 9,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 41.0,
+          "solve_ms": 1073.3728000004703,
+          "total_with_seed_ms": 1516.9746000001396,
+          "matches_reference": false,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d2",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 272.476000000097,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d1",
+                "d11",
+                "d12",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 325.11739999972633,
+              "accepted": true
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d1",
+                "d10",
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 230.52410000036616,
+              "accepted": true
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d11",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 232.7147000005425,
+              "accepted": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
