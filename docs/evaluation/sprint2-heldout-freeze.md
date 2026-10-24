@@ -87,6 +87,13 @@ gold and provenance, ensure systems never receive the answers, preserve the
 frozen bytes, and suppress private case text from logs/artifacts. That adapter
 and actual evaluation execution are outside this toolkit's scope.
 
+The [synthetic phase-one apparatus](conversation-adapter-phase1.md) implements
+the draft clock, fixed-message confirmation, own-history delivery and common
+output container. It does not load sealed files, admit a run or establish a
+formal freeze; shared bytes and system transports still require independent
+review and preregistration. Do not use the older gold-driven product request
+builder as a substitute for the end-to-end adapter.
+
 An authorised operator supplies the sealed path/digest to a fixed automated
 process without inspecting cases. That process verifies digests, runs all
 pre-registered systems on the same frozen set and reference facts, and emits
