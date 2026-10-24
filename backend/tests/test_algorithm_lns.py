@@ -20,6 +20,9 @@ def test_whole_neighborhood_matches_enumeration_for_families(factory):
     assert objective.score_validated(problem, result.assignments, result.validation) == exact["score"]
     assert objective.diversity(problem, result.assignments) == exact["diversity"]
     assert len(planner.repairs) == 1
+    assert result.trace.deterministic is False
+    assert planner.repairs[0]["workers"] == 4
+    assert planner.repairs[0]["solver_seed"] == 0
 
 
 def test_joint_repair_escapes_package_cost_local_minimum():
@@ -72,14 +75,18 @@ def test_failed_repair_keeps_valid_seed(monkeypatch, status):
     assert result.assignments == initial.assignments
     assert result.validation.status == "passed"
     assert not any(row["accepted"] for row in planner.repairs)
+    assert len(planner.repairs) == 1  # A failed whole-horizon repair is not retried identically.
 
 
-def test_partial_repair_fixes_other_meals_and_is_reproducible():
+def test_partial_repair_has_reproducible_schedule_not_assignment_guarantee():
     problem, objective = packet()
     problem.slots.append(problem.slots[-1].model_copy(update={"slot_id": "s2"}))
     planners = [LargeNeighborhoodPlanner(objective, seed=9, iterations=3, destroy_size=2) for _ in range(2)]
     results = [planner.solve(problem) for planner in planners]
-    assert results[0].assignments == results[1].assignments
+    assert all(result.trace.deterministic is False for result in results)
+    assert [objective.score_validated(problem, result.assignments, result.validation) for result in results] == [
+        objective.score_validated(problem, results[0].assignments, results[0].validation)
+    ] * 2
     assert [row["released"] for row in planners[0].repairs] == [row["released"] for row in planners[1].repairs]
     assert all(len(row["released"]) == 2 for row in planners[0].repairs)
     assert results[0].validation.status == "passed"

@@ -25,6 +25,8 @@ class LargeNeighborhoodPlanner(DiversityAwareGreedyPlanner):
         self.repairs = []
         best = initial.model_copy(deep=True) if initial is not None else super().solve(problem)
         best.trace.algorithm = "large-neighborhood-search"
+        # A seeded neighborhood schedule does not make parallel CP-SAT tie choices deterministic.
+        best.trace.deterministic = False
         if best.status != "feasible":
             best.trace.warnings.append("No feasible seed; LNS did not run.")
             return best
@@ -58,13 +60,15 @@ class LargeNeighborhoodPlanner(DiversityAwareGreedyPlanner):
                 "status": result["status"],
                 "elapsed_ms": (perf_counter() - started) * 1000,
                 "accepted": False,
+                "workers": result.get("workers"),
+                "solver_seed": 0,
             }
             if "reason" in result:
                 row["reason"] = result["reason"]
             self.repairs.append(row)
             if result["status"] != "optimal_for_native_model":
                 best.trace.warnings.append(f"LNS repair {step}: {result['status']}; kept validated incumbent.")
-                if result["status"] == "unsupported":
+                if result["status"] == "unsupported" or len(released) == len(slots):
                     break
                 continue
             from app.schemas.planning_v2 import PlanningAssignment
@@ -83,6 +87,7 @@ class LargeNeighborhoodPlanner(DiversityAwareGreedyPlanner):
                 break
         best.trace.warnings.append(
             f"seed={self.seed}; repairs={len(self.repairs)}; iterations={self.iterations}; "
-            f"destroy_size={self.destroy_size}; no global optimality claim"
+            f"destroy_size={self.destroy_size}; native workers=4; solver_seed=0; "
+            "parallel tie choices may vary; no global optimality claim"
         )
         return best

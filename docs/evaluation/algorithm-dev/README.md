@@ -172,6 +172,10 @@ result replaces the incumbent. Each repair records its released meals, status,
 acceptance and elapsed time in `planner.repairs`.
 
 `seed`, `iterations` and `destroy_size` define a reproducible neighborhood schedule.
+The native optimizer uses four workers with solver seed 0; equal-score assignments
+and timings may differ. The trace therefore does not claim deterministic execution,
+and repair rows record the worker count and solver seed. Historical report rows
+without these fields predate this trace correction and are not new measurements.
 Repairs have no wall-clock cutoff. A whole-horizon optimal repair ends the loop;
 partial repairs run the configured iteration count. Unsupported native inputs or
 unsuccessful repairs keep the validated incumbent and are reported explicitly.
