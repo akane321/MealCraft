@@ -15,6 +15,7 @@ from urllib.parse import urlsplit
 from jsonschema import Draft202012Validator, FormatChecker
 from jsonschema.exceptions import SchemaError
 
+CHECKER_VERSION = "sprint2-authoring-check-v2"
 CATEGORIES = ("planning", "intent", "multi_turn", "adversarial")
 SUBTYPES = {
     "planning:meal",
@@ -85,8 +86,119 @@ def read_author_bytes(path: Path) -> bytes:
     return path.read_bytes()
 
 
+def unique_keys(pairs: list) -> dict:
+    # A repeated key would let two readers see different values (say "ai" and "human"); reject it.
+    keys = [key for key, _value in pairs]
+    if len(keys) != len(set(keys)):
+        raise ValueError("Duplicate JSON key")
+    return dict(pairs)
+
+
+def parse_json(raw: bytes) -> dict:
+    return json.loads(raw.decode("utf-8-sig"), parse_constant=reject_constant, object_pairs_hook=unique_keys)
+
+
 def load_author_file(path: Path) -> dict:
-    return json.loads(read_author_bytes(path).decode("utf-8-sig"), parse_constant=reject_constant)
+    return parse_json(read_author_bytes(path))
+
+
+def attestation_errors(data: dict, attestation: dict, content_sha256: str, fields_sha256: str) -> list[str]:
+    """Check a review attestation against the exact content bytes it attests; echo counts, never case IDs.
+
+    The attestation records who reviewed each case and how, so the content file keeps its bytes (and digest)
+    while several reviewers, or an AI review declared as such, are recorded truthfully. `content_sha256` must
+    be the digest of the very bytes `data` was parsed from; the command line guarantees that, a caller must too.
+    """
+    schema = json.loads(Path(__file__).with_name("sprint2-review-attestation.schema.json").read_text(encoding="utf-8"))
+    validator = Draft202012Validator(schema, format_checker=FormatChecker())
+    errors = [
+        "attestation schema:"
+        + error.validator
+        + " at /"
+        + "/".join(str(p) if isinstance(p, int) else "field" for p in error.absolute_path)
+        for error in validator.iter_errors(attestation)
+    ]
+    if errors:
+        return errors
+    if attestation["content_sha256"].lower() != content_sha256.lower():
+        errors.append("attestation: content_sha256 does not match these exact content bytes")
+    if attestation["fields_sha256"].lower() != fields_sha256.lower():
+        errors.append("attestation: fields_sha256 does not match the dictionary used")
+    if data["purpose"] == "format_demo":
+        errors.append("attestation: a format demo is not a release, attested or not")
+    author = data["author_id"]
+    if not author or attestation["author_id"] != author:
+        errors.append("attestation: author_id missing or different from the content file's")
+    reviewers = {r["reviewer_id"] for r in attestation["reviewers"]}
+    if len(reviewers) != len(attestation["reviewers"]):
+        errors.append("attestation: a reviewer is listed twice")
+    approver = data["quota_manifest"]["approved_by"]
+    if author in reviewers or approver in reviewers:
+        errors.append("attestation: a reviewer is the author or the quota approver")
+    if data["reviewer_id"] is not None and data["reviewer_id"] not in reviewers:
+        # Attested reviewers already exclude the author and approver, so this keeps both independence rules.
+        errors.append("attestation: the content file's reviewer_id is not an attested reviewer")
+    executed = {r["reviewer_id"]: r["executed_by"] for r in attestation["reviewers"]}
+    claimed_human = sum(
+        case["source"]["pii_reviewed"]
+        and case["id"] in attestation["cases"]
+        and executed.get(attestation["cases"][case["id"]]["anonymisation_review"]["reviewer_id"]) == "ai"
+        for case in data["cases"]
+    )
+    if claimed_human:
+        errors.append(
+            f"attestation: {claimed_human} case(s) mark a human anonymisation review the attestation records as AI"
+        )
+    reviews = [attestation["dictionary_review"]] + [
+        review for entry in attestation["cases"].values() for review in entry.values()
+    ]
+    if any(review["reviewer_id"] not in reviewers for review in reviews):
+        errors.append("attestation: a review names a reviewer who is not listed")
+    ids = [case["id"] for case in data["cases"]]
+    missing = sum(case_id not in attestation["cases"] for case_id in ids)
+    extra = len(set(attestation["cases"]) - set(ids))
+    if missing:
+        errors.append(f"attestation: {missing} case(s) have no review entry")
+    if extra:
+        errors.append(f"attestation: {extra} review entr(y/ies) name no case in the content file")
+    conflicts = sum(
+        case["gold"]["reviewer_id"] is not None
+        and case["id"] in attestation["cases"]
+        and case["gold"]["reviewer_id"] != attestation["cases"][case["id"]]["gold_review"]["reviewer_id"]
+        for case in data["cases"]
+    )
+    if conflicts:
+        errors.append(f"attestation: {conflicts} case(s) name a different gold reviewer in the content file")
+    return errors
+
+
+def attestation_summary(data: dict, attestation: dict, attestation_sha256: str) -> tuple[dict, list[str]]:
+    """Per-reviewer counts and the limitations an AI-executed review carries; no case IDs."""
+    executed = {r["reviewer_id"]: r["executed_by"] for r in attestation["reviewers"]}
+    ids = {case["id"] for case in data["cases"]}
+    entries = [entry for case_id, entry in attestation["cases"].items() if case_id in ids]
+    per_reviewer = {
+        reviewer: {
+            "executed_by": by,
+            "gold_reviews": sum(e["gold_review"]["reviewer_id"] == reviewer for e in entries),
+            "anonymisation_reviews": sum(e["anonymisation_review"]["reviewer_id"] == reviewer for e in entries),
+        }
+        for reviewer, by in sorted(executed.items())
+    }
+    limitations = []
+    for kind in ("gold_review", "anonymisation_review"):
+        by_ai = sum(executed[e[kind]["reviewer_id"]] == "ai" for e in entries)
+        if by_ai:
+            limitations.append(f"{kind}: {by_ai} case(s) reviewed by AI, not by a person")
+    if executed[attestation["dictionary_review"]["reviewer_id"]] == "ai":
+        limitations.append("dictionary_review: reviewed by AI, not by a person")
+    summary = {
+        "sha256": attestation_sha256,
+        "recorded_on": attestation["recorded_on"],
+        "reviewers": per_reviewer,
+        "dictionary_reviewed_by": attestation["dictionary_review"]["reviewer_id"],
+    }
+    return summary, limitations
 
 
 def finite_numbers(value) -> bool:
@@ -110,7 +222,18 @@ def string_leaves(value, path=()):
             yield from string_leaves(item, (*path, key))
 
 
-def check(data: dict, *, format_only: bool = False, fields_path: Path | None = None) -> tuple[list[str], dict]:
+def check(
+    data: dict,
+    *,
+    format_only: bool = False,
+    fields_path: Path | None = None,
+    attestation: dict | None = None,
+    content_sha256: str | None = None,
+    attestation_sha256: str | None = None,
+) -> tuple[list[str], dict]:
+    """Errors and a content-free summary. With an attestation (readiness only), review facts come from it."""
+    if attestation is not None and (format_only or content_sha256 is None):
+        raise ValueError("An attestation needs a readiness check of exact content bytes")
     if not finite_numbers(data):
         return ["Non-finite numeric value rejected"], {}
     schema = json.loads(Path(__file__).with_name("sprint2-heldout.schema.json").read_text(encoding="utf-8"))
@@ -272,21 +395,31 @@ def check(data: dict, *, format_only: bool = False, fields_path: Path | None = N
                 or gold["expected_fields"].get("perishable_window_days") != 3
             ):
                 errors.append(f"{prefix}: long horizon needs explicit two-trip, per-trip budget and 3-day window facts")
-        if not format_only:
+        if not format_only and attestation is None:
             if not source["pii_reviewed"]:
                 errors.append(f"{prefix}: human anonymisation review missing")
             if gold["review_status"] != "independently_checked" or gold["reviewer_id"] != data["reviewer_id"]:
                 errors.append(f"{prefix}: independent gold review missing")
     if format_only:
         return sorted(set(errors)), summary
-    if data["purpose"] != "freeze_candidate":
-        errors.append("Formal readiness requires purpose=freeze_candidate; drafts/demos are not a release")
-    if not data["author_id"] or not data["reviewer_id"] or data["author_id"] == data["reviewer_id"]:
-        errors.append("Distinct author and independent reviewer IDs are required")
+    if attestation is not None:
+        # The attestation, bound to these exact bytes, carries purpose and every review; the content's own
+        # review fields stay as authored (pending/null) and are only checked for contradiction.
+        errors += attestation_errors(data, attestation, content_sha256, digest)
+        if not any(e.startswith("attestation") for e in errors):
+            summary["attestation"], summary["limitations"] = attestation_summary(data, attestation, attestation_sha256)
+    else:
+        if data["purpose"] != "freeze_candidate":
+            errors.append("Formal readiness requires purpose=freeze_candidate; drafts/demos are not a release")
+        if not data["author_id"] or not data["reviewer_id"] or data["author_id"] == data["reviewer_id"]:
+            errors.append("Distinct author and independent reviewer IDs are required")
     manifest = data["quota_manifest"]
     if not manifest["declared_on"] or not manifest["approved_by"]:
         errors.append("Quota declaration date and approver are required")
-    if manifest["approved_by"] in {data["author_id"], data["reviewer_id"]}:
+    # With an attestation, its reviewers are checked against the approver in `attestation_errors`.
+    if manifest["approved_by"] == data["author_id"] or (
+        attestation is None and manifest["approved_by"] == data["reviewer_id"]
+    ):
         errors.append("Quota approver must differ from author and reviewer")
     if sum(c["category"] == "planning" and c["horizon_days"] is not None and c["horizon_days"] > 7 for c in cases) < 2:
         errors.append("At least two planning cases must cover 8-14 days")
@@ -333,17 +466,41 @@ def main() -> int:
     parser.add_argument(
         "--fields", type=Path, help="Author-owned field dictionary; defaults to the adjacent dictionary"
     )
+    parser.add_argument(
+        "--attestation",
+        type=Path,
+        help="Review attestation for these exact content bytes (readiness only); the content file is not edited",
+    )
     args = parser.parse_args()
+    if args.attestation and args.format_only:
+        print("An attestation is checked only in a readiness run, not with --format-only", file=sys.stderr)
+        return 2
     try:
-        errors, summary = check(load_author_file(args.input), format_only=args.format_only, fields_path=args.fields)
+        raw = read_author_bytes(args.input)
+        attestation_raw = read_author_bytes(args.attestation) if args.attestation else None
+        errors, summary = check(
+            parse_json(raw),
+            format_only=args.format_only,
+            fields_path=args.fields,
+            attestation=parse_json(attestation_raw) if attestation_raw is not None else None,
+            content_sha256=hashlib.sha256(raw).hexdigest(),
+            attestation_sha256=hashlib.sha256(attestation_raw).hexdigest() if attestation_raw is not None else None,
+        )
     except (OSError, ValueError, RecursionError, SchemaError):
         print("Input rejected (path, encoding or JSON); no input content logged", file=sys.stderr)
         return 2
+    if args.format_only:
+        mode = "format_only_not_freeze_ready"
+    else:
+        mode = "readiness_with_attestation" if args.attestation else "readiness"
     print(
         json.dumps(
             {
-                "mode": "format_only_not_freeze_ready" if args.format_only else "readiness",
+                "checker_version": CHECKER_VERSION,
+                "mode": mode,
                 "passed": not errors,
+                # Top level, so a reader of `passed` also sees that a review was AI-executed.
+                "limitations": summary.get("limitations", []),
                 "summary": summary,
                 "errors": errors,
             },
