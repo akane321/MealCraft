@@ -2,6 +2,28 @@
 
 ## Status and purpose
 
+### Product improvement boundary
+
+`planning/product_improvement.py` adapts a feasible product beam result to
+simulated annealing. The initial plan is copied and revalidated; every explored
+move must pass the independent validator, and the best validated result is kept.
+The pass uses seed 0 and 50 proposals, with no wall-clock cutoff or CP-SAT call.
+It runs for ordinary hard-budget beam requests, including requests without a
+stated budget. Cheapest-price searches, the greedy baseline and explicit
+over-budget preview selection retain their separate paths.
+
+The product keeps whole-table title-based `dish_kind` grouping. It does not
+adopt the offline member-mean objective or unreviewed recipe-pair thresholds
+(ADR-0089). Member eligibility remains enforced by validation. The score orders
+empty optional positions, table kinds, repetition, soft nutrition deviation,
+recommendation loss and exact checkout cents. Soft nutrition deviations are
+normalized by the largest absolute stated bound, at least one, per check.
+Composed requests reuse the product meal candidate generator. Single-dish
+requests use the same packet with all recipes admitted per role.
+Trace records the seed, proposal count and before/after scores; runtime timing
+does not enter this deterministic evidence. The parameter choice is an initial
+integration setting, not an acceptance or optimality claim.
+
 This document is the implementation handoff for the contributor completing
 MealCraft's planning and validation algorithm. It defines the **accepted final
 scope**, not only the current days × meals runtime (decision ADR-0046). The merged runtime remains

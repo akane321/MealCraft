@@ -86,12 +86,20 @@ class AnnealingPlanner(DiversityAwareGreedyPlanner):
             raise ValueError("Step count must be positive")
         self.seed, self.steps = seed, steps
 
-    def solve(self, problem):
-        best = super().solve(problem)
+    def solve(self, problem, *, initial=None):
+        # A product adapter may supply its validated beam result. Never mutate it
+        # or trust a validation report produced for a different request.
+        best = super().solve(problem) if initial is None else initial.model_copy(deep=True)
         best.trace.algorithm = "simulated-annealing"
         if best.status != "feasible":
             best.trace.warnings.append("No feasible seed; annealing did not run.")
             return best
+        if initial is not None:
+            shopping = self.candidates._build_shopping(problem, best.assignments)
+            report = self.candidates.validator.validate(problem, best.assignments, shopping)
+            if report.status != "passed":
+                raise ValueError("Initial annealing plan does not pass the current problem's validation")
+            best.shopping, best.validation = shopping, report
         slots, options = domains(self, problem)
         current = tuple(
             (s.slot_id, tuple((a.role_id, a.recipe_id) for a in best.assignments if a.slot_id == s.slot_id))

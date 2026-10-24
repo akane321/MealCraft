@@ -50,6 +50,12 @@ def test_real_request_persists_validated_snapshot_and_trace(recipe_client, monke
     run, trace = latest_trace()
     assert run.status == "succeeded"
     assert trace["algorithm"] == strategy
+    if strategy == "beam":
+        assert trace["local_improvement"]["algorithm"] == "beam+simulated-annealing"
+        assert trace["local_improvement"]["variety_basis"] == "table-product-dish-kind"
+        assert tuple(trace["local_improvement"]["after"]) <= tuple(trace["local_improvement"]["before"])
+    else:
+        assert "local_improvement" not in trace
     assert trace["validation"]["status"] == "passed"
     assert trace["validation"]["purchase_total_sgd"] == plan["grocery_estimate"]["purchase_total_sgd"]
     assert {"kind": "meal_plan", "id": plan["id"]} in run.artifact_references
