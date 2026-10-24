@@ -57,6 +57,11 @@ reviewer attestation, then puts the file in controlled read-only storage. Also
 hash the exact field-dictionary file, template/schema and frozen reference-facts
 version. Preserve dictionary bytes (including line endings); do not reformat it
 after recording its digest. The adapter uses that same frozen dictionary.
+When reviews are recorded in a review attestation (authoring guide, "Several
+reviewers, or an AI-executed review"), also hash the exact attestation file and record
+the checker's `checker_version`, the reviewers and their `executed_by`, and the
+`limitations` the readiness run reported. An AI-executed review stays labelled as
+such in every record derived from it.
 
 ```powershell
 # The author runs this on their own final file; this chat must not open it.
