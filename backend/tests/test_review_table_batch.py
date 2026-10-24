@@ -18,16 +18,22 @@ from app.data.recipe_tags import Dish, Line, rule_tags
 from app.planning import product_path
 from app.planning.meal_composition import meal_role_of, unreviewed
 
+SCRIPTS = repository_root() / "data-engineering/scripts"
+pytestmark = pytest.mark.skipif(
+    not (SCRIPTS / "import_review_table.py").is_file(),
+    reason="Repository-only review scripts are not shipped in the backend image.",
+)
+
 
 def script(name: str):
-    path = repository_root() / f"data-engineering/scripts/{name}.py"
+    path = SCRIPTS / f"{name}.py"
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 
 
-table = script("import_review_table")
+table = script("import_review_table") if (SCRIPTS / "import_review_table.py").is_file() else None
 REVIEW = recipe_tags.REVIEW_TABLE_BATCH
 
 
