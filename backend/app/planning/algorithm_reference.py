@@ -25,10 +25,10 @@ def require_min_dish_kinds(value):
         raise ValueError("min_dish_kinds must be a nonnegative integer")
 
 
-def evaluate(planner, problem, choices, *, min_dish_kinds=0):
+def evaluate(planner, problem, choices, *, min_dish_kinds=0, validate=None):
     assignments = assignments_of(MealState(choices))
     shopping = planner.candidates._build_shopping(problem, assignments)
-    report = planner.candidates.validator.validate(problem, assignments, shopping)
+    report = (validate or planner.candidates.validator.validate)(problem, assignments, shopping)
     score = planner.objective.score_validated(problem, assignments, report) if report.status == "passed" else None
     if score is not None:
         kind_index = 2 if planner.objective.priority == "price" else 1
@@ -86,7 +86,7 @@ class AnnealingPlanner(DiversityAwareGreedyPlanner):
             raise ValueError("Step count must be positive")
         self.seed, self.steps = seed, steps
 
-    def solve(self, problem, *, initial=None):
+    def solve(self, problem, *, initial=None, validate=None):
         # A product adapter may supply its validated beam result. Never mutate it
         # or trust a validation report produced for a different request.
         best = super().solve(problem) if initial is None else initial.model_copy(deep=True)
@@ -94,9 +94,9 @@ class AnnealingPlanner(DiversityAwareGreedyPlanner):
         if best.status != "feasible":
             best.trace.warnings.append("No feasible seed; annealing did not run.")
             return best
-        if initial is not None:
+        if initial is not None or validate is not None:
             shopping = self.candidates._build_shopping(problem, best.assignments)
-            report = self.candidates.validator.validate(problem, best.assignments, shopping)
+            report = (validate or self.candidates.validator.validate)(problem, best.assignments, shopping)
             if report.status != "passed":
                 raise ValueError("Initial annealing plan does not pass the current problem's validation")
             best.shopping, best.validation = shopping, report
@@ -121,7 +121,7 @@ class AnnealingPlanner(DiversityAwareGreedyPlanner):
             else:
                 trial[i] = (slots[i].slot_id, rng.choice(options[i]))
             trial = tuple(trial)
-            candidate_score, assignments, shopping, report = evaluate(self, problem, trial)
+            candidate_score, assignments, shopping, report = evaluate(self, problem, trial, validate=validate)
             if candidate_score is None:
                 continue
             # Final ranking remains lexicographic. Acceptance uses the first

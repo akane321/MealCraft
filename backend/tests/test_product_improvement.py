@@ -1,7 +1,9 @@
 from datetime import timedelta
+from functools import partial
 
 from app.planning.meal_beam import MealBeamPlanner
 from app.planning.product_improvement import improve_product_plan
+from app.planning.product_path import product_validation
 from app.schemas.planning_v2 import PlanningAssignment
 from tests.test_diversity_greedy import setup_problem
 
@@ -33,3 +35,35 @@ def test_product_improvement_is_repeatable_and_never_worsens_incumbent():
     second, b = improve_product_plan(problem, seed, dict.fromkeys("abc", 0))
     assert first == second
     assert a["after"] == b["after"] <= a["before"]
+
+
+def test_improvement_preserves_hard_recipe_count_even_for_one_shared_title_kind():
+    problem, _ = setup_problem(100)
+    for recipe in problem.recipes:
+        recipe.title = "Invented rice bowl"
+    initial = [
+        PlanningAssignment(slot_id=slot.slot_id, recipe_id=rid) for slot, rid in zip(problem.slots, "ab", strict=True)
+    ]
+    builder = MealBeamPlanner()
+    shopping = builder._build_shopping(problem, initial)
+    validate = partial(product_validation, builder.validator, minimum_distinct_dishes=2)
+    report = validate(problem, initial, shopping)
+    result, _ = improve_product_plan(problem, (initial, shopping, report), {"a": 1, "b": 1, "c": 0}, validate=validate)
+    assert result[2].status == "passed"
+    assert len({a.recipe_id for a in result[0]}) >= 2
+    assert any(c.code == "minimum_distinct_dishes" for c in result[2].checks)
+
+
+def test_improvement_checks_per_meal_budget_not_just_weekly_checkout():
+    problem, _ = setup_problem(100)
+    problem.recipes[2].ingredients[0].quantity = 1000
+    initial = [PlanningAssignment(slot_id=slot.slot_id, recipe_id="a") for slot in problem.slots]
+    builder = MealBeamPlanner()
+    shopping = builder._build_shopping(problem, initial)
+    validate = partial(product_validation, builder.validator, per_meal_budget=1.5)
+    report = validate(problem, initial, shopping)
+    assert report.status == "passed"
+    result, _ = improve_product_plan(problem, (initial, shopping, report), {"a": 1, "b": 1, "c": 0}, validate=validate)
+    assert result[2].status == "passed"
+    assert "c" not in {a.recipe_id for a in result[0]}
+    assert all(c.status == "passed" for c in result[2].checks if c.code == "per_meal_budget")

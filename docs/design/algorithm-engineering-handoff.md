@@ -7,6 +7,9 @@
 `planning/product_improvement.py` adapts a feasible product beam result to
 simulated annealing. The initial plan is copied and revalidated; every explored
 move must pass the independent validator, and the best validated result is kept.
+The product's full acceptance callback is reused for the seed and every move,
+including the per-meal cost ceiling and any requested minimum distinct-recipe
+count that are not fields of the generic planning packet.
 The pass uses seed 0 and 50 proposals, with no wall-clock cutoff or CP-SAT call.
 It runs for ordinary hard-budget beam requests, including requests without a
 stated budget. Cheapest-price searches, the greedy baseline and explicit

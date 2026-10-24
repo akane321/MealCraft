@@ -19,7 +19,7 @@ class ProductTableObjective(AlgorithmObjective):
         return super().terms(table, assignments, report, partial=partial)
 
 
-def improve_product_plan(problem, result, losses, *, steps=50, candidates=None):
+def improve_product_plan(problem, result, losses, *, steps=50, candidates=None, validate=None):
     """Keep a validated beam incumbent; never invoke CP-SAT or change member eligibility."""
     groups = defaultdict(list)
     for recipe in problem.recipes:
@@ -50,7 +50,9 @@ def improve_product_plan(problem, result, losses, *, steps=50, candidates=None):
         MealBeamLimits(candidates_per_role=len(problem.recipes), meal_options_per_slot=256), local_losses=losses
     )
     before = objective.score_validated(problem, initial.assignments, initial.validation)
-    improved = AnnealingPlanner(objective, candidates, seed=0, steps=steps).solve(problem, initial=initial)
+    improved = AnnealingPlanner(objective, candidates, seed=0, steps=steps).solve(
+        problem, initial=initial, validate=validate
+    )
     after = objective.score_validated(problem, improved.assignments, improved.validation)
     return (improved.assignments, improved.shopping, improved.validation), {
         "algorithm": "beam+simulated-annealing",
