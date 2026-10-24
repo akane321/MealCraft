@@ -249,6 +249,18 @@ def test_product_normalizer_uses_observed_values_and_preserves_servings():
     assert not output.awaiting_confirmation
 
 
+def test_normalizer_preserves_skip_lock_and_explicit_horizon_not_just_dates_with_dishes():
+    plan = product_plan().model_copy(update={"day_count": 14, "end_date": date(2031, 2, 17)}, deep=True)
+    plan.days[0].status = "skipped"
+    plan.days[0].is_locked = True
+    output = normalize_product(session(plan_id=7, status="planned", can_confirm=False), plan)
+    assert output.plan.horizon_days == 14
+    assert output.plan.start_date == date(2031, 2, 4)
+    assert output.plan.end_date == date(2031, 2, 17)
+    assert output.plan.meals[0].dishes[0].status == "skipped"
+    assert output.plan.meals[0].dishes[0].locked is True
+
+
 def test_normalizer_never_substitutes_another_plan_or_hides_a_missing_saved_plan():
     with pytest.raises(ValueError, match="actual saved plan"):
         normalize_product(session(plan_id=7))

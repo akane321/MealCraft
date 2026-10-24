@@ -12,6 +12,8 @@
               "awaiting_confirmation": false,
               "clarification": [],
               "plan": {
+                "end_date": null,
+                "horizon_days": null,
                 "household_size": null,
                 "meals": [
                   {
@@ -19,17 +21,20 @@
                     "dishes": [
                       {
                         "evidence": {},
+                        "locked": null,
                         "name": "Invented bean bowl",
                         "not_for": [],
                         "recipe_reference": null,
                         "role": null,
-                        "servings": null
+                        "servings": null,
+                        "status": null
                       }
                     ],
                     "meal_type": "dinner"
                   }
                 ],
                 "shopping": [],
+                "start_date": null,
                 "total_cost_sgd": null
               },
               "refusal": null,
@@ -65,6 +70,8 @@
               "awaiting_confirmation": false,
               "clarification": [],
               "plan": {
+                "end_date": null,
+                "horizon_days": null,
                 "household_size": null,
                 "meals": [
                   {
@@ -72,17 +79,20 @@
                     "dishes": [
                       {
                         "evidence": {},
+                        "locked": null,
                         "name": "Invented bean bowl",
                         "not_for": [],
                         "recipe_reference": null,
                         "role": null,
-                        "servings": null
+                        "servings": null,
+                        "status": null
                       }
                     ],
                     "meal_type": "dinner"
                   }
                 ],
                 "shopping": [],
+                "start_date": null,
                 "total_cost_sgd": null
               },
               "refusal": null,
@@ -106,6 +116,8 @@
               "awaiting_confirmation": false,
               "clarification": [],
               "plan": {
+                "end_date": null,
+                "horizon_days": null,
                 "household_size": null,
                 "meals": [
                   {
@@ -113,17 +125,20 @@
                     "dishes": [
                       {
                         "evidence": {},
+                        "locked": null,
                         "name": "Invented bean bowl",
                         "not_for": [],
                         "recipe_reference": null,
                         "role": null,
-                        "servings": null
+                        "servings": null,
+                        "status": null
                       }
                     ],
                     "meal_type": "dinner"
                   }
                 ],
                 "shopping": [],
+                "start_date": null,
                 "total_cost_sgd": null
               },
               "refusal": null,
@@ -138,6 +153,8 @@
               "awaiting_confirmation": false,
               "clarification": [],
               "plan": {
+                "end_date": null,
+                "horizon_days": null,
                 "household_size": null,
                 "meals": [
                   {
@@ -145,17 +162,20 @@
                     "dishes": [
                       {
                         "evidence": {},
+                        "locked": null,
                         "name": "Changed Invented bean bowl",
                         "not_for": [],
                         "recipe_reference": null,
                         "role": null,
-                        "servings": null
+                        "servings": null,
+                        "status": null
                       }
                     ],
                     "meal_type": "dinner"
                   }
                 ],
                 "shopping": [],
+                "start_date": null,
                 "total_cost_sgd": null
               },
               "refusal": null,
@@ -178,6 +198,6 @@
     "timezone": "Asia/Singapore"
   },
   "scope": "Invented stub conversations only; no product end-to-end or formal evaluation claim",
-  "shared_instructions": "Today is 2031-02-03 (Monday); timezone: Asia/Singapore.\nInitial state: {}\nUse only this conversation and your own previous responses. Return JSON conforming to the following shared output schema. Set awaiting_confirmation only when waiting for confirmation, not when asking for missing information.\n{\"$defs\":{\"JsonValue\":{},\"PlanDish\":{\"additionalProperties\":false,\"properties\":{\"evidence\":{\"additionalProperties\":{\"$ref\":\"#/$defs/JsonValue\"},\"title\":\"Evidence\",\"type\":\"object\"},\"name\":{\"title\":\"Name\",\"type\":\"string\"},\"not_for\":{\"items\":{\"type\":\"string\"},\"title\":\"Not For\",\"type\":\"array\"},\"recipe_reference\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Recipe Reference\"},\"role\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Role\"},\"servings\":{\"anyOf\":[{\"exclusiveMinimum\":0,\"type\":\"number\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Servings\"}},\"required\":[\"name\"],\"title\":\"PlanDish\",\"type\":\"object\"},\"PlanMeal\":{\"additionalProperties\":false,\"properties\":{\"date\":{\"format\":\"date\",\"title\":\"Date\",\"type\":\"string\"},\"dishes\":{\"items\":{\"$ref\":\"#/$defs/PlanDish\"},\"minItems\":1,\"title\":\"Dishes\",\"type\":\"array\"},\"meal_type\":{\"title\":\"Meal Type\",\"type\":\"string\"}},\"required\":[\"date\",\"meal_type\",\"dishes\"],\"title\":\"PlanMeal\",\"type\":\"object\"},\"PlanOutput\":{\"additionalProperties\":false,\"properties\":{\"household_size\":{\"anyOf\":[{\"minimum\":1,\"type\":\"integer\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Household Size\"},\"meals\":{\"items\":{\"$ref\":\"#/$defs/PlanMeal\"},\"minItems\":1,\"title\":\"Meals\",\"type\":\"array\"},\"shopping\":{\"items\":{\"additionalProperties\":{\"$ref\":\"#/$defs/JsonValue\"},\"type\":\"object\"},\"title\":\"Shopping\",\"type\":\"array\"},\"total_cost_sgd\":{\"anyOf\":[{\"minimum\":0,\"type\":\"number\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Total Cost Sgd\"}},\"required\":[\"meals\"],\"title\":\"PlanOutput\",\"type\":\"object\"}},\"additionalProperties\":false,\"properties\":{\"answer\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Answer\"},\"awaiting_confirmation\":{\"default\":false,\"title\":\"Awaiting Confirmation\",\"type\":\"boolean\"},\"clarification\":{\"items\":{\"type\":\"string\"},\"title\":\"Clarification\",\"type\":\"array\"},\"plan\":{\"anyOf\":[{\"$ref\":\"#/$defs/PlanOutput\"},{\"type\":\"null\"}],\"default\":null},\"refusal\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Refusal\"},\"request_fields\":{\"additionalProperties\":{\"$ref\":\"#/$defs/JsonValue\"},\"title\":\"Request Fields\",\"type\":\"object\"}},\"title\":\"UnifiedOutput\",\"type\":\"object\"}",
+  "shared_instructions": "Today is 2031-02-03 (Monday); timezone: Asia/Singapore.\nInitial state: {}\nUse only this conversation and your own previous responses. Return JSON conforming to the following shared output schema. Set awaiting_confirmation only when waiting for confirmation, not when asking for missing information.\n{\"$defs\":{\"JsonValue\":{},\"PlanDish\":{\"additionalProperties\":false,\"properties\":{\"evidence\":{\"additionalProperties\":{\"$ref\":\"#/$defs/JsonValue\"},\"title\":\"Evidence\",\"type\":\"object\"},\"locked\":{\"anyOf\":[{\"type\":\"boolean\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Locked\"},\"name\":{\"title\":\"Name\",\"type\":\"string\"},\"not_for\":{\"items\":{\"type\":\"string\"},\"title\":\"Not For\",\"type\":\"array\"},\"recipe_reference\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Recipe Reference\"},\"role\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Role\"},\"servings\":{\"anyOf\":[{\"exclusiveMinimum\":0,\"type\":\"number\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Servings\"},\"status\":{\"anyOf\":[{\"enum\":[\"planned\",\"completed\",\"skipped\"],\"type\":\"string\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Status\"}},\"required\":[\"name\"],\"title\":\"PlanDish\",\"type\":\"object\"},\"PlanMeal\":{\"additionalProperties\":false,\"properties\":{\"date\":{\"format\":\"date\",\"title\":\"Date\",\"type\":\"string\"},\"dishes\":{\"items\":{\"$ref\":\"#/$defs/PlanDish\"},\"minItems\":1,\"title\":\"Dishes\",\"type\":\"array\"},\"meal_type\":{\"title\":\"Meal Type\",\"type\":\"string\"}},\"required\":[\"date\",\"meal_type\",\"dishes\"],\"title\":\"PlanMeal\",\"type\":\"object\"},\"PlanOutput\":{\"additionalProperties\":false,\"properties\":{\"end_date\":{\"anyOf\":[{\"format\":\"date\",\"type\":\"string\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"End Date\"},\"horizon_days\":{\"anyOf\":[{\"minimum\":1,\"type\":\"integer\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Horizon Days\"},\"household_size\":{\"anyOf\":[{\"minimum\":1,\"type\":\"integer\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Household Size\"},\"meals\":{\"items\":{\"$ref\":\"#/$defs/PlanMeal\"},\"minItems\":1,\"title\":\"Meals\",\"type\":\"array\"},\"shopping\":{\"items\":{\"additionalProperties\":{\"$ref\":\"#/$defs/JsonValue\"},\"type\":\"object\"},\"title\":\"Shopping\",\"type\":\"array\"},\"start_date\":{\"anyOf\":[{\"format\":\"date\",\"type\":\"string\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Start Date\"},\"total_cost_sgd\":{\"anyOf\":[{\"minimum\":0,\"type\":\"number\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Total Cost Sgd\"}},\"required\":[\"meals\"],\"title\":\"PlanOutput\",\"type\":\"object\"}},\"additionalProperties\":false,\"properties\":{\"answer\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Answer\"},\"awaiting_confirmation\":{\"default\":false,\"title\":\"Awaiting Confirmation\",\"type\":\"boolean\"},\"clarification\":{\"items\":{\"type\":\"string\"},\"title\":\"Clarification\",\"type\":\"array\"},\"plan\":{\"anyOf\":[{\"$ref\":\"#/$defs/PlanOutput\"},{\"type\":\"null\"}],\"default\":null},\"refusal\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"null\"}],\"default\":null,\"title\":\"Refusal\"},\"request_fields\":{\"additionalProperties\":{\"$ref\":\"#/$defs/JsonValue\"},\"title\":\"Request Fields\",\"type\":\"object\"}},\"title\":\"UnifiedOutput\",\"type\":\"object\"}",
   "version": "conversation-adapter-draft-v1"
 }

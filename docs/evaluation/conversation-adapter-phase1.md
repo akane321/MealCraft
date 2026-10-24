@@ -27,6 +27,8 @@ gold argument, category switch, scorer, provider or initial-household/plan seed.
 - `normalize_product` reads an actual `AgentSessionResponse` and, if saved,
   that session's actual `WeeklyMealPlanResponse`. It preserves dates, roles,
   actual dish servings, exclusions, nutrition and shopping observations. It
+  retains the explicit horizon even on dates without dishes, and keeps skip/lock
+  state rather than silently treating every saved entry as a selected meal. It
   rejects a missing or substituted saved plan. Native constraint echoes are
   copied without inferring dictionary fields from answers or recipe names.
 

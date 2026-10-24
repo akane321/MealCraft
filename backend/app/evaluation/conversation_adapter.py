@@ -60,6 +60,8 @@ class PlanDish(StrictModel):
     recipe_reference: str | None = None
     servings: float | None = Field(default=None, gt=0, allow_inf_nan=False)
     not_for: list[str] = Field(default_factory=list)
+    status: Literal["planned", "completed", "skipped"] | None = None
+    locked: bool | None = None
     # Model arms without a catalog can provide their own ingredient/step evidence here.
     evidence: dict[str, JsonValue] = Field(default_factory=dict)
 
@@ -73,6 +75,9 @@ class PlanMeal(StrictModel):
 class PlanOutput(StrictModel):
     meals: list[PlanMeal] = Field(min_length=1)
     household_size: int | None = Field(default=None, ge=1)
+    start_date: date | None = None
+    end_date: date | None = None
+    horizon_days: int | None = Field(default=None, ge=1)
     shopping: list[dict[str, JsonValue]] = Field(default_factory=list)
     total_cost_sgd: float | None = Field(default=None, ge=0, allow_inf_nan=False)
 
@@ -176,12 +181,17 @@ def normalize_product(session: AgentSessionResponse, plan: WeeklyMealPlanRespons
                     recipe_reference=dish.recipe.slug,
                     servings=dish.servings if dish.servings is not None else plan.household_size * dish.portion_share,
                     not_for=list(dish.not_for),
+                    status=dish.status,
+                    locked=dish.is_locked,
                     evidence={"nutrition_per_person": dish.nutrition_per_person.model_dump(mode="json")},
                 )
             )
         normalized_plan = PlanOutput(
             meals=[PlanMeal(date=day, meal_type=meal, dishes=dishes) for (day, meal), dishes in sorted(meals.items())],
             household_size=plan.household_size,
+            start_date=plan.start_date,
+            end_date=plan.end_date,
+            horizon_days=plan.day_count,
             shopping=[line.model_dump(mode="json") for line in plan.grocery_estimate.items],
             total_cost_sgd=plan.grocery_estimate.purchase_total_sgd,
         )
