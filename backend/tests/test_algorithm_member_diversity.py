@@ -94,7 +94,8 @@ def test_missing_member_data_stays_table_only():
 def test_member_only_at_empty_meal_is_not_in_denominator():
     problem, objective = family(2)
     problem.slots[0].members = [PlanningSlotMember(name="guest", servings=1)]
-    metrics = objective.diversity(problem, [PlanningAssignment(slot_id="s1", recipe_id="a")])
+    assignments = [PlanningAssignment(slot_id="s1", recipe_id="a")]
+    metrics = objective.diversity(problem, assignments)
     assert metrics["member_kinds"] == {"adult-0": 1, "adult-1": 1}
     assert metrics["member_mean"] == metrics["member_min"] == 1
 
@@ -102,7 +103,8 @@ def test_member_only_at_empty_meal_is_not_in_denominator():
 def test_filled_meal_still_counts_ineligible_and_exempt_role_members():
     problem, objective = family(2)
     assignments = [PlanningAssignment(slot_id="s1", recipe_id="c")]
-    assert objective.diversity(problem, assignments)["member_kinds"] == {"adult-0": 0, "adult-1": 1}
+    metrics = objective.diversity(problem, assignments)
+    assert metrics["member_kinds"] == {"adult-0": 0, "adult-1": 1}
     problem.uncounted_roles = ["staple"]
     assignments[0].role_id = "staple"
     metrics = objective.diversity(problem, assignments)
@@ -126,6 +128,16 @@ def test_optional_meal_member_denominator_matches_exact_models(priority):
         assert result["score"] == exact["score"]
         assert result["diversity"] == exact["diversity"]
         assert "guest" not in result["diversity"]["member_kinds"]
+
+
+def test_native_fixed_empty_slot_excludes_its_unique_member():
+    problem, objective = family(2)
+    problem.slots[0].required = False
+    problem.slots[0].members = [PlanningSlotMember(name="guest", servings=1)]
+    result = NativeSharedScoreCpSat(objective).solve_exact(problem, fixed_choices={"s0": ()})
+    assert result["status"] == "optimal_for_native_model"
+    assert result["diversity"]["member_mean"] == 1
+    assert "guest" not in result["diversity"]["member_kinds"]
 
 
 @pytest.mark.parametrize("size", [2, 6])

@@ -24,12 +24,12 @@ def integer(value, scale=1000):
 
 
 class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
-    def solve_exact(self, problem, *, time_limit=15, optimize=True, min_dish_kinds=0):
+    def solve_exact(self, problem, *, time_limit=15, optimize=True, min_dish_kinds=0, fixed_choices=None):
         from ortools.sat.python import cp_model
 
         require_finite_problem(problem)
         require_min_dish_kinds(min_dish_kinds)
-        if not isfinite(time_limit) or time_limit <= 0:
+        if time_limit is not None and (not isfinite(time_limit) or time_limit <= 0):
             raise ValueError("Time limit must be finite and positive")
         if set(self.objective.keys) != {r.recipe_id for r in problem.recipes}:
             raise ValueError("Objective candidates differ from the problem")
@@ -43,6 +43,15 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
         soft_scale = lcm(*norms.values()) if norms else 1
         started = perf_counter()
         slots, pools = domains(self, problem)
+        fixed_choices = fixed_choices or {}
+        if set(fixed_choices) - {slot.slot_id for slot in slots}:
+            raise ValueError("Fixed choices refer to an unknown slot")
+        for index, slot in enumerate(slots):
+            if slot.slot_id in fixed_choices:
+                choice = fixed_choices[slot.slot_id]
+                if choice not in pools[index]:
+                    raise ValueError("Fixed choice is outside the generated meal domain")
+                pools[index] = (choice,)
         recipes = {r.recipe_id: r for r in problem.recipes}
         quantity_scale = 100000 * lcm(*(r.servings for r in problem.recipes))
         if quantity_scale > 10**9:
@@ -52,7 +61,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
         demand = defaultdict(list)
         counts = defaultdict(list)
         member_counts = defaultdict(list)
-        self.objective.diversity(problem, [])  # Validate names, including empty meals.
+        self.objective.diversity(problem, [])  # Validate unique names even in empty meals.
         member_names = sorted({m.name for s in slots for m in s.members})
         member_meals = defaultdict(list)
         rule_counts, ingredient_meals = defaultdict(list), defaultdict(list)
@@ -208,7 +217,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
         variety_scale = 1
         variety = sum(representative.values())
         if member_names:
-            # Backport the ADR-0090 denominator fix from the stacked #341.
+            # Exact rational mean with a decision-dependent denominator.
             variety_scale = lcm(*range(1, len(member_names) + 1))
             bound = len(member_names) * len(keys) * variety_scale
             if bound > 10**12:
@@ -389,10 +398,11 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
             if optimize and isinstance(term, int):
                 output["stage_ms"].append(0.0)
                 continue
-            remaining_time = time_limit - (perf_counter() - started)
-            if remaining_time <= 0:
-                return output
-            solver.parameters.max_time_in_seconds = remaining_time
+            if time_limit is not None:
+                remaining_time = time_limit - (perf_counter() - started)
+                if remaining_time <= 0:
+                    return output
+                solver.parameters.max_time_in_seconds = remaining_time
             model.Minimize(term)
             stage_started = perf_counter()
             status = solver.Solve(model)
