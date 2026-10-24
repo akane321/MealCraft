@@ -32,12 +32,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 2041,
+            "recipe_pool_servable": 2052,
             "recipe_pool_by_member": {
-              "Ann": 2041,
-              "Ben": 2041,
-              "Kai": 2041,
-              "Mei": 2041
+              "Ann": 2052,
+              "Ben": 2052,
+              "Kai": 2052,
+              "Mei": 2052
             },
             "servings_cooked": 165.24,
             "shopping_trips": 1,
@@ -70,12 +70,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7567,
+            "recipe_pool_servable": 7585,
             "recipe_pool_by_member": {
-              "Ann": 2041,
-              "Ben": 7567,
-              "Kai": 7567,
-              "Mei": 7567
+              "Ann": 2052,
+              "Ben": 7585,
+              "Kai": 7585,
+              "Mei": 7585
             },
             "servings_cooked": 161.58,
             "shopping_trips": 1,
@@ -116,10 +116,10 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 2041,
+            "recipe_pool_servable": 2052,
             "recipe_pool_by_member": {
-              "Lin": 2041,
-              "Raj": 2041
+              "Lin": 2052,
+              "Raj": 2052
             },
             "servings_cooked": 112.5,
             "shopping_trips": 2,
@@ -150,10 +150,10 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7567,
+            "recipe_pool_servable": 7585,
             "recipe_pool_by_member": {
-              "Lin": 2041,
-              "Raj": 7567
+              "Lin": 2052,
+              "Raj": 7585
             },
             "servings_cooked": 94.68,
             "shopping_trips": 2,
@@ -192,11 +192,11 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7110,
+            "recipe_pool_servable": 7126,
             "recipe_pool_by_member": {
-              "Ann": 7110,
-              "Ben": 7110,
-              "Mei": 7110
+              "Ann": 7126,
+              "Ben": 7126,
+              "Mei": 7126
             },
             "servings_cooked": 49.82,
             "shopping_trips": 1,
@@ -228,11 +228,11 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7567,
+            "recipe_pool_servable": 7585,
             "recipe_pool_by_member": {
-              "Ann": 7567,
-              "Ben": 7567,
-              "Mei": 7110
+              "Ann": 7585,
+              "Ben": 7585,
+              "Mei": 7126
             },
             "servings_cooked": 49.82,
             "shopping_trips": 1,
@@ -272,12 +272,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 2041,
+            "recipe_pool_servable": 2052,
             "recipe_pool_by_member": {
-              "Ann": 2041,
-              "Ben": 2041,
-              "Kai": 2041,
-              "Mei": 2041
+              "Ann": 2052,
+              "Ben": 2052,
+              "Kai": 2052,
+              "Mei": 2052
             },
             "servings_cooked": 157.58,
             "shopping_trips": 1,
@@ -310,12 +310,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7567,
+            "recipe_pool_servable": 7585,
             "recipe_pool_by_member": {
-              "Ann": 2041,
-              "Ben": 7567,
-              "Kai": 7567,
-              "Mei": 7567
+              "Ann": 2052,
+              "Ben": 7585,
+              "Kai": 7585,
+              "Mei": 7585
             },
             "servings_cooked": 155.01,
             "shopping_trips": 1,
@@ -356,12 +356,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 2041,
+            "recipe_pool_servable": 2052,
             "recipe_pool_by_member": {
-              "Ann": 2041,
-              "Ben": 2041,
-              "Kai": 2041,
-              "Mei": 2041
+              "Ann": 2052,
+              "Ben": 2052,
+              "Kai": 2052,
+              "Mei": 2052
             },
             "servings_cooked": 175.16,
             "shopping_trips": 1,
@@ -395,12 +395,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7567,
+            "recipe_pool_servable": 7585,
             "recipe_pool_by_member": {
-              "Ann": 2041,
-              "Ben": 7567,
-              "Kai": 7567,
-              "Mei": 7567
+              "Ann": 2052,
+              "Ben": 7585,
+              "Kai": 7585,
+              "Mei": 7585
             },
             "servings_cooked": 166.53,
             "shopping_trips": 1,
@@ -442,12 +442,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7142,
+            "recipe_pool_servable": 7160,
             "recipe_pool_by_member": {
-              "Ann": 7142,
-              "Ben": 7142,
-              "Kai": 7142,
-              "Mei": 7142
+              "Ann": 7160,
+              "Ben": 7160,
+              "Kai": 7160,
+              "Mei": 7160
             },
             "servings_cooked": 68.34,
             "shopping_trips": 1,
@@ -480,12 +480,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7142,
+            "recipe_pool_servable": 7160,
             "recipe_pool_by_member": {
-              "Ann": 7142,
-              "Ben": 7142,
-              "Kai": 7142,
-              "Mei": 7142
+              "Ann": 7160,
+              "Ben": 7160,
+              "Kai": 7160,
+              "Mei": 7160
             },
             "servings_cooked": 66.3,
             "shopping_trips": 1,
@@ -526,12 +526,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7142,
+            "recipe_pool_servable": 7160,
             "recipe_pool_by_member": {
-              "Ann": 7142,
-              "Ben": 7142,
-              "Kai": 7142,
-              "Mei": 7142
+              "Ann": 7160,
+              "Ben": 7160,
+              "Kai": 7160,
+              "Mei": 7160
             },
             "servings_cooked": 68.34,
             "shopping_trips": 1,
@@ -564,12 +564,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7567,
+            "recipe_pool_servable": 7585,
             "recipe_pool_by_member": {
-              "Ann": 7567,
-              "Ben": 7567,
-              "Kai": 7567,
-              "Mei": 7142
+              "Ann": 7585,
+              "Ben": 7585,
+              "Kai": 7585,
+              "Mei": 7160
             },
             "servings_cooked": 68.34,
             "shopping_trips": 1,
@@ -610,12 +610,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 1006,
+            "recipe_pool_servable": 1011,
             "recipe_pool_by_member": {
-              "Ann": 1006,
-              "Ben": 1006,
-              "Kai": 1006,
-              "Mei": 1006
+              "Ann": 1011,
+              "Ben": 1011,
+              "Kai": 1011,
+              "Mei": 1011
             },
             "servings_cooked": 69.36,
             "shopping_trips": 1,
@@ -648,12 +648,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7567,
+            "recipe_pool_servable": 7585,
             "recipe_pool_by_member": {
-              "Ann": 2041,
-              "Ben": 7567,
-              "Kai": 4738,
-              "Mei": 7567
+              "Ann": 2052,
+              "Ben": 7585,
+              "Kai": 4748,
+              "Mei": 7585
             },
             "servings_cooked": 71.11,
             "shopping_trips": 1,
@@ -694,14 +694,14 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 2041,
+            "recipe_pool_servable": 2052,
             "recipe_pool_by_member": {
-              "Adult 1": 2041,
-              "Adult 2": 2041,
-              "Adult 3": 2041,
-              "Adult 4": 2041,
-              "Adult 5": 2041,
-              "Adult 6": 2041
+              "Adult 1": 2052,
+              "Adult 2": 2052,
+              "Adult 3": 2052,
+              "Adult 4": 2052,
+              "Adult 5": 2052,
+              "Adult 6": 2052
             },
             "servings_cooked": 103.1,
             "shopping_trips": 1,
@@ -736,14 +736,14 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7567,
+            "recipe_pool_servable": 7585,
             "recipe_pool_by_member": {
-              "Adult 1": 2041,
-              "Adult 2": 7567,
-              "Adult 3": 7567,
-              "Adult 4": 7567,
-              "Adult 5": 7567,
-              "Adult 6": 7567
+              "Adult 1": 2052,
+              "Adult 2": 7585,
+              "Adult 3": 7585,
+              "Adult 4": 7585,
+              "Adult 5": 7585,
+              "Adult 6": 7585
             },
             "servings_cooked": 104.66,
             "shopping_trips": 1,
@@ -786,12 +786,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 2041,
+            "recipe_pool_servable": 2052,
             "recipe_pool_by_member": {
-              "Ann": 2041,
-              "Ben": 2041,
-              "Kai": 2041,
-              "Mei": 2041
+              "Ann": 2052,
+              "Ben": 2052,
+              "Kai": 2052,
+              "Mei": 2052
             },
             "servings_cooked": 74.46,
             "shopping_trips": 1,
@@ -824,12 +824,12 @@
           "failures": {},
           "uncovered": [],
           "metrics": {
-            "recipe_pool_servable": 7567,
+            "recipe_pool_servable": 7585,
             "recipe_pool_by_member": {
-              "Ann": 2041,
-              "Ben": 7567,
-              "Kai": 7567,
-              "Mei": 7567
+              "Ann": 2052,
+              "Ben": 7585,
+              "Kai": 7585,
+              "Mei": 7585
             },
             "servings_cooked": 62.94,
             "shopping_trips": 1,
