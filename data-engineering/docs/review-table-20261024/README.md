@@ -15,7 +15,8 @@ AI 预填、在聊天里按"菜品类型"确认的，没有人逐行看过食材
 
 - `decisions.json`：复核表的导入结果。`provenance` 记来源，`counts` 记数字，`accepted` 是导入的值（按菜），
   `skipped` 是每一个没导入的表格值及原因。由 `data-engineering/scripts/import_review_table.py` 生成，不要手改。
-- `sample.json`：抽样记录（种子、每道菜属于哪一层哪一子层、要核对的值）。
+  它是表导入值的唯一来源：一个值从这里去掉，重新生成后那个字段就回到未标注。
+- `sample.json`：抽样记录（种子、每道菜属于哪一层、哪个子层和角色格、要核对的值）。
 - `sample.xlsx`：给复核人亲自核对用的表（见下文"抽样核对"）。
 - 核对后由 `review_table_accuracy.py` 生成的 `accuracy.md` 和 `accuracy.json`（尚未生成）。
 
@@ -28,7 +29,7 @@ AI 预填、在聊天里按"菜品类型"确认的，没有人逐行看过食材
 | 行数 / 菜数 | 815 行 / 422 道，全部在复核包里 |
 | 已亲自核对 | 0 行（该栏每一行都是空的） |
 | 复核包 | `data-engineering/docs/role-rules-20261023b/review.json`，SHA-256 `d7dcb750eb57802419ce519816a8f8e813ca03d30d57432cfb4f11348f2248de` |
-| 基准提交 | `5238449433d381af8a8304bb14d37713087b902a`（main） |
+| 基准提交 | main 的 `5238449`（完整提交号记在 `decisions.json` 的 `provenance.base_commit`） |
 
 每行的取值按"你的决定"解读：同意 Claude 建议取建议值（去掉开头的"被规则挡住 →"），同意模型原值取模型值，
 其他情况取"其他值"；聊天确认或被规则挡住而没有其他值的，取建议值；没有决定或"跳过"的不取值。
@@ -40,15 +41,17 @@ AI 预填、在聊天里按"菜品类型"确认的，没有人逐行看过食材
 | 部分 | 值 | 菜 | method | 说明 |
 | --- | ---: | ---: | --- | --- |
 | 复核表导入值 | 214（角色 106、主食 106、蛋白来源 2） | 108 | `llm` | AI 预填，只在规则留空的字段 |
-| 规则已定的冻结字段 | 453（角色 214、主食 214、蛋白来源 25） | 239 | `rule` | 冻结的模型值换成现行规则的值 |
+| 规则已定的冻结字段 | 562（角色 214、主食 214、蛋白来源 134） | 269 | `rule` | 冻结的模型值换成现行规则的值 |
 
-两部分都是 `batch = "recipe-tags-v1/review-table-20261024"`、`reviewed = false`。规则已定的那部分里，
-134 道菜的规则值全部等于冻结的模型原值，105 道至少有一项不同（61 道全不同，38 道部分不同，另 6 道同时带表导入值）；
-有 17 道菜两部分都有。
+两部分都是 `batch = "recipe-tags-v1/review-table-20261024"`、`reviewed = false`；44 道菜两部分都有。
+规则部分的蛋白来源里，有一部分是规则自己的不变量：最终角色是甜品、饮料、酱料或自制主食时没有主要蛋白（`[]`），
+这个 `[]` 标 `rule`，角色还在等复核或属于本批时跟着本批走，否则是普通规则值。
+规则部分里，163 道菜的规则值全部等于冻结的模型原值，106 道至少有一项不同。
 
 `python -m app.data.recipe_tags` 构建时的优先级：owner 逐道决定 > 现行规则 > 复核表 > 冻结的模型值。
 冻结字段（`recipe-tags-v1/llm` 的未复核值，重跑时也包括本批自己的未复核值）若现行规则能定，就写规则值进本批；
-若规则留空，复核表有值且在当前 `review_roles` 里就用表值，否则保持冻结。
+若规则留空，复核表有值且在当前 `review_roles` 里就用表值，否则保持冻结的模型值。本批里表导入的旧值不会被冻结带下去，
+只由 `decisions.json` 重新写入。最后按最终角色执行一次上面的不变量。接受前后连续重新生成，结果逐字节相同。
 
 ## 规划器的门禁
 
@@ -57,7 +60,7 @@ AI 预填、在聊天里按"菜品类型"确认的，没有人逐行看过食材
 `product_path.recipe_tags`、换菜时的角色判断）都用它；其他 batch 的规则值不受影响。
 
 当前有 417 道菜的关键字段在等复核。接受本批后放行 326 道；仍有 91 道被挡，因为它们还有冻结模型批次
-（`recipe-tags-v1/llm`）的字段，规则和复核表都没给值（共 138 个字段）。
+（`recipe-tags-v1/llm`）的字段，规则和复核表都没给值（共 135 个字段）。
 
 ## 复核表的导入数字
 
@@ -96,17 +99,23 @@ pork、beef、shellfish、egg；食材里的肉是可选的未指明肉类）。
 
 ## 抽样核对
 
-`sample.json` 和 `sample.xlsx` 共 46 道菜、87 行，种子 `20261024`：
+`sample.json` 和 `sample.xlsx` 共 46 道菜、92 行，种子 `20261024`：
 
 - **表导入层**（31 道）：第一轮的 30 道不变（按导入的角色分层，每层至少 1 道，其余按层的大小分配：
   staple 6、snack 6、sauce 6、dessert 5、soup 3、breakfast 1、one_bowl 1、vegetable 1、只导入蛋白来源 1），
   另把"只导入蛋白来源"那层剩下的一道也抽进来，这一层两道都看（Pâté Chaud 和 Ramen Hot And Sour Soup）。
-- **规则已定层**（15 道）：从 239 道里排除 owner 决定的菜后抽取，分"规则值等于模型原值"（134 道，抽 8 道）
-  和"规则值不同于模型原值"（105 道，抽 7 道）两个子层，每层至少 5 道，其余按比例。
+- **规则已定层**（15 道）：从 269 道里排除 owner 决定的菜后抽取。先分"规则值等于模型原值"（163 道）和
+  "规则值不同于模型原值"（106 道）两个子层，再按本批里的角色分格（规则部分没有角色的记为"只有蛋白来源"），
+  每格至少 1 道，其余按大小分配：
 
-`sample.xlsx` 每行是一道菜的一个字段，要核对的就是本批里的值（"本批的值"一栏），不显示模型原值，
-也不标这一行来自复核表还是规则。同一道菜可能在两层各出现一次，核对的字段不同（如 Welsh Rarebit）。
-复核人本人逐行核对：先看食材和步骤再看值，在"你看完后的值"里填正确值（同意也照抄），
+  | 子层 | 角色格（菜数 → 抽取） |
+  | --- | --- |
+  | 等于（抽 8） | staple 61 → 3、one_bowl 36 → 2、protein_main 24 → 1、只有蛋白来源 42 → 2 |
+  | 不同（抽 7） | protein_main 37 → 2、vegetable 22 → 1、staple 19 → 1、只有蛋白来源 13 → 1、sauce 10 → 1、one_bowl 5 → 1 |
+
+`sample.xlsx` 每行是一道菜的一个字段，要核对的就是本批里的值（"本批的值"一栏）。表里所有菜混在一起按编号排序、
+重新编序号；不显示模型原值，没有"可选角色"一栏，也没有任何一栏标明这一行来自复核表还是规则。复核人填了不在可选范围里的角色，
+照常记为不一致。复核人本人逐行核对：先看食材和步骤再看值，在"你看完后的值"里填正确值（同意也照抄），
 **只有亲自看完这一行之后**才在"已亲自核对（填 是）"填"是"。填法写在表里的"说明"页。
 
 填好后运行：
@@ -128,31 +137,25 @@ uv run --project backend python -m app.data.recipe_tags --accept-batch recipe-ta
 ```
 
 它把这一批所有未复核的值（`llm` 和 `rule` 都算）设为 `reviewed: true`，不动冻结的 `recipe-tags-v1/llm` 批次和普通规则值。
-接受后再跑 `python -m app.data.recipe_tags`：复核表的值保持 `reviewed`（值没变的话）；规则已定的那部分回到普通规则值
-（`method rule`、`recipe-tags-v1/rules`），规划器照常读。
+接受只改数据：仓库里的测试在接受前后都成立。接受后再跑 `python -m app.data.recipe_tags`：复核表的值保持 `reviewed`
+（值没变的话）；规则已定的那部分回到普通规则值（`method rule`、`recipe-tags-v1/rules`），只有跟着本批角色走的不变量 `[]`
+仍记在本批、保持 `reviewed`；规划器照常读。
 
-另：导入角色为 sauce 或 dessert 的菜里，有 15 道的蛋白来源是规则给的 egg、soy 或 legume（规则在角色未定时算出）：
-9 道本来就是普通规则值，6 道是冻结的模型值 `[]` 换成了规则值，属于本批的规则部分（如 Fake Feta 的 `soy`）。
-规则优先，导入不改它们；它们不填正餐，不影响蛋白不重复的检查。
+`--reask` 会撤销冻结：规则能定的冻结字段直接放行，不经过本批（见 `data-engineering/README.md`）。
 
 ## 开发报告
 
-仅规则重生成之后重跑四份开发报告。full-default、household-rules 和 v3 meal-day-week dev 的结果完全不变
-（meal-day-week 只有记录的代码版本号变了，未提交）。三道按规则定为 staple 的 owner 菜现在能被规划器读到，
-但没有一份报告的计划选到它们。shared-dish 的计划、份数、采购额和达成率都不变，只有"可上桌菜谱"的池子计数变了
-（相对 main：7567 → 7585、2041 → 2052、1006 → 1011 等）。这个计数直接读菜谱行上的 `meal_role`，不经过复核门禁：
-本批的规则部分让 28 道冻结菜的角色移入正餐角色、4 道移出，复核表的值移入 1 道、移出 7 道，
-owner 的决定移入 1 道（Pupusas）、移出 1 道（Asian Wraps），净增 18。
+仅规则重生成之后重跑四份开发报告，差异和原因见本分支的提交说明。
 
 ## 复现
 
 离线，用装有 openpyxl 的 Python，在仓库根目录：
 
 ```text
-python -I -X utf8 data-engineering/scripts/import_review_table.py <review.xlsx> --base 5238449433d381af8a8304bb14d37713087b902a
+python -I -X utf8 data-engineering/scripts/import_review_table.py <review.xlsx> --base 5238449
 cd backend && uv run python -m app.data.recipe_tags && cd ..
-python -I -X utf8 data-engineering/scripts/import_review_table.py <review.xlsx> --base 5238449433d381af8a8304bb14d37713087b902a
+python -I -X utf8 data-engineering/scripts/import_review_table.py <review.xlsx> --base 5238449
 ```
 
-第一步写 `decisions.json`（标签文件还没带上它时就此停下）；第二步只用规则（不带 `--llm`），不调用模型；
-第三步按重生成后的标签文件写抽样。
+第一步写 `decisions.json`（`--base` 解析为完整提交号）；标签文件还没带上表导入值或规则部分时就此停下。
+第二步只用规则（不带 `--llm`），不调用模型；第三步按重生成后的标签文件写抽样。

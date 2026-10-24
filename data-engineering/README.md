@@ -131,6 +131,10 @@ python data-engineering/scripts/review_tag_rule_changes.py --base-ref <修复前
 包中包含原标签、新标签、变动字段、完整步骤与release归一化克重。已知回归案例优先，
 其余按固定种子从变动菜谱抽取；这证明修复的针对性，不是独立总体准确率。
 模型字段仍被门禁拦截时会明确标出，新规则建议不能被误读为已放行。
+注意：这是带日期的复核包，只能在它自己的 base 修订上复现；脚本的"冻结"判断只认 `llm`，
+不适用于复核批次 `recipe-tags-v1/review-table-20261024` 之后的标签文件（在其后重跑会断言失败或写出缩水的包）。
+同样带日期、同样只能在各自 base 上复现的还有 `data-engineering/scripts/role_review_table.py`（[role-rules-20261023b](docs/role-rules-20261023b/README.md)）
+和 `data-engineering/scripts/role_rules_review.py`（[role-rules-119-20261023](docs/role-rules-119-20261023/README.md)）。
 
 人工核验完成后，原包的 `before`、`after` 和标签哈希保留为当时的快照；
 不同意的字段记为 `verdict=false`，人工正确值另存 `corrected_values`，不覆盖原预测。
@@ -144,6 +148,7 @@ python data-engineering/scripts/review_tag_rule_changes.py --base-ref <修复前
 
 该命令逐字段验证当前标签与人工意见一致，生成[修正落实报告](docs/recipe-tags-v1-rule-changes-review-applied.md)，
 同时刷新获准的满血默认开发集前后对照；不重抽样、不覆盖审查包、不计算全库准确率、不放行模型批次。
+它同样只能在该复核包的 base 修订上复现，不适用于复核批次之后的标签文件。
 
 ```bash
 uv run --project backend python -m app.data.recipe_tags          # 只用规则；之前模型给的答案保留并复用
@@ -152,7 +157,8 @@ uv run --project backend python -m app.data.recipe_tags --llm    # 规则定不�
 
 规则在 `backend/app/data/recipe_tags.py`，产出 `data/recipes/recipe-tags-v1.json` 和
 `data/ingredients/ingredient-tags-v1.json`，导入器（版本 6）按 release < 标签文件 < 运行时写入的顺序
-写进数据库。覆盖率和模型花费见 `docs/recipe-tags-v1-report.md`。`--reask` 丢掉之前模型的答案重新问。
+写进数据库。覆盖率和模型花费见 `docs/recipe-tags-v1-report.md`。`--reask` 丢掉之前模型的答案重新问；
+它同时撤销冻结，规则能定的冻结字段会直接放行，不经过复核批次。
 运行时写入的菜谱标签会在重新导入时保留，前提是写入方把它标出来：删掉该字段在 `estimated` 里的条目（人定的值不是估计），
 或把条目的 `reviewed` 设为 `true`。
 

@@ -2,6 +2,7 @@
   "batch": "recipe-tags-v1/review-table-20261024",
   "seed": 20261024,
   "size": 46,
+  "distinct_recipes": 46,
   "layers": {
     "table": {
       "breakfast": {
@@ -42,13 +43,49 @@
       }
     },
     "rule_decided": {
-      "rule_differs_from_model": {
-        "recipes": 105,
-        "drawn": 7
-      },
       "rule_equals_model": {
-        "recipes": 134,
-        "drawn": 8
+        "one_bowl": {
+          "recipes": 36,
+          "drawn": 2
+        },
+        "protein_main": {
+          "recipes": 24,
+          "drawn": 1
+        },
+        "protein_sources only": {
+          "recipes": 42,
+          "drawn": 2
+        },
+        "staple": {
+          "recipes": 61,
+          "drawn": 3
+        }
+      },
+      "rule_differs_from_model": {
+        "one_bowl": {
+          "recipes": 5,
+          "drawn": 1
+        },
+        "protein_main": {
+          "recipes": 37,
+          "drawn": 2
+        },
+        "protein_sources only": {
+          "recipes": 13,
+          "drawn": 1
+        },
+        "sauce": {
+          "recipes": 10,
+          "drawn": 1
+        },
+        "staple": {
+          "recipes": 19,
+          "drawn": 1
+        },
+        "vegetable": {
+          "recipes": 22,
+          "drawn": 1
+        }
       }
     }
   },
@@ -398,14 +435,53 @@
       }
     },
     {
-      "id": "RCP2_03DEE14CDC60",
-      "title": "Hush Puppies",
+      "id": "RCP2_BBA025B49BA6",
+      "title": "Pierogi",
+      "course": "main",
+      "layer": "rule_decided",
+      "stratum": "rule_differs_from_model",
+      "role": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_45BE0219D45D",
+      "title": "Heart-Shaped Tamagoyaki (Japanese Omelet)",
       "course": "side",
       "layer": "rule_decided",
       "stratum": "rule_differs_from_model",
+      "role": "protein_main",
       "values": {
-        "meal_role": "staple",
-        "contains_staple": true
+        "meal_role": "protein_main",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_6336ACA2F9AE",
+      "title": "Japanese Tamago Egg",
+      "course": "side",
+      "layer": "rule_decided",
+      "stratum": "rule_differs_from_model",
+      "role": "protein_main",
+      "values": {
+        "meal_role": "protein_main",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_355D74D12F4C",
+      "title": "Vietnamese Spiced Paté",
+      "course": "snack_appetizer",
+      "layer": "rule_decided",
+      "stratum": "rule_differs_from_model",
+      "role": "protein_sources only",
+      "values": {
+        "protein_sources": [
+          "chicken",
+          "pork"
+        ]
       }
     },
     {
@@ -414,64 +490,94 @@
       "course": "side",
       "layer": "rule_decided",
       "stratum": "rule_differs_from_model",
+      "role": "sauce",
       "values": {
         "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_2E6B4C7D3281",
+      "title": "Granny Gibbs' Famous Dumplings",
+      "course": "side",
+      "layer": "rule_decided",
+      "stratum": "rule_differs_from_model",
+      "role": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_C81AEF8EF1AC",
+      "title": "Onion Creme Brulee",
+      "course": "side",
+      "layer": "rule_decided",
+      "stratum": "rule_differs_from_model",
+      "role": "vegetable",
+      "values": {
+        "meal_role": "vegetable",
         "contains_staple": false
       }
     },
     {
-      "id": "RCP2_1EF61A58359F",
-      "title": "Apple Casserole",
-      "course": "side",
+      "id": "RCP2_1554F9789729",
+      "title": "Banh Mi Hotdog",
+      "course": "main",
       "layer": "rule_decided",
       "stratum": "rule_equals_model",
+      "role": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_FF3C50B5519E",
+      "title": "Vietnamese \"Banh Mi\" Chicken Burger",
+      "course": "main",
+      "layer": "rule_decided",
+      "stratum": "rule_equals_model",
+      "role": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_0DE59ED69BBF",
+      "title": "Stuffed Bell Peppers",
+      "course": "main",
+      "layer": "rule_decided",
+      "stratum": "rule_equals_model",
+      "role": "protein_main",
+      "values": {
+        "meal_role": "protein_main",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_6AD2450270A2",
+      "title": "Russian Wafers",
+      "course": "baked_good",
+      "layer": "rule_decided",
+      "stratum": "rule_equals_model",
+      "role": "protein_sources only",
       "values": {
         "protein_sources": []
       }
     },
     {
-      "id": "RCP2_23DCDA368745",
-      "title": "Homemade Nama (Fresh) Udon Noodles",
-      "course": "side",
-      "layer": "rule_decided",
-      "stratum": "rule_equals_model",
-      "values": {
-        "meal_role": "staple",
-        "contains_staple": true
-      }
-    },
-    {
-      "id": "RCP2_35DC1259F6B0",
-      "title": "Soft Shell Tacos",
+      "id": "RCP2_CEEA9D67A7EE",
+      "title": "Basic Italian Cookies",
       "course": "baked_good",
       "layer": "rule_decided",
-      "stratum": "rule_differs_from_model",
-      "values": {
-        "meal_role": "sauce",
-        "contains_staple": false
-      }
-    },
-    {
-      "id": "RCP2_4A7CC5A410F0",
-      "title": "Plantains In Coconut Milk",
-      "course": "side",
-      "layer": "rule_decided",
       "stratum": "rule_equals_model",
+      "role": "protein_sources only",
       "values": {
-        "meal_role": "staple",
-        "contains_staple": true
-      }
-    },
-    {
-      "id": "RCP2_561E7EDAC82C",
-      "title": "Cuban Black Beans",
-      "course": "side",
-      "layer": "rule_decided",
-      "stratum": "rule_differs_from_model",
-      "values": {
-        "protein_sources": [
-          "legume"
-        ]
+        "protein_sources": []
       }
     },
     {
@@ -480,85 +586,37 @@
       "course": "side",
       "layer": "rule_decided",
       "stratum": "rule_equals_model",
+      "role": "staple",
       "values": {
         "meal_role": "staple",
-        "contains_staple": true
-      }
-    },
-    {
-      "id": "RCP2_A660E279682A",
-      "title": "Easy Potato Dumplings",
-      "course": "side",
-      "layer": "rule_decided",
-      "stratum": "rule_equals_model",
-      "values": {
-        "meal_role": "staple",
-        "contains_staple": true
-      }
-    },
-    {
-      "id": "RCP2_B8E67A023CFD",
-      "title": "Chtitha Batata (Algerian Potato Stew)",
-      "course": "main",
-      "layer": "rule_decided",
-      "stratum": "rule_differs_from_model",
-      "values": {
-        "meal_role": "staple",
-        "contains_staple": true
-      }
-    },
-    {
-      "id": "RCP2_C25D9C4D878B",
-      "title": "Yorkshire Pudding",
-      "course": "side",
-      "layer": "rule_decided",
-      "stratum": "rule_differs_from_model",
-      "values": {
-        "meal_role": "staple",
-        "contains_staple": true
-      }
-    },
-    {
-      "id": "RCP2_C8B759477F8B",
-      "title": "Gözleme (Turkish Flatbread)",
-      "course": "main",
-      "layer": "rule_decided",
-      "stratum": "rule_equals_model",
-      "values": {
-        "meal_role": "staple",
-        "contains_staple": true
-      }
-    },
-    {
-      "id": "RCP2_D1A78AFA0C85",
-      "title": "Teenage Sloppy Joes",
-      "course": "main",
-      "layer": "rule_decided",
-      "stratum": "rule_differs_from_model",
-      "values": {
-        "meal_role": "protein_main",
-        "contains_staple": false
-      }
-    },
-    {
-      "id": "RCP2_F9AC64939A2C",
-      "title": "Welsh Rarebit",
-      "course": "main",
-      "layer": "rule_decided",
-      "stratum": "rule_equals_model",
-      "values": {
+        "contains_staple": true,
         "protein_sources": []
       }
     },
     {
-      "id": "RCP2_FB5F31874C8A",
-      "title": "Fresh Ramen Egg Noodles From Scratch",
+      "id": "RCP2_E20C08DE6172",
+      "title": "Polenta Gnocchi With Gorgonzola",
       "course": "side",
       "layer": "rule_decided",
       "stratum": "rule_equals_model",
+      "role": "staple",
       "values": {
         "meal_role": "staple",
-        "contains_staple": true
+        "contains_staple": true,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_F918B184F959",
+      "title": "Spaetzle",
+      "course": "side",
+      "layer": "rule_decided",
+      "stratum": "rule_equals_model",
+      "role": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": []
       }
     }
   ]

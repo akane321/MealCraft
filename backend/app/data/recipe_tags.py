@@ -893,6 +893,11 @@ def flavor_tags(dish: Dish, role: str | None, methods: list[str]) -> list[str]:
     return tags
 
 
+def without_main_protein(dish: Dish, role: str | None) -> bool:
+    """A dish in this role has no main protein: a sweet or condiment dish, or a homemade staple (its binder eggs)."""
+    return role in SWEET_OR_CONDIMENT or (role == "staple" and homemade_staple(dish))
+
+
 def rule_tags(dish: Dish) -> Tags:
     tags = Tags()
     led = dish_vegetable_led(dish)
@@ -910,7 +915,7 @@ def rule_tags(dish: Dish) -> Tags:
             role, allowed, sources = None, (), None
     if sources == []:  # a dish with no main protein is never a protein main, whatever the model would say
         allowed = tuple(name for name in allowed if name != "protein_main")
-    if role in SWEET_OR_CONDIMENT or (role == "staple" and homemade_staple(dish)):
+    if without_main_protein(dish, role):
         sources = []  # the eggs of a cake are not its main protein
     if dish.key in OWNER_ROLES:  # the owner's decision overrides the rules' role; the sources stay the rules'
         role, allowed = OWNER_ROLES[dish.key], ()
@@ -1190,14 +1195,17 @@ def recipe_entry(tags: Tags, previous: dict | None = None) -> dict:
     the owner's own decisions (`OWNER_BATCH`) are reviewed."""
     previous = previous or {}
     entry = {name: tags.values[name] for name in tags.values}
-    entry["estimated"] = {}
-    for name, method in tags.methods.items():
-        batch = tags.batches.get(name) or (RULE_BATCH if method == "rule" else LLM_BATCH)
-        held = previous.get("estimated", {}).get(name, {})
-        same = held.get("batch") == batch and held.get("method") == method and previous.get(name) == entry[name]
-        reviewed = batch == OWNER_BATCH or bool(same and held.get("reviewed"))
-        entry["estimated"][name] = {"method": method, "batch": batch, "reviewed": reviewed}
+    entry["estimated"] = {name: field_estimate(tags, name, previous) for name in tags.methods}
     return entry
+
+
+def field_estimate(tags: Tags, name: str, previous: dict) -> dict:
+    """How the tag file records a decided field: its method, its batch, and whether it is reviewed."""
+    method = tags.methods[name]
+    batch = tags.batches.get(name) or (RULE_BATCH if method == "rule" else LLM_BATCH)
+    held = previous.get("estimated", {}).get(name, {})
+    same = held.get("batch") == batch and held.get("method") == method and previous.get(name) == tags.values[name]
+    return {"method": method, "batch": batch, "reviewed": batch == OWNER_BATCH or bool(same and held.get("reviewed"))}
 
 
 def accept_batch(batch: str) -> int:
@@ -1265,9 +1273,10 @@ def build(use_llm: bool, max_usd: float, log=print, reask: bool = False) -> dict
             merge_answer(tags, earlier[dish.key])
         # Better rules alone do not release the failed, unreviewed model batch (owner 2026-10-24). A frozen field the
         # rules now decide takes the rule's value into the review batch, still waiting for review; one they leave
-        # open stays frozen for the reviewer's table below. The owner's own decisions win over both.
+        # open stays frozen for the reviewer's table below, whose values come from decisions.json alone. The owner's
+        # own decisions win over all of them.
+        entry = previous.get("recipes", {}).get(dish.key, {})
         if not reask:
-            entry = previous.get("recipes", {}).get(dish.key, {})
             for name in CRITICAL_MODEL_FIELDS:
                 estimate = entry.get("estimated", {}).get(name, {})
                 if not waits_for_review(estimate) or tags.batches.get(name) == OWNER_BATCH:
@@ -1275,11 +1284,20 @@ def build(use_llm: bool, max_usd: float, log=print, reask: bool = False) -> dict
                 if ruled[name] is not None:
                     tags.values[name], tags.methods[name] = ruled[name], "rule"
                     tags.batches[name] = REVIEW_TABLE_BATCH
-                else:
+                elif not (estimate["method"] == "llm" and estimate.get("batch") == REVIEW_TABLE_BATCH):
                     tags.values[name], tags.methods[name] = entry[name], estimate["method"]
                     if estimate.get("batch", LLM_BATCH) != LLM_BATCH:
                         tags.batches[name] = estimate["batch"]
         merge_review_table(tags, review_table.get(dish.key, {}), ruled, roles)
+        # The rules' own invariant on the final role: a sweet or condiment dish or a homemade staple has no main
+        # protein. In the review batch while the role is the batch's or waits for review, else an ordinary rule value.
+        if without_main_protein(dish, tags.values["meal_role"]):
+            role = field_estimate(tags, "meal_role", entry)
+            tags.values["protein_sources"], tags.methods["protein_sources"] = [], "rule"
+            if waits_for_review(role) or role["batch"] == REVIEW_TABLE_BATCH:
+                tags.batches["protein_sources"] = REVIEW_TABLE_BATCH
+            else:
+                tags.batches.pop("protein_sources", None)
     still_open = [(dish, tags) for dish, tags in tagged if any(tags.values[name] is None for name in tags.open)]
     # The model's spend over every run, kept in the tag file's header.
     usage = dict(NO_USAGE) | previous.get("llm_usage", {})
@@ -1503,7 +1521,12 @@ def main() -> None:
     parser.add_argument(
         "--max-usd", type=float, default=5.0, help="estimated spend at which the model is no longer asked"
     )
-    parser.add_argument("--reask", action="store_true", help="drop the model's earlier answers and ask again")
+    parser.add_argument(
+        "--reask",
+        action="store_true",
+        help="drop the model's earlier answers and ask again; this also lifts the freeze, so a frozen field the rules "
+        "decide is released at once, not through the review batch",
+    )
     parser.add_argument(
         "--accept-batch",
         metavar="BATCH",

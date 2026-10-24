@@ -549,20 +549,27 @@ def test_the_vegetable_role_agrees_with_the_planners_vegetable_led_rule() -> Non
 
 
 def test_the_tag_files_are_current_with_the_rules() -> None:
-    """A rule-decided value is what the rules give today; re-run `python -m app.data.recipe_tags` after a change."""
+    """A rule-decided value is what the rules give today, for the dish's final role (a dessert's sources are none);
+    re-run `python -m app.data.recipe_tags` after a change. It holds before and after the owner accepts a batch."""
+    from app.data.recipe_tags import without_main_protein
+
     entries = committed(tag_files.RECIPE_TAGS, "recipes")
     stale = []
     for key, item in dishes().items():
         found = rule_tags(item)
         for field, estimate in entries[key]["estimated"].items():
-            if estimate["method"] == "rule" and found.values[field] != entries[key][field]:
+            final = field == "protein_sources" and without_main_protein(item, entries[key]["meal_role"])
+            expected = [] if final else found.values[field]
+            if estimate["method"] == "rule" and expected != entries[key][field]:
                 stale.append((key, field))
-            sweet = field == "protein_sources" and entries[key]["meal_role"] in {"dessert", "drink", "sauce"}
+            # An accepted model or table value stands only where the rules leave the field open.
             if (
                 estimate["method"] == "llm"
                 and estimate["reviewed"]
-                and field not in {"contains_staple", *found.open}
-                and not sweet
+                and field != "contains_staple"
+                and field not in found.open
+                and found.values[field] is not None
+                and not final
             ):
                 stale.append((key, field))
     assert not stale, stale[:10]
@@ -706,7 +713,7 @@ def test_accepting_a_batch_marks_its_model_values_reviewed_and_a_re_run_keeps_th
     monkeypatch.setattr(recipe_tags, "repository_root", lambda: tmp_path)
     before = json.loads(target.read_text(encoding="utf-8"))
     model = sum(
-        e["method"] == "llm" and e["batch"] == recipe_tags.LLM_BATCH
+        e["method"] == "llm" and e["batch"] == recipe_tags.LLM_BATCH and not e["reviewed"]
         for entry in before["recipes"].values()
         for e in entry["estimated"].values()
     )
@@ -717,8 +724,9 @@ def test_accepting_a_batch_marks_its_model_values_reviewed_and_a_re_run_keeps_th
     assert {k: v for k, v in after.items() if k != "recipes"} == {k: v for k, v in before.items() if k != "recipes"}
     for key, entry in after["recipes"].items():
         for name, estimate in entry["estimated"].items():
-            # The review table's batch waits for its own acceptance; the owner's decisions were reviewed already.
-            assert estimate["reviewed"] is (estimate["batch"] in {recipe_tags.LLM_BATCH, recipe_tags.OWNER_BATCH})
+            # Only the model's batch changes; the review batch keeps whatever state its own acceptance left.
+            held = before["recipes"][key]["estimated"][name]
+            assert estimate["reviewed"] is (held["reviewed"] or estimate["batch"] == recipe_tags.LLM_BATCH)
             assert entry[name] == before["recipes"][key][name]
     assert recipe_tags.accept_batch(recipe_tags.LLM_BATCH) == 0
 

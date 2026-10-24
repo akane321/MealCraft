@@ -162,14 +162,23 @@ def test_the_sample_is_fixed_stratified_and_takes_every_protein_only_recipe():
     assert picked == table.draw_sample(accepted) and len(picked) == len(set(picked))
     assert {key for stratum, key in picked if stratum == table.PROTEIN_ONLY} == {"R900", "R901"}
     assert len(picked) == table.SAMPLE_SIZE + 1  # one protein-only recipe drawn, the other added
-    # The rule-decided layer: at least five per stratum, the rest by size.
-    strata = {
-        "rule_equals_model": [f"E{i}" for i in range(130)],
-        "rule_differs_from_model": [f"D{i}" for i in range(20)],
+    # The rule-decided layer: by stratum and role, at least one in each cell, the rest by size.
+    rules = {f"E{i:03d}": {"stratum": "rule_equals_model", "role": "staple"} for i in range(120)}
+    rules |= {f"F{i:03d}": {"stratum": "rule_equals_model", "role": table.PROTEIN_ONLY} for i in range(10)}
+    rules |= {f"D{i:03d}": {"stratum": "rule_differs_from_model", "role": "vegetable"} for i in range(20)}
+    rules |= {"G000": {"stratum": "rule_differs_from_model", "role": "sauce"}}
+    drawn = table.draw_rule_sample(rules)
+    assert drawn == table.draw_rule_sample(rules) and len(drawn) == table.RULE_SAMPLE_SIZE
+    cells = Counter((stratum, role) for stratum, role, _ in drawn)
+    assert cells == {
+        ("rule_equals_model", "staple"): 11,
+        ("rule_equals_model", table.PROTEIN_ONLY): 1,
+        ("rule_differs_from_model", "vegetable"): 2,
+        ("rule_differs_from_model", "sauce"): 1,
     }
-    drawn = table.draw(strata, table.RULE_SAMPLE_SIZE, table.RULE_STRATUM_MINIMUM)
-    assert len(drawn) == table.RULE_SAMPLE_SIZE
-    assert Counter(stratum for stratum, _ in drawn) == {"rule_equals_model": 10, "rule_differs_from_model": 5}
+    # More cells than the sample size: one in each, none dropped.
+    many = {f"H{i:02d}": {"stratum": "rule_equals_model", "role": f"role{i:02d}"} for i in range(20)}
+    assert len(table.draw_rule_sample(many)) == 20
 
 
 def test_accuracy_is_by_stratum_and_counts_only_readable_rows_checked_in_person():
@@ -308,6 +317,63 @@ def test_the_owners_dish_decisions_override_the_rules_as_a_persons_decision():
     assert recipe_tags.recipe_entry(rule_tags(other))["estimated"]["meal_role"]["batch"] == recipe_tags.RULE_BATCH
 
 
+def build_one(monkeypatch, item: Dish, values: dict, previous: dict) -> dict:
+    monkeypatch.setattr(recipe_tags, "curated_dishes", lambda: [])
+    monkeypatch.setattr(recipe_tags, "release_dishes", lambda: [item])
+    monkeypatch.setattr(recipe_tags, "previous_file", lambda: {"recipes": {item.key: previous}})
+    monkeypatch.setattr(recipe_tags, "review_table_values", lambda: {item.key: values})
+    monkeypatch.setattr(recipe_tags, "ask_model", lambda *a: pytest.fail("No model call authorized"))
+    return recipe_tags.recipe_entry(recipe_tags.build(False, 0)["tagged"][0][1], previous)
+
+
+def kolache_build(monkeypatch, values: dict, previous: dict) -> dict:
+    """A baked good whose egg the rules count as protein when its role is open, frozen as a model dessert."""
+    return build_one(monkeypatch, KOLACHE, values, previous)
+
+
+KOLACHE = dish("RCP2_T3", "Quick Kolache", "baked_good", [("flour", 250), ("butter", 113), ("egg", 100), ("sugar", 50)])
+KOLACHE.sugar_g, KOLACHE.carbohydrate_g = 12.0, 50.0
+
+
+@pytest.mark.parametrize("values", [{"meal_role": "dessert"}, {}], ids=["table dessert", "frozen dessert"])
+def test_a_dessert_has_no_main_protein_and_a_re_run_after_acceptance_is_stable(monkeypatch, tmp_path, values):
+    assert rule_tags(KOLACHE).values["meal_role"] is None and rule_tags(KOLACHE).values["protein_sources"] == ["egg"]
+    frozen = recipe_tags.recipe_entry(rule_tags(KOLACHE))
+    frozen |= {"meal_role": "dessert", "contains_staple": False, "protein_sources": []}
+    for name in recipe_tags.CRITICAL_MODEL_FIELDS:
+        frozen["estimated"][name] = estimate("llm", recipe_tags.LLM_BATCH)
+    entry = kolache_build(monkeypatch, values, frozen)
+    # The rules' own invariant on the final role, in the review batch while that role waits or is the batch's.
+    assert entry["meal_role"] == "dessert" and entry["protein_sources"] == []
+    assert entry["estimated"]["protein_sources"] == estimate("rule")
+    assert kolache_build(monkeypatch, values, entry) == entry
+
+    target = tmp_path / tag_files.RECIPE_TAGS
+    target.parent.mkdir(parents=True)
+    recipe_tags.write_keyed(target, {"version": recipe_tags.VERSION}, "recipes", {KOLACHE.key: entry})
+    monkeypatch.setattr(recipe_tags, "repository_root", lambda: tmp_path)
+    recipe_tags.accept_batch(REVIEW)
+    accepted = json.loads(target.read_text(encoding="utf-8"))["recipes"][KOLACHE.key]
+    again = kolache_build(monkeypatch, values, accepted)
+    assert again == accepted == kolache_build(monkeypatch, values, again)  # no flip between rule and model
+    assert again["estimated"]["protein_sources"] == estimate("rule", reviewed=True)
+    # Once the role is an ordinary rule value, so is the invariant's.
+    sauce = dish("RCP2_T4", "Lemon Sauce", "sauce_condiment", [("egg", 50), ("lemon_juice", 60)])
+    owned = build_one(monkeypatch, sauce, {}, {})
+    assert owned["protein_sources"] == [] and owned["estimated"]["protein_sources"] == estimate(
+        "rule", recipe_tags.RULE_BATCH
+    )
+
+
+def test_a_table_value_comes_from_decisions_json_alone(monkeypatch):
+    entry = built(monkeypatch, CRESCENTS, {"meal_role": "snack"})
+    assert entry["meal_role"] == "snack" and entry["estimated"]["meal_role"] == estimate("llm")
+    # Taken out of decisions.json, the field is untagged again, not the old table value carried on.
+    again = built(monkeypatch, CRESCENTS, {}, previous=entry)
+    assert again["meal_role"] is again["contains_staple"] is None
+    assert "meal_role" not in again["estimated"] and "contains_staple" not in again["estimated"]
+
+
 def test_the_committed_tag_file_carries_the_owners_decisions_and_the_gated_batch():
     entries = json.loads((repository_root() / tag_files.RECIPE_TAGS).read_text(encoding="utf-8"))["recipes"]
     owner = {
@@ -324,7 +390,20 @@ def test_the_committed_tag_file_carries_the_owners_decisions_and_the_gated_batch
         for name in recipe_tags.CRITICAL_MODEL_FIELDS:
             if name in values:
                 assert entries[key][name] == values[name], (key, name)
-                assert entries[key]["estimated"][name] == estimate("llm"), (key, name)
+                assert entries[key]["estimated"][name] | {"reviewed": False} == estimate("llm"), (key, name)
+    # The batch is accepted as a whole or not at all; before, nothing of it is read, and after, only a recipe still
+    # holding a frozen model value waits.
+    held = [v for e in entries.values() for v in e["estimated"].values() if v["batch"] == REVIEW]
+    states = {v["reviewed"] for v in held}
+    assert len(states) == 1
     batch = {k for k, e in entries.items() if any(v["batch"] == REVIEW for v in e["estimated"].values())}
     assert batch >= set(decisions["accepted"])
-    assert all(unreviewed(SimpleNamespace(**entries[key])) for key in batch)  # nothing is read before acceptance
+    for key in batch:
+        model = any(
+            v["batch"] == recipe_tags.LLM_BATCH and not v["reviewed"] for v in entries[key]["estimated"].values()
+        )
+        assert unreviewed(SimpleNamespace(**entries[key])) is (states == {False} or model), key
+    # No dessert, drink or sauce keeps a main protein, whichever part decided its role.
+    assert not [
+        k for k, e in entries.items() if e["meal_role"] in {"dessert", "drink", "sauce"} and e["protein_sources"]
+    ]
