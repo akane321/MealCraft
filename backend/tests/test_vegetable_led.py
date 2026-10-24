@@ -1,4 +1,4 @@
-"""The vegetable dish of a meal is a side or salad of vegetables without meat (owner, 2026-10-02)."""
+"""Vegetable-led dishes allow a measured little flesh seasoning, not a vegetarian claim."""
 
 import pytest
 
@@ -45,10 +45,12 @@ def test_potatoes_and_ungrouped_ingredients_never_lead_and_a_curated_id_takes_it
 
 def test_the_vegetable_role_is_vegetable_and_its_numbered_copies():
     assert vegetable_role("vegetable") and vegetable_role("vegetable-2")
+    # The same reading as role_base, so the vegetable-led gate and the portion, salad and coverage rules agree.
+    assert vegetable_role("vegetable-side")
     assert not any(vegetable_role(role) for role in ("main", "main-2", "soup", "side", "vegetables", "veg"))
 
 
-def test_a_dish_with_any_meat_or_fish_is_not_a_vegetable_dish():
+def test_a_meat_led_salad_and_unweighed_meat_are_not_vegetable_dishes():
     # "Saigon Chicken Cole Slaw" (release lines): 62% cabbage, onion and carrot, and 344 g of chicken. The
     # product planned it as the vegetable of mdw-dev-002 and mdw-dev-007 (review of #210).
     slaw = [
@@ -63,8 +65,8 @@ def test_a_dish_with_any_meat_or_fish_is_not_a_vegetable_dish():
         ("sugar", 37.5),
     ]
     assert vegetable_share(slaw) > 0.6 and not vegetable_led(slaw)
-    # However little of it: three anchovy fillets in a kimchi, or a line of bacon the release did not weigh.
-    assert not vegetable_led([("daikon", 453.6), ("cabbage", 113.4), ("anchovy", 12.0)])
+    # Small measured anchovies season the vegetable; unknown bacon cannot count as a little.
+    assert vegetable_led([("daikon", 453.6), ("cabbage", 113.4), ("anchovy", 12.0)])
     assert not vegetable_led([("green_beans", 450.0), ("bacon", None)])
 
 
@@ -73,7 +75,7 @@ def test_seasonings_stocks_and_fats_made_from_meat_or_fish_and_eggs_and_dairy_ar
     for seasoning in ("fish_sauce", "worcestershire", "oyster_sauce", "shrimp_paste", "nuoc_cham", "steak_sauce"):
         assert seasoning in SEASONING_FROM_FLESH and not meat_or_fish(seasoning), seasoning
         assert vegetable_led([("spinach", 300.0), (seasoning, 10.0)]), seasoning
-    for other in ("bonito_flakes", "chicken_broth", "dashi", "lard", "bacon_grease", "gelatin"):
+    for other in ("chicken_broth", "dashi", "lard", "bacon_grease", "gelatin"):
         assert not meat_or_fish(other), other
     for flesh in ("anchovy", "bacon", "ham", "chicken_breast", "beef_steak", "shrimp", "crab", "tuna", "pork_fatback"):
         assert meat_or_fish(flesh), flesh
@@ -179,3 +181,46 @@ def test_an_alternative_rendered_as_a_non_meat_ingredient_is_not_classified_as_m
 def test_a_fat_cut_of_meat_is_still_meat_wording():
     # "fat" excludes rendered fat only, not a word that merely starts with it.
     assert meat_or_fish("garlic", "1 lb pork fatback")
+
+
+@pytest.mark.parametrize(
+    "name,text",
+    [
+        ("bacon", "bacon"),
+        ("ham", "ham"),
+        ("sausage", "lap cheong sausage"),
+        ("shrimp", "dried shrimp"),
+        ("anchovy", "dried anchovies"),
+        ("anchovy", "ikan bilis"),
+        ("bonito_flakes", "bonito flakes"),
+        ("ground_beef", "ground beef"),
+        ("chicken_breast", "minced chicken breast"),
+        ("pork", "pork, minced"),
+    ],
+)
+def test_measured_preserved_or_minced_meat_can_season_vegetables_up_to_twenty_percent(name, text):
+    assert vegetable_led([("cabbage", 800), (name, 200, text)])
+    assert not vegetable_led([("cabbage", 799), (name, 201, text)])
+    assert not vegetable_led([("cabbage", 800), (name, None, text)])
+
+
+@pytest.mark.parametrize("meat", ["chicken_breast", "beef", "crab", "imitation_crab", "shrimp", "tuna", "anchovy"])
+def test_fresh_meat_salads_are_not_vegetables_except_at_trace_share(meat):
+    assert not vegetable_led([("lettuce", 800), (meat, 200)])
+    assert vegetable_led([("lettuce", 950), (meat, 50)])
+    assert not vegetable_led([("lettuce", 949), (meat, 51)])
+
+
+def test_minced_vegetables_in_a_fresh_meat_line_do_not_turn_the_meat_into_seasoning():
+    assert not vegetable_led([("cabbage", 800), ("chicken_breast", 200, "chicken breast with minced garlic")])
+    assert not vegetable_led([("cabbage", 800), ("chicken_breast", 200, "chicken, minced garlic")])
+    assert not vegetable_led([("cabbage", 800), ("chicken_breast", 200, "chicken with dried shrimp")])
+    assert not vegetable_led([("cabbage", 800), ("bacon", 200, "bacon and chicken")])
+    # Without a preserved-state statement an anchovy fillet remains in the 5% trace allowance.
+    assert not vegetable_led([("lettuce", 800), ("anchovy", 200, "anchovy fillets")])
+
+
+def test_combined_seasoning_and_fresh_meat_must_meet_both_limits():
+    assert vegetable_led([("cabbage", 800), ("bacon", 150), ("shrimp", 50)])
+    assert not vegetable_led([("cabbage", 799), ("bacon", 151), ("shrimp", 50)])
+    assert not vegetable_led([("cabbage", 800), ("bacon", 149), ("shrimp", 51)])

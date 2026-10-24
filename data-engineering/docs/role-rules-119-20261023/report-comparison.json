@@ -1,0 +1,343 @@
+[
+  {
+    "report": "docs/evaluation/full-default/latest.json",
+    "changed": false,
+    "before_sha256": "f68b2fb39cbaaaa4c8f21296e2793ee789f7fc3f40d456af32e50873f17714ef",
+    "after_sha256": "f68b2fb39cbaaaa4c8f21296e2793ee789f7fc3f40d456af32e50873f17714ef",
+    "cases": [
+      {
+        "case": "one-adult",
+        "changed": false,
+        "metric_changes": {},
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "four-with-vegetarian",
+        "changed": false,
+        "metric_changes": {},
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "six-tight-budget",
+        "changed": false,
+        "metric_changes": {},
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "two-no-oven-ten-days",
+        "changed": false,
+        "metric_changes": {},
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "seven-with-young-children",
+        "changed": false,
+        "metric_changes": {},
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      }
+    ]
+  },
+  {
+    "report": "docs/evaluation/shared-dish/latest.json",
+    "changed": true,
+    "before_sha256": "abb2892290a6e96fb2f94c57c7f2d0ec7bcca5454f4a5ba83b7ec9f88a57deca",
+    "after_sha256": "848b6b1f8aaa4cab44c42652a09311935517da9d1f12bf643fc06267af79cffc",
+    "cases": [
+      {
+        "case": "four-one-vegetarian",
+        "changed": true,
+        "metric_changes": {
+          "recipe_pool_by_member": {
+            "before": {
+              "Ann": 2040,
+              "Ben": 7565,
+              "Kai": 7565,
+              "Mei": 7565
+            },
+            "after": {
+              "Ann": 2044,
+              "Ben": 7570,
+              "Kai": 7570,
+              "Mei": 7570
+            }
+          },
+          "recipe_pool_servable": {
+            "before": 7565,
+            "after": 7570
+          }
+        },
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "two-one-vegetarian",
+        "changed": true,
+        "metric_changes": {
+          "recipe_pool_by_member": {
+            "before": {
+              "Lin": 2040,
+              "Raj": 7565
+            },
+            "after": {
+              "Lin": 2044,
+              "Raj": 7570
+            }
+          },
+          "recipe_pool_servable": {
+            "before": 7565,
+            "after": 7570
+          }
+        },
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "with-a-child",
+        "changed": true,
+        "metric_changes": {
+          "recipe_pool_by_member": {
+            "before": {
+              "Ann": 7565,
+              "Ben": 7565,
+              "Mei": 7108
+            },
+            "after": {
+              "Ann": 7570,
+              "Ben": 7570,
+              "Mei": 7113
+            }
+          },
+          "recipe_pool_servable": {
+            "before": 7565,
+            "after": 7570
+          }
+        },
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "weekday-lunch-away",
+        "changed": true,
+        "metric_changes": {
+          "recipe_pool_by_member": {
+            "before": {
+              "Ann": 2040,
+              "Ben": 7565,
+              "Kai": 7565,
+              "Mei": 7565
+            },
+            "after": {
+              "Ann": 2044,
+              "Ben": 7570,
+              "Kai": 7570,
+              "Mei": 7570
+            }
+          },
+          "recipe_pool_servable": {
+            "before": 7565,
+            "after": 7570
+          }
+        },
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "weekend-guest",
+        "changed": true,
+        "metric_changes": {
+          "recipe_pool_by_member": {
+            "before": {
+              "Ann": 2040,
+              "Ben": 7565,
+              "Kai": 7565,
+              "Mei": 7565
+            },
+            "after": {
+              "Ann": 2044,
+              "Ben": 7570,
+              "Kai": 7570,
+              "Mei": 7570
+            }
+          },
+          "recipe_pool_servable": {
+            "before": 7565,
+            "after": 7570
+          }
+        },
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "peanut-whole-household",
+        "changed": true,
+        "metric_changes": {
+          "recipe_pool_by_member": {
+            "before": {
+              "Ann": 7140,
+              "Ben": 7140,
+              "Kai": 7140,
+              "Mei": 7140
+            },
+            "after": {
+              "Ann": 7145,
+              "Ben": 7145,
+              "Kai": 7145,
+              "Mei": 7145
+            }
+          },
+          "recipe_pool_servable": {
+            "before": 7140,
+            "after": 7145
+          }
+        },
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "peanut-only-mei-avoids",
+        "changed": true,
+        "metric_changes": {
+          "recipe_pool_by_member": {
+            "before": {
+              "Ann": 7565,
+              "Ben": 7565,
+              "Kai": 7565,
+              "Mei": 7140
+            },
+            "after": {
+              "Ann": 7570,
+              "Ben": 7570,
+              "Kai": 7570,
+              "Mei": 7145
+            }
+          },
+          "recipe_pool_servable": {
+            "before": 7565,
+            "after": 7570
+          }
+        },
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "mixed-diets",
+        "changed": true,
+        "metric_changes": {
+          "recipe_pool_by_member": {
+            "before": {
+              "Ann": 2040,
+              "Ben": 7565,
+              "Kai": 4735,
+              "Mei": 7565
+            },
+            "after": {
+              "Ann": 2044,
+              "Ben": 7570,
+              "Kai": 4737,
+              "Mei": 7570
+            }
+          },
+          "recipe_pool_servable": {
+            "before": 7565,
+            "after": 7570
+          }
+        },
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "six-one-vegetarian",
+        "changed": true,
+        "metric_changes": {
+          "recipe_pool_by_member": {
+            "before": {
+              "Adult 1": 2040,
+              "Adult 2": 7565,
+              "Adult 3": 7565,
+              "Adult 4": 7565,
+              "Adult 5": 7565,
+              "Adult 6": 7565
+            },
+            "after": {
+              "Adult 1": 2044,
+              "Adult 2": 7570,
+              "Adult 3": 7570,
+              "Adult 4": 7570,
+              "Adult 5": 7570,
+              "Adult 6": 7570
+            }
+          },
+          "recipe_pool_servable": {
+            "before": 7565,
+            "after": 7570
+          }
+        },
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      },
+      {
+        "case": "tight-budget",
+        "changed": true,
+        "metric_changes": {
+          "energy_attainment_by_member": {
+            "before": {
+              "Ann": 1.275,
+              "Ben": 1.328,
+              "Kai": 1.329,
+              "Mei": 1.335
+            },
+            "after": {
+              "Ann": 1.296,
+              "Ben": 1.35,
+              "Kai": 1.351,
+              "Mei": 1.356
+            }
+          },
+          "lowest_energy_attainment": {
+            "before": 1.275,
+            "after": 1.296
+          },
+          "recipe_pool_by_member": {
+            "before": {
+              "Ann": 2040,
+              "Ben": 7565,
+              "Kai": 7565,
+              "Mei": 7565
+            },
+            "after": {
+              "Ann": 2044,
+              "Ben": 7570,
+              "Kai": 7570,
+              "Mei": 7570
+            }
+          },
+          "recipe_pool_servable": {
+            "before": 7565,
+            "after": 7570
+          }
+        },
+        "new_selected_titles": [],
+        "removed_selected_titles": []
+      }
+    ]
+  },
+  {
+    "report": "docs/evaluation/household-rules/latest.json",
+    "changed": false,
+    "before_sha256": "b74989aa768b792575095660f73b4a40fc89bf1df8236c790eeb6910e8678fb3",
+    "after_sha256": "b74989aa768b792575095660f73b4a40fc89bf1df8236c790eeb6910e8678fb3",
+    "cases": []
+  },
+  {
+    "report": "docs/evaluation/latest.json",
+    "changed": false,
+    "before_sha256": "acd3185a9b06f282553fa44b22b75b8b0f79250262a288ba3eb3be486dc7cb40",
+    "after_sha256": "acd3185a9b06f282553fa44b22b75b8b0f79250262a288ba3eb3be486dc7cb40",
+    "cases": []
+  }
+]

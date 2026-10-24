@@ -1,8 +1,8 @@
 # MealCraft Data Engineering
 
 本目录把大型但不完整的 RecipeNLG 原始食谱，转换成 MealCraft 可使用、可审计、可继续补充营养和
-超市商品信息的数据层，并切出版本化 release。Release 目前**尚未导入**运行时目录
-（`data/recipes/recipes.json`）；导入进度见 `docs/current-status.md`。
+超市商品信息的数据层，并切出版本化 release。Release v2.1 已于 2026-09-21 导入，与原有的策展目录并存（见
+`../docs/data/README.md` 第 2 节）；运行时目录文件仍是 `data/recipes/recipes.json`，当前进度见 `docs/current-status.md`。
 
 核心原则：
 
@@ -56,6 +56,23 @@ python scripts/v2_release_report.py
 再跑一次 `packet` 就会打包它们。`config/allergen_corrections.csv` 是 owner 确认过的过敏原补充
 （只增不减）；含鱼或贝类的食材、或标题步骤提到肉鱼，菜谱就不是素食/纯素。
 
+## release v2.2：整件与容器的克数修正（owner 2026-10-23）
+
+v2.1 已发布、不再修改。v2.1 无法从仓库重建（`build_release_v2.py` 读的 `data/staging/` 被 git 忽略），
+所以 v2.2 由一个确定性的修正步骤从 v2.1 的已提交文件生成：
+
+```bash
+python scripts/correct_release_v22.py      # 读 data/release/v2.1/，写 data/release/v2.2/（含 corrections.jsonl）
+PYTHONPATH=src python -m unittest discover -s tests -p "test_correct*"
+```
+
+只改这些行的克数（以及鲜红椒行的食材 id），再用构建时同一份 `nutrition_per_100g` 重算这些菜谱的每份营养；
+菜谱集合、id 和其他字段不变。修正类别：鲜红椒误映射到 cayenne、行文本里写明但构建漏读的重量、
+"N 件（总重）"被乘了 N、整鸡、整颗菜/整个菠萝、整张 pizza 饼底、千层面片。克数只来自行文本、同一食材条目
+自己的单位重量，或带出处的公开参考（USDA FoodData Central，见脚本里的 `SOURCES`）。大小词（small/large）
+不在本轮。每一行的前后克数和出处在 `data/release/v2.2/corrections.jsonl`，数量、守卫告警和未修的项目
+在 `data/release/v2.2/quality_report.md` 末节。产品导入和基线评分从这一版起读 v2.2。
+
 ## release v2 的 FairPrice 商品映射
 
 ```bash
@@ -84,8 +101,9 @@ python scripts/fairprice_mapping.py export                 # 写运行时快照 
 
 `docs/recipe-tags-v1-sample.json` 是原批次的固定审查包，标签重生成不覆盖它。
 已审核字段、AI建议和待定项不能混作完整人工准确率，更正建议也不等于原预测正确。
-失败模型批次的关键字段在仅规则重生成时保持原值、原来源和未审核门禁，
-不会因为新规则可以给出答案就自动放行。`--accept-batch` 是独立且须获准的操作。
+失败模型批次的关键字段在仅规则重生成时一直受未审核门禁约束：现行规则能定的写规则值、记入复核批次
+（owner 2026-10-24，见下文），规则留空的保持原值和原来源；不会因为新规则可以给出答案就自动放行。
+`--accept-batch` 是独立且须获准的操作。
 
 规则只采用食材行有依据的肉种（包括括号内说明）；泛称肉、不同肉类共用一个总重的主要来源比例保留未知。
 具体食材后的替代说明不算第二种实际肉类；真正的“A或B”仍保留未知。
@@ -113,6 +131,10 @@ python data-engineering/scripts/review_tag_rule_changes.py --base-ref <修复前
 包中包含原标签、新标签、变动字段、完整步骤与release归一化克重。已知回归案例优先，
 其余按固定种子从变动菜谱抽取；这证明修复的针对性，不是独立总体准确率。
 模型字段仍被门禁拦截时会明确标出，新规则建议不能被误读为已放行。
+注意：这是带日期的复核包，只能在它自己的 base 修订上复现；脚本的"冻结"判断只认 `llm`，
+不适用于复核批次 `recipe-tags-v1/review-table-20261024` 之后的标签文件（在其后重跑会断言失败或写出缩水的包）。
+同样带日期、同样只能在各自 base 上复现的还有 `data-engineering/scripts/role_review_table.py`（[role-rules-20261023b](docs/role-rules-20261023b/README.md)）
+和 `data-engineering/scripts/role_rules_review.py`（[role-rules-119-20261023](docs/role-rules-119-20261023/README.md)）。
 
 人工核验完成后，原包的 `before`、`after` 和标签哈希保留为当时的快照；
 不同意的字段记为 `verdict=false`，人工正确值另存 `corrected_values`，不覆盖原预测。
@@ -126,6 +148,7 @@ python data-engineering/scripts/review_tag_rule_changes.py --base-ref <修复前
 
 该命令逐字段验证当前标签与人工意见一致，生成[修正落实报告](docs/recipe-tags-v1-rule-changes-review-applied.md)，
 同时刷新获准的满血默认开发集前后对照；不重抽样、不覆盖审查包、不计算全库准确率、不放行模型批次。
+它同样只能在该复核包的 base 修订上复现，不适用于复核批次之后的标签文件。
 
 ```bash
 uv run --project backend python -m app.data.recipe_tags          # 只用规则；之前模型给的答案保留并复用
@@ -134,7 +157,8 @@ uv run --project backend python -m app.data.recipe_tags --llm    # 规则定不�
 
 规则在 `backend/app/data/recipe_tags.py`，产出 `data/recipes/recipe-tags-v1.json` 和
 `data/ingredients/ingredient-tags-v1.json`，导入器（版本 6）按 release < 标签文件 < 运行时写入的顺序
-写进数据库。覆盖率和模型花费见 `docs/recipe-tags-v1-report.md`。`--reask` 丢掉之前模型的答案重新问。
+写进数据库。覆盖率和模型花费见 `docs/recipe-tags-v1-report.md`。`--reask` 丢掉之前模型的答案重新问；
+它同时撤销冻结，规则能定的冻结字段会直接放行，不经过复核批次。
 运行时写入的菜谱标签会在重新导入时保留，前提是写入方把它标出来：删掉该字段在 `estimated` 里的条目（人定的值不是估计），
 或把条目的 `reviewed` 设为 `true`。
 
@@ -164,6 +188,12 @@ uv run --project backend python -m app.data.recipe_tags --llm    # 规则定不�
    在此之前，`meal_role`、`contains_staple` 或 `protein_sources` 里有一项是模型定的、还没 `reviewed` 的菜，
    结构化规划（按 `meal_roles` 的餐）当它没打标签，哪个正餐角色都不填；按菜类（courses）的旧规划不受影响。
    重跑标签命令时，值没变的条目保持 `reviewed`，值变了的回到待审。
+
+按 owner 2026-10-24 的决定，冻结批次由复核批次 `recipe-tags-v1/review-table-20261024` 接替，分两部分：
+复核人复核表里的值（只导入规则留空的字段，仍是未复核的 AI 估计），和现行规则已能定的冻结字段（写规则值）。
+两部分都等待接受，规划器在此之前不读；复核人亲自核对两部分的分层抽样、公开准确率后，owner 才决定是否
+`--accept-batch recipe-tags-v1/review-table-20261024`。owner 逐道决定的五道菜的角色（`OWNER_ROLES`）立即生效，覆盖规则。
+见 [复核批次](docs/review-table-20261024/README.md)。
 
 面团、饼底、面糊、酱、腌料、干料、沙拉汁、肉汁、高汤、酱料膏和调味料这类"菜的一部分"由规则判成 `sauce`
 （`sauce` 即所有不能单独成菜的部分），永远不填一餐：标题去掉括号、结尾的 `Recipe`/`I`/`II` 和 ` - ...`、

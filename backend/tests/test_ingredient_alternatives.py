@@ -91,7 +91,7 @@ def test_with_no_option_left_the_recipe_is_excluded_as_before():
 
 
 def test_the_options_table_names_real_catalog_ingredients():
-    release = repository_root() / "data-engineering/data/release/v2.1/ingredients.jsonl"
+    release = repository_root() / "data-engineering/data/release/v2.2/ingredients.jsonl"
     names = {
         json.loads(line)["ingredient_id"][4:].lower()
         for line in release.read_text(encoding="utf-8").splitlines()

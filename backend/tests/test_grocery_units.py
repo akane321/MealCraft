@@ -26,7 +26,7 @@ def test_densities_are_the_release_catalog_cup_weights() -> None:
     from app.data.units import CUP_ML, GRAMS_PER_CUP
 
     assert CUP_ML == 236.6
-    release = data_root().parent / "data-engineering/data/release/v2.1/ingredients.jsonl"
+    release = data_root().parent / "data-engineering/data/release/v2.2/ingredients.jsonl"
     cups = {}
     for line in release.read_text(encoding="utf-8").splitlines():
         record = json.loads(line)

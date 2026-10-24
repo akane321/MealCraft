@@ -19,25 +19,25 @@ The code revision it ran at is `code_revision` in `latest.json` beside this file
 
 | Episode | Category | Lang | Class | Answered | Success | Failed checks | Dishes | Distinct recipes | Distinct dish kinds | Meal fit | Cost |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| mdw-dev-001 | meals_per_day | en | feasible | plan | yes | - | 21 | 21 | 20 | 21/21 | 293.7 |
-| mdw-dev-002 | meals_per_day | zh | feasible | plan | yes | - | 28 | 28 | 26 | 28/28 | 470.13 |
-| mdw-dev-003 | meals_per_day | en | feasible | plan | yes | - | 21 | 20 | 17 | 21/21 | 404.42 |
-| mdw-dev-004 | composition | en | feasible | plan | yes | - | 28 | 28 | 28 | 28/28 | 486.4 |
-| mdw-dev-005 | composition | zh | feasible | plan | yes | - | 28 | 28 | 24 | 28/28 | 463.29 |
-| mdw-dev-006 | nutrition_per_day | en | feasible | plan | yes | - | 21 | 20 | 20 | 21/21 | 380.9 |
-| mdw-dev-007 | nutrition_per_day | zh | feasible | plan | yes | - | 28 | 21 | 19 | 28/28 | 415.16 |
-| mdw-dev-008 | budget | en | feasible | plan | yes | - | 28 | 13 | 12 | 28/28 | 100.97 |
+| mdw-dev-001 | meals_per_day | en | feasible | plan | yes | - | 21 | 21 | 19 | 21/21 | 301.01 |
+| mdw-dev-002 | meals_per_day | zh | feasible | plan | yes | - | 28 | 28 | 26 | 28/28 | 480.14 |
+| mdw-dev-003 | meals_per_day | en | feasible | plan | yes | - | 21 | 20 | 17 | 21/21 | 406.27 |
+| mdw-dev-004 | composition | en | feasible | plan | yes | - | 28 | 28 | 28 | 28/28 | 502.21 |
+| mdw-dev-005 | composition | zh | feasible | plan | yes | - | 28 | 28 | 24 | 28/28 | 486.93 |
+| mdw-dev-006 | nutrition_per_day | en | feasible | plan | yes | - | 21 | 20 | 20 | 21/21 | 363.02 |
+| mdw-dev-007 | nutrition_per_day | zh | feasible | plan | yes | - | 28 | 24 | 22 | 28/28 | 402.82 |
+| mdw-dev-008 | budget | en | feasible | plan | yes | - | 28 | 11 | 11 | 28/28 | 103.15 |
 | mdw-dev-009 | budget | en | infeasible | infeasible | yes | - | - | - | - | - | - |
-| mdw-dev-010 | safety_diet | en | feasible | plan | yes | - | 28 | 28 | 24 | 26/28 | 387.35 |
+| mdw-dev-010 | safety_diet | en | feasible | plan | yes | - | 28 | 28 | 24 | 26/28 | 383.22 |
 | mdw-dev-011 | safety_diet | zh | feasible | plan | yes | - | 14 | 14 | 14 | 14/14 | 301.27 |
-| mdw-dev-012 | variety | en | feasible | plan | yes | - | 28 | 28 | 23 | 28/28 | 438.08 |
-| mdw-dev-013 | shape_change | en | feasible | plan | yes | - | 21 | 21 | 19 | 21/21 | 330.57 |
-| mdw-dev-014 | shape_change | zh | feasible | plan | yes | - | 14 | 14 | 14 | 14/14 | 266.69 |
-| mdw-dev-015 | shape_change | en | feasible | plan | yes | - | 15 | 15 | 15 | 15/15 | 393.27 |
-| mdw-dev-016 | shape_change | zh | feasible | plan | yes | - | 20 | 20 | 20 | 20/20 | 333.48 |
-| mdw-dev-017 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16 | 16/16 | 327.85 |
-| mdw-dev-018 | shape_change | zh | feasible | plan | yes | - | 16 | 16 | 16 | 16/16 | 242.96 |
-| mdw-dev-019 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16 | 16/16 | 303.93 |
+| mdw-dev-012 | variety | en | feasible | plan | yes | - | 28 | 28 | 23 | 28/28 | 463.52 |
+| mdw-dev-013 | shape_change | en | feasible | plan | yes | - | 21 | 21 | 20 | 21/21 | 306.25 |
+| mdw-dev-014 | shape_change | zh | feasible | plan | yes | - | 14 | 14 | 13 | 14/14 | 275.96 |
+| mdw-dev-015 | shape_change | en | feasible | plan | yes | - | 15 | 15 | 14 | 15/15 | 383.58 |
+| mdw-dev-016 | shape_change | zh | feasible | plan | yes | - | 20 | 20 | 20 | 20/20 | 342.38 |
+| mdw-dev-017 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16 | 16/16 | 321.02 |
+| mdw-dev-018 | shape_change | zh | feasible | plan | yes | - | 16 | 16 | 16 | 16/16 | 240.27 |
+| mdw-dev-019 | shape_change | en | feasible | plan | yes | - | 16 | 16 | 16 | 16/16 | 335.06 |
 | mdw-dev-020 | budget | en | feasible | plan | yes | - | 28 | 4 | 4 | 28/28 | 50.9 |
 | mdw-dev-021 | variety | en | feasible | plan | yes | - | 35 | 35 | 34 | 35/35 | 544.25 |
 
@@ -57,6 +57,8 @@ Counts only, no rates (ADR-0028).
 
 - `data-engineering/data/release/v2.1/ingredients.jsonl`: `499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25`
 - `data-engineering/data/release/v2.1/recipes.jsonl`: `df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db`
+- `data-engineering/data/release/v2.2/ingredients.jsonl`: `4c71b1a9f13e738d7c82d8a302ef11543d0d1705b614d3dc05150b86529eb95e`
+- `data-engineering/data/release/v2.2/recipes.jsonl`: `1f4f64f6156050290b256fd016495ebcec52377209170c659f0e831ca1ab44b2`
 - `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-001.json`: `cb6d643a0aaacce97f62ff6cf56c88b4b1b993ab137559687e3db3a32a810284`
 - `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-002.json`: `b8d45775bdd61ff7afb5f69a0f2c3537af73b21d36f391135c7dbfefb0d1e753`
 - `data/evaluation/dev/v3-meal-day-week/episodes/mdw-dev-003.json`: `f2f5814e8434306b51fb182174db305a0e960c7626a1618983e998518ce887cc`

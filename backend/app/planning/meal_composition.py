@@ -9,6 +9,7 @@ from fractions import Fraction
 from math import ceil
 
 from app.data import meal_structure
+from app.data.tag_files import waits_for_review
 from app.planning.member_coverage import coverage_issues, dish_base_servings, member_has_a_dish
 from app.planning.vegetable_led import candidate_vegetable_led, catalog_vegetable_led, vegetable_role
 from app.schemas.planning_v2 import (
@@ -30,13 +31,11 @@ GATED_TAGS = ("meal_role", "contains_staple", "protein_sources")
 
 
 def unreviewed(recipe) -> bool:
-    """A catalog recipe whose meal role, staple or protein sources the model decided and nobody has reviewed yet
-    (`python -m app.data.recipe_tags --accept-batch`): the structured planner treats it as untagged."""
+    """A catalog recipe whose meal role, staple or protein sources wait for review (`tag_files.waits_for_review`:
+    the model decided it, or it is in the frozen batch's review batch, and its batch is not accepted yet): the
+    structured planner treats it as untagged."""
     estimated = getattr(recipe, "estimated", None) or {}
-    return any(
-        (estimated.get(name) or {}).get("method") == "llm" and (estimated.get(name) or {}).get("reviewed") is not True
-        for name in GATED_TAGS
-    )
+    return any(waits_for_review(estimated.get(name) or {}) for name in GATED_TAGS)
 
 
 def meal_role_of(recipe) -> str | None:
@@ -50,7 +49,8 @@ def meal_role_of(recipe) -> str | None:
 
 def role_admits(role: PlanningMealRole, recipe: PlanningRecipeCandidate) -> bool:
     """A role takes a recipe of one of its courses, or for a structured role of one of its meal roles; a vegetable
-    role only one led by vegetables (ADR-0054). A recipe with no meal-role tag fills no structured role."""
+    role only one led by vegetables, with measured minor flesh seasoning at most (ADR-0082 amends ADR-0054).
+    A recipe with no meal-role tag fills no structured role. Member diet checks are separate."""
     if role.meal_roles:
         admitted = meal_role_of(recipe) in role.meal_roles
     else:

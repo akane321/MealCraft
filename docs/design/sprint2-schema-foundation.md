@@ -4,13 +4,15 @@ Migration `20261018_0030` (after `20261012_0029`) adds every column and table th
 Sprint 2 layers need, in one revision, so that feature work does not have to
 write competing migrations. It changes no behaviour.
 
-**Status.** The columns, the table and the types below are a **verified
-baseline**: they are defined by migration `20261018_0030` and covered by
+**Status.** This page describes the **baseline at migration `20261018_0030`**.
+The columns, the table and the types below are a **verified baseline**: they
+are defined by that migration and covered by
 `backend/tests/test_sprint2_foundation_types.py` and
-`backend/tests/migrations/test_sprint2_foundation_migration.py`. What reads and
-writes them is an **accepted target**: nothing in the planner, the API or the
-importer uses them yet. A feature PR that starts using a column also wires its
-API field, its behaviour and any regenerated evaluation report.
+`backend/tests/migrations/test_sprint2_foundation_migration.py`. At the
+baseline nothing in the planner, the API or the importer used them; the
+feature PRs have wired many since, and "Wired so far" below and the `(wired)`
+markers say which. A feature PR that starts using a column also wires its API
+field, its behaviour and any regenerated evaluation report.
 
 **Wired so far.** Layer 08 PR-1 (household member fields and rules) wires, with
 their behaviour and the [API Contracts](../api-contracts.md):
@@ -65,10 +67,17 @@ evaluation reports did not change: their requests carry no household block.
 `python -m app.evaluation.household_rules` (in CI) measures the rules instead:
 `docs/evaluation/household-rules/latest.md`.
 
+Dish feedback (ADR-0087) **writes and reads** `recipe_feedback`: the Like,
+Dislike and Never again buttons append rows, undo deletes them, and every
+product plan and change leaves out the household's live Never again dishes (see
+the table's section below). The evaluation services do not read it, so their
+reports did not change.
+
 ## Rules of this foundation
 
-- **Nothing reads or writes the new columns.** The planner, the importer and
-  every endpoint behave as before. The generated OpenAPI document is identical
+- **At migration `20261018_0030` nothing read or wrote the new columns.** The
+  planner, the importer and every endpoint behaved as before; see "Wired so far"
+  for what the feature PRs changed since. The generated OpenAPI document is identical
   before and after the migration.
 - **Every new column is nullable, and NULL is today's behaviour.** Each column
   below says what NULL means.
@@ -192,7 +201,7 @@ The extension table is the `ingredients` rows whose `provenance.origin` is
 - `product_source` is not reused: it says how the product data was obtained
   (`fairprice` or `fixture`) and is validated when read back.
 
-### `recipe_feedback` (new)
+### `recipe_feedback` (new, wired)
 
 | Column | Content |
 | --- | --- |
@@ -207,6 +216,16 @@ Indexes: `recipe_feedback_household_created_idx` (`household_id`, `created_at`,
 `id`) and `recipe_feedback_recipe_id_idx`. Rows are only appended; undo, delete
 and "clear all" delete rows. Preference scores are not stored: they are computed
 from this table and the existing cooked, locked and swapped records.
+
+Writer and readers (decision ADR-0087), in `backend/app/repositories/recipe_feedback.py`:
+
+- a recipe's state is the `kind` of the household's latest row for it (highest
+  `id`); a press appends a `button` row unless the state already is that kind;
+- undo deletes every row of that household and recipe, so the state is none;
+- Never again is active while the state is `never_again`. The planning request
+  carries the live list as `never_again_recipes` (recipe slugs) and the
+  validator packet as `FinalPlanningProblem.never_again_recipes`; both are left
+  out of a dump while empty.
 
 ## Unwired types
 

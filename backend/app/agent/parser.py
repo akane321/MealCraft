@@ -552,7 +552,7 @@ class OpenAIConstraintParser:
         api_key: str,
         model: str,
         vocabulary: ConstraintVocabulary | None = None,
-        timeout_seconds: float = 15.0,
+        timeout_seconds: float = 60.0,
     ) -> None:
         self.vocabulary = vocabulary
         self.model = model

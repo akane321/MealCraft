@@ -202,3 +202,43 @@ independence. Passing it does not replace human review or run an evaluation.
 
 The empty template contains no case. Automated tests use impossible fictional
 robot placeholders only. No real or realistic example is part of this toolkit.
+
+### Several reviewers, or an AI-executed review: the review attestation
+
+The authoring format has one `reviewer_id` for the whole file and per-case review
+fields inside the content. When the content's digest is already recorded, or when
+different reviewers checked different cases, do **not** rewrite those fields to make
+the readiness check pass. Write a separate review attestation instead
+([schema](../../scripts/sprint2-review-attestation.schema.json),
+`sprint2-review-attestation-v1`) and pass it with `--attestation`:
+
+```text
+python check_sprint2_heldout.py --input final-cases.json --fields fields-used.json --attestation review-attestation.json
+```
+
+- It is bound to the content by `content_sha256`, the SHA-256 of the exact content
+  bytes, and to the dictionary by `fields_sha256`. The content file is never edited,
+  so its recorded digest stays valid.
+- It declares `purpose: freeze_candidate`, lists every reviewer with
+  `executed_by` (`human` or `ai`), and gives each case one `gold_review` and one
+  `anonymisation_review`, plus one `dictionary_review`. Reviewers differ from the
+  author and from the quota approver.
+- The content's own per-case review fields may stay `pending`/`null`; a content
+  reviewer that names someone other than the attested reviewer is an error.
+- Reviewer and author IDs are pseudonyms (letters, digits, `_` or `-`, at most 64
+  characters); the output prints them, so never use a name or contact detail.
+- The content's top-level `reviewer_id`, if set, must be an attested reviewer, and a
+  case whose `pii_reviewed` claims a human review cannot be attested as AI-reviewed.
+- An AI-executed review is accepted and reported in the top-level `limitations`
+  ("reviewed by AI, not by a person"), whatever `passed` says. Never record an AI
+  review as a human one. An AI reviewer runs in its own conversation: not the
+  author's, and not any owner, Claude or Codex conversation used for development or
+  tuning.
+- Digests may be upper or lower case (PowerShell's `Get-FileHash` prints upper case).
+  A JSON key repeated in the content or the attestation is rejected.
+- Errors give counts only, never case IDs. The attestation itself names case IDs,
+  so keep it with the sealed content, not in a developer-visible location.
+- `--attestation` is a readiness check only; `--format-only` refuses it.
+
+Copy the attestation schema next to the checker together with the five files above.
+

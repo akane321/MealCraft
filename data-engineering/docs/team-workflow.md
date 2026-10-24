@@ -1,5 +1,8 @@
 # 数据库组员操作流程
 
+> Status: **historical** (Sprint 1 team split). Current practice is
+> `../enrichment-work/README.md`.
+
 ## 第一次理解工程
 
 1. 阅读 `README.md`、`docs/data-dictionary.md` 和 `docs/cleaning-decisions.md`。

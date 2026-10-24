@@ -57,12 +57,14 @@ class AlgorithmObjective:
         slots = {s.slot_id: s for s in problem.slots}
         recipes = {r.recipe_id: r for r in problem.recipes}
         member_ids = {}
+        filled_slots = {a.slot_id for a in assignments}
         for slot in problem.slots:
             names = [m.name for m in slot.members]
             if len(names) != len(set(names)):
                 raise ValueError("Member names must be unique within a slot")
             for name in names:
-                member_ids.setdefault(name, [])
+                if slot.slot_id in filled_slots:
+                    member_ids.setdefault(name, [])
         table = []
         for assignment in assignments:
             if assignment.role_id in problem.uncounted_roles:
