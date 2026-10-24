@@ -8,14 +8,17 @@ The workbook's decisions were prefilled by AI and confirmed in chat by dish type
   (`review_allowed_roles`), its staple (true exactly for one_bowl and staple), and protein sources of the vocabulary;
 - a field the rules or the owner decide, a null, a skipped row, a role outside the reviewer's options, a staple that
   disagrees with its role, or an unknown code is not imported, and is listed with its reason;
-- the reviewer checks a fixed-seed sample of 30 of the recipes in person (`sample.xlsx`) and
-  `review_table_accuracy.py` reports the sample's accuracy, which is published. Only then may the owner accept the
-  batch (`python -m app.data.recipe_tags --accept-batch recipe-tags-v1/review-table-20261024`).
+- the batch's other part is the frozen fields the current rules decide, which `python -m app.data.recipe_tags`
+  writes with the rule's value. The reviewer checks a fixed-seed sample of both parts in person (`sample.xlsx`):
+  30 recipes with table values stratified by role, plus every recipe whose only table value is its protein
+  sources, and 15 with rule-decided frozen fields, stratified by whether the rule's value is the model's.
+  `review_table_accuracy.py` reports the sample's accuracy by stratum, which is published. Only then may the owner
+  accept the batch (`python -m app.data.recipe_tags --accept-batch recipe-tags-v1/review-table-20261024`).
 
 Offline, with a Python that has openpyxl, from the repository root:
 `python -I -X utf8 data-engineering/scripts/import_review_table.py <workbook.xlsx> --base <commit>`.
-It writes `decisions.json`, `sample.json` and `sample.xlsx` and never the tag file: `python -m app.data.recipe_tags`
-reads `decisions.json`.
+It writes `decisions.json`, then, once the tag file carries it (`python -m app.data.recipe_tags` reads
+`decisions.json`; run this script again after it), `sample.json` and `sample.xlsx`. It never writes the tag file.
 """
 
 from __future__ import annotations
@@ -34,6 +37,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.data.recipe_tags import (  # noqa: E402
+    CRITICAL_MODEL_FIELDS,
     MEAL_ROLES,
     OWNER_ROLES,
     PROTEIN_SOURCES,
@@ -41,6 +45,7 @@ from app.data.recipe_tags import (  # noqa: E402
     REVIEW_TABLE_BATCH,
 )
 from app.data.release_v2 import release_dir  # noqa: E402
+from app.data.tag_files import RECIPE_TAGS  # noqa: E402
 
 PACKET = "data-engineering/docs/role-rules-20261023b/review.json"
 OUT = ROOT / REVIEW_TABLE
@@ -50,10 +55,17 @@ STAPLE_ROLES = frozenset({"one_bowl", "staple"})
 SKIP = "<skip>"  # an empty cell or decision, or one left to the owner: the reviewer gave no value
 PENDING = "待组长定"
 SEED = 20261024
-SAMPLE_SIZE = 30
+SAMPLE_SIZE = 30  # recipes with table values, by imported role; those with protein sources alone are all taken
+RULE_SAMPLE_SIZE = 15  # recipes with rule-decided frozen fields
+RULE_STRATUM_MINIMUM = 5
+PROTEIN_ONLY = "protein_sources only"
+RULE_STRATA = ("rule_equals_model", "rule_differs_from_model")
 STEPS_SHOWN = 400
+SAMPLE_SHEET = "抽样核对"
 CHECKED = "已亲自核对（填 是）"
 YOUR_VALUE = "你看完后的值"
+SEPARATORS = re.compile(r"[,，、]")
+NOTE = re.compile(r"[（(][^（()）]*[）)]")  # a bracketed note, innermost first
 REASONS = (
     "rule_decided_agrees",
     "rule_decided_conflicts",
@@ -69,14 +81,18 @@ REASONS = (
 def code(text):
     """A workbook cell as a value: 'staple（主食）' -> 'staple', 'pork（猪）,beef（牛）' -> ['beef', 'pork'],
     'true（是）' -> True, '[]' -> [], 'null（未知/不放行）' -> None, an empty cell or '待组长定' -> SKIP.
-    A leading '被规则挡住 →' is dropped; each comma-separated part is cut at its first bracket. Excel's TRUE and
-    FALSE cells are booleans already."""
+    A leading '被规则挡住 →' and bracketed notes are dropped (an unclosed bracket cuts its part); parts are separated
+    by ',', '，' or '、'. Excel's TRUE and FALSE cells are booleans already. Anything else comes back as it is,
+    for `valid` to judge."""
     if isinstance(text, bool):
         return text
     if text is None or not str(text).strip():
         return SKIP
     text = re.sub(r"^被规则挡住\s*→\s*", "", str(text).strip().lower())
-    text = ",".join(re.split(r"[（(]", part)[0].strip() for part in text.split(","))
+    while NOTE.search(text):
+        text = NOTE.sub("", text)
+    parts = [re.split(r"[（(]", part)[0].strip() for part in SEPARATORS.split(text)]
+    text = ",".join(parts)
     if text == PENDING:
         return SKIP
     if text in {"null", ""}:
@@ -85,9 +101,24 @@ def code(text):
         return text == "true"
     if text == "[]":
         return []
-    if "," in text or text in PROTEIN_SOURCES:
-        return sorted(part.strip() for part in text.split(",") if part.strip())
+    if len(parts) > 1 or text in PROTEIN_SOURCES:
+        return sorted(part for part in parts if part)
     return text
+
+
+def valid(field: str, value) -> bool:
+    """A value the field can hold, null aside: a meal role, a boolean staple, or protein sources of the vocabulary."""
+    if field == "meal_role":
+        return isinstance(value, str) and value in MEAL_ROLES
+    if field == "contains_staple":
+        return isinstance(value, bool)
+    return isinstance(value, list) and set(value) <= set(PROTEIN_SOURCES)
+
+
+def same_value(a, b) -> bool:
+    if isinstance(a, list) and isinstance(b, list):
+        return sorted(a) == sorted(b)
+    return a == b and type(a) is type(b)
 
 
 def intended(row: dict):
@@ -115,17 +146,14 @@ def judge(key: str, field: str, value, current: dict) -> str | None:
         return "owner_decided"
     rule = current["rule_suggestion"][field]
     if rule is not None:
-        agrees = sorted(rule) == value if field == "protein_sources" else rule == value and type(rule) is type(value)
-        return "rule_decided_agrees" if agrees else "rule_decided_conflicts"
+        return "rule_decided_agrees" if same_value(rule, value) else "rule_decided_conflicts"
     if value is None:
         return "left_open"
-    if field == "meal_role":
-        if value not in MEAL_ROLES:
-            return "invalid_value"
-        return None if value in current["review_allowed_roles"] else "outside_allowed_roles"
-    if field == "contains_staple":
-        return None if isinstance(value, bool) else "invalid_value"
-    return None if isinstance(value, list) and set(value) <= set(PROTEIN_SOURCES) else "invalid_value"
+    if not valid(field, value):
+        return "invalid_value"
+    if field == "meal_role" and value not in current["review_allowed_roles"]:
+        return "outside_allowed_roles"
+    return None
 
 
 def decide(rows: list[dict], packet: dict[str, dict]) -> tuple[dict, list[dict]]:
@@ -189,19 +217,59 @@ def counts(accepted: dict, skipped: list[dict]) -> dict:
     }
 
 
+def draw(strata: dict[str, list[str]], size: int, minimum: int) -> list[tuple[str, str]]:
+    """`size` keys over the strata: each at least `minimum` (or all it has), the rest by size (largest remainder),
+    drawn with `SEED`."""
+    total = sum(map(len, strata.values()))
+    if not total:
+        return []
+    quota = {name: min(len(keys), max(minimum, len(keys) * size // total)) for name, keys in strata.items()}
+    remainder = {name: len(keys) * size / total - quota[name] for name, keys in strata.items()}
+    while sum(quota.values()) < min(size, total):
+        name = max(sorted(strata), key=lambda s: remainder[s])
+        quota[name], remainder[name] = quota[name] + 1, remainder[name] - 1
+    while sum(quota.values()) > size:  # the minimums overshot: take back from the most over-served stratum
+        name = min((s for s in sorted(strata) if quota[s] > minimum), key=lambda s: remainder[s])
+        quota[name], remainder[name] = quota[name] - 1, remainder[name] + 1
+    rng = random.Random(SEED)
+    return [(name, key) for name in sorted(strata) for key in sorted(rng.sample(sorted(strata[name]), quota[name]))]
+
+
 def draw_sample(accepted: dict) -> list[tuple[str, str]]:
-    """`SAMPLE_SIZE` recipes with an imported value, stratified by the imported meal role (protein sources alone are
-    their own stratum): every stratum at least one, the rest by size (largest remainder), drawn with `SEED`."""
+    """`SAMPLE_SIZE` recipes with an imported value, stratified by the imported meal role, every stratum at least one;
+    then every recipe whose only table value is its protein sources (owner 2026-10-24: none is accepted unseen)."""
     strata: dict[str, list[str]] = defaultdict(list)
     for key in sorted(accepted):
-        strata[accepted[key].get("meal_role", "protein_sources only")].append(key)
-    total = len(accepted)
-    quota = {name: max(1, len(keys) * SAMPLE_SIZE // total) for name, keys in strata.items()}
-    while sum(quota.values()) < min(SAMPLE_SIZE, total):
-        name = max(sorted(strata), key=lambda s: len(strata[s]) * SAMPLE_SIZE / total - quota[s])
-        quota[name] += 1
-    rng = random.Random(SEED)
-    return [(name, key) for name in sorted(strata) for key in sorted(rng.sample(strata[name], quota[name]))]
+        strata[accepted[key].get("meal_role", PROTEIN_ONLY)].append(key)
+    picked = draw(strata, SAMPLE_SIZE, 1)
+    return picked + [(PROTEIN_ONLY, key) for key in strata[PROTEIN_ONLY] if (PROTEIN_ONLY, key) not in picked]
+
+
+def rule_part(entries: dict[str, dict], packet: dict[str, dict]) -> dict[str, dict]:
+    """The frozen fields the rules decide (`rule` in the review batch) by recipe, the owner's dishes left out, and
+    whether every one of them is the frozen model value (`stored` in the reviewer packet)."""
+    part = {}
+    for key, entry in entries.items():
+        fields = [
+            name
+            for name in CRITICAL_MODEL_FIELDS
+            if entry["estimated"].get(name, {}).get("batch") == REVIEW_TABLE_BATCH
+            and entry["estimated"][name]["method"] == "rule"
+        ]
+        if fields and key not in OWNER_ROLES:
+            same = all(same_value(entry[name], packet[key]["stored"][name]) for name in fields)
+            part[key] = {"stratum": RULE_STRATA[0 if same else 1], "values": {name: entry[name] for name in fields}}
+    return part
+
+
+def carried(entries: dict[str, dict], accepted: dict) -> bool:
+    """Whether the tag file carries every imported value in the review batch (it was regenerated after the import)."""
+    return all(
+        entries[key][name] == value and entries[key]["estimated"][name]["batch"] == REVIEW_TABLE_BATCH
+        for key, values in accepted.items()
+        for name, value in values.items()
+        if name in FIELDS
+    )
 
 
 def shown(value) -> str:
@@ -253,22 +321,22 @@ def steps_of(keys: set[str]) -> dict[str, str]:
 INSTRUCTIONS = [
     "AI 标签抽样核对（recipe-tags-v1/review-table-20261024）",
     "",
-    f"这 {SAMPLE_SIZE} 道菜按固定种子 {SEED} 抽自“复核表里的值被导入的菜”，按导入的餐型角色分层。",
-    "导入值来自你的复核表，是 AI 预填、在聊天里按菜品类型确认的，没有人逐条看过食材，所以现在仍记为 AI 估计、未复核。",
+    f"这些菜按固定种子 {SEED} 抽自这一批。一部分的值来自你的复核表（AI 预填、在聊天里按菜品类型确认，",
+    "没有人逐条看过食材），另一部分的值是现行规则给的。两部分现在都记为未复核；表里不标来源，请一律独立判断。",
     "这次核对的结果决定这一批能不能被组长接受。",
     "",
     "每一行是一道菜的一个字段。请你本人逐行：",
-    "1. 先看“食材（克）”和“步骤（前 400 字）”，再看“导入值”。不要只凭菜名判断。",
-    "2. 在“你看完后的值”里填你认为正确的值（同意导入值也照抄一遍，不能空着），用代码：",
-    "   餐型角色：" + " / ".join(MEAL_ROLES) + "，并且必须在“可选角色”里；",
-    "   是否自带主食：true 或 false（one_bowl 和 staple 是 true，其他角色是 false）；",
-    "   主要蛋白来源：用英文逗号分隔 " + ", ".join(PROTEIN_SOURCES) + "；没有主要蛋白填 []；",
-    "   看不出来、或正确的值不在可选范围里：填 null。",
+    "1. 先看“食材（克）”和“步骤（前 400 字）”，再看“本批的值”。不要只凭菜名判断。",
+    "2. 在“你看完后的值”里填你认为正确的值（同意也照抄一遍，不能空着），用代码：",
+    "   餐型角色：" + " / ".join(MEAL_ROLES) + "；“可选角色”有内容时必须在里面，空着时任填一个；",
+    "   是否自带主食：true 或 false（one_bowl 和 staple 是 true，其他角色是 false），不要填“是/否”；",
+    "   主要蛋白来源：用逗号分隔 " + ", ".join(PROTEIN_SOURCES) + "；没有主要蛋白填 []；",
+    "   看不出来、或正确的值不在可选范围里：填 null。认不出的写法会被标为“无法识别，请重填”。",
     "3. 只有你亲自看完这一行的食材和步骤之后，才在“已亲自核对（填 是）”里填“是”。没看的行不要填。",
     "   没填“是”的行不计入准确率，只计为“未核对”。",
     "4. 不要改其他栏，不要增删行；有话可写在“备注”里。",
     "",
-    "准确率由 data-engineering/scripts/review_table_accuracy.py 计算并公开。组长看过准确率后，",
+    "准确率由 data-engineering/scripts/review_table_accuracy.py 分层计算并公开。组长看过准确率后，",
     "才决定是否接受这一批（python -m app.data.recipe_tags --accept-batch recipe-tags-v1/review-table-20261024）。",
 ]
 SAMPLE_COLUMNS = (
@@ -279,7 +347,7 @@ SAMPLE_COLUMNS = (
     "食材（克）",
     "步骤（前 400 字）",
     "字段",
-    "导入值",
+    "本批的值",
     "可选角色",
     YOUR_VALUE,
     CHECKED,
@@ -298,7 +366,7 @@ def write_sample_xlsx(path: Path, recipes: list[dict]) -> None:
         guide.append([line])
     guide["A1"].font = Font(bold=True)
     guide.column_dimensions["A"].width = 110
-    sheet = workbook.create_sheet(f"抽样{SAMPLE_SIZE}道")
+    sheet = workbook.create_sheet(SAMPLE_SHEET)
     sheet.append(SAMPLE_COLUMNS)
     for number, recipe in enumerate(recipes, 1):
         ingredients = "; ".join(
@@ -306,11 +374,12 @@ def write_sample_xlsx(path: Path, recipes: list[dict]) -> None:
             for line in recipe["ingredients"]
         )
         for field in FIELDS:
-            if field in recipe["imported"]:
-                roles = " / ".join(recipe["review_allowed_roles"]) if field == "meal_role" else ""
+            if field in recipe["values"]:
+                options = recipe["layer"] == "table" and field == "meal_role"
+                roles = " / ".join(recipe["review_allowed_roles"]) if options else ""
                 sheet.append(
                     [number, recipe["id"], recipe["title"], recipe["course"], ingredients, recipe["steps"], field]
-                    + [shown(recipe["imported"][field]), roles, None, None, None]
+                    + [shown(recipe["values"][field]), roles, None, None, None]
                 )
     widths = (6, 20, 30, 11, 60, 60, 16, 16, 24, 16, 14, 24)
     fill = PatternFill("solid", fgColor="FFF2CC")
@@ -329,6 +398,59 @@ def write_sample_xlsx(path: Path, recipes: list[dict]) -> None:
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write_sample(packet: dict[str, dict], accepted: dict, entries: dict[str, dict]) -> dict:
+    """`sample.json` and `sample.xlsx` over both parts of the batch."""
+    rules = rule_part(entries, packet)
+    picked = [("table", stratum, key, accepted[key]) for stratum, key in draw_sample(accepted)]
+    strata = {name: sorted(key for key in rules if rules[key]["stratum"] == name) for name in RULE_STRATA}
+    drawn = draw(strata, RULE_SAMPLE_SIZE, RULE_STRATUM_MINIMUM)
+    # By id, not by stratum, so the rows' order does not tell whether a rule agrees with the model.
+    picked += [
+        ("rule_decided", stratum, key, rules[key]["values"]) for stratum, key in sorted(drawn, key=lambda d: d[1])
+    ]
+    steps = steps_of({key for _, _, key, _ in picked})
+    recipes = [
+        {
+            "id": key,
+            "title": packet[key]["title"],
+            "course": packet[key]["course"],
+            "layer": layer,
+            "stratum": stratum,
+            "values": {field: values[field] for field in FIELDS if field in values},
+            "review_allowed_roles": packet[key]["review_allowed_roles"],
+            "ingredients": packet[key]["ingredients"],
+            "steps": steps.get(key, ""),
+        }
+        for layer, stratum, key, values in picked
+    ]
+    population = {
+        "table": Counter(values.get("meal_role", PROTEIN_ONLY) for values in accepted.values()),
+        "rule_decided": Counter(item["stratum"] for item in rules.values()),
+    }
+    sample = {
+        "batch": REVIEW_TABLE_BATCH,
+        "seed": SEED,
+        "size": len(recipes),
+        "layers": {
+            layer: {
+                name: {"recipes": n, "drawn": sum(r["layer"] == layer and r["stratum"] == name for r in recipes)}
+                for name, n in sorted(population[layer].items())
+            }
+            for layer in population
+        },
+        "how_to_check": "data-engineering/docs/review-table-20261024/README.md; fill sample.xlsx in person",
+        "recipes": [
+            {name: recipe[name] for name in ("id", "title", "course", "layer", "stratum", "values")}
+            for recipe in recipes
+        ],
+    }
+    (OUT.parent / "sample.json").write_text(
+        json.dumps(sample, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
+    )
+    write_sample_xlsx(OUT.parent / "sample.xlsx", recipes)
+    return sample
 
 
 def main() -> None:
@@ -370,42 +492,15 @@ def main() -> None:
         "skipped": skipped,
     }
     OUT.write_text(json.dumps(decisions, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
-
-    picked = draw_sample(accepted)
-    steps = steps_of({key for _, key in picked})
-    recipes = [
-        {
-            "id": key,
-            "title": packet[key]["title"],
-            "course": packet[key]["course"],
-            "stratum": stratum,
-            "imported": {field: accepted[key][field] for field in FIELDS if field in accepted[key]},
-            "review_allowed_roles": packet[key]["review_allowed_roles"],
-            "ingredients": packet[key]["ingredients"],
-            "steps": steps.get(key, ""),
-        }
-        for stratum, key in picked
-    ]
-    strata = Counter(accepted[key].get("meal_role", "protein_sources only") for key in accepted)
-    sample = {
-        "batch": REVIEW_TABLE_BATCH,
-        "seed": SEED,
-        "size": len(recipes),
-        "drawn_from": len(accepted),
-        "strata": {
-            name: {"recipes": n, "drawn": sum(s == name for s, _ in picked)} for name, n in sorted(strata.items())
-        },
-        "how_to_check": "data-engineering/docs/review-table-20261024/README.md; fill sample.xlsx in person",
-        "recipes": [
-            {name: recipe[name] for name in ("id", "title", "course", "stratum", "imported")} for recipe in recipes
-        ],
-    }
-    (OUT.parent / "sample.json").write_text(
-        json.dumps(sample, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
-    )
-    write_sample_xlsx(OUT.parent / "sample.xlsx", recipes)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
-    print(f"sample: {len(recipes)} recipes; strata {sample['strata']}")
+    entries = json.loads((ROOT / RECIPE_TAGS).read_text(encoding="utf-8"))["recipes"]
+    if not carried(entries, accepted):
+        raise SystemExit(
+            "The tag file does not carry decisions.json yet: run `python -m app.data.recipe_tags` "
+            "from backend, then this script again for the sample."
+        )
+    sample = write_sample(packet, accepted, entries)
+    print(f"sample: {sample['size']} recipes; {json.dumps(sample['layers'], ensure_ascii=False)}")
 
 
 if __name__ == "__main__":

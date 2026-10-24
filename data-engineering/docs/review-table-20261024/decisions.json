@@ -28,9 +28,9 @@
       "protein_sources": 2
     },
     "skipped": {
-      "rule_decided_agrees": 371,
-      "rule_decided_conflicts": 88,
-      "owner_decided": 4,
+      "rule_decided_agrees": 370,
+      "rule_decided_conflicts": 83,
+      "owner_decided": 10,
       "outside_allowed_roles": 32,
       "left_open": 106,
       "skipped_by_reviewer": 0,
@@ -41,18 +41,18 @@
       "meal_role": {
         "imported": 106,
         "rule_decided_agrees": 172,
-        "rule_decided_conflicts": 45,
+        "rule_decided_conflicts": 42,
         "left_open": 28,
         "outside_allowed_roles": 16,
-        "owner_decided": 2
+        "owner_decided": 5
       },
       "contains_staple": {
         "imported": 106,
-        "rule_decided_agrees": 181,
-        "rule_decided_conflicts": 36,
+        "rule_decided_agrees": 180,
+        "rule_decided_conflicts": 34,
         "left_open": 28,
         "outside_allowed_roles": 16,
-        "owner_decided": 2
+        "owner_decided": 5
       },
       "protein_sources": {
         "imported": 2,
@@ -1931,7 +1931,7 @@
       "field": "meal_role",
       "value": "one_bowl",
       "rule": "staple",
-      "reason": "rule_decided_conflicts"
+      "reason": "owner_decided"
     },
     {
       "id": "RCP2_3C310D373BB9",
@@ -1939,7 +1939,7 @@
       "field": "contains_staple",
       "value": true,
       "rule": true,
-      "reason": "rule_decided_agrees"
+      "reason": "owner_decided"
     },
     {
       "id": "RCP2_3D5ADFE023AB",
@@ -2899,7 +2899,7 @@
       "field": "meal_role",
       "value": "soup",
       "rule": "staple",
-      "reason": "rule_decided_conflicts"
+      "reason": "owner_decided"
     },
     {
       "id": "RCP2_66540AABF0E0",
@@ -2907,7 +2907,7 @@
       "field": "contains_staple",
       "value": false,
       "rule": true,
-      "reason": "rule_decided_conflicts"
+      "reason": "owner_decided"
     },
     {
       "id": "RCP2_66AD2CDBCB53",
@@ -5229,7 +5229,7 @@
       "field": "meal_role",
       "value": "vegetable",
       "rule": "staple",
-      "reason": "rule_decided_conflicts"
+      "reason": "owner_decided"
     },
     {
       "id": "RCP2_F480AAE0C111",
@@ -5237,7 +5237,7 @@
       "field": "contains_staple",
       "value": false,
       "rule": true,
-      "reason": "rule_decided_conflicts"
+      "reason": "owner_decided"
     },
     {
       "id": "RCP2_F484CD172351",

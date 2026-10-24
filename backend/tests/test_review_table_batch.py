@@ -1,7 +1,12 @@
-"""The reviewer's table as an unreviewed AI-estimated batch, and the owner's own role decisions (owner 2026-10-24)."""
+"""The review batch for the frozen model batch and the owner's own role decisions (owner 2026-10-24).
+
+The batch holds the reviewer's table, an unreviewed AI estimate imported only where the rules leave a field open, and
+the frozen fields the rules decide; the planner reads neither before the owner accepts the batch.
+"""
 
 import importlib.util
 import json
+from collections import Counter
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -23,6 +28,7 @@ def script(name: str):
 
 
 table = script("import_review_table")
+REVIEW = recipe_tags.REVIEW_TABLE_BATCH
 
 
 def dish(key: str, title: str, course: str, lines: list[tuple[str, float]], **nutrition) -> Dish:
@@ -30,10 +36,12 @@ def dish(key: str, title: str, course: str, lines: list[tuple[str, float]], **nu
     return Dish(key, title, course, "chinese", 4, lines=[Line(n, g, None) for n, g in lines], steps="Bake.", **values)
 
 
-# A baked good whose role the rules leave open, and a soup whose unnamed meat leaves its sources open.
+# A baked good whose role the rules leave open (its sources, [], they decide), and a soup whose role the rules
+# decide (one_bowl) and whose unnamed meat leaves its sources open.
 CRESCENTS = dish("RCP2_T1", "Swedish Crescents", "baked_good", [("butter", 227), ("flour", 218.8), ("pecan", 119)])
 CRESCENTS.sugar_g, CRESCENTS.carbohydrate_g = 12.0, 50.0
 RAMEN = dish("RCP2_T2", "Ramen Soup", "soup", [("ramen", 85), ("water", 474), ("egg", 50), ("meat", 17.5)])
+WRAPS = dish("RCP2_A84B4E56257C", "Asian Wraps", "main", [("rice_paper", 96), ("chicken_breast", 907)])
 
 
 def row(field: str, decision: str, claude=None, model=None, other=None) -> dict:
@@ -55,8 +63,9 @@ def imported(rows: list[dict], current: dict) -> tuple[dict, dict]:
 
 def test_workbook_codes_are_normalised():
     assert table.code("staple（主食）") == "staple"
-    assert table.code("one_bowl（一碗饭（自带主食））") == "one_bowl"  # nested brackets: cut at the first
+    assert table.code("one_bowl（一碗饭（自带主食））") == "one_bowl"  # nested brackets
     assert table.code("pork（猪）,beef（牛）") == ["beef", "pork"]
+    assert table.code("pork，beef") == table.code("pork、beef（牛）") == ["beef", "pork"]  # full-width separators
     assert table.code("egg（蛋）") == ["egg"]
     assert table.code("true（是）") is True and table.code("false") is False and table.code(True) is True
     assert table.code("[]（没有主要蛋白）") == []
@@ -64,6 +73,8 @@ def test_workbook_codes_are_normalised():
     assert table.code("被规则挡住 → staple") == "staple"
     assert table.code(None) is table.SKIP and table.code("  ") is table.SKIP
     assert table.code("被规则挡住 → 待组长定") is table.SKIP
+    assert table.code("是") == "是" and not table.valid("contains_staple", table.code("是"))
+    assert not table.valid("meal_role", table.code("snak")) and not table.valid("protein_sources", table.code("porc"))
 
 
 def test_a_decision_means_the_value_it_names():
@@ -141,23 +152,50 @@ def test_contains_staple_follows_the_imported_role():
     }
 
 
-def test_the_sample_is_fixed_stratified_and_counts_only_rows_checked_in_person():
-    accepted = {f"R{i:03d}": {"meal_role": ["dessert", "snack", "sauce"][i % 3]} for i in range(90)}
-    accepted |= {"R900": {"protein_sources": ["egg"]}}
-    picked = table.draw_sample(accepted)
-    assert picked == table.draw_sample(accepted) and len(picked) == table.SAMPLE_SIZE == len(set(picked))
-    assert {stratum for stratum, _ in picked} == {"dessert", "snack", "sauce", "protein_sources only"}
+# --- the sample and its accuracy ---------------------------------------------------------------------------
 
+
+def test_the_sample_is_fixed_stratified_and_takes_every_protein_only_recipe():
+    accepted = {f"R{i:03d}": {"meal_role": ["dessert", "snack", "sauce"][i % 3]} for i in range(90)}
+    accepted |= {"R900": {"protein_sources": ["egg"]}, "R901": {"protein_sources": []}}
+    picked = table.draw_sample(accepted)
+    assert picked == table.draw_sample(accepted) and len(picked) == len(set(picked))
+    assert {key for stratum, key in picked if stratum == table.PROTEIN_ONLY} == {"R900", "R901"}
+    assert len(picked) == table.SAMPLE_SIZE + 1  # one protein-only recipe drawn, the other added
+    # The rule-decided layer: at least five per stratum, the rest by size.
+    strata = {
+        "rule_equals_model": [f"E{i}" for i in range(130)],
+        "rule_differs_from_model": [f"D{i}" for i in range(20)],
+    }
+    drawn = table.draw(strata, table.RULE_SAMPLE_SIZE, table.RULE_STRATUM_MINIMUM)
+    assert len(drawn) == table.RULE_SAMPLE_SIZE
+    assert Counter(stratum for stratum, _ in drawn) == {"rule_equals_model": 10, "rule_differs_from_model": 5}
+
+
+def test_accuracy_is_by_stratum_and_counts_only_readable_rows_checked_in_person():
     accuracy = script("review_table_accuracy")
-    sample = {"recipes": [{"id": "A", "imported": {"meal_role": "dessert", "contains_staple": False}}]}
+    a = {"meal_role": "dessert", "contains_staple": False}
+    b = {"protein_sources": ["egg"]}
+    sample = {
+        "recipes": [
+            {"id": "A", "layer": "table", "stratum": "dessert", "values": a},
+            {"id": "B", "layer": "rule_decided", "stratum": "rule_differs_from_model", "values": b},
+        ]
+    }
     rows = [
         {"id": "A", "field": "meal_role", "value": "snack（小吃）", "checked": True},
-        {"id": "A", "field": "contains_staple", "value": False, "checked": False},
+        {"id": "A", "field": "contains_staple", "value": "否", "checked": True},  # 是/否 is not a code
+        {"id": "B", "field": "protein_sources", "value": "egg，", "checked": True},  # a full-width comma reads
     ]
-    result = accuracy.accuracy(rows, sample)["fields"]
-    expected = {"rows": 1, "checked": 1, "agree": 0, "unchecked": 0, "checked_without_value": 0, "accuracy": 0.0}
-    assert result["meal_role"] == expected
-    assert result["contains_staple"]["unchecked"] == 1 and result["contains_staple"]["accuracy"] is None
+    result = accuracy.accuracy(rows, sample)
+    groups = result["groups"]
+    expected = {"rows": 2, "checked": 1, "agree": 0, "unchecked": 0, "checked_without_value": 0, "unrecognized": 1}
+    assert groups["table"] == expected | {"accuracy": 0.0}
+    assert groups["rule_decided"]["agree"] == groups["rule_differs_from_model"]["agree"] == 1
+    assert groups["all"]["checked"] == 2 and groups["all"]["unrecognized"] == 1
+    assert [row["field"] for row in result["unrecognized"]] == ["contains_staple"]
+    rows[2]["checked"] = False
+    assert accuracy.accuracy(rows, sample)["groups"]["rule_decided"]["unchecked"] == 1
     with pytest.raises(SystemExit):
         accuracy.accuracy(rows[:1], sample)
 
@@ -185,85 +223,108 @@ def planner_view(entry: dict) -> dict:
     return product_path.recipe_tags(recipe, SimpleNamespace(ingredients=[]))
 
 
-def test_the_rules_win_and_an_open_field_takes_the_table_unreviewed(monkeypatch):
-    # The baked good's role is open, its sources ([]) are the rules': the table's role lands, its sources do not.
+def estimate(method: str, batch: str = REVIEW, reviewed: bool = False) -> dict:
+    return {"method": method, "batch": batch, "reviewed": reviewed}
+
+
+def test_the_owner_then_the_rules_then_the_table_then_the_frozen_value(monkeypatch):
+    # The baked good's role is open: the table's lands. Its sources the rules decide: the rule's value replaces the
+    # frozen model value, in the review batch, and the table's sources are not taken.
     entry = built(monkeypatch, CRESCENTS, {"meal_role": "dessert", "protein_sources": ["egg"]})
-    batch = {"method": "llm", "batch": recipe_tags.REVIEW_TABLE_BATCH, "reviewed": False}
     assert entry["meal_role"] == "dessert" and entry["contains_staple"] is False
-    assert entry["estimated"]["meal_role"] == entry["estimated"]["contains_staple"] == batch
-    # The rules decide its sources ([]), so the table's are not taken; the frozen model value stays frozen.
-    assert entry["protein_sources"] == ["pork", "beef"]
-    assert entry["estimated"]["protein_sources"]["batch"] == recipe_tags.LLM_BATCH
+    assert entry["estimated"]["meal_role"] == entry["estimated"]["contains_staple"] == estimate("llm")
+    assert entry["protein_sources"] == [] and entry["estimated"]["protein_sources"] == estimate("rule")
     # A role outside the reviewer's options keeps the frozen value.
     entry = built(monkeypatch, CRESCENTS, {"meal_role": "sauce"})
-    assert entry["meal_role"] == "protein_main" and entry["estimated"]["meal_role"]["batch"] == recipe_tags.LLM_BATCH
-    # The soup's role is the rules' (one_bowl, frozen); its unknown sources are open and take the table's.
+    assert entry["meal_role"] == "protein_main"
+    assert entry["estimated"]["meal_role"] == estimate("llm", recipe_tags.LLM_BATCH)
+    # The soup's role is the rules' (one_bowl) over the frozen value and the table; its open sources take the table's.
     entry = built(monkeypatch, RAMEN, {"meal_role": "soup", "protein_sources": ["egg"]})
-    assert entry["meal_role"] == "protein_main" and entry["estimated"]["meal_role"]["batch"] == recipe_tags.LLM_BATCH
-    assert entry["protein_sources"] == ["egg"] and entry["estimated"]["protein_sources"] == batch
+    assert (entry["meal_role"], entry["contains_staple"]) == ("one_bowl", True)
+    assert entry["estimated"]["meal_role"] == estimate("rule")
+    assert entry["protein_sources"] == ["egg"] and entry["estimated"]["protein_sources"] == estimate("llm")
+    # An owner's dish keeps the owner's role over a frozen one, reviewed in the owner's batch; a frozen field the
+    # owner did not decide follows the rules into the review batch.
+    entry = built(monkeypatch, WRAPS, {"meal_role": "one_bowl"})
+    assert (entry["meal_role"], entry["contains_staple"]) == ("snack", False)
+    owner = estimate("rule", recipe_tags.OWNER_BATCH, True)
+    assert entry["estimated"]["meal_role"] == entry["estimated"]["contains_staple"] == owner
+    assert entry["protein_sources"] == ["chicken"] and entry["estimated"]["protein_sources"] == estimate("rule")
 
 
-def test_the_planner_ignores_the_table_until_the_owner_accepts_the_batch(monkeypatch, tmp_path: Path):
+def test_a_re_run_takes_only_the_models_own_batch_for_its_earlier_answers():
+    entry = {
+        "meal_role": "dessert",
+        "protein_sources": [],
+        "estimated": {"meal_role": estimate("llm", reviewed=True), "protein_sources": estimate("llm")},
+    }
+    model = {"meal_role": "snack", "estimated": {"meal_role": estimate("llm", recipe_tags.LLM_BATCH)}}
+    answers = recipe_tags.previous_answers({"recipes": {"A": entry, "B": model}})
+    assert answers == {"B": {"meal_role": "snack"}}
+
+
+def test_the_planner_reads_the_batch_only_once_the_owner_accepts_it(monkeypatch, tmp_path: Path):
     entry = built(monkeypatch, CRESCENTS, {"meal_role": "snack"})
-    entry["estimated"]["protein_sources"] = {"method": "rule", "batch": recipe_tags.RULE_BATCH, "reviewed": False}
-    entry["protein_sources"] = []  # only the table's fields wait for review
+    # The table's role and staple, and the rule's sources, all wait in the review batch.
+    assert [entry["estimated"][name]["method"] for name in recipe_tags.CRITICAL_MODEL_FIELDS] == ["llm", "llm", "rule"]
     assert unreviewed(SimpleNamespace(**entry)) and meal_role_of(SimpleNamespace(**entry)) is None
     gated = planner_view(entry)
     assert gated["meal_role"] is gated["contains_staple"] is gated["protein_sources"] is None
+    # Even with the table's values accepted, the rule-decided field of the batch keeps the recipe gated.
+    held = json.loads(json.dumps(entry))
+    held["estimated"]["meal_role"]["reviewed"] = held["estimated"]["contains_staple"]["reviewed"] = True
+    assert unreviewed(SimpleNamespace(**held))
 
     target = tmp_path / tag_files.RECIPE_TAGS
     target.parent.mkdir(parents=True)
     recipe_tags.write_keyed(target, {"version": recipe_tags.VERSION}, "recipes", {CRESCENTS.key: entry})
     monkeypatch.setattr(recipe_tags, "repository_root", lambda: tmp_path)
     assert recipe_tags.accept_batch(recipe_tags.LLM_BATCH) == 0  # the model's own batch is another batch
-    assert recipe_tags.accept_batch(recipe_tags.REVIEW_TABLE_BATCH) == 2
+    assert recipe_tags.accept_batch(recipe_tags.RULE_BATCH) == 0  # and ordinary rule values are never accepted
+    assert recipe_tags.accept_batch(REVIEW) == 3
     accepted = json.loads(target.read_text(encoding="utf-8"))["recipes"][CRESCENTS.key]
-    assert (
-        accepted["estimated"]["meal_role"]["reviewed"] is accepted["estimated"]["contains_staple"]["reviewed"] is True
-    )
+    assert all(accepted["estimated"][name]["reviewed"] for name in recipe_tags.CRITICAL_MODEL_FIELDS)
     assert not unreviewed(SimpleNamespace(**accepted)) and meal_role_of(SimpleNamespace(**accepted)) == "snack"
     read = planner_view(accepted)
     assert read["meal_role"] == "snack" and read["contains_staple"] is False and read["protein_sources"] == []
-    # A re-run keeps the accepted values reviewed while they are unchanged.
+    # A re-run keeps the accepted table values reviewed while they are unchanged, and writes the accepted rule value
+    # back as an ordinary rule value: the planner still reads all three.
     again = built(monkeypatch, CRESCENTS, {"meal_role": "snack"}, previous=accepted)
-    assert again["estimated"]["meal_role"] == {
-        "method": "llm",
-        "batch": recipe_tags.REVIEW_TABLE_BATCH,
-        "reviewed": True,
-    }
+    assert again["estimated"]["meal_role"] == estimate("llm", reviewed=True)
+    assert again["estimated"]["protein_sources"] == estimate("rule", recipe_tags.RULE_BATCH)
+    assert not unreviewed(SimpleNamespace(**again)) and planner_view(again)["protein_sources"] == []
 
 
 def test_the_owners_dish_decisions_override_the_rules_as_a_persons_decision():
-    wraps = dish("RCP2_A84B4E56257C", "Asian Wraps", "main", [("rice_paper", 96), ("chicken_breast", 907)])
     other = dish("RCP2_OTHER", "Asian Wraps", "main", [("rice_paper", 96), ("chicken_breast", 907)])
     assert rule_tags(other).values["meal_role"] == "protein_main"  # the rules' role for the same dish
-    entry = recipe_tags.recipe_entry(rule_tags(wraps))
+    entry = recipe_tags.recipe_entry(rule_tags(WRAPS))
     assert entry["meal_role"] == "snack" and entry["contains_staple"] is False
     assert entry["protein_sources"] == rule_tags(other).values["protein_sources"] == ["chicken"]
-    owner = {"method": "rule", "batch": recipe_tags.OWNER_BATCH, "reviewed": True}
+    owner = estimate("rule", recipe_tags.OWNER_BATCH, True)
     assert entry["estimated"]["meal_role"] == entry["estimated"]["contains_staple"] == owner
     assert entry["estimated"]["protein_sources"]["batch"] == recipe_tags.RULE_BATCH
     assert not unreviewed(SimpleNamespace(**entry)) and meal_role_of(SimpleNamespace(**entry)) == "snack"
     assert recipe_tags.recipe_entry(rule_tags(other))["estimated"]["meal_role"]["batch"] == recipe_tags.RULE_BATCH
 
 
-def test_the_committed_tag_file_carries_the_owners_decisions_and_the_unreviewed_table():
+def test_the_committed_tag_file_carries_the_owners_decisions_and_the_gated_batch():
     entries = json.loads((repository_root() / tag_files.RECIPE_TAGS).read_text(encoding="utf-8"))["recipes"]
     owner = {
-        key
-        for key, entry in entries.items()
-        if entry["estimated"].get("meal_role", {}).get("batch") == recipe_tags.OWNER_BATCH
+        k for k, e in entries.items() if e["estimated"].get("meal_role", {}).get("batch") == recipe_tags.OWNER_BATCH
     }
     assert owner == set(recipe_tags.OWNER_ROLES)
-    assert {key: entries[key]["meal_role"] for key in owner} == recipe_tags.OWNER_ROLES
-    assert {
-        (entries[key]["contains_staple"], entries[key]["estimated"]["protein_sources"]["batch"]) for key in owner
-    } == {(False, recipe_tags.RULE_BATCH)}
+    for key in owner:
+        assert entries[key]["meal_role"] == recipe_tags.OWNER_ROLES[key]
+        assert entries[key]["contains_staple"] is (recipe_tags.OWNER_ROLES[key] in {"one_bowl", "staple"})
+        assert not unreviewed(SimpleNamespace(**entries[key])), key  # the owner's decisions are read at once
     decisions = json.loads((repository_root() / recipe_tags.REVIEW_TABLE).read_text(encoding="utf-8"))
     assert decisions["reviewed"] is False and decisions["provenance"]["personally_checked_rows"] == 0
     for key, values in decisions["accepted"].items():
         for name in recipe_tags.CRITICAL_MODEL_FIELDS:
             if name in values:
                 assert entries[key][name] == values[name], (key, name)
-                assert entries[key]["estimated"][name]["batch"] == recipe_tags.REVIEW_TABLE_BATCH, (key, name)
-        assert unreviewed(SimpleNamespace(**entries[key])), key  # nothing of the table is read before acceptance
+                assert entries[key]["estimated"][name] == estimate("llm"), (key, name)
+    batch = {k for k, e in entries.items() if any(v["batch"] == REVIEW for v in e["estimated"].values())}
+    assert batch >= set(decisions["accepted"])
+    assert all(unreviewed(SimpleNamespace(**entries[key])) for key in batch)  # nothing is read before acceptance

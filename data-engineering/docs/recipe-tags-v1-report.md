@@ -7,29 +7,31 @@ Recipes: 8997 (release v2.2 recipes the importer loads, and the curated catalog)
 
 | Field | rule | llm | open (null) |
 | --- | ---: | ---: | ---: |
-| `meal_role` | 8558 | 367 | 72 |
-| `contains_staple` | 8558 | 367 | 72 |
-| `protein_sources` | 8815 | 77 | 105 |
+| `meal_role` | 8775 | 150 | 72 |
+| `contains_staple` | 8775 | 150 | 72 |
+| `protein_sources` | 8840 | 52 | 105 |
 | `cooking_methods` | 8997 | 0 | 0 |
 | `equipment` | 8997 | 0 | 0 |
 | `flavor_tags` | 8997 | 0 | 0 |
 
-Of these, 214 `llm` values are the human reviewer's table (`recipe-tags-v1/review-table-20261024`: prefilled by AI, not checked row by row, unreviewed until the owner accepts the batch) and 4 `rule` values are the owner's own decisions dish by dish (`recipe-tags-v1/owner-20261024`).
+## The review batch for the frozen model batch
+
+`recipe-tags-v1/review-table-20261024` (owner 2026-10-24) replaces the failed model batch's frozen fields in two parts, both waiting for the owner's acceptance after the reviewer's in-person sample check: 214 values on 108 recipes from the human reviewer's table (`llm`: prefilled by AI and confirmed in chat by dish type, not checked row by row; only in fields the rules leave open), and 453 values on 239 recipes in frozen fields the rules now decide (`rule`). Recipes waiting for review: 417; accepting the batch releases 326 of them, and 91 still wait on frozen model fields the rules and the table leave open. The owner decided 10 values dish by dish (`recipe-tags-v1/owner-20261024`, reviewed).
 
 ## Meal role by method
 
 | Meal role | rule | llm |
 | --- | ---: | ---: |
-| protein_main | 3610 | 27 |
-| vegetable | 589 | 2 |
-| soup | 212 | 14 |
-| staple | 560 | 113 |
-| one_bowl | 1497 | 82 |
-| breakfast | 390 | 10 |
+| protein_main | 3671 | 0 |
+| vegetable | 611 | 2 |
+| soup | 212 | 12 |
+| staple | 643 | 40 |
+| one_bowl | 1538 | 9 |
+| breakfast | 390 | 3 |
 | salad | 484 | 0 |
-| snack | 242 | 68 |
+| snack | 242 | 33 |
 | dessert | 529 | 21 |
-| sauce | 367 | 30 |
+| sauce | 377 | 30 |
 | drink | 78 | 0 |
 | open (null) | 0 | 0 |
 
@@ -37,17 +39,17 @@ Of these, 214 `llm` values are the human reviewer's table (`recipe-tags-v1/revie
 
 | Value | Recipes |
 | --- | ---: |
-| chicken | 2161 |
+| chicken | 2162 |
 | duck | 4 |
-| pork | 1228 |
+| pork | 1225 |
 | beef | 1278 |
 | lamb | 33 |
 | fish | 231 |
 | shellfish | 480 |
-| soy | 143 |
-| egg | 995 |
-| legume | 214 |
-| none (`[]`) | 2900 |
+| soy | 145 |
+| egg | 998 |
+| legume | 216 |
+| none (`[]`) | 2892 |
 
 ## `cooking_methods` values (recipes carrying each)
 
@@ -78,8 +80,8 @@ Of these, 214 `llm` values are the human reviewer's table (`recipe-tags-v1/revie
 
 | Value | Recipes |
 | --- | ---: |
-| contains_staple True | 2252 |
-| contains_staple False | 6673 |
+| contains_staple True | 2230 |
+| contains_staple False | 6695 |
 | contains_staple None | 72 |
 | equipment ('blender',) | 532 |
 | equipment ('microwave',) | 218 |

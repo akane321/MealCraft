@@ -348,8 +348,13 @@ def test_owner_reviewed_source_conflict_is_unknown_without_erasing_the_known_sou
     assert found.incomplete_reason.startswith("ingredient/step conflict")
 
 
-def test_rule_regeneration_keeps_the_unreviewed_model_batch_frozen(monkeypatch) -> None:
+def test_rule_regeneration_keeps_the_unreviewed_model_batch_gated(monkeypatch) -> None:
+    """A frozen field the rules now decide takes the rule's value into the review batch (owner 2026-10-24), still
+    waiting for review: better rules alone release nothing."""
+    from types import SimpleNamespace
+
     from app.data import recipe_tags
+    from app.planning.meal_composition import unreviewed
 
     item = dish("Bobotie", "main", [("beef", 454), ("bread", 58), ("egg", 100), ("onion", 110)])
     old = {
@@ -369,16 +374,20 @@ def test_rule_regeneration_keeps_the_unreviewed_model_batch_frozen(monkeypatch) 
     fresh = rule_tags(item)
     assert fresh.values["meal_role"] == "protein_main"
     frozen = recipe_tags.build(False, 0)["tagged"][0][1]
-    assert frozen.values["meal_role"] == "one_bowl" and frozen.methods["meal_role"] == "llm"
     assert frozen.values["protein_sources"] == fresh.values["protein_sources"]  # Only model decisions are frozen.
     entry = recipe_tags.recipe_entry(frozen, old)
+    assert (entry["meal_role"], entry["contains_staple"]) == ("protein_main", False)
     for name in ("meal_role", "contains_staple"):
-        assert entry[name] == old[name]
-        assert entry["estimated"][name] == old["estimated"][name]
-    assert entry["estimated"]["protein_sources"]["method"] == "rule"
+        assert entry["estimated"][name] == {
+            "method": "rule",
+            "batch": recipe_tags.REVIEW_TABLE_BATCH,
+            "reviewed": False,
+        }
+    assert entry["estimated"]["protein_sources"] == old["estimated"]["protein_sources"]
+    assert unreviewed(SimpleNamespace(**entry))
 
 
-def test_a_frozen_homemade_staple_updates_only_its_rule_owned_sources(monkeypatch) -> None:
+def test_a_frozen_homemade_staple_takes_the_rules_staple_but_stays_gated(monkeypatch) -> None:
     from types import SimpleNamespace
 
     from app.data import recipe_tags
@@ -394,9 +403,9 @@ def test_a_frozen_homemade_staple_updates_only_its_rule_owned_sources(monkeypatc
     monkeypatch.setattr(recipe_tags, "previous_file", lambda: {"recipes": {item.key: old}})
     monkeypatch.setattr(recipe_tags, "ask_model", lambda *a: pytest.fail("No model call authorized"))
     regenerated = recipe_tags.recipe_entry(recipe_tags.build(False, 0)["tagged"][0][1], old)
+    assert (regenerated["meal_role"], regenerated["contains_staple"]) == ("staple", True)  # the rule's, gated
     for name in ("meal_role", "contains_staple"):
-        assert regenerated[name] == old[name]
-        assert regenerated["estimated"][name] == old["estimated"][name]
+        assert regenerated["estimated"][name]["batch"] == recipe_tags.REVIEW_TABLE_BATCH
     assert regenerated["protein_sources"] == []
     assert regenerated["estimated"]["protein_sources"]["method"] == "rule"
     assert meal_role_of(SimpleNamespace(**regenerated)) is None
