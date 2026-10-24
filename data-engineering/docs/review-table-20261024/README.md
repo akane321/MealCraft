@@ -145,7 +145,10 @@ uv run --project backend python -m app.data.recipe_tags --accept-batch recipe-ta
 
 ## 开发报告
 
-仅规则重生成之后重跑四份开发报告，差异和原因见本分支的提交说明。
+仅规则重生成之后重跑四份开发报告。full-default、household-rules 和 v3 meal-day-week dev 的结果和 main 完全相同
+（meal-day-week 只有记录的代码版本号不同，未提交）。shared-dish 的计划、份数、采购额和达成率都不变，只有"可上桌菜谱"的池子计数变了
+（相对 main：7567 → 7585、2041 → 2052、1006 → 1011 等）。这个计数直接读菜谱行上的 `meal_role`，不经过复核门禁，
+所以本批改动的角色（规则部分、复核表）和 owner 的决定都会反映在里面；本批在接受之前不改变规划器读到的标签。
 
 ## 复现
 
