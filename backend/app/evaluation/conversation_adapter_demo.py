@@ -62,7 +62,9 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(synthetic_report(), ensure_ascii=False, indent=2, sort_keys=True) + "\n", "utf-8")
+    args.output.write_text(
+        json.dumps(synthetic_report(), ensure_ascii=False, indent=2, sort_keys=True) + "\n", "utf-8", newline="\n"
+    )
 
 
 if __name__ == "__main__":

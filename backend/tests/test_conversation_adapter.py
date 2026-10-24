@@ -19,6 +19,7 @@ from app.evaluation.conversation_adapter import (
     normalize_product,
     shared_instructions,
 )
+from app.evaluation.conversation_adapter_demo import main as demo_main
 from app.orchestration.contracts import ScopeClass, ScopeDecision
 from app.schemas.agent import AgentSessionResponse
 from app.schemas.meal_plan import WeeklyMealPlanResponse
@@ -302,3 +303,12 @@ def test_concurrent_contexts_do_not_share_the_injected_clock():
 
     with ThreadPoolExecutor(max_workers=2) as pool:
         assert list(pool.map(run, ("2031-02-03", "2032-03-04"))) == [date(2031, 2, 3), date(2032, 3, 4)]
+
+
+def test_demo_report_is_byte_stable_and_lf_encoded(tmp_path, monkeypatch):
+    files = [tmp_path / "first.json", tmp_path / "second.json"]
+    for path in files:
+        monkeypatch.setattr("sys.argv", ["demo", "--output", str(path)])
+        demo_main()
+    assert files[0].read_bytes() == files[1].read_bytes()
+    assert b"\r\n" not in files[0].read_bytes()
