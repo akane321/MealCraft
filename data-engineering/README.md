@@ -84,8 +84,9 @@ uv run --project backend python -m app.data.planning_pool   # 写 docs/planning-
 
 它把已提交的目录和 release 导进内存数据库，每道菜按规划池的关（`RecipeRepository._load_for_planning`：
 菜的类别、每种食材都有价格、没被撤下、`recipe_quality.incomplete` 判断完整）走一遍，再过结构化规划器的角色关
-（`meal_composition.meal_role_of`）；被挡的菜只记在它没过的第一道关下面。报告还列出最常用的没定价食材，以及给前 N 种
-定价后能多进多少道菜（上限）。报告头记 release 版本和指纹、标签文件和可定价食材集合的 SHA-256。数字只看报告本身，
+（`meal_composition.meal_role_of`）；被挡的菜只记在它没过的第一道关下面。能用的菜分"能排午餐、晚餐"和"能排早餐"两项
+（一天排三餐，ADR-0070）。报告还单独数新加坡、马来西亚菜（`malaysian_singaporean`）进了多少，列出最常用的没定价食材，
+以及给前 N 种定价后能多进多少道菜（上限）。报告头记 release 版本和指纹、标签文件和可定价食材集合的 SHA-256。数字只看报告本身，
 不在文档里复写。
 
 ## release v2 的 FairPrice 商品映射

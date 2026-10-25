@@ -16,16 +16,15 @@ Every shared catalog recipe is followed through the planning pool's gates (`Reci
 | Excluded: incomplete recipe | 171 | 0 |
 | **In the planning pool** | 6680 | 30 |
 
-Of the 6710 recipes in the pool, **5449** fill a lunch or dinner role of the structured planner; the rest are left out by the role gate:
+Of the 6710 recipes in the pool, **5764** fill a role of the structured planner, 5449 a lunch or dinner role and 315 a breakfast one (a day plans three meals, ADR-0070); the rest are left out by the role gate:
 
 | Role gate | Recipes |
 | --- | ---: |
-| not a lunch or dinner role (dessert) | 393 |
-| not a lunch or dinner role (breakfast) | 315 |
+| not a breakfast, lunch or dinner role (dessert) | 393 |
 | meal-role tags wait for review | 276 |
-| not a lunch or dinner role (snack) | 190 |
+| not a breakfast, lunch or dinner role (snack) | 190 |
 | main with unknown protein source | 35 |
-| not a lunch or dinner role (sauce) | 28 |
+| not a breakfast, lunch or dinner role (sauce) | 28 |
 | no meal-role tag | 24 |
 
 Roles of the recipes that fill one:
@@ -37,7 +36,12 @@ Roles of the recipes that fill one:
 | vegetable | 469 |
 | staple | 463 |
 | salad | 362 |
+| breakfast | 315 |
 | soup | 153 |
+
+## Local dishes
+
+Singapore and Malaysia dishes (cuisine `malaysian_singaporean`): 109 recipes, 88 in the planning pool, 69 fill a role.
 
 ## Incomplete recipes
 

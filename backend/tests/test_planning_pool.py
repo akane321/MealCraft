@@ -26,8 +26,9 @@ def session() -> Session:
         session.flush()
         items = {row.normalized_name: row for row in session.scalars(select(Ingredient))}
         chicken, rice = items["chicken_breast"], items["brown_rice"]
-        _release(session, "priced", "main", [chicken, rice], role="protein_main")
-        _release(session, "untagged", "main", [chicken, rice])
+        _release(session, "priced", "main", [chicken, rice], role="protein_main", cuisine="malaysian_singaporean")
+        _release(session, "untagged", "main", [chicken, rice], cuisine="malaysian_singaporean")
+        _release(session, "porridge", "breakfast", [rice], role="breakfast")
         _release(session, "waits", "main", [chicken, rice], role="protein_main", model=True)
         _release(session, "dessert", "dessert", [rice], role="dessert")
         _release(session, "spiced", "main", [chicken, items["test_spice"]], role="protein_main")
@@ -50,6 +51,7 @@ def _release(
     model: bool = False,
     withdrawn: bool = False,
     kcal: float = 500,
+    cuisine: str = "test",
 ) -> None:
     estimated = {"meal_role": {"method": "llm", "batch": "recipe-tags-v1/llm", "reviewed": False}} if model else None
     session.add(
@@ -57,7 +59,7 @@ def _release(
             slug=f"v2-{name}",
             title=name,
             description=name,
-            cuisine="test",
+            cuisine=cuisine,
             meal_type=course,
             course=course,
             servings=2,
@@ -96,16 +98,18 @@ def test_the_report_pool_is_the_planning_pool(session: Session) -> None:
     pool = RecipeRepository(session)._load_for_planning(session, sorted(POOL_COURSES))
     assert sum(result["pool"].values()) == len(pool)
     assert result["pool"]["release"] == sum(1 for recipe in pool if recipe.release_version is not None)
-    assert result["recipes"]["release"] == 10
+    assert result["recipes"]["release"] == 11
 
 
 def test_each_excluded_recipe_counts_once_under_its_first_gate(session: Session) -> None:
     result = _report(session, release_only=True)
     assert result["excluded"]["release"] == {COURSE: 1, UNPRICED: 3, WITHDRAWN: 1, INCOMPLETE: 1}
     assert result["incomplete"] == {"too few kcal for a main": 1}
-    assert result["not_usable"] == {WAITS: 1, NO_ROLE: 1, "not a lunch or dinner role (dessert)": 1}
-    assert result["usable_roles"] == {"protein_main": 1}
-    assert result["usable"] == 1
+    assert result["not_usable"] == {WAITS: 1, NO_ROLE: 1, "not a breakfast, lunch or dinner role (dessert)": 1}
+    assert result["usable_roles"] == {"breakfast": 1, "protein_main": 1}
+    assert result["usable"] == 2
+    assert result["usable_by_meal"] == {"lunch or dinner": 1, "breakfast": 1}
+    assert result["local"] == {"recipes": 2, "pool": 2, "usable": 1}
 
 
 def test_unpriced_ingredients_rank_by_use_and_recover_whole_recipes_only(session: Session) -> None:
@@ -130,4 +134,7 @@ def test_the_markdown_names_its_sources(session: Session) -> None:
     }
     text = markdown(result)
     assert "Release v2 (digest `r`)" in text
-    assert "| **In the planning pool** | 4 | 30 |" in text
+    assert "| **In the planning pool** | 5 | 30 |" in text
+    meals = result["usable_by_meal"]
+    assert f"{meals['lunch or dinner']} a lunch or dinner role and {meals['breakfast']} a breakfast one" in text
+    assert "2 recipes, 2 in the planning pool, 1 fill a role" in text

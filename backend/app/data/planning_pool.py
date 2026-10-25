@@ -4,8 +4,9 @@
 
 Loads the committed catalog and release into an in-memory database, as the product import does, and follows
 every recipe through the planning pool's gates (`RecipeRepository._load_for_planning`) and then the structured
-planner's role gate (`meal_composition.meal_role_of`). Each excluded recipe is counted once, under the first gate it
-fails. Writes `data-engineering/docs/planning-pool-report.md` and `.json`; both are generated, do not edit them.
+planner's role gate (`meal_composition.meal_role_of`): a usable recipe fills a breakfast role or a lunch or dinner one
+(ADR-0070). Each excluded recipe is counted once, under the first gate it fails. Writes
+`data-engineering/docs/planning-pool-report.md` and `.json`; both are generated, do not edit them.
 """
 
 from __future__ import annotations
@@ -45,6 +46,13 @@ NO_ROLE = "no meal-role tag"
 WAITS = "meal-role tags wait for review"
 NO_SOURCE = "main with unknown protein source"
 
+# A day plans three meals (ADR-0070): a breakfast-role dish fills breakfast, every other usable role lunch or dinner.
+BREAKFAST = "breakfast"
+LUNCH_DINNER = "lunch or dinner"
+LEFT_OUT_ROLES = NON_MEAL_ROLES - {BREAKFAST}
+# The 03 plan's local dishes: Singapore and Malaysia, one cuisine of the release.
+LOCAL_CUISINES = frozenset({"malaysian_singaporean"})
+
 
 def unpriced(recipe: Recipe, priceable: frozenset[str]) -> list[str]:
     """A release recipe's ingredients the estimator cannot price; a curated recipe is never priced out."""
@@ -68,13 +76,13 @@ def pool_gate(recipe: Recipe, priceable: frozenset[str], withdrawn: frozenset[st
 
 
 def role_gate(recipe: Recipe) -> str | None:
-    """Why a pool recipe fills no lunch or dinner role of the structured planner, or None when it does."""
+    """Why a pool recipe fills no breakfast, lunch or dinner role of the structured planner, or None when it does."""
     role = meal_role_of(recipe)
     if role is None:
         if recipe.meal_role is None:
             return NO_ROLE
         return WAITS if unreviewed(recipe) else NO_SOURCE
-    return f"not a lunch or dinner role ({role})" if role in NON_MEAL_ROLES else None
+    return f"not a breakfast, lunch or dinner role ({role})" if role in LEFT_OUT_ROLES else None
 
 
 def incomplete_reason(why: str) -> str:
@@ -91,11 +99,13 @@ def report(recipes: list[Recipe], *, priceable: frozenset[str], withdrawn: froze
     """The counts of the report for shared catalog recipes (household recipes are left out)."""
     shared = [recipe for recipe in recipes if recipe.owner_household_id is None]
     excluded: dict[str, Counter] = {"release": Counter(), "curated": Counter()}
-    incomplete_detail, usable, not_usable = Counter(), Counter(), Counter()
+    incomplete_detail, usable, not_usable, local = Counter(), Counter(), Counter(), Counter()
     missing_sets: list[list[str]] = []
     pool = {"release": 0, "curated": 0}
     for recipe in shared:
         part = "curated" if recipe.release_version is None else "release"
+        is_local = recipe.cuisine in LOCAL_CUISINES
+        local["recipes"] += is_local
         gate = pool_gate(recipe, priceable, withdrawn)
         if gate is not None:
             excluded[part][gate] += 1
@@ -105,9 +115,11 @@ def report(recipes: list[Recipe], *, priceable: frozenset[str], withdrawn: froze
                 incomplete_detail[incomplete_reason(incomplete(recipe))] += 1
             continue
         pool[part] += 1
+        local["pool"] += is_local
         why = role_gate(recipe)
         if why is None:
             usable[meal_role_of(recipe)] += 1
+            local["usable"] += is_local
         else:
             not_usable[why] += 1
     uses = Counter(name for names in missing_sets for name in names)
@@ -127,6 +139,11 @@ def report(recipes: list[Recipe], *, priceable: frozenset[str], withdrawn: froze
         "usable_roles": dict(sorted(usable.items(), key=lambda item: (-item[1], item[0]))),
         "not_usable": dict(sorted(not_usable.items(), key=lambda item: (-item[1], item[0]))),
         "usable": sum(usable.values()),
+        "usable_by_meal": {
+            LUNCH_DINNER: sum(count for role, count in usable.items() if role != BREAKFAST),
+            BREAKFAST: usable[BREAKFAST],
+        },
+        "local": {key: local[key] for key in ("recipes", "pool", "usable")},
         "unpriced": {
             "ingredients": len(uses),
             "per_recipe": {str(n): c for n, c in sorted(Counter(len(names) for names in missing_sets).items())},
@@ -169,15 +186,25 @@ def markdown(result: dict) -> str:
     ]
     rows += [("**In the planning pool**", result["pool"]["release"], result["pool"]["curated"])]
     lines += table(rows, ("", "Release", "Curated"))
+    meals = result["usable_by_meal"]
     lines += [
         "",
-        f"Of the {sum(result['pool'].values())} recipes in the pool, **{result['usable']}** fill a lunch or dinner "
-        "role of the structured planner; the rest are left out by the role gate:",
+        f"Of the {sum(result['pool'].values())} recipes in the pool, **{result['usable']}** fill a role of the "
+        f"structured planner, {meals[LUNCH_DINNER]} a lunch or dinner role and {meals[BREAKFAST]} a breakfast one "
+        "(a day plans three meals, ADR-0070); the rest are left out by the role gate:",
         "",
     ]
     lines += table(list(result["not_usable"].items()), ("Role gate", "Recipes"))
     lines += ["", "Roles of the recipes that fill one:", ""]
     lines += table(list(result["usable_roles"].items()), ("Meal role", "Recipes"))
+    local = result["local"]
+    lines += [
+        "",
+        "## Local dishes",
+        "",
+        f"Singapore and Malaysia dishes (cuisine {', '.join(f'`{c}`' for c in sorted(LOCAL_CUISINES))}): "
+        f"{local['recipes']} recipes, {local['pool']} in the planning pool, {local['usable']} fill a role.",
+    ]
     lines += ["", "## Incomplete recipes", ""]
     lines += table(list(result["incomplete"].items()), ("Reason (`recipe_quality.incomplete`)", "Recipes"))
     priced = result["unpriced"]
@@ -239,7 +266,7 @@ def main() -> None:
     out = root / REPORT
     out.write_text(markdown(result), encoding="utf-8")
     out.with_suffix(".json").write_text(json.dumps(result, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"{out}: {sum(result['pool'].values())} in the pool, {result['usable']} fill a lunch or dinner role")
+    print(f"{out}: {sum(result['pool'].values())} in the pool, {result['usable']} fill a meal role")
 
 
 if __name__ == "__main__":

@@ -32,18 +32,27 @@
   "vegetable": 469,
   "staple": 463,
   "salad": 362,
+  "breakfast": 315,
   "soup": 153
  },
  "not_usable": {
-  "not a lunch or dinner role (dessert)": 393,
-  "not a lunch or dinner role (breakfast)": 315,
+  "not a breakfast, lunch or dinner role (dessert)": 393,
   "meal-role tags wait for review": 276,
-  "not a lunch or dinner role (snack)": 190,
+  "not a breakfast, lunch or dinner role (snack)": 190,
   "main with unknown protein source": 35,
-  "not a lunch or dinner role (sauce)": 28,
+  "not a breakfast, lunch or dinner role (sauce)": 28,
   "no meal-role tag": 24
  },
- "usable": 5449,
+ "usable": 5764,
+ "usable_by_meal": {
+  "lunch or dinner": 5449,
+  "breakfast": 315
+ },
+ "local": {
+  "recipes": 109,
+  "pool": 88,
+  "usable": 69
+ },
  "unpriced": {
   "ingredients": 177,
   "per_recipe": {
