@@ -60,6 +60,7 @@ from app.schemas.agent import (
     AgentConfirmationResponse,
     AgentConstraintState,
     AgentMessageResponse,
+    AgentPreferenceUpdate,
     AgentReplanConfirmationResponse,
     AgentReplanDraft,
     AgentRunCollectionResponse,
@@ -520,6 +521,46 @@ class AgentSessionService:
         )
 
     @model_client.counting()
+    def update_preferences(self, session_id: int, change: AgentPreferenceUpdate) -> AgentSessionResponse:
+        saved = self.repository.get(session_id)
+        if saved is None:
+            raise AgentSessionNotFoundError
+        snapshot = self._to_response(saved)
+        self.repository.end_read_transaction()
+        if (
+            not snapshot.can_confirm
+            or snapshot.plan_id is not None
+            or snapshot.context_version != change.context_version
+        ):
+            raise AgentSessionNotReadyError("The confirmation card changed. Reopen it before editing preferences.")
+        constraints = snapshot.constraints.model_copy(update={"planning_preferences": change.planning_preferences})
+        started = self._start_run(
+            agent_session_id=session_id,
+            intent="create_plan",
+            input_payload={"operation": "edit_preferences", **change.model_dump(mode="json")},
+            context_version=change.context_version,
+            idempotency_key=None,
+        )
+        run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
+        updated = self.repository.replace_preferences(
+            session_id, expected_version=change.context_version, constraints=constraints, run_id=run.id
+        )
+        if updated is None:
+            error = AgentSessionNotReadyError("This conversation changed or is busy. Reopen it before editing.")
+            self._fail_run(run, error)
+            raise error
+        self._finish_turn_run(run, result_status="ready", scope_decision=snapshot.last_scope_decision)
+        return self._to_response(updated)
+
+    def _require_context_version(self, session_id: int, version: int, run: AgentRun) -> None:
+        self.repository.end_read_transaction()
+        current = self.repository.get(session_id)
+        if current is None or current.context_version != version:
+            error = AgentSessionNotReadyError("This conversation changed. Review the latest details first.")
+            self._fail_run(run, error)
+            raise error
+
+    @model_client.counting()
     def reply(
         self,
         session_id: int,
@@ -546,6 +587,7 @@ class AgentSessionService:
             self.repository.end_read_transaction()
             return self.get(session_id) or snapshot
         run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
+        self._require_context_version(session_id, snapshot.context_version, run)
         if snapshot.plan_id is not None:
             self.repository.end_read_transaction()
             try:
@@ -1368,6 +1410,7 @@ class AgentSessionService:
         constraints = snapshot.constraints
         lang = language("", snapshot.messages)
         run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
+        self._require_context_version(session_id, snapshot.context_version, run)
         request = self._plan_request(constraints)
         try:
             plan = self.meal_plan_service.generate(request)
