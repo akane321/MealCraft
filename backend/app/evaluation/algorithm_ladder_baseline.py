@@ -17,6 +17,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+from pydantic_core import to_jsonable_python
+
 from app.evaluation.baseline_output import (
     BaselineDish,
     BaselineIngredient,
@@ -210,12 +212,16 @@ def _response_from_solution(
     )
 
 
-def load_development_episodes(path: Path) -> list[dict]:
+def reject_protected_path(path: Path) -> None:
     if any(
         any(token in part.casefold() for token in ("heldout", "held-out", "held_out", "holdout", "workbench"))
         for part in path.resolve().parts
     ):
         raise ValueError("Protected evaluation paths are not available to this development runner")
+
+
+def load_development_episodes(path: Path) -> list[dict]:
+    reject_protected_path(path)
     return _load_episodes(path)
 
 
@@ -225,6 +231,9 @@ def main() -> int:
     parser.add_argument("--episodes", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    reject_protected_path(args.output)
+    if args.output.exists():
+        raise FileExistsError("Use a new development output path")
     resources = load_resources()
     results = [
         run_episode(episode, system_id=args.arm, resources=resources)
@@ -237,7 +246,9 @@ def main() -> int:
         "episodes": results,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    args.output.write_text(
+        json.dumps(to_jsonable_python(report), ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     print(f"{args.arm}: {len(results)} offline development outputs")
     return 0
 

@@ -112,3 +112,34 @@ def test_protected_paths_are_rejected_before_the_loader(monkeypatch, tmp_path):
     monkeypatch.setattr(runner, "_load_episodes", lambda _: pytest.fail("Must not open protected input"))
     with pytest.raises(ValueError, match="Protected"):
         runner.load_development_episodes(tmp_path / "heldout" / "never-open.json")
+
+
+def test_development_cli_serializes_shared_model_artifacts(monkeypatch, tmp_path):
+    import json
+    import sys
+
+    output = tmp_path / "new-output.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "runner",
+            "--arm",
+            runner.implemented_system_ids()[0],
+            "--episodes",
+            str(tmp_path / "synthetic.json"),
+            "--output",
+            str(output),
+        ],
+    )
+    monkeypatch.setattr(runner, "load_resources", lambda: None)
+    monkeypatch.setattr(runner, "load_development_episodes", lambda _: [{"episode_id": "synthetic"}])
+    monkeypatch.setattr(
+        runner,
+        "run_episode",
+        lambda *a, **kw: {
+            "scored": PlanningNutrients(calories_kcal=1, protein_g=1, carbohydrate_g=1, fat_g=1, sodium_mg=1, sugar_g=1)
+        },
+    )
+    assert runner.main() == 0
+    assert json.loads(output.read_text())["development_only"] is True

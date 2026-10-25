@@ -86,11 +86,7 @@ def run_comparison(*, episodes: list[dict], arms: list[Arm], output_dir: Path, r
     allowed = set(algorithms.implemented_system_ids())
     if any(arm.system_id not in allowed for arm in arms) or len({a.system_id for a in arms}) != len(arms):
         raise ValueError("Only unique offline algorithm arms are available")
-    if any(
-        any(token in part.casefold() for token in ("heldout", "held-out", "held_out", "holdout", "workbench"))
-        for part in output_dir.resolve().parts
-    ):
-        raise ValueError("Protected output paths are not available")
+    algorithms.reject_protected_path(output_dir)
     # No stale/failure cache and no accidental overwrite of a previous run.
     output_dir.mkdir(parents=True, exist_ok=False)
     rows = []
