@@ -825,6 +825,24 @@ optional typed `pending_interaction`. `POST
 /api/agent/sessions/{session_id}/messages` appends another turn and merges only
 explicitly extracted values into the current state.
 
+`PUT /api/agent/sessions/{session_id}/preferences` replaces the confirmation
+card's soft `planning_preferences` with a typed object, without a model call.
+The body requires `context_version` and `planning_preferences`; extra fields
+are rejected. It cannot change allergies, diets, exclusions, household size,
+numeric limits or halal requirements. Only an unplanned, ready conversation of
+the authorized household can be edited. A stale version or competing active
+run returns 409; a missing conversation returns 404. A successful replacement
+increments the context version, persists a recorded exchange and zero-call run,
+and is visible on subsequent GETs. Confirm/reply recheck their snapshot version
+after starting a run so an intervening edit cannot be silently discarded.
+
+The desktop card offers Save, Cancel and one-step Undo. Cancel sends nothing;
+Undo sends the previous complete preference object with the new context version
+and can clear booleans and lists. The Undo snapshot is local to the open card,
+not a cross-device undo history. It is unavailable after another state change
+or conversation switch. An explicit hard no-repeat constraint remains in force
+even when a soft repeat preference is edited.
+
 Every message first passes through the deterministic reference scope gate.
 Supported meal-planning input may reach constraint parsing. Social, off-topic,
 disease-treatment and adversarial requests receive a bounded response without

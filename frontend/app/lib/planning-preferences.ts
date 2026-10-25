@@ -8,6 +8,15 @@ export interface PlanningPreferencesView {
   lighter: boolean;
 }
 
+export function copyPlanningPreferences(value?: PlanningPreferencesView | null): PlanningPreferencesView {
+  return value ? {
+    repeat_allowed_meals: [...value.repeat_allowed_meals],
+    flavor_boosts: value.flavor_boosts.map(boost => ({ ...boost, weekdays: [...boost.weekdays], meal_types: [...boost.meal_types] })),
+    more_vegetables: value.more_vegetables,
+    lighter: value.lighter,
+  } : { repeat_allowed_meals: [], flavor_boosts: [], more_vegetables: false, lighter: false };
+}
+
 const mealLabels: Record<MealType, string> = {
   breakfast: "breakfast",
   lunch: "lunch",

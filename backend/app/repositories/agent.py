@@ -1,7 +1,7 @@
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session, selectinload
 
-from app.models.agent import AgentMessage, AgentSession
+from app.models.agent import AgentMessage, AgentRun, AgentSession
 from app.orchestration.contracts import InteractionRequest, ScopeDecision
 from app.schemas.agent import AgentConstraintState, AgentReplanDraft
 from app.services.cleanup import delete_sessions
@@ -91,6 +91,40 @@ class AgentSessionRepository:
         delete_sessions(self.session, [agent_session])
         self.session.commit()
         return True
+
+    def replace_preferences(self, session_id, *, expected_version, constraints, run_id) -> AgentSession | None:
+        other_work = select(AgentRun.id).where(
+            AgentRun.agent_session_id == session_id,
+            AgentRun.household_id == self.household_id,
+            AgentRun.id != run_id,
+            AgentRun.status.in_(("created", "running")),
+        )
+        changed = self.session.execute(
+            update(AgentSession)
+            .where(
+                AgentSession.id == session_id,
+                AgentSession.household_id == self.household_id,
+                AgentSession.context_version == expected_version,
+                AgentSession.status == "ready",
+                AgentSession.plan_id.is_(None),
+                ~other_work.exists(),
+            )
+            .values(constraints=constraints.model_dump(mode="json"), context_version=expected_version + 1)
+            .execution_options(synchronize_session=False)
+        )
+        if changed.rowcount == 0:
+            self.session.rollback()
+            return None
+        self.session.expire_all()
+        agent_session = self.get(session_id)
+        agent_session.messages.extend(
+            [
+                AgentMessage(role="user", content="Updated meal preferences using the confirmation card."),
+                AgentMessage(role="assistant", content="Preferences updated. Review the details before planning."),
+            ]
+        )
+        self.session.commit()
+        return self.get(session_id)
 
     def append_exchange(
         self,
