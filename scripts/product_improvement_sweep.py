@@ -12,7 +12,7 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
-from statistics import median
+from statistics import mean, median
 from time import perf_counter
 from unittest.mock import patch
 
@@ -89,6 +89,8 @@ def summarize(parts):
         "Each evaluation independently plans each feasible case twice to check determinism.",
         "Times cover the product planning engine, excluding HTTP, LLM parsing and live prices.",
         "No exact reference is run here, so no optimality gap is claimed.",
+        "Machine load was not controlled; some sweep runs overlapped local regression checks.",
+        "Times are descriptive and must not be used to claim a speedup between nearby settings.",
         "",
         "| Beam width | SA steps | Runs | Hard violations | Legacy failures (range) "
         "| Median plan s | Max plan s | Median improvement s |",
@@ -106,6 +108,18 @@ def summarize(parts):
         lines.append(
             f"| {width} | {steps} | {len(rows)} | {violations} | {min(failures)}–{max(failures)} "
             f"| {median(times):.4f} | {max(times):.4f} | {median(local):.4f} |"
+        )
+    lines += [
+        "",
+        "| Beam width | SA steps | Mean table kinds | Mean checkout S$ | Worsened weekly scores |",
+        "| --- | --- | --- | --- | --- |",
+    ]
+    for (width, steps), rows in sorted(grouped.items()):
+        calls = [c for row in rows for c in row["result"]["calls"]]
+        worse = sum(c["score_after"] > c["score_before"] for c in calls if c["score_before"] is not None)
+        lines.append(
+            f"| {width} | {steps} | {mean(c['table_kinds'] for c in calls):.3f} "
+            f"| {mean(c['checkout_sgd'] for c in calls):.3f} | {worse} |"
         )
     lines += [
         "",
