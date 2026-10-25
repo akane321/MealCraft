@@ -78,3 +78,22 @@ def test_improvement_checks_per_meal_budget_not_just_weekly_checkout():
     assert result[2].status == "passed"
     assert "c" not in {a.recipe_id for a in result[0]}
     assert all(c.status == "passed" for c in result[2].checks if c.code == "per_meal_budget")
+
+
+def test_price_priority_reduces_checkout_while_retaining_required_distinct_recipes():
+    problem, _ = setup_problem(100)
+    problem.recipes[0].ingredients[0].quantity = 300
+    initial = [PlanningAssignment(slot_id=s.slot_id, recipe_id=r) for s, r in zip(problem.slots, "ab", strict=True)]
+    builder = MealBeamPlanner()
+    shopping = builder._build_shopping(problem, initial)
+    validate = partial(product_validation, builder.validator, minimum_distinct_dishes=2)
+    report = validate(problem, initial, shopping)
+    assert report.purchase_total_sgd == 4
+    result, trace = improve_product_plan(
+        problem, (initial, shopping, report), {"a": 0, "b": 1, "c": 1}, priority="price", validate=validate
+    )
+    assert result[2].status == "passed"
+    assert result[2].purchase_total_sgd == 2
+    assert {a.recipe_id for a in result[0]} == {"b", "c"}
+    assert trace["objective_priority"] == "price"
+    assert trace["after"] < trace["before"]
