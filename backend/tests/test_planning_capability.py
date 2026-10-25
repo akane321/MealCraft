@@ -1,7 +1,6 @@
 """The planning capability switch of ADR-0036 section 6: mvp refuses meal compositions."""
 
 import math
-from collections import Counter
 from contextlib import contextmanager
 
 import pytest
@@ -176,8 +175,7 @@ def test_full_capability_plans_and_stores_a_week_of_composed_dinners(composed_cl
         assert meal["main"]["portion_share"] == 0.6 and meal["soup"]["portion_share"] == 0.4
         assert meal["main"]["recipe"]["slug"] in {"salmon-bake", "chicken-roast"}
     mains = [by_day[day]["main"]["recipe"]["slug"] for day in range(1, 8)]
-    # Whole-week repeat counts matter; an exact alternating order is not requested.
-    assert sorted(Counter(mains).values()) == [3, 4]
+    assert all(a != b for a, b in zip(mains, mains[1:], strict=False))  # preserve the beam's alternating order
     salmon = next(d for d in days if d["recipe"]["slug"] == "salmon-bake")
     assert salmon["nutrition_per_person"]["calories_kcal"] == 300  # 500 kcal x 0.6
 

@@ -31,8 +31,7 @@ def evaluate(planner, problem, choices, *, min_dish_kinds=0, validate=None):
     report = (validate or planner.candidates.validator.validate)(problem, assignments, shopping)
     score = planner.objective.score_validated(problem, assignments, report) if report.status == "passed" else None
     if score is not None:
-        kind_index = 2 if planner.objective.priority == "price" else 1
-        if -score[kind_index] < min_dish_kinds:
+        if planner.objective.diversity(problem, assignments)["table_kinds"] < min_dish_kinds:
             score = None
     return score, assignments, shopping, report
 
@@ -62,11 +61,12 @@ class EnumeratedReference(DiversityAwareGreedyPlanner):
             return result
         for selection in product(*options):
             choices = tuple((s.slot_id, dishes) for s, dishes in zip(slots, selection, strict=True))
-            score, _, _, report = evaluate(self, problem, choices, min_dish_kinds=min_dish_kinds)
+            score, assignments, _, report = evaluate(self, problem, choices, min_dish_kinds=min_dish_kinds)
             result["checked"] += 1
             result["unknown"] += report.status == "indeterminate"
             if score is not None and (result["score"] is None or score < result["score"]):
                 result["score"] = score
+                result["diversity"] = self.objective.diversity(problem, assignments)
         result["status"] = (
             "needs_data"
             if result["unknown"]

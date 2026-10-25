@@ -13,6 +13,7 @@ from app.planning.diversity_greedy import DiversityAwareGreedyPlanner
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_beam import MealState, assignments_of
 from app.planning.meal_composition import dish_servings, meal_shares
+from app.planning.member_coverage import member_can_eat
 
 
 def integer(value, scale=1000):
@@ -23,12 +24,12 @@ def integer(value, scale=1000):
 
 
 class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
-    def solve_exact(self, problem, *, time_limit=15, optimize=True, min_dish_kinds=0):
+    def solve_exact(self, problem, *, time_limit=15, optimize=True, min_dish_kinds=0, fixed_choices=None):
         from ortools.sat.python import cp_model
 
         require_finite_problem(problem)
         require_min_dish_kinds(min_dish_kinds)
-        if not isfinite(time_limit) or time_limit <= 0:
+        if time_limit is not None and (not isfinite(time_limit) or time_limit <= 0):
             raise ValueError("Time limit must be finite and positive")
         if set(self.objective.keys) != {r.recipe_id for r in problem.recipes}:
             raise ValueError("Objective candidates differ from the problem")
@@ -42,6 +43,15 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
         soft_scale = lcm(*norms.values()) if norms else 1
         started = perf_counter()
         slots, pools = domains(self, problem)
+        fixed_choices = fixed_choices or {}
+        if set(fixed_choices) - {slot.slot_id for slot in slots}:
+            raise ValueError("Fixed choices refer to an unknown slot")
+        for index, slot in enumerate(slots):
+            if slot.slot_id in fixed_choices:
+                choice = fixed_choices[slot.slot_id]
+                if choice not in pools[index]:
+                    raise ValueError("Fixed choice is outside the generated meal domain")
+                pools[index] = (choice,)
         recipes = {r.recipe_id: r for r in problem.recipes}
         quantity_scale = 100000 * lcm(*(r.servings for r in problem.recipes))
         if quantity_scale > 10**9:
@@ -50,6 +60,10 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
         options, selections = {}, {}
         demand = defaultdict(list)
         counts = defaultdict(list)
+        member_counts = defaultdict(list)
+        self.objective.diversity(problem, [])  # Validate unique names even in empty meals.
+        member_names = sorted({m.name for s in slots for m in s.members})
+        member_meals = defaultdict(list)
         rule_counts, ingredient_meals = defaultdict(list), defaultdict(list)
         soft_terms = []
         nutrition = defaultdict(list)
@@ -83,6 +97,9 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
                 chosen.append(x)
                 options[slot.slot_id, index] = dishes
                 selections[slot.slot_id, index] = x
+                if dishes:
+                    for member in slot.members:
+                        member_meals[member.name].append(x)
                 serving = dish_servings(local, assignments)
                 local_demand = defaultdict(float)
                 for n, assignment in enumerate(assignments):
@@ -95,6 +112,9 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
                         local_demand[key] += ingredient.quantity * share / recipe.servings
                     if assignment.role_id not in problem.uncounted_roles:
                         counts[assignment.recipe_id].append(x)
+                        for member in slot.members:
+                            if member_can_eat(member, recipe):
+                                member_counts[member.name, assignment.recipe_id].append(x)
                     if assignment.role_id not in problem.uncounted_roles:
                         rule_counts[assignment.recipe_id].append(x)
                     rank_terms.append(integer(self.objective.ranking[assignment.recipe_id], 10000) * x)
@@ -178,6 +198,53 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
             model.Add(rep >= used[rid] - sum(conflicts))
             representative[rid] = rep
         model.Add(sum(representative.values()) >= min_dish_kinds)
+        member_representatives = []
+        for name in member_names:
+            reps = {}
+            for rid in sorted(keys, key=keys.get):
+                present = model.NewBoolVar(f"member_used_{name}_{rid}")
+                occurrences = member_counts[name, rid]
+                model.Add(sum(occurrences) >= 1).OnlyEnforceIf(present)
+                model.Add(sum(occurrences) == 0).OnlyEnforceIf(present.Not())
+                conflicts = [v for other, v in reps.items() if tuple(sorted((keys[rid], keys[other]))) in related]
+                rep = model.NewBoolVar(f"member_rep_{name}_{rid}")
+                model.Add(rep <= present)
+                for conflict in conflicts:
+                    model.Add(rep + conflict <= 1)
+                model.Add(rep >= present - sum(conflicts))
+                reps[rid] = rep
+            member_representatives.extend(reps.values())
+        variety_scale = 1
+        variety = sum(representative.values())
+        if member_names:
+            # Exact rational mean with a decision-dependent denominator.
+            variety_scale = lcm(*range(1, len(member_names) + 1))
+            bound = len(member_names) * len(keys) * variety_scale
+            if bound > 10**12:
+                raise ValueError("Member denominator exceeds the supported integer scale")
+            active = []
+            for name in member_names:
+                present = model.NewBoolVar(f"member_at_filled_meal_{name}")
+                model.Add(sum(member_meals[name]) >= 1).OnlyEnforceIf(present)
+                model.Add(sum(member_meals[name]) == 0).OnlyEnforceIf(present.Not())
+                active.append(present)
+            denominator = model.NewIntVar(0, len(member_names), "member_denominator")
+            model.Add(denominator == sum(active))
+            factor = model.NewIntVar(0, variety_scale, "member_mean_factor")
+            model.AddAllowedAssignments(
+                [denominator, factor],
+                [(0, 0)] + [(n, variety_scale // n) for n in range(1, len(member_names) + 1)],
+            )
+            numerator = model.NewIntVar(0, len(member_representatives), "member_kinds_total")
+            model.Add(numerator == sum(member_representatives))
+            mean = model.NewIntVar(0, bound, "scaled_member_mean")
+            model.AddMultiplicationEquality(mean, [numerator, factor])
+            has_members = model.NewBoolVar("has_members_at_filled_meals")
+            model.Add(denominator > 0).OnlyEnforceIf(has_members)
+            model.Add(denominator == 0).OnlyEnforceIf(has_members.Not())
+            variety = model.NewIntVar(0, bound, "scaled_variety")
+            model.Add(variety == mean).OnlyEnforceIf(has_members)
+            model.Add(variety == sum(representative.values()) * variety_scale).OnlyEnforceIf(has_members.Not())
         repeat_terms = []
         for rid, count in recipe_counts.items():
             repeated = model.NewIntVar(0, max_dishes * max_dishes, f"repeat_{rid}")
@@ -307,7 +374,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
                     model.Add(value <= integer(band.upper) * divisor)
         terms = [
             sum(empty_terms),
-            -sum(representative.values()),
+            -variety,
             sum(repeat_terms),
             sum(soft_terms),
             sum(rank_terms),
@@ -331,10 +398,11 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
             if optimize and isinstance(term, int):
                 output["stage_ms"].append(0.0)
                 continue
-            remaining_time = time_limit - (perf_counter() - started)
-            if remaining_time <= 0:
-                return output
-            solver.parameters.max_time_in_seconds = remaining_time
+            if time_limit is not None:
+                remaining_time = time_limit - (perf_counter() - started)
+                if remaining_time <= 0:
+                    return output
+                solver.parameters.max_time_in_seconds = remaining_time
             model.Minimize(term)
             stage_started = perf_counter()
             status = solver.Solve(model)
@@ -353,6 +421,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
         if report.status != "passed" or score is None:
             return {**output, "status": "validation_rejected"}
         modeled = [solver.Value(t) for t in terms]
+        modeled[1] /= variety_scale
         modeled[3] /= soft_scale
         modeled[4] /= 10000
         modeled = self.objective.ordered(modeled)
@@ -362,6 +431,7 @@ class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):
             **output,
             "status": "optimal_for_native_model",
             "score": score,
+            "diversity": self.objective.diversity(problem, assignments),
             "minimum_checkout_sgd": report.purchase_total_sgd if self.objective.priority == "price" else None,
             "assignments": [a.model_dump() for a in assignments],
             "shopping": [r.model_dump() for r in shopping],
