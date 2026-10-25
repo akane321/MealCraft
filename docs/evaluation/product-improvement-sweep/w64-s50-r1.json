@@ -1,0 +1,1493 @@
+{
+  "commit": "ec0bcdde39fa8de11da59d5e478f62dea14fb0bd",
+  "inputs": {
+    "data\\ingredients\\ingredients.json": "c995508b5d9dde109b62d0cf3d8fad2e9086a115eaee5bdc50a7a5937f573fe8",
+    "data\\recipes\\recipes.json": "f35c55874b15c3a16510aded46921cf52b5f20eb0aab15d41690879c30ac2066",
+    "data\\evaluation\\dev\\planning-v1.json": "ba128503501c09bcdcb1bcc938600dd228800f638af1baddb731595d03f47627",
+    "data\\fixtures\\fairprice-products.json": "19e760bd53e438fac44c77569724460cf6a69269690c302f3d1a59edb7a0323c"
+  },
+  "machine": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+  "logical_cpus": 20,
+  "python": "3.12.14",
+  "width": 64,
+  "steps": 50,
+  "repeat": 1,
+  "result": {
+    "metrics": {
+      "catalog_recipe_count": 30,
+      "catalog_ingredient_count": 34,
+      "scenario_count": 20,
+      "scenario_expectation_rate": 1.0,
+      "feasible_scenario_success_rate": 1.0,
+      "hard_constraint_violation_count": 0,
+      "determinism_rate": 1.0,
+      "consecutive_repetition_count": 0,
+      "mean_distinct_recipes": 6.7778,
+      "fixture_mapping_count": 34,
+      "used_ingredient_count": 34,
+      "fixture_mapping_coverage": 1.0,
+      "complete_grocery_rate": 1.0,
+      "failure_case_count": 0
+    },
+    "scenarios": [
+      {
+        "id": "dev-001",
+        "name": "baseline",
+        "category": "basic",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "mushroom-spinach-pasta",
+          "spinach-oat-egg-cakes",
+          "tuna-cucumber-rice-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-002",
+        "name": "vegetarian",
+        "category": "dietary",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "mushroom-spinach-pasta",
+          "black-bean-quinoa-skillet",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-003",
+        "name": "vegan",
+        "category": "dietary",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "black-bean-quinoa-skillet",
+          "chickpea-quinoa-salad",
+          "chickpea-tomato-stew",
+          "mushroom-spinach-pasta",
+          "vegetable-rice-skillet",
+          "savoury-vegan-oats",
+          "black-bean-sweet-potato-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-004",
+        "name": "gluten-free",
+        "category": "dietary",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "black-bean-quinoa-skillet",
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "egg-vegetable-rice",
+          "chicken-broccoli-rice",
+          "tuna-cucumber-rice-bowl",
+          "chicken-quinoa-pepper"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-005",
+        "name": "dairy-free",
+        "category": "dietary",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "mushroom-spinach-pasta",
+          "spinach-oat-egg-cakes",
+          "tuna-cucumber-rice-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-006",
+        "name": "soy-allergy",
+        "category": "allergen",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "mushroom-spinach-pasta",
+          "spinach-oat-egg-cakes",
+          "tuna-cucumber-rice-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-007",
+        "name": "fish-allergy",
+        "category": "allergen",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "mushroom-spinach-pasta",
+          "black-bean-quinoa-skillet",
+          "spinach-oat-egg-cakes"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-008",
+        "name": "egg-allergy",
+        "category": "allergen",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chicken-broccoli-rice",
+          "tuna-tomato-pasta",
+          "tuna-spinach-pasta",
+          "savoury-vegan-oats",
+          "black-bean-quinoa-skillet",
+          "ginger-salmon-soba",
+          "chicken-quinoa-pepper"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-009",
+        "name": "sesame-allergy",
+        "category": "allergen",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "mushroom-spinach-pasta",
+          "spinach-oat-egg-cakes",
+          "tuna-cucumber-rice-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-010",
+        "name": "exclude-chicken",
+        "category": "exclusion",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "mushroom-spinach-pasta",
+          "spinach-oat-egg-cakes",
+          "tuna-cucumber-rice-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-011",
+        "name": "sodium-hard-limit",
+        "category": "nutrition",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chicken-quinoa-pepper",
+          "chickpea-quinoa-salad",
+          "savoury-vegan-oats",
+          "egg-tomato-quinoa",
+          "mushroom-spinach-pasta",
+          "spinach-oat-egg-cakes",
+          "salmon-quinoa-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-012",
+        "name": "quick-meals",
+        "category": "time",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "savoury-vegan-oats",
+          "spinach-oat-egg-cakes",
+          "savoury-vegan-oats",
+          "spinach-oat-egg-cakes",
+          "yogurt-oat-bowl",
+          "savoury-vegan-oats",
+          "yogurt-oat-bowl"
+        ],
+        "distinct_recipe_count": 3,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-013",
+        "name": "lower-calorie-soft-preference",
+        "category": "preference",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "mushroom-spinach-pasta",
+          "spinach-oat-egg-cakes",
+          "tuna-cucumber-rice-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-014",
+        "name": "low-sugar-soft-preference",
+        "category": "preference",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "mushroom-spinach-pasta",
+          "spinach-oat-egg-cakes",
+          "tuna-cucumber-rice-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-015",
+        "name": "nutrition-targets",
+        "category": "nutrition",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "tuna-cucumber-rice-bowl",
+          "chicken-quinoa-pepper",
+          "salmon-sweet-potato-tray",
+          "egg-vegetable-rice",
+          "tuna-spinach-pasta",
+          "tofu-brown-rice-stir-fry",
+          "tofu-vegetable-soba"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-016",
+        "name": "known-pantry-quantity",
+        "category": "pantry",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "black-bean-sweet-potato-bowl",
+          "lemon-herb-chicken-rice-bowl",
+          "chicken-quinoa-pepper",
+          "chicken-broccoli-rice",
+          "chickpea-quinoa-salad",
+          "vegetable-rice-skillet",
+          "tofu-vegetable-soba"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-017",
+        "name": "unknown-pantry-quantity",
+        "category": "pantry",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-sweet-potato-curry",
+          "chickpea-tomato-stew",
+          "savoury-vegan-oats",
+          "tofu-chickpea-bowl",
+          "spinach-oat-egg-cakes",
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-018",
+        "name": "per-meal-budget",
+        "category": "budget",
+        "difficulty": "basic",
+        "system": "product-planner",
+        "expected_feasible": true,
+        "actual_feasible": true,
+        "selected_slugs": [
+          "chickpea-quinoa-salad",
+          "egg-tomato-quinoa",
+          "savoury-vegan-oats",
+          "egg-vegetable-rice",
+          "mushroom-spinach-pasta",
+          "spinach-oat-egg-cakes",
+          "tuna-cucumber-rice-bowl"
+        ],
+        "distinct_recipe_count": 7,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": true,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-019",
+        "name": "impossible-five-minute-limit",
+        "category": "infeasible",
+        "difficulty": "edge",
+        "system": "product-planner",
+        "expected_feasible": false,
+        "actual_feasible": false,
+        "selected_slugs": [],
+        "distinct_recipe_count": 0,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": null,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      },
+      {
+        "id": "dev-020",
+        "name": "impossible-vegan-ten-minute-limit",
+        "category": "infeasible",
+        "difficulty": "edge",
+        "system": "product-planner",
+        "expected_feasible": false,
+        "actual_feasible": false,
+        "selected_slugs": [],
+        "distinct_recipe_count": 0,
+        "hard_constraint_violations": [],
+        "deterministic": true,
+        "consecutive_repetitions": 0,
+        "grocery_complete": null,
+        "within_weekly_budget": null,
+        "failure_reasons": []
+      }
+    ],
+    "calls": [
+      {
+        "packet_sha256": "2b13340cf63d54b019f9c3d4c6c90f922a084a0997f19a2d94265aea8c55f887",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04134450000128709,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "planning_seconds": 0.2965369000012288
+      },
+      {
+        "packet_sha256": "2b13340cf63d54b019f9c3d4c6c90f922a084a0997f19a2d94265aea8c55f887",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.042602600002283,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "planning_seconds": 0.177698400002555
+      },
+      {
+        "packet_sha256": "a3048497366572d9d66eb743082fcdc9ce08b37424ae6c2ebe4e97b9a89f0bf3",
+        "candidate_count": 19,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 96.5,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.0383724000021175,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.367,
+          9650
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.367,
+          9650
+        ],
+        "planning_seconds": 0.14929580000170972
+      },
+      {
+        "packet_sha256": "a3048497366572d9d66eb743082fcdc9ce08b37424ae6c2ebe4e97b9a89f0bf3",
+        "candidate_count": 19,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 96.5,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.05858450000232551,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.367,
+          9650
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.367,
+          9650
+        ],
+        "planning_seconds": 0.1743267999991076
+      },
+      {
+        "packet_sha256": "b3a2850dcceb909776808fefd0ff8cbd23a361369ff66926c4a8aee792456a34",
+        "candidate_count": 12,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 99.95,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04394200000024284,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.6,
+          9995
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.6,
+          9995
+        ],
+        "planning_seconds": 0.12376389999917592
+      },
+      {
+        "packet_sha256": "b3a2850dcceb909776808fefd0ff8cbd23a361369ff66926c4a8aee792456a34",
+        "candidate_count": 12,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 99.95,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.033510699999169447,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.6,
+          9995
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.6,
+          9995
+        ],
+        "planning_seconds": 0.21260899999833782
+      },
+      {
+        "packet_sha256": "ac22039a8bc79bcfeaf5cfef1f6e79d0ee549d4773f8620c607de7a2ee1073a1",
+        "candidate_count": 20,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 91.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.03974059999745805,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.4989999999999997,
+          9105
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.4989999999999997,
+          9105
+        ],
+        "planning_seconds": 0.15410179999889806
+      },
+      {
+        "packet_sha256": "ac22039a8bc79bcfeaf5cfef1f6e79d0ee549d4773f8620c607de7a2ee1073a1",
+        "candidate_count": 20,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 91.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.03959279999980936,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.4989999999999997,
+          9105
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.4989999999999997,
+          9105
+        ],
+        "planning_seconds": 0.1571038000001863
+      },
+      {
+        "packet_sha256": "da220ff1e2279e19846b9493e1ddfbe0ac556e563d4b7900808940a93a6b8828",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.042577000000164844,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "planning_seconds": 0.1765040999998746
+      },
+      {
+        "packet_sha256": "da220ff1e2279e19846b9493e1ddfbe0ac556e563d4b7900808940a93a6b8828",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.046653999997943174,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "planning_seconds": 0.3039403000002494
+      },
+      {
+        "packet_sha256": "240b98c7f4c48b4efd9c454249dd16bbc9f67265f4393ef958f28a4a714985ff",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04922919999808073,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "planning_seconds": 0.19978510000146343
+      },
+      {
+        "packet_sha256": "240b98c7f4c48b4efd9c454249dd16bbc9f67265f4393ef958f28a4a714985ff",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.042037300001538824,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "planning_seconds": 0.17665730000226176
+      },
+      {
+        "packet_sha256": "6ca0d5e8b9b62f5c22cc88665fcea06a29de73c788083c44dbcaf45161f4248f",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 96.5,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.044800200001191115,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.367,
+          9650
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.367,
+          9650
+        ],
+        "planning_seconds": 0.18174379999982193
+      },
+      {
+        "packet_sha256": "6ca0d5e8b9b62f5c22cc88665fcea06a29de73c788083c44dbcaf45161f4248f",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 96.5,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04470290000244859,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.367,
+          9650
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.367,
+          9650
+        ],
+        "planning_seconds": 0.3103469999987283
+      },
+      {
+        "packet_sha256": "5e96decfde61e402cbfe5b409b4c7e387972c91fd8bf7a68975e02d793aa8d47",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 117.3,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.0431946999997308,
+        "score_before": [
+          0,
+          -6,
+          1,
+          0.0,
+          1.4,
+          9595
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.4989999999999999,
+          11730
+        ],
+        "planning_seconds": 0.17786659999910626
+      },
+      {
+        "packet_sha256": "5e96decfde61e402cbfe5b409b4c7e387972c91fd8bf7a68975e02d793aa8d47",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 117.3,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.05701249999765423,
+        "score_before": [
+          0,
+          -6,
+          1,
+          0.0,
+          1.4,
+          9595
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.4989999999999999,
+          11730
+        ],
+        "planning_seconds": 0.24840400000175578
+      },
+      {
+        "packet_sha256": "4f4d903259b55e34904d7e3f822f36c3f8d1275f4a1b38dc4844dd9f907c07ad",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.041553300001396565,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "planning_seconds": 0.1878178000006301
+      },
+      {
+        "packet_sha256": "4f4d903259b55e34904d7e3f822f36c3f8d1275f4a1b38dc4844dd9f907c07ad",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04363799999919138,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "planning_seconds": 0.3004936000033922
+      },
+      {
+        "packet_sha256": "6e5a5ce2d04855bca241cbdea4545b25fca9e3ec7f48257793ceb65f89a23271",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.043752599998697406,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "planning_seconds": 0.1789182000029541
+      },
+      {
+        "packet_sha256": "6e5a5ce2d04855bca241cbdea4545b25fca9e3ec7f48257793ceb65f89a23271",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04202729999815347,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "planning_seconds": 0.17711620000045514
+      },
+      {
+        "packet_sha256": "19a746a838028bdffe992a7ecebe9e0e5cce02bc7eefd7fb58c0294f55c629b2",
+        "candidate_count": 14,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 108.15,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.036152799999399576,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.4,
+          10815
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.4,
+          10815
+        ],
+        "planning_seconds": 0.10765919999903417
+      },
+      {
+        "packet_sha256": "19a746a838028bdffe992a7ecebe9e0e5cce02bc7eefd7fb58c0294f55c629b2",
+        "candidate_count": 14,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 108.15,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04826450000109617,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.4,
+          10815
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.4,
+          10815
+        ],
+        "planning_seconds": 0.12199450000116485
+      },
+      {
+        "packet_sha256": "ad2568b9bc2e2bacea4692255d1b493641084cbc045ef5970c90994e420bcb77",
+        "candidate_count": 3,
+        "slot_count": 7,
+        "table_kinds": 3,
+        "checkout_sgd": 60.85,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.02905580000151531,
+        "score_before": [
+          0,
+          -3,
+          5,
+          0.0,
+          2.3200000000000003,
+          6085
+        ],
+        "score_after": [
+          0,
+          -3,
+          5,
+          0.0,
+          2.3200000000000003,
+          6085
+        ],
+        "planning_seconds": 0.045659599996724864
+      },
+      {
+        "packet_sha256": "ad2568b9bc2e2bacea4692255d1b493641084cbc045ef5970c90994e420bcb77",
+        "candidate_count": 3,
+        "slot_count": 7,
+        "table_kinds": 3,
+        "checkout_sgd": 60.85,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.02777040000000852,
+        "score_before": [
+          0,
+          -3,
+          5,
+          0.0,
+          2.3200000000000003,
+          6085
+        ],
+        "score_after": [
+          0,
+          -3,
+          5,
+          0.0,
+          2.3200000000000003,
+          6085
+        ],
+        "planning_seconds": 0.03963360000125249
+      },
+      {
+        "packet_sha256": "957e7a05350b1a7a70a8e3dd011383383b8c210a4b8baae0b31ec19f647ac608",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04372489999877871,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          0.47499999999999987,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          0.47499999999999987,
+          9205
+        ],
+        "planning_seconds": 0.3152833999993163
+      },
+      {
+        "packet_sha256": "957e7a05350b1a7a70a8e3dd011383383b8c210a4b8baae0b31ec19f647ac608",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04220310000164318,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          0.47499999999999987,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          0.47499999999999987,
+          9205
+        ],
+        "planning_seconds": 0.17766850000043632
+      },
+      {
+        "packet_sha256": "52ab97d2d94bf42a4c9211fd513410c46a908a3506a398464595557eeab9662c",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04240949999802979,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          0.47499999999999987,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          0.47499999999999987,
+          9205
+        ],
+        "planning_seconds": 0.17699229999925592
+      },
+      {
+        "packet_sha256": "52ab97d2d94bf42a4c9211fd513410c46a908a3506a398464595557eeab9662c",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04152299999987008,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          0.47499999999999987,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          0.47499999999999987,
+          9205
+        ],
+        "planning_seconds": 0.17600659999880008
+      },
+      {
+        "packet_sha256": "be1e70c254f57eff42bc5dd465492837cd90f01c2deb7dd16d8814e73e4e1531",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 113.1,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.09153479999804404,
+        "score_before": [
+          0,
+          -6,
+          1,
+          0.0,
+          1.114,
+          10035
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.221,
+          11310
+        ],
+        "planning_seconds": 0.35383250000086264
+      },
+      {
+        "packet_sha256": "be1e70c254f57eff42bc5dd465492837cd90f01c2deb7dd16d8814e73e4e1531",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 113.1,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.042598600000928855,
+        "score_before": [
+          0,
+          -6,
+          1,
+          0.0,
+          1.114,
+          10035
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.221,
+          11310
+        ],
+        "planning_seconds": 0.2206876000018383
+      },
+      {
+        "packet_sha256": "ac863c9d4d2d3fefee4558f1b18522ef5b8003d908c17997fad4e40b1cf8e6ca",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 100.6,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.043958399997791275,
+        "score_before": [
+          0,
+          -6,
+          1,
+          0.0,
+          3.845,
+          8065
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          4.204000000000001,
+          10060
+        ],
+        "planning_seconds": 0.1806525000029069
+      },
+      {
+        "packet_sha256": "ac863c9d4d2d3fefee4558f1b18522ef5b8003d908c17997fad4e40b1cf8e6ca",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 100.6,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.043694200001482386,
+        "score_before": [
+          0,
+          -6,
+          1,
+          0.0,
+          3.845,
+          8065
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          4.204000000000001,
+          10060
+        ],
+        "planning_seconds": 0.17915290000019013
+      },
+      {
+        "packet_sha256": "6d85788e9f75b022757be7b3ef88ec49b3e41e53ebae244f41d1e4c44ecb01db",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 76.9,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04200479999781237,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          4.243,
+          7690
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          4.243,
+          7690
+        ],
+        "planning_seconds": 0.30681140000160667
+      },
+      {
+        "packet_sha256": "6d85788e9f75b022757be7b3ef88ec49b3e41e53ebae244f41d1e4c44ecb01db",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 76.9,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.04400960000202758,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          4.243,
+          7690
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          4.243,
+          7690
+        ],
+        "planning_seconds": 0.18216279999978724
+      },
+      {
+        "packet_sha256": "bb73110a8df4edd53dc664715c81577b96197091247d0b9303602c6a2b350f8a",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.08601229999840143,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "planning_seconds": 0.2639166999979352
+      },
+      {
+        "packet_sha256": "bb73110a8df4edd53dc664715c81577b96197091247d0b9303602c6a2b350f8a",
+        "candidate_count": 22,
+        "slot_count": 7,
+        "table_kinds": 7,
+        "checkout_sgd": 92.05,
+        "validation": "passed",
+        "hard_failures": 0,
+        "improvement_seconds": 0.06424060000063037,
+        "score_before": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "score_after": [
+          0,
+          -7,
+          0,
+          0.0,
+          1.3339999999999999,
+          9205
+        ],
+        "planning_seconds": 0.1996407000006002
+      }
+    ]
+  }
+}

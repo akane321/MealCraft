@@ -31,7 +31,20 @@ def summarize(folder):
                 f"| {m.get('most_uses_of_one_dish', 'n/a')} | {m.get('purchase_total_sgd', 'n/a')} "
                 f"| {part['timings'][name]['first']:.2f} |"
             )
+    baseline = {c["case"]: c for c in parts[0]["report"]["cases"]}
+    improved = {c["case"]: c for c in parts[1]["report"]["cases"]}
+    if set(baseline) != set(improved):
+        raise ValueError("Comparison needs the same households")
+    measures = ("distinct_dishes_excluding_staples", "most_uses_of_one_dish", "purchase_total_sgd")
+    unchanged = sum(
+        all(baseline[name].get("metrics", {}).get(k) == improved[name].get("metrics", {}).get(k) for k in measures)
+        for name in baseline
+    )
     lines += [
+        "",
+        f"In {unchanged} of {len(baseline)} households, distinct dishes, worst repeat and checkout are unchanged.",
+        "The table must not be presented as evidence that annealing improves these households.",
+        "Investigate proposal acceptance and stage costs before expanding the iteration count or claiming acceptance.",
         "",
         "Raw JSON retains every check and the planned dishes. A passing check is not proof of user preference.",
         "The ten-day household exercises two shopping trips; "

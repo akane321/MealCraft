@@ -126,7 +126,24 @@ def summarize(parts):
         "No product default is changed by this diagnostic. Raw records include packet hashes,",
         "table-kind counts, checkout totals, per-case outcomes and before/after scores.",
         "",
+        f"Recorded evaluation rounds: {len(parts)}. Source commits: "
+        + ", ".join(f"`{v}`" for v in sorted({p["commit"] for p in parts}))
+        + ".",
+        "",
     ]
+    if all((32, steps) in grouped for steps in (0, 50, 200)):
+        qualities = {}
+        for steps in (0, 50, 200):
+            calls = [c for p in grouped[32, steps] for c in p["result"]["calls"]]
+            qualities[steps] = mean(c["table_kinds"] for c in calls)
+        lines += [
+            f"At width 32, mean table kinds are {qualities[0]:.3f} without improvement, "
+            f"{qualities[50]:.3f} at 50 proposals and {qualities[200]:.3f} at 200 proposals.",
+            "More proposals are not automatically a better default. The weekly objective prioritizes variety",
+            "over cost, so a valid improved plan may cost more. Household breadth and exact-reference evidence",
+            "remain necessary before claiming final algorithm acceptance.",
+            "",
+        ]
     return "\n".join(lines)
 
 
