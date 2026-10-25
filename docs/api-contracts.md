@@ -895,6 +895,12 @@ is read after loading the response body, including embedding usage; zero-call
 fixture turns remain zero. This request-count guard is not a dollar budget for
 standalone developer evaluation scripts.
 
+The added `backend/scripts/evaluate_sprint2_live_dev.py` entry is disabled until
+the owner approves its own pre-request cost policy. It exits before loading
+settings, credentials or model clients, including when passed `--live`.
+Offline orchestration benchmark tests remain available; the product's ordinary
+model path and the separately governed baseline runners are not disabled.
+
 The assistant requires household size and resolves any unquantified available
 ingredient before confirmation. A user may answer `unknown`; the quantity then
 remains null, so the ingredient improves recipe ranking but is never deducted.
