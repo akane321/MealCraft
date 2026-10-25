@@ -48,7 +48,9 @@ def test_full_capability_stores_the_composition_on_the_profile_version(
 
 def test_mvp_refuses_a_plan_request_with_a_meal_composition(recipe_client: TestClient, monkeypatch):  # noqa: F811
     monkeypatch.setattr(get_settings(), "planning_capability", "mvp")
-    response = recipe_client.post("/api/plans/generate", json={"household_size": 2, "meal_composition": COMPOSITION})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{"household_size": 2, "meal_composition": COMPOSITION}}
+    )
 
     assert response.status_code == 422
     assert "switched off" in response.json()["detail"]
@@ -60,7 +62,8 @@ def test_a_composition_needs_unique_roles_and_one_required_dish(recipe_client: T
         [{"role_id": "soup", "courses": ["soup"], "required": False}],
     ):
         response = recipe_client.post(
-            "/api/plans/generate", json={"household_size": 2, "meal_composition": composition}
+            "/api/plans/generate",
+            json={"requires_halal": False, **{"household_size": 2, "meal_composition": composition}},
         )
         assert response.status_code == 422
 
@@ -155,11 +158,14 @@ def test_full_capability_plans_and_stores_a_week_of_composed_dinners(composed_cl
     response = composed_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-28",
-            "household_size": 4,
-            "max_cooking_time_minutes": 90,
-            "pricing_mode": "fixture",
-            "meal_composition": COMPOSITION,
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-28",
+                "household_size": 4,
+                "max_cooking_time_minutes": 90,
+                "pricing_mode": "fixture",
+                "meal_composition": COMPOSITION,
+            },
         },
     )
 
@@ -184,11 +190,14 @@ def _composed_plan(client):
     response = client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-28",
-            "household_size": 4,
-            "max_cooking_time_minutes": 90,
-            "pricing_mode": "fixture",
-            "meal_composition": COMPOSITION,
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-28",
+                "household_size": 4,
+                "max_cooking_time_minutes": 90,
+                "pricing_mode": "fixture",
+                "meal_composition": COMPOSITION,
+            },
         },
     )
     assert response.status_code == 201, response.text
@@ -257,11 +266,14 @@ def _week_ahead(client, composition=COMPOSITION):
     response = client.post(
         "/api/plans/generate",
         json={
-            "start_date": (local_today() + timedelta(days=1)).isoformat(),
-            "household_size": 4,
-            "max_cooking_time_minutes": 90,
-            "pricing_mode": "fixture",
-            "plan_shape": {"meals": {"dinner": composition}},
+            "requires_halal": False,
+            **{
+                "start_date": (local_today() + timedelta(days=1)).isoformat(),
+                "household_size": 4,
+                "max_cooking_time_minutes": 90,
+                "pricing_mode": "fixture",
+                "plan_shape": {"meals": {"dinner": composition}},
+            },
         },
     )
     assert response.status_code == 201, response.text
@@ -334,12 +346,15 @@ def _tight_week(client, budget):
     response = client.post(
         "/api/plans/generate",
         json={
-            "start_date": (local_today() + timedelta(days=1)).isoformat(),
-            "household_size": 4,
-            "max_cooking_time_minutes": 90,
-            "pricing_mode": "fixture",
-            "weekly_budget_sgd": budget,
-            "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
+            "requires_halal": False,
+            **{
+                "start_date": (local_today() + timedelta(days=1)).isoformat(),
+                "household_size": 4,
+                "max_cooking_time_minutes": 90,
+                "pricing_mode": "fixture",
+                "weekly_budget_sgd": budget,
+                "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
+            },
         },
     )
     assert response.status_code == 201, response.text
@@ -670,9 +685,11 @@ def test_a_change_that_goes_over_the_weekly_budget_is_saved_as_over_it(composed_
         "pricing_mode": "fixture",
         "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
     }
-    unbudgeted = composed_client.post("/api/plans/generate", json=request).json()
+    unbudgeted = composed_client.post("/api/plans/generate", json={"requires_halal": False, **request}).json()
     budget = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
-    plan = composed_client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": budget}).json()
+    plan = composed_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**request, "weekly_budget_sgd": budget}}
+    ).json()
     assert plan["grocery_estimate"]["within_weekly_budget"] is True
 
     # A soup on the last day buys tomatoes the week did not need: the checkout total passes the budget. (An
@@ -721,7 +738,8 @@ def _budget_conversation_week(client, roles):
     }
     request = {key: profile[key] for key in ("max_cooking_time_minutes", "pricing_mode", "plan_shape")}
     unbudgeted = client.post(
-        "/api/plans/generate", json={**request, "start_date": local_today().isoformat(), "household_size": 2}
+        "/api/plans/generate",
+        json={"requires_halal": False, **{**request, "start_date": local_today().isoformat(), "household_size": 2}},
     )
     profile["weekly_budget_sgd"] = unbudgeted.json()["grocery_estimate"]["purchase_total_sgd"]
     assert client.post("/api/household-profiles", json=profile).status_code == 201
@@ -785,11 +803,14 @@ def test_a_shape_change_within_the_budget_is_offered_as_before(composed_client):
     roomy = composed_client.post(
         "/api/plans/generate",
         json={
-            **{key: plan[key] for key in ("start_date", "household_size")},
-            "max_cooking_time_minutes": 90,
-            "pricing_mode": "fixture",
-            "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
-            "weekly_budget_sgd": round(plan["grocery_estimate"]["purchase_total_sgd"] * 1.5, 2),
+            "requires_halal": False,
+            **{
+                **{key: plan[key] for key in ("start_date", "household_size")},
+                "max_cooking_time_minutes": 90,
+                "pricing_mode": "fixture",
+                "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
+                "weekly_budget_sgd": round(plan["grocery_estimate"]["purchase_total_sgd"] * 1.5, 2),
+            },
         },
     ).json()
 
@@ -985,9 +1006,11 @@ def test_a_change_on_a_week_of_two_meals_a_day_goes_over_by_the_cheapest_week(mo
             "pricing_mode": "fixture",
             "plan_shape": {"meals": {"lunch": [main], "dinner": [main]}},
         }
-        unbudgeted = client.post("/api/plans/generate", json=request).json()
+        unbudgeted = client.post("/api/plans/generate", json={"requires_halal": False, **request}).json()
         budget = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
-        plan = client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": budget}).json()
+        plan = client.post(
+            "/api/plans/generate", json={"requires_halal": False, **{**request, "weekly_budget_sgd": budget}}
+        ).json()
         assert plan["grocery_estimate"]["within_weekly_budget"] is True
 
         preview = client.post(
@@ -1032,7 +1055,7 @@ def test_a_change_with_cheap_lunches_left_still_charges_a_repeat_one_meals_share
             "plan_shape": {"meals": {"lunch": [main], "dinner": [main]}},
             "weekly_budget_sgd": 25.6,
         }
-        plan = client.post("/api/plans/generate", json=request).json()
+        plan = client.post("/api/plans/generate", json={"requires_halal": False, **request}).json()
         assert plan["grocery_estimate"]["purchase_total_sgd"] == 25.6
         assert {d["recipe"]["slug"] for d in plan["days"] if d["meal_type"] == "lunch"} == {"sweet-potato-lunch"}
 
@@ -1091,9 +1114,11 @@ def test_a_soup_added_day_by_day_over_the_budget_is_the_one_the_week_already_buy
             "pricing_mode": "fixture",
             "plan_shape": {"meals": {"dinner": [main]}},
         }
-        unbudgeted = client.post("/api/plans/generate", json=request).json()
+        unbudgeted = client.post("/api/plans/generate", json={"requires_halal": False, **request}).json()
         budget = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
-        plan = client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": budget}).json()
+        plan = client.post(
+            "/api/plans/generate", json={"requires_halal": False, **{**request, "weekly_budget_sgd": budget}}
+        ).json()
         previews = []
         for day in (1, 2):
             preview = client.post(
@@ -1142,9 +1167,11 @@ def test_a_meal_added_over_the_budget_keeps_the_households_cap_across_the_week(m
             "plan_shape": {"meals": {"dinner": [main]}},
             "max_uses_per_recipe": cap,
         }
-        unbudgeted = client.post("/api/plans/generate", json=request).json()
+        unbudgeted = client.post("/api/plans/generate", json={"requires_halal": False, **request}).json()
         budget = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
-        plan = client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": budget}).json()
+        plan = client.post(
+            "/api/plans/generate", json={"requires_halal": False, **{**request, "weekly_budget_sgd": budget}}
+        ).json()
         assert max(Counter(d["recipe"]["slug"] for d in plan["days"]).values()) <= cap
 
         preview = client.post(f"/api/plans/{plan['id']}/shape/preview", json={"meal_type": "lunch", "roles": [main]})
@@ -1199,7 +1226,7 @@ def test_a_meal_added_over_the_budget_counts_repeats_with_the_rest_of_the_week(m
             # S$12.85 left: seven lunches cost at least S$12.95 (chickpeas every day).
             "weekly_budget_sgd": 28.0,
         }
-        plan = client.post("/api/plans/generate", json=request).json()
+        plan = client.post("/api/plans/generate", json={"requires_halal": False, **request}).json()
         assert plan["grocery_estimate"]["purchase_total_sgd"] == 15.15
         assert max(Counter(d["recipe"]["slug"] for d in plan["days"]).values()) == 1
 

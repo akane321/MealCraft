@@ -88,7 +88,9 @@ def test_plan_saving_the_week_its_reply_checked_is_timed_as_that_search(monkeypa
 
 def test_plan_warnings_are_recorded_on_its_planning_run(monkeypatch):
     with dish_client(monkeypatch, dishes()) as client:
-        plan = client.post("/api/plans/generate", json={"household_size": 2, "weekly_budget_sgd": 100})
+        plan = client.post(
+            "/api/plans/generate", json={"requires_halal": False, **{"household_size": 2, "weekly_budget_sgd": 100}}
+        )
         assert plan.status_code == 201, plan.text
         run = planning_run()
     assert plan.json()["warnings"] and run.warnings == plan.json()["warnings"]
@@ -128,7 +130,8 @@ def test_a_live_plan_records_its_pricing_as_asked_and_its_list_as_checked(monkey
     checked_at_fairprice(monkeypatch, 50)
     with dish_client(monkeypatch, dishes()) as client:
         response = client.post(
-            "/api/plans/generate", json={"household_size": 2, "weekly_budget_sgd": 100, "pricing_mode": "live"}
+            "/api/plans/generate",
+            json={"requires_halal": False, **{"household_size": 2, "weekly_budget_sgd": 100, "pricing_mode": "live"}},
         )
         assert response.status_code == 201, response.text
         run = planning_run()
@@ -148,7 +151,8 @@ def test_a_live_plan_with_a_line_fairprice_did_not_confirm_saves_with_providers_
     checked_at_fairprice(monkeypatch, 50, unanswered=1)
     with dish_client(monkeypatch, dishes()) as client:
         response = client.post(
-            "/api/plans/generate", json={"household_size": 2, "weekly_budget_sgd": 100, "pricing_mode": "live"}
+            "/api/plans/generate",
+            json={"requires_halal": False, **{"household_size": 2, "weekly_budget_sgd": 100, "pricing_mode": "live"}},
         )
         assert response.status_code == 201, response.text
         run = planning_run()
@@ -161,7 +165,8 @@ def test_a_failed_live_plan_records_the_pricing_it_asked_for(monkeypatch):
     checked_at_fairprice(monkeypatch, 50)
     with dish_client(monkeypatch, dishes()) as client:
         response = client.post(
-            "/api/plans/generate", json={"household_size": 2, "weekly_budget_sgd": 1, "pricing_mode": "live"}
+            "/api/plans/generate",
+            json={"requires_halal": False, **{"household_size": 2, "weekly_budget_sgd": 1, "pricing_mode": "live"}},
         )
         assert response.status_code >= 400, response.text
         run = planning_run()

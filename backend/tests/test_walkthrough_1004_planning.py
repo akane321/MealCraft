@@ -252,12 +252,15 @@ def a_week_of_seven(client) -> dict:
     response = client.post(
         "/api/plans/generate",
         json={
-            "start_date": (local_today() + timedelta(days=1)).isoformat(),
-            "household_size": 4,
-            "max_cooking_time_minutes": 90,
-            "weekly_budget_sgd": 20,
-            "pricing_mode": "fixture",
-            "plan_shape": {"meals": {"dinner": [{"role_id": "main", "courses": ["main"]}]}},
+            "requires_halal": False,
+            **{
+                "start_date": (local_today() + timedelta(days=1)).isoformat(),
+                "household_size": 4,
+                "max_cooking_time_minutes": 90,
+                "weekly_budget_sgd": 20,
+                "pricing_mode": "fixture",
+                "plan_shape": {"meals": {"dinner": [{"role_id": "main", "courses": ["main"]}]}},
+            },
         },
     )
     assert response.status_code == 201, response.text
