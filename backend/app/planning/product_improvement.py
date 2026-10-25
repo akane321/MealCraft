@@ -47,7 +47,7 @@ def improve_product_plan(problem, result, losses, *, steps=50, candidates=None, 
     objective = ProductTableObjective(
         DishGroups(NearDuplicatePolicy("product-title-kinds", 1, 1, 1), grouped, near, ()),
         keys,
-        losses,
+        {recipe_id: losses[recipe_id] for recipe_id in keys},
         scales,
     )
     initial = FinalPlanningSolution(

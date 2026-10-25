@@ -70,6 +70,17 @@ def test_adjacent_repeat_guard_respects_exempt_roles_and_meals_not_input_order()
     assert adjacent_repetitions(problem, dishes) == 0
 
 
+def test_improvement_scores_only_recipes_that_survived_packet_validation():
+    problem, _ = setup_problem()
+    beam = MealBeamPlanner().solve(problem)
+    seed = (beam.assignments, beam.shopping, beam.validation)
+    losses = dict.fromkeys("abc", 0)
+    expected, evidence = improve_product_plan(problem, seed, losses)
+    actual, actual_evidence = improve_product_plan(problem, seed, {**losses, "rejected-recipe": 0.1})
+    assert actual == expected
+    assert actual_evidence == evidence
+
+
 def test_improvement_preserves_hard_recipe_count_even_for_one_shared_title_kind():
     problem, _ = setup_problem(100)
     for recipe in problem.recipes:
