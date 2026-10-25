@@ -73,6 +73,21 @@ PYTHONPATH=src python -m unittest discover -s tests -p "test_correct*"
 不在本轮。每一行的前后克数和出处在 `data/release/v2.2/corrections.jsonl`，数量、守卫告警和未修的项目
 在 `data/release/v2.2/quality_report.md` 末节。产品导入和基线评分从这一版起读 v2.2。
 
+## 规划器可用池报告（每次发布、改价格或改标签之后重跑）
+
+`quality_report.md` 只管 release 本身；发布出来的菜有多少真正进得了规划器、每道关挡掉多少，由下面这条命令生成
+（在仓库根目录，离线）：
+
+```bash
+uv run --project backend python -m app.data.planning_pool   # 写 docs/planning-pool-report.md 和 .json
+```
+
+它把已提交的目录和 release 导进内存数据库，每道菜按规划池的关（`RecipeRepository._load_for_planning`：
+菜的类别、每种食材都有价格、没被撤下、`recipe_quality.incomplete` 判断完整）走一遍，再过结构化规划器的角色关
+（`meal_composition.meal_role_of`）；被挡的菜只记在它没过的第一道关下面。报告还列出最常用的没定价食材，以及给前 N 种
+定价后能多进多少道菜（上限）。报告头记 release 版本和指纹、标签文件和可定价食材集合的 SHA-256。数字只看报告本身，
+不在文档里复写。
+
 ## release v2 的 FairPrice 商品映射
 
 ```bash

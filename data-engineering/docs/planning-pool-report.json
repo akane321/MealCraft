@@ -1,0 +1,169 @@
+{
+ "recipes": {
+  "release": 8967,
+  "curated": 30
+ },
+ "excluded": {
+  "release": {
+   "course is not a dish course": 408,
+   "an ingredient has no price": 1706,
+   "withdrawn": 2,
+   "incomplete recipe": 171
+  },
+  "curated": {
+   "course is not a dish course": 0,
+   "an ingredient has no price": 0,
+   "withdrawn": 0,
+   "incomplete recipe": 0
+  }
+ },
+ "incomplete": {
+  "too few kcal for a main": 135,
+  "named meat missing": 22,
+  "wrapper or dough with no filling": 14
+ },
+ "pool": {
+  "release": 6680,
+  "curated": 30
+ },
+ "usable_roles": {
+  "protein_main": 2861,
+  "one_bowl": 1141,
+  "vegetable": 469,
+  "staple": 463,
+  "salad": 362,
+  "soup": 153
+ },
+ "not_usable": {
+  "not a lunch or dinner role (dessert)": 393,
+  "not a lunch or dinner role (breakfast)": 315,
+  "meal-role tags wait for review": 276,
+  "not a lunch or dinner role (snack)": 190,
+  "main with unknown protein source": 35,
+  "not a lunch or dinner role (sauce)": 28,
+  "no meal-role tag": 24
+ },
+ "usable": 5449,
+ "unpriced": {
+  "ingredients": 177,
+  "per_recipe": {
+   "1": 1498,
+   "2": 195,
+   "3": 13
+  },
+  "top": [
+   {
+    "ingredient": "allspice",
+    "recipes": 107,
+    "only_missing": 79
+   },
+   {
+    "ingredient": "turkey",
+    "recipes": 83,
+    "only_missing": 66
+   },
+   {
+    "ingredient": "vegetable_broth",
+    "recipes": 77,
+    "only_missing": 66
+   },
+   {
+    "ingredient": "dill",
+    "recipes": 75,
+    "only_missing": 60
+   },
+   {
+    "ingredient": "rosemary",
+    "recipes": 75,
+    "only_missing": 55
+   },
+   {
+    "ingredient": "buttermilk",
+    "recipes": 68,
+    "only_missing": 55
+   },
+   {
+    "ingredient": "half_and_half",
+    "recipes": 61,
+    "only_missing": 47
+   },
+   {
+    "ingredient": "pie_crust",
+    "recipes": 60,
+    "only_missing": 46
+   },
+   {
+    "ingredient": "biscuit_mix",
+    "recipes": 58,
+    "only_missing": 52
+   },
+   {
+    "ingredient": "ricotta",
+    "recipes": 57,
+    "only_missing": 52
+   },
+   {
+    "ingredient": "water_chestnut",
+    "recipes": 57,
+    "only_missing": 48
+   },
+   {
+    "ingredient": "orange_zest",
+    "recipes": 53,
+    "only_missing": 39
+   },
+   {
+    "ingredient": "seasoned_salt",
+    "recipes": 52,
+    "only_missing": 40
+   },
+   {
+    "ingredient": "meat",
+    "recipes": 51,
+    "only_missing": 45
+   },
+   {
+    "ingredient": "mixed_nuts",
+    "recipes": 46,
+    "only_missing": 33
+   },
+   {
+    "ingredient": "italian_dressing",
+    "recipes": 43,
+    "only_missing": 37
+   },
+   {
+    "ingredient": "celery_seed",
+    "recipes": 42,
+    "only_missing": 32
+   },
+   {
+    "ingredient": "hamburger_bun",
+    "recipes": 38,
+    "only_missing": 29
+   },
+   {
+    "ingredient": "radish",
+    "recipes": 30,
+    "only_missing": 19
+   },
+   {
+    "ingredient": "dried_onion_flakes",
+    "recipes": 26,
+    "only_missing": 22
+   }
+  ],
+  "recovered_if_top_priced": {
+   "10": 606,
+   "20": 988,
+   "40": 1315,
+   "all": 1706
+  }
+ },
+ "sources": {
+  "release_version": "v2.2",
+  "release_digest": "f20b21024948812c4625ea9adae2283fb5fc2e29587859f40e5e650772f1cc48",
+  "recipe_tags_sha256": "d003b6bf0013d12d7ca1c167b625662e5821051948a2f928f153517b0cab426e",
+  "priceable_sha256": "0f69e18232e1f3383ed48e39c937a1cadc60bd46c24ec36eee0f1c798ac5c562"
+ }
+}
