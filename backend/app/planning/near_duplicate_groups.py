@@ -8,12 +8,7 @@ from dataclasses import dataclass
 from math import isfinite
 from typing import Literal, Protocol
 
-
-class RecipePairSignals(Protocol):
-    title_overlap: float | None
-    ingredient_overlap: float | None
-    vector_cosine: float | None
-    vector_status: str
+from app.planning.recipe_pair_similarity import RecipePairSignals
 
 
 @dataclass(frozen=True)

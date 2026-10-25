@@ -8,10 +8,11 @@ from datetime import date
 from fractions import Fraction
 from functools import lru_cache
 
-from app.data.household_reference import basic_seasonings, meal_shares
+from app.data.household_reference import basic_seasonings, hpb, meal_shares
 from app.data.ingredient_hierarchy import expand_exclusions
 from app.schemas.household_rules import WEEKDAYS, HouseholdPlanning
 from app.schemas.planning_nutrition import ProductNutritionTarget
+from app.schemas.planning_v2 import PlanningSlotMember
 
 
 def _applies(rule, planned_date: date, meal: str) -> bool:
@@ -27,6 +28,44 @@ def _present(household: HouseholdPlanning, planned_date: date, meal: str) -> lis
         if rule.member_name in present and _applies(rule, planned_date, meal):
             present[rule.member_name] = rule.present
     return [member for member in household.members or [] if present[member.name]]
+
+
+def present_members(household: HouseholdPlanning, planned_date: date, meal: str) -> list:
+    """The members home for this meal (the presence rules applied), in the household's own order."""
+    return _present(household, planned_date, meal)
+
+
+def slot_members(
+    household: HouseholdPlanning | None, planned_date: date, meal: str, energy_floor_share: float | None
+) -> list[PlanningSlotMember]:
+    """The slot's members for the shared-dish model (ADR-0071 section 1): who is home, with each one's own
+    allergens, exclusions, diet and energy floor for this meal.
+
+    Empty without a household block or without members, which is the whole-table rule this replaces. A member's
+    exclusions are expanded here, as the household's are, so "no pork" also keeps bacon out of that member's
+    food. The energy floor is that member's HPB target times the meal's share; with no researched target it
+    stays the adult reference at that member's portions, which is the floor the whole table had.
+    """
+    if household is None or household.members is None:
+        return []
+    adult = hpb()["adult_reference"]["energy_kcal"]
+    members = []
+    for member in _present(household, planned_date, meal):
+        floor = None
+        if energy_floor_share:
+            need = member.daily_energy_kcal or member.servings * adult
+            floor = round(energy_floor_share * need, 1)
+        members.append(
+            PlanningSlotMember(
+                name=member.name,
+                servings=member.servings,
+                allergens=sorted(member.allergens),
+                excluded_ingredients=sorted(expand_exclusions(member.excluded_ingredients)),
+                dietary_requirements=sorted(member.dietary_preferences),
+                min_energy_kcal=floor,
+            )
+        )
+    return members
 
 
 def slot_servings(household: HouseholdPlanning, planned_date: date, meal: str) -> int | float:
@@ -67,11 +106,14 @@ def assumed_basics(household: HouseholdPlanning | None, excluded: list[str]) -> 
     """The basic seasonings taken as at home: off the list, unpriced, outside the budget.
 
     Shopping only. A basic stays a recipe ingredient for allergens, exclusions and diets, and one the household
-    excludes is never assumed, so its exclusion is still matched against the recipe's lines.
+    excludes is never assumed, so its exclusion is still matched against the recipe's lines. A basic any single
+    member excludes is not assumed either: the household buys it knowingly rather than cooking with a jar of it
+    nobody meant to use (ADR-0071 section 1 moves the limits to members, it does not move this assumption).
     """
     if household is None:
         return frozenset()
-    return _assumed(tuple(sorted(household.missing_basics)), tuple(sorted(excluded)))
+    stated = {*excluded, *(item for member in household.members or [] for item in member.excluded_ingredients)}
+    return _assumed(tuple(sorted(household.missing_basics)), tuple(sorted(stated)))
 
 
 def basics_note(names) -> str | None:

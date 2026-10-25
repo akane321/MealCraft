@@ -9,6 +9,8 @@ from fractions import Fraction
 from math import ceil
 
 from app.data import meal_structure
+from app.data.tag_files import waits_for_review
+from app.planning.member_coverage import coverage_issues, dish_base_servings, member_has_a_dish
 from app.planning.vegetable_led import candidate_vegetable_led, catalog_vegetable_led, vegetable_role
 from app.schemas.planning_v2 import (
     NON_MEAL_ROLES,
@@ -29,25 +31,28 @@ GATED_TAGS = ("meal_role", "contains_staple", "protein_sources")
 
 
 def unreviewed(recipe) -> bool:
-    """A catalog recipe whose meal role, staple or protein sources the model decided and nobody has reviewed yet
-    (`python -m app.data.recipe_tags --accept-batch`): the structured planner treats it as untagged."""
+    """A catalog recipe whose meal role, staple or protein sources wait for review (`tag_files.waits_for_review`:
+    the model decided it, or it is in the frozen batch's review batch, and its batch is not accepted yet): the
+    structured planner treats it as untagged."""
     estimated = getattr(recipe, "estimated", None) or {}
-    return any(
-        (estimated.get(name) or {}).get("method") == "llm" and (estimated.get(name) or {}).get("reviewed") is not True
-        for name in GATED_TAGS
-    )
+    return any(waits_for_review(estimated.get(name) or {}) for name in GATED_TAGS)
 
 
 def meal_role_of(recipe) -> str | None:
-    """A catalog recipe's meal role as the structured planner reads it: None while it is `unreviewed`."""
-    return None if unreviewed(recipe) else getattr(recipe, "meal_role", None)
+    """Admissible role: retain catalog facts, but unknown main sources cannot satisfy no-repeat constraints."""
+    role = getattr(recipe, "meal_role", None)
+    unknown_sources = (
+        role in {"protein_main", "one_bowl"} and hasattr(recipe, "protein_sources") and recipe.protein_sources is None
+    )
+    return None if unreviewed(recipe) or unknown_sources else role
 
 
 def role_admits(role: PlanningMealRole, recipe: PlanningRecipeCandidate) -> bool:
     """A role takes a recipe of one of its courses, or for a structured role of one of its meal roles; a vegetable
-    role only one led by vegetables (ADR-0054). A recipe with no meal-role tag fills no structured role."""
+    role only one led by vegetables, with measured minor flesh seasoning at most (ADR-0082 amends ADR-0054).
+    A recipe with no meal-role tag fills no structured role. Member diet checks are separate."""
     if role.meal_roles:
-        admitted = recipe.meal_role in role.meal_roles
+        admitted = meal_role_of(recipe) in role.meal_roles
     else:
         admitted = recipe.course in role.courses
     return admitted and (not vegetable_role(role.role_id) or candidate_vegetable_led(recipe))
@@ -146,16 +151,22 @@ def real_meal_issues(
     Empty for a meal of course roles. The search keeps only meals with none; the validator reports each. A lunch
     or dinner has a filling core (a protein main and its staple, or a dish that carries its staple), no non-meal
     dish, at most one dish moved from its default, distinct protein sources across its mains and its energy
-    floor; a structured breakfast only fills its roles with dishes of their tags."""
+    floor; a structured breakfast only fills its roles with dishes of their tags. With members home for the slot,
+    each one's own coverage and energy floor are checked instead of the table's one floor (`member_coverage`)."""
     roles = slot.composition or []
-    if not structured(roles):
-        return []
+    covered = structured(roles) and slot.meal_type in ("lunch", "dinner")
     issues: list[tuple[str, str, float | None, float | None]] = []
+    if slot.members and not covered:
+        # A meal the full coverage rules cannot judge - a breakfast, a one-dish slot, a meal of course roles -
+        # still may not leave a member at it with nothing to eat (ADR-0071 section 1).
+        issues.extend(member_has_a_dish(slot, dishes, recipes))
+    if not structured(roles):
+        return issues
     filled = {role: recipes[recipe_id] for role, recipe_id in dishes}
     by_id = {role.role_id: role for role in roles}
     for role_id, recipe in filled.items():
         role = by_id.get(role_id)
-        if role is not None and recipe.meal_role not in (role.meal_roles or ()):
+        if role is not None and meal_role_of(recipe) not in (role.meal_roles or ()):
             issues.append(
                 ("meal_role_tag", f"A {recipe.meal_role or 'untagged'} dish cannot fill {role_id}.", None, None)
             )
@@ -185,7 +196,7 @@ def real_meal_issues(
         issues.append(("meal_filling_core", "The meal has no filling core.", None, None))
     elif bowl and has_staple:
         issues.append(("meal_filling_core", "A dish that carries its staple takes no second staple.", None, None))
-    elif not bowl and not (has_staple and dish.meal_role == "protein_main"):
+    elif not bowl and not (has_staple and meal_role_of(dish) == "protein_main"):
         issues.append(("meal_filling_core", "A protein main needs a staple.", None, None))
     # The planner may move one dish from the default (section 0.2): an optional dish left out, or the vegetable
     # dish beside a dish that carries its staple (section 0.4). That staple left out is no move.
@@ -193,12 +204,17 @@ def real_meal_issues(
     moved += bool(vegetable is not None and vegetable.required and vegetable.role_id not in filled)
     if moved > 1:
         issues.append(("meal_dish_count", f"{moved} dishes moved from the meal's default; one may be.", moved, 1))
-    sources = [
-        set(recipe.protein_sources or ()) for role_id, recipe in filled.items() if role_base(role_id) == MAIN_ROLE
-    ]
+    mains = [recipe for role_id, recipe in filled.items() if role_base(role_id) == MAIN_ROLE]
+    if any(recipe.protein_sources is None for recipe in mains):
+        issues.append(("meal_protein_unknown", "A protein main has unknown protein sources.", None, None))
+    sources = [set(recipe.protein_sources) for recipe in mains if recipe.protein_sources is not None]
     if sum(len(group) for group in sources) != len(set().union(*sources)):
         issues.append(("meal_protein_repeat", "Two protein mains share a protein source.", None, None))
-    if slot.min_energy_kcal is not None and shares is not None:
+    if slot.members:
+        # The shared-dish model (ADR-0071 section 1): every present member is covered by the dishes that member
+        # can eat, and each one's energy floor is that member's own, not one adult reference for the table.
+        issues.extend(coverage_issues(slot, dishes, recipes, shares))
+    elif slot.min_energy_kcal is not None and shares is not None:
         energy = meal_energy(dishes, recipes, shares)
         if energy - slot.min_energy_kcal < -1e-6:
             detail = "The meal gives less than its energy floor per serving."
@@ -268,15 +284,30 @@ def dish_servings(problem: FinalPlanningProblem, assignments: list[PlanningAssig
     """Servings each assignment is cooked for, by its index in `assignments`.
 
     A slot's household eats its meal once: each dish is scaled to
-    `servings * share`. Assignments to unknown slots, or meals outside the
-    policy's sizes, are left out; the validator reports them.
+    `servings * share`, where the servings are the present members who can eat
+    that dish (ADR-0071 section 1), or the slot's own without members.
+    Assignments to unknown slots, or meals outside the policy's sizes, are left
+    out; the validator reports them.
+    """
+    return {index: share * base for index, (share, base) in dish_portions(problem, assignments).items()}
+
+
+def dish_portions(
+    problem: FinalPlanningProblem, assignments: list[PlanningAssignment]
+) -> dict[int, tuple[Fraction, Fraction]]:
+    """Each assignment's share of its meal and the servings that share is cooked for, by its index.
+
+    The share is the dish's role share, what one person who eats it has of the meal; it never changes with who
+    can eat the dish. The servings are the present members who can eat it (ADR-0071 section 1), the slot's own
+    without members. Keeping them apart matters: a dish cooked for fewer people is still a full share for each
+    of them, so nutrition per person stays the share and only the quantities bought follow the servings.
     """
     slots = {slot.slot_id: slot for slot in problem.slots}
     recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
     by_slot: dict[str, list[int]] = defaultdict(list)
     for index, assignment in enumerate(assignments):
         by_slot[assignment.slot_id].append(index)
-    servings: dict[int, Fraction] = {}
+    portions: dict[int, tuple[Fraction, Fraction]] = {}
     for slot_id, indexes in by_slot.items():
         slot = slots.get(slot_id)
         if slot is None:
@@ -290,8 +321,10 @@ def dish_servings(problem: FinalPlanningProblem, assignments: list[PlanningAssig
         if shares is None or len(set(keys)) != len(keys):
             continue
         for index, key in zip(indexes, keys, strict=True):
-            servings[index] = Fraction(str(slot.servings)) * shares[key]
-    return servings
+            recipe = recipes.get(assignments[index].recipe_id)
+            base = dish_base_servings(slot, recipe) if recipe is not None else Fraction(str(slot.servings))
+            portions[index] = (shares[key], base)
+    return portions
 
 
 def hands_on_and_waiting(recipe: PlanningRecipeCandidate, policy: PlanningCompositionPolicy) -> tuple[float, float]:

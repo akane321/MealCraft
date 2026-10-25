@@ -6,9 +6,10 @@ request. Layer 08 PR-3 wires `MissingEquipment`. Still unwired: `FlavorBoost` an
 Meanings and NULL rules are in docs/design/sprint2-schema-foundation.md.
 """
 
+from collections import Counter
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.schemas.catalog_tags import Equipment, FlavorTag
 from app.schemas.planning_v2 import MealType, NutrientMetric
@@ -80,12 +81,25 @@ class PlanningPreferences(BaseModel):
 
 
 class PlanningMember(BaseModel):
-    """A member as the planner sees one: portions a meal (stated, or the HPB default) and whether usually home."""
+    """A member as the planner sees one: portions a meal (stated, or the HPB default), whether usually home, and
+    the limits that are this member's own (ADR-0071 section 1: a dish may be served when at least one present
+    member can eat it, and every present member is covered).
+
+    `allergens` holds every allergen of this member, including the ones only this member avoids: a dish with one
+    is never this member's food. The household-wide avoidance stays in the request's own `allergens`, so an
+    allergen nobody marked "only I avoid it" keeps every dish of the week off the table (ADR-0071 section 2).
+    """
 
     model_config = ConfigDict(extra="forbid")
     name: str = Field(min_length=1, max_length=80)
     servings: float = Field(gt=0, le=3)
     default_present: bool = True
+    allergens: list[str] = Field(default_factory=list, max_length=20)
+    excluded_ingredients: list[str] = Field(default_factory=list, max_length=50)
+    dietary_preferences: list[str] = Field(default_factory=list, max_length=4)
+    # This member's HPB daily energy target in kcal, after a fat-loss goal; None where HPB researched none, and
+    # the meal's energy floor then stays the adult reference at this member's servings (ADR-0070 section 3).
+    daily_energy_kcal: float | None = Field(default=None, gt=0, le=6000)
 
 
 class HouseholdPlanning(BaseModel):
@@ -95,7 +109,8 @@ class HouseholdPlanning(BaseModel):
     """
 
     model_config = ConfigDict(extra="forbid")
-    # None: every meal is cooked for `household_size` (a conversation changed the size).
+    # None: every meal is cooked for `household_size` (a conversation changed the size), and the request's own
+    # allergens, exclusions and diets are the whole household's, as before the shared-dish model.
     members: list[PlanningMember] | None = Field(default=None, min_length=1, max_length=12)
     presence_rules: list[PresenceRule] = Field(default_factory=list, max_length=20)
     cooking_time_rules: list[CookingTimeRule] = Field(default_factory=list, max_length=20)
@@ -107,6 +122,37 @@ class HouseholdPlanning(BaseModel):
     protein_priority: bool = False
     # Equipment the kitchen lacks: a recipe whose equipment cannot be met is never planned (section 4.3).
     missing_equipment: MissingEquipment = Field(default_factory=list, max_length=5)
+
+    @model_validator(mode="after")
+    def members_have_distinct_names(self) -> "HouseholdPlanning":
+        """The same rule the profile holds (`HouseholdProfileWrite`), here for a request that arrives on its own.
+
+        Names tell members apart everywhere that matters: a presence rule names one, the coverage rules report
+        one, and the plan says a dish is not for one. Two members called the same are one member to all of them,
+        so a plan could cover one and be read as covering both.
+        """
+        seen = Counter(member.name.casefold() for member in self.members or [])
+        repeated = sorted({member.name for member in self.members or [] if seen[member.name.casefold()] > 1})
+        if repeated:
+            raise ValueError(f"Give each person their own name: {', '.join(repeated)} is used more than once.")
+        return self
+
+
+def limits_of_every_member(household: HouseholdPlanning | None) -> dict[str, list[str]]:
+    """Every member's own limits as one household-wide set, for the moment the members are dropped.
+
+    A request that keeps its members holds each limit against its own member (ADR-0071 section 1). When the
+    members go - a size the conversation states replaces them - nothing is left to hold those limits, so they
+    have to become the whole household's or they vanish. Allergens marked "only I avoid it" are folded in with
+    the rest: once the member they belong to is gone, there is nobody left to keep them for, and the safe
+    reading of an allergen with no owner is that the household avoids it.
+    """
+    members = household.members if household is not None else None
+    return {
+        "allergens": sorted({item for member in members or [] for item in member.allergens}),
+        "excluded_ingredients": sorted({item for member in members or [] for item in member.excluded_ingredients}),
+        "dietary_preferences": sorted({item for member in members or [] for item in member.dietary_preferences}),
+    }
 
 
 WEEKDAYS: tuple[Weekday, ...] = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")

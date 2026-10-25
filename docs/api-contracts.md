@@ -82,6 +82,9 @@ Available endpoints:
 - POST /api/plans/{plan_id}/shape/preview
 - POST /api/plans/{plan_id}/replan/{event_id}/confirm
 - GET /api/plans/{plan_id}/events
+- GET /api/feedback/recipes?kind={kind}
+- PUT /api/feedback/recipes/{recipe_id}
+- DELETE /api/feedback/recipes/{recipe_id}
 - POST /api/agent/sessions
 - GET /api/agent/sessions
 - GET /api/agent/sessions/{session_id}
@@ -292,9 +295,10 @@ artifact has `total: null`, which is distinct from a valid empty file with
 
 The current implementation maintains one profile per authenticated household.
 Each member supplies a name, portions a meal, allergens, prohibited ingredient
-IDs, and dietary requirements. The backend merges every member's safety
-constraints into the shared-plan hard constraints (allergens, exclusions and
-diets stay household-wide in this version).
+IDs, and dietary requirements. Planning reads each member's limits (decision
+ADR-0071): a dish may be served when at least one member home can eat it, and
+the plan covers every member home. Allergens are still avoided by the whole
+household unless a member marks one as only their own (`self_only_allergens`).
 
 **Member fields (layer 08).** Each member may also give:
 
@@ -318,7 +322,27 @@ Reads return each member with `resolved_servings_per_meal` and
 no researched value). The resolved portions of all members are at most 12.
 `planning_household_size` is still an integer: the usually-home members'
 portions, rounded up. Each meal of a plan is cooked for the exact sum of the
-members home for it. Member-only allergens are not accepted yet.
+members home for it.
+
+**Shared dish (layer 08 PR-4, ADR-0071 sections 1 and 2).** Each member may also
+give `self_only_allergens`: a list of allergens, a subset of that member's own
+`allergens` (default `[]`; anything else is rejected). Such an allergen is
+handled like a diet: only that member's dishes leave it out. An allergen named
+in the conversation is still the whole household's. A saved profile still writes
+the household-wide union columns `excluded_ingredients` and `dietary_preferences`
+for compatibility, but planning no longer reads them; the `allergens` column
+holds only what the whole household avoids (every member's allergens, less those
+their own member marked `self_only_allergens`). A request with no `household`
+block, or whose members carry no limits of their own, plans as before.
+
+A profile is refused (422) when two members share a name, since a presence
+rule, the coverage rules and the plan's `not_for` all identify a member by it,
+and when any member's allergen is outside the checked vocabulary
+(`data/ingredients/allergen-vocabulary.json`), which no recipe was checked for
+and so cannot be planned around (decision ADR-0024 section 3). Should such an
+allergen reach the planner by another route, that member is treated as able to
+eat nothing, and the plan is refused for leaving them uncovered rather than
+served a dish that may hold it.
 
 **Kitchen equipment (layer 08 PR-3).** The body and every version read add
 `missing_equipment`: up to five of `oven`, `air_fryer`, `steamer`, `microwave`,
@@ -533,6 +557,13 @@ for bounds, compatibility, examples and the Agent handoff.
   each course only while a week's worth of its other dishes remain; the
   conversation sets it to last week's dishes when the household asks for a new,
   more varied week.
+- `never_again_recipes` (recipe slugs, up to 500; decision ADR-0087): dishes no
+  week, swap or change may plan, checked by the planner and again by the
+  validator (`excluded_recipe`). Every product request (plans, profile plans,
+  changes and the conversation) replaces it with the household's live "Never
+  again" list, so a client's own value is ignored; evaluations and console
+  replays plan their stored requests as stored. An empty list is left out of the
+  dump, so stored constraints and digests stay byte-identical.
 
 - an optional `household` (layer 08, default null): `members` (`name`,
   `servings` above 0 and at most 3, `default_present`; null cooks every meal for
@@ -545,9 +576,16 @@ for bounds, compatibility, examples and the Agent handoff.
   planned and each meal's dish roles; the older `meal_composition` (dinner only)
   is still accepted, but not both.
   A role whose id is `vegetable` (a second one `vegetable-2`, and so on) takes
-  only a dish of its courses that is led by vegetables and holds no meat or
-  fish, as `backend/app/planning/vegetable_led.py` defines it (owner,
-  2026-10-02); when none fits, an optional vegetable stays empty and a required
+  only a vegetable-led dish with measured cured/dried or minced flesh up to 20%
+  in total, and other meat/fish up to 5%; both limits apply to mixed dishes,
+  as `backend/app/planning/vegetable_led.py` defines it. This is a role, not a
+  dish-name check: starchy tubers count as vegetables only if non-tuber
+  vegetables already reach 40% of counted solids; the total still needs 50%.
+  The role is not a
+  vegetarian-diet claim: member limits and member vegetable coverage still bind.
+  The complete seasoning list and ingredient-wording requirements are in the
+  [user guide](user-guide.md); the role does not grant a member diet permission.
+  When none fits, an optional vegetable stays empty and a required
   one leaves the meal without a plan. Other roles take any dish of their
   courses.
 
@@ -575,7 +613,10 @@ The response holds the week as days × meals: one persisted entry per dish, each
 with its `day_index`, `meal_type`, `role_id`, `portion_share` and `servings`
 (the servings the dish is cooked for when the request had a `household`; null is
 `household_size` at `portion_share`; cost follows the servings, nutrition per
-person stays at the portion share), plus the
+person stays at the portion share), `not_for` (a list of the names of the
+members at that meal who cannot eat the dish; empty when everyone can and for
+any plan made without a `household` block; field of `WeeklyPlanDayResponse`, on
+`GET` and `POST` meal-plan responses), plus the
 `plan_shape` it was planned with, per-person weekly nutrition totals, an
 aggregated shopping list, package checkout cost, ingredient-use cost, weekly
 budget status, and explicit warnings. Each grocery line may carry
@@ -636,13 +677,12 @@ types is reported as a soft check and leaves the week's cost known. Under a
 weekly budget, when every ranked week fails, the planner tries last the weeks of
 its cost-led cheapest-week search: the strongest budget-led search, run under
 the least whole-dollar budget it still completes a week within, bisected under
-the cheapest week found so far to 5%, every week it found kept. That search
+the cheapest week found so far to the whole dollar, every week it found kept. That search
 never reads the requested budget, so a week it finds at S$C is tried again
 under any budget of S$C or more; failed attempts of it are marked
 `cheapest_search` in the trace. It is the cheapest week a search found, not a
-proof that no cheaper week exists. A shape with a meal of four or more dishes
-does without it: there that search takes 5 to 16 s on the release catalog, and
-minutes with no dish twice, past a plan's 10 s (ADR-0046).
+proof that no cheaper week exists. Every plan shape gets it, however many
+dishes a meal has, with no time cap (ADR-0080).
 
 Non-plans return HTTP 422 with one actionable `detail` sentence. Internal status
 and proof scope are recorded in `OperationRun`, not added to the product view.
@@ -678,10 +718,55 @@ meal record or duplicate nutrition contribution is created.
 - planned, completed, and skipped entry counts
 - weekly completion rate
 - the user-entered nutrition targets stored with the plan
+- on each dish, `feedback`: the household's `like`, `dislike` or `never_again`
+  on that recipe, or null
+- on each dish, `reasons`: up to two facts true of the dish (layer 08 section
+  7.2), each `{code, label}`, worked out when the week is read from what it
+  saved, so a confirmed swap or meal change shows the new dish's own. Three
+  codes only, in this order: `preference` (a main within the benchmark the
+  recommendation score uses for each of the week's health preferences: sodium
+  700 mg, sugar 12 g, 600 kcal; "Fits low-sodium"), `cheap_main` (with at least
+  4 different priced mains in the week that are not skipped, a main in the
+  cheapest quarter per serving, ties counting against it; "One of the week's cheapest mains") and
+  `quick` (20 minutes or less; "Ready in 15 min"). A main is a `main`,
+  `main-2`, ... role outside breakfast. Empty when nothing holds, and always
+  empty on a skipped dish. They are
+  facts, not why the planner chose the dish, and never the engine's `reasons`
+- on each dish, `cost_per_serving_sgd`: its consumed cost over its saved
+  servings, or over household size × portion share when no servings were
+  saved; null when the week saved no grocery estimate for it. It is the cost
+  to buy after the pantry deduction, so a dish the pantry mostly covers
+  costs less here than the same dish bought from scratch
 
 Only completed dishes from the selected MealCraft plan contribute to completed
 nutrition. Plan-external foods are outside the current baseline and cannot be entered through
 this contract.
+
+## Dish Feedback
+
+Like, Dislike and Never again belong to the whole household (decision
+ADR-0087). Rows of `recipe_feedback` are only appended; a recipe's state is the
+kind of the household's latest row for it.
+
+- `PUT /api/feedback/recipes/{recipe_id}` with `{"kind": "like" | "dislike" |
+  "never_again"}` returns `{recipe_id, kind}`. It adds a `button` row unless the
+  state already is that kind, so repeating it is idempotent. Any member with the
+  check-in permission (owner, editor, member) may press any of the three and
+  replace another member's; a viewer gets 403, and the CSRF header is required.
+  An unknown recipe is 404. A household may mark up to 500 dishes Never again;
+  one more is 422.
+- `DELETE /api/feedback/recipes/{recipe_id}` (undo) deletes every row the
+  household has for that recipe and returns 204, also when there was none.
+- `GET /api/feedback/recipes?kind=never_again` (any member, viewers included)
+  returns `{"items": [{recipe_id, slug, title, kind, created_at}]}`, latest
+  first; without `kind` every recipe with feedback is listed.
+
+Never again is a hard filter while it is the state: the planner leaves the
+recipe out of every week, swap, meal change, variety change, cheapest-week and
+week-floor offer. Pressing Like or Dislike afterwards replaces it, and the dish
+can be planned again. A saved week is never rewritten; locked and cooked
+entries stay as they are. A meal being changed that still holds a Never-again
+dish is planned again as a whole.
 
 ## Event-driven Replanning
 
@@ -813,18 +898,15 @@ week fits it, so it plans). The amount is first checked as accepting it plans it
 under that budget; a budget changes the candidate packet, so when that check finds
 no week, the cheapest week of its own cost-led search that only the budget turned
 down sets the amount instead, which plans under any budget of its cost or more,
-with no further search. A second choice, for one meal a day, is half the people at their own
+with no further search. A second choice is half the people at their own
 cheapest week when that week costs less than the whole household's ("2 people at
-S$18 a week", or "Plan for 2 people" when that fits the budget as it is); for more
-meals a day that second search would take the reply past its
-time limit, so it is not offered. A meal of four or more dishes takes the
-planner's searches 5 to 26 s on the release catalog, past the reply's time
-limit, so for such a shape nothing is searched before the session is ready:
-only what the floor proves is refused (a weekly budget under it names the floor,
-with no amount offered, since no week backs one yet), and **Plan my week**
-answers the rest. Plan does not run the cheapest-week search for such a shape
-either, so a budget its search runs into is named ("the search found no week
-that meets the S$20 weekly budget") with no amount offered. No amount is
+S$18 a week", or "Plan for 2 people" when that fits the budget as it is). Every
+plan shape, however many meals a day and dishes a meal, gets the readiness
+check, the cheapest-week search and this half-household offer, with no time cap
+(ADR-0080). What the floor itself proves (a role with no dish, a member with no
+plate, too few dishes for the cap on uses, a per-meal budget under the cheapest
+meal) is refused from the floor, and a weekly budget under the floor whose
+cheapest-week search finds no week names the floor with no amount offered. No amount is
 ever a guess. After a refusal, a bare amount ("S$50", 那就50新币吧) answers the
 budget it asked about. A per-meal amount is offered only when a week plans with
 it. When prices cannot be read, the check is skipped and Plan answers for itself.

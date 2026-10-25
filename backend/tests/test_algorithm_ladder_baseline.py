@@ -1,66 +1,145 @@
+from types import SimpleNamespace
+
 import pytest
 
-from app.evaluation.algorithm_ladder_baseline import (
-    ARMS,
-    generate,
-    implemented_system_ids,
-    run_episode,
-)
-from tests.test_strong_rule_baseline import EPISODE, catalog, resources
-
-EXPECTED_ARMS = (
-    "algorithm-rung-0-naive-greedy",
-    "algorithm-rung-1-diversity-greedy",
-    "algorithm-rung-2-grasp",
-    "algorithm-rung-3-local-search",
-    "algorithm-rung-3-simulated-annealing",
-    "algorithm-current-shared-objective-beam",
-    "algorithm-rung-6-cp-sat",
-)
+from app.agent.ingredient_matcher import IngredientMatcher
+from app.evaluation import algorithm_ladder_baseline as runner
+from app.evaluation.baseline_recomputation import IngredientEvaluationFacts
+from app.evaluation.baseline_resources import BaselineResources
+from app.schemas.planning_v2 import PlanningMealRole, PlanningNutrients
+from tests.test_diversity_greedy import setup_problem
 
 
-def test_only_implemented_algorithm_rungs_have_stable_identifiers():
-    assert implemented_system_ids() == EXPECTED_ARMS
-    assert [ARMS[system_id].rung for system_id in EXPECTED_ARMS] == [
-        "0",
-        "1",
-        "2",
-        "3-local",
-        "3-annealing",
-        "current-beam",
-        "6",
-    ]
+def synthetic(monkeypatch):
+    problem, _ = setup_problem(20)
+    problem.problem_id = "synthetic"
+    for slot in problem.slots:
+        slot.composition = [PlanningMealRole(role_id="main", courses=["main"], required=True)]
+    monkeypatch.setattr(runner, "build_problem", lambda *_: problem)
+    episode = {
+        "episode_id": "synthetic",
+        "scenario": {
+            "user_request": "Plan dinners for two.",
+            "household_profile": {
+                "household_size": 2,
+                "allergens": [],
+                "excluded_ingredients": [],
+                "dietary_preferences": [],
+            },
+        },
+        "recipe_steps": {r.recipe_id: ["Cook the listed rice and serve."] for r in problem.recipes},
+    }
+    return problem, episode
 
 
-@pytest.mark.parametrize("system_id", EXPECTED_ARMS)
-def test_each_algorithm_arm_is_deterministic_and_has_zero_model_cost(monkeypatch, system_id):
-    monkeypatch.setattr("app.evaluation.multidish_runner.load_release_catalog", catalog)
-
-    first = generate(EPISODE, system_id=system_id)
-    second = generate(EPISODE, system_id=system_id)
-
-    assert first.response == second.response
-    assert first.response is not None
-    assert first.response.system_id == system_id
-    assert first.response.status == "plan"
-    assert first.usage.input_tokens == first.usage.output_tokens == first.usage.total_tokens == 0
-    assert first.usage.cost_usd == 0.0
-
-
-@pytest.mark.parametrize("system_id", EXPECTED_ARMS)
-def test_each_arm_uses_shared_mapping_coverage_and_recomputation(monkeypatch, system_id):
-    monkeypatch.setattr("app.evaluation.multidish_runner.load_release_catalog", catalog)
-
-    result = run_episode(EPISODE, system_id=system_id, resources=resources())
-
-    assert result.valid_output is True
-    assert result.coverage is not None and result.coverage.coverage == 1
-    assert result.verification is not None and result.verification.verifiable is True
-    assert result.recomputation is not None
-    assert result.recomputation.pricing_status == "complete"
-    assert result.recomputation.purchase_total_sgd is not None
+def resources(problem):
+    facts = IngredientEvaluationFacts(
+        (),
+        PlanningNutrients(
+            calories_kcal=100,
+            protein_g=2,
+            carbohydrate_g=20,
+            fat_g=1,
+            sodium_mg=1,
+            sugar_g=0,
+        ),
+    )
+    names = {"rice": "Rice"}
+    return BaselineResources(
+        names=names,
+        aliases={},
+        matcher=IngredientMatcher(names, mode="spelling"),
+        ingredient_facts={"rice": facts},
+        frozen_products=problem.products,
+        not_purchased=frozenset(),
+    )
 
 
-def test_unknown_algorithm_identifier_is_rejected():
-    with pytest.raises(ValueError, match="unknown algorithm baseline arm"):
-        generate(EPISODE, system_id="algorithm-rung-4-lns")
+@pytest.mark.parametrize("system_id", runner.implemented_system_ids())
+def test_each_offline_arm_uses_current_schema_and_zero_model_cost(monkeypatch, system_id):
+    problem, episode = synthetic(monkeypatch)
+    generated = runner.generate(episode, system_id=system_id)
+    assert generated.usage.total_tokens == 0 and generated.cost_usd == 0
+    assert generated.response.status == "plan"
+    for meal in generated.response.plan.meals:
+        for dish in meal.dishes:
+            assert dish.servings > 0 and dish.steps == ["Cook the listed rice and serve."]
+            assert dish.ingredients and dish.role_id
+    result = runner.run_episode(episode, system_id=system_id, resources=resources(problem))
+    assert result["scored"]["recomputation"]["nutrition_complete"]
+    assert result["development_only"]
+    assert result["deterministic"] == (system_id != "algorithm-rung-6-cp-sat")
+    assert result["scored"]["validation"].get("skipped")  # No gold problem: not an automatic pass.
+
+
+def test_missing_steps_and_non_gram_quantities_fail_instead_of_being_invented(monkeypatch):
+    problem, episode = synthetic(monkeypatch)
+    episode["recipe_steps"] = {}
+    with pytest.raises(ValueError, match="Missing original recipe steps"):
+        runner.generate(episode, system_id=runner.implemented_system_ids()[0])
+    episode["recipe_steps"] = {r.recipe_id: ["Cook rice."] for r in problem.recipes}
+    for recipe in problem.recipes:
+        recipe.ingredients[0].unit = "cups"
+    with pytest.raises((ValueError, RuntimeError)):
+        runner.generate(episode, system_id=runner.implemented_system_ids()[0])
+
+
+@pytest.mark.parametrize("status", ["unknown", "feasible", "score_mismatch", "infeasible"])
+def test_solver_status_is_not_converted_to_proven_infeasibility(monkeypatch, status):
+    problem, _ = synthetic(monkeypatch)
+    monkeypatch.setattr(runner.NativeSharedScoreCpSat, "solve_exact", lambda *_: {"status": status})
+    with pytest.raises(RuntimeError, match=status):
+        runner._cp_sat(problem, runner._objective(problem))
+
+
+def test_multiple_dishes_are_grouped_by_slot(monkeypatch):
+    problem, episode = synthetic(monkeypatch)
+    from app.schemas.planning_v2 import PlanningAssignment
+
+    solution = SimpleNamespace(
+        assignments=[
+            PlanningAssignment(slot_id=problem.slots[0].slot_id, recipe_id="a", role_id="main"),
+            PlanningAssignment(slot_id=problem.slots[0].slot_id, recipe_id="b", role_id="side"),
+        ]
+    )
+    response = runner._response_from_solution(problem, solution, system_id="dev", recipe_steps=episode["recipe_steps"])
+    assert len(response.plan.meals) == 1
+    assert len(response.plan.meals[0].dishes) == 2
+    assert [d.role_id for d in response.plan.meals[0].dishes] == ["main", "side"]
+
+
+def test_protected_paths_are_rejected_before_the_loader(monkeypatch, tmp_path):
+    monkeypatch.setattr(runner, "_load_episodes", lambda _: pytest.fail("Must not open protected input"))
+    with pytest.raises(ValueError, match="Protected"):
+        runner.load_development_episodes(tmp_path / "heldout" / "never-open.json")
+
+
+def test_development_cli_serializes_shared_model_artifacts(monkeypatch, tmp_path):
+    import json
+    import sys
+
+    output = tmp_path / "new-output.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "runner",
+            "--arm",
+            runner.implemented_system_ids()[0],
+            "--episodes",
+            str(tmp_path / "synthetic.json"),
+            "--output",
+            str(output),
+        ],
+    )
+    monkeypatch.setattr(runner, "load_resources", lambda: None)
+    monkeypatch.setattr(runner, "load_development_episodes", lambda _: [{"episode_id": "synthetic"}])
+    monkeypatch.setattr(
+        runner,
+        "run_episode",
+        lambda *a, **kw: {
+            "scored": PlanningNutrients(calories_kcal=1, protein_g=1, carbohydrate_g=1, fat_g=1, sodium_mg=1, sugar_g=1)
+        },
+    )
+    assert runner.main() == 0
+    assert json.loads(output.read_text())["development_only"] is True

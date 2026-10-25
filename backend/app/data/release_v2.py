@@ -56,7 +56,7 @@ from app.data.tag_files import apply_ingredient_tags, apply_recipe_tags, tag_fil
 from app.models.meal_plan import MealPlanEntry, MealPlanEvent
 from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 
-RELEASE_VERSION = "v2.1"
+RELEASE_VERSION = "v2.2"
 SLUG_PREFIX = "v2-"
 RELEASE_FILES = ("release_manifest.json", "ingredients.jsonl", "recipes.jsonl")
 

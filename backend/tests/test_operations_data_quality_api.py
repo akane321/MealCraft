@@ -150,7 +150,7 @@ def test_registered_current_release_is_readable() -> None:
     dropped = service.dropped(offset=0, limit=1, reason=None)
 
     assert summary.status == "available"
-    assert summary.release_version == "v2.1"
+    assert summary.release_version == "v2.2"
     assert summary.coverage is not None
     assert summary.coverage.released_recipes == 8968
     assert summary.coverage.released_ingredients == 701

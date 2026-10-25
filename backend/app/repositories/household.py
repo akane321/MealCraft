@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models.household import HouseholdProfile, HouseholdProfileVersion
 from app.models.meal_plan import MealPlan
-from app.schemas.household import HouseholdProfileWrite
+from app.schemas.household import HouseholdProfileWrite, household_allergens
 
 
 class HouseholdProfileVersionConflictError(RuntimeError):
@@ -113,7 +113,10 @@ class HouseholdProfileRepository:
 
     @staticmethod
     def _build_version(*, payload: HouseholdProfileWrite, version: int) -> HouseholdProfileVersion:
-        allergens = sorted({item for member in payload.members for item in member.allergens})
+        # What the whole household avoids: every member's allergens, less the ones only their own member avoids
+        # (ADR-0071 section 2). The exclusion and diet union columns stay written for compatibility
+        # (docs/design/sprint2-schema-foundation.md); planning reads them per member, not from these.
+        allergens = household_allergens(payload.members)
         excluded = sorted({item for member in payload.members for item in member.excluded_ingredients})
         dietary = sorted({item for member in payload.members for item in member.dietary_preferences})
         return HouseholdProfileVersion(

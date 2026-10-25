@@ -6,7 +6,6 @@ prices after validation, and never promotes a bounded miss into a global proof.
 
 import hashlib
 import json
-import time
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, replace
 from datetime import timedelta
@@ -19,6 +18,7 @@ from app.data.allergens import checked_allergens
 from app.data.household_reference import hpb
 from app.data.ingredient_hierarchy import expand_exclusions
 from app.data.units import UNIT_BASE, in_grams, weighed
+from app.planning import alternatives
 from app.planning.beam_planner import BeamLimits, BeamPlanner
 from app.planning.capability import PlanningCapabilityError, require_composition_enabled
 from app.planning.constraint_compiler import compile_search_domains
@@ -29,6 +29,7 @@ from app.planning.household_slots import (
     assumed_basics,
     basics_note,
     limit_targets,
+    slot_members,
     slot_people,
     slot_servings,
     slot_time_limit,
@@ -39,10 +40,26 @@ from app.planning.meal_beam import (
     MealBeamPlanner,
     MealBeamResult,
     assignments_of,
+    dish_eligible,
     empty_roles,
     staple_slots,
 )
-from app.planning.meal_composition import dish_servings, meal_role_of, structured_slot, unreviewed
+from app.planning.meal_composition import (
+    dish_portions,
+    dish_servings,
+    fills_staple,
+    meal_role_of,
+    role_base,
+    structured_slot,
+    unreviewed,
+)
+from app.planning.member_coverage import (
+    STAPLE_ROLE,
+    catalog_can_eat,
+    covering_groups,
+    member_can_eat,
+    member_limits,
+)
 from app.planning.nutrition_scope import compile_nutrition_targets, nutrition_guard_loss
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
@@ -92,39 +109,27 @@ COST_WEIGHTS = (1.0, 4.0, 16.0)
 # the fixture catalog's 2-person week offering S$43.25 at every refused budget where a S$31.70 week plans (main's
 # budget-scaled weights found it at budgets up to S$10); x64 finds it, and x256 or x1000 find none cheaper.
 ONE_DISH_COST_WEIGHTS = (*COST_WEIGHTS, 64.0)
-# The cheapest-week search (see `plan`): the first budget it tries, how close it bisects the least budget it
-# completes a week within (a share of that budget), and the beam it searches with. Lighter than the ranked
-# search's beam: on the release catalog it finds as cheap a week in a third of the time (PR #211); 32 meals a
-# slot find no week at all for three meals with no dish twice. Bisecting under the cheapest week found so far
-# rather than under the budget it was found within takes 3 to 7 probes instead of 6 to 9 there (48 shapes,
-# sizes and caps on uses), and finds the same week in 35 of them and one within 5% in 44 (PR #211 round 1).
+# The cheapest-week search (see `plan`): the first budget it tries. It searches with the ranked search's own meal
+# options and bisects to the whole dollar, the unit a budget is offered in, so the least budget it completes a week
+# within is exact to that dollar for the weeks it generates (owner, 2026-10-22; ADR-0080). Its earlier lighter beam
+# (64 meals a slot) and 5% stop saved time only. Bisecting under the cheapest week found so far rather than under
+# the budget it was found within takes fewer probes for the same week (PR #211 round 1).
 CHEAPEST_START_SGD = 64
-CHEAPEST_PRECISION = 0.05
-CHEAPEST_MEAL_OPTIONS = 64
-# Meals of at most this many dishes: the planner's searches answer within a chat reply. On the release catalog
-# a week of them is checked in at most 6.7 s and its cheapest week found in at most 4.5 s (1 or 4 people, up to
-# three meals a day, any cap on uses); for a meal of four to six dishes either takes 5 to 26 s, and the cheapest
-# week minutes with no dish twice (ADR-0046 section 3: a plan answers within 10 s). A plan of such meals that
-# no week fits under its budget ends without the cheapest-week search.
-QUICK_MEAL_DISHES = 3
-# The budget applies only to the post-search variety pass. A start already in flight finishes so every
-# returned week still satisfies the same rules and validator; later starts are optional alternate routes.
-VARIETY_PASS_SECONDS = 2.0
+# Search breadth of a meal (`MealBeamLimits.max_meal_combinations`): the most dish combinations its first widening
+# step builds, which sets how many dishes each of its roles keeps. A parameter of the search, set by plan quality: the
+# smallest value at which no developer-set plan gets worse than at 16,384 (owner, 2026-10-22; ADR-0083;
+# docs/evaluation/combination-cap-sweep). Removing it planned no better and took up to hours (task 15).
+MEAL_COMBINATIONS = 16384
+# A week of this many dish positions or more (and no locked dishes) is "heavy": its variety pass stops early at a
+# week no later start can make more varied (`is_best`). No pass is cut by the clock: planning time has no hard
+# limit and a slow plan never trades quality for speed (owner, 2026-10-21; ADR-0080).
 HEAVY_COMPOSITION_DISH_POSITIONS = 35
 
 
-def _vary_starts_within_time_budget(
-    meal_beam, problem, starts, seen, *, is_best, clock=time.perf_counter, seconds=None
-):
-    """Try ordered variety starts until time is spent or one varies into a week `is_best` says none can beat.
-
-    The time is read between starts, so a start in flight finishes: a pass can run over by one start.
-    """
-    deadline = clock() + (VARIETY_PASS_SECONDS if seconds is None else seconds)
+def _vary_starts(meal_beam, problem, starts, seen, *, is_best):
+    """Try every ordered variety start, or until one varies into a week `is_best` says none can beat."""
     added = []
     for weight, state in starts:
-        if clock() >= deadline:
-            break
         varied = meal_beam.vary_within_budget(problem, state)
         if varied.choices not in seen:
             seen.add(varied.choices)
@@ -144,6 +149,85 @@ def meals_of_the_day(constraints) -> list[tuple[str, list]] | None:
         return shape.ordered()
     composition = getattr(constraints, "meal_composition", None)
     return [("dinner", composition)] if composition is not None else None
+
+
+def uncoverable_members(problem) -> list[str]:
+    """Members no meal of the frozen candidates can cover, by name (ADR-0071 section 1)."""
+    return [name for names in uncoverable_by_rule(problem).values() for name in names]
+
+
+def uncoverable_by_rule(problem) -> dict[str, list[str]]:
+    """Members no meal of the frozen candidates can cover, under `"core"` and under `"any"`.
+
+    For each structured lunch or dinner and each member home for it: is there a filling core at all among the
+    dishes eligible for that slot which the member can eat - a dish that carries its staple, or a protein main
+    beside a staple. That is `"core"`. Every other meal is held to the weakest form instead, `"any"`: is there
+    any eligible dish at all that member can eat. Keeping them apart lets the refusal say what the meal could
+    not give, because a breakfast was never owed a main and a staple. It proves a member uncoverable; it does
+    not prove the rest coverable together.
+    """
+    by_rule: dict[str, list[str]] = {"core": [], "any": []}
+    for slot in problem.slots:
+        if not slot.members:
+            continue
+        if not structured_slot(slot) or slot.meal_type not in ("lunch", "dinner"):
+            eligible = [recipe for recipe in problem.recipes if dish_eligible(problem, slot, recipe)]
+            for member in slot.members:
+                if not any(member_can_eat(member, recipe) for recipe in eligible):
+                    if member.name not in by_rule["any"]:
+                        by_rule["any"].append(member.name)
+            continue
+        names = by_rule["core"]
+        roles = slot.composition or []
+        if not any(role.role_id == STAPLE_ROLE for role in roles):
+            continue
+        eligible = [recipe for recipe in problem.recipes if dish_eligible(problem, slot, recipe)]
+        mains = [
+            r
+            for r in eligible
+            if any(meal_role_of(r) in (role.meal_roles or ()) for role in roles if role_base(role.role_id) == "main")
+        ]
+        staples = [r for r in eligible if meal_role_of(r) == STAPLE_ROLE]
+        for member in slot.members:
+            mine = [r for r in mains if member_can_eat(member, r)]
+            covered = any(fills_staple(r) for r in mine) or (
+                any(member_can_eat(member, r) for r in staples) and any(meal_role_of(r) == "protein_main" for r in mine)
+            )
+            if not covered and member.name not in names:
+                names.append(member.name)
+    # A member both rules name is reported once, by the stronger one.
+    by_rule["any"] = [name for name in by_rule["any"] if name not in by_rule["core"]]
+    return by_rule
+
+
+def names_in_words(names: list[str]) -> str:
+    """ "Ann", "Ann and Ben", "Ann, Ben and Kai"."""
+    return names[0] if len(names) == 1 else f"{', '.join(names[:-1])} and {names[-1]}"
+
+
+def uncovered_message(by_rule: dict[str, list[str]]) -> str:
+    """The refusal for members no meal can cover (`uncoverable_by_rule`), in the household's words.
+
+    Every member needs a plate of their own (ADR-0071 section 1), which ADR-0068 keeps outside idealization: the plan
+    is refused rather than leaving someone uncovered. What the meal could not give differs by meal, so a member named
+    under `"any"` (a breakfast, a one-dish meal) is not promised a main dish and a staple, which those meals were never
+    owed.
+    """
+    parts = []
+    core, other = by_rule["core"], by_rule["any"]
+    if core:
+        they = "they" if len(core) > 1 else core[0]
+        parts.append(
+            f"I couldn't give {names_in_words(core)} a main dish and a staple at every lunch and dinner with what "
+            f"{they} can eat."
+        )
+    if other:
+        parts.append(f"At one of the other meals there was nothing {names_in_words(other)} can eat at all.")
+    parts.append(
+        "Try a higher budget, more cooking time or fewer dishes a meal; no allergen, diet or excluded ingredient "
+        "will be relaxed."
+    )
+    return " ".join(parts)
 
 
 def pool_courses(meals) -> list[str] | None:
@@ -231,14 +315,32 @@ def families_first(recommendations, seen=()) -> list:
     return first + again
 
 
+# Dishes of each kind the packet adds for every group of alike members (`_packet_covering`), beside the ranking's
+# own picks, whether or not those already hold one that suits the group. Four was too few: a member whose diet is
+# narrow had four cores for a whole week. Added only when the ranking kept none, a group with one suitable dish in
+# the ranking's picks had that one dish all week (task 14: `two-one-vegetarian` repeated two dishes eight times).
+#
+# Layer 08 PR-4 kept the top-up conditional because topping up always refused `mixed-diets` at 6 and at 40. That
+# refusal was never the packet's: `meal_beam.meal_options` widened each role to four times its usual dishes and
+# then gave up, so one lunch had no meal at all although eligible dishes were left. The meal beam now tries every
+# eligible dish, up to `LAST_STEP_COMBINATIONS` combinations, before it calls a meal empty (`MEAL_OPTION_WIDENING`),
+# and every setting plans; the measurements are in the task 14 record.
+PACKET_COVERAGE_CANDIDATES = 40
+
+
 def composed_packet(
-    composition, day_count: int, budget, recommendations, recipes, *, keep=()
+    composition, day_count: int, budget, recommendations, recipes, *, keep=(), members=(), cooked=None
 ) -> tuple[list, dict[str, int]]:
     """The recommendations a composed week is planned from, and how many each kind of dish keeps.
 
     The meal beam ranks each role's dishes itself; keep the best of every course it may fill, enough of each
     for every slot that uses it to get a different dish (a lunch-and-dinner week needs fourteen mains, not the
     24 a dinner week kept).
+
+    `members` are the household's own limits (ADR-0071 section 1): each kind also keeps a few dishes each member
+    can eat, and a few every member can, because a packet chosen by rank alone can hold no dish at all that
+    suits one member, and then no meal covers that member however the search combines what it was given.
+    `cooked(recipe)` gives a recipe's lines as the household cooks them (`_packet_covering`).
     """
     uses: dict[str, int] = {}
     for _, roles in composition:
@@ -281,7 +383,45 @@ def composed_packet(
             kept = {dish_family(r.recipe.title) for r in best}
             best += families_first(sorted(ranked[len(best) :], key=dish_cost), kept)[: limits[key] - len(best)]
         chosen |= {r.recipe.id for r in best}
+        chosen |= {r.recipe.id for r in _packet_covering(ranked, best, members, by_id, limits[key], cooked)}
     return [r for r in recommendations if r.recipe.id in chosen or (keep and r.recipe.slug in keep)], limits
+
+
+def _packet_covering(ranked: list, best: list, members, by_id: dict, limit: int, cooked=None) -> list:
+    """Recommendations added to one kind of dish so every member a meal has to cover has a real choice of it
+    (ADR-0071 section 1).
+
+    Every group gets up to `PACKET_COVERAGE_CANDIDATES` more of them that suit it, or as many as the ranking keeps
+    for the table where that is more, after the ranking's own picks. A group the ranking keeps one suitable dish for
+    still gets them: one dish is no choice, and a week planned from it repeats it at every meal of that member.
+
+    `cooked(recipe)` gives a recipe's lines as this household cooks them (`alternatives.lines`), so an "A or B" line
+    is judged by the option that reaches the table; None reads the recipe's own lines.
+
+    Empty without members and for a household whose members are all alike, so a packet that is not a
+    shared-dish household's is exactly the packet it was before.
+    """
+    groups = covering_groups(members)
+    if not groups:
+        return []
+    want = max(limit, PACKET_COVERAGE_CANDIDATES)
+    lines = {}
+
+    def eats(member, recipe) -> bool:
+        if cooked is not None and recipe.id not in lines:
+            lines[recipe.id] = cooked(recipe)
+        return catalog_can_eat(member, recipe, lines.get(recipe.id))
+
+    added: list = []
+    for group in groups:
+
+        def suits(recommendation, group=group) -> bool:
+            recipe = by_id.get(recommendation.recipe.id)
+            return recipe is not None and all(eats(member, recipe) for member in group)
+
+        more = [r for r in ranked if r not in best and r not in added and suits(r)]
+        added += more[:want]
+    return added
 
 
 def staple_packet(ranked, limit: int) -> list:
@@ -443,6 +583,8 @@ class ProductPlanningEngine:
                 recommendations,
                 recipes,
                 keep=kept_dishes,
+                members=member_limits(household),
+                cooked=lambda recipe: alternatives.lines(recipe, constraints),
             )
             trace["candidate_limit"] = limits
         if not recommendations:
@@ -582,6 +724,8 @@ class ProductPlanningEngine:
                     min_energy_kcal=round(floor_share * floor_kcal, 1) if floor_share else None,
                     trip=trip,
                     days_after_shopping=since_trip,
+                    # The shared-dish model (ADR-0071 section 1): who is at this meal, and each one's own limits.
+                    members=slot_members(household, planned_date, meal, floor_share),
                 )
                 slots.append(slot)
                 slot_day[slot.slot_id] = (i, meal)
@@ -619,6 +763,7 @@ class ProductPlanningEngine:
             allergen_vocabulary=sorted(checked_allergens()),
             # "No pork" also removes bacon: the checks downstream match ids exactly, so they get the expanded list.
             excluded_ingredients=expand_exclusions(constraints.excluded_ingredients),
+            never_again_recipes=sorted(constraints.never_again_recipes),
             dietary_requirements=constraints.dietary_preferences,
             health_preferences=constraints.health_preferences,
             nutrition_bands=bands,
@@ -760,7 +905,7 @@ class ProductPlanningEngine:
                     max_expansions=max(MealBeamLimits().max_expansions, 32 * 256 * len(slots) + 256),
                     repeat_cost=1.0,
                     flat_repeat=True,
-                    max_meal_combinations=16384,
+                    max_meal_combinations=MEAL_COMBINATIONS,
                     distinct_kinds=True,
                     rotate_candidates=True,
                 )
@@ -840,11 +985,7 @@ class ProductPlanningEngine:
                     """
                     cost = {r.recipe.slug: dish_cost(r) for r in recommendations}
                     weight = COST_WEIGHTS[-1]
-                    led = replace(
-                        meal_beam.limits,
-                        repeat_cost=meal_beam.limits.repeat_cost + weight,
-                        meal_options_per_slot=CHEAPEST_MEAL_OPTIONS,
-                    )
+                    led = replace(meal_beam.limits, repeat_cost=meal_beam.limits.repeat_cost + weight)
 
                     def within(limit: int) -> tuple:
                         share = len(slots) / limit
@@ -867,8 +1008,9 @@ class ProductPlanningEngine:
                         )
 
                     # Up from a first guess until a week completes, then halve the gap between the last budget
-                    # that completed none and the cheapest week found so far: whole dollars, to within
-                    # CHEAPEST_PRECISION. Every week found is kept, so the cheapest of any probe is tried.
+                    # that completed none and the cheapest week found so far, to the whole dollar: no whole-dollar
+                    # budget under the one offered completes a week. Every week found is kept, so the cheapest of
+                    # any probe is tried.
                     kept: dict = {}
                     low, limit = 0, CHEAPEST_START_SGD
                     states = within(limit)
@@ -880,7 +1022,7 @@ class ProductPlanningEngine:
                         kept.update((state.choices, state) for state in states)
                         high = min(limit, ceil(min(map(bought, states))))
                         states = ()
-                        while not states and high - low > max(1, high * CHEAPEST_PRECISION):
+                        while not states and high - low > 1:
                             limit = (low + high) // 2
                             states = within(limit)
                             low = low if states else limit
@@ -924,12 +1066,11 @@ class ProductPlanningEngine:
                         return heavy_composition and full_and_varied(state)
 
                     found.extend(
-                        _vary_starts_within_time_budget(
+                        _vary_starts(
                             meal_beam,
                             problem,
                             starts,
                             seen,
-                            seconds=(VARIETY_PASS_SECONDS if heavy_composition else float("inf")),
                             is_best=is_best,
                         )
                     )
@@ -938,12 +1079,9 @@ class ProductPlanningEngine:
                 assignments_list = most_varied_first(found)
                 if cheapest:
                     assignments_list, fallback, last_resort = [], None, cheapest_weeks
-                elif (
-                    cheapest_last
-                    and budget is not None
-                    and max(len(roles) for _, roles in composition) <= QUICK_MEAL_DISHES
-                ):
-                    # Every week above failed: the cheapest week the search can find, if it is within budget.
+                elif cheapest_last and budget is not None:
+                    # Every week above failed: the cheapest week the search can find, if it is within budget. Every
+                    # plan shape gets it, however many dishes a meal has (owner, 2026-10-22; ADR-0080).
                     last_resort = cheapest_weeks
             trace["search"] = {k: v for k, v in asdict(search).items() if k != "states"}
             trace["search"]["completed_candidates"] = len(search.states)
@@ -1021,6 +1159,9 @@ class ProductPlanningEngine:
             uncertain = uncertain and emptied_by is None and not searched.get("exhausted")
             evidence = "needs_data" if uncertain else "bounded_search_exhausted"
             status = "needs_data" if uncertain else "candidate_rejected"
+            if not uncertain and constraints.planner_strategy == "greedy-baseline" and trace["validation_attempts"]:
+                # The baseline produced a candidate; its rejection is not a search-resource limit or a proof.
+                evidence = "candidate_validation_failed"
             if (
                 not uncertain
                 and only_budget_failures
@@ -1051,8 +1192,12 @@ class ProductPlanningEngine:
                     f"I found costs S${min(totals):.2f}. Try a higher budget or fewer limits."
                 )
             elif trace.get("search", {}).get("exhausted"):
-                # A search that ran out of steps proves nothing about the limits themselves.
-                message = "Planning took longer than it should this time. Please try again."
+                # The search used every step it is allowed (`max_expansions`) and built no week. Said as that, not as
+                # a slow plan to try again: planning time has no limit (ADR-0080), and the same request searches the
+                # same way again.
+                message = (
+                    "I searched as far as the planner goes and found no week that fits. Try relaxing one of the limits."
+                )
             elif emptied_by == "repeats":
                 message = (
                     "I couldn't find enough different dishes for a week without repeats under these limits. "
@@ -1060,6 +1205,12 @@ class ProductPlanningEngine:
                 )
             else:
                 message = "I couldn't find a week that meets every limit. Try relaxing one of them."
+            by_rule = uncoverable_by_rule(problem)
+            uncovered = [name for names in by_rule.values() for name in names]
+            if uncovered:
+                message = uncovered_message(by_rule)
+                trace["uncovered_members"] = uncovered
+                trace["uncovered_members_by_rule"] = by_rule
             raise ProductPlanningError(status, message, trace, problem=problem.model_copy(deep=True))
         assignments, shopping, report = result
         # A perishable line says "use within N days" on the list (layer 08); only with the household's rules on.
@@ -1123,15 +1274,15 @@ class ProductPlanningEngine:
             by_slug[a.recipe_id].model_copy(deep=True, update={"recipe": recipe_snapshots[a.recipe_id]})
             for a in assignments
         ]
-        servings = dish_servings(problem, assignments)
-        slot_servings_of = {slot.slot_id: Fraction(str(slot.servings)) for slot in slots}
+        portions = dish_portions(problem, assignments)
         placements = [
             (
                 *slot_day[a.slot_id],
                 a.role_id or "main",
-                # The dish's share of its meal; with a household block, the servings it is cooked for besides.
-                servings[i] / (slot_servings_of[a.slot_id] if household is not None else constraints.household_size),
-                servings[i] if household is not None else None,
+                # The dish's share of its meal, what one person who eats it has; with a household block, the
+                # servings it is cooked for besides, which are the members who can eat it (ADR-0071 section 1).
+                portions[i][0],
+                portions[i][0] * portions[i][1] if household is not None else None,
             )
             for i, a in enumerate(assignments)
         ]
@@ -1154,7 +1305,7 @@ def recipe_tags(recipe, candidate) -> dict:
     )
     held = not unreviewed(recipe)
     return {
-        "meal_role": recipe.meal_role if held else None,
+        "meal_role": meal_role_of(recipe),
         "contains_staple": recipe.contains_staple if held else None,
         "protein_sources": recipe.protein_sources if held else None,
         "cooking_methods": recipe.cooking_methods,

@@ -9,6 +9,8 @@ import {
   NO_TIME_LIMIT_MINUTES,
   noGoals,
   statedTimeLimit,
+  householdAllergens,
+  ownSelfOnlyAllergens,
   summarizeHouseholdMembers,
   totalServings,
 } from "../app/lib/household-profile";
@@ -40,16 +42,39 @@ function member(change: Partial<HouseholdMemberInput>): HouseholdMemberInput {
 }
 
 describe("household profile constraints", () => {
-  it("merges member safety constraints and sums planned servings", () => {
+  // ADR-0071 sections 1 and 2: allergens stay the household's, because one kitchen can cross-contact, while a
+  // diet and the foods someone will not eat are that member's own. Merging them into one list made one
+  // vegetarian member's week vegetarian for everyone.
+  it("keeps allergens household-wide, each member's diet and exclusions their own, and sums planned servings", () => {
     expect(summarizeHouseholdMembers([
       member({ allergens: ["soy"], excluded_ingredients: ["mushroom"] }),
       member({ name: "Guest", servings_per_meal: 2, allergens: ["soy", "sesame"], excluded_ingredients: ["yellow_onion"], dietary_preferences: ["vegetarian"] }),
     ])).toEqual({
       planningHouseholdSize: 3,
       allergens: ["sesame", "soy"],
-      excludedIngredients: ["mushroom", "yellow_onion"],
-      dietaryPreferences: ["vegetarian"],
+      members: [
+        { name: "Akane", allergens: ["soy"], selfOnlyAllergens: [], excludedIngredients: ["mushroom"], dietaryPreferences: [] },
+        { name: "Guest", allergens: ["sesame", "soy"], selfOnlyAllergens: [], excludedIngredients: ["yellow_onion"], dietaryPreferences: ["vegetarian"] },
+      ],
     });
+  });
+
+  it("drops an \"only I avoid it\" mark when its allergen is unticked", () => {
+    expect(ownSelfOnlyAllergens(["peanut", "sesame"], ["peanut"])).toEqual(["peanut"]);
+    // The allergen is gone, so the mark that narrowed it to one member goes with it.
+    expect(ownSelfOnlyAllergens(["sesame"], ["peanut"])).toEqual([]);
+    expect(ownSelfOnlyAllergens([], [])).toEqual([]);
+  });
+
+  it("leaves an allergen only its own member avoids out of the household-wide list", () => {
+    const members = [
+      member({ allergens: ["peanut"], self_only_allergens: ["peanut"] }),
+      member({ name: "Guest", allergens: ["sesame"] }),
+    ];
+    expect(householdAllergens(members)).toEqual(["sesame"]);
+    // One member keeping it household-wide keeps it so for everyone.
+    expect(householdAllergens([...members, member({ name: "Wei", allergens: ["peanut"] })]))
+      .toEqual(["peanut", "sesame"]);
   });
 
   it("counts only members usually home at a meal, but every member towards the 12-portion limit", () => {

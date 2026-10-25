@@ -1,0 +1,367 @@
+{
+  "cap": 8192,
+  "code_commit": "2128394e1e1751a3fc799a1f7908af6633ebf5df",
+  "machine": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+  "rows": [
+    {
+      "scenario": "full-default/one-adult",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 42,
+      "worst_repeat": 1,
+      "price_sgd": 405.82,
+      "seconds": 4.69
+    },
+    {
+      "scenario": "full-default/four-with-vegetarian",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 48,
+      "worst_repeat": 2,
+      "price_sgd": 545.01,
+      "seconds": 14.54
+    },
+    {
+      "scenario": "full-default/six-tight-budget",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 56,
+      "worst_repeat": 1,
+      "price_sgd": 238.08,
+      "seconds": 95.36
+    },
+    {
+      "scenario": "full-default/two-no-oven-ten-days",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 59,
+      "worst_repeat": 2,
+      "price_sgd": 642.77,
+      "seconds": 4.98
+    },
+    {
+      "scenario": "full-default/seven-with-young-children",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 57,
+      "worst_repeat": 3,
+      "price_sgd": 739.2,
+      "seconds": 8.13
+    },
+    {
+      "scenario": "shared-dish/four-one-vegetarian",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 47,
+      "worst_repeat": 2,
+      "price_sgd": 535.59,
+      "seconds": 13.16
+    },
+    {
+      "scenario": "shared-dish/two-one-vegetarian",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 60,
+      "worst_repeat": 1,
+      "price_sgd": 644.5,
+      "seconds": 6.94
+    },
+    {
+      "scenario": "shared-dish/with-a-child",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 21,
+      "worst_repeat": 1,
+      "price_sgd": 276.49,
+      "seconds": 7.53
+    },
+    {
+      "scenario": "shared-dish/weekday-lunch-away",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 47,
+      "worst_repeat": 2,
+      "price_sgd": 527.27,
+      "seconds": 14.46
+    },
+    {
+      "scenario": "shared-dish/weekend-guest",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 48,
+      "worst_repeat": 2,
+      "price_sgd": 535.35,
+      "seconds": 15.12
+    },
+    {
+      "scenario": "shared-dish/peanut-whole-household",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 21,
+      "worst_repeat": 1,
+      "price_sgd": 296.25,
+      "seconds": 7.91
+    },
+    {
+      "scenario": "shared-dish/peanut-only-mei-avoids",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 21,
+      "worst_repeat": 1,
+      "price_sgd": 316.58,
+      "seconds": 7.94
+    },
+    {
+      "scenario": "shared-dish/mixed-diets",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 20,
+      "worst_repeat": 2,
+      "price_sgd": 246.51,
+      "seconds": 8.36
+    },
+    {
+      "scenario": "shared-dish/six-one-vegetarian",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 24,
+      "worst_repeat": 1,
+      "price_sgd": 324.72,
+      "seconds": 12.49
+    },
+    {
+      "scenario": "shared-dish/tight-budget",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 21,
+      "worst_repeat": 1,
+      "price_sgd": 84.33,
+      "seconds": 47.67
+    },
+    {
+      "scenario": "mdw/mdw-dev-001",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 21,
+      "worst_repeat": 1,
+      "price_sgd": 293.7,
+      "seconds": 1.01
+    },
+    {
+      "scenario": "mdw/mdw-dev-002",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 28,
+      "worst_repeat": 1,
+      "price_sgd": 470.13,
+      "seconds": 0.79
+    },
+    {
+      "scenario": "mdw/mdw-dev-003",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 20,
+      "worst_repeat": 2,
+      "price_sgd": 404.42,
+      "seconds": 0.7
+    },
+    {
+      "scenario": "mdw/mdw-dev-004",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 28,
+      "worst_repeat": 1,
+      "price_sgd": 486.4,
+      "seconds": 1.33
+    },
+    {
+      "scenario": "mdw/mdw-dev-005",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 28,
+      "worst_repeat": 1,
+      "price_sgd": 461.34,
+      "seconds": 1.27
+    },
+    {
+      "scenario": "mdw/mdw-dev-006",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 20,
+      "worst_repeat": 2,
+      "price_sgd": 380.9,
+      "seconds": 1.03
+    },
+    {
+      "scenario": "mdw/mdw-dev-007",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 21,
+      "worst_repeat": 5,
+      "price_sgd": 415.16,
+      "seconds": 2.28
+    },
+    {
+      "scenario": "mdw/mdw-dev-008",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 13,
+      "worst_repeat": 7,
+      "price_sgd": 100.97,
+      "seconds": 3.08
+    },
+    {
+      "scenario": "mdw/mdw-dev-009",
+      "planned": false,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": null,
+      "worst_repeat": null,
+      "price_sgd": null,
+      "seconds": 5.17
+    },
+    {
+      "scenario": "mdw/mdw-dev-010",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 28,
+      "worst_repeat": 1,
+      "price_sgd": 387.35,
+      "seconds": 0.98
+    },
+    {
+      "scenario": "mdw/mdw-dev-011",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 14,
+      "worst_repeat": 1,
+      "price_sgd": 301.27,
+      "seconds": 0.69
+    },
+    {
+      "scenario": "mdw/mdw-dev-012",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 28,
+      "worst_repeat": 1,
+      "price_sgd": 467.59,
+      "seconds": 1.39
+    },
+    {
+      "scenario": "mdw/mdw-dev-013",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 21,
+      "worst_repeat": 1,
+      "price_sgd": 301.22,
+      "seconds": 1.05
+    },
+    {
+      "scenario": "mdw/mdw-dev-014",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 14,
+      "worst_repeat": 1,
+      "price_sgd": 266.69,
+      "seconds": 0.84
+    },
+    {
+      "scenario": "mdw/mdw-dev-015",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 15,
+      "worst_repeat": 1,
+      "price_sgd": 393.27,
+      "seconds": 1.02
+    },
+    {
+      "scenario": "mdw/mdw-dev-016",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 20,
+      "worst_repeat": 1,
+      "price_sgd": 333.48,
+      "seconds": 1.19
+    },
+    {
+      "scenario": "mdw/mdw-dev-017",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 16,
+      "worst_repeat": 1,
+      "price_sgd": 319.95,
+      "seconds": 0.89
+    },
+    {
+      "scenario": "mdw/mdw-dev-018",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 16,
+      "worst_repeat": 1,
+      "price_sgd": 242.96,
+      "seconds": 0.86
+    },
+    {
+      "scenario": "mdw/mdw-dev-019",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 16,
+      "worst_repeat": 1,
+      "price_sgd": 303.93,
+      "seconds": 0.84
+    },
+    {
+      "scenario": "mdw/mdw-dev-020",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 4,
+      "worst_repeat": 14,
+      "price_sgd": 50.9,
+      "seconds": 2.02
+    },
+    {
+      "scenario": "mdw/mdw-dev-021",
+      "planned": true,
+      "safety_violations": 0,
+      "failed_checks": 0,
+      "distinct": 35,
+      "worst_repeat": 1,
+      "price_sgd": 544.25,
+      "seconds": 1.53
+    }
+  ]
+}

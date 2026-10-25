@@ -228,8 +228,8 @@ def main() -> int:
             path: hashlib.sha256((root / path).read_bytes()).hexdigest()
             for path in (
                 BASE_EPISODE.as_posix(),
-                "data-engineering/data/release/v2.1/recipes.jsonl",
-                "data-engineering/data/release/v2.1/ingredients.jsonl",
+                "data-engineering/data/release/v2.2/recipes.jsonl",
+                "data-engineering/data/release/v2.2/ingredients.jsonl",
                 "data/products/fairprice-v2-snapshot.json",
                 "data/fixtures/fairprice-products.json",
             )

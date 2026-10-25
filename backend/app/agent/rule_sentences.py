@@ -27,6 +27,10 @@ NO_DATES = "Rules name weekdays and meals, not dates."
 NO_SPEAKER = "Choose who is writing, so 'I' can be read."
 NO_TIME = "Couldn't find a cooking time, for example 'within 30 minutes'."
 TIME_RANGE = "A cooking time is between 5 and 240 minutes."
+AND_CONFLICT = (
+    "Two parts joined by 'and' say different things. Put a comma between them, "
+    "for example 'weekday dinners within 30 minutes, weekends 90 minutes'."
+)
 
 # English day names and their short forms; Chinese 周一..周日 (also 星期, 礼拜).
 EN_DAY = {
@@ -167,6 +171,20 @@ def _clauses(text: str) -> list[str]:
     return [part.strip() for part in parts if part and part.strip()]
 
 
+def _polarity(text: str) -> bool | None:
+    lowered = text.lower()
+    return False if re.search(ABSENT, lowered) else True if re.search(PRESENT, lowered) else None
+
+
+def _and_conflict(clause: str, kind: str) -> bool:
+    """Whether "and" joins parts that say different things ("weekday dinners within 30 minutes and weekends 90
+    minutes", "at school on weekdays and at home on weekends"). Read as one clause, they would become one rule wider
+    than the sentence, so the reader asks for a comma instead."""
+    value = _minutes if kind == "cooking_time" else _polarity
+    values = {v for part in re.split(r"\band\b|以及|和|而|及", clause) if (v := value(part)) is not None}
+    return len(values) > 1
+
+
 def _members_named(clause: str, members: list[RuleParseMember], speaker: str | None, reading: _Reading) -> list[str]:
     text = clause.lower()
     named = [
@@ -214,6 +232,9 @@ def read_with_rules(request: RuleParseRequest) -> _Reading:
     people: list[str] = []
     meals: list[str] = []
     for clause in _clauses(text):
+        if _and_conflict(clause, request.kind):
+            reading.issue(AND_CONFLICT)
+            continue
         days = _days(clause)
         clause_meals = _meals(clause) or meals
         if request.kind == "cooking_time":
@@ -236,8 +257,7 @@ def read_with_rules(request: RuleParseRequest) -> _Reading:
             )
             meals = clause_meals
             continue
-        lowered = clause.lower()
-        present = False if re.search(ABSENT, lowered) else True if re.search(PRESENT, lowered) else None
+        present = _polarity(clause)
         named = _members_named(clause, request.members, request.speaker, reading) or people
         if present is None:
             if named or days is not None or _meals(clause):

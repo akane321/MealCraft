@@ -1,11 +1,26 @@
 <script setup lang="ts">
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
-import { MEAL_LABEL, isStapleDish, mealsByDay, nextMeal, type PlannedMeal } from "~/lib/home-surface";
-import type { NutritionDashboardDay } from "~/types/meal-plan";
+import { FEEDBACK_BUTTONS, MEAL_LABEL, dishFacts, isStapleDish, mealsByDay, nextFeedback, nextMeal, type PlannedMeal } from "~/lib/home-surface";
+import type { FeedbackKind, NutritionDashboardDay } from "~/types/meal-plan";
 
-// A replaced week (readonly) is only read: its dishes offer no changes.
-const props = defineProps<{ days: NutritionDashboardDay[]; planId: number | null; revision?: number; startDate?: string | null; readonly?: boolean }>();
-const emit = defineEmits<{ openRecipe: [slug: string]; ask: [text: string] }>();
+// A replaced week (readonly) is only read: its dishes offer no changes. Feedback is on the dish, not the week
+// (ADR-0087): it shows for every dish not skipped, to anyone but a viewer (`canGiveFeedback`).
+const props = defineProps<{
+  days: NutritionDashboardDay[];
+  planId: number | null;
+  revision?: number;
+  startDate?: string | null;
+  readonly?: boolean;
+  canGiveFeedback?: boolean;
+  feedbackRecipeId?: number | null;
+  feedbackError?: string | null;
+}>();
+const emit = defineEmits<{ openRecipe: [slug: string]; ask: [text: string]; feedback: [recipeId: number, kind: FeedbackKind | null] }>();
+const changeable = (dish: NutritionDashboardDay) => !props.readonly && dish.status === "planned" && !dish.is_locked;
+const rated = (dish: NutritionDashboardDay) => Boolean(props.canGiveFeedback) && dish.status !== "skipped";
+// The dish whose facts panel is open: any of its reason tags opens or closes it.
+const factsOpen = ref<number | null>(null);
+const toggleFacts = (entryId: number) => { factsOpen.value = factsOpen.value === entryId ? null : entryId; };
 
 const week = computed(() => mealsByDay(props.days));
 const next = computed(() => nextMeal(props.days, todayIsoDate()));
@@ -51,6 +66,7 @@ const ACTIONS = [
         <span v-else class="overview-dishes" :title="dayText(day)">{{ dayText(day) }}</span>
       </li>
     </ol>
+    <p v-if="feedbackError" class="feedback-error" role="alert">{{ feedbackError }}</p>
     <ol class="days">
       <li v-for="day in week" :key="day.dayIndex" class="day">
         <p v-if="severalMeals" class="day-head mc-label">
@@ -73,6 +89,8 @@ const ACTIONS = [
               <span class="title-line">
                 <button type="button" class="name" :title="dish.recipe.title" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button>
                 <span v-if="isStapleDish(dish)" class="role-tag" title="Rice, noodles or bread with the meal">Staple</span>
+                <!-- Who at this meal cannot eat this dish: the meal's other dishes cover them (ADR-0071). -->
+                <span v-if="dish.not_for?.length" class="not-for" :title="`${dish.not_for.join(', ')} cannot eat this dish; other dishes at this meal are for them`">Not for {{ dish.not_for.join(", ") }}</span>
                 <!-- The meal's chip rides on its first dish's line, leaving the full width for each dish's changes. -->
                 <span v-if="index === 0" class="mc-chip" :class="CHIP_TONE[chip(meal).kind]">
                   <svg v-if="chip(meal).kind === 'completed'" class="ok-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
@@ -80,19 +98,56 @@ const ACTIONS = [
                   {{ chip(meal).label }}
                 </span>
               </span>
+              <!-- Facts true of the dish, never why it was chosen; a tag opens the dish's facts. -->
+              <span v-if="dish.reasons?.length" class="reasons">
+                <button
+                  v-for="reason in dish.reasons"
+                  :key="reason.code"
+                  type="button"
+                  class="reason"
+                  :aria-expanded="factsOpen === dish.entry_id"
+                  @click="toggleFacts(dish.entry_id)"
+                >
+                  {{ reason.label }}
+                </button>
+              </span>
               <span v-if="meal.dishes.length === 1 || dish.is_locked" class="rest">
                 <template v-if="meal.dishes.length === 1">{{ dish.recipe.total_time_minutes }} min · {{ Math.round(dish.nutrition_per_person.calories_kcal) }} kcal</template>
                 <span v-if="dish.is_locked" class="kept"><template v-if="meal.dishes.length === 1"> · </template>Kept as is</span>
               </span>
-              <span v-if="!readonly && dish.status === 'planned' && !dish.is_locked" class="acts" role="group" :aria-label="`Change ${dish.recipe.title}`">
-                <button
-                  v-for="action in ACTIONS"
-                  :key="action.label"
-                  type="button"
-                  @click="emit('ask', action.text(formatPlanDate(day.date, { weekday: 'long' }), dish.recipe.title))"
-                >
-                  {{ action.label }}
-                </button>
+              <span v-if="factsOpen === dish.entry_id" :id="`facts-${dish.entry_id}`" class="facts" role="region" :aria-label="`Facts about ${dish.recipe.title}`">
+                <span class="facts-head">Dish facts</span>
+                <span v-for="fact in dishFacts(dish)" :key="fact.label" class="fact"><b>{{ fact.label }}</b> {{ fact.value }}</span>
+              </span>
+              <span v-if="changeable(dish) || rated(dish)" class="act-row">
+                <span v-if="changeable(dish)" class="acts" role="group" :aria-label="`Change ${dish.recipe.title}`">
+                  <button
+                    v-for="action in ACTIONS"
+                    :key="action.label"
+                    type="button"
+                    @click="emit('ask', action.text(formatPlanDate(day.date, { weekday: 'long' }), dish.recipe.title))"
+                  >
+                    {{ action.label }}
+                  </button>
+                </span>
+                <!-- Pressing the pressed button again undoes it; the whole household's, whoever pressed it. -->
+                <span v-if="rated(dish)" class="feedback" role="group" :aria-label="`Feedback on ${dish.recipe.title}`">
+                  <button
+                    v-for="button in FEEDBACK_BUTTONS"
+                    :key="button.kind"
+                    type="button"
+                    :aria-pressed="dish.feedback === button.kind"
+                    :aria-busy="feedbackRecipeId === dish.recipe.id"
+                    :disabled="feedbackRecipeId === dish.recipe.id"
+                    @click="emit('feedback', dish.recipe.id, nextFeedback(dish.feedback, button.kind))"
+                  >
+                    {{ button.label }}
+                  </button>
+                </span>
+                <span v-if="rated(dish) && dish.feedback === 'never_again'" class="never">
+                  Won't be planned again ·
+                  <button type="button" :disabled="feedbackRecipeId === dish.recipe.id" @click="emit('feedback', dish.recipe.id, null)">Undo</button>
+                </span>
               </span>
             </span>
           </span>
@@ -124,6 +179,7 @@ const ACTIONS = [
 .dish { min-width: 0; display: flex; flex-direction: column; }
 .title-line { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .title-line .name { flex: 0 1 auto; min-width: 0; }
+.not-for { flex: none; color: var(--c-muted); font-size: 11px; line-height: 18px; font-weight: 700; }
 .role-tag { flex: none; padding: 0 7px; border: 1px solid var(--c-line); border-radius: 999px; color: var(--c-muted); font-size: 11px; line-height: 18px; font-weight: 700; }
 .title-line .mc-chip { flex: none; margin-left: auto; }
 .name { max-width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 800; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -132,9 +188,23 @@ const ACTIONS = [
 .rest { font-size: 12px; line-height: 16px; color: var(--c-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kept { color: var(--c-green-text); font-weight: 800; }
 .ok-tick { color: var(--c-green); }
-/* A dish's changes, quiet until the row is pointed at or focused; they wrap rather than run under the chip. */
-.acts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 4px; opacity: 0.6; transition: opacity 150ms var(--ease); }
-.row:hover .acts, .row:focus-within .acts { opacity: 1; }
-.acts button { flex: none; height: 24px; padding: 0 8px; white-space: nowrap; border: 1px solid var(--c-line); border-radius: 999px; background: #fff; color: var(--c-ink); font-size: 12px; font-weight: 700; }
-.acts button:hover { border-color: var(--c-coral); }
+/* A dish's changes and its feedback, quiet until the row is pointed at or focused; each group wraps as a whole
+   rather than run under the chip. */
+.act-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 4px; }
+.acts, .feedback { display: flex; align-items: center; gap: 4px; opacity: 0.6; transition: opacity 150ms var(--ease); }
+.acts { flex-wrap: wrap; }
+.row:hover .acts, .row:focus-within .acts, .row:hover .feedback, .row:focus-within .feedback { opacity: 1; }
+.acts button, .feedback button { flex: none; height: 24px; padding: 0 8px; white-space: nowrap; border: 1px solid var(--c-line); border-radius: 999px; background: #fff; color: var(--c-ink); font-size: 12px; font-weight: 700; }
+.acts button:hover, .feedback button:hover { border-color: var(--c-coral); }
+.feedback button[aria-pressed="true"] { border-color: var(--c-ink); background: var(--c-ink); color: #fff; }
+.feedback button:disabled { opacity: 0.6; }
+.never { font-size: 12px; line-height: 24px; color: var(--c-muted); font-weight: 700; white-space: nowrap; }
+.never button { padding: 0; border: 0; background: none; color: var(--c-coral); font: inherit; text-decoration: underline; }
+.reasons { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.reason { height: 20px; padding: 0 8px; border: 1px solid var(--c-line); border-radius: 999px; background: none; color: var(--c-muted); font-size: 11px; font-weight: 700; white-space: nowrap; }
+.reason:hover, .reason[aria-expanded="true"] { border-color: var(--c-ink); color: var(--c-ink); }
+.facts { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 4px; padding: 6px 10px; border-radius: 8px; background: var(--c-canvas); font-size: 12px; line-height: 18px; }
+.facts-head { flex-basis: 100%; color: var(--c-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+.fact b { font-weight: 800; }
+.feedback-error { margin: 8px 16px 0; color: var(--c-coral); font-size: 12px; font-weight: 700; }
 </style>

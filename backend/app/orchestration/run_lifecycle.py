@@ -220,11 +220,14 @@ class AgentRunLifecycle:
         amount: int = 1,
         api_cost_usd: Decimal = Decimal("0"),
         now: datetime | None = None,
+        check_deadline: bool = True,
     ) -> AgentRun:
+        """Count `amount` of `kind` against the run's budget. `check_deadline=False` skips the wall-time check: for
+        a record of work that already finished, which the deadline can no longer stop (`record_tool`)."""
         if amount < 0 or api_cost_usd < 0:
             raise AgentRunLifecycleError("Budget consumption cannot be negative.")
         moment = now or datetime.now(UTC)
-        if self._is_expired(run, moment):
+        if check_deadline and self._is_expired(run, moment):
             self._terminate_for_budget(run, code="WALL_TIME_BUDGET_EXCEEDED", moment=moment)
             raise AgentRunBudgetExceededError("Agent run wall-time budget exceeded.")
         counters = {
@@ -261,11 +264,15 @@ class AgentRunLifecycle:
         error_code: str | None = None,
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
+        check_deadline: bool = True,
     ) -> AgentRun:
+        """Record a tool call. `check_deadline=False` when the call has already run to the end: a planner that
+        finished after the deadline has done its work, and failing the run then turns a slow plan into an error
+        (owner, 2026-10-21: planning time has no hard limit)."""
         moment = started_at or datetime.now(UTC)
-        run = self.consume_budget(run, BudgetKind.TOOL_CALL, now=moment)
+        run = self.consume_budget(run, BudgetKind.TOOL_CALL, now=moment, check_deadline=check_deadline)
         if tool_name in {"generate_plan_preview", "generate_replan_preview"}:
-            run = self.consume_budget(run, BudgetKind.PLANNING_ATTEMPT, now=moment)
+            run = self.consume_budget(run, BudgetKind.PLANNING_ATTEMPT, now=moment, check_deadline=check_deadline)
         self.repository.add_tool_execution(
             run,
             tool_name=tool_name,

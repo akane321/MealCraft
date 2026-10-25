@@ -1,71 +1,94 @@
 from app.agent.ingredient_matcher import IngredientMatcher
-from app.evaluation.baseline_mapping import (
-    map_ingredient,
-    map_response_ingredients,
-)
+from app.evaluation.baseline_mapping import map_ingredient, map_response_ingredients
 from app.evaluation.baseline_output import BaselineResponse
 
 NAMES = {
+    "chicken": "Chicken",
     "chicken_breast": "Chicken breast",
     "brown_rice": "Brown rice",
     "coriander": "Coriander",
+    "tomato": "Tomato",
+    "spinach": "Spinach",
 }
-
-ALIASES = {
-    "coriander": ["cilantro"],
-}
+ALIASES = {"coriander": ["cilantro"]}
+PARENTS = {"baby_spinach": "spinach", "kangkung": "spinach"}
 
 
-def matcher() -> IngredientMatcher:
-    return IngredientMatcher(
-        NAMES,
-        aliases=ALIASES,
-        mode="spelling",
-    )
+def map_one(name: str, grams: float = 100, **kwargs):
+    matcher = IngredientMatcher(NAMES, aliases=ALIASES, mode="spelling")
+    return map_ingredient(name, grams, names=NAMES, aliases=ALIASES, matcher=matcher, parents=PARENTS, **kwargs)
 
 
-def test_exact_display_name_is_matched():
-    result = map_ingredient(
-        "Chicken breast",
-        300,
-        names=NAMES,
-        aliases=ALIASES,
-        matcher=matcher(),
-    )
-
-    assert result.status == "matched"
-    assert result.ingredient_id == "chicken_breast"
+def test_display_name_and_id_map_without_review():
+    named = map_one("Chicken breast")
+    assert (named.status, named.ingredient_id, named.needs_review) == ("matched", "chicken_breast", False)
+    assert named.method in {"id", "name"}
+    assert map_one("brown_rice").method == "id"
 
 
-def test_alias_is_matched():
-    result = map_ingredient(
-        "cilantro",
-        20,
-        names=NAMES,
-        aliases=ALIASES,
-        matcher=matcher(),
-    )
-
-    assert result.status == "matched"
+def test_alias_alone_maps_but_waits_for_review():
+    result = map_one("cilantro")
     assert result.ingredient_id == "coriander"
+    assert result.method == "alias"
+    assert result.needs_review and result.status == "needs_review"
 
 
-def test_non_exact_match_requires_review():
-    result = map_ingredient(
-        "chicken fillet",
-        300,
+def test_similarity_above_floor_maps_flagged_and_below_floor_is_unmatched():
+    plural = map_one("tomatoes")
+    assert (plural.ingredient_id, plural.method, plural.needs_review) == ("tomato", "similarity", True)
+    stranger = map_one("brown sugar")
+    assert stranger.status == "unmatched"
+    assert stranger.ingredient_id is None
+    assert stranger.suggestions  # kept for the review list
+
+
+def test_hierarchy_parent_step():
+    child = map_one("baby spinach")
+    assert (child.ingredient_id, child.method, child.needs_review) == ("spinach", "hierarchy", True)
+    longer = map_one("boneless chicken breast fillet")
+    assert (longer.ingredient_id, longer.method, longer.needs_review) == ("chicken_breast", "hierarchy", True)
+    # A longer line holding a hierarchy child, not a catalog name, maps to that child's parent.
+    held = map_one("fresh kangkung")
+    assert (held.ingredient_id, held.method, held.needs_review) == ("spinach", "hierarchy", True)
+
+
+def test_a_name_two_catalog_ingredients_share_is_unmatched():
+    names = {"shallot_red": "Shallot", "shallot_brown": "Shallot"}
+    matcher = IngredientMatcher(names, mode="spelling")
+    result = map_ingredient("shallot", 50, names=names, aliases={}, matcher=matcher)
+    assert (result.status, result.ingredient_id) == ("unmatched", None)
+    assert result.suggestions == ("shallot_brown", "shallot_red")
+
+
+def test_mixed_script_line_goes_to_review_even_when_it_maps():
+    result = map_one("chicken 鸡肉")
+    assert result.ingredient_id == "chicken"
+    assert result.needs_review
+    assert any("Chinese" in reason for reason in result.review_reasons)
+
+
+def test_lines_are_matched_in_one_batched_call():
+    calls = []
+
+    class Counting(IngredientMatcher):
+        def suggest_all(self, terms, *, limit=4):
+            calls.append(list(terms))
+            return super().suggest_all(terms, limit=limit)
+
+    coverage = map_response_ingredients(
+        plan_response([[("chicken breast", 300), ("brown rice", 200)], [("unknown leaf", 50), ("tomato", 50)]]),
         names=NAMES,
         aliases=ALIASES,
-        matcher=matcher(),
+        matcher=Counting(NAMES, aliases=ALIASES, mode="spelling"),
     )
+    assert len(calls) == 1 and len(calls[0]) == 4
+    assert [dish.coverage for dish in coverage.dishes] == [1.0, 0.5]
+    assert coverage.total_grams == 600
+    assert coverage.mapped_grams == 550
 
-    assert result.status == "needs_review"
-    assert result.ingredient_id is None
-    assert result.suggestions
 
-
-def test_coverage_is_weighted_by_grams():
-    response = BaselineResponse.model_validate(
+def plan_response(dishes: list[list[tuple[str, float]]]) -> BaselineResponse:
+    return BaselineResponse.model_validate(
         {
             "episode_id": "ep-1",
             "system_id": "pure-llm",
@@ -76,37 +99,16 @@ def test_coverage_is_weighted_by_grams():
                         "slot_id": "mon-dinner",
                         "dishes": [
                             {
-                                "name": "Chicken Rice",
+                                "name": f"Dish {index}",
+                                "servings": 2,
                                 "cooking_time_minutes": 30,
-                                "ingredients": [
-                                    {
-                                        "name": "chicken breast",
-                                        "quantity_g": 300,
-                                    },
-                                    {
-                                        "name": "brown rice",
-                                        "quantity_g": 200,
-                                    },
-                                    {
-                                        "name": "unknown leaf",
-                                        "quantity_g": 50,
-                                    },
-                                ],
+                                "steps": ["Cook."],
+                                "ingredients": [{"name": name, "quantity_g": grams} for name, grams in lines],
                             }
+                            for index, lines in enumerate(dishes)
                         ],
                     }
                 ]
             },
         }
     )
-
-    result = map_response_ingredients(
-        response,
-        names=NAMES,
-        aliases=ALIASES,
-        matcher=matcher(),
-    )
-
-    assert result.total_grams == 550
-    assert result.matched_grams == 500
-    assert result.coverage == 500 / 550

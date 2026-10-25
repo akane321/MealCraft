@@ -3,6 +3,7 @@
 import pytest
 
 from app.agent.rule_sentences import (
+    AND_CONFLICT,
     NAME_THE_PERSON,
     NO_DATES,
     NO_POLARITY,
@@ -118,6 +119,44 @@ def test_what_it_cannot_read_it_says_and_never_guesses(text, kind, issue):
     result = read(text, kind=kind)
     assert issue in " ".join(result.issues)
     assert result.rules == []
+
+
+@pytest.mark.parametrize(
+    ("text", "kind"),
+    [
+        ("weekday dinners within 30 minutes and weekends 90 minutes", "cooking_time"),
+        ("weekday dinners within 30 minutes and weekends no limit", "cooking_time"),
+        ("工作日晚饭30分钟内和周末90分钟", "cooking_time"),
+        ("工作日晚饭30分钟以内而周末无所谓", "cooking_time"),
+        ("Mei eats at school on weekdays and at home on weekends", "presence"),
+        ("孩子工作日在学校吃和周末在家吃", "presence"),
+        ("Ben is away and Grandma comes over on Sundays", "presence"),
+    ],
+)
+def test_and_between_different_answers_asks_for_a_comma_instead_of_a_wider_rule(text, kind):
+    result = read(text, kind=kind)
+    assert result.issues == [AND_CONFLICT]
+    assert result.rules == []
+
+
+@pytest.mark.parametrize(
+    ("text", "kind", "count"),
+    [
+        # The comma form of the same sentences reads as two rules.
+        ("weekday dinners within 30 minutes, weekends 90 minutes", "cooking_time", 2),
+        ("Mei eats at school on weekdays, but at home on weekends", "presence", 2),
+        # "And" joining days, meals or people with one answer is one rule, as before.
+        ("weekday lunch and dinner within 30 minutes", "cooking_time", 1),
+        ("工作日和周末晚饭都30分钟", "cooking_time", 1),
+        ("weekend dinners take an hour and a half", "cooking_time", 1),
+        ("Ben and Mei are away on Fridays", "presence", 2),
+        ("孩子工作日午饭和晚饭在学校吃", "presence", 1),
+    ],
+)
+def test_and_with_one_answer_reads_as_before(text, kind, count):
+    result = read(text, kind=kind)
+    assert result.issues == []
+    assert len(result.rules) == count
 
 
 def test_i_needs_a_speaker():

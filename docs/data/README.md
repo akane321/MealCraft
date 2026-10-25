@@ -22,17 +22,17 @@ remains the canonical cross-module contract.
 | State | Meaning |
 | --- | --- |
 | Verified baseline | Merged runtime behaviour supported by current code and tests |
-| Released data | A versioned release cut by the `data-engineering/` pipeline; release v2.1 is imported beside the curated catalog |
+| Released data | A versioned release cut by the `data-engineering/` pipeline; release v2.2 is imported beside the curated catalog |
 | Accepted target | The intended module responsibility and release contract |
 
 The curated runtime catalog is the compact one in `data/recipes/recipes.json` and
 `data/ingredients/ingredients.json`, loaded by `backend/app/data/catalog.py`.
 Held-out episodes, planning fixtures and tests name its slugs, so it stays as it is.
 
-Release v2.1 is loaded beside it by `python -m app.data.import_release_v2`
+Release v2.2 is loaded beside it by `python -m app.data.import_release_v2`
 (`backend/app/data/release_v2.py`), which compose runs after the curated import:
 
-- release recipes carry `release_version` (`v2.1`), `external_id` (the release
+- release recipes carry `release_version` (`v2.2`), `external_id` (the release
   `recipe_id`) and a slug `v2-<title>-<id suffix>`, plus the release-only fields
   course, meal types, difficulty, passive time, time and servings basis,
   recipe allergens, source/licence and video URL. Curated recipes leave all of
@@ -48,11 +48,20 @@ Release v2.1 is loaded beside it by `python -m app.data.import_release_v2`
 - Recipes with fewer than two ingredient lines are skipped and listed.
 - Rows of an earlier release are upgraded in place by `external_id`, so a
   database that held v2 keeps its recipe ids (and the meal plans pointing at
-  them) when v2.1 arrives.
+  them) when v2.1 or v2.2 arrives.
 - `catalog_imports` records the release digest, which includes the importer
   version. A rerun with the same files does nothing; changed files or importer
   logic re-import, and release recipes no longer in the release are deleted
   unless a meal plan references them.
+
+Release v2.2 is v2.1 with whole-item and container unit weights corrected (owner, 2026-10-23;
+`data-engineering/scripts/correct_release_v22.py`, which v2.1's git-ignored staging inputs make necessary
+instead of a rebuild). The recipe set, ids, ingredients and their nutrition are v2.1's; only the grams of
+the corrected lines change (and fresh "red pepper" lines move from cayenne to bell pepper), with each
+changed recipe's per-serving nutrition recomputed from the same per-100 g values. Every changed line, its
+v2.1 and v2.2 grams and its source are in `data-engineering/data/release/v2.2/corrections.jsonl`; counts,
+guard warnings and what this round leaves open are in the
+[v2.2 quality report](../../data-engineering/data/release/v2.2/quality_report.md) (last section).
 
 Release v2.1 differs from v2 only in what the build checks (`data-engineering`,
 [quality report](../../data-engineering/data/release/v2.1/quality_report.md)):

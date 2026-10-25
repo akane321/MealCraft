@@ -1,7 +1,7 @@
 # Embedding held-out results (run once, 2026-09-26)
 
 The two held-out sets for ingredient proposals (ADR-0041) and swap requests (ADR-0042) were written by
-Zhang Naiqian with ChatGPT assistance from the sealed packet (`scripts/build_embedding_heldout_packet.py`),
+an independent author with ChatGPT assistance from the sealed packet (`scripts/build_embedding_heldout_packet.py`),
 checked, and frozen before this run (`data/evaluation/agent/*-heldout.frozen.json` hold the digests and the
 scoring rules). They were scored as submitted: the tuning session changed no label. Both sets are now spent.
 

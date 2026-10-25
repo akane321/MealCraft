@@ -20,6 +20,19 @@ RECIPE_TAGS = "data/recipes/recipe-tags-v1.json"
 INGREDIENT_TAGS = "data/ingredients/ingredient-tags-v1.json"
 TAG_FILES = (RECIPE_TAGS, INGREDIENT_TAGS)
 RECIPE_TAG_FIELDS = ("meal_role", "contains_staple", "protein_sources", "cooking_methods", "equipment", "flavor_tags")
+# The review batch for the frozen model batch (owner 2026-10-24, `app.data.recipe_tags`): its values, rule-decided
+# or not, wait for the owner's acceptance, so the planner's gate (`meal_composition.unreviewed`) reads it too.
+REVIEW_TABLE_BATCH = "recipe-tags-v1/review-table-20261024"
+
+
+def waits_for_review(estimate: dict) -> bool:
+    """A model-decided value nobody has reviewed yet, or any unreviewed value of `REVIEW_TABLE_BATCH`, a
+    rule-decided one too: the planner reads neither before the owner accepts its batch (`--accept-batch`)."""
+    if estimate.get("reviewed") is True:
+        return False
+    return estimate.get("method") == "llm" or estimate.get("batch") == REVIEW_TABLE_BATCH
+
+
 INGREDIENT_TAG_FIELDS = ("food_group", "perishable", "basic_seasoning")
 
 
