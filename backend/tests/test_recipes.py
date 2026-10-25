@@ -1936,10 +1936,10 @@ def test_an_agent_run_stores_the_parser_configuration(recipe_client: TestClient)
     runs = recipe_client.get(f"/api/agent/sessions/{session['id']}/runs").json()
     items = runs["items"] if isinstance(runs, dict) else runs
     assert items
-    assert {key: items[0]["run_config"][key] for key in ("parser", "parser_model")} == {
-        "parser": "fixture",
-        "parser_model": None,
-    }
+    assert items[0]["run_config"]["parser"] == "fixture"
+    assert items[0]["run_config"]["parser_model"] is None
+    assert items[0]["run_config"]["api_cost_estimate_status"] == "estimated"
+    assert items[0]["run_config"]["api_cost_estimate_usd"] == "0"
 
 
 def test_the_live_parser_can_be_built_against_the_catalog(recipe_client: TestClient, monkeypatch) -> None:
@@ -1993,6 +1993,36 @@ def _openai_answered_in_process(monkeypatch: pytest.MonkeyPatch, extraction: dic
             return httpx2.Response(
                 200, json={"object": "list", "data": vectors, "model": body["model"], "usage": usage}
             )
+        if body.get("tools"):
+            # Scope classification runs before constraint parsing and uses the bounded tool scheduler.
+            # Return a valid route tool call so this fixture exercises the normal planning path.
+            route = next(
+                tool["function"]["name"]
+                for tool in body["tools"]
+                if tool["function"]["name"] == "route_planning_request"
+            )
+            message = {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": "call_scope",
+                        "type": "function",
+                        "function": {"name": route, "arguments": json.dumps({"supported_segments": []})},
+                    }
+                ],
+            }
+            return httpx2.Response(
+                200,
+                json={
+                    "id": "chatcmpl-scope-test",
+                    "object": "chat.completion",
+                    "created": 0,
+                    "model": body["model"],
+                    "choices": [{"index": 0, "finish_reason": "tool_calls", "message": message}],
+                    "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
+                },
+            )
         message = {"role": "assistant", "content": json.dumps(extraction)}
         return httpx2.Response(
             200,
@@ -2020,9 +2050,8 @@ def _latest_run(recipe_client: TestClient, session_id: int) -> dict:
 
 
 def test_a_turn_records_every_model_request_on_its_run(recipe_client: TestClient, monkeypatch) -> None:
-    """In OpenAI mode agent_runs.used_llm_calls stayed 0. A turn now records what it sent: the parser's chat
-    request, then one embedding request for every word it could not place (not one each), sent as text so no
-    tokenizer has to be downloaded."""
+    """In OpenAI mode the run records both scope and constraint chat requests, then one embedding request for
+    every word it could not place (not one each), sent as text so no tokenizer has to be downloaded."""
     sent = _openai_answered_in_process(
         monkeypatch, {"household_size": 2, "excluded_ingredients": ["taugeh", "belacan"]}
     )
@@ -2031,7 +2060,11 @@ def test_a_turn_records_every_model_request_on_its_run(recipe_client: TestClient
         "/api/agent/sessions", json={"message": "Plan dinners for two, no taugeh or belacan"}
     ).json()
 
-    assert [item["path"] for item in sent] == ["/v1/chat/completions", "/v1/chat/completions", "/v1/embeddings"]
+    assert [item["path"] for item in sent] == [
+        "/v1/chat/completions",
+        "/v1/chat/completions",
+        "/v1/embeddings",
+    ]
     assert sent[2]["body"]["input"] == ["taugeh", "belacan"]
     run = _latest_run(recipe_client, session["id"])
     assert run["used_llm_calls"] == 3
@@ -2039,7 +2072,7 @@ def test_a_turn_records_every_model_request_on_its_run(recipe_client: TestClient
 
 
 def test_a_retried_request_is_counted_and_a_fallback_is_recorded(recipe_client: TestClient, monkeypatch) -> None:
-    """A model that does not answer is asked twice (the SDK retries once), and both requests count; the rules
+    """Scope classification fails once and constraint parsing retries once; all three requests count. The rules
     then read the turn, which the run records for the console's fallback figure."""
     import httpx2
 
@@ -2068,7 +2101,7 @@ def test_a_retried_request_is_counted_and_a_fallback_is_recorded(recipe_client: 
 def test_a_swap_records_its_embedding_request_on_its_run(recipe_client: TestClient, monkeypatch) -> None:
     sent = _openai_answered_in_process(monkeypatch, {"household_size": 2, "budget_per_meal_sgd": 20})
     created, result = _plan_with_evidence(recipe_client)
-    assert result["run"]["used_llm_calls"] == 0  # saving the plan asks no model
+    assert result["run"]["used_llm_calls"] == 0  # fixture mode sends no model request when saving the plan
     sent.clear()
 
     recipe_client.post(
