@@ -145,6 +145,7 @@ def get_agent_service(
             OpenAISubstituteGenerator(
                 api_key=settings.openai_api_key.get_secret_value(),
                 model=settings.openai_model,
+                timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
             )
             if openai_enabled
             else None
