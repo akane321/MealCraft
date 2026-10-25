@@ -126,7 +126,9 @@ def test_a_planned_week_and_its_swap_buy_milk_once_by_weight(recipe_client) -> N
         session.commit()
     start = local_today() + timedelta(days=1)
     request = {"start_date": start.isoformat(), "household_size": 2, "pricing_mode": "fixture"}
-    response = recipe_client.post("/api/plans/generate", json={**request, "max_uses_per_recipe": 1})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**request, "max_uses_per_recipe": 1}}
+    )
     assert response.status_code == 201, response.text
     plan = response.json()
     assert {day["recipe"]["slug"] for day in plan["days"]} >= {"milk-oats", "milk-custard"}
@@ -168,7 +170,7 @@ def _milk_dishes(*units: str) -> list[Recipe]:
 def _week(client, **request) -> dict:
     start = (local_today() + timedelta(days=1)).isoformat()
     payload = {"start_date": start, "household_size": 4, "pricing_mode": "fixture", "max_uses_per_recipe": 1}
-    response = client.post("/api/plans/generate", json={**payload, **request})
+    response = client.post("/api/plans/generate", json={"requires_halal": False, **{**payload, **request}})
     assert response.status_code == 201, response.text
     return response.json()
 

@@ -1,8 +1,9 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_serializer, model_validator
 
 from app.schemas.display import ShownTitle
+from app.schemas.household_rules import PlanningPreferences
 from app.schemas.planning_v2 import LEAN
 from app.schemas.product import GroceryEstimateResponse, PricingMode
 from app.schemas.recipe import RecipeListItemResponse
@@ -52,11 +53,23 @@ class RecipeRecommendationRequest(BaseModel):
     allergens: list[str] = Field(default_factory=list, max_length=20)
     excluded_ingredients: list[str] = Field(default_factory=list, max_length=50)
     dietary_preferences: list[DietaryPreference] = Field(default_factory=list, max_length=4)
+    requires_halal: bool = False
     health_preferences: list[HealthPreference] = Field(default_factory=list, max_length=3)
     nutrition_targets: NutritionTargets = Field(default_factory=NutritionTargets)
     max_sodium_mg_per_meal: float | None = Field(default=None, ge=100, le=5000)
     available_ingredients: list[AvailableIngredientInput] = Field(default_factory=list, max_length=100)
     pricing_mode: PricingMode = "fixture"
+    planning_preferences: PlanningPreferences = Field(default_factory=PlanningPreferences)
+
+    @model_serializer(mode="wrap")
+    def _omit_default_planning_preferences(self, handler):
+        data = handler(self)
+        if self.planning_preferences == PlanningPreferences() and isinstance(data, dict):
+            data.pop("planning_preferences", None)
+        if not self.requires_halal and isinstance(data, dict):
+            data.pop("requires_halal", None)
+        return data
+
     # Recipe slugs the household marked "Never again" (ADR-0087): a hard filter, read live from its feedback
     # when a product request is planned. Left out of a dump while empty, so stored constraints and digests of a
     # household without any stay byte-identical.

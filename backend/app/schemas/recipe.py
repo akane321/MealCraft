@@ -66,3 +66,6 @@ class RecipeDetailResponse(RecipeListItemResponse):
     meal_types: list[str] | None = None
     prep_time_minutes: int | None = None
     cook_time_minutes: int | None = None
+    flavor_tags: list[str] | None = None
+    halal_status: str | None = None
+    unknown_safety: list[str] | None = None

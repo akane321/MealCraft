@@ -700,6 +700,15 @@ class ProductPlanningEngine:
                 if not servings:
                     unattended.append(f"{planned_date:%A} {meal} is not planned: nobody is home.")
                     continue
+                weekday = planned_date.strftime("%A").lower()
+                preferred_flavors = list(
+                    dict.fromkeys(
+                        boost.flavor
+                        for boost in constraints.planning_preferences.flavor_boosts
+                        if (not boost.weekdays or weekday in boost.weekdays)
+                        and (not boost.meal_types or meal in boost.meal_types)
+                    )
+                )
                 meal_roles, floor_share, kept_roles = roles, None, locked.get((i, meal))
                 if structured(roles):
                     # The dinner grows with the people at it (ADR-0070 table); a count the household stated has no
@@ -728,6 +737,9 @@ class ProductPlanningEngine:
                     days_after_shopping=since_trip,
                     # The shared-dish model (ADR-0071 section 1): who is at this meal, and each one's own limits.
                     members=slot_members(household, planned_date, meal, floor_share),
+                    preferred_flavors=preferred_flavors,
+                    prefer_more_vegetables=constraints.planning_preferences.more_vegetables,
+                    prefer_lighter=constraints.planning_preferences.lighter,
                 )
                 slots.append(slot)
                 slot_day[slot.slot_id] = (i, meal)
@@ -767,6 +779,7 @@ class ProductPlanningEngine:
             excluded_ingredients=expand_exclusions(constraints.excluded_ingredients),
             never_again_recipes=sorted(constraints.never_again_recipes),
             dietary_requirements=constraints.dietary_preferences,
+            requires_halal=constraints.requires_halal,
             health_preferences=constraints.health_preferences,
             nutrition_bands=bands,
             purchase_budget_sgd=constraints.weekly_budget_sgd,
@@ -786,12 +799,15 @@ class ProductPlanningEngine:
             repetition_rules=(
                 PlanningRepetitionRules(
                     max_uses_per_recipe=cap,
+                    repeat_allowed_meals=constraints.planning_preferences.repeat_allowed_meals,
                     recipe_counts=[
                         PlanningRecipeCount(recipe_id=slug, max_uses=max(0, cap - count))
                         for slug, count in sorted((used or {}).items())
-                    ],
+                    ]
+                    if cap is not None
+                    else [],
                 )
-                if cap is not None
+                if cap is not None or constraints.planning_preferences.repeat_allowed_meals
                 else None
             ),
             catalog_version=digest([r.model_dump(mode="json") for r in candidates]),

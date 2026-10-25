@@ -72,7 +72,8 @@ class OperationsSeriesResponse(BaseModel):
     provider_modes: dict[str, int]
 
 
-TaskKind = Literal["agent", "planning"]
+TaskKind = Literal["agent", "planning", "intake"]
+ReplayKind = Literal["agent", "planning"]
 
 
 class OperationsTaskSummary(BaseModel):
@@ -158,7 +159,7 @@ class ReplayPlanningOverrides(BaseModel):
 
 class OperationsReplay(BaseModel):
     id: int
-    kind: TaskKind
+    kind: ReplayKind
     source_id: int
     overrides: dict[str, Any]
     # Agent: constraints, assistant_message, status, missing_fields, parser.
@@ -171,7 +172,7 @@ class OperationsReplay(BaseModel):
 
 class OperationsReplaySummary(BaseModel):
     id: int
-    kind: TaskKind
+    kind: ReplayKind
     source_id: int
     overrides: dict[str, Any]
     original_status: str | None

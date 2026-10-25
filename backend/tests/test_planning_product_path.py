@@ -44,7 +44,9 @@ def test_real_request_persists_validated_snapshot_and_trace(recipe_client, monke
         pytest.fail("A validated basket must not be repriced")
 
     monkeypatch.setattr(WeeklyGroceryAggregator, "estimate", refetch)
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "planner_strategy": strategy})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "planner_strategy": strategy}}
+    )
     assert response.status_code == 201, response.text
     plan = response.json()
     run, trace = latest_trace()
@@ -70,7 +72,7 @@ def test_search_limit_is_not_infeasibility_and_does_not_save_a_plan(recipe_clien
         original(self, overrides={"width": 1, "max_expansions": 1})
 
     monkeypatch.setattr(ProductPlanningEngine, "__init__", limited)
-    response = recipe_client.post("/api/plans/generate", json=REQUEST)
+    response = recipe_client.post("/api/plans/generate", json={"requires_halal": False, **REQUEST})
     assert response.status_code == 422
     run, trace = latest_trace()
     assert run.status == "failed"
@@ -86,7 +88,7 @@ def test_search_limit_is_not_infeasibility_and_does_not_save_a_plan(recipe_clien
 def test_greedy_budget_rejection_is_validation_failure_not_search_exhaustion(recipe_client):
     response = recipe_client.post(
         "/api/plans/generate",
-        json={**REQUEST, "planner_strategy": "greedy-baseline", "weekly_budget_sgd": 0.01},
+        json={"requires_halal": False, **{**REQUEST, "planner_strategy": "greedy-baseline", "weekly_budget_sgd": 0.01}},
     )
     assert response.status_code == 422
     run, trace = latest_trace()
@@ -121,7 +123,7 @@ def test_independent_validator_rejects_corrupt_planner_output(recipe_client, mon
         return basket
 
     monkeypatch.setattr(FinalScopeReferencePlanner, "_build_shopping", corrupted)
-    response = recipe_client.post("/api/plans/generate", json=REQUEST)
+    response = recipe_client.post("/api/plans/generate", json={"requires_halal": False, **REQUEST})
     assert response.status_code == 422
     _, trace = latest_trace()
     assert trace["validation"]["status"] == "failed"
@@ -137,7 +139,7 @@ def test_missing_prices_fail_closed(recipe_client):
         for row in session.scalars(select(RecipeIngredient)):
             row.unit = "unmapped-unit"
         session.commit()
-    response = recipe_client.post("/api/plans/generate", json=REQUEST)
+    response = recipe_client.post("/api/plans/generate", json={"requires_halal": False, **REQUEST})
     assert response.status_code == 422
     _, trace = latest_trace()
     assert trace["status"] == "needs_data"
@@ -145,7 +147,9 @@ def test_missing_prices_fail_closed(recipe_client):
 
 
 def test_subcent_budget_requires_clarification(recipe_client):
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "weekly_budget_sgd": 40.001})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "weekly_budget_sgd": 40.001}}
+    )
     assert response.status_code == 422
     _, trace = latest_trace()
     assert trace["status"] == "needs_clarification"
@@ -153,7 +157,8 @@ def test_subcent_budget_requires_clarification(recipe_client):
 
 def test_exhaustive_budget_proof_is_limited_to_the_input_packet(recipe_client):
     response = recipe_client.post(
-        "/api/plans/generate", json={**REQUEST, "allergens": ["soy"], "weekly_budget_sgd": 0.01}
+        "/api/plans/generate",
+        json={"requires_halal": False, **{**REQUEST, "allergens": ["soy"], "weekly_budget_sgd": 0.01}},
     )
     assert response.status_code == 422
     _, trace = latest_trace()
@@ -163,7 +168,10 @@ def test_exhaustive_budget_proof_is_limited_to_the_input_packet(recipe_client):
 
 
 def test_unknown_allergen_is_missing_evidence(recipe_client):
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "allergens": ["not-in-reviewed-vocabulary"]})
+    response = recipe_client.post(
+        "/api/plans/generate",
+        json={"requires_halal": False, **{**REQUEST, "allergens": ["not-in-reviewed-vocabulary"]}},
+    )
     assert response.status_code == 422
     _, trace = latest_trace()
     assert trace["status"] == "needs_data"
@@ -178,7 +186,9 @@ def test_compiler_proves_a_blocked_slot_even_if_upstream_filter_is_wrong(recipe_
         return original(self, constraints.model_copy(update={"max_cooking_time_minutes": 240}), **kwargs)
 
     monkeypatch.setattr(RecipeRecommendationService, "recommend", faulty_admission)
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "max_cooking_time_minutes": 20})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "max_cooking_time_minutes": 20}}
+    )
     assert response.status_code == 422
     _, trace = latest_trace()
     assert trace["status"] == "infeasible"
@@ -187,9 +197,12 @@ def test_compiler_proves_a_blocked_slot_even_if_upstream_filter_is_wrong(recipe_
 
 def test_one_cent_below_the_only_basket_is_rejected(recipe_client):
     request = {**REQUEST, "allergens": ["soy"]}
-    plan = recipe_client.post("/api/plans/generate", json=request).json()
+    plan = recipe_client.post("/api/plans/generate", json={"requires_halal": False, **request}).json()
     amount = plan["grocery_estimate"]["purchase_total_sgd"]
-    response = recipe_client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": round(amount - 0.01, 2)})
+    response = recipe_client.post(
+        "/api/plans/generate",
+        json={"requires_halal": False, **{**request, "weekly_budget_sgd": round(amount - 0.01, 2)}},
+    )
     assert response.status_code == 422
     _, trace = latest_trace()
     assert trace["evidence"] == "exhaustively_infeasible"
@@ -197,7 +210,9 @@ def test_one_cent_below_the_only_basket_is_rejected(recipe_client):
 
 def test_duplicate_pantry_entries_require_clarification(recipe_client):
     item = {"normalized_name": "chicken_breast", "quantity": 100, "unit": "g"}
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "available_ingredients": [item, item]})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "available_ingredients": [item, item]}}
+    )
     assert response.status_code == 422
     _, trace = latest_trace()
     assert trace["status"] == "needs_clarification"
@@ -212,14 +227,18 @@ def test_per_meal_cost_is_recomputed_even_if_upstream_admits_a_bad_candidate(rec
         return original(self, constraints.model_copy(update={"budget_per_meal_sgd": None}), **kwargs)
 
     monkeypatch.setattr(RecipeRecommendationService, "recommend", faulty_admission)
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "budget_per_meal_sgd": 0.01})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "budget_per_meal_sgd": 0.01}}
+    )
     assert response.status_code == 422
     _, trace = latest_trace()
     assert any(c["code"] == "per_meal_budget" and c["status"] == "failed" for c in trace["validation"]["checks"])
 
 
 def test_post_beam_improvement_keeps_product_per_meal_acceptance_checks(recipe_client):
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "budget_per_meal_sgd": 100})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **REQUEST, "budget_per_meal_sgd": 100}
+    )
     assert response.status_code == 201, response.text
     _, trace = latest_trace()
     assert "local_improvement" in trace
@@ -234,7 +253,7 @@ def test_default_request_with_repository_catalog(recipe_client):
     catalog = load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
     with database() as session:
         import_catalog(session, catalog)
-    response = recipe_client.post("/api/plans/generate", json=REQUEST)
+    response = recipe_client.post("/api/plans/generate", json={"requires_halal": False, **REQUEST})
     assert response.status_code == 201, response.text
     _, trace = latest_trace()
     assert trace["validation"]["status"] == "passed"
@@ -248,7 +267,9 @@ def test_a_full_catalog_week_has_seven_different_dinners(recipe_client):
     catalog = load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
     with database() as session:
         import_catalog(session, catalog)
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "weekly_budget_sgd": None})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "weekly_budget_sgd": None}}
+    )
     assert response.status_code == 201, response.text
     days = response.json()["days"]
     assert len({day["recipe"]["slug"] for day in days}) == 7
@@ -260,7 +281,8 @@ def test_a_full_catalog_week_has_seven_different_dinners(recipe_client):
 
 def test_trace_contains_no_plaintext_health_profile(recipe_client):
     response = recipe_client.post(
-        "/api/plans/generate", json={**REQUEST, "allergens": ["soy"], "max_sodium_mg_per_meal": 619}
+        "/api/plans/generate",
+        json={"requires_halal": False, **{**REQUEST, "allergens": ["soy"], "max_sodium_mg_per_meal": 619}},
     )
     assert response.status_code == 201
     _, trace = latest_trace()
@@ -286,9 +308,9 @@ def test_same_snapshot_and_settings_produce_same_plan(recipe_client, monkeypatch
             return datetime(2026, 9, 20, tzinfo=UTC)
 
     monkeypatch.setattr(provider, "datetime", FrozenDatetime)
-    first = recipe_client.post("/api/plans/generate", json=REQUEST).json()
+    first = recipe_client.post("/api/plans/generate", json={"requires_halal": False, **REQUEST}).json()
     _, first_trace = latest_trace()
-    second = recipe_client.post("/api/plans/generate", json=REQUEST).json()
+    second = recipe_client.post("/api/plans/generate", json={"requires_halal": False, **REQUEST}).json()
     _, second_trace = latest_trace()
     assert [d["recipe"]["slug"] for d in first["days"]] == [d["recipe"]["slug"] for d in second["days"]]
     assert first_trace == second_trace
@@ -306,7 +328,7 @@ def test_plan_and_trace_rollback_together_on_storage_error(recipe_client, monkey
 
     monkeypatch.setattr(Session, "commit", fail_plan_commit)
     with pytest.raises(RuntimeError, match="synthetic storage failure"):
-        recipe_client.post("/api/plans/generate", json=REQUEST)
+        recipe_client.post("/api/plans/generate", json={"requires_halal": False, **REQUEST})
     with database() as session:
         assert session.scalars(select(MealPlan)).all() == []
         assert session.scalars(select(OperationRun).where(OperationRun.run_type == "planning")).all() == []
@@ -321,15 +343,21 @@ def test_a_budget_below_the_best_ranked_week_is_still_planned(recipe_client):
     catalog = load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
     with database() as session:
         import_catalog(session, catalog)
-    free = recipe_client.post("/api/plans/generate", json=REQUEST).json()["grocery_estimate"]["purchase_total_sgd"]
+    free = recipe_client.post("/api/plans/generate", json={"requires_halal": False, **REQUEST}).json()[
+        "grocery_estimate"
+    ]["purchase_total_sgd"]
 
     budget = 60  # about two thirds of the best-ranked week (S$89.20 on this catalog)
     assert free > budget
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "weekly_budget_sgd": budget})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "weekly_budget_sgd": budget}}
+    )
     assert response.status_code == 201, response.text
     assert response.json()["grocery_estimate"]["purchase_total_sgd"] <= budget
 
-    too_low = recipe_client.post("/api/plans/generate", json={**REQUEST, "weekly_budget_sgd": 20})
+    too_low = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "weekly_budget_sgd": 20}}
+    )
     assert too_low.status_code == 422
     assert "couldn't fit seven dinners into S$20.00" in too_low.json()["detail"]
 
@@ -346,7 +374,8 @@ def test_budget_packet_does_not_turn_a_normal_request_into_cheapest_mode(recipe_
         )
     monkeypatch.setattr(ProductPlanningEngine, "_packet_limit", lambda self, days: 2)
     response = recipe_client.post(
-        "/api/plans/generate", json={**REQUEST, "weekly_budget_sgd": 1000, "planner_strategy": strategy}
+        "/api/plans/generate",
+        json={"requires_halal": False, **{**REQUEST, "weekly_budget_sgd": 1000, "planner_strategy": strategy}},
     )
     assert response.status_code == 201, response.text
     assert response.json()["grocery_estimate"]["within_weekly_budget"] is True
@@ -380,7 +409,9 @@ def test_the_default_household_week_is_the_full_meal_structure(recipe_client):
     ]
 
     both = {"meals": {"lunch": MEAL_PRESETS["lunch"]["one dish"], "dinner": [{"role_id": "main", "courses": ["main"]}]}}
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "plan_shape": both})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "plan_shape": both}}
+    )
     assert response.status_code == 201, response.text
     meals = {(d["day_index"], d["meal_type"]) for d in response.json()["days"]}
     assert meals == {(day, meal) for day in range(1, 8) for meal in ("lunch", "dinner")}

@@ -156,7 +156,10 @@ def _dashboard(client, plan_id):
 def test_the_dashboard_carries_each_dish_s_tags_and_cost_per_serving(client):
     plan = client.post(
         "/api/plans/generate",
-        json={"household_size": 2, "pricing_mode": "fixture", "health_preferences": ["low-sodium"]},
+        json={
+            "requires_halal": False,
+            **{"household_size": 2, "pricing_mode": "fixture", "health_preferences": ["low-sodium"]},
+        },
     )
     assert plan.status_code == 201, plan.text
     days = _dashboard(client, plan.json()["id"]).values()
@@ -176,7 +179,9 @@ def test_the_dashboard_carries_each_dish_s_tags_and_cost_per_serving(client):
 
 
 def test_a_confirmed_swap_shows_the_new_dish_s_tags(client):
-    plan = client.post("/api/plans/generate", json={"household_size": 2, "pricing_mode": "fixture"}).json()
+    plan = client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{"household_size": 2, "pricing_mode": "fixture"}}
+    ).json()
     entry_ = next(day for day in plan["days"] if day["recipe"]["slug"] != QUICK)
     assert "quick" not in {tag["code"] for tag in _dashboard(client, plan["id"])[entry_["entry_id"]]["reasons"]}
     # Every other slow dish is Never again, so the swap can only bring the quick one.
@@ -201,12 +206,15 @@ def test_a_meal_change_tags_the_new_dishes_by_their_roles(composed_client):  # n
     plan = composed_client.post(
         "/api/plans/generate",
         json={
-            "start_date": start,
-            "household_size": 4,
-            "max_cooking_time_minutes": 90,
-            "pricing_mode": "fixture",
-            "health_preferences": ["low-sodium"],
-            "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
+            "requires_halal": False,
+            **{
+                "start_date": start,
+                "household_size": 4,
+                "max_cooking_time_minutes": 90,
+                "pricing_mode": "fixture",
+                "health_preferences": ["low-sodium"],
+                "plan_shape": {"meals": {"dinner": COMPOSITION[:2]}},
+            },
         },
     )
     assert plan.status_code == 201, plan.text

@@ -99,7 +99,9 @@ def test_an_empty_table_leaves_exclusions_exactly_as_they_were(monkeypatch, tmp_
 def test_an_empty_table_still_lets_the_planner_serve_tofu_for_a_tofu_exclusion(recipe_client, monkeypatch, tmp_path):
     use_table(monkeypatch, tmp_path)
 
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "excluded_ingredients": ["tofu"]})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "excluded_ingredients": ["tofu"]}}
+    )
 
     assert response.status_code == 201, response.text
     # Without the table firm_tofu is not a kind of tofu, but "Tofu Soba" names tofu
@@ -121,7 +123,9 @@ def test_the_planning_path_hands_the_planner_the_expanded_exclusions(recipe_clie
 
     monkeypatch.setattr(product_path, "FinalPlanningProblem", spy)
 
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "excluded_ingredients": ["tofu"]})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "excluded_ingredients": ["tofu"]}}
+    )
 
     assert response.status_code == 201, response.text
     assert handed and all(excluded == ["firm_tofu", "tofu"] for excluded in handed)
@@ -138,7 +142,9 @@ def test_excluding_the_curated_id_does_not_climb_to_the_release_id(recipe_client
 
     monkeypatch.setattr(product_path, "FinalPlanningProblem", spy)
 
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "excluded_ingredients": ["firm_tofu"]})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "excluded_ingredients": ["firm_tofu"]}}
+    )
 
     assert response.status_code == 201, response.text
     assert handed and all(excluded == ["firm_tofu"] for excluded in handed)  # not tofu, not every kind of tofu
@@ -197,7 +203,8 @@ def test_recommendations_expand_once_per_call_not_once_per_recipe(monkeypatch, t
 
 def test_the_committed_wp1_data_makes_a_tofu_exclusion_catch_the_curated_tofu(recipe_client):
     response = recipe_client.post(
-        "/api/recommendations/recipes", json={"household_size": 2, "excluded_ingredients": ["tofu"]}
+        "/api/recommendations/recipes",
+        json={"requires_halal": False, **{"household_size": 2, "excluded_ingredients": ["tofu"]}},
     )
 
     assert response.status_code == 200
