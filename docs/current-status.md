@@ -4,7 +4,7 @@
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `09736e17` (algorithm integration, synthetic adapter phase one and validated product improvement)
+> Verified remote `main`: `2d9deddf` (reviewed algorithm, product-improvement and LLM integration)
 
 ### Verified integration delta (2026-10-25)
 
@@ -32,16 +32,34 @@
   retains the verified beam plan. This is not a switch to the offline objective
   or a claim of a globally optimal week. All required checks passed on the exact
   reviewed head before merge.
+- #329 integrates the individually reviewed preference, routing, food-question,
+  substitution, external-intake and offline algorithm-wiring slices. Preferences
+  can be edited, saved, cancelled and undone without changing hard constraints;
+  current household restrictions and stale-preview guards remain enforced.
+  Unsupported halal planning is explicitly declined, and HTTP halal declarations
+  are required rather than silently defaulted. Numeric and safety answers use
+  catalog evidence; ordinary cooking knowledge may use attributed web sources.
+- External intake normalizes reviewed vocabulary, ingredient and role evidence,
+  household safety, provenance and recipe identity before household-private
+  admission; failures have a catalog fallback. Unknown evidence is not verified
+  safe. Live extraction quality and independent human accuracy remain unverified.
+- The new algorithm comparison wiring is offline developer tooling only. It uses
+  the current common outputs and scorer, exposes no paid entry, and is not formal
+  baseline registration or held-out run admission. The separate unbudgeted live
+  developer entry remains disabled, including inside the backend container.
 
 The integrated #327 head passed all required CI checks before merge; the combined
 targeted synthetic/SQLite regression also passed. This verification did not open
 protected held-out inputs, labels or results, call paid models, or use Docker
 locally. Formal evaluation, real-participant studies and live-model rehearsal
-have not been newly completed. The preference/routing/intake stack and offline
-baseline wiring are integrated in #329's branch but are not merged to main.
-Its frontend, documentation, migration and paired-record checks passed; its
-container test step failed, so it is not accepted as a completed integration.
-The failed step must be diagnosed without inspecting protected evaluation data.
+have not been newly completed. The final #329 head passed backend, frontend,
+migrations, docs, compose and knowledge-record before merge
+([CI run](https://github.com/akane321/MealCraft/actions/runs/40197542323)). The initial
+container failure was a missing deliberately disabled script; packaging and root
+resolution were corrected without weakening its refusal tests or enabling paid
+calls. This is scoped integration evidence, not full live-provider or final-product
+acceptance. Chat-based confirmation of a pending preview is accepted design only;
+that new behavior has not been implemented.
 
 ### Historical integration snapshot (#302-#325, 2026-10-23)
 
@@ -504,7 +522,7 @@ improved.
 | Authentication and user separation | Partial | Authentication, non-null household ownership, household-scoped repositories, cross-household denial, per-action household authorization and browser registration/login are merged. Member-management routes, a wider isolation matrix, household collaboration, password lifecycle and account export/deletion are out of scope by owner decision (ADR-0051) |
 | High-dimensional recipe knowledge | Partial | Expand the catalog and complete cuisine, taste, method, equipment, difficulty, nutrition provenance, instruction, source, and media fields |
 | Verified recipe benchmark | Partial | Import a gated, enriched data release into the runtime catalog; the recipe count is set by what passes the release gate, not by a fixed range (decision ADR-0024) |
-| Validated web-recipe supplementation | Target | Specified in [External Recipe Intake](design/external-recipe-intake.md) (decision ADR-0032): parsing, duplicate check, ingredient mapping, the user-confirmed allergen question, source tiers and an admission gate equal to the release gate. Not built |
+| Validated web-recipe supplementation | Partial | Typed search/extraction, normalization, reviewed ingredient mapping, source policy, household-private persistence, admission checks, trace inspection and catalog fallback are implemented; see [API contracts](api-contracts.md). Independent human accuracy, live extraction evidence, unknown-ingredient enrichment and promotion into the shared catalog remain open; this is not demonstrated full release-gate parity |
 | Semantic preference retrieval | Target | Combine semantic matching with strict metadata filtering and evaluate its incremental value |
 | Recipe execution side panel | Partial | The recipe sheet shows ingredients, allergen labels and steps, and the plan panel's "Today" view carries the Top-1 tutorial for the next meal (ADR-0048). Remaining: attributes, provenance and a tutorial per dish beyond the sample set |
 | Final-scope planning and validation | Partial | Constraint compilation, bounded Beam Search, conservative bounds, independent shopping/budget validation and a small exhaustive oracle are executable. The integration and its deepenings are specified as eight packets in [Planning and Validation v2](design/planning-validation-v2.md) (decision ADR-0033). The engine and the independent validator are wired into the product path (P1), as are conflict explanations (P2) and nutrition scope (P4). Remaining: explain infeasibility with a minimal conflicting set and a numeric relaxation, bound variety against ingredient overlap, compile nutrition scope, purchase across the whole slot set, replan with minimal perturbation, add a reorder-only learned ranking that ships off, and add integrated-product evidence to the existing developer ablations |
