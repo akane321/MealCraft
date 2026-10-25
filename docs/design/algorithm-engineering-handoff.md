@@ -10,6 +10,12 @@ move must pass the independent validator, and the best validated result is kept.
 The product's full acceptance callback is reused for the seed and every move,
 including the per-meal cost ceiling and any requested minimum distinct-recipe
 count that are not fields of the generic planning packet.
+As a final quality guard, a proposal that increases adjacent repeated dishes
+relative to the beam seed is not returned: the seed is retained and the trace
+records why. Consecutive filled meals are compared chronologically, exempt
+roles are excluded, and each shared recipe between two meals counts once.
+This does not change the offline objective or turn repetition into a new hard
+feasibility constraint.
 The pass uses seed 0 and 50 proposals, with no wall-clock cutoff or CP-SAT call.
 It runs for ordinary hard-budget beam requests, including requests without a
 stated budget. Cheapest-price searches, the greedy baseline and explicit

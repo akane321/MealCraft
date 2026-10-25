@@ -19,6 +19,18 @@ class ProductTableObjective(AlgorithmObjective):
         return super().terms(table, assignments, report, partial=partial)
 
 
+def adjacent_repetitions(problem, assignments):
+    free = set(problem.uncounted_roles)
+    if problem.repetition_rules is not None:
+        free.update(problem.repetition_rules.repeat_ok_roles)
+    meals = [
+        {a.recipe_id for a in assignments if a.slot_id == slot.slot_id and a.role_id not in free}
+        for slot in sorted(problem.slots, key=MealBeamPlanner._slot_key)
+    ]
+    filled = [meal for meal in meals if meal]
+    return sum(len(left & right) for left, right in zip(filled, filled[1:], strict=False))
+
+
 def improve_product_plan(problem, result, losses, *, steps=50, candidates=None, validate=None):
     """Keep a validated beam incumbent; never invoke CP-SAT or change member eligibility."""
     groups = defaultdict(list)
@@ -54,6 +66,12 @@ def improve_product_plan(problem, result, losses, *, steps=50, candidates=None, 
         problem, initial=initial, validate=validate
     )
     after = objective.score_validated(problem, improved.assignments, improved.validation)
+    before_repeats = adjacent_repetitions(problem, initial.assignments)
+    proposed_repeats = adjacent_repetitions(problem, improved.assignments)
+    retained = proposed_repeats > before_repeats
+    proposed_score = after
+    if retained:
+        improved, after = initial, before
     return (improved.assignments, improved.shopping, improved.validation), {
         "algorithm": "beam+simulated-annealing",
         "seed": 0,
@@ -62,4 +80,9 @@ def improve_product_plan(problem, result, losses, *, steps=50, candidates=None, 
         "before": before,
         "after": after,
         "improved": after < before,
+        "adjacent_repetitions_before": before_repeats,
+        "adjacent_repetitions_proposed": proposed_repeats,
+        "adjacent_repetitions_after": before_repeats if retained else proposed_repeats,
+        "retained_beam_reason": "adjacent_repetition_increased" if retained else None,
+        "proposed_score": proposed_score,
     }
