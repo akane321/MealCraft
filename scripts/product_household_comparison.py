@@ -24,6 +24,7 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     original = product_path.improve_product_plan
+    run_case = full_default.run_case
     for steps in (0, 50):
         path = args.output / f"steps-{steps}.json"
         if path.exists():
@@ -34,7 +35,15 @@ def main():
                 return initial, {"algorithm": "beam-only", "steps": 0}
             return original(problem, initial, losses, steps=_steps, **kwargs)
 
-        with patch.object(product_path, "improve_product_plan", improve):
+        def progress(plans, session, case, *, _steps=steps):
+            result, elapsed = run_case(plans, session, case)
+            print(f"steps={_steps}: {case['case']} {result['outcome']} in {elapsed:.2f}s", flush=True)
+            return result, elapsed
+
+        with (
+            patch.object(product_path, "improve_product_plan", improve),
+            patch.object(full_default, "run_case", progress),
+        ):
             report, timings = full_default.evaluate(repeats=0)
         artifact = {
             "commit": commit,
