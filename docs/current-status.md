@@ -1,12 +1,41 @@
 # MealCraft Current Status
 
-> Last verified public snapshot: 2026-10-23
+> Last verified integration delta: 2026-10-25 (not a new full-product acceptance)
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `779b502` (integration through #325)
+> Verified remote `main`: `1d08da3` (algorithm integration and synthetic adapter phase one)
 
-### Sprint 2 integration (#302-#325, 2026-10-23)
+### Verified integration delta (2026-10-25)
+
+- #326/#328: maintenance and household-rule parsing fixes are merged; a sentence
+  joining different answers asks for clarification rather than widening a rule.
+- #337/#338: evidence-based role refinements and release v2.2 unit corrections
+  are merged. Data completeness is not independent truth verification.
+- #342/#345: review attestations bind to content; the reviewer-table batch remains
+  gated until explicit owner acceptance. Merging the review tools did not accept
+  the batch or make its unreviewed values available to planning.
+- #347: synthetic conversation adapter phase one, paired with Knowledge #195.
+  It tests message transport and output normalization with invented inputs only;
+  shared formal contracts, product transport, freeze and run admission remain
+  pending. It is not a formal evaluation run or score.
+- #327 incorporates the reviewed #339/#340/#341/#343/#344 algorithm chain.
+  Offline arms measure member variety over filled meals, retain exact-price and
+  minimum-kind references, and add whole-horizon CP-SAT neighborhood repair.
+  Generated developer comparisons retain their original source and environment.
+  Synthetic prices, bounded meal-option domains and unreviewed grouping prevent
+  product-scale, retail-savings or formal baseline claims. Product defaults have
+  not switched to LNS or the offline member-mean objective.
+
+The integrated #327 head passed all required CI checks before merge; the combined
+targeted synthetic/SQLite regression also passed. This verification did not open
+protected held-out inputs, labels or results, call paid models, or use Docker
+locally. Formal evaluation, real-participant studies and live-model rehearsal
+have not been newly completed. The preference/routing/intake stack, product-local
+improvement and new baseline wiring remain unmerged work, not current capability.
+
+### Historical integration snapshot (#302-#325, 2026-10-23)
+
 
 Merged since the last snapshot, each with its paired knowledge record:
 
