@@ -61,6 +61,7 @@ from app.planning.member_coverage import (
     member_limits,
 )
 from app.planning.nutrition_scope import compile_nutrition_targets, nutrition_guard_loss
+from app.planning.product_improvement import improve_product_plan
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
 from app.planning.recipe_quality import dish_family, dish_kind
@@ -1093,6 +1094,17 @@ class ProductPlanningEngine:
         # checks them all, and a copy each took about a second of a whole-week change); the builder it checks
         # still gets its own each time, so a builder that changed the problem could not change the check.
         checked = problem.model_copy(deep=True)
+
+        def validate_product(_problem, assignments, shopping):
+            return product_validation(
+                self.validator,
+                checked,
+                assignments,
+                shopping,
+                minimum_distinct_dishes=minimum_distinct_dishes,
+                per_meal_budget=constraints.budget_per_meal_sgd,
+            )
+
         index, cheapest_from = 0, None
         while True:
             if index == len(assignments_list):
@@ -1113,19 +1125,7 @@ class ProductPlanningEngine:
             shopping = builder._build_shopping(
                 problem.model_copy(deep=True), [a.model_copy(deep=True) for a in assignments]
             )
-            report = self.validator.validate(checked, assignments, shopping)
-            if constraints.budget_per_meal_sgd is not None:
-                extra = per_meal_budget_checks(problem, assignments, constraints.budget_per_meal_sgd)
-                report.checks.extend(extra)
-                report.hard_failure_count += sum(c.status == "failed" for c in extra)
-                report.indeterminate_count += sum(c.status == "indeterminate" for c in extra)
-                report.status = (
-                    "failed"
-                    if report.hard_failure_count
-                    else "indeterminate"
-                    if report.indeterminate_count
-                    else "passed"
-                )
+            report = validate_product(checked, assignments, shopping)
             # Operations may expose verdicts, but never plaintext health inputs.
             redacted = report.model_dump(mode="json", exclude={"checks"})
             redacted["checks"] = [
@@ -1212,7 +1212,21 @@ class ProductPlanningEngine:
                 trace["uncovered_members"] = uncovered
                 trace["uncovered_members_by_rule"] = by_rule
             raise ProductPlanningError(status, message, trace, problem=problem.model_copy(deep=True))
+        if constraints.planner_strategy == "beam" and budget_is_hard:
+            result, trace["local_improvement"] = improve_product_plan(
+                problem,
+                result,
+                losses,
+                candidates=meal_beam if composition is not None else None,
+                validate=validate_product,
+                priority="price" if cheapest else "variety",
+            )
         assignments, shopping, report = result
+        if "local_improvement" in trace:
+            trace["validation"] = report.model_dump(mode="json", exclude={"checks"})
+            trace["validation"]["checks"] = [
+                {"code": c.code, "status": c.status, "hard": c.hard, "scope_id": c.scope_id} for c in report.checks
+            ]
         # A perishable line says "use within N days" on the list (layer 08); only with the household's rules on.
         perishables = perishable_ingredients(by_id.values()) if household_rules else set()
         lines = []
@@ -1355,6 +1369,28 @@ def over_budget_pick(passed, slots, budget, uncounted=frozenset()):
 
     price = min(passed, key=charged)[2].purchase_total_sgd
     return next(item for item in passed if item[2].purchase_total_sgd <= price)
+
+
+def product_validation(validator, problem, assignments, shopping, *, minimum_distinct_dishes=0, per_meal_budget=None):
+    """The same complete product acceptance boundary for beam and every improvement move."""
+    report = validator.validate(problem, assignments, shopping)
+    extra = per_meal_budget_checks(problem, assignments, per_meal_budget) if per_meal_budget is not None else []
+    if minimum_distinct_dishes:
+        extra.append(
+            PlanningConstraintCheck(
+                code="minimum_distinct_dishes",
+                status="passed" if len({a.recipe_id for a in assignments}) >= minimum_distinct_dishes else "failed",
+                detail="The household's requested minimum number of distinct dishes.",
+            )
+        )
+    if extra:
+        report.checks.extend(extra)
+        report.hard_failure_count += sum(check.status == "failed" for check in extra)
+        report.indeterminate_count += sum(check.status == "indeterminate" for check in extra)
+        report.status = (
+            "failed" if report.hard_failure_count else "indeterminate" if report.indeterminate_count else "passed"
+        )
+    return report
 
 
 def per_meal_budget_checks(problem, assignments, budget):
