@@ -186,6 +186,14 @@ def markdown(result: dict) -> str:
     ]
     rows += [("**In the planning pool**", result["pool"]["release"], result["pool"]["curated"])]
     lines += table(rows, ("", "Release", "Curated"))
+    skipped = result["import_skipped"]
+    if skipped:
+        lines += [
+            "",
+            f"The release file holds {release + len(skipped)} recipes; the product import skips {len(skipped)} with "
+            f"fewer than two ingredient lines or no instruction ({', '.join(f'`{key}`' for key in skipped)}), so they "
+            "are not counted here.",
+        ]
     meals = result["usable_by_meal"]
     lines += [
         "",
@@ -237,16 +245,17 @@ def markdown(result: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-def load(session: Session) -> list[Recipe]:
+def load(session: Session) -> tuple[list[Recipe], list[str]]:
+    """The shared catalog recipes as the product imports them, and the release recipes the import skips."""
     data = repository_root() / "data"
     import_catalog(session, load_catalog(data / "ingredients/ingredients.json", data / "recipes/recipes.json"))
-    import_release_v2(session)
+    skipped = import_release_v2(session).recipes_skipped
     session.commit()
     statement = select(Recipe).options(
         joinedload(Recipe.nutrition),
         selectinload(Recipe.recipe_ingredients).joinedload(RecipeIngredient.ingredient),
     )
-    return list(session.scalars(statement).unique().all())
+    return list(session.scalars(statement).unique().all()), sorted(skipped)
 
 
 def main() -> None:
@@ -254,8 +263,9 @@ def main() -> None:
     engine = create_engine("sqlite+pysqlite://")
     Base.metadata.create_all(engine)
     with Session(engine) as session:
-        recipes = load(session)
+        recipes, skipped = load(session)
         result = report(recipes, priceable=priceable_ingredients(), withdrawn=frozenset(withdrawn_slugs()))
+    result["import_skipped"] = skipped
     directory = release_dir()
     result["sources"] = {
         "release_version": RELEASE_VERSION,

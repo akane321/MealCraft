@@ -132,7 +132,9 @@ def test_the_markdown_names_its_sources(session: Session) -> None:
         "recipe_tags_sha256": "t",
         "priceable_sha256": "p",
     }
+    result["import_skipped"] = ["RCP2_ONE_LINE"]
     text = markdown(result)
+    assert "holds 12 recipes; the product import skips 1" in text
     assert "Release v2 (digest `r`)" in text
     assert "| **In the planning pool** | 5 | 30 |" in text
     meals = result["usable_by_meal"]

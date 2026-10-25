@@ -16,6 +16,8 @@ Every shared catalog recipe is followed through the planning pool's gates (`Reci
 | Excluded: incomplete recipe | 171 | 0 |
 | **In the planning pool** | 6680 | 30 |
 
+The release file holds 8968 recipes; the product import skips 1 with fewer than two ingredient lines or no instruction (`RCP2_5EFEFE98D566`), so they are not counted here.
+
 Of the 6710 recipes in the pool, **5764** fill a role of the structured planner, 5449 a lunch or dinner role and 315 a breakfast one (a day plans three meals, ADR-0070); the rest are left out by the role gate:
 
 | Role gate | Recipes |
