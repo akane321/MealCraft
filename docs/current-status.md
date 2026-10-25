@@ -4,7 +4,7 @@
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `1d08da3` (algorithm integration and synthetic adapter phase one)
+> Verified remote `main`: `09736e17` (algorithm integration, synthetic adapter phase one and validated product improvement)
 
 ### Verified integration delta (2026-10-25)
 
@@ -26,13 +26,22 @@
   Synthetic prices, bounded meal-option domains and unreviewed grouping prevent
   product-scale, retail-savings or formal baseline claims. Product defaults have
   not switched to LNS or the offline member-mean objective.
+- #349: the product beam can be followed by a validated simulated-annealing
+  improvement. It keeps the product's meal and week checks, including actual
+  checkout budgets and required variety; if adjacent repetition increases, it
+  retains the verified beam plan. This is not a switch to the offline objective
+  or a claim of a globally optimal week. All required checks passed on the exact
+  reviewed head before merge.
 
 The integrated #327 head passed all required CI checks before merge; the combined
 targeted synthetic/SQLite regression also passed. This verification did not open
 protected held-out inputs, labels or results, call paid models, or use Docker
 locally. Formal evaluation, real-participant studies and live-model rehearsal
-have not been newly completed. The preference/routing/intake stack, product-local
-improvement and new baseline wiring remain unmerged work, not current capability.
+have not been newly completed. The preference/routing/intake stack and offline
+baseline wiring are integrated in #329's branch but are not merged to main.
+Its frontend, documentation, migration and paired-record checks passed; its
+container test step failed, so it is not accepted as a completed integration.
+The failed step must be diagnosed without inspecting protected evaluation data.
 
 ### Historical integration snapshot (#302-#325, 2026-10-23)
 
