@@ -1,5 +1,7 @@
 from types import SimpleNamespace
 
+import pytest
+
 from app.services.food_questions import CatalogFoodQuestionAnswerer, OpenAIWebFoodQuestionAnswerer
 
 
@@ -88,7 +90,7 @@ def response_with_citation(url="https://example.test/food", title="Food source")
     )
 
 
-def test_web_food_answer_requires_search_and_attaches_verified_citations() -> None:
+def test_web_food_answer_requires_search_and_attaches_reported_citations() -> None:
     client = SearchClient(response_with_citation())
     answerer = OpenAIWebFoodQuestionAnswerer(api_key="unused", model="test-model", client=client)
 
@@ -118,3 +120,57 @@ def test_web_food_answer_returns_none_on_provider_failure(monkeypatch) -> None:
 
     assert answerer.answer("What is miso?", lang="en") is None
     assert noted == [True]
+
+
+@pytest.mark.parametrize(
+    ("question", "field", "descending"),
+    [
+        ("推荐低钠菜谱", "sodium_mg", False),
+        ("推荐低糖菜谱", "sugar_g", False),
+        ("推荐低脂肪菜谱", "fat_g", False),
+        ("推荐高蛋白质又低糖的菜谱", "protein_g", True),
+        ("Which recipes have highest protein with low sodium?", "protein_g", True),
+    ],
+)
+def test_ranking_direction_belongs_to_the_selected_metric(question, field, descending):
+    repository = RankingRepository([recipe("Example", "example", **{field: 12})])
+    CatalogFoodQuestionAnswerer(repository, household_id=1).answer(question, lang="en")
+    assert repository.calls == [(field, descending, 1, 3)]
+
+
+@pytest.mark.parametrize(
+    "question",
+    [
+        "Is miso halal?",
+        "How much protein is in miso?",
+        "Cook it for 10 minutes?",
+        "Is this suitable for a peanut allergy?",
+        "需要煮几度才安全？",
+        "需要七分钟吗？",
+        "Can I eat this with coeliac disease?",
+        "Use twenty grams?",
+    ],
+)
+def test_web_search_cannot_answer_catalog_numeric_or_safety_questions(question):
+    client = SearchClient(response_with_citation())
+    answerer = OpenAIWebFoodQuestionAnswerer(api_key="unused", model="test", client=client)
+    assert answerer.answer(question, lang="en") is None
+    assert client.calls == []
+
+
+@pytest.mark.parametrize(
+    "claim",
+    [
+        "It has 20 g protein.",
+        "It is halal.",
+        "It is safe for allergies.",
+        "Simmer for twenty minutes.",
+        "含糖很低。",
+        "煮十分钟。",
+    ],
+)
+def test_a_citation_does_not_certify_model_generated_numbers_or_safety(claim):
+    response = response_with_citation()
+    response.output_text = claim
+    answerer = OpenAIWebFoodQuestionAnswerer(api_key="unused", model="test", client=SearchClient(response))
+    assert answerer.answer("What is miso?", lang="en") is None

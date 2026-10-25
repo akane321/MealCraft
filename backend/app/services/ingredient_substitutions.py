@@ -47,9 +47,9 @@ def reviewed_ingredient_mapper() -> ReviewedIngredientMapper:
 class OpenAISubstituteGenerator:
     """Ask the model for ingredient names; the result is untrusted until catalog-filtered."""
 
-    def __init__(self, *, api_key: str, model: str, client=None) -> None:
+    def __init__(self, *, api_key: str, model: str, timeout_seconds: float = 60.0, client=None) -> None:
         self.model = model
-        self.client = client or OpenAI(api_key=api_key, http_client=model_client.http_client())
+        self.client = client or OpenAI(api_key=api_key, timeout=timeout_seconds, http_client=model_client.http_client())
 
     def suggest(self, source_ingredient: str, *, use_context: str | None = None) -> list[str]:
         prompt = (
@@ -118,9 +118,10 @@ class IngredientSubstitutionFoodQuestionAnswerer:
                 if len(best) == 1:
                     resolved = self.mapper.resolve(next(alias for alias in matching_aliases if len(alias) == longest))
         if resolved.canonical_id is None:
-            return None
+            return self._unverified(lang)
         # Ingredient-level catalog facts do not certify vegan/vegetarian status. Fail closed for these requests.
-        if constraints.dietary_preferences:
+        members = constraints.household.members if constraints.household and constraints.household.members else []
+        if constraints.dietary_preferences or any(member.dietary_preferences for member in members):
             if lang == "zh":
                 return "我无法核实替代食材是否满足家庭的饮食偏好，因此不会推荐未经核验的选项。"
             return (
@@ -130,15 +131,21 @@ class IngredientSubstitutionFoodQuestionAnswerer:
 
         try:
             proposed = self.generator.suggest(source)
-        except (APIError, ValueError):
-            return None
+        except (APIError, ValueError, TimeoutError, ConnectionError):
+            return self._unverified(lang)
         names = {self.mapper.resolve(item).canonical_id for item in proposed}
         names.discard(None)
         catalog = list(self.session.scalars(select(Ingredient).where(Ingredient.normalized_name.in_(names))))
-        exclusions = expand_exclusions([*constraints.excluded_ingredients, resolved.canonical_id])
+        exclusions = expand_exclusions(
+            [
+                *constraints.excluded_ingredients,
+                resolved.canonical_id,
+                *(item for member in members for item in member.excluded_ingredients),
+            ]
+        )
         safe = filter_safe_substitutes(
             catalog,
-            household_allergens=constraints.allergens,
+            household_allergens=[*constraints.allergens, *(item for member in members for item in member.allergens)],
             excluded_ingredients=exclusions,
             requires_halal=constraints.requires_halal,
         )
@@ -152,6 +159,15 @@ class IngredientSubstitutionFoodQuestionAnswerer:
         if lang == "zh":
             return f"可考虑：{options}。这些选项已按食材目录中的过敏原、忌口和清真信息筛选。"
         return f"Possible options: {options}. These were filtered using catalog allergen, exclusion, and halal data."
+
+    @staticmethod
+    def _unverified(lang: str) -> str:
+        return (
+            "我无法按目录和家庭限制核实这项替代建议，因此不会提供未经核验的选项。"
+            if lang == "zh"
+            else "I couldn't verify this substitution against the catalog and household constraints, "
+            "so I won't suggest unverified options."
+        )
 
 
 def filter_safe_substitutes(

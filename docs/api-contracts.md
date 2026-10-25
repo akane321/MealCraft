@@ -86,6 +86,8 @@ Available endpoints:
 - PUT /api/feedback/recipes/{recipe_id}
 - DELETE /api/feedback/recipes/{recipe_id}
 - POST /api/agent/sessions
+- POST /api/ingredient-substitutions/review
+- POST /api/ingredient-substitutions/suggest
 - GET /api/agent/sessions
 - GET /api/agent/sessions/{session_id}
 - POST /api/agent/sessions/{session_id}/messages
@@ -464,6 +466,38 @@ deterministic Top-1 ranker. Per-query results have a bounded 24-hour process
 cache. Missing configuration or named provider errors return visibly labelled
 fixture/degraded results; no invented candidate is substituted. Candidate lists
 and raw provider payloads are absent from this user-facing contract.
+
+## Food questions and ingredient substitutions
+
+`POST /api/ingredient-substitutions/review` accepts `source_ingredient`,
+`candidates` and an explicit boolean `requires_halal`; `/suggest` accepts
+`source_ingredient`, optional `use_context`, and the same required flag.
+Missing or null flags produce 422. Both endpoints require the active household's
+CreatePlan permission and CSRF token. Suggestions additionally require the
+configured OpenAI provider; unavailable providers return 503.
+
+Model candidates are only proposals. Exact reviewed aliases resolve them to
+catalog ingredients; unknown source identities return no candidates. Without a
+named eater, filtering includes every member's allergies and exclusions,
+including self-only allergies. Ingredient records do not currently certify diet
+compatibility, so a declared member diet returns no verified substitutions.
+Unknown allergen facts fail closed for the relevant limit; halal requires an
+explicit verified `halal` record, never an unknown status. The model client's
+timeout follows the runtime OpenAI timeout setting.
+
+Catalog nutrition ranking is deterministic and names each recipe and catalog
+serving. Ranking direction is attached to the selected nutrient, not another
+nutrient mentioned in the question. Recognized substitution failures return a
+bounded unavailable answer rather than falling through to a free-form web answer.
+
+Web food Q&A is limited to qualitative culinary knowledge. Nutrition quantities,
+diet compatibility, allergens and halal conclusions require catalog tools;
+unavailable evidence is not filled in by the model. The web service rejects
+numeric/safety requests and responses using conservative lexical guards, and
+requires returned HTTP(S) citations. These citations identify retrieved sources,
+not proof that the generated prose is correct. The guard is not a general
+semantic verifier; unsupported wording may be missed, so live adversarial
+accuracy remains unverified. The decision boundary is ADR-0096.
 
 ## Recipe Recommendations
 
