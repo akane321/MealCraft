@@ -161,6 +161,9 @@ Approved tools should expose typed contracts for:
 Tool results are evidence. The Agent may summarize them but may not silently
 edit numeric results or emit a free-form Shopping List as authoritative output.
 
+Food questions follow the catalog-first, citation-bearing web fallback in the
+[External Retrieval and RAG contract](external-retrieval-rag.md#food-question-fallback).
+
 ## Session, run and state model
 
 Keep `AuthSession`, long-lived `AgentSession`, single-action `AgentRun` and

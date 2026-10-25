@@ -1,5 +1,5 @@
 from collections.abc import Generator
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from urllib.error import URLError
 
@@ -228,15 +228,18 @@ def test_recommendations_apply_hard_filters_and_return_score_reasons(recipe_clie
     response = recipe_client.post(
         "/api/recommendations/recipes",
         json={
-            "household_size": 2,
-            "max_cooking_time_minutes": 45,
-            "allergens": ["soy"],
-            "health_preferences": ["low-sodium"],
-            "nutrition_targets": {"calories_kcal": 500, "protein_g": 40},
-            "available_ingredients": [
-                {"normalized_name": "lemon", "quantity": None, "unit": None},
-                {"normalized_name": "chicken_breast", "quantity": 150, "unit": "g"},
-            ],
+            "requires_halal": False,
+            **{
+                "household_size": 2,
+                "max_cooking_time_minutes": 45,
+                "allergens": ["soy"],
+                "health_preferences": ["low-sodium"],
+                "nutrition_targets": {"calories_kcal": 500, "protein_g": 40},
+                "available_ingredients": [
+                    {"normalized_name": "lemon", "quantity": None, "unit": None},
+                    {"normalized_name": "chicken_breast", "quantity": 150, "unit": "g"},
+                ],
+            },
         },
     )
 
@@ -253,7 +256,10 @@ def test_recommendations_apply_hard_filters_and_return_score_reasons(recipe_clie
 def test_an_allergen_nobody_checked_for_excludes_every_recipe(recipe_client: TestClient) -> None:
     # mustard is outside data/ingredients/allergen-vocabulary.json, so no recipe
     # can be shown to be free of it: unknown is excluded, not admitted.
-    response = recipe_client.post("/api/recommendations/recipes", json={"household_size": 2, "allergens": ["mustard"]})
+    response = recipe_client.post(
+        "/api/recommendations/recipes",
+        json={"requires_halal": False, **{"household_size": 2, "allergens": ["mustard"]}},
+    )
 
     assert response.status_code == 200
     payload = response.json()
@@ -265,10 +271,13 @@ def test_recommendations_enforce_budget_with_fixture_product_costs(recipe_client
     response = recipe_client.post(
         "/api/recommendations/recipes",
         json={
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "budget_per_meal_sgd": 4.3,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "budget_per_meal_sgd": 4.3,
+                "pricing_mode": "fixture",
+            },
         },
     )
 
@@ -294,12 +303,15 @@ def test_known_pantry_quantity_is_deducted_but_unknown_quantity_is_not(recipe_cl
     response = recipe_client.post(
         "/api/recommendations/recipes",
         json={
-            "household_size": 2,
-            "max_cooking_time_minutes": 35,
-            "available_ingredients": [
-                {"normalized_name": "chicken_breast", "quantity": 300, "unit": "g"},
-                {"normalized_name": "lemon", "quantity": None, "unit": None},
-            ],
+            "requires_halal": False,
+            **{
+                "household_size": 2,
+                "max_cooking_time_minutes": 35,
+                "available_ingredients": [
+                    {"normalized_name": "chicken_breast", "quantity": 300, "unit": "g"},
+                    {"normalized_name": "lemon", "quantity": None, "unit": None},
+                ],
+            },
         },
     )
 
@@ -326,9 +338,12 @@ def test_recommendation_rejects_known_quantity_without_unit(recipe_client: TestC
     response = recipe_client.post(
         "/api/recommendations/recipes",
         json={
-            "available_ingredients": [
-                {"normalized_name": "lemon", "quantity": 1, "unit": None},
-            ]
+            "requires_halal": False,
+            **{
+                "available_ingredients": [
+                    {"normalized_name": "lemon", "quantity": 1, "unit": None},
+                ]
+            },
         },
     )
 
@@ -801,14 +816,17 @@ def test_weekly_plan_is_persisted_without_consecutive_repeats(recipe_client: Tes
     response = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-01",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "weekly_budget_sgd": 40,
-            "pricing_mode": "fixture",
-            "available_ingredients": [
-                {"normalized_name": "chicken_breast", "quantity": 300, "unit": "g"},
-            ],
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-01",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "weekly_budget_sgd": 40,
+                "pricing_mode": "fixture",
+                "available_ingredients": [
+                    {"normalized_name": "chicken_breast", "quantity": 300, "unit": "g"},
+                ],
+            },
         },
     )
 
@@ -842,11 +860,14 @@ def test_weekly_plan_respects_allergen_filter_and_explains_unavoidable_repeat(
     response = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-08",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "allergens": ["soy"],
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-08",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "allergens": ["soy"],
+                "pricing_mode": "fixture",
+            },
         },
     )
 
@@ -878,7 +899,7 @@ def test_live_plan_selects_offline_and_only_checks_the_final_basket(
     monkeypatch.setattr(provider_module, "urlopen", offline)
     response = recipe_client.post(
         "/api/plans/generate",
-        json={"start_date": "2026-09-08", "household_size": 2, "pricing_mode": "live"},
+        json={"requires_halal": False, **{"start_date": "2026-09-08", "household_size": 2, "pricing_mode": "live"}},
     )
 
     assert response.status_code == 201
@@ -894,9 +915,12 @@ def test_weekly_plan_returns_422_when_no_recipe_meets_hard_constraints(recipe_cl
     response = recipe_client.post(
         "/api/plans/generate",
         json={
-            "household_size": 2,
-            "max_cooking_time_minutes": 20,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "household_size": 2,
+                "max_cooking_time_minutes": 20,
+                "pricing_mode": "fixture",
+            },
         },
     )
 
@@ -909,11 +933,14 @@ def test_meal_checkin_is_idempotent_and_dashboard_counts_completed_meals(recipe_
     generated = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-15",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "pricing_mode": "fixture",
-            "nutrition_targets": {"calories_kcal": 500, "protein_g": 35},
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-15",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "pricing_mode": "fixture",
+                "nutrition_targets": {"calories_kcal": 500, "protein_g": 35},
+            },
         },
     )
     assert generated.status_code == 201
@@ -963,9 +990,12 @@ def test_meal_checkin_rejects_unknown_entry_and_invalid_status(recipe_client: Te
     generated = recipe_client.post(
         "/api/plans/generate",
         json={
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "pricing_mode": "fixture",
+            },
         },
     )
     plan_id = generated.json()["id"]
@@ -987,10 +1017,12 @@ def test_meal_checkin_rejects_unknown_entry_and_invalid_status(recipe_client: Te
 def test_a_weekly_total_equal_to_the_budget_is_within_it_to_the_cent(recipe_client: TestClient) -> None:
     # ADR-0021: budgets are compared in whole cents on every path.
     request = {"start_date": "2026-09-08", "household_size": 2, "pricing_mode": "fixture"}
-    unbudgeted = recipe_client.post("/api/plans/generate", json=request).json()
+    unbudgeted = recipe_client.post("/api/plans/generate", json={"requires_halal": False, **request}).json()
     total = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
 
-    exact = recipe_client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": total}).json()
+    exact = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**request, "weekly_budget_sgd": total}}
+    ).json()
 
     assert exact["grocery_estimate"]["purchase_total_sgd"] <= total
     assert exact["grocery_estimate"]["within_weekly_budget"] is True
@@ -1000,11 +1032,14 @@ def _generate_replanning_fixture(recipe_client: TestClient, start_date: str) -> 
     response = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": start_date,
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "weekly_budget_sgd": 60,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": start_date,
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "weekly_budget_sgd": 60,
+                "pricing_mode": "fixture",
+            },
         },
     )
     assert response.status_code == 201
@@ -1189,6 +1224,266 @@ def test_household_profile_is_versioned_and_merges_member_hard_constraints(
     assert stale.status_code == 409
 
 
+def test_model_substitution_suggestion_route_filters_catalog_candidates_for_household(
+    recipe_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.api.routes import ingredient_substitutions
+
+    override_database = app.dependency_overrides[get_db_session]
+    database_generator = override_database()
+    database = next(database_generator)
+    try:
+        database.add_all(
+            [
+                Ingredient(normalized_name="butter", display_name="Butter", allergens=["milk"]),
+                Ingredient(normalized_name="peanut_oil", display_name="Peanut oil", allergens=["peanut"]),
+                Ingredient(normalized_name="olive_oil", display_name="Olive oil", allergens=[]),
+                Ingredient(normalized_name="sunflower_oil", display_name="Sunflower oil", allergens=[]),
+            ]
+        )
+        database.commit()
+    finally:
+        database_generator.close()
+
+    profile_payload = _household_profile_payload()
+    profile_payload["members"][0]["allergens"] = ["peanut"]
+    profile_payload["members"][0]["excluded_ingredients"] = ["olive_oil"]
+    assert recipe_client.post("/api/household-profiles", json=profile_payload).status_code == 201
+
+    class FakeGenerator:
+        def __init__(self, **_kwargs):
+            pass
+
+        def suggest(self, source_ingredient, *, use_context=None):
+            assert source_ingredient == "butter"
+            assert use_context == "for frying"
+            return ["peanut oil", "olive oil", "sunflower oil", "butter"]
+
+    monkeypatch.setattr(ingredient_substitutions, "OpenAISubstituteGenerator", FakeGenerator)
+    monkeypatch.setitem(
+        app.dependency_overrides,
+        get_settings,
+        lambda: config.Settings(
+            agent_parser_provider="openai", openai_api_key=SecretStr("unused"), openai_model="test"
+        ),
+    )
+
+    response = recipe_client.post(
+        "/api/ingredient-substitutions/suggest",
+        json={"source_ingredient": "butter", "use_context": "for frying", "requires_halal": False},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"safe_candidates": [{"ingredient_id": "sunflower_oil", "display_name": "Sunflower oil"}]}
+
+
+def test_external_recipe_search_route_reviews_and_persists_candidate_privately(
+    recipe_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.api.routes import external_recipes
+    from app.models.platform import OperationRun
+    from app.repositories.operations import OperationsRepository
+    from app.services.external_recipe_intake import ExternalIngredientLine, ExternalRecipeDraft
+    from app.services.operations import OperationsService
+
+    override_database = app.dependency_overrides[get_db_session]
+    database_generator = override_database()
+    database = next(database_generator)
+    try:
+        database.add_all(
+            [
+                Ingredient(normalized_name="tofu", display_name="Tofu", allergens=["soy"]),
+                Ingredient(normalized_name="soba_noodles", display_name="Soba noodles", allergens=["gluten"]),
+            ]
+        )
+        database.commit()
+    finally:
+        database_generator.close()
+
+    draft = ExternalRecipeDraft(
+        title="Ginger Tofu Bowl",
+        source_url="https://recipes.example.test/ginger-tofu",
+        source_tier=2,
+        license="Unverified; structured facts only; source steps paraphrased",
+        retrieved_at=datetime(2026, 10, 21, tzinfo=UTC),
+        steps_basis="rewritten",
+        servings=2,
+        servings_basis="stated",
+        prep_time_minutes=10,
+        cook_time_minutes=20,
+        time_basis="stated",
+        passive_time_minutes=0,
+        course="main",
+        cuisine="international",
+        meal_types=["dinner"],
+        difficulty="easy",
+        nutrition_per_serving={
+            "calories_kcal": 400,
+            "protein_g": 25,
+            "carbohydrate_g": 45,
+            "fat_g": 12,
+            "sodium_mg": 500,
+            "sugar_g": 7,
+        },
+        ingredients=[
+            ExternalIngredientLine(source_name="tofu", grams=200),
+            ExternalIngredientLine(source_name="soba noodles", grams=100),
+        ],
+        steps=["Cook the noodles, prepare the tofu, and serve together."],
+    )
+
+    class FakeExtractor:
+        def __init__(self, **_kwargs):
+            pass
+
+        def search_and_extract(self, query):
+            assert query == "ginger tofu dinner"
+            return draft
+
+    monkeypatch.setattr(external_recipes, "OpenAIRecipeSearchExtractor", FakeExtractor)
+    monkeypatch.setitem(
+        app.dependency_overrides,
+        get_settings,
+        lambda: config.Settings(
+            agent_parser_provider="openai", openai_api_key=SecretStr("unused"), openai_model="test"
+        ),
+    )
+
+    response = recipe_client.post(
+        "/api/external-recipes/search-and-intake",
+        json={"query": "ginger tofu dinner", "requires_halal": False},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["admitted"] is True
+    assert payload["review"]["mapping_coverage"] == 1
+    assert payload["review"]["eligible_for_household"] is True
+
+    override_database = app.dependency_overrides[get_db_session]
+    database_generator = override_database()
+    database = next(database_generator)
+    try:
+        persisted = database.scalars(select(Recipe).where(Recipe.slug == payload["recipe_slug"])).one()
+        membership = database.scalars(select(HouseholdMembership)).one()
+        assert persisted.owner_household_id == membership.household_id
+        # Model-extracted nutrition (400 kcal in this fixture) is replaced by release nutrient
+        # values multiplied by ingredient grams and divided by servings.
+        assert float(persisted.nutrition.calories_kcal) == 193.5
+        assert persisted.source["url"] == "https://recipes.example.test/ginger-tofu"
+        assert persisted.source["tier"] == 2
+        operation = database.scalars(
+            select(OperationRun).where(OperationRun.run_type == "external_recipe_intake")
+        ).one()
+        tasks = OperationsService(OperationsRepository(database), config.Settings()).tasks(
+            kind="intake", status=None, since=None, until=None, offset=0, limit=10
+        )
+        detail = OperationsService(OperationsRepository(database), config.Settings()).task_detail(
+            "intake", operation.id
+        )
+        assert tasks.total == 1
+        assert tasks.items[0].label == "External recipe: Ginger Tofu Bowl"
+        assert detail is not None
+        assert [stage["stage"] for stage in detail.trace["stages"]] == [
+            "search_and_extract",
+            "ingredient_mapping",
+            "household_admission_review",
+            "private_persistence",
+        ]
+        assert detail.validation["admitted"] is True
+    finally:
+        database_generator.close()
+
+
+def test_external_recipe_block_returns_similar_household_safe_catalog_dishes(
+    recipe_client: TestClient,
+) -> None:
+    from app.services.external_recipe_intake import ExternalIngredientLine, ExternalRecipeDraft
+
+    override_database = app.dependency_overrides[get_db_session]
+    database_generator = override_database()
+    database = next(database_generator)
+    try:
+        database.add(Ingredient(normalized_name="peanut", display_name="Peanut", allergens=["peanut"]))
+        database.commit()
+    finally:
+        database_generator.close()
+
+    profile_payload = _household_profile_payload()
+    profile_payload["members"][0]["allergens"] = ["peanut"]
+    assert recipe_client.post("/api/household-profiles", json=profile_payload).status_code == 201
+
+    draft = ExternalRecipeDraft(
+        title="Lemon Chicken",
+        source_url="https://recipes.example.test/lemon-chicken-with-peanuts",
+        source_tier=2,
+        license="Unverified; structured facts only; source steps paraphrased",
+        retrieved_at=datetime(2026, 10, 22, tzinfo=UTC),
+        steps_basis="rewritten",
+        servings=2,
+        servings_basis="stated",
+        prep_time_minutes=10,
+        cook_time_minutes=20,
+        time_basis="stated",
+        passive_time_minutes=0,
+        course="main",
+        cuisine="international",
+        meal_types=["dinner"],
+        difficulty="easy",
+        nutrition_per_serving={
+            "calories_kcal": 400,
+            "protein_g": 25,
+            "carbohydrate_g": 45,
+            "fat_g": 12,
+            "sodium_mg": 500,
+            "sugar_g": 7,
+        },
+        ingredients=[ExternalIngredientLine(source_name="peanut", grams=20)],
+        steps=["Cook the chicken, add the peanuts, and serve."],
+    )
+
+    response = recipe_client.post(
+        "/api/external-recipes/intake",
+        json={"draft": draft.model_dump(mode="json"), "requires_halal": False},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["admitted"] is False
+    assert payload["review"]["eligible_for_household"] is False
+    assert "peanut" in payload["review"]["safety_conflicts"]
+    assert payload["suggestions"] == [{"slug": "lemon-chicken", "title": "Lemon Chicken"}]
+
+
+def test_external_recipe_search_failure_is_saved_as_an_operations_trace(
+    recipe_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.models.platform import OperationRun
+    from app.repositories.operations import OperationsRepository
+    from app.services.operations import OperationsService
+
+    monkeypatch.setitem(app.dependency_overrides, get_settings, lambda: config.Settings(openai_api_key=None))
+    response = recipe_client.post(
+        "/api/external-recipes/search-and-intake", json={"query": "ginger tofu", "requires_halal": False}
+    )
+    assert response.status_code == 503
+    assert response.json()["detail"]["reason"] == "api_key_missing"
+    assert response.json()["detail"]["suggestions"] == [{"slug": "tofu-soba", "title": "Tofu Soba"}]
+
+    database_generator = app.dependency_overrides[get_db_session]()
+    database = next(database_generator)
+    try:
+        run = database.scalars(select(OperationRun).where(OperationRun.run_type == "external_recipe_intake")).one()
+        assert run.status == "failed"
+        assert run.error_code == "api_key_missing"
+        detail = OperationsService(OperationsRepository(database), config.Settings()).task_detail("intake", run.id)
+        assert detail is not None
+        assert detail.trace["stages"][0]["stage"] == "search_and_extract"
+        assert detail.trace["stages"][0]["status"] == "failed"
+    finally:
+        database_generator.close()
+
+
 def test_household_profile_generates_traceable_plan_and_explains_replanning(
     recipe_client: TestClient,
 ) -> None:
@@ -1243,10 +1538,13 @@ def test_private_routes_require_authentication_and_reject_cross_household_ids(
     plan = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-12-01",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": "2026-12-01",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "pricing_mode": "fixture",
+            },
         },
     ).json()
     agent_session = recipe_client.post(
@@ -1325,10 +1623,13 @@ def test_plan_writes_enforce_create_plan_action(
     response = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-12-08",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": "2026-12-08",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "pricing_mode": "fixture",
+            },
         },
     )
 
@@ -1370,10 +1671,13 @@ def test_check_in_writes_enforce_check_in_action(
     plan = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-12-15",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": "2026-12-15",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "pricing_mode": "fixture",
+            },
         },
     ).json()
     _set_authenticated_household_role(role)
@@ -1405,10 +1709,13 @@ def test_authorized_write_still_requires_csrf(recipe_client: TestClient) -> None
         response = recipe_client.post(
             "/api/plans/generate",
             json={
-                "start_date": "2026-12-22",
-                "household_size": 2,
-                "max_cooking_time_minutes": 60,
-                "pricing_mode": "fixture",
+                "requires_halal": False,
+                **{
+                    "start_date": "2026-12-22",
+                    "household_size": 2,
+                    "max_cooking_time_minutes": 60,
+                    "pricing_mode": "fixture",
+                },
             },
         )
     finally:
@@ -1677,7 +1984,11 @@ def test_an_agent_run_stores_the_parser_configuration(recipe_client: TestClient)
     session = recipe_client.post("/api/agent/sessions", json={"message": "Plan for 2 people"}).json()
     runs = recipe_client.get(f"/api/agent/sessions/{session['id']}/runs").json()
     items = runs["items"] if isinstance(runs, dict) else runs
-    assert items and items[0]["run_config"] == {"parser": "fixture", "parser_model": None}
+    assert items
+    assert items[0]["run_config"]["parser"] == "fixture"
+    assert items[0]["run_config"]["parser_model"] is None
+    assert items[0]["run_config"]["api_cost_estimate_status"] == "estimated"
+    assert items[0]["run_config"]["api_cost_estimate_usd"] == "0"
 
 
 def test_the_live_parser_can_be_built_against_the_catalog(recipe_client: TestClient, monkeypatch) -> None:
@@ -1731,6 +2042,36 @@ def _openai_answered_in_process(monkeypatch: pytest.MonkeyPatch, extraction: dic
             return httpx2.Response(
                 200, json={"object": "list", "data": vectors, "model": body["model"], "usage": usage}
             )
+        if body.get("tools"):
+            # Scope classification runs before constraint parsing and uses the bounded tool scheduler.
+            # Return a valid route tool call so this fixture exercises the normal planning path.
+            route = next(
+                tool["function"]["name"]
+                for tool in body["tools"]
+                if tool["function"]["name"] == "route_planning_request"
+            )
+            message = {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": "call_scope",
+                        "type": "function",
+                        "function": {"name": route, "arguments": json.dumps({"supported_segments": []})},
+                    }
+                ],
+            }
+            return httpx2.Response(
+                200,
+                json={
+                    "id": "chatcmpl-scope-test",
+                    "object": "chat.completion",
+                    "created": 0,
+                    "model": body["model"],
+                    "choices": [{"index": 0, "finish_reason": "tool_calls", "message": message}],
+                    "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
+                },
+            )
         message = {"role": "assistant", "content": json.dumps(extraction)}
         return httpx2.Response(
             200,
@@ -1758,9 +2099,8 @@ def _latest_run(recipe_client: TestClient, session_id: int) -> dict:
 
 
 def test_a_turn_records_every_model_request_on_its_run(recipe_client: TestClient, monkeypatch) -> None:
-    """In OpenAI mode agent_runs.used_llm_calls stayed 0. A turn now records what it sent: the parser's chat
-    request, then one embedding request for every word it could not place (not one each), sent as text so no
-    tokenizer has to be downloaded."""
+    """In OpenAI mode the run records both scope and constraint chat requests, then one embedding request for
+    every word it could not place (not one each), sent as text so no tokenizer has to be downloaded."""
     sent = _openai_answered_in_process(
         monkeypatch, {"household_size": 2, "excluded_ingredients": ["taugeh", "belacan"]}
     )
@@ -1769,15 +2109,19 @@ def test_a_turn_records_every_model_request_on_its_run(recipe_client: TestClient
         "/api/agent/sessions", json={"message": "Plan dinners for two, no taugeh or belacan"}
     ).json()
 
-    assert [item["path"] for item in sent] == ["/v1/chat/completions", "/v1/embeddings"]
-    assert sent[1]["body"]["input"] == ["taugeh", "belacan"]
+    assert [item["path"] for item in sent] == [
+        "/v1/chat/completions",
+        "/v1/chat/completions",
+        "/v1/embeddings",
+    ]
+    assert sent[2]["body"]["input"] == ["taugeh", "belacan"]
     run = _latest_run(recipe_client, session["id"])
-    assert run["used_llm_calls"] == 2
+    assert run["used_llm_calls"] == 3
     assert run["used_llm_calls"] <= run["max_llm_calls"]
 
 
 def test_a_retried_request_is_counted_and_a_fallback_is_recorded(recipe_client: TestClient, monkeypatch) -> None:
-    """A model that does not answer is asked twice (the SDK retries once), and both requests count; the rules
+    """Scope classification fails once and constraint parsing retries once; all three requests count. The rules
     then read the turn, which the run records for the console's fallback figure."""
     import httpx2
 
@@ -1794,9 +2138,9 @@ def test_a_retried_request_is_counted_and_a_fallback_is_recorded(recipe_client: 
 
     session = recipe_client.post("/api/agent/sessions", json={"message": "Plan for 2 people"}).json()
 
-    assert [item["path"] for item in sent] == ["/v1/chat/completions"] * 2
+    assert [item["path"] for item in sent] == ["/v1/chat/completions"] * 3
     run = _latest_run(recipe_client, session["id"])
-    assert run["used_llm_calls"] == 2
+    assert run["used_llm_calls"] == 3
     assert run["run_config"]["model_fell_back"] is True
     # A turn the rules had to read in the model's place is what "degraded" means on the console.
     assert (run["status"], run["termination_reason_code"]) == ("degraded", "MODEL_FALLBACK")
@@ -1806,16 +2150,16 @@ def test_a_retried_request_is_counted_and_a_fallback_is_recorded(recipe_client: 
 def test_a_swap_records_its_embedding_request_on_its_run(recipe_client: TestClient, monkeypatch) -> None:
     sent = _openai_answered_in_process(monkeypatch, {"household_size": 2, "budget_per_meal_sgd": 20})
     created, result = _plan_with_evidence(recipe_client)
-    assert result["run"]["used_llm_calls"] == 0  # saving the plan asks no model
+    assert result["run"]["used_llm_calls"] == 0  # fixture mode sends no model request when saving the plan
     sent.clear()
 
     recipe_client.post(
         f"/api/agent/sessions/{created['id']}/messages", json={"message": "Replace day 3 with something with tofu"}
     )
 
-    assert [item["path"] for item in sent] == ["/v1/embeddings"]
-    assert sent[0]["body"]["input"] == ["tofu"]  # the request as text, not token ids
-    assert _latest_run(recipe_client, created["id"])["used_llm_calls"] == 1
+    assert [item["path"] for item in sent] == ["/v1/chat/completions", "/v1/embeddings"]
+    assert sent[1]["body"]["input"] == ["tofu"]  # the request as text, not token ids
+    assert _latest_run(recipe_client, created["id"])["used_llm_calls"] == 2
 
 
 def _embeddings_unavailable(monkeypatch: pytest.MonkeyPatch, sent: list[dict]) -> None:
@@ -1852,9 +2196,13 @@ def test_a_swap_whose_embedding_request_failed_is_recorded_as_a_fallback(
 
     assert reply.status_code == 200
     assert reply.json()["pending_replan"] is not None  # the swap still came
-    assert [item["path"] for item in sent] == ["/v1/embeddings"] * 2
+    assert [item["path"] for item in sent] == [
+        "/v1/chat/completions",
+        "/v1/embeddings",
+        "/v1/embeddings",
+    ]
     run = _latest_run(recipe_client, created["id"])
-    assert run["used_llm_calls"] == 2
+    assert run["used_llm_calls"] == 3
     assert run["run_config"]["model_fell_back"] is True
 
 
@@ -1868,9 +2216,14 @@ def test_a_turn_whose_embedding_request_failed_is_recorded_as_a_fallback(
 
     session = recipe_client.post("/api/agent/sessions", json={"message": "Dinners for two, no taugeh"}).json()
 
-    assert [item["path"] for item in sent] == ["/v1/chat/completions", "/v1/embeddings", "/v1/embeddings"]
+    assert [item["path"] for item in sent] == [
+        "/v1/chat/completions",
+        "/v1/chat/completions",
+        "/v1/embeddings",
+        "/v1/embeddings",
+    ]
     run = _latest_run(recipe_client, session["id"])
-    assert run["used_llm_calls"] == 3
+    assert run["used_llm_calls"] == 4
     assert run["run_config"]["model_fell_back"] is True
 
 

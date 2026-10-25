@@ -57,4 +57,7 @@ class RecipeService:
             meal_types=list(recipe.meal_types) if recipe.meal_types is not None else None,
             prep_time_minutes=recipe.prep_time_minutes,
             cook_time_minutes=recipe.cook_time_minutes,
+            flavor_tags=list(recipe.flavor_tags) if recipe.flavor_tags is not None else None,
+            halal_status=recipe.halal_status,
+            unknown_safety=list(recipe.unknown_safety) if recipe.unknown_safety is not None else None,
         )

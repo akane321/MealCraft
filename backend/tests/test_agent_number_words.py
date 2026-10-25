@@ -10,6 +10,38 @@ def parse(message: str):
     )
 
 
+def test_rule_parser_extracts_soft_preferences_separately_from_hard_constraints() -> None:
+    extraction = parse("Keep breakfast the same daily, add more vegetables, and I want fragrant dinners")
+
+    assert extraction.planning_preferences.repeat_allowed_meals == ["breakfast"]
+    assert extraction.planning_preferences.more_vegetables is True
+    assert extraction.planning_preferences.flavor_boosts[0].flavor == "fragrant"
+    assert extraction.allergens is None
+    assert extraction.excluded_ingredients is None
+
+
+def test_soft_preferences_merge_into_agent_state_without_changing_hard_limits() -> None:
+    from app.agent.workflow import AgentConstraintWorkflow
+
+    current = AgentConstraintState(allergens=["peanut"], weekly_budget_sgd=80)
+    extraction = parse("Keep breakfast the same daily, add more vegetables")
+    merged = AgentConstraintWorkflow._merge_constraints(current, extraction)
+
+    assert merged.planning_preferences.repeat_allowed_meals == ["breakfast"]
+    assert merged.planning_preferences.more_vegetables is True
+    assert merged.allergens == ["peanut"]
+    assert merged.weekly_budget_sgd == 80
+
+
+def test_day_and_meal_scoped_flavor_preference_is_preserved() -> None:
+    extraction = parse("I want a fragrant dinner on Wednesday")
+
+    boost = extraction.planning_preferences.flavor_boosts[0]
+    assert boost.flavor == "fragrant"
+    assert boost.weekdays == ["wednesday"]
+    assert boost.meal_types == ["dinner"]
+
+
 @pytest.mark.parametrize(
     ("message", "size", "weekly"),
     [
@@ -26,6 +58,87 @@ def test_household_size_and_weekly_budget_in_words(message, size, weekly) -> Non
     extraction = parse(message)
     assert extraction.household_size == size
     assert extraction.weekly_budget_sgd == weekly
+
+
+def test_nutrition_targets_are_not_mistaken_for_household_size() -> None:
+    extraction = parse("For two people, aim for 600 kcal and 30 g protein")
+
+    assert extraction.household_size == 2
+    assert extraction.nutrition_targets.calories_kcal == 600
+    assert extraction.nutrition_targets.protein_g == 30
+
+
+@pytest.mark.parametrize(
+    ("message", "size", "health"),
+    [
+        ("我们一家五口吃。", 5, None),
+        ("For 2 people, keep meals low-sodium and low-sugar.", 2, ["low-sodium", "low-sugar"]),
+    ],
+)
+def test_understands_common_household_and_hyphenated_health_phrasing(message, size, health) -> None:
+    extraction = parse(message)
+
+    assert extraction.household_size == size
+    assert extraction.health_preferences == health
+
+
+def test_extracts_chained_exclusions_and_does_not_copy_pantry_quantities() -> None:
+    exclusions = parse("We are 3. Please avoid beef and mushrooms.")
+    pantry = parse("Four people, 家里有糙米500克和豆腐。")
+
+    assert exclusions.excluded_ingredients == ["beef", "mushroom"]
+    assert [(item.normalized_name, item.quantity) for item in pantry.available_ingredients] == [
+        ("brown_rice", 500),
+        ("firm_tofu", None),
+    ]
+
+
+def test_recognizes_short_quantity_and_unknown_quantity_replies() -> None:
+    from app.agent.workflow import AgentConstraintWorkflow
+
+    current = AgentConstraintState(household_size=2, available_ingredients=[{"normalized_name": "brown_rice"}])
+    parser = RuleBasedConstraintParser()
+    quantity = parser.parse("还剩750克。", current=current, acknowledged_unknowns=[], history=[])
+    unknown = AgentConstraintWorkflow(parser).run(
+        "I don't know the amount.", current=current, acknowledged_unknowns=[], history=[]
+    )
+
+    assert quantity.available_ingredients[0].quantity == 750
+    assert unknown["missing_fields"] == []
+
+
+def test_understands_serving_budgets_and_cooking_time_phrasing() -> None:
+    served = parse("Dinner should serve seven.")
+    budget = parse("We are 5; the whole week must cost no more than S$125.")
+    time = parse("A 45-minute cooking limit for four people.")
+
+    assert served.household_size == 7
+    assert budget.weekly_budget_sgd == 125
+    assert time.max_cooking_time_minutes == 45
+
+
+def test_reads_hyphenated_cooking_limit_and_fridge_inventory() -> None:
+    time = parse("A 45-minute cooking limit for four people.")
+    pantry = parse("For four, there is 1 l milk in the fridge.")
+
+    assert time.household_size == 4
+    assert time.max_cooking_time_minutes == 45
+    assert pantry.available_ingredients[0].normalized_name == "milk"
+    assert pantry.available_ingredients[0].quantity == 1
+
+
+def test_dietary_and_pantry_terms_keep_their_meaning() -> None:
+    vegetarian = parse("两个人吃素。")
+    dairy_free = parse("五个人，不吃乳制品。")
+    pantry = parse("For four, there is 1 l milk in the fridge.")
+    lighter = parse("Three people prefer lighter meals.")
+
+    assert vegetarian.dietary_preferences == ["vegetarian"]
+    assert dairy_free.dietary_preferences == ["dairy-free"]
+    assert dairy_free.excluded_ingredients is None
+    assert pantry.available_ingredients[0].normalized_name == "milk"
+    assert lighter.planning_preferences.lighter is True
+    assert lighter.planning_preferences.flavor_boosts == []
 
 
 @pytest.mark.parametrize("opening", ["We're two", "We are two", "We\u2019re two", "We're 2"])
@@ -58,7 +171,7 @@ def test_we_are_counts_must_describe_the_whole_household(message: str) -> None:
     ("message", "excluded"),
     [
         ("Dinners for two. We don't eat pork.", ["pork"]),
-        ("We don\u2019t eat pork or beef", ["pork"]),
+        ("We don\u2019t eat pork or beef", ["beef", "pork"]),
         ("Plan for 2 people but exclude mushrooms.", ["mushroom"]),
         ("No chicken breast this week", ["chicken_breast"]),
         ("No chicken please", ["chicken"]),

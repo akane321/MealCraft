@@ -56,6 +56,8 @@ services:
       # held-out freeze command runs the authoring checker rather than restating
       # its rules, and that file has to exist inside the container too.
       - ./scripts:/app/scripts:ro
+      # Keep this disabled backend entry separate from the repository scripts mount.
+      - ./backend/scripts/evaluate_sprint2_live_dev.py:/app/backend/scripts/evaluate_sprint2_live_dev.py:ro
     depends_on:
       database:
         condition: service_healthy

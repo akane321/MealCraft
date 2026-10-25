@@ -1,0 +1,2094 @@
+[
+  {
+    "id": "cud-001",
+    "category": "household",
+    "language": "en",
+    "message": "Dinner for four, please.",
+    "expected_extraction": {
+      "household_size": 4
+    }
+  },
+  {
+    "id": "cud-002",
+    "category": "household",
+    "language": "zh",
+    "message": "我们一家五口吃。",
+    "expected_extraction": {
+      "household_size": 5
+    }
+  },
+  {
+    "id": "cud-003",
+    "category": "household",
+    "language": "mixed",
+    "message": "Plan for 2 people, 我们两个人。",
+    "expected_extraction": {
+      "household_size": 2
+    }
+  },
+  {
+    "id": "cud-004",
+    "category": "budget",
+    "language": "en",
+    "message": "Weekly budget is S$120 for four people.",
+    "expected_extraction": {
+      "household_size": 4,
+      "weekly_budget_sgd": 120
+    }
+  },
+  {
+    "id": "cud-005",
+    "category": "budget",
+    "language": "zh",
+    "message": "两个人，一周预算一百新币。",
+    "expected_extraction": {
+      "household_size": 2,
+      "weekly_budget_sgd": 100
+    }
+  },
+  {
+    "id": "cud-006",
+    "category": "budget",
+    "language": "mixed",
+    "message": "For three people, 每餐预算 S$18.",
+    "expected_extraction": {
+      "household_size": 3,
+      "budget_per_meal_sgd": 18
+    }
+  },
+  {
+    "id": "cud-007",
+    "category": "time",
+    "language": "en",
+    "message": "Keep prep and cooking under 45 minutes for 2 people.",
+    "expected_extraction": {
+      "household_size": 2,
+      "max_cooking_time_minutes": 45
+    }
+  },
+  {
+    "id": "cud-008",
+    "category": "time",
+    "language": "zh",
+    "message": "三个人，做饭最多半小时。",
+    "expected_extraction": {
+      "household_size": 3,
+      "max_cooking_time_minutes": 30
+    }
+  },
+  {
+    "id": "cud-009",
+    "category": "allergen",
+    "language": "en",
+    "message": "A family of four; one member is allergic to sesame.",
+    "expected_extraction": {
+      "household_size": 4,
+      "allergens": [
+        "sesame"
+      ]
+    }
+  },
+  {
+    "id": "cud-010",
+    "category": "allergen",
+    "language": "zh",
+    "message": "两个人，其中一人对虾过敏。",
+    "expected_extraction": {
+      "household_size": 2,
+      "allergens": [
+        "shellfish"
+      ]
+    }
+  },
+  {
+    "id": "cud-011",
+    "category": "exclusion",
+    "language": "en",
+    "message": "We are 3. Please avoid beef and mushrooms.",
+    "expected_extraction": {
+      "household_size": 3,
+      "excluded_ingredients": [
+        "beef",
+        "mushroom"
+      ]
+    }
+  },
+  {
+    "id": "cud-012",
+    "category": "exclusion",
+    "language": "zh",
+    "message": "四个人，不吃猪肉和洋葱。",
+    "expected_extraction": {
+      "household_size": 4,
+      "excluded_ingredients": [
+        "onion",
+        "pork"
+      ]
+    }
+  },
+  {
+    "id": "cud-013",
+    "category": "dietary",
+    "language": "en",
+    "message": "For five, make the plan dairy-free and gluten-free.",
+    "expected_extraction": {
+      "household_size": 5,
+      "dietary_preferences": [
+        "dairy-free",
+        "gluten-free"
+      ]
+    }
+  },
+  {
+    "id": "cud-014",
+    "category": "dietary",
+    "language": "zh",
+    "message": "三个人，要纯素和清真。",
+    "expected_extraction": {
+      "household_size": 3,
+      "dietary_preferences": [
+        "vegan"
+      ],
+      "requires_halal": true
+    }
+  },
+  {
+    "id": "cud-015",
+    "category": "health",
+    "language": "en",
+    "message": "For 2 people, choose low-sodium and low-sugar meals.",
+    "expected_extraction": {
+      "household_size": 2,
+      "health_preferences": [
+        "low-sodium",
+        "low-sugar"
+      ]
+    }
+  },
+  {
+    "id": "cud-016",
+    "category": "health",
+    "language": "zh",
+    "message": "两个人，想吃低卡、少盐的菜。",
+    "expected_extraction": {
+      "household_size": 2,
+      "health_preferences": [
+        "low-sodium",
+        "lower-calorie"
+      ]
+    }
+  },
+  {
+    "id": "cud-017",
+    "category": "nutrition",
+    "language": "en",
+    "message": "For two people, aim for 600 kcal and 30 g protein.",
+    "expected_extraction": {
+      "household_size": 2,
+      "nutrition_targets": {
+        "calories_kcal": 600,
+        "protein_g": 30
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-018",
+    "category": "nutrition",
+    "language": "zh",
+    "message": "两个人，每餐钠不超过800毫克。",
+    "expected_extraction": {
+      "household_size": 2,
+      "max_sodium_mg_per_meal": 800
+    }
+  },
+  {
+    "id": "cud-019",
+    "category": "pantry",
+    "language": "en",
+    "message": "For 2 people. We have 1.5 kg chicken breast on hand.",
+    "expected_extraction": {
+      "household_size": 2,
+      "available_ingredients": [
+        {
+          "normalized_name": "chicken_breast",
+          "quantity": 1.5,
+          "unit": "kg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "cud-020",
+    "category": "pantry",
+    "language": "zh",
+    "message": "四个人，家里有糙米500克和豆腐。",
+    "expected_extraction": {
+      "household_size": 4,
+      "available_ingredients": [
+        {
+          "normalized_name": "brown_rice",
+          "quantity": 500,
+          "unit": "g"
+        },
+        {
+          "normalized_name": "firm_tofu"
+        }
+      ]
+    },
+    "expected_missing_fields": [
+      "available_ingredients.firm_tofu.quantity"
+    ]
+  },
+  {
+    "id": "cud-021",
+    "category": "clarification",
+    "language": "en",
+    "message": "I don't know the amount.",
+    "current_constraints": {
+      "household_size": 2,
+      "available_ingredients": [
+        {
+          "normalized_name": "brown_rice"
+        }
+      ]
+    },
+    "expected_extraction": {}
+  },
+  {
+    "id": "cud-022",
+    "category": "clarification",
+    "language": "zh",
+    "message": "还剩750克。",
+    "current_constraints": {
+      "household_size": 2,
+      "available_ingredients": [
+        {
+          "normalized_name": "brown_rice"
+        }
+      ]
+    },
+    "expected_extraction": {
+      "available_ingredients": [
+        {
+          "normalized_name": "brown_rice",
+          "quantity": 750,
+          "unit": "g"
+        }
+      ]
+    }
+  },
+  {
+    "id": "cud-023",
+    "category": "soft-preference",
+    "language": "en",
+    "message": "For 2 people, more vegetables and lighter dinners, please.",
+    "expected_extraction": {
+      "household_size": 2,
+      "planning_preferences": {
+        "more_vegetables": true,
+        "lighter": true
+      }
+    }
+  },
+  {
+    "id": "cud-024",
+    "category": "soft-preference",
+    "language": "zh",
+    "message": "三个人，晚餐多来点蔬菜，口味想要香辣。",
+    "expected_extraction": {
+      "household_size": 3,
+      "planning_preferences": {
+        "more_vegetables": true,
+        "flavor_boosts": [
+          {
+            "flavor": "spicy",
+            "meal_types": [
+              "dinner"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "cud-025",
+    "category": "repeat",
+    "language": "en",
+    "message": "For 2 people, don't serve any dish twice this week.",
+    "expected_extraction": {
+      "household_size": 2,
+      "max_uses_per_recipe": 1
+    }
+  },
+  {
+    "id": "cud-026",
+    "category": "repeat",
+    "language": "zh",
+    "message": "四个人，这周晚餐不要重样。",
+    "expected_extraction": {
+      "household_size": 4,
+      "max_uses_per_recipe": 1
+    }
+  },
+  {
+    "id": "cud-027",
+    "category": "pricing",
+    "language": "en",
+    "message": "For 3 people, use FairPrice live prices.",
+    "expected_extraction": {
+      "household_size": 3,
+      "pricing_mode": "live"
+    }
+  },
+  {
+    "id": "cud-028",
+    "category": "medical-boundary",
+    "language": "zh",
+    "message": "两个人，给糖尿病患者安排饮食。",
+    "expected_extraction": {
+      "household_size": 2,
+      "medical_request_detected": true
+    },
+    "expect_medical_boundary": true
+  },
+  {
+    "id": "cud-029",
+    "category": "mixed-constraints",
+    "language": "mixed",
+    "message": "For four people, 无麸质, no pork, 每周预算 S$140.",
+    "expected_extraction": {
+      "household_size": 4,
+      "dietary_preferences": [
+        "gluten-free"
+      ],
+      "excluded_ingredients": [
+        "pork"
+      ],
+      "weekly_budget_sgd": 140
+    }
+  },
+  {
+    "id": "cud-030",
+    "category": "mixed-constraints",
+    "language": "mixed",
+    "message": "三个人, peanut allergy, cook within 35 minutes, 低糖。",
+    "expected_extraction": {
+      "household_size": 3,
+      "allergens": [
+        "peanut"
+      ],
+      "max_cooking_time_minutes": 35,
+      "health_preferences": [
+        "low-sugar"
+      ]
+    }
+  },
+  {
+    "id": "cud-031",
+    "category": "household",
+    "language": "en",
+    "message": "Plan meals for 6 people.",
+    "expected_extraction": {
+      "household_size": 6
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-032",
+    "category": "household",
+    "language": "en",
+    "message": "Dinner should serve seven.",
+    "expected_extraction": {
+      "household_size": 7
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-033",
+    "category": "household",
+    "language": "en",
+    "message": "We are 8 people.",
+    "expected_extraction": {
+      "household_size": 8
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-034",
+    "category": "household",
+    "language": "en",
+    "message": "A family of nine needs a weekly plan.",
+    "expected_extraction": {
+      "household_size": 9
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-035",
+    "category": "household",
+    "language": "zh",
+    "message": "请为六个人安排一周菜单。",
+    "expected_extraction": {
+      "household_size": 6
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-036",
+    "category": "household",
+    "language": "zh",
+    "message": "我们家有七口人。",
+    "expected_extraction": {
+      "household_size": 7
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-037",
+    "category": "household",
+    "language": "zh",
+    "message": "八个人一起吃饭。",
+    "expected_extraction": {
+      "household_size": 8
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-038",
+    "category": "household",
+    "language": "zh",
+    "message": "家里九个人，请安排晚餐。",
+    "expected_extraction": {
+      "household_size": 9
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-039",
+    "category": "household",
+    "language": "zh",
+    "message": "我们一家四口。",
+    "expected_extraction": {
+      "household_size": 4
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-040",
+    "category": "household",
+    "language": "zh",
+    "message": "给十个人准备晚饭。",
+    "expected_extraction": {
+      "household_size": 10
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-041",
+    "category": "household",
+    "language": "mixed",
+    "message": "Plan for 3 people, 我们一家三口。",
+    "expected_extraction": {
+      "household_size": 3
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-042",
+    "category": "household",
+    "language": "mixed",
+    "message": "Dinner for 5, 请安排五个人的份量。",
+    "expected_extraction": {
+      "household_size": 5
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-043",
+    "category": "budget",
+    "language": "en",
+    "message": "Weekly budget S$80 for 2 people.",
+    "expected_extraction": {
+      "household_size": 2,
+      "weekly_budget_sgd": 80
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-044",
+    "category": "budget",
+    "language": "en",
+    "message": "Keep each dinner under S$14 for 3 people.",
+    "expected_extraction": {
+      "household_size": 3,
+      "budget_per_meal_sgd": 14
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-045",
+    "category": "budget",
+    "language": "en",
+    "message": "S$5 per person per meal for four people.",
+    "expected_extraction": {
+      "household_size": 4,
+      "budget_per_meal_sgd": 20
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-046",
+    "category": "budget",
+    "language": "en",
+    "message": "We are 5; the whole week must cost no more than S$125.",
+    "expected_extraction": {
+      "household_size": 5,
+      "weekly_budget_sgd": 125
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-047",
+    "category": "budget",
+    "language": "zh",
+    "message": "两个人，每周预算80新币。",
+    "expected_extraction": {
+      "household_size": 2,
+      "weekly_budget_sgd": 80
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-048",
+    "category": "budget",
+    "language": "zh",
+    "message": "三个人，每餐不超过14新币。",
+    "expected_extraction": {
+      "household_size": 3,
+      "budget_per_meal_sgd": 14
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-049",
+    "category": "budget",
+    "language": "zh",
+    "message": "每人每餐5新币，四个人吃。",
+    "expected_extraction": {
+      "household_size": 4,
+      "budget_per_meal_sgd": 20
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-050",
+    "category": "budget",
+    "language": "zh",
+    "message": "五个人，这一周总预算125元。",
+    "expected_extraction": {
+      "household_size": 5,
+      "weekly_budget_sgd": 125
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-051",
+    "category": "budget",
+    "language": "zh",
+    "message": "两个人每顿最多花18块。",
+    "expected_extraction": {
+      "household_size": 2,
+      "budget_per_meal_sgd": 18
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-052",
+    "category": "budget",
+    "language": "mixed",
+    "message": "For 3 people, 每周预算 S$90.",
+    "expected_extraction": {
+      "household_size": 3,
+      "weekly_budget_sgd": 90
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-053",
+    "category": "budget",
+    "language": "mixed",
+    "message": "四个人, keep dinner to S$16 per meal.",
+    "expected_extraction": {
+      "household_size": 4,
+      "budget_per_meal_sgd": 16
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-054",
+    "category": "budget",
+    "language": "mixed",
+    "message": "S$4 per person per dinner, 给两个人做。",
+    "expected_extraction": {
+      "household_size": 2,
+      "budget_per_meal_sgd": 8
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-055",
+    "category": "time",
+    "language": "en",
+    "message": "For two people, cooking takes at most 25 minutes.",
+    "expected_extraction": {
+      "household_size": 2,
+      "max_cooking_time_minutes": 25
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-056",
+    "category": "time",
+    "language": "en",
+    "message": "We are 3; keep cooking below 40 minutes.",
+    "expected_extraction": {
+      "household_size": 3,
+      "max_cooking_time_minutes": 40
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-057",
+    "category": "time",
+    "language": "en",
+    "message": "A 45-minute cooking limit for four people.",
+    "expected_extraction": {
+      "household_size": 4,
+      "max_cooking_time_minutes": 45
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-058",
+    "category": "time",
+    "language": "en",
+    "message": "For five, dinner prep should take half an hour.",
+    "expected_extraction": {
+      "household_size": 5,
+      "max_cooking_time_minutes": 30
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-059",
+    "category": "time",
+    "language": "zh",
+    "message": "两个人，做饭控制在25分钟内。",
+    "expected_extraction": {
+      "household_size": 2,
+      "max_cooking_time_minutes": 25
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-060",
+    "category": "time",
+    "language": "zh",
+    "message": "三个人，烹饪时间最多40分钟。",
+    "expected_extraction": {
+      "household_size": 3,
+      "max_cooking_time_minutes": 40
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-061",
+    "category": "time",
+    "language": "zh",
+    "message": "四个人，做饭不超过45分钟。",
+    "expected_extraction": {
+      "household_size": 4,
+      "max_cooking_time_minutes": 45
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-062",
+    "category": "time",
+    "language": "zh",
+    "message": "五个人，半小时内能做好的晚餐。",
+    "expected_extraction": {
+      "household_size": 5,
+      "max_cooking_time_minutes": 30
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-063",
+    "category": "time",
+    "language": "zh",
+    "message": "六个人，最多一小时做完。",
+    "expected_extraction": {
+      "household_size": 6,
+      "max_cooking_time_minutes": 60
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-064",
+    "category": "time",
+    "language": "mixed",
+    "message": "For 2 people, 做饭不超过35分钟。",
+    "expected_extraction": {
+      "household_size": 2,
+      "max_cooking_time_minutes": 35
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-065",
+    "category": "time",
+    "language": "mixed",
+    "message": "三个人, dinner in under 50 minutes.",
+    "expected_extraction": {
+      "household_size": 3,
+      "max_cooking_time_minutes": 50
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-066",
+    "category": "time",
+    "language": "mixed",
+    "message": "Cooking for four, 最多半小时。",
+    "expected_extraction": {
+      "household_size": 4,
+      "max_cooking_time_minutes": 30
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-067",
+    "category": "allergen",
+    "language": "en",
+    "message": "For two people, one person has a milk allergy.",
+    "expected_extraction": {
+      "household_size": 2,
+      "allergens": [
+        "dairy"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-068",
+    "category": "allergen",
+    "language": "en",
+    "message": "Three people; someone is allergic to eggs.",
+    "expected_extraction": {
+      "household_size": 3,
+      "allergens": [
+        "egg"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-069",
+    "category": "allergen",
+    "language": "en",
+    "message": "A family of four has a wheat allergy.",
+    "expected_extraction": {
+      "household_size": 4,
+      "allergens": [
+        "gluten"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-070",
+    "category": "allergen",
+    "language": "en",
+    "message": "For five, avoid cross-contact with tree nuts due to an allergy.",
+    "expected_extraction": {
+      "household_size": 5,
+      "allergens": [
+        "tree_nut"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-071",
+    "category": "allergen",
+    "language": "zh",
+    "message": "两个人，其中一人对牛奶过敏。",
+    "expected_extraction": {
+      "household_size": 2,
+      "allergens": [
+        "dairy"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-072",
+    "category": "allergen",
+    "language": "zh",
+    "message": "三个人，有人鸡蛋过敏。",
+    "expected_extraction": {
+      "household_size": 3,
+      "allergens": [
+        "egg"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-073",
+    "category": "allergen",
+    "language": "zh",
+    "message": "四个人，小麦过敏。",
+    "expected_extraction": {
+      "household_size": 4,
+      "allergens": [
+        "gluten"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-074",
+    "category": "allergen",
+    "language": "zh",
+    "message": "五个人，有人对芝麻过敏。",
+    "expected_extraction": {
+      "household_size": 5,
+      "allergens": [
+        "sesame"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-075",
+    "category": "allergen",
+    "language": "zh",
+    "message": "六个人，其中一个对大豆过敏。",
+    "expected_extraction": {
+      "household_size": 6,
+      "allergens": [
+        "soy"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-076",
+    "category": "allergen",
+    "language": "mixed",
+    "message": "For 2 people, 有人对 peanut 过敏。",
+    "expected_extraction": {
+      "household_size": 2,
+      "allergens": [
+        "peanut"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-077",
+    "category": "allergen",
+    "language": "mixed",
+    "message": "三个人, one has a shellfish allergy.",
+    "expected_extraction": {
+      "household_size": 3,
+      "allergens": [
+        "shellfish"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-078",
+    "category": "allergen",
+    "language": "mixed",
+    "message": "Four people, fish allergy for one member.",
+    "expected_extraction": {
+      "household_size": 4,
+      "allergens": [
+        "fish"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-079",
+    "category": "exclusion",
+    "language": "en",
+    "message": "For two people, no pork.",
+    "expected_extraction": {
+      "household_size": 2,
+      "excluded_ingredients": [
+        "pork"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-080",
+    "category": "exclusion",
+    "language": "en",
+    "message": "Three people, please skip tofu.",
+    "expected_extraction": {
+      "household_size": 3,
+      "excluded_ingredients": [
+        "firm_tofu"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-081",
+    "category": "exclusion",
+    "language": "en",
+    "message": "Exclude chicken for four people.",
+    "expected_extraction": {
+      "household_size": 4,
+      "excluded_ingredients": [
+        "chicken"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-082",
+    "category": "exclusion",
+    "language": "en",
+    "message": "For five people, do not use cooking wine.",
+    "expected_extraction": {
+      "household_size": 5,
+      "excluded_ingredients": [
+        "wine_cooking"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-083",
+    "category": "exclusion",
+    "language": "zh",
+    "message": "两个人，不要牛肉。",
+    "expected_extraction": {
+      "household_size": 2,
+      "excluded_ingredients": [
+        "beef"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-084",
+    "category": "exclusion",
+    "language": "zh",
+    "message": "三个人，不放大蒜。",
+    "expected_extraction": {
+      "household_size": 3,
+      "excluded_ingredients": [
+        "garlic"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-085",
+    "category": "exclusion",
+    "language": "zh",
+    "message": "四个人，避免香菜。",
+    "expected_extraction": {
+      "household_size": 4,
+      "excluded_ingredients": [
+        "cilantro"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-086",
+    "category": "exclusion",
+    "language": "zh",
+    "message": "五个人，不吃羊肉。",
+    "expected_extraction": {
+      "household_size": 5,
+      "excluded_ingredients": [
+        "lamb"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-087",
+    "category": "exclusion",
+    "language": "zh",
+    "message": "六个人，不要料酒。",
+    "expected_extraction": {
+      "household_size": 6,
+      "excluded_ingredients": [
+        "wine_cooking"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-088",
+    "category": "exclusion",
+    "language": "mixed",
+    "message": "For 2 people, 不要蘑菇。",
+    "expected_extraction": {
+      "household_size": 2,
+      "excluded_ingredients": [
+        "mushroom"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-089",
+    "category": "exclusion",
+    "language": "mixed",
+    "message": "Three people, no 鸡肉 please.",
+    "expected_extraction": {
+      "household_size": 3,
+      "excluded_ingredients": [
+        "chicken"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-090",
+    "category": "exclusion",
+    "language": "mixed",
+    "message": "四个人, exclude onion.",
+    "expected_extraction": {
+      "household_size": 4,
+      "excluded_ingredients": [
+        "onion"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-091",
+    "category": "dietary",
+    "language": "en",
+    "message": "Vegetarian meals for two people.",
+    "expected_extraction": {
+      "household_size": 2,
+      "dietary_preferences": [
+        "vegetarian"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-092",
+    "category": "dietary",
+    "language": "en",
+    "message": "For three, make everything vegan.",
+    "expected_extraction": {
+      "household_size": 3,
+      "dietary_preferences": [
+        "vegan"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-093",
+    "category": "dietary",
+    "language": "en",
+    "message": "Four people need gluten-free dinners.",
+    "expected_extraction": {
+      "household_size": 4,
+      "dietary_preferences": [
+        "gluten-free"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-094",
+    "category": "dietary",
+    "language": "en",
+    "message": "Dairy-free meals for five, please.",
+    "expected_extraction": {
+      "household_size": 5,
+      "dietary_preferences": [
+        "dairy-free"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-095",
+    "category": "dietary",
+    "language": "zh",
+    "message": "两个人吃素。",
+    "expected_extraction": {
+      "household_size": 2,
+      "dietary_preferences": [
+        "vegetarian"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-096",
+    "category": "dietary",
+    "language": "zh",
+    "message": "三个人，要纯素菜单。",
+    "expected_extraction": {
+      "household_size": 3,
+      "dietary_preferences": [
+        "vegan"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-097",
+    "category": "dietary",
+    "language": "zh",
+    "message": "四个人，要求无麸质。",
+    "expected_extraction": {
+      "household_size": 4,
+      "dietary_preferences": [
+        "gluten-free"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-098",
+    "category": "dietary",
+    "language": "zh",
+    "message": "五个人，不吃乳制品。",
+    "expected_extraction": {
+      "household_size": 5,
+      "dietary_preferences": [
+        "dairy-free"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-099",
+    "category": "dietary",
+    "language": "zh",
+    "message": "六个人，需要清真餐。",
+    "expected_extraction": {
+      "household_size": 6,
+      "requires_halal": true
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-100",
+    "category": "dietary",
+    "language": "mixed",
+    "message": "For 2 people, 素食 only.",
+    "expected_extraction": {
+      "household_size": 2,
+      "dietary_preferences": [
+        "vegetarian"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-101",
+    "category": "dietary",
+    "language": "mixed",
+    "message": "Three people, make the meals halal / 清真.",
+    "expected_extraction": {
+      "household_size": 3,
+      "requires_halal": true
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-102",
+    "category": "dietary",
+    "language": "mixed",
+    "message": "四个人, dairy-free please.",
+    "expected_extraction": {
+      "household_size": 4,
+      "dietary_preferences": [
+        "dairy-free"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-103",
+    "category": "health",
+    "language": "en",
+    "message": "For two, choose lower sodium meals.",
+    "expected_extraction": {
+      "household_size": 2,
+      "health_preferences": [
+        "low-sodium"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-104",
+    "category": "health",
+    "language": "en",
+    "message": "Three people want low-sugar food.",
+    "expected_extraction": {
+      "household_size": 3,
+      "health_preferences": [
+        "low-sugar"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-105",
+    "category": "health",
+    "language": "en",
+    "message": "For four people, keep the meals low calorie.",
+    "expected_extraction": {
+      "household_size": 4,
+      "health_preferences": [
+        "lower-calorie"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-106",
+    "category": "health",
+    "language": "en",
+    "message": "Five people prefer low-sodium and low-sugar dinners.",
+    "expected_extraction": {
+      "household_size": 5,
+      "health_preferences": [
+        "low-sodium",
+        "low-sugar"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-107",
+    "category": "health",
+    "language": "zh",
+    "message": "两个人，少盐。",
+    "expected_extraction": {
+      "household_size": 2,
+      "health_preferences": [
+        "low-sodium"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-108",
+    "category": "health",
+    "language": "zh",
+    "message": "三个人，低糖饮食。",
+    "expected_extraction": {
+      "household_size": 3,
+      "health_preferences": [
+        "low-sugar"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-109",
+    "category": "health",
+    "language": "zh",
+    "message": "四个人，选择低热量菜。",
+    "expected_extraction": {
+      "household_size": 4,
+      "health_preferences": [
+        "lower-calorie"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-110",
+    "category": "health",
+    "language": "zh",
+    "message": "五个人，低盐低糖。",
+    "expected_extraction": {
+      "household_size": 5,
+      "health_preferences": [
+        "low-sodium",
+        "low-sugar"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-111",
+    "category": "health",
+    "language": "zh",
+    "message": "六个人，少油少盐。",
+    "expected_extraction": {
+      "household_size": 6,
+      "health_preferences": [
+        "low-sodium"
+      ],
+      "planning_preferences": {
+        "lighter": true
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-112",
+    "category": "health",
+    "language": "mixed",
+    "message": "For 2 people, low-sodium meals.",
+    "expected_extraction": {
+      "household_size": 2,
+      "health_preferences": [
+        "low-sodium"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-113",
+    "category": "health",
+    "language": "mixed",
+    "message": "三个人, low-sugar please.",
+    "expected_extraction": {
+      "household_size": 3,
+      "health_preferences": [
+        "low-sugar"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-114",
+    "category": "health",
+    "language": "mixed",
+    "message": "Four people, lower calorie 菜肴.",
+    "expected_extraction": {
+      "household_size": 4,
+      "health_preferences": [
+        "lower-calorie"
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-115",
+    "category": "nutrition",
+    "language": "en",
+    "message": "For two, target 500 kcal.",
+    "expected_extraction": {
+      "household_size": 2,
+      "nutrition_targets": {
+        "calories_kcal": 500
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-116",
+    "category": "nutrition",
+    "language": "en",
+    "message": "Three people; aim for 25 g protein.",
+    "expected_extraction": {
+      "household_size": 3,
+      "nutrition_targets": {
+        "protein_g": 25
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-117",
+    "category": "nutrition",
+    "language": "en",
+    "message": "For four people, target 60 g carbs and 20 g fat.",
+    "expected_extraction": {
+      "household_size": 4,
+      "nutrition_targets": {
+        "carbohydrate_g": 60,
+        "fat_g": 20
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-118",
+    "category": "nutrition",
+    "language": "en",
+    "message": "Keep sodium under 900 mg per meal for five.",
+    "expected_extraction": {
+      "household_size": 5,
+      "max_sodium_mg_per_meal": 900
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-119",
+    "category": "nutrition",
+    "language": "zh",
+    "message": "两个人，每餐目标550千卡。",
+    "expected_extraction": {
+      "household_size": 2,
+      "nutrition_targets": {
+        "calories_kcal": 550
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-120",
+    "category": "nutrition",
+    "language": "zh",
+    "message": "三个人，每餐蛋白质30克。",
+    "expected_extraction": {
+      "household_size": 3,
+      "nutrition_targets": {
+        "protein_g": 30
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-121",
+    "category": "nutrition",
+    "language": "zh",
+    "message": "四个人，每餐碳水50克、脂肪15克。",
+    "expected_extraction": {
+      "household_size": 4,
+      "nutrition_targets": {
+        "carbohydrate_g": 50,
+        "fat_g": 15
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-122",
+    "category": "nutrition",
+    "language": "zh",
+    "message": "五个人，每餐钠不超过700毫克。",
+    "expected_extraction": {
+      "household_size": 5,
+      "max_sodium_mg_per_meal": 700
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-123",
+    "category": "nutrition",
+    "language": "zh",
+    "message": "六个人，每餐目标600卡路里。",
+    "expected_extraction": {
+      "household_size": 6,
+      "nutrition_targets": {
+        "calories_kcal": 600
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-124",
+    "category": "nutrition",
+    "language": "mixed",
+    "message": "For 2 people, 35 g protein target.",
+    "expected_extraction": {
+      "household_size": 2,
+      "nutrition_targets": {
+        "protein_g": 35
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-125",
+    "category": "nutrition",
+    "language": "mixed",
+    "message": "三个人, target 650 kcal.",
+    "expected_extraction": {
+      "household_size": 3,
+      "nutrition_targets": {
+        "calories_kcal": 650
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-126",
+    "category": "nutrition",
+    "language": "mixed",
+    "message": "Four people, sodium 不超过1000毫克.",
+    "expected_extraction": {
+      "household_size": 4,
+      "max_sodium_mg_per_meal": 1000
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-127",
+    "category": "pantry",
+    "language": "en",
+    "message": "For two people, I have 300 g brown rice.",
+    "expected_extraction": {
+      "household_size": 2,
+      "available_ingredients": [
+        {
+          "normalized_name": "brown_rice",
+          "quantity": 300,
+          "unit": "g"
+        }
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-128",
+    "category": "pantry",
+    "language": "en",
+    "message": "Three people. We already have 2 kg chicken breast.",
+    "expected_extraction": {
+      "household_size": 3,
+      "available_ingredients": [
+        {
+          "normalized_name": "chicken_breast",
+          "quantity": 2,
+          "unit": "kg"
+        }
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-129",
+    "category": "pantry",
+    "language": "en",
+    "message": "For four, there is 1 l milk in the fridge.",
+    "expected_extraction": {
+      "household_size": 4,
+      "available_ingredients": [
+        {
+          "normalized_name": "milk",
+          "quantity": 1,
+          "unit": "l"
+        }
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-130",
+    "category": "pantry",
+    "language": "en",
+    "message": "Five people. I have tofu at home.",
+    "expected_extraction": {
+      "household_size": 5,
+      "available_ingredients": [
+        {
+          "normalized_name": "firm_tofu"
+        }
+      ]
+    },
+    "expected_missing_fields": [
+      "available_ingredients.firm_tofu.quantity"
+    ]
+  },
+  {
+    "id": "cud-131",
+    "category": "pantry",
+    "language": "zh",
+    "message": "两个人，家里有300克糙米。",
+    "expected_extraction": {
+      "household_size": 2,
+      "available_ingredients": [
+        {
+          "normalized_name": "brown_rice",
+          "quantity": 300,
+          "unit": "g"
+        }
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-132",
+    "category": "pantry",
+    "language": "zh",
+    "message": "三个人，现有2千克鸡胸肉。",
+    "expected_extraction": {
+      "household_size": 3,
+      "available_ingredients": [
+        {
+          "normalized_name": "chicken_breast",
+          "quantity": 2,
+          "unit": "kg"
+        }
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-133",
+    "category": "pantry",
+    "language": "zh",
+    "message": "四个人，家里有1升牛奶。",
+    "expected_extraction": {
+      "household_size": 4,
+      "available_ingredients": [
+        {
+          "normalized_name": "milk",
+          "quantity": 1,
+          "unit": "l"
+        }
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-134",
+    "category": "pantry",
+    "language": "zh",
+    "message": "五个人，我有豆腐。",
+    "expected_extraction": {
+      "household_size": 5,
+      "available_ingredients": [
+        {
+          "normalized_name": "firm_tofu"
+        }
+      ]
+    },
+    "expected_missing_fields": [
+      "available_ingredients.firm_tofu.quantity"
+    ]
+  },
+  {
+    "id": "cud-135",
+    "category": "pantry",
+    "language": "zh",
+    "message": "六个人，家里已有番茄。",
+    "expected_extraction": {
+      "household_size": 6,
+      "available_ingredients": [
+        {
+          "normalized_name": "tomato"
+        }
+      ]
+    },
+    "expected_missing_fields": [
+      "available_ingredients.tomato.quantity"
+    ]
+  },
+  {
+    "id": "cud-136",
+    "category": "pantry",
+    "language": "mixed",
+    "message": "For 2 people, 家里有500克糙米。",
+    "expected_extraction": {
+      "household_size": 2,
+      "available_ingredients": [
+        {
+          "normalized_name": "brown_rice",
+          "quantity": 500,
+          "unit": "g"
+        }
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-137",
+    "category": "pantry",
+    "language": "mixed",
+    "message": "Three people, 我有chicken breast 1 kg.",
+    "expected_extraction": {
+      "household_size": 3,
+      "available_ingredients": [
+        {
+          "normalized_name": "chicken_breast",
+          "quantity": 1,
+          "unit": "kg"
+        }
+      ]
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-138",
+    "category": "pantry",
+    "language": "mixed",
+    "message": "Four people, I have tofu at home.",
+    "expected_extraction": {
+      "household_size": 4,
+      "available_ingredients": [
+        {
+          "normalized_name": "firm_tofu"
+        }
+      ]
+    },
+    "expected_missing_fields": [
+      "available_ingredients.firm_tofu.quantity"
+    ]
+  },
+  {
+    "id": "cud-139",
+    "category": "soft-preference",
+    "language": "en",
+    "message": "For two people, add more vegetables.",
+    "expected_extraction": {
+      "household_size": 2,
+      "planning_preferences": {
+        "more_vegetables": true
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-140",
+    "category": "soft-preference",
+    "language": "en",
+    "message": "Three people prefer lighter meals.",
+    "expected_extraction": {
+      "household_size": 3,
+      "planning_preferences": {
+        "lighter": true
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-141",
+    "category": "soft-preference",
+    "language": "en",
+    "message": "For four, repeat breakfast if needed.",
+    "expected_extraction": {
+      "household_size": 4,
+      "planning_preferences": {
+        "repeat_allowed_meals": [
+          "breakfast"
+        ]
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-142",
+    "category": "soft-preference",
+    "language": "en",
+    "message": "Five people want spicy dinners on Friday.",
+    "expected_extraction": {
+      "household_size": 5,
+      "planning_preferences": {
+        "flavor_boosts": [
+          {
+            "flavor": "spicy",
+            "weekdays": [
+              "friday"
+            ],
+            "meal_types": [
+              "dinner"
+            ]
+          }
+        ]
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-143",
+    "category": "soft-preference",
+    "language": "zh",
+    "message": "两个人，多吃蔬菜。",
+    "expected_extraction": {
+      "household_size": 2,
+      "planning_preferences": {
+        "more_vegetables": true
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-144",
+    "category": "soft-preference",
+    "language": "zh",
+    "message": "三个人，吃得清淡些。",
+    "expected_extraction": {
+      "household_size": 3,
+      "planning_preferences": {
+        "lighter": true
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-145",
+    "category": "soft-preference",
+    "language": "zh",
+    "message": "四个人，早餐可以重复。",
+    "expected_extraction": {
+      "household_size": 4,
+      "planning_preferences": {
+        "repeat_allowed_meals": [
+          "breakfast"
+        ]
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-146",
+    "category": "soft-preference",
+    "language": "zh",
+    "message": "五个人，周五晚餐想吃辣的。",
+    "expected_extraction": {
+      "household_size": 5,
+      "planning_preferences": {
+        "flavor_boosts": [
+          {
+            "flavor": "spicy",
+            "weekdays": [
+              "friday"
+            ],
+            "meal_types": [
+              "dinner"
+            ]
+          }
+        ]
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-147",
+    "category": "soft-preference",
+    "language": "zh",
+    "message": "六个人，蔬菜多一点。",
+    "expected_extraction": {
+      "household_size": 6,
+      "planning_preferences": {
+        "more_vegetables": true
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-148",
+    "category": "soft-preference",
+    "language": "mixed",
+    "message": "For 2 people, 多来点蔬菜.",
+    "expected_extraction": {
+      "household_size": 2,
+      "planning_preferences": {
+        "more_vegetables": true
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-149",
+    "category": "soft-preference",
+    "language": "mixed",
+    "message": "三个人, lighter dinners.",
+    "expected_extraction": {
+      "household_size": 3,
+      "planning_preferences": {
+        "lighter": true
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-150",
+    "category": "soft-preference",
+    "language": "mixed",
+    "message": "Four people, 想吃spicy food.",
+    "expected_extraction": {
+      "household_size": 4,
+      "planning_preferences": {
+        "flavor_boosts": [
+          {
+            "flavor": "spicy"
+          }
+        ]
+      }
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-151",
+    "category": "interaction",
+    "language": "en",
+    "message": "For two people, no dish twice this week.",
+    "expected_extraction": {
+      "household_size": 2,
+      "max_uses_per_recipe": 1
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-152",
+    "category": "interaction",
+    "language": "en",
+    "message": "Three people, use FairPrice live pricing.",
+    "expected_extraction": {
+      "household_size": 3,
+      "pricing_mode": "live"
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-153",
+    "category": "interaction",
+    "language": "en",
+    "message": "For four, plan meals for someone with diabetes.",
+    "expected_extraction": {
+      "household_size": 4,
+      "medical_request_detected": true
+    },
+    "expected_missing_fields": [],
+    "expect_medical_boundary": true
+  },
+  {
+    "id": "cud-154",
+    "category": "interaction",
+    "language": "en",
+    "message": "I don't know the amount.",
+    "expected_extraction": {},
+    "expected_missing_fields": [],
+    "current_constraints": {
+      "household_size": 2,
+      "available_ingredients": [
+        {
+          "normalized_name": "brown_rice"
+        }
+      ]
+    }
+  },
+  {
+    "id": "cud-155",
+    "category": "interaction",
+    "language": "zh",
+    "message": "两个人，这周菜不要重复。",
+    "expected_extraction": {
+      "household_size": 2,
+      "max_uses_per_recipe": 1
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-156",
+    "category": "interaction",
+    "language": "zh",
+    "message": "三个人，使用FairPrice实时价格。",
+    "expected_extraction": {
+      "household_size": 3,
+      "pricing_mode": "live"
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-157",
+    "category": "interaction",
+    "language": "zh",
+    "message": "四个人，给痛风患者安排饮食。",
+    "expected_extraction": {
+      "household_size": 4,
+      "medical_request_detected": true
+    },
+    "expected_missing_fields": [],
+    "expect_medical_boundary": true
+  },
+  {
+    "id": "cud-158",
+    "category": "interaction",
+    "language": "zh",
+    "message": "不知道。",
+    "expected_extraction": {},
+    "expected_missing_fields": [],
+    "current_constraints": {
+      "household_size": 2,
+      "available_ingredients": [
+        {
+          "normalized_name": "brown_rice"
+        }
+      ]
+    }
+  },
+  {
+    "id": "cud-159",
+    "category": "interaction",
+    "language": "zh",
+    "message": "还剩750克。",
+    "expected_extraction": {
+      "available_ingredients": [
+        {
+          "normalized_name": "brown_rice",
+          "quantity": 750,
+          "unit": "g"
+        }
+      ]
+    },
+    "expected_missing_fields": [],
+    "current_constraints": {
+      "household_size": 2,
+      "available_ingredients": [
+        {
+          "normalized_name": "brown_rice"
+        }
+      ]
+    }
+  },
+  {
+    "id": "cud-160",
+    "category": "interaction",
+    "language": "mixed",
+    "message": "For 2 people, 一周不重样.",
+    "expected_extraction": {
+      "household_size": 2,
+      "max_uses_per_recipe": 1
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-161",
+    "category": "interaction",
+    "language": "mixed",
+    "message": "Three people, 请用FairPrice live prices.",
+    "expected_extraction": {
+      "household_size": 3,
+      "pricing_mode": "live"
+    },
+    "expected_missing_fields": []
+  },
+  {
+    "id": "cud-162",
+    "category": "interaction",
+    "language": "mixed",
+    "message": "For four, 糖尿病患者.",
+    "expected_extraction": {
+      "household_size": 4,
+      "medical_request_detected": true
+    },
+    "expected_missing_fields": [],
+    "expect_medical_boundary": true
+  }
+]

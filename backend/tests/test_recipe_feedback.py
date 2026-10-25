@@ -203,7 +203,7 @@ def test_never_again_is_capped_at_what_a_planning_request_carries(client, monkey
 
 
 def test_the_dashboard_shows_each_dish_s_feedback(client):
-    plan = client.post("/api/plans/generate", json=WEEK).json()
+    plan = client.post("/api/plans/generate", json={"requires_halal": False, **WEEK}).json()
     first = plan["days"][0]["recipe"]
     client.put(f"/api/feedback/recipes/{first['id']}", json={"kind": "never_again"})
     days = client.get(f"/api/plans/{plan['id']}/dashboard").json()["days"]
@@ -218,7 +218,7 @@ def test_the_dashboard_shows_each_dish_s_feedback(client):
 
 def test_a_never_again_dish_is_never_planned_and_the_engine_says_why(client):
     _never_again(client, "tofu-bowl", "chickpea-stew")
-    plan = client.post("/api/plans/generate", json=WEEK)
+    plan = client.post("/api/plans/generate", json={"requires_halal": False, **WEEK})
     assert plan.status_code == 201, plan.text
     assert _slugs(plan.json()) <= {"salmon-bake", "chicken-roast"}
     with _session() as session:
@@ -275,13 +275,15 @@ def test_broadened_candidates_leave_the_dish_out(client, monkeypatch):
 def test_a_shared_dish_week_covering_each_member_leaves_the_dish_out(client):
     _never_again(client, "chickpea-stew")
     members = [{"name": "Ann", "servings": 1, "excluded_ingredients": ["firm_tofu"]}, {"name": "Ben", "servings": 1}]
-    plan = client.post("/api/plans/generate", json={**WEEK, "household": {"members": members}})
+    plan = client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**WEEK, "household": {"members": members}}}
+    )
     assert plan.status_code == 201, plan.text
     assert "chickpea-stew" not in _slugs(plan.json())
 
 
 def test_a_swap_never_proposes_a_never_again_dish(client):
-    plan = client.post("/api/plans/generate", json=WEEK).json()
+    plan = client.post("/api/plans/generate", json={"requires_halal": False, **WEEK}).json()
     entry = plan["days"][0]
     others = [slug for slug in MAINS if slug != entry["recipe"]["slug"]]
     _never_again(client, *others)
@@ -301,7 +303,9 @@ def test_a_swap_never_proposes_a_never_again_dish(client):
 
 def test_a_variety_preview_never_brings_a_never_again_dish(client):
     _never_again(client, "salmon-bake", "chicken-roast")
-    plan = client.post("/api/plans/generate", json={**WEEK, "start_date": local_today().isoformat()}).json()
+    plan = client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**WEEK, "start_date": local_today().isoformat()}}
+    ).json()
     assert _slugs(plan) == {"tofu-bowl", "chickpea-stew"}  # two dishes over seven days: repeats
     client.delete(f"/api/feedback/recipes/{_ids()['salmon-bake']}")
     with _session() as session:
@@ -313,7 +317,9 @@ def test_a_variety_preview_never_brings_a_never_again_dish(client):
 
 def test_a_preview_made_before_a_never_again_cannot_be_confirmed_after_it(client):
     _never_again(client, "salmon-bake", "chicken-roast")
-    plan = client.post("/api/plans/generate", json={**WEEK, "start_date": local_today().isoformat()}).json()
+    plan = client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**WEEK, "start_date": local_today().isoformat()}}
+    ).json()
     client.delete(f"/api/feedback/recipes/{_ids()['salmon-bake']}")  # leaves the variety preview a dish to bring
     entry = plan["days"][0]
     swap = client.post(
@@ -359,7 +365,7 @@ def test_a_meal_change_replans_a_meal_holding_a_never_again_dish(composed_client
 
 def test_a_replan_leaves_locked_and_cooked_never_again_dishes_as_they_are(client):
     start = (local_today() + timedelta(days=1)).isoformat()
-    plan = client.post("/api/plans/generate", json={**WEEK, "start_date": start}).json()
+    plan = client.post("/api/plans/generate", json={"requires_halal": False, **{**WEEK, "start_date": start}}).json()
     locked, cooked, target = plan["days"][0], plan["days"][1], plan["days"][2]
     with _session() as session:
         session.get(MealPlanEntry, locked["entry_id"]).is_locked = True
@@ -415,7 +421,7 @@ def test_an_empty_never_again_list_leaves_dumps_and_digests_byte_identical(clien
         assert with_never_again(request, session, _household()) is request
 
     with _planned(monkeypatch) as (_, digests):
-        stored = [client.post("/api/plans/generate", json=WEEK).json()["id"]]
+        stored = [client.post("/api/plans/generate", json={"requires_halal": False, **WEEK}).json()["id"]]
         with _session() as session:
             stored.append(build_meal_plan_service(session, _household()).generate(request).id)
     assert digests[0] == digests[1] and "never_again_recipes" not in digests[0][2]
@@ -453,7 +459,7 @@ def test_every_product_entry_point_plans_with_live_feedback(client):
 
 def test_the_console_replay_plans_a_stored_request_as_stored_after_a_never_again(console):  # noqa: F811
     client, factory = console
-    plan = client.post("/api/plans/generate", json={**WEEK, "start_date": "2026-09-01"})
+    plan = client.post("/api/plans/generate", json={"requires_halal": False, **{**WEEK, "start_date": "2026-09-01"}})
     assert plan.status_code == 201, plan.text
     (run_id,) = _planning_run_ids(factory)
     for slug in _slugs(plan.json()):

@@ -14,8 +14,12 @@ COPY backend/app ./app
 COPY backend/alembic ./alembic
 COPY backend/alembic.ini ./alembic.ini
 COPY backend/tests ./tests
+COPY backend/scripts/evaluate_sprint2_live_dev.py ./backend/scripts/evaluate_sprint2_live_dev.py
 COPY data ./data
 COPY data-engineering/data/fixtures/ops ./data-engineering/data/fixtures/ops
+COPY data-engineering/config/ingredient_aliases.csv ./data-engineering/config/ingredient_aliases.csv
+COPY data-engineering/config/ingredient_aliases_v2_additions.csv ./data-engineering/config/ingredient_aliases_v2_additions.csv
+COPY data-engineering/data/release/v2.1/ingredients.jsonl ./data-engineering/data/release/v2.1/ingredients.jsonl
 
 EXPOSE 8000
 

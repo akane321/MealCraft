@@ -58,7 +58,7 @@ def test_a_household_cannot_touch_another_household_s_conversation_or_week(conso
 
 def test_deleting_a_week_keeps_the_conversation_that_planned_it(console) -> None:  # noqa: F811
     client, factory = console
-    plan = client.post("/api/plans/generate", json=WEEK)
+    plan = client.post("/api/plans/generate", json={"requires_halal": False, **WEEK})
     assert plan.status_code == 201, plan.text
     plan_id = plan.json()["id"]
     talk = client.post("/api/agent/sessions", json={"message": "Dinners for two"}).json()

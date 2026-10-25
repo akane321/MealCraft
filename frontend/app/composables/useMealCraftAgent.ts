@@ -1,4 +1,5 @@
 import { conversationForPlan } from "~/lib/home-surface";
+import type { PlanningPreferencesView } from "~/lib/planning-preferences";
 import type {
   AgentConfirmation,
   AgentInteractionAnswer,
@@ -64,6 +65,16 @@ export function useMealCraftAgent() {
     const result = await run(() => apiFetch<AgentSession>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/interactions`,
       { method: "POST", body: answer },
+    ));
+    if (result) session.value = result;
+    return result;
+  }
+
+  async function updatePreferences(planningPreferences: PlanningPreferencesView, contextVersion: number) {
+    if (!session.value) return null;
+    const result = await run(() => apiFetch<AgentSession>(
+      `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/preferences`,
+      { method: "PUT", body: { context_version: contextVersion, planning_preferences: planningPreferences } },
     ));
     if (result) session.value = result;
     return result;
@@ -187,5 +198,6 @@ export function useMealCraftAgent() {
     reset,
     restore,
     session,
+    updatePreferences,
   };
 }
