@@ -21,7 +21,7 @@ UNIT_BASE: dict[str, tuple[str, float]] = {
 
 # Grams in one 236.6 ml US cup of the liquids recipes measure both by weight and by volume: the curated
 # catalog has millilitres of milk and tablespoons of oil, the release catalog grams of both. Copied from
-# the release ingredients' `unit_grams` (data-engineering/data/release/v2.1/ingredients.jsonl), the
+# the release ingredients' `unit_grams` (data-engineering/data/release/v2.2/ingredients.jsonl), the
 # weights the reviewed FairPrice mapping converts bottles with ("830 ml x 1.031 g/ml"); a test holds the
 # two equal. Recipe lines and pantry quantities are converted. A week buys a weighed liquid from products
 # sold by weight, as the reviewed mapping states every bottle; a bottle sold by volume is converted only

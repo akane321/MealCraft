@@ -1,8 +1,8 @@
 """The frozen facts every ingredient-level baseline is scored on (02-baselines.md sections 3.1 and 4).
 
-- Names, nutrition and allergens: release v2.1 `ingredients.jsonl` (the frozen data version), with the curated
-  catalog's allergen lists (`data/ingredients/ingredients.json`) added for the ids both hold, as the product's
-  import does: an allergen list only ever grows.
+- Names, nutrition and allergens: release v2.2 `ingredients.jsonl` (the frozen data version; v2.1 until
+  2026-10-23), with the curated catalog's allergen lists (`data/ingredients/ingredients.json`) added for the ids
+  both hold, as the product's import does: an allergen list only ever grows.
 - Hierarchy step: the `same` and `variety` links of `data/ingredients/hierarchy` whose parent the release names.
 - Allergen vocabulary: `checked_allergens()` (`data/ingredients/allergen-vocabulary.json`). An allergen outside
   it is unverifiable for every ingredient (`app.data.allergens`).
@@ -25,9 +25,12 @@ from app.data.household_reference import basic_seasonings
 from app.data.ingredient_hierarchy import read_links
 from app.data.release_v2 import map_allergens
 from app.evaluation.baseline_recomputation import IngredientEvaluationFacts
-from app.evaluation.release_catalog import CURATED, NOT_PURCHASED, RELEASE, SNAPSHOT, load_release_catalog
+from app.evaluation.release_catalog import CURATED, NOT_PURCHASED, SNAPSHOT, load_release_catalog
 from app.schemas.planning_v2 import PlanningNutrients, PlanningProductOption
 
+# The frozen data version the baselines and the product are scored on (02-baselines.md section 4); a change is
+# logged in the Knowledge baseline freeze log (operations/sprint2-plan/02-baselines-freeze-log.md).
+RELEASE = Path("data-engineering/data/release/v2.2")
 RELEASE_INGREDIENTS = RELEASE / "ingredients.jsonl"
 RELEASE_MANIFEST = RELEASE / "release_manifest.json"
 
@@ -56,7 +59,7 @@ class BaselineResources:
 
 def load_resources(root: Path | None = None) -> BaselineResources:
     root = root or repository_root()
-    release = load_release_catalog(root)
+    release = load_release_catalog(root, RELEASE)
     names = {row["normalized_name"]: row["display_name"] for row in release.ingredients}
     aliases = {key: values for key, values in catalog_aliases().items() if key in names}
     products = [

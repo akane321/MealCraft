@@ -1,0 +1,623 @@
+{
+  "batch": "recipe-tags-v1/review-table-20261024",
+  "seed": 20261024,
+  "size": 46,
+  "distinct_recipes": 46,
+  "layers": {
+    "table": {
+      "breakfast": {
+        "recipes": 1,
+        "drawn": 1
+      },
+      "dessert": {
+        "recipes": 20,
+        "drawn": 5
+      },
+      "one_bowl": {
+        "recipes": 1,
+        "drawn": 1
+      },
+      "protein_sources only": {
+        "recipes": 2,
+        "drawn": 2
+      },
+      "sauce": {
+        "recipes": 24,
+        "drawn": 6
+      },
+      "snack": {
+        "recipes": 24,
+        "drawn": 6
+      },
+      "soup": {
+        "recipes": 10,
+        "drawn": 3
+      },
+      "staple": {
+        "recipes": 24,
+        "drawn": 6
+      },
+      "vegetable": {
+        "recipes": 2,
+        "drawn": 1
+      }
+    },
+    "rule_decided": {
+      "rule_equals_model": {
+        "one_bowl": {
+          "recipes": 36,
+          "drawn": 2
+        },
+        "protein_main": {
+          "recipes": 24,
+          "drawn": 1
+        },
+        "protein_sources only": {
+          "recipes": 42,
+          "drawn": 2
+        },
+        "staple": {
+          "recipes": 61,
+          "drawn": 3
+        }
+      },
+      "rule_differs_from_model": {
+        "one_bowl": {
+          "recipes": 5,
+          "drawn": 1
+        },
+        "protein_main": {
+          "recipes": 37,
+          "drawn": 2
+        },
+        "protein_sources only": {
+          "recipes": 13,
+          "drawn": 1
+        },
+        "sauce": {
+          "recipes": 10,
+          "drawn": 1
+        },
+        "staple": {
+          "recipes": 19,
+          "drawn": 1
+        },
+        "vegetable": {
+          "recipes": 22,
+          "drawn": 1
+        }
+      }
+    }
+  },
+  "how_to_check": "data-engineering/docs/review-table-20261024/README.md; fill sample.xlsx in person",
+  "recipes": [
+    {
+      "id": "RCP2_5D84F859E558",
+      "title": "English Popovers",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "breakfast",
+      "values": {
+        "meal_role": "breakfast",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_00100560483E",
+      "title": "Swedish Crescents",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_02ED221BB8C3",
+      "title": "Snowballs(Swedish)",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_0CFF755F4ED0",
+      "title": "Mexican Wedding Cakes",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_229B831CE6C7",
+      "title": "Mexican Wedding Bells",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_44C42897EBAD",
+      "title": "Peruvian Alfajores",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_A96FC949077E",
+      "title": "Moroccan Lentils And Couscous",
+      "course": "side",
+      "layer": "table",
+      "stratum": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_956FD7177508",
+      "title": "Ramen Hot And Sour Soup",
+      "course": "soup",
+      "layer": "table",
+      "stratum": "protein_sources only",
+      "values": {
+        "protein_sources": [
+          "egg"
+        ]
+      }
+    },
+    {
+      "id": "RCP2_75BFE1C39E34",
+      "title": "Taco Casserole",
+      "course": "main",
+      "layer": "table",
+      "stratum": "sauce",
+      "values": {
+        "meal_role": "sauce",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_8F83C05E5E00",
+      "title": "Siopao (Filipino Steamed Buns)",
+      "course": "main",
+      "layer": "table",
+      "stratum": "sauce",
+      "values": {
+        "meal_role": "sauce",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_DC882B3F674A",
+      "title": "Banana Raita With Coconut",
+      "course": "side",
+      "layer": "table",
+      "stratum": "sauce",
+      "values": {
+        "meal_role": "sauce",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_E8D667BA918A",
+      "title": "Fake Feta",
+      "course": "side",
+      "layer": "table",
+      "stratum": "sauce",
+      "values": {
+        "meal_role": "sauce",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_ED8C37EACE4D",
+      "title": "Mock Feta Cheese ( Vegan Substitute )",
+      "course": "side",
+      "layer": "table",
+      "stratum": "sauce",
+      "values": {
+        "meal_role": "sauce",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_F9AC64939A2C",
+      "title": "Welsh Rarebit",
+      "course": "main",
+      "layer": "table",
+      "stratum": "sauce",
+      "values": {
+        "meal_role": "sauce",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_290971CF4730",
+      "title": "Mexican Wedding Rings",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_49CA27EAC641",
+      "title": "Alfajores De Maizena",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_59209F8AE7D0",
+      "title": "South African Vetkoek",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_5954131C04AC",
+      "title": "Scrumpets",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_81C30294D91B",
+      "title": "Turkish Pogaca",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_A887D44E2FC0",
+      "title": "Sauerkraut pierogii",
+      "course": "main",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_806075FC7BF8",
+      "title": "French Onion Soup",
+      "course": "soup",
+      "layer": "table",
+      "stratum": "soup",
+      "values": {
+        "meal_role": "soup",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_EAAD839F9258",
+      "title": "Mushroom-Barley Soup",
+      "course": "soup",
+      "layer": "table",
+      "stratum": "soup",
+      "values": {
+        "meal_role": "soup",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_F0A2E3140892",
+      "title": "Hearty French Onion Soup",
+      "course": "soup",
+      "layer": "table",
+      "stratum": "soup",
+      "values": {
+        "meal_role": "soup",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_130F971CF821",
+      "title": "Ukrainian Bukovinian Nachynka (Cornbread Dressing)",
+      "course": "side",
+      "layer": "table",
+      "stratum": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_1722D847EECE",
+      "title": "Southern Spoon Bread",
+      "course": "side",
+      "layer": "table",
+      "stratum": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_310A97E81CC3",
+      "title": "Taco Baked Potatoes",
+      "course": "main",
+      "layer": "table",
+      "stratum": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_3CC1354BC571",
+      "title": "Brazilian Arroz De Festa (Confetti Rice)",
+      "course": "side",
+      "layer": "table",
+      "stratum": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_409262770DBA",
+      "title": "Popovers(Portuguese)",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_50567B7B0B2C",
+      "title": "Kumpir",
+      "course": "main",
+      "layer": "table",
+      "stratum": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_12D50BBDB52E",
+      "title": "Eggplant A La Parmesan",
+      "course": "main",
+      "layer": "table",
+      "stratum": "vegetable",
+      "values": {
+        "meal_role": "vegetable",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_441BD2095B93",
+      "title": "Vietnamese Pâté Chaud",
+      "course": "snack_appetizer",
+      "layer": "table",
+      "stratum": "protein_sources only",
+      "values": {
+        "protein_sources": [
+          "pork"
+        ]
+      }
+    },
+    {
+      "id": "RCP2_BBA025B49BA6",
+      "title": "Pierogi",
+      "course": "main",
+      "layer": "rule_decided",
+      "stratum": "rule_differs_from_model",
+      "role": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_45BE0219D45D",
+      "title": "Heart-Shaped Tamagoyaki (Japanese Omelet)",
+      "course": "side",
+      "layer": "rule_decided",
+      "stratum": "rule_differs_from_model",
+      "role": "protein_main",
+      "values": {
+        "meal_role": "protein_main",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_6336ACA2F9AE",
+      "title": "Japanese Tamago Egg",
+      "course": "side",
+      "layer": "rule_decided",
+      "stratum": "rule_differs_from_model",
+      "role": "protein_main",
+      "values": {
+        "meal_role": "protein_main",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_355D74D12F4C",
+      "title": "Vietnamese Spiced Paté",
+      "course": "snack_appetizer",
+      "layer": "rule_decided",
+      "stratum": "rule_differs_from_model",
+      "role": "protein_sources only",
+      "values": {
+        "protein_sources": [
+          "chicken",
+          "pork"
+        ]
+      }
+    },
+    {
+      "id": "RCP2_1729D7258E04",
+      "title": "Egg Filling For Sushi",
+      "course": "side",
+      "layer": "rule_decided",
+      "stratum": "rule_differs_from_model",
+      "role": "sauce",
+      "values": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_2E6B4C7D3281",
+      "title": "Granny Gibbs' Famous Dumplings",
+      "course": "side",
+      "layer": "rule_decided",
+      "stratum": "rule_differs_from_model",
+      "role": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_C81AEF8EF1AC",
+      "title": "Onion Creme Brulee",
+      "course": "side",
+      "layer": "rule_decided",
+      "stratum": "rule_differs_from_model",
+      "role": "vegetable",
+      "values": {
+        "meal_role": "vegetable",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_1554F9789729",
+      "title": "Banh Mi Hotdog",
+      "course": "main",
+      "layer": "rule_decided",
+      "stratum": "rule_equals_model",
+      "role": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_FF3C50B5519E",
+      "title": "Vietnamese \"Banh Mi\" Chicken Burger",
+      "course": "main",
+      "layer": "rule_decided",
+      "stratum": "rule_equals_model",
+      "role": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_0DE59ED69BBF",
+      "title": "Stuffed Bell Peppers",
+      "course": "main",
+      "layer": "rule_decided",
+      "stratum": "rule_equals_model",
+      "role": "protein_main",
+      "values": {
+        "meal_role": "protein_main",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_6AD2450270A2",
+      "title": "Russian Wafers",
+      "course": "baked_good",
+      "layer": "rule_decided",
+      "stratum": "rule_equals_model",
+      "role": "protein_sources only",
+      "values": {
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_CEEA9D67A7EE",
+      "title": "Basic Italian Cookies",
+      "course": "baked_good",
+      "layer": "rule_decided",
+      "stratum": "rule_equals_model",
+      "role": "protein_sources only",
+      "values": {
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_A31F833871D7",
+      "title": "Bread Dumplings",
+      "course": "side",
+      "layer": "rule_decided",
+      "stratum": "rule_equals_model",
+      "role": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_E20C08DE6172",
+      "title": "Polenta Gnocchi With Gorgonzola",
+      "course": "side",
+      "layer": "rule_decided",
+      "stratum": "rule_equals_model",
+      "role": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_F918B184F959",
+      "title": "Spaetzle",
+      "course": "side",
+      "layer": "rule_decided",
+      "stratum": "rule_equals_model",
+      "role": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": []
+      }
+    }
+  ]
+}

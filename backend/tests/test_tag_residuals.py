@@ -29,7 +29,7 @@ def tagged(title, lines, *, course="main"):
 
 
 @pytest.mark.parametrize(
-    "carrier", ["tortilla", "wrap", "bagel", "naan", "pita", "flatbread", "roti", "chapati", "paratha"]
+    "carrier", ["tortilla", "pita_bread", "hamburger_bun", "dinner_roll", "english_muffin", "bread", "taco_shell"]
 )
 def test_listed_wrap_and_sandwich_carriers_supply_staple(carrier):
     _, tags = tagged("Chicken Kebab Wrap", [("chicken_thigh", 800), (carrier, 100)])

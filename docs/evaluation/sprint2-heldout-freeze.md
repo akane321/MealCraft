@@ -57,6 +57,11 @@ reviewer attestation, then puts the file in controlled read-only storage. Also
 hash the exact field-dictionary file, template/schema and frozen reference-facts
 version. Preserve dictionary bytes (including line endings); do not reformat it
 after recording its digest. The adapter uses that same frozen dictionary.
+When reviews are recorded in a review attestation (authoring guide, "Several
+reviewers, or an AI-executed review"), also hash the exact attestation file and record
+the checker's `checker_version`, the reviewers and their `executed_by`, and the
+`limitations` the readiness run reported. An AI-executed review stays labelled as
+such in every record derived from it.
 
 ```powershell
 # The author runs this on their own final file; this chat must not open it.
@@ -81,6 +86,13 @@ tested on developer/synthetic data only. It must separate scenario inputs from
 gold and provenance, ensure systems never receive the answers, preserve the
 frozen bytes, and suppress private case text from logs/artifacts. That adapter
 and actual evaluation execution are outside this toolkit's scope.
+
+The [synthetic phase-one apparatus](conversation-adapter-phase1.md) implements
+the draft clock, fixed-message confirmation, own-history delivery and common
+output container. It does not load sealed files, admit a run or establish a
+formal freeze; shared bytes and system transports still require independent
+review and preregistration. Do not use the older gold-driven product request
+builder as a substitute for the end-to-end adapter.
 
 An authorised operator supplies the sealed path/digest to a fixed automated
 process without inspecting cases. That process verifies digests, runs all

@@ -147,13 +147,13 @@ def look_alikes(ingredient_id: str, known: Iterable[str]) -> list[str]:
 
 def _load_vocabulary(root: Path) -> dict[str, Ingredient]:
     occurrences: Counter[str] = Counter()
-    release_recipes = root / "data-engineering/data/release/v2.1/recipes.jsonl"
+    release_recipes = root / "data-engineering/data/release/v2.2/recipes.jsonl"
     for line in release_recipes.read_text(encoding="utf-8").splitlines():
         if line.strip():
             recipe = json.loads(line)
             occurrences.update({row["canonical_ingredient_id"][4:].lower() for row in recipe["ingredients"]})
     ingredients: dict[str, Ingredient] = {}
-    release = root / "data-engineering/data/release/v2.1/ingredients.jsonl"
+    release = root / "data-engineering/data/release/v2.2/ingredients.jsonl"
     for line in release.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
