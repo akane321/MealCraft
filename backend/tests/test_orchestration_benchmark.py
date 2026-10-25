@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from app.core.paths import repository_root
@@ -9,6 +10,7 @@ from app.evaluation.orchestration_benchmark import (
 
 ROOT = repository_root()
 DATASET = ROOT / "data" / "evaluation" / "agent-orchestration" / "scope-developer-v1.json"
+DEVELOPER_V2 = ROOT / "data" / "evaluation" / "agent-orchestration" / "scope-developer-v2.json"
 GROUNDING_DATASET = ROOT / "data/evaluation/agent-orchestration/grounding-developer-v1.json"
 
 
@@ -34,6 +36,20 @@ def test_scope_reference_policy_has_no_known_developer_set_failures() -> None:
     assert report["metrics"]["state_contamination_count"] == 0
     assert report["metrics"]["tool_policy_accuracy"] == 1.0
     assert report["failure_cases"] == []
+
+
+def test_scope_developer_v2_covers_150_cases_and_reports_languages_separately() -> None:
+    report = evaluate_scope_policy(dataset_path=DEVELOPER_V2)
+    count = report["dataset"]["case_count"]
+    language_counts = report["dataset"]["language_counts"]
+    cases = json.loads(DEVELOPER_V2.read_text(encoding="utf-8"))
+
+    assert count >= 150
+    assert len({item["message"] for item in cases}) == count
+    assert language_counts["zh"] >= count / 3
+    assert report["evaluation_role"] == "developer_set"
+    assert report["language_metrics"]["zh"]["case_count"] == language_counts["zh"]
+    assert report["language_metrics"]["en"]["case_count"] == language_counts["en"]
 
 
 def test_scope_report_is_machine_and_human_readable(tmp_path: Path) -> None:

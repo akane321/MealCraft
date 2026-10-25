@@ -2,7 +2,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_serializer
+from pydantic import BaseModel, ConfigDict, Field, model_serializer
 from pydantic.json_schema import SkipJsonSchema
 
 from app.orchestration.contracts import (
@@ -43,6 +43,12 @@ class AgentMessageInput(BaseModel):
 
 class AgentInteractionInput(InteractionAnswer):
     pass
+
+
+class AgentPreferenceUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    context_version: int = Field(ge=1)
+    planning_preferences: PlanningPreferences
 
 
 class AgentMessageResponse(BaseModel):

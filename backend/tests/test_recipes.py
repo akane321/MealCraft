@@ -1,5 +1,5 @@
 from collections.abc import Generator
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from urllib.error import URLError
 
@@ -1224,6 +1224,266 @@ def test_household_profile_is_versioned_and_merges_member_hard_constraints(
     assert stale.status_code == 409
 
 
+def test_model_substitution_suggestion_route_filters_catalog_candidates_for_household(
+    recipe_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.api.routes import ingredient_substitutions
+
+    override_database = app.dependency_overrides[get_db_session]
+    database_generator = override_database()
+    database = next(database_generator)
+    try:
+        database.add_all(
+            [
+                Ingredient(normalized_name="butter", display_name="Butter", allergens=["milk"]),
+                Ingredient(normalized_name="peanut_oil", display_name="Peanut oil", allergens=["peanut"]),
+                Ingredient(normalized_name="olive_oil", display_name="Olive oil", allergens=[]),
+                Ingredient(normalized_name="sunflower_oil", display_name="Sunflower oil", allergens=[]),
+            ]
+        )
+        database.commit()
+    finally:
+        database_generator.close()
+
+    profile_payload = _household_profile_payload()
+    profile_payload["members"][0]["allergens"] = ["peanut"]
+    profile_payload["members"][0]["excluded_ingredients"] = ["olive_oil"]
+    assert recipe_client.post("/api/household-profiles", json=profile_payload).status_code == 201
+
+    class FakeGenerator:
+        def __init__(self, **_kwargs):
+            pass
+
+        def suggest(self, source_ingredient, *, use_context=None):
+            assert source_ingredient == "butter"
+            assert use_context == "for frying"
+            return ["peanut oil", "olive oil", "sunflower oil", "butter"]
+
+    monkeypatch.setattr(ingredient_substitutions, "OpenAISubstituteGenerator", FakeGenerator)
+    monkeypatch.setitem(
+        app.dependency_overrides,
+        get_settings,
+        lambda: config.Settings(
+            agent_parser_provider="openai", openai_api_key=SecretStr("unused"), openai_model="test"
+        ),
+    )
+
+    response = recipe_client.post(
+        "/api/ingredient-substitutions/suggest",
+        json={"source_ingredient": "butter", "use_context": "for frying", "requires_halal": False},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"safe_candidates": [{"ingredient_id": "sunflower_oil", "display_name": "Sunflower oil"}]}
+
+
+def test_external_recipe_search_route_reviews_and_persists_candidate_privately(
+    recipe_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.api.routes import external_recipes
+    from app.models.platform import OperationRun
+    from app.repositories.operations import OperationsRepository
+    from app.services.external_recipe_intake import ExternalIngredientLine, ExternalRecipeDraft
+    from app.services.operations import OperationsService
+
+    override_database = app.dependency_overrides[get_db_session]
+    database_generator = override_database()
+    database = next(database_generator)
+    try:
+        database.add_all(
+            [
+                Ingredient(normalized_name="tofu", display_name="Tofu", allergens=["soy"]),
+                Ingredient(normalized_name="soba_noodles", display_name="Soba noodles", allergens=["gluten"]),
+            ]
+        )
+        database.commit()
+    finally:
+        database_generator.close()
+
+    draft = ExternalRecipeDraft(
+        title="Ginger Tofu Bowl",
+        source_url="https://recipes.example.test/ginger-tofu",
+        source_tier=2,
+        license="Unverified; structured facts only; source steps paraphrased",
+        retrieved_at=datetime(2026, 10, 21, tzinfo=UTC),
+        steps_basis="rewritten",
+        servings=2,
+        servings_basis="stated",
+        prep_time_minutes=10,
+        cook_time_minutes=20,
+        time_basis="stated",
+        passive_time_minutes=0,
+        course="main",
+        cuisine="international",
+        meal_types=["dinner"],
+        difficulty="easy",
+        nutrition_per_serving={
+            "calories_kcal": 400,
+            "protein_g": 25,
+            "carbohydrate_g": 45,
+            "fat_g": 12,
+            "sodium_mg": 500,
+            "sugar_g": 7,
+        },
+        ingredients=[
+            ExternalIngredientLine(source_name="tofu", grams=200),
+            ExternalIngredientLine(source_name="soba noodles", grams=100),
+        ],
+        steps=["Cook the noodles, prepare the tofu, and serve together."],
+    )
+
+    class FakeExtractor:
+        def __init__(self, **_kwargs):
+            pass
+
+        def search_and_extract(self, query):
+            assert query == "ginger tofu dinner"
+            return draft
+
+    monkeypatch.setattr(external_recipes, "OpenAIRecipeSearchExtractor", FakeExtractor)
+    monkeypatch.setitem(
+        app.dependency_overrides,
+        get_settings,
+        lambda: config.Settings(
+            agent_parser_provider="openai", openai_api_key=SecretStr("unused"), openai_model="test"
+        ),
+    )
+
+    response = recipe_client.post(
+        "/api/external-recipes/search-and-intake",
+        json={"query": "ginger tofu dinner", "requires_halal": False},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["admitted"] is True
+    assert payload["review"]["mapping_coverage"] == 1
+    assert payload["review"]["eligible_for_household"] is True
+
+    override_database = app.dependency_overrides[get_db_session]
+    database_generator = override_database()
+    database = next(database_generator)
+    try:
+        persisted = database.scalars(select(Recipe).where(Recipe.slug == payload["recipe_slug"])).one()
+        membership = database.scalars(select(HouseholdMembership)).one()
+        assert persisted.owner_household_id == membership.household_id
+        # Model-extracted nutrition (400 kcal in this fixture) is replaced by release nutrient
+        # values multiplied by ingredient grams and divided by servings.
+        assert float(persisted.nutrition.calories_kcal) == 193.5
+        assert persisted.source["url"] == "https://recipes.example.test/ginger-tofu"
+        assert persisted.source["tier"] == 2
+        operation = database.scalars(
+            select(OperationRun).where(OperationRun.run_type == "external_recipe_intake")
+        ).one()
+        tasks = OperationsService(OperationsRepository(database), config.Settings()).tasks(
+            kind="intake", status=None, since=None, until=None, offset=0, limit=10
+        )
+        detail = OperationsService(OperationsRepository(database), config.Settings()).task_detail(
+            "intake", operation.id
+        )
+        assert tasks.total == 1
+        assert tasks.items[0].label == "External recipe: Ginger Tofu Bowl"
+        assert detail is not None
+        assert [stage["stage"] for stage in detail.trace["stages"]] == [
+            "search_and_extract",
+            "ingredient_mapping",
+            "household_admission_review",
+            "private_persistence",
+        ]
+        assert detail.validation["admitted"] is True
+    finally:
+        database_generator.close()
+
+
+def test_external_recipe_block_returns_similar_household_safe_catalog_dishes(
+    recipe_client: TestClient,
+) -> None:
+    from app.services.external_recipe_intake import ExternalIngredientLine, ExternalRecipeDraft
+
+    override_database = app.dependency_overrides[get_db_session]
+    database_generator = override_database()
+    database = next(database_generator)
+    try:
+        database.add(Ingredient(normalized_name="peanut", display_name="Peanut", allergens=["peanut"]))
+        database.commit()
+    finally:
+        database_generator.close()
+
+    profile_payload = _household_profile_payload()
+    profile_payload["members"][0]["allergens"] = ["peanut"]
+    assert recipe_client.post("/api/household-profiles", json=profile_payload).status_code == 201
+
+    draft = ExternalRecipeDraft(
+        title="Lemon Chicken",
+        source_url="https://recipes.example.test/lemon-chicken-with-peanuts",
+        source_tier=2,
+        license="Unverified; structured facts only; source steps paraphrased",
+        retrieved_at=datetime(2026, 10, 22, tzinfo=UTC),
+        steps_basis="rewritten",
+        servings=2,
+        servings_basis="stated",
+        prep_time_minutes=10,
+        cook_time_minutes=20,
+        time_basis="stated",
+        passive_time_minutes=0,
+        course="main",
+        cuisine="international",
+        meal_types=["dinner"],
+        difficulty="easy",
+        nutrition_per_serving={
+            "calories_kcal": 400,
+            "protein_g": 25,
+            "carbohydrate_g": 45,
+            "fat_g": 12,
+            "sodium_mg": 500,
+            "sugar_g": 7,
+        },
+        ingredients=[ExternalIngredientLine(source_name="peanut", grams=20)],
+        steps=["Cook the chicken, add the peanuts, and serve."],
+    )
+
+    response = recipe_client.post(
+        "/api/external-recipes/intake",
+        json={"draft": draft.model_dump(mode="json"), "requires_halal": False},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["admitted"] is False
+    assert payload["review"]["eligible_for_household"] is False
+    assert "peanut" in payload["review"]["safety_conflicts"]
+    assert payload["suggestions"] == [{"slug": "lemon-chicken", "title": "Lemon Chicken"}]
+
+
+def test_external_recipe_search_failure_is_saved_as_an_operations_trace(
+    recipe_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.models.platform import OperationRun
+    from app.repositories.operations import OperationsRepository
+    from app.services.operations import OperationsService
+
+    monkeypatch.setitem(app.dependency_overrides, get_settings, lambda: config.Settings(openai_api_key=None))
+    response = recipe_client.post(
+        "/api/external-recipes/search-and-intake", json={"query": "ginger tofu", "requires_halal": False}
+    )
+    assert response.status_code == 503
+    assert response.json()["detail"]["reason"] == "api_key_missing"
+    assert response.json()["detail"]["suggestions"] == [{"slug": "tofu-soba", "title": "Tofu Soba"}]
+
+    database_generator = app.dependency_overrides[get_db_session]()
+    database = next(database_generator)
+    try:
+        run = database.scalars(select(OperationRun).where(OperationRun.run_type == "external_recipe_intake")).one()
+        assert run.status == "failed"
+        assert run.error_code == "api_key_missing"
+        detail = OperationsService(OperationsRepository(database), config.Settings()).task_detail("intake", run.id)
+        assert detail is not None
+        assert detail.trace["stages"][0]["stage"] == "search_and_extract"
+        assert detail.trace["stages"][0]["status"] == "failed"
+    finally:
+        database_generator.close()
+
+
 def test_household_profile_generates_traceable_plan_and_explains_replanning(
     recipe_client: TestClient,
 ) -> None:
@@ -1724,7 +1984,11 @@ def test_an_agent_run_stores_the_parser_configuration(recipe_client: TestClient)
     session = recipe_client.post("/api/agent/sessions", json={"message": "Plan for 2 people"}).json()
     runs = recipe_client.get(f"/api/agent/sessions/{session['id']}/runs").json()
     items = runs["items"] if isinstance(runs, dict) else runs
-    assert items and items[0]["run_config"] == {"parser": "fixture", "parser_model": None}
+    assert items
+    assert items[0]["run_config"]["parser"] == "fixture"
+    assert items[0]["run_config"]["parser_model"] is None
+    assert items[0]["run_config"]["api_cost_estimate_status"] == "estimated"
+    assert items[0]["run_config"]["api_cost_estimate_usd"] == "0"
 
 
 def test_the_live_parser_can_be_built_against_the_catalog(recipe_client: TestClient, monkeypatch) -> None:
@@ -1778,6 +2042,36 @@ def _openai_answered_in_process(monkeypatch: pytest.MonkeyPatch, extraction: dic
             return httpx2.Response(
                 200, json={"object": "list", "data": vectors, "model": body["model"], "usage": usage}
             )
+        if body.get("tools"):
+            # Scope classification runs before constraint parsing and uses the bounded tool scheduler.
+            # Return a valid route tool call so this fixture exercises the normal planning path.
+            route = next(
+                tool["function"]["name"]
+                for tool in body["tools"]
+                if tool["function"]["name"] == "route_planning_request"
+            )
+            message = {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": "call_scope",
+                        "type": "function",
+                        "function": {"name": route, "arguments": json.dumps({"supported_segments": []})},
+                    }
+                ],
+            }
+            return httpx2.Response(
+                200,
+                json={
+                    "id": "chatcmpl-scope-test",
+                    "object": "chat.completion",
+                    "created": 0,
+                    "model": body["model"],
+                    "choices": [{"index": 0, "finish_reason": "tool_calls", "message": message}],
+                    "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
+                },
+            )
         message = {"role": "assistant", "content": json.dumps(extraction)}
         return httpx2.Response(
             200,
@@ -1805,9 +2099,8 @@ def _latest_run(recipe_client: TestClient, session_id: int) -> dict:
 
 
 def test_a_turn_records_every_model_request_on_its_run(recipe_client: TestClient, monkeypatch) -> None:
-    """In OpenAI mode agent_runs.used_llm_calls stayed 0. A turn now records what it sent: the parser's chat
-    request, then one embedding request for every word it could not place (not one each), sent as text so no
-    tokenizer has to be downloaded."""
+    """In OpenAI mode the run records both scope and constraint chat requests, then one embedding request for
+    every word it could not place (not one each), sent as text so no tokenizer has to be downloaded."""
     sent = _openai_answered_in_process(
         monkeypatch, {"household_size": 2, "excluded_ingredients": ["taugeh", "belacan"]}
     )
@@ -1816,15 +2109,19 @@ def test_a_turn_records_every_model_request_on_its_run(recipe_client: TestClient
         "/api/agent/sessions", json={"message": "Plan dinners for two, no taugeh or belacan"}
     ).json()
 
-    assert [item["path"] for item in sent] == ["/v1/chat/completions", "/v1/embeddings"]
-    assert sent[1]["body"]["input"] == ["taugeh", "belacan"]
+    assert [item["path"] for item in sent] == [
+        "/v1/chat/completions",
+        "/v1/chat/completions",
+        "/v1/embeddings",
+    ]
+    assert sent[2]["body"]["input"] == ["taugeh", "belacan"]
     run = _latest_run(recipe_client, session["id"])
-    assert run["used_llm_calls"] == 2
+    assert run["used_llm_calls"] == 3
     assert run["used_llm_calls"] <= run["max_llm_calls"]
 
 
 def test_a_retried_request_is_counted_and_a_fallback_is_recorded(recipe_client: TestClient, monkeypatch) -> None:
-    """A model that does not answer is asked twice (the SDK retries once), and both requests count; the rules
+    """Scope classification fails once and constraint parsing retries once; all three requests count. The rules
     then read the turn, which the run records for the console's fallback figure."""
     import httpx2
 
@@ -1841,9 +2138,9 @@ def test_a_retried_request_is_counted_and_a_fallback_is_recorded(recipe_client: 
 
     session = recipe_client.post("/api/agent/sessions", json={"message": "Plan for 2 people"}).json()
 
-    assert [item["path"] for item in sent] == ["/v1/chat/completions"] * 2
+    assert [item["path"] for item in sent] == ["/v1/chat/completions"] * 3
     run = _latest_run(recipe_client, session["id"])
-    assert run["used_llm_calls"] == 2
+    assert run["used_llm_calls"] == 3
     assert run["run_config"]["model_fell_back"] is True
     # A turn the rules had to read in the model's place is what "degraded" means on the console.
     assert (run["status"], run["termination_reason_code"]) == ("degraded", "MODEL_FALLBACK")
@@ -1853,16 +2150,16 @@ def test_a_retried_request_is_counted_and_a_fallback_is_recorded(recipe_client: 
 def test_a_swap_records_its_embedding_request_on_its_run(recipe_client: TestClient, monkeypatch) -> None:
     sent = _openai_answered_in_process(monkeypatch, {"household_size": 2, "budget_per_meal_sgd": 20})
     created, result = _plan_with_evidence(recipe_client)
-    assert result["run"]["used_llm_calls"] == 0  # saving the plan asks no model
+    assert result["run"]["used_llm_calls"] == 0  # fixture mode sends no model request when saving the plan
     sent.clear()
 
     recipe_client.post(
         f"/api/agent/sessions/{created['id']}/messages", json={"message": "Replace day 3 with something with tofu"}
     )
 
-    assert [item["path"] for item in sent] == ["/v1/embeddings"]
-    assert sent[0]["body"]["input"] == ["tofu"]  # the request as text, not token ids
-    assert _latest_run(recipe_client, created["id"])["used_llm_calls"] == 1
+    assert [item["path"] for item in sent] == ["/v1/chat/completions", "/v1/embeddings"]
+    assert sent[1]["body"]["input"] == ["tofu"]  # the request as text, not token ids
+    assert _latest_run(recipe_client, created["id"])["used_llm_calls"] == 2
 
 
 def _embeddings_unavailable(monkeypatch: pytest.MonkeyPatch, sent: list[dict]) -> None:
@@ -1899,9 +2196,13 @@ def test_a_swap_whose_embedding_request_failed_is_recorded_as_a_fallback(
 
     assert reply.status_code == 200
     assert reply.json()["pending_replan"] is not None  # the swap still came
-    assert [item["path"] for item in sent] == ["/v1/embeddings"] * 2
+    assert [item["path"] for item in sent] == [
+        "/v1/chat/completions",
+        "/v1/embeddings",
+        "/v1/embeddings",
+    ]
     run = _latest_run(recipe_client, created["id"])
-    assert run["used_llm_calls"] == 2
+    assert run["used_llm_calls"] == 3
     assert run["run_config"]["model_fell_back"] is True
 
 
@@ -1915,9 +2216,14 @@ def test_a_turn_whose_embedding_request_failed_is_recorded_as_a_fallback(
 
     session = recipe_client.post("/api/agent/sessions", json={"message": "Dinners for two, no taugeh"}).json()
 
-    assert [item["path"] for item in sent] == ["/v1/chat/completions", "/v1/embeddings", "/v1/embeddings"]
+    assert [item["path"] for item in sent] == [
+        "/v1/chat/completions",
+        "/v1/chat/completions",
+        "/v1/embeddings",
+        "/v1/embeddings",
+    ]
     run = _latest_run(recipe_client, session["id"])
-    assert run["used_llm_calls"] == 3
+    assert run["used_llm_calls"] == 4
     assert run["run_config"]["model_fell_back"] is True
 
 
