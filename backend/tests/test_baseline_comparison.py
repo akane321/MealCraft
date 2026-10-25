@@ -15,8 +15,8 @@ def episode(identifier="episode-1"):
     }
 
 
-def result(identifier="episode-1", *, coverage=1.0):
-    response = BaselineResponse(episode_id=identifier, system_id="test-arm", status="plan")
+def result(identifier="episode-1", *, coverage=1.0, system_id="test-arm"):
+    response = BaselineResponse(episode_id=identifier, system_id=system_id, status="plan")
     mapping = IngredientMapping("rice", 100, "rice", "matched")
     recomputation = BaselineRecomputation(
         nutrition=PlanningNutrients(
@@ -38,7 +38,7 @@ def result(identifier="episode-1", *, coverage=1.0):
     )
     return EpisodeResult(
         episode_id=identifier,
-        system_id="test-arm",
+        system_id=system_id,
         valid_output=True,
         generation=GenerationResult(
             response=response,
@@ -101,3 +101,34 @@ def test_episode_selection_rejects_unknown_ids():
 
     with pytest.raises(ValueError, match="unknown evaluation episodes"):
         select_episodes([episode()], {"missing"})
+
+
+def test_arm_failure_is_recorded_without_aborting_other_arms(tmp_path):
+    def fail(_item):
+        raise RuntimeError("deliberate test failure")
+
+    report = run_comparison(
+        episodes=[episode()],
+        arms=[
+            Arm("broken-arm", "deterministic", fail),
+            Arm("healthy-arm", "deterministic", lambda _: result(system_id="healthy-arm")),
+        ],
+        output_dir=tmp_path,
+    )
+
+    assert (tmp_path / "comparison.json").is_file()
+    assert len(report["runs"]) == 2
+    failed, completed = report["runs"]
+    assert failed["status"] == "failed"
+    assert failed["error"]["type"] == "RuntimeError"
+    assert failed["error"]["message"] == "deliberate test failure"
+    assert completed["status"] == "completed"
+    assert completed["comparison"]["strict_success"] is True
+    assert completed["comparison"]["coverage_adjusted_success"] is True
+    assert report["arms"]["broken-arm"]["failed_runs"] == 1
+    assert report["arms"]["broken-arm"]["token_usage"]["total_tokens"] is None
+    assert report["arms"]["broken-arm"]["api_model_cost_usd"] is None
+    assert report["arms"]["healthy-arm"]["completed_runs"] == 1
+    raw = tmp_path / failed["raw_result"]
+    assert raw.is_file()
+    assert '"status": "failed"' in raw.read_text(encoding="utf-8")

@@ -5,6 +5,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import time
+import traceback
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -225,25 +227,46 @@ def run_comparison(
                     if payload.get("episode_sha256") != _digest(episode):
                         raise ValueError(f"cached deterministic result has different episode data: {path}")
                 else:
-                    payload = {
-                        "schema_version": "baseline-comparison-raw-v1",
-                        "arm_kind": arm.kind,
-                        "repeat": repeat,
-                        "episode_sha256": _digest(episode),
-                        "result": scored_payload(episode, arm.run_episode(episode)),
-                    }
+                    started = time.perf_counter()
+                    try:
+                        result = scored_payload(episode, arm.run_episode(episode))
+                        payload = {
+                            "schema_version": "baseline-comparison-raw-v1",
+                            "status": "completed",
+                            "arm_kind": arm.kind,
+                            "repeat": repeat,
+                            "episode_sha256": _digest(episode),
+                            "result": result,
+                        }
+                    except Exception as error:
+                        payload = {
+                            "schema_version": "baseline-comparison-raw-v1",
+                            "status": "failed",
+                            "arm_kind": arm.kind,
+                            "repeat": repeat,
+                            "episode_sha256": _digest(episode),
+                            "error": {
+                                "type": type(error).__name__,
+                                "message": str(error),
+                                "elapsed_seconds": time.perf_counter() - started,
+                                "traceback": traceback.format_exc(),
+                            },
+                        }
                     _write_json(path, payload)
-                rows.append(
-                    {
-                        "system_id": arm.system_id,
-                        "arm_kind": arm.kind,
-                        "repeat": repeat,
-                        "episode_id": identifier,
-                        "reused": reused,
-                        "raw_result": str(path.relative_to(output_dir)),
-                        **payload["result"],
-                    }
-                )
+                row = {
+                    "system_id": arm.system_id,
+                    "arm_kind": arm.kind,
+                    "repeat": repeat,
+                    "episode_id": identifier,
+                    "reused": reused,
+                    "raw_result": str(path.relative_to(output_dir)),
+                    "status": payload.get("status", "completed"),
+                }
+                if row["status"] == "completed":
+                    row.update(payload["result"])
+                else:
+                    row["error"] = payload["error"]
+                rows.append(row)
     report = _report(rows, episodes)
     _write_json(output_dir / "comparison.json", report)
     return report
@@ -254,24 +277,31 @@ def _mean(values: list[float]) -> float | None:
 
 
 def _sum_or_none(values: list[int | float | None]) -> int | float | None:
-    return None if any(value is None for value in values) else sum(value for value in values if value is not None)
+    return (
+        None
+        if not values or any(value is None for value in values)
+        else sum(value for value in values if value is not None)
+    )
 
 
 def _report(rows: list[dict[str, Any]], episodes: list[dict[str, Any]]) -> dict[str, Any]:
     summaries: dict[str, Any] = {}
     for system_id in dict.fromkeys(row["system_id"] for row in rows):
         mine = [row for row in rows if row["system_id"] == system_id]
-        coverage = [row["verification"]["coverage"] for row in mine if row.get("verification")]
-        generation = [row["generation"] for row in mine]
-        recomputations = [row["recomputation"] for row in mine if row.get("recomputation")]
+        completed = [row for row in mine if row["status"] == "completed"]
+        coverage = [row["verification"]["coverage"] for row in completed if row.get("verification")]
+        generation = [row["generation"] for row in completed]
+        recomputations = [row["recomputation"] for row in completed if row.get("recomputation")]
         summaries[system_id] = {
             "runs": len(mine),
+            "completed_runs": len(completed),
+            "failed_runs": len(mine) - len(completed),
             "episodes": len({row["episode_id"] for row in mine}),
             "mapping_coverage_mean": _mean(coverage),
             "verifiable": sum(bool(row.get("verification") and row["verification"]["verifiable"]) for row in mine),
-            "hard_constraint_success": sum(row["comparison"]["hard_constraint_success"] for row in mine),
-            "strict_success": sum(row["comparison"]["strict_success"] for row in mine),
-            "coverage_adjusted_success": sum(row["comparison"]["coverage_adjusted_success"] for row in mine),
+            "hard_constraint_success": sum(row["comparison"]["hard_constraint_success"] for row in completed),
+            "strict_success": sum(row["comparison"]["strict_success"] for row in completed),
+            "coverage_adjusted_success": sum(row["comparison"]["coverage_adjusted_success"] for row in completed),
             "nutrition_complete": sum(item["nutrition_complete"] for item in recomputations),
             "allergens_complete": sum(item["allergens_complete"] for item in recomputations),
             "price_complete": sum(item["pricing_status"] == "complete" for item in recomputations),

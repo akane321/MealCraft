@@ -6,6 +6,7 @@ from app.evaluation.algorithm_ladder_baseline import (
     implemented_system_ids,
     run_episode,
 )
+from app.planning.native_algorithm_cp_sat import integer
 from tests.test_strong_rule_baseline import EPISODE, catalog, resources
 
 EXPECTED_ARMS = (
@@ -64,3 +65,34 @@ def test_each_arm_uses_shared_mapping_coverage_and_recomputation(monkeypatch, sy
 def test_unknown_algorithm_identifier_is_rejected():
     with pytest.raises(ValueError, match="unknown algorithm baseline arm"):
         generate(EPISODE, system_id="algorithm-rung-4-lns")
+
+
+def test_cp_sat_adapter_uses_native_ranking_grid_without_changing_order(monkeypatch):
+    release = catalog()
+    third = {
+        **release.recipes[0],
+        "slug": "tofu-rice-third",
+        "title": "Third tofu rice",
+    }
+    release.recipes.append(third)
+    release.by_slug[third["slug"]] = third
+    episode = {
+        **EPISODE,
+        "scenario": {
+            **EPISODE["scenario"],
+            "recipe_candidate_slugs": [*EPISODE["scenario"]["recipe_candidate_slugs"], third["slug"]],
+        },
+    }
+    monkeypatch.setattr("app.evaluation.multidish_runner.load_release_catalog", lambda: release)
+
+    generated = generate(episode, system_id="algorithm-rung-6-cp-sat")
+
+    assert generated.response is not None
+    assert generated.response.status == "plan"
+
+
+def test_native_grid_accepts_only_binary_noise_around_exact_coefficient():
+    assert integer(151.20000000000002, 72_000_000) == 10_886_400_000
+    assert integer(32.95999999999999, 100) == 3296
+    with pytest.raises(ValueError, match="Coefficient precision"):
+        integer(151.2000001, 72_000_000)

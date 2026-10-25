@@ -5,7 +5,7 @@ grid and ranking 0.0001. Unsupported precision/policies are refused.
 """
 
 from collections import defaultdict
-from math import gcd, isfinite, lcm
+from math import gcd, isfinite, lcm, ulp
 from time import perf_counter
 
 from app.planning.algorithm_reference import domains, evaluate
@@ -17,9 +17,14 @@ from app.planning.meal_composition import dish_servings, meal_shares
 
 def integer(value, scale=1000):
     scaled = value * scale
-    if not isfinite(scaled) or abs(scaled - round(scaled)) > 1e-7:
+    nearest = round(scaled)
+    # Arithmetic over grid-aligned decimal inputs can land a few binary
+    # floating-point steps beside the exact integer at large quantity scales.
+    # Accept only that representation error; genuine off-grid values remain
+    # many ULPs away and are still refused.
+    if not isfinite(scaled) or abs(scaled - nearest) > 4 * ulp(scaled):
         raise ValueError("Coefficient precision exceeds the native model's declared grid")
-    return round(scaled)
+    return nearest
 
 
 class NativeSharedScoreCpSat(DiversityAwareGreedyPlanner):

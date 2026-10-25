@@ -175,3 +175,24 @@ def test_missing_household_size_returns_clarification_without_planning(monkeypat
     assert response is not None
     assert response.status == "clarification"
     assert response.plan is None
+
+
+def test_current_plan_shape_episode_is_normalized_by_shared_schema(monkeypatch):
+    monkeypatch.setattr("app.evaluation.multidish_runner.load_release_catalog", catalog)
+    profile = EPISODE["scenario"]["household_profile"]
+    episode = {
+        **EPISODE,
+        "scenario": {
+            **EPISODE["scenario"],
+            "household_profile": {
+                **{key: value for key, value in profile.items() if key != "meal_composition"},
+                "plan_shape": {"meals": {"dinner": profile["meal_composition"]}},
+            },
+        },
+    }
+
+    response = generate(episode).response
+
+    assert response is not None and response.status == "plan"
+    assert response.plan is not None
+    assert [meal.slot_id for meal in response.plan.meals] == ["mon-dinner", "tue-dinner"]

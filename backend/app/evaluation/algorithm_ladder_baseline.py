@@ -147,8 +147,9 @@ def _objective(problem: FinalPlanningProblem) -> AlgorithmObjective:
         unknown_pairs=(),
         near_pairs=(),
     )
-    denominator = max(1, len(recipe_ids) - 1)
-    ranking = {recipe_id: index / denominator for index, recipe_id in enumerate(recipe_ids)}
+    # Native CP-SAT declares a 0.0001 ranking grid. A positive common scale
+    # preserves every comparison made by the lexicographic ranking-loss term.
+    ranking = {recipe_id: index / 10000 for index, recipe_id in enumerate(recipe_ids)}
     return AlgorithmObjective(groups, keys, ranking)
 
 
