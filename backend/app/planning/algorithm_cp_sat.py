@@ -113,6 +113,7 @@ class SharedScoreCpSat(DiversityAwareGreedyPlanner):
             if unknown
             else ("optimal_for_count_table" if compressible else "optimal_for_generated_options"),
             score=score,
+            diversity=self.objective.diversity(problem, assignments),
             minimum_checkout_sgd=report.purchase_total_sgd
             if self.objective.priority == "price" and not unknown
             else None,

@@ -1,0 +1,3323 @@
+{
+  "environment": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i9-12900H",
+    "logical_cpu_count": 20,
+    "physical_core_count": "not recorded",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.14",
+    "code_commit": "b6277d1cf15ce9bda864afd208cdedd92df5f27a",
+    "working_tree_dirty": false
+  },
+  "scope": "Synthetic three-recipe households, synthetic packages/prices, 7/14 dinners; couple with alternating attendance, six adults including a vegetarian, and two-dish couple dinners. One run per configuration; grouping is the algorithm near-duplicate policy, not product dish_kind. No held-out inputs; no product latency or real-price acceptance claim.",
+  "rows": [
+    {
+      "case": "couple",
+      "days": 7,
+      "reference": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 18,
+        "build_ms": 7.071299998642644,
+        "symmetry_pairs": 5,
+        "workers": 4,
+        "stage_ms": [
+          14.504399998259032,
+          15.831000000616768,
+          14.757700002519414,
+          0.0,
+          15.284199998859549,
+          15.953099999023834
+        ],
+        "score": [
+          0,
+          -1.5,
+          9,
+          0.0,
+          1.5,
+          1200
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "c",
+            "role_id": null
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "c",
+            "role_id": null
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "c",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "beans",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "beans-bag",
+            "packages": 2,
+            "purchase_cost_sgd": 4.0,
+            "surplus_quantity": 100.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 700.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 700.0,
+            "selected_product_id": "rice-bag",
+            "packages": 4,
+            "purchase_cost_sgd": 8.0,
+            "surplus_quantity": 100.0,
+            "note": null,
+            "trip": 1
+          }
+        ],
+        "total_ms": 86.18769999884535
+      },
+      "reference_ms": 8260.439699999552,
+      "runs": [
+        {
+          "algorithm": "DiversityAwareGreedyPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            9,
+            0.0,
+            1.5,
+            1200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 12.0,
+          "elapsed_ms": 14.996300000348128,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "GraspPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            9,
+            0.0,
+            1.5,
+            1200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 12.0,
+          "elapsed_ms": 77.85489999878337,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "LocalSearchPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            9,
+            0.0,
+            1.5,
+            1200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 12.0,
+          "elapsed_ms": 17.42020000165212,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "SharedObjectiveBeamPlanner",
+          "parameters": {
+            "width": 8
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            9,
+            0.0,
+            1.5,
+            1200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 12.0,
+          "elapsed_ms": 51.02690000057919,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "AnnealingPlanner",
+          "parameters": {
+            "steps": 50,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            9,
+            0.0,
+            1.5,
+            1200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 12.0,
+          "elapsed_ms": 32.513900001504226,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            9,
+            0.0,
+            1.5,
+            1200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 12.0,
+          "elapsed_ms": 354.7236000013072,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d3",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 75.94669999889447,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d2",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 91.84979999918141,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d2",
+                "d3",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 78.77639999787789,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d1",
+                "d4",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 94.30179999981192,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            9,
+            0.0,
+            1.5,
+            1200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 12.0,
+          "elapsed_ms": 386.90629999837256,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d2",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 81.52599999812082,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 90.9739000016998,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d1",
+                "d3",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 93.21889999773703,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d3",
+                "d4",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 91.31379999962519,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 2
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            9,
+            0.0,
+            1.5,
+            1200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 12.0,
+          "elapsed_ms": 388.68949999960023,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d4",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 78.08980000118027,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d1",
+                "d2",
+                "d4",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 91.58739999838872,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d1",
+                "d4",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 91.5065000008326,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d1",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 93.3815999997023,
+              "accepted": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "couple",
+      "days": 14,
+      "reference": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 35,
+        "build_ms": 16.287499998725252,
+        "symmetry_pairs": 10,
+        "workers": 4,
+        "stage_ms": [
+          21.804899999551708,
+          15.38540000183275,
+          30.263300002843607,
+          0.0,
+          30.825200003164355,
+          15.03460000094492
+        ],
+        "score": [
+          0,
+          -1.5,
+          42,
+          0.0,
+          3.5,
+          2200
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "c",
+            "role_id": null
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "c",
+            "role_id": null
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "c",
+            "role_id": null
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "c",
+            "role_id": null
+          },
+          {
+            "slot_id": "d7",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d8",
+            "recipe_id": "c",
+            "role_id": null
+          },
+          {
+            "slot_id": "d9",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d10",
+            "recipe_id": "c",
+            "role_id": null
+          },
+          {
+            "slot_id": "d11",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d12",
+            "recipe_id": "c",
+            "role_id": null
+          },
+          {
+            "slot_id": "d13",
+            "recipe_id": "a",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "beans",
+            "required_quantity": 400.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 400.0,
+            "selected_product_id": "beans-bag",
+            "packages": 2,
+            "purchase_cost_sgd": 4.0,
+            "surplus_quantity": 0.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "beans",
+            "required_quantity": 300.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 300.0,
+            "selected_product_id": "beans-bag",
+            "packages": 2,
+            "purchase_cost_sgd": 4.0,
+            "surplus_quantity": 100.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 600.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 600.0,
+            "selected_product_id": "rice-bag",
+            "packages": 3,
+            "purchase_cost_sgd": 6.0,
+            "surplus_quantity": 0.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 800.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 800.0,
+            "selected_product_id": "rice-bag",
+            "packages": 4,
+            "purchase_cost_sgd": 8.0,
+            "surplus_quantity": 0.0,
+            "note": null,
+            "trip": 2
+          }
+        ],
+        "total_ms": 132.60349999836762
+      },
+      "reference_ms": 133.2672000025923,
+      "runs": [
+        {
+          "algorithm": "DiversityAwareGreedyPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            43,
+            0.0,
+            3.0,
+            2400
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 24.0,
+          "elapsed_ms": 30.537200000253506,
+          "matches_reference": false,
+          "repairs": []
+        },
+        {
+          "algorithm": "GraspPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            43,
+            0.0,
+            3.0,
+            2400
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 24.0,
+          "elapsed_ms": 262.0572000014363,
+          "matches_reference": false,
+          "repairs": []
+        },
+        {
+          "algorithm": "LocalSearchPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            42,
+            0.0,
+            3.5,
+            2200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 22.0,
+          "elapsed_ms": 48.56440000003204,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "SharedObjectiveBeamPlanner",
+          "parameters": {
+            "width": 8
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            43,
+            0.0,
+            3.0,
+            2400
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 24.0,
+          "elapsed_ms": 162.64289999890025,
+          "matches_reference": false,
+          "repairs": []
+        },
+        {
+          "algorithm": "AnnealingPlanner",
+          "parameters": {
+            "steps": 50,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            43,
+            0.0,
+            3.0,
+            2200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 22.0,
+          "elapsed_ms": 59.74190000051749,
+          "matches_reference": false,
+          "repairs": []
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            42,
+            0.0,
+            3.5,
+            2200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 22.0,
+          "elapsed_ms": 406.48370000053546,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d12",
+                "d13",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 91.40579999802867,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d4",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 93.34540000054403,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d12",
+                "d4",
+                "d5",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 89.7975999978371,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d2",
+                "d3",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 92.5610999984201,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            42,
+            0.0,
+            3.5,
+            2200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 22.0,
+          "elapsed_ms": 448.3922999970673,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d2",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 104.95109999828856,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d1",
+                "d11",
+                "d12",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 88.78829999957816,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d1",
+                "d10",
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 93.57069999896339,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d11",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 116.98239999896032,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 2
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            42,
+            0.0,
+            3.5,
+            2200
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 22.0,
+          "elapsed_ms": 420.0449000018125,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d11",
+                "d13"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 89.89409999776399,
+              "accepted": true
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d10",
+                "d11",
+                "d2",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 89.13400000164984,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d12",
+                "d13",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 92.45799999916926,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d12",
+                "d3",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 89.13329999995767,
+              "accepted": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "six",
+      "days": 7,
+      "reference": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 14,
+        "build_ms": 15.643599999748403,
+        "symmetry_pairs": 6,
+        "workers": 4,
+        "stage_ms": [
+          20.36480000242591,
+          14.85580000007758,
+          15.236500003084075,
+          0.0,
+          30.54390000033891,
+          15.069199998833938
+        ],
+        "score": [
+          0,
+          -1.0,
+          21,
+          0.0,
+          0,
+          4200
+        ],
+        "diversity": {
+          "table_kinds": 1,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 1,
+            "adult-2": 1,
+            "adult-3": 1,
+            "adult-4": 1,
+            "adult-5": 1
+          },
+          "member_mean": 1.0,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "a",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 4200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 4200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 21,
+            "purchase_cost_sgd": 42.0,
+            "surplus_quantity": 0.0,
+            "note": null,
+            "trip": 1
+          }
+        ],
+        "total_ms": 117.09060000066529
+      },
+      "reference_ms": 117.73879999964265,
+      "runs": [
+        {
+          "algorithm": "DiversityAwareGreedyPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            21,
+            0.0,
+            0,
+            4200
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 42.0,
+          "elapsed_ms": 43.63109999758308,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "GraspPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            21,
+            0.0,
+            0,
+            4200
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 42.0,
+          "elapsed_ms": 116.51210000127321,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "LocalSearchPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            21,
+            0.0,
+            0,
+            4200
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 42.0,
+          "elapsed_ms": 20.98639999894658,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "SharedObjectiveBeamPlanner",
+          "parameters": {
+            "width": 8
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            21,
+            0.0,
+            0,
+            4200
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 42.0,
+          "elapsed_ms": 65.29250000312459,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "AnnealingPlanner",
+          "parameters": {
+            "steps": 50,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            21,
+            0.0,
+            0,
+            4200
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 42.0,
+          "elapsed_ms": 61.52300000030664,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            21,
+            0.0,
+            0,
+            4200
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 42.0,
+          "elapsed_ms": 417.1219000018027,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d3",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 89.36570000150823,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d2",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 89.08230000088224,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d2",
+                "d3",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 121.48069999966538,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d1",
+                "d4",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 89.17719999953988,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            21,
+            0.0,
+            0,
+            4200
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 42.0,
+          "elapsed_ms": 378.35049999921466,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d2",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 64.33950000064215,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 94.32759999981499,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d1",
+                "d3",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 91.96810000139521,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d3",
+                "d4",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 90.80960000210325,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 2
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            21,
+            0.0,
+            0,
+            4200
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 42.0,
+          "elapsed_ms": 414.2461999981606,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d4",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 84.04270000028191,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d1",
+                "d2",
+                "d4",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 90.37249999892083,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d1",
+                "d4",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 91.63859999898705,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d1",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 105.76049999872339,
+              "accepted": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "six",
+      "days": 14,
+      "reference": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 28,
+        "build_ms": 14.830000000074506,
+        "symmetry_pairs": 12,
+        "workers": 4,
+        "stage_ms": [
+          17.70530000067083,
+          15.187499997409759,
+          15.35650000005262,
+          0.0,
+          15.71459999831859,
+          15.727599999081576
+        ],
+        "score": [
+          0,
+          -1.0,
+          91,
+          0.0,
+          0,
+          8400
+        ],
+        "diversity": {
+          "table_kinds": 1,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 1,
+            "adult-2": 1,
+            "adult-3": 1,
+            "adult-4": 1,
+            "adult-5": 1
+          },
+          "member_mean": 1.0,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d7",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d8",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d9",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d10",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d11",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d12",
+            "recipe_id": "a",
+            "role_id": null
+          },
+          {
+            "slot_id": "d13",
+            "recipe_id": "a",
+            "role_id": null
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 4200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 4200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 21,
+            "purchase_cost_sgd": 42.0,
+            "surplus_quantity": 0.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 4200.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 4200.0,
+            "selected_product_id": "rice-bag",
+            "packages": 21,
+            "purchase_cost_sgd": 42.0,
+            "surplus_quantity": 0.0,
+            "note": null,
+            "trip": 2
+          }
+        ],
+        "total_ms": 99.19140000056359
+      },
+      "reference_ms": 99.84550000081072,
+      "runs": [
+        {
+          "algorithm": "DiversityAwareGreedyPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            91,
+            0.0,
+            0,
+            8400
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 84.0,
+          "elapsed_ms": 45.14779999954044,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "GraspPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            91,
+            0.0,
+            0,
+            8400
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 84.0,
+          "elapsed_ms": 364.12990000098944,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "LocalSearchPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            91,
+            0.0,
+            0,
+            8400
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 84.0,
+          "elapsed_ms": 73.60609999886947,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "SharedObjectiveBeamPlanner",
+          "parameters": {
+            "width": 8
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            91,
+            0.0,
+            0,
+            8400
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 84.0,
+          "elapsed_ms": 244.98740000126418,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "AnnealingPlanner",
+          "parameters": {
+            "steps": 50,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            91,
+            0.0,
+            0,
+            8400
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 84.0,
+          "elapsed_ms": 136.95599999846308,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            91,
+            0.0,
+            0,
+            8400
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 84.0,
+          "elapsed_ms": 458.0789999999979,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d12",
+                "d13",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 93.73150000101305,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d4",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 106.20700000072247,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d12",
+                "d4",
+                "d5",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 101.09989999909885,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d2",
+                "d3",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 92.13159999853815,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            91,
+            0.0,
+            0,
+            8400
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 84.0,
+          "elapsed_ms": 495.59640000006766,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d2",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 81.3756999996258,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d1",
+                "d11",
+                "d12",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 91.08599999672151,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d1",
+                "d10",
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 91.26500000274973,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d11",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 102.14420000193059,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 2
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.0,
+            91,
+            0.0,
+            0,
+            8400
+          ],
+          "diversity": {
+            "table_kinds": 1,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 1,
+              "adult-2": 1,
+              "adult-3": 1,
+              "adult-4": 1,
+              "adult-5": 1
+            },
+            "member_mean": 1.0,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 84.0,
+          "elapsed_ms": 445.8959000003233,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d11",
+                "d13"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 89.21879999979865,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d10",
+                "d11",
+                "d2",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 102.97859999991488,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d12",
+                "d13",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 100.22989999924903,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d12",
+                "d3",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 89.01790000163601,
+              "accepted": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "shared",
+      "days": 7,
+      "reference": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 42,
+        "build_ms": 27.839800000947434,
+        "symmetry_pairs": 6,
+        "workers": 4,
+        "stage_ms": [
+          19.62669999920763,
+          30.094000001554377,
+          31.225099999574013,
+          0.0,
+          30.838000002404442,
+          15.423799999553012
+        ],
+        "score": [
+          0,
+          -1.5,
+          42,
+          0.0,
+          3.5,
+          1400
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "a",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d0",
+            "recipe_id": "c",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "a",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "c",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "a",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "a",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "a",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "a",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "a",
+            "role_id": "extra"
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "beans",
+            "required_quantity": 475.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 475.0,
+            "selected_product_id": "beans-bag",
+            "packages": 3,
+            "purchase_cost_sgd": 6.0,
+            "surplus_quantity": 125.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 800.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 800.0,
+            "selected_product_id": "rice-bag",
+            "packages": 4,
+            "purchase_cost_sgd": 8.0,
+            "surplus_quantity": 0.0,
+            "note": null,
+            "trip": 1
+          }
+        ],
+        "total_ms": 157.50710000065737
+      },
+      "reference_ms": 157.8025000017078,
+      "runs": [
+        {
+          "algorithm": "DiversityAwareGreedyPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            42,
+            0.0,
+            3.5,
+            1400
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 14.0,
+          "elapsed_ms": 40.491100000508595,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "GraspPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            42,
+            0.0,
+            3.5,
+            1400
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 14.0,
+          "elapsed_ms": 393.28000000023167,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "LocalSearchPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            42,
+            0.0,
+            3.5,
+            1400
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 14.0,
+          "elapsed_ms": 83.22580000094604,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "SharedObjectiveBeamPlanner",
+          "parameters": {
+            "width": 8
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            42,
+            0.0,
+            3.5,
+            1400
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 14.0,
+          "elapsed_ms": 229.809500000556,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "AnnealingPlanner",
+          "parameters": {
+            "steps": 50,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            42,
+            0.0,
+            3.5,
+            1400
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 14.0,
+          "elapsed_ms": 91.87639999800012,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            42,
+            0.0,
+            3.5,
+            1400
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 14.0,
+          "elapsed_ms": 407.43510000174865,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d3",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 87.94900000066264,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d2",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 90.25879999899189,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d2",
+                "d3",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 92.50570000222069,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d1",
+                "d4",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 89.12359999885666,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            42,
+            0.0,
+            3.5,
+            1400
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 14.0,
+          "elapsed_ms": 504.12539999888395,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d2",
+                "d4"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 87.5555999991775,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d0",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 130.5796000015107,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d1",
+                "d3",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 122.80819999796222,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d3",
+                "d4",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 107.31709999890882,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 2
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            42,
+            0.0,
+            3.5,
+            1400
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 14.0,
+          "elapsed_ms": 413.262100002612,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d4",
+                "d5",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 91.04669999942416,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d1",
+                "d2",
+                "d4",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 90.87989999898127,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d0",
+                "d1",
+                "d4",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 91.186599998764,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d1",
+                "d3",
+                "d4",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 89.90159999666503,
+              "accepted": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "shared",
+      "days": 14,
+      "reference": {
+        "status": "optimal_for_native_model",
+        "objective_priority": "variety",
+        "min_dish_kinds": 0,
+        "scope": "native generated meal options",
+        "meal_variables": 84,
+        "build_ms": 34.13580000051297,
+        "symmetry_pairs": 12,
+        "workers": 4,
+        "stage_ms": [
+          36.65689999979804,
+          30.30159999980242,
+          158.07420000055572,
+          0.0,
+          77.81360000080895,
+          29.46689999953378
+        ],
+        "score": [
+          0,
+          -1.5,
+          182,
+          0.0,
+          7.0,
+          2800
+        ],
+        "diversity": {
+          "table_kinds": 2,
+          "member_kinds": {
+            "adult-0": 1,
+            "adult-1": 2
+          },
+          "member_mean": 1.5,
+          "member_min": 1,
+          "primary_basis": "member_mean"
+        },
+        "minimum_checkout_sgd": null,
+        "assignments": [
+          {
+            "slot_id": "d0",
+            "recipe_id": "a",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d0",
+            "recipe_id": "c",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "a",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d1",
+            "recipe_id": "c",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "a",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d2",
+            "recipe_id": "c",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "a",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d3",
+            "recipe_id": "c",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "a",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d4",
+            "recipe_id": "c",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d5",
+            "recipe_id": "a",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d6",
+            "recipe_id": "a",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d7",
+            "recipe_id": "a",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d7",
+            "recipe_id": "c",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d8",
+            "recipe_id": "a",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d8",
+            "recipe_id": "c",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d9",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d9",
+            "recipe_id": "a",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d10",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d10",
+            "recipe_id": "a",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d11",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d11",
+            "recipe_id": "a",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d12",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d12",
+            "recipe_id": "a",
+            "role_id": "extra"
+          },
+          {
+            "slot_id": "d13",
+            "recipe_id": "c",
+            "role_id": "main"
+          },
+          {
+            "slot_id": "d13",
+            "recipe_id": "a",
+            "role_id": "extra"
+          }
+        ],
+        "shopping": [
+          {
+            "ingredient_id": "beans",
+            "required_quantity": 400.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 400.0,
+            "selected_product_id": "beans-bag",
+            "packages": 2,
+            "purchase_cost_sgd": 4.0,
+            "surplus_quantity": 0.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "beans",
+            "required_quantity": 475.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 475.0,
+            "selected_product_id": "beans-bag",
+            "packages": 3,
+            "purchase_cost_sgd": 6.0,
+            "surplus_quantity": 125.0,
+            "note": null,
+            "trip": 2
+          },
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 950.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 950.0,
+            "selected_product_id": "rice-bag",
+            "packages": 5,
+            "purchase_cost_sgd": 10.0,
+            "surplus_quantity": 50.0,
+            "note": null,
+            "trip": 1
+          },
+          {
+            "ingredient_id": "rice",
+            "required_quantity": 800.0,
+            "unit": "g",
+            "pantry_deduction": 0.0,
+            "remaining_quantity": 800.0,
+            "selected_product_id": "rice-bag",
+            "packages": 4,
+            "purchase_cost_sgd": 8.0,
+            "surplus_quantity": 0.0,
+            "note": null,
+            "trip": 2
+          }
+        ],
+        "total_ms": 369.8617000009108
+      },
+      "reference_ms": 370.2405000003637,
+      "runs": [
+        {
+          "algorithm": "DiversityAwareGreedyPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            182,
+            0.0,
+            7.0,
+            2800
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 28.0,
+          "elapsed_ms": 137.84129999839934,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "GraspPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            182,
+            0.0,
+            7.0,
+            2800
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 28.0,
+          "elapsed_ms": 1126.6424999994342,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "LocalSearchPlanner",
+          "parameters": {},
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            182,
+            0.0,
+            7.0,
+            2800
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 28.0,
+          "elapsed_ms": 386.4212000007683,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "SharedObjectiveBeamPlanner",
+          "parameters": {
+            "width": 8
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            182,
+            0.0,
+            7.0,
+            2800
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 28.0,
+          "elapsed_ms": 819.9391999987711,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "AnnealingPlanner",
+          "parameters": {
+            "steps": 50,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            182,
+            0.0,
+            7.0,
+            2800
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 28.0,
+          "elapsed_ms": 281.63150000182213,
+          "matches_reference": true,
+          "repairs": []
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 0
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            182,
+            0.0,
+            7.0,
+            2800
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 28.0,
+          "elapsed_ms": 1477.54999999961,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d12",
+                "d13",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 988.7161999977252,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d4",
+                "d6",
+                "d7",
+                "d8"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 107.95979999966221,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d12",
+                "d4",
+                "d5",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 121.95340000107535,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d2",
+                "d3",
+                "d8",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 79.088700000284,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 1
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            182,
+            0.0,
+            7.0,
+            2800
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 28.0,
+          "elapsed_ms": 590.2094000011857,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d1",
+                "d2",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 109.00269999910961,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d1",
+                "d11",
+                "d12",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 89.84369999961928,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d1",
+                "d10",
+                "d3",
+                "d6"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 104.96760000023642,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d11",
+                "d6",
+                "d7"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 141.472999999678,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "algorithm": "LargeNeighborhoodPlanner",
+          "parameters": {
+            "iterations": 4,
+            "destroy_size": 4,
+            "seed": 2
+          },
+          "status": "feasible",
+          "validation": "passed",
+          "score": [
+            0,
+            -1.5,
+            182,
+            0.0,
+            7.0,
+            2800
+          ],
+          "diversity": {
+            "table_kinds": 2,
+            "member_kinds": {
+              "adult-0": 1,
+              "adult-1": 2
+            },
+            "member_mean": 1.5,
+            "member_min": 1,
+            "primary_basis": "member_mean"
+          },
+          "price_sgd": 28.0,
+          "elapsed_ms": 642.6986000005854,
+          "matches_reference": true,
+          "repairs": [
+            {
+              "iteration": 0,
+              "released": [
+                "d0",
+                "d1",
+                "d11",
+                "d13"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 134.1385999985505,
+              "accepted": false
+            },
+            {
+              "iteration": 1,
+              "released": [
+                "d10",
+                "d11",
+                "d2",
+                "d5"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 111.30490000141435,
+              "accepted": false
+            },
+            {
+              "iteration": 2,
+              "released": [
+                "d12",
+                "d13",
+                "d4",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 131.7419000006339,
+              "accepted": false
+            },
+            {
+              "iteration": 3,
+              "released": [
+                "d0",
+                "d12",
+                "d3",
+                "d9"
+              ],
+              "status": "optimal_for_native_model",
+              "elapsed_ms": 105.88499999721535,
+              "accepted": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -155,11 +155,79 @@ solver workers and symmetry information. Recipe-count cases use developer
 recipes, synthetic prices and exactly one dish per dinner. They do not measure
 retail savings or end-to-end product latency.
 
-The existing fixtures have no `PlanningSlot.members`. Member eligibility and
+The historical native-scale and native-speed fixtures have no `PlanningSlot.members`. Member eligibility and
 coverage come from the shared candidate generator and validator (ADR-0071);
 these runs do not establish member-level algorithm quality. Nutrition bands
 in these packets describe the whole table. Member-specific tests and comparisons
 are a separate required delivery.
+
+## Large-neighborhood search
+
+`LargeNeighborhoodPlanner` is an offline comparison arm. It starts from a
+validated greedy plan (or a supplied plan that it revalidates), releases several
+meals, and fixes all other meal choices in the native CP-SAT model. The model
+still sees the entire horizon, including shared packages, pantry, shopping trips,
+member attendance and nutrition. Only a strictly better independently validated
+result replaces the incumbent. Each repair records its released meals, status,
+acceptance and elapsed time in `planner.repairs`.
+
+`seed`, `iterations` and `destroy_size` define a reproducible neighborhood schedule.
+The native optimizer uses four workers with solver seed 0; equal-score assignments
+and timings may differ. The trace therefore does not claim deterministic execution,
+and repair rows record the worker count and solver seed. Historical report rows
+without these fields predate this trace correction and are not new measurements.
+Repairs have no wall-clock cutoff. A whole-horizon optimal repair ends the loop;
+partial repairs run the configured iteration count. Unsupported native inputs or
+unsuccessful repairs keep the validated incumbent and are reported explicitly.
+The native model's precision and policy restrictions still apply. LNS does not
+claim global optimality, and this arm is not wired into the product planner.
+
+Tests cover a package-cost local minimum that requires changing two meals
+together, member households, shared dishes, separate shopping-trip budgets,
+locked meals, fixed empty optional meals, and unsuccessful repairs. These are
+synthetic regressions, not large-scale or real-price acceptance evidence.
+
+## Member-level variety
+
+For packets with members, the variety component maximizes the mean count of
+distinct kinds across members present at a meal with at least one assigned dish. Each member only
+receives dishes they can eat in slots where they are present, using the same
+`member_can_eat` eligibility rules as shared-dish coverage. The minimum member
+count is reported, not a separate optimization stage. Table variety remains in
+the report; packets without member data retain the previous table objective and
+report member metrics as null. Names identify members across slots and must be
+unique within a slot. A member present only at empty meals is excluded from the
+denominator. A member at a filled meal remains included with zero counted dishes
+when none are eligible or all roles are exempt. The native CP-SAT objective uses
+an exact scaled rational mean with a decision-dependent denominator; it refuses
+member scales beyond its integer bound. Exempt roles and near/unknown pairs use
+the existing representative rule. An entirely empty plan reports null member
+metrics and uses the table fallback, consistent with packets lacking member data.
+
+This experimental near-duplicate grouping is not the product's `dish_kind`
+classification: it combines pair evidence over the candidate set. The grouping
+policy still needs the independent human review requested in issue #310.
+`min_dish_kinds` continues to constrain whole-table counts, not the member mean.
+
+`scripts/compare_member_algorithm.py` generates [member-smoke.json](member-smoke.json)
+for a couple with different diets/attendance, six adults, and a couple sharing
+multiple dishes. These are synthetic two-dinner fixtures with synthetic prices.
+Every heuristic result passes the independent validator; exhaustive and both
+CP-SAT references expose both member and table counts. This is regression evidence,
+not the full household benchmark or a product-planner rollout.
+
+## Household catalog comparison
+
+The household horizon runner also accepts `--catalog-count 30`:
+`python scripts/compare_member_lns.py --catalog-count 30`. It writes separate
+`member-catalog-30.json` and `.md` artifacts without replacing `member-lns`.
+It uses catalog quantities, diet tags and nutrients with synthetic packages and
+prices. The developer fixture projects every recipe as a dinner/main; it does
+not reproduce product meal-role classification. Every arm uses the same candidate
+generator, with all input recipes allowed per role and at most 64 meal options
+per slot. Reports include recipe IDs and actual option counts. A proven native
+result is optimal only over those options; an unproven reference leaves score
+matching null. These are developer comparisons, not real-price acceptance.
 
 ## Price-priority reference
 
