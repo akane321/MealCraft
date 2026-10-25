@@ -4,7 +4,7 @@
 >
 > Remote repository: `akane321/MealCraft`
 >
-> Verified remote `main`: `2d9deddf` (reviewed algorithm, product-improvement and LLM integration)
+> Verified remote `main`: `33b49492` (reviewed product integration and aggregate-only evaluation apparatus)
 
 ### Verified integration delta (2026-10-25)
 
@@ -47,6 +47,17 @@
   the current common outputs and scorer, exposes no paid entry, and is not formal
   baseline registration or held-out run admission. The separate unbudgeted live
   developer entry remains disabled, including inside the backend container.
+- #352 adds a pure supplied-outcome aggregate report by category, language and
+  source. Its reviewed head passed all required checks
+  ([CI run](https://github.com/akane321/MealCraft/actions/runs/40202445306)); 37
+  local synthetic aggregate/adapter tests passed. This is apparatus, not an actual
+  held-out result, a scorer or run admission. Expected-manifest validation and
+  small-cell disclosure policy remain required before formal export; see the
+  [aggregate contract](evaluation/heldout-aggregate-report.md).
+- Issue #315 is closed against its stated engineering acceptance, not against
+  live-model or independent human-quality targets. Issue #310 remains open for
+  independent near-duplicate labels, matched exact/real-price evidence, composed
+  parameter calibration and mixed-purchase/product acceptance still missing.
 
 The integrated #327 head passed all required CI checks before merge; the combined
 targeted synthetic/SQLite regression also passed. This verification did not open
