@@ -31,9 +31,21 @@ recommendation loss and exact checkout cents. Soft nutrition deviations are
 normalized by the largest absolute stated bound, at least one, per check.
 Composed requests reuse the product meal candidate generator. Single-dish
 requests use the same packet with all recipes admitted per role.
+Within a composed request, beam and annealing reuse identical generated meal
+options through `planning/product_candidates.py`. Reuse requires equal packet,
+slot, ranking and search-limit values; changing any of them invalidates the
+stored options. Each caller receives its own list and widening evidence is
+preserved. Shopping, whole-plan validation and scoring still run independently.
 Trace records the seed, proposal count and before/after scores; runtime timing
 does not enter this deterministic evidence. The parameter choice is an initial
 integration setting, not an acceptance or optimality claim.
+
+For developer diagnosis, `scripts/product_household_comparison.py --profile`
+records candidate generation, shopping, validation and objective durations.
+These stage durations are inclusive and overlap, so they must not be summed
+as total runtime. `--cases` selects named developer households and `--steps`
+selects iteration counts; omitted options retain the full comparison. Profiling
+adds overhead and does not enter product traces, scores or stopping rules.
 
 This document is the implementation handoff for the contributor completing
 MealCraft's planning and validation algorithm. It defines the **accepted final
