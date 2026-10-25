@@ -90,6 +90,8 @@ def compile_constraints(problem: FinalPlanningProblem) -> tuple[CandidateEligibi
                 reasons.add("time_limit")
             if set(recipe.allergens).intersection(problem.allergens) or unverifiable_allergens(problem):
                 reasons.add("allergen")
+            if problem.allergens and "allergens" in recipe.unknown_safety:
+                reasons.add("allergen_status_unknown")
             if {item.ingredient_id for item in recipe.ingredients}.intersection(problem.excluded_ingredients):
                 reasons.add("excluded_ingredient")
             # Tags are closed over the entailments that hold by definition, so a
@@ -100,6 +102,10 @@ def compile_constraints(problem: FinalPlanningProblem) -> tuple[CandidateEligibi
             # A dish nobody home for this meal can eat is served to no one (ADR-0071 section 1).
             if not servable(slot, recipe):
                 reasons.add("not_servable")
+            if problem.dietary_requirements and "diet" in recipe.unknown_safety:
+                reasons.add("dietary_status_unknown")
+            if problem.requires_halal and recipe.halal_status != "halal":
+                reasons.add("halal_requirement")
             if problem.missing_equipment and not equipment_met(recipe.equipment, problem.missing_equipment):
                 reasons.add("equipment")
             if (

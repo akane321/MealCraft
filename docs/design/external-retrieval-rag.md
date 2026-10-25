@@ -305,6 +305,17 @@ normalized, safety-checked, nutrition-linked where required and released under
 the recipe-data contract. Implement this after the internal catalog pipeline is
 stable; do not fold it into the tutorial provider.
 
+### Food-question fallback
+
+Food questions first query supported facts in the household-visible recipe
+catalog. Only after a catalog miss, and only when the OpenAI provider is
+explicitly selected with a configured key, may the Agent use required hosted
+web search. The answer must include source URLs carried by the Responses
+provider's citation annotations. An empty, failed or uncited search produces
+the normal inability-to-verify response; it must not be filled from model
+memory. Fixture mode must not issue a web request. Live accuracy and source
+coverage remain unverified until an explicitly authorized live evaluation.
+
 ## Storage target
 
 | Record | Purpose |

@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from pydantic import Field
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db_session
@@ -33,9 +34,14 @@ RecommendationServiceDependency = Annotated[
 ]
 
 
+class RecipeRecommendationInput(RecipeRecommendationRequest):
+    # ADR-0091: HTTP callers must state this explicitly; stored/domain defaults stay compatible.
+    requires_halal: bool = Field(...)
+
+
 @router.post("/recipes", response_model=RecipeRecommendationCollectionResponse)
 def recommend_recipes(
-    constraints: RecipeRecommendationRequest,
+    constraints: RecipeRecommendationInput,
     service: RecommendationServiceDependency,
 ) -> RecipeRecommendationCollectionResponse:
     return service.recommend(constraints)

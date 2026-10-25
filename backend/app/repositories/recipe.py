@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from app.core.config import get_settings
 from app.core.paths import repository_root
 from app.data.catalog import CATALOG_REFRESH_MARKER
-from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient
+from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient, RecipeNutrition
 from app.planning.grocery_estimator import priceable_ingredients
 from app.planning.recipe_quality import incomplete
 from app.schemas.planning_v2 import DishCourse
@@ -166,8 +166,14 @@ def keep_planning_pool_warm(bind: Engine, stop: threading.Event) -> None:
 
 
 class RecipeRepository:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, household_id: int | None = None) -> None:
         self.session = session
+        self.household_id = household_id
+
+    def _visible_to_household(self):
+        if self.household_id is None:
+            return Recipe.owner_household_id.is_(None)
+        return or_(Recipe.owner_household_id.is_(None), Recipe.owner_household_id == self.household_id)
 
     def list_after(
         self, *, after_id: int | None, limit: int, query: str | None = None, course: str | None = None
@@ -182,13 +188,49 @@ class RecipeRepository:
             statement = statement.where(Recipe.title.icontains(word, autoescape=True))
         if course is not None:
             statement = statement.where(Recipe.course == course)
+        statement = statement.where(self._visible_to_household())
 
+        return list(self.session.scalars(statement).unique().all())
+
+    def rank_by_nutrition(
+        self,
+        metric: str,
+        *,
+        descending: bool,
+        household_id: int,
+        limit: int = 3,
+    ) -> list[Recipe]:
+        """Read recipes ranked by one supported per-serving nutrient, within the caller's visibility scope."""
+        columns = {
+            "calories_kcal": RecipeNutrition.calories_kcal,
+            "protein_g": RecipeNutrition.protein_g,
+            "carbohydrate_g": RecipeNutrition.carbohydrate_g,
+            "fat_g": RecipeNutrition.fat_g,
+            "sodium_mg": RecipeNutrition.sodium_mg,
+            "sugar_g": RecipeNutrition.sugar_g,
+        }
+        if metric not in columns:
+            raise ValueError("Unsupported nutrition metric")
+        if not 1 <= limit <= 10:
+            raise ValueError("Nutrition lookup limit must be between 1 and 10")
+        value = columns[metric]
+        order = value.desc() if descending else value.asc()
+        statement = (
+            select(Recipe)
+            .join(RecipeNutrition)
+            .options(joinedload(Recipe.nutrition))
+            .where(or_(Recipe.owner_household_id.is_(None), Recipe.owner_household_id == household_id))
+            .where(Recipe.withdrawn_at.is_(None))
+            .order_by(order, Recipe.id)
+            .limit(limit)
+        )
         return list(self.session.scalars(statement).unique().all())
 
     def get_by_slug(self, slug: str) -> Recipe | None:
         statement = (
             select(Recipe)
             .where(Recipe.slug == slug)
+            .where(self._visible_to_household())
             .options(
                 joinedload(Recipe.nutrition),
                 selectinload(Recipe.recipe_ingredients).joinedload(RecipeIngredient.ingredient),
@@ -201,6 +243,7 @@ class RecipeRepository:
         """Every recipe that can fill a meal; callers load it once per request and pass it on."""
         statement = (
             self._with_ingredients()
+            .where(self._visible_to_household())
             .where(or_(Recipe.course.is_(None), Recipe.course.in_(MEAL_COURSES)))
             .order_by(Recipe.id)
         )
@@ -214,7 +257,7 @@ class RecipeRepository:
         wanted = set(courses or MEAL_COURSES)
         seconds = get_settings().planning_pool_cache_seconds
         if not seconds or not wanted <= POOL_COURSES:
-            return self._load_for_planning(self.session, courses)
+            return self._load_for_planning(self.session, courses, household_id=self.household_id)
         bind = self.session.get_bind()
         cached = _planning_pool.get(id(bind))
         if cached is None or time.monotonic() - cached[0] >= seconds:
@@ -222,9 +265,22 @@ class RecipeRepository:
                 cached = _planning_pool.get(id(bind))
                 if cached is None or time.monotonic() - cached[0] >= seconds:
                     cached = _load_pool(bind)
-        return [recipe for recipe in cached[1] if recipe.course is None or recipe.course in wanted]
+        visible = [recipe for recipe in cached[1] if recipe.course is None or recipe.course in wanted]
+        if self.household_id is not None:
+            private = self._load_for_planning(
+                self.session, courses, household_id=self.household_id, include_shared=False
+            )
+            visible.extend(private)
+        return visible
 
-    def _load_for_planning(self, session: Session, courses: list[str] | None) -> list[Recipe]:
+    def _load_for_planning(
+        self,
+        session: Session,
+        courses: list[str] | None,
+        *,
+        household_id: int | None = None,
+        include_shared: bool = True,
+    ) -> list[Recipe]:
         unmatchable_line = (
             select(RecipeIngredient.id)
             .join(Ingredient)
@@ -237,6 +293,16 @@ class RecipeRepository:
             self._with_ingredients()
             .options(selectinload(Recipe.steps))  # read when a plan is saved
             .where(or_(Recipe.course.is_(None), Recipe.course.in_(courses or MEAL_COURSES)))
+            .where(
+                or_(
+                    Recipe.owner_household_id.is_(None),
+                    Recipe.owner_household_id == household_id,
+                )
+                if include_shared and household_id is not None
+                else Recipe.owner_household_id.is_(None)
+                if include_shared
+                else Recipe.owner_household_id == household_id
+            )
             .where(or_(Recipe.release_version.is_(None), ~exists(unmatchable_line)))
             .where(Recipe.slug.not_in(withdrawn_slugs()), Recipe.withdrawn_at.is_(None))
             .order_by(Recipe.id)
@@ -247,7 +313,12 @@ class RecipeRepository:
     def list_by_ids(self, ids: list[int]) -> list[Recipe]:
         if not ids:
             return []
-        statement = self._with_ingredients().where(Recipe.id.in_(set(ids))).order_by(Recipe.id)
+        statement = (
+            self._with_ingredients()
+            .where(Recipe.id.in_(set(ids)))
+            .where(self._visible_to_household())
+            .order_by(Recipe.id)
+        )
         return list(self.session.scalars(statement).unique().all())
 
     @staticmethod

@@ -1,8 +1,9 @@
 import re
+from collections.abc import Callable
 
 from pydantic import BaseModel, Field
 
-from app.agent.parser import ConstraintParser
+from app.agent.parser import ConstraintParser, requests_halal
 from app.agent.replies import language, say
 from app.agent.workflow import AgentConstraintWorkflow, FeasibilityCheck
 from app.orchestration.contracts import InteractionRequest, ScopeClass, ScopeDecision
@@ -13,6 +14,7 @@ from app.orchestration.interactions import (
     short_prompt,
     unmatched_term_interaction,
 )
+from app.orchestration.scope_classifier import ScopeClassifier
 from app.orchestration.scope_policy import ReferenceScopePolicy
 from app.schemas.agent import AgentConstraintState, AgentMessageResponse
 
@@ -94,10 +96,32 @@ class BoundedAgentOrchestrator:
         parser: ConstraintParser,
         *,
         scope_policy: ReferenceScopePolicy | None = None,
+        scope_classifier: ScopeClassifier | None = None,
+        food_question_handler: Callable[[str, str], str | None] | None = None,
+        food_question_context_handler: Callable[[str, str, AgentConstraintState], str | None] | None = None,
         check: FeasibilityCheck | None = None,
     ) -> None:
         self.workflow = AgentConstraintWorkflow(parser, check=check)
         self.scope_policy = scope_policy or ReferenceScopePolicy()
+        self.scope_classifier = scope_classifier or getattr(parser, "scope_classifier", None)
+        self.food_question_handler = food_question_handler
+        self.food_question_context_handler = food_question_context_handler
+
+    def classify(self, message: str, *, history: list[AgentMessageResponse] | None = None) -> ScopeDecision:
+        if self.scope_classifier is not None:
+            return self.scope_classifier.classify(message, history=history or ())
+        return self.scope_policy.classify(message)
+
+    def answer_food_question(
+        self, message: str, *, lang: str, current: AgentConstraintState | None = None
+    ) -> str | None:
+        if self.food_question_context_handler is not None and current is not None:
+            answer = self.food_question_context_handler(message, lang, current)
+            if answer is not None:
+                return answer
+        if self.food_question_handler is None:
+            return None
+        return self.food_question_handler(message, lang)
 
     def process(
         self,
@@ -112,7 +136,25 @@ class BoundedAgentOrchestrator:
         context_version: int,
         pending_interaction: InteractionRequest | None = None,
     ) -> AgentTurnOutcome:
-        decision = self.scope_policy.classify(message)
+        explicit_halal = requests_halal(message)
+        decision = None if explicit_halal else self.classify(message, history=history)
+        if explicit_halal or (current.requires_halal and decision.should_mutate_state):
+            # ADR-0091: persist the requirement and block old ready cards without calling the model/planner.
+            return AgentTurnOutcome(
+                constraints=current.model_copy(update={"requires_halal": True}),
+                acknowledged_unknowns=acknowledged_unknowns,
+                missing_fields=["requires_halal"],
+                status="collecting",
+                assistant_message=say("halal_unsupported", language(message, history)),
+                scope_decision=ScopeDecision(
+                    scope_class=ScopeClass.RESTRICTED,
+                    unsupported_segments=[message],
+                    reason_code="HALAL_NOT_SUPPORTED",
+                ),
+                context_version=max(context_version + 1, 1),
+                state_mutated=True,
+            )
+        assert decision is not None
         if decision.scope_class is ScopeClass.AMBIGUOUS and current_questions:
             decision = ScopeDecision(
                 scope_class=ScopeClass.DOMAIN_ACTION,
@@ -135,6 +177,10 @@ class BoundedAgentOrchestrator:
             )
         if not decision.should_mutate_state:
             reply = self.boundary_message(decision, lang)
+            if "answer_food_question" in decision.detected_intents:
+                reply = self.answer_food_question(message, lang=lang, current=current) or self.food_question_fallback(
+                    lang
+                )
             if decision.scope_class is ScopeClass.AMBIGUOUS:
                 # Not a dead end: say what can be done from here, as choices.
                 options = wish_options(lang, planned=False)
@@ -259,6 +305,18 @@ class BoundedAgentOrchestrator:
     def boundary_message(decision: ScopeDecision, lang: str = "en") -> str:
         key = decision.scope_class.value
         return say(key if key in BOUNDARY_KEYS else "unsupported", lang)
+
+    @staticmethod
+    def food_question_fallback(lang: str) -> str:
+        if lang == "zh":
+            return (
+                "我目前无法从 MealCraft 可用的数据中核实这个问题，因此不猜测答案。"
+                "可以问我目录中已有菜谱或营养数据的问题。"
+            )
+        return (
+            "I couldn't verify that from MealCraft's available data, so I won't guess. "
+            "I can answer questions grounded in the current recipe and nutrition catalog."
+        )
 
 
 BOUNDARY_KEYS = {"social", "out_of_scope", "restricted", "adversarial", "ambiguous", "domain_question"}

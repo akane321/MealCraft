@@ -21,6 +21,8 @@ from app.core.runtime_config import runtime_value
 from app.db.session import get_db_session
 from app.models.recipe import Ingredient
 from app.orchestration.run_lifecycle import AgentRunLifecycleError, AgentRunNotFoundError
+from app.orchestration.scope_classifier import OpenAIScopeClassifier
+from app.orchestration.tool_scheduler import ModelToolScheduler
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
@@ -29,6 +31,7 @@ from app.schemas.agent import (
     AgentConfirmationResponse,
     AgentInteractionInput,
     AgentMessageInput,
+    AgentPreferenceUpdate,
     AgentReplanConfirmationResponse,
     AgentRunCollectionResponse,
     AgentRunResponse,
@@ -43,6 +46,8 @@ from app.services.agent import (
     AgentSessionService,
     profile_constraints,
 )
+from app.services.food_questions import OpenAIWebFoodQuestionAnswerer
+from app.services.ingredient_substitutions import OpenAISubstituteGenerator
 from app.services.replanning import (
     MealPlanReplanConflictError,
     MealPlanReplanNotFoundError,
@@ -75,13 +80,36 @@ def create_constraint_parser(
                 names, vectors=catalog_vectors(), embed=catalog_embedder(api_key), aliases=catalog_aliases()
             ),
         )
-    return FallbackConstraintParser(
+    parser = FallbackConstraintParser(
         OpenAIConstraintParser(
             api_key=api_key,
             model=settings.openai_model,
             vocabulary=vocabulary,
             timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
         )
+    )
+    parser.scope_classifier = OpenAIScopeClassifier(
+        api_key=api_key,
+        model=settings.openai_model,
+        timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
+        tool_scheduler=ModelToolScheduler(
+            api_key=api_key,
+            model=settings.openai_model,
+            timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
+            max_steps=2,
+        ),
+    )
+    return parser
+
+
+def create_web_food_question_answerer(settings: Settings, database: Session | None = None):
+    """Keep web search behind the same explicit live-provider selection as the parser."""
+    if runtime_value("agent_parser_provider", settings, database) != "openai" or settings.openai_api_key is None:
+        return None
+    return OpenAIWebFoodQuestionAnswerer(
+        api_key=settings.openai_api_key.get_secret_value(),
+        model=settings.openai_model,
+        timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
     )
 
 
@@ -97,6 +125,9 @@ def get_agent_service(
     household_id = current.active_membership.household_id
     profiles = HouseholdProfileRepository(database, household_id=household_id)
     profile = profiles.get_current()
+    openai_enabled = (
+        runtime_value("agent_parser_provider", settings, database) == "openai" and settings.openai_api_key is not None
+    )
     return AgentSessionService(
         repository=AgentSessionRepository(database, household_id=household_id),
         run_repository=AgentRunRepository(database, household_id=household_id),
@@ -110,6 +141,16 @@ def get_agent_service(
             profile_constraints(HouseholdProfileRepository.current_version(profile)) if profile else None
         ),
         keep_plan_shape=(lambda shape: profiles.keep_plan_shape(shape.model_dump(mode="json"))) if profile else None,
+        substitute_generator=(
+            OpenAISubstituteGenerator(
+                api_key=settings.openai_api_key.get_secret_value(),
+                model=settings.openai_model,
+                timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
+            )
+            if openai_enabled
+            else None
+        ),
+        web_food_question_answerer=create_web_food_question_answerer(settings, database),
     )
 
 
@@ -172,6 +213,21 @@ def get_agent_session(session_id: int, service: AgentServiceDependency) -> Agent
     if agent_session is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found")
     return agent_session
+
+
+@router.put("/{session_id}/preferences", response_model=AgentSessionResponse)
+def update_agent_preferences(
+    session_id: int,
+    payload: AgentPreferenceUpdate,
+    service: AgentServiceDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
+) -> AgentSessionResponse:
+    try:
+        return service.update_preferences(session_id, payload)
+    except AgentSessionNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
+    except (AgentSessionNotReadyError, AgentRunLifecycleError) as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
 
 @router.post("/{session_id}/messages", response_model=AgentSessionResponse)

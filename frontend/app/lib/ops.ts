@@ -139,7 +139,7 @@ export function describeOverrides(overrides: Record<string, unknown>) {
 
 /** The drawer's query value, "planning-12", split back into its kind and id. */
 export function parseTaskKey(value: unknown): { kind: OpsTaskKind; id: number } | null {
-  const match = typeof value === "string" ? /^(agent|planning)-(\d+)$/.exec(value) : null;
+  const match = typeof value === "string" ? /^(agent|planning|intake)-(\d+)$/.exec(value) : null;
   return match ? { kind: match[1] as OpsTaskKind, id: Number(match[2]) } : null;
 }
 

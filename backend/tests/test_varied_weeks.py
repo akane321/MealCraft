@@ -24,7 +24,8 @@ from app.data.catalog import import_catalog, load_catalog
 from app.data.release_v2 import import_release_v2
 from app.db.base import Base
 from app.planning import product_path
-from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner, MealState
+from app.planning.final_scope_scoring import planning_preference_loss
+from app.planning.meal_beam import MealBeamLimits, MealBeamPlanner, MealState, dish_eligible, repetition_loss
 from app.planning.product_path import _vary_starts, composed_packet
 from app.planning.recipe_quality import dish_family, dish_kind
 from app.repositories.recipe import clear_planning_pool
@@ -171,6 +172,73 @@ def repeated_week() -> MealState:
             ("d2", (("main", "chicken-rice"), ("vegetable", "bok-choy"))),
         )
     )
+
+
+def test_halal_is_a_fail_closed_recipe_hard_constraint():
+    problem = week_problem().model_copy(update={"requires_halal": True})
+    slot = problem.slots[0]
+    recipe = problem.recipes[0]
+    assert not dish_eligible(problem, slot, recipe)
+    assert not dish_eligible(problem, slot, recipe.model_copy(update={"halal_status": "uncertain"}))
+    assert dish_eligible(problem, slot, recipe.model_copy(update={"halal_status": "halal"}))
+    from app.planning.constraint_compiler import compile_constraints
+
+    compiled = {(row.recipe_id, row.rejection_codes) for row in compile_constraints(problem)}
+    assert all("halal_requirement" in reasons for _, reasons in compiled)
+    verified_problem = problem.model_copy(
+        update={"recipes": [recipe.model_copy(update={"halal_status": "halal"}), *problem.recipes[1:]]}
+    )
+    verified_rows = [row for row in compile_constraints(verified_problem) if row.recipe_id == recipe.recipe_id]
+    assert verified_rows and all("halal_requirement" not in row.rejection_codes for row in verified_rows)
+
+
+def test_unverified_external_recipe_tags_fail_closed_for_later_household_constraints():
+    from app.planning.constraint_compiler import compile_constraints
+
+    source = week_problem()
+    recipe = source.recipes[0].model_copy(update={"unknown_safety": ["allergens", "diet"]})
+    allergens = source.model_copy(update={"allergens": ["peanut"], "recipes": [recipe, *source.recipes[1:]]})
+    slot = allergens.slots[0]
+    assert not dish_eligible(allergens, slot, recipe)
+    allergen_codes = next(
+        row.rejection_codes for row in compile_constraints(allergens) if row.recipe_id == recipe.recipe_id
+    )
+    assert "allergen_status_unknown" in allergen_codes
+
+    dietary = source.model_copy(update={"dietary_requirements": ["vegan"], "recipes": [recipe, *source.recipes[1:]]})
+    assert not dish_eligible(dietary, dietary.slots[0], recipe)
+    dietary_codes = next(
+        row.rejection_codes for row in compile_constraints(dietary) if row.recipe_id == recipe.recipe_id
+    )
+    assert "dietary_status_unknown" in dietary_codes
+
+
+def test_repeat_allowed_breakfast_only_removes_breakfast_repetition_penalty():
+    problem = week_problem().model_copy(
+        update={
+            "slots": [slot.model_copy(update={"meal_type": "breakfast"}) for slot in week_problem().slots],
+            "repetition_rules": PlanningRepetitionRules(repeat_allowed_meals=["breakfast"]),
+        }
+    )
+    state = repeated_week()
+    dish = (("main", "chicken-rice"),)
+
+    assert repetition_loss(problem, state, dish, meal_type="breakfast") == 0
+    assert repetition_loss(problem, state, dish, meal_type="dinner") > 0
+
+
+def test_slot_preferences_change_only_the_soft_recipe_rank():
+    problem = week_problem()
+    recipe = problem.recipes[0].model_copy(update={"flavor_tags": ["spicy"], "vegetable_share": 0.2})
+    slot = problem.slots[0].model_copy(
+        update={"preferred_flavors": ["fragrant"], "prefer_more_vegetables": True, "prefer_lighter": True}
+    )
+    changed = planning_preference_loss(recipe, slot)
+    matching = recipe.model_copy(update={"flavor_tags": ["fragrant"], "vegetable_share": 0.8})
+
+    assert changed > planning_preference_loss(matching, slot)
+    assert problem.allergens == []
+    assert problem.purchase_budget_sgd == 13
 
 
 def test_a_composed_packet_keeps_a_locked_dish_outside_its_ranked_limit():

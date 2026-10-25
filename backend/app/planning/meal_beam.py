@@ -15,7 +15,7 @@ from app.data import meal_structure
 from app.planning.dietary_tags import satisfies
 from app.planning.diversity import diversity_loss
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
-from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
+from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss, planning_preference_loss
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_composition import (
     MAIN_ROLE,
@@ -336,7 +336,12 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
             )
         )
         # A soft nutrition guard keeps a dish near a stated target (planning-nutrition-scope).
-        return local + meal_affinity_loss(recipe, slot.meal_type) + nutrition_guard_loss(problem, recipe)
+        return (
+            local
+            + meal_affinity_loss(recipe, slot.meal_type)
+            + nutrition_guard_loss(problem, recipe)
+            + planning_preference_loss(recipe, slot)
+        )
 
     def search_candidates(self, problem: FinalPlanningProblem) -> MealBeamResult:
         require_finite_problem(problem)
@@ -389,7 +394,12 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                             state.loss
                             + option.loss
                             + repetition_loss(
-                                problem, state, option.dishes, self.limits.repeat_cost, self.limits.flat_repeat
+                                problem,
+                                state,
+                                option.dishes,
+                                self.limits.repeat_cost,
+                                self.limits.flat_repeat,
+                                meal_type=slot.meal_type,
                             )
                         )
                         next_states.append(
@@ -670,6 +680,8 @@ def dish_eligible(problem: FinalPlanningProblem, slot: PlanningSlot, recipe: Pla
         return False
     if set(recipe.allergens) & set(problem.allergens):
         return False
+    if problem.allergens and "allergens" in recipe.unknown_safety:
+        return False
     if set(problem.allergens) - set(problem.allergen_vocabulary or []):
         return False
     if {item.ingredient_id for item in recipe.ingredients} & set(problem.excluded_ingredients):
@@ -678,6 +690,10 @@ def dish_eligible(problem: FinalPlanningProblem, slot: PlanningSlot, recipe: Pla
         return False
     # A dish reaches the table when at least one present member can eat it (ADR-0071 section 1).
     if not servable(slot, recipe):
+        return False
+    if problem.dietary_requirements and "diet" in recipe.unknown_safety:
+        return False
+    if problem.requires_halal and recipe.halal_status != "halal":
         return False
     if problem.missing_equipment and not equipment_met(recipe.equipment, problem.missing_equipment):
         return False
@@ -957,17 +973,37 @@ def dish_cost(
     )
 
 
-def repetition_loss(problem, state: MealState, dishes, repeat_cost: float = 0.10, flat_repeat: bool = False) -> float:
+def repetition_loss(
+    problem,
+    state: MealState,
+    dishes,
+    repeat_cost: float = 0.10,
+    flat_repeat: bool = False,
+    *,
+    meal_type: str | None = None,
+) -> float:
     """Without a diversity policy, the one-dish beam's legacy penalties, counted per dish.
 
     Each earlier use of a recipe costs 0.10 and repeating the previous meal's
     dish costs 0.35 more (`app/planning/diversity.py`). An explicit policy uses
     hard repetition guards plus bounded diversity and overlap soft terms.
     """
+    slots = {slot.slot_id: slot for slot in problem.slots}
+    allowed_meals = set(problem.repetition_rules.repeat_allowed_meals) if problem.repetition_rules else set()
     if problem.diversity_policy is not None:
         # One bounded increment per meal: average the dish increments so adding
         # roles cannot multiply the horizon's 0.10 soft-term bound.
-        previous = [recipe_id for _, meal in state.choices for _, recipe_id in meal]
+        previous = [
+            recipe_id
+            for slot_id, meal in state.choices
+            for _, recipe_id in meal
+            if not (
+                allowed_meals
+                and meal_type in allowed_meals
+                and slot_id in slots
+                and slots[slot_id].meal_type == meal_type
+            )
+        ]
         loss = 0.0
         for _, recipe_id in dishes:
             loss += diversity_loss(problem, previous, recipe_id)
@@ -975,22 +1011,63 @@ def repetition_loss(problem, state: MealState, dishes, repeat_cost: float = 0.10
         return loss / len(dishes) if dishes else 0.0
     free = set(problem.repetition_rules.repeat_ok_roles) if problem.repetition_rules else set()
     free |= problem.uncounted_roles
-    previous = [recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in free]
-    last = {recipe_id for role, recipe_id in state.choices[-1][1] if role not in free} if state.choices else set()
-    return sum(
-        (min(previous.count(recipe_id), 1) if flat_repeat else previous.count(recipe_id)) * repeat_cost
-        + (0.35 if recipe_id in last else 0.0)
-        for role, recipe_id in dishes
-        if role not in free
-    )
+    if not allowed_meals:
+        previous = [recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in free]
+        last = {recipe_id for role, recipe_id in state.choices[-1][1] if role not in free} if state.choices else set()
+        return sum(
+            (min(previous.count(recipe_id), 1) if flat_repeat else previous.count(recipe_id)) * repeat_cost
+            + (0.35 if recipe_id in last else 0.0)
+            for role, recipe_id in dishes
+            if role not in free
+        )
+    loss = 0.0
+    for role, recipe_id in dishes:
+        if role in free:
+            continue
+        earlier = [
+            (slot_id, prior_recipe)
+            for slot_id, meal in state.choices
+            for prior_role, prior_recipe in meal
+            if prior_role not in free
+            and prior_recipe == recipe_id
+            and not (meal_type in allowed_meals and slot_id in slots and slots[slot_id].meal_type == meal_type)
+        ]
+        loss += (min(len(earlier), 1) if flat_repeat else len(earlier)) * repeat_cost
+        if state.choices:
+            last_slot_id, last_meal = state.choices[-1]
+            previous_same = any(
+                prior_recipe == recipe_id and prior_role not in free for prior_role, prior_recipe in last_meal
+            )
+            exempt = meal_type in allowed_meals and last_slot_id in slots and slots[last_slot_id].meal_type == meal_type
+            if previous_same and not exempt:
+                loss += 0.35
+    return loss
 
 
 def repeats(problem, state: MealState) -> int:
     """Dishes that repeat an earlier one in the plan, outside the roles the household lets repeat."""
     free = set(problem.repetition_rules.repeat_ok_roles) if problem.repetition_rules else set()
     free |= problem.uncounted_roles
-    dishes = [recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in free]
-    return len(dishes) - len(set(dishes))
+    allowed_meals = set(problem.repetition_rules.repeat_allowed_meals) if problem.repetition_rules else set()
+    if not allowed_meals:
+        dishes = [recipe_id for _, meal in state.choices for role, recipe_id in meal if role not in free]
+        return len(dishes) - len(set(dishes))
+    counts: dict[str, int] = {}
+    slots = {slot.slot_id: slot for slot in problem.slots}
+    repeats_count = 0
+    for slot_id, meal in state.choices:
+        meal_type = slots[slot_id].meal_type if slot_id in slots else None
+        for role, recipe_id in meal:
+            if role in free:
+                continue
+            exempt_uses = counts.get(f"{recipe_id}:{meal_type}", 0) if meal_type in allowed_meals else 0
+            prior = counts.get(recipe_id, 0)
+            repeats_count += max(0, prior - exempt_uses)
+            counts[recipe_id] = prior + 1
+            if meal_type in allowed_meals:
+                key = f"{recipe_id}:{meal_type}"
+                counts[key] = exempt_uses + 1
+    return repeats_count
 
 
 def empty_roles(state: MealState, roles_of: dict[str, int], staples=frozenset()) -> int:

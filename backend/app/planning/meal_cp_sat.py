@@ -33,7 +33,7 @@ from dataclasses import dataclass
 from math import ceil
 
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
-from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
+from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss, planning_preference_loss
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_beam import ANY_COURSE, EMPTY_OPTIONAL_ROLE_LOSS, dish_eligible
 from app.planning.meal_composition import MAIN_ROLE, hands_on_and_waiting, role_admits
@@ -78,7 +78,12 @@ class MealCpSatPlanner(FinalScopeReferencePlanner):
             )
         )
         # A soft nutrition guard keeps a dish near a stated target (planning-nutrition-scope).
-        return local + meal_affinity_loss(recipe, slot.meal_type) + nutrition_guard_loss(problem, recipe)
+        return (
+            local
+            + meal_affinity_loss(recipe, slot.meal_type)
+            + nutrition_guard_loss(problem, recipe)
+            + planning_preference_loss(recipe, slot)
+        )
 
     def solve_exact(
         self, problem: FinalPlanningProblem, *, hint: list[PlanningAssignment] | None = None
@@ -233,18 +238,28 @@ class MealCpSatPlanner(FinalScopeReferencePlanner):
                 model.Add(sum(vars_) == in_meal)
                 penalised[s][r_id] = in_meal
         # Legacy repetition penalties over dishes (no diversity policy).
+        repeat_allowed_meals = set(rules.repeat_allowed_meals) if rules is not None else set()
         for r_id in all_ids:
-            uses = [penalised[s.slot_id][r_id] for s in slots if r_id in penalised[s.slot_id]]
-            if len(uses) > 1:
-                count = model.NewIntVar(0, len(uses), f"uses[{r_id}]")
-                model.Add(count == sum(uses))
-                square = model.NewIntVar(0, len(uses) ** 2, f"uses2[{r_id}]")
-                model.AddMultiplicationEquality(square, [count, count])
-                # sum over uses of earlier uses = n(n-1)/2
-                objective.append(round(REPEAT_LOSS * SCALE / 2) * (square - count))
+            for earlier_index, earlier in enumerate(slots):
+                a = penalised[earlier.slot_id].get(r_id)
+                if a is None:
+                    continue
+                for later in slots[earlier_index + 1 :]:
+                    b = penalised[later.slot_id].get(r_id)
+                    if b is None or (
+                        earlier.meal_type == later.meal_type and earlier.meal_type in repeat_allowed_meals
+                    ):
+                        continue
+                    both = model.NewBoolVar("")
+                    model.AddBoolAnd([a, b]).OnlyEnforceIf(both)
+                    model.AddBoolOr([a.Not(), b.Not()]).OnlyEnforceIf(both.Not())
+                    objective.append(round(REPEAT_LOSS * SCALE) * both)
             for previous, current in zip(slots, slots[1:], strict=False):
                 a, b = penalised[previous.slot_id].get(r_id), penalised[current.slot_id].get(r_id)
-                if a is not None and b is not None:
+                same_repeatable_meal = (
+                    previous.meal_type == current.meal_type and previous.meal_type in repeat_allowed_meals
+                )
+                if a is not None and b is not None and not same_repeatable_meal:
                     both = model.NewBoolVar("")
                     model.AddBoolAnd([a, b]).OnlyEnforceIf(both)
                     model.AddBoolOr([a.Not(), b.Not()]).OnlyEnforceIf(both.Not())

@@ -64,7 +64,7 @@ const replaying = ref(false);
 const replayError = ref("");
 watch(selected, () => (replayError.value = ""));
 async function replay() {
-  if (!selected.value) return;
+  if (!selected.value || selected.value.kind === "intake") return;
   replaying.value = true;
   replayError.value = "";
   try {
@@ -105,8 +105,8 @@ const validation = computed(() => {
   <div class="ops-page">
     <header>
       <p class="mc-eyebrow">Tasks</p>
-      <h1 class="mc-serif">Every conversation turn and planning run</h1>
-      <p>Open a task to see what it was asked, how it was understood, what the planner and validator did, and how long it took.</p>
+      <h1 class="mc-serif">Conversation, planning, and recipe intake traces</h1>
+      <p>Open a task to inspect what the assistant or intake pipeline did, what the validator decided, and how long each stage took.</p>
     </header>
 
     <OpsJobActions />
@@ -117,6 +117,7 @@ const validation = computed(() => {
           <option value="">All</option>
           <option value="agent">Assistant turns</option>
           <option value="planning">Planning runs</option>
+          <option value="intake">External recipe intake</option>
         </select>
       </label>
       <label>Status
@@ -162,11 +163,11 @@ const validation = computed(() => {
       <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="task-title">
         <header class="drawer-head">
           <div>
-            <p class="mc-eyebrow">{{ selected.kind === "agent" ? "Assistant turn" : "Planning run" }} #{{ selected.id }}</p>
+            <p class="mc-eyebrow">{{ selected.kind === "agent" ? "Assistant turn" : selected.kind === "intake" ? "External recipe intake" : "Planning run" }} #{{ selected.id }}</p>
             <h2 id="task-title" class="mc-serif">{{ detail?.summary.label ?? "Loading…" }}</h2>
           </div>
           <div class="drawer-actions">
-            <button type="button" class="mc-primary" :disabled="replaying || !detail" @click="replay">{{ replaying ? "Replaying…" : "Replay" }}</button>
+            <button v-if="selected.kind !== 'intake'" type="button" class="mc-primary" :disabled="replaying || !detail" @click="replay">{{ replaying ? "Replaying…" : "Replay" }}</button>
             <button type="button" class="mc-pill" @click="close">Close</button>
           </div>
         </header>
@@ -197,7 +198,7 @@ const validation = computed(() => {
           <section aria-labelledby="sec-validation">
             <h3 id="sec-validation">Validation</h3>
             <OpsFields v-if="validation" :data="validation" />
-            <p v-else class="ops-muted">{{ selected.kind === "agent" ? "Assistant turns are not validated themselves; open the planning run they started." : "The validator did not run for this plan." }}</p>
+            <p v-else class="ops-muted">{{ selected.kind === "agent" ? "Assistant turns are not validated themselves; open the planning run they started." : selected.kind === "intake" ? "No admission decision was recorded." : "The validator did not run for this plan." }}</p>
           </section>
 
           <section aria-labelledby="sec-trace">
@@ -215,7 +216,7 @@ const validation = computed(() => {
           </section>
 
           <section aria-labelledby="sec-config">
-            <h3 id="sec-config">{{ selected.kind === "agent" ? "Model configuration" : "Planner configuration" }}</h3>
+            <h3 id="sec-config">{{ selected.kind === "agent" ? "Model configuration" : selected.kind === "intake" ? "Intake configuration" : "Planner configuration" }}</h3>
             <OpsFields v-if="detail.model_configuration" :data="detail.model_configuration" />
             <p v-else class="ops-muted">This run recorded no configuration.</p>
           </section>

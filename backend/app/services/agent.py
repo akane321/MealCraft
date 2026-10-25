@@ -3,12 +3,13 @@ import re
 from collections.abc import Callable
 from contextlib import suppress
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 from uuid import uuid4
 
 from pydantic_core import to_jsonable_python
 
 from app.agent import limits, model_client
-from app.agent.parser import ConstraintParser
+from app.agent.parser import ConstraintParser, requests_halal
 from app.agent.plan_dates import default_start
 from app.agent.replanning import AgentReplanInterpreter
 from app.agent.replies import language, listed, planner_message, say, weekday, word
@@ -35,6 +36,7 @@ from app.orchestration.interactions import (
     typed_choice,
     validate_interaction_answer,
 )
+from app.orchestration.model_pricing import CHAT_RATES, EMBEDDING_RATES, model_name
 from app.orchestration.run_lifecycle import (
     AgentRunLifecycle,
     AgentRunLifecycleError,
@@ -49,7 +51,6 @@ from app.orchestration.runtime import (
     BoundedAgentOrchestrator,
     wish_options,
 )
-from app.orchestration.scope_policy import ReferenceScopePolicy
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.products.provider import ProductProviderError
 from app.repositories.agent import AgentSessionRepository
@@ -59,6 +60,7 @@ from app.schemas.agent import (
     AgentConfirmationResponse,
     AgentConstraintState,
     AgentMessageResponse,
+    AgentPreferenceUpdate,
     AgentReplanConfirmationResponse,
     AgentReplanDraft,
     AgentRunCollectionResponse,
@@ -75,7 +77,16 @@ from app.schemas.meal_plan import (
     WeeklyMealPlanResponse,
     default_plan_shape,
 )
+from app.services.food_questions import (
+    CatalogFoodQuestionAnswerer,
+    OpenAIWebFoodQuestionAnswerer,
+    question_has_specific_period,
+)
 from app.services.household import household_planning
+from app.services.ingredient_substitutions import (
+    IngredientSubstitutionFoodQuestionAnswerer,
+    OpenAISubstituteGenerator,
+)
 from app.services.meal_plan import WeeklyMealPlanService
 from app.services.replanning import (
     MealPlanReplanningService,
@@ -147,6 +158,139 @@ REPLAN_REFUSED = "REPLAN_REFUSED"
 # has no hard limit and a slow plan never becomes an error (owner, 2026-10-21; ADR-0080): the run's wall-time budget
 # is checked before the planner starts, never on the records that follow it (`record_tool(check_deadline=False)`).
 # A fixed longer ceiling (300 s) only moved the error to a slower household.
+
+
+PLAN_NUTRITION_FIELDS = (
+    ("calories_kcal", "calories", "热量", "kcal", "千卡"),
+    ("protein_g", "protein", "蛋白质", "g protein", "克蛋白质"),
+    ("carbohydrate_g", "carbohydrate", "碳水", "g carbohydrate", "克碳水化合物"),
+    ("fat_g", "fat", "脂肪", "g fat", "克脂肪"),
+    ("sodium_mg", "sodium", "钠", "mg sodium", "毫克钠"),
+    ("sugar_g", "sugar", "糖", "g sugar", "克糖"),
+)
+
+
+def answer_saved_plan_question(message: str, plan, *, lang: str, recipe_repository=None) -> str | None:
+    """Answer a small read-only set of questions with facts from the saved plan response."""
+    lower = message.casefold()
+    scale_factor = (
+        0.5
+        if any(term in lower for term in ("halve", "half", "减半"))
+        else 2.0
+        if any(term in lower for term in ("double", "twice", "加倍", "两倍"))
+        else None
+    )
+    specific_period = question_has_specific_period(message)
+    asks_nutrition = any(
+        term in lower
+        for term in (
+            "nutrition",
+            "营养",
+            "protein",
+            "蛋白质",
+            "calorie",
+            "热量",
+            "sodium",
+            "钠",
+            "fat",
+            "脂肪",
+            "carbohydrate",
+            "碳水",
+            "sugar",
+            "糖",
+        )
+    )
+    asks_dishes = any(
+        term in lower
+        for term in (
+            "which dish",
+            "which recipe",
+            "what meals",
+            "list the meals",
+            "菜有哪些",
+            "哪些菜",
+            "什么菜",
+            "菜谱列表",
+        )
+    )
+
+    if scale_factor is not None and recipe_repository is not None:
+        matched = [day.recipe for day in plan.days if day.recipe.title.casefold() in lower]
+        recipes = {item.slug: item for item in matched}
+        if len(recipes) == 1:
+            recipe = recipe_repository.get_by_slug(next(iter(recipes)))
+            if recipe is not None:
+                direction = "half" if scale_factor == 0.5 else "double"
+                lines = []
+                for item in recipe.recipe_ingredients:
+                    if item.grams is None:
+                        amount = "not recorded" if lang == "en" else "目录未记录克重"
+                    else:
+                        grams = float(item.grams) * scale_factor
+                        amount = f"{grams:g} g" if lang == "en" else f"{grams:g} 克"
+                    lines.append(f"{item.ingredient.display_name}: {amount}")
+                if lines:
+                    if lang == "zh":
+                        action = "减半" if scale_factor == 0.5 else "加倍"
+                        return (
+                            f"《{recipe.title}》食材用量{action}后的克重：{'；'.join(lines)}。"
+                            f"来源：MealCraft 菜谱目录（{recipe.slug}）。未记录的原料克重无法换算。"
+                        )
+                    return (
+                        f"For {recipe.title}, the {direction} amounts are: {'; '.join(lines)}. "
+                        f"Source: MealCraft recipe catalog ({recipe.slug}). "
+                        "Unrecorded gram amounts cannot be converted."
+                    )
+
+    if asks_nutrition and not specific_period:
+        nutrition = plan.nutrition_summary_per_person
+        selected = [
+            (field, unit, zh_unit)
+            for field, english, chinese, unit, zh_unit in PLAN_NUTRITION_FIELDS
+            if any(term in lower for term in (english, chinese))
+        ]
+        if not selected:
+            selected = [(field, unit, zh_unit) for field, _en, _zh, unit, zh_unit in PLAN_NUTRITION_FIELDS]
+        values = [
+            f"{getattr(nutrition, field):g} {zh_unit if lang == 'zh' else unit}" for field, unit, zh_unit in selected
+        ]
+        if lang == "zh":
+            return (
+                f"已保存的计划 {plan.id}（版本 {plan.revision}）：按每人计算，整周计划合计为"
+                f"{'、'.join(values)}。来源：MealCraft 计划营养汇总。"
+            )
+        return (
+            f"Saved plan {plan.id}, revision {plan.revision}: per person across the planned week, "
+            f"{', '.join(values)}. Source: MealCraft plan nutrition summary."
+        )
+
+    if asks_dishes:
+        meal_order = {"breakfast": 0, "lunch": 1, "dinner": 2}
+        ordered = sorted(plan.days, key=lambda day: (day.day_index, meal_order.get(day.meal_type, 3), day.role_id))
+        meal_names = {
+            "breakfast": "早餐",
+            "lunch": "午餐",
+            "dinner": "晚餐",
+        }
+        entries = []
+        for day in ordered:
+            if day.status == "skipped":
+                continue
+            if lang == "zh":
+                meal_name = meal_names.get(day.meal_type, day.meal_type)
+                entries.append(f"第 {day.day_index} 天{meal_name}：{day.recipe.title}")
+            else:
+                entries.append(f"Day {day.day_index} {day.meal_type}: {day.recipe.title}")
+        if entries:
+            if lang == "zh":
+                return (
+                    f"已保存的计划 {plan.id}（版本 {plan.revision}）："
+                    f"{'；'.join(entries)}。来源：MealCraft 已保存计划。"
+                )
+            return (
+                f"Saved plan {plan.id}, revision {plan.revision}: {'; '.join(entries)}. Source: MealCraft saved plan."
+            )
+    return None
 
 
 def _refused(decision: ScopeDecision) -> ScopeDecision:
@@ -239,15 +383,36 @@ class AgentSessionService:
         max_history_messages: int = 20,
         starting_constraints: AgentConstraintState | None = None,
         keep_plan_shape: Callable[[MealPlanShape], None] | None = None,
+        substitute_generator: OpenAISubstituteGenerator | None = None,
+        web_food_question_answerer: OpenAIWebFoodQuestionAnswerer | None = None,
     ) -> None:
         # A new conversation starts from the saved household, so it does not ask what the
         # profile already says; anything the message states is merged over it.
         self.starting_constraints = starting_constraints
         self.repository = repository
         self.parser = parser
-        self.orchestrator = BoundedAgentOrchestrator(parser, check=self._refusal)
-        self.scope_policy = ReferenceScopePolicy()
         self.meal_plan_service = meal_plan_service
+        self.food_question_answerer = CatalogFoodQuestionAnswerer(
+            meal_plan_service.recipe_repository,
+            household_id=household_id,
+        )
+        self.web_food_question_answerer = web_food_question_answerer
+        self.substitution_question_answerer = (
+            IngredientSubstitutionFoodQuestionAnswerer(
+                meal_plan_service.recipe_repository.session,
+                generator=substitute_generator,
+            )
+            if substitute_generator is not None
+            else None
+        )
+        self.orchestrator = BoundedAgentOrchestrator(
+            parser,
+            check=self._refusal,
+            food_question_handler=self._answer_food_question,
+            food_question_context_handler=(
+                self.substitution_question_answerer.answer if self.substitution_question_answerer else None
+            ),
+        )
         self.replanning_service = replanning_service
         self.replan_interpreter = AgentReplanInterpreter()
         self.run_lifecycle = AgentRunLifecycle(run_repository)
@@ -257,8 +422,16 @@ class AgentSessionService:
         # Saves a shape changed in the conversation as the household's usual one, on a yes (ADR-0046).
         self.keep_plan_shape = keep_plan_shape
 
+    def _answer_food_question(self, message: str, lang: str) -> str | None:
+        catalog_answer = self.food_question_answerer.answer(message, lang=lang)
+        if catalog_answer is not None:
+            return catalog_answer
+        if self.web_food_question_answerer is None:
+            return None
+        return self.web_food_question_answerer.answer(message, lang=lang)
+
     # Count this turn from its start, before its run exists.
-    @model_client.counting()
+    @model_client.counting(max_requests=4)
     def create(
         self, message: str, *, idempotency_key: str | None = None, plan_id: int | None = None
     ) -> AgentSessionResponse:
@@ -347,7 +520,47 @@ class AgentSessionService:
             items=[self._to_response(item) for item in self.repository.list_recent(limit=limit)]
         )
 
-    @model_client.counting()
+    @model_client.counting(max_requests=4)
+    def update_preferences(self, session_id: int, change: AgentPreferenceUpdate) -> AgentSessionResponse:
+        saved = self.repository.get(session_id)
+        if saved is None:
+            raise AgentSessionNotFoundError
+        snapshot = self._to_response(saved)
+        self.repository.end_read_transaction()
+        if (
+            not snapshot.can_confirm
+            or snapshot.plan_id is not None
+            or snapshot.context_version != change.context_version
+        ):
+            raise AgentSessionNotReadyError("The confirmation card changed. Reopen it before editing preferences.")
+        constraints = snapshot.constraints.model_copy(update={"planning_preferences": change.planning_preferences})
+        started = self._start_run(
+            agent_session_id=session_id,
+            intent="create_plan",
+            input_payload={"operation": "edit_preferences", **change.model_dump(mode="json")},
+            context_version=change.context_version,
+            idempotency_key=None,
+        )
+        run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
+        updated = self.repository.replace_preferences(
+            session_id, expected_version=change.context_version, constraints=constraints, run_id=run.id
+        )
+        if updated is None:
+            error = AgentSessionNotReadyError("This conversation changed or is busy. Reopen it before editing.")
+            self._fail_run(run, error)
+            raise error
+        self._finish_turn_run(run, result_status="ready", scope_decision=snapshot.last_scope_decision)
+        return self._to_response(updated)
+
+    def _require_context_version(self, session_id: int, version: int, run: AgentRun) -> None:
+        self.repository.end_read_transaction()
+        current = self.repository.get(session_id)
+        if current is None or current.context_version != version:
+            error = AgentSessionNotReadyError("This conversation changed. Review the latest details first.")
+            self._fail_run(run, error)
+            raise error
+
+    @model_client.counting(max_requests=4)
     def reply(
         self,
         session_id: int,
@@ -374,7 +587,8 @@ class AgentSessionService:
             self.repository.end_read_transaction()
             return self.get(session_id) or snapshot
         run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
-        if snapshot.plan_id is not None:
+        self._require_context_version(session_id, snapshot.context_version, run)
+        if snapshot.plan_id is not None and not (snapshot.constraints.requires_halal or requests_halal(message)):
             self.repository.end_read_transaction()
             try:
                 response = (
@@ -561,6 +775,7 @@ class AgentSessionService:
             allergens=constraints.allergens,
             excluded_ingredients=constraints.excluded_ingredients,
             dietary_preferences=constraints.dietary_preferences,
+            requires_halal=constraints.requires_halal,
             health_preferences=constraints.health_preferences,
             nutrition_targets=constraints.nutrition_targets,
             max_sodium_mg_per_meal=constraints.max_sodium_mg_per_meal,
@@ -570,6 +785,7 @@ class AgentSessionService:
             max_uses_per_recipe=constraints.max_uses_per_recipe,
             avoid_recipe_ids=constraints.avoid_recipe_ids,
             household=constraints.household,
+            planning_preferences=constraints.planning_preferences,
         )
 
     def _refusal(self, constraints: AgentConstraintState, lang: str) -> limits.Refusal | None:
@@ -657,7 +873,7 @@ class AgentSessionService:
         plan = self.meal_plan_service.get(snapshot.plan_id)
         if plan is None:
             raise AgentSessionNotFoundError
-        scope_decision = self.scope_policy.classify(message)
+        scope_decision = self.orchestrator.classify(message, history=snapshot.messages)
         if scope_decision.scope_class is ScopeClass.AMBIGUOUS and snapshot.clarification_questions:
             scope_decision = ScopeDecision(
                 scope_class=ScopeClass.DOMAIN_ACTION,
@@ -681,6 +897,17 @@ class AgentSessionService:
             )
         if not scope_decision.should_mutate_state:
             reply, choices = self.orchestrator.boundary_message(scope_decision, lang), None
+            if scope_decision.scope_class is ScopeClass.DOMAIN_QUESTION:
+                reply = (
+                    answer_saved_plan_question(
+                        message,
+                        plan,
+                        lang=lang,
+                        recipe_repository=self.meal_plan_service.recipe_repository,
+                    )
+                    or self.orchestrator.answer_food_question(message, lang=lang, current=snapshot.constraints)
+                    or reply
+                )
             if scope_decision.scope_class is ScopeClass.AMBIGUOUS:
                 # Not a dead end: what can change in the week, as choices.
                 wish = FOOD_WISH.search(message.lower()) is not None
@@ -1154,6 +1381,9 @@ class AgentSessionService:
         agent_session = self.repository.get(session_id)
         if agent_session is None:
             raise AgentSessionNotFoundError
+        if AgentConstraintState.model_validate(agent_session.constraints).requires_halal:
+            self.repository.end_read_transaction()
+            raise AgentSessionNotReadyError(say("halal_unsupported", language("", agent_session.messages)))
         snapshot = self._to_response(agent_session)
         self.repository.end_read_transaction()
         started = self._start_run(
@@ -1183,6 +1413,7 @@ class AgentSessionService:
         constraints = snapshot.constraints
         lang = language("", snapshot.messages)
         run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
+        self._require_context_version(session_id, snapshot.context_version, run)
         request = self._plan_request(constraints)
         try:
             plan = self.meal_plan_service.generate(request)
@@ -1250,6 +1481,9 @@ class AgentSessionService:
         if agent_session is None:
             raise AgentSessionNotFoundError
         snapshot = self._to_response(agent_session)
+        if snapshot.constraints.requires_halal:
+            self.repository.end_read_transaction()
+            raise AgentSessionNotReadyError(say("halal_unsupported", language("", snapshot.messages)))
         if snapshot.plan_id is None or snapshot.pending_replan is None:
             self.repository.end_read_transaction()
             raise AgentSessionNotReadyError("There is no replanning preview to confirm.")
@@ -1488,6 +1722,19 @@ class AgentSessionService:
                 "recipe_vectors": _vector_meta("data/recipes/embeddings-v1.json"),
             }
             config.update({key: value for key, value in vectors.items() if value})
+            chat_rates = CHAT_RATES.get(getattr(self.parser, "model", ""))
+            if chat_rates:
+                config["chat_token_rates_usd_per_million"] = [str(value) for value in chat_rates]
+            embedding_models = sorted(
+                {
+                    candidate
+                    for key in ("ingredient_vectors", "recipe_vectors")
+                    if (candidate := model_name(vectors.get(key))) in EMBEDDING_RATES
+                }
+            )
+            config["embedding_token_rates_usd_per_million"] = {
+                name: str(EMBEDDING_RATES[name]) for name in embedding_models
+            }
         return config
 
     def _finish_turn_run(
@@ -1554,9 +1801,43 @@ class AgentSessionService:
         A record of work already done, so neither the deadline nor the limit is checked here: the turn is over,
         and a budget stop now would fail a turn whose reply is already saved, or hide why it failed."""
         taken = model_client.take()
-        # ponytail: the table holds used <= max, so a turn past its limit records the limit; a turn sends at most
-        # 4 (one chat and one embedding request, each retried once), so check before each request if that grows.
-        run.used_llm_calls = min(run.used_llm_calls + taken.requests, run.max_llm_calls)
+        # The HTTP request hook refuses the next call before sending; never hide sent requests by clamping.
+        run.used_llm_calls += taken.requests
+        run.model_config = {
+            **(run.model_config or {}),
+            "token_usage": {
+                "input_tokens": taken.input_tokens,
+                "cached_input_tokens": taken.cached_input_tokens,
+                "output_tokens": taken.output_tokens,
+                "embedding_tokens": taken.embedding_tokens,
+            },
+        }
+        chat_rates = run.model_config.get("chat_token_rates_usd_per_million")
+        embedding_rates = run.model_config.get("embedding_token_rates_usd_per_million", {})
+        cost_known = chat_rates is not None or taken.input_tokens + taken.output_tokens == 0
+        estimated_cost = Decimal("0")
+        if chat_rates is not None:
+            input_rate, cached_rate, output_rate = (Decimal(value) for value in chat_rates)
+            cached = min(taken.cached_input_tokens, taken.input_tokens)
+            estimated_cost += (
+                Decimal(taken.input_tokens - cached) * input_rate
+                + Decimal(cached) * cached_rate
+                + Decimal(taken.output_tokens) * output_rate
+            ) / Decimal(1_000_000)
+        if taken.embedding_tokens:
+            if len(embedding_rates) == 1:
+                embedding_rate = Decimal(next(iter(embedding_rates.values())))
+                estimated_cost += Decimal(taken.embedding_tokens) * embedding_rate / Decimal(1_000_000)
+            else:
+                cost_known = False
+        if taken.input_tokens + taken.output_tokens and chat_rates is None:
+            cost_known = False
+        if taken.requests and taken.input_tokens + taken.output_tokens + taken.embedding_tokens == 0:
+            cost_known = False
+        if cost_known:
+            run.used_api_cost_usd = Decimal(run.used_api_cost_usd) + estimated_cost
+        run.model_config["api_cost_estimate_status"] = "estimated" if cost_known else "usage_or_price_unavailable"
+        run.model_config["api_cost_estimate_usd"] = str(estimated_cost) if cost_known else None
         if taken.fell_back:
             # What the console counts as a fallback.
             run.model_config = {**(run.model_config or {}), "model_fell_back": True}
@@ -1628,7 +1909,11 @@ class AgentSessionService:
                 else None
             ),
             latest_run=AgentRunResponse.model_validate(latest_run) if latest_run is not None else None,
-            can_confirm=agent_session.status == "ready" and agent_session.plan_id is None,
+            can_confirm=(
+                agent_session.status == "ready"
+                and agent_session.plan_id is None
+                and not AgentConstraintState.model_validate(agent_session.constraints).requires_halal
+            ),
             title=agent_session.title,
             pinned_at=agent_session.pinned_at,
             created_at=agent_session.created_at,
