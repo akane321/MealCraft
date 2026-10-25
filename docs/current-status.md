@@ -1,6 +1,6 @@
 # MealCraft Current Status
 
-> Last verified integration delta: 2026-10-25 (not a new full-product acceptance)
+> Last verified public snapshot: 2026-10-25 (targeted integration delta, not a new full-product acceptance)
 >
 > Remote repository: `akane321/MealCraft`
 >
