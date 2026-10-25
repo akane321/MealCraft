@@ -236,7 +236,9 @@ def test_per_meal_cost_is_recomputed_even_if_upstream_admits_a_bad_candidate(rec
 
 
 def test_post_beam_improvement_keeps_product_per_meal_acceptance_checks(recipe_client):
-    response = recipe_client.post("/api/plans/generate", json={**REQUEST, "budget_per_meal_sgd": 100})
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **REQUEST, "budget_per_meal_sgd": 100}
+    )
     assert response.status_code == 201, response.text
     _, trace = latest_trace()
     assert "local_improvement" in trace
