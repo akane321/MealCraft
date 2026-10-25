@@ -70,6 +70,10 @@ Available endpoints:
 - GET /api/recipes?limit=20&after_id={recipe_id}
 - GET /api/recipes/{slug}
 - GET /api/recipes/{slug}/tutorial?live={boolean}&language={language}
+- POST /api/external-recipes/intake
+- POST /api/external-recipes/search-and-intake
+- POST /api/ingredient-substitutions/suggest
+- POST /api/ingredient-substitutions/review
 - POST /api/recommendations/recipes
 - GET /api/products/search?q={query}&live={boolean}&refresh={boolean}
 - POST /api/plans/generate
@@ -86,6 +90,8 @@ Available endpoints:
 - PUT /api/feedback/recipes/{recipe_id}
 - DELETE /api/feedback/recipes/{recipe_id}
 - POST /api/agent/sessions
+- POST /api/ingredient-substitutions/review
+- POST /api/ingredient-substitutions/suggest
 - GET /api/agent/sessions
 - GET /api/agent/sessions/{session_id}
 - POST /api/agent/sessions/{session_id}/messages
@@ -207,6 +213,34 @@ The tenancy migration preserves pre-authentication rows by assigning them to a
 reserved, suspended migration household with no login credential. Those rows
 remain inaccessible to normal users until an administrator explicitly reassigns
 them; they are never attached to the first account that logs in.
+
+## External recipe intake and ingredient substitutions
+
+`POST /api/external-recipes/intake` accepts a structured, sourced draft;
+`POST /api/external-recipes/search-and-intake` accepts a search query and uses
+the configured OpenAI Responses web-search adapter. Both routes require an
+authenticated household with permission to create a plan. Search results must
+include a provider citation matching the extracted source URL. External-source
+tier and licence claims from the request are ignored; stored external records
+remain private to the requesting household and tier 2 until source rights are
+reviewed.
+
+Ingredient names are resolved only through reviewed aliases. Household
+allergens, exclusions, dietary requirements and requested halal status are
+checked by deterministic admission logic. Per-serving nutrition is recomputed
+from mapped ingredient grams and released nutrition-per-100-g data; submitted
+or model-extracted nutrition totals are not used. A candidate with missing
+mapping, nutrition, safety or other required fields is not admitted. A blocked
+admission response includes `review.missing_fields`, `review.safety_conflicts`
+and up to three similar catalog recipes that pass household recommendation
+filters. A search/extraction error returns HTTP 422 or 503 with a `detail`
+object containing a reason code, user-facing message and the same safe
+catalog suggestions.
+
+`POST /api/ingredient-substitutions/suggest` returns only catalog alternatives
+that pass the active household's allergen, exclusion and requested halal
+filters. `/review` applies the same gate to a caller-supplied candidate list.
+Neither endpoint admits an unknown or unsafe candidate.
 
 ## Operations Console
 
@@ -465,6 +499,38 @@ cache. Missing configuration or named provider errors return visibly labelled
 fixture/degraded results; no invented candidate is substituted. Candidate lists
 and raw provider payloads are absent from this user-facing contract.
 
+## Food questions and ingredient substitutions
+
+`POST /api/ingredient-substitutions/review` accepts `source_ingredient`,
+`candidates` and an explicit boolean `requires_halal`; `/suggest` accepts
+`source_ingredient`, optional `use_context`, and the same required flag.
+Missing or null flags produce 422. Both endpoints require the active household's
+CreatePlan permission and CSRF token. Suggestions additionally require the
+configured OpenAI provider; unavailable providers return 503.
+
+Model candidates are only proposals. Exact reviewed aliases resolve them to
+catalog ingredients; unknown source identities return no candidates. Without a
+named eater, filtering includes every member's allergies and exclusions,
+including self-only allergies. Ingredient records do not currently certify diet
+compatibility, so a declared member diet returns no verified substitutions.
+Unknown allergen facts fail closed for the relevant limit; halal requires an
+explicit verified `halal` record, never an unknown status. The model client's
+timeout follows the runtime OpenAI timeout setting.
+
+Catalog nutrition ranking is deterministic and names each recipe and catalog
+serving. Ranking direction is attached to the selected nutrient, not another
+nutrient mentioned in the question. Recognized substitution failures return a
+bounded unavailable answer rather than falling through to a free-form web answer.
+
+Web food Q&A is limited to qualitative culinary knowledge. Nutrition quantities,
+diet compatibility, allergens and halal conclusions require catalog tools;
+unavailable evidence is not filled in by the model. The web service rejects
+numeric/safety requests and responses using conservative lexical guards, and
+requires returned HTTP(S) citations. These citations identify retrieved sources,
+not proof that the generated prose is correct. The guard is not a general
+semantic verifier; unsupported wording may be missed, so live adversarial
+accuracy remains unverified. The decision boundary is ADR-0096.
+
 ## Recipe Recommendations
 
 > Design boundary: `backend/app/schemas/planning_v2.py` is an internal
@@ -479,6 +545,12 @@ and raw provider payloads are absent from this user-facing contract.
   and a conversation; the planning evaluation scenarios keep the 60 minutes they
   were written with, `SCENARIO_UNSTATED_TIME_LIMIT`)
 - allergens, excluded ingredient IDs, and dietary requirements
+- an explicit `requires_halal` boolean (required at this HTTP boundary, and at
+  `/api/plans/generate`; omitted or null returns 422, never implicit false).
+  The internal/stored request model retains its legacy default only for reading
+  old records; that default does not satisfy a new HTTP declaration. Until the
+  halal source is decided, conversation requests for halal are declined as not
+  yet supported (ADR-0091).
 - optional health preferences and user-entered nutrition targets
 - an optional explicit sodium ceiling
 - available ingredients with optional quantities and units
@@ -825,7 +897,28 @@ optional typed `pending_interaction`. `POST
 /api/agent/sessions/{session_id}/messages` appends another turn and merges only
 explicitly extracted values into the current state.
 
-Every message first passes through the deterministic reference scope gate.
+`PUT /api/agent/sessions/{session_id}/preferences` replaces the confirmation
+card's soft `planning_preferences` with a typed object, without a model call.
+The body requires `context_version` and `planning_preferences`; extra fields
+are rejected. It cannot change allergies, diets, exclusions, household size,
+numeric limits or halal requirements. Only an unplanned, ready conversation of
+the authorized household can be edited. A stale version or competing active
+run returns 409; a missing conversation returns 404. A successful replacement
+increments the context version, persists a recorded exchange and zero-call run,
+and is visible on subsequent GETs. Confirm/reply recheck their snapshot version
+after starting a run so an intervening edit cannot be silently discarded.
+
+The desktop card offers Save, Cancel and one-step Undo. Cancel sends nothing;
+Undo sends the previous complete preference object with the new context version
+and can clear booleans and lists. The Undo snapshot is local to the open card,
+not a cross-device undo history. It is unavailable after another state change
+or conversation switch. An explicit hard no-repeat constraint remains in force
+even when a soft repeat preference is edited.
+
+Every message first passes deterministic safety guards. In model mode the model
+proposes scope and the application guards its state/tool permissions; fixture
+mode uses the reference policy. Explicit food restrictions recognized by the
+parser's vocabulary cannot be discarded by a model's social/off-topic mistake.
 Supported meal-planning input may reach constraint parsing. Social, off-topic,
 disease-treatment and adversarial requests receive a bounded response without
 changing constraints, clarification state, pending interaction or context
@@ -851,14 +944,34 @@ whole-week request: it runs the weekly planner again, avoids recipes from the
 current week while alternatives remain, and saves the new week as replacing
 the old one. An explicit "no dish twice" request also limits each recipe to
 one use in that new week.
-A mixed request sends only
-its supported segment to the parser. The persisted `last_scope_decision` makes
+A mixed request sends only its supported segments to the parser, retaining
+separate allergy/exclusion clauses and splitting English sentence boundaries
+without splitting decimal quantities. The persisted `last_scope_decision` makes
 this routing visible to clients and tests. Every templated reply is written in
 the language of the household's message, or, for a message with no words to
 tell by (a number, "ok"), of their last one that had some
 (`backend/app/agent/replies.py`). That includes the reason the planner or a
 change to a saved week gives for turning a request down; one with no Chinese
 wording yet is said in general terms rather than in English.
+
+Under ADR-0091, an explicit halal request is declined as not yet supported,
+without invoking the parser or planner. The requirement is retained with
+`HALAL_NOT_SUPPORTED`, invalidating any prior ready card. Stored ready states
+and replan previews cannot bypass this guard through confirmation. This is an
+unsupported capability, not a claim that an ordinary menu satisfies halal.
+
+Counted create/reply turns have the existing four-request allowance enforced
+before each external request, including retries. Accounting records sent
+requests rather than clamping them to the allowance. Non-streaming HTTP usage
+is read after loading the response body, including embedding usage; zero-call
+fixture turns remain zero. This request-count guard is not a dollar budget for
+standalone developer evaluation scripts.
+
+The added `backend/scripts/evaluate_sprint2_live_dev.py` entry is disabled until
+the owner approves its own pre-request cost policy. It exits before loading
+settings, credentials or model clients, including when passed `--live`.
+Offline orchestration benchmark tests remain available; the product's ordinary
+model path and the separately governed baseline runners are not disabled.
 
 The assistant requires household size and resolves any unquantified available
 ingredient before confirmation. A user may answer `unknown`; the quantity then

@@ -40,3 +40,7 @@ Thumbs.db
 postgres-data/
 local-data/
 *.db
+
+# Local agent receipts and disposable evaluation runs
+.local/preflight.json
+.local/evaluation/

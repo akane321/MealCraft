@@ -78,19 +78,28 @@ def test_a_stated_cap_reaches_the_problem_as_its_repetition_rule(composed_client
 
     monkeypatch.setattr(FinalPlanningValidator, "validate", spy)
 
-    response = composed_client.post("/api/plans/generate", json={**WEEK, "max_uses_per_recipe": 4})
+    response = composed_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**WEEK, "max_uses_per_recipe": 4}}
+    )
     assert response.status_code == 201, response.text
     assert seen[0].max_uses_per_recipe == 4 and seen[0].recipe_counts == []
     assert max(Counter(d["recipe"]["slug"] for d in response.json()["days"]).values()) <= 4
 
     seen.clear()
-    assert composed_client.post("/api/plans/generate", json=WEEK).status_code == 201
+    assert composed_client.post("/api/plans/generate", json={"requires_halal": False, **WEEK}).status_code == 201
     assert seen[0] is None  # nothing stated: repeating stays a soft cost
-    assert composed_client.post("/api/plans/generate", json={**WEEK, "max_uses_per_recipe": 0}).status_code == 422
+    assert (
+        composed_client.post(
+            "/api/plans/generate", json={"requires_halal": False, **{**WEEK, "max_uses_per_recipe": 0}}
+        ).status_code
+        == 422
+    )
 
 
 def test_no_dish_twice_forces_a_week_of_distinct_dishes(varied_client):
-    response = varied_client.post("/api/plans/generate", json={**WEEK, "max_uses_per_recipe": 1})
+    response = varied_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**WEEK, "max_uses_per_recipe": 1}}
+    )
 
     assert response.status_code == 201, response.text
     slugs = [d["recipe"]["slug"] for d in response.json()["days"]]
@@ -98,7 +107,9 @@ def test_no_dish_twice_forces_a_week_of_distinct_dishes(varied_client):
 
 
 def test_no_dish_twice_is_refused_when_two_mains_cannot_fill_seven_dinners(composed_client):  # noqa: F811
-    response = composed_client.post("/api/plans/generate", json={**WEEK, "max_uses_per_recipe": 1})
+    response = composed_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**WEEK, "max_uses_per_recipe": 1}}
+    )
 
     assert response.status_code == 422, response.text
     # The search ran out of different dishes: it says so, rather than a vague "every limit".
@@ -109,8 +120,15 @@ def test_a_one_dish_week_holds_the_cap_too(recipe_client):  # noqa: F811
     request = {"start_date": "2026-09-28", "household_size": 2, "pricing_mode": "fixture"}
 
     # Two recipes fill seven dinners only as four and three.
-    assert recipe_client.post("/api/plans/generate", json={**request, "max_uses_per_recipe": 3}).status_code == 422
-    response = recipe_client.post("/api/plans/generate", json={**request, "max_uses_per_recipe": 4})
+    assert (
+        recipe_client.post(
+            "/api/plans/generate", json={"requires_halal": False, **{**request, "max_uses_per_recipe": 3}}
+        ).status_code
+        == 422
+    )
+    response = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**request, "max_uses_per_recipe": 4}}
+    )
     assert response.status_code == 201, response.text
     uses = Counter(d["recipe"]["slug"] for d in response.json()["days"])
     assert sorted(uses.values()) == [3, 4]

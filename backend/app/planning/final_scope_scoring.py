@@ -53,3 +53,18 @@ def local_recipe_loss(
             )
         )
     return sum(losses) / len(losses) if losses else 0.0
+
+
+def planning_preference_loss(recipe: PlanningRecipeCandidate, slot) -> float:
+    """A small soft penalty for stated flavor, vegetable-share and lightness preferences."""
+    loss = 0.0
+    if slot.preferred_flavors and recipe.flavor_tags is not None:
+        if not set(slot.preferred_flavors).intersection(recipe.flavor_tags):
+            loss += 0.2
+    if slot.prefer_more_vegetables and recipe.vegetable_share is not None:
+        loss += (1.0 - recipe.vegetable_share) * 0.2
+    if slot.prefer_lighter:
+        sodium = flexible_upper_loss(recipe.nutrients_per_serving.sodium_mg, 500.0, 2.0)
+        fat = flexible_upper_loss(recipe.nutrients_per_serving.fat_g, 15.0, 2.0)
+        loss += (sodium + fat) * 0.1
+    return loss

@@ -188,6 +188,8 @@ def details(stated, lang: str) -> list[str]:
         parts.append(say("time_detail", lang, minutes=stated.max_cooking_time_minutes))
     if stated.dietary_preferences:
         parts.append(words(stated.dietary_preferences))
+    if getattr(stated, "requires_halal", False):
+        parts.append("清真饮食" if lang == "zh" else "halal meals")
     if stated.health_preferences:
         parts.append(words(stated.health_preferences))
     if stated.allergens:
@@ -202,6 +204,18 @@ def details(stated, lang: str) -> list[str]:
         parts.append(say("no_repeats_detail", lang))
     elif stated.max_uses_per_recipe:
         parts.append(say("cap_detail", lang, count=stated.max_uses_per_recipe))
+    preferences = getattr(stated, "planning_preferences", None)
+    if preferences is not None:
+        if preferences.repeat_allowed_meals:
+            meals = words(preferences.repeat_allowed_meals)
+            parts.append(f"{meals}可以重复" if lang == "zh" else f"Repeats are allowed for {meals}")
+        if preferences.more_vegetables:
+            parts.append("多安排蔬菜" if lang == "zh" else "More vegetables")
+        if preferences.lighter:
+            parts.append("口味清淡一些" if lang == "zh" else "Lighter meals")
+        if preferences.flavor_boosts:
+            names = words([item.flavor for item in preferences.flavor_boosts])
+            parts.append(f"多安排{names}口味" if lang == "zh" else f"More {names} dishes")
     return parts
 
 
@@ -215,6 +229,10 @@ REPLIES: dict[str, tuple[str, str]] = {
         "That request is outside MealCraft's meal-planning scope. I can help with recipes, "
         "dietary constraints, groceries, budgets, or an existing meal plan.",
         "这个请求不在 MealCraft 的饮食规划范围内。我可以帮你处理食谱、饮食限制、买菜、预算，或调整已有的计划。",
+    ),
+    "halal_unsupported": (
+        "Halal meal planning is not supported yet. I won't plan this request as ordinary meals.",
+        "目前暂不支持清真排餐，我不会把这项要求忽略后按普通饮食排餐。",
     ),
     "restricted": (
         "MealCraft does not create disease-treatment diets or medical prescriptions. "
@@ -231,8 +249,8 @@ REPLIES: dict[str, tuple[str, str]] = {
         "我不太确定这是不是饮食规划的请求。告诉我想安排哪一餐、哪道菜，或者预算、买菜、饮食上需要什么帮助，也可以直接选下面一项。",
     ),
     "domain_question": (
-        "I can answer questions using the saved MealCraft plan and grounded tool results.",
-        "我可以根据已保存的 MealCraft 计划和工具查到的结果回答问题。",
+        "I can answer about the saved week's nutrition totals or list its planned dishes. Ask one of those questions.",
+        "我目前可以查询已保存计划的整周营养汇总，或列出计划中的菜。你可以问其中一类问题。",
     ),
     "unsupported": (
         "I could not safely process that request. Please restate the supported meal-planning task.",

@@ -149,6 +149,14 @@ class OperationsRepository:
             select(OperationRun).where(OperationRun.id == run_id, OperationRun.run_type == "planning")
         ).one_or_none()
 
+    def external_intake_run(self, run_id: int) -> OperationRun | None:
+        return self.session.scalars(
+            select(OperationRun).where(
+                OperationRun.id == run_id,
+                OperationRun.run_type == "external_recipe_intake",
+            )
+        ).one_or_none()
+
     def plan_constraints(self, plan_id: int) -> dict | None:
         return self.session.scalar(select(MealPlan.constraints).where(MealPlan.id == plan_id))
 

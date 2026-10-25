@@ -104,6 +104,8 @@ class FinalScopeReferencePlanner:
                 continue
             if set(recipe.allergens).intersection(problem.allergens):
                 continue
+            if problem.allergens and "allergens" in recipe.unknown_safety:
+                continue
             if set(problem.allergens).difference(problem.allergen_vocabulary or []):
                 continue
             if ingredient_ids.intersection(problem.excluded_ingredients):
@@ -111,6 +113,10 @@ class FinalScopeReferencePlanner:
             if not set(problem.dietary_requirements).issubset(recipe.dietary_tags):
                 continue
             if not servable(slot, recipe):
+                continue
+            if problem.dietary_requirements and "diet" in recipe.unknown_safety:
+                continue
+            if problem.requires_halal and recipe.halal_status != "halal":
                 continue
             eligible.append(recipe)
         return eligible

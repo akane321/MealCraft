@@ -73,6 +73,16 @@ def _meaningful_fields(payload: dict[str, Any]) -> dict[str, Any]:
     return meaningful
 
 
+def _canonicalize(value: Any) -> Any:
+    """Compare structured constraints independent of the order of set-like fields."""
+    if isinstance(value, dict):
+        return {key: _canonicalize(item) for key, item in sorted(value.items())}
+    if isinstance(value, list):
+        items = [_canonicalize(item) for item in value]
+        return sorted(items, key=lambda item: json.dumps(item, sort_keys=True, ensure_ascii=False))
+    return value
+
+
 def _load_cases(path: Path) -> list[AgentBenchmarkCase]:
     raw = json.loads(path.read_text(encoding="utf-8"))
     return [AgentBenchmarkCase.model_validate(item) for item in raw]
@@ -132,7 +142,9 @@ def evaluate_agent(
         expected = _meaningful_fields(
             AgentConstraintExtraction.model_validate(case.expected_extraction).model_dump(mode="json")
         )
-        mismatched = sorted(key for key, value in expected.items() if actual.get(key) != value)
+        mismatched = sorted(
+            key for key, value in expected.items() if _canonicalize(actual.get(key)) != _canonicalize(value)
+        )
         hallucinated = sorted(key for key in actual if key not in expected)
         matched = len(expected) - len(mismatched)
 
@@ -145,7 +157,12 @@ def evaluate_agent(
         actual_missing = sorted(state["missing_fields"])
         missing_match = actual_missing == sorted(case.expected_missing_fields)
         boundary_text = state["assistant_message"].lower()
-        boundary_match = not case.expect_medical_boundary or "does not provide disease-specific" in boundary_text
+        boundary_phrases = {
+            "zh": ("不提供针对疾病", "不制定疾病治疗"),
+            "en": ("does not provide disease-specific",),
+            "mixed": ("does not provide disease-specific", "不提供针对疾病", "不制定疾病治疗"),
+        }[case.language]
+        boundary_match = not case.expect_medical_boundary or any(phrase in boundary_text for phrase in boundary_phrases)
         failure_reasons: list[str] = []
         if mismatched:
             failure_reasons.append("extraction_mismatch")
@@ -198,8 +215,10 @@ def evaluate_agent(
         "failure_case_count": sum(bool(item.failure_reasons) for item in results),
     }
     categories: dict[str, list[AgentCaseResult]] = defaultdict(list)
+    languages: dict[str, list[AgentCaseResult]] = defaultdict(list)
     for item in results:
         categories[item.category].append(item)
+        languages[item.language].append(item)
     return {
         "schema_version": "1.0",
         "provider": provider,
@@ -214,6 +233,16 @@ def evaluate_agent(
         "category_metrics": {
             category: {"case_count": len(items), "failure_case_count": sum(bool(i.failure_reasons) for i in items)}
             for category, items in sorted(categories.items())
+        },
+        "language_metrics": {
+            language: {
+                "case_count": len(items),
+                "exact_case_rate": round(sum(item.exact_match for item in items) / max(len(items), 1), 4),
+                "clarification_accuracy": round(
+                    sum(item.missing_fields_match for item in items) / max(len(items), 1), 4
+                ),
+            }
+            for language, items in sorted(languages.items())
         },
         "failure_cases": [asdict(item) for item in results if item.failure_reasons],
         "cases": [asdict(item) for item in results],
